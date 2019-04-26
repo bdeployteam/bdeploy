@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.com/bdeployteam/bdeploy.svg?branch=master)](https://travis-ci.com/bdeployteam/bdeploy)
+[![Test Coverage](https://sonarcloud.io/api/project_badges/measure?metric=coverage&project=bdeployteam_bdeploy)](https://sonarcloud.io/dashboard?id=bdeployteam_bdeploy)
+
 # What do we need?
 
 Some products require from their deployment solution :
