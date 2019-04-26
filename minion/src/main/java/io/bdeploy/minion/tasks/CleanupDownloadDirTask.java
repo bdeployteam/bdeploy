@@ -13,11 +13,11 @@ import io.bdeploy.common.util.PathHelper;
  */
 public class CleanupDownloadDirTask extends MinionIntervalThread {
 
-    private static final long INTERVAL = TimeUnit.MINUTES.toMillis(10);
+    private static final long CLEANUP_INTERVAL = TimeUnit.MINUTES.toMillis(10);
     private final Path downloadDir;
 
     public CleanupDownloadDirTask(Path downloadDir) {
-        super("CleanupDownloadDir", INTERVAL, INTERVAL / 2);
+        super("CleanupDownloadDir", CLEANUP_INTERVAL, CLEANUP_INTERVAL / 2);
         this.downloadDir = downloadDir;
     }
 

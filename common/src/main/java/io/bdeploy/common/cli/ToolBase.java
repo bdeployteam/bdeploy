@@ -131,7 +131,7 @@ public abstract class ToolBase {
         } catch (RuntimeException t) {
             exc = t;
         } finally {
-            if (closeOutput) {
+            if (closeOutput && output != null) {
                 output.close();
             }
 

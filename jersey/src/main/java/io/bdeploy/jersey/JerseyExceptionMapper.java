@@ -63,6 +63,10 @@ public class JerseyExceptionMapper implements ExceptionMapper<RuntimeException> 
     }
 
     private String mapExceptionCausesToReason(RuntimeException exception) {
+        if (exception == null) {
+            return "<unknown>";
+        }
+
         StringBuilder reason = new StringBuilder();
         Throwable current = exception;
         do {

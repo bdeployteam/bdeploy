@@ -21,6 +21,8 @@ public class MinionConfigVariableResolver implements Function<String, String> {
             switch (var) {
                 case "HOSTNAME":
                     return root.getState().officialName;
+                default:
+                    return null;
             }
         }
         return null;

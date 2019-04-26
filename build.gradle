@@ -95,7 +95,7 @@ subprojects {
     }
 
     jacocoTestReport {
-        shouldRunAfter "test", "allTests"
+        shouldRunAfter "test"
         executionData fileTree(dir: "$buildDir/jacoco").matching { include '*.exec' }
     }
 
@@ -106,18 +106,7 @@ subprojects {
 
     test {
         useJUnitPlatform {
-            excludeTags 'slow'
-        }
-        maxParallelForks = 8
-        testLogging {
-            reports.html.enabled = false
-        }
-    }
-
-    task allTests(type: Test) {
-        dependsOn test
-        useJUnitPlatform {
-            includeTags 'slow'
+        //    excludeTags 'slow'
         }
         maxParallelForks = 8
         maxHeapSize = "2g"
@@ -253,19 +242,6 @@ task testReport(type: TestReport) {
     destinationDir = file("$buildDir/reports/tests")
     // Include the results from the `test` task in all subprojects
     reportOn subprojects*.test
-}
-
-task allTestReport(type: TestReport) {
-    destinationDir = file("$buildDir/reports/allTests")
-    // Include the results from the `test` task in all subprojects
-    reportOn subprojects*.test
-    reportOn subprojects*.allTests
-}
-
-task allTests {
-    dependsOn subprojects*.allTests
-    finalizedBy allTestReport
-    finalizedBy jacocoFullReport
 }
 
 task test {

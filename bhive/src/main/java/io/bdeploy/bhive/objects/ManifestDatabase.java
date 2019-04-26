@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -98,20 +99,22 @@ public class ManifestDatabase extends LockableDatabase {
                 return result;
             }
 
-            Files.walk(scanRoot).filter(Files::isRegularFile).forEach(f -> {
-                Path rel = root.relativize(f);
+            try (Stream<Path> walk = Files.walk(scanRoot)) {
+                walk.filter(Files::isRegularFile).forEach(f -> {
+                    Path rel = root.relativize(f);
 
-                if (rel.getParent() == null) {
-                    // file in the db-root, cannot be a manifest.
-                    return;
-                }
+                    if (rel.getParent() == null) {
+                        // file in the db-root, cannot be a manifest.
+                        return;
+                    }
 
-                // windows paths contain '\' - replace it to get proper names.
-                String manifestName = rel.getParent().toString().replace('\\', '/');
-                String manifestTag = rel.getFileName().toString();
+                    // windows paths contain '\' - replace it to get proper names.
+                    String manifestName = rel.getParent().toString().replace('\\', '/');
+                    String manifestTag = rel.getFileName().toString();
 
-                result.add(new Manifest.Key(manifestName, manifestTag));
-            });
+                    result.add(new Manifest.Key(manifestName, manifestTag));
+                });
+            }
             return result;
         } catch (IOException e) {
             throw new IllegalStateException("Error reading manifest database", e);

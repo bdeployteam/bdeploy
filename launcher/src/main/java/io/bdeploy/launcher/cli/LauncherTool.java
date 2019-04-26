@@ -18,8 +18,8 @@ import io.bdeploy.bhive.op.remote.FetchOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.cfg.Configuration.Help;
-import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
+import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.dcu.InstanceNodeController;
 import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
@@ -127,6 +127,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 p.waitFor();
             } catch (InterruptedException e) {
                 log.warn("waiting for application exit interrupted");
+                Thread.currentThread().interrupt();
             }
         }
     }

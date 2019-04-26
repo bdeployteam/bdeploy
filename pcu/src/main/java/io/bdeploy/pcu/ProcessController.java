@@ -469,6 +469,7 @@ public class ProcessController {
                 lock.lockInterruptibly();
             }
         } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException("Interrupted while waiting to execute task '" + taskName + "'", ie);
         }
         this.lockTask = taskName;
@@ -783,6 +784,7 @@ public class ProcessController {
             unit.sleep(value);
             return true;
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             return false;
         }
     }

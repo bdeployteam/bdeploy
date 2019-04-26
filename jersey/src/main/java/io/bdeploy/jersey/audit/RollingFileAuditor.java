@@ -48,7 +48,7 @@ public class RollingFileAuditor implements Auditor {
      */
     @Override
     public void audit(AuditRecord record) {
-        if (logAppender.isStopped() || logAppender.isStopped()) {
+        if (logAppender.isStopped() || jsonAppender.isStopped()) {
             return;
         }
 

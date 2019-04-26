@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.remote.FetchOperation;
 import io.bdeploy.bhive.remote.RemoteBHive;
 import io.bdeploy.common.ActivityReporter;
@@ -89,36 +89,7 @@ public class RemoteDependencyFetcher implements DependencyFetcher {
             if (!dep.contains(":")) {
                 throw new IllegalStateException("Dependency must have a tag ('name:tag'): " + dep);
             }
-            Manifest.Key k = Manifest.Key.parse(dep);
-            try (RemoteBHive rbh = RemoteBHive.forService(svc, group, reporter)) {
-                // find all manifests which match the prefix name part
-                SortedMap<Key, ObjectId> rmi = rbh.getManifestInventory(k.getName());
-                List<Key> available = rmi.keySet().stream().filter(rk -> rk.getTag().equals(k.getTag()))
-                        .collect(Collectors.toList());
-
-                // for each of them check whether the OS matches.
-                for (Key rk : available) {
-                    // check for a scoped OS specific match
-                    ScopedManifestKey smk = ScopedManifestKey.parse(rk);
-                    if (smk != null && smk.getOperatingSystem() == os) {
-                        // found one!
-                        toFetch.add(smk.getKey());
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (!found) {
-                    for (Key rk : available) {
-                        // check a direct unscoped match
-                        if (rk.equals(k)) {
-                            toFetch.add(k);
-                            found = true;
-                            break;
-                        }
-                    }
-                }
-            }
+            found = findOnRemote(os, group, toFetch, dep);
             if (!found) {
                 unresolved.add(dep);
             }
@@ -132,6 +103,35 @@ public class RemoteDependencyFetcher implements DependencyFetcher {
         hive.execute(fop);
 
         return unresolved;
+    }
+
+    private boolean findOnRemote(OperatingSystem os, String group, SortedSet<Manifest.Key> toFetch, String dep) {
+        Manifest.Key k = Manifest.Key.parse(dep);
+        try (RemoteBHive rbh = RemoteBHive.forService(svc, group, reporter)) {
+            // find all manifests which match the prefix name part
+            SortedMap<Key, ObjectId> rmi = rbh.getManifestInventory(k.getName());
+            List<Key> available = rmi.keySet().stream().filter(rk -> rk.getTag().equals(k.getTag())).collect(Collectors.toList());
+
+            // for each of them check whether the OS matches.
+            for (Key rk : available) {
+                // check for a scoped OS specific match
+                ScopedManifestKey smk = ScopedManifestKey.parse(rk);
+                if (smk != null && smk.getOperatingSystem() == os) {
+                    // found one!
+                    toFetch.add(smk.getKey());
+                    return true;
+                }
+            }
+
+            for (Key rk : available) {
+                // check a direct unscoped match
+                if (rk.equals(k)) {
+                    toFetch.add(k);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }

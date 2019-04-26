@@ -297,7 +297,7 @@ public class SecurityHelper {
                 return cert;
             }
         }
-        return null;
+        throw new IllegalStateException("KeyStore does not contain a certificate");
     }
 
     private String getRawSignature(String data, PrivateKey pk) throws Exception {

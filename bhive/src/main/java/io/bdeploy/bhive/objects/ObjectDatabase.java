@@ -12,6 +12,7 @@ import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.common.ActivityReporter;
@@ -227,8 +228,8 @@ public class ObjectDatabase extends LockableDatabase {
      */
     public SortedSet<ObjectId> getAllObjects() throws IOException {
         Activity scan = reporter.start("Scanning objects...", 0);
-        try {
-            return Files.walk(root).filter(Files::isRegularFile).map(Path::getFileName).map(Object::toString).map(ObjectId::parse)
+        try (Stream<Path> walk = Files.walk(root)) {
+            return walk.filter(Files::isRegularFile).map(Path::getFileName).map(Object::toString).map(ObjectId::parse)
                     .filter(Objects::nonNull).peek(e -> scan.workAndCancelIfRequested(1))
                     .collect(Collectors.toCollection(TreeSet::new));
         } finally {

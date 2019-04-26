@@ -13,6 +13,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,10 +31,10 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.variables.ApplicationParameterProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
+import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 import io.bdeploy.interfaces.variables.InstanceVariableResolver;
 import io.bdeploy.interfaces.variables.ManifestRefPathProvider;
 import io.bdeploy.interfaces.variables.VariableResolver;
-import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 
 /**
  * A {@link InstanceNodeController} is a unit which can be locally deployed.
@@ -218,8 +219,8 @@ public class InstanceNodeController {
      */
     private static SortedMap<ObjectId, List<Path>> scan(Path root) {
         SortedMap<ObjectId, List<Path>> result = new TreeMap<>();
-        try {
-            Files.walk(root, 1).forEach(uuid -> {
+        try (Stream<Path> walk = Files.walk(root, 1)) {
+            walk.forEach(uuid -> {
                 scanKeys(uuid, result);
             });
             return result;
@@ -233,8 +234,8 @@ public class InstanceNodeController {
      * @param result a map to contribute to. places a mapping of root OID to actual deployment path.
      */
     private static void scanKeys(Path uuidRoot, SortedMap<ObjectId, List<Path>> result) {
-        try {
-            Files.walk(uuidRoot, 1).forEach(oid -> {
+        try (Stream<Path> walk = Files.walk(uuidRoot, 1)) {
+            walk.forEach(oid -> {
                 // FIXME: this is WRONG now. filename is not the OID but the manifest tag
                 ObjectId id = ObjectId.parse(oid.getFileName().toString());
                 if (id != null) {

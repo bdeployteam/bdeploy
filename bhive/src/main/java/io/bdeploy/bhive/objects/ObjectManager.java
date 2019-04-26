@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import com.j256.simplemagic.ContentInfo;
 import com.j256.simplemagic.ContentInfoInputStreamWrapper;
@@ -136,8 +137,10 @@ public class ObjectManager {
     public void exportTree(ObjectId tree, Path location) {
         try {
             if (Files.exists(location)) {
-                if (Files.list(location).findAny().isPresent()) {
-                    throw new IllegalStateException("Location must not exist or be empty: " + location);
+                try (Stream<Path> list = Files.list(location)) {
+                    if (list.findAny().isPresent()) {
+                        throw new IllegalStateException("Location must not exist or be empty: " + location);
+                    }
                 }
             }
 
@@ -170,27 +173,7 @@ public class ObjectManager {
                 case BLOB:
                     filesOnLevel.add(fileOps.submit(() -> {
                         try {
-                            // always try to use hard-links
-
-                            // TODO: check what to do on windows. It seems that 'deleting' a hard-linked file is not
-                            // possible if the file is open, regardless of the link-ref-count. I.e. an executable cannot
-                            // be deleted even if it is not used at all, if it points to a physical file which
-                            // is in use elsewhere... :|
-
-                            Files.createLink(child, db.getObjectFile(obj));
-                            setExecutable(child, null);
-                        } catch (IOException e) {
-                            // fallback only: create copy of file. determine content type as we go.
-                            try (ContentInfoInputStreamWrapper is = new ContentInfoInputStreamWrapper(db.getStream(obj))) {
-                                ObjectId finalId = ObjectId.createByCopy(is, child);
-                                if (!finalId.equals(obj)) {
-                                    // not good - object in DB seems corrupt.
-                                    throw new IOException("BLOB corruption: " + obj + " (is " + finalId + "), run FSCK");
-                                }
-                                setExecutable(child, is.findMatch());
-                            } catch (IOException ioe) {
-                                throw new IllegalStateException("Cannot export " + obj + " to " + child, ioe);
-                            }
+                            internalExportBlob(exporting, obj, child);
                         } finally {
                             exporting.workAndCancelIfRequested(1);
                         }
@@ -215,60 +198,95 @@ public class ObjectManager {
         exporting.workAndCancelIfRequested(1);
     }
 
+    private void internalExportBlob(Activity exporting, ObjectId obj, Path child) {
+        try {
+            // always try to use hard-links
+
+            // TODO: (DCS-358) check what to do on windows. It seems that 'deleting' a hard-linked file is not
+            // possible if the file is open, regardless of the link-ref-count. I.e. an executable cannot
+            // be deleted even if it is not used at all, if it points to a physical file which
+            // is in use elsewhere... :|
+
+            Files.createLink(child, db.getObjectFile(obj));
+            setExecutable(child, null);
+        } catch (IOException e) {
+            // fallback only: create copy of file. determine content type as we go.
+            try (ContentInfoInputStreamWrapper is = new ContentInfoInputStreamWrapper(db.getStream(obj))) {
+                ObjectId finalId = ObjectId.createByCopy(is, child);
+                if (!finalId.equals(obj)) {
+                    // not good - object in DB seems corrupt.
+                    throw new IOException("BLOB corruption: " + obj + " (is " + finalId + "), run FSCK");
+                }
+                setExecutable(child, is.findMatch());
+            } catch (IOException ioe) {
+                throw new IllegalStateException("Cannot export " + obj + " to " + child, ioe);
+            }
+        }
+    }
+
     /**
      * Sets attributes to make a file executable if required.
      *
      * @param child {@link Path} to the file to check
-     * @param hint a potential pre-calculatet {@link ContentInfo}
+     * @param hint a potential pre-calculated {@link ContentInfo}
      */
     private void setExecutable(Path child, ContentInfo hint) throws IOException {
         PosixFileAttributeView view = Files.getFileAttributeView(child, PosixFileAttributeView.class);
         if (view != null) {
-            boolean shouldBeExe = false;
-
-            // hint might have been calculated already while streaming file.
+            hint = getContentInfo(child, hint);
             if (hint == null) {
-                ContentInfoUtil util = new ContentInfoUtil();
-                try (InputStream is = Files.newInputStream(child)) {
-                    hint = util.findMatch(is);
-                }
-                if (hint == null) {
-                    // just any unknown file type.
-                    return;
-                }
+                return;
             }
 
-            if (hint.getMimeType() != null) {
-                // match known mime types.
-                switch (hint.getMimeType()) {
-                    case "application/x-sharedlib":
-                    case "application/x-executable":
-                    case "application/x-dosexec":
-                    case "text/x-shellscript":
-                    case "text/x-msdos-batch":
-                        shouldBeExe = true;
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            if (hint.getMessage() != null) {
-                // and additionally all with message containing:
-                //  'script text executable' -> matches all shebangs (#!...) for scripts
-                //  (this is due to https://github.com/j256/simplemagic/issues/59).
-                if (!shouldBeExe && hint.getMessage().toLowerCase().contains("script text executable")) {
-                    shouldBeExe = true;
-                }
-            }
-
-            if (shouldBeExe) {
+            if (isExecutableHint(hint)) {
                 Set<PosixFilePermission> perms = view.readAttributes().permissions();
                 perms.add(PosixFilePermission.OWNER_EXECUTE);
                 perms.add(PosixFilePermission.GROUP_EXECUTE);
                 view.setPermissions(perms);
             }
         }
+    }
+
+    private boolean isExecutableHint(ContentInfo hint) {
+        if (hint.getMimeType() != null) {
+            // match known mime types.
+            switch (hint.getMimeType()) {
+                case "application/x-sharedlib":
+                case "application/x-executable":
+                case "application/x-dosexec":
+                case "text/x-shellscript":
+                case "text/x-msdos-batch":
+                    return true;
+                default:
+                    break;
+            }
+        }
+
+        if (hint.getMessage() != null) {
+            // and additionally all with message containing:
+            //  'script text executable' -> matches all shebangs (#!...) for scripts
+            //  (this is due to https://github.com/j256/simplemagic/issues/59).
+            if (hint.getMessage().toLowerCase().contains("script text executable")) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private ContentInfo getContentInfo(Path child, ContentInfo hint) throws IOException {
+        // hint might have been calculated already while streaming file.
+        if (hint == null) {
+            ContentInfoUtil util = new ContentInfoUtil();
+            try (InputStream is = Files.newInputStream(child)) {
+                hint = util.findMatch(is);
+            }
+            if (hint == null) {
+                // just any unknown file type.
+                return null;
+            }
+        }
+        return hint;
     }
 
     /**

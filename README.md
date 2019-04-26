@@ -35,7 +35,7 @@ BDeploy aims at solving some (if not all) of these issues.
 * All of this make BDeploy suitable for deploying highly dynamic products with extreme performance and flexibility demands.
 
 # A thought on the cloud
-The cloud (and clusters) is unquestionably a thing that is not going to go away any time soon. Yet not all applications are read to be deployed in cloud environments. Also, even with current tooling, not every setup (especially in restricted environments) is feasible.
+The cloud (and clusters) is unquestionably a thing that is not going to go away any time soon. Yet not all applications are ready to be deployed in cloud environments. Also, even with current tooling, not every setup (especially in restricted environments) is feasible.
 
 Even today, most tools related to "cloud" and "clusters" (e.g. "kubectl", "helm", etc.) are thinking about the cloud as a single thing. Some restricted environments would require to have a "cluster per installation" (e.g. per customer's restricted network). In such environments, orchestration and management of the plethora of clusters is giving devops teams headaches. Also preparing and writing configuration for applications which then can be targeted at different cluster setups is everything but easy/simple.
 

@@ -4,13 +4,11 @@ import io.bdeploy.interfaces.remote.MinionUpdateResource;
 
 /**
  * Allows swapping the minions actual update logic (usually exiting the JVM after a short timeout with a special exit code).
- * 
+ *
  * @see MinionUpdateResource
  */
 @FunctionalInterface
 public interface MinionUpdateManager {
-
-    public static final int CODE_UPDATE = 42;
 
     /**
      * Trigger update of the minion. This would usually involve shutting down the JVM with a special exist code to tell a script

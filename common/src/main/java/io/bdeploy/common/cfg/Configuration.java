@@ -65,29 +65,13 @@ public class Configuration {
      *
      * @param arguments the command line argument as passed to the program.
      */
-    @SuppressWarnings("unchecked")
     public void add(String... arguments) {
         for (String arg : arguments) {
             if (arg.startsWith("--")) {
                 String stripped = arg.substring(2);
                 int equalsIndex = stripped.indexOf('=');
                 if (equalsIndex != -1) {
-                    String key = stripped.substring(0, equalsIndex);
-                    String value = stripped.substring(equalsIndex + 1);
-
-                    if (objects.containsKey(key)) {
-                        Object existing = objects.get(key);
-                        if (existing instanceof List) {
-                            ((List<Object>) existing).add(value);
-                        } else {
-                            List<Object> l = new ArrayList<>();
-                            l.add(existing);
-                            l.add(value);
-                            objects.put(key, l);
-                        }
-                    } else {
-                        objects.put(key, value);
-                    }
+                    addKeyValueArgument(stripped, equalsIndex);
                 } else {
                     objects.put(stripped, Boolean.TRUE);
                 }
@@ -95,6 +79,26 @@ public class Configuration {
                 // unsupported right now
                 throw new IllegalStateException("Unsupported argument format: " + arg);
             }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void addKeyValueArgument(String stripped, int equalsIndex) {
+        String key = stripped.substring(0, equalsIndex);
+        String value = stripped.substring(equalsIndex + 1);
+
+        if (objects.containsKey(key)) {
+            Object existing = objects.get(key);
+            if (existing instanceof List) {
+                ((List<Object>) existing).add(value);
+            } else {
+                List<Object> l = new ArrayList<>();
+                l.add(existing);
+                l.add(value);
+                objects.put(key, l);
+            }
+        } else {
+            objects.put(key, value);
         }
     }
 
@@ -182,8 +186,8 @@ public class Configuration {
 
         // check source type
         if (!(object instanceof String) && !returnType.isAnnotation()) {
-            throw new IllegalStateException(
-                    "Illegal conversion from non-string object to different type: " + object.getClass() + " to " + returnType);
+            throw new IllegalStateException("Illegal conversion from non-string object to different type: "
+                    + (object == null ? "null" : object.getClass()) + " to " + returnType);
         }
 
         // do actual conversion
@@ -215,6 +219,9 @@ public class Configuration {
         } else if (target.equals(float.class)) {
             return Float.parseFloat(source);
         } else if (target.equals(char.class)) {
+            if (source == null) {
+                throw new IllegalArgumentException("Character conversion of null source not possible");
+            }
             if (source.length() > 1) {
                 throw new IllegalArgumentException("Character conversion with input length > 1: " + source);
             }

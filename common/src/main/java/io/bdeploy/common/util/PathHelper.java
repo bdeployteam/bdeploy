@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.stream.Stream;
 
 /**
  * Helps in handling different {@link String}s in the context of {@link Path}s.
@@ -54,8 +55,8 @@ public class PathHelper {
             return;
         }
 
-        try {
-            Files.walk(path).map(Path::toFile).sorted(Comparator.reverseOrder()).forEach(File::delete);
+        try (Stream<Path> walk = Files.walk(path)) {
+            walk.map(Path::toFile).sorted(Comparator.reverseOrder()).forEach(File::delete);
         } catch (IOException e) {
             throw new IllegalStateException("Cannot delete " + path, e);
         }
