@@ -1,0 +1,24 @@
+apply plugin: 'application'
+
+ext {
+    scriptDefVmArgs = [ '-Xms64m', '-Xmx128m' ]
+}
+
+mainClassName = 'io.bdeploy.launcher.cli.LauncherCli'
+
+dependencies {
+    implementation(
+        project(":common"),
+        project(":jersey"),
+        project(":bhive"),
+        project(":dcu"),
+        project(":interfaces"),
+    )
+
+    testCompile project(path: ":jersey", configuration: 'testRuntime')
+    testCompile project(path: ":bhive", configuration: 'testRuntime')
+}
+
+applicationDefaultJvmArgs = [ "-Xmx256m" ]
+rootProject.addMultiPlatformDistBuild(project)
+

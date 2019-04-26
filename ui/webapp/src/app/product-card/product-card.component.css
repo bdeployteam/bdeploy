@@ -1,0 +1,29 @@
+.product-card {
+  width: 320px;
+  height: 170px;
+  cursor: pointer;
+}
+
+.title {
+  max-width: 245px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.card-menu {
+  float: right;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.header-image {
+  background-size: cover;
+  border-radius: 10%;
+}
+
+.mat-card-actions {
+  text-align: right;
+}

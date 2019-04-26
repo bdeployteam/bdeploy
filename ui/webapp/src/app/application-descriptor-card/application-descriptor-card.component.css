@@ -1,0 +1,24 @@
+mat-card {
+  min-width: 340px;
+  max-width: 340px;
+  margin: 5px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.app-title {
+  margin: 0px 0px 0px 5px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.icon {
+  align-self: center;
+  padding-left: 5px;
+}
+
+.icons {
+  float: right;
+  padding-top: 0.5em;
+}

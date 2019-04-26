@@ -1,0 +1,133 @@
+mat-form-field {
+  flex: 1 1 auto;
+  margin-left: 1em;
+}
+
+.param-hint {
+  padding: 10px;
+  margin-top: 0.5em;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  font-weight: lighter;
+  font-style: italic;
+}
+
+.boolean-param-field {
+  flex: 1 1 auto;
+  margin-left: 1em;
+  justify-content: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.54);
+}
+
+.boolean-param-widget {
+  margin: -1em 0em 0em 0em;
+}
+
+.boolean-param-label {
+  position: absolute;
+  left: 0;
+  margin: -3em 1em;
+  padding: 0.5em;
+  font-size: 0.75em;
+  color: rgba(0, 0, 0, 0.54);
+  text-overflow: ellipsis;
+}
+
+.loading-container {
+  flex: 1 0 auto;
+  flex-direction: row;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  flex: 1 1 auto;
+  margin-top: 5px;
+  padding: 10px 20px;
+}
+
+.title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0px;
+  margin-top: 0.5em;
+  position: relative;
+  height: 2.5em;
+}
+
+.title-toolbar {
+  font-weight: lighter;
+  position: absolute;
+  right: 2%;
+  top: 18px;
+}
+
+.title-header {
+  font-size: 1em;
+  font-weight: bolder;
+}
+
+.title-header-icon {
+  position: relative;
+  top: 5px;
+  right: 5px;
+}
+
+.title-hint {
+  font-size: 1em;
+}
+
+.console {
+  flex: 0 0 auto;
+  display: flex;
+  padding: 20px 5px;
+  border: 1px dashed #ccc;
+  margin: 10px 20px;
+}
+
+.icons {
+  margin-left: 10px;
+  margin-right: 10px;
+  display: flex;
+  align-content: center;
+  justify-content: center;
+}
+
+.info-backdrop {
+  opacity: 0;
+}
+
+.info-grid {
+  display: grid;
+  grid-column-gap: 10px;
+  grid-row-gap: 5px;
+
+  grid-template-columns: auto auto auto;
+  align-items: center;
+}
+
+.info-grid-span-2 {
+  grid-column: auto / span 2;
+}
+
+.info-default-value {
+  word-break: break-all;
+  overflow-wrap: break-word;
+}
+
+.info-restore-button {
+  justify-self: end;
+}
+
+.info-card {
+  max-width: 400px;
+}
+
+.group-hint {
+  margin-top: 0.15em;
+  font-style: italic;
+  font-size: smaller;
+}

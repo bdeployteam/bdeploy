@@ -1,0 +1,13 @@
+apply plugin: 'java-library'
+
+dependencies {
+    implementation(
+        project(":common"),
+        project(":jersey"),
+        project(":bhive"),
+        project(":interfaces"),
+    )
+    testCompile project(path: ":common", configuration: 'testRuntime')
+    testCompile project(path: ":bhive", configuration: 'testRuntime')
+}
+

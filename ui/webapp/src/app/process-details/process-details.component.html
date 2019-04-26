@@ -1,0 +1,71 @@
+<mat-toolbar>
+    <mat-toolbar-row>
+      <span>{{appConfig.name}}</span>
+      <div class='spacer'></div>
+      <div *ngIf='loading'><mat-spinner diameter='24'></mat-spinner></div>
+      <app-process-status [instanceTag]="instanceTag" [appId]="appConfig.uid" [iconWhenStopped]="true"></app-process-status>
+    </mat-toolbar-row>
+    <mat-toolbar-row class="subHeader process-uid">
+        <span> ID: {{appConfig.uid}}</span>
+    </mat-toolbar-row>
+  </mat-toolbar>
+<div class='flex-column'>
+  <div class="out-of-sync" *ngIf="isRunningOutOfSync()" matTooltip="Application is running in a version that is not activated.">
+    Running out-of-sync
+  </div>
+  <div class='info-grid'>
+    <ng-container *ngIf="isStopped() || isStoppedPermanently()">
+      <mat-icon>timer</mat-icon>
+      <div>Stopped At:</div>
+      <div>{{getStopTime()}}</div>
+    </ng-container>
+    <ng-container *ngIf="isRunning() || isRunningUnstable()">
+      <mat-icon>timelapse</mat-icon>
+      <div>Up Time:</div>
+      <div>{{getUpTimeInWords()}}</div>
+
+      <mat-icon>timer</mat-icon>
+      <div>Started At:</div>
+      <div>{{getStartTime()}}</div>
+    </ng-container>
+    <ng-container *ngIf="isStoppedWaiting()">
+      <mat-icon>report</mat-icon>
+      <div>Stopped At:</div><div>{{getStopTime()}}</div>
+      <mat-progress-spinner [value]="restartProgress" color="primary" [diameter]="24"></mat-progress-spinner>
+      <div>Restart In:</div>
+      <span title="{{restartProgressText}}">{{restartProgressText}}</span>
+    </ng-container>
+    <mat-icon>flight_takeoff</mat-icon>
+    <div>Start Type:</div>
+    <div>{{appConfig.processControl.startType}}</div>
+
+    <mat-icon>favorite_outline</mat-icon>
+    <div>Keep Alive:</div>
+    <div>{{appConfig.processControl.keepAlive ? 'yes' : 'no'}}</div>
+  </div>
+  <ng-container *ngIf='getStatusDetails()'>
+    <mat-divider></mat-divider>
+    <div class='info-detail'>{{getStatusDetails()}}</div>
+  </ng-container>
+  <mat-divider></mat-divider>
+  <div class='flex-row flex-row-center'>
+    <button mat-icon-button color='primary' class='control-button' (click)='start()' [disabled]='!canStart()' matTooltip="Start">
+      <mat-icon>play_arrow</mat-icon>
+    </button>
+    <mat-divider [vertical]="true" class='control-divider'></mat-divider>
+    <button mat-icon-button color='primary' class='control-button' (click)='stop()' [disabled]='!canStop()' matTooltip="Stop">
+      <mat-icon>stop</mat-icon>
+    </button>
+    <mat-divider [vertical]="true" class='control-divider'></mat-divider>
+    <button mat-icon-button color='primary' class='control-button' (click)='restart()' [disabled]='!canRestart()' matTooltip="Restart">
+      <mat-icon>replay</mat-icon>
+    </button>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <button mat-icon-button (click)='showProcessList()' [disabled]='(!isRunning() && !isRunningUnstable())' matTooltip="Show process list">
+    <mat-icon>extension</mat-icon>
+  </button>
+
+</div>

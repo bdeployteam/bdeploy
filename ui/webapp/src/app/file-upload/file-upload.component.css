@@ -1,0 +1,56 @@
+.container {
+  height: 100%;
+}
+
+.mat-dialog-content {
+  margin-top: 1.5em;
+  padding: 0.5em 1.5em;
+}
+
+.mat-table {
+  width: 100%;
+  margin-bottom: 1em;
+}
+
+.mat-cell {
+  padding: 5px;
+  word-break: break-all;
+}
+
+.mat-column-status {
+  width: 45px;
+}
+
+.mat-column-action {
+  width: 45px;
+}
+
+.mat-column-fileName {
+  width: 30%;
+}
+
+.actions {
+  justify-content: flex-end;
+}
+
+.dropZone {
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px dashed #ccc;
+}
+
+.dropZoneIcon {
+  margin-right: 10px;
+}
+
+.browseButton {
+  position: relative;
+  cursor: pointer;
+  background: transparent;
+  padding: 0;
+  border: 0;
+  font-family: inherit;
+  font-size: inherit;
+}

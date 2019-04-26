@@ -1,0 +1,92 @@
+<mat-card #appNodeCard class="node-card instance-node-card-theme">
+  <!-- server applications node header -->
+  <mat-card-header *ngIf="!isClientApplicationsNode()" class='node-card-header instance-node-card-header-theme'>
+    <div mat-card-avatar class='instance-node-avatar-container'>
+      <mat-icon class='instance-node-avatar' *ngIf='node.status' [svgIcon]='node.status.os'></mat-icon>
+      <mat-icon class='instance-node-avatar' *ngIf='!node.status'>device_unknown</mat-icon>
+    </div>
+    <mat-card-title>{{ node.nodeName }}</mat-card-title>
+    <mat-card-subtitle class='node-card-subtitle'>Target Node</mat-card-subtitle>
+    <span class="fill-space"></span>
+
+    <mat-icon class='instance-node-online' *ngIf='node.status' [matTooltip]="node.statusHint">flight_takeoff</mat-icon>
+    <mat-icon class='instance-node-offline' *ngIf='!node.status' [matTooltip]="node.statusHint">warning</mat-icon>
+  </mat-card-header>
+
+  <!-- client applications node header -->
+  <mat-card-header *ngIf="isClientApplicationsNode()" class='node-card-header instance-node-card-header-theme'>
+    <div mat-card-avatar class='instance-node-avatar-container'>
+      <mat-icon class='instance-node-avatar'>computer</mat-icon>
+    </div>
+    <mat-card-title>Client Applications</mat-card-title>
+    <mat-card-subtitle class='node-card-subtitle'>Published Client Applications</mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content class='node-card-content'>
+    <!-- placeholder must be first element -->
+    <div #appDropZone class="new-flex-container">
+      <div cdkDropList [cdkDropListEnterPredicate]="enterDropList" (cdkDropListDropped)="dropListDropped($event)" (cdkDropListExited)="dropListExited($event)" #placeholder>
+        <div #appDropPlaceholder>
+          <mat-card *ngIf="manageApplications" class="process-card init-drop-card">
+            <span *ngIf="!isClientApplicationsNode()">Drop Application here</span>
+            <span *ngIf="isClientApplicationsNode()">Drop Client Application here</span>
+          </mat-card>
+        </div>
+      </div>
+      <div *ngIf='needEmptyHint()' class='empty-hint'>
+        <span *ngIf="!isClientApplicationsNode()">There are currently no applications assigned to this node.</span>
+        <span *ngIf="isClientApplicationsNode()">There are currently no client applications assigned to this node.</span>
+        </div>
+      <ng-container *ngIf="node.nodeConfiguration">
+        <div
+          cdkDropList
+          [cdkDropListEnterPredicate]="enterDropList"
+          (cdkDropListExited)="dropListExited($event)"
+          (cdkDropListDropped)="dropListDropped($event)"
+          *ngFor="let process of node.nodeConfiguration.applications">
+          <app-application-configuration-card #card
+            class="process-card"
+            [appConfig]="process"
+            [instanceVersion]="processConfig.version"
+            [activatedTag]="activatedInstanceTag"
+            cdkDrag
+            [cdkDragDisabled]="isDragDisabled(process)"
+            [cdkDragData]="getInterDragData(card)"
+            (cdkDragStarted)="dragStarted.next($event)"
+            (removeEvent)="removeProcess(process)"
+            (editEvent)="fireEditAppConfigEvent(process)"
+            (click)="onSelect(process)"
+            (downloadLauncherEvent)="downloadLauncherDescriptor($event)"
+            [isReadonly]="isReadonly"
+            [isClient]="isClientApplicationsNode()">
+          </app-application-configuration-card>
+        </div>
+      </ng-container>
+    </div>
+
+    <div *ngIf='!isClientApplicationsNode() && node.foreignNodeConfigurations && node.foreignNodeConfigurations.length > 0'>
+      <mat-expansion-panel class='foreign-panel'>
+        <mat-expansion-panel-header>
+          <mat-panel-title class='foreign-panel-header'>
+            Other instances: {{getForeignInstanceText()}}
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <div *ngFor="let nodeCfg of node.foreignNodeConfigurations">
+          <div class="foreign-header">
+            Foreign Applications of Instance
+            <a [routerLink]="['/processconfiguration', instanceGroupName, nodeCfg.uuid]">{{ nodeCfg.name }}</a>
+          </div>
+          <div class="app-foreign-card-container">
+            <div *ngFor="let cfg of nodeCfg.applications">
+              <app-application-configuration-card
+                class="process-card foreign-process-card"
+                [isForeign]="'true'"
+                [appConfig]="cfg"
+              ></app-application-configuration-card>
+            </div>
+          </div>
+        </div>
+      </mat-expansion-panel>
+    </div>
+  </mat-card-content>
+</mat-card>

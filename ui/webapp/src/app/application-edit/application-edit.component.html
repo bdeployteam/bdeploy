@@ -1,0 +1,122 @@
+<div>
+  <form [formGroup]="formGroup">
+    <div class="title title-theme">
+      <div class="title-header"> {{appDesc.name}}</div>
+      <div class="title-hint info-theme" *ngIf="readonly">(Read-only view. No changes are possible.)</div>
+      <div class="title-hint error-theme" *ngIf="getErrorTextForAppConfig()">({{getErrorTextForAppConfig()}})</div>
+      <div class="title-toolbar" *ngIf="!isClientApplication()">
+        <mat-slide-toggle [formControlName]="'$appKeepAlive'" labelPosition="before"> Keep-Alive </mat-slide-toggle>
+      </div>
+    </div>
+    <div class="container">
+      <mat-grid-list cols="2" rowHeight="5em">
+        <mat-grid-tile>
+          <mat-form-field>
+            <input matInput placeholder="Description" [formControlName]="'$appCfgName'" type="text" />
+            <mat-error *ngIf="!isCtrlValid('$appCfgName')">{{getCtrlErrorMessage('$appCfgName')}}</mat-error>
+          </mat-form-field>
+        </mat-grid-tile>
+        <mat-grid-tile *ngIf="!isClientApplication()">
+          <mat-form-field>
+            <input matInput placeholder="Stop timeout [ms]" [formControlName]="'$appGracePeriod'" type="number"
+              title="Maximum time the process may take to terminate after it is stopped. If the time exceeds, the application is terminated forcefully." />
+            <mat-error *ngIf="!isCtrlValid('$appGracePeriod')">{{getCtrlErrorMessage('$appGracePeriod')}}</mat-error>
+          </mat-form-field>
+        </mat-grid-tile>
+      </mat-grid-list>
+    </div>
+    <div class="title title-theme">
+      <div class="title-header">Parameter Settings</div>
+      <div class="title-hint">Configuration of the command line arguments used to launch the application.</div>
+    </div>
+    <div class="container">
+      <mat-accordion>
+        <mat-expansion-panel *ngFor="let groupName of sortedGroups; let i = index" (opened)="setExpandedGroup(groupName)" [expanded]="expandedGroup === groupName">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <span>{{groupName}}</span>
+              <span class="group-hint error-theme" *ngIf="getErrorTextForGroup(groupName)">&nbsp; {{getErrorTextForGroup(groupName)}}</span>
+              <span class="group-hint info-theme" *ngIf="!getErrorTextForGroup(groupName)">&nbsp; {{getHintTextForGroup(groupName)}}</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <div id="param-group-content-{{i}}" class="param-hint" *ngIf="getParametersOfGroup(groupName).length === 0" >
+            <span> No parameters of this group have been configured.</span>
+          </div>
+
+          <mat-grid-list cols="2" rowHeight="5em" id="param-group-content-{{i}}" *ngIf="getParametersOfGroup(groupName).length > 0">
+            <mat-grid-tile *ngFor="let param of getParametersOfGroup(groupName)" [ngSwitch]="param.desc.type" class='allow-overflow'>
+
+              <ng-container *ngSwitchCase="parameterType.BOOLEAN">
+                <!-- HasValue=true;  Mandatory=false: Optional parameter, value slider   -> Parameter present if configured with slider value as value -->
+                <!-- HasValue=false; Mandatory=true:  Mandatory parameter, value slider  -> Value slider controls whether parameter is present on command line -->
+                <!-- HasValue=true;  Mandatory=true:  Mandatory parameter, value slider  -> Parameter always present with slider value as value -->
+                <div class="boolean-param-field" *ngIf="param.desc.hasValue || param.desc.mandatory">
+                  <mat-slide-toggle class="boolean-param-widget" [formControlName]="param.desc.uid"> </mat-slide-toggle>
+                  <label class="boolean-param-label"> {{getCtrlPlaceholderText(param.desc)}} </label>
+                </div>
+
+                <!-- HasValue=false;  Mandatory=false:  Optional parameter, no value slider   -> Parameter either present or not -->
+                <div class="boolean-param-field" *ngIf="!param.desc.hasValue &&! param.desc.mandatory">
+                  {{param.desc.name}}
+                </div>
+            </ng-container>
+
+              <mat-form-field *ngSwitchDefault>
+                <input matInput readonly="{{param.desc.fixed}}" placeholder="{{getCtrlPlaceholderText(param.desc)}}" [formControlName]="param.desc.uid" type="{{getCtrlInputType(param.desc.type)}}"/>
+                <mat-error *ngIf="!isCtrlValid(param.desc.uid)">{{getCtrlErrorMessage(param.desc.uid)}}</mat-error>
+              </mat-form-field>
+
+              <ng-template #infoPopup>
+                <mat-card class="info-card">
+                  <div class="mat-title">{{param.desc.name}}</div>
+                    <mat-card-content class="info-grid">
+                      <div><b>Description:</b></div>
+                      <div class="info-grid-span-2">{{param.desc.longDescription ? param.desc.longDescription : '(none)'}}</div>
+                      <div><b>Default:</b></div>
+                      <div class="info-default-value">{{param.desc.defaultValue ? param.desc.defaultValue : '(none)'}}</div>
+                        <button mat-icon-button type="button" class="info-restore-button" [disabled]="!param.desc.defaultValue || readonly" (click)="revertValue(param)" title="Restore default value">
+                        <mat-icon>undo</mat-icon>
+                      </button>
+                    </mat-card-content>
+                </mat-card>
+              </ng-template>
+              <ng-template #globalPopup>
+                <mat-card class="info-card">
+                  <div class="mat-title">{{param.desc.name}}</div>
+                    <mat-card-content>
+                      This is a global parameter. All applications of this instance referring to this parameter will be affected when the value is changed.
+                    </mat-card-content>
+                  </mat-card>
+              </ng-template>
+
+              <div class="icons">
+                <button mat-icon-button type="button" #globalButton (click)="openOverlay(param, globalButton, globalPopup)" *ngIf="param.desc.global">
+                  <mat-icon class="icons">public</mat-icon>
+                </button>
+                <button mat-icon-button type="button" #infoButton (click)="openOverlay(param, infoButton, infoPopup)">
+                  <mat-icon class="info-icon">info</mat-icon>
+                </button>
+              </div>
+            </mat-grid-tile>
+          </mat-grid-list>
+          <mat-action-row>
+            <button type="button" mat-button (click)="manageOptionalParameters(groupName)" [disabled]="readonly" *ngIf="hasOptionalParameters(groupName)">Manage Optional Parameters</button>
+            <button type="button" mat-button (click)="manageCustomParameters()" [disabled]="readonly" *ngIf="hasCustomParameters(groupName)">Manage Custom Parameters</button>
+            <ng-container nfIf*="hasMultipleGroups()">
+              <button type="button" mat-button (click)="expandPreviousGroup()" *ngIf="hasPreviousGroup(groupName)">Previous</button>
+              <button type="button" mat-button (click)="expandNextGroup()" *ngIf="hasNextGroup(groupName)">Next</button>
+            </ng-container>
+          </mat-action-row>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+  </form>
+  <div class="title title-theme">
+    <div class="title-header">Command Line Preview</div>
+    <div class="title-hint">A preview of the command line arguments used to launch the application.</div>
+  </div>
+  <div class="console console-theme">
+    <span> {{commandLinePreview}} </span>
+  </div>
+</div>

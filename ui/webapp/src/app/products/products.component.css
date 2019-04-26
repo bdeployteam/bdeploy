@@ -1,0 +1,71 @@
+.fill-space {
+  flex: 1 1 auto;
+}
+
+.subHeader {
+  font-size: smaller;
+  font-weight: lighter;
+  height: 32px;
+  padding-left: 55px;
+  margin-top: -10px;
+}
+
+.box {
+  display: flex;
+  flex-flow: column;
+  align-items: stretch;
+  height: 100%;
+}
+
+.drawer-container {
+  flex: 1 0 auto;
+}
+
+.drawer-wrapper {
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  height: 100%;
+}
+
+.drawer-content {
+  overflow: auto;
+  flex: 1 1 auto;
+}
+
+.add-button {
+  top: auto !important;
+  right: 40px !important;
+  bottom: 40px !important;
+  left: auto !important;
+  position: fixed !important;
+}
+
+.loading-container {
+  flex: 1 0 auto;
+  flex-direction: row;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.list-heading {
+  margin-top: 30px;
+  margin-left: 15px;
+}
+
+.center {
+  text-align: center;
+}
+
+.headerText {
+  font-size: 1.5em;
+  margin-left: 15px;
+  vertical-align: middle;
+}
+
+.headerIcon {
+  font-size: 2em;
+  vertical-align: middle;
+}
+

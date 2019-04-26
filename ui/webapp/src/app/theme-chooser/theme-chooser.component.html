@@ -1,0 +1,17 @@
+<ng-template #chooser>
+<mat-card class='chooser-card'>
+  <div class='chooser-grid'>
+    <div *ngFor="let t of themeService.getThemes()" [ngClass]='t + "-chooser"'>
+      <div class='preview-background' (click)='themeService.updateTheme(t)'>
+        <div class='preview-circle'>
+          <div class='preview-selected' *ngIf='t === themeService.getCurrentTheme()'>
+            <mat-icon>check_circle_outline</mat-icon>
+          </div>
+        </div>
+        <div class='preview-accent'></div>
+      </div>
+    </div>
+  </div>
+</mat-card>
+</ng-template>
+<button mat-icon-button aria-label="Switch theme" #trigger (click)='openOverlay(trigger, chooser)'><mat-icon>format_color_fill</mat-icon></button>

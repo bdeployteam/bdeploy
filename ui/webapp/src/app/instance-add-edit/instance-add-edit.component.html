@@ -1,0 +1,78 @@
+<section class="mat-typography dialog">
+  <form [formGroup]="instanceFormGroup" (ngSubmit)="onSubmit()">
+    <mat-toolbar class="mat-elevation-z1 header-toolbar">
+      <mat-toolbar-row>
+        <button mat-icon-button type="button" [disabled]="loading" (click)='location.back()'><mat-icon>chevron_left</mat-icon></button>
+        <span *ngIf="isCreate()">Create New Instance</span>
+        <span *ngIf="!isCreate()">Edit Instance '{{nameControl.value}}'</span>
+        <span class="fill-space"></span>
+        <button mat-raised-button color="primary" type="submit" [disabled]="loading || !isModified() || !instanceFormGroup.valid">SAVE</button>
+      </mat-toolbar-row>
+      <mat-toolbar-row class="subHeader">
+        <span> UUID: <b>{{uuidControl.value}}</b> </span>
+        <span class="spacer"></span>
+        <span> Instance Group: <b>{{groupParam}}</b> </span>
+      </mat-toolbar-row>
+    </mat-toolbar>
+
+    <div class="field-container margin-container">
+      <div class="hBox">
+        <mat-form-field>
+          <input type="text" class="input-field" matInput formControlName="name" placeholder="Name" />
+          <mat-error *ngIf="nameControl.invalid">{{getErrorMessage(nameControl)}}</mat-error>
+        </mat-form-field>
+        <div class="spacer"></div>
+        <mat-form-field>
+          <mat-select formControlName="purpose" placeholder="Purpose">
+            <mat-option *ngFor="let purpose of purposes" value="{{purpose}}">{{purpose}}</mat-option>
+          </mat-select>
+          <mat-error *ngIf="purposeControl.invalid">{{getErrorMessage(purposeControl)}}</mat-error>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field>
+        <input type="text" class="input-field" matInput formControlName="description" placeholder="Description" />
+        <mat-error *ngIf="descriptionControl.invalid">{{getErrorMessage(descriptionControl)}}</mat-error>
+      </mat-form-field>
+
+      <h3 class="section"> Product </h3>
+
+      <div formGroupName="product" class="hBox">
+        <mat-form-field>
+          <mat-select formControlName="name" placeholder="Product">
+            <mat-option *ngFor="let pname of getProductNames()" value="{{pname}}">{{pname}}</mat-option>
+          </mat-select>
+          <mat-error *ngIf="productNameControl.invalid">{{getErrorMessage(productNameControl)}}</mat-error>
+        </mat-form-field>
+        <div class="spacer"></div>
+        <mat-form-field>
+          <mat-select formControlName="tag" placeholder="Tag">
+            <mat-option *ngFor="let tag of getTagsForProduct()" value="{{tag}}">{{tag}}</mat-option>
+          </mat-select>
+          <mat-error *ngIf="productTagControl.invalid">{{getErrorMessage(productTagControl)}}</mat-error>
+        </mat-form-field>
+      </div>
+
+      <h3 class="section"> Master </h3>
+
+      <div formGroupName="target" class="vBox">
+        <mat-form-field>
+          <input type="text" placeholder="Master URL" matInput formControlName="uri" [matAutocomplete]="auto">
+          <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+            <mat-option *ngFor="let url of filteredMasterURLs | async" [value]="url">{{url}}</mat-option>
+          </mat-autocomplete>
+          <mat-error *ngIf="masterUrlControl.invalid">{{getErrorMessage(masterUrlControl)}}</mat-error>
+        </mat-form-field>
+
+        <mat-checkbox (change)="toggleUpdateMasterToken()" *ngIf="masterTokenCheckboxVisible">
+          <label> Update Security Token </label>
+        </mat-checkbox>
+
+        <mat-form-field *ngIf="masterTokenControlVisible">
+          <textarea matInput placeholder="Security Token" formControlName="authPack"></textarea>
+          <mat-error *ngIf="masterTokenControl.invalid">{{getErrorMessage(masterTokenControl)}}</mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+  </form>
+</section>

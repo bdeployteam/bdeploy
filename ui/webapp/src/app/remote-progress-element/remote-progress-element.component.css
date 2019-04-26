@@ -1,0 +1,15 @@
+.progress-label {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.progress-element-grid {
+  display: grid;
+  grid-template-columns: 40px auto 300px 40px;
+  align-items: center;
+}
+
+.progress-children {
+  margin-left: 40px;
+}

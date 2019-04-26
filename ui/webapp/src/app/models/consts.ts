@@ -1,0 +1,108 @@
+import { ApplicationConfiguration, CommandConfiguration, DeploymentStateDto, InstanceConfiguration, InstanceGroupConfiguration, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstancePurpose, InstanceVersionDto, ManifestKey, ParameterConfiguration, ParameterDescriptor, ParameterType, RemoteService } from './gen.dtos';
+
+// Defines the order in which instances should appear based on their purpose
+const PURPOSE_ORDER = [InstancePurpose.PRODUCTIVE, InstancePurpose.TEST, InstancePurpose.DEVELOPMENT];
+
+// Function to sort a purpose by the internal index
+// Used in the instance browser to determine the order
+export const SORT_PURPOSE = (a: InstancePurpose, b: InstancePurpose) => {
+  const aIdx = PURPOSE_ORDER.findIndex(x => x === a);
+  const bIdx = PURPOSE_ORDER.findIndex(x => x === b);
+  if (aIdx < bIdx) {
+    return -1;
+  }
+  if (aIdx > bIdx) {
+    return 1;
+  }
+  return 0;
+};
+
+export const CLIENT_NODE_NAME = '__ClientApplications';
+
+export const EMPTY_MANIFEST_KEY: ManifestKey = {
+  name: null,
+  tag: null,
+};
+
+export const EMPTY_REMOTE_SERVICE: RemoteService = {
+  uri: null,
+  authPack: null,
+};
+
+export const EMPTY_INSTANCE: InstanceConfiguration = {
+  uuid: null,
+  name: null,
+  description: null,
+  purpose: null,
+  autoStart: false,
+  product: EMPTY_MANIFEST_KEY,
+  target: EMPTY_REMOTE_SERVICE,
+};
+
+export const EMPTY_INSTANCE_GROUP: InstanceGroupConfiguration = {
+  name: null,
+  description: null,
+  logo: null,
+};
+
+export const EMPTY_COMMAND_CONFIGURATION: CommandConfiguration = {
+  executable: null,
+  parameters: [],
+};
+
+export const EMPTY_PARAMETER_CONFIGURATION: ParameterConfiguration = {
+  uid: null,
+  value: null,
+  preRendered: [],
+};
+
+export const EMPTY_PARAMETER_DESCRIPTOR: ParameterDescriptor = {
+  uid: null,
+  defaultValue: null,
+  fixed: false,
+  global: false,
+  groupName: null,
+  hasValue: false,
+  longDescription: null,
+  mandatory: false,
+  name: null,
+  parameter: null,
+  type: ParameterType.STRING,
+  valueAsSeparateArg: false,
+  valueSeparator: null,
+};
+
+export const EMPTY_DEPLOYMENT_STATE: DeploymentStateDto = {
+  activatedVersion: null,
+  deployedVersions: [],
+  offlineMasterVersions: [],
+};
+
+export const EMPTY_APPLICATION_CONFIGURATION: ApplicationConfiguration = {
+  uid: null,
+  name: null,
+  application: null,
+  processControl: null,
+  start: EMPTY_COMMAND_CONFIGURATION,
+  stop: EMPTY_COMMAND_CONFIGURATION,
+};
+
+export const EMPTY_INSTANCE_NODE_CONFIGURATION: InstanceNodeConfiguration = {
+  uuid: null,
+  autoStart: false,
+  name: null,
+  applications: [],
+};
+
+export const EMPTY_INSTANCE_NODE_CONFIGURATION_DTO: InstanceNodeConfigurationDto = {
+  nodeName: null,
+  status: null,
+  statusHint: null,
+  nodeConfiguration: null,
+  foreignNodeConfigurations: null,
+}
+
+export const EMPTY_VERSION_DTO: InstanceVersionDto = {
+  key: null,
+  product: null,
+};

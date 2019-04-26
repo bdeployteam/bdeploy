@@ -1,0 +1,132 @@
+def webappDir = "$projectDir/webapp"
+
+apply plugin: 'cz.habarta.typescript-generator'
+
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'cz.habarta.typescript-generator:typescript-generator-gradle-plugin:2.+'
+    }
+}
+
+dependencies {
+    implementation(
+        project(":common"),
+        project(":jersey"),
+        project(":bhive"),
+        project(":interfaces"),
+    )
+    testCompile project(path: ":jersey", configuration: 'testRuntime')
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDirs = ["$webappDir/dist", "$projectDir/src/main/resources"]
+        }
+    }
+}
+
+ext.sharedNpmLogic = { task, List<String> target -> 
+    configure(task) {
+        workingDir "$webappDir"
+        group = BasePlugin.BUILD_GROUP
+        def cmd = []
+        if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
+            commandLine (["npm"] + target)
+        } else {
+            commandLine (["npm.cmd"] + target)
+        }
+    }
+}
+
+task buildAngular(type:Exec) { t ->
+    inputs.dir "$webappDir/src"
+    outputs.dir "$webappDir/dist"
+    sharedNpmLogic(t, ["run", "--", "ng", "build", "--prod"])
+	dependsOn 'installAngular'
+    dependsOn 'genDtos'
+}
+
+task installAngular(type:Exec) { t ->
+    inputs.file "$webappDir/package.json"
+    outputs.dir "$webappDir/node_modules"
+    sharedNpmLogic(t, ["install"])
+}
+
+task genDtos() {
+    dependsOn 'compileJava'
+
+    inputs.files compileJava.destinationDir
+    inputs.files project(":interfaces").sourceSets.main.output.classesDirs
+    inputs.files project(":jersey").sourceSets.main.output.classesDirs
+    outputs.file "${webappDir}/src/app/models/gen.dtos.ts"
+
+    doLast {
+        def cfg = new cz.habarta.typescript.generator.Jackson2Configuration();
+        cfg.fieldVisibility = com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
+        cfg.getterVisibility = com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
+        cfg.setterVisibility = com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
+
+        def settings = new cz.habarta.typescript.generator.Settings();
+        def classes = [
+            // Descriptors
+            'io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor',
+            'io.bdeploy.interfaces.descriptor.client.ClientDescriptor',
+            // Configurations
+            'io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration',
+            'io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto',
+            'io.bdeploy.interfaces.configuration.instance.InstanceConfiguration',
+            'io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration',
+            'io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration',
+            'io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration',
+            // UI only DTOs
+            'io.bdeploy.ui.dto.ApplicationDto',
+            'io.bdeploy.ui.dto.CredentialsDto',
+            'io.bdeploy.ui.dto.InstanceConfigurationDto',
+            'io.bdeploy.ui.dto.InstanceNodeConfigurationDto',
+            'io.bdeploy.ui.dto.InstanceNodeConfigurationListDto',
+            'io.bdeploy.ui.dto.ProductDto',
+            'io.bdeploy.ui.dto.HiveEntryDto',
+            'io.bdeploy.ui.dto.InstanceVersionDto',
+            'io.bdeploy.ui.dto.DeploymentStateDto',
+            // Other, generic
+            'io.bdeploy.common.ActivitySnapshot',
+        ]
+        settings.customTypeMappings.put('java.net.URI', 'string');
+        settings.customTypeNaming.put('io.bdeploy.bhive.model.Manifest$Key', 'ManifestKey');
+        settings.customTypeNaming.put('io.bdeploy.bhive.model.Tree$EntryType', 'TreeEntryType');
+        def excludeClasses = [
+            'java.lang.Comparable',
+            'java.io.Serializable',
+        ]
+        settings.setExcludeFilter(excludeClasses, null);
+        settings.outputFileType = 'implementationFile'
+        settings.outputKind = 'module'
+        settings.mapEnum = 'asEnum'
+        settings.nonConstEnums = true
+        settings.jsonLibrary = 'jackson2'
+
+        def outputFile = "${webappDir}/src/app/models/gen.dtos.ts"
+
+        // add the compile classpath to see the classes dirs of other projects as JAR files are not yet built.
+        def uris = configurations.compileClasspath.files.asType(List).collect { it.toURI().toURL() };
+        // and add the runtime classpath as well to get our OWN classes.
+        uris.addAll(sourceSets.main.runtimeClasspath.collect { it.toURI().toURL() });
+        uris.unique();
+        def cl = settings.createClassLoader("dummy", uris as URL[], Thread.currentThread().getContextClassLoader());
+
+        settings.classLoader = cl;
+        settings.setJackson2Configuration(cl, cfg);
+
+        new cz.habarta.typescript.generator.TypeScriptGenerator(settings).generateTypeScript(
+            cz.habarta.typescript.generator.Input.fromClassNamesAndJaxrsApplication(classes, [], [], [], null, false, settings.getExcludeFilter(), cl, false),
+            cz.habarta.typescript.generator.Output.to(file(outputFile)));
+    }
+}
+
+processResources.dependsOn "buildAngular"
+

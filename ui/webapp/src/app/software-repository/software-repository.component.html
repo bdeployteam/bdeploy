@@ -1,0 +1,41 @@
+<div class="box">
+    <mat-toolbar class="mat-elevation-z1 header-toolbar">
+      <mat-toolbar-row>
+        <button mat-icon-button type="button" (click)='location.back()'><mat-icon>chevron_left</mat-icon></button>
+        <span>Software Repository {{softwareRepositoryName}}</span>
+      </mat-toolbar-row>
+      <mat-toolbar-row class="subHeader">
+          <span><b>Software Packages</b></span>
+      </mat-toolbar-row>
+    </mat-toolbar>
+
+    <mat-drawer-container class="drawer-container" (backdropClick)='sidenav.close()'>
+      <mat-drawer #appsidenav mode="over" position="end" disableClose>
+        <div class='drawer-wrapper'>
+          <mat-toolbar class="mat-elevation-z1 fixed-toolbar">Versions for&nbsp;<b>{{selectedSoftwarePackageName ? selectedSoftwarePackageName : 'none'}}</b></mat-toolbar>
+          <app-software-list class='drawer-content' [softwareRepositoryName]="softwareRepositoryName" [softwareVersions]='softwarePackages.get(selectedSoftwarePackageName)' (deleted)='versionDeleted()'></app-software-list>
+        </div>
+      </mat-drawer>
+
+      <mat-drawer-content>
+        <div *ngIf="loading" class="loading-container">
+          <mat-progress-spinner [mode]="'indeterminate'" class="loading-spinner" mode></mat-progress-spinner>
+        </div>
+        <div *ngIf="!loading">
+          <div *ngIf="softwarePackageNames.length === 0" class="list-heading center">
+            <p>
+              <span class="material-icons headerIcon">cloud_upload</span>
+              <span class="headerText">No software packages.</span>
+            <p>
+          </div>
+          <mat-grid-list cols="{{columns}}" rowHeight="220px" gutterSize="10px">
+            <mat-grid-tile *ngFor="let softwarePackageName of softwarePackageNames">
+              <app-software-card [softwareRepositoryName]="softwareRepositoryName" [softwarePackageName]="softwarePackageName" [softwarePackageVersions]='softwarePackages.get(softwarePackageName)' (select)="openSoftwarePackage(softwarePackageName)"></app-software-card>
+            </mat-grid-tile>
+          </mat-grid-list>
+        </div>
+        <a mat-fab class="add-button" (click)="openUploadDialog()"><mat-icon>cloud_upload</mat-icon></a>
+      </mat-drawer-content>
+    </mat-drawer-container>
+
+  </div>

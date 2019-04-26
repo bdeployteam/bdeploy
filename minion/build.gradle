@@ -1,0 +1,43 @@
+apply plugin: 'application'
+
+ext {
+    scriptDefVmArgs = [ '-Xms64m', '-Xmx512m' ]
+}
+
+mainClassName = 'io.bdeploy.minion.cli.MinionServerCli'
+
+dependencies {
+    implementation(
+        project(":common"),
+        project(":jersey"),
+        project(":bhive"),
+        project(":dcu"),
+        project(":pcu"),
+        project(":interfaces"),
+        project(":ui"),
+
+        'org.bouncycastle:bcpkix-jdk15on:1.60',
+        'org.bouncycastle:bcprov-jdk15on:1.60',
+        'org.apache.commons:commons-compress:1.18'
+    )
+
+    testCompile project(path: ":jersey", configuration: 'testRuntime')
+    testCompile project(path: ":bhive", configuration: 'testRuntime')
+    testCompile project(path: ":pcu", configuration: 'testRuntime')
+    testCompile project(path: ":ui", configuration: 'testRuntime')
+}
+
+rootProject.addMultiPlatformDistBuild(project)
+
+startScripts {
+    applicationName = 'bdeploy'
+}
+
+distributions {
+    win64 {
+        baseName = 'bdeploy-win64'
+    }
+    linux64 {
+        baseName = 'bdeploy-linux64'
+    }
+}

@@ -1,0 +1,46 @@
+.mat-dialog-container {
+  overflow: visible!;
+}
+
+.mat-dialog-content {
+  overflow: visible!;
+}
+
+.container {
+  height: 100%;
+}
+
+.mat-dialog-content {
+  padding: 0.5em 1.5em;
+}
+
+.mat-form-field {
+  font-size: 14px;
+  width: 100%;
+}
+
+.mat-table {
+  width: 100%;
+  margin-bottom: 1em;
+}
+
+.mat-cell {
+  padding: 5px;
+  word-break: break-all;
+}
+
+.mat-header-cell {
+  padding: 5px;
+}
+
+.mat-column-status {
+  width: 10px;
+}
+
+.mat-column-name {
+  width: 30%;
+}
+
+.actions {
+  justify-content: flex-end;
+}

@@ -1,0 +1,10 @@
+.icon {
+  height: 24px;
+}
+
+.app-process-out-of-sync-text {
+  float: left;
+  padding: 5px;
+  margin-right: 5px;
+  border-radius: 5px;
+}

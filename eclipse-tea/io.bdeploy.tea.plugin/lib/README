@@ -1,0 +1,2 @@
+Execute ../gradlew shadowJar in the 'interfaces' project of BDeploy and copy the
+build/libs/interfaces*-all.jar in here for now.

@@ -1,0 +1,10 @@
+<mat-toolbar class="mat-elevation-z1 header-toolbar">
+  <span>Software Repositories Overview</span>
+  <span class="fill-space"></span>
+</mat-toolbar>
+
+<mat-grid-list cols="{{columns}}" rowHeight="200px" gutterSize="10px">
+  <mat-grid-tile *ngFor="let repository of softwareRepositoryList.data">
+    <app-software-repository-card [repository]="repository"></app-software-repository-card>
+  </mat-grid-tile>
+</mat-grid-list>

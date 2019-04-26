@@ -1,0 +1,25 @@
+apply plugin: 'java-library'
+
+dependencies {
+    implementation(
+        'org.glassfish.jersey.media:jersey-media-sse:2.27',
+        'org.glassfish.jersey.ext:jersey-proxy-client:2.27',
+        'javax.xml.bind:jaxb-api:2.2.11',
+        'javax.activation:activation:1.1.1',
+        'org.slf4j:jul-to-slf4j:1.7.25',
+        'org.apache.logging.log4j:log4j-core:2.11.1',
+        'org.apache.logging.log4j:log4j-slf4j-impl:2.11.1',
+        project(":common"),
+    )
+
+    testCompile    project(path: ":common", configuration: 'testRuntime')
+
+    api(
+        'org.glassfish.jersey.inject:jersey-hk2:2.27',
+        'org.glassfish.jersey.containers:jersey-container-grizzly2-http:2.27',
+        'org.glassfish.jersey.media:jersey-media-multipart:2.27',
+    )
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8

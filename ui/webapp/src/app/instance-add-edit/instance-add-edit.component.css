@@ -1,0 +1,43 @@
+.fill-space {
+  flex: 1 1 auto;
+}
+
+.field-container {
+  display: flex;
+  flex-direction: column;
+}
+
+mat-form-field {
+  flex: 1 1 auto;
+}
+
+mat-checkbox {
+  margin-bottom: 0.5em;
+}
+
+.hBox {
+  display: flex;
+  flex-direction: row;
+}
+
+.vBox {
+  display: flex;
+  flex-direction: column;
+}
+
+.spacer {
+  width: 20px;
+}
+
+.section {
+  margin: 1em 0em 1em 0em;
+  font-weight: bolder;
+}
+
+.subHeader {
+  font-size: smaller;
+  font-weight: lighter;
+  height: 32px;
+  padding-left: 55px;
+  margin-top: -10px;
+}

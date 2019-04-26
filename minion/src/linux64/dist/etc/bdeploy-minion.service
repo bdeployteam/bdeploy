@@ -1,0 +1,19 @@
+# Template for a BDeploy minion service unit. Usage:
+#  1) sudo copy the .service file to /etc/systemd/system/ and chmod 644 it.
+#  2) replace all [master|slave] in the file with EITHER 'master' or 'slave' depending on what you set up.
+#  3) fix all paths to be valid.
+#  4) set the correct application user which will be running the application.
+#  5) start and/or enable service using systemctl
+
+[Unit]
+Description=BDeploy [Master|Slave]
+
+[Service]
+User=APPLICATION_USER
+Type=simple
+Restart=always
+RestartSec=10
+ExecStart=/opt/bdeploy/master/bin/minion [master|slave] --root=/opt/bdeploy/data
+
+[Install]
+WantedBy=multi-user.target

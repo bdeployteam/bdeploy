@@ -1,0 +1,35 @@
+package io.bdeploy.bhive.op;
+
+import static io.bdeploy.common.util.RuntimeAssert.assertNotNull;
+
+import java.nio.file.Path;
+
+import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.bhive.model.Tree;
+
+/**
+ * Import a {@link Path} recursively into the local hive and return the
+ * {@link Tree} {@link ObjectId}.
+ */
+public class ImportTreeOperation extends BHive.Operation<ObjectId> {
+
+    private Path toImport;
+
+    @Override
+    public ObjectId call() throws Exception {
+        assertNotNull(toImport, "Source path not set");
+
+        return getObjectManager().importTree(toImport);
+    }
+
+    /**
+     * Set the path to import from. The given directory will be recursively imported
+     * into the {@link BHive}.
+     */
+    public ImportTreeOperation setSourcePath(Path toImport) {
+        this.toImport = toImport;
+        return this;
+    }
+
+}

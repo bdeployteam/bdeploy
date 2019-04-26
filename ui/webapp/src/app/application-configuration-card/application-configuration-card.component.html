@@ -1,0 +1,32 @@
+<mat-card [ngClass]="getCardStyle()" matTooltip='Application is missing in the current product tag' [matTooltipDisabled]='!isMissing()' matTooltipPosition='above'>
+  <div class="title-row">
+    <span class="mat-title app-title">{{ appConfig.name }}</span>
+    <span class="spacer"></span>
+    <mat-menu #appMenu="matMenu" xPosition="before">
+      <button mat-menu-item (click)="onEdit()" [disabled]='isMissing()'>
+        <ng-container *ngIf="!isReadonly"> Configure... </ng-container>
+        <ng-container *ngIf="isReadonly"> View... </ng-container>
+      </button>
+      <ng-container *ngIf='isClient'>
+        <button mat-menu-item (click)="downloadLauncherEvent.emit(appConfig)">Download Launcher Descriptor...</button>
+        <mat-divider></mat-divider>
+      </ng-container>
+      <button mat-menu-item (click)="onDelete()" [disabled]="isReadonly">Delete...</button>
+    </mat-menu>
+    <button class="option-button" mat-icon-button [matMenuTriggerFor]="appMenu" *ngIf="!isForeign" appClickStopPropagation>
+      <mat-icon>more_vert</mat-icon>
+    </button>
+  </div>
+  <mat-card-content>
+    <div class="content-row">
+      <div class="mat-body app-description">{{ appConfig.application.tag }}</div>
+      <span class="spacer"></span>
+      <div class="icons" *ngIf="isClient">
+        <mat-icon class="icon" [svgIcon]='appOs' title="{{appOs}} Client Application"></mat-icon>
+      </div>
+      <div class="icons" *ngIf="!isForeign">
+        <app-process-status [appId]="appConfig.uid" [instanceTag]="instanceVersion.key.tag" [activatedTag]="activatedTag" [outOfSyncIcon]="true" [outOfSyncText]="true"></app-process-status>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

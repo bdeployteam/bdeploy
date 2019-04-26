@@ -1,0 +1,43 @@
+@import '~@angular/material/theming';
+
+@mixin instance-node-card-theme($theme) {
+  $dark: map-get($theme, 'is-dark');
+
+  $header-color: if($dark, #5a5a5a, mat-color($mat-grey, 200));
+  $content-color: if($dark, mat-color($mat-grey, 700), mat-color($mat-grey, 100));
+
+  $online-color: if($dark, #55da08, #146400);
+  $offline-color: if($dark, rgb(207, 0, 0), rgb(180, 0, 0));
+
+  .instance-node-card-header-theme {
+    background-color: $header-color !important;
+  }
+
+  .instance-node-card-theme {
+    background-color: $content-color !important;
+  }
+
+  .instance-node-online {
+    align-self: center;
+    color: $online-color;
+  }
+
+  .instance-node-offline {
+    align-self: center;
+    color: $offline-color;
+  }
+
+  .instance-node-avatar {
+    color: if($dark, #8d8d8d, #3d3d3d);
+  }
+
+  .instance-node-valid-drop-zone {
+    border: 1px dashed $online-color;
+  }
+
+  .instance-node-invalid-drop-zone {
+    opacity: 0.2;
+    transition: opacity .5s;
+    border: 1px dashed $offline-color;
+  }
+}

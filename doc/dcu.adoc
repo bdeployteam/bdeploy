@@ -1,0 +1,7 @@
+= DCU (Deployment Control Unit)
+
+The DCU is responsible for consuming a deployment manifest. A deployment manifest is an artificial BHive manifest created by a configuration application (central deployment control server, local application, ...).
+
+The DCU assumes that any referenced BHive Manifest is locally available, i.e. has been pushed to the BHive associated with the DCU before passing a reference to it to the DCU.
+
+Note that the DCU does not know about multiple nodes in a system. It assumes that everything is local, and so do all data structures in the DCU. The minion controlling the local DCU may have additional higher level structures to allow multiple DCUs distributed among nodes.

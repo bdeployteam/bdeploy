@@ -1,0 +1,110 @@
+package io.bdeploy.minion.remote.jersey;
+
+import java.io.IOException;
+import java.nio.file.FileStore;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import javax.inject.Inject;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response.Status;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.op.ExportOperation;
+import io.bdeploy.bhive.op.ManifestDeleteOperation;
+import io.bdeploy.bhive.op.ManifestListOperation;
+import io.bdeploy.bhive.op.ObjectListOperation;
+import io.bdeploy.bhive.op.ObjectSizeOperation;
+import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.common.util.VersionHelper;
+import io.bdeploy.interfaces.remote.MinionUpdateResource;
+import io.bdeploy.minion.MinionRoot;
+
+public class MinionUpdateResourceImpl implements MinionUpdateResource {
+
+    private static final Logger log = LoggerFactory.getLogger(MinionUpdateResourceImpl.class);
+    private static final String UPDATE_DIR = "next";
+
+    @Inject
+    private MinionRoot root;
+
+    @Override
+    public void update(Manifest.Key key) {
+        Path updateTarget = root.getUpdateDir().resolve(UPDATE_DIR);
+
+        if (!Files.isDirectory(updateTarget)) {
+            throw new WebApplicationException("Update has not been prepared, missing " + updateTarget,
+                    Status.PRECONDITION_FAILED);
+        }
+
+        root.getUpdateManager().performUpdate(1_000);
+    }
+
+    @Override
+    public void prepare(Key key) {
+        String currentVersion = VersionHelper.readVersion();
+        if (currentVersion.equals(VersionHelper.UNKNOWN)) {
+            // cannot prevent at LEAST for unit tests.
+            log.error("I don't know my own version, this might not work well");
+        }
+
+        BHive h = root.getHive();
+
+        SortedSet<Key> mfs = h.execute(new ManifestListOperation().setManifestName(key.toString()));
+        if (!mfs.contains(key)) {
+            throw new WebApplicationException("Cannot find version to update to: " + key, Status.NOT_FOUND);
+        }
+
+        Path updateTarget = root.getUpdateDir().resolve(UPDATE_DIR);
+        if (Files.isDirectory(updateTarget)) {
+            log.warn("Removing stale update folder at " + updateTarget);
+            PathHelper.deleteRecursive(updateTarget);
+        }
+
+        try {
+            FileStore store = Files.getFileStore(root.getUpdateDir());
+            long space = store.getUsableSpace();
+
+            SortedSet<ObjectId> objects = h.execute(new ObjectListOperation().addManifest(key));
+            ObjectSizeOperation sop = new ObjectSizeOperation();
+            objects.forEach(sop::addObject);
+            long required = h.execute(sop);
+
+            if ((required * 2) >= space) {
+                throw new WebApplicationException("Not enough space available to savely perform update",
+                        Status.PRECONDITION_FAILED);
+            }
+        } catch (IOException e) {
+            log.warn("Cannot check space requirements for update", e);
+        }
+
+        // never use a link provider here.
+        h.execute(new ExportOperation().setManifest(key).setTarget(updateTarget));
+
+        // clean up any version from the hive which is not the currently running and not the new target version
+        SortedSet<Manifest.Key> keysToKeep = new TreeSet<>();
+        keysToKeep.add(key);
+        keysToKeep.add(new Manifest.Key(key.getName(), currentVersion));
+
+        // there is a tiny (acceptable) potential for left-over minion versions: if the 'name' of the
+        // to-be installed update diverges from the name of the currently installed version, versions
+        // with the old name are not cleaned up properly. Since the name is calculated by us, this
+        // is not much of a problem.
+
+        SortedSet<Key> allVersions = h.execute(new ManifestListOperation().setManifestName(key.getName()));
+        allVersions.stream().filter(k -> !keysToKeep.contains(k)).forEach(k -> {
+            h.execute(new ManifestDeleteOperation().setToDelete(k));
+        });
+
+        // update is now prepared in the update dir of the root.
+    }
+
+}

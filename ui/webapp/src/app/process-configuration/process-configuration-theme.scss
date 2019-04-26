@@ -1,0 +1,18 @@
+@import '~@angular/material/theming';
+
+@mixin process-configuration-theme($theme) {
+  $dark: map-get($theme, is-dark);
+
+  .drawer-content {
+    background-color: if($dark, #363537, #ffffff);
+  }
+
+  .application-caption {
+    background-color: if($dark, #5a5a5a, #eeeeee);
+  }
+
+  .app-process-out-of-sync-text {
+    color: #fff;
+    background-color: if($dark, #da0808, #640000);
+  }
+}

@@ -1,0 +1,9 @@
+@import '~@angular/material/theming';
+
+@mixin product-tag-card-theme($theme) {
+  $selected-color: mat-color(map-get($theme, 'accent'));
+
+  .product-tag-selected {
+    border-left: 10px solid $selected-color;
+  }
+}

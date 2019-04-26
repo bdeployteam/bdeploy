@@ -1,0 +1,37 @@
+import { Location } from '@angular/common';
+import { Injectable } from '@angular/core';
+import { ActivatedRouteSnapshot, CanDeactivate, Router } from '@angular/router';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
+
+/**
+ * Interface to be implemented by a component to prevent navigation events. Typically
+ * a component will prevent navigation when there are unsaved changes.
+ */
+export interface CanComponentDeactivate {
+  canDeactivate: () => Observable<boolean>;
+}
+
+@Injectable({
+  providedIn: 'root',
+})
+export class CanDeactivateGuard implements CanDeactivate<CanComponentDeactivate> {
+
+  constructor(private location: Location, private router: Router) {}
+
+  canDeactivate(component: CanComponentDeactivate, currentRoute: ActivatedRouteSnapshot) {
+    return component.canDeactivate ? component.canDeactivate().pipe(
+      tap(allowed => {
+        if (!allowed && this.router.getCurrentNavigation().trigger === 'popstate') {
+          // FORWARD navigation is broken by this, but there is no simple and no plausible way to
+          // distinguish back vs. forward button (grmpf). In the case where the user presses
+          // forward and then cancels due to unsaved changes, we will destroy the forward history
+          // by pushing state here.
+          const currentUrlTree = this.router.createUrlTree([], currentRoute);
+          const currentUrl = currentUrlTree.toString();
+          this.location.go(currentUrl);
+        }
+      })
+    ) : true;
+  }
+}

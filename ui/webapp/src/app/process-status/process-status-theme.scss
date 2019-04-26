@@ -1,0 +1,31 @@
+@import '~@angular/material/theming';
+
+@mixin process-status-theme($theme) {
+  $dark: map-get($theme, 'is-dark');
+
+  .app-process-running {
+    color: if($dark, #55da08, #146400) !important;
+  }
+
+  .app-process-crash-waiting {
+    color: if($dark, #f0964d, #ec832c) !important;
+  }
+
+  .app-process-crash-permanently {
+    color: if($dark, #da0808, #640000)  !important;
+  }
+
+  .app-process-stopped {
+    color: if($dark, #bbbbbb, #414141) !important;
+  }
+
+  .app-process-out-of-sync {
+    opacity: 0.6;
+  }
+
+  .app-process-out-of-sync-text {
+    color: #fff;
+    background-color: if($dark, #da0808, #640000);
+  }
+
+}

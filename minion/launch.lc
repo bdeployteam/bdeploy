@@ -1,0 +1,117 @@
+abstract java configuration minion-base {
+	project minion;
+	main-class io.bdeploy.minion.cli.MinionServerCli;
+	
+	argument "-v";
+}
+
+/** Launches the master with a single slave */
+group configuration MasterSlave {
+	adopt member Master regex ".*Started.*";
+	adopt member Slave;
+}
+
+/**
+ * Initialize a new master root.
+ */
+java configuration Master-Init : minion-base {
+	argument "init";
+	argument "--root=${workspace_loc}/runtime/master";
+	argument "--hostname=localhost";
+	argument "--port=7701";
+	argument "--dist=ignore";
+	argument "--tokenFile=${workspace_loc}/runtime/token.txt";
+}
+
+/**
+ * Initialize a new slave root.
+ */
+java configuration Slave-Init : minion-base {
+	argument "init";
+	argument "--root=${workspace_loc}/runtime/slave";
+	argument "--hostname=localhost";
+	argument "--port=7702";
+	argument "--dist=ignore";
+	argument "--tokenFile=${workspace_loc}/runtime/token-slave.txt";
+}
+
+/**
+ * Registers the slave with the master root.
+ */
+java configuration Slave-Register : minion-base {
+	argument "slave";
+	argument "--root=${workspace_loc}/runtime/master";
+	argument "--add=slave";
+	argument "--remote=https://localhost:7702/api";
+	argument "--tokenFile=${workspace_loc}/runtime/token-slave.txt";
+}
+
+/**
+ * Run the slave.
+ */
+java configuration Slave : minion-base {
+	argument "slave";
+	argument "--root=${workspace_loc}/runtime/slave";
+	memory max=256 MB;
+}
+
+/**
+ * Runs the master on the previously initialized root.
+ */
+java configuration Master : minion-base {
+	argument "master";
+	argument "--root=${workspace_loc}/runtime/master";
+	argument "--allowCors";
+	vm-argument "-XX:+HeapDumpOnOutOfMemoryError";
+	memory max=256 MB;
+}
+
+java configuration Launcher {
+	project launcher;
+	main-class io.bdeploy.launcher.cli.LauncherCli;
+	
+	working-dir "${workspace_loc}/runtime";
+	
+	argument "-v";
+	argument "launcher";
+	argument "--launch=${file_prompt:.bdeploy file to launch}";
+}
+
+/**
+ * Add a new user to the master's user database
+ */
+java configuration Master-AddUser : minion-base {
+	argument "user";
+	argument "--admin"; // all users are global admin which are created using this config
+	argument "--root=${workspace_loc}/runtime/master";
+	argument "--add=${string_prompt:Enter Username}";
+	argument "--password=${password_prompt:Enter Password}";
+}
+
+java configuration Master-Product-List : minion-base {
+	argument "product";
+	argument "--list";
+	argument "--hive=${folder_prompt:Path to Hive}";
+}
+
+java configuration Remote-List-Minions : minion-base {
+	argument "remote-master";
+	argument "--remote=https://localhost:7701/api";
+	argument "--tokenFile=${workspace_loc}/runtime/token.txt";
+	argument "--minions";
+}
+
+java configuration Remote-Update : minion-base {
+	argument "remote-master";
+	argument "--yes";
+	argument "--remote=https://localhost:7701/api";
+	argument "--tokenFile=${file_prompt:Token file to use}";
+	argument "--update=${file_prompt:Update package to push}";
+}
+
+java configuration NewToken : minion-base {
+	argument "token";
+	argument "--keystore=${workspace_loc}/runtime/master/etc/private";
+	argument "--passphrase=${password_prompt:Enter Password}";
+	argument "--create";
+}

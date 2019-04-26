@@ -1,0 +1,53 @@
+@import '~@angular/material/theming';
+
+@mixin application-edit-theme($theme) {
+  $dark: map-get($theme, 'is-dark');
+  $bg: map-get($theme, 'background');
+
+  $header-color: if($dark, mat-color($mat-grey, 800), mat-color($mat-grey, 200));
+  $content-color: if($dark, mat-color($mat-grey, 700), #fff);
+  $card-color: map-get($bg, 'card');
+
+  .title-theme {
+    background-color: $header-color !important;
+  }
+
+  .mat-expansion-panel-header {
+    background-color: $header-color !important;
+  }
+
+  .mat-expansion-panel-body {
+    background-color: $content-color;
+  }
+
+  input[type='text']:read-only,
+  input[type='number']:read-only {
+    color: if($dark, #bababa, #969696);
+  }
+
+  .console-theme {
+    background-color: $content-color;
+  }
+
+  .error-theme {
+    color: if($dark, rgb(207, 0, 0), rgb(180, 0, 0));
+  }
+
+  .info-theme {
+    color: if($dark, #bababa, #969696);
+  }
+
+  .info-card::after {
+    content: '';
+    position: absolute;
+    transform: rotate(45deg);
+    top: calc(100% - 10px);
+    right: 25px;
+    margin-left: -10px;
+    border-width: 10px;
+    border-style: solid;
+    border-color: transparent $card-color $card-color transparent;
+
+    box-shadow: #{rgba($mat-elevation-color, $mat-elevation-opacity * 0.12)} 2px 2px 2px;
+  }
+}

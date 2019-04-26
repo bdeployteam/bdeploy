@@ -1,0 +1,33 @@
+<div class="process-container mat-elevation-z8" matSort>
+  <table mat-table [dataSource]='dataSource'>
+    <ng-container matColumnDef="pid">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>PID</th>
+      <td mat-cell *matCellDef="let element">{{element.pid}}</td>
+      <td mat-footer-cell *matFooterCellDef> # {{dataSource.data.length}} </td>
+    </ng-container>
+    <ng-container matColumnDef="user">
+      <th mat-header-cell *matHeaderCellDef>User</th>
+      <td mat-cell *matCellDef="let element">{{element.user}}</td>
+      <td mat-footer-cell *matFooterCellDef> </td>
+    </ng-container>
+    <ng-container matColumnDef="totalCpuDuration">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>CPU time</th>
+      <td mat-cell *matCellDef="let element">{{element.totalCpuDuration}}</td>
+      <td mat-footer-cell *matFooterCellDef> {{totalCpuDuration}} </td>
+    </ng-container>
+    <ng-container matColumnDef="command">
+      <th mat-header-cell *matHeaderCellDef>Command</th>
+      <td mat-cell *matCellDef="let element">{{element.command || '(unknown)'}}</td>
+      <td mat-footer-cell *matFooterCellDef> </td>
+    </ng-container>
+    <ng-container matColumnDef="arguments">
+      <th mat-header-cell *matHeaderCellDef>Arguments</th>
+      <td mat-cell *matCellDef="let element">{{element.arguments || '(unknown)'}}</td>
+      <td mat-footer-cell *matFooterCellDef> </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef='displayedColumns; sticky: true'></tr>
+    <tr mat-row *matRowDef='let row; columns: displayedColumns'></tr>
+    <tr mat-footer-row *matFooterRowDef="displayedColumns"></tr>
+  </table>
+  <mat-paginator *ngIf="dataSource.data.length > 10" [pageSizeOptions]="[10]" showFirstLastButtons></mat-paginator>
+</div>

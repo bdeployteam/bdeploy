@@ -1,0 +1,20 @@
+.add-button {
+  top: auto !important;
+  right: 40px !important;
+  bottom: 40px !important;
+  left: auto !important;
+  position: fixed !important;
+}
+
+.list-divider {
+  margin-top: 30px;
+}
+
+.list-heading {
+  margin-top: 30px;
+  margin-left: 15px;
+}
+
+.fill-space {
+  flex: 1 0 auto;
+}

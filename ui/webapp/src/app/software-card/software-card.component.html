@@ -1,0 +1,19 @@
+<mat-card class="software-card" (click)='clickIt()'>
+  <mat-card-header>
+    <mat-card-title class="title">{{softwarePackageName}}</mat-card-title>
+    <mat-card-subtitle>Software Package</mat-card-subtitle>
+      <span class="spacer"></span>
+      <mat-menu #appMenu="matMenu" xPosition="before">
+        <button mat-menu-item (click)="clickIt()">Versions</button>
+      </mat-menu>
+      <button class="option-button" mat-icon-button [matMenuTriggerFor]="appMenu" appClickStopPropagation>
+        <mat-icon>more_vert</mat-icon>
+      </button>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-list>
+        <mat-list-item><b>{{softwarePackageVersions.length}}</b>&nbsp;version{{softwarePackageVersions.length > 1 ? 's' : ''}} available</mat-list-item>
+        <mat-list-item><b>{{diskUsage}}</b>&nbsp;total disk usage</mat-list-item>
+      </mat-list>
+    </mat-card-content>
+  </mat-card>

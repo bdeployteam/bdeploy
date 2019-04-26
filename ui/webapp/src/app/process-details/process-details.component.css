@@ -1,0 +1,74 @@
+.flex-column {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+
+  margin: 20px;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex: 1 1 auto;
+}
+
+.flex-row-center {
+  justify-content: center;
+}
+
+.spacer {
+  flex: 1 0 auto;
+}
+
+.info-grid {
+  display: grid;
+  justify-content: start;
+  grid-template-columns: 24px auto auto;
+  grid-column-gap: 10px;
+  grid-row-gap: 10px;
+  align-items: center;
+}
+
+.info-detail {
+  font-style: italic;
+  max-width: 350px;
+}
+
+mat-divider {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.control-button {
+  width: 80px;
+  height: 80px;
+  margin: 5px;
+}
+
+.control-button mat-icon {
+  width: 32px;
+  height: 32px;
+  font-size: 32px;
+}
+
+.control-divider {
+  height: 80px;
+}
+
+.health-icon {
+  height: 24px;
+}
+
+.subHeader {
+  font-size: smaller;
+  font-weight: lighter;
+  height: 32px;
+  margin-top: -15px;
+}
+
+.out-of-sync {
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}

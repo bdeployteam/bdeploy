@@ -1,0 +1,164 @@
+.mat-toolbar {
+  height: 64px;
+  min-height: 64px;
+}
+
+.fill-space {
+  flex: 1 1 auto;
+}
+
+.process-config-header {
+  height: 128px;
+  min-height: 128px;
+}
+
+.subHeader {
+  font-size: smaller;
+  font-weight: lighter;
+  padding-left: 55px;
+  margin-top: -10px;
+}
+
+.header-logo {
+  width: 64px;
+  height: 64px;
+}
+
+.spacer {
+  width: 20px;
+}
+
+.default-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+}
+
+.default-toolbar {
+  display: flex;
+  flex-direction: row;
+  flex-flow: row-reverse;
+}
+
+.drawer-container {
+  flex: 1 1 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+.side-nav-container {
+  display: flex;
+  overflow-x: visible;
+  overflow-y: hidden;
+  flex-direction: column;
+  height: 100%;
+  min-width: 390px;
+  align-items: center;
+}
+
+.drawer-content {
+  overflow: auto;
+  flex: 1 1 auto;
+  margin: 0px;
+  padding: 0px;
+  width: 100%;
+}
+
+.version-card {
+  display: flex;
+  flex-direction: row;
+}
+
+.nodes-container {
+  flex: 0 1 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+
+.node {
+  flex: 0 1 auto;
+}
+
+.box {
+  display: flex;
+  flex-flow: column;
+  align-items: stretch;
+  height: 100%;
+}
+
+.app-card {
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  transition: box-shadow 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.app-card:active {
+  opacity: 0.9;
+}
+
+.loading-container {
+  flex: 1 0 auto;
+  flex-direction: row;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.toolbar-info-grid {
+  display: grid;
+  grid-column-gap: 40px;
+  grid-template-columns: auto auto;
+  align-items: center;
+}
+
+.toolbar-progress {
+  padding-left: 8px;
+}
+
+.card-list-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.card-list-divider {
+  width: 100%;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.products-toolbar {
+  display: flex;
+  flex-direction: row;
+  flex-flow: row-reverse;
+}
+
+.application-caption {
+  /*
+   * D&D removes elements from the DOM. That would shrink the caption.
+   * Thus we need to set a fixed width to prevent that
+  */
+  width: 320px;
+  border-radius: 5px 5px 0px 0px;
+  padding: 10px;
+  margin: 5px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.application-caption-text {
+  margin-left: 5px;
+}
+
+.app-process-out-of-sync-text {
+  padding: 15px;
+  margin: 15px;
+  border-radius: 5px;
+}

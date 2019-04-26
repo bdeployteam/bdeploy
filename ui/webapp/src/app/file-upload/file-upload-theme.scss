@@ -1,0 +1,27 @@
+@import '~@angular/material/theming';
+
+@mixin product-upload-theme($theme) {
+  $dark: map-get($theme, 'is-dark');
+
+  $primary: map-get($theme, 'primary');
+  $accent: map-get($theme, 'accent');
+  $warn: map-get($theme, 'warn');
+
+  .dropZoneActive {
+    border: 1px dashed mat-color($primary) !important;
+    background-color: mat-color($accent);
+  }
+
+  .browseButton {
+    color: mat-color($primary);
+  }
+
+  .uploadSuccessful {
+    color: mat-color($primary);
+  }
+
+  .uploadError {
+    color: mat-color($warn);
+  }
+
+}

@@ -1,0 +1,36 @@
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav #drawer  class="sidenav mat-elevation-z3" fixedInViewport="true"
+      attr.role='dialog'
+      mode='over'>
+    <mat-toolbar class="main-toolbar main-toolbar-height"><app-logo class='logo' [size]='48'></app-logo>BDeploy</mat-toolbar>
+    <mat-nav-list>
+      <a mat-list-item (click)='drawer.close()' [routerLink]="['/instancegroupbrowser']"><mat-icon class="nav-icon">cloud</mat-icon>Instance Groups</a>
+      <a mat-list-item (click)='drawer.close()' [routerLink]="['/softwarerepositoriesbrowser']"><mat-icon class="nav-icon">cloud</mat-icon>Software Repositories</a>
+      <a mat-list-item (click)='drawer.close()' [routerLink]="['/hivebrowser']"><mat-icon class="nav-icon">home</mat-icon>Hive Browser</a>
+    </mat-nav-list>
+    <footer>
+        <div class="footer-content">Server: {{ backendVersion | async }}</div>
+    </footer>
+  </mat-sidenav>
+  <mat-sidenav-content class="sidenav-content">
+    <mat-toolbar class="mat-elevation-z3 sidenav-toolbar main-toolbar main-toolbar-height" #mainToolbar>
+      <button
+        type="button"
+        aria-label="Toggle sidenav"
+        mat-icon-button
+        (click)="drawer.toggle()"
+        *ngIf="(isAuth$ | async)">
+        <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
+      </button>
+      <app-logo class='logo' [size]='48'></app-logo>{{title.getTitle()}}
+      <span class="spacer"></span>
+      <app-theme-chooser></app-theme-chooser>
+      <ng-container *ngIf="isAuth$ | async">
+        <button mat-icon-button aria-label="Logout icon" (click)="logout()"><mat-icon>logout</mat-icon></button>
+      </ng-container>
+    </mat-toolbar>
+    <div class="sidenav-margin">
+      <ng-content></ng-content>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

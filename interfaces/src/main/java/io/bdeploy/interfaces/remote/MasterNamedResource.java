@@ -1,0 +1,163 @@
+package io.bdeploy.interfaces.remote;
+
+import java.util.SortedMap;
+import java.util.SortedSet;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+
+import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.Tree;
+import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
+import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
+import io.bdeploy.jersey.JerseyAuthenticationProvider.WeakTokenAllowed;
+
+/**
+ * Manages a certain hive on the master
+ * <p>
+ * TODO: some APIs are not optimal.
+ */
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
+public interface MasterNamedResource {
+
+    /**
+     * @param key the key to a master {@link Manifest} (grouping deployment
+     *            manifests for each available node). The master {@link Manifest}
+     *            <b>must</b>:
+     *            <ul>
+     *            <li>Have a root {@link Tree} containing of entries which are all
+     *            {@link Manifest} references. Each Entries name is the name of the
+     *            node as known to the master to install to, the {@link Manifest}
+     *            reference references a {@link Manifest} suitable for the DCU.
+     *            <li>Have a label with the key 'X-Instance'. The
+     *            value must be the UUID of the deployment this {@link Manifest}
+     *            belongs to.
+     *            </ul>
+     */
+    @PUT
+    public void install(Manifest.Key key);
+
+    /**
+     * @param key activates the previously installed master manifest.
+     * @see #install(io.bdeploy.bhive.model.Manifest.Key)
+     */
+    @POST
+    public void activate(Manifest.Key key);
+
+    /**
+     * @param key the installation to remove.
+     * @see #install(io.bdeploy.bhive.model.Manifest.Key)
+     */
+    @POST
+    @Path("/remove")
+    public void remove(Manifest.Key key);
+
+    /**
+     * @return available manifests to deploy.
+     */
+    @GET
+    @Path("/available")
+    public SortedMap<String, SortedSet<Manifest.Key>> getAvailableDeployments();
+
+    /**
+     * @return return active deployments.
+     */
+    @GET
+    @Path("/active")
+    public SortedMap<String, Manifest.Key> getActiveDeployments();
+
+    /**
+     * @return available manifests to deploy on a certain minion.
+     */
+    @GET
+    @Path("/available-m")
+    public SortedMap<String, SortedSet<Manifest.Key>> getAvailableDeployments(@QueryParam("m") String minion);
+
+    /**
+     * @return return active deployments on a certain minion.
+     */
+    @GET
+    @Path("/active-m")
+    public SortedMap<String, Manifest.Key> getActiveDeployments(@QueryParam("m") String minion);
+
+    /**
+     * @param instanceId the deployment/instance uuid
+     * @param application the application id
+     * @return the applications configuration
+     */
+    @GET
+    @WeakTokenAllowed
+    @Path("/client-config")
+    public ClientApplicationConfiguration getClientConfiguration(@QueryParam("u") String instanceId,
+            @QueryParam("a") String application);
+
+    /**
+     * Starts all applications of the given instance having the start type 'INSTANCE' configured.
+     *
+     * @param instanceId
+     */
+    @POST
+    @Path("/startAll")
+    public void start(@QueryParam("u") String instanceId);
+
+    /**
+     * Starts a single application of an instance.
+     *
+     * @param instanceId
+     *            the unique id of the instance.
+     * @param applicationId
+     *            the unique ID of the application.
+     */
+    @POST
+    @Path("/startApp")
+    public void start(@QueryParam("u") String instanceId, @QueryParam("a") String applicationId);
+
+    /**
+     * Stops a single application of an instance.
+     *
+     * @param instanceId
+     *            the unique id of the instance.
+     * @param applicationId
+     *            the unique ID of the application.
+     */
+    @POST
+    @Path("/stopApp")
+    public void stop(@QueryParam("u") String instanceId, @QueryParam("a") String applicationId);
+
+    /**
+     * Stops all applications of an instance.
+     *
+     * @param instanceId
+     *            the unique id of the instance.
+     */
+    @POST
+    @Path("/stopAll")
+    public void stop(@QueryParam("u") String instanceId);
+
+    /**
+     * Returns status information about applications running in this instance.
+     *
+     * @param instanceId
+     *            the unique id of the instance.
+     * @return the running applications
+     */
+    @GET
+    @Path("/status")
+    public InstanceStatusDto getStatus(@QueryParam("u") String instanceId);
+
+    /**
+     * @param principal the principal name to issue the token to.
+     * @return a "weak" token only suitable for fetching by launcher-like applications.
+     */
+    @POST
+    @Path("/weak-token")
+    public String generateWeakToken(String principal);
+
+}

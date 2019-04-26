@@ -1,0 +1,10 @@
+.chooser-grid {
+  display: grid;
+  grid-template-columns: auto auto;
+
+  background-color: none !important;
+}
+
+.chooser-backdrop {
+  opacity: 0;
+}

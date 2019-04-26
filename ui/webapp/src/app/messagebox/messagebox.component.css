@@ -1,0 +1,11 @@
+.flex-row {
+  flex: 0 1 auto;
+  display: flex;
+  align-items: center;
+  flex-direction: row nowrap;
+  padding: 5px;
+}
+
+.warn-icon {
+  margin-right: 5px;
+}

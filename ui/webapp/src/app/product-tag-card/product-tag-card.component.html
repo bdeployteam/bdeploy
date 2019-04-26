@@ -1,0 +1,16 @@
+<mat-card matRipple [ngClass]="current.tag === product.key.tag ? 'product-tag-selected' : ''">
+  <div class="title-row">
+    <div class="mat-title tag-title">{{ product.key.tag }}</div>
+    <span class="spacer"></span>
+    <button
+      class="option-button"
+      mat-icon-button
+      [disabled]="current.tag === product.key.tag"
+      (click)="select.emit(product)"
+      [matTooltip]="current.tag > product.key.tag ? 'Downgrade...' : 'Upgrade...'">
+      <mat-icon *ngIf='current.tag === product.key.tag'>check</mat-icon>
+      <mat-icon *ngIf='current.tag > product.key.tag'>arrow_downward</mat-icon>
+      <mat-icon *ngIf='current.tag < product.key.tag'>arrow_upward</mat-icon>
+    </button>
+  </div>
+</mat-card>

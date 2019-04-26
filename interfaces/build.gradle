@@ -1,0 +1,21 @@
+plugins {
+  id 'com.github.johnrengelman.shadow' version '5.0.0'
+  id 'java-library'
+}
+
+dependencies {
+    implementation(
+        project(":common"),
+        project(":jersey"),
+        project(":bhive")
+    )
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+build.dependsOn shadowJar
+
+shadowJar {
+    baseName = 'bdeploy-api'
+}

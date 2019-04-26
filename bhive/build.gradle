@@ -1,0 +1,20 @@
+apply plugin: 'application'
+
+mainClassName = 'io.bdeploy.bhive.cli.BHiveCli'
+
+dependencies {
+    implementation project(":common")
+    implementation project(":jersey")
+    implementation 'com.j256.simplemagic:simplemagic:1.14'
+    testCompile    project(path: ":common", configuration: 'testRuntime')
+    testCompile    project(path: ":jersey", configuration: 'testRuntime')
+}
+
+distTar.enabled = false
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+startScripts {
+    defaultJvmOpts = [ '-Xmx512m' ]
+}

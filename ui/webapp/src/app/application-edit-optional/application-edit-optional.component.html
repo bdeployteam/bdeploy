@@ -1,0 +1,54 @@
+<div class="container" fxLayout="column" fxLayoutAlign="space-evenly stretch">
+  <h1 mat-dialog-title>Manage Optional Parameters</h1>
+  <p>
+    Select the optional parameters that should be added to the command line arguments of the application.
+  </p>
+  <mat-form-field>
+    <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Filter" />
+  </mat-form-field>
+  <mat-dialog-content fxFlex>
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+      <tr mat-header-row *matHeaderRowDef="columnsToDisplay; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: columnsToDisplay"></tr>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>
+          <mat-checkbox
+            (change)="toggleSelection()"
+            [checked]="isAllSelected()"
+            [indeterminate]="isAtLeastOneSelected() && !isAllSelected()"
+          >
+          </mat-checkbox>
+        </th>
+        <td mat-cell *matCellDef="let row">
+          <mat-checkbox (click)="$event.stopPropagation()" (change)="toggleRowSelection(row)" [checked]="row.rendered">
+          </mat-checkbox>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="uid">
+        <th mat-header-cell *matHeaderCellDef>UID</th>
+        <td mat-cell *matCellDef="let linkedDescriptor">
+          {{ linkedDescriptor.desc.uid }}
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Name</th>
+        <td mat-cell *matCellDef="let linkedDescriptor">
+          {{ linkedDescriptor.desc.name }}
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="description">
+        <th mat-header-cell *matHeaderCellDef>Description</th>
+        <td mat-cell *matCellDef="let linkedDescriptor">
+          {{ linkedDescriptor.desc.longDescription ? linkedDescriptor.desc.longDescription : '(none)' }}
+        </td>
+      </ng-container>
+    </table>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="actions">
+    <button mat-button [mat-dialog-close]="false">Cancel</button>
+    <button mat-raised-button color="primary" [disabled]="!isDirty" [mat-dialog-close]="parameters">Save</button>
+  </mat-dialog-actions>
+</div>

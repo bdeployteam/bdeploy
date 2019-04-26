@@ -1,0 +1,38 @@
+.fill-space {
+  flex: 1 1 auto;
+}
+
+.field-container {
+  display: flex;
+  flex-direction: column;
+}
+
+mat-form-field {
+  flex: 1 1 auto;
+}
+
+.logo-box {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: row;
+  padding: 20px 0px 0px 0px;
+}
+
+.logo-title {
+  flex: 1 1 auto;
+}
+
+.logo {
+  flex: 0 0 auto;
+  max-width: 200px;
+}
+
+.logo-button {
+  flex: 0 0 auto;
+}
+
+.logo-preview {
+  background: #eeeeee;
+  padding: 20px 0px 20px 0px;
+  justify-content: center;
+}

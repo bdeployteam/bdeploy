@@ -1,0 +1,36 @@
+<section class="mat-typography dialog">
+  <form [formGroup]="instanceGroupFormGroup" (ngSubmit)="onSubmit()">
+    <mat-toolbar class="mat-elevation-z1 header-toolbar">
+      <button mat-icon-button type="button" [disabled]="loading" (click)='location.back()'><mat-icon>chevron_left</mat-icon></button>
+      <span *ngIf="isCreate() == true">Create Instance Group</span>
+      <span *ngIf="isCreate() == false">Edit Instance Group</span>
+      <span class="fill-space"></span>
+      <button mat-raised-button color="primary" type="submit" [disabled]="loading || !isModified() || !instanceGroupFormGroup.valid">SAVE</button>
+    </mat-toolbar>
+
+    <div class="field-container margin-container">
+      <mat-form-field>
+        <input class="input-field" matInput [readonly]="!isCreate()"
+          formControlName="name" placeholder="Instance group name (Cannot be changed after creation!)" />
+        <mat-error *ngIf="nameControl.invalid">{{getErrorMessage(nameControl)}}</mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <input class="input-field" matInput
+          formControlName="description" placeholder="Description" />
+        <mat-error *ngIf="descriptionControl.invalid">{{getErrorMessage(descriptionControl)}}</mat-error>
+      </mat-form-field>
+
+      <div class="logo-box">
+        <h3 class="logo-title">Logo</h3>
+        <button mat-icon-button class="logo-button" type="button" [disabled]="loading" (click)="fileInput.click()"><mat-icon>folder_open</mat-icon></button>
+        <button mat-icon-button class="logo-button" type="button" [disabled]="loading" (click)="deleteLogo()"><mat-icon>delete</mat-icon></button>
+        <input type="file" hidden (change)="onLogoChange($event)" #fileInput>
+      </div>
+      <div class="logo-box logo-preview">
+        <div class="logo-img" *ngIf="getLogoUrl() != null">
+          <img class="logo" [src]="getLogoUrl()">
+        </div>
+      </div>
+    </div>
+  </form>
+</section>

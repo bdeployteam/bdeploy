@@ -1,0 +1,11 @@
+<div class="margin-container">
+  <div class="field-container">
+    <mat-form-field>
+      <mat-select placeholder="Select a Hive" [(value)]="selectedHive">
+        <mat-option *ngFor="let key of hiveKeys" value="{{key}}">{{key}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <app-hive [hive]="selectedHive"></app-hive>
+</div>

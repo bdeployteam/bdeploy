@@ -1,0 +1,26 @@
+<div class="login-wrapper">
+  <form (ngSubmit)="onSubmit()">
+    <mat-card class="login-card">
+      <div class="header"><app-logo class='logo' color="main-toolbar" [size]='128'></app-logo></div>
+      <mat-card-content>
+        <div>
+          <mat-form-field>
+            <input matInput [formControl]="username" placeholder="Username" required />
+            <mat-error *ngIf="username.invalid" class="invalid-feedback">{{ getErrorMessage(username) }}</mat-error>
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field>
+            <input matInput type="password" [formControl]="password" placeholder="Password" required />
+            <mat-error *ngIf="password.invalid" class="invalid-feedback">{{ getErrorMessage(password) }}</mat-error>
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+      <mat-card-actions align="end">
+        <button mat-raised-button [disabled]="loading" type="submit" color="accent">
+          Login
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </form>
+</div>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="io.bdeploy.tea.plugin.rcp.RcpProductBuildService">
+   <service>
+      <provide interface="io.bdeploy.tea.plugin.services.BDeployApplicationService"/>
+   </service>
+   <implementation class="io.bdeploy.tea.plugin.rcp.RcpProductBuildService"/>
+</scr:component>

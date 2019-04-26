@@ -1,0 +1,29 @@
+@import '~@angular/material/theming';
+
+@mixin instance-version-card-theme($theme) {
+  $dark: map-get($theme, 'is-dark');
+  $selected-color: mat-color(map-get($theme, 'accent'));
+  $running-color: if($dark, #55da08, #146400);
+
+  .instance-version-selected {
+    padding-left: 16px !important;
+    border-left: 10px solid $selected-color !important;
+  }
+
+  .instance-version-modified {
+    padding-left: 24px;
+    font-style: italic;
+    border-left: 2px dashed $selected-color;
+    border-right: 2px dashed $selected-color;
+    border-top: 2px dashed $selected-color;
+    border-bottom: 2px dashed $selected-color;
+  }
+
+  .instance-version-disabled {
+    background: if($dark, #706f6f, #f0f0f0);
+  }
+
+  .instance-version-running {
+    color: $running-color !important;
+  }
+}

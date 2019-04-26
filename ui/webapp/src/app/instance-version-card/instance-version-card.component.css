@@ -1,0 +1,59 @@
+mat-card {
+  min-width: 340px;
+  max-width: 340px;
+  margin: 5px;
+  cursor: pointer;
+  box-sizing: border-box;
+  border-left: 10px solid transparent;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.icon-margin {
+  margin-right: 8px;
+}
+
+.header-icon {
+  width: 32px;
+  height: 24px;
+}
+
+.title {
+  max-width: 300px;
+  margin: 0px 0px 0px 0px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.content-row {
+  height: 28px;
+  display: flex;
+  flex-direction: row;
+}
+
+.description {
+  margin-left: 32px;
+  align-self: center;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.icons {
+  align-self: flex-end;
+  margin-right: 0.6em;
+}
+
+.icon {
+  align-self: center;
+}

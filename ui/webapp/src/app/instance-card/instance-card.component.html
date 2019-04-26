@@ -1,0 +1,19 @@
+<mat-card [ngClass]="['instance-card', 'instance-card-' + instance.purpose]" [routerLink]="['/processconfiguration', instanceGroupName, instance.uuid]">
+  <mat-card-header>
+    <app-instance-group-logo mat-card-avatar [instanceGroupName]='instanceGroupName'></app-instance-group-logo>
+    <mat-card-title>{{instance.name}}</mat-card-title>
+    <mat-card-subtitle>Instance ({{instance.uuid}})</mat-card-subtitle>
+    <span class="fill-space"></span>
+    <mat-menu #appMenu="matMenu" xPosition="before">
+      <button mat-menu-item [routerLink]="['/instanceedit', instanceGroupName, instance.uuid]">Edit</button>
+      <button mat-menu-item (click)="delete()">Delete</button>
+    </mat-menu>
+    <button class="option-button" mat-icon-button [matMenuTriggerFor]="appMenu" appClickStopPropagation>
+      <mat-icon>more_vert</mat-icon>
+    </button>
+  </mat-card-header>
+  <mat-card-content>
+    <p>{{instance.description}}</p>
+    <p>Product: <b>{{instance.product.name}}</b> Tag: <b>{{instance.product.tag}}</b></p>
+  </mat-card-content>
+</mat-card>

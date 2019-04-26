@@ -1,0 +1,47 @@
+package io.bdeploy.jersey;
+
+import java.security.Principal;
+
+import javax.ws.rs.core.SecurityContext;
+
+import io.bdeploy.common.security.ApiAccessToken;
+import io.bdeploy.common.security.ApiAccessToken.Capability;
+
+/**
+ * A simple {@link SecurityContext} which provides information based on the
+ * authentication token used to authenticate a service call.
+ */
+public class JerseySecurityContext implements SecurityContext {
+
+    private final ApiAccessToken token;
+
+    public JerseySecurityContext(ApiAccessToken token) {
+        this.token = token;
+    }
+
+    public boolean hasCapability(String scope, Capability cap) {
+        return token.hasCapability(scope, cap);
+    }
+
+    @Override
+    public Principal getUserPrincipal() {
+        return () -> token.getIssuedTo();
+    }
+
+    @Override
+    public boolean isUserInRole(String role) {
+        // this is not used. it is required for @RolesAllowed, which is too static for DCS.
+        return false;
+    }
+
+    @Override
+    public boolean isSecure() {
+        return true;
+    }
+
+    @Override
+    public String getAuthenticationScheme() {
+        return JerseyAuthenticationProvider.AUTHENTICATION_SCHEME;
+    }
+
+}

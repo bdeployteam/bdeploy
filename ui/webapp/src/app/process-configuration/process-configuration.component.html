@@ -1,0 +1,224 @@
+<div class="box">
+  <mat-toolbar class="mat-elevation-z1 header-toolbar process-config-header">
+    <mat-toolbar-row>
+      <button mat-icon-button type="button" (click)='location.back()' *ngIf="!editMode">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <button mat-icon-button type="button" (click)="onDiscardAppChanges(true)" *ngIf="editMode">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <span>Instance: {{ groupParam }} &mdash; {{ selectedConfig?.instance?.name }}</span>
+      <span class="fill-space"></span>
+      <ng-container *ngIf="!editMode">
+        <button mat-button type="button" (click)="onDiscardChanges()" *ngIf="discardEnabled">DISCARD</button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="!saveEnabled" (click)="onSave()">SAVE</button>
+      </ng-container>
+      <ng-container *ngIf="editMode">
+        <button mat-button type="button" [disabled]="!cancelEnabled" (click)="onDiscardAppChanges(false)">CANCEL</button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="!saveEnabled" (click)="onApplyAppChanges()">APPLY</button>
+      </ng-container>
+    </mat-toolbar-row>
+    <mat-toolbar-row class="subHeader">
+      <app-instance-group-logo class="header-logo" [instanceGroupName]="groupParam"></app-instance-group-logo>
+      <div class="spacer"></div>
+      <div class="toolbar-info-grid">
+        <div>
+          Product: <b>{{ selectedConfig?.version.product.name }}</b>
+        </div>
+        <div>
+          Tag: <b>{{ selectedConfig?.instance?.product.tag }}</b>
+        </div>
+        <div>
+          Purpose: <b>{{ selectedConfig?.instance?.purpose }}</b>
+        </div>
+      </div>
+      <span class="fill-space"></span>
+      <app-remote-progress [scope]='[groupParam, uuidParam]'></app-remote-progress>
+      <ng-container *ngIf="isAutoRefreshVisible() && autoRefresh">
+        <button mat-icon-button (click)="toggleAutoRefresh()" class="toolbar-progress">
+          <mat-progress-spinner [value]="autoRefreshProgress" color="primary" [diameter]="24"
+            matTooltip="Auto refresh of process status enabled. Next refresh in {{nextAutoRefreshSec}} seconds. Click to disable.">
+          </mat-progress-spinner>
+        </button>
+      </ng-container>
+      <ng-container *ngIf="isAutoRefreshVisible() && !autoRefresh">
+        <button mat-icon-button (click)="toggleAutoRefresh()" matTooltip="Auto refresh of process status disabled. Click to enable.">
+          <mat-icon>sync_disabled</mat-icon>
+        </button>
+      </ng-container>
+      <mat-menu #appMenu="matMenu" xPosition="before">
+        <button mat-menu-item (click)="startInstance()" matTooltip="Starts all processes having the start type 'INSTANCE' configured.">
+          Start Instance...
+        </button>
+        <button mat-menu-item (click)="stopInstance()" matTooltip="Stops all processes.">
+          Stop Instance...
+        </button>
+        <button mat-menu-item (click)="restartInstance()" matTooltip="Stops all processes, then starts all having the start type 'INSTANCE' configured.">
+          Restart Instance...
+        </button>
+        <mat-divider></mat-divider>
+        <button mat-menu-item [routerLink]="['/instanceedit', groupParam, uuidParam]" [disabled]="!isEditable()">
+          Edit Instance...
+        </button>
+        <button mat-menu-item (click)="setSidenavApplications()" [disabled]="isSidenavApplications() || !isEditable()">
+          Configure Applications...
+        </button>
+        <button mat-menu-item (click)="setSidenavProducts()" [disabled]="isSidenavProducts() || !isEditable()">
+          Change Product Tag...
+        </button>
+      </mat-menu>
+      <button class="option-button" mat-icon-button [matMenuTriggerFor]="appMenu" appClickStopPropagation>
+        <mat-icon>more_vert</mat-icon>
+      </button>
+    </mat-toolbar-row>
+  </mat-toolbar>
+
+  <!-- Nodes overview and sidebar -->
+  <div class="drawer-container" cdkDropListGroup *ngIf="!editMode">
+    <div class="nodes-container">
+      <div *ngIf="!loading">
+        <div *ngIf="isRunningOutOfSync" class="app-process-out-of-sync-text">
+          One or more applications are running in a version that is not activated.
+        </div>
+        <ng-container *ngFor="let node of selectedConfig.nodeList.nodeConfigDtos">
+          <app-instance-node-card
+            class="node"
+            *ngIf="shouldShowNode(node)"
+            [instanceGroupName]="groupParam"
+            [instance]="selectedConfig.instance"
+            [activatedInstanceTag]="deploymentState.activatedVersion"
+            [node]="node"
+            [processConfig]="selectedConfig"
+            [productApplications]="selectedConfig.productApplications"
+            [dragStopped]="dragStop"
+            [dragStarted]="dragStart"
+            [manageApplications]="isSidenavApplications()"
+            [isReadonly]="selectedConfig.readonly"
+            (editAppConfigEvent)="onEditApp(node.nodeConfiguration, $event)"
+            (editNodeAppsEvent)="onUpdateNodeApps()"
+            (removeNodeAppEvent)="onUpdateNodeApps()"
+            (selectAppConfigEvent)="setSidenavProcessStatus($event)">
+          </app-instance-node-card>
+        </ng-container>
+      </div>
+      <div *ngIf="loading" class="loading-container">
+        <mat-progress-spinner [mode]="'indeterminate'" class="loading-spinner" mode></mat-progress-spinner>
+      </div>
+    </div>
+    <!-- sidenav (Versions / Applications / ... ) -->
+    <div class="side-nav-container mat-elevation-z1">
+      <mat-toolbar class="fixed-toolbar mat-elevation-z1">
+        <div *ngIf="isSidenavApplications()">Configure Applications</div>
+        <div *ngIf="isSidenavVersions()">Instance Versions</div>
+        <div *ngIf="isSidenavProducts()">Change Product Tag</div>
+        <div *ngIf="isSidenavProcessStatus()">Process Control</div>
+        <span class="fill-space"></span>
+        <button *ngIf="!isSidenavVersions()" mat-icon-button (click)="setSidenavVersions()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-toolbar>
+      <div class="drawer-content">
+        <div class='card-list-container' *ngIf="isSidenavApplications()">
+          <div *ngIf="hasServerApplications()"
+            cdkDropList
+            [cdkDropListEnterPredicate]="enterDropList"
+            [cdkDropListData]="getDropListData()"
+            (cdkDropListDropped)="drop($event)">
+            <div class='application-caption'>
+              <mat-icon class="icon">storage</mat-icon>
+              <span class="application-caption-text">Server Applications</span>
+            </div>
+            <ng-container *ngFor='let group of selectedConfig.productApplications'>
+              <app-application-descriptor-card
+                *ngIf="group.isServerApp()"
+                [applicationGroup]="group"
+                class="app-card"
+                cdkDrag
+                (cdkDragStarted)="dragStarted($event)"
+                [cdkDragData]="group">
+              </app-application-descriptor-card>
+            </ng-container>
+          </div>
+          <div *ngIf="hasClientApplications()"
+            cdkDropList
+            [cdkDropListEnterPredicate]="enterDropList"
+            [cdkDropListData]="getDropListData()"
+            (cdkDropListDropped)="drop($event)">
+            <div class='application-caption'>
+              <mat-icon class="icon">computer</mat-icon>
+              <span class="application-caption-text">Client Applications</span>
+            </div>
+            <ng-container *ngFor='let group of selectedConfig.productApplications'>
+              <app-application-descriptor-card
+                *ngIf="group.isClientApp()"
+                [applicationGroup]="group"
+                class="app-card"
+                cdkDrag
+                (cdkDragStarted)="dragStarted($event)"
+                [cdkDragData]="group">
+              </app-application-descriptor-card>
+            </ng-container>
+          </div>
+        </div>
+        <div *ngIf="isSidenavVersions()">
+          <mat-toolbar class='default-toolbar'>
+            <mat-slide-toggle #showAllVersions>Show all versions</mat-slide-toggle>
+          </mat-toolbar>
+          <div class='card-list-container'>
+            <ng-container *ngFor='let config of processConfigs'>
+              <app-instance-version-card #appVersionCard
+                *ngIf="shouldShowVersion(showAllVersions, config)"
+                [instanceVersionDto]="config.version"
+                class="version-card"
+                (click)="onSelectConfig(config)"
+                (activate)="doActivateVersion($event, appVersionCard)"
+                (install)="doInstallVersion($event, appVersionCard)"
+                (uninstall)="doUninstallVersion($event, appVersionCard)"
+                [state]='deploymentState'
+                [selected]="isVersionSelected(config)"
+                [dirty]="config.dirty"
+                [disabled]="loading">
+              </app-instance-version-card>
+            </ng-container>
+          </div>
+        </div>
+        <div *ngIf='isSidenavProducts()'>
+          <mat-toolbar class='products-toolbar'>
+            <mat-slide-toggle #showAll>Show all tags</mat-slide-toggle>
+          </mat-toolbar>
+          <div class='card-list-container'>
+            <mat-progress-spinner *ngIf='productsLoading'></mat-progress-spinner>
+            <ng-container *ngFor='let tag of productTags'>
+              <app-product-tag-card *ngIf='shouldShowProduct(showAll, tag)'
+                [product]='tag'
+                [current]='selectedConfig.instance.product'
+                (select)='updateProduct($event)'>
+              </app-product-tag-card>
+            </ng-container>
+          </div>
+        </div>
+        <div *ngIf='isSidenavProcessStatus()'>
+          <app-process-details
+            [instanceGroup]='groupParam'
+            [instanceId]='uuidParam'
+            [instanceTag]='selectedConfig.version.key.tag'
+            [activatedInstanceTag]="deploymentState.activatedVersion"
+            [appConfig]='selectedProcess'>
+          </app-process-details>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Edit component. Replaces nodes and sidebar -->
+  <div class="drawer-container" *ngIf="editMode">
+    <app-application-edit
+      class="nodes-container"
+      [instanceGroup]="groupParam"
+      [instanceConfig]="selectedConfig.instance"
+      [appConfigContext]="editAppConfigContext"
+      [appDesc]="selectedConfig.nodeList.applications[editAppConfigContext.applicationConfiguration.application.name]"
+      [readonly]="selectedConfig.readonly"
+      (validationStateChanged)="updateDirtyStateAndValidate()">
+    </app-application-edit>
+  </div>
+</div>

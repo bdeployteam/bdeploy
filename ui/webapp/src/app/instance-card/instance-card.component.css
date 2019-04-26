@@ -1,0 +1,14 @@
+.instance-card {
+  margin: 2em;
+  max-width: 100%;
+  cursor: pointer;
+}
+
+.fill-space {
+  flex: 1 1 auto;
+}
+
+.header-image {
+  background-size: cover;
+  border-radius: 10%;
+}

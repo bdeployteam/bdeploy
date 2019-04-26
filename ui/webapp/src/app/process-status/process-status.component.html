@@ -1,0 +1,5 @@
+<div *ngIf="showOutOfSyncText" class="app-process-out-of-sync-text"  matTooltip="Application is running in a version that is not activated.">
+  Out-of-sync
+</div>
+<mat-icon *ngIf="showIcon" [ngClass]='statusClass' matTooltip="{{statusHint}}" [matBadge]="statusCount" [matBadgeHidden]="!showStateOfAllApps()">{{statusIcon}}</mat-icon>
+

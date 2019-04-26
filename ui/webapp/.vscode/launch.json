@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "firefox",
+      "request": "launch",
+      "name": "Launch Firefox",
+      "keepProfileChanges": true,
+      "profileDir": "${workspaceRoot}/.vscode/firefox-debug-profile/",
+      "url": "http://localhost:4200/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Launch Chrome",
+      "url": "http://localhost:4200",
+      "webRoot": "${workspaceFolder}"
+    }
+  ]
+}

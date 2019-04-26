@@ -1,0 +1,14 @@
+rootProject.name = 'io.bdeploy'
+
+include(
+    'common',
+    'bhive',
+    'dcu',
+    'pcu',
+    'minion',
+    'interfaces',
+    'ui',
+    'jersey',
+    'doc',
+    'launcher'
+)

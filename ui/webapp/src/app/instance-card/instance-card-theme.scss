@@ -1,0 +1,20 @@
+@import '~@angular/material/theming';
+
+@mixin instance-card-theme($theme) {
+  $prod-border: mat-color(map-get($theme, 'warn'));
+  $test-border: mat-color(map-get($theme, 'primary'));
+  $dev-border: mat-color(map-get($theme, 'accent'));
+
+  .instance-card-DEVELOPMENT {
+    border-left: 10px solid $dev-border;
+  }
+
+  .instance-card-TEST {
+    border-left: 10px solid $test-border;
+  }
+
+  .instance-card-PRODUCTIVE {
+    border-left: 10px solid $prod-border;
+  }
+
+}

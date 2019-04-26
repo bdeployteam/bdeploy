@@ -1,0 +1,189 @@
+@import '~@angular/material/theming';
+@include mat-core();
+
+@import 'app/main-nav/main-nav-theme.scss';
+@import 'app/logo/logo-theme.scss';
+
+/* Custom component theme collection */
+@import 'app/instance-group-delete-dialog/instance-group-delete-dialog-theme.scss';
+@import 'app/hive/hive-theme.scss';
+@import 'app/instance-card/instance-card-theme.scss';
+@import 'app/instance-node-card/instance-node-card-theme.scss';
+@import 'app/instance-version-card/instance-version-card-theme.scss';
+@import 'app/application-edit/application-edit-theme.scss';
+@import 'app/product-tag-card/product-tag-card-theme.scss';
+@import 'app/application-configuration-card/application-configuration-card-theme.scss';
+@import 'app/file-upload/file-upload-theme.scss';
+@import 'app/instance-group-logo/instance-group-logo-theme.scss';
+@import 'app/process-configuration/process-configuration-theme.scss';
+@import 'app/process-details/process-details-theme.scss';
+@import 'app/process-status/process-status-theme.scss';
+
+@mixin all-themes($theme) {
+  // general angular material theme
+  @include angular-material-theme($theme);
+
+  // basic application framework themes
+  @include main-nav-theme($theme);
+  @include logo-theme($theme);
+
+  // application component themes
+  @include instance-group-delete-dialog-theme($theme);
+  @include hive-theme($theme);
+  @include instance-card-theme($theme);
+  @include instance-node-card-theme($theme);
+  @include instance-version-card-theme($theme);
+  @include application-edit-theme($theme);
+  @include product-tag-card-theme($theme);
+  @include application-configuration-card-theme($theme);
+  @include product-upload-theme($theme);
+  @include instance-group-logo-theme($theme);
+  @include process-configuration-theme($theme);
+  @include process-details-theme($theme);
+  @include process-status-theme($theme);
+}
+
+@mixin theme-chooser($theme) {
+  $theme-bg: map-get($theme, 'background');
+  $theme-primary: mat-color(map-get($theme, 'primary'));
+  $theme-accent: mat-color(map-get($theme, 'accent'));
+  $theme-main-tb: mat-color(map-get($theme, 'main-toolbar'));
+
+  .preview-background {
+    cursor: pointer;
+    display: block;
+    position: relative;
+    margin: 3px;
+    width: 56px;
+    height: 56px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    background-color: map-get($theme-bg, 'background');
+  }
+
+  .preview-accent {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    position: absolute;
+    right: 4px;
+    bottom: 4px;
+    background-color: $theme-accent;
+  }
+
+  .preview-selected {
+    width: 24px;
+    height: 24px;
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    color: $theme-accent;
+  }
+
+  .preview-circle {
+    position: absolute;
+    top: 9px;
+    right: 9px;
+    width: 34px;
+    height: 34px;
+    border-radius: 25%;
+    background: linear-gradient(to right, $theme-main-tb 0%, $theme-main-tb 50%, $theme-primary 51%, $theme-primary 100%);
+  }
+
+}
+
+/* Theme definitions - keep in sync with ThemeService.Theme */
+@function add-toolbar-color($theme, $toolbar-palette) {
+  @return map-merge($theme, ( 'main-toolbar': $toolbar-palette ));
+}
+
+@function override-theme-background($theme, $key, $value) {
+  $bg: map-get($theme, background);
+  $bg: map-merge($bg, ( $key: $value ));
+  @return map-merge($theme, ( background: $bg ));
+}
+
+/* "proper" yellow */
+$app-yellow-def: (
+  50: #fffee8,
+  100: #fbf315,
+  200: #fbf315,
+  300: #fbf315,
+  400: #fbf315,
+  500: #fbf315,
+  600: #fbf315,
+  700: #fbf315,
+  800: #fbf315,
+  900: #fbf315,
+  A100: #fbf315,
+  A200: #fbf315,
+  A400: #fbf315,
+  A700: #fbf315,
+  contrast: (
+    50: $dark-primary-text,
+    100: $dark-primary-text,
+    200: $dark-primary-text,
+    300: $dark-primary-text,
+    400: $dark-primary-text,
+    500: $dark-primary-text,
+    600: $dark-primary-text,
+    700: $dark-primary-text,
+    800: $dark-primary-text,
+    900: $dark-primary-text,
+    A100: $dark-primary-text,
+    A200: $dark-primary-text,
+    A400: $dark-primary-text,
+    A700: $dark-primary-text,
+  )
+);
+$app-yellow-palette: mat-palette($app-yellow-def, 700, 50);
+
+/* light theme - default */
+$app-light-primary: mat-palette($mat-indigo, 500);
+$app-light-accent: mat-palette($mat-pink, A200);
+$app-light-warning: mat-palette($mat-orange, A700);
+$app-light-theme: add-toolbar-color(mat-light-theme($app-light-primary, $app-light-accent, $app-light-warning), $app-light-primary);
+.app-light-theme {
+  @include all-themes($app-light-theme);
+}
+.app-light-theme-chooser {
+  @include theme-chooser($app-light-theme);
+}
+
+/* light theme with yellow toolbar */
+$app-light-yellow-primary: mat-palette($mat-grey, 700);
+$app-light-yellow-accent: mat-palette($mat-red);
+$app-light-yellow-warning: mat-palette($mat-orange);
+$app-light-yellow-theme: add-toolbar-color(mat-light-theme($app-light-yellow-primary, $app-light-yellow-accent, $app-light-yellow-warning), $app-yellow-palette);
+.app-light-yellow-theme {
+  @include all-themes($app-light-yellow-theme);
+}
+.app-light-yellow-theme-chooser {
+  @include theme-chooser($app-light-yellow-theme);
+}
+
+/* dark blue theme */
+$app-dark-primary: mat-palette($mat-indigo, 200);
+$app-dark-accent: $app-yellow-palette;
+$app-dark-warning: mat-palette($mat-deep-orange);
+$app-dark-theme: add-toolbar-color(mat-dark-theme($app-dark-primary, $app-dark-accent, $app-dark-warning), mat-palette($mat-indigo, 500));
+$app-dark-theme: override-theme-background($app-dark-theme, app-bar, #3d3c3e);
+.app-dark-theme {
+  @include all-themes($app-dark-theme);
+}
+.app-dark-theme-chooser {
+  @include theme-chooser($app-dark-theme);
+}
+
+/* dark yellow theme */
+$app-dark-yellow-primary: $app-yellow-palette;
+$app-dark-yellow-accent: mat-palette($mat-blue-grey, 500);
+$app-dark-yellow-warning: mat-palette($mat-deep-orange);
+$app-dark-yellow-theme: add-toolbar-color(mat-dark-theme($app-dark-yellow-primary, $app-dark-yellow-accent, $app-dark-yellow-warning), $app-yellow-palette);
+$app-dark-yellow-theme: override-theme-background($app-dark-yellow-theme, app-bar, #3d3c3e);
+.app-dark-yellow-theme {
+  @include all-themes($app-dark-yellow-theme);
+}
+.app-dark-yellow-theme-chooser {
+  @include theme-chooser($app-dark-yellow-theme);
+}
