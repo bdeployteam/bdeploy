@@ -46,6 +46,8 @@ import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.util.FutureHelper;
+import io.bdeploy.common.util.OsHelper;
+import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 
 /**
@@ -200,27 +202,32 @@ public class ObjectManager {
 
     private void internalExportBlob(Activity exporting, ObjectId obj, Path child) {
         try {
-            // always try to use hard-links
-
-            // TODO: (DCS-358) check what to do on windows. It seems that 'deleting' a hard-linked file is not
-            // possible if the file is open, regardless of the link-ref-count. I.e. an executable cannot
-            // be deleted even if it is not used at all, if it points to a physical file which
-            // is in use elsewhere... :|
-
-            Files.createLink(child, db.getObjectFile(obj));
-            setExecutable(child, null);
-        } catch (IOException e) {
-            // fallback only: create copy of file. determine content type as we go.
-            try (ContentInfoInputStreamWrapper is = new ContentInfoInputStreamWrapper(db.getStream(obj))) {
-                ObjectId finalId = ObjectId.createByCopy(is, child);
-                if (!finalId.equals(obj)) {
-                    // not good - object in DB seems corrupt.
-                    throw new IOException("BLOB corruption: " + obj + " (is " + finalId + "), run FSCK");
-                }
-                setExecutable(child, is.findMatch());
-            } catch (IOException ioe) {
-                throw new IllegalStateException("Cannot export " + obj + " to " + child, ioe);
+            // always try to use hard-links, except in windows. On windows it is not possible to decrement
+            // the link-count of a file which is locked (e.g. running executable), even if the executable
+            // was started from a different path.
+            if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
+                internalExportBlobByCopy(obj, child);
+            } else {
+                // everywhere except windows: always hard-link :)
+                Files.createLink(child, db.getObjectFile(obj));
+                setExecutable(child, null);
             }
+        } catch (IOException e) {
+            internalExportBlobByCopy(obj, child);
+        }
+    }
+
+    private void internalExportBlobByCopy(ObjectId obj, Path child) {
+        // fallback only: create copy of file. determine content type as we go.
+        try (ContentInfoInputStreamWrapper is = new ContentInfoInputStreamWrapper(db.getStream(obj))) {
+            ObjectId finalId = ObjectId.createByCopy(is, child);
+            if (!finalId.equals(obj)) {
+                // not good - object in DB seems corrupt.
+                throw new IOException("BLOB corruption: " + obj + " (is " + finalId + "), run FSCK");
+            }
+            setExecutable(child, is.findMatch());
+        } catch (IOException ioe) {
+            throw new IllegalStateException("Cannot export " + obj + " to " + child, ioe);
         }
     }
 
