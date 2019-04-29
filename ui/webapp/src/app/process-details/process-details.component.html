@@ -9,9 +9,9 @@
         <span> ID: {{appConfig.uid}}</span>
     </mat-toolbar-row>
   </mat-toolbar>
-<div class='flex-column'>
+<div class='flex-column' *ngIf="status">
   <div class="out-of-sync" *ngIf="isRunningOutOfSync()" matTooltip="Application is running in a version that is not activated.">
-    Running out-of-sync
+    Out-of-sync
   </div>
   <div class='info-grid'>
     <ng-container *ngIf="isStopped() || isStoppedPermanently()">
@@ -64,8 +64,11 @@
 
   <mat-divider></mat-divider>
 
-  <button mat-icon-button (click)='showProcessList()' [disabled]='(!isRunning() && !isRunningUnstable())' matTooltip="Show process list">
-    <mat-icon>extension</mat-icon>
-  </button>
+  <div class="icon-toolbar">
+    <button mat-icon-button (click)='showProcessList()' [disabled]='!isRunningOrUnstable()' matTooltip="Show processes"
+      [matBadge]="getProcessCount()" [matBadgeHidden]="!isRunningOrUnstable()" matBadgeSize="medium">
+      <mat-icon>settings</mat-icon>
+    </button>
+  </div>
 
 </div>

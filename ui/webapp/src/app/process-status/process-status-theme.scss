@@ -2,17 +2,14 @@
 
 @mixin process-status-theme($theme) {
   $dark: map-get($theme, 'is-dark');
+  $warn: map-get($theme, 'warn');
 
   .app-process-running {
     color: if($dark, #55da08, #146400) !important;
   }
 
-  .app-process-crash-waiting {
-    color: if($dark, #f0964d, #ec832c) !important;
-  }
-
-  .app-process-crash-permanently {
-    color: if($dark, #da0808, #640000)  !important;
+  .app-process-crash {
+    color: if($dark, #da0808, #640000);
   }
 
   .app-process-stopped {
@@ -25,7 +22,6 @@
 
   .app-process-out-of-sync-text {
     color: #fff;
-    background-color: if($dark, #da0808, #640000);
+    background-color: mat-color($warn);
   }
-
 }

@@ -2,6 +2,7 @@
 
 @mixin process-details-theme($theme) {
   $dark: map-get($theme, is-dark);
+  $warn: map-get($theme, 'warn');
 
   .process-uid {
     color: if($dark, mat-color($mat-grey, 400), mat-color($mat-grey, 600));
@@ -9,6 +10,6 @@
 
   .out-of-sync {
     color: #fff;
-    background-color: if($dark, #da0808, #640000);
+    background-color: mat-color($warn);
   }
 }

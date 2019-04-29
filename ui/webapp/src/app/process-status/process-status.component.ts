@@ -10,6 +10,9 @@ import { unsubscribe } from '../utils/object.utils';
   styleUrls: ['./process-status.component.css'],
 })
 export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
+  private readonly icons: { [key: string]: string } = {};
+  private readonly icons_outlined: { [key: string]: string } = {};
+
   @Input() instanceTag: string;
   @Input() activatedTag: string;
   @Input() appId: string;
@@ -31,7 +34,9 @@ export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
   public statusClass: string[] = [];
   public statusCount: number;
 
-  constructor(private processService: ProcessService) {}
+  constructor(private processService: ProcessService) {
+    this.initIcons();
+  }
 
   ngOnInit() {
     this.processState = ProcessState.STOPPED;
@@ -44,6 +49,19 @@ export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnDestroy() {
     unsubscribe(this.subscription);
+  }
+
+  initIcons() {
+    this.icons[ProcessState.STOPPED] = 'favorite';
+    this.icons[ProcessState.RUNNING] = 'favorite';
+    this.icons[ProcessState.RUNNING_UNSTABLE] = 'favorite';
+    this.icons[ProcessState.CRASH_BACK_OFF] = 'report_problem';
+    this.icons[ProcessState.STOPPED_CRASHED] = 'error';
+    this.icons_outlined[ProcessState.STOPPED] = 'favorite_outline';
+    this.icons_outlined[ProcessState.RUNNING] = 'favorite_outline';
+    this.icons_outlined[ProcessState.RUNNING_UNSTABLE] = 'favorite_outline';
+    this.icons_outlined[ProcessState.CRASH_BACK_OFF] = 'report_problem_outline';
+    this.icons_outlined[ProcessState.STOPPED_CRASHED] = 'error_outline';
   }
 
   onStatusChanged() {
@@ -104,9 +122,9 @@ export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
 
   getStatusIcon() {
     if (!this.isMyVersion()) {
-      return 'favorite_outline';
+      return this.icons_outlined[this.processState];
     }
-    return 'favorite';
+    return this.icons[this.processState];
   }
 
   getStatusClass() {
@@ -118,10 +136,10 @@ export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
       styles.push('app-process-stopped');
     }
     if (this.isCrashedWaiting()) {
-      styles.push('app-process-crash-waiting');
+      styles.push('app-process-crash');
     }
     if (this.isCrashedPermanently()) {
-      styles.push('app-process-crash-permanently');
+      styles.push('app-process-crash');
     }
     if (this.getShowOutOfSync() && !this.isMyVersion()) {
       styles.push('app-process-out-of-sync');

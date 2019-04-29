@@ -1,9 +1,9 @@
 import { Component, Input, OnChanges, OnDestroy, OnInit } from '@angular/core';
-import { MatBottomSheet } from '@angular/material';
+import { MatBottomSheet, MatBottomSheetRef } from '@angular/material';
 import { distanceInWordsStrict, format } from 'date-fns';
 import { Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { ApplicationConfiguration, ProcessState, ProcessStatusDto } from '../models/gen.dtos';
+import { ApplicationConfiguration, ProcessDetailDto, ProcessState, ProcessStatusDto } from '../models/gen.dtos';
 import { ProcessListComponent } from '../process-list/process-list.component';
 import { ProcessService } from '../services/process.service';
 import { unsubscribe } from '../utils/object.utils';
@@ -27,6 +27,8 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
   restartProgress: number;
   restartProgressText: string;
   restartProgressHandle: any;
+
+  processSheet: MatBottomSheetRef<ProcessListComponent>;
 
   constructor(private processService: ProcessService, private bottomSheet: MatBottomSheet) {}
 
@@ -65,6 +67,11 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
       this.restartProgressHandle = setInterval(() => this.doUpdateRestartProgress(), 1000);
       this.doUpdateRestartProgress();
     }
+
+    // Update sheet when open
+    if (this.processSheet && this.processSheet.instance) {
+      this.processSheet.instance.setStatus(this.status);
+    }
   }
 
   reLoadStatus() {
@@ -96,14 +103,19 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
       .subscribe(r => {});
   }
 
-  /** Returns whether or not the process is running in this version */
+  /** Returns whether or not the process is running */
   isRunning() {
     return this.hasState(ProcessState.RUNNING);
   }
 
-  /** Returns whether or not the process is running unstable in this version */
+  /** Returns whether or not the process is running unstable */
   isRunningUnstable() {
     return this.hasState(ProcessState.RUNNING_UNSTABLE);
+  }
+
+  /** Returns whether or not the process is running or running unstable */
+  isRunningOrUnstable() {
+    return this.isRunning() || this.isRunningUnstable();
   }
 
   /** Returns whether or not this tag represents the active one */
@@ -182,6 +194,13 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
     });
   }
 
+  getProcessCount() {
+    if (!this.status || !this.status.processDetails) {
+      return 0;
+    }
+    return this.countProcessRecursive(this.status.processDetails);
+  }
+
   getStatusDetails() {
     if (this.isRunningOutOfSync()) {
       return 'Application is running in a version that is not activated. Only stopping is possible.';
@@ -221,8 +240,19 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   showProcessList() {
-    this.bottomSheet.open(ProcessListComponent, {
-      data: { statusDto: this.status },
+    this.processSheet = this.bottomSheet.open(ProcessListComponent, {
+      data: {
+        statusDto: this.status,
+        appConfig: this.appConfig,
+      },
     });
+  }
+
+  countProcessRecursive(parent: ProcessDetailDto): number {
+    let number = 1;
+    parent.children.forEach(child => {
+      number += this.countProcessRecursive(child);
+    });
+    return number;
   }
 }

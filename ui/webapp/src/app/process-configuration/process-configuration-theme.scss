@@ -2,6 +2,7 @@
 
 @mixin process-configuration-theme($theme) {
   $dark: map-get($theme, is-dark);
+  $warn: map-get($theme, 'warn');
 
   .drawer-content {
     background-color: if($dark, #363537, #ffffff);
@@ -13,6 +14,6 @@
 
   .app-process-out-of-sync-text {
     color: #fff;
-    background-color: if($dark, #da0808, #640000);
+    background-color: mat-color($warn);
   }
 }

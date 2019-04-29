@@ -53,8 +53,8 @@ public class ProcessControllerTest {
 
         // Overwrite instance and try to recover
         process.detach();
-        latch = listener.expect(process, ProcessState.RUNNING);
         process = TestFactory.create(tmp, "App1", false, "600");
+        latch = listener.expect(process, ProcessState.RUNNING);
         process.addStatusListener(listener);
         process.recover();
         latch.await();

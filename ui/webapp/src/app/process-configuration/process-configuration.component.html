@@ -78,7 +78,7 @@
     <div class="nodes-container">
       <div *ngIf="!loading">
         <div *ngIf="isRunningOutOfSync" class="app-process-out-of-sync-text">
-          One or more applications are running in a version that is not activated.
+          Out-of-sync: One or more applications are running in a version that is not activated.
         </div>
         <ng-container *ngFor="let node of selectedConfig.nodeList.nodeConfigDtos">
           <app-instance-node-card
