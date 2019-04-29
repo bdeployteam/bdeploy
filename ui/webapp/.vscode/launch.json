@@ -2,6 +2,14 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "type": "edge",
+      "request": "launch",
+      "version": "dev",
+      "name": "Launch Edge",
+      "url": "http://localhost:4200/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
       "type": "firefox",
       "request": "launch",
       "name": "Launch Firefox",
