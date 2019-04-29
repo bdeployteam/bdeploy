@@ -4,8 +4,8 @@ import java.nio.file.Path;
 import java.util.SortedMap;
 import java.util.SortedSet;
 
-import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.remote.RemoteBHive;
 import io.bdeploy.bhive.remote.jersey.BHiveResource.FetchSpec;
 import io.bdeploy.bhive.remote.jersey.BHiveResource.ObjectListSpec;
@@ -80,6 +80,7 @@ public class JerseyRemoteBHive implements RemoteBHive {
 
     @Override
     public void close() {
+        // nothing to close in this case.
     }
 
 }

@@ -2,6 +2,7 @@ package io.bdeploy.minion.cli;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -70,14 +71,7 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
         MasterRootResource client = ResourceProvider.getResource(svc, MasterRootResource.class);
 
         if (config.minions()) {
-            SortedMap<String, NodeStatus> minions = client.getMinions();
-            out().println(String.format("%1$-20s %2$-8s %3$25s %4$-10s %5$-15s", "NAME", "STATUS", "START", "OS", "VERSION"));
-            for (Map.Entry<String, NodeStatus> e : minions.entrySet()) {
-                NodeStatus s = e.getValue();
-                String startTime = (s == null ? "" : FORMATTER.format(s.startup));
-                out().println(String.format("%1$-20s %2$-8s %3$25s %4$-10s %5$-15s", e.getKey(), s == null ? "OFFLINE" : "ONLINE",
-                        startTime, s == null ? "" : s.os, s == null ? "" : s.version));
-            }
+            listMinions(client);
         } else if (config.update() != null) {
             Path zip = Paths.get(config.update());
             if (!Files.isRegularFile(zip)) {
@@ -85,6 +79,17 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
             }
 
             performUpdate(config, svc, client, zip);
+        }
+    }
+
+    private void listMinions(MasterRootResource client) {
+        SortedMap<String, NodeStatus> minions = client.getMinions();
+        out().println(String.format("%1$-20s %2$-8s %3$25s %4$-10s %5$-15s", "NAME", "STATUS", "START", "OS", "VERSION"));
+        for (Map.Entry<String, NodeStatus> e : minions.entrySet()) {
+            NodeStatus s = e.getValue();
+            String startTime = (s == null ? "" : FORMATTER.format(s.startup));
+            out().println(String.format("%1$-20s %2$-8s %3$25s %4$-10s %5$-15s", e.getKey(), s == null ? "OFFLINE" : "ONLINE",
+                    startTime, s == null ? "" : s.os, s == null ? "" : s.version));
         }
     }
 
@@ -120,12 +125,14 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
 
             // expecting a single directory in the ZIP containing all the things.
             Path updContent = null;
-            for (Path path : Files.newDirectoryStream(src)) {
-                if (Files.isDirectory(path)) {
-                    if (updContent != null) {
-                        throw new IllegalStateException("More than one directory in update package");
+            try (DirectoryStream<Path> content = Files.newDirectoryStream(src)) {
+                for (Path path : content) {
+                    if (Files.isDirectory(path)) {
+                        if (updContent != null) {
+                            throw new IllegalStateException("More than one directory in update package");
+                        }
+                        updContent = path;
                     }
-                    updContent = path;
                 }
             }
             if (updContent == null) {

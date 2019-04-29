@@ -100,15 +100,16 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
                 try {
                     SecurityHelper sh = SecurityHelper.getInstance();
                     KeyStore ks = sh.loadPrivateKeyStore(state.keystorePath, state.keystorePass);
-                    JerseyServer srv = new JerseyServer(port, ks, state.keystorePass);
-                    srv.setAuditor(new RollingFileAuditor(r.getAuditLogDir()));
-                    r.setUpdateManager(new JerseyAwareMinionUpdateManager(srv));
+                    try (JerseyServer srv = new JerseyServer(port, ks, state.keystorePass)) {
+                        srv.setAuditor(new RollingFileAuditor(r.getAuditLogDir()));
+                        r.setUpdateManager(new JerseyAwareMinionUpdateManager(srv));
 
-                    delegate.setDelegate(srv.getSseActivityReporter());
-                    registerCommonResources(srv, r, srv.getSseActivityReporter());
+                        delegate.setDelegate(srv.getSseActivityReporter());
+                        registerCommonResources(srv, r, srv.getSseActivityReporter());
 
-                    srv.start();
-                    srv.join();
+                        srv.start();
+                        srv.join();
+                    }
                 } catch (Exception e) {
                     throw new IllegalStateException("Cannot run server on " + port, e);
                 }

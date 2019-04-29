@@ -28,6 +28,8 @@ public class InstanceVariableResolver implements Function<String, String> {
                     return incf.uuid;
                 case "NAME":
                     return incf.name;
+                default:
+                    return null;
             }
         }
         return null;

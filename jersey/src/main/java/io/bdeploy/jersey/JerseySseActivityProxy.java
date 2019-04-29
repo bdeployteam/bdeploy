@@ -57,35 +57,17 @@ public class JerseySseActivityProxy implements NoThrowAutoCloseable {
                     : uuidMapping.computeIfAbsent(snap.parentUuid, (s) -> UuidHelper.randomId());
 
             if (proxiedActivities.containsKey(mappedUuid)) {
-                // update activities which we already have.
-                ActivityNode toUpdate = proxiedActivities.get(mappedUuid);
-                toUpdate.current = snap.current;
-                toUpdate.max = snap.max;
-
-                if (snap.cancel) {
-                    toUpdate.activity.requestCancel();
-                }
+                updateExistingActivity(snap, mappedUuid);
             } else {
-                // if an activity already exists, we must not re-create it. This happens
-                // when proxying to the own server (i.e. web-backend to local master).
-                String parentUuid = mappedParentUuid;
-                if (parentUuid == null || !hasGlobalActivity(parentUuid)) {
-                    if (parent == null) {
-                        parentUuid = null;
-                    } else {
-                        parentUuid = parent.getUuid();
-                    }
-                }
-
-                // create activities which we don't have yet.
-                ActivityNode node = new ActivityNode(snap, parent, this::onDone, this::onCancel, mappedUuid, parentUuid,
-                        proxyUuid);
-                proxiedActivities.put(mappedUuid, node);
-                reporter.addProxyActivity(node.activity);
+                createNewActivity(snap, mappedUuid, mappedParentUuid);
             }
         }
 
-        // 3. finish activities which are no longer reported.
+        // finish activities which are no longer reported.
+        cleanupActivities(activities);
+    }
+
+    private void cleanupActivities(List<ActivitySnapshot> activities) {
         Set<String> reportedUuids = activities.stream().map(a -> uuidMapping.get(a.uuid)).collect(Collectors.toSet());
         Set<String> toRemove = new TreeSet<>();
 
@@ -98,6 +80,35 @@ public class JerseySseActivityProxy implements NoThrowAutoCloseable {
             toRemove.add(entry.getKey());
         }
         toRemove.forEach(x -> proxiedActivities.remove(x));
+    }
+
+    private void createNewActivity(ActivitySnapshot snap, String mappedUuid, String mappedParentUuid) {
+        // if an activity already exists, we must not re-create it. This happens
+        // when proxying to the own server (i.e. web-backend to local master).
+        String parentUuid = mappedParentUuid;
+        if (parentUuid == null || !hasGlobalActivity(parentUuid)) {
+            if (parent == null) {
+                parentUuid = null;
+            } else {
+                parentUuid = parent.getUuid();
+            }
+        }
+
+        // create activities which we don't have yet.
+        ActivityNode node = new ActivityNode(snap, parent, this::onDone, this::onCancel, mappedUuid, parentUuid, proxyUuid);
+        proxiedActivities.put(mappedUuid, node);
+        reporter.addProxyActivity(node.activity);
+    }
+
+    private void updateExistingActivity(ActivitySnapshot snap, String mappedUuid) {
+        // update activities which we already have.
+        ActivityNode toUpdate = proxiedActivities.get(mappedUuid);
+        toUpdate.current = snap.current;
+        toUpdate.max = snap.max;
+
+        if (snap.cancel) {
+            toUpdate.activity.requestCancel();
+        }
     }
 
     private boolean hasGlobalActivity(String uuid) {

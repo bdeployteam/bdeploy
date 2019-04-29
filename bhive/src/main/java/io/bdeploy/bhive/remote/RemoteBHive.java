@@ -6,9 +6,9 @@ import java.util.SortedSet;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
-import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.RemoteService;
@@ -87,8 +87,9 @@ public interface RemoteBHive extends AutoCloseable {
                 return new LocalBHiveAdapter(new BHive(svc.getUri(), reporter), reporter);
             case "https":
                 return new JerseyRemoteBHive(svc, name, reporter);
+            default:
+                throw new UnsupportedOperationException("scheme " + svc.getUri().getScheme() + " not supported");
         }
-        throw new UnsupportedOperationException("scheme " + svc.getUri().getScheme() + " not supported");
     }
 
     @Override

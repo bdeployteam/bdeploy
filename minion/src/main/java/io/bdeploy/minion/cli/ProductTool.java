@@ -57,45 +57,53 @@ public class ProductTool extends RemoteServiceTool<ProductConfig> {
 
         try (BHive hive = new BHive(Paths.get(config.hive()).toUri(), getActivityReporter())) {
             if (config.list()) {
-                SortedSet<Key> scan = ProductManifest.scan(hive);
-                for (Key key : scan) {
-                    out().println(String.format("%1$-50s %2$-30s", key, ProductManifest.of(hive, key).getProduct()));
-
-                    if (isVerbose()) {
-                        ProductManifest pmf = ProductManifest.of(hive, key);
-                        for (Manifest.Key appKey : pmf.getApplications()) {
-                            ApplicationManifest amf = ApplicationManifest.of(hive, appKey);
-                            out().println(String.format("  %1$-48s %2$-30s", appKey, amf.getDescriptor().name));
-                        }
-                        out().println("  Other References:");
-                        for (Manifest.Key otherKey : pmf.getReferences()) {
-                            out().println(String.format("    %1$-48s", otherKey));
-                        }
-                    }
-                }
+                listProducts(hive);
             } else if (config.imp() != null) {
-                DependencyFetcher fetcher;
-                if (svc != null) {
-                    fetcher = new RemoteDependencyFetcher(svc, config.instanceGroup(), getActivityReporter());
-                } else {
-                    fetcher = new LocalDependencyFetcher();
-                }
-
-                Manifest.Key key = ProductManifest.importFromDescriptor(config.imp(), hive, fetcher);
-
-                if (config.push()) {
-                    helpAndFailIfMissing(svc, "missing --remote");
-
-                    TransferStatistics stats = hive
-                            .execute(new PushOperation().setRemote(svc).setHiveName(config.instanceGroup()).addManifest(key));
-
-                    out().println(String.format("Pushed %1$d manifests. %2$d of %3$d trees reused, %4$d objects sent (%5$s)",
-                            stats.sumManifests, stats.sumTrees - stats.sumMissingTrees, stats.sumTrees, stats.sumMissingObjects,
-                            UnitHelper.formatFileSize(stats.transferSize)));
-                }
+                importProduct(config, svc, hive);
             }
         }
 
+    }
+
+    private void importProduct(ProductConfig config, RemoteService svc, BHive hive) {
+        DependencyFetcher fetcher;
+        if (svc != null) {
+            fetcher = new RemoteDependencyFetcher(svc, config.instanceGroup(), getActivityReporter());
+        } else {
+            fetcher = new LocalDependencyFetcher();
+        }
+
+        Manifest.Key key = ProductManifest.importFromDescriptor(config.imp(), hive, fetcher);
+
+        if (config.push()) {
+            helpAndFailIfMissing(svc, "missing --remote");
+
+            TransferStatistics stats = hive
+                    .execute(new PushOperation().setRemote(svc).setHiveName(config.instanceGroup()).addManifest(key));
+
+            out().println(String.format("Pushed %1$d manifests. %2$d of %3$d trees reused, %4$d objects sent (%5$s)",
+                    stats.sumManifests, stats.sumTrees - stats.sumMissingTrees, stats.sumTrees, stats.sumMissingObjects,
+                    UnitHelper.formatFileSize(stats.transferSize)));
+        }
+    }
+
+    private void listProducts(BHive hive) {
+        SortedSet<Key> scan = ProductManifest.scan(hive);
+        for (Key key : scan) {
+            out().println(String.format("%1$-50s %2$-30s", key, ProductManifest.of(hive, key).getProduct()));
+
+            if (isVerbose()) {
+                ProductManifest pmf = ProductManifest.of(hive, key);
+                for (Manifest.Key appKey : pmf.getApplications()) {
+                    ApplicationManifest amf = ApplicationManifest.of(hive, appKey);
+                    out().println(String.format("  %1$-48s %2$-30s", appKey, amf.getDescriptor().name));
+                }
+                out().println("  Other References:");
+                for (Manifest.Key otherKey : pmf.getReferences()) {
+                    out().println(String.format("    %1$-48s", otherKey));
+                }
+            }
+        }
     }
 
 }

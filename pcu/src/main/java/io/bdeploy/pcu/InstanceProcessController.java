@@ -257,6 +257,7 @@ public class InstanceProcessController {
             log.info(buildLogString("All applications stopped. Stopping took %s", Formatter.formatDuration(duration)));
         } catch (InterruptedException e) {
             Duration duration = Duration.between(start, Instant.now());
+            Thread.currentThread().interrupt();
             throw new WebApplicationException(
                     "Interruped while waiting for processes to stop. Waited for " + Formatter.formatDuration(duration), e);
         }

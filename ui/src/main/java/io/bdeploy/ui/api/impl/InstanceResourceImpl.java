@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.concurrent.atomic.AtomicLong;
@@ -43,8 +44,8 @@ import io.bdeploy.bhive.op.ManifestNextIdOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.ActivityReporter.Activity;
+import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
@@ -53,14 +54,14 @@ import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.interfaces.NodeStatus;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
-import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
+import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.descriptor.client.ClientDescriptor;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
+import io.bdeploy.interfaces.manifest.InstanceManifest.Builder;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
-import io.bdeploy.interfaces.manifest.InstanceManifest.Builder;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
@@ -481,8 +482,13 @@ public class InstanceResourceImpl implements InstanceResource {
 
             for (Map.Entry<URI, List<InstanceManifest>> entry : remotes.entrySet()) {
                 // use target of latest manifest
-                RemoteService remote = entry.getValue().stream()
-                        .max(Comparator.comparing(mf -> Long.valueOf(mf.getManifest().getTag()))).get().getConfiguration().target;
+                Optional<InstanceManifest> optManifest = entry.getValue().stream()
+                        .max(Comparator.comparing(mf -> Long.valueOf(mf.getManifest().getTag())));
+                if (!optManifest.isPresent()) {
+                    throw new WebApplicationException(
+                            "Cannot determine max version of " + instanceId + ": cannot find any version", Status.NOT_FOUND);
+                }
+                RemoteService remote = optManifest.get().getConfiguration().target;
 
                 try (NoThrowAutoCloseable proxy = reporter.proxyActivities(remote)) {
                     MasterRootResource r = ResourceProvider.getResource(remote, MasterRootResource.class);

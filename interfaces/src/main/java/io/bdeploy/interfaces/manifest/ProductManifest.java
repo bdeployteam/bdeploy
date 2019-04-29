@@ -12,9 +12,9 @@ import java.util.TreeSet;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
-import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.ImportObjectOperation;
 import io.bdeploy.bhive.op.ImportOperation;
 import io.bdeploy.bhive.op.InsertArtificialTreeOperation;
@@ -26,8 +26,8 @@ import io.bdeploy.bhive.op.ManifestRefScanOperation;
 import io.bdeploy.bhive.op.ObjectLoadOperation;
 import io.bdeploy.bhive.op.TreeLoadOperation;
 import io.bdeploy.bhive.util.StorageHelper;
-import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
+import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.product.ProductDescriptor;
@@ -146,15 +146,7 @@ public class ProductManifest {
             impDesc = impDesc.resolve("product-info.yaml");
         }
         impDesc = impDesc.toAbsolutePath();
-        if (!Files.exists(impDesc)) {
-            throw new IllegalArgumentException("Product descriptor does not exist: " + impDesc);
-        }
-        ProductDescriptor prod;
-        try (InputStream is = Files.newInputStream(impDesc)) {
-            prod = StorageHelper.fromYamlStream(is, ProductDescriptor.class);
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot read " + impDesc, e);
-        }
+        ProductDescriptor prod = readProductDescriptor(impDesc);
 
         // 2. read version descriptor.
         if (prod.versionFile == null || prod.versionFile.isEmpty()) {
@@ -163,15 +155,7 @@ public class ProductManifest {
         }
         // path is relative to product descriptor, or absolute.
         Path vDesc = impDesc.getParent().resolve(prod.versionFile);
-        if (!Files.exists(vDesc)) {
-            throw new IllegalStateException("Cannot find version descriptor at " + vDesc);
-        }
-        ProductVersionDescriptor versions;
-        try (InputStream is = Files.newInputStream(vDesc)) {
-            versions = StorageHelper.fromYamlStream(is, ProductVersionDescriptor.class);
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot read " + impDesc, e);
-        }
+        ProductVersionDescriptor versions = readProductVersionDescriptor(impDesc, vDesc);
 
         // 3. validate product and version info.
         RuntimeAssert.assertNotNull(versions.version, "no version defined in " + vDesc);
@@ -180,6 +164,28 @@ public class ProductManifest {
 
         // make sure that all applications are there in the version descriptor.
         Map<String, Map<OperatingSystem, String>> toImport = new TreeMap<>();
+        matchApplicationsWithDescriptor(prod, vDesc, versions, toImport);
+
+        // 4. prepare product meta-data and builder to be filled.
+        String baseName = prod.product + '/';
+        Manifest.Key prodKey = new Manifest.Key(baseName + "product", versions.version);
+        Builder builder = new Builder(prod);
+
+        // 5. find and import all applications to import.
+        Path impBasePath = impDesc.getParent();
+        importApplications(hive, fetcher, versions, toImport, baseName, builder, impBasePath);
+
+        // 6. additional labels
+        versions.labels.forEach(builder::addLabel);
+
+        // 7. generate product
+        builder.insert(hive, prodKey, prod.product);
+
+        return prodKey;
+    }
+
+    private static void matchApplicationsWithDescriptor(ProductDescriptor prod, Path vDesc, ProductVersionDescriptor versions,
+            Map<String, Map<OperatingSystem, String>> toImport) {
         for (String appName : prod.applications) {
             Map<OperatingSystem, String> map = versions.appInfo.get(appName);
             if (map == null || map.isEmpty()) {
@@ -191,14 +197,10 @@ public class ProductManifest {
 
             toImport.put(appName, map);
         }
+    }
 
-        // 4. prepare product meta-data and builder to be filled.
-        String baseName = prod.product + '/';
-        Manifest.Key prodKey = new Manifest.Key(baseName + "product", versions.version);
-        Builder builder = new Builder(prod);
-
-        // 5. find and import all applications to import.
-        Path impBasePath = impDesc.getParent();
+    private static void importApplications(BHive hive, DependencyFetcher fetcher, ProductVersionDescriptor versions,
+            Map<String, Map<OperatingSystem, String>> toImport, String baseName, Builder builder, Path impBasePath) {
         for (Map.Entry<String, Map<OperatingSystem, String>> entry : toImport.entrySet()) {
             for (Map.Entry<OperatingSystem, String> relApp : entry.getValue().entrySet()) {
                 Path appPath = impBasePath.resolve(relApp.getValue());
@@ -227,14 +229,32 @@ public class ProductManifest {
                         new ScopedManifestKey(baseName + entry.getKey(), relApp.getKey(), versions.version).getKey())));
             }
         }
+    }
 
-        // 6. additional labels
-        versions.labels.forEach(builder::addLabel);
+    private static ProductVersionDescriptor readProductVersionDescriptor(Path impDesc, Path vDesc) {
+        if (!Files.exists(vDesc)) {
+            throw new IllegalStateException("Cannot find version descriptor at " + vDesc);
+        }
+        ProductVersionDescriptor versions;
+        try (InputStream is = Files.newInputStream(vDesc)) {
+            versions = StorageHelper.fromYamlStream(is, ProductVersionDescriptor.class);
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot read " + impDesc, e);
+        }
+        return versions;
+    }
 
-        // 7. generate product
-        builder.insert(hive, prodKey, prod.product);
-
-        return prodKey;
+    private static ProductDescriptor readProductDescriptor(Path impDesc) {
+        if (!Files.exists(impDesc)) {
+            throw new IllegalArgumentException("Product descriptor does not exist: " + impDesc);
+        }
+        ProductDescriptor prod;
+        try (InputStream is = Files.newInputStream(impDesc)) {
+            prod = StorageHelper.fromYamlStream(is, ProductDescriptor.class);
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot read " + impDesc, e);
+        }
+        return prod;
     }
 
     /**

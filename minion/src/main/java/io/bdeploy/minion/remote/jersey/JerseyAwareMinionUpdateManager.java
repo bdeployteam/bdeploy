@@ -13,6 +13,10 @@ import io.bdeploy.minion.MinionUpdateManager;
 @SuppressFBWarnings("DM_EXIT")
 public class JerseyAwareMinionUpdateManager implements MinionUpdateManager {
 
+    /**
+     * This must match what the launcher script(s) expect to perform an update.
+     */
+    private static final int CODE_UPDATE = 42;
     private static final Logger log = LoggerFactory.getLogger(JerseyAwareMinionUpdateManager.class);
     private final JerseyServer server;
 
@@ -27,6 +31,7 @@ public class JerseyAwareMinionUpdateManager implements MinionUpdateManager {
                 Thread.sleep(timeout);
             } catch (InterruptedException e) {
                 // not happening xD
+                Thread.currentThread().interrupt();
             }
 
             log.info("Exiting to perform update");

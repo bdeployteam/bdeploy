@@ -244,6 +244,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 return isRunning();
             }
         }
@@ -283,6 +284,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
 
         @Override
         public void dispose(Auditor instance) {
+            // nothing to do
         }
 
     }
@@ -302,6 +304,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
 
         @Override
         public void dispose(ActivityReporter instance) {
+            // nothing to do
         }
 
     }
@@ -320,10 +323,12 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
 
         @Override
         public void onReload(Container container) {
+            // delegate stays the same
         }
 
         @Override
         public void onShutdown(Container container) {
+            // nothing to do
         }
 
     }

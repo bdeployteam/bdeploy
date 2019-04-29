@@ -20,6 +20,8 @@ public class LocalHostnameResolver implements Function<String, String> {
                     } catch (UnknownHostException e) {
                         return "localhost";
                     }
+                default:
+                    return null;
             }
         }
         return null;

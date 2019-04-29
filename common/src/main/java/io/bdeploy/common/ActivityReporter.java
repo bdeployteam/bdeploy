@@ -402,10 +402,12 @@ public interface ActivityReporter {
 
             @Override
             public void worked(long amount) {
+                // nothing
             }
 
             @Override
             public void done() {
+                // nothing
             }
 
             @Override
