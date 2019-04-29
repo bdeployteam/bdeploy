@@ -54,15 +54,14 @@ mat-form-field {
   align-items: center;
   padding: 10px 0px;
   margin-top: 0.5em;
-  position: relative;
   height: 2.5em;
+  position: relative;
 }
 
 .title-toolbar {
   font-weight: lighter;
   position: absolute;
   right: 2%;
-  top: 18px;
 }
 
 .title-header {
@@ -70,22 +69,8 @@ mat-form-field {
   font-weight: bolder;
 }
 
-.title-header-icon {
-  position: relative;
-  top: 5px;
-  right: 5px;
-}
-
 .title-hint {
   font-size: 1em;
-}
-
-.console {
-  flex: 0 0 auto;
-  display: flex;
-  padding: 20px 5px;
-  border: 1px dashed #ccc;
-  margin: 10px 20px;
 }
 
 .icons {

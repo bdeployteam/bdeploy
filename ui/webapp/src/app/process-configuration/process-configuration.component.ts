@@ -162,6 +162,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       this.loading = false;
       this.updateDirtyStateAndValidate();
       this.onProcessStatusChanged();
+      this.createStickyHeader();
     });
   }
 
@@ -173,6 +174,22 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
         this.deploymentState = r;
         this.doTriggerProcessStatusUpdate();
       });
+  }
+
+  createStickyHeader() {
+    const document = window.document;
+    const header = document.getElementById('page-header');
+    const content = document.getElementById('app-content');
+    content.onscroll = function() {
+      const sticky = header.offsetTop;
+      if (content.scrollTop > sticky) {
+        header.classList.add('sticky-header');
+        header.classList.add('mat-elevation-z1');
+      } else {
+        header.classList.remove('sticky-header');
+        header.classList.remove('mat-elevation-z1');
+      }
+    };
   }
 
   public getDropListData(): any {
@@ -217,6 +234,10 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   setSidenavProcessStatus(process: ApplicationConfiguration): void {
+    // Do not show process details if the configuration mode is active
+    if (this.sidenavMode === SidenavMode.Applications) {
+      return;
+    }
     const callRefresh = this.selectedProcess === process;
     this.sidenavMode = SidenavMode.ProcessStatus;
     this.selectedProcess = process;

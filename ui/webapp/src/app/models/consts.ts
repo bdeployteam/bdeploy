@@ -1,4 +1,4 @@
-import { ApplicationConfiguration, CommandConfiguration, DeploymentStateDto, InstanceConfiguration, InstanceGroupConfiguration, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstancePurpose, InstanceVersionDto, ManifestKey, ParameterConfiguration, ParameterDescriptor, ParameterType, RemoteService } from './gen.dtos';
+import { ApplicationConfiguration, ApplicationStartType, CommandConfiguration, DeploymentStateDto, InstanceConfiguration, InstanceGroupConfiguration, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstancePurpose, InstanceVersionDto, ManifestKey, ParameterConfiguration, ParameterDescriptor, ParameterType, ProcessControlConfiguration, RemoteService } from './gen.dtos';
 
 // Defines the order in which instances should appear based on their purpose
 const PURPOSE_ORDER = [InstancePurpose.PRODUCTIVE, InstancePurpose.TEST, InstancePurpose.DEVELOPMENT];
@@ -100,9 +100,16 @@ export const EMPTY_INSTANCE_NODE_CONFIGURATION_DTO: InstanceNodeConfigurationDto
   statusHint: null,
   nodeConfiguration: null,
   foreignNodeConfigurations: null,
-}
+};
 
 export const EMPTY_VERSION_DTO: InstanceVersionDto = {
   key: null,
   product: null,
+};
+
+export const EMPTY_PROCESS_CONTROL_CONFIG: ProcessControlConfiguration = {
+  gracePeriod: 30,
+  keepAlive: false,
+  noOfRetries: 5,
+  startType: ApplicationStartType.MANUAL,
 };

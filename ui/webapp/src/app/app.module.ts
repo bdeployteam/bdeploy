@@ -13,6 +13,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ApplicationConfigurationCardComponent } from './application-configuration-card/application-configuration-card.component';
 import { ApplicationDescriptorCardComponent } from './application-descriptor-card/application-descriptor-card.component';
+import { ApplicationEditCommandPreviewComponent } from './application-edit-command-preview/application-edit-command-preview.component';
 import { ApplicationEditManualComponent } from './application-edit-manual/application-edit-manual.component';
 import { ApplicationEditOptionalComponent } from './application-edit-optional/application-edit-optional.component';
 import { ApplicationEditComponent } from './application-edit/application-edit.component';
@@ -105,7 +106,8 @@ export function loadAppConfig(cfgService: ConfigService) {
     SoftwareCardComponent,
     SoftwareListComponent,
     ProcessStatusComponent,
-    ProcessListComponent
+    ProcessListComponent,
+    ApplicationEditCommandPreviewComponent
   ],
   imports: [
     BrowserModule,
@@ -163,7 +165,8 @@ export function loadAppConfig(cfgService: ConfigService) {
     FileUploadComponent,
     ApplicationEditManualComponent,
     ApplicationEditOptionalComponent,
-    ProcessListComponent
+    ApplicationEditCommandPreviewComponent,
+    ProcessListComponent,
   ],
   bootstrap: [AppComponent],
 })

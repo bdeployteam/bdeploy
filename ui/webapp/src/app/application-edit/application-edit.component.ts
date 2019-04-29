@@ -2,15 +2,16 @@ import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef, ViewContainerRef } from '@angular/core';
 import { FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { MatButton, MatDialog, MatDialogConfig } from '@angular/material';
+import { MatBottomSheet, MatButton, MatDialog, MatDialogConfig } from '@angular/material';
 import { cloneDeep, isEqual } from 'lodash';
 import { Observable, of } from 'rxjs';
+import { ApplicationEditCommandPreviewComponent } from '../application-edit-command-preview/application-edit-command-preview.component';
 import { ApplicationEditManualComponent, Context } from '../application-edit-manual/application-edit-manual.component';
 import { ApplicationEditOptionalComponent } from '../application-edit-optional/application-edit-optional.component';
 import { MessageBoxMode } from '../messagebox/messagebox.component';
 import { CustomParameter, GroupNames, LinkedParameter, NamedParameter } from '../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_PARAMETER_CONFIGURATION, EMPTY_PARAMETER_DESCRIPTOR } from '../models/consts';
-import { ApplicationConfiguration, ApplicationDescriptor, InstanceConfiguration, ParameterDescriptor, ParameterType } from '../models/gen.dtos';
+import { ApplicationConfiguration, ApplicationDescriptor, ApplicationStartType, InstanceConfiguration, ParameterDescriptor, ParameterType } from '../models/gen.dtos';
 import { EditAppConfigContext } from '../models/process.model';
 import { ApplicationService } from '../services/application.service';
 import { Logger, LoggingService } from '../services/logging.service';
@@ -60,9 +61,6 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
   /** All groups that we currently display. Sorted by their name */
   public sortedGroups: string[];
 
-  /** A full preview of the command line */
-  public commandLinePreview: string;
-
   constructor(
     private loggingService: LoggingService,
     private appService: ApplicationService,
@@ -70,6 +68,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     private overlay: Overlay,
     private viewContainerRef: ViewContainerRef,
     private messageBoxService: MessageboxService,
+    private bottomSheet: MatBottomSheet,
   ) {}
 
   ngOnInit() {
@@ -81,7 +80,6 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     this.initFormGroup();
     this.updateFormGroup();
     this.updateAppCfgParameterOrder();
-    this.updateCommandLinePreview();
 
     // Disable all controls in readonly mode
     if (this.readonly) {
@@ -100,9 +98,6 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     this.formGroup.statusChanges.subscribe(status => {
       const isValid = status === 'VALID';
       this.validationStateChanged.emit(isValid);
-    });
-    this.formGroup.valueChanges.subscribe(v => {
-      this.updateCommandLinePreview();
     });
 
     // this is required to run asynchronously to avoid changes to the model while updating the view.
@@ -268,21 +263,21 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
 
   /** Returns a hint-text how many parameters are configured in this group */
   getHintTextForGroup(groupName: string) {
-    let totalParams = 0;
     let configuredParams = 0;
     for (const linkedPara of Array.from(this.linkedDescriptors.values())) {
       if (linkedPara.desc.groupName !== groupName) {
         continue;
       }
-      totalParams++;
       if (linkedPara.rendered) {
         configuredParams++;
       }
     }
-    if (totalParams === 0) {
-      return 'No parameters configured';
+    if (configuredParams === 0) {
+      return 'No parameters have been configured';
+    } else if (configuredParams === 1) {
+      return '1 parameter has been configured';
     }
-    return configuredParams + '/' + totalParams + ' parameters configured';
+    return configuredParams + ' parameters have been configured';
   }
 
   /** Returns a hint-text whether or not the group contains errors. Null if the group is valid */
@@ -412,7 +407,12 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     });
     this.formGroup.addControl('$appGracePeriod', gracePeriodCtrl);
 
-    // TODO: check supportsKeepAlive, check and configure start type
+    const startType = new FormControl();
+    startType.setValue(this.appConfigContext.applicationConfiguration.processControl.startType);
+    startType.valueChanges.subscribe(v => {
+      this.appConfigContext.applicationConfiguration.processControl.startType = v;
+    });
+    this.formGroup.addControl('$appStartType', startType);
 
     const keepAlive = new FormControl();
     keepAlive.setValue(this.appConfigContext.applicationConfiguration.processControl.keepAlive);
@@ -762,12 +762,21 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** Opens a bottom sheet displaying the command-line that will be executed */
+  openCommandLinePreview() {
+    this.bottomSheet.open(ApplicationEditCommandPreviewComponent, {
+      data: {
+        commandLinePreview: this.getCommandLinePreview(),
+      },
+    });
+  }
+
   /**
    * Updates the preview property to show the user what will be executed
    */
-  updateCommandLinePreview() {
-    // Executable
-    this.commandLinePreview = this.appConfigContext.applicationConfiguration.start.executable;
+  getCommandLinePreview() {
+    const preview = [];
+    preview.push(this.appConfigContext.applicationConfiguration.start.executable);
 
     // add all parameters in their defined order
     for (const para of this.appConfigContext.applicationConfiguration.start.parameters) {
@@ -777,7 +786,16 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
         continue;
       }
       const value = linkedPara.getCommandLinePreview(this.appService, para.preRendered);
-      this.commandLinePreview = this.commandLinePreview.concat(' ', value);
+      preview.push(value);
     }
+    return preview;
+  }
+
+  getSupportedStartTypes() {
+    const types = this.appDesc.processControl.supportedStartTypes;
+    if (!types) {
+      return [ApplicationStartType.MANUAL];
+    }
+    return types;
   }
 }

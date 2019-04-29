@@ -1,0 +1,11 @@
+<div class="container">
+  <div class="title">
+    <div class="title-header">Command Line Preview</div>
+    <div class="title-hint">A preview of the command line arguments used to launch the application.</div>
+  </div>
+  <div class="console console-theme">
+    <ng-container *ngFor="let command of commandLinePreview; let i = index">
+      <div class="{{i === 0 ? 'executable' : 'argument'}}">{{command}}</div>
+    </ng-container>
+  </div>
+</div>

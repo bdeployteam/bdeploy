@@ -4,8 +4,8 @@ import { cloneDeep, isEqual } from 'lodash';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { ApplicationConfigurationCardComponent } from '../application-configuration-card/application-configuration-card.component';
 import { ApplicationGroup } from '../models/application.model';
-import { CLIENT_NODE_NAME, EMPTY_APPLICATION_CONFIGURATION, EMPTY_INSTANCE_NODE_CONFIGURATION } from '../models/consts';
-import { ApplicationConfiguration, ApplicationDto, ApplicationStartType, InstanceConfiguration, InstanceNodeConfiguration, InstanceNodeConfigurationDto } from '../models/gen.dtos';
+import { CLIENT_NODE_NAME, EMPTY_APPLICATION_CONFIGURATION, EMPTY_INSTANCE_NODE_CONFIGURATION, EMPTY_PROCESS_CONTROL_CONFIG } from '../models/consts';
+import { ApplicationConfiguration, ApplicationDto, InstanceConfiguration, InstanceNodeConfiguration, InstanceNodeConfigurationDto } from '../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../models/process.model';
 import { ApplicationService } from '../services/application.service';
 import { InstanceService } from '../services/instance.service';
@@ -406,18 +406,19 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy, AfterViewIn
   /** Creates a new application configuration and initializes it with default values */
   createNewAppConfig(app: ApplicationDto): ApplicationConfiguration {
     const appConfig = cloneDeep(EMPTY_APPLICATION_CONFIGURATION);
+    appConfig.processControl = cloneDeep(EMPTY_PROCESS_CONTROL_CONFIG);
     appConfig.application = app.key;
     appConfig.name = app.name;
 
-    // default configuration
-    appConfig.processControl = {
-      gracePeriod: app.descriptor.processControl.gracePeriod,
-      startType: app.descriptor.processControl.supportedStartTypes
-        ? app.descriptor.processControl.supportedStartTypes[0]
-        : ApplicationStartType.MANUAL,
-      keepAlive: app.descriptor.processControl.supportsKeepAlive,
-      noOfRetries: app.descriptor.processControl.noOfRetries,
-    };
+    // default process control configuration
+    const processControlDesc = app.descriptor.processControl;
+    const processControlConfig = appConfig.processControl;
+    processControlConfig.gracePeriod = processControlDesc.gracePeriod;
+    if (processControlDesc.supportedStartTypes) {
+      processControlConfig.startType = processControlDesc.supportedStartTypes[0];
+    }
+    processControlConfig.keepAlive = processControlDesc.supportsKeepAlive;
+    processControlConfig.noOfRetries = processControlDesc.noOfRetries;
 
     // Template is the first application having the same app to launch
     const apps = this.appService.getAllApps(this.processConfig);

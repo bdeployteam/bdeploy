@@ -1,15 +1,13 @@
-<div>
   <form [formGroup]="formGroup">
     <div class="title title-theme">
-      <div class="title-header"> {{appDesc.name}}</div>
-      <div class="title-hint info-theme" *ngIf="readonly">(Read-only view. No changes are possible.)</div>
-      <div class="title-hint error-theme" *ngIf="getErrorTextForAppConfig()">({{getErrorTextForAppConfig()}})</div>
-      <div class="title-toolbar" *ngIf="!isClientApplication()">
-        <mat-slide-toggle [formControlName]="'$appKeepAlive'" labelPosition="before"> Keep-Alive </mat-slide-toggle>
+      <div class="title-header">Process Settings</div>
+      <div class="title-hint info-theme">{{appDesc.name}}</div>
+      <div class="title-toolbar" *ngIf="readonly">
+        <mat-icon matTooltip="Read-only view. No changes are possible.">lock</mat-icon>
       </div>
     </div>
     <div class="container">
-      <mat-grid-list cols="2" rowHeight="5em">
+      <mat-grid-list cols="4" rowHeight="5em">
         <mat-grid-tile>
           <mat-form-field>
             <input matInput placeholder="Description" [formControlName]="'$appCfgName'" type="text" />
@@ -18,8 +16,25 @@
         </mat-grid-tile>
         <mat-grid-tile *ngIf="!isClientApplication()">
           <mat-form-field>
+            <mat-label>Start Type</mat-label>
+            <mat-select [formControlName]="'$appStartType'">
+              <mat-option *ngFor="let startType of getSupportedStartTypes()" [value]="startType">
+                {{startType}}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="!isCtrlValid('$appStartType')">{{getCtrlErrorMessage('$appStartType')}}</mat-error>
+          </mat-form-field>
+        </mat-grid-tile>
+        <mat-grid-tile *ngIf="!isClientApplication()">
+          <div class="boolean-param-field">
+            <mat-slide-toggle class="boolean-param-widget" [formControlName]="'$appKeepAlive'"> </mat-slide-toggle>
+            <label class="boolean-param-label"> Keep Alive </label>
+          </div>
+        </mat-grid-tile>
+        <mat-grid-tile *ngIf="!isClientApplication()">
+          <mat-form-field>
             <input matInput placeholder="Stop timeout [ms]" [formControlName]="'$appGracePeriod'" type="number"
-              title="Maximum time the process may take to terminate after it is stopped. If the time exceeds, the application is terminated forcefully." />
+              matTooltip="Maximum time the process may take to terminate after it retrieved a stop signal. If the time exceeds, the application is terminated forcefully." />
             <mat-error *ngIf="!isCtrlValid('$appGracePeriod')">{{getCtrlErrorMessage('$appGracePeriod')}}</mat-error>
           </mat-form-field>
         </mat-grid-tile>
@@ -27,8 +42,14 @@
     </div>
     <div class="title title-theme">
       <div class="title-header">Parameter Settings</div>
-      <div class="title-hint">Configuration of the command line arguments used to launch the application.</div>
+      <div class="title-hint info-theme">Configuration of the command line arguments used to launch the application.</div>
+      <div class="title-toolbar">
+        <button mat-icon-button (click)="openCommandLinePreview()" matTooltip="Show command line preview">
+          <mat-icon>input</mat-icon>
+        </button>
+      </div>
     </div>
+
     <div class="container">
       <mat-accordion>
         <mat-expansion-panel *ngFor="let groupName of sortedGroups; let i = index" (opened)="setExpandedGroup(groupName)" [expanded]="expandedGroup === groupName">
@@ -53,7 +74,7 @@
                 <!-- HasValue=true;  Mandatory=true:  Mandatory parameter, value slider  -> Parameter always present with slider value as value -->
                 <div class="boolean-param-field" *ngIf="param.desc.hasValue || param.desc.mandatory">
                   <mat-slide-toggle class="boolean-param-widget" [formControlName]="param.desc.uid"> </mat-slide-toggle>
-                  <label class="boolean-param-label"> {{getCtrlPlaceholderText(param.desc)}} </label>
+                  <label class="boolean-param-label">{{ getCtrlPlaceholderText(param.desc) }}</label>
                 </div>
 
                 <!-- HasValue=false;  Mandatory=false:  Optional parameter, no value slider   -> Parameter either present or not -->
@@ -75,7 +96,7 @@
                       <div class="info-grid-span-2">{{param.desc.longDescription ? param.desc.longDescription : '(none)'}}</div>
                       <div><b>Default:</b></div>
                       <div class="info-default-value">{{param.desc.defaultValue ? param.desc.defaultValue : '(none)'}}</div>
-                        <button mat-icon-button type="button" class="info-restore-button" [disabled]="!param.desc.defaultValue || readonly" (click)="revertValue(param)" title="Restore default value">
+                        <button mat-icon-button type="button" class="info-restore-button" [disabled]="!param.desc.defaultValue || readonly" (click)="revertValue(param)" matTooltip="Restore default value">
                         <mat-icon>undo</mat-icon>
                       </button>
                     </mat-card-content>
@@ -112,11 +133,3 @@
       </mat-accordion>
     </div>
   </form>
-  <div class="title title-theme">
-    <div class="title-header">Command Line Preview</div>
-    <div class="title-hint">A preview of the command line arguments used to launch the application.</div>
-  </div>
-  <div class="console console-theme">
-    <span> {{commandLinePreview}} </span>
-  </div>
-</div>

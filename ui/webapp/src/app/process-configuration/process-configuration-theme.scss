@@ -4,6 +4,10 @@
   $dark: map-get($theme, is-dark);
   $warn: map-get($theme, 'warn');
 
+  .sticky-header {
+    background-color: if($dark, #5a5a5a, #eeeeee);
+  }
+
   .drawer-content {
     background-color: if($dark, #363537, #ffffff);
   }
