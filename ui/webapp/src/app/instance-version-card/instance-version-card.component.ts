@@ -13,6 +13,7 @@ export class InstanceVersionCardComponent implements OnChanges {
   @Input() dirty: boolean;
   @Input() disabled: boolean;
   @Input() state: DeploymentStateDto;
+  @Input() isRunningOrScheduled: boolean;
 
   @Output() install = new EventEmitter<ManifestKey>();
   @Output() activate = new EventEmitter<ManifestKey>();
