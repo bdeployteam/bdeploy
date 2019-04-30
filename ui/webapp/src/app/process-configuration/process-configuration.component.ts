@@ -443,11 +443,11 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       return true;
     }
     // App is running in this version
-    const isRunning = this.processService.isRunningOrScheduledInVersion(version.key.tag);
-    if (isRunning) {
-      return true;
-    }
-    return false;
+    return this.isRunningOrScheduledVersion(version.key.tag);
+  }
+
+  public isRunningOrScheduledVersion(instanceTag: string): boolean {
+    return this.processService.isRunningOrScheduledInVersion(instanceTag);
   }
 
   public isValid() {

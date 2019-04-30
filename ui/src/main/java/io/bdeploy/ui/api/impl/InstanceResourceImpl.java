@@ -56,6 +56,8 @@ import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
+import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
+import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 import io.bdeploy.interfaces.descriptor.client.ClientDescriptor;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
@@ -442,8 +444,20 @@ public class InstanceResourceImpl implements InstanceResource {
         RemoteService svc = instance.getConfiguration().target;
         try (Activity deploy = reporter.start("Undeploying " + instanceId + ":" + tag);
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
-            // 1: tell master to undeploy
+
+            // 1: check for running or scheduled applications
             MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class);
+            MasterNamedResource namedMaster = master.getNamedMaster(group);
+            InstanceStatusDto instanceStatus = namedMaster.getStatus(instanceId);
+            Map<String, ProcessStatusDto> appStatus = instanceStatus.getAppStatus();
+            Optional<ProcessStatusDto> runningOrScheduledInVersion = appStatus.values().stream()
+                    .filter(p -> tag.equals(p.instanceTag)).findFirst();
+            if (runningOrScheduledInVersion.isPresent()) {
+                throw new WebApplicationException("Cannot uninstall instance version " + instanceId + ":" + tag
+                        + " because it has running or scheduled applications", Status.FORBIDDEN);
+            }
+
+            // 1: tell master to undeploy
             master.getNamedMaster(group).remove(instance.getManifest());
 
             // 2: TODO: cleanup in hives - how, where, who?

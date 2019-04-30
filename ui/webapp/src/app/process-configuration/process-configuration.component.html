@@ -175,6 +175,7 @@
                 (install)="doInstallVersion($event, appVersionCard)"
                 (uninstall)="doUninstallVersion($event, appVersionCard)"
                 [state]='deploymentState'
+                [isRunningOrScheduled]='isRunningOrScheduledVersion(config.version.key.tag)'
                 [selected]="isVersionSelected(config)"
                 [dirty]="config.dirty"
                 [disabled]="loading">
