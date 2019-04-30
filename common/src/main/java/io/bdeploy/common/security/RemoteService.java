@@ -1,5 +1,6 @@
 package io.bdeploy.common.security;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.security.KeyStore;
 
@@ -9,7 +10,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Represents data about a single known minion.
  */
-public class RemoteService {
+public class RemoteService implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     /**
      * The URI under which the referenced minion is reachable.

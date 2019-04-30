@@ -8,6 +8,9 @@ public class VersionHelper {
 
     public static final String UNKNOWN = "Unknown";
 
+    private VersionHelper() {
+    }
+
     public static String readVersion() {
         try (InputStream is = VersionHelper.class.getResourceAsStream("/version.properties")) {
             Properties p = new Properties();

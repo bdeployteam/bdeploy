@@ -11,6 +11,9 @@ public class UuidHelper {
     private static final String AB = "0123456789abcdefghijklmnopqrstuvwxyz";
     private static final Random RND = new SecureRandom();
 
+    private UuidHelper() {
+    }
+
     /**
      * @return a pseudo-UUID generated from random data.
      *         <p>

@@ -8,6 +8,9 @@ import java.util.concurrent.Future;
  */
 public class FutureHelper {
 
+    private FutureHelper() {
+    }
+
     public static void awaitAll(Collection<Future<?>> futures) {
         futures.forEach(t -> {
             try {

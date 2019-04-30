@@ -1,7 +1,5 @@
 package io.bdeploy.interfaces.configuration.pcu;
 
-import java.util.EnumSet;
-
 /**
  * Enumeration containing the possible states of a process.
  */
@@ -21,16 +19,6 @@ public enum ProcessState {
 
     /** Process was running but crashed unexpectedly. Will automatically be restarted after some delay */
     CRASH_BACK_OFF;
-
-    /** States that indicate that the process is running or scheduled */
-    public static final EnumSet<ProcessState> SET_RUNNING_SCHEDULED = EnumSet.of(ProcessState.RUNNING,
-            ProcessState.RUNNING_UNSTABLE, ProcessState.CRASH_BACK_OFF);
-
-    /** States that indicate that the process is running or scheduled */
-    public static final EnumSet<ProcessState> SET_RUNNING = EnumSet.of(ProcessState.RUNNING, ProcessState.RUNNING_UNSTABLE);
-
-    /** States that indicate that the process is stopped */
-    public static final EnumSet<ProcessState> SET_STOPPED = EnumSet.of(ProcessState.STOPPED, ProcessState.STOPPED_CRASHED);
 
     /**
      * Returns whether or not the status indicates that the process is alive and running.

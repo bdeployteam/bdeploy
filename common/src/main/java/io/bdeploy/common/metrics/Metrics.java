@@ -14,6 +14,9 @@ public class Metrics {
         HIVE
     }
 
+    private Metrics() {
+    }
+
     /**
      * @param group the {@link MetricGroup} to get a {@link MetricRegistry} for.
      * @return a {@link MetricRegistry} which can be used to create and track metrics.

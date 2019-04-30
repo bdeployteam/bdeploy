@@ -10,6 +10,9 @@ public class UnitHelper {
     private static final DecimalFormat SIZE_FORMAT = new DecimalFormat("#,##0.#");
     private static final String[] SIZE_UNITS = new String[] { "B", "kB", "MB", "GB", "TB" };
 
+    private UnitHelper() {
+    }
+
     public static String formatFileSize(long size) {
         if (size <= 0) {
             return "0 B";

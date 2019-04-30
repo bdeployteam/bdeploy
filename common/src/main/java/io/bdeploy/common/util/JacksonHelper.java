@@ -21,6 +21,9 @@ public class JacksonHelper {
         YAML
     }
 
+    private JacksonHelper() {
+    }
+
     private static ObjectMapper createObjectMapper(JsonFactory factory) {
         final ObjectMapper result = new ObjectMapper(factory);
 

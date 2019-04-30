@@ -8,7 +8,10 @@ package io.bdeploy.common.util;
  */
 public class Hex {
 
-    private final static char[] hexArray = "0123456789abcdef".toCharArray();
+    private static final char[] hexArray = "0123456789abcdef".toCharArray();
+
+    private Hex() {
+    }
 
     public static String bytesToHex(byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];

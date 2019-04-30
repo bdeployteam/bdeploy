@@ -12,6 +12,9 @@ import java.util.stream.Stream;
  */
 public class PathHelper {
 
+    private PathHelper() {
+    }
+
     /**
      * Replace all problematic characters in a String with '_'.
      * <p>
@@ -51,7 +54,7 @@ public class PathHelper {
      * @param path the {@link Path} to delete recursively.
      */
     public static void deleteRecursive(Path path) {
-        if (!Files.exists(path)) {
+        if (!path.toFile().exists()) {
             return;
         }
 

@@ -5,6 +5,9 @@ package io.bdeploy.common.util;
  */
 public class StringHelper {
 
+    private StringHelper() {
+    }
+
     /**
      * Checks whether a given string is null or empty
      *

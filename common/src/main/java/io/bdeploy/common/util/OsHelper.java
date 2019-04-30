@@ -12,6 +12,9 @@ public class OsHelper {
         UNKNOWN
     }
 
+    private OsHelper() {
+    }
+
     /**
      * @return the currently running {@link OperatingSystem}.
      */

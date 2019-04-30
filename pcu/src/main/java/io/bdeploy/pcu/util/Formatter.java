@@ -48,16 +48,22 @@ public class Formatter {
     public static String formatDuration(Duration value) {
         List<String> parts = new ArrayList<>();
         long days = value.toDaysPart();
-        if (days > 0) {
-            parts.add(days + (days == 1 ? " day" : " days"));
+        if (days == 1) {
+            parts.add(days + " day");
+        } else if (days > 1) {
+            parts.add(days + " days");
         }
         long hours = value.toHoursPart();
-        if (hours > 0) {
-            parts.add(hours + (hours == 1 ? " hour" : " hours"));
+        if (hours == 1) {
+            parts.add(hours + " hour");
+        } else if (hours > 1) {
+            parts.add(hours + " hours");
         }
         long minutes = value.toMinutesPart();
-        if (minutes > 0) {
-            parts.add(minutes + (minutes == 1 ? " minute" : " minutes"));
+        if (minutes == 1) {
+            parts.add(minutes + " minute");
+        } else if (minutes > 1) {
+            parts.add(minutes + " minutes");
         }
 
         // Skip seconds if we have days, hours
@@ -65,8 +71,10 @@ public class Formatter {
             return Joiner.on(" ").join(parts);
         }
         long seconds = value.toSecondsPart();
-        if (seconds > 0) {
-            parts.add(seconds + (seconds == 1 ? " second" : " seconds"));
+        if (seconds == 1) {
+            parts.add(seconds + " second");
+        } else if (seconds > 1) {
+            parts.add(seconds + " seconds");
         }
 
         // Skip milliseconds if we have minutes
@@ -74,8 +82,10 @@ public class Formatter {
             return Joiner.on(" ").join(parts);
         }
         long millis = value.toMillisPart();
-        if (millis > 0 || parts.isEmpty()) {
-            parts.add(millis + (millis == 1 ? " millisecond" : " milliseconds"));
+        if (millis == 1) {
+            parts.add(millis + " millisecond");
+        } else if (millis > 1 || parts.isEmpty()) {
+            parts.add(millis + " milliseconds");
         }
         return Joiner.on(" ").join(parts);
     }

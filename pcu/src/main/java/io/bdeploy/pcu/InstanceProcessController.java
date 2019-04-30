@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -19,6 +20,8 @@ import javax.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Sets;
 
 import io.bdeploy.common.util.NamedDaemonThreadFactory;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
@@ -38,6 +41,14 @@ import io.bdeploy.pcu.util.Formatter;
 public class InstanceProcessController {
 
     private static final Logger log = LoggerFactory.getLogger(InstanceProcessController.class);
+
+    /** States that indicate that the process is running or scheduled */
+    private static final Set<ProcessState> SET_RUNNING_SCHEDULED = Sets.immutableEnumSet(ProcessState.RUNNING,
+            ProcessState.RUNNING_UNSTABLE, ProcessState.CRASH_BACK_OFF);
+
+    /** States that indicate that the process is running or scheduled */
+    private static final Set<ProcessState> SET_RUNNING = Sets.immutableEnumSet(ProcessState.RUNNING,
+            ProcessState.RUNNING_UNSTABLE);
 
     /** Guards access to the map */
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
@@ -172,7 +183,7 @@ public class InstanceProcessController {
             // Compute runtime state across all versions
             Map<String, ProcessController> running = new HashMap<>();
             for (ProcessList list : processMap.values()) {
-                running.putAll(list.getWithState(ProcessState.SET_RUNNING_SCHEDULED));
+                running.putAll(list.getWithState(SET_RUNNING_SCHEDULED));
             }
 
             // Start all missing applications
@@ -226,7 +237,7 @@ public class InstanceProcessController {
             readLock.lock();
             // Execute stopping in parallel as this could last for some time
             for (ProcessList list : processMap.values()) {
-                for (ProcessController controller : list.getWithState(ProcessState.SET_RUNNING_SCHEDULED).values()) {
+                for (ProcessController controller : list.getWithState(SET_RUNNING_SCHEDULED).values()) {
                     toStop.add(controller);
                 }
             }
@@ -277,7 +288,7 @@ public class InstanceProcessController {
         try {
             readLock.lock();
             for (ProcessList list : processMap.values()) {
-                Map<String, ProcessController> running = list.getWithState(ProcessState.SET_RUNNING);
+                Map<String, ProcessController> running = list.getWithState(SET_RUNNING);
                 if (running.containsKey(applicationId)) {
                     ProcessStatusDto dto = running.get(applicationId).getStatus();
                     throw new RuntimeException(
@@ -310,7 +321,7 @@ public class InstanceProcessController {
         try {
             readLock.lock();
             for (ProcessList list : processMap.values()) {
-                Map<String, ProcessController> running = list.getWithState(ProcessState.SET_RUNNING_SCHEDULED);
+                Map<String, ProcessController> running = list.getWithState(SET_RUNNING_SCHEDULED);
                 process = running.get(applicationId);
                 if (process == null) {
                     continue;
@@ -360,7 +371,7 @@ public class InstanceProcessController {
         try {
             readLock.lock();
             for (ProcessList list : processMap.values()) {
-                Map<String, ProcessController> running = list.getWithState(ProcessState.SET_RUNNING_SCHEDULED);
+                Map<String, ProcessController> running = list.getWithState(SET_RUNNING_SCHEDULED);
                 for (ProcessController controller : running.values()) {
                     controller.detach();
                 }

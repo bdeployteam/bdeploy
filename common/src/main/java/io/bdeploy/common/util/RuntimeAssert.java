@@ -7,6 +7,9 @@ import java.util.Objects;
  */
 public class RuntimeAssert {
 
+    private RuntimeAssert() {
+    }
+
     public static void assertTrue(boolean condition, String msg) {
         if (!condition) {
             throw new IllegalStateException(msg);

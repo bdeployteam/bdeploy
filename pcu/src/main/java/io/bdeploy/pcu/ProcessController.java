@@ -346,41 +346,15 @@ public class ProcessController {
         log.info(buildLogString("Stopping application. PID = %s", pid));
 
         // try to gracefully stop the process using it's stop command
-        executeStopCommand();
+        doInvokeStopCommand();
         if (processExit == null || processExit.isDone()) {
             afterTerminated();
             return;
         }
 
         // No stop command defined. Go on with destroying the process via its handle
-        int retryCount = 0;
-        boolean stopped = false;
         Instant stopRequested = Instant.now();
-        while (!stopped && retryCount < 10) {
-            // Destroy or forcibly destroy based on the retry counter
-            if (retryCount == 0) {
-                destroy(process);
-            } else {
-                log.warn(buildLogString("Attempt %s: Kill application.", retryCount));
-                destroyForcibly(process);
-            }
-
-            // Wait configured delay to stop
-            try {
-                processExit.get(processConfig.processControl.gracePeriod, TimeUnit.MILLISECONDS);
-            } catch (TimeoutException e) {
-                log.warn(buildLogString("Timed-out waiting for application to exit. Timeout: %s ms",
-                        processConfig.processControl.gracePeriod));
-            } catch (Exception e) {
-                log.warn(buildLogString("Execption while waiting for application to terminate."), e);
-            }
-
-            // Continue when process is still alive.
-            stopped = processExit == null || processExit.isDone();
-            if (!stopped) {
-                retryCount++;
-            }
-        }
+        boolean stopped = doDestroyProcess();
 
         // Inform about the result of the stop operation
         if (stopped) {
@@ -711,7 +685,7 @@ public class ProcessController {
     }
 
     /** Executes the configured stop command and waits for the termination */
-    private void executeStopCommand() {
+    private void doInvokeStopCommand() {
         List<String> stopCommand = processConfig.stop;
         if (stopCommand == null || stopCommand.isEmpty()) {
             log.debug(buildLogString("No stop command configured."));
@@ -742,6 +716,38 @@ public class ProcessController {
         } catch (Exception e) {
             log.error(buildLogString("Failed to execute stop command."), e);
         }
+    }
+
+    /** Signals the process to terminate and waits for the completion */
+    private boolean doDestroyProcess() {
+        int retryCount = 0;
+        boolean stopped = false;
+        while (!stopped && retryCount < 10) {
+            // Destroy or forcibly destroy based on the retry counter
+            if (retryCount == 0) {
+                destroy(process);
+            } else {
+                log.warn(buildLogString("Attempt %s: Kill application.", retryCount));
+                destroyForcibly(process);
+            }
+
+            // Wait configured delay to stop
+            try {
+                processExit.get(processConfig.processControl.gracePeriod, TimeUnit.MILLISECONDS);
+            } catch (TimeoutException e) {
+                log.warn(buildLogString("Timed-out waiting for application to exit. Timeout: %s ms",
+                        processConfig.processControl.gracePeriod));
+            } catch (Exception e) {
+                log.warn(buildLogString("Execption while waiting for application to terminate."), e);
+            }
+
+            // Continue when process is still alive.
+            stopped = processExit == null || processExit.isDone();
+            if (!stopped) {
+                retryCount++;
+            }
+        }
+        return stopped;
     }
 
     /** Closes the executor so that the resources are released */

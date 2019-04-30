@@ -1,6 +1,6 @@
 package io.bdeploy.pcu;
 
-import java.util.EnumSet;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -74,7 +74,7 @@ public class ProcessList {
      * @param states the states to filter
      * @return all applications with the given state
      */
-    public Map<String, ProcessController> getWithState(EnumSet<ProcessState> states) {
+    public Map<String, ProcessController> getWithState(Collection<ProcessState> states) {
         return controllers.entrySet().stream().filter(e -> states.contains(e.getValue().getState()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
