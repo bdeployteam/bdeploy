@@ -175,7 +175,7 @@ public class ObjectManager {
                 case BLOB:
                     filesOnLevel.add(fileOps.submit(() -> {
                         try {
-                            internalExportBlob(exporting, obj, child);
+                            internalExportBlob(obj, child);
                         } finally {
                             exporting.workAndCancelIfRequested(1);
                         }
@@ -200,7 +200,7 @@ public class ObjectManager {
         exporting.workAndCancelIfRequested(1);
     }
 
-    private void internalExportBlob(Activity exporting, ObjectId obj, Path child) {
+    private void internalExportBlob(ObjectId obj, Path child) {
         try {
             // always try to use hard-links, except in windows. On windows it is not possible to decrement
             // the link-count of a file which is locked (e.g. running executable), even if the executable
@@ -269,13 +269,11 @@ public class ObjectManager {
             }
         }
 
-        if (hint.getMessage() != null) {
+        if (hint.getMessage() != null && hint.getMessage().toLowerCase().contains("script text executable")) {
             // and additionally all with message containing:
             //  'script text executable' -> matches all shebangs (#!...) for scripts
             //  (this is due to https://github.com/j256/simplemagic/issues/59).
-            if (hint.getMessage().toLowerCase().contains("script text executable")) {
-                return true;
-            }
+            return true;
         }
 
         return false;

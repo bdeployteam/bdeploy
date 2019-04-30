@@ -208,6 +208,10 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
             while (entries.hasMoreElements()) {
                 ZipArchiveEntry entry = entries.nextElement();
                 Path path = target.resolve(entry.getName());
+                if (!path.startsWith(target)) {
+                    // path was absolute?!
+                    throw new IllegalStateException("The given zip contains absolute paths: " + zipFile);
+                }
                 if (entry.isDirectory()) {
                     PathHelper.mkdirs(path);
                 } else {
