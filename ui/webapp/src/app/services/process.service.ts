@@ -64,13 +64,13 @@ export class ProcessService {
   }
 
   /**
-   * Returns whether or not at least one app is running or scheduled in a version NOT equal to the given one.
+   * Returns whether or not at least one app is running or waiting in a version NOT equal to the given one.
    */
   public isRunningOutOfSync(instanceTag: string): boolean {
     const states = new Set<ProcessState>([
       ProcessState.RUNNING,
       ProcessState.RUNNING_UNSTABLE,
-      ProcessState.CRASH_BACK_OFF,
+      ProcessState.CRASHED_WAITING,
     ]);
     for (const status of Object.values(this.app2Status)) {
       if (!states.has(status.processState)) {
@@ -94,7 +94,7 @@ export class ProcessService {
     const states = new Set<ProcessState>([
       ProcessState.RUNNING,
       ProcessState.RUNNING_UNSTABLE,
-      ProcessState.CRASH_BACK_OFF,
+      ProcessState.CRASHED_WAITING,
     ]);
     const runningApp = apps.find(app => states.has(app.processState));
     if (runningApp) {
@@ -117,9 +117,9 @@ export class ProcessService {
         return 'Application is running.';
       case ProcessState.STOPPED:
         return 'Application has been stopped.';
-      case ProcessState.CRASH_BACK_OFF:
+      case ProcessState.CRASHED_WAITING:
         return 'The application recently crashed.';
-      case ProcessState.STOPPED_CRASHED:
+      case ProcessState.CRASHED_PERMANENTLY:
         return 'The application crashed repeatedly.';
     }
     return 'unknown';

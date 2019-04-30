@@ -5,20 +5,34 @@ package io.bdeploy.interfaces.configuration.pcu;
  */
 public enum ProcessState {
 
-    /** Process is not running. */
+    /**
+     * Process is not running.
+     * Indicates the initial state or that the process has been manually stopped or that it terminated expectedly.
+     */
     STOPPED,
 
-    /** Recovering of the process failed */
-    STOPPED_CRASHED,
-
-    /** Process is running. */
+    /**
+     * Process is running.
+     */
     RUNNING,
 
-    /** Process was restarted after a crash. State remains unstable for a while. */
+    /**
+     * Process is running.
+     * Indicates that the process was automatically restarted due to a crash.
+     */
     RUNNING_UNSTABLE,
 
-    /** Process was running but crashed unexpectedly. Will automatically be restarted after some delay */
-    CRASH_BACK_OFF;
+    /**
+     * Process is stopped.
+     * Indicates that the process control failed to recover the process as it keeps crashing.
+     */
+    CRASHED_PERMANENTLY,
+
+    /**
+     * Process is stopped.
+     * Indicates that the process controls will automatically restart the process after some delay.
+     */
+    CRASHED_WAITING;
 
     /**
      * Returns whether or not the status indicates that the process is alive and running.
@@ -36,7 +50,7 @@ public enum ProcessState {
      * @return {@code true} if it is running
      */
     public boolean isRunningOrScheduled() {
-        return this == RUNNING || this == RUNNING_UNSTABLE || this == CRASH_BACK_OFF;
+        return this == RUNNING || this == RUNNING_UNSTABLE || this == CRASHED_WAITING;
     }
 
 }

@@ -796,6 +796,13 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     if (!types) {
       return [ApplicationStartType.MANUAL];
     }
+
+    // Add manual if just instance is present
+    const instanceIdx = types.indexOf(ApplicationStartType.INSTANCE);
+    const manualIdx = types.indexOf(ApplicationStartType.MANUAL);
+    if (instanceIdx !== -1 && manualIdx === -1) {
+      types.push(ApplicationStartType.MANUAL);
+    }
     return types;
   }
 }

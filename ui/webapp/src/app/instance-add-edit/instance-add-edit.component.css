@@ -1,37 +1,34 @@
+.container {
+  flex: 1 1 auto;
+  margin-top: 5px;
+  padding: 10px 20px;
+}
+
 .fill-space {
   flex: 1 1 auto;
 }
 
-.field-container {
-  display: flex;
-  flex-direction: column;
-}
-
 mat-form-field {
   flex: 1 1 auto;
+  margin-left: 1em;
 }
 
-mat-checkbox {
-  margin-bottom: 0.5em;
+.container {
+  flex: 1 1 auto;
+  margin-top: 5px;
+  padding: 10px 20px;
 }
 
-.hBox {
-  display: flex;
-  flex-direction: row;
+.align-left {
+  justify-content: start;
 }
 
-.vBox {
-  display: flex;
-  flex-direction: column;
+.header {
+  font-weight: bolder;
 }
 
 .spacer {
-  width: 20px;
-}
-
-.section {
-  margin: 1em 0em 1em 0em;
-  font-weight: bolder;
+  margin-left: 20px;
 }
 
 .subHeader {
@@ -40,4 +37,25 @@ mat-checkbox {
   height: 32px;
   padding-left: 55px;
   margin-top: -10px;
+}
+
+.boolean-param-field {
+  flex: 1 1 auto;
+  justify-content: left;
+  margin-left: 1em;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.54);
+}
+
+.boolean-param-widget {
+  margin: -1em 0em 0em 0em;
+}
+
+.boolean-param-label {
+  position: absolute;
+  left: 0;
+  margin: -3em 1em;
+  padding: 0.5em;
+  font-size: 0.75em;
+  color: rgba(0, 0, 0, 0.54);
+  text-overflow: ellipsis;
 }

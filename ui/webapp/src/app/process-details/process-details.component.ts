@@ -1,10 +1,11 @@
 import { Component, Input, OnChanges, OnDestroy, OnInit } from '@angular/core';
-import { MatBottomSheet, MatBottomSheetRef } from '@angular/material';
+import { MatBottomSheet, MatBottomSheetRef, MatDialog } from '@angular/material';
 import { distanceInWordsStrict, format } from 'date-fns';
 import { Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { ApplicationConfiguration, ProcessDetailDto, ProcessState, ProcessStatusDto } from '../models/gen.dtos';
+import { ApplicationConfiguration, ApplicationStartType, ProcessDetailDto, ProcessState, ProcessStatusDto } from '../models/gen.dtos';
 import { ProcessListComponent } from '../process-list/process-list.component';
+import { ProcessStartConfirmComponent } from '../process-start-confirm/process-start-confirm.component';
 import { ProcessService } from '../services/process.service';
 import { unsubscribe } from '../utils/object.utils';
 
@@ -30,7 +31,7 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
 
   processSheet: MatBottomSheetRef<ProcessListComponent>;
 
-  constructor(private processService: ProcessService, private bottomSheet: MatBottomSheet) {}
+  constructor(private processService: ProcessService, private bottomSheet: MatBottomSheet, private dialog: MatDialog) {}
 
   ngOnInit() {
     this.subscription = this.processService.subscribe(() => this.onStatusChanged());
@@ -63,7 +64,7 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     // Schedule update countdown
-    if (this.isStoppedWaiting()) {
+    if (this.isCrashedWaiting()) {
       this.restartProgressHandle = setInterval(() => this.doUpdateRestartProgress(), 1000);
       this.doUpdateRestartProgress();
     }
@@ -79,7 +80,11 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
     this.processService.refreshStatus(this.instanceGroup, this.instanceId);
   }
 
-  start() {
+  async start() {
+    const confirmed = await this.confirmStart();
+    if (!confirmed) {
+      return;
+    }
     this.loading = true;
     this.processService
       .startProcess(this.instanceGroup, this.instanceId, this.appConfig.uid)
@@ -101,6 +106,26 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
       .restartProcess(this.instanceGroup, this.instanceId, this.appConfig.uid)
       .pipe(finalize(() => this.reLoadStatus()))
       .subscribe(r => {});
+  }
+
+  /** Asks the user if launching is OK if manual confirmation is required */
+  async confirmStart() {
+    // Check if manual confirmation is required
+    if (this.appConfig.processControl.startType !== ApplicationStartType.MANUAL_CONFIRM) {
+      return true;
+    }
+
+    // Ask for confirmation
+    const myDialog = this.dialog.open(ProcessStartConfirmComponent, {
+      data: {
+        application: this.appConfig.name,
+      },
+    });
+    const result = await myDialog.afterClosed().toPromise();
+    if (result === 'start') {
+      return true;
+    }
+    return false;
   }
 
   /** Returns whether or not the process is running */
@@ -138,7 +163,7 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
     const desired = new Set();
     desired.add(ProcessState.RUNNING);
     desired.add(ProcessState.RUNNING_UNSTABLE);
-    desired.add(ProcessState.CRASH_BACK_OFF);
+    desired.add(ProcessState.CRASHED_WAITING);
     if (!desired.has(state)) {
       return false;
     }
@@ -151,21 +176,21 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   /** Returns whether or the process is stopped crashed in this version */
-  isStoppedPermanently() {
-    return this.hasState(ProcessState.STOPPED_CRASHED) && this.isMyVersion();
+  isCrashedPermanently() {
+    return this.hasState(ProcessState.CRASHED_PERMANENTLY) && this.isMyVersion();
   }
 
   /** Returns whether or the process is stopped waiting in this version */
-  isStoppedWaiting() {
-    return this.hasState(ProcessState.CRASH_BACK_OFF) && this.isMyVersion();
+  isCrashedWaiting() {
+    return this.hasState(ProcessState.CRASHED_WAITING) && this.isMyVersion();
   }
 
   canStart() {
-    return (this.isStopped() || this.isStoppedPermanently() || this.isStoppedWaiting()) && this.isMyVersion();
+    return (this.isStopped() || this.isCrashedPermanently() || this.isCrashedWaiting()) && this.isMyVersion();
   }
 
   canStop() {
-    return this.isRunning() || this.isRunningUnstable() || this.isStoppedWaiting();
+    return this.isRunning() || this.isRunningUnstable() || this.isCrashedWaiting();
   }
 
   canRestart() {
@@ -194,6 +219,42 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
     });
   }
 
+  getStartTypeText() {
+    switch (this.appConfig.processControl.startType) {
+      case ApplicationStartType.INSTANCE:
+        return 'Instance';
+      case ApplicationStartType.MANUAL:
+        return 'Manual';
+      case ApplicationStartType.MANUAL_CONFIRM:
+        return 'Manual Confirm';
+    }
+  }
+
+  getStartTypeHint() {
+    switch (this.appConfig.processControl.startType) {
+      case ApplicationStartType.INSTANCE:
+        return 'Application will be started on node startup if "Auto Start" is configured on the instance.';
+      case ApplicationStartType.MANUAL:
+        return 'Application must be manually started.';
+      case ApplicationStartType.MANUAL_CONFIRM:
+        return 'Application must be manually started. Additional confirmation is required.';
+    }
+  }
+
+  getKeepAliveText() {
+    if (this.appConfig.processControl.keepAlive) {
+      return 'Enabled';
+    }
+    return 'Disabled';
+  }
+
+  getKeepAliveHint() {
+    if (this.appConfig.processControl.keepAlive) {
+      return 'Application will automatically be restarted after it terminated unexpectedly.';
+    }
+    return 'Application remains stopped after it terminated.';
+  }
+
   getProcessCount() {
     if (!this.status || !this.status.processDetails) {
       return 0;
@@ -211,10 +272,10 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
     if (!this.isActivated()) {
       return 'Process control is disabled because this version is not activated.';
     }
-    if (this.isStoppedPermanently()) {
+    if (this.isCrashedPermanently()) {
       return 'The application crashed repeatedly. The process control gave up restarting it.';
     }
-    if (this.isStoppedWaiting()) {
+    if (this.isCrashedWaiting()) {
       return 'The application terminated unexpectedly. The process control is delaying restart for a short time to reduce load on the node.';
     }
     return null;

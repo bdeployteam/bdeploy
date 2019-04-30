@@ -54,13 +54,6 @@ public class ProcessController {
 
     private static final Logger log = LoggerFactory.getLogger(ProcessController.class);
 
-    /** Time that an application is switched back to stable if it crashed unexpectedly */
-    private static final Duration DEFAULT_STABLE_THRESHOLD = Duration.ofMinutes(5);
-
-    /** Delays in seconds between crash-back-off recoveries */
-    private static Duration[] DEFAULT_RECOVER_DELAYS = { Duration.ofSeconds(0), Duration.ofSeconds(10), Duration.ofSeconds(30),
-            Duration.ofSeconds(60) };
-
     /** File that holds the standard out as well as standard error written by the process */
     private static final String OUT_TXT = "out.txt";
     private static final String OUT_TMP = "out.tmp";
@@ -106,14 +99,18 @@ public class ProcessController {
     /** Time when the process was stopped / crashed */
     private Instant stopTime;
 
-    /** Number of times we tried to recover the application */
-    private int recoverCount = 0;
-
     /** Configured threshold for the application to get back to normal running */
-    private Duration stableThreshold = DEFAULT_STABLE_THRESHOLD;
+    private Duration stableThreshold = Duration.ofMinutes(5);
 
     /** Delays in seconds between restarts after the application crashes */
-    private Duration[] recoverDelays = DEFAULT_RECOVER_DELAYS;
+    private Duration[] recoverDelays = { Duration.ofSeconds(0), Duration.ofSeconds(10), Duration.ofSeconds(30),
+            Duration.ofSeconds(60) };
+
+    /** Number of times to retry starting after the application crashes */
+    private int recoverAttempts = 3;
+
+    /** Number of times we tried to recover the application */
+    private int recoverCount = 0;
 
     /** Listener that is notified when the state changes */
     private final List<Consumer<ProcessState>> statusListeners = new ArrayList<>();
@@ -135,6 +132,7 @@ public class ProcessController {
         this.instanceUid = instanceUid;
         this.instanceTag = instanceTag;
         this.processConfig = pc;
+        this.recoverAttempts = pc.processControl.noOfRetries;
         this.processDir = processDir;
     }
 
@@ -149,12 +147,37 @@ public class ProcessController {
     }
 
     /**
-     * Configures the number of restart attempts that are executed as well as the duration how long
-     * to wait between two consecutive restart attempts. When the restart counter is higher than the given
-     * number of attempts than the application remains terminated.
+     * Configures the number of restart attempts that are executed if the application crashed. The delay between
+     * two consecutive restart attempts is configured separately. When the restart counter is higher than the given
+     * number of attempts than the application remains terminated. Zero means that the controller will never give
+     * up restarting the application.
+     *
+     * @param attempts the number of attempts to execute.
+     */
+    public void setRecoverAttempts(int attempts) {
+        this.recoverAttempts = attempts;
+    }
+
+    /**
+     * Configures the duration how long to wait between two consecutive restart attempts. For each restart attempt
+     * the corresponding delay will be used. The highest delay will be used if the recover counter is higher than the configured
+     * number of delays.
      * <p>
      * Default: 0 seconds, 10 seconds, 30 seconds, 60 seconds
      * </p>
+     *
+     * <pre>
+     *          Attempts =  10
+     *          Delays   =  1 sec, 2 sec, 5 sec, 10 sec
+     *
+     *          Restart #1 ->  1 sec
+     *          Restart #2 ->  2 sec
+     *          Restart #3 ->  5 sec
+     *          Restart #4 ->  10 sec
+     *          Restart #5 ->  10 sec
+     *          ...
+     *          Restart #10 -> 10 sec
+     * </pre>
      *
      * @param recoverDelays the recover delays
      */
@@ -190,12 +213,12 @@ public class ProcessController {
         }
 
         // Retry attempts when process crashed
-        dto.maxRetryCount = recoverDelays.length;
-        if (processState == ProcessState.CRASH_BACK_OFF) {
-            Duration delay = recoverDelays[recoverCount - 1];
-            dto.retryCount = recoverCount;
+        dto.maxRetryCount = recoverAttempts;
+        if (recoverCount > 0 && stopTime != null) {
+            Duration delay = recoverDelays[Math.min(recoverCount, recoverDelays.length - 1)];
             dto.recoverAt = stopTime.plus(delay).toEpochMilli();
             dto.recoverDelay = delay.toSeconds();
+            dto.retryCount = recoverCount;
         }
         if (stopTime != null) {
             dto.stopTime = stopTime.toEpochMilli();
@@ -246,7 +269,7 @@ public class ProcessController {
      * Starts the process and monitors the execution.
      */
     public void start() {
-        executeLocked("Start", false, () -> doStart());
+        executeLocked("Start", false, () -> doStart(true));
     }
 
     /**
@@ -285,11 +308,16 @@ public class ProcessController {
     }
 
     /** Starts the application */
-    private void doStart() {
+    private void doStart(boolean resetRecoverCount) {
         if (processState == ProcessState.RUNNING || processState == ProcessState.RUNNING_UNSTABLE) {
             throw new RuntimeException("Application is already running.");
         }
         log.info(buildLogString("Starting application."));
+
+        // Reset counter if manually started
+        if (resetRecoverCount) {
+            recoverCount = 0;
+        }
 
         // Create runtime directory if missing
         if (!Files.isDirectory(processDir)) {
@@ -323,7 +351,7 @@ public class ProcessController {
             monitorProcess();
         } catch (IOException e) {
             log.error(buildLogString("Failed to launch application.", e));
-            processState = ProcessState.STOPPED_CRASHED;
+            processState = ProcessState.CRASHED_PERMANENTLY;
             cleanup();
         }
     }
@@ -336,7 +364,7 @@ public class ProcessController {
 
         // Set flag that the termination of the process is expected
         stopRequested = true;
-        if (processState == ProcessState.CRASH_BACK_OFF) {
+        if (processState == ProcessState.CRASHED_WAITING) {
             log.info(buildLogString("Aborting restart attempt of application."));
             processState = ProcessState.STOPPED;
             cleanup();
@@ -406,7 +434,6 @@ public class ProcessController {
     /** Cleanup internal members */
     private void cleanup() {
         process = null;
-        recoverCount = 0;
 
         // Cancel the hook that is notified when the process terminates
         if (processExit != null) {
@@ -415,14 +442,6 @@ public class ProcessController {
         }
 
         // Cancel restart task and monitoring task
-        if (recoverTask != null) {
-            recoverTask.cancel(true);
-            recoverTask = null;
-        }
-        if (uptimeTask != null) {
-            uptimeTask.cancel(true);
-            uptimeTask = null;
-        }
         shutdownExecutor();
     }
 
@@ -509,13 +528,29 @@ public class ProcessController {
             return;
         }
 
-        // Adopt state accordingly
-        if (processState == ProcessState.STOPPED || processState == ProcessState.STOPPED_CRASHED) {
+        // Set to running if launched from stopped or crashed
+        if (processState == ProcessState.STOPPED || processState == ProcessState.CRASHED_PERMANENTLY) {
             processState = ProcessState.RUNNING;
             log.info(buildLogString("Application status is now RUNNING."));
-        } else if (processState == ProcessState.CRASH_BACK_OFF) {
+        }
+
+        // Schedule uptime monitor if launched from crashed waiting
+        if (processState == ProcessState.CRASHED_WAITING) {
             processState = ProcessState.RUNNING_UNSTABLE;
+            if (recoverCount > 0) {
+                log.info(buildLogString("Application successfully recovered. Attempts: %s/%s", recoverCount, recoverAttempts));
+            }
             log.info(buildLogString("Application status is now RUNNING_UNSTABLE."));
+
+            // Periodically watch if the process remains alive
+            long rateInSeconds = stableThreshold.dividedBy(10).getSeconds();
+            if (rateInSeconds == 0) {
+                rateInSeconds = 1;
+            }
+            uptimeTask = executorService.scheduleAtFixedRate(() -> doCheckUptime(), rateInSeconds, rateInSeconds,
+                    TimeUnit.SECONDS);
+            String requiredUptime = Formatter.formatDuration(stableThreshold);
+            log.info(buildLogString("Application will be marked as stable after: %s", requiredUptime));
         }
     }
 
@@ -557,19 +592,18 @@ public class ProcessController {
         }
 
         // Process terminated unexpectedly
-        log.error(buildLogString("Application terminated unexpectedly. Crash count: %s. Total uptime: %s", recoverCount + 1,
-                uptimeString));
+        log.error(buildLogString("Application terminated unexpectedly. Total uptime: %s", uptimeString));
 
         // Give up when the application keeps crashing
-        if (recoverCount >= recoverDelays.length) {
+        if (recoverAttempts > 0 && recoverCount >= recoverAttempts) {
             log.error(buildLogString("Giving up to launch application. Tried %s times to launch without success.", recoverCount));
-            processState = ProcessState.STOPPED_CRASHED;
+            processState = ProcessState.CRASHED_PERMANENTLY;
             waitForLockRelease();
             cleanup();
             return;
         }
-        Duration delay = recoverDelays[recoverCount];
-        processState = ProcessState.CRASH_BACK_OFF;
+        Duration delay = recoverDelays[Math.min(recoverCount, recoverDelays.length - 1)];
+        processState = ProcessState.CRASHED_WAITING;
         recoverCount++;
 
         // Schedule restarting of application
@@ -602,19 +636,7 @@ public class ProcessController {
         }
 
         // Start the application again
-        doStart();
-
-        // Periodically watch if the process remains alive
-        long rateInSeconds = stableThreshold.dividedBy(10).getSeconds();
-        if (rateInSeconds == 0) {
-            rateInSeconds = 1;
-        }
-        if (uptimeTask == null || uptimeTask.isCancelled()) {
-            uptimeTask = executorService.scheduleAtFixedRate(() -> doCheckUptime(), rateInSeconds, rateInSeconds,
-                    TimeUnit.SECONDS);
-        }
-        String requiredUptime = Formatter.formatDuration(stableThreshold);
-        log.info(buildLogString("Application successfully recovered. Will be marked as stable after: %s", requiredUptime));
+        doStart(false);
     }
 
     /** Switches the state of a process to running if it is alive for a given time period */
@@ -752,11 +774,18 @@ public class ProcessController {
 
     /** Closes the executor so that the resources are released */
     private void shutdownExecutor() {
-        if (executorService == null) {
-            return;
+        if (recoverTask != null) {
+            recoverTask.cancel(true);
+            recoverTask = null;
         }
-        executorService.shutdown();
-        executorService = null;
+        if (uptimeTask != null) {
+            uptimeTask.cancel(true);
+            uptimeTask = null;
+        }
+        if (executorService != null) {
+            executorService.shutdown();
+            executorService = null;
+        }
     }
 
     /** Notifies all listeners about the of the process */

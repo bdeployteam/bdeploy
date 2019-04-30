@@ -55,13 +55,13 @@ export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
     this.icons[ProcessState.STOPPED] = 'favorite';
     this.icons[ProcessState.RUNNING] = 'favorite';
     this.icons[ProcessState.RUNNING_UNSTABLE] = 'favorite';
-    this.icons[ProcessState.CRASH_BACK_OFF] = 'report_problem';
-    this.icons[ProcessState.STOPPED_CRASHED] = 'error';
+    this.icons[ProcessState.CRASHED_WAITING] = 'report_problem';
+    this.icons[ProcessState.CRASHED_PERMANENTLY] = 'error';
     this.icons_outlined[ProcessState.STOPPED] = 'favorite_outline';
     this.icons_outlined[ProcessState.RUNNING] = 'favorite_outline';
     this.icons_outlined[ProcessState.RUNNING_UNSTABLE] = 'favorite_outline';
-    this.icons_outlined[ProcessState.CRASH_BACK_OFF] = 'report_problem_outline';
-    this.icons_outlined[ProcessState.STOPPED_CRASHED] = 'error_outline';
+    this.icons_outlined[ProcessState.CRASHED_WAITING] = 'report_problem_outline';
+    this.icons_outlined[ProcessState.CRASHED_PERMANENTLY] = 'error_outline';
   }
 
   onStatusChanged() {
@@ -102,14 +102,14 @@ export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
     this.statusCount = status.filter(app => runningStates.has(app.processState)).length;
 
     // Display if at least one app crashed permanently
-    if (status.find(app => ProcessState.STOPPED_CRASHED === app.processState)) {
-      this.processState = ProcessState.STOPPED_CRASHED;
+    if (status.find(app => ProcessState.CRASHED_PERMANENTLY === app.processState)) {
+      this.processState = ProcessState.CRASHED_PERMANENTLY;
       return;
     }
 
     // Display if at least one app is waiting
-    if (status.find(app => ProcessState.CRASH_BACK_OFF === app.processState)) {
-      this.processState = ProcessState.CRASH_BACK_OFF;
+    if (status.find(app => ProcessState.CRASHED_WAITING === app.processState)) {
+      this.processState = ProcessState.CRASHED_WAITING;
       return;
     }
 
@@ -235,10 +235,10 @@ export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   isCrashedWaiting() {
-    return this.processState === ProcessState.CRASH_BACK_OFF;
+    return this.processState === ProcessState.CRASHED_WAITING;
   }
 
   isCrashedPermanently() {
-    return this.processState === ProcessState.STOPPED_CRASHED;
+    return this.processState === ProcessState.CRASHED_PERMANENTLY;
   }
 }

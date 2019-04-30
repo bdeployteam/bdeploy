@@ -23,13 +23,16 @@
       <div class="spacer"></div>
       <div class="toolbar-info-grid">
         <div>
-          Product: <b>{{ selectedConfig?.version.product.name }}</b>
+          Product: <b *ngIf="!loading">{{ selectedConfig.version.product.name }}</b>
         </div>
         <div>
-          Tag: <b>{{ selectedConfig?.instance?.product.tag }}</b>
+          Tag: <b *ngIf="!loading">{{ selectedConfig.instance.product.tag }}</b>
         </div>
         <div>
-          Purpose: <b>{{ selectedConfig?.instance?.purpose }}</b>
+          Purpose: <b *ngIf="!loading">{{ selectedConfig.instance.purpose }}</b>
+        </div>
+        <div>
+          Auto Start: <b *ngIf="!loading">{{ selectedConfig.instance.autoStart ? 'Enabled' : 'Disabled' }}</b>
         </div>
       </div>
       <span class="fill-space"></span>
@@ -47,13 +50,13 @@
         </button>
       </ng-container>
       <mat-menu #appMenu="matMenu" xPosition="before">
-        <button mat-menu-item (click)="startInstance()" matTooltip="Starts all processes having the start type 'INSTANCE' configured.">
+        <button mat-menu-item (click)="startInstance()" matTooltip="Starts all processes having the start type 'Instance' configured.">
           Start Instance...
         </button>
         <button mat-menu-item (click)="stopInstance()" matTooltip="Stops all processes.">
           Stop Instance...
         </button>
-        <button mat-menu-item (click)="restartInstance()" matTooltip="Stops all processes, then starts all having the start type 'INSTANCE' configured.">
+        <button mat-menu-item (click)="restartInstance()" matTooltip="Stops all processes, then starts all having the start type 'Instance' configured.">
           Restart Instance...
         </button>
         <mat-divider></mat-divider>

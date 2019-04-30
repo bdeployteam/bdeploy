@@ -15,64 +15,86 @@
       </mat-toolbar-row>
     </mat-toolbar>
 
-    <div class="field-container margin-container">
-      <div class="hBox">
-        <mat-form-field>
-          <input type="text" class="input-field" matInput formControlName="name" placeholder="Name" />
-          <mat-error *ngIf="nameControl.invalid">{{getErrorMessage(nameControl)}}</mat-error>
-        </mat-form-field>
-        <div class="spacer"></div>
-        <mat-form-field>
-          <mat-select formControlName="purpose" placeholder="Purpose">
-            <mat-option *ngFor="let purpose of purposes" value="{{purpose}}">{{purpose}}</mat-option>
-          </mat-select>
-          <mat-error *ngIf="purposeControl.invalid">{{getErrorMessage(purposeControl)}}</mat-error>
-        </mat-form-field>
-      </div>
+    <div class="container">
+      <mat-grid-list cols="3" rowHeight="5em">
+        <mat-grid-tile>
+          <mat-form-field>
+            <input type="text" class="input-field" matInput formControlName="name" placeholder="Name" />
+            <mat-error *ngIf="nameControl.invalid">{{getErrorMessage(nameControl)}}</mat-error>
+          </mat-form-field>
+        </mat-grid-tile>
+        <mat-grid-tile>
+          <mat-form-field>
+            <mat-select formControlName="purpose" placeholder="Purpose">
+              <mat-option *ngFor="let purpose of purposes" value="{{purpose}}">{{purpose}}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="purposeControl.invalid">{{getErrorMessage(purposeControl)}}</mat-error>
+          </mat-form-field>
+        </mat-grid-tile>
+        <mat-grid-tile>
+          <div class="boolean-param-field">
+            <mat-slide-toggle class="boolean-param-widget" formControlName="autoStart"> </mat-slide-toggle>
+            <label class="boolean-param-label"> Auto Start </label>
+          </div>
+        </mat-grid-tile>
+        <mat-grid-tile [colspan]="3">
+          <mat-form-field>
+            <input type="text" class="input-field" matInput formControlName="description" placeholder="Description" />
+            <mat-error *ngIf="descriptionControl.invalid">{{getErrorMessage(descriptionControl)}}</mat-error>
+          </mat-form-field>
+        </mat-grid-tile>
+      </mat-grid-list>
+    </div>
 
-      <mat-form-field>
-        <input type="text" class="input-field" matInput formControlName="description" placeholder="Description" />
-        <mat-error *ngIf="descriptionControl.invalid">{{getErrorMessage(descriptionControl)}}</mat-error>
-      </mat-form-field>
+    <div formGroupName="product" class="container">
+      <h3 class="header"> Product </h3>
+      <mat-grid-list cols="2" rowHeight="5em">
+        <mat-grid-tile>
+          <mat-form-field>
+            <mat-select formControlName="name" placeholder="Product">
+              <mat-option *ngFor="let pname of getProductNames()" value="{{pname}}">{{pname}}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="productNameControl.invalid">{{getErrorMessage(productNameControl)}}</mat-error>
+          </mat-form-field>
+        </mat-grid-tile>
+        <mat-grid-tile>
+          <mat-form-field>
+            <mat-select formControlName="tag" placeholder="Tag">
+              <mat-option *ngFor="let tag of getTagsForProduct()" value="{{tag}}">{{tag}}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="productTagControl.invalid">{{getErrorMessage(productTagControl)}}</mat-error>
+          </mat-form-field>
+        </mat-grid-tile>
+      </mat-grid-list>
+    </div>
 
-      <h3 class="section"> Product </h3>
+    <div formGroupName="target" class="container">
+      <h3 class="header"> Master </h3>
+      <mat-grid-list cols="2" rowHeight="5em">
+        <mat-grid-tile>
+          <mat-form-field>
+            <input type="text" placeholder="Master URL" matInput formControlName="uri" [matAutocomplete]="auto">
+            <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+              <mat-option *ngFor="let url of filteredMasterURLs | async" [value]="url">{{url}}</mat-option>
+            </mat-autocomplete>
+            <mat-error *ngIf="masterUrlControl.invalid">{{getErrorMessage(masterUrlControl)}}</mat-error>
+          </mat-form-field>
+        </mat-grid-tile>
 
-      <div formGroupName="product" class="hBox">
-        <mat-form-field>
-          <mat-select formControlName="name" placeholder="Product">
-            <mat-option *ngFor="let pname of getProductNames()" value="{{pname}}">{{pname}}</mat-option>
-          </mat-select>
-          <mat-error *ngIf="productNameControl.invalid">{{getErrorMessage(productNameControl)}}</mat-error>
-        </mat-form-field>
-        <div class="spacer"></div>
-        <mat-form-field>
-          <mat-select formControlName="tag" placeholder="Tag">
-            <mat-option *ngFor="let tag of getTagsForProduct()" value="{{tag}}">{{tag}}</mat-option>
-          </mat-select>
-          <mat-error *ngIf="productTagControl.invalid">{{getErrorMessage(productTagControl)}}</mat-error>
-        </mat-form-field>
-      </div>
+        <mat-grid-tile>
+          <div class="boolean-param-field underline-field">
+            <mat-slide-toggle (change)="toggleUpdateMasterToken()" *ngIf="masterTokenCheckboxVisible"> </mat-slide-toggle>
+            <label class="boolean-param-label"> Update Security Token </label>
+          </div>
+        </mat-grid-tile>
 
-      <h3 class="section"> Master </h3>
-
-      <div formGroupName="target" class="vBox">
-        <mat-form-field>
-          <input type="text" placeholder="Master URL" matInput formControlName="uri" [matAutocomplete]="auto">
-          <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
-            <mat-option *ngFor="let url of filteredMasterURLs | async" [value]="url">{{url}}</mat-option>
-          </mat-autocomplete>
-          <mat-error *ngIf="masterUrlControl.invalid">{{getErrorMessage(masterUrlControl)}}</mat-error>
-        </mat-form-field>
-
-        <mat-checkbox (change)="toggleUpdateMasterToken()" *ngIf="masterTokenCheckboxVisible">
-          <label> Update Security Token </label>
-        </mat-checkbox>
-
-        <mat-form-field *ngIf="masterTokenControlVisible">
-          <textarea matInput placeholder="Security Token" formControlName="authPack"></textarea>
-          <mat-error *ngIf="masterTokenControl.invalid">{{getErrorMessage(masterTokenControl)}}</mat-error>
-        </mat-form-field>
-      </div>
+        <mat-grid-tile [colspan]="2">
+          <mat-form-field *ngIf="masterTokenControlVisible">
+            <textarea matInput placeholder="Security Token" formControlName="authPack"></textarea>
+            <mat-error *ngIf="masterTokenControl.invalid">{{getErrorMessage(masterTokenControl)}}</mat-error>
+          </mat-form-field>
+        </mat-grid-tile>
+      </mat-grid-list>
     </div>
   </form>
 </section>

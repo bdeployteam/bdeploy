@@ -41,6 +41,7 @@ import { MessageboxComponent } from './messagebox/messagebox.component';
 import { ProcessConfigurationComponent } from './process-configuration/process-configuration.component';
 import { ProcessDetailsComponent } from './process-details/process-details.component';
 import { ProcessListComponent } from './process-list/process-list.component';
+import { ProcessStartConfirmComponent } from './process-start-confirm/process-start-confirm.component';
 import { ProcessStatusComponent } from './process-status/process-status.component';
 import { ProductCardComponent } from './product-card/product-card.component';
 import { ProductListComponent } from './product-list/product-list.component';
@@ -107,7 +108,8 @@ export function loadAppConfig(cfgService: ConfigService) {
     SoftwareListComponent,
     ProcessStatusComponent,
     ProcessListComponent,
-    ApplicationEditCommandPreviewComponent
+    ApplicationEditCommandPreviewComponent,
+    ProcessStartConfirmComponent
   ],
   imports: [
     BrowserModule,
@@ -167,6 +169,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     ApplicationEditOptionalComponent,
     ApplicationEditCommandPreviewComponent,
     ProcessListComponent,
+    ProcessStartConfirmComponent,
   ],
   bootstrap: [AppComponent],
 })

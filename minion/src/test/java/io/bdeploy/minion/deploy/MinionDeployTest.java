@@ -34,6 +34,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
+import io.bdeploy.interfaces.configuration.pcu.ProcessControlConfiguration;
 import io.bdeploy.interfaces.descriptor.product.ProductDescriptor;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
@@ -134,6 +135,7 @@ public class MinionDeployTest {
         cfg.start = new CommandConfiguration();
         cfg.start.executable = amf.getDescriptor().startCommand.launcherPath;
         cfg.application = amf.getKey();
+        cfg.processControl = ProcessControlConfiguration.createDefault();
 
         /* STEP 1d: configure parameters, usually in the UI based on information from the application descriptor */
         ParameterConfiguration sleepParam = new ParameterConfiguration();

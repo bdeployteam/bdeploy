@@ -14,7 +14,7 @@
     Out-of-sync
   </div>
   <div class='info-grid'>
-    <ng-container *ngIf="isStopped() || isStoppedPermanently()">
+    <ng-container *ngIf="isStopped() || isCrashedPermanently()">
       <mat-icon>timer</mat-icon>
       <div>Stopped At:</div>
       <div>{{getStopTime()}}</div>
@@ -28,7 +28,7 @@
       <div>Started At:</div>
       <div>{{getStartTime()}}</div>
     </ng-container>
-    <ng-container *ngIf="isStoppedWaiting()">
+    <ng-container *ngIf="isCrashedWaiting()">
       <mat-icon>report</mat-icon>
       <div>Stopped At:</div><div>{{getStopTime()}}</div>
       <mat-progress-spinner [value]="restartProgress" color="primary" [diameter]="24"></mat-progress-spinner>
@@ -37,11 +37,11 @@
     </ng-container>
     <mat-icon>flight_takeoff</mat-icon>
     <div>Start Type:</div>
-    <div>{{appConfig.processControl.startType}}</div>
+    <div matTooltip="{{getStartTypeHint()}}">{{getStartTypeText()}}</div>
 
     <mat-icon>favorite_outline</mat-icon>
     <div>Keep Alive:</div>
-    <div>{{appConfig.processControl.keepAlive ? 'yes' : 'no'}}</div>
+    <div matTooltip="{{getKeepAliveHint()}}">{{getKeepAliveText()}}</div>
   </div>
   <ng-container *ngIf='getStatusDetails()'>
     <mat-divider></mat-divider>

@@ -7,8 +7,6 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor.ApplicationStartType;
-import io.bdeploy.pcu.InstanceProcessController;
-import io.bdeploy.pcu.ProcessController;
 
 /**
  * Factory class to create instance {@linkplain InstanceProcessController controllers}, process {@linkplain ProcessConfiguration
@@ -40,20 +38,20 @@ public class TestFactory {
      *            the target path where to store the script
      * @param name
      *            the UID of the application
-     * @param autoStart
-     *            whether or not to launch the application automatically
+     * @param keepAlive
+     *            whether or not to restart the application after it terminated
      * @param argument
      *            the arguments passed to the script
      * @return the process configuration that describes the application
      */
-    public static ProcessConfiguration createConfig(Path path, String name, boolean autoStart, String argument) {
+    public static ProcessConfiguration createConfig(Path path, String name, boolean keepAlive, String argument) {
         Path script = TestAppFactory.genSleepScript("sleep", path);
 
         ProcessConfiguration config = new ProcessConfiguration();
         config.uid = name;
         config.processControl = new ProcessControlConfiguration();
-        config.processControl.keepAlive = autoStart;
-        config.processControl.startType = autoStart ? ApplicationStartType.INSTANCE : ApplicationStartType.MANUAL;
+        config.processControl.keepAlive = keepAlive;
+        config.processControl.startType = keepAlive ? ApplicationStartType.INSTANCE : ApplicationStartType.MANUAL;
         config.start.addAll(Arrays.asList(script.toString(), argument));
         return config;
     }
@@ -65,14 +63,14 @@ public class TestFactory {
      *            the target path where to store the script
      * @param name
      *            the UID of the application
-     * @param autoStart
+     * @param keepAlive
      *            whether or not to launch the application automatically
      * @param argument
      *            the arguments passed to the script
      * @return the process controller to launch the application
      */
-    public static ProcessController create(Path path, String name, boolean autoStart, String argument) {
-        ProcessConfiguration config = createConfig(path, name, autoStart, argument);
+    public static ProcessController create(Path path, String name, boolean keepAlive, String argument) {
+        ProcessConfiguration config = createConfig(path, name, keepAlive, argument);
         ProcessController controller = new ProcessController("Test", "V1", config, path);
         return controller;
     }

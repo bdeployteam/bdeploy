@@ -21,65 +21,68 @@ import io.bdeploy.pcu.util.ProcessHandles;
 @ExtendWith(TempDirectory.class)
 public class ProcessControllerTest {
 
+    private final static Duration TIMEOUT = Duration.ofSeconds(10);
+
     @Test
     public void testStartStop(@TempDir Path tmp) throws Exception {
-        CountDownListener listener = new CountDownListener();
+        StateListener listener = new StateListener();
         ProcessController process = TestFactory.create(tmp, "App1", false, "100");
         process.addStatusListener(listener);
 
         // Start and wait until the application is running
-        CountDownLatch latch = listener.expect(process, ProcessState.RUNNING);
+        listener.expect(process, ProcessState.RUNNING);
         process.start();
-        latch.await();
+        listener.await(TIMEOUT);
         assertEquals(process.getState(), ProcessState.RUNNING);
 
-        latch = listener.expect(process, ProcessState.STOPPED);
+        listener.expect(process, ProcessState.STOPPED);
         process.stop();
-        latch.await();
+        listener.await(TIMEOUT);
 
         assertEquals(process.getState(), ProcessState.STOPPED);
     }
 
     @Test
     public void testRecover(@TempDir Path tmp) throws Exception {
-        CountDownListener listener = new CountDownListener();
+        StateListener listener = new StateListener();
         ProcessController process = TestFactory.create(tmp, "App2", false, "100");
         process.addStatusListener(listener);
 
         // Start and wait for running
-        CountDownLatch latch = listener.expect(process, ProcessState.RUNNING);
+        listener.expect(process, ProcessState.RUNNING);
         process.start();
-        latch.await();
+        listener.await(TIMEOUT);
 
         // Overwrite instance and try to recover
         process.detach();
         process = TestFactory.create(tmp, "App1", false, "600");
-        latch = listener.expect(process, ProcessState.RUNNING);
+
+        listener.expect(process, ProcessState.RUNNING);
         process.addStatusListener(listener);
         process.recover();
-        latch.await();
+        listener.await(TIMEOUT);
 
         // Process must still be running
         assertEquals(process.getState(), ProcessState.RUNNING);
 
         // Terminate after recovering
-        latch = listener.expect(process, ProcessState.STOPPED);
+        listener.expect(process, ProcessState.STOPPED);
         process.stop();
-        latch.await();
+        listener.await(TIMEOUT);
         assertEquals(process.getState(), ProcessState.STOPPED);
     }
 
     @Test
     public void testRecoverAfterCrash(@TempDir Path tmp) throws Exception {
-        CountDownListener listener = new CountDownListener();
+        StateListener listener = new StateListener();
         ProcessController process = TestFactory.create(tmp, "App3", true, "100");
         process.addStatusListener(listener);
         process.setRecoverDelays(Duration.ofSeconds(1));
         process.setStableThreshold(Duration.ofSeconds(1));
 
-        CountDownLatch latch = listener.expect(process, ProcessState.RUNNING);
+        listener.expect(process, ProcessState.RUNNING);
         process.start();
-        latch.await();
+        listener.await(TIMEOUT);
         assertEquals(process.getState(), ProcessState.RUNNING);
 
         // Terminate process using the provided PID
@@ -87,36 +90,35 @@ public class ProcessControllerTest {
         ProcessHandles.destroy(handle);
 
         // Check state transitions from waiting to running
-        latch = listener.expect(process, ProcessState.CRASH_BACK_OFF, ProcessState.RUNNING_UNSTABLE, ProcessState.RUNNING);
-        latch.await();
+        listener.expect(process, ProcessState.CRASHED_WAITING, ProcessState.RUNNING_UNSTABLE, ProcessState.RUNNING);
+        listener.await(TIMEOUT);
 
         // Now shutdown the process again
-        latch = listener.expect(process, ProcessState.STOPPED);
+        listener.expect(process, ProcessState.STOPPED);
         process.stop();
-        latch.await();
+        listener.await(TIMEOUT);
         assertEquals(process.getState(), ProcessState.STOPPED);
     }
 
     @Test
     public void testStopWhileInCrashBackOff(@TempDir Path tmp) throws Exception {
-        CountDownListener listener = new CountDownListener();
+        StateListener listener = new StateListener();
         ProcessController process = TestFactory.create(tmp, "App4", true, "1");
         process.addStatusListener(listener);
 
         // Increment duration so that we can test the stopping
-        Duration recoverDelay = Duration.ofSeconds(10);
-        process.setRecoverDelays(recoverDelay);
+        process.setRecoverDelays(Duration.ofSeconds(10));
         process.setStableThreshold(Duration.ZERO);
 
         // Start and wait until it is running
-        CountDownLatch latch = listener.expect(process, ProcessState.RUNNING);
+        listener.expect(process, ProcessState.RUNNING);
         process.start();
-        latch.await();
+        listener.await(TIMEOUT);
         assertEquals(process.getState(), ProcessState.RUNNING);
 
         // Wait until it crashes
-        latch = listener.expect(process, ProcessState.CRASH_BACK_OFF);
-        latch.await();
+        listener.expect(process, ProcessState.CRASHED_WAITING);
+        listener.await(TIMEOUT);
 
         // Check if properties are set
         ProcessStatusDto status = process.getStatus();
@@ -127,9 +129,9 @@ public class ProcessControllerTest {
         assertNotNull(process.getRecoverTask());
 
         // Now execute stop command
-        latch = listener.expect(process, ProcessState.STOPPED);
+        listener.expect(process, ProcessState.STOPPED);
         process.stop();
-        latch.await();
+        listener.await(TIMEOUT);
 
         // Recover task must be canceled
         assertTrue(process.getRecoverTask() == null);
@@ -137,7 +139,7 @@ public class ProcessControllerTest {
 
     @Test
     public void testStartStopInParallel(@TempDir Path tmp) throws Exception {
-        CountDownListener listener = new CountDownListener();
+        StateListener listener = new StateListener();
         ProcessController process = TestFactory.create(tmp, "App5", true, "100");
         process.addStatusListener(listener);
         AtomicInteger failedCounter = new AtomicInteger(0);
@@ -164,9 +166,9 @@ public class ProcessControllerTest {
         t2.start();
 
         // Release lock so that both are running
-        CountDownLatch latch = listener.expect(process, ProcessState.RUNNING);
+        listener.expect(process, ProcessState.RUNNING);
         startLock.countDown();
-        latch.await();
+        listener.await(TIMEOUT);
 
         // Wait for both threads to finish
         t1.join();
@@ -199,9 +201,9 @@ public class ProcessControllerTest {
         t2.start();
 
         // Release lock so that both are running
-        latch = listener.expect(process, ProcessState.STOPPED);
+        listener.expect(process, ProcessState.STOPPED);
         stopLock.countDown();
-        latch.await();
+        listener.await(TIMEOUT);
 
         // One thread must failed to start because the other one holds the lock
         assertEquals(1, failedCounter.get());
@@ -209,19 +211,84 @@ public class ProcessControllerTest {
     }
 
     @Test
-    public void testCrashWithoutRecover(@TempDir Path tmp) throws Exception {
-        CountDownListener listener = new CountDownListener();
+    public void testRecoverAttemptsExceeded(@TempDir Path tmp) throws Exception {
+        StateListener listener = new StateListener();
         ProcessController process = TestFactory.create(tmp, "App6", true, "1");
         process.addStatusListener(listener);
-        process.setRecoverDelays();
+        process.setRecoverAttempts(1);
 
-        // Start and wait until it terminates
-        CountDownLatch latch = listener.expect(process, ProcessState.RUNNING, ProcessState.STOPPED_CRASHED);
+        // Start and wait until it permanently crashes
+        listener.expect(process, ProcessState.CRASHED_PERMANENTLY);
         process.start();
-        latch.await();
+        listener.await(TIMEOUT);
 
         // Check final state
-        assertEquals(process.getState(), ProcessState.STOPPED_CRASHED);
+        ProcessStatusDto status = process.getStatus();
+        assertEquals(ProcessState.CRASHED_PERMANENTLY, status.processState);
+        assertEquals(1, status.maxRetryCount);
+        assertEquals(1, status.retryCount);
+        assertEquals(10, status.recoverDelay);
+    }
+
+    @Test
+    public void testStopWithoutRecover(@TempDir Path tmp) throws Exception {
+        StateListener listener = new StateListener();
+        ProcessController process = TestFactory.create(tmp, "App6", false, "1");
+        process.addStatusListener(listener);
+
+        // Start and wait until it terminates
+        listener.expect(process, ProcessState.RUNNING, ProcessState.STOPPED);
+        process.start();
+        listener.await(TIMEOUT);
+
+        // Check final state
+        assertEquals(process.getState(), ProcessState.STOPPED);
+    }
+
+    @Test
+    public void testStartWhileInCrashBackOff(@TempDir Path tmp) throws Exception {
+        StateListener listener = new StateListener();
+        ProcessController process = TestFactory.create(tmp, "App7", true, "300");
+        process.addStatusListener(listener);
+
+        // Increment duration so that we can test the starting
+        process.setRecoverDelays(Duration.ofSeconds(10));
+        process.setStableThreshold(Duration.ZERO);
+
+        // Start and wait until it is running
+        listener.expect(process, ProcessState.RUNNING);
+        process.start();
+        listener.await(TIMEOUT);
+        assertEquals(process.getState(), ProcessState.RUNNING);
+
+        // Terminate process using the provided PID
+        ProcessHandle handle = ProcessHandle.of(process.getStatus().processDetails.pid).get();
+        ProcessHandles.destroy(handle);
+
+        // Wait until it crashes
+        listener.expect(process, ProcessState.CRASHED_WAITING);
+        listener.await(TIMEOUT);
+
+        // Check if properties are set and that the recover task is scheduled
+        ProcessStatusDto status = process.getStatus();
+        assertEquals(1, status.retryCount);
+        assertEquals(10, status.recoverDelay);
+        assertNotNull(process.getRecoverTask());
+
+        // Now execute start command
+        listener.expect(process, ProcessState.RUNNING_UNSTABLE, ProcessState.RUNNING);
+        process.start();
+        listener.await(TIMEOUT);
+
+        // Recover task must be canceled and counter must be reset due to the manual start
+        assertTrue(process.getRecoverTask() == null);
+        status = process.getStatus();
+        assertEquals(0, status.retryCount);
+
+        // Now execute stop command
+        listener.expect(process, ProcessState.STOPPED);
+        process.stop();
+        listener.await(TIMEOUT);
     }
 
 }

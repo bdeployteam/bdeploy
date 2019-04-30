@@ -44,7 +44,7 @@ public class InstanceProcessController {
 
     /** States that indicate that the process is running or scheduled */
     private static final Set<ProcessState> SET_RUNNING_SCHEDULED = Sets.immutableEnumSet(ProcessState.RUNNING,
-            ProcessState.RUNNING_UNSTABLE, ProcessState.CRASH_BACK_OFF);
+            ProcessState.RUNNING_UNSTABLE, ProcessState.CRASHED_WAITING);
 
     /** States that indicate that the process is running or scheduled */
     private static final Set<ProcessState> SET_RUNNING = Sets.immutableEnumSet(ProcessState.RUNNING,
@@ -94,10 +94,10 @@ public class InstanceProcessController {
             }
 
             // Add a new controller for each application
-            for (ProcessConfiguration pc : groupConfig.applications) {
-                Path processDir = pathProvider.get(SpecialDirectory.RUNTIME).resolve(pc.uid);
-                processList.add(new ProcessController(groupConfig.uuid, tag, pc, processDir));
-                log.info(buildAppLogString("Creating new process controller.", tag, pc.uid));
+            for (ProcessConfiguration config : groupConfig.applications) {
+                Path processDir = pathProvider.get(SpecialDirectory.RUNTIME).resolve(config.uid);
+                processList.add(new ProcessController(groupConfig.uuid, tag, config, processDir));
+                log.info(buildAppLogString("Creating new process controller.", tag, config.uid));
             }
         } finally {
             writeLock.unlock();
