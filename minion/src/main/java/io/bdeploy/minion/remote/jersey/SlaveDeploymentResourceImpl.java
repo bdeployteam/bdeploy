@@ -85,7 +85,7 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
 
         // Active version cannot be removed
         Key activeVersion = root.getState().activeVersions.get(inm.getUUID());
-        if (activeVersion.equals(key)) {
+        if (key.equals(activeVersion)) {
             throw new WebApplicationException("Active version " + key + " cannot be removed.", Status.BAD_REQUEST);
         }
 
