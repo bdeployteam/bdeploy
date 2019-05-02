@@ -3,6 +3,7 @@ package io.bdeploy.pcu;
 import java.nio.file.Path;
 import java.util.Arrays;
 
+import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
@@ -45,6 +46,7 @@ public class TestFactory {
      * @return the process configuration that describes the application
      */
     public static ProcessConfiguration createConfig(Path path, String name, boolean keepAlive, String argument) {
+        path = path.resolve(UuidHelper.randomId());
         Path script = TestAppFactory.genSleepScript("sleep", path);
 
         ProcessConfiguration config = new ProcessConfiguration();
@@ -70,6 +72,7 @@ public class TestFactory {
      * @return the process controller to launch the application
      */
     public static ProcessController create(Path path, String name, boolean keepAlive, String argument) {
+        path = path.resolve(UuidHelper.randomId());
         ProcessConfiguration config = createConfig(path, name, keepAlive, argument);
         ProcessController controller = new ProcessController("Test", "V1", config, path);
         return controller;

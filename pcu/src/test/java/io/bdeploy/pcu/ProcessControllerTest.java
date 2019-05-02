@@ -52,13 +52,12 @@ public class ProcessControllerTest {
         listener.expect(process, ProcessState.RUNNING);
         process.start();
         listener.await(TIMEOUT);
+        process.detach();
 
         // Overwrite instance and try to recover
-        process.detach();
-        process = TestFactory.create(tmp, "App1", false, "600");
-
-        listener.expect(process, ProcessState.RUNNING);
+        process = process.newInstance();
         process.addStatusListener(listener);
+        listener.expect(process, ProcessState.RUNNING);
         process.recover();
         listener.await(TIMEOUT);
 
