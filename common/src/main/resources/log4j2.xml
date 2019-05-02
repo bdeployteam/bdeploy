@@ -3,33 +3,46 @@
 	<Appenders>
 		<Console name="Console" target="SYSTEM_OUT">
 			<PatternLayout
-				pattern="%d{dd-HH:mm:ss.SSS} | %-5level | %-25.25t | %logger{1.}: %-80msg - (%F:%L)%n" />
+				pattern="%d{yyyy-MM-dd:mm:ss.SSS} | %25.25t | %-5level | %-80msg - (%F:%L)%n" />
+		</Console>
+
+		<Console name="ConsoleWithMdc" target="SYSTEM_OUT">
+			<PatternLayout
+				pattern="%d{yyyy-MM-dd:mm:ss.SSS} | %25.25t | %-5level | %-35.35MDC{BDEPLOY} | %-42msg - (%F:%L)%n" />
 		</Console>
 	</Appenders>
 	<Loggers>
 		<Root level="info">
 			<AppenderRef ref="Console" />
 		</Root>
+
 		<!-- JerseyServer's log level also controls Grizzly and Jersey log levels! -->
 		<Logger name="io.bdeploy.jersey.JerseyServer" level="info"
 			additivity="false">
 			<AppenderRef ref="Console" />
 		</Logger>
+
 		<!-- Always set Grizzly and Jersey levels to maximum, use JerseyServer 
 			above to control actual level -->
 		<Logger name="org.glassfish" level="trace" additivity="false">
 			<AppenderRef ref="Console" />
 		</Logger>
+
 		<!-- UI Interface -->
-		<Logger name="io.bdeploy.ui" level="info"
-			additivity="false">
+		<Logger name="io.bdeploy.ui" level="info" additivity="false">
 			<AppenderRef ref="Console" />
 		</Logger>
+
 		<!-- Poor man's profiling by observing activities in the logs -->
 		<Logger
 			name="io.bdeploy.jersey.JerseySseActivityReporter$SseActivity"
 			level="info" additivity="false">
 			<AppenderRef ref="Console" />
+		</Logger>
+
+		<!-- PCU -->
+		<Logger name="io.bdeploy.pcu" level="trace" additivity="false">
+			<AppenderRef ref="ConsoleWithMdc" />
 		</Logger>
 	</Loggers>
 </Configuration>

@@ -19,12 +19,10 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import io.bdeploy.bhive.util.StorageHelper;
+import io.bdeploy.common.util.MdcLogger;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
@@ -52,7 +50,7 @@ import io.bdeploy.pcu.util.Formatter;
  */
 public class ProcessController {
 
-    private static final Logger log = LoggerFactory.getLogger(ProcessController.class);
+    private final MdcLogger logger = new MdcLogger(ProcessController.class);
 
     /** File that holds the standard out as well as standard error written by the process */
     private static final String OUT_TXT = "out.txt";
@@ -129,6 +127,7 @@ public class ProcessController {
      *            launch
      */
     public ProcessController(String instanceUid, String instanceTag, ProcessConfiguration pc, Path processDir) {
+        this.logger.setMdcValue(instanceUid, instanceTag, pc.uid);
         this.instanceUid = instanceUid;
         this.instanceTag = instanceTag;
         this.processConfig = pc;
@@ -312,7 +311,7 @@ public class ProcessController {
         if (processState == ProcessState.RUNNING || processState == ProcessState.RUNNING_UNSTABLE) {
             throw new RuntimeException("Application is already running.");
         }
-        log.info(buildLogString("Starting application."));
+        logger.log((l) -> l.info("Starting application."));
 
         // Reset counter if manually started
         if (resetRecoverCount) {
@@ -345,12 +344,12 @@ public class ProcessController {
             dto.pid = process.pid();
             dto.startTime = startTime;
             Files.write(infoFile, StorageHelper.toRawBytes(dto));
-            log.info(buildLogString("Successfully started application. PID = %s.", dto.pid));
+            logger.log((l) -> l.info("Successfully started application. PID = {}.", dto.pid));
 
             // Attach exit handle to get notified about termination
             monitorProcess();
         } catch (IOException e) {
-            log.error(buildLogString("Failed to launch application.", e));
+            logger.log((l) -> l.error("Failed to launch application.", e));
             processState = ProcessState.CRASHED_PERMANENTLY;
             cleanup();
         }
@@ -365,13 +364,13 @@ public class ProcessController {
         // Set flag that the termination of the process is expected
         stopRequested = true;
         if (processState == ProcessState.CRASHED_WAITING) {
-            log.info(buildLogString("Aborting restart attempt of application."));
+            logger.log((l) -> l.info("Aborting restart attempt of application."));
             processState = ProcessState.STOPPED;
             cleanup();
             return;
         }
         long pid = process.pid();
-        log.info(buildLogString("Stopping application. PID = %s", pid));
+        logger.log((l) -> l.info("Stopping application. PID = {}", pid));
 
         // try to gracefully stop the process using it's stop command
         doInvokeStopCommand();
@@ -388,10 +387,10 @@ public class ProcessController {
         if (stopped) {
             afterTerminated();
             Duration duration = Duration.between(stopRequested, Instant.now());
-            log.info(buildLogString("Application is now stopped. Stopping took %s", Formatter.formatDuration(duration)));
+            logger.log((l) -> l.info("Application is now stopped. Stopping took {}", Formatter.formatDuration(duration)));
         } else {
-            log.error(buildLogString("Giving up to terminate application. Process does not respond to kill requests."));
-            log.error(buildLogString("Application state remains " + processState));
+            logger.log((l) -> l.error("Giving up to terminate application. Process does not respond to kill requests."));
+            logger.log((l) -> l.error("Application state remains {} ", processState));
         }
     }
 
@@ -417,7 +416,7 @@ public class ProcessController {
         // make sure that this is still the process we're looking for.
         startTime = process.info().startInstant().orElse(Instant.now());
         if (startTime.compareTo(dto.startTime) == 0) {
-            log.info(buildLogString("Successfully attached to application. PID = %s.", dto.pid));
+            logger.log((logger) -> logger.info("Successfully attached to application. PID = {}.", dto.pid));
             monitorProcess();
         } else {
             PathHelper.deleteRecursive(pidFile);
@@ -458,7 +457,7 @@ public class ProcessController {
         // Wait until we get the lock
         try {
             if (wait && !lock.tryLock()) {
-                log.info("Task '" + taskName + "' is waiting for operation '" + lockTask + "' to finish.");
+                logger.log((l) -> l.info("Task '{}' is waiting for operation '{}' to finish.", taskName, lockTask));
                 lock.lockInterruptibly();
             }
         } catch (InterruptedException ie) {
@@ -500,7 +499,7 @@ public class ProcessController {
         // Lock is typically held for up to 150ms
         int retry = 1;
         while (!outFile.renameTo(tmpFile) && retry <= 20) {
-            log.info(buildLogString("Waiting for file-lock to be released: " + retry));
+            logger.log((l) -> l.info("Waiting for file-lock to be released"));
             doSleep(50, TimeUnit.MILLISECONDS);
             retry++;
         }
@@ -508,10 +507,10 @@ public class ProcessController {
         // Rename back to the original log-file
         if (tmpFile.exists()) {
             if (!tmpFile.renameTo(outFile)) {
-                log.warn(buildLogString("Failed to rename output file back to its original name."));
+                logger.log((l) -> l.warn("Failed to rename output file back to its original name."));
             }
         } else {
-            log.warn(buildLogString("Process is still holding file-locks on the output file."));
+            logger.log((l) -> l.warn("Process is still holding file-locks on the output file."));
         }
     }
 
@@ -531,16 +530,16 @@ public class ProcessController {
         // Set to running if launched from stopped or crashed
         if (processState == ProcessState.STOPPED || processState == ProcessState.CRASHED_PERMANENTLY) {
             processState = ProcessState.RUNNING;
-            log.info(buildLogString("Application status is now RUNNING."));
+            logger.log((l) -> l.info("Application status is now RUNNING."));
         }
 
         // Schedule uptime monitor if launched from crashed waiting
         if (processState == ProcessState.CRASHED_WAITING) {
             processState = ProcessState.RUNNING_UNSTABLE;
             if (recoverCount > 0) {
-                log.info(buildLogString("Application successfully recovered. Attempts: %s/%s", recoverCount, recoverAttempts));
+                logger.log((l) -> l.info("Application successfully recovered. Attempts: {}/{}", recoverCount, recoverAttempts));
             }
-            log.info(buildLogString("Application status is now RUNNING_UNSTABLE."));
+            logger.log((l) -> l.info("Application status is now RUNNING_UNSTABLE."));
 
             // Periodically watch if the process remains alive
             long rateInSeconds = stableThreshold.dividedBy(10).getSeconds();
@@ -550,7 +549,7 @@ public class ProcessController {
             uptimeTask = executorService.scheduleAtFixedRate(() -> doCheckUptime(), rateInSeconds, rateInSeconds,
                     TimeUnit.SECONDS);
             String requiredUptime = Formatter.formatDuration(stableThreshold);
-            log.info(buildLogString("Application will be marked as stable after: %s", requiredUptime));
+            logger.log((l) -> l.info("Application will be marked as stable after: {}", requiredUptime));
         }
     }
 
@@ -562,7 +561,7 @@ public class ProcessController {
             }
             afterTerminated();
         } catch (Exception ex) {
-            log.error("Failed to execute termination hook", ex);
+            logger.log((l) -> l.error("Failed to execute termination hook", ex));
         }
     }
 
@@ -574,7 +573,7 @@ public class ProcessController {
 
         // Someone requested termination
         if (stopRequested) {
-            log.info(buildLogString("Application terminated after stop request. Total uptime: %s", uptimeString));
+            logger.log((l) -> l.info("Application terminated after stop request. Total uptime: {}", uptimeString));
             processState = ProcessState.STOPPED;
             waitForLockRelease();
             cleanup();
@@ -583,8 +582,8 @@ public class ProcessController {
 
         // One-Shot process that can terminate at any time
         if (!processConfig.processControl.keepAlive) {
-            log.info(buildLogString("Application terminated. Remains stopped as keep-alive is not configured. Total uptime: %s",
-                    uptimeString));
+            String message = "Application terminated. Remains stopped as keep-alive is not configured. Total uptime: {}";
+            logger.log((l) -> l.info(message, uptimeString));
             processState = ProcessState.STOPPED;
             waitForLockRelease();
             cleanup();
@@ -592,11 +591,12 @@ public class ProcessController {
         }
 
         // Process terminated unexpectedly
-        log.error(buildLogString("Application terminated unexpectedly. Total uptime: %s", uptimeString));
+        logger.log((l) -> l.error("Application terminated unexpectedly. Total uptime: {}", uptimeString));
 
         // Give up when the application keeps crashing
         if (recoverAttempts > 0 && recoverCount >= recoverAttempts) {
-            log.error(buildLogString("Giving up to launch application. Tried %s times to launch without success.", recoverCount));
+            String message = "Giving up to launch application. Tried {} times to launch without success.";
+            logger.log((l) -> l.error(message, recoverCount));
             processState = ProcessState.CRASHED_PERMANENTLY;
             waitForLockRelease();
             cleanup();
@@ -615,10 +615,10 @@ public class ProcessController {
         // Schedule restarting of application based on configured delay
         Runnable task = () -> executeLocked("Restart", true, () -> doRestart());
         if (delay.isZero()) {
-            log.info(buildLogString("Re-launching application immediatly."));
+            logger.log((l) -> l.info("Re-launching application immediatly."));
             recoverTask = executorService.schedule(task, 0, TimeUnit.SECONDS);
         } else {
-            log.info(buildLogString("Waiting %s before re-launching application.", Formatter.formatDuration(delay)));
+            logger.log((l) -> l.info("Waiting {} before re-launching application.", Formatter.formatDuration(delay)));
             recoverTask = executorService.schedule(task, delay.getSeconds(), TimeUnit.SECONDS);
         }
     }
@@ -628,10 +628,10 @@ public class ProcessController {
         // Re-Start the application to try again
         // NOTE: User can manually start while we are waiting
         if (processState == ProcessState.STOPPED) {
-            log.info(buildLogString("Application has been stopped while in crash-back-off. Doing nothing."));
+            logger.log((l) -> l.info("Application has been stopped while in crash-back-off. Doing nothing."));
             return;
         } else if (processState == ProcessState.RUNNING || processState == ProcessState.RUNNING_UNSTABLE) {
-            log.info(buildLogString("Application has been started while in crash-back-off. Doing nothing."));
+            logger.log((l) -> l.info("Application has been started while in crash-back-off. Doing nothing."));
             return;
         }
 
@@ -658,8 +658,8 @@ public class ProcessController {
             // Reset counter and set application to stable
             recoverCount = 0;
             processState = ProcessState.RUNNING;
-            log.info(buildLogString("Uptime threshold reached. Marking as stable again."));
-            log.info(buildLogString("Application status is now RUNNING."));
+            logger.log((l) -> l.info("Uptime threshold reached. Marking as stable again."));
+            logger.log((l) -> l.info("Application status is now RUNNING."));
         });
     }
 
@@ -684,12 +684,12 @@ public class ProcessController {
     private void destroy(ProcessHandle process) {
         // First kill all processes that might be forked by the root
         process.descendants().forEach(ph -> {
-            log.info(buildLogString("Terminate child process. PID = %s", ph.pid()));
+            logger.log((l) -> l.info("Terminate child process. PID = {}", ph.pid()));
             ph.destroy();
         });
 
         // Terminate the process itself
-        log.info(buildLogString("Terminate main process. PID = %s", process.pid()));
+        logger.log((l) -> l.info("Terminate main process. PID = {}", process.pid()));
         process.destroy();
     }
 
@@ -697,12 +697,12 @@ public class ProcessController {
     private void destroyForcibly(ProcessHandle process) {
         // First kill all processes that might be forked by the root
         process.descendants().forEach(ph -> {
-            log.info(buildLogString("Forcibly terminate child process. PID = %s", ph.pid()));
+            logger.log((l) -> l.info("Forcibly terminate child process. PID = {}", ph.pid()));
             ph.destroyForcibly();
         });
 
         // Terminate the process itself
-        log.info(buildLogString("Forcibly terminate main process. PID = %s", process.pid()));
+        logger.log((l) -> l.info("Forcibly terminate main process. PID = {}", process.pid()));
         process.destroyForcibly();
     }
 
@@ -710,33 +710,33 @@ public class ProcessController {
     private void doInvokeStopCommand() {
         List<String> stopCommand = processConfig.stop;
         if (stopCommand == null || stopCommand.isEmpty()) {
-            log.debug(buildLogString("No stop command configured."));
+            logger.log((l) -> l.debug("No stop command configured."));
             return;
         }
         try {
-            log.info(buildLogString("Invoking configured stop command."));
+            logger.log((l) -> l.info("Invoking configured stop command."));
             Process p = launch(stopCommand);
             boolean exited = p.waitFor(processConfig.processControl.gracePeriod, TimeUnit.MILLISECONDS);
             if (!exited) {
                 // stop command did not complete within allowed time, kill both
-                log.warn(buildLogString("Stop command did not finish within configured grace period."));
+                logger.log((l) -> l.warn("Stop command did not finish within configured grace period."));
                 p.destroy();
                 boolean stopExited = p.waitFor(200, TimeUnit.MILLISECONDS);
                 if (!stopExited) {
-                    log.warn(buildLogString("Stop command refuses to exit, killing."));
+                    logger.log((l) -> l.warn("Stop command refuses to exit, killing."));
                     p.destroyForcibly();
                 }
             } else {
                 // stop command completed within the timeout, check status
                 int exitValue = p.exitValue();
                 if (exitValue != 0) {
-                    log.warn(buildLogString("Stop command exited with non-zero code: %s ", processState));
+                    logger.log((l) -> l.warn("Stop command exited with non-zero code: {} ", processState));
                 } else {
-                    log.info(buildLogString("Stop command exited with return code 0 "));
+                    logger.log((l) -> l.info("Stop command exited with return code 0 "));
                 }
             }
         } catch (Exception e) {
-            log.error(buildLogString("Failed to execute stop command."), e);
+            logger.log((l) -> l.error("Failed to execute stop command.", e));
         }
     }
 
@@ -749,7 +749,8 @@ public class ProcessController {
             if (retryCount == 0) {
                 destroy(process);
             } else {
-                log.warn(buildLogString("Attempt %s: Kill application.", retryCount));
+                int logCount = retryCount;
+                logger.log((l) -> l.warn("Attempt {}: Kill application.", logCount));
                 destroyForcibly(process);
             }
 
@@ -757,10 +758,10 @@ public class ProcessController {
             try {
                 processExit.get(processConfig.processControl.gracePeriod, TimeUnit.MILLISECONDS);
             } catch (TimeoutException e) {
-                log.warn(buildLogString("Timed-out waiting for application to exit. Timeout: %s ms",
+                logger.log((l) -> l.warn("Timed-out waiting for application to exit. Timeout: {} ms",
                         processConfig.processControl.gracePeriod));
             } catch (Exception e) {
-                log.warn(buildLogString("Execption while waiting for application to terminate."), e);
+                logger.log((l) -> l.warn("Execption while waiting for application to terminate.", e));
             }
 
             // Continue when process is still alive.
@@ -793,7 +794,7 @@ public class ProcessController {
         try {
             statusListeners.forEach(c -> c.accept(processState));
         } catch (Exception ex) {
-            log.error(buildLogString("Failed to notify listener about current process status."), ex);
+            logger.log((l) -> l.error("Failed to notify listener about current process status.", ex));
         }
     }
 
@@ -805,12 +806,6 @@ public class ProcessController {
     /** Returns the future that is scheduled to monitor the up-time */
     Future<?> getUptimeTask() {
         return uptimeTask;
-    }
-
-    /** Prefixes the given message with the instanceUid, instanceTag as well as the application ID */
-    private String buildLogString(String message, Object... args) {
-        String prefix = String.format("%s / %s / %s - ", instanceUid, instanceTag, processConfig.uid);
-        return prefix + String.format(message, args);
     }
 
     /** Sleeps the given number of seconds */

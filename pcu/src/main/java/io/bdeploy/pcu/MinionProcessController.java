@@ -7,10 +7,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.common.util.MdcLogger;
 
 /**
  * Represents the top-level process controller of a minion. The controller will instantiate a new
@@ -18,7 +16,7 @@ import io.bdeploy.bhive.model.Manifest.Key;
  */
 public class MinionProcessController {
 
-    private static final Logger log = LoggerFactory.getLogger(MinionProcessController.class);
+    private final MdcLogger logger = new MdcLogger(MinionProcessController.class);
 
     /** Guards access to the map */
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
@@ -101,7 +99,7 @@ public class MinionProcessController {
             if (controller == null) {
                 controller = new InstanceProcessController(instanceId);
                 instance2Controller.put(instanceId, controller);
-                log.info("{} - Creating new instance controller.", instanceId);
+                logger.log((l) -> l.info("Creating new instance controller."), instanceId);
             }
             return controller;
         } finally {

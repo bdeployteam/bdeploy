@@ -67,6 +67,12 @@ subprojects {
     apply plugin: 'com.adarshr.test-logger'
     apply plugin: 'ru.vyarus.quality'
     apply plugin: 'eclipse'
+	
+	eclipse {
+		classpath {
+			downloadSources = true
+		}
+	}
 
     eclipse.project {
         natures 'org.eclipse.xtext.ui.shared.xtextNature'

@@ -18,11 +18,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.ws.rs.WebApplicationException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.collect.Sets;
 
+import io.bdeploy.common.util.MdcLogger;
 import io.bdeploy.common.util.NamedDaemonThreadFactory;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
@@ -40,8 +38,6 @@ import io.bdeploy.pcu.util.Formatter;
  */
 public class InstanceProcessController {
 
-    private static final Logger log = LoggerFactory.getLogger(InstanceProcessController.class);
-
     /** States that indicate that the process is running or scheduled */
     private static final Set<ProcessState> SET_RUNNING_SCHEDULED = Sets.immutableEnumSet(ProcessState.RUNNING,
             ProcessState.RUNNING_UNSTABLE, ProcessState.CRASHED_WAITING);
@@ -49,6 +45,8 @@ public class InstanceProcessController {
     /** States that indicate that the process is running or scheduled */
     private static final Set<ProcessState> SET_RUNNING = Sets.immutableEnumSet(ProcessState.RUNNING,
             ProcessState.RUNNING_UNSTABLE);
+
+    private final MdcLogger logger = new MdcLogger(InstanceProcessController.class);
 
     /** Guards access to the map */
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
@@ -71,6 +69,7 @@ public class InstanceProcessController {
      */
     public InstanceProcessController(String instanceUid) {
         this.instanceUid = instanceUid;
+        this.logger.setMdcValue(this.instanceUid);
     }
 
     /**
@@ -97,7 +96,7 @@ public class InstanceProcessController {
             for (ProcessConfiguration config : groupConfig.applications) {
                 Path processDir = pathProvider.get(SpecialDirectory.RUNTIME).resolve(config.uid);
                 processList.add(new ProcessController(groupConfig.uuid, tag, config, processDir));
-                log.info(buildAppLogString("Creating new process controller.", tag, config.uid));
+                logger.log((l) -> l.info("Creating new process controller."), tag, config.uid);
             }
         } finally {
             writeLock.unlock();
@@ -109,7 +108,7 @@ public class InstanceProcessController {
      * or when starting all applications of this instance.
      */
     public void setActiveTag(String activeTag) {
-        log.info(buildLogString("Setting active tag to %s.", activeTag));
+        logger.log((l) -> l.info("Setting active tag to {}.", activeTag));
         this.activeTag = activeTag;
     }
 
@@ -118,7 +117,7 @@ public class InstanceProcessController {
      */
     public void recover() {
         Map<String, Integer> tag2Running = new TreeMap<>();
-        log.info(buildLogString("Checking which applications are alive."));
+        logger.log((l) -> l.info("Checking which applications are alive."));
         try {
             readLock.lock();
             for (ProcessList list : processMap.values()) {
@@ -134,13 +133,13 @@ public class InstanceProcessController {
 
         // Print out a summary. Indicate if applications across different versions are running
         if (tag2Running.isEmpty()) {
-            log.info(buildLogString("No applications are running."));
+            logger.log((l) -> l.info("No applications are running."));
         } else if (tag2Running.size() == 1) {
             int counter = tag2Running.values().iterator().next();
-            log.info(buildLogString("%s application(s) are running.", counter));
+            logger.log((l) -> l.info("{} application(s) are running.", counter));
         } else {
             int counter = tag2Running.values().stream().mapToInt(Integer::intValue).sum();
-            log.info(buildLogString("%s application(s) from multiple different versions are running.", counter));
+            logger.log((l) -> l.info("{} application(s) from multiple different versions are running.", counter));
         }
     }
 
@@ -149,7 +148,7 @@ public class InstanceProcessController {
      */
     public void autoStart() {
         if (activeTag == null) {
-            log.info(buildLogString("Autostart not possible. No active tag has been set."));
+            logger.log((l) -> l.info("Autostart not possible. No active tag has been set."));
             return;
         }
         // Check auto-start flag of instance
@@ -157,10 +156,10 @@ public class InstanceProcessController {
             readLock.lock();
             ProcessList list = processMap.get(activeTag);
             if (!list.processConfig.autoStart) {
-                log.info(buildTagLogString("Autostart not configured. Applications remain stopped.", activeTag));
+                logger.log((l) -> l.info("Autostart not configured. Applications remain stopped."), activeTag);
                 return;
             }
-            log.info(buildTagLogString("Auto-Starting applications.", activeTag));
+            logger.log((l) -> l.info("Auto-Starting applications."), activeTag);
         } finally {
             readLock.unlock();
         }
@@ -178,7 +177,7 @@ public class InstanceProcessController {
         }
         try {
             readLock.lock();
-            log.info(buildTagLogString("Starting all applications.", activeTag));
+            logger.log((l) -> l.info("Starting all applications."), activeTag);
 
             // Compute runtime state across all versions
             Map<String, ProcessController> running = new HashMap<>();
@@ -199,10 +198,10 @@ public class InstanceProcessController {
                 if (running.containsKey(appId)) {
                     ProcessStatusDto data = controller.getStatus();
                     if (data.instanceTag.equals(activeTag)) {
-                        log.warn(buildAppLogString("Application already running in a different version.", data.instanceTag,
-                                data.appUid));
+                        logger.log((l) -> l.warn("Application already running in a different version."), data.instanceTag,
+                                data.appUid);
                     } else {
-                        log.info(buildAppLogString("Application already running.", data.instanceTag, data.appUid));
+                        logger.log((l) -> l.info("Application already running."), data.instanceTag, data.appUid);
                     }
                     continue;
                 }
@@ -210,7 +209,7 @@ public class InstanceProcessController {
                 // Only start when auto-start is configured
                 ProcessConfiguration config = controller.getDescriptor();
                 if (config.processControl.startType != ApplicationStartType.INSTANCE) {
-                    log.info(buildAppLogString("Application does not have 'instance' start type set.", activeTag, appId));
+                    logger.log((l) -> l.info("Application does not have 'instance' start type set."), activeTag, appId);
                     continue;
                 }
 
@@ -218,10 +217,10 @@ public class InstanceProcessController {
                 try {
                     controller.start();
                 } catch (Exception ex) {
-                    log.error(buildAppLogString("Failed to start application", activeTag, appId), ex);
+                    logger.log((l) -> l.info("Failed to start application.", ex), activeTag, appId);
                 }
             }
-            log.info(buildTagLogString("All applications have been started.", activeTag));
+            logger.log((l) -> l.info("All applications have been started."), activeTag);
         } finally {
             readLock.unlock();
         }
@@ -245,7 +244,7 @@ public class InstanceProcessController {
             readLock.unlock();
         }
 
-        log.info(buildLogString("Stopping %s running applications.", toStop.size()));
+        logger.log((l) -> l.info("Stopping {} running applications.", toStop.size()));
         for (ProcessController process : toStop) {
             service.execute(() -> {
                 try {
@@ -253,19 +252,19 @@ public class InstanceProcessController {
                 } catch (Exception ex) {
                     String appId = process.getDescriptor().uid;
                     String tag = process.getStatus().instanceTag;
-                    log.error(buildAppLogString("Failed to stop application", tag, appId), ex);
+                    logger.log((l) -> l.error("Failed to stop application.", ex), tag, appId);
                 }
             });
         }
 
         // Wait for all to terminate
         Instant start = Instant.now();
-        log.info(buildLogString("Waiting for applications to stop."));
+        logger.log((l) -> l.info("Waiting for applications to stop."));
         try {
             service.shutdown();
             service.awaitTermination(5, TimeUnit.MINUTES);
             Duration duration = Duration.between(start, Instant.now());
-            log.info(buildLogString("All applications stopped. Stopping took %s", Formatter.formatDuration(duration)));
+            logger.log((l) -> l.info("All applications stopped. Stopping took {}", Formatter.formatDuration(duration)));
         } catch (InterruptedException e) {
             Duration duration = Duration.between(start, Instant.now());
             Thread.currentThread().interrupt();
@@ -305,7 +304,7 @@ public class InstanceProcessController {
             ProcessController controller = list.get(applicationId);
             controller.start();
         } catch (Exception ex) {
-            log.error(buildAppLogString("Failed to start application", activeTag, applicationId), ex);
+            logger.log((l) -> l.error("Failed to start application", ex), activeTag, applicationId);
         }
     }
 
@@ -340,7 +339,7 @@ public class InstanceProcessController {
             process.stop();
         } catch (Exception ex) {
             String tag = process.getStatus().instanceTag;
-            log.error(buildAppLogString("Failed to stop application", tag, applicationId), ex);
+            logger.log((l) -> l.error("Failed to stop application", ex), tag, applicationId);
         }
     }
 
@@ -379,24 +378,6 @@ public class InstanceProcessController {
         } finally {
             readLock.unlock();
         }
-    }
-
-    /** Prefixes the given message with the instanceUid */
-    private String buildLogString(String message, Object... args) {
-        String prefix = String.format("%s - ", instanceUid);
-        return prefix + String.format(message, args);
-    }
-
-    /** Prefixes the given message with the instanceUid and tag */
-    private String buildTagLogString(String message, String tag, Object... args) {
-        String prefix = String.format("%s / %s - ", instanceUid, tag);
-        return prefix + String.format(message, args);
-    }
-
-    /** Prefixes the given message with the instanceUid, tag and application ID */
-    private String buildAppLogString(String message, String tag, String appId, Object... args) {
-        String prefix = String.format("%s / %s / %s - ", instanceUid, tag, appId);
-        return prefix + String.format(message, args);
     }
 
 }
