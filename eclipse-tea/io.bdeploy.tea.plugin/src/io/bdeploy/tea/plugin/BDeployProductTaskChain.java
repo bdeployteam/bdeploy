@@ -9,7 +9,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.internal.variables.StringVariableManager;
 import org.eclipse.core.runtime.CoreException;
@@ -19,6 +21,7 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.extensions.Service;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.tea.core.BackgroundTask;
 import org.eclipse.tea.core.TaskExecutionContext;
 import org.eclipse.tea.core.annotations.TaskChainContextInit;
 import org.eclipse.tea.core.annotations.TaskChainMenuEntry;
@@ -137,6 +140,9 @@ public class BDeployProductTaskChain implements TaskChain {
                 throw new IllegalArgumentException("Unknown application type: " + app.type);
             }
         }
+
+        c.addTask(BackgroundTask
+                .allBarrier(pd.apps.stream().map(a -> a.task).filter(Objects::nonNull).collect(Collectors.toList())));
 
         c.addTask(new BDeployBuildProductTask(pd));
         c.addTask(cache.getCleanup());
