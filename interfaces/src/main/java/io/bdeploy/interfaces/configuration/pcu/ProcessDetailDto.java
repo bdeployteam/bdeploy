@@ -1,6 +1,7 @@
 package io.bdeploy.interfaces.configuration.pcu;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.google.common.base.Joiner;
@@ -52,7 +53,7 @@ public class ProcessDetailDto {
             log.add("Command Line: " + command);
         }
         if (arguments != null) {
-            log.add("Arguments: " + arguments);
+            log.add("Arguments: " + Arrays.toString(arguments));
         }
         if (!children.isEmpty()) {
             log.add("Children:");

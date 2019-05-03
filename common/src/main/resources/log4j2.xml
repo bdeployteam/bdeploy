@@ -17,31 +17,28 @@
 		</Root>
 
 		<!-- JerseyServer's log level also controls Grizzly and Jersey log levels! -->
-		<Logger name="io.bdeploy.jersey.JerseyServer" level="info"
-			additivity="false">
+		<Logger name="io.bdeploy.jersey.JerseyServer" level="info" additivity="false">
 			<AppenderRef ref="Console" />
 		</Logger>
 
 		<!-- Always set Grizzly and Jersey levels to maximum, use JerseyServer 
 			above to control actual level -->
-		<Logger name="org.glassfish" level="trace" additivity="false">
+		<Logger name="org.glassfish" additivity="false" level="trace">
 			<AppenderRef ref="Console" />
 		</Logger>
 
 		<!-- UI Interface -->
-		<Logger name="io.bdeploy.ui" level="info" additivity="false">
+		<Logger name="io.bdeploy.ui" additivity="false" level="info" >
 			<AppenderRef ref="Console" />
 		</Logger>
 
 		<!-- Poor man's profiling by observing activities in the logs -->
-		<Logger
-			name="io.bdeploy.jersey.JerseySseActivityReporter$SseActivity"
-			level="info" additivity="false">
+		<Logger name="io.bdeploy.jersey.JerseySseActivity" additivity="false" level="info">
 			<AppenderRef ref="Console" />
 		</Logger>
 
 		<!-- PCU -->
-		<Logger name="io.bdeploy.pcu" level="trace" additivity="false">
+		<Logger name="io.bdeploy.pcu" additivity="false" level="info" >
 			<AppenderRef ref="ConsoleWithMdc" />
 		</Logger>
 	</Loggers>

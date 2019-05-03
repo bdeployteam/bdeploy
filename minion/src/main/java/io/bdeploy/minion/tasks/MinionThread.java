@@ -69,7 +69,7 @@ public abstract class MinionThread extends Thread {
             wasRunning = true;
             doTheJob();
         } catch (Throwable tx) {
-            log.error("thread " + this + " failed", tx);
+            log.error("thread {} failed", this, tx);
         } finally {
             running = false;
         }

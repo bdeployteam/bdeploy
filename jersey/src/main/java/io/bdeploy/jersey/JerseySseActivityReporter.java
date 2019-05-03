@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.LongSupplier;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -49,7 +49,7 @@ public class JerseySseActivityReporter implements ActivityReporter {
     }
 
     @Override
-    public synchronized Activity start(String activity, Supplier<Long> maxValue, Supplier<Long> currentValue) {
+    public synchronized Activity start(String activity, LongSupplier maxValue, LongSupplier currentValue) {
         ContainerRequestContext rqc = context.get();
         List<String> scope = JerseySseActivityScopeFilter.getRequestActivityScope(rqc);
         String user = "<Unknown>";

@@ -5,12 +5,14 @@ package io.bdeploy.pcu.util;
  */
 public class ProcessHandles {
 
+    private ProcessHandles() {
+    }
+
     /** Destroys this process and all its descendants */
-    public static void destroy(ProcessHandle process) throws Exception {
+    public static void destroy(ProcessHandle process) {
         // First kill all processes that might be forked by the root
-        process.descendants().forEach(ph -> {
-            ph.destroy();
-        });
+        process.descendants().forEach(ProcessHandle::destroy);
+
         // Terminate the process itself
         process.destroy();
     }

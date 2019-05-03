@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
 import javax.ws.rs.sse.InboundSseEvent;
@@ -52,7 +53,7 @@ public interface ActivityReporter {
      * {@link Supplier}s are queried periodically when reporting progress, to catch
      * updates on the values.
      */
-    public Activity start(String activity, Supplier<Long> maxValue, Supplier<Long> currentValue);
+    public Activity start(String activity, LongSupplier maxValue, LongSupplier currentValue);
 
     /**
      * Proxy remote activities to this {@link ActivityReporter} implementation if possible.
@@ -274,7 +275,7 @@ public interface ActivityReporter {
         }
 
         @Override
-        public synchronized Activity start(String activity, Supplier<Long> maxValue, Supplier<Long> currentValue) {
+        public synchronized Activity start(String activity, LongSupplier maxValue, LongSupplier currentValue) {
             AsyncActivity act = new AsyncActivity(activity, maxValue, currentValue);
             activities.push(act);
             allActivities.add(act);
@@ -290,29 +291,29 @@ public interface ActivityReporter {
 
             private final String activity;
             private final LongAdder localCurrent = new LongAdder();
-            private final Supplier<Long> currentAmount;
-            private final Supplier<Long> maxAmount;
+            private final LongSupplier currentAmount;
+            private final LongSupplier maxAmount;
             private final long startTime;
             private long stopTime;
             private boolean isNested = false;
 
-            public AsyncActivity(String activity, Supplier<Long> maxValue, Supplier<Long> currentValue) {
+            public AsyncActivity(String activity, LongSupplier maxValue, LongSupplier currentValue) {
                 this.activity = activity;
                 this.maxAmount = maxValue;
-                this.currentAmount = currentValue != null ? currentValue : () -> localCurrent.sum();
+                this.currentAmount = currentValue != null ? currentValue : localCurrent::sum;
                 this.startTime = System.currentTimeMillis();
                 this.isNested = !activities.isEmpty();
             }
 
-            Long getCurrentAmount() {
-                if (stopTime != 0 && maxAmount.get() > 0) {
-                    return maxAmount.get(); // already stopped.
+            long getCurrentAmount() {
+                if (stopTime != 0 && maxAmount.getAsLong() > 0) {
+                    return maxAmount.getAsLong(); // already stopped.
                 }
-                return currentAmount.get();
+                return currentAmount.getAsLong();
             }
 
-            Long getMaxAmount() {
-                return maxAmount.get();
+            long getMaxAmount() {
+                return maxAmount.getAsLong();
             }
 
             @Override
@@ -392,7 +393,7 @@ public interface ActivityReporter {
         }
 
         @Override
-        public Activity start(String activity, Supplier<Long> maxValue, Supplier<Long> currentValue) {
+        public Activity start(String activity, LongSupplier maxValue, LongSupplier currentValue) {
             return new NullActivity();
         }
 
@@ -453,7 +454,7 @@ public interface ActivityReporter {
         }
 
         @Override
-        public Activity start(String activity, Supplier<Long> maxValue, Supplier<Long> currentValue) {
+        public Activity start(String activity, LongSupplier maxValue, LongSupplier currentValue) {
             return delegate.start(activity, maxValue, currentValue);
         }
 

@@ -3,13 +3,13 @@ package io.bdeploy.jersey;
 import java.util.List;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.LongSupplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.bdeploy.common.ActivitySnapshot;
 import io.bdeploy.common.ActivityReporter.Activity;
+import io.bdeploy.common.ActivitySnapshot;
 import io.bdeploy.common.util.UuidHelper;
 
 final class JerseySseActivity implements Activity {
@@ -19,8 +19,8 @@ final class JerseySseActivity implements Activity {
     private final String name;
     private final Consumer<JerseySseActivity> onDone;
     private final Consumer<JerseySseActivity> onCancel;
-    private final Supplier<Long> maxWork;
-    private final Supplier<Long> currentWork;
+    private final LongSupplier maxWork;
+    private final LongSupplier currentWork;
     private final long start;
     private final String uuid;
     private String parentUuid;
@@ -32,12 +32,12 @@ final class JerseySseActivity implements Activity {
 
     private final String user;
 
-    public JerseySseActivity(Consumer<JerseySseActivity> onDone, String name, Supplier<Long> maxWork, Supplier<Long> currentWork,
+    public JerseySseActivity(Consumer<JerseySseActivity> onDone, String name, LongSupplier maxWork, LongSupplier currentWork,
             List<String> scope, String user) {
         this.onDone = onDone;
         this.name = name;
         this.maxWork = maxWork;
-        this.currentWork = currentWork != null ? currentWork : () -> localCurrent.sum();
+        this.currentWork = currentWork != null ? currentWork : localCurrent::sum;
         this.start = System.currentTimeMillis();
         this.uuid = UuidHelper.randomId();
         this.scope = scope;
@@ -53,15 +53,16 @@ final class JerseySseActivity implements Activity {
         }
         JerseySseActivityReporter.currentActivity.set(this);
 
-        log.trace("Begin: [" + uuid + "] " + name);
+        if (log.isTraceEnabled()) {
+            log.trace("Begin: [{}] {}", uuid, name);
+        }
     }
 
     /**
      * Directly create an activity - used by {@link JerseySseActivityProxy}
      */
-    JerseySseActivity(Consumer<JerseySseActivity> onDone, Consumer<JerseySseActivity> onCancel, String name,
-            Supplier<Long> maxWork, Supplier<Long> currentWork, List<String> scope, String user, long start, String uuid,
-            String parentUuid) {
+    JerseySseActivity(Consumer<JerseySseActivity> onDone, Consumer<JerseySseActivity> onCancel, String name, LongSupplier maxWork,
+            LongSupplier currentWork, List<String> scope, String user, long start, String uuid, String parentUuid) {
         this.onDone = onDone;
         this.onCancel = onCancel;
         this.name = name;
@@ -84,7 +85,9 @@ final class JerseySseActivity implements Activity {
         stop = System.currentTimeMillis();
         onDone.accept(this);
 
-        log.trace("Done: [" + uuid + "] " + name + ". Duration: " + duration() + " ms");
+        if (log.isTraceEnabled()) {
+            log.trace("Done: [{}] {}. Duration: {} ms", uuid, name, duration());
+        }
     }
 
     @Override
@@ -107,7 +110,9 @@ final class JerseySseActivity implements Activity {
             onCancel.accept(this);
         }
 
-        log.trace("Cancel: [" + uuid + "] " + name + ", duration: " + duration());
+        if (log.isTraceEnabled()) {
+            log.trace("Cancel: [{}] {}, duration: {} ms", uuid, name, duration());
+        }
     }
 
     String getUuid() {
@@ -128,8 +133,8 @@ final class JerseySseActivity implements Activity {
     }
 
     ActivitySnapshot snapshot() {
-        return new ActivitySnapshot(uuid, name, stop != 0 ? duration() : (System.currentTimeMillis() - start), maxWork.get(),
-                currentWork.get(), this.scope, this.cancel, this.parentUuid, this.user);
+        return new ActivitySnapshot(uuid, name, stop != 0 ? duration() : (System.currentTimeMillis() - start),
+                maxWork.getAsLong(), currentWork.getAsLong(), this.scope, this.cancel, this.parentUuid, this.user);
     }
 
 }

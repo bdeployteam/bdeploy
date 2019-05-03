@@ -135,7 +135,7 @@ public abstract class MinionLoopThread extends MinionThread {
             if (isInterruptionFromOutside(e)) {
                 return;
             }
-            log.error("cannot prepare thread " + this, e);
+            log.error("cannot prepare thread {}", this, e);
             return;
         }
 
@@ -149,7 +149,7 @@ public abstract class MinionLoopThread extends MinionThread {
             try {
                 finishThread();
             } catch (Exception e) {
-                log.error("cannot finish thread " + this, e);
+                log.error("cannot finish thread {}", this, e);
             }
         }
     }
@@ -164,7 +164,7 @@ public abstract class MinionLoopThread extends MinionThread {
                 if (isInterruptionFromOutside(e)) {
                     markStopped();
                 } else {
-                    log.error("thread " + this + " failed", e);
+                    log.error("thread {} failed", this, e);
                     doSleep(5000); // avoid hot error loops
                 }
             } finally {
@@ -209,14 +209,14 @@ public abstract class MinionLoopThread extends MinionThread {
      */
     protected void wakeup() {
         if (stopper.wakeup()) {
-            log.info("wake up " + getName());
+            log.info("wake up {}", getName());
             super.interrupt();
         }
     }
 
     @Override
     public final void terminate() {
-        log.info("terminate " + getName());
+        log.info("terminate {}", getName());
         stopper.terminate(this);
     }
 
@@ -254,7 +254,7 @@ public abstract class MinionLoopThread extends MinionThread {
     public void setInterruptAllowed(boolean isInterruptAllowed) {
         this.isInterruptAllowed = isInterruptAllowed;
         if (log.isDebugEnabled()) {
-            log.debug(String.format("setInterruptAllowed(%s) called on %s", isInterruptAllowed, getName()));
+            log.debug("setInterruptAllowed({}) called on {}", isInterruptAllowed, getName());
         }
     }
 
