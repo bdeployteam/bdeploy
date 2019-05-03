@@ -9,7 +9,10 @@
     <mat-progress-bar mode="indeterminate" [color]="element.snapshot.cancel ? 'accent' : 'primary'"></mat-progress-bar>
   </ng-container>
   <ng-container *ngIf="element.snapshot.max !== -1">
-    <div class="progress-label">
+    <div class="progress-label" *ngIf="element.snapshot.max === 0">
+      {{ element.snapshot.name }} ({{ element.snapshot.current }})
+    </div>
+    <div class="progress-label" *ngIf="element.snapshot.max !== 0">
       {{ element.snapshot.name }} ({{ element.snapshot.current }}/{{ element.snapshot.max }})
     </div>
     <mat-progress-bar

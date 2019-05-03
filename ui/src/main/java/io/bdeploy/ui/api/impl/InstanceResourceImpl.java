@@ -423,7 +423,7 @@ public class InstanceResourceImpl implements InstanceResource {
     public void install(String instanceId, String tag) {
         InstanceManifest instance = InstanceManifest.load(hive, instanceId, tag);
         RemoteService svc = instance.getConfiguration().target;
-        try (Activity deploy = reporter.start("Deploying " + instanceId + ":" + tag);
+        try (Activity deploy = reporter.start("Deploying " + instance.getConfiguration().name + ":" + tag);
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
             // 1. push manifest to remote
             TransferStatistics stats = hive
@@ -442,7 +442,7 @@ public class InstanceResourceImpl implements InstanceResource {
     public void uninstall(String instanceId, String tag) {
         InstanceManifest instance = InstanceManifest.load(hive, instanceId, tag);
         RemoteService svc = instance.getConfiguration().target;
-        try (Activity deploy = reporter.start("Undeploying " + instanceId + ":" + tag);
+        try (Activity deploy = reporter.start("Undeploying " + instance.getConfiguration().name + ":" + tag);
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
 
             // 1: check for running or scheduled applications
@@ -453,8 +453,8 @@ public class InstanceResourceImpl implements InstanceResource {
             Optional<ProcessStatusDto> runningOrScheduledInVersion = appStatus.values().stream()
                     .filter(p -> tag.equals(p.instanceTag)).findFirst();
             if (runningOrScheduledInVersion.isPresent()) {
-                throw new WebApplicationException("Cannot uninstall instance version " + instanceId + ":" + tag
-                        + " because it has running or scheduled applications", Status.FORBIDDEN);
+                throw new WebApplicationException("Cannot uninstall instance version " + instance.getConfiguration().name + ":"
+                        + tag + " because it has running or scheduled applications", Status.FORBIDDEN);
             }
 
             // 1: tell master to undeploy
