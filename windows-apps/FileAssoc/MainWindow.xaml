@@ -1,12 +1,97 @@
-﻿<Window x:Class="FileAssoc.MainWindow"
+﻿<Window x:Class="Bdeploy.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:FileAssoc"
         mc:Ignorable="d"
-        Title="MainWindow" Height="445.473" Width="563.682">
+        Title="BDeploy File Association" Height="450" MinHeight="450" Width="700" MinWidth="700" >
+    <Window.Resources>
+        <BitmapImage x:Key="Bee" UriSource="/Resources/logo.ico" />
+        <BitmapImage x:Key="Security" UriSource="/Resources/security.png" />
+        <BitmapImage x:Key="Search" UriSource="/Resources/search.png" />
+    </Window.Resources>
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
 
+        <Border BorderBrush="Gray" Background="#fbf315" BorderThickness="0 0 0 3" DockPanel.Dock="Bottom" Grid.Row="0">
+            <StackPanel Orientation="Horizontal" Margin="20,20,10,20">
+                <Image Source="{StaticResource Bee}" Width="32" Height="32" />
+                <Label FontWeight="Bold" VerticalAlignment="Center" FontSize="16">BDeploy File Association</Label>
+            </StackPanel>
+        </Border>
+        <Grid Margin="20,20,20,20" Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Header -->
+            <TextBlock Grid.Row="0" Grid.ColumnSpan="4"  TextWrapping="Wrap">
+                This application associates *.bdeploy files with the BDeploy Launcher so that applications can be launched by double clicking a bdeploy file.
+            </TextBlock>
+
+            <!-- Browse launcher -->
+            <Label Grid.Row="1" Grid.Column="0" Content="Launcher" HorizontalAlignment="Right" VerticalAlignment="Center" />
+            <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Name="LauncherPath" VerticalAlignment="Center" TextChanged="LauncherPath_TextChanged"  />
+            <Button Grid.Row="1" Grid.Column="4" Name="BrowseLauncher" Click="BrowseLauncher_Click" Height="32" Margin="10,0,10,0">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="{StaticResource Search}" />
+                    <Label>Browse</Label>
+                </StackPanel>
+            </Button>
+
+            <!-- Hints-->
+            <TextBlock Grid.Row="2" Grid.ColumnSpan="4" HorizontalAlignment="Center" VerticalAlignment="Top">
+            Hint: Moving the launcher requires re-creation of the association.
+            </TextBlock>
+
+            <!-- Header -->
+            <TextBlock Grid.Row="3" Grid.ColumnSpan="4"  TextWrapping="Wrap" VerticalAlignment="Bottom" Margin="0,0,0,15">
+            File association can be created for the current user or for all users on this system (requires administrative privileges).
+            </TextBlock>
+
+            <!-- Association Groups -->
+            <GroupBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Header="Current User" Margin="0,0,10,0">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Button Name="CreateAssociation" Height="30" Margin="0,0,10,0" Click="CreateAssociation_Click">
+                        <Label Margin="5,0,5,0">Create Association</Label>
+                    </Button>
+                    <Button Name="DeleteAssociation" HorizontalAlignment="Center" VerticalAlignment="Center" Height="30" Click="DeleteAssociation_Click">
+                        <Label Margin="5,0,5,0">Delete Association</Label>
+                    </Button>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Grid.Row="4" Grid.Column="2" Grid.ColumnSpan="2" Header="All Users" Margin="10,0,0,0">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Button Name="CreateAssociationAsAdmin" Height="30" Margin="0,0,10,0" Click="CreateAssociationAsAdmin_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="{StaticResource Security}" />
+                            <Label>Create Association</Label>
+                        </StackPanel>
+                    </Button>
+                    <Button Name="DeleteAssociationAsAdmin" Height="30" Click="DeleteAssociationAsAdmin_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="{StaticResource Security}" />
+                            <Label>Delete Association</Label>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </GroupBox>
+        </Grid>
     </Grid>
 </Window>

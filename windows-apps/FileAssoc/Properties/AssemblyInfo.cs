@@ -10,7 +10,7 @@ using System.Windows;
 [assembly: AssemblyTitle("FileAssoc")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("BDeploy")]
 [assembly: AssemblyProduct("FileAssoc")]
 [assembly: AssemblyCopyright("Copyright ©  2019")]
 [assembly: AssemblyTrademark("")]

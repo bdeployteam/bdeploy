@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace Bdeploy
@@ -13,5 +8,63 @@ namespace Bdeploy
     /// </summary>
     public partial class App : Application
     {
+        void App_Startup(object sender, StartupEventArgs e)
+        {
+            if (e.Args.Length == 0)
+            {
+                MainWindow mainWindow = new MainWindow();
+                mainWindow.Show();
+            }
+            else
+            {
+                bool success = HandleArguments(e.Args);
+                int exitCode = success ? 0 : 1;
+                Current.Shutdown(exitCode);
+            }
+        }
+
+        /// <summary>
+        /// Creates or removes the file association depending on the argumets
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns>true if association was done and false otherwise</returns>
+        private bool HandleArguments(string[] args)
+        {
+            string mainArg = args[0];
+            if (mainArg == "/CreateForAllUsers" && args.Length == 2)
+            {
+                if (!Launcher.IsAdmin())
+                {
+                    Console.WriteLine("Administrative privileges required to create association for all users");
+                    return false;
+                }
+                string launcherPath = args[1];
+                FileAssociation.CreateAssociationForAllUsers(launcherPath);
+                return true;
+            }
+            if (mainArg == "/CreateForCurrentUser" && args.Length == 2)
+            {
+                string launcherPath = args[1];
+                FileAssociation.CreateAssociation(launcherPath);
+                return true;
+            }
+            if (mainArg == "/RemoveForAllUsers")
+            {
+                if (!Launcher.IsAdmin())
+                {
+                    Console.WriteLine("Administrative privileges required to remove association for all users");
+                    return false;
+                }
+                FileAssociation.RemoveAssociationForAllUsers();
+                return true;
+            }
+            if (mainArg == "/RemoveForCurrentUser")
+            {
+                FileAssociation.RemoveAssociation();
+                return true;
+            }
+            Console.WriteLine("Unsupported argument: Must be one of /CreateForCurrentUser <launcher> /CreateForAllUsers <launcher> /RemoveForAllUsers /RemoveForCurrentUser.");
+            return false;
+        }
     }
 }
