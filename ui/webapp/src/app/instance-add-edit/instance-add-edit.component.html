@@ -82,8 +82,8 @@
         </mat-grid-tile>
 
         <mat-grid-tile>
-          <div class="boolean-param-field underline-field">
-            <mat-slide-toggle (change)="toggleUpdateMasterToken()" *ngIf="masterTokenCheckboxVisible"> </mat-slide-toggle>
+          <div class="boolean-param-field underline-field" *ngIf="masterTokenCheckboxVisible">
+            <mat-slide-toggle (change)="toggleUpdateMasterToken()"> </mat-slide-toggle>
             <label class="boolean-param-label"> Update Security Token </label>
           </div>
         </mat-grid-tile>
