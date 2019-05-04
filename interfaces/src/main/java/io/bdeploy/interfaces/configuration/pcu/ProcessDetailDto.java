@@ -1,5 +1,6 @@
 package io.bdeploy.interfaces.configuration.pcu;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -42,12 +43,13 @@ public class ProcessDetailDto {
      */
     public List<String> log() {
         List<String> log = new ArrayList<>();
-        log.add("PID: " + pid);
+        log.add("ProcessDetail [ PID=" + pid + " ]");
         if (user != null) {
             log.add("Started by:  " + user);
         }
         if (startTime != -1) {
-            log.add("Started at:  " + startTime);
+            SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+            log.add("Started at:  " + format.format(startTime));
         }
         if (command != null) {
             log.add("Command Line: " + command);

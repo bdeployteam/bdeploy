@@ -19,6 +19,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
+import com.google.common.base.Joiner;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import io.bdeploy.bhive.util.StorageHelper;
@@ -91,6 +92,9 @@ public class ProcessController {
     /** Flag indicating whether or not the process is killed intentionally */
     private boolean stopRequested = false;
 
+    /** Flag indicating that stop command gave up */
+    private boolean stopRequestGaveUp = false;
+
     /** Time when the process has been started */
     private Instant startTime;
 
@@ -133,6 +137,24 @@ public class ProcessController {
         this.processConfig = pc;
         this.recoverAttempts = pc.processControl.noOfRetries;
         this.processDir = processDir;
+    }
+
+    @Override
+    public String toString() {
+        ProcessStatusDto status = getStatus();
+        List<String> logs = new ArrayList<>();
+        logs.addAll(status.logStatusDetails());
+        logs.add("Alive: " + (process != null ? process.isAlive() : "false"));
+        if (process != null) {
+            logs.add("Children: " + process.children().count());
+        }
+        logs.add("Directory: " + processDir);
+        logs.add("Active Task: " + (lockTask != null ? lockTask : "-"));
+        logs.add("Stop Requested: " + stopRequested);
+        logs.add("Stop Request Failed: " + stopRequestGaveUp);
+        logs.add("Uptime Task: " + (uptimeTask != null ? !uptimeTask.isDone() : "false"));
+        logs.add("Recover Task: " + (recoverTask != null ? !recoverTask.isDone() : "false"));
+        return Joiner.on("\n").join(logs);
     }
 
     /**
@@ -217,8 +239,8 @@ public class ProcessController {
             Duration delay = recoverDelays[Math.min(recoverCount, recoverDelays.length - 1)];
             dto.recoverAt = stopTime.plus(delay).toEpochMilli();
             dto.recoverDelay = delay.toSeconds();
-            dto.retryCount = recoverCount;
         }
+        dto.retryCount = recoverCount;
         if (stopTime != null) {
             dto.stopTime = stopTime.toEpochMilli();
         }
@@ -363,6 +385,7 @@ public class ProcessController {
 
         // Set flag that the termination of the process is expected
         stopRequested = true;
+        stopRequestGaveUp = false;
         if (processState == ProcessState.CRASHED_WAITING) {
             logger.log((l) -> l.info("Aborting restart attempt of application."));
             processState = ProcessState.STOPPED;
@@ -389,6 +412,7 @@ public class ProcessController {
             Duration duration = Duration.between(stopRequested, Instant.now());
             logger.log((l) -> l.info("Application is now stopped. Stopping took {}", Formatter.formatDuration(duration)));
         } else {
+            stopRequestGaveUp = true;
             logger.log((l) -> l.error("Giving up to terminate application. Process does not respond to kill requests."));
             logger.log((l) -> l.error("Application state remains {} ", processState));
         }
@@ -473,6 +497,7 @@ public class ProcessController {
         } catch (Exception ex) {
             throw new RuntimeException("Failed to execute task '" + taskName + "'", ex);
         } finally {
+            lockTask = null;
             lock.unlock();
 
             // Notify listeners when state changes
@@ -556,7 +581,8 @@ public class ProcessController {
     /** Callback method that is executed when the process terminates */
     private void onTerminated() {
         try {
-            if (stopRequested) {
+            // Process terminated after stop request. Nothing to do
+            if (stopRequested && !stopRequestGaveUp) {
                 return;
             }
             afterTerminated();
@@ -761,7 +787,7 @@ public class ProcessController {
                 logger.log((l) -> l.warn("Timed-out waiting for application to exit. Timeout: {} ms",
                         processConfig.processControl.gracePeriod));
             } catch (Exception e) {
-                logger.log((l) -> l.warn("Execption while waiting for application to terminate.", e));
+                logger.log((l) -> l.warn("Exception while waiting for application to terminate.", e));
             }
 
             // Continue when process is still alive.

@@ -1,5 +1,7 @@
 package io.bdeploy.pcu;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -16,6 +18,7 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessState;
  */
 public class StateListener implements Consumer<ProcessState> {
 
+    private ProcessController pc;
     private CountDownLatch latch;
     private List<ProcessState> expected;
 
@@ -26,9 +29,9 @@ public class StateListener implements Consumer<ProcessState> {
      *            the expected target states.
      */
     public void expect(ProcessController pc, ProcessState... expected) {
+        this.pc = pc;
         this.expected = Lists.newArrayList(expected);
         this.latch = new CountDownLatch(1);
-        this.accept(pc.getState());
     }
 
     @Override
@@ -52,16 +55,13 @@ public class StateListener implements Consumer<ProcessState> {
      * Causes the current thread to wait until all desired target states have been reached or the specified waiting time
      * elapses. An exception will be thrown if the waiting time exceeds.
      */
-    public void await(Duration duration) {
-        try {
-            boolean done = latch.await(duration.getSeconds(), TimeUnit.SECONDS);
-            if (!done) {
-                throw new RuntimeException("Timout occured while waiting for expected states: " + expected);
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("Interrupted while waiting for expected states: " + expected);
+    public void await(Duration duration) throws InterruptedException {
+        boolean done = latch.await(duration.getSeconds(), TimeUnit.SECONDS);
+        if (done) {
+            return;
         }
+        String message = "Expected states not achived within waiting time. Expected: <%1$s> but was: <[%2$s]>.\n%3$s";
+        fail(String.format(message, expected, pc.getState(), pc.toString()));
     }
 
 }

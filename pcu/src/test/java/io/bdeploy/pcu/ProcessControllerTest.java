@@ -21,7 +21,7 @@ import io.bdeploy.pcu.util.ProcessHandles;
 @ExtendWith(TempDirectory.class)
 public class ProcessControllerTest {
 
-    private final static Duration TIMEOUT = Duration.ofSeconds(10);
+    private final static Duration TIMEOUT = Duration.ofSeconds(60);
 
     @Test
     public void testStartStop(@TempDir Path tmp) throws Exception {
@@ -54,9 +54,11 @@ public class ProcessControllerTest {
         listener.await(TIMEOUT);
         process.detach();
 
-        // Overwrite instance and try to recover
+        // Overwrite instance
         process = process.newInstance();
         process.addStatusListener(listener);
+
+        // Try to recover
         listener.expect(process, ProcessState.RUNNING);
         process.recover();
         listener.await(TIMEOUT);
@@ -85,11 +87,11 @@ public class ProcessControllerTest {
         assertEquals(process.getState(), ProcessState.RUNNING);
 
         // Terminate process using the provided PID
+        listener.expect(process, ProcessState.CRASHED_WAITING, ProcessState.RUNNING_UNSTABLE, ProcessState.RUNNING);
         ProcessHandle handle = ProcessHandle.of(process.getStatus().processDetails.pid).get();
         ProcessHandles.destroy(handle);
 
-        // Check state transitions from waiting to running
-        listener.expect(process, ProcessState.CRASHED_WAITING, ProcessState.RUNNING_UNSTABLE, ProcessState.RUNNING);
+        // Wait for state transitions from waiting to running
         listener.await(TIMEOUT);
 
         // Now shutdown the process again
@@ -232,7 +234,7 @@ public class ProcessControllerTest {
     @Test
     public void testStopWithoutRecover(@TempDir Path tmp) throws Exception {
         StateListener listener = new StateListener();
-        ProcessController process = TestFactory.create(tmp, "App6", false, "1");
+        ProcessController process = TestFactory.create(tmp, "App7", false, "1");
         process.addStatusListener(listener);
 
         // Start and wait until it terminates
@@ -247,7 +249,7 @@ public class ProcessControllerTest {
     @Test
     public void testStartWhileInCrashBackOff(@TempDir Path tmp) throws Exception {
         StateListener listener = new StateListener();
-        ProcessController process = TestFactory.create(tmp, "App7", true, "300");
+        ProcessController process = TestFactory.create(tmp, "App8", true, "300");
         process.addStatusListener(listener);
 
         // Increment duration so that we can test the starting
@@ -261,11 +263,9 @@ public class ProcessControllerTest {
         assertEquals(process.getState(), ProcessState.RUNNING);
 
         // Terminate process using the provided PID
+        listener.expect(process, ProcessState.CRASHED_WAITING);
         ProcessHandle handle = ProcessHandle.of(process.getStatus().processDetails.pid).get();
         ProcessHandles.destroy(handle);
-
-        // Wait until it crashes
-        listener.expect(process, ProcessState.CRASHED_WAITING);
         listener.await(TIMEOUT);
 
         // Check if properties are set and that the recover task is scheduled

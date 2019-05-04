@@ -1,6 +1,8 @@
 package io.bdeploy.interfaces.configuration.pcu;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.google.common.base.Joiner;
@@ -10,14 +12,14 @@ import com.google.common.base.Joiner;
  */
 public class ProcessStatusDto {
 
-    /** Unique id of the application */
-    public String appUid;
-
     /** The UID of the instance */
     public String instanceUid;
 
     /** Tag of the instance */
     public String instanceTag;
+
+    /** Unique id of the application */
+    public String appUid;
 
     /** Current process state */
     public ProcessState processState;
@@ -43,31 +45,39 @@ public class ProcessStatusDto {
     @Override
     public String toString() {
         List<String> logs = new ArrayList<>();
-        logs.addAll(logProcessDetails());
-        logs.addAll(logDeploymentDetails());
+        logs.addAll(logStatusDetails());
+        logProcessDetails().forEach(l -> logs.add("\t" + l));
         return Joiner.on("\n").join(logs);
     }
 
     /**
-     * Returns a human readable string of the process status.
+     * Returns a human readable string of the current status.
      */
-    public List<String> logProcessDetails() {
+    public List<String> logStatusDetails() {
+        SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
         List<String> logs = new ArrayList<>();
-        logs.add("Application: " + appUid);
-        logs.add("Version: " + instanceTag);
-        if (processDetails != null) {
-            processDetails.log().forEach(l -> logs.add(l));
+        logs.add("ProcessController [" + instanceUid + " / " + instanceTag + " / " + appUid + "]");
+        logs.add("State: " + processState);
+        if (!processState.isRunning() && stopTime > 0) {
+            logs.add("Stopped At: " + format.format(new Date(stopTime)));
+        }
+        if (recoverAt > 0) {
+            logs.add("Restart At: " + format.format(new Date(recoverAt)));
+        }
+        if (retryCount > 0) {
+            logs.add("Recoverd: " + retryCount + "/" + maxRetryCount);
         }
         return logs;
     }
 
     /**
-     * Returns a human readable string of the deployment details.
+     * Returns a human readable string of the launched processes.
      */
-    public List<String> logDeploymentDetails() {
+    public List<String> logProcessDetails() {
         List<String> logs = new ArrayList<>();
-        logs.add("Application: " + appUid);
-        logs.add("\tVersion: " + instanceTag);
+        if (processDetails != null) {
+            processDetails.log().forEach(l -> logs.add(l));
+        }
         return logs;
     }
 
