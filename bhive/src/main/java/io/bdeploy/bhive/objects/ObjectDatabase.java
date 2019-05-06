@@ -6,6 +6,7 @@ package io.bdeploy.bhive.objects;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -84,7 +85,14 @@ public class ObjectDatabase extends LockableDatabase {
      * @return <code>true</code> if it exists, <code>false</code> otherwise.
      */
     public boolean hasObject(ObjectId id) {
-        return Files.exists(getObjectFile(id));
+        // java.io.File.exists() seems to be about 30% faster than java.nio.file.Files.exists() on Windows
+        // e.g. 60 microseconds vs. 85 microseconds -- this calculates to 25 seconds for 1,000,000 calls...
+        Path path = getObjectFile(id);
+        if (path.getFileSystem() == FileSystems.getDefault()) {
+            return getObjectFile(id).toFile().exists();
+        } else {
+            return Files.exists(getObjectFile(id));
+        }
     }
 
     /**
