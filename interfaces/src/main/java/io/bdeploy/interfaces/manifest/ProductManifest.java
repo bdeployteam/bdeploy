@@ -5,10 +5,14 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ForkJoinPool;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
@@ -201,6 +205,8 @@ public class ProductManifest {
 
     private static void importApplications(BHive hive, DependencyFetcher fetcher, ProductVersionDescriptor versions,
             Map<String, Map<OperatingSystem, String>> toImport, String baseName, Builder builder, Path impBasePath) {
+        List<Callable<ApplicationDescriptor>> tasks = new ArrayList<>();
+
         for (Map.Entry<String, Map<OperatingSystem, String>> entry : toImport.entrySet()) {
             for (Map.Entry<OperatingSystem, String> relApp : entry.getValue().entrySet()) {
                 Path appPath = impBasePath.resolve(relApp.getValue());
@@ -212,23 +218,42 @@ public class ProductManifest {
                     throw new IllegalStateException("Cannot find " + appPath + " while importing " + entry.getKey());
                 }
 
-                // read and resolve dependencies.
-                ApplicationDescriptor appDesc;
-                try (InputStream is = Files.newInputStream(appPath)) {
-                    appDesc = StorageHelper.fromYamlStream(is, ApplicationDescriptor.class);
-                } catch (IOException e) {
-                    throw new IllegalStateException("Cannot read " + appPath);
-                }
+                Path finalAppPath = appPath;
 
-                RuntimeAssert.assertTrue(appDesc.supportedOperatingSystems.contains(relApp.getKey()),
-                        "Application " + entry.getKey() + " does not support operating system " + relApp.getKey());
-
-                fetcher.fetch(hive, appDesc.runtimeDependencies, relApp.getKey()).forEach(builder::add);
-
-                builder.add(hive.execute(new ImportOperation().setSourcePath(appPath.getParent()).setManifest(
-                        new ScopedManifestKey(baseName + entry.getKey(), relApp.getKey(), versions.version).getKey())));
+                tasks.add(() -> importDependenciesAndApplication(hive, fetcher, versions, baseName, builder, entry.getKey(),
+                        relApp.getKey(), finalAppPath));
             }
         }
+
+        ForkJoinPool.commonPool().invokeAll(tasks).forEach(f -> {
+            try {
+                f.get();
+            } catch (Exception e) {
+                throw new IllegalStateException("Failed to import", e);
+            }
+        });
+    }
+
+    private static ApplicationDescriptor importDependenciesAndApplication(BHive hive, DependencyFetcher fetcher,
+            ProductVersionDescriptor versions, String baseName, Builder builder, String appName, OperatingSystem os,
+            Path appPath) {
+        // read and resolve dependencies.
+        ApplicationDescriptor appDesc;
+        try (InputStream is = Files.newInputStream(appPath)) {
+            appDesc = StorageHelper.fromYamlStream(is, ApplicationDescriptor.class);
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot read " + appPath);
+        }
+
+        RuntimeAssert.assertTrue(appDesc.supportedOperatingSystems.contains(os),
+                "Application " + appName + " does not support operating system " + os);
+
+        fetcher.fetch(hive, appDesc.runtimeDependencies, os).forEach(builder::add);
+
+        builder.add(hive.execute(new ImportOperation().setSourcePath(appPath.getParent())
+                .setManifest(new ScopedManifestKey(baseName + appName, os, versions.version).getKey())));
+
+        return appDesc;
     }
 
     private static ProductVersionDescriptor readProductVersionDescriptor(Path impDesc, Path vDesc) {
