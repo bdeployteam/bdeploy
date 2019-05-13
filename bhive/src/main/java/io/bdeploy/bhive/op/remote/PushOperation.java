@@ -2,22 +2,24 @@ package io.bdeploy.bhive.op.remote;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.core.UriBuilder;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
-import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.objects.view.BlobView;
+import io.bdeploy.bhive.objects.view.SkippedElementView;
 import io.bdeploy.bhive.objects.view.TreeView;
 import io.bdeploy.bhive.objects.view.scanner.TreeVisitor;
 import io.bdeploy.bhive.op.CopyOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestRefScanOperation;
-import io.bdeploy.bhive.op.ObjectListOperation;
 import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.bhive.remote.RemoteBHive;
 
@@ -41,7 +43,7 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
 
         try (RemoteBHive rh = RemoteBHive.forService(getRemote(), hiveName, getActivityReporter())) {
             SortedMap<Manifest.Key, ObjectId> remoteManifests = rh
-                    .getManifestInventory(manifests.stream().map(Manifest.Key::toString).toArray(String[]::new));
+                    .getManifestInventory(manifests.parallelStream().map(Manifest.Key::toString).toArray(String[]::new));
 
             for (Manifest.Key key : manifests) {
                 if (remoteManifests.containsKey(key)) {
@@ -51,6 +53,7 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
             }
 
             // explicitly push and create on the remote any referenced manifests.
+            // TODO: there is /some/ potential here: ref scan does all the scanning which happens below separately again.
             manifests.forEach(m -> toPush.addAll(execute(new ManifestRefScanOperation().setManifest(m)).values()));
 
             if (toPush.isEmpty()) {
@@ -59,8 +62,16 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
 
             stats.sumManifests = toPush.size();
 
-            // STEP 1: figure out all trees we want to push
-            SortedSet<ObjectId> allTrees = scanAllTrees(toPush);
+            // create a view of every manifest on our side. does not follow references as references are scanned above.
+            // TODO: ref scan above already calculated all this internally - maybe we can avoid double scanning (although it is cached).
+            List<TreeView> snapshots = toPush.parallelStream()
+                    .map(m -> execute(new ScanOperation().setManifest(m).setFollowReferences(false)))
+                    .collect(Collectors.toList());
+
+            // STEP 1: figure out all trees we want to push - scans without following references
+            SortedSet<TreeView> allTreeSnapshots = scanAllTreeSnapshots(snapshots);
+            SortedSet<ObjectId> allTrees = allTreeSnapshots.parallelStream().map(TreeView::getElementId)
+                    .collect(Collectors.toCollection(TreeSet::new));
             stats.sumTrees = allTrees.size();
 
             // STEP 2: ask the remote for missing trees
@@ -68,14 +79,12 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
             stats.sumMissingTrees = missingTrees.size();
 
             // STEP 3: figure out (locally) which trees are already present on the remote.
-            SortedSet<ObjectId> presentTrees = new TreeSet<>(allTrees);
-            presentTrees.removeAll(missingTrees);
+            SortedSet<TreeView> missingTreeSnapshots = allTreeSnapshots.parallelStream()
+                    .filter(t -> missingTrees.contains(t.getElementId())).collect(Collectors.toCollection(TreeSet::new));
 
             // STEP 4: scan all trees, exclude trees already present.
-            ObjectListOperation scanWithExcludes = new ObjectListOperation();
-            presentTrees.forEach(scanWithExcludes::excludeTree);
-            missingTrees.forEach(scanWithExcludes::addTree);
-            SortedSet<ObjectId> requiredObjects = execute(scanWithExcludes);
+            //scan objectIds of each missingTree, include missingTree itself
+            SortedSet<ObjectId> requiredObjects = scanAllObjectSnapshots(missingTreeSnapshots);
 
             // STEP 5: filter object to transfer only what is REALLY required
             SortedSet<ObjectId> missingObjects = rh.getMissingObjects(requiredObjects);
@@ -103,13 +112,32 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
         return stats;
     }
 
-    private SortedSet<ObjectId> scanAllTrees(SortedSet<Key> toPush) {
-        SortedSet<ObjectId> allTrees = new TreeSet<>();
-        for (Manifest.Key k : toPush) {
-            TreeView snapshot = execute(new ScanOperation().setManifest(k));
-            snapshot.visit(new TreeVisitor.Builder().onTree(x -> allTrees.add(x.getElementId())).build());
+    /**
+     * Find all Trees within the list of {@link TreeView}s recursively.
+     */
+    private SortedSet<TreeView> scanAllTreeSnapshots(List<TreeView> toPush) {
+        SortedSet<TreeView> allTrees = new TreeSet<>();
+        TreeVisitor visitor = new TreeVisitor.Builder().onTree(x -> allTrees.add(x)).build();
+        for (TreeView snapshot : toPush) {
+            snapshot.visit(visitor);
         }
         return allTrees;
+    }
+
+    /**
+     * Find all {@link ObjectId}s referenced by the given trees (flat).
+     * <p>
+     * {@link SkippedElementView} is treated like {@link BlobView} as manifest references are assumed to be skipped but required
+     * to push.
+     */
+    private SortedSet<ObjectId> scanAllObjectSnapshots(SortedSet<TreeView> missingTreeSnapshots) {
+        return missingTreeSnapshots.parallelStream().map(t -> {
+            SortedSet<ObjectId> objectsOfTree = new TreeSet<>();
+            t.visit(new TreeVisitor.Builder().onTree(check -> t.equals(check)).onBlob(b -> objectsOfTree.add(b.getElementId()))
+                    .onSkipped(m -> objectsOfTree.add(m.getElementId())).build());
+            objectsOfTree.add(t.getElementId());
+            return objectsOfTree;
+        }).flatMap(SortedSet::stream).collect(Collectors.toCollection(TreeSet::new));
     }
 
     public PushOperation addManifest(Manifest.Key key) {

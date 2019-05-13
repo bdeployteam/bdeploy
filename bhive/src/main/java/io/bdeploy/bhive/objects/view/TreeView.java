@@ -4,13 +4,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.objects.view.scanner.TreeVisitor;
-
-import java.util.TreeMap;
 
 /**
  * A recursive view of a {@link Tree}'s metadata, usually a {@link Manifest}'s root {@link Tree}.

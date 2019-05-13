@@ -15,6 +15,7 @@ public class ScanOperation extends BHive.Operation<TreeView> {
     private ObjectId treeId;
     private int maxDepth = Integer.MAX_VALUE;
     private Manifest.Key manifest;
+    private boolean followReferences = true;
 
     @Override
     public TreeView call() throws Exception {
@@ -26,7 +27,7 @@ public class ScanOperation extends BHive.Operation<TreeView> {
 
         RuntimeAssert.assertNotNull(treeId, "No tree to scan");
 
-        return getObjectManager().scan(treeId, maxDepth);
+        return getObjectManager().scan(treeId, maxDepth, followReferences);
     }
 
     /**
@@ -50,6 +51,14 @@ public class ScanOperation extends BHive.Operation<TreeView> {
      */
     public ScanOperation setMaxDepth(int max) {
         this.maxDepth = max;
+        return this;
+    }
+
+    /**
+     * Set whether to follow {@link Manifest} references. Defaults to <code>true</code>.
+     */
+    public ScanOperation setFollowReferences(boolean follow) {
+        this.followReferences = follow;
         return this;
     }
 

@@ -21,11 +21,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.j256.simplemagic.ContentInfo;
 import com.j256.simplemagic.ContentInfoInputStreamWrapper;
 import com.j256.simplemagic.ContentInfoUtil;
@@ -59,6 +62,17 @@ public class ObjectManager {
     private final ManifestDatabase mdb;
     private final ActivityReporter reporter;
     private final ExecutorService fileOps;
+
+    /**
+     * A cache for Tree and ManifestRef objects which need to actually be loaded from disk for correct tree traversal.
+     * <p>
+     * Assuming a max object size of ~1K, this cache would grow to ~10MB. The average object size is assumed to be less,
+     * but the calculation is defensive.
+     * <p>
+     * For instance a TREE object contains approx. 70 bytes per entry. This means that a 1K tree can hold ~15 entries.
+     * The average for a representative large-scale sample application is ~7.
+     */
+    private final Cache<ObjectId, Object> objectCache = CacheBuilder.newBuilder().maximumSize(10_000).build();
 
     /**
      * Creates a new {@link ObjectManager}. The manager itself has no state. It only
@@ -305,7 +319,7 @@ public class ObjectManager {
      * @param tree the root tree to scan
      */
     public TreeView scan(ObjectId tree) {
-        return scan(tree, Integer.MAX_VALUE);
+        return scan(tree, Integer.MAX_VALUE, true);
     }
 
     /**
@@ -314,14 +328,14 @@ public class ObjectManager {
      * @param tree the root tree to scan
      * @param maxDepth maximum scan depth. A depth of 1 will include only direct children at the root level, and so on.
      */
-    public TreeView scan(ObjectId tree, int maxDepth) {
+    public TreeView scan(ObjectId tree, int maxDepth, boolean followReferences) {
         if (!db.hasObject(tree)) {
             throw new IllegalArgumentException("Cannot find root tree to scan: " + tree);
         }
-        return (TreeView) scan(tree, EntryType.TREE, new ArrayDeque<>(), maxDepth);
+        return (TreeView) scan(tree, EntryType.TREE, new ArrayDeque<>(), maxDepth, followReferences);
     }
 
-    private ElementView scan(ObjectId object, EntryType type, Deque<String> path, int maxDepth) {
+    private ElementView scan(ObjectId object, EntryType type, Deque<String> path, int maxDepth, boolean followReferences) {
         // include blobs anyway, only skip following trees
         if (type != EntryType.BLOB && path.size() >= maxDepth) {
             return new SkippedElementView(object, path);
@@ -333,6 +347,9 @@ public class ObjectManager {
             case BLOB:
                 return new BlobView(object, path);
             case MANIFEST:
+                if (!followReferences) {
+                    return new SkippedElementView(object, path);
+                }
                 Manifest mf = lookupManifestRef(object);
                 if (mf == null) {
                     return new MissingObjectView(object, type, path);
@@ -345,7 +362,7 @@ public class ObjectManager {
 
                 try {
                     Tree mrt = loadObject(mf.getRoot(), (is) -> StorageHelper.fromStream(is, Tree.class));
-                    scanChildren(mrs, mrt, path, maxDepth);
+                    scanChildren(mrs, mrt, path, maxDepth, followReferences);
                 } catch (Exception e) {
                     mrs.addChild(new DamagedObjectView(mf.getRoot(), type, path));
                 }
@@ -354,7 +371,7 @@ public class ObjectManager {
                 try {
                     Tree t = loadObject(object, (is) -> StorageHelper.fromStream(is, Tree.class));
                     TreeView ts = new TreeView(object, path);
-                    scanChildren(ts, t, path, maxDepth);
+                    scanChildren(ts, t, path, maxDepth, followReferences);
                     return ts;
                 } catch (Exception e) {
                     return new DamagedObjectView(object, EntryType.TREE, path);
@@ -364,10 +381,10 @@ public class ObjectManager {
         }
     }
 
-    private void scanChildren(TreeView container, Tree tree, Deque<String> path, int maxDepth) {
+    private void scanChildren(TreeView container, Tree tree, Deque<String> path, int maxDepth, boolean followReferences) {
         for (Entry<Key, ObjectId> entry : tree.getChildren().entrySet()) {
             path.addLast(entry.getKey().getName());
-            container.addChild(scan(entry.getValue(), entry.getKey().getType(), path, maxDepth));
+            container.addChild(scan(entry.getValue(), entry.getKey().getType(), path, maxDepth, followReferences));
             path.removeLast();
         }
     }
@@ -486,11 +503,18 @@ public class ObjectManager {
      * @param loader the loader to use.
      * @return the loaded object.
      */
+    @SuppressWarnings("unchecked")
     private <T> T loadObject(ObjectId id, Function<InputStream, T> loader) {
-        try (InputStream is = db.getStream(id)) {
-            return loader.apply(is);
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot load object " + id, e);
+        try {
+            return (T) objectCache.get(id, () -> {
+                try (InputStream is = db.getStream(id)) {
+                    return loader.apply(is);
+                } catch (IOException e) {
+                    throw new IllegalStateException("Cannot load object " + id, e);
+                }
+            });
+        } catch (ExecutionException e) {
+            throw new IllegalStateException("Cannot load object into cache: " + id, e);
         }
     }
 

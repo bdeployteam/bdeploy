@@ -14,7 +14,7 @@ import io.bdeploy.bhive.op.ScanOperation;
 /**
  * Base of all view carried by a {@link TreeView} recursively.
  */
-public abstract class ElementView {
+public abstract class ElementView implements Comparable<ElementView> {
 
     private final ObjectId id;
     private final List<String> path;
@@ -60,6 +60,11 @@ public abstract class ElementView {
     @Override
     public String toString() {
         return getClass().getSimpleName() + "[path:" + getPathString() + ", id:" + id + "]";
+    }
+
+    @Override
+    public int compareTo(ElementView o) {
+        return id.compareTo(o.id);
     }
 
 }
