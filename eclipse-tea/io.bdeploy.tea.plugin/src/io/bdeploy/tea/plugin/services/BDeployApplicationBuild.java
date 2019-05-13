@@ -6,6 +6,8 @@ package io.bdeploy.tea.plugin.services;
 import java.io.File;
 import java.util.function.Supplier;
 
+import org.eclipse.tea.core.BackgroundTask;
+
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 
 /**
@@ -18,4 +20,5 @@ public class BDeployApplicationBuild {
     public String name;
     public Supplier<File> source;
     public OperatingSystem os;
+    public BackgroundTask task;
 }
