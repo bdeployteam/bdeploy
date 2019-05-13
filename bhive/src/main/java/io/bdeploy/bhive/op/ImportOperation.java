@@ -12,6 +12,7 @@ import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditStrategy;
 import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditWith;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.common.ActivityReporter.Activity;
 
 /**
  * Import a {@link Path} recursively into the local hive.
@@ -29,18 +30,19 @@ public class ImportOperation extends BHive.Operation<Manifest.Key> {
         assertNotNull(toImport, "Source path not set");
         assertNotNull(manifest, "Manifest not set");
 
-        SortedSet<Manifest.Key> existing = execute(new ManifestListOperation());
-        if (existing.contains(manifest)) {
-            throw new IllegalArgumentException("Manifest " + manifest + " already present");
+        try (Activity activity = getActivityReporter().start("Importing manifest...", -1)) {
+            SortedSet<Manifest.Key> existing = execute(new ManifestListOperation());
+            if (existing.contains(manifest)) {
+                throw new IllegalArgumentException("Manifest " + manifest + " already present");
+            }
+
+            Manifest.Builder builder = new Manifest.Builder(manifest);
+
+            builder.setRoot(execute(new ImportTreeOperation().setSourcePath(toImport)));
+            labels.forEach((k, v) -> builder.addLabel(k, v));
+
+            getManifestDatabase().addManifest(builder.build());
         }
-
-        Manifest.Builder builder = new Manifest.Builder(manifest);
-
-        builder.setRoot(execute(new ImportTreeOperation().setSourcePath(toImport)));
-        labels.forEach((k, v) -> builder.addLabel(k, v));
-
-        getManifestDatabase().addManifest(builder.build());
-
         return manifest;
     }
 

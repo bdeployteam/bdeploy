@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
+import io.bdeploy.common.ActivityReporter.Activity;
 
 /**
  * Import a {@link Path} recursively into the local hive and return the
@@ -20,7 +21,9 @@ public class ImportTreeOperation extends BHive.Operation<ObjectId> {
     public ObjectId call() throws Exception {
         assertNotNull(toImport, "Source path not set");
 
-        return getObjectManager().importTree(toImport);
+        try (Activity activity = getActivityReporter().start("Importing tree...", -1)) {
+            return getObjectManager().importTree(toImport);
+        }
     }
 
     /**

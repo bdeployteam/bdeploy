@@ -9,6 +9,7 @@ import io.bdeploy.bhive.audit.AuditParameterExtractor.NoAudit;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.objects.ObjectDatabase;
+import io.bdeploy.common.ActivityReporter.Activity;
 
 /**
  * Import a single blob from existing data in memory into the {@link ObjectDatabase}. Useful mainly
@@ -21,8 +22,10 @@ public class ImportObjectOperation extends BHive.Operation<ObjectId> {
 
     @Override
     public ObjectId call() throws Exception {
-        assertNotNull(data, "Data to import not set");
-        return getObjectManager().db(x -> x.addObject(data));
+        try (Activity activity = getActivityReporter().start("Importing data...", -1)) {
+            assertNotNull(data, "Data to import not set");
+            return getObjectManager().db(x -> x.addObject(data));
+        }
     }
 
     /**

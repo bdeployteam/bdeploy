@@ -14,6 +14,7 @@ import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditWith;
 import io.bdeploy.bhive.audit.AuditParameterExtractor.NoAudit;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.common.ActivityReporter.Activity;
 
 /**
  * The {@link CopyOperation} copies objects and manifests from one local
@@ -38,36 +39,38 @@ public class CopyOperation extends BHive.Operation<Void> {
     public Void call() throws Exception {
         assertNotNull(destinationHive, "Destination Hive not set");
 
-        if (objects.isEmpty() && manifests.isEmpty()) {
-            // copy all from the local hive; don't check which are reachable from manifests,
-            // as manifest may not be consistent in the source hive (delta transfer).
-            execute(new ManifestListOperation()).forEach(manifests::add);
-            execute(new ObjectListOperation()).forEach(objects::add);
-        }
+        try (Activity activity = getActivityReporter().start("Copying objects...")) {
+            if (objects.isEmpty() && manifests.isEmpty()) {
+                // copy all from the local hive; don't check which are reachable from manifests,
+                // as manifest may not be consistent in the source hive (delta transfer).
+                execute(new ManifestListOperation()).forEach(manifests::add);
+                execute(new ObjectListOperation()).forEach(objects::add);
+            }
 
-        // Scan for referenced manifests. Referenced manifests are found transitively.
-        SortedSet<Manifest.Key> additional = new TreeSet<>();
-        manifests.forEach(m -> additional
-                .addAll(execute(new ManifestRefScanOperation().setAllowMissingObjects(true).setManifest(m)).values()));
-        manifests.addAll(additional);
+            // Scan for referenced manifests. Referenced manifests are found transitively.
+            SortedSet<Manifest.Key> additional = new TreeSet<>();
+            manifests.forEach(m -> additional
+                    .addAll(execute(new ManifestRefScanOperation().setAllowMissingObjects(true).setManifest(m)).values()));
+            manifests.addAll(additional);
 
-        if (!objects.isEmpty()) {
-            InsertExistingObjectsOperation destinationInsert = new InsertExistingObjectsOperation()
-                    .setSourceObjectManager(getObjectManager());
-            objects.forEach(destinationInsert::addObject);
-            destinationHive.execute(destinationInsert);
-        }
+            if (!objects.isEmpty()) {
+                InsertExistingObjectsOperation destinationInsert = new InsertExistingObjectsOperation()
+                        .setSourceObjectManager(getObjectManager());
+                objects.forEach(destinationInsert::addObject);
+                destinationHive.execute(destinationInsert);
+            }
 
-        List<Manifest> loaded = manifests.stream().map(getManifestDatabase()::getManifest).collect(Collectors.toList());
+            List<Manifest> loaded = manifests.stream().map(getManifestDatabase()::getManifest).collect(Collectors.toList());
 
-        InsertManifestOperation destinationManifestInsert = new InsertManifestOperation();
-        loaded.forEach(destinationManifestInsert::addManifest);
-        destinationHive.execute(destinationManifestInsert);
+            InsertManifestOperation destinationManifestInsert = new InsertManifestOperation();
+            loaded.forEach(destinationManifestInsert::addManifest);
+            destinationHive.execute(destinationManifestInsert);
 
-        if (!partialAllowed) {
-            ManifestConsistencyCheckOperation destinationCheck = new ManifestConsistencyCheckOperation();
-            manifests.forEach(destinationCheck::addRoot);
-            destinationHive.execute(destinationCheck);
+            if (!partialAllowed) {
+                ManifestConsistencyCheckOperation destinationCheck = new ManifestConsistencyCheckOperation();
+                manifests.forEach(destinationCheck::addRoot);
+                destinationHive.execute(destinationCheck);
+            }
         }
 
         return null;

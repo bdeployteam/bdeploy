@@ -15,6 +15,7 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.objects.ManifestDatabase;
+import io.bdeploy.common.ActivityReporter.Activity;
 
 /**
  * Operation to delete manifests from the {@link ManifestDatabase} of
@@ -42,25 +43,27 @@ public class ManifestDeleteOldByIdOperation extends BHive.Operation<Void> {
         }
 
         long i = (mfsByKey.size() - amountToKeep);
-        for (Map.Entry<Long, List<Key>> entry : mfsByKey.entrySet()) {
-            if (entry.getValue().size() != 1) {
-                log.warn("Expected exactly one manifest match per tag: " + entry.getKey() + ", " + entry.getValue());
-                continue;
+        try (Activity activity = getActivityReporter().start("Deleting manifests...", i)) {
+            for (Map.Entry<Long, List<Key>> entry : mfsByKey.entrySet()) {
+                if (entry.getValue().size() != 1) {
+                    log.warn("Expected exactly one manifest match per tag: " + entry.getKey() + ", " + entry.getValue());
+                    continue;
+                }
+                Manifest.Key k = entry.getValue().get(0);
+                if (preDelete != null) {
+                    preDelete.accept(k);
+                }
+                execute(new ManifestDeleteOperation().setToDelete(k));
+                if (--i == 0) {
+                    break;
+                }
+                activity.workAndCancelIfRequested(1);
             }
-            Manifest.Key k = entry.getValue().get(0);
-            if (preDelete != null) {
-                preDelete.accept(k);
-            }
-            execute(new ManifestDeleteOperation().setToDelete(k));
-            if (--i == 0) {
-                break;
+
+            if (runGc) {
+                execute(new PruneOperation());
             }
         }
-
-        if (runGc) {
-            execute(new PruneOperation());
-        }
-
         return null;
     }
 

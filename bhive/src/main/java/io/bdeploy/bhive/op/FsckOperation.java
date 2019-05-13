@@ -10,6 +10,7 @@ import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditStrategy;
 import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditWith;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.objects.view.ElementView;
+import io.bdeploy.common.ActivityReporter.Activity;
 
 /**
  * The {@link FsckOperation} checks the hive for consistency problems.
@@ -24,31 +25,32 @@ public class FsckOperation extends BHive.Operation<List<ElementView>> {
 
     @Override
     public List<ElementView> call() throws Exception {
-        SortedSet<Manifest.Key> localManifests = execute(new ManifestListOperation());
+        try (Activity activity = getActivityReporter().start("Checking manifests...", -1)) {
+            if (manifests.isEmpty()) {
+                SortedSet<Manifest.Key> localManifests = execute(new ManifestListOperation());
+                manifests.addAll(localManifests);
+            }
 
-        if (manifests.isEmpty()) {
-            manifests.addAll(localManifests);
+            // TODO: handle missing manifest refs
+            // TODO: handle nested manifests (refs) so that they are checked only once!
+            ManifestConsistencyCheckOperation mfCheck = new ManifestConsistencyCheckOperation().setDryRun(!repair);
+            ObjectConsistencyCheckOperation objCheck = new ObjectConsistencyCheckOperation().setDryRun(!repair);
+
+            manifests.forEach(k -> {
+                mfCheck.addRoot(k);
+                objCheck.addRoot(k);
+            });
+
+            List<ElementView> problematic = new ArrayList<>();
+
+            // check whether all manifests are still valid, objects might have been removed.
+            problematic.addAll(execute(mfCheck));
+
+            // scan and re-hash all objects...
+            problematic.addAll(execute(objCheck));
+
+            return problematic;
         }
-
-        // TODO: handle missing manifest refs
-        // TODO: handle nested manifests (refs) so that they are checked only once!
-        ManifestConsistencyCheckOperation mfCheck = new ManifestConsistencyCheckOperation().setDryRun(!repair);
-        ObjectConsistencyCheckOperation objCheck = new ObjectConsistencyCheckOperation().setDryRun(!repair);
-
-        manifests.forEach(k -> {
-            mfCheck.addRoot(k);
-            objCheck.addRoot(k);
-        });
-
-        List<ElementView> problematic = new ArrayList<>();
-
-        // check whether all manifests are still valid, objects might have been removed.
-        problematic.addAll(execute(mfCheck));
-
-        // scan and re-hash all objects...
-        problematic.addAll(execute(objCheck));
-
-        return problematic;
     }
 
     /**
