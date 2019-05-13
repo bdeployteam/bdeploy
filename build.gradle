@@ -109,7 +109,12 @@ subprojects {
     }
 
     testlogger {
-        theme 'mocha-parallel'
+        if(project.hasProperty('verboseTest')) {
+            theme 'standard'
+            showStandardStreams true
+        } else {
+            theme 'mocha-parallel'
+        }
         slowThreshold 6000
     }
 
@@ -117,7 +122,9 @@ subprojects {
         useJUnitPlatform {
         //    excludeTags 'slow'
         }
-        maxParallelForks = 8
+        if(!project.hasProperty('verboseTest')) {
+            maxParallelForks = 8
+        }
         maxHeapSize = "2g"
         testLogging {
             reports.html.enabled = false

@@ -15,7 +15,7 @@ before_install:
 
 install: true
 script:
-  - ./gradlew clean sonarqube --scan -s
+  - ./gradlew clean sonarqube --scan -s -PverboseTest
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
