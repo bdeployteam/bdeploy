@@ -23,7 +23,6 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.ExportOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
-import io.bdeploy.bhive.op.ManifestRefScanOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
@@ -168,15 +167,16 @@ public class InstanceNodeController {
     }
 
     private void installConfigurationTo(InstanceNodeConfiguration dc) {
-        // write all the manifest content to the according target location
-        hive.execute(new ExportOperation().setManifest(manifest.getKey()).setTarget(paths.get(SpecialDirectory.BIN)));
+        Path targetDir = paths.get(SpecialDirectory.BIN);
 
-        // find out which Manifest is deployed where in the tree.
-        SortedMap<String, Manifest.Key> includedManifests = hive
-                .execute(new ManifestRefScanOperation().setManifest(manifest.getKey()));
+        ApplicationPoolingReferenceHandler aprh = new ApplicationPoolingReferenceHandler(hive,
+                paths.getAndCreate(SpecialDirectory.MANIFEST_POOL), targetDir.resolve(InstanceNodeManifest.MANIFEST_TREE));
+
+        // write all the manifest content to the according target location, but specially handle applications
+        hive.execute(new ExportOperation().setManifest(manifest.getKey()).setTarget(targetDir).setReferenceHandler(aprh));
 
         // render the PCU information.
-        VariableResolver resolver = new VariableResolver(paths, new ManifestRefPathProvider(paths, includedManifests),
+        VariableResolver resolver = new VariableResolver(paths, new ManifestRefPathProvider(paths, aprh.getExportedManifests()),
                 new ApplicationParameterProvider(dc), additionalResolvers);
         ProcessGroupConfiguration processGroupConfig = dc.renderDescriptor(resolver);
 

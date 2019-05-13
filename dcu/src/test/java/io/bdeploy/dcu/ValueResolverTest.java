@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.SortedMap;
@@ -27,9 +28,9 @@ import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
 import io.bdeploy.interfaces.variables.ApplicationParameterProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
+import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 import io.bdeploy.interfaces.variables.ManifestRefPathProvider;
 import io.bdeploy.interfaces.variables.VariableResolver;
-import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 import io.bdeploy.interfaces.variables.VariableResolver.SpecialVariablePrefix;
 
 @ExtendWith(TempDirectory.class)
@@ -37,14 +38,14 @@ public class ValueResolverTest {
 
     @Test
     public void testValueProvider(@TempDir Path tmp) throws Exception {
-        SortedMap<String, Manifest.Key> mfs = new TreeMap<>();
+        SortedMap<Path, Manifest.Key> mfs = new TreeMap<>();
         Manifest.Key keyA1 = new Manifest.Key("a", "v1");
         Manifest.Key keyA2 = new Manifest.Key("a", "v2");
         Manifest.Key keyB1 = new Manifest.Key("b", "v1");
 
-        mfs.put("path/to/a", keyA1);
-        mfs.put("path/to/a-v2", keyA2);
-        mfs.put("path/to/b", keyB1);
+        mfs.put(Paths.get("path/to/a"), keyA1);
+        mfs.put(Paths.get("path/to/a-v2"), keyA2);
+        mfs.put(Paths.get("path/to/b"), keyB1);
 
         Path fakeDeploy = tmp.resolve("fake");
         DeploymentPathProvider dpp = new DeploymentPathProvider(fakeDeploy, "fakeId");

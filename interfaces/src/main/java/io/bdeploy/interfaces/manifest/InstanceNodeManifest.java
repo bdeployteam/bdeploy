@@ -9,9 +9,9 @@ import java.util.TreeSet;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
-import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.ImportObjectOperation;
 import io.bdeploy.bhive.op.ImportTreeOperation;
 import io.bdeploy.bhive.op.InsertArtificialTreeOperation;
@@ -32,6 +32,7 @@ import io.bdeploy.interfaces.manifest.dependencies.LocalDependencyFetcher;
 public class InstanceNodeManifest {
 
     public static final String INSTANCE_NODE_LABEL = "X-InstanceNode";
+    public static final String MANIFEST_TREE = "manifests";
 
     private InstanceNodeConfiguration config;
     private Manifest.Key key;
@@ -172,7 +173,7 @@ public class InstanceNodeManifest {
                 mtb.add(new Tree.Key(refName, Tree.EntryType.MANIFEST),
                         hive.execute(new InsertManifestRefOperation().setManifest(ref)));
             }
-            tb.add(new Tree.Key("manifests", Tree.EntryType.TREE),
+            tb.add(new Tree.Key(MANIFEST_TREE, Tree.EntryType.TREE),
                     hive.execute(new InsertArtificialTreeOperation().setTree(mtb)));
 
             Manifest.Builder mfb = new Manifest.Builder(key);

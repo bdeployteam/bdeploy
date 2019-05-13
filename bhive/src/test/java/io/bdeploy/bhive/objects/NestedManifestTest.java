@@ -18,15 +18,13 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.model.Tree.EntryType;
-import io.bdeploy.bhive.objects.ManifestDatabase;
-import io.bdeploy.bhive.objects.ObjectManager;
 import io.bdeploy.bhive.objects.view.TreeView;
 import io.bdeploy.bhive.objects.view.scanner.TreeVisitor;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ContentHelper;
 import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.TempDirectory.TempDir;
+import io.bdeploy.common.TestActivityReporter;
 
 @ExtendWith(TempDirectory.class)
 @ExtendWith(TestActivityReporter.class)
@@ -69,7 +67,7 @@ public class NestedManifestTest extends DbTestBase {
             Manifest m = mdb.getManifest(root);
 
             Path target = rootd.resolve("exp");
-            om.exportTree(m.getRoot(), target);
+            om.exportTree(m.getRoot(), target, null);
 
             ContentHelper.checkDirsEqual(target.resolve("nested-a"), tmp);
             ContentHelper.checkDirsEqual(target.resolve("nested-b"), tmp);
@@ -83,6 +81,7 @@ public class NestedManifestTest extends DbTestBase {
             assertTrue(refKeys.containsKey("nested-a"));
             assertTrue(refKeys.containsKey("nested-b"));
             assertThat(refKeys.get("nested-a"), is(na));
+
         } finally {
             s.shutdownNow();
         }

@@ -16,7 +16,8 @@ public class DeploymentPathProvider {
         CONFIG("config"),
         RUNTIME("runtime"),
         BIN("bin"),
-        DATA("data");
+        DATA("data"),
+        MANIFEST_POOL("pool");
 
         private final String dirName;
 
@@ -48,6 +49,9 @@ public class DeploymentPathProvider {
                 return deploymentDir.resolve(dir.dirName);
             case BIN:
                 return deploymentDir.resolve(dir.dirName).resolve(installationId);
+            case MANIFEST_POOL:
+                // TODO: is this really a good idea to reach outside to the parent? this makes all instances share the pool.
+                return deploymentDir.getParent().resolve(dir.dirName);
             case CONFIG:
                 return get(SpecialDirectory.BIN).resolve(dir.dirName);
             case RUNTIME:

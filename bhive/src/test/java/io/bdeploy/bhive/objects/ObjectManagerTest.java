@@ -28,19 +28,17 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.model.Tree.EntryType;
-import io.bdeploy.bhive.objects.ManifestDatabase;
-import io.bdeploy.bhive.objects.ObjectManager;
 import io.bdeploy.bhive.objects.view.ElementView;
 import io.bdeploy.bhive.objects.view.ManifestRefView;
 import io.bdeploy.bhive.objects.view.MissingObjectView;
 import io.bdeploy.bhive.objects.view.TreeView;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.ContentHelper;
 import io.bdeploy.common.SlowTest;
 import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TestActivityReporter;
-import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.TempDirectory.TempDir;
+import io.bdeploy.common.TestActivityReporter;
 
 @ExtendWith(TempDirectory.class)
 @ExtendWith(TestActivityReporter.class)
@@ -60,7 +58,7 @@ public class ObjectManagerTest extends DbTestBase {
             assertThat(getObjectDatabase().getAllObjects().size(), is(4));
 
             // re-create tree in other directory.
-            mgr.exportTree(tree, myTarget);
+            mgr.exportTree(tree, myTarget, new DefaultReferenceHandler(mgr));
 
             Path t1 = myTarget.resolve("test.txt");
             Path t2 = myTarget.resolve(Paths.get("dir", "file.txt"));

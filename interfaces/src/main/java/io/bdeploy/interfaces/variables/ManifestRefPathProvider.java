@@ -19,11 +19,11 @@ import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 public class ManifestRefPathProvider {
 
     private final Path exportDir;
-    private final SortedMap<String, Manifest.Key> relPaths;
+    private final SortedMap<Path, Manifest.Key> paths;
 
-    public ManifestRefPathProvider(DeploymentPathProvider provider, SortedMap<String, Manifest.Key> relPaths) {
+    public ManifestRefPathProvider(DeploymentPathProvider provider, SortedMap<Path, Manifest.Key> paths) {
         this.exportDir = provider.get(SpecialDirectory.BIN);
-        this.relPaths = relPaths;
+        this.paths = paths;
 
         assertTrue(exportDir.isAbsolute(), "Given directory is not absolute: " + exportDir);
     }
@@ -40,26 +40,27 @@ public class ManifestRefPathProvider {
     public Path getManifestPath(String name) {
         if (name.contains(":")) {
             Manifest.Key fullKey = Manifest.Key.parse(name);
-            return relPaths.entrySet().stream().filter(e -> e.getValue().equals(fullKey)).map(e -> exportDir.resolve(e.getKey()))
-                    .findFirst().orElse(null);
+            return paths.entrySet().stream().filter(e -> e.getValue().equals(fullKey)).map(e -> e.getKey()).findFirst()
+                    .orElse(null);
         }
 
         List<Path> candidates = new ArrayList<>();
-        for (Map.Entry<String, Manifest.Key> entry : relPaths.entrySet()) {
-            if (entry.getValue().getName().equals(name)) {
-                candidates.add(exportDir.resolve(entry.getKey()));
+
+        // check OS specific
+        for (Map.Entry<Path, Manifest.Key> entry : paths.entrySet()) {
+            ScopedManifestKey smk = ScopedManifestKey.parse(entry.getValue());
+            if (smk != null) {
+                if (smk.getName().equals(name)) {
+                    candidates.add(entry.getKey());
+                }
             }
         }
 
-        // only resolve OS specific if no direct match has been found.
+        // only resolve non-OS specific if no OS specific match has been found.
         if (candidates.isEmpty()) {
-            // check OS specific
-            for (Map.Entry<String, Manifest.Key> entry : relPaths.entrySet()) {
-                ScopedManifestKey smk = ScopedManifestKey.parse(entry.getValue());
-                if (smk != null) {
-                    if (smk.getName().equals(name)) {
-                        candidates.add(exportDir.resolve(entry.getKey()));
-                    }
+            for (Map.Entry<Path, Manifest.Key> entry : paths.entrySet()) {
+                if (entry.getValue().getName().equals(name)) {
+                    candidates.add(entry.getKey());
                 }
             }
         }

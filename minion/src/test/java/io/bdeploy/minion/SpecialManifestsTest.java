@@ -173,8 +173,18 @@ public class SpecialManifestsTest {
             inmf.install();
 
             // paths may change in the future, this is a little internal :)
-            ContentHelper.checkDirsEqual(app,
-                    tmp.resolve("d/" + uuid + "/bin/" + ifmRoot.getTag() + "/manifests/" + appKey.directoryFriendlyName()));
+            ContentHelper.checkDirsEqual(app, tmp.resolve("d/pool/" + appKey.directoryFriendlyName()));
+
+            // try to re-use the pooled application.
+            inmf.uninstall();
+
+            // right now, the pooled things stay alive - this might change in the future.
+            ContentHelper.checkDirsEqual(app, tmp.resolve("d/pool/" + appKey.directoryFriendlyName()));
+
+            inmf.install();
+
+            // right now, the pooled things stay alive - this might change in the future.
+            ContentHelper.checkDirsEqual(app, tmp.resolve("d/pool/" + appKey.directoryFriendlyName()));
         }
 
     }

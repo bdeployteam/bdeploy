@@ -135,8 +135,14 @@ public class ObjectManager {
      *
      * @param tree the {@link ObjectId} of the {@link Tree} to write
      * @param location the target {@link Path} to create
+     * @param handler a custom reference handler which takes care of references. If not set, the default will be used (inline
+     *            export of manifest reference in place).
      */
-    public void exportTree(ObjectId tree, Path location) {
+    public void exportTree(ObjectId tree, Path location, ReferenceHandler handler) {
+        if (handler == null) {
+            handler = new DefaultReferenceHandler(this);
+        }
+
         try {
             if (Files.exists(location)) {
                 try (Stream<Path> list = Files.list(location)) {
@@ -148,7 +154,7 @@ public class ObjectManager {
 
             Activity exporting = reporter.start("Writing objects...", 0);
             try {
-                internalExportTree(tree, location, tree, location, exporting);
+                internalExportTree(tree, location, tree, location, exporting, handler);
             } finally {
                 exporting.done();
             }
@@ -160,8 +166,8 @@ public class ObjectManager {
     /**
      * Recursively export tree to target location.
      */
-    private void internalExportTree(ObjectId tree, Path topLevel, ObjectId topLevelTree, Path location, Activity exporting)
-            throws IOException {
+    private void internalExportTree(ObjectId tree, Path topLevel, ObjectId topLevelTree, Path location, Activity exporting,
+            ReferenceHandler handler) throws IOException {
         PathHelper.mkdirs(location);
         Tree t = loadObject(tree, (is) -> StorageHelper.fromStream(is, Tree.class));
 
@@ -182,11 +188,10 @@ public class ObjectManager {
                     }));
                     break;
                 case MANIFEST:
-                    ObjectId mroot = lookupManifestRef(obj).getRoot();
-                    internalExportTree(mroot, child, mroot, child, exporting);
+                    handler.onReference(location, key, lookupManifestRef(obj));
                     break;
                 case TREE:
-                    internalExportTree(obj, topLevel, topLevelTree, child, exporting);
+                    internalExportTree(obj, topLevel, topLevelTree, child, exporting, handler);
                     break;
                 default:
                     break;
