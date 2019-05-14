@@ -5,6 +5,7 @@ import static io.bdeploy.common.util.RuntimeAssert.assertNotNull;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.objects.ManifestDatabase;
+import io.bdeploy.common.ActivityReporter.Activity;
 
 /**
  * Loads the specified {@link Manifest} from its underlying storage in the
@@ -18,7 +19,9 @@ public class ManifestLoadOperation extends BHive.Operation<Manifest> {
     public Manifest call() throws Exception {
         assertNotNull(manifest, "Manifest to load not set");
 
-        return getManifestDatabase().getManifest(manifest);
+        try (Activity activity = getActivityReporter().start("Loading manifest...", -1)) {
+            return getManifestDatabase().getManifest(manifest);
+        }
     }
 
     /**

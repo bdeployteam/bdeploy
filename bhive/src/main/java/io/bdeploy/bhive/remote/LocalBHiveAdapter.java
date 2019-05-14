@@ -11,8 +11,8 @@ import javax.ws.rs.core.UriBuilder;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.objects.view.TreeView;
 import io.bdeploy.bhive.objects.view.scanner.TreeVisitor;
 import io.bdeploy.bhive.op.CopyOperation;
@@ -24,6 +24,7 @@ import io.bdeploy.bhive.op.ObjectListOperation;
 import io.bdeploy.bhive.op.PruneOperation;
 import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.ActivityReporter.Activity;
 
 /**
  * Adapts a local {@link BHive} to a {@link RemoteBHive}. This makes it possible
@@ -44,12 +45,14 @@ public class LocalBHiveAdapter implements RemoteBHive {
 
     @Override
     public SortedSet<ObjectId> getMissingObjects(SortedSet<ObjectId> all) {
-        ObjectExistsOperation findExisting = new ObjectExistsOperation();
-        all.forEach(findExisting::addObject);
-        SortedSet<ObjectId> known = hive.execute(findExisting);
-        SortedSet<ObjectId> result = new TreeSet<>(all);
-        result.removeAll(known);
-        return result;
+        try (Activity activity = reporter.start("Scanning for missing objects...")) {
+            ObjectExistsOperation findExisting = new ObjectExistsOperation();
+            all.forEach(findExisting::addObject);
+            SortedSet<ObjectId> known = hive.execute(findExisting);
+            SortedSet<ObjectId> result = new TreeSet<>(all);
+            result.removeAll(known);
+            return result;
+        }
     }
 
     @Override

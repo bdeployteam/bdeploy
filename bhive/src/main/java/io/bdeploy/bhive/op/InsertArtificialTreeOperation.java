@@ -4,6 +4,7 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.objects.ObjectDatabase;
+import io.bdeploy.common.ActivityReporter.Activity;
 
 /**
  * Create a {@link Tree} in the {@link ObjectDatabase} and return its
@@ -15,7 +16,9 @@ public class InsertArtificialTreeOperation extends BHive.Operation<ObjectId> {
 
     @Override
     public ObjectId call() throws Exception {
-        return getObjectManager().insertTree(builder.build());
+        try (Activity activity = getActivityReporter().start("Inserting tree...", -1)) {
+            return getObjectManager().insertTree(builder.build());
+        }
     }
 
     /**

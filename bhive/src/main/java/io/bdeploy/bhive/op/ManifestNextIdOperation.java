@@ -3,6 +3,7 @@ package io.bdeploy.bhive.op;
 import java.util.Optional;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.util.RuntimeAssert;
 
 /**
@@ -16,9 +17,10 @@ public class ManifestNextIdOperation extends BHive.Operation<Long> {
     public Long call() throws Exception {
         RuntimeAssert.assertNotNull(key, "No Manifest to inspect");
 
-        Optional<Long> max = execute(new ManifestMaxIdOperation().setManifestName(key));
-
-        return max.orElse(0l) + 1;
+        try (Activity activity = getActivityReporter().start("Evaluating next manifest version...", -1)) {
+            Optional<Long> max = execute(new ManifestMaxIdOperation().setManifestName(key));
+            return max.orElse(0l) + 1;
+        }
     }
 
     /**

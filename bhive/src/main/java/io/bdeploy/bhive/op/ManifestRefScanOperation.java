@@ -9,6 +9,7 @@ import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.objects.view.MissingObjectView;
 import io.bdeploy.bhive.objects.view.TreeView;
 import io.bdeploy.bhive.objects.view.scanner.TreeVisitor;
+import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.util.RuntimeAssert;
 
 /**
@@ -25,18 +26,19 @@ public class ManifestRefScanOperation extends BHive.Operation<SortedMap<String, 
         RuntimeAssert.assertNotNull(manifest, "Nothing to scan");
 
         SortedMap<String, Manifest.Key> referenced = new TreeMap<>();
+        try (Activity activity = getActivityReporter().start("Scanning for manifests references...", -1)) {
+            ObjectId root = execute(new ManifestLoadOperation().setManifest(manifest)).getRoot();
+            if (allowMissing && !execute(new ObjectExistsOperation().addObject(root)).contains(root)) {
+                // root tree is not here, but this is OK if copying from a partial hive
+                return referenced;
+            }
 
-        ObjectId root = execute(new ManifestLoadOperation().setManifest(manifest)).getRoot();
-        if (allowMissing && !execute(new ObjectExistsOperation().addObject(root)).contains(root)) {
-            // root tree is not here, but this is OK if copying from a partial hive
+            TreeView state = execute(new ScanOperation().setManifest(manifest).setMaxDepth(maxDepth));
+            state.visit(new TreeVisitor.Builder().onMissing(this::missing)
+                    .onManifestRef(m -> referenced.put(m.getPathString(), m.getReferenced())).build());
+
             return referenced;
         }
-
-        TreeView state = execute(new ScanOperation().setManifest(manifest).setMaxDepth(maxDepth));
-        state.visit(new TreeVisitor.Builder().onMissing(this::missing)
-                .onManifestRef(m -> referenced.put(m.getPathString(), m.getReferenced())).build());
-
-        return referenced;
     }
 
     private void missing(MissingObjectView m) {

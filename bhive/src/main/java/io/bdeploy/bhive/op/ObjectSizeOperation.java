@@ -7,6 +7,7 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditStrategy;
 import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditWith;
 import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.util.RuntimeAssert;
 
 /**
@@ -20,7 +21,9 @@ public class ObjectSizeOperation extends BHive.Operation<Long> {
     @Override
     public Long call() throws Exception {
         RuntimeAssert.assertFalse(objects.isEmpty(), "No objects to measure");
-        return objects.stream().mapToLong(id -> getObjectManager().db(x -> x.getObjectSize(id))).sum();
+        try (Activity activity = getActivityReporter().start("Listing object sizes...", -1)) {
+            return objects.stream().mapToLong(id -> getObjectManager().db(x -> x.getObjectSize(id))).sum();
+        }
     }
 
     /**

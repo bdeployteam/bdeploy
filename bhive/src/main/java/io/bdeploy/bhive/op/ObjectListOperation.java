@@ -16,6 +16,7 @@ import io.bdeploy.bhive.objects.view.ElementView;
 import io.bdeploy.bhive.objects.view.ManifestRefView;
 import io.bdeploy.bhive.objects.view.TreeView;
 import io.bdeploy.bhive.objects.view.scanner.TreeVisitor;
+import io.bdeploy.common.ActivityReporter.Activity;
 
 /**
  * List {@link ObjectId}s available in the {@link BHive}.
@@ -39,33 +40,34 @@ public class ObjectListOperation extends BHive.Operation<SortedSet<ObjectId>> {
 
     @Override
     public SortedSet<ObjectId> call() throws Exception {
-        for (Manifest.Key m : manifests) {
-            trees.add(execute(new ManifestLoadOperation().setManifest(m)).getRoot());
+        try (Activity activity = getActivityReporter().start("Listing objects...", -1)) {
+            for (Manifest.Key m : manifests) {
+                trees.add(execute(new ManifestLoadOperation().setManifest(m)).getRoot());
+            }
+
+            if (trees.isEmpty()) {
+                return getObjectManager().db(x -> x.getAllObjects());
+            }
+
+            SortedSet<ObjectId> result = new TreeSet<>();
+            for (ObjectId tree : trees) {
+                List<ElementView> scanned = new ArrayList<>();
+                TreeView state = execute(new ScanOperation().setTree(tree));
+
+                state.visit(new TreeVisitor.Builder().onBlob(scanned::add).onTree(t -> {
+                    if (treeExcludes.contains(t.getElementId())) {
+                        return false;
+                    }
+                    scanned.add(t);
+                    return true;
+                }).onManifestRef(scanned::add).build());
+
+                scanned.stream().map(ElementView::getElementId).forEach(result::add);
+                scanned.stream().filter(ManifestRefView.class::isInstance).map(x -> ((ManifestRefView) x).getReferenceId())
+                        .forEach(result::add);
+            }
+            return result;
         }
-
-        if (trees.isEmpty()) {
-            return getObjectManager().db(x -> x.getAllObjects());
-        }
-
-        SortedSet<ObjectId> result = new TreeSet<>();
-        for (ObjectId tree : trees) {
-            List<ElementView> scanned = new ArrayList<>();
-            TreeView state = execute(new ScanOperation().setTree(tree));
-
-            state.visit(new TreeVisitor.Builder().onBlob(scanned::add).onTree(t -> {
-                if (treeExcludes.contains(t.getElementId())) {
-                    return false;
-                }
-                scanned.add(t);
-                return true;
-            }).onManifestRef(scanned::add).build());
-
-            scanned.stream().map(ElementView::getElementId).forEach(result::add);
-            scanned.stream().filter(ManifestRefView.class::isInstance).map(x -> ((ManifestRefView) x).getReferenceId())
-                    .forEach(result::add);
-        }
-
-        return result;
     }
 
     /**

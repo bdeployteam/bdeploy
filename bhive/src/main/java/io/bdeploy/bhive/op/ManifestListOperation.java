@@ -4,6 +4,7 @@ import java.util.SortedSet;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.common.ActivityReporter.Activity;
 
 /**
  * Lists all {@link Manifest}s available in the {@link BHive}.
@@ -14,10 +15,12 @@ public class ManifestListOperation extends BHive.Operation<SortedSet<Manifest.Ke
 
     @Override
     public SortedSet<Manifest.Key> call() throws Exception {
-        if (key == null) {
-            return getManifestDatabase().getAllManifests();
-        } else {
-            return getManifestDatabase().getAllForName(key);
+        try (Activity activity = getActivityReporter().start("Listing manifests...", -1)) {
+            if (key == null) {
+                return getManifestDatabase().getAllManifests();
+            } else {
+                return getManifestDatabase().getAllForName(key);
+            }
         }
     }
 

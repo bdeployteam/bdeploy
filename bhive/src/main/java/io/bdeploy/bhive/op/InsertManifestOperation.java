@@ -11,6 +11,7 @@ import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditStrategy;
 import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditWith;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.common.ActivityReporter.Activity;
 
 /**
  * Insert one or more {@link Manifest}s into the {@link BHive}. No object
@@ -30,11 +31,14 @@ public class InsertManifestOperation extends BHive.Operation<Long> {
     public Long call() throws Exception {
         assertFalse(manifests.isEmpty(), "Nothing to insert");
 
-        for (Map.Entry<Manifest.Key, Manifest> entry : manifests.entrySet()) {
-            if (getManifestDatabase().hasManifest(entry.getValue().getKey())) {
-                continue;
+        try (Activity activity = getActivityReporter().start("Inserting manifests...", -1)) {
+            for (Map.Entry<Manifest.Key, Manifest> entry : manifests.entrySet()) {
+                if (getManifestDatabase().hasManifest(entry.getValue().getKey())) {
+                    continue;
+                }
+                getManifestDatabase().addManifest(entry.getValue());
+                activity.workAndCancelIfRequested(1);
             }
-            getManifestDatabase().addManifest(entry.getValue());
         }
 
         return Long.valueOf(manifests.size());

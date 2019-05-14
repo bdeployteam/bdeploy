@@ -7,6 +7,7 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditStrategy;
 import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditWith;
 import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.common.ActivityReporter.Activity;
 
 /**
  * Checks whether the given {@link ObjectId}s exist in the {@link BHive}.
@@ -20,9 +21,11 @@ public class ObjectExistsOperation extends BHive.Operation<SortedSet<ObjectId>> 
     public SortedSet<ObjectId> call() throws Exception {
         SortedSet<ObjectId> existing = new TreeSet<>();
 
-        for (ObjectId o : objects) {
-            if (getObjectManager().db(x -> x.hasObject(o))) {
-                existing.add(o);
+        try (Activity activity = getActivityReporter().start("Checking objects...", -1)) {
+            for (ObjectId o : objects) {
+                if (getObjectManager().db(x -> x.hasObject(o))) {
+                    existing.add(o);
+                }
             }
         }
 

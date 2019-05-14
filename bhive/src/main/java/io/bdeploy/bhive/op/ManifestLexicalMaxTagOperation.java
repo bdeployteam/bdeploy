@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.util.RuntimeAssert;
 
 /**
@@ -17,10 +18,11 @@ public class ManifestLexicalMaxTagOperation extends BHive.Operation<Optional<Str
     public Optional<String> call() throws Exception {
         RuntimeAssert.assertNotNull(key, "No Manifest to inspect");
 
-        Optional<String> max = getManifestDatabase().getAllForName(key).stream().map(Manifest.Key::getTag)
-                .sorted((a, b) -> b.compareTo(a)).findFirst();
-
-        return max;
+        try (Activity activity = getActivityReporter().start("Evaluating latest manifest version...", -1)) {
+            Optional<String> max = getManifestDatabase().getAllForName(key).stream().map(Manifest.Key::getTag)
+                    .sorted((a, b) -> b.compareTo(a)).findFirst();
+            return max;
+        }
     }
 
     /**
