@@ -471,6 +471,11 @@ public class ProcessController {
     /**
      * Tries to acquire the lock in order to execute the given runnable. Fails immediately if the lock is held by another thread.
      * Notifies all listeners if the process state changes after the runnable has been invoked.
+     * <p>
+     * <b>Implementation note:</b> Only a single process-state change should be performed within a given task execution.
+     * State listeners are notified about about changes when the task completes. Thus when a task performs multiple state changes
+     * then the listeners are only notified about the final state. In all other cases listeners must be notified manually.
+     * </p>
      */
     private void executeLocked(String taskName, boolean wait, Runnable runnable) {
         // Fail fast if another thread holds the lock
@@ -545,12 +550,6 @@ public class ProcessController {
         processExit.thenRunAsync(() -> {
             executeLocked("ExitHook", true, () -> onTerminated());
         });
-
-        // Catch situations where the process is terminated before we attach our handler
-        if (processExit.isDone()) {
-            afterTerminated();
-            return;
-        }
 
         // Set to running if launched from stopped or crashed
         if (processState == ProcessState.STOPPED || processState == ProcessState.CRASHED_PERMANENTLY) {
@@ -756,7 +755,7 @@ public class ProcessController {
                 // stop command completed within the timeout, check status
                 int exitValue = p.exitValue();
                 if (exitValue != 0) {
-                    logger.log((l) -> l.warn("Stop command exited with non-zero code: {} ", processState));
+                    logger.log((l) -> l.warn("Stop command exited with non-zero code: {} ", exitValue));
                 } else {
                     logger.log((l) -> l.info("Stop command exited with return code 0 "));
                 }
