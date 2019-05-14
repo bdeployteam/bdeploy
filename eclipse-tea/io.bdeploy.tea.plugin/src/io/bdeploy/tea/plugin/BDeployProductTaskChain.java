@@ -144,7 +144,9 @@ public class BDeployProductTaskChain implements TaskChain {
         c.addTask(BackgroundTask
                 .allBarrier(pd.apps.stream().map(a -> a.task).filter(Objects::nonNull).collect(Collectors.toList())));
 
-        c.addTask(new BDeployBuildProductTask(pd));
+        BDeployBuildProductTask build = new BDeployBuildProductTask(pd);
+        c.addTask(build);
+        c.addTask(new BDeployPackageProductTask(build));
         c.addTask(cache.getCleanup());
     }
 

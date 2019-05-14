@@ -8,7 +8,6 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
@@ -17,7 +16,6 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedSet;
 
 import javax.ws.rs.core.UriBuilder;
 
@@ -35,13 +33,8 @@ import org.eclipse.tea.library.build.util.FileUtils;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.bhive.model.ObjectId;
-import io.bdeploy.bhive.op.CopyOperation;
-import io.bdeploy.bhive.op.ObjectListOperation;
-import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.interfaces.descriptor.product.ProductDescriptor;
@@ -56,6 +49,8 @@ import io.bdeploy.tea.plugin.services.BDeployApplicationBuild;
 public class BDeployBuildProductTask {
 
     private final ProductDesc desc;
+    private Manifest.Key key;
+    private File target;
 
     public BDeployBuildProductTask(ProductDesc desc) {
         this.desc = desc;
@@ -63,13 +58,13 @@ public class BDeployBuildProductTask {
 
     @Override
     public String toString() {
-        return "BDeploy Product Build: " + desc.productInfo;
+        return "BDeploy Product Build: " + desc.productInfo.getFileName();
     }
 
     @Execute
     public void build(BuildDirectories dirs, TaskingLog log, TeaBuildVersionService bvs, BDeployConfig cfg) throws Exception {
         File prodInfoDir = new File(dirs.getProductDirectory(), "prod-info");
-        File target = new File(dirs.getProductDirectory(), "bhive");
+        target = new File(dirs.getProductDirectory(), "bhive");
 
         if (cfg.clearBHive) {
             log.info("Clearing " + target);
@@ -128,40 +123,17 @@ public class BDeployBuildProductTask {
             }
 
             log.info("Importing product from " + prodInfoYaml);
-            Manifest.Key productKey = ProductManifest.importFromDescriptor(prodInfoYaml.getAbsolutePath(), bhive, fetcher);
-
-            // 3: optionally push
-            if (svc != null && cfg.bdeployTargetInstanceGroup != null && !cfg.bdeployTargetInstanceGroup.isEmpty()) {
-                log.info("Pushing result to " + svc.getUri() + " | " + cfg.bdeployTargetInstanceGroup);
-                try (NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
-                    PushOperation pushOp = new PushOperation();
-                    bhive.execute(pushOp.addManifest(productKey).setHiveName(cfg.bdeployTargetInstanceGroup).setRemote(svc));
-                }
-            }
-
-            // 4: optionally export to ZIP.
-            if (cfg.bdeployZip) {
-                File targetFile = new File(dirs.getProductDirectory(), productKey.directoryFriendlyName() + ".zip");
-
-                log.info("Creating product ZIP at " + targetFile);
-                ObjectListOperation listOp = new ObjectListOperation();
-                listOp.addManifest(productKey);
-                SortedSet<ObjectId> objectIds = bhive.execute(listOp);
-
-                // Copy objects into the target hive
-                FileUtils.delete(targetFile);
-                URI targetUri = UriBuilder.fromUri("jar:" + targetFile.toURI()).build();
-                try (BHive zipHive = new BHive(targetUri, reporter)) {
-                    CopyOperation op = new CopyOperation().setDestinationHive(zipHive);
-                    op.addManifest(productKey);
-                    objectIds.forEach(op::addObject);
-                    bhive.execute(op);
-                }
-                log.info("Archived Product to: " + targetFile);
-            }
-
+            key = ProductManifest.importFromDescriptor(prodInfoYaml.getAbsolutePath(), bhive, fetcher);
         }
 
+    }
+
+    public Manifest.Key getKey() {
+        return key;
+    }
+
+    public File getTarget() {
+        return target;
     }
 
     private Repository findRepoForProduct(Path productInfo) {
