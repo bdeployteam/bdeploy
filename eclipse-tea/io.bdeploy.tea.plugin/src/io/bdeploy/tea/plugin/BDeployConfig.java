@@ -20,9 +20,6 @@ public class BDeployConfig implements TaskingConfigurationExtension {
     @TaskingConfigProperty(description = "Clear BHive on build")
     public boolean clearBHive = false;
 
-    @TaskingConfigProperty(description = "Create a ZIP of every product built")
-    public boolean bdeployZip = false;
-
     @TaskingConfigProperty(description = "BDeploy Server")
     public String bdeployServer; // default none
 
