@@ -6,8 +6,6 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.LongSupplier;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.SecurityContext;
 
@@ -24,9 +22,6 @@ import io.bdeploy.common.security.RemoteService;
  */
 @Service
 public class JerseySseActivityReporter implements ActivityReporter {
-
-    @Inject
-    private Provider<ContainerRequestContext> context;
 
     private static final Logger log = LoggerFactory.getLogger(JerseySseActivityReporter.class);
     static final ThreadLocal<JerseySseActivity> currentActivity = new ThreadLocal<>();
@@ -50,7 +45,7 @@ public class JerseySseActivityReporter implements ActivityReporter {
 
     @Override
     public synchronized Activity start(String activity, LongSupplier maxValue, LongSupplier currentValue) {
-        ContainerRequestContext rqc = context.get();
+        ContainerRequestContext rqc = JerseyMultiThreadingContextBridge.current();
         List<String> scope = JerseySseActivityScopeFilter.getRequestActivityScope(rqc);
         String user = "<Unknown>";
         if (rqc != null) {
