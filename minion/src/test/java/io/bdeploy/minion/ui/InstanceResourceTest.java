@@ -30,13 +30,13 @@ import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
+import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
-import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
+import io.bdeploy.interfaces.manifest.InstanceManifest.Builder;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
-import io.bdeploy.interfaces.manifest.InstanceManifest.Builder;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.ui.TestFactory;
@@ -135,7 +135,7 @@ public class InstanceResourceTest {
             nodeConfig.name = "DemoInstance-Node1-Config";
             nodeDto.nodeConfiguration = nodeConfig;
         }
-        instanceResource.update("DemoInstance", new InstanceConfigurationDto(null, Collections.singletonList(nodeDto)));
+        instanceResource.update("DemoInstance", new InstanceConfigurationDto(null, Collections.singletonList(nodeDto)), "1");
 
         // Check node configuration
         InstanceNodeConfigurationListDto instanceConfigDto = instanceResource.getNodeConfigurations("DemoInstance", "2");
@@ -157,7 +157,7 @@ public class InstanceResourceTest {
 
         // Remove all applications from Node1
         nodeDto.nodeConfiguration.applications.clear();
-        instanceResource.update("DemoInstance", new InstanceConfigurationDto(null, Collections.singletonList(nodeDto)));
+        instanceResource.update("DemoInstance", new InstanceConfigurationDto(null, Collections.singletonList(nodeDto)), "2");
 
         // Check the updated configuration
         instanceConfigDto = instanceResource.getNodeConfigurations("DemoInstance", "3");
@@ -278,7 +278,7 @@ public class InstanceResourceTest {
         assertEquals("", read.target.getAuthPack());
 
         read.name = "New Desc";
-        res.update(instance.uuid, new InstanceConfigurationDto(read, null));
+        res.update(instance.uuid, new InstanceConfigurationDto(read, null), "1");
 
         InstanceConfiguration reread = res.read(instance.uuid);
         assertEquals("New Desc", reread.name);
@@ -310,7 +310,7 @@ public class InstanceResourceTest {
         res.create(instance);
 
         instance.name = "My modified Instance";
-        res.update(instance.uuid, new InstanceConfigurationDto(instance, null));
+        res.update(instance.uuid, new InstanceConfigurationDto(instance, null), "1");
 
         InstanceConfiguration read = res.read(instance.uuid);
         assertEquals(read.name, instance.name);
