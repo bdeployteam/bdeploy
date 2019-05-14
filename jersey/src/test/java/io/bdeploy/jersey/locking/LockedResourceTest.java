@@ -1,0 +1,68 @@
+package io.bdeploy.jersey.locking;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.bdeploy.jersey.TestServer;
+
+public class LockedResourceTest {
+
+    @RegisterExtension
+    TestServer srv = new TestServer(LockedResourceImpl.class);
+
+    private static final Logger log = LoggerFactory.getLogger(LockedResourceTest.class);
+
+    @Test
+    void blockWrites(LockedResource rsrc) throws Exception {
+        assertEquals("Hello", rsrc.getValue());
+
+        // start 2 threads, 2nd one should block and not throw an exception
+        ExecutorService es = Executors.newFixedThreadPool(2);
+        try {
+            Future<?> unlocked1 = es.submit(() -> rsrc.setValueUnlocked("World"));
+            Future<?> unlocked2 = es.submit(() -> rsrc.setValueUnlocked("Universe"));
+
+            assertThrows(ExecutionException.class, () -> {
+                // either of the two must throw, we don't know which one.
+                try {
+                    unlocked1.get();
+                } finally {
+                    unlocked2.get();
+                }
+            });
+
+            es.submit(() -> {
+                for (int i = 0; i < 7; ++i) {
+                    log.info(rsrc.getValue());
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+            });
+
+            Future<?> locked1 = es.submit(() -> rsrc.setValue("World"));
+            Thread.sleep(100); // make sure the second one is second...
+            Future<?> locked2 = es.submit(() -> rsrc.setValue("Universe"));
+
+            locked1.get();
+            locked2.get();
+
+            assertEquals("Universe", rsrc.getValue());
+        } finally {
+            es.shutdownNow();
+        }
+    }
+
+}

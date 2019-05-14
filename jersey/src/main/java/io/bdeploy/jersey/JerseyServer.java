@@ -199,6 +199,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             rc.register(new JerseyLazySseInitializer());
             rc.register(new JerseyServerReporterContextResolver());
             rc.register(new JerseyMultiThreadingContextBridge());
+            rc.register(new JerseyWriteLockFilter());
 
             server = GrizzlyHttpServerFactory.createHttpServer(jerseyUri, rc, true, sslEngine, false);
             if (root != null) {
@@ -259,6 +260,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             Function<ApiAccessToken, String> signer = (a) -> SecurityHelper.getInstance().createToken(a, store, passphrase);
 
             bind(JerseySseActivityReporter.class).in(Singleton.class).to(JerseySseActivityReporter.class);
+            bind(JerseyWriteLockService.class).in(Singleton.class).to(JerseyWriteLockService.class);
             bind(startTime).named(START_TIME).to(Instant.class);
             bind(broadcastScheduler).named(BROADCAST_EXECUTOR).to(ScheduledExecutorService.class);
             bind(signer).named(TOKEN_SIGNER).to(new TypeLiteral<Function<ApiAccessToken, String>>() {
