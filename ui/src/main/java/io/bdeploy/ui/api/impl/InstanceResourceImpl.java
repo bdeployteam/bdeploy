@@ -67,6 +67,8 @@ import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.jersey.JerseyWriteLockService.LockingResource;
+import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.InstanceResource;
 import io.bdeploy.ui.api.Minion;
@@ -77,6 +79,7 @@ import io.bdeploy.ui.dto.InstanceNodeConfigurationDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
 import io.bdeploy.ui.dto.InstanceVersionDto;
 
+@LockingResource
 public class InstanceResourceImpl implements InstanceResource {
 
     private static final Logger log = LoggerFactory.getLogger(InstanceResourceImpl.class);
@@ -153,6 +156,7 @@ public class InstanceResourceImpl implements InstanceResource {
         return scan.stream().map(k -> InstanceManifest.of(hive, k).getConfiguration()).collect(Collectors.toList());
     }
 
+    @WriteLock
     @Override
     public void create(InstanceConfiguration instanceConfig) {
         String rootName = InstanceManifest.getRootName(instanceConfig.uuid);
@@ -195,9 +199,15 @@ public class InstanceResourceImpl implements InstanceResource {
         return configuration;
     }
 
+    @WriteLock
     @Override
-    public void update(String instance, InstanceConfigurationDto dto) {
+    public void update(String instance, InstanceConfigurationDto dto, String expectedTag) {
         InstanceManifest oldConfig = InstanceManifest.load(hive, instance, null);
+
+        if (!oldConfig.getManifest().getTag().equals(expectedTag)) {
+            throw new WebApplicationException("Expected version is not the current one: expected=" + expectedTag + ", current="
+                    + oldConfig.getManifest().getTag(), Status.CONFLICT);
+        }
 
         Builder newConfig = new InstanceManifest.Builder();
         InstanceConfiguration config = dto.config;
@@ -299,6 +309,7 @@ public class InstanceResourceImpl implements InstanceResource {
         newConfig.setKey(rootKey).insert(hive);
     }
 
+    @WriteLock
     @Override
     public void delete(String instance) {
         // find all root and node manifests by uuid

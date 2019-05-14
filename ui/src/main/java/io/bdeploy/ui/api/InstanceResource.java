@@ -10,6 +10,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
@@ -47,7 +48,8 @@ public interface InstanceResource {
 
     @POST
     @Path("/{instance}")
-    public void update(@ActivityScope @PathParam("instance") String instanceId, InstanceConfigurationDto config);
+    public void update(@ActivityScope @PathParam("instance") String instanceId, InstanceConfigurationDto config,
+            @QueryParam("expect") String expectedTag);
 
     @DELETE
     @Path("/{instance}")

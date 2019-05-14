@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ClientDescriptor, DeploymentStateDto, InstanceConfiguration, InstanceConfigurationDto, InstanceNodeConfigurationListDto, InstancePurpose, InstanceVersionDto, ManifestKey } from '../models/gen.dtos';
@@ -32,14 +32,18 @@ export class InstanceService {
     return this.http.get<InstanceConfiguration>(url);
   }
 
-  public updateInstance(instanceGroupName: string, instanceName: string, instance: InstanceConfiguration, nodeList: InstanceNodeConfigurationListDto) {
+  public updateInstance(instanceGroupName: string, instanceName: string, instance: InstanceConfiguration, nodeList: InstanceNodeConfigurationListDto, expectedTag: string) {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceName);
     this.log.debug('updateInstance: ' + url);
     const dto: InstanceConfigurationDto = {
       config: instance,
       nodeDtos: nodeList ? nodeList.nodeConfigDtos : null
     };
-    return this.http.post(url, dto);
+    const options = {
+      params: new HttpParams()
+        .set('expect', expectedTag)
+    };
+    return this.http.post(url, dto, options);
   }
 
   public deleteInstance(instanceGroupName: string, instanceName: string) {

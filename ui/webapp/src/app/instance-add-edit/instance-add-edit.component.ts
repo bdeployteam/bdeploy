@@ -7,7 +7,7 @@ import { Observable, of } from 'rxjs';
 import { finalize, map, startWith } from 'rxjs/operators';
 import { MessageBoxMode } from '../messagebox/messagebox.component';
 import { EMPTY_INSTANCE } from '../models/consts';
-import { InstanceConfiguration, InstancePurpose, ProductDto } from '../models/gen.dtos';
+import { InstanceConfiguration, InstancePurpose, InstanceVersionDto, ProductDto } from '../models/gen.dtos';
 import { InstanceGroupService } from '../services/instance-group.service';
 import { InstanceService } from '../services/instance.service';
 import { Logger, LoggingService } from '../services/logging.service';
@@ -41,6 +41,7 @@ export class InstanceAddEditComponent implements OnInit {
   public masterTokenControlVisible = false;
 
   public clonedInstance: InstanceConfiguration;
+  private expectedVersion: InstanceVersionDto;
 
   public instanceFormGroup = this.formBuilder.group({
     uuid: ['', Validators.required],
@@ -88,6 +89,13 @@ export class InstanceAddEditComponent implements OnInit {
         this.log.debug('got instance ' + this.uuidParam);
         this.instanceFormGroup.setValue(instance);
         this.clonedInstance = cloneDeep(instance);
+      });
+      // TODO: this could be better (group with above request)
+      this.instanceService.listInstanceVersions(this.groupParam, this.uuidParam).subscribe(vs => {
+        vs.sort((a, b) => {
+          return +b.key.tag - +a.key.tag;
+        });
+        this.expectedVersion = vs[0];
       });
     }
 
@@ -185,7 +193,7 @@ export class InstanceAddEditComponent implements OnInit {
         });
     } else {
       this.instanceService
-        .updateInstance(this.groupParam, this.uuidParam, instance, null)
+        .updateInstance(this.groupParam, this.uuidParam, instance, null, this.expectedVersion.key.tag)
         .pipe(finalize(() => (this.loading = false)))
         .subscribe(result => {
           this.clonedInstance = instance;

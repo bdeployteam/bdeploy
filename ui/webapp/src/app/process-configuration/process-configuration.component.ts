@@ -326,6 +326,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       this.uuidParam,
       this.selectedConfig.instance,
       this.selectedConfig.nodeList,
+      this.processConfigs[0].version.key.tag
     );
     nodePromise.subscribe(x => {
       this.loadVersions();
