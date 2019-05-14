@@ -55,6 +55,32 @@
     "stringMap": {
       "type": "object",
       "additionalProperties": { "type": "string" }
+    },
+    "splashArea": {
+      "type": "object",
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "width": { "type": "number" },
+        "height": { "type": "number" }
+      },
+      "required": [ "x", "y", "width", "height" ]
+    },
+    "splash": {
+      "type": "object",
+      "properties": {
+        "image": { "type": "string" },
+        "textRect": { "$ref": "#/definitions/splashArea" },
+        "progressRect": { "$ref": "#/definitions/splashArea" }
+      },
+      "required": [ "image" ]
+    },
+    "branding": {
+      "type": "object",
+      "properties": {
+        "splash": { "$ref": "#/definitions/splash" },
+        "icon": { "type": "string" }
+      }
     }
   },
 
@@ -73,6 +99,7 @@
         "enum": ["WINDOWS", "LINUX", "AIX"]
       }
     },
+    "branding": { "$ref": "#/definitions/branding" },
     "processControl": { "$ref": "#/definitions/pcuSettings" },
     "startCommand": { "$ref": "#/definitions/command" },
     "stopCommand": { "$ref": "#/definitions/command" },

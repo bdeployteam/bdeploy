@@ -42,6 +42,13 @@ public class ApplicationDescriptor implements Comparable<ApplicationDescriptor> 
     public ApplicationType type = ApplicationType.SERVER;
 
     /**
+     * Provides branding information (splash, icon, ...).
+     * <p>
+     * This information is evaluated and used for instance by the client launcher, possibly by others.
+     */
+    public ApplicationBrandingDescriptor branding = new ApplicationBrandingDescriptor();
+
+    /**
      * Operating systems which are supported by this app-info.yaml.
      * <p>
      * The purpose of this information is solely verification of product configuration
