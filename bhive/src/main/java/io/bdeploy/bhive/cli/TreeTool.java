@@ -2,24 +2,28 @@ package io.bdeploy.bhive.cli;
 
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.cli.TreeTool.TreeConfig;
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.objects.view.ElementView;
 import io.bdeploy.bhive.objects.view.ManifestRefView;
 import io.bdeploy.bhive.objects.view.TreeView;
 import io.bdeploy.bhive.objects.view.scanner.TreeDiff;
 import io.bdeploy.bhive.objects.view.scanner.TreeElementDiff;
-import io.bdeploy.bhive.objects.view.scanner.TreeVisitor;
 import io.bdeploy.bhive.objects.view.scanner.TreeElementDiff.DifferenceType;
+import io.bdeploy.bhive.objects.view.scanner.TreeVisitor;
 import io.bdeploy.bhive.op.ObjectSizeOperation;
 import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.common.cfg.Configuration.Help;
-import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
+import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.util.UnitHelper;
 
 /**
@@ -62,12 +66,12 @@ public class TreeTool extends ConfiguredCliTool<TreeConfig> {
                 TreeView t1 = hive.execute(new ScanOperation().setManifest(Manifest.Key.parse(config.diff()[0])));
                 TreeView t2 = hive.execute(new ScanOperation().setManifest(Manifest.Key.parse(config.diff()[1])));
 
-                format(new TreeDiff(t1, t2).diff(), hive);
+                format(new TreeDiff(t1, t2).diff(), t1, hive);
             }
         }
     }
 
-    private void format(List<TreeElementDiff> diff, BHive hive) {
+    private void format(List<TreeElementDiff> diff, TreeView original, BHive hive) {
         for (TreeElementDiff ted : diff) {
             switch (ted.getType()) {
                 case CONTENT_DIFF:
@@ -86,10 +90,15 @@ public class TreeTool extends ConfiguredCliTool<TreeConfig> {
             }
         }
 
-        // count size difference when updating to right - collect all only right or diff
+        // count size difference when updating to right - collect all only right or diff, but exclude objects with existing hash
+        SortedSet<ObjectId> existingObjs = new TreeSet<>();
+        Function<ElementView, Boolean> enlist = (ev) -> existingObjs.add(ev.getElementId());
+        original.visit(
+                new TreeVisitor.Builder().onBlob(enlist::apply).onTree(enlist::apply).onManifestRef(enlist::apply).build());
+
         ObjectSizeOperation oso = new ObjectSizeOperation();
         diff.stream().filter(d -> d.getType() != DifferenceType.ONLY_LEFT).map(d -> d.getRight().getElementId())
-                .forEach(oso::addObject);
+                .filter(o -> !existingObjs.contains(o)).forEach(oso::addObject);
 
         Long size = hive.execute(oso);
 
