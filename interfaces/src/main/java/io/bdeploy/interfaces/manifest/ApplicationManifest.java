@@ -1,7 +1,9 @@
 package io.bdeploy.interfaces.manifest;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
@@ -61,6 +63,35 @@ public class ApplicationManifest implements Comparable<ApplicationManifest> {
                 throw new RuntimeException("Failed to export configuration templates to " + target + " for " + key);
             }
         }
+    }
+
+    public byte[] readBrandingSplashScreen(BHive hive) {
+        if (desc.branding == null || desc.branding.splash == null || desc.branding.splash.image == null) {
+            return null;
+        }
+
+        try (InputStream fis = hive.execute(
+                new TreeEntryLoadOperation().setRootTree(manifest.getRoot()).setRelativePath(desc.branding.splash.image));
+                ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            copy(fis, baos);
+            return baos.toByteArray();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read splash screen for " + key);
+        }
+    }
+
+    /**
+     * @see Files.copy (required due to Java 8 compat).
+     */
+    private static long copy(InputStream source, OutputStream sink) throws IOException {
+        long nread = 0L;
+        byte[] buf = new byte[8192];
+        int n;
+        while ((n = source.read(buf)) > 0) {
+            sink.write(buf, 0, n);
+            nread += n;
+        }
+        return nread;
     }
 
     public ApplicationDescriptor getDescriptor() {

@@ -298,6 +298,9 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         cfg.resolvedRequires.addAll(
                 new LocalDependencyFetcher().fetch(hive, amf.getDescriptor().runtimeDependencies, smk.getOperatingSystem()));
 
+        // load splash screen from hive and send along.
+        cfg.clientSplashData = amf.readBrandingSplashScreen(hive);
+
         return cfg;
     }
 

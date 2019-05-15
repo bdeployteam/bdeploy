@@ -16,7 +16,7 @@ import io.bdeploy.bhive.op.ManifestDeleteOldByIdOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.remote.FetchOperation;
 import io.bdeploy.bhive.util.StorageHelper;
-import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
@@ -34,6 +34,8 @@ import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 import io.bdeploy.launcher.cli.LauncherTool.LauncherConfig;
+import io.bdeploy.launcher.cli.branding.LauncherSplash;
+import io.bdeploy.launcher.cli.branding.LauncherSplashReporter;
 
 @CliName("launcher")
 @Help("A tool which launches an application described by a '.bdeploy' file")
@@ -72,18 +74,35 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 PathHelper.mkdirs(check);
             }
             rootDir = check;
+        } else {
+            String override = System.getenv("BDEPLOY_HOME");
+            if (override != null && !override.isEmpty()) {
+                rootDir = Paths.get(override);
+            } else {
+                override = System.getenv("LOCALAPPDATA");
+                if (override != null && !override.isEmpty()) {
+                    rootDir = Paths.get(override).resolve("BDeploy");
+                }
+            }
         }
 
-        doLaunchFromConfig(cfg, rootDir.toAbsolutePath().resolve(".bdeploy"), getActivityReporter());
+        log.info("Using cache directory " + rootDir);
+
+        doLaunchFromConfig(cfg, rootDir.toAbsolutePath().resolve(".bdeploy"));
     }
 
-    private static void doLaunchFromConfig(Path cfg, Path rootDir, ActivityReporter reporter) {
+    private static void doLaunchFromConfig(Path cfg, Path rootDir) {
         ClientDescriptor cd;
         try (InputStream is = Files.newInputStream(cfg)) {
             cd = StorageHelper.fromStream(is, ClientDescriptor.class);
         } catch (IOException e) {
             throw new IllegalStateException("Failed to read " + cfg, e);
         }
+
+        LauncherSplash splash = new LauncherSplash(cd, rootDir.resolve(".splash"));
+        splash.show();
+
+        LauncherSplashReporter reporter = new LauncherSplashReporter(splash);
 
         // yay, we have information
         log.info("Launching " + cd.groupId + " / " + cd.instanceId + " / " + cd.clientId + " from " + cd.host.getUri());
@@ -92,9 +111,14 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         MasterRootResource master = ResourceProvider.getResource(cd.host, MasterRootResource.class);
         MasterNamedResource namedMaster = master.getNamedMaster(cd.groupId);
 
-        // fails with 404 or other error, but never null.
-        log.info("fetching information from " + cd.host.getUri());
-        ClientApplicationConfiguration appCfg = namedMaster.getClientConfiguration(cd.instanceId, cd.clientId);
+        ClientApplicationConfiguration appCfg;
+        try (Activity info = reporter.start("Loading meta-data...")) {
+            // fails with 404 or other error, but never null.
+            log.info("fetching information from " + cd.host.getUri());
+            appCfg = namedMaster.getClientConfiguration(cd.instanceId, cd.clientId);
+        }
+
+        splash.update(appCfg);
 
         // this /might/ lead to too much re-installs if unrelated things change, but there is not
         // other/easy way (currently) to detect this...
@@ -106,18 +130,31 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 log.info("re-using existing manifest: " + targetClientKey);
             } else {
                 log.info("fetching updated applications/configurations for " + targetClientKey);
-                // 2: fetch the underlying application and it's requirements into local cache (BHive)
-                fetchApplicationAndRequirements(hive, cd, appCfg);
+                try (Activity info = reporter.start("Loading requirements...")) {
+                    // 2: fetch the underlying application and it's requirements into local cache (BHive)
+                    fetchApplicationAndRequirements(hive, cd, appCfg);
+                }
 
-                // 3: generate a 'fake' instanceNodeManifest from the existing configuration for local caching.
-                createInstanceNodeManifest(appCfg, targetClientKey, hive);
+                try (Activity info = reporter.start("Preparing configuration...")) {
+                    // 3: generate a 'fake' instanceNodeManifest from the existing configuration for local caching.
+                    createInstanceNodeManifest(appCfg, targetClientKey, hive);
+                }
             }
 
-            // 4: install using DCU to the target directory
-            InstanceNodeController controller = installApplication(rootDir, targetClientKey, hive);
+            InstanceNodeController controller;
+            try (Activity info = reporter.start("Updating application...")) {
+                // 4: install using DCU to the target directory
+                controller = installApplication(rootDir, targetClientKey, hive);
+            }
 
-            // 5: launch.
-            Process p = launchProcess(targetClientKey, controller);
+            Process p;
+            try (Activity info = reporter.start("Launching...")) {
+                // 5: launch.
+                p = launchProcess(targetClientKey, controller);
+            }
+
+            reporter.stop();
+            splash.dismiss();
 
             // 6. cleanup old versions. keep the last 2 versions.
             cleanupOldInstalls(rootDir, cd, hive);

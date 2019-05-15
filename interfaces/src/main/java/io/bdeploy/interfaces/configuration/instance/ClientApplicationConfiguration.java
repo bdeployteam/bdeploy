@@ -16,6 +16,8 @@ public class ClientApplicationConfiguration {
 
     public ApplicationDescriptor clientDesc;
 
+    public byte[] clientSplashData;
+
     public Manifest.Key instanceKey;
 
     public List<Manifest.Key> resolvedRequires = new ArrayList<>();

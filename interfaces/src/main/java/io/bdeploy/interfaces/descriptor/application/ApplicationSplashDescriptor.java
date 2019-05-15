@@ -8,7 +8,7 @@ public class ApplicationSplashDescriptor {
     /**
      * Relative path to an image which is used as splash screen.
      * <p>
-     * Currently only PNG format is supported.
+     * Supported formats are all that are accepted by AWT's <code>ImageIO.read(byte[])<code>. (BMP is fine :)).
      */
     public String image;
 
