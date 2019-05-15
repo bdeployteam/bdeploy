@@ -19,9 +19,9 @@ namespace Bdeploy
 
         private void InitDefaults()
         {
-            CreateAssociation.IsEnabled = false;
-            CreateAssociationAsAdmin.IsEnabled = false;
+            LauncherPath.Text = Path.Combine(Launcher.GetWorkingDir(), "BDeploy.exe");
         }
+
 
         private void BrowseLauncher_Click(object sender, RoutedEventArgs e)
         {
@@ -29,7 +29,7 @@ namespace Bdeploy
             OpenFileDialog dlg = new OpenFileDialog
             {
                 DefaultExt = ".exe",
-                Filter = "Launcher Executable (*.exe)|*.exe"
+                Filter = "BDeploy Launcher (*.exe)|*.exe"
             };
 
             // Display OpenFileDialog by calling ShowDialog method 

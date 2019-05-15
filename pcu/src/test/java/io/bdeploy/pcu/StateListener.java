@@ -37,7 +37,7 @@ public class StateListener implements Consumer<ProcessState> {
     @Override
     public void accept(ProcessState current) {
         if (expected.isEmpty()) {
-            throw new RuntimeException("Unexpected state cange: " + current);
+            throw new RuntimeException("No more state changes expected but got <[" + current + "]>");
         }
         // Remove first element when matching
         if (expected.get(0) == current) {

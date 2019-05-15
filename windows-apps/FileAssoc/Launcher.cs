@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.ComponentModel;
 using System.Security.Principal;
+using System.IO;
 
 namespace Bdeploy
 {
@@ -24,7 +25,6 @@ namespace Bdeploy
                 {
                     process.StartInfo.FileName = Process.GetCurrentProcess().MainModule.FileName;
                     process.StartInfo.Verb = "runas";
-                    process.StartInfo.UseShellExecute = true;
                     process.StartInfo.Arguments = arguments;
                     process.Start();
                     process.WaitForExit();
@@ -49,7 +49,17 @@ namespace Bdeploy
                 WindowsPrincipal principal = new WindowsPrincipal(identity);
                 return principal.IsInRole(WindowsBuiltInRole.Administrator);
             }
-        } 
+        }
+
+        /// <summary>
+        /// Returns the working directory of the current process.
+        /// </summary>
+        /// <returns></returns>
+        public static string GetWorkingDir()
+        {
+            FileInfo info = new FileInfo(Process.GetCurrentProcess().MainModule.FileName);
+            return info.DirectoryName;
+        }
 
     }
 }

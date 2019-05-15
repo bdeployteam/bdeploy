@@ -188,6 +188,7 @@ public class ProcessControllerTest {
         t1 = new Thread(() -> {
             stopLock.countDown();
             try {
+                stopLock.await();
                 process.stop();
             } catch (Exception ex) {
                 failedCounter.addAndGet(1);
@@ -197,6 +198,7 @@ public class ProcessControllerTest {
         t2 = new Thread(() -> {
             stopLock.countDown();
             try {
+                stopLock.await();
                 process.stop();
             } catch (Exception ex) {
                 failedCounter.addAndGet(1);
@@ -207,6 +209,7 @@ public class ProcessControllerTest {
         // Release lock so that both are running
         listener.expect(process, ProcessState.STOPPED);
         stopLock.countDown();
+        stopLock.await();
         listener.await(TIMEOUT);
 
         // One thread must failed to start because the other one holds the lock
