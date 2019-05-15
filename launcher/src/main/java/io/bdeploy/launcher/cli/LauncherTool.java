@@ -46,7 +46,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         @Help("Launch file (*.bdeploy). This can be given directly to the executable as single argument as well.")
         String launch();
 
-        @Help("Local working directory for the launcher, defaults to the current working directory.")
+        @Help("Local working directory for the launcher, defaults to the user's home/.bdeploy.")
         String cacheDir();
 
     }
@@ -65,7 +65,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
 
         // 0: check where to put local temporary data.
-        Path rootDir = Paths.get(""); // current
+        Path rootDir = Paths.get(System.getProperty("user.home"));
         if (config.cacheDir() != null && !config.cacheDir().isEmpty()) {
             Path check = Paths.get(config.cacheDir());
             if (!Files.isDirectory(check)) {
