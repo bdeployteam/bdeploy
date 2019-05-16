@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 
@@ -17,6 +18,8 @@ public class ClientApplicationConfiguration {
     public ApplicationDescriptor clientDesc;
 
     public byte[] clientSplashData;
+
+    public ObjectId configTreeId;
 
     public Manifest.Key instanceKey;
 

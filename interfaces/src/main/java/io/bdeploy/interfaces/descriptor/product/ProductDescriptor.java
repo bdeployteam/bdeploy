@@ -36,6 +36,13 @@ public class ProductDescriptor {
     public List<String> applications = new ArrayList<>();
 
     /**
+     * Relative path to a directory containing configuration templates.
+     * <p>
+     * The directory's content is used as starting point for each instance's config directory
+     */
+    public String configTemplates;
+
+    /**
      * Relative path to a file containing the {@link ProductVersionDescriptor} which may be generated or static.
      */
     public String versionFile;

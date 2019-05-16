@@ -2,9 +2,7 @@ package io.bdeploy.interfaces.descriptor.application;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
@@ -72,16 +70,6 @@ public class ApplicationDescriptor implements Comparable<ApplicationDescriptor> 
      * shut down properly).
      */
     public ExecutableDescriptor stopCommand;
-
-    /**
-     * Additional configuration files which are required.
-     * <p>
-     * Key is the target path in the shared config directory per deployment.
-     * <p>
-     * Value is the relative path to a default config file which is copied as a
-     * starting template.
-     */
-    public SortedMap<String, String> configFiles = new TreeMap<>();
 
     /**
      * Additional dependencies of the application.

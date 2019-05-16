@@ -109,6 +109,17 @@ public class BDeployBuildProductTask {
                 ProductDescriptor pd = StorageHelper.fromYamlStream(is, ProductDescriptor.class);
                 pd.versionFile = "product-versions.yaml";
                 os.write(StorageHelper.toRawYamlBytes(pd));
+
+                if (pd.configTemplates != null && !pd.configTemplates.isEmpty()) {
+                    File source = desc.productInfo.getParent().resolve(pd.configTemplates).toFile();
+                    if (!source.isDirectory()) {
+                        throw new IllegalStateException("Cannot find " + source);
+                    }
+                    File cfgDir = new File(prodInfoDir, source.getName());
+                    FileUtils.deleteDirectory(cfgDir);
+                    FileUtils.mkdirs(cfgDir);
+                    FileUtils.copyDirectory(source, cfgDir);
+                }
             }
 
             // 2: create product and import into bhive

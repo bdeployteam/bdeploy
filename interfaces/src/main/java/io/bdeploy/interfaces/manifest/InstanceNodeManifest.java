@@ -2,8 +2,6 @@ package io.bdeploy.interfaces.manifest;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -13,7 +11,6 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.op.ImportObjectOperation;
-import io.bdeploy.bhive.op.ImportTreeOperation;
 import io.bdeploy.bhive.op.InsertArtificialTreeOperation;
 import io.bdeploy.bhive.op.InsertManifestOperation;
 import io.bdeploy.bhive.op.InsertManifestRefOperation;
@@ -96,8 +93,8 @@ public class InstanceNodeManifest {
         private String name;
         private Manifest.Key key;
         private InstanceNodeConfiguration cfg;
-        private Path configDir;
         private final SortedSet<Manifest.Key> applications = new TreeSet<>();
+        private ObjectId configTree;
 
         public Builder setMinionName(String name) {
             this.name = name;
@@ -109,8 +106,8 @@ public class InstanceNodeManifest {
             return this;
         }
 
-        public Builder setConfigSource(Path source) {
-            configDir = source;
+        public Builder setConfigTreeId(ObjectId configTree) {
+            this.configTree = configTree;
             return this;
         }
 
@@ -136,9 +133,8 @@ public class InstanceNodeManifest {
             Tree.Builder tb = new Tree.Builder();
             tb.add(new Tree.Key(InstanceNodeConfiguration.FILE_NAME, Tree.EntryType.BLOB), cfgId);
 
-            if (configDir != null) {
-                ObjectId cfgTreeId = hive.execute(new ImportTreeOperation().setSourcePath(configDir));
-                tb.add(new Tree.Key("config", Tree.EntryType.TREE), cfgTreeId);
+            if (configTree != null) {
+                tb.add(new Tree.Key("config", Tree.EntryType.TREE), configTree);
             }
 
             // grab all required manifests from the applications
@@ -153,18 +149,6 @@ public class InstanceNodeManifest {
                 // the dependency must be here. it has been pushed here with the product,
                 // since the product /must/ reference all direct dependencies.
                 applications.addAll(localDeps.fetch(hive, amf.getDescriptor().runtimeDependencies, smk.getOperatingSystem()));
-
-                for (String cfgFile : amf.getDescriptor().configFiles.keySet()) {
-                    if (configDir == null) {
-                        throw new IllegalArgumentException(app.application + " requires config files but not config dir is set");
-                    }
-
-                    Path check = configDir.resolve(cfgFile);
-                    if (!Files.exists(check)) {
-                        throw new IllegalArgumentException(
-                                app.application + " requires config file " + check + " which cannot be found");
-                    }
-                }
             }
 
             Tree.Builder mtb = new Tree.Builder();

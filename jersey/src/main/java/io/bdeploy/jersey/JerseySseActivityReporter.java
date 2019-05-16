@@ -6,7 +6,9 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.LongSupplier;
 
+import javax.inject.Provider;
 import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.SecurityContext;
 
 import org.jvnet.hk2.annotations.Service;
@@ -28,6 +30,9 @@ public class JerseySseActivityReporter implements ActivityReporter {
 
     Consumer<JerseySseActivity> onDone = this::done;
 
+    @Context
+    private Provider<ContainerRequestContext> requestContext;
+
     /**
      * All running activities.
      */
@@ -45,7 +50,7 @@ public class JerseySseActivityReporter implements ActivityReporter {
 
     @Override
     public synchronized Activity start(String activity, LongSupplier maxValue, LongSupplier currentValue) {
-        ContainerRequestContext rqc = JerseyMultiThreadingContextBridge.current();
+        ContainerRequestContext rqc = requestContext.get();
         List<String> scope = JerseySseActivityScopeFilter.getRequestActivityScope(rqc);
         String user = "<Unknown>";
         if (rqc != null) {

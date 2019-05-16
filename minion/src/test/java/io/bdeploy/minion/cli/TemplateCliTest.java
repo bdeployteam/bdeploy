@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.SortedSet;
 
@@ -22,15 +23,13 @@ import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.TempDirectory;
+import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.TestCliTool;
-import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.util.OsHelper;
+import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.descriptor.product.ProductDescriptor;
 import io.bdeploy.interfaces.descriptor.product.ProductVersionDescriptor;
-import io.bdeploy.minion.cli.MinionServerCli;
-import io.bdeploy.minion.cli.ProductTool;
-import io.bdeploy.minion.cli.TemplateTool;
 import io.bdeploy.pcu.TestAppFactory;
 
 @ExtendWith(TempDirectory.class)
@@ -58,11 +57,16 @@ public class TemplateCliTest {
         Path pdesc = tmp.resolve("product-info.yaml");
         Path pvdesc = tmp.resolve("version-info.yaml");
 
+        Path cfgs = tmp.resolve("config-templates");
+        PathHelper.mkdirs(cfgs);
+        Files.write(cfgs.resolve("config.json"), Arrays.asList("{ \"cfg\": \"value\" }"));
+
         ProductDescriptor p = new ProductDescriptor();
         p.name = "Dummy Product";
         p.product = "dummy";
         p.applications.add("dummy");
         p.versionFile = "version-info.yaml";
+        p.configTemplates = "config-templates";
 
         ProductVersionDescriptor pv = new ProductVersionDescriptor();
         pv.version = "1.0.0";

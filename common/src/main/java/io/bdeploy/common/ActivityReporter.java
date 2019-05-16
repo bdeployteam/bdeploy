@@ -233,11 +233,6 @@ public interface ActivityReporter {
         }
 
         private void reportSummary() {
-            if (!activities.isEmpty()) {
-                // seems there is a .done() missing somewhere...?
-                activities.forEach(a -> stream.println("Unfinished activity: " + a.activity));
-            }
-
             if (allActivities.isEmpty()) {
                 return;
             }

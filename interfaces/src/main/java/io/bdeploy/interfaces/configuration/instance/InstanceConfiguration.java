@@ -1,6 +1,7 @@
 package io.bdeploy.interfaces.configuration.instance;
 
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.common.security.RemoteService;
 
 /**
@@ -45,6 +46,11 @@ public class InstanceConfiguration {
      * The key of the product which was used to create the instance.
      */
     public Manifest.Key product;
+
+    /**
+     * The key of the tree which contains the current configuration file state.
+     */
+    public ObjectId configTree;
 
     /**
      * The target to push/deploy the instance to when requested.

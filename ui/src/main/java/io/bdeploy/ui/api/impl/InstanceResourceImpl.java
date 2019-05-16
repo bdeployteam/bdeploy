@@ -1,9 +1,6 @@
 package io.bdeploy.ui.api.impl;
 
-import java.io.IOException;
 import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -47,12 +44,10 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.security.RemoteService;
-import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.interfaces.NodeStatus;
-import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
@@ -91,9 +86,6 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Inject
     private AuthService auth;
-
-    @Inject
-    private Minion minion;
 
     @Inject
     private ActivityReporter reporter;
@@ -188,6 +180,7 @@ public class InstanceResourceImpl implements InstanceResource {
             throw new WebApplicationException("Product not found: " + instanceConfig.product, Status.NOT_FOUND);
         }
 
+        instanceConfig.configTree = product.getConfigTemplateTreeId();
         new InstanceManifest.Builder().setInstanceConfiguration(instanceConfig).insert(hive);
     }
 
@@ -219,7 +212,6 @@ public class InstanceResourceImpl implements InstanceResource {
         InstanceConfiguration cfg;
 
         if (config != null) {
-            // TODO: assert that manifest version is the same as when the client loaded the config.
             RuntimeAssert.assertEquals(oldConfig.getConfiguration().uuid, config.uuid, "Instance UUID changed");
             RuntimeAssert.assertEquals(oldConfig.getConfiguration().uuid, instance, "Instance UUID changed");
 
@@ -261,23 +253,11 @@ public class InstanceResourceImpl implements InstanceResource {
                 nodeConfig.autoStart = cfg.autoStart;
 
                 RuntimeAssert.assertEquals(nodeDto.nodeConfiguration.uuid, instance, "Instance ID not set on nodes");
-                try {
-                    Path cfgTmpDir = Files.createTempDirectory(minion.getTempDir(), "cfg-");
-                    try {
-                        // FIXME: REAL configuration file data :)
-                        fixmeExtractDefaultConfig(cfgTmpDir, hive, nodeConfig);
-
-                        String mfName = instance + "/" + minionName;
-                        Key instanceNodeKey = new InstanceNodeManifest.Builder().setInstanceNodeConfiguration(nodeConfig)
-                                .setMinionName(minionName).setConfigSource(cfgTmpDir).setKey(new Manifest.Key(mfName, rootTag))
-                                .insert(hive);
-                        newConfig.addInstanceNodeManifest(minionName, instanceNodeKey);
-                    } finally {
-                        PathHelper.deleteRecursive(cfgTmpDir);
-                    }
-                } catch (IOException e) {
-                    throw new WebApplicationException("Internal IO error", e);
-                }
+                String mfName = instance + "/" + minionName;
+                Key instanceNodeKey = new InstanceNodeManifest.Builder().setInstanceNodeConfiguration(nodeConfig)
+                        .setMinionName(minionName).setConfigTreeId(cfg.configTree).setKey(new Manifest.Key(mfName, rootTag))
+                        .insert(hive);
+                newConfig.addInstanceNodeManifest(minionName, instanceNodeKey);
             }
         } else {
             // no new node config - apply existing one.
@@ -408,17 +388,6 @@ public class InstanceResourceImpl implements InstanceResource {
             instanceDto.applications.put(applicationKey.getName(), manifest.getDescriptor());
         }
         return instanceDto;
-    }
-
-    private void fixmeExtractDefaultConfig(Path cfgTmpDir, BHive hive, InstanceNodeConfiguration nodeConfig) {
-        for (ApplicationConfiguration cfg : nodeConfig.applications) {
-            ApplicationManifest amf = ApplicationManifest.of(hive, cfg.application);
-            if (amf == null) {
-                throw new WebApplicationException("Cannot find application: " + cfg.application, Status.NOT_FOUND);
-            }
-
-            amf.exportConfigTemplatesTo(hive, cfgTmpDir);
-        }
     }
 
     /** Clears the token from the remote service */

@@ -5,23 +5,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.util.StorageHelper;
-import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 
 public class ApplicationManifest implements Comparable<ApplicationManifest> {
-
-    private static final Logger log = LoggerFactory.getLogger(ApplicationManifest.class);
 
     private Manifest.Key key;
     private ApplicationDescriptor desc;
@@ -40,29 +32,6 @@ public class ApplicationManifest implements Comparable<ApplicationManifest> {
         }
 
         return am;
-    }
-
-    public void exportConfigTemplatesTo(BHive hive, Path target) {
-        // key = target path, source = template config path in application manifest.
-        for (Map.Entry<String, String> cfgFile : desc.configFiles.entrySet()) {
-            String targetRelPath = cfgFile.getKey();
-            String sourceRelPath = cfgFile.getValue();
-
-            Path targetPath = target.resolve(targetRelPath);
-            PathHelper.mkdirs(targetPath.getParent());
-
-            if (Files.exists(targetPath)) {
-                log.warn("WARNING: " + targetRelPath + " contributed by multiple applications");
-                continue;
-            }
-
-            try (InputStream fis = hive
-                    .execute(new TreeEntryLoadOperation().setRootTree(manifest.getRoot()).setRelativePath(sourceRelPath))) {
-                Files.copy(fis, targetPath);
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to export configuration templates to " + target + " for " + key);
-            }
-        }
     }
 
     public byte[] readBrandingSplashScreen(BHive hive) {

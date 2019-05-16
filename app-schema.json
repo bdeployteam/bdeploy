@@ -52,17 +52,14 @@
         "gracePeriod": { "type": "number", "default": 30000 }
       }
     },
-    "stringMap": {
-      "type": "object",
-      "additionalProperties": { "type": "string" }
-    },
     "splashArea": {
       "type": "object",
       "properties": {
         "x": { "type": "number" },
         "y": { "type": "number" },
         "width": { "type": "number" },
-        "height": { "type": "number" }
+        "height": { "type": "number" },
+        "foreground": { "type": "string" }
       },
       "required": [ "x", "y", "width", "height" ]
     },
@@ -106,8 +103,7 @@
     "runtimeDependencies": {
       "type": "array",
       "items": { "type": "string" }
-    },
-    "configFiles": { "$ref": "#/definitions/stringMap" }
+    }
   },
   "required": ["name", "startCommand", "supportedOperatingSystems"]
 }

@@ -17,10 +17,13 @@ import javax.ws.rs.core.UriBuilder;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.bhive.op.ExportTreeOperation;
+import io.bdeploy.bhive.op.ImportTreeOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.cfg.Configuration.Help;
-import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
+import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.UuidHelper;
@@ -28,8 +31,8 @@ import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
-import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
+import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
@@ -111,7 +114,6 @@ public class TemplateTool extends ConfiguredCliTool<TemplateConfig> {
     private void createAppTemplate() {
         ApplicationDescriptor ad = new ApplicationDescriptor();
         ad.name = "DemoApplication";
-        ad.configFiles.put("myconfig.json", "myconfig.json.template");
         ad.runtimeDependencies.add("jdk:1.8.0");
 
         ad.startCommand = new ExecutableDescriptor();
@@ -166,7 +168,7 @@ public class TemplateTool extends ConfiguredCliTool<TemplateConfig> {
             // this is not how this should work in reality - each node should have
             // it's own config directory with only files required by applications on this
             // node..
-            inmBuilder.setConfigSource(configPath);
+            inmBuilder.setConfigTreeId(hive.execute(new ImportTreeOperation().setSourcePath(configPath)));
             inmBuilder.setInstanceNodeConfiguration(entry.getValue().config);
             inmBuilder.setMinionName(entry.getKey());
 
@@ -185,8 +187,15 @@ public class TemplateTool extends ConfiguredCliTool<TemplateConfig> {
 
         PathHelper.mkdirs(templateDir);
 
+        ProductManifest pmf = ProductManifest.of(hive, Manifest.Key.parse(product));
+
+        ObjectId sourceCfgTree = pmf.getConfigTemplateTreeId();
+        if (sourceCfgTree != null) {
+            hive.execute(new ExportTreeOperation().setTargetPath(configPath).setSourceTree(sourceCfgTree));
+        }
+
         // find application manifests, copy template config
-        SortedMap<Manifest.Key, ApplicationDescriptor> applications = loadApplicationsAndConfig(hive, product, configPath);
+        SortedMap<Manifest.Key, ApplicationDescriptor> applications = loadApplications(hive, pmf);
 
         Template tpl = new Template();
         tpl.config.uuid = UuidHelper.randomId();
@@ -260,17 +269,14 @@ public class TemplateTool extends ConfiguredCliTool<TemplateConfig> {
      * @return the list of {@link ApplicationDescriptor}s for further template
      *         processing.
      */
-    private SortedMap<Manifest.Key, ApplicationDescriptor> loadApplicationsAndConfig(BHive hive, String product,
-            Path configPath) {
+    private SortedMap<Manifest.Key, ApplicationDescriptor> loadApplications(BHive hive, ProductManifest pmf) {
         SortedMap<Manifest.Key, ApplicationDescriptor> result = new TreeMap<>();
-        ProductManifest pmf = ProductManifest.of(hive, Manifest.Key.parse(product));
 
         TreeSet<ApplicationManifest> appMfs = pmf.getApplications().stream().map(k -> ApplicationManifest.of(hive, k))
                 .collect(Collectors.toCollection(TreeSet::new));
 
         for (ApplicationManifest m : appMfs) {
             result.put(m.getKey(), m.getDescriptor());
-            m.exportConfigTemplatesTo(hive, configPath);
         }
 
         return result;

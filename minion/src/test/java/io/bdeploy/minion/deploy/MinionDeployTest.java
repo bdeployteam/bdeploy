@@ -4,10 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
+import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +16,6 @@ import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ImportOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
-import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.common.SlowTest;
 import io.bdeploy.common.TempDirectory;
@@ -65,11 +63,16 @@ public class MinionDeployTest {
         local.execute(new ImportOperation().setManifest(appKey).setSourcePath(app));
         local.execute(new ImportOperation().setManifest(jdkKey).setSourcePath(jdk));
 
+        Path cfgs = tmp.resolve("config-templates");
+        PathHelper.mkdirs(cfgs);
+        Files.write(cfgs.resolve("myconfig.json"), Arrays.asList("{ \"cfg\": \"value\" }"));
+
         ProductDescriptor pd = new ProductDescriptor();
         pd.name = "Dummy Product";
         pd.product = "customer";
         pd.applications.add("demo");
-        new ProductManifest.Builder(pd).add(appKey).insert(local, prodKey, "Demo Product for Unit Test");
+        pd.configTemplates = "config-templates";
+        new ProductManifest.Builder(pd).add(appKey).setConfigTemplates(cfgs).insert(local, prodKey, "Demo Product for Unit Test");
 
         /* STEP 2: Create customer (normally via Web UI) and associated hive on remote */
         InstanceGroupConfiguration desc = new InstanceGroupConfiguration();
@@ -149,24 +152,8 @@ public class MinionDeployTest {
         inc.uuid = uuid;
         inc.applications.add(cfg);
 
-        /* STEP 1f: prepare required config file */
-        Path configPath = tmp.resolve("config");
-        for (Map.Entry<String, String> cfgFile : amf.getDescriptor().configFiles.entrySet()) {
-            String targetRelPath = cfgFile.getKey();
-            String sourceRelPath = cfgFile.getValue();
-
-            Path targetPath = configPath.resolve(targetRelPath);
-            PathHelper.mkdirs(targetPath.getParent());
-
-            try (InputStream fis = local.execute(new TreeEntryLoadOperation()
-                    .setRootTree(local.execute(new ManifestLoadOperation().setManifest(amf.getKey())).getRoot())
-                    .setRelativePath(sourceRelPath))) {
-                Files.copy(fis, targetPath);
-            }
-        }
-
         /* STEP 2: create an node manifest per node which will participate (only master in this case */
-        InstanceNodeManifest.Builder builder = new InstanceNodeManifest.Builder().setConfigSource(configPath);
+        InstanceNodeManifest.Builder builder = new InstanceNodeManifest.Builder().setConfigTreeId(pmf.getConfigTemplateTreeId());
         Manifest.Key inmKey = builder.setInstanceNodeConfiguration(inc).setMinionName(Minion.DEFAULT_MASTER_NAME).insert(local);
 
         InstanceConfiguration ic = new InstanceConfiguration();

@@ -60,17 +60,20 @@ public class CopyOperation extends BHive.Operation<Void> {
                 destinationHive.execute(destinationInsert);
             }
 
-            List<Manifest> loaded = manifests.stream().map(getManifestDatabase()::getManifest).collect(Collectors.toList());
+            if (!manifests.isEmpty()) {
+                List<Manifest> loaded = manifests.stream().map(getManifestDatabase()::getManifest).collect(Collectors.toList());
 
-            InsertManifestOperation destinationManifestInsert = new InsertManifestOperation();
-            loaded.forEach(destinationManifestInsert::addManifest);
-            destinationHive.execute(destinationManifestInsert);
+                InsertManifestOperation destinationManifestInsert = new InsertManifestOperation();
+                loaded.forEach(destinationManifestInsert::addManifest);
+                destinationHive.execute(destinationManifestInsert);
 
-            if (!partialAllowed) {
-                ManifestConsistencyCheckOperation destinationCheck = new ManifestConsistencyCheckOperation();
-                manifests.forEach(destinationCheck::addRoot);
-                destinationHive.execute(destinationCheck);
+                if (!partialAllowed) {
+                    ManifestConsistencyCheckOperation destinationCheck = new ManifestConsistencyCheckOperation();
+                    manifests.forEach(destinationCheck::addRoot);
+                    destinationHive.execute(destinationCheck);
+                }
             }
+
         }
 
         return null;

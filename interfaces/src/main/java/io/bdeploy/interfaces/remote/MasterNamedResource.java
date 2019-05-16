@@ -99,6 +99,16 @@ public interface MasterNamedResource {
             @QueryParam("a") String application);
 
     /**
+     * @param instanceId the instance id to retrieve configuration data for
+     * @return a ZIPed version of the configuration tree associated with the instance
+     */
+    @POST
+    @WeakTokenAllowed
+    @Path("/client-instance-config")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public java.nio.file.Path getClientInstanceConfiguration(Manifest.Key instanceId);
+
+    /**
      * Starts all applications of the given instance having the start type 'INSTANCE' configured.
      *
      * @param instanceId

@@ -34,6 +34,7 @@ export const EMPTY_INSTANCE: InstanceConfiguration = {
   name: null,
   description: null,
   purpose: null,
+  configTree: null,
   autoStart: false,
   product: EMPTY_MANIFEST_KEY,
   target: EMPTY_REMOTE_SERVICE,

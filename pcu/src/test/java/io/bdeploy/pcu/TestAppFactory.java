@@ -5,7 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFilePermission;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -13,10 +12,10 @@ import java.util.TreeMap;
 
 import io.bdeploy.common.ContentHelper;
 import io.bdeploy.common.util.JacksonHelper;
-import io.bdeploy.common.util.OsHelper;
-import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.JacksonHelper.MapperType;
+import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
+import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
@@ -104,12 +103,10 @@ public class TestAppFactory {
         cfg.startCommand.parameters.add(getParam("--param1", "Parameter 1", "test"));
         cfg.startCommand.parameters.add(getParam("--param2", "Parameter 2", "more"));
         cfg.startCommand.parameters.add(getParam("--jdk", "Parameter 2", "${M:jdk}"));
-        cfg.configFiles.put("config.json", "myconfig.json");
 
         try {
             Files.write(target.resolve(ApplicationDescriptor.FILE_NAME),
                     JacksonHelper.createObjectMapper(MapperType.YAML).writeValueAsBytes(cfg));
-            Files.write(target.resolve("myconfig.json"), Arrays.asList("{ \"cfg\": \"value\" }"));
             return target;
         } catch (IOException ioe) {
             throw new RuntimeException("Failed to generate application.", ioe);

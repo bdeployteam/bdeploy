@@ -21,6 +21,7 @@ import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.op.ImportObjectOperation;
 import io.bdeploy.bhive.op.ImportOperation;
+import io.bdeploy.bhive.op.ImportTreeOperation;
 import io.bdeploy.bhive.op.InsertArtificialTreeOperation;
 import io.bdeploy.bhive.op.InsertManifestOperation;
 import io.bdeploy.bhive.op.InsertManifestRefOperation;
@@ -46,20 +47,23 @@ public class ProductManifest {
 
     public static final String PRODUCT_LABEL = "X-Product";
     public static final String PRODUCT_DESC = "product.json";
+    private static final String CONFIG_ENTRY = "config";
 
     private final SortedSet<Manifest.Key> applications;
     private final SortedSet<Manifest.Key> references;
     private final String prodName;
-    private final Key key;
     private final ProductDescriptor desc;
+    private final Manifest manifest;
+    private final ObjectId cfgTreeId;
 
-    private ProductManifest(String name, Manifest.Key key, SortedSet<Manifest.Key> applications,
-            SortedSet<Manifest.Key> references, ProductDescriptor desc) {
+    private ProductManifest(String name, Manifest manifest, SortedSet<Manifest.Key> applications,
+            SortedSet<Manifest.Key> references, ProductDescriptor desc, ObjectId cfgTreeId) {
         this.prodName = name;
-        this.key = key;
+        this.manifest = manifest;
         this.applications = applications;
         this.references = references;
         this.desc = desc;
+        this.cfgTreeId = cfgTreeId;
     }
 
     /**
@@ -100,7 +104,18 @@ public class ProductManifest {
             throw new IllegalStateException("Cannot load deployment manifest", e);
         }
 
-        return new ProductManifest(label, manifest, appRefs, otherRefs, desc);
+        ObjectId cfgEntry = null;
+        Map<Tree.Key, ObjectId> entries = tree.getChildren();
+        Tree.Key configKey = new Tree.Key(CONFIG_ENTRY, Tree.EntryType.TREE);
+        if (entries.containsKey(configKey)) {
+            cfgEntry = entries.get(configKey);
+        }
+
+        return new ProductManifest(label, mf, appRefs, otherRefs, desc, cfgEntry);
+    }
+
+    public ObjectId getConfigTemplateTreeId() {
+        return cfgTreeId;
     }
 
     /**
@@ -121,7 +136,7 @@ public class ProductManifest {
      * @return the product {@link Manifest} {@link Key}.
      */
     public Key getKey() {
-        return key;
+        return manifest.getKey();
     }
 
     /**
@@ -182,7 +197,16 @@ public class ProductManifest {
         // 6. additional labels
         versions.labels.forEach(builder::addLabel);
 
-        // 7. generate product
+        // 7. configuration templates
+        if (prod.configTemplates != null) {
+            Path cfgDir = impDesc.getParent().resolve(prod.configTemplates);
+            if (!Files.isDirectory(cfgDir)) {
+                throw new IllegalStateException("Configuration template directory not found: " + cfgDir);
+            }
+            builder.setConfigTemplates(cfgDir);
+        }
+
+        // 8. generate product
         builder.insert(hive, prodKey, prod.product);
 
         return prodKey;
@@ -305,6 +329,7 @@ public class ProductManifest {
 
         private final Map<String, Manifest.Key> applications = new TreeMap<>();
         private final Map<String, String> labels = new TreeMap<>();
+        private Path configTemplates;
         private final ProductDescriptor desc;
 
         public Builder(ProductDescriptor desc) {
@@ -316,6 +341,11 @@ public class ProductManifest {
             return this;
         }
 
+        public Builder setConfigTemplates(Path templates) {
+            configTemplates = templates;
+            return this;
+        }
+
         public Builder addLabel(String key, String value) {
             labels.put(key, value);
             return this;
@@ -323,11 +353,20 @@ public class ProductManifest {
 
         public void insert(BHive hive, Manifest.Key manifest, String productName) {
             Tree.Builder tree = new Tree.Builder();
+
+            // add application references
             applications.forEach((k, v) -> tree.add(new Tree.Key(k, Tree.EntryType.MANIFEST),
                     hive.execute(new InsertManifestRefOperation().setManifest(v))));
 
+            // add product descriptor
             ObjectId descId = hive.execute(new ImportObjectOperation().setData(StorageHelper.toRawBytes(desc)));
             tree.add(new Tree.Key(PRODUCT_DESC, Tree.EntryType.BLOB), descId);
+
+            // create config file tree
+            if (configTemplates != null) {
+                ObjectId configId = hive.execute(new ImportTreeOperation().setSourcePath(configTemplates));
+                tree.add(new Tree.Key(CONFIG_ENTRY, Tree.EntryType.TREE), configId);
+            }
 
             Manifest.Builder m = new Manifest.Builder(manifest);
             labels.forEach(m::addLabel);

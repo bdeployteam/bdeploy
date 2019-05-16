@@ -7,11 +7,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import javax.ws.rs.core.UriBuilder;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.op.CopyOperation;
 import io.bdeploy.bhive.op.ManifestDeleteOldByIdOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.remote.FetchOperation;
@@ -27,7 +30,6 @@ import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
 import io.bdeploy.interfaces.descriptor.client.ClientDescriptor;
-import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
@@ -136,6 +138,15 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 }
 
                 try (Activity info = reporter.start("Preparing configuration...")) {
+                    // download configuration data.
+                    if (appCfg.configTreeId != null) {
+                        Path tmpCfg = namedMaster.getClientInstanceConfiguration(appCfg.instanceKey);
+                        try (BHive tmpHive = new BHive(UriBuilder.fromUri("jar:" + tmpCfg.toUri()).build(), reporter)) {
+                            CopyOperation copyAll = new CopyOperation().setDestinationHive(hive);
+                            tmpHive.execute(copyAll);
+                        }
+                    }
+
                     // 3: generate a 'fake' instanceNodeManifest from the existing configuration for local caching.
                     createInstanceNodeManifest(appCfg, targetClientKey, hive);
                 }
@@ -192,19 +203,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         Path cfgTmp = null;
         try {
-            if (!appCfg.clientDesc.configFiles.isEmpty()) {
-                // TODO: not yet properly supported for clients... :|
-                try {
-                    cfgTmp = Files.createTempDirectory("cfg-");
-                    ApplicationManifest amf = ApplicationManifest.of(hive, appCfg.clientConfig.application);
-                    amf.exportConfigTemplatesTo(hive, cfgTmp);
-                } catch (IOException e) {
-                    log.error("Cannot write configuration files", e);
-                }
-            }
-
             new InstanceNodeManifest.Builder().setInstanceNodeConfiguration(fakeInc).setMinionName("client")
-                    .setKey(targetClientKey).setConfigSource(cfgTmp).insert(hive);
+                    .setKey(targetClientKey).setConfigTreeId(appCfg.configTreeId).insert(hive);
         } finally {
             if (cfgTmp != null) {
                 PathHelper.deleteRecursive(cfgTmp);

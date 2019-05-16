@@ -578,6 +578,10 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     this.selectedConfig.instance.product = product.key;
     this.selectedConfig.version.product = product.key;
 
+    if (!this.selectedConfig.instance.configTree) {
+      this.selectedConfig.instance.configTree = product.configTree;
+    }
+
     this.applicationService
       .listApplications(this.groupParam, product.key)
       .pipe(finalize(() => (this.productsLoading = false)))

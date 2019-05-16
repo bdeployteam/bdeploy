@@ -198,7 +198,6 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             rc.register(JerseySseActivityScopeFilter.class);
             rc.register(new JerseyLazySseInitializer());
             rc.register(new JerseyServerReporterContextResolver());
-            rc.register(new JerseyMultiThreadingContextBridge());
             rc.register(new JerseyWriteLockFilter());
 
             server = GrizzlyHttpServerFactory.createHttpServer(jerseyUri, rc, true, sslEngine, false);

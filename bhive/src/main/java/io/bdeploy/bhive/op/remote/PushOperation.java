@@ -66,7 +66,7 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
 
                 // create a view of every manifest on our side. does not follow references as references are scanned above.
                 // TODO: ref scan above already calculated all this internally - maybe we can avoid double scanning (although it is cached).
-                List<TreeView> snapshots = toPush.parallelStream()
+                List<TreeView> snapshots = toPush.stream()
                         .map(m -> execute(new ScanOperation().setManifest(m).setFollowReferences(false)))
                         .collect(Collectors.toList());
 

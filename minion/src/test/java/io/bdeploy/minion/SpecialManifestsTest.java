@@ -24,6 +24,7 @@ import io.bdeploy.common.TempDirectory;
 import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper;
+import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.dcu.InstanceNodeController;
 import io.bdeploy.interfaces.ScopedManifestKey;
@@ -113,12 +114,17 @@ public class SpecialManifestsTest {
             hive.execute(new ImportOperation().setSourcePath(jdk).setManifest(jdkKey));
             ApplicationDescriptor desc = ApplicationManifest.of(hive, appKey).getDescriptor();
 
+            Path cfgs = tmp.resolve("config-templates");
+            PathHelper.mkdirs(cfgs);
+            Files.write(cfgs.resolve("myconfig.json"), Arrays.asList("{ \"cfg\": \"value\" }"));
+
             Manifest.Key prodKey = new Manifest.Key("prod", "v1");
             ProductDescriptor pd = new ProductDescriptor();
             pd.name = "Dummy Product";
             pd.product = "prod";
             pd.applications.add("app");
-            new ProductManifest.Builder(pd).add(appKey).insert(hive, prodKey, "Dummy Product");
+            pd.configTemplates = "config-templates";
+            new ProductManifest.Builder(pd).add(appKey).setConfigTemplates(cfgs).insert(hive, prodKey, "Dummy Product");
 
             InstanceNodeManifest.Builder ifmb = new InstanceNodeManifest.Builder();
 
@@ -142,7 +148,8 @@ public class SpecialManifestsTest {
             Files.createDirectories(cfgDir);
             Files.write(cfgDir.resolve("config.json"), Arrays.asList("DummyConfig"));
 
-            Manifest.Key ifk = ifmb.setInstanceNodeConfiguration(cfg).setConfigSource(cfgDir)
+            Manifest.Key ifk = ifmb.setInstanceNodeConfiguration(cfg)
+                    .setConfigTreeId(ProductManifest.of(hive, prodKey).getConfigTemplateTreeId())
                     .setMinionName(Minion.DEFAULT_MASTER_NAME).insert(hive);
 
             InstanceConfiguration ic = new InstanceConfiguration();

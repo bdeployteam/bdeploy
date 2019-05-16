@@ -48,6 +48,7 @@ export class InstanceAddEditComponent implements OnInit {
     name: ['', Validators.required],
     description: [''],
     autoStart: [''],
+    configTree: [''],
     purpose: ['', Validators.required],
     product: this.formBuilder.group({
       name: ['', Validators.required],
