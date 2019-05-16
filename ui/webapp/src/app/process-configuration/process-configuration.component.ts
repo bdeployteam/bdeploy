@@ -11,7 +11,16 @@ import { InstanceVersionCardComponent } from '../instance-version-card/instance-
 import { MessageBoxMode } from '../messagebox/messagebox.component';
 import { ApplicationGroup } from '../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_DEPLOYMENT_STATE } from '../models/consts';
-import { ApplicationConfiguration, ApplicationDescriptor, ApplicationDto, DeploymentStateDto, InstanceNodeConfiguration, InstanceNodeConfigurationDto, ManifestKey, ProductDto } from '../models/gen.dtos';
+import {
+  ApplicationConfiguration,
+  ApplicationDescriptor,
+  ApplicationDto,
+  DeploymentStateDto,
+  InstanceNodeConfiguration,
+  InstanceNodeConfigurationDto,
+  ManifestKey,
+  ProductDto,
+} from '../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../models/process.model';
 import { ProcessDetailsComponent } from '../process-details/process-details.component';
 import { ApplicationService } from '../services/application.service';
@@ -234,8 +243,9 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   setSidenavProcessStatus(process: ApplicationConfiguration): void {
-    // Do not show process details if the configuration mode is active
-    if (this.sidenavMode === SidenavMode.Applications) {
+    // Prevent switching if we edit applications or products
+    const disallowed = [SidenavMode.Applications, SidenavMode.Products];
+    if (disallowed.includes(this.sidenavMode)) {
       return;
     }
     const callRefresh = this.selectedProcess === process;
@@ -326,7 +336,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       this.uuidParam,
       this.selectedConfig.instance,
       this.selectedConfig.nodeList,
-      this.processConfigs[0].version.key.tag
+      this.processConfigs[0].version.key.tag,
     );
     nodePromise.subscribe(x => {
       this.loadVersions();
