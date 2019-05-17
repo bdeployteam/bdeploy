@@ -9,6 +9,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LoadingBarHttpClientModule } from '@ngx-loading-bar/http-client';
 import { LoadingBarRouterModule } from '@ngx-loading-bar/router';
+import { CookieService } from 'ngx-cookie-service';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ApplicationConfigurationCardComponent } from './application-configuration-card/application-configuration-card.component';
@@ -157,6 +158,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     ConfigService,
     LoggingService,
     httpInterceptorProviders,
+    CookieService,
     /* make sure that ConfigService and HistoryService are initialize always on startup */
     { provide: APP_INITIALIZER, useFactory: loadAppConfig, deps: [ConfigService], multi: true },
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
