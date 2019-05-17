@@ -69,7 +69,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
 
         // 0: check where to put local temporary data.
-        Path rootDir = Paths.get(System.getProperty("user.home"));
+        Path rootDir = Paths.get(System.getProperty("user.home")).resolve(".bdeploy");
         if (config.cacheDir() != null && !config.cacheDir().isEmpty()) {
             Path check = Paths.get(config.cacheDir());
             if (!Files.isDirectory(check)) {
@@ -90,7 +90,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         log.info("Using cache directory " + rootDir);
 
-        doLaunchFromConfig(cfg, rootDir.toAbsolutePath().resolve(".bdeploy"));
+        doLaunchFromConfig(cfg, rootDir.toAbsolutePath());
     }
 
     private static void doLaunchFromConfig(Path cfg, Path rootDir) {
