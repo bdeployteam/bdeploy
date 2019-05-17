@@ -55,9 +55,11 @@ export class ApplicationConfigurationCardComponent implements OnInit {
     } else if (this.isDirty()) {
       styles.push('app-config-modified');
     }
-
     if (this.isMissing()) {
       styles.push('app-config-missing');
+    }
+    if (this.isForeign) {
+      styles.push('app-config-foreign');
     }
     return styles;
   }

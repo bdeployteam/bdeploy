@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ManifestKey, ProductDto } from '../models/gen.dtos';
+import { ProcessConfigDto } from '../models/process.model';
 import { ConfigService } from './config.service';
 import { InstanceGroupService } from './instance-group.service';
 import { Logger, LoggingService } from './logging.service';
@@ -12,11 +13,7 @@ import { Logger, LoggingService } from './logging.service';
 export class ProductService {
   private log: Logger = this.loggingService.getLogger('ProductService');
 
-  constructor(
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private loggingService: LoggingService,
-  ) {}
+  constructor(private cfg: ConfigService, private http: HttpClient, private loggingService: LoggingService) {}
 
   public getProducts(instanceGroupName: string): Observable<ProductDto[]> {
     const url: string = this.buildProductUrl(instanceGroupName) + '/list';
@@ -66,5 +63,22 @@ export class ProductService {
 
   private buildProductNameTagUrl(instanceGroupName: string, key: ManifestKey): string {
     return this.buildProductUrl(instanceGroupName) + '/' + key.name + '/' + key.tag;
+  }
+
+  /**
+   * Changes the product version used in the given process configuration.
+   * Note that the contained applications must be updated separately.
+   *
+   * @param config the current configuration
+   * @param product the new product version.
+   */
+  updateProduct(config: ProcessConfigDto, product: ProductDto) {
+    config.instance.product = product.key;
+    config.version.product = product.key;
+
+    // Update configuration files
+    if (!config.instance.configTree) {
+      config.instance.configTree = product.configTree;
+    }
   }
 }

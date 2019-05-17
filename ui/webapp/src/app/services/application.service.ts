@@ -91,10 +91,12 @@ export class ApplicationService {
     // Process start and stop command of all apps
     const apps = this.getAllApps(processConfig);
     for (const app of apps) {
-      // Update start command
+      // Do not update ourself. Changes are already applied
       if (app.uid === template.uid) {
         continue;
       }
+
+      // Update start command
       for (const param of app.start.parameters) {
         const paraDef = paraDescMap.get(param.uid);
         if (!paraDef || !paraDef.global) {
@@ -128,7 +130,7 @@ export class ApplicationService {
   public initAppConfig(
     appConfig: ApplicationConfiguration,
     appDesc: ApplicationDescriptor,
-    template: ApplicationConfiguration,
+    templates: ApplicationConfiguration[],
   ) {
     // Initialize name
     appConfig.name = appDesc.name;
@@ -143,23 +145,19 @@ export class ApplicationService {
     appConfig.start = cloneDeep(EMPTY_COMMAND_CONFIGURATION);
     if (appDesc.startCommand) {
       appConfig.start.executable = appDesc.startCommand.launcherPath;
-      appConfig.start.parameters = this.createParameters(appDesc.startCommand.parameters, template, true);
+      appConfig.start.parameters = this.createParameters(appDesc.startCommand.parameters, templates);
     }
 
     // Initialize stop command
     appConfig.stop = cloneDeep(EMPTY_COMMAND_CONFIGURATION);
     if (appDesc.stopCommand) {
       appConfig.stop.executable = appDesc.stopCommand.launcherPath;
-      appConfig.stop.parameters = this.createParameters(appDesc.stopCommand.parameters, template, false);
+      appConfig.stop.parameters = this.createParameters(appDesc.stopCommand.parameters, templates);
     }
   }
 
   /** Creates and returns an array of parameters based on the given descriptors */
-  createParameters(
-    descs: ParameterDescriptor[],
-    template: ApplicationConfiguration,
-    isStart: boolean,
-  ): ParameterConfiguration[] {
+  createParameters(descs: ParameterDescriptor[], templates: ApplicationConfiguration[]): ParameterConfiguration[] {
     const configs: ParameterConfiguration[] = [];
 
     // Prepare all mandatory parameters
@@ -167,35 +165,50 @@ export class ApplicationService {
       if (!paraDesc.mandatory) {
         continue;
       }
-      const config = cloneDeep(EMPTY_PARAMETER_CONFIGURATION);
-      config.uid = paraDesc.uid;
-      config.value = this.getParameterValue(paraDesc, template, isStart);
-      config.preRendered = this.preRenderParameter(paraDesc, config.value);
+      const config = this.createParameter(paraDesc, templates);
       configs.push(config);
     }
     return configs;
   }
 
+  /**
+   * Creates and returns a new parameter based on the given descriptor
+   */
+  createParameter(paraDesc: ParameterDescriptor, templates: ApplicationConfiguration[]) {
+    const config = cloneDeep(EMPTY_PARAMETER_CONFIGURATION);
+    config.uid = paraDesc.uid;
+    this.updateParameterValue(config, paraDesc, templates);
+    return config;
+  }
+
+  /**
+   * Updates the value of the given paramter based on the given descriptor.
+   * Takes the global value if the parameter is defined as global and otherwise the default value.
+   */
+  updateParameterValue(
+    config: ParameterConfiguration,
+    paraDesc: ParameterDescriptor,
+    templates: ApplicationConfiguration[],
+  ) {
+    config.value = this.getParameterValue(paraDesc, templates);
+    config.preRendered = this.preRenderParameter(paraDesc, config.value);
+  }
+
   /** Returns the default value for the given parameter */
-  getParameterValue(paraDesc: ParameterDescriptor, template: ApplicationConfiguration, isStart: boolean): string {
+  getParameterValue(paraDesc: ParameterDescriptor, templates: ApplicationConfiguration[]): string {
     // Take default value for a non-global parameter
-    if (!paraDesc.global || !template) {
+    if (!paraDesc.global || !templates) {
       return paraDesc.defaultValue;
     }
 
-    // Lookup value from start command
-    if (isStart) {
-      const startPara = template.start.parameters.find(p => p.uid === paraDesc.uid);
-      if (startPara) {
-        return startPara.value;
+    for (const template of templates) {
+      let para = template.start.parameters.find(p => p.uid === paraDesc.uid);
+      if (!para) {
+        para = template.stop.parameters.find(p => p.uid === paraDesc.uid);
       }
-      return paraDesc.defaultValue;
-    }
-
-    // Lookup value from stop command
-    const stopPara = template.stop.parameters.find(p => p.uid === paraDesc.uid);
-    if (stopPara) {
-      return stopPara.value;
+      if (para) {
+        return para.value;
+      }
     }
     return paraDesc.defaultValue;
   }
@@ -506,5 +519,95 @@ export class ApplicationService {
       }
     }
     return apps;
+  }
+
+  /**
+   * Updates the application version of all applications and creates/updates parameters.
+   * Typically called after the product version has been changed.
+   *
+   * @param config the current version of the apps
+   * @param dtos the current version of the descriptor
+   */
+  updateApplications(config: ProcessConfigDto, dtos: ApplicationDto[]) {
+    const descriptors: { [index: string]: ApplicationDescriptor } = {};
+    const keys: { [index: string]: ManifestKey } = {};
+    dtos.forEach(a => {
+      descriptors[a.key.name] = a.descriptor;
+      keys[a.key.name] = a.key;
+    });
+
+    // Collect all applications of all nodes
+    const apps = this.getAllApps(config);
+    for (const appDesc of this.getAllApps(config)) {
+      const newAppManifest = keys[appDesc.application.name];
+
+      // only set new application when found - otherwise leave the old version and leave it to validation
+      // to detect that this application is no longer contained in the product.
+      if (!newAppManifest) {
+        continue;
+      }
+
+      // Update reference to the new version
+      const newAppDescriptor: ApplicationDescriptor = descriptors[newAppManifest.name];
+      appDesc.application = newAppManifest;
+      this.updateApplicationParams(appDesc, newAppDescriptor, apps);
+    }
+
+    config.nodeList.applications = descriptors;
+    config.setApplications(dtos);
+  }
+
+  /**
+   * Updates the parameters of the given application according to the given descriptor.
+   */
+  updateApplicationParams(
+    app: ApplicationConfiguration,
+    desc: ApplicationDescriptor,
+    templates: ApplicationConfiguration[],
+  ) {
+    if (desc.startCommand) {
+      app.start.executable = desc.startCommand.launcherPath;
+      this.updateParameter(app.start.parameters, desc.startCommand.parameters, templates);
+    }
+    if (desc.stopCommand) {
+      app.stop.executable = desc.stopCommand.launcherPath;
+      this.updateParameter(app.stop.parameters, desc.stopCommand.parameters, templates);
+    }
+  }
+
+  /**
+   * Updates the configuration according to the given descriptors. The following is done:
+   *
+   * Create missing mandatory parameters.
+   * Update fixed parameters to the newest value.
+   * Set global parameters
+   */
+  updateParameter(
+    configs: ParameterConfiguration[],
+    descs: ParameterDescriptor[],
+    templates: ApplicationConfiguration[],
+  ) {
+    // Order of parameters is important. Thus we need to insert a missing parameter
+    // at the correct index in the config array.
+    for (let index = 0; index < descs.length; index++) {
+      const desc = descs[index];
+
+      // Create parameter if it is not yet defined but mandatory
+      let config = configs.find(c => c.uid === desc.uid);
+      if (!config && desc.mandatory) {
+        config = this.createParameter(desc, templates);
+        configs.splice(index, 0, config);
+        continue;
+      }
+      // Ignore if parameter is not yet defined
+      if (!config) {
+        continue;
+      }
+
+      // Overwrite value if parameter is fixed
+      if (desc.fixed) {
+        this.updateParameterValue(config, desc, templates);
+      }
+    }
   }
 }

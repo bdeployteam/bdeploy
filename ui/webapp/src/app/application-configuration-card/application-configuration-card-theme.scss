@@ -6,6 +6,10 @@
   $invalid-border: if($dark, mat-color($mat-red, 300), mat-color($mat-red, 200));
   $modified-border: if($dark, mat-color($mat-yellow, 300), mat-color($mat-yellow, 200));
 
+  .app-config-foreign {
+    background-color: if($dark, #424242, #ddd);
+  }
+
   .app-config-invalid {
     border-left: 10px solid $invalid-border;
   }
@@ -17,7 +21,6 @@
   .app-config-missing {
     border: 2px dotted $invalid-border;
     opacity: 0.5;
-
     transition: opacity 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   }
 }

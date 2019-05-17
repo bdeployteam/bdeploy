@@ -11,16 +11,7 @@ import { InstanceVersionCardComponent } from '../instance-version-card/instance-
 import { MessageBoxMode } from '../messagebox/messagebox.component';
 import { ApplicationGroup } from '../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_DEPLOYMENT_STATE } from '../models/consts';
-import {
-  ApplicationConfiguration,
-  ApplicationDescriptor,
-  ApplicationDto,
-  DeploymentStateDto,
-  InstanceNodeConfiguration,
-  InstanceNodeConfigurationDto,
-  ManifestKey,
-  ProductDto,
-} from '../models/gen.dtos';
+import { ApplicationConfiguration, ApplicationDto, DeploymentStateDto, InstanceNodeConfiguration, InstanceNodeConfigurationDto, ManifestKey, ProductDto } from '../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../models/process.model';
 import { ProcessDetailsComponent } from '../process-details/process-details.component';
 import { ApplicationService } from '../services/application.service';
@@ -41,6 +32,7 @@ export enum SidenavMode {
   selector: 'app-process-configuration',
   templateUrl: './process-configuration.component.html',
   styleUrls: ['./process-configuration.component.css'],
+  providers: [ApplicationService]
 })
 export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   public static readonly DROPLIST_APPLICATIONS = 'APPLICATIONS';
@@ -575,13 +567,9 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
   updateProduct(product: ProductDto): void {
     this.productsLoading = true;
-    this.selectedConfig.instance.product = product.key;
-    this.selectedConfig.version.product = product.key;
+    this.productService.updateProduct(this.selectedConfig, product);
 
-    if (!this.selectedConfig.instance.configTree) {
-      this.selectedConfig.instance.configTree = product.configTree;
-    }
-
+    // Fetch applications of the new product and update the config
     this.applicationService
       .listApplications(this.groupParam, product.key)
       .pipe(finalize(() => (this.productsLoading = false)))
@@ -591,34 +579,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   updateApplications(apps: ApplicationDto[]) {
-    const updated: { [index: string]: ApplicationDescriptor } = {};
-    const keys: { [index: string]: ManifestKey } = {};
-    apps.forEach(a => {
-      updated[a.key.name] = a.descriptor;
-      keys[a.key.name] = a.key;
-    });
-
-    // update all app configs to new application version...
-    this.selectedConfig.nodeList.nodeConfigDtos.forEach(n => {
-      if (!n || !n.nodeConfiguration || !n.nodeConfiguration.applications) {
-        return;
-      }
-
-      n.nodeConfiguration.applications.forEach(a => {
-        const newKey = keys[a.application.name];
-
-        // only set new application when found - otherwise leave the old version and leave it to validation
-        // to detect that this application is no longer contained in the product.
-        if (newKey) {
-          // application found by name in new product version - app version may or may not have changed
-          a.application = newKey;
-          a.start.executable = updated[newKey.name].startCommand.launcherPath;
-        }
-      });
-    });
-
-    this.selectedConfig.nodeList.applications = updated;
-    this.selectedConfig.setApplications(apps);
+    this.applicationService.updateApplications(this.selectedConfig,apps);
     this.updateDirtyStateAndValidate();
     this.setSidenavVersions();
   }

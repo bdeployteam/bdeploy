@@ -43,7 +43,8 @@ mat-form-field {
   flex: 1 1 auto;
   justify-content: left;
   margin-left: 1em;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.54);
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
 }
 
 .boolean-param-widget {
@@ -53,9 +54,8 @@ mat-form-field {
 .boolean-param-label {
   position: absolute;
   left: 0;
-  margin: -3em 1em;
+  margin: -2.5em 1em;
   padding: 0.5em;
   font-size: 0.75em;
-  color: rgba(0, 0, 0, 0.54);
   text-overflow: ellipsis;
 }

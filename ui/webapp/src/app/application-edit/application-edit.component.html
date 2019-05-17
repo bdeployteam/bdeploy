@@ -72,7 +72,7 @@
                 <!-- HasValue=true;  Mandatory=false: Optional parameter, value slider   -> Parameter present if configured with slider value as value -->
                 <!-- HasValue=false; Mandatory=true:  Mandatory parameter, value slider  -> Value slider controls whether parameter is present on command line -->
                 <!-- HasValue=true;  Mandatory=true:  Mandatory parameter, value slider  -> Parameter always present with slider value as value -->
-                <div class="boolean-param-field" *ngIf="param.desc.hasValue || param.desc.mandatory">
+                <div [ngClass]="['boolean-param-field', param.desc.fixed ? 'boolean-param-field-readonly' : '']" *ngIf="param.desc.hasValue || param.desc.mandatory">
                   <mat-slide-toggle class="boolean-param-widget" [formControlName]="param.desc.uid"> </mat-slide-toggle>
                   <label class="boolean-param-label">{{ getCtrlPlaceholderText(param.desc) }}</label>
                 </div>
@@ -84,7 +84,7 @@
             </ng-container>
 
               <mat-form-field *ngSwitchDefault>
-                <input matInput readonly="{{param.desc.fixed}}" placeholder="{{getCtrlPlaceholderText(param.desc)}}" [formControlName]="param.desc.uid" type="{{getCtrlInputType(param.desc.type)}}"/>
+                <input matInput placeholder="{{getCtrlPlaceholderText(param.desc)}}" [formControlName]="param.desc.uid" type="{{getCtrlInputType(param.desc.type)}}"/>
                 <mat-error *ngIf="!isCtrlValid(param.desc.uid)">{{getCtrlErrorMessage(param.desc.uid)}}</mat-error>
               </mat-form-field>
 

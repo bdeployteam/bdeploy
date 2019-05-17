@@ -11,8 +11,8 @@ import { ApplicationEditOptionalComponent } from '../application-edit-optional/a
 import { MessageBoxMode } from '../messagebox/messagebox.component';
 import { CustomParameter, GroupNames, LinkedParameter, NamedParameter } from '../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_PARAMETER_CONFIGURATION, EMPTY_PARAMETER_DESCRIPTOR } from '../models/consts';
-import { ApplicationConfiguration, ApplicationDescriptor, ApplicationStartType, InstanceConfiguration, ParameterDescriptor, ParameterType } from '../models/gen.dtos';
-import { EditAppConfigContext } from '../models/process.model';
+import { ApplicationConfiguration, ApplicationDescriptor, ApplicationStartType, ParameterDescriptor, ParameterType } from '../models/gen.dtos';
+import { EditAppConfigContext, ProcessConfigDto } from '../models/process.model';
 import { ApplicationService } from '../services/application.service';
 import { Logger, LoggingService } from '../services/logging.service';
 import { MessageboxService } from '../services/messagebox.service';
@@ -30,7 +30,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
   public instanceGroup: string;
 
   @Input()
-  public instanceConfig: InstanceConfiguration;
+  public processConfig: ProcessConfigDto;
 
   @Input()
   public appConfigContext: EditAppConfigContext;
@@ -471,6 +471,11 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
       control.setValue(config.value);
     }
 
+    // Disable in case of a fixed parameter
+    if (descriptor.fixed) {
+      control.disable();
+    }
+
     // Track value changes and update
     control.valueChanges.subscribe(v => {
       linkedPara.preRender(this.appService, v);
@@ -517,12 +522,22 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
   updateOptionalParams(results: LinkedParameter[]) {
     for (const param of results) {
       const linkedPara = this.linkedDescriptors.get(param.desc.uid);
+      // init param value if param was added
+      if (!linkedPara.rendered && param.rendered) {
+        this.initOptionalParameterValue(linkedPara);
+      }
       linkedPara.rendered = param.rendered;
     }
 
     // Update order and group
     this.updateAppCfgParameterOrder();
     this.updateFormGroup();
+  }
+
+  /** Initializes the value of an optional parameter */
+  initOptionalParameterValue(param: LinkedParameter) {
+    const apps: ApplicationConfiguration[] = this.appService.getAllApps(this.processConfig);
+    param.conf.value = this.appService.getParameterValue(param.desc, apps);
   }
 
   /** Updates the visibility state of custom parameters */

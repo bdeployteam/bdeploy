@@ -1,6 +1,6 @@
 import { CdkDrag, CdkDragDrop, CdkDragExit, CdkDragStart, CdkDropList, CdkDropListContainer, moveItemInArray } from '@angular/cdk/drag-drop';
 import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
-import { cloneDeep, isEqual } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { ApplicationConfigurationCardComponent } from '../application-configuration-card/application-configuration-card.component';
 import { ApplicationGroup } from '../models/application.model';
@@ -420,9 +420,8 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy, AfterViewIn
     processControlConfig.keepAlive = processControlDesc.supportsKeepAlive;
     processControlConfig.noOfRetries = processControlDesc.noOfRetries;
 
-    // Template is the first application having the same app to launch
+    // Lookup parameter in all available applications
     const apps = this.appService.getAllApps(this.processConfig);
-    const template = apps.find(ac => isEqual(ac.application, appConfig.application));
 
     // Load descriptor and initialize configuration
     const productKey = this.instance.product;
@@ -431,7 +430,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy, AfterViewIn
       // Generate unique identifier
       this.appService.createUuid(this.instanceGroupName).subscribe(uid => {
         appConfig.uid = uid;
-        this.appService.initAppConfig(appConfig, desc, template);
+        this.appService.initAppConfig(appConfig, desc, apps);
         this.editNodeAppsEvent.emit();
       });
     });
