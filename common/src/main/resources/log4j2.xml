@@ -3,12 +3,12 @@
 	<Appenders>
 		<Console name="Console" target="SYSTEM_OUT">
 			<PatternLayout
-				pattern="%d{yyyy-MM-dd:mm:ss.SSS} | %25.25t | %-5level | %-80msg - (%F:%L)%n" />
+				pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} | %25.25t | %-5level | %-80msg - (%F:%L)%n" />
 		</Console>
 
 		<Console name="ConsoleWithMdc" target="SYSTEM_OUT">
 			<PatternLayout
-				pattern="%d{yyyy-MM-dd:mm:ss.SSS} | %25.25t | %-5level | %-35.35MDC{BDEPLOY} | %-42msg - (%F:%L)%n" />
+				pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} | %25.25t | %-5level | %-35.35MDC{BDEPLOY} | %-42msg - (%F:%L)%n" />
 		</Console>
 	</Appenders>
 	<Loggers>
