@@ -73,7 +73,6 @@ public interface MasterRootResource {
     /**
      * Creates a named hive on the remote
      *
-     * @param id the name of the hive to create
      * @param meta the {@link InstanceGroupConfiguration} to associate with the new hive
      * @param storage the location to create the hive in.
      */
@@ -84,7 +83,7 @@ public interface MasterRootResource {
     /**
      * Request the master that is responsible for the given named Hive.
      * <p>
-     * Use {@link #addInstanceGroup(String, InstanceGroupConfiguration, String)} to create new instance groups.
+     * Use {@link #addInstanceGroup(InstanceGroupConfiguration, String)} to create new instance groups.
      *
      * @param name the name of a named hive.
      * @return the resource used to manage a certain namespace on the master

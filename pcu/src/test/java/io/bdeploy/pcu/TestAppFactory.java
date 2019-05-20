@@ -17,6 +17,7 @@ import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
+import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor.ApplicationType;
 import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
 
@@ -76,10 +77,14 @@ public class TestAppFactory {
         }
     }
 
+    public static Path createDummyApp(String name, Path tmp) {
+        return createDummyApp(name, tmp, false);
+    }
+
     /**
      * Creates a dummy application along with an {@link ApplicationDescriptor}.
      */
-    public static Path createDummyApp(String name, Path tmp) {
+    public static Path createDummyApp(String name, Path tmp, boolean client) {
         Path target = tmp.resolve(name);
         PathHelper.mkdirs(target);
         ApplicationDescriptor cfg = new ApplicationDescriptor();
@@ -90,6 +95,7 @@ public class TestAppFactory {
         cfg.supportedOperatingSystems.add(OsHelper.getRunningOs());
         cfg.startCommand = new ExecutableDescriptor();
         cfg.startCommand.launcherPath = script.getFileName().toString();
+        cfg.type = client ? ApplicationType.CLIENT : ApplicationType.SERVER;
 
         cfg.runtimeDependencies.add("jdk:1.8.0");
         ParameterDescriptor sleepParam = new ParameterDescriptor();

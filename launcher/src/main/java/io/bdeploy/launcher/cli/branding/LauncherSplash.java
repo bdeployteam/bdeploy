@@ -46,6 +46,10 @@ public class LauncherSplash implements LauncherSplashDisplay {
     }
 
     public void show() {
+        if (GraphicsEnvironment.isHeadless()) {
+            return;
+        }
+
         splash = new Window(null);
         splash.setSize(480, 280);
         splash.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
@@ -108,11 +112,6 @@ public class LauncherSplash implements LauncherSplashDisplay {
             splashCfg.textRect = new ApplicationSplashAreaDescriptor(10, image.getHeight() - 60, image.getWidth() - 20, 20, null);
         }
 
-        // remove previous component.
-        if (splash.getComponentCount() > 0) {
-            splash.remove(0);
-        }
-
         // colors...
         Color textColor = Color.BLACK;
         Color progressColor = Color.DARK_GRAY;
@@ -127,6 +126,15 @@ public class LauncherSplash implements LauncherSplashDisplay {
             if (splashCfg.progressRect.foreground != null) {
                 progressColor = Color.decode(splashCfg.progressRect.foreground);
             }
+        }
+
+        if (splash == null) {
+            return;
+        }
+
+        // remove previous component.
+        if (splash.getComponentCount() > 0) {
+            splash.remove(0);
         }
 
         // add image splash.
@@ -166,8 +174,13 @@ public class LauncherSplash implements LauncherSplashDisplay {
     }
 
     public void dismiss() {
+        if (splash == null) {
+            return;
+        }
+
         splash.setVisible(false);
         splash.dispose();
+        splash = null;
     }
 
     @Override
