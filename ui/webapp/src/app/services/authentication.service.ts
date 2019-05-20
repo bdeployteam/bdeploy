@@ -1,5 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { CookieService } from 'ngx-cookie-service';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpErrorHandlerInterceptor } from '../interceptors/error-handler.interceptor';
 import { CredentialsDto } from '../models/gen.dtos';
@@ -12,10 +13,10 @@ import { Logger, LoggingService } from './logging.service';
 export class AuthenticationService {
   private log: Logger = this.loggingService.getLogger('AuthenticationService');
 
-  private tokenSubject: BehaviorSubject<string> = new BehaviorSubject(localStorage.getItem('st'));
+  private tokenSubject: BehaviorSubject<string> = new BehaviorSubject(this.cookies.check('st') ? this.cookies.get('st') : null);
   private username: string;
 
-  constructor(private cfg: ConfigService, private http: HttpClient, private loggingService: LoggingService) { }
+  constructor(private cfg: ConfigService, private http: HttpClient, private loggingService: LoggingService, private cookies: CookieService) { }
 
   authenticate(username: string, password: string): Observable<any> {
     this.log.debug('authenticate("' + username + '", <...>)');
@@ -25,11 +26,11 @@ export class AuthenticationService {
      { responseType: 'text', headers: HttpErrorHandlerInterceptor.suppressGlobalErrorHandling(new HttpHeaders) });
     x.subscribe(result => {
       this.tokenSubject.next(result);
-      localStorage.setItem('st', result);
+      this.cookies.set('st', result, 365, '/');
       this.username = username;
     }, error => {
       this.tokenSubject.next(null);
-      localStorage.removeItem('st');
+      this.cookies.delete('st', '/');
       this.username = null;
     });
     return x;
@@ -60,7 +61,7 @@ export class AuthenticationService {
   logout(): void {
     this.log.info('destroying session for user "' + this.username + '"');
     this.tokenSubject.next(null);
-    localStorage.removeItem('st');
+    this.cookies.delete('st', '/');
   }
 
   getRecentInstanceGroups(): Observable<String[]> {
