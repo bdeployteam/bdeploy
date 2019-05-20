@@ -67,4 +67,8 @@ export class SoftwareRepositoriesBrowserComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
+  onRemoveRepo(repository: SoftwareRepositoryConfiguration) {
+    this.softwareRepositoryList.remove(c => c === repository);
+  }
+
 }

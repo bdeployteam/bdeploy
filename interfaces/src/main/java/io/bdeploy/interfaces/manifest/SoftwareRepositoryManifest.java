@@ -30,6 +30,10 @@ public class SoftwareRepositoryManifest {
         this.hive = hive;
     }
 
+    public static boolean isSoftwareRepositoryManifest(Manifest.Key key) {
+        return key.getName().equals(MANIFEST_NAME);
+    }
+
     /**
      * @return the current version of the {@link SoftwareRepositoryConfiguration}, or <code>null</code> if not present
      */

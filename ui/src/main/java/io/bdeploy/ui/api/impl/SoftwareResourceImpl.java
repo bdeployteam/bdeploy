@@ -29,8 +29,8 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.CopyOperation;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestExistsOperation;
@@ -41,6 +41,7 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.common.util.UuidHelper;
+import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.SoftwareResource;
 
@@ -64,7 +65,11 @@ public class SoftwareResourceImpl implements SoftwareResource {
     public List<Manifest.Key> list() {
         List<Manifest.Key> result = new ArrayList<>();
         SortedSet<Key> keySet = hive.execute(new ManifestListOperation());
-        result.addAll(keySet);  // TODO filter unwanted/internal manifests like meta/*?
+        for (Manifest.Key k : keySet) {
+            if (!SoftwareRepositoryManifest.isSoftwareRepositoryManifest(k)) {
+                result.add(k);
+            }
+        }
         return result;
     }
 

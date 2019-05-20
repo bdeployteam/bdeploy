@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -197,15 +196,32 @@ public class MasterRootResourceImpl implements MasterRootResource {
     }
 
     @Override
-    public Set<String> getSoftwareRepositories() {
-        Set<String> result = new TreeSet<>();
+    public List<SoftwareRepositoryConfiguration> getSoftwareRepositories() {
+        List<SoftwareRepositoryConfiguration> result = new ArrayList<>();
         for (Map.Entry<String, BHive> entry : registry.getAll().entrySet()) {
             SoftwareRepositoryConfiguration cfg = new SoftwareRepositoryManifest(entry.getValue()).read();
             if (cfg != null) {
-                result.add(entry.getKey());
+                result.add(cfg);
             }
         }
         return result;
+    }
+
+    @Override
+    public void addSoftwareRepository(SoftwareRepositoryConfiguration config, String storage) {
+        if (!getStorageLocations().contains(storage)) {
+            log.warn("Tried to use storage location: " + storage + ", valid are: " + getStorageLocations());
+            throw new WebApplicationException("Invalid Storage Location", Status.NOT_FOUND);
+        }
+
+        Path hive = Paths.get(storage, config.name);
+        if (Files.isDirectory(hive)) {
+            throw new WebApplicationException("Hive path already exists", Status.NOT_ACCEPTABLE);
+        }
+
+        BHive h = new BHive(hive.toUri(), reporter);
+        new SoftwareRepositoryManifest(h).update(config);
+        registry.register(config.name, h);
     }
 
     @Override
@@ -214,20 +230,20 @@ public class MasterRootResourceImpl implements MasterRootResource {
     }
 
     @Override
-    public void addInstanceGroup(String name, InstanceGroupConfiguration meta, String storage) {
+    public void addInstanceGroup(InstanceGroupConfiguration meta, String storage) {
         if (!getStorageLocations().contains(storage)) {
             log.warn("Tried to use storage location: " + storage + ", valid are: " + getStorageLocations());
             throw new WebApplicationException("Invalid Storage Location", Status.NOT_FOUND);
         }
 
-        Path hive = Paths.get(storage, name);
+        Path hive = Paths.get(storage, meta.name);
         if (Files.isDirectory(hive)) {
             throw new WebApplicationException("Hive path already exists", Status.NOT_ACCEPTABLE);
         }
 
         BHive h = new BHive(hive.toUri(), reporter);
         new InstanceGroupManifest(h).update(meta);
-        registry.register(name, h);
+        registry.register(meta.name, h);
     }
 
     @Override

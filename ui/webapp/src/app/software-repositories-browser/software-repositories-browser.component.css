@@ -1,0 +1,7 @@
+.add-button {
+  top: auto !important;
+  right: 40px !important;
+  bottom: 40px !important;
+  left: auto !important;
+  position: fixed !important;
+}

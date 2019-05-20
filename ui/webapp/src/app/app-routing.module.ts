@@ -10,6 +10,7 @@ import { InstanceGroupBrowserComponent } from './instance-group-browser/instance
 import { LoginComponent } from './login/login.component';
 import { ProcessConfigurationComponent } from './process-configuration/process-configuration.component';
 import { ProductsComponent } from './products/products.component';
+import { SoftwareRepoAddEditComponent } from './software-repo-add-edit/software-repo-add-edit.component';
 import { SoftwareRepositoriesBrowserComponent } from './software-repositories-browser/software-repositories-browser.component';
 import { SoftwareRepositoryComponent } from './software-repository/software-repository.component';
 
@@ -88,6 +89,20 @@ const routes: Routes = [
     component: SoftwareRepositoriesBrowserComponent,
     canActivate: [AuthGuard],
     data: { title: 'Software Repositories' }
+  },
+  {
+    path: 'softwarerepoadd',
+    component: SoftwareRepoAddEditComponent,
+    canActivate: [AuthGuard],
+    canDeactivate: [CanDeactivateGuard],
+    data: { title: 'Add Software Repository' }
+  },
+  {
+    path: 'softwarerepoedit/:name',
+    component: SoftwareRepoAddEditComponent,
+    canActivate: [AuthGuard],
+    canDeactivate: [CanDeactivateGuard],
+    data: { title: 'Edit Software Repository (${params["name"]})' }
   },
   {
     path: 'softwarerepository/:name',

@@ -54,6 +54,7 @@ import { ConfigService } from './services/config.service';
 import { LoggingService } from './services/logging.service';
 import { SoftwareCardComponent } from './software-card/software-card.component';
 import { SoftwareListComponent } from './software-list/software-list.component';
+import { SoftwareRepoAddEditComponent } from './software-repo-add-edit/software-repo-add-edit.component';
 import { SoftwareRepositoriesBrowserComponent } from './software-repositories-browser/software-repositories-browser.component';
 import { SoftwareRepositoryCardComponent } from './software-repository-card/software-repository-card.component';
 import { SoftwareRepositoryComponent } from './software-repository/software-repository.component';
@@ -105,6 +106,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     SoftwareRepositoriesBrowserComponent,
     SoftwareRepositoryComponent,
     SoftwareRepositoryCardComponent,
+    SoftwareRepoAddEditComponent,
     SoftwareCardComponent,
     SoftwareListComponent,
     ProcessStatusComponent,

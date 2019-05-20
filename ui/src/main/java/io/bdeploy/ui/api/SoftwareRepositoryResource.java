@@ -3,7 +3,10 @@ package io.bdeploy.ui.api;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -19,6 +22,21 @@ public interface SoftwareRepositoryResource {
 
     @GET
     public List<SoftwareRepositoryConfiguration> list();
+
+    @PUT
+    public void create(SoftwareRepositoryConfiguration config);
+
+    @GET
+    @Path("/{repo}")
+    public SoftwareRepositoryConfiguration read(@ActivityScope @PathParam("repo") String repo);
+
+    @POST
+    @Path("/{repo}")
+    public void update(@ActivityScope @PathParam("repo") String repo, SoftwareRepositoryConfiguration config);
+
+    @DELETE
+    @Path("/{repo}")
+    public void delete(@ActivityScope @PathParam("repo") String repo);
 
     @Path("/{softwareRepository}/content")
     public SoftwareResource getSoftwareResource(@ActivityScope @PathParam("softwareRepository") String softwareRepository);

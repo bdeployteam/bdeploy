@@ -1,5 +1,6 @@
 package io.bdeploy.interfaces.remote;
 
+import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
 
@@ -17,6 +18,7 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.interfaces.NodeStatus;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
+import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
 
 /**
  * Master API. The master groups APIs available from minions and delegates tasks
@@ -51,8 +53,12 @@ public interface MasterRootResource {
      * @return the list of available software repository hives on the master.
      */
     @GET
-    @Path("/softwareRepos")
-    public Set<String> getSoftwareRepositories();
+    @Path("/softwareRepositories")
+    public List<SoftwareRepositoryConfiguration> getSoftwareRepositories();
+
+    @PUT
+    @Path("/softwareRepositories")
+    public void addSoftwareRepository(SoftwareRepositoryConfiguration config, @QueryParam("storage") String storage);
 
     /**
      * The list of storage locations on the remote can be used to prompt the user where to create a named hive if there are
@@ -73,8 +79,7 @@ public interface MasterRootResource {
      */
     @PUT
     @Path("/namedHives")
-    public void addInstanceGroup(@QueryParam("name") String id, InstanceGroupConfiguration meta,
-            @QueryParam("storage") String storage);
+    public void addInstanceGroup(InstanceGroupConfiguration meta, @QueryParam("storage") String storage);
 
     /**
      * Request the master that is responsible for the given named Hive.

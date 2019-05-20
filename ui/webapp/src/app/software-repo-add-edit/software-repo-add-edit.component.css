@@ -1,0 +1,12 @@
+.fill-space {
+  flex: 1 1 auto;
+}
+
+.field-container {
+  display: flex;
+  flex-direction: column;
+}
+
+mat-form-field {
+  flex: 1 1 auto;
+}

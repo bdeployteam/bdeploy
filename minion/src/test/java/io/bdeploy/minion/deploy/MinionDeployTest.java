@@ -76,7 +76,7 @@ public class MinionDeployTest {
 
         /* STEP 2: Create customer (normally via Web UI) and associated hive on remote */
         InstanceGroupConfiguration desc = new InstanceGroupConfiguration();
-        desc.name = "Demo Customer";
+        desc.name = "demo";
         desc.description = "For Unit Test";
         /* (note: usually this would be once locally (local HiveRegistry) as well as on the master). */
         /* (this test creates the named hive only on the target "remote" server - see below) */
@@ -88,7 +88,7 @@ public class MinionDeployTest {
 
         /* STEP 3b: Establish sync with designated remote master */
         /* NOTE: alternative: sync via exported property file and master CLI in offline mode */
-        master.addInstanceGroup("demo", desc, master.getStorageLocations().iterator().next());
+        master.addInstanceGroup(desc, master.getStorageLocations().iterator().next());
         // TODO: create CLI to do it via property file (e.g.) on master
 
         /* STEP 4: push instance manifest to remote master */

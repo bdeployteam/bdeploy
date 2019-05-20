@@ -41,7 +41,7 @@ public class RemoteInstanceGroupTool extends RemoteServiceTool<RemoteInstanceGro
         desc.name = config.create();
         desc.description = config.description();
 
-        client.addInstanceGroup(config.create(), desc, config.storage());
+        client.addInstanceGroup(desc, config.storage());
     }
 
 }

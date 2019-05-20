@@ -17,8 +17,6 @@ import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.jersey.TestServer;
 import io.bdeploy.jersey.audit.RollingFileAuditor;
-import io.bdeploy.minion.MinionRoot;
-import io.bdeploy.minion.MinionState;
 import io.bdeploy.minion.cli.InitTool;
 import io.bdeploy.minion.cli.MasterTool;
 

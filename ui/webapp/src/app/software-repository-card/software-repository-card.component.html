@@ -8,6 +8,8 @@
     <span class="spacer"></span>
     <mat-menu #appMenu="matMenu" xPosition="before">
       <button mat-menu-item [routerLink]="['/softwarerepository', repository.name]">Open</button>
+      <button mat-menu-item [routerLink]="['/softwarerepoedit', repository.name]">Edit</button>
+      <button mat-menu-item (click)="delete()">Delete</button>
       <mat-divider></mat-divider>
       <button mat-menu-item [routerLink]="['/hivebrowser', {hive: repository.name}]">Hive</button>
     </mat-menu>
