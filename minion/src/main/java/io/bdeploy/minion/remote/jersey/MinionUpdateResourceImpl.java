@@ -16,8 +16,8 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.ExportOperation;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
@@ -25,6 +25,7 @@ import io.bdeploy.bhive.op.ObjectListOperation;
 import io.bdeploy.bhive.op.ObjectSizeOperation;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.VersionHelper;
+import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.remote.MinionUpdateResource;
 import io.bdeploy.minion.MinionRoot;
 
@@ -90,17 +91,25 @@ public class MinionUpdateResourceImpl implements MinionUpdateResource {
         h.execute(new ExportOperation().setManifest(key).setTarget(updateTarget));
 
         // clean up any version from the hive which is not the currently running and not the new target version
-        SortedSet<Manifest.Key> keysToKeep = new TreeSet<>();
-        keysToKeep.add(key);
-        keysToKeep.add(new Manifest.Key(key.getName(), currentVersion));
+        SortedSet<String> tagsToKeep = new TreeSet<>();
+        tagsToKeep.add(key.getTag());
+        tagsToKeep.add(currentVersion);
 
         // there is a tiny (acceptable) potential for left-over minion versions: if the 'name' of the
         // to-be installed update diverges from the name of the currently installed version, versions
         // with the old name are not cleaned up properly. Since the name is calculated by us, this
         // is not much of a problem.
 
-        SortedSet<Key> allVersions = h.execute(new ManifestListOperation().setManifestName(key.getName()));
-        allVersions.stream().filter(k -> !keysToKeep.contains(k)).forEach(k -> {
+        String toList = key.getName();
+        ScopedManifestKey smk = ScopedManifestKey.parse(key);
+        if (smk != null) {
+            // rather use the name without OS part to be able to cleanup 'foreign' OS update packages
+            // as well.
+            toList = smk.getName();
+        }
+
+        SortedSet<Key> allVersions = h.execute(new ManifestListOperation().setManifestName(toList));
+        allVersions.stream().filter(k -> !tagsToKeep.contains(k.getTag())).forEach(k -> {
             h.execute(new ManifestDeleteOperation().setToDelete(k));
         });
 
