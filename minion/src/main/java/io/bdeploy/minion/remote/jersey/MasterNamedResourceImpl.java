@@ -3,8 +3,6 @@ package io.bdeploy.minion.remote.jersey;
 import static io.bdeploy.common.util.RuntimeAssert.assertNotNull;
 
 import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
@@ -18,7 +16,6 @@ import java.util.TreeSet;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriBuilder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,10 +23,6 @@ import org.slf4j.LoggerFactory;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
-import io.bdeploy.bhive.objects.view.TreeView;
-import io.bdeploy.bhive.objects.view.scanner.TreeVisitor;
-import io.bdeploy.bhive.op.CopyOperation;
-import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
@@ -317,32 +310,33 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     @DeleteAfterWrite
     @Override
     public Path getClientInstanceConfiguration(Manifest.Key instanceId) {
-        InstanceManifest imf = InstanceManifest.of(hive, instanceId);
-
-        if (imf.getConfiguration().configTree == null) {
-            return null;
-        }
-
-        try {
-            Path tmp = Files.createTempFile(root.getTempDir(), "cfg", ".zip");
-            // file must not exist... :|
-            Files.deleteIfExists(tmp);
-            URI uri = UriBuilder.fromUri("jar:" + tmp.toUri()).build();
-            try (BHive zipHive = new BHive(uri, reporter)) {
-                TreeView content = hive.execute(new ScanOperation().setTree(imf.getConfiguration().configTree));
-                CopyOperation copy = new CopyOperation().setDestinationHive(zipHive).setPartialAllowed(true);
-                content.visit(new TreeVisitor.Builder().onBlob(b -> copy.addObject(b.getElementId())).onTree(t -> {
-                    copy.addObject(t.getElementId());
-                    return true;
-                }).build());
-
-                hive.execute(copy);
-            }
-            return tmp;
-        } catch (IOException e) {
-            log.warn("cannot export config for instance " + instanceId, e);
-            throw new WebApplicationException("Cannot create configuration data", Status.INTERNAL_SERVER_ERROR);
-        }
+        return null;
+        // FIXME: DCS-396: client config shall not contain server config files.
+        //InstanceManifest imf = InstanceManifest.of(hive, instanceId);
+        //if (imf.getConfiguration().configTree == null) {
+        //    return null;
+        //}
+        //
+        //try {
+        //    Path tmp = Files.createTempFile(root.getTempDir(), "cfg", ".zip");
+        //    // file must not exist... :|
+        //    Files.deleteIfExists(tmp);
+        //    URI uri = UriBuilder.fromUri("jar:" + tmp.toUri()).build();
+        //    try (BHive zipHive = new BHive(uri, reporter)) {
+        //        TreeView content = hive.execute(new ScanOperation().setTree(imf.getConfiguration().configTree));
+        //        CopyOperation copy = new CopyOperation().setDestinationHive(zipHive).setPartialAllowed(true);
+        //        content.visit(new TreeVisitor.Builder().onBlob(b -> copy.addObject(b.getElementId())).onTree(t -> {
+        //            copy.addObject(t.getElementId());
+        //            return true;
+        //        }).build());
+        //
+        //        hive.execute(copy);
+        //    }
+        //    return tmp;
+        //} catch (IOException e) {
+        //    log.warn("cannot export config for instance " + instanceId, e);
+        //    throw new WebApplicationException("Cannot create configuration data", Status.INTERNAL_SERVER_ERROR);
+        //}
     }
 
     @Override

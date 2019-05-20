@@ -7,14 +7,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import javax.ws.rs.core.UriBuilder;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.bhive.op.CopyOperation;
+import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.ManifestDeleteOldByIdOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.remote.FetchOperation;
@@ -138,14 +136,15 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 }
 
                 try (Activity info = reporter.start("Preparing configuration...")) {
+                    // FIXME: DCS-396: client config shall not contain server config files.
                     // download configuration data.
-                    if (appCfg.configTreeId != null) {
-                        Path tmpCfg = namedMaster.getClientInstanceConfiguration(appCfg.instanceKey);
-                        try (BHive tmpHive = new BHive(UriBuilder.fromUri("jar:" + tmpCfg.toUri()).build(), reporter)) {
-                            CopyOperation copyAll = new CopyOperation().setDestinationHive(hive);
-                            tmpHive.execute(copyAll);
-                        }
-                    }
+                    //if (appCfg.configTreeId != null) {
+                    //    Path tmpCfg = namedMaster.getClientInstanceConfiguration(appCfg.instanceKey);
+                    //    try (BHive tmpHive = new BHive(UriBuilder.fromUri("jar:" + tmpCfg.toUri()).build(), reporter)) {
+                    //        CopyOperation copyAll = new CopyOperation().setDestinationHive(hive);
+                    //        tmpHive.execute(copyAll);
+                    //    }
+                    //}
 
                     // 3: generate a 'fake' instanceNodeManifest from the existing configuration for local caching.
                     createInstanceNodeManifest(appCfg, targetClientKey, hive);
@@ -200,11 +199,14 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         fakeInc.applications.add(appCfg.clientConfig);
         fakeInc.name = appCfg.clientConfig.name;
         fakeInc.uuid = appCfg.clientConfig.uid;
+        // FIXME: DCS-396: client config shall not contain server config files.
+        //        ObjectId cfg = appCfg.configTreeId;
+        ObjectId cfg = null;
 
         Path cfgTmp = null;
         try {
             new InstanceNodeManifest.Builder().setInstanceNodeConfiguration(fakeInc).setMinionName("client")
-                    .setKey(targetClientKey).setConfigTreeId(appCfg.configTreeId).insert(hive);
+                    .setKey(targetClientKey).setConfigTreeId(cfg).insert(hive);
         } finally {
             if (cfgTmp != null) {
                 PathHelper.deleteRecursive(cfgTmp);
