@@ -10,6 +10,7 @@ import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.TestHive;
@@ -17,9 +18,11 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ImportOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
+import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.SlowTest;
 import io.bdeploy.common.TempDirectory;
 import io.bdeploy.common.TempDirectory.TempDir;
+import io.bdeploy.common.TestCliTool;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.PathHelper;
@@ -33,12 +36,15 @@ import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlConfiguration;
+import io.bdeploy.interfaces.descriptor.client.ClientDescriptor;
 import io.bdeploy.interfaces.descriptor.product.ProductDescriptor;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.remote.MasterRootResource;
+import io.bdeploy.launcher.cli.LauncherCli;
+import io.bdeploy.launcher.cli.LauncherTool;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.pcu.TestAppFactory;
 import io.bdeploy.ui.api.Minion;
@@ -48,19 +54,26 @@ import io.bdeploy.ui.api.Minion;
 @ExtendWith(TempDirectory.class)
 public class MinionDeployTest {
 
+    @RegisterExtension
+    TestCliTool launcher = new TestCliTool(new LauncherCli());
+
     @Test
     @SlowTest
     void testRemoteDeploy(BHive local, MasterRootResource master, RemoteService remote, @TempDir Path tmp)
             throws IOException, InterruptedException {
         /* STEP 1: Applications and external Application provided by development teams */
         Path app = TestAppFactory.createDummyApp("app", tmp);
+        Path client = TestAppFactory.createDummyApp("client", tmp);
         Path jdk = TestAppFactory.createDummyAppNoDescriptor("jdk", tmp);
 
         Manifest.Key prodKey = new Manifest.Key("customer/product", "1.0.0.1234");
         Manifest.Key appKey = new Manifest.Key(ScopedManifestKey.createScopedName("demo", OsHelper.getRunningOs()), "1.0.0.1234");
+        Manifest.Key clientKey = new Manifest.Key(ScopedManifestKey.createScopedName("demo-client", OsHelper.getRunningOs()),
+                "1.0.0.1234");
         Manifest.Key jdkKey = new Manifest.Key(ScopedManifestKey.createScopedName("jdk", OsHelper.getRunningOs()), "1.8.0");
 
         local.execute(new ImportOperation().setManifest(appKey).setSourcePath(app));
+        local.execute(new ImportOperation().setManifest(clientKey).setSourcePath(client));
         local.execute(new ImportOperation().setManifest(jdkKey).setSourcePath(jdk));
 
         Path cfgs = tmp.resolve("config-templates");
@@ -72,7 +85,8 @@ public class MinionDeployTest {
         pd.product = "customer";
         pd.applications.add("demo");
         pd.configTemplates = "config-templates";
-        new ProductManifest.Builder(pd).add(appKey).setConfigTemplates(cfgs).insert(local, prodKey, "Demo Product for Unit Test");
+        new ProductManifest.Builder(pd).add(appKey).add(clientKey).setConfigTemplates(cfgs).insert(local, prodKey,
+                "Demo Product for Unit Test");
 
         /* STEP 2: Create customer (normally via Web UI) and associated hive on remote */
         InstanceGroupConfiguration desc = new InstanceGroupConfiguration();
@@ -82,7 +96,7 @@ public class MinionDeployTest {
         /* (this test creates the named hive only on the target "remote" server - see below) */
 
         /* STEP 3a: Configuration created (normally via Web UI) */
-        Manifest.Key instance = createDemoInstance(local, prodKey, tmp, remote);
+        Manifest.Key instance = createDemoInstance(local, prodKey, tmp, remote, appKey, clientKey);
         String uuid = local.execute(new ManifestLoadOperation().setManifest(instance)).getLabels()
                 .get(InstanceManifest.INSTANCE_LABEL);
 
@@ -114,6 +128,21 @@ public class MinionDeployTest {
         status = master.getNamedMaster("demo").getStatus(uuid);
         System.out.println(status);
         assertFalse(status.isAppRunningOrScheduled("app"));
+
+        /* STEP 7: generate client .bdeploy file and feed launcher */
+        ClientDescriptor cdesc = new ClientDescriptor();
+        cdesc.clientId = "client";
+        cdesc.groupId = "demo";
+        cdesc.instanceId = uuid;
+        cdesc.host = new RemoteService(remote.getUri(), master.getNamedMaster("demo").generateWeakToken("client"));
+
+        Path bdeployFile = tmp.resolve("client.bdeploy");
+        Files.write(bdeployFile, StorageHelper.toRawBytes(cdesc));
+
+        /* STEP 8: launcher client, assert that the script does some sleeping... */
+        launcher.getTool(LauncherTool.class, "--cacheDir=" + tmp.resolve("launcher"), "--launch=" + bdeployFile).run();
+
+        // if we reach here, launching succeeded. unfortunately no better way to check right now.
     }
 
     /**
@@ -121,15 +150,16 @@ public class MinionDeployTest {
      *
      * @param remote
      */
-    private Manifest.Key createDemoInstance(BHive local, Manifest.Key product, Path tmp, RemoteService remote)
-            throws IOException {
+    private Manifest.Key createDemoInstance(BHive local, Manifest.Key product, Path tmp, RemoteService remote,
+            Manifest.Key serverApp, Manifest.Key clientApp) throws IOException {
         String uuid = UuidHelper.randomId();
 
         /* STEP 1a: read available applications from product manifest */
         ProductManifest pmf = ProductManifest.of(local, product);
 
         /* STEP 1b: read application(s) to configure */
-        ApplicationManifest amf = ApplicationManifest.of(local, pmf.getApplications().first());
+        ApplicationManifest amf = ApplicationManifest.of(local, serverApp);
+        ApplicationManifest camf = ApplicationManifest.of(local, clientApp);
 
         /* STEP 1c: create application configuration based on application descriptor */
         ApplicationConfiguration cfg = new ApplicationConfiguration();
@@ -143,21 +173,44 @@ public class MinionDeployTest {
         /* STEP 1d: configure parameters, usually in the UI based on information from the application descriptor */
         ParameterConfiguration sleepParam = new ParameterConfiguration();
         sleepParam.uid = "sleepParam";
-        sleepParam.preRendered.add("10");
+        sleepParam.preRendered.add("3");
         cfg.start.parameters.add(sleepParam);
 
         /* STEP 1e: setup the node configuration, which basically only references all application configs */
         InstanceNodeConfiguration inc = new InstanceNodeConfiguration();
-        inc.name = "Demo Instance";
+        inc.name = "DemoInstance";
         inc.uuid = uuid;
         inc.applications.add(cfg);
 
-        /* STEP 2: create an node manifest per node which will participate (only master in this case */
+        /* STEP 1f: create application configuration based on application descriptor (client) */
+        ApplicationConfiguration clientCfg = new ApplicationConfiguration();
+        clientCfg.uid = camf.getDescriptor().name;
+        clientCfg.name = camf.getDescriptor().name;
+        clientCfg.start = new CommandConfiguration();
+        clientCfg.start.executable = camf.getDescriptor().startCommand.launcherPath;
+        clientCfg.application = camf.getKey();
+        clientCfg.processControl = ProcessControlConfiguration.createDefault();
+
+        /* STEP 1g: reuse parameters for client */
+        clientCfg.start.parameters.add(sleepParam);
+
+        /* STEP 1h: node config for the clients */
+        InstanceNodeConfiguration cinc = new InstanceNodeConfiguration();
+        cinc.name = "DemoInstance";
+        cinc.uuid = uuid;
+        cinc.applications.add(clientCfg);
+
+        /* STEP 2: create an node manifest per node which will participate (master & clients) */
         InstanceNodeManifest.Builder builder = new InstanceNodeManifest.Builder().setConfigTreeId(pmf.getConfigTemplateTreeId());
         Manifest.Key inmKey = builder.setInstanceNodeConfiguration(inc).setMinionName(Minion.DEFAULT_MASTER_NAME).insert(local);
 
+        // minion name does not "technically" matter here, real code uses '__ClientApplications'
+        InstanceNodeManifest.Builder clientBuilder = new InstanceNodeManifest.Builder();
+        Manifest.Key cinmKey = clientBuilder.setInstanceNodeConfiguration(cinc).setMinionName("__ClientApplications")
+                .insert(local);
+
         InstanceConfiguration ic = new InstanceConfiguration();
-        ic.name = "Demo Instance";
+        ic.name = "DemoInstance";
         ic.product = pmf.getKey();
         ic.target = remote;
         ic.uuid = uuid;
@@ -165,7 +218,8 @@ public class MinionDeployTest {
         /* STEP 3: create an InstanceManifest with all instance node configurations. */
         // TODO: record the product manifest to enable updates late
         Manifest.Key imKey = new InstanceManifest.Builder().setInstanceConfiguration(ic)
-                .addInstanceNodeManifest(Minion.DEFAULT_MASTER_NAME, inmKey).insert(local);
+                .addInstanceNodeManifest(Minion.DEFAULT_MASTER_NAME, inmKey)
+                .addInstanceNodeManifest("__ClientApplications", cinmKey).insert(local);
 
         return imKey; // this is the "root" - all instance artifacts are now reachable from here.
     }

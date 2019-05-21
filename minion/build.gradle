@@ -25,6 +25,7 @@ dependencies {
     testCompile project(path: ":bhive", configuration: 'testRuntime')
     testCompile project(path: ":pcu", configuration: 'testRuntime')
     testCompile project(path: ":ui", configuration: 'testRuntime')
+    testCompile project(path: ":launcher", configuration: 'testRuntime')
 }
 
 rootProject.addMultiPlatformDistBuild(project)
