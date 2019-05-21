@@ -111,11 +111,11 @@ public class RollingFileAuditor implements Auditor {
      */
     private RollingFileAppender createFileAppender(Path logDir) {
         RollingFileAppender.Builder<?> builder = RollingFileAppender.newBuilder();
-        builder.withName("auditLogger");
+        builder.setName("auditLogger");
         builder.withFileName(logDir.resolve("audit.log").toString());
         builder.withFilePattern(logDir.resolve("audit-%i.log.gz").toString());
         builder.withPolicy(SizeBasedTriggeringPolicy.createPolicy("5M"));
-        builder.withLayout(PatternLayout.newBuilder().withPattern(LOG_PATTERN).build());
+        builder.setLayout(PatternLayout.newBuilder().withPattern(LOG_PATTERN).build());
         builder.withStrategy(DefaultRolloverStrategy.newBuilder()
                 .withCompressionLevelStr(String.valueOf(Deflater.DEFAULT_COMPRESSION)).withMax("3").build());
         return builder.build();
@@ -132,11 +132,11 @@ public class RollingFileAuditor implements Auditor {
         fields.add(KeyValuePair.newBuilder().setKey("parameters").setValue("${ctx:PARAMETERS}").build());
 
         RollingFileAppender.Builder<?> builder = RollingFileAppender.newBuilder();
-        builder.withName("auditJsonLogger");
+        builder.setName("auditJsonLogger");
         builder.withFileName(logDir.resolve("audit.json").toString());
         builder.withFilePattern(logDir.resolve("audit-%i.json.gz").toString());
         builder.withPolicy(SizeBasedTriggeringPolicy.createPolicy("10M"));
-        builder.withLayout(JsonLayout.newBuilder().setCompact(true).setEventEol(true).setConfiguration(new DefaultConfiguration())
+        builder.setLayout(JsonLayout.newBuilder().setCompact(true).setEventEol(true).setConfiguration(new DefaultConfiguration())
                 .setAdditionalFields(fields.toArray(new KeyValuePair[0])).build());
         builder.withStrategy(DefaultRolloverStrategy.newBuilder()
                 .withCompressionLevelStr(String.valueOf(Deflater.DEFAULT_COMPRESSION)).withMax("3").build());

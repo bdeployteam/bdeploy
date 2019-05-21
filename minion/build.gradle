@@ -16,8 +16,8 @@ dependencies {
         project(":interfaces"),
         project(":ui"),
 
-        'org.bouncycastle:bcpkix-jdk15on:1.60',
-        'org.bouncycastle:bcprov-jdk15on:1.60',
+        'org.bouncycastle:bcpkix-jdk15on:1.61',
+        'org.bouncycastle:bcprov-jdk15on:1.61',
         'org.apache.commons:commons-compress:1.18'
     )
 
