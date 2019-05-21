@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Svg Vector Icons : http://www.onlinewebfonts.com/icon -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   x="0px"
+   y="0px"
+   viewBox="0 0 1000 1000"
+   enable-background="new 0 0 1000 1000"
+   xml:space="preserve"
+   id="svg905"
+   sodipodi:docname="logo-loading-grey.svg"
+   inkscape:version="0.92.4 (unknown)"><defs
+   id="defs909" /><sodipodi:namedview
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1"
+   objecttolerance="10"
+   gridtolerance="10"
+   guidetolerance="10"
+   inkscape:pageopacity="0"
+   inkscape:pageshadow="2"
+   inkscape:window-width="1920"
+   inkscape:window-height="1016"
+   id="namedview907"
+   showgrid="false"
+   inkscape:zoom="0.823"
+   inkscape:cx="500"
+   inkscape:cy="500"
+   inkscape:window-x="1920"
+   inkscape:window-y="1107"
+   inkscape:window-maximized="1"
+   inkscape:current-layer="svg905" />
+<metadata
+   id="metadata899"> Svg Vector Icons : http://www.onlinewebfonts.com/icon <rdf:RDF><cc:Work
+     rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
+       rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata>
+<path
+   inkscape:connector-curvature="0"
+   id="path901"
+   d="M 835,814.2 C 760.7,910 680,890.4 680,890.4 761.2,819 757.5,636.3 757.5,636.3 817.1,643.5 835,738 835,738 c 2.7,58.6 155,101.6 155,101.6 -97.5,-18 -155,-25.4 -155,-25.4 z M 501.2,544.7 c 0,0 -27.9,-17 -22.6,-89.6 0,0 45.7,-403.1 248,-340.6 0,0 134.1,96 -22.6,318.2 0.1,0 -142.5,152.9 -202.8,112 z m 49.6,40.9 c 33.3,112.2 -51.7,228.7 -51.7,228.7 -99.4,35.6 -70.7,-61.7 -70.7,-61.7 61.7,-66.4 44.9,-141.5 44.9,-141.5 26.9,-24.1 77.5,-25.5 77.5,-25.5 z M 189.1,763.4 c 0,0 -16.6,-74 9.7,-108.5 0,0 20.4,57.8 67.8,6.9 0,0 14.6,-67.3 -52.5,-52 0,0 22,-75.2 69.2,-112.1 -86.6,-109 -249.2,-90 -249.2,-90 -54.2,-32.9 0,-50.8 0,-50.8 141.7,-1.1 232.5,101.6 232.5,101.6 -25.1,-137.8 -155,-177.8 -155,-177.8 -41.6,-52.5 18.3,-38.8 18.3,-38.8 131.7,88.5 156.6,206.5 161.4,250.1 21.5,-13.9 47.6,-19.6 78.7,-8.1 0,0 164,80 -25.8,279.5 -0.1,0 -121.9,118.3 -155.1,0 z M 703.9,594.8 c 31.6,127.2 -24,219.4 -24,219.4 C 617.7,950.4 525,865 525,865 623.2,762 628.3,585.5 628.3,585.5 c 43.1,-1.8 75.6,9.3 75.6,9.3 z"
+   style="fill:#808080" />
+</svg>
