@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.bdeploy.interfaces.NodeStatus;
@@ -31,8 +32,7 @@ public class InstanceNodeConfigurationDto {
     /** The list of configurations belonging to another instance */
     public final List<InstanceNodeConfiguration> foreignNodeConfigurations = new ArrayList<>();
 
-    // TODO: per-process configuration files!
-
+    @JsonCreator
     public InstanceNodeConfigurationDto(@JsonProperty("nodeName") String nodeName, @JsonProperty("status") NodeStatus status,
             @JsonProperty("statusHint") String hint) {
         this.nodeName = nodeName;
