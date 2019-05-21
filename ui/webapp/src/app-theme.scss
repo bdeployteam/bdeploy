@@ -1,6 +1,7 @@
 @import '~@angular/material/theming';
 @include mat-core();
 
+@import 'app-externals.scss';
 @import 'app/main-nav/main-nav-theme.scss';
 @import 'app/logo/logo-theme.scss';
 
