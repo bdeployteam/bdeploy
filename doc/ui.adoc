@@ -9,10 +9,10 @@ The `app-theme.scss` currently supports a dark and a light theme. Components can
 
 To create a theme mixin for any component:
 
-- Create a new .scss file in the component's folder, e.g. my-component.scss.
+- Create a new .scss file in the component's folder, e.g. `my-component.scss`.
 - Import angular material theming support
 - Define a mixin with your theme selectors (attention, those are application global, so be careful with naming them).
-- Import and include the new mixin in the global app-theme.scss
+- Import and include the new mixin in the global `app-theme.scss`
 
 A very simple custom component's scss file could look like this:
 

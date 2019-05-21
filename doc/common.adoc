@@ -4,19 +4,19 @@ This bundle contains things shared by all components (BHive, DCU, PCU, Minion, .
 
 == SecurityHelper
 
-The io.bdeploy.common.security package contains the SecurityHelper which can be used to generate and verify keystores and access tokens for remote APIs (over HTTP).
+The `io.bdeploy.common.security` package contains the `SecurityHelper` which can be used to generate and verify keystores and access tokens for remote APIs (over HTTP).
 
 == Configuration
 
-The io.bdeploy.common.cfg package contains the Configuration class which can be used to create command line tools and map their parameters to annotation proxies.
+The `io.bdeploy.common.cfg` package contains the `Configuration` class which can be used to create command line tools and map their parameters to annotation proxies.
 
 == ActivityReporter
 
-The ActivityReporter implementations (Stream and Null) can be used to track activities/operations.
+The `ActivityReporter` implementations (`Stream` and `Null`) can be used to track activities/operations.
 
 == Metrics
 
-The io.bdeploy.common.metrics package contains an entry point to allow measurement of various metrics.
+The `io.bdeploy.common.metrics` package contains an entry point to allow measurement of various metrics.
 
 == Troubleshooting
 

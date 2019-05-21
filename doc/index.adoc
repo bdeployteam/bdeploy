@@ -50,9 +50,6 @@ BDeploy is built in a way that it can act as bridge to such systems (e.g. Kubern
 * <<dcu.adoc#,DCU>>
 * <<common.adoc#,Common>>
 * <<minion.adoc#,Minion (Server)>>
+* <<launcher.adoc#,Client Launcher>>
 * <<interfaces.adoc#,Common interfaces, descriptors, DTOs>>
 * <<ui.adoc#,UI Front- and Backend>>
-
-There is also a getting started for the command line applications:
-
-* <<getting-started-cli.adoc#,Getting Started (CLI)>>

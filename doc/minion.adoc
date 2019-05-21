@@ -1,4 +1,6 @@
 = Minion (master/slave) Server
 
-TODO
+The minion is the main BDeploy deliverable. It contains all the command tools as well as the server for remote services and the configuration web UI.
 
+Use `bdeploy init ...` to initalize a minion root, then use either `bdeploy master ...` or `bdeploy slave...` to launch a master (including web UI) or a slave (controlled by a master) from that root
+ 
