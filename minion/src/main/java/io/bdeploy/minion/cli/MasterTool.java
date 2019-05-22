@@ -95,6 +95,7 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
             @Override
             protected void configure() {
                 bind(Boolean.TRUE).named(Minion.MASTER).to(Boolean.class);
+                bind(MasterRootResourceImpl.class).to(MasterRootResource.class);
             }
         });
 

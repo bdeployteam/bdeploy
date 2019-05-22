@@ -85,7 +85,7 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
 
     }
 
-    static final String AUTHENTICATION_SCHEME = "Bearer";
+    public static final String AUTHENTICATION_SCHEME = "Bearer";
     private static final String REALM = "BDeploy";
     private static final String NO_AUTH = "unsecured";
     private static final String WEAK_AUTH = "weak";

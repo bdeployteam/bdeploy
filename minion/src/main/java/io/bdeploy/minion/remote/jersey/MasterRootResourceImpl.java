@@ -82,7 +82,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
     }
 
     @Override
-    public void update(Manifest.Key version) {
+    public void update(Manifest.Key version, boolean clean) {
         BHive h = registry.get(JerseyRemoteBHive.DEFAULT_NAME);
 
         SortedSet<Key> keys = h.execute(new ManifestListOperation().setManifestName(version.toString()));
@@ -147,7 +147,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
         // prepare the update on all minions
         for (Map.Entry<String, MinionUpdateResource> ur : toUpdate.entrySet()) {
             try {
-                ur.getValue().prepare(version);
+                ur.getValue().prepare(version, clean);
             } catch (Exception e) {
                 // don't immediately throw to update as many minions as possible.
                 // this Exception should actually never happen according to the contract.

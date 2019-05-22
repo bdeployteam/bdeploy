@@ -17,8 +17,7 @@ dependencies {
         project(":ui"),
 
         'org.bouncycastle:bcpkix-jdk15on:1.61',
-        'org.bouncycastle:bcprov-jdk15on:1.61',
-        'org.apache.commons:commons-compress:1.18'
+        'org.bouncycastle:bcprov-jdk15on:1.61'
     )
 
     testCompile project(path: ":jersey", configuration: 'testRuntime')

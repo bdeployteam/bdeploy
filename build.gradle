@@ -191,7 +191,7 @@ subprojects {
         doLast {
             file("$buildDir/resources/main").mkdirs()
             file("$buildDir/resources/main/version.properties").withWriter { w ->
-                Properties p = new Properties()
+                def p = new Properties()
                 p['project'] = project.name
                 p['snapshot'] = version.contains('SNAPSHOT') ? 'true' : 'false'
                 p['version'] = version.replaceAll('SNAPSHOT', rootProject.ext.buildDate)
@@ -200,7 +200,36 @@ subprojects {
         }
     }
 
-    processResources.dependsOn genVersionProperties
+    task genLinux64VersionProperties() {
+        dependsOn genVersionProperties
+        outputs.file "$buildDir/resources/linux64/version.properties"
+        doLast {
+            file("$buildDir/resources/linux64").mkdirs()
+            file("$buildDir/resources/linux64/version.properties").withWriter { w ->
+                def p = new Properties()
+                file("$buildDir/resources/main/version.properties").withInputStream { is -> p.load is }
+                p['os'] = 'LINUX' // literal of OperatingSystem
+                p.store w, null
+            }
+        }
+    }
+
+    task genWin64VersionProperties() {
+        dependsOn genVersionProperties
+        outputs.file "$buildDir/resources/win64/version.properties"
+        doLast {
+            file("$buildDir/resources/win64").mkdirs()
+            file("$buildDir/resources/win64/version.properties").withWriter { w ->
+                def p = new Properties()
+                file("$buildDir/resources/main/version.properties").withInputStream { is -> p.load is }
+                p['os'] = 'WINDOWS' // literal of OperatingSystem
+                p.store w, null
+            }
+        }
+    }
+
+    processResources.dependsOn genLinux64VersionProperties
+    processResources.dependsOn genWin64VersionProperties
 }
 
 def void addMultiPlatformDistBuild(Project prj) {
@@ -221,7 +250,7 @@ def void addMultiPlatformDistBuild(Project prj) {
             contents {
                 with prj.distributions.main.getContents()
                 from rootProject.jlinkLinux64.outputs
-                from prj.genVersionProperties.outputs
+                from prj.genLinux64VersionProperties.outputs
             }
         }
 
@@ -229,7 +258,7 @@ def void addMultiPlatformDistBuild(Project prj) {
             contents {
                 with prj.distributions.main.getContents()
                 from rootProject.jlinkWin64.outputs
-                from prj.genVersionProperties.outputs
+                from prj.genWin64VersionProperties.outputs
             }
         }
     }

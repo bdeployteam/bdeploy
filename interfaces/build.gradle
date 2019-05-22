@@ -7,7 +7,8 @@ dependencies {
     implementation(
         project(":common"),
         project(":jersey"),
-        project(":bhive")
+        project(":bhive"),
+        'org.apache.commons:commons-compress:1.18'
     )
 }
 

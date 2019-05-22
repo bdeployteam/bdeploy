@@ -76,8 +76,17 @@ public class ScopedManifestKey {
         return name;
     }
 
+    public String getTag() {
+        return tag;
+    }
+
     public boolean isSameBase(ScopedManifestKey other) {
         return name.equals(other.name) && tag.equals(other.tag);
+    }
+
+    @Override
+    public String toString() {
+        return getKey().toString();
     }
 
 }

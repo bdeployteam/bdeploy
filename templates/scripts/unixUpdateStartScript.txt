@@ -235,12 +235,16 @@ childTerm() {
     wait
 }
 
-trap childTerm INT TERM
+if [[ \${ORIG_ARGS[0]} == "master" || \${ORIG_ARGS[0]} == "slave" ]]; then
+    # slave and master must run in background.
+    trap childTerm INT TERM
 
-# always pass the update dir to the application, used by slave and master
-"\$JAVACMD" "\$@" "--updateDir=\$APP_HOME/update" &
-export JAVA_PID=\$!
-wait \${JAVA_PID}
+    "\$JAVACMD" "\$@" "--updateDir=\$APP_HOME/update" &
+    export JAVA_PID=\$!
+    wait \${JAVA_PID}
+else
+    "\$JAVACMD" "\$@"
+fi
 
 if [ \$? == 42 ]; then
     echo "Minion signalled update request, restarting"
