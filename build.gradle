@@ -17,6 +17,7 @@ buildscript {
     dependencies {
         classpath 'com.adarshr:gradle-test-logger-plugin:1.6.0'
         classpath 'ru.vyarus:gradle-quality-plugin:3.4.0'
+        classpath "gradle.plugin.net.ossindex:ossindex-gradle-plugin:0.4.11"
     }
 }
 
@@ -67,6 +68,7 @@ subprojects {
     apply plugin: 'com.adarshr.test-logger'
     apply plugin: 'ru.vyarus.quality'
     apply plugin: 'eclipse'
+    apply plugin: "net.ossindex.audit"
 	
 	eclipse {
 		classpath {
@@ -88,6 +90,14 @@ subprojects {
                            'org.junit.jupiter:junit-jupiter-params:5.4.2',
                            'org.hamcrest:hamcrest-core:2.1'
         testRuntimeOnly    'org.junit.jupiter:junit-jupiter-engine:5.4.2'
+    }
+
+    audit {
+        rateLimitAsError = false
+        failOnError = false
+        ignore = [
+            'org.dom4j:dom4j:2.1.0' // introduced by spotbugs, which is not part of the distribution
+        ]
     }
 
     quality {
