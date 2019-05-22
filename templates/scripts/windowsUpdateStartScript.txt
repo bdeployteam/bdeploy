@@ -17,11 +17,11 @@ set APP_HOME=%DIRNAME%${appHomeRelativePath}
 @rem Add default JVM options here. You can also use JAVA_OPTS and ${optsEnvironmentVar} to pass JVM options to this script.
 set DEFAULT_JVM_OPTS=${defaultJvmOpts}
 
-@rem SSI OBELIX EXTENSION
+@rem BDEPLOY EXTENSION
 set JAVA_EXE=%APP_HOME%\\jre\\bin\\java.exe
 %JAVA_EXE% -version >NUL 2>&1
 if "%ERRORLEVEL%" == "0" goto init
-@rem SSI OBELIX EXTENSION END
+@rem BDEPLOY EXTENSION END
 
 @rem Find java.exe
 if defined JAVA_HOME goto findJavaFromJavaHome
@@ -70,15 +70,15 @@ set CMD_LINE_ARGS=%*
 :execute
 @rem Setup the command line
 
-@rem SSI OBELIX EXTENSION
+@rem BDEPLOY EXTENSION
 @rem set CLASSPATH=$classpath
 set CLASSPATH="%APP_HOME%\\lib\\*"
-@rem SSI OBELIX EXTENSION END
+@rem BDEPLOY EXTENSION END
 
-@rem Execute ${applicationName} (--updateDir SSI OBELIX EXTENSION)
+@rem Execute ${applicationName} (--updateDir BDEPLOY EXTENSION)
 "%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %${optsEnvironmentVar}% <% if ( appNameSystemProperty ) { %>"-D${appNameSystemProperty}=%APP_BASE_NAME%"<% } %> -classpath %CLASSPATH% ${mainClassName} %CMD_LINE_ARGS% "--updateDir=%APP_HOME%\\update"
 
-@rem SSI OBELIX EXTENSION
+@rem BDEPLOY EXTENSION
 if NOT "%ERRORLEVEL%"=="42" goto :end
 
 @rem update requested (exit code == 42)
@@ -110,7 +110,7 @@ if EXIST "%APP_HOME%\\update\\next\\jre" (
 rmdir /s /q "%APP_HOME%\\update\\next"
 
 goto :execute
-@rem SSI OBELIX EXTENSION END
+@rem BDEPLOY EXTENSION END
 
 
 :end

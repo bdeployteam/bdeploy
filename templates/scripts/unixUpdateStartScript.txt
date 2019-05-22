@@ -64,7 +64,7 @@ case "`uname`" in
     ;;
 esac
 
-######### SSI OBELIX EXTENSION #########
+########## BDEPLOY EXTENSION ###########
 # Copy this when updating the scripts  #
 ########################################
 # We can NOT use the pre-calculated CP
@@ -77,7 +77,7 @@ CLASSPATH="\$APP_HOME/lib/*"
 # always prefer the built-in java
 if [ -x "\$APP_HOME/jre/bin/java" ]; then
     JAVACMD="\$APP_HOME/jre/bin/java"
-####### SSI OBELIX EXTENSION END #######
+######## BDEPLOY EXTENSION END #########
 else
     # Determine the Java command to use to start the JVM.
     if [ -n "\$JAVA_HOME" ] ; then
@@ -100,7 +100,7 @@ else
     Please set the JAVA_HOME variable in your environment to match the
     location of your Java installation."
     fi
-fi # SSI OBELIX EXTENSION
+fi # BDEPLOY EXTENSION
 
 # Increase the maximum file descriptors if we can.
 if [ "\$cygwin" = "false" -a "\$darwin" = "false" -a "\$nonstop" = "false" ] ; then
@@ -168,7 +168,7 @@ if \$cygwin ; then
     esac
 fi
 
-######### SSI OBELIX EXTENSION #########
+########## BDEPLOY EXTENSION ###########
 # Copy this when updating the scripts  #
 ########################################
 
@@ -207,7 +207,7 @@ fi
 
 ORIG_ARGS=( "\$@" )
 
-####### SSI OBELIX EXTENSION END #######
+######## BDEPLOY EXTENSION END #########
 
 # Escape application args
 save () {
@@ -224,16 +224,27 @@ if [ "\$(uname)" = "Darwin" ] && [ "\$HOME" = "\$PWD" ]; then
   cd "\$(dirname "\$0")"
 fi
 
-######### SSI OBELIX EXTENSION #########
+########## BDEPLOY EXTENSION ###########
 # Don't 'exec' but wait for special \$? #
 ########################################
 
+childTerm() {
+    echo "Killing \${JAVA_PID}"
+    kill \${JAVA_PID}
+    echo "Waiting for children to exit..."
+    wait
+}
+
+trap childTerm INT TERM
+
 # always pass the update dir to the application, used by slave and master
-"\$JAVACMD" "\$@" "--updateDir=\$APP_HOME/update"
+"\$JAVACMD" "\$@" "--updateDir=\$APP_HOME/update" &
+export JAVA_PID=\$!
+wait \${JAVA_PID}
 
 if [ \$? == 42 ]; then
     echo "Minion signalled update request, restarting"
     exec "\$0" "\${ORIG_ARGS[@]}"
 fi
-####### SSI OBELIX EXTENSION END #######
+######## BDEPLOY EXTENSION END #########
 
