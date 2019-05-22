@@ -203,15 +203,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         //        ObjectId cfg = appCfg.configTreeId;
         ObjectId cfg = null;
 
-        Path cfgTmp = null;
-        try {
-            new InstanceNodeManifest.Builder().setInstanceNodeConfiguration(fakeInc).setMinionName("client")
-                    .setKey(targetClientKey).setConfigTreeId(cfg).insert(hive);
-        } finally {
-            if (cfgTmp != null) {
-                PathHelper.deleteRecursive(cfgTmp);
-            }
-        }
+        new InstanceNodeManifest.Builder().setInstanceNodeConfiguration(fakeInc).setMinionName("client").setKey(targetClientKey)
+                .setConfigTreeId(cfg).insert(hive);
     }
 
     /**

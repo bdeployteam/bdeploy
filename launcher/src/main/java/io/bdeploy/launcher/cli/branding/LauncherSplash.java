@@ -109,7 +109,13 @@ public class LauncherSplash implements LauncherSplashDisplay {
 
         if (splashCfg == null || splashCfg.textRect == null) {
             splashCfg = new ApplicationSplashDescriptor();
-            splashCfg.textRect = new ApplicationSplashAreaDescriptor(10, image.getHeight() - 60, image.getWidth() - 20, 20, null);
+
+            if (image != null) {
+                splashCfg.textRect = new ApplicationSplashAreaDescriptor(10, image.getHeight() - 60, image.getWidth() - 20, 20,
+                        null);
+            } else {
+                splashCfg.textRect = new ApplicationSplashAreaDescriptor(10, 130, 460, 20, null);
+            }
         }
 
         // colors...
