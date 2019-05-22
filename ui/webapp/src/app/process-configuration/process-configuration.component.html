@@ -79,7 +79,7 @@
   <!-- Nodes overview and sidebar -->
   <div class="drawer-container" cdkDropListGroup *ngIf="!editMode">
     <div class="nodes-container">
-      <div *ngIf="!loading">
+      <ng-container *ngIf="!loading">
         <div *ngIf="isRunningOutOfSync" class="app-process-out-of-sync-text">
           Out-of-sync: One or more applications are running in a version that is not activated.
         </div>
@@ -103,7 +103,7 @@
             (selectAppConfigEvent)="setSidenavProcessStatus($event)">
           </app-instance-node-card>
         </ng-container>
-      </div>
+      </ng-container>
       <div *ngIf="loading" class="loading-container">
         <mat-progress-spinner [mode]="'indeterminate'" class="loading-spinner" mode></mat-progress-spinner>
       </div>
@@ -120,7 +120,7 @@
           <mat-icon>close</mat-icon>
         </button>
       </mat-toolbar>
-      <div class="drawer-content">
+      <div class="side-nav-container-content">
         <div class='card-list-container' *ngIf="isSidenavApplications()">
           <div *ngIf="hasServerApplications()"
             cdkDropList
