@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MessageBoxMode } from '../messagebox/messagebox.component';
 import { ApplicationGroup } from '../models/application.model';
+import { EventWithCallback } from '../models/event';
 import { ApplicationConfiguration, InstanceVersionDto, OperatingSystem } from '../models/gen.dtos';
 import { ApplicationService } from '../services/application.service';
 import { MessageboxService } from '../services/messagebox.service';
@@ -20,9 +21,11 @@ export class ApplicationConfigurationCardComponent implements OnInit {
 
   @Output() editEvent = new EventEmitter<ApplicationConfiguration>();
   @Output() removeEvent = new EventEmitter<boolean>();
-  @Output() downloadLauncherEvent = new EventEmitter<ApplicationConfiguration>();
+  @Output() downloadClickAndStartEvent = new EventEmitter<ApplicationConfiguration>();
+  @Output() downloadInstallerEvent = new EventEmitter<EventWithCallback<ApplicationConfiguration>>();
 
   appOs: OperatingSystem;
+  downloading = false;
 
   constructor(private mbService: MessageboxService, private appService: ApplicationService) {}
 
@@ -74,5 +77,14 @@ export class ApplicationConfigurationCardComponent implements OnInit {
 
   isMissing() {
     return this.appService.isMissing(this.appConfig.application);
+  }
+
+  downloadClickAndStart() {
+    this.downloadClickAndStartEvent.emit(this.appConfig);
+  }
+
+  downloadInstaller() {
+    this.downloading = true;
+    this.downloadInstallerEvent.emit(new EventWithCallback(this.appConfig, () => (this.downloading = false)));
   }
 }

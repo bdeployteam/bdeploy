@@ -5,7 +5,7 @@
       <div *ngIf='loading'><mat-spinner diameter='24'></mat-spinner></div>
       <app-process-status [instanceTag]="instanceTag" [appId]="appConfig.uid" [iconWhenStopped]="true"></app-process-status>
     </mat-toolbar-row>
-    <mat-toolbar-row class="subHeader process-uid">
+    <mat-toolbar-row class="subHeader subHeaderTheme">
         <span> ID: {{appConfig.uid}}</span>
     </mat-toolbar-row>
   </mat-toolbar>

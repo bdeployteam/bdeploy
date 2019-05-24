@@ -100,7 +100,9 @@
             (editAppConfigEvent)="onEditApp(node.nodeConfiguration, $event)"
             (editNodeAppsEvent)="onUpdateNodeApps()"
             (removeNodeAppEvent)="onUpdateNodeApps()"
-            (selectAppConfigEvent)="setSidenavProcessStatus($event)">
+            (selectAppConfigEvent)="onSelectApp(node, $event)"
+            (downloadClickAndStartEvent)="onDownloadClickAndStart($event)"
+            (downloadInstallerEvent)="onDownloadInstaller($event)">
           </app-instance-node-card>
         </ng-container>
       </ng-container>
@@ -115,6 +117,7 @@
         <div *ngIf="isSidenavVersions()">Instance Versions</div>
         <div *ngIf="isSidenavProducts()">Change Product Tag</div>
         <div *ngIf="isSidenavProcessStatus()">Process Control</div>
+        <div *ngIf="isSidenavClientInfo()">Client Application</div>
         <span class="fill-space"></span>
         <button *ngIf="!isSidenavVersions()" mat-icon-button (click)="setSidenavVersions()">
           <mat-icon>close</mat-icon>
@@ -209,6 +212,16 @@
             [activatedInstanceTag]="deploymentState.activatedVersion"
             [appConfig]='selectedProcess'>
           </app-process-details>
+        </div>
+        <div *ngIf='isSidenavClientInfo()'>
+          <app-client-info
+            [instanceGroup]='groupParam'
+            [instanceId]='uuidParam'
+            [instanceTag]='selectedConfig.version.key.tag'
+            [appConfig]='selectedProcess'
+            (downloadClickAndStartEvent)="onDownloadClickAndStart($event)"
+            (downloadInstallerEvent)="onDownloadInstaller($event)">
+          </app-client-info>
         </div>
       </div>
     </div>

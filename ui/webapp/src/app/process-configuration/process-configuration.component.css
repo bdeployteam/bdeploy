@@ -62,6 +62,7 @@
   flex-direction: column;
   height: 100%;
   min-width: 390px;
+  max-width: 390px;
   align-items: center;
 }
 

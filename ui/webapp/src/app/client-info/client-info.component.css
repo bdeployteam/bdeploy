@@ -1,0 +1,35 @@
+.spacer {
+  flex: 1 0 auto;
+}
+
+.subHeader {
+  font-size: smaller;
+  font-weight: lighter;
+  height: 32px;
+  margin-top: -15px;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  margin: 10px;
+}
+
+.align-left {
+  text-align: left;
+}
+
+.button-text {
+  margin-left: 10px;
+}
+
+.progress-spinner {
+  float: left;
+  margin-top: 5px;
+}
+
+mat-divider {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}

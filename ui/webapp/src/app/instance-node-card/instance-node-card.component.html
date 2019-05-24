@@ -56,7 +56,8 @@
             (removeEvent)="removeProcess(process)"
             (editEvent)="fireEditAppConfigEvent(process)"
             (click)="onSelect(process)"
-            (downloadLauncherEvent)="downloadLauncherDescriptor($event)"
+            (downloadClickAndStartEvent)="downloadClickAndStartEvent.next($event)"
+            (downloadInstallerEvent)="downloadInstallerEvent.next($event)"
             [isReadonly]="isReadonly"
             [isClient]="isClientApplicationsNode()">
           </app-application-configuration-card>

@@ -12,11 +12,13 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
 import io.bdeploy.interfaces.descriptor.client.ClientDescriptor;
 import io.bdeploy.jersey.ActivityScope;
+import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import io.bdeploy.ui.dto.DeploymentStateDto;
 import io.bdeploy.ui.dto.InstanceConfigurationDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
@@ -87,5 +89,18 @@ public interface InstanceResource {
 
     @Path("/{instance}/processes")
     public ProcessResource getProcessResource(@ActivityScope @PathParam("instance") String instanceId);
+
+    @GET
+    @Path("/{instance}/installerZip/{processId}")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String createClientInstaller(@ActivityScope @PathParam("instance") String instanceId,
+            @PathParam("processId") String processId);
+
+    @GET
+    @Unsecured
+    @Path("/{instance}/installerDownload/{processId}")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response downloadClientInstaller(@ActivityScope @PathParam("instance") String instanceId,
+            @PathParam("processId") String processId);
 
 }
