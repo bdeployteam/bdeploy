@@ -33,13 +33,13 @@ public class ProcessControllerTest {
         listener.expect(process, ProcessState.RUNNING);
         process.start();
         listener.await(TIMEOUT);
-        assertEquals(process.getState(), ProcessState.RUNNING);
+        assertEquals(ProcessState.RUNNING, process.getState());
 
         listener.expect(process, ProcessState.STOPPED);
         process.stop();
         listener.await(TIMEOUT);
 
-        assertEquals(process.getState(), ProcessState.STOPPED);
+        assertEquals(ProcessState.STOPPED, process.getState());
     }
 
     @Test
@@ -64,13 +64,13 @@ public class ProcessControllerTest {
         listener.await(TIMEOUT);
 
         // Process must still be running
-        assertEquals(process.getState(), ProcessState.RUNNING);
+        assertEquals(ProcessState.RUNNING, process.getState());
 
         // Terminate after recovering
         listener.expect(process, ProcessState.STOPPED);
         process.stop();
         listener.await(TIMEOUT);
-        assertEquals(process.getState(), ProcessState.STOPPED);
+        assertEquals(ProcessState.STOPPED, process.getState());
     }
 
     @Test
@@ -84,7 +84,7 @@ public class ProcessControllerTest {
         listener.expect(process, ProcessState.RUNNING);
         process.start();
         listener.await(TIMEOUT);
-        assertEquals(process.getState(), ProcessState.RUNNING);
+        assertEquals(ProcessState.RUNNING, process.getState());
 
         // Terminate process using the provided PID
         listener.expect(process, ProcessState.CRASHED_WAITING, ProcessState.RUNNING_UNSTABLE, ProcessState.RUNNING);
@@ -98,7 +98,7 @@ public class ProcessControllerTest {
         listener.expect(process, ProcessState.STOPPED);
         process.stop();
         listener.await(TIMEOUT);
-        assertEquals(process.getState(), ProcessState.STOPPED);
+        assertEquals(ProcessState.STOPPED, process.getState());
     }
 
     @Test
@@ -115,7 +115,7 @@ public class ProcessControllerTest {
         listener.expect(process, ProcessState.RUNNING);
         process.start();
         listener.await(TIMEOUT);
-        assertEquals(process.getState(), ProcessState.RUNNING);
+        assertEquals(ProcessState.RUNNING, process.getState());
 
         // Wait until it crashes
         listener.expect(process, ProcessState.CRASHED_WAITING);
@@ -180,7 +180,7 @@ public class ProcessControllerTest {
 
         // One thread must failed to start because the other one holds the lock
         assertEquals(1, failedCounter.get());
-        assertEquals(process.getState(), ProcessState.RUNNING);
+        assertEquals(ProcessState.RUNNING, process.getState());
 
         // Stop in parallel
         failedCounter.set(0);
@@ -214,7 +214,7 @@ public class ProcessControllerTest {
 
         // One thread must failed to start because the other one holds the lock
         assertEquals(1, failedCounter.get());
-        assertEquals(process.getState(), ProcessState.STOPPED);
+        assertEquals(ProcessState.STOPPED, process.getState());
     }
 
     @Test
@@ -249,7 +249,7 @@ public class ProcessControllerTest {
         listener.await(TIMEOUT);
 
         // Check final state
-        assertEquals(process.getState(), ProcessState.STOPPED);
+        assertEquals(ProcessState.STOPPED, process.getState());
     }
 
     @Test
@@ -266,7 +266,7 @@ public class ProcessControllerTest {
         listener.expect(process, ProcessState.RUNNING);
         process.start();
         listener.await(TIMEOUT);
-        assertEquals(process.getState(), ProcessState.RUNNING);
+        assertEquals(ProcessState.RUNNING, process.getState());
 
         // Terminate process using the provided PID
         listener.expect(process, ProcessState.CRASHED_WAITING);

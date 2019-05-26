@@ -5,9 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import io.bdeploy.common.util.MdcLogger;
 import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessListDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessState;
@@ -17,7 +15,7 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessState;
  */
 public class ProcessList {
 
-    private static final Logger log = LoggerFactory.getLogger(MinionProcessController.class);
+    private final MdcLogger logger = new MdcLogger(ProcessController.class);
 
     /** The tag of this process list */
     private final String instanceTag;
@@ -30,6 +28,7 @@ public class ProcessList {
 
     /** Creates a new process list */
     public ProcessList(String instanceTag, ProcessGroupConfiguration processConfig) {
+        this.logger.setMdcValue(processConfig.uuid, instanceTag);
         this.instanceTag = instanceTag;
         this.processConfig = processConfig;
     }
@@ -63,7 +62,7 @@ public class ProcessList {
     public ProcessController get(String applicationId) {
         ProcessController controller = controllers.get(applicationId);
         if (controller == null) {
-            throw new RuntimeException("Unknown application: " + applicationId);
+            throw new PcuRuntimeException("Unknown application: " + applicationId);
         }
         return controller;
     }
@@ -97,7 +96,7 @@ public class ProcessList {
                 continue;
             }
             running++;
-            log.info(buildAppLogString("Application is running.", appId));
+            logger.log(l -> l.info("Application {} is running.", appId));
         }
         return running;
     }
@@ -113,12 +112,6 @@ public class ProcessList {
             statusDto.add(controller.getStatus());
         }
         return statusDto;
-    }
-
-    /** Prefixes the given message with the instanceUid and instanceTag */
-    private String buildAppLogString(String message, String appId, Object... args) {
-        String prefix = String.format("%s / %s / %s - ", processConfig.uuid, instanceTag, appId);
-        return prefix + String.format(message, args);
     }
 
 }

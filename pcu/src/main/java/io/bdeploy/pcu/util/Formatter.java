@@ -7,8 +7,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.common.base.Joiner;
-
 /**
  * Helper to format duration and times.
  */
@@ -16,6 +14,9 @@ public class Formatter {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
             .withZone(ZoneId.systemDefault());
+
+    private Formatter() {
+    }
 
     /**
      * Formats the given instant into a human readable string.
@@ -68,7 +69,7 @@ public class Formatter {
 
         // Skip seconds if we have days, hours
         if (days > 0 || hours > 0) {
-            return Joiner.on(" ").join(parts);
+            return String.join(" ", parts);
         }
         long seconds = value.toSecondsPart();
         if (seconds == 1) {
@@ -79,7 +80,7 @@ public class Formatter {
 
         // Skip milliseconds if we have minutes
         if (minutes > 0) {
-            return Joiner.on(" ").join(parts);
+            return String.join(" ", parts);
         }
         long millis = value.toMillisPart();
         if (millis == 1) {
@@ -87,7 +88,7 @@ public class Formatter {
         } else if (millis > 1 || parts.isEmpty()) {
             parts.add(millis + " milliseconds");
         }
-        return Joiner.on(" ").join(parts);
+        return String.join(" ", parts);
     }
 
 }

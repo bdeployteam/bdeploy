@@ -99,7 +99,7 @@ public class MinionProcessController {
             if (controller == null) {
                 controller = new InstanceProcessController(instanceId);
                 instance2Controller.put(instanceId, controller);
-                logger.log((l) -> l.info("Creating new instance controller."), instanceId);
+                logger.log(l -> l.info("Creating new instance controller."), instanceId);
             }
             return controller;
         } finally {

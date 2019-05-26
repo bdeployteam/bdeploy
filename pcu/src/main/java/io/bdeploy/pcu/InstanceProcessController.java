@@ -96,7 +96,7 @@ public class InstanceProcessController {
             for (ProcessConfiguration config : groupConfig.applications) {
                 Path processDir = pathProvider.get(SpecialDirectory.RUNTIME).resolve(config.uid);
                 processList.add(new ProcessController(groupConfig.uuid, tag, config, processDir));
-                logger.log((l) -> l.info("Creating new process controller."), tag, config.uid);
+                logger.log(l -> l.info("Creating new process controller."), tag, config.uid);
             }
         } finally {
             writeLock.unlock();
@@ -108,7 +108,7 @@ public class InstanceProcessController {
      * or when starting all applications of this instance.
      */
     public void setActiveTag(String activeTag) {
-        logger.log((l) -> l.info("Setting active tag to {}.", activeTag));
+        logger.log(l -> l.info("Setting active tag to {}.", activeTag));
         this.activeTag = activeTag;
     }
 
@@ -117,7 +117,7 @@ public class InstanceProcessController {
      */
     public void recover() {
         Map<String, Integer> tag2Running = new TreeMap<>();
-        logger.log((l) -> l.info("Checking which applications are alive."));
+        logger.log(l -> l.info("Checking which applications are alive."));
         try {
             readLock.lock();
             for (ProcessList list : processMap.values()) {
@@ -133,13 +133,13 @@ public class InstanceProcessController {
 
         // Print out a summary. Indicate if applications across different versions are running
         if (tag2Running.isEmpty()) {
-            logger.log((l) -> l.info("No applications are running."));
+            logger.log(l -> l.info("No applications are running."));
         } else if (tag2Running.size() == 1) {
             int counter = tag2Running.values().iterator().next();
-            logger.log((l) -> l.info("{} application(s) are running.", counter));
+            logger.log(l -> l.info("{} application(s) are running.", counter));
         } else {
             int counter = tag2Running.values().stream().mapToInt(Integer::intValue).sum();
-            logger.log((l) -> l.info("{} application(s) from multiple different versions are running.", counter));
+            logger.log(l -> l.info("{} application(s) from multiple different versions are running.", counter));
         }
     }
 
@@ -148,7 +148,7 @@ public class InstanceProcessController {
      */
     public void autoStart() {
         if (activeTag == null) {
-            logger.log((l) -> l.info("Autostart not possible. No active tag has been set."));
+            logger.log(l -> l.info("Autostart not possible. No active tag has been set."));
             return;
         }
         // Check auto-start flag of instance
@@ -156,10 +156,10 @@ public class InstanceProcessController {
             readLock.lock();
             ProcessList list = processMap.get(activeTag);
             if (!list.processConfig.autoStart) {
-                logger.log((l) -> l.info("Autostart not configured. Applications remain stopped."), activeTag);
+                logger.log(l -> l.info("Autostart not configured. Applications remain stopped."), activeTag);
                 return;
             }
-            logger.log((l) -> l.info("Auto-Starting applications."), activeTag);
+            logger.log(l -> l.info("Auto-Starting applications."), activeTag);
         } finally {
             readLock.unlock();
         }
@@ -173,11 +173,11 @@ public class InstanceProcessController {
      */
     public void start() {
         if (activeTag == null) {
-            throw new RuntimeException("No active tag has been set");
+            throw new PcuRuntimeException("No active tag has been set");
         }
         try {
             readLock.lock();
-            logger.log((l) -> l.info("Starting all applications."), activeTag);
+            logger.log(l -> l.info("Starting all applications."), activeTag);
 
             // Compute runtime state across all versions
             Map<String, ProcessController> running = new HashMap<>();
@@ -188,7 +188,7 @@ public class InstanceProcessController {
             // Start all missing applications
             ProcessList list = processMap.get(activeTag);
             if (list == null) {
-                throw new RuntimeException("Activated version '" + activeTag + "' is not deployed");
+                throw new PcuRuntimeException("Activated version '" + activeTag + "' is not deployed");
             }
             for (Map.Entry<String, ProcessController> entry : list.controllers.entrySet()) {
                 String appId = entry.getKey();
@@ -198,10 +198,10 @@ public class InstanceProcessController {
                 if (running.containsKey(appId)) {
                     ProcessStatusDto data = controller.getStatus();
                     if (data.instanceTag.equals(activeTag)) {
-                        logger.log((l) -> l.warn("Application already running in a different version."), data.instanceTag,
+                        logger.log(l -> l.warn("Application already running in a different version."), data.instanceTag,
                                 data.appUid);
                     } else {
-                        logger.log((l) -> l.info("Application already running."), data.instanceTag, data.appUid);
+                        logger.log(l -> l.info("Application already running."), data.instanceTag, data.appUid);
                     }
                     continue;
                 }
@@ -209,7 +209,7 @@ public class InstanceProcessController {
                 // Only start when auto-start is configured
                 ProcessConfiguration config = controller.getDescriptor();
                 if (config.processControl.startType != ApplicationStartType.INSTANCE) {
-                    logger.log((l) -> l.info("Application does not have 'instance' start type set."), activeTag, appId);
+                    logger.log(l -> l.info("Application does not have 'instance' start type set."), activeTag, appId);
                     continue;
                 }
 
@@ -217,10 +217,10 @@ public class InstanceProcessController {
                 try {
                     controller.start();
                 } catch (Exception ex) {
-                    logger.log((l) -> l.info("Failed to start application.", ex), activeTag, appId);
+                    logger.log(l -> l.info("Failed to start application.", ex), activeTag, appId);
                 }
             }
-            logger.log((l) -> l.info("All applications have been started."), activeTag);
+            logger.log(l -> l.info("All applications have been started."), activeTag);
         } finally {
             readLock.unlock();
         }
@@ -244,7 +244,7 @@ public class InstanceProcessController {
             readLock.unlock();
         }
 
-        logger.log((l) -> l.info("Stopping {} running applications.", toStop.size()));
+        logger.log(l -> l.info("Stopping {} running applications.", toStop.size()));
         for (ProcessController process : toStop) {
             service.execute(() -> {
                 try {
@@ -252,19 +252,19 @@ public class InstanceProcessController {
                 } catch (Exception ex) {
                     String appId = process.getDescriptor().uid;
                     String tag = process.getStatus().instanceTag;
-                    logger.log((l) -> l.error("Failed to stop application.", ex), tag, appId);
+                    logger.log(l -> l.error("Failed to stop application.", ex), tag, appId);
                 }
             });
         }
 
         // Wait for all to terminate
         Instant start = Instant.now();
-        logger.log((l) -> l.info("Waiting for applications to stop."));
+        logger.log(l -> l.info("Waiting for applications to stop."));
         try {
             service.shutdown();
             service.awaitTermination(5, TimeUnit.MINUTES);
             Duration duration = Duration.between(start, Instant.now());
-            logger.log((l) -> l.info("All applications stopped. Stopping took {}", Formatter.formatDuration(duration)));
+            logger.log(l -> l.info("All applications stopped. Stopping took {}", Formatter.formatDuration(duration)));
         } catch (InterruptedException e) {
             Duration duration = Duration.between(start, Instant.now());
             Thread.currentThread().interrupt();
@@ -282,7 +282,7 @@ public class InstanceProcessController {
      */
     public void start(String applicationId) {
         if (activeTag == null) {
-            throw new RuntimeException("No active tag has been set");
+            throw new PcuRuntimeException("No active tag has been set");
         }
         try {
             readLock.lock();
@@ -290,7 +290,7 @@ public class InstanceProcessController {
                 Map<String, ProcessController> running = list.getWithState(SET_RUNNING);
                 if (running.containsKey(applicationId)) {
                     ProcessStatusDto dto = running.get(applicationId).getStatus();
-                    throw new RuntimeException(
+                    throw new PcuRuntimeException(
                             "Application '" + dto.appUid + "' already running in version '" + dto.instanceTag + "'");
                 }
             }
@@ -304,7 +304,7 @@ public class InstanceProcessController {
             ProcessController controller = list.get(applicationId);
             controller.start();
         } catch (Exception ex) {
-            logger.log((l) -> l.error("Failed to start application", ex), activeTag, applicationId);
+            logger.log(l -> l.error("Failed to start application", ex), activeTag, applicationId);
         }
     }
 
@@ -333,13 +333,13 @@ public class InstanceProcessController {
 
         // Throw if we cannot find a running process
         if (process == null) {
-            throw new RuntimeException("Application not running");
+            throw new PcuRuntimeException("Application not running");
         }
         try {
             process.stop();
         } catch (Exception ex) {
             String tag = process.getStatus().instanceTag;
-            logger.log((l) -> l.error("Failed to stop application", ex), tag, applicationId);
+            logger.log(l -> l.error("Failed to stop application", ex), tag, applicationId);
         }
     }
 
