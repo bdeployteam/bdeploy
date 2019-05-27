@@ -8,9 +8,10 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.cli.ExportTool.ExportConfig;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ExportOperation;
+import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
-import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
+import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 
 /**
  * A tool to export a given manifest's files recursively to a target directory.
@@ -22,6 +23,7 @@ public class ExportTool extends ConfiguredCliTool<ExportConfig> {
     public @interface ExportConfig {
 
         @Help("The source BHive to export from")
+        @EnvironmentFallback("BHIVE")
         String hive();
 
         @Help("The target path to export to")

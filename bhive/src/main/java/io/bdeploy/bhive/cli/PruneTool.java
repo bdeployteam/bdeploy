@@ -8,9 +8,10 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.cli.PruneTool.PruneConfig;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.PruneOperation;
+import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
-import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
+import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.util.UnitHelper;
 
 /**
@@ -24,6 +25,7 @@ public class PruneTool extends ConfiguredCliTool<PruneConfig> {
     public @interface PruneConfig {
 
         @Help("The BHive to use")
+        @EnvironmentFallback("BHIVE")
         String hive();
 
         @Help(value = "List details about removed objects", arg = false)

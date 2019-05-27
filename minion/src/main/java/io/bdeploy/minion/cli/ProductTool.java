@@ -9,6 +9,7 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.common.cfg.Configuration.ConfigurationNameMapping;
+import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.security.RemoteService;
@@ -31,6 +32,7 @@ public class ProductTool extends RemoteServiceTool<ProductConfig> {
     public @interface ProductConfig {
 
         @Help("The hive to operate on.")
+        @EnvironmentFallback("BHIVE")
         String hive();
 
         @Help("Creates a product from a product descriptor. Either a path to a YAML file, or a path to a directory containing a 'product-info.yaml' file.")
@@ -38,6 +40,7 @@ public class ProductTool extends RemoteServiceTool<ProductConfig> {
         String imp();
 
         @Help("Name of the target instance group to import the product into")
+        @EnvironmentFallback("REMOTE_BHIVE")
         String instanceGroup();
 
         @Help(value = "When given, push the result in the specified instance group on the given remote")

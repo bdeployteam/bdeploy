@@ -24,7 +24,7 @@ public class RepoTool extends RemoteServiceTool<RepoConfig> {
         @Help("The description to set for the software repo.")
         String description();
 
-        @Help("The storage to create the repo at.")
+        @Help("The storage to create the repo at. Defaults to the first storage location.")
         String storage();
 
         @Help(value = "List existing software repositories", arg = false)
@@ -40,7 +40,6 @@ public class RepoTool extends RemoteServiceTool<RepoConfig> {
         MasterRootResource client = ResourceProvider.getResource(svc, MasterRootResource.class);
         if (config.add() != null) {
             helpAndFailIfMissing(config.description(), "Missing --description");
-            helpAndFailIfMissing(config.storage(), "Missing --storage");
 
             SoftwareRepositoryConfiguration meta = new SoftwareRepositoryConfiguration();
             meta.name = config.add();

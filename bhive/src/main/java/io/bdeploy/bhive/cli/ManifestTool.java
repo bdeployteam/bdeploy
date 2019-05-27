@@ -12,6 +12,7 @@ import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.remote.RemoteBHive;
+import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.security.RemoteService;
@@ -27,6 +28,7 @@ public class ManifestTool extends RemoteServiceTool<ManifestConfig> {
     public @interface ManifestConfig {
 
         @Help("The BHive to use. Alternatively use --remote.")
+        @EnvironmentFallback("BHIVE")
         String hive();
 
         @Help(value = "List available manifests", arg = false)

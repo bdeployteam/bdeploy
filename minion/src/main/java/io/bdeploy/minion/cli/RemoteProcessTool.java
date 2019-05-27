@@ -1,5 +1,6 @@
 package io.bdeploy.minion.cli;
 
+import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.security.RemoteService;
@@ -23,6 +24,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         String application();
 
         @Help("The name of the remote hive to work on")
+        @EnvironmentFallback("REMOTE_BHIVE")
         String target();
 
         @Help(value = "List process status on the remote", arg = false)

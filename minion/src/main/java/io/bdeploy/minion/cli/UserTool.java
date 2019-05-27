@@ -3,6 +3,7 @@ package io.bdeploy.minion.cli;
 import java.nio.file.Paths;
 import java.util.Collections;
 
+import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.security.ApiAccessToken;
@@ -22,6 +23,7 @@ public class UserTool extends RemoteServiceTool<UserConfig> {
     public @interface UserConfig {
 
         @Help("Root directory for the master minion. The minion will put all required things here.")
+        @EnvironmentFallback("BDEPLOY_ROOT")
         String root();
 
         @Help("Adds a user with the given name.")

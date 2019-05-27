@@ -21,7 +21,7 @@ public class RemoteInstanceGroupTool extends RemoteServiceTool<RemoteInstanceGro
         @Help("Description of the customer")
         String description();
 
-        @Help("Storage to create the new hive in")
+        @Help("Storage to create the new hive in, defaults to the first available storage.")
         String storage();
     }
 
@@ -33,7 +33,6 @@ public class RemoteInstanceGroupTool extends RemoteServiceTool<RemoteInstanceGro
     protected void run(RemoteInstanceGroupConfig config, RemoteService svc) {
         helpAndFailIfMissing(config.create(), "Missing instance group to create");
         helpAndFailIfMissing(config.description(), "Missing description");
-        helpAndFailIfMissing(config.storage(), "Missing Storage location (list with minion storage tool)");
 
         MasterRootResource client = ResourceProvider.getResource(svc, MasterRootResource.class);
 

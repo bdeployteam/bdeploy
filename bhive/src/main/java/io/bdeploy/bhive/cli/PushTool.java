@@ -7,6 +7,7 @@ import io.bdeploy.bhive.cli.PushTool.PushConfig;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.bhive.op.remote.TransferStatistics;
+import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.security.RemoteService;
@@ -28,9 +29,11 @@ public class PushTool extends RemoteServiceTool<PushConfig> {
     public @interface PushConfig {
 
         @Help("The local BHive")
+        @EnvironmentFallback("BHIVE")
         String hive();
 
         @Help("The remote hive name. Set to 'default' to push to the 'default' hive on the remote.")
+        @EnvironmentFallback("REMOTE_BHIVE")
         String target();
 
         @Help("Manifest(s) to push. May appear multiple times. Format is 'name:tag'")

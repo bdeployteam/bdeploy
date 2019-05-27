@@ -8,9 +8,10 @@ import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
-import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
+import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.SlaveDeploymentResource;
@@ -39,6 +40,7 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
     public @interface MasterConfig {
 
         @Help("Root directory for the master minion. Must be initialized using the init command.")
+        @EnvironmentFallback("BDEPLOY_ROOT")
         String root();
 
         @Help("Specify the directory where any incoming updates should be placed in.")
@@ -47,7 +49,7 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
         @Help("Publish the web application, defaults to true.")
         boolean publishWebapp() default true;
 
-        @Help("Allow CORS, defaults to true to allow access to the API from a central web-app")
+        @Help("Allow CORS, allows the web-app to run on a different port than the backend.")
         boolean allowCors() default false;
     }
 

@@ -7,9 +7,10 @@ import java.nio.file.Paths;
 
 import javax.ws.rs.core.UriBuilder;
 
+import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
-import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
+import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.SecurityHelper;
@@ -27,18 +28,21 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
     public @interface InitConfig {
 
         @Help("Root directory to initialize, must not exist.")
+        @EnvironmentFallback("BDEPLOY_ROOT")
         String root();
 
         @Help("Optional directory where to deploy applications to, defaults to root/deploy")
         String deployments();
 
         @Help("The official hostname that the minion will think of for itself")
+        @EnvironmentFallback("HOSTNAME")
         String hostname();
 
         @Help("Path to the ZIP file you extracted this program from. Set to 'ignore' to skip. Be aware that this will cause an immediate update once connected to a remote master.")
         String dist();
 
         @Help("Write the access token to a token file instead of printing it on the console")
+        @EnvironmentFallback("BDEPLOY_TOKENFILE")
         String tokenFile();
 
         @Help("Port that the master will run on.")

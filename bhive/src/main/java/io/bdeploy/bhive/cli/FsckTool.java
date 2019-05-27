@@ -9,9 +9,10 @@ import io.bdeploy.bhive.cli.FsckTool.FsckConfig;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.objects.view.ElementView;
 import io.bdeploy.bhive.op.FsckOperation;
+import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
-import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
+import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 
 /**
  * A tool to check consistency of manifests and objects.
@@ -26,6 +27,7 @@ public class FsckTool extends ConfiguredCliTool<FsckConfig> {
     public @interface FsckConfig {
 
         @Help("The local BHive")
+        @EnvironmentFallback("BHIVE")
         String hive();
 
         @Help("Manifest(s) to check. May appear multiple times. Format is 'name:tag'. If not present, all manifests are checked.")

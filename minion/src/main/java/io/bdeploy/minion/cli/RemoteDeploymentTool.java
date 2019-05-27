@@ -6,6 +6,7 @@ import java.util.SortedSet;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.security.RemoteService;
@@ -21,6 +22,7 @@ public class RemoteDeploymentTool extends RemoteServiceTool<RemoteDeployConfig> 
     public @interface RemoteDeployConfig {
 
         @Help("Target hive name, must be created up front.")
+        @EnvironmentFallback("REMOTE_BHIVE")
         String target();
 
         @Help("Name of the manifest to deploy")

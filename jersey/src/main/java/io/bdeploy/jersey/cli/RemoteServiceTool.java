@@ -21,6 +21,7 @@ import javax.ws.rs.core.UriBuilder;
 
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.NoThrowAutoCloseable;
+import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.security.OnDiscKeyStore;
@@ -38,6 +39,7 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
     private @interface RemoteConfig {
 
         @Help("URI of remote BHive. Supports file:, jar:file:, bhive:")
+        @EnvironmentFallback("BDEPLOY_REMOTE")
         String remote();
 
         @Help("Path to keystore containing access token.")
@@ -47,9 +49,11 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
         String passphrase();
 
         @Help("Token for the remote access. Can be given alternatively to a keystore.")
+        @EnvironmentFallback("BDEPLOY_TOKEN")
         String token();
 
         @Help("Path to a file containing the access token. Can be given alternatively to a keystore.")
+        @EnvironmentFallback("BDEPLOY_TOKENFILE")
         String tokenFile();
     }
 

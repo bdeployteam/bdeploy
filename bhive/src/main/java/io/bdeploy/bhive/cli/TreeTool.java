@@ -21,6 +21,7 @@ import io.bdeploy.bhive.objects.view.scanner.TreeElementDiff.DifferenceType;
 import io.bdeploy.bhive.objects.view.scanner.TreeVisitor;
 import io.bdeploy.bhive.op.ObjectSizeOperation;
 import io.bdeploy.bhive.op.ScanOperation;
+import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
@@ -38,6 +39,7 @@ public class TreeTool extends ConfiguredCliTool<TreeConfig> {
     public @interface TreeConfig {
 
         @Help("The BHive to use. Alternatively use --remote.")
+        @EnvironmentFallback("BHIVE")
         String hive();
 
         @Help("List available manifests")

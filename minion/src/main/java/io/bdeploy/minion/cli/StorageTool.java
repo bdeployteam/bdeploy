@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.security.RemoteService;
@@ -23,6 +24,7 @@ public class StorageTool extends RemoteServiceTool<StorageConfig> {
     public @interface StorageConfig {
 
         @Help("Root directory for the master minion. The minion will put all required things here.")
+        @EnvironmentFallback("BDEPLOY_ROOT")
         String root();
 
         @Help("Adds a storage location at the given path.")

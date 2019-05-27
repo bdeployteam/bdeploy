@@ -7,6 +7,7 @@ import io.bdeploy.bhive.cli.FetchTool.FetchConfig;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.remote.FetchOperation;
 import io.bdeploy.bhive.op.remote.TransferStatistics;
+import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.security.RemoteService;
@@ -25,9 +26,11 @@ public class FetchTool extends RemoteServiceTool<FetchConfig> {
     public @interface FetchConfig {
 
         @Help("The local BHive")
+        @EnvironmentFallback("BHIVE")
         String hive();
 
         @Help("The remote hive name if not default")
+        @EnvironmentFallback("REMOTE_BHIVE")
         String source();
 
         @Help("Manifest(s) to push. May appear multiple times. Format is 'name:tag'")

@@ -21,6 +21,7 @@ import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.ExportTreeOperation;
 import io.bdeploy.bhive.op.ImportTreeOperation;
 import io.bdeploy.bhive.util.StorageHelper;
+import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
@@ -52,6 +53,7 @@ public class TemplateTool extends ConfiguredCliTool<TemplateConfig> {
     public @interface TemplateConfig {
 
         @Help("Path to the local hive used for loading application descriptors and storing the dfeployment manifests when loading")
+        @EnvironmentFallback("BHIVE")
         String hive();
 
         @Help("Target path to put template in, or source path to import config from")

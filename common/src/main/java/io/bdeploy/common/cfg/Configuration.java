@@ -148,11 +148,19 @@ public class Configuration {
             key = mapping.value();
         }
 
-        if (!objects.containsKey(key) && !method.getReturnType().isAnnotation()) {
+        Object value = objects.get(key);
+        if (value == null) {
+            EnvironmentFallback fallback = method.getAnnotation(EnvironmentFallback.class);
+            if (fallback != null) {
+                value = System.getenv(fallback.value());
+            }
+        }
+
+        if (value == null && !method.getReturnType().isAnnotation()) {
             return method.getDefaultValue();
         }
 
-        return doConvert(method, objects.get(key));
+        return doConvert(method, value);
     }
 
     private Object doConvert(Method method, Object object) {
@@ -261,6 +269,12 @@ public class Configuration {
             } else {
                 target.println(indent + m.getName());
             }
+
+            EnvironmentFallback env = m.getAnnotation(EnvironmentFallback.class);
+            if (env != null) {
+                target.println(indent + String.format("%1$24s  (Environment variable '%2$s' is used as fallback if not given)",
+                        "", env.value()));
+            }
         }
     }
 
@@ -294,5 +308,16 @@ public class Configuration {
          *         in help text).
          */
         boolean arg() default true;
+    }
+
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(value = { ElementType.METHOD })
+    public @interface EnvironmentFallback {
+
+        /**
+         * @return the name of the environment variable to query in case the parameter is not explicitly set.
+         */
+        String value();
     }
 }

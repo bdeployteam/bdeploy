@@ -10,9 +10,10 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.cli.ImportTool.ImportConfig;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ImportOperation;
+import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
-import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
+import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 
 /**
  * Import a source directory recursively into a hive and create a manifest for
@@ -28,6 +29,7 @@ public class ImportTool extends ConfiguredCliTool<ImportConfig> {
         String source();
 
         @Help("The target BHive to import into")
+        @EnvironmentFallback("BHIVE")
         String hive();
 
         @Help("Manifest(s) to create. Format is 'name:tag'")

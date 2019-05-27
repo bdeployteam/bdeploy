@@ -209,6 +209,10 @@ public class MasterRootResourceImpl implements MasterRootResource {
 
     @Override
     public void addSoftwareRepository(SoftwareRepositoryConfiguration config, String storage) {
+        if (storage == null) {
+            storage = getStorageLocations().iterator().next();
+        }
+
         if (!getStorageLocations().contains(storage)) {
             log.warn("Tried to use storage location: " + storage + ", valid are: " + getStorageLocations());
             throw new WebApplicationException("Invalid Storage Location", Status.NOT_FOUND);
@@ -231,6 +235,10 @@ public class MasterRootResourceImpl implements MasterRootResource {
 
     @Override
     public void addInstanceGroup(InstanceGroupConfiguration meta, String storage) {
+        if (storage == null) {
+            storage = getStorageLocations().iterator().next();
+        }
+
         if (!getStorageLocations().contains(storage)) {
             log.warn("Tried to use storage location: " + storage + ", valid are: " + getStorageLocations());
             throw new WebApplicationException("Invalid Storage Location", Status.NOT_FOUND);
