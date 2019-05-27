@@ -1,4 +1,5 @@
-﻿using System;
+using Bdeploy.Common;
+using System;
 using System.Windows;
 
 namespace Bdeploy
@@ -33,7 +34,7 @@ namespace Bdeploy
             string mainArg = args[0];
             if (mainArg == "/CreateForAllUsers" && args.Length == 2)
             {
-                if (!Launcher.IsAdmin())
+                if (!Utils.IsAdmin())
                 {
                     Console.WriteLine("Administrative privileges required to create association for all users");
                     return false;
@@ -50,7 +51,7 @@ namespace Bdeploy
             }
             if (mainArg == "/RemoveForAllUsers")
             {
-                if (!Launcher.IsAdmin())
+                if (!Utils.IsAdmin())
                 {
                     Console.WriteLine("Administrative privileges required to remove association for all users");
                     return false;
