@@ -19,6 +19,7 @@ public class MinionServerCli extends ToolBase {
         // tools for local use
         register(ProductTool.class);
         register(TokenTool.class);
+        register(BHiveWrapperTool.class);
 
         // remote client
         register(RemoteMasterTool.class);

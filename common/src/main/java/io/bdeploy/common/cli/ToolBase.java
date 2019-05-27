@@ -194,6 +194,8 @@ public abstract class ToolBase {
             }
             ConfiguredCliTool<?> toConfig = ((ConfiguredCliTool<?>) instance);
             toConfig.setConfig(cfg);
+        } else if (instance instanceof NativeCliTool) {
+            ((NativeCliTool) instance).setArguments(Arrays.copyOfRange(args, 1, args.length));
         }
         return instance;
     }
@@ -284,6 +286,26 @@ public abstract class ToolBase {
     }
 
     /**
+     * Base class for tools which require access to the actual command line they have been passed.
+     */
+    public abstract static class NativeCliTool extends CliTool {
+
+        private String[] args;
+
+        private void setArguments(String[] args) {
+            this.args = args;
+        }
+
+        @Override
+        public final void run() {
+            run(args);
+        }
+
+        abstract protected void run(String[] args);
+
+    }
+
+    /**
      * Base class for tools that accept additional configuration.
      *
      * @see Configuration
@@ -339,7 +361,7 @@ public abstract class ToolBase {
         }
 
         @Override
-        public void run() {
+        public final void run() {
             run(config.get(configClass));
         }
 
