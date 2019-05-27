@@ -1,5 +1,7 @@
 package io.bdeploy.ui.api.impl;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URI;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -23,9 +25,14 @@ import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.StreamingOutput;
 
+import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +54,7 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.common.util.UnitHelper;
+import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.NodeStatus;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
@@ -533,6 +541,28 @@ public class InstanceResourceImpl implements InstanceResource {
     @Override
     public ProcessResource getProcessResource(String instanceId) {
         return rc.initResource(new ProcessResourceImpl(hive, group, instanceId));
+    }
+
+    @Override
+    public String createClientInstaller(String instanceId, String processId) {
+        String randomId = UuidHelper.randomId();
+        return randomId;
+    }
+
+    @Override
+    public Response downloadClientInstaller(String instanceId, String token) {
+        ResponseBuilder responeBuilder = Response.ok(new StreamingOutput() {
+
+            @Override
+            public void write(OutputStream output) throws IOException, WebApplicationException {
+                String content = "My custom installer: " + token;
+                output.write(content.getBytes());
+            }
+        }, MediaType.APPLICATION_OCTET_STREAM);
+
+        ContentDisposition contentDisposition = ContentDisposition.type("attachement").build();
+        responeBuilder.header("Content-Disposition", contentDisposition);
+        return responeBuilder.build();
     }
 
 }

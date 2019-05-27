@@ -11,10 +11,12 @@ import { InstanceVersionCardComponent } from '../instance-version-card/instance-
 import { MessageBoxMode } from '../messagebox/messagebox.component';
 import { ApplicationGroup } from '../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_DEPLOYMENT_STATE } from '../models/consts';
+import { EventWithCallback } from '../models/event';
 import { ApplicationConfiguration, ApplicationDto, DeploymentStateDto, InstanceNodeConfiguration, InstanceNodeConfigurationDto, ManifestKey, ProductDto } from '../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../models/process.model';
 import { ProcessDetailsComponent } from '../process-details/process-details.component';
 import { ApplicationService } from '../services/application.service';
+import { DownloadService } from '../services/download.service';
 import { InstanceService } from '../services/instance.service';
 import { Logger, LoggingService } from '../services/logging.service';
 import { MessageboxService } from '../services/messagebox.service';
@@ -26,13 +28,14 @@ export enum SidenavMode {
   Versions,
   Products,
   ProcessStatus,
+  ClientInfo,
 }
 
 @Component({
   selector: 'app-process-configuration',
   templateUrl: './process-configuration.component.html',
   styleUrls: ['./process-configuration.component.css'],
-  providers: [ApplicationService]
+  providers: [ApplicationService],
 })
 export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   public static readonly DROPLIST_APPLICATIONS = 'APPLICATIONS';
@@ -91,6 +94,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     private productService: ProductService,
     private processService: ProcessService,
     public location: Location,
+    public downloadService: DownloadService,
   ) {}
 
   ngOnInit() {
@@ -224,6 +228,10 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     return this.sidenavMode === SidenavMode.ProcessStatus;
   }
 
+  isSidenavClientInfo() {
+    return this.sidenavMode === SidenavMode.ClientInfo;
+  }
+
   setSidenavVersions(): void {
     this.sidenavMode = SidenavMode.Versions;
     this.enableAutoRefresh();
@@ -235,17 +243,17 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   setSidenavProcessStatus(process: ApplicationConfiguration): void {
-    // Prevent switching if we edit applications or products
-    const disallowed = [SidenavMode.Applications, SidenavMode.Products];
-    if (disallowed.includes(this.sidenavMode)) {
-      return;
-    }
     const callRefresh = this.selectedProcess === process;
     this.sidenavMode = SidenavMode.ProcessStatus;
     this.selectedProcess = process;
     if (callRefresh && this.processDetails) {
       this.processDetails.reLoadStatus();
     }
+  }
+
+  setSideNavClientInfo(process: ApplicationConfiguration) {
+    this.sidenavMode = SidenavMode.ClientInfo;
+    this.selectedProcess = process;
   }
 
   setSidenavProducts(): void {
@@ -267,6 +275,22 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
   public hasServerApplications(): boolean {
     return this.selectedConfig.hasServerApplications();
+  }
+
+  onDownloadClickAndStart(app: ApplicationConfiguration) {
+    this.instanceService.getNewClientDescriptor(this.groupParam, this.uuidParam, app.uid).subscribe(data => {
+      this.downloadService.downloadData(app.name + '.bdeploy', data);
+    });
+  }
+
+  onDownloadInstaller(event: EventWithCallback<ApplicationConfiguration>) {
+    const app = event.data;
+    this.instanceService
+      .createClientInstaller(this.groupParam, this.uuidParam, app.uid)
+      .pipe(finalize(() => event.done()))
+      .subscribe(token => {
+        window.location.href = this.instanceService.downloadClientInstaller(this.groupParam, this.uuidParam, token);
+      });
   }
 
   /** Predicate called when entering the drop zone */
@@ -354,6 +378,19 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
     // Update enabled state of buttons
     this.updateDirtyStateAndValidate();
+  }
+
+  public onSelectApp(node: InstanceNodeConfigurationDto, process: ApplicationConfiguration) {
+    // Prevent switching if we edit applications or products
+    const disallowed = [SidenavMode.Applications, SidenavMode.Products];
+    if (disallowed.includes(this.sidenavMode)) {
+      return;
+    }
+    if (node.nodeName === CLIENT_NODE_NAME) {
+      this.setSideNavClientInfo(process);
+    } else {
+      this.setSidenavProcessStatus(process);
+    }
   }
 
   public onEditApp(nodeConfig: InstanceNodeConfiguration, context: EditAppConfigContext) {
@@ -579,7 +616,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   updateApplications(apps: ApplicationDto[]) {
-    this.applicationService.updateApplications(this.selectedConfig,apps);
+    this.applicationService.updateApplications(this.selectedConfig, apps);
     this.updateDirtyStateAndValidate();
     this.setSidenavVersions();
   }

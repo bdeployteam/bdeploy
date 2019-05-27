@@ -59,6 +59,7 @@ import { SoftwareRepositoriesBrowserComponent } from './software-repositories-br
 import { SoftwareRepositoryCardComponent } from './software-repository-card/software-repository-card.component';
 import { SoftwareRepositoryComponent } from './software-repository/software-repository.component';
 import { ThemeChooserComponent } from './theme-chooser/theme-chooser.component';
+import { ClientInfoComponent } from './client-info/client-info.component';
 
 export function loadAppConfig(cfgService: ConfigService) {
   return () => cfgService.load();
@@ -112,7 +113,8 @@ export function loadAppConfig(cfgService: ConfigService) {
     ProcessStatusComponent,
     ProcessListComponent,
     ApplicationEditCommandPreviewComponent,
-    ProcessStartConfirmComponent
+    ProcessStartConfirmComponent,
+    ClientInfoComponent
   ],
   imports: [
     BrowserModule,

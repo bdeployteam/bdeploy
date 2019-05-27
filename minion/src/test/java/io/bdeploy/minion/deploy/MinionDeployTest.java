@@ -48,6 +48,7 @@ import io.bdeploy.launcher.cli.LauncherTool;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.pcu.TestAppFactory;
 import io.bdeploy.ui.api.Minion;
+import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
 
 @ExtendWith(TestMinion.class)
 @ExtendWith(TestHive.class)
@@ -206,8 +207,8 @@ public class MinionDeployTest {
 
         // minion name does not "technically" matter here, real code uses '__ClientApplications'
         InstanceNodeManifest.Builder clientBuilder = new InstanceNodeManifest.Builder();
-        Manifest.Key cinmKey = clientBuilder.setInstanceNodeConfiguration(cinc).setMinionName("__ClientApplications")
-                .insert(local);
+        Manifest.Key cinmKey = clientBuilder.setInstanceNodeConfiguration(cinc)
+                .setMinionName(InstanceNodeConfigurationListDto.CLIENT_NODE_NAME).insert(local);
 
         InstanceConfiguration ic = new InstanceConfiguration();
         ic.name = "DemoInstance";
@@ -219,7 +220,7 @@ public class MinionDeployTest {
         // TODO: record the product manifest to enable updates late
         Manifest.Key imKey = new InstanceManifest.Builder().setInstanceConfiguration(ic)
                 .addInstanceNodeManifest(Minion.DEFAULT_MASTER_NAME, inmKey)
-                .addInstanceNodeManifest("__ClientApplications", cinmKey).insert(local);
+                .addInstanceNodeManifest(InstanceNodeConfigurationListDto.CLIENT_NODE_NAME, cinmKey).insert(local);
 
         return imKey; // this is the "root" - all instance artifacts are now reachable from here.
     }

@@ -4,7 +4,7 @@
   $dark: map-get($theme, is-dark);
   $warn: map-get($theme, 'warn');
 
-  .process-uid {
+  .subHeaderTheme {
     color: if($dark, mat-color($mat-grey, 400), mat-color($mat-grey, 600));
   }
 

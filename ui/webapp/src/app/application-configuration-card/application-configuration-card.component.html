@@ -8,9 +8,16 @@
         <ng-container *ngIf="isReadonly"> View... </ng-container>
       </button>
       <ng-container *ngIf='isClient'>
-        <button mat-menu-item (click)="downloadLauncherEvent.emit(appConfig)">Download Launcher Descriptor...</button>
+        <mat-divider></mat-divider>
+        <button mat-menu-item (click)="downloadClickAndStart()">
+          <span>Click & Start</span>
+        </button>
+        <button mat-menu-item [disabled]="downloading" (click)="downloadInstaller()">
+          <span>Download Installer</span>
+        </button>
         <mat-divider></mat-divider>
       </ng-container>
+      <mat-divider></mat-divider>
       <button mat-menu-item (click)="onDelete()" [disabled]="isReadonly">Delete...</button>
     </mat-menu>
     <button class="option-button" mat-icon-button [matMenuTriggerFor]="appMenu" *ngIf="!isForeign" appClickStopPropagation>

@@ -171,7 +171,7 @@ export class ApplicationGroup {
   /**
    * Returns the OS supported by this application
    */
-  public static getAppOs(appKey: ManifestKey) {
+  public static getAppOs(appKey: ManifestKey): OperatingSystem {
     const fullName = appKey.name;
     const lastSlashIdx = fullName.lastIndexOf('/') + 1;
     const osName = fullName.substring(lastSlashIdx).toUpperCase();

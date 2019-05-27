@@ -5,9 +5,11 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { ApplicationConfigurationCardComponent } from '../application-configuration-card/application-configuration-card.component';
 import { ApplicationGroup } from '../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_APPLICATION_CONFIGURATION, EMPTY_INSTANCE_NODE_CONFIGURATION, EMPTY_PROCESS_CONTROL_CONFIG } from '../models/consts';
+import { EventWithCallback } from '../models/event';
 import { ApplicationConfiguration, ApplicationDto, InstanceConfiguration, InstanceNodeConfiguration, InstanceNodeConfigurationDto } from '../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../models/process.model';
 import { ApplicationService } from '../services/application.service';
+import { DownloadService } from '../services/download.service';
 import { InstanceService } from '../services/instance.service';
 import { Logger, LoggingService } from '../services/logging.service';
 import { indexOf } from '../utils/object.utils';
@@ -47,6 +49,8 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy, AfterViewIn
   @Output() editNodeAppsEvent = new EventEmitter<void>();
   @Output() removeNodeAppEvent = new EventEmitter<ApplicationConfiguration>();
   @Output() selectAppConfigEvent = new EventEmitter<ApplicationConfiguration>();
+  @Output() downloadClickAndStartEvent = new EventEmitter<ApplicationConfiguration>();
+  @Output() downloadInstallerEvent = new EventEmitter<EventWithCallback<ApplicationConfiguration>>();
 
   @ViewChild(CdkDropList) placeholder: CdkDropList;
   @ViewChild('appDropZone') appDropZone: ElementRef;
@@ -68,6 +72,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy, AfterViewIn
     private loggingService: LoggingService,
     private appService: ApplicationService,
     private instanceService: InstanceService,
+    private downloadService: DownloadService,
   ) {}
 
   ngOnInit() {
@@ -385,9 +390,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   onSelect(process: ApplicationConfiguration): void {
-    if (!this.isClientApplicationsNode()) {
-      this.selectAppConfigEvent.emit(process);
-    }
+    this.selectAppConfigEvent.emit(process);
   }
 
   fireEditAppConfigEvent(appConfig: ApplicationConfiguration) {
@@ -475,21 +478,6 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy, AfterViewIn
 
   isClientApplicationsNode(): boolean {
     return this.node && this.node.nodeName === CLIENT_NODE_NAME;
-  }
-
-  downloadLauncherDescriptor(app: ApplicationConfiguration) {
-    this.instanceService.getNewClientDescriptor(this.instanceGroupName, this.instance.uuid, app.uid).subscribe(data => {
-      const mediatype = 'application/octet-stream';
-      const blob = new Blob([JSON.stringify(data)], { type: mediatype });
-
-      // this opens the well known open dialog with open with/save file options
-      const link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.download = app.name + '.bdeploy';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    });
   }
 
   /** Returns whether or not the given application is supported by this node */

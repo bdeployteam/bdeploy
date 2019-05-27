@@ -32,16 +32,21 @@ export class InstanceService {
     return this.http.get<InstanceConfiguration>(url);
   }
 
-  public updateInstance(instanceGroupName: string, instanceName: string, instance: InstanceConfiguration, nodeList: InstanceNodeConfigurationListDto, expectedTag: string) {
+  public updateInstance(
+    instanceGroupName: string,
+    instanceName: string,
+    instance: InstanceConfiguration,
+    nodeList: InstanceNodeConfigurationListDto,
+    expectedTag: string,
+  ) {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceName);
     this.log.debug('updateInstance: ' + url);
     const dto: InstanceConfigurationDto = {
       config: instance,
-      nodeDtos: nodeList ? nodeList.nodeConfigDtos : null
+      nodeDtos: nodeList ? nodeList.nodeConfigDtos : null,
     };
     const options = {
-      params: new HttpParams()
-        .set('expect', expectedTag)
+      params: new HttpParams().set('expect', expectedTag),
     };
     return this.http.post(url, dto, options);
   }
@@ -58,7 +63,8 @@ export class InstanceService {
     return this.http.get<InstanceVersionDto[]>(url);
   }
 
-  public getInstanceVersion(instanceGroupName: string,
+  public getInstanceVersion(
+    instanceGroupName: string,
     instanceName: string,
     tag: string,
   ): Observable<InstanceConfiguration> {
@@ -106,10 +112,24 @@ export class InstanceService {
     return this.http.get<DeploymentStateDto>(url);
   }
 
-  public getNewClientDescriptor(instanceGroupName: string, instanceName: string, processId: string): Observable<ClientDescriptor> {
-    const url = this.buildInstanceUrl(instanceGroupName, instanceName) + '/launcher/' + processId;
+  public getNewClientDescriptor(
+    instanceGroupName: string,
+    instanceName: string,
+    appId: string,
+  ): Observable<ClientDescriptor> {
+    const url = this.buildInstanceUrl(instanceGroupName, instanceName) + '/launcher/' + appId;
     this.log.debug('getNewClientDescriptor: ' + url);
     return this.http.get<ClientDescriptor>(url);
+  }
+
+  public createClientInstaller(instanceGroupName: string, instanceName: string, appId: string): Observable<string> {
+    const url = this.buildInstanceUrl(instanceGroupName, instanceName) + '/installerZip/' + appId;
+    this.log.debug('createClientInstaller: ' + url);
+    return this.http.get(url, { responseType: 'text' });
+  }
+
+  public downloadClientInstaller(instanceGroupName: string, instanceName: string, token: any): string {
+    return this.buildInstanceUrl(instanceGroupName, instanceName) + '/installerDownload/' + token;
   }
 
   public buildGroupUrl(instanceGroupName: string): string {
