@@ -53,4 +53,8 @@ export class UpdateDataService {
     return this.cfg.config.api + UpdateDataService.BASEPATH;
   }
 
+  public getDownloadUrl(key: ManifestKey) {
+    return this.cfg.config.api + UpdateDataService.BASEPATH + '/download/' + key.name + '/' + key.tag;
+  }
+
 }
