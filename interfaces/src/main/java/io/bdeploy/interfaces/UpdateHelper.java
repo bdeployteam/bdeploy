@@ -16,6 +16,8 @@ import java.util.zip.ZipInputStream;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
@@ -33,22 +35,47 @@ public class UpdateHelper {
     /**
      * Prefix for all update package {@link Key}s.
      */
-    private static final String SW_META_PREFIX = "meta/";
+    public static final String SW_META_PREFIX = "meta/";
 
     /**
      * Suffix for 'snapshot' update packages (non-release-builds).
      */
-    private static final String SW_SNAPSHOT = "/snapshot";
+    public static final String SW_SNAPSHOT = "/snapshot";
 
     /**
      * Name of the 'launcher' software.
      */
-    private static final String SW_LAUNCHER = "launcher";
+    public static final String SW_LAUNCHER = "launcher";
 
     /**
      * Name of the 'bdeploy' software.
      */
     private static final String SW_BDEPLOY = "bdeploy";
+
+    /**
+     * Directory (within the update dir) where to put the "to-be-installed" software.
+     */
+    public static final String UPDATE_DIR = "next";
+
+    /**
+     * This must match what the launcher script(s) expect to perform an update.
+     */
+    public static final int CODE_UPDATE = 42;
+
+    private static final Logger log = LoggerFactory.getLogger(UpdateHelper.class);
+
+    /**
+     * @param updateDir the update directory root
+     * @return the path to the update directory to use.
+     */
+    public static Path prepareUpdateDirectory(Path updateDir) {
+        Path updateTarget = updateDir.resolve(UpdateHelper.UPDATE_DIR);
+        if (Files.isDirectory(updateTarget)) {
+            log.warn("Removing stale update folder at " + updateTarget);
+            PathHelper.deleteRecursive(updateTarget);
+        }
+        return updateTarget;
+    }
 
     /**
      * @param updateZipFile the update ZIP file containing the actual software

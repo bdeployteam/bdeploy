@@ -25,9 +25,9 @@ import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ObjectListOperation;
 import io.bdeploy.bhive.op.ObjectSizeOperation;
-import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.ScopedManifestKey;
+import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.interfaces.remote.MinionUpdateResource;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.ui.api.Minion;
@@ -35,8 +35,6 @@ import io.bdeploy.ui.api.Minion;
 public class MinionUpdateResourceImpl implements MinionUpdateResource {
 
     private static final Logger log = LoggerFactory.getLogger(MinionUpdateResourceImpl.class);
-    private static final String UPDATE_DIR = "next";
-
     @Inject
     private MinionRoot root;
 
@@ -47,7 +45,7 @@ public class MinionUpdateResourceImpl implements MinionUpdateResource {
 
     @Override
     public void update(Manifest.Key key) {
-        Path updateTarget = root.getUpdateDir().resolve(UPDATE_DIR);
+        Path updateTarget = root.getUpdateDir().resolve(UpdateHelper.UPDATE_DIR);
 
         if (!Files.isDirectory(updateTarget)) {
             throw new WebApplicationException("Update has not been prepared, missing " + updateTarget,
@@ -72,11 +70,8 @@ public class MinionUpdateResourceImpl implements MinionUpdateResource {
             throw new WebApplicationException("Cannot find version to update to: " + key, Status.NOT_FOUND);
         }
 
-        Path updateTarget = root.getUpdateDir().resolve(UPDATE_DIR);
-        if (Files.isDirectory(updateTarget)) {
-            log.warn("Removing stale update folder at " + updateTarget);
-            PathHelper.deleteRecursive(updateTarget);
-        }
+        Path updateDir = root.getUpdateDir();
+        Path updateTarget = UpdateHelper.prepareUpdateDirectory(updateDir);
 
         try {
             FileStore store = Files.getFileStore(root.getUpdateDir());

@@ -1,5 +1,6 @@
 package io.bdeploy.launcher.cli;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,7 +24,19 @@ public class LauncherCli extends ToolBase {
             args = new String[] { "config" };
         } else if (noOptArgs.size() == 1 && noOptArgs.get(0).toLowerCase().endsWith(".bdeploy")) {
             // want to directly launch a single .bdeploy file
-            args = new String[] { "launcher", "--launch=" + noOptArgs.get(0) };
+            List<String> argumentList = new ArrayList<>();
+            argumentList.add("launcher");
+
+            for (String arg : args) {
+                if (arg.toLowerCase().endsWith(".bdeploy")) {
+                    argumentList.add("--launch=" + arg);
+                } else {
+                    // pass on all others (e.g. updateDir).
+                    argumentList.add(arg);
+                }
+            }
+
+            args = argumentList.toArray(new String[argumentList.size()]);
         }
 
         super.toolMain(args);
