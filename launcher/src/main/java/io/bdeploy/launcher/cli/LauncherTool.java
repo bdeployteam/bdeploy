@@ -48,7 +48,7 @@ import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfigurati
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
-import io.bdeploy.interfaces.descriptor.client.ClientDescriptor;
+import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
@@ -116,9 +116,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     }
 
     private static void doLaunchFromConfig(Path cfg, Path rootDir, String updateDir) {
-        ClientDescriptor cd;
+        ClickAndStartDescriptor cd;
         try (InputStream is = Files.newInputStream(cfg)) {
-            cd = StorageHelper.fromStream(is, ClientDescriptor.class);
+            cd = StorageHelper.fromStream(is, ClickAndStartDescriptor.class);
         } catch (IOException e) {
             throw new IllegalStateException("Failed to read " + cfg, e);
         }
@@ -133,7 +133,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             doCheckForUpdate(cd, hive, reporter, updateDir);
 
             // yay, we have information
-            log.info("Launching " + cd.groupId + " / " + cd.instanceId + " / " + cd.clientId + " from " + cd.host.getUri());
+            log.info("Launching " + cd.groupId + " / " + cd.instanceId + " / " + cd.applicationId + " from " + cd.host.getUri());
 
             MasterRootResource master = ResourceProvider.getResource(cd.host, MasterRootResource.class);
             MasterNamedResource namedMaster = master.getNamedMaster(cd.groupId);
@@ -143,14 +143,14 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             try (Activity info = reporter.start("Loading meta-data...")) {
                 // fails with 404 or other error, but never null.
                 log.info("fetching information from " + cd.host.getUri());
-                appCfg = namedMaster.getClientConfiguration(cd.instanceId, cd.clientId);
+                appCfg = namedMaster.getClientConfiguration(cd.instanceId, cd.applicationId);
             }
 
             splash.update(appCfg);
 
             // this /might/ lead to too much re-installs if unrelated things change, but there is not
             // other/easy way (currently) to detect this...
-            Manifest.Key targetClientKey = new Manifest.Key(cd.clientId, appCfg.instanceKey.getTag());
+            Manifest.Key targetClientKey = new Manifest.Key(cd.applicationId, appCfg.instanceKey.getTag());
 
             if (hive.execute(new ManifestListOperation().setManifestName(targetClientKey.toString())).contains(targetClientKey)) {
                 // we have it already, no need to re-create.
@@ -207,7 +207,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     }
 
     @SuppressFBWarnings("DM_EXIT")
-    private static void doCheckForUpdate(ClientDescriptor cd, BHive hive, ActivityReporter reporter, String updateDir) {
+    private static void doCheckForUpdate(ClickAndStartDescriptor cd, BHive hive, ActivityReporter reporter, String updateDir) {
         String running = VersionHelper.readVersion();
         if (VersionHelper.UNKNOWN.equals(running)) {
             log.info("Skipping update, as running version cannot be determined");
@@ -278,7 +278,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /**
      * Fetch the application and all its requirements from the remote hive.
      */
-    private static void fetchApplicationAndRequirements(BHive hive, ClientDescriptor cd, ClientApplicationConfiguration appCfg) {
+    private static void fetchApplicationAndRequirements(BHive hive, ClickAndStartDescriptor cd, ClientApplicationConfiguration appCfg) {
         FetchOperation fetchOp = new FetchOperation().setHiveName(cd.groupId).setRemote(cd.host)
                 .addManifest(appCfg.clientConfig.application);
         appCfg.resolvedRequires.forEach(fetchOp::addManifest);
@@ -322,8 +322,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /**
      * Cleanup the installation directory and the hive. Keeps a max. of 2 existing installations per client around.
      */
-    private static void cleanupOldInstalls(Path rootDir, ClientDescriptor cd, BHive hive) {
-        hive.execute(new ManifestDeleteOldByIdOperation().setAmountToKeep(2).setRunGarbageCollector(true).setToDelete(cd.clientId)
+    private static void cleanupOldInstalls(Path rootDir, ClickAndStartDescriptor cd, BHive hive) {
+        hive.execute(new ManifestDeleteOldByIdOperation().setAmountToKeep(2).setRunGarbageCollector(true).setToDelete(cd.applicationId)
                 .setPreDeleteHook(k -> {
                     log.info("uninstall and delete old version " + k);
                     InstanceNodeController c = new InstanceNodeController(hive, rootDir, InstanceNodeManifest.of(hive, k));

@@ -1,30 +1,47 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
+using System.Net;
 using System.Security.Principal;
-using System.Text;
 
 namespace Bdeploy.Shared
 {
     public class Utils
     {
         /// <summary>
-        /// Returns the home directory where the applications are stored.
+        /// Returns whether or not the given array contains the given value
+        /// </summary>
+        /// <param name="args">The arguments to check</param>
+        /// <param name="expected">The expected value</param>
+        /// <returns>true if matching argument found, false otherwise</returns>
+        public static bool HasArgument(string[] args, string expected)
+        {
+            foreach (string arg in args)
+            {
+                if (arg == expected)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Disables TSL/SSL validation
+        /// </summary>
+        public static void AllowUntrustedCertificates()
+        {
+            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+        }
+
+        /// <summary>
+        /// Returns the working directory of the current process.
         /// </summary>
         /// <returns></returns>
-        public static string GetBdeployHome()
+        public static string GetWorkingDir()
         {
-            // Check if BDEPLOY_HOME is set
-            string home = Environment.GetEnvironmentVariable("BDEPLOY_HOME");
-            if (File.Exists(home))
-            {
-                return home;
-            }
-
-            // Otherwise store in local app-data folder of current user
-            string appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            return Path.Combine(appData, "BDeploy");
+            FileInfo info = new FileInfo(Process.GetCurrentProcess().MainModule.FileName);
+            return info.DirectoryName;
         }
 
         /// <summary>
@@ -33,7 +50,7 @@ namespace Bdeploy.Shared
         /// <param name="fileName"></param>
         /// <param name="arguments"></param>
         /// <returns></returns>
-        public static int RunProcess(string fileName, string arguments)
+        public static int RunProcessAndWait(string fileName, string arguments)
         {
             using (Process process = new Process())
             {
@@ -42,6 +59,22 @@ namespace Bdeploy.Shared
                 process.Start();
                 process.WaitForExit();
                 return process.ExitCode;
+            }
+        }
+
+        /// <summary>
+        /// Starts a new process. Does not wait for termination
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="arguments"></param>
+        /// <returns></returns>
+        public static void RunProcess(string fileName, string arguments)
+        {
+            using (Process process = new Process())
+            {
+                process.StartInfo.FileName = fileName;
+                process.StartInfo.Arguments = arguments;
+                process.Start();
             }
         }
 
@@ -55,30 +88,6 @@ namespace Bdeploy.Shared
             {
                 WindowsPrincipal principal = new WindowsPrincipal(identity);
                 return principal.IsInRole(WindowsBuiltInRole.Administrator);
-            }
-        }
-
-        /// <summary>
-        /// Converts the given icon to a string using UTF-8
-        /// </summary>
-        public static string IconToString(Icon icon)
-        {
-            using (MemoryStream ms = new MemoryStream())
-            {
-                icon.Save(ms);
-                return Encoding.Default.GetString(ms.ToArray());
-            }
-        }
-
-        /// <summary>
-        /// Converts the given serialized UTF-8 string into an icon 
-        /// </summary>
-        public static Icon StringToIcon(string serializedIcon)
-        {
-            byte[] bytes = Encoding.Default.GetBytes(serializedIcon);
-            using (MemoryStream ms = new MemoryStream(bytes))
-            {
-                return new Icon(ms);
             }
         }
     }

@@ -30,13 +30,11 @@ import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.interfaces.ScopedManifestKey;
-import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
-import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.dependencies.LocalDependencyFetcher;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
@@ -274,18 +272,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
         InstanceManifest imf = InstanceManifest.of(hive, active);
         ClientApplicationConfiguration cfg = new ClientApplicationConfiguration();
-
-        // find the application with the given ID in the configuration. Don't rely on naming magic, just check all nodes, it's not so expensive.
-        for (Map.Entry<String, Manifest.Key> entry : imf.getInstanceNodeManifests().entrySet()) {
-            InstanceNodeManifest inmf = InstanceNodeManifest.of(hive, entry.getValue());
-            for (ApplicationConfiguration app : inmf.getConfiguration().applications) {
-                if (app.uid.equals(application)) {
-                    // this is the one.
-                    cfg.clientConfig = app;
-                }
-            }
-        }
-
+        cfg.clientConfig = imf.getApplicationConfiguration(hive, application);
         if (cfg.clientConfig == null) {
             throw new WebApplicationException("Cannot find application " + application + " in instance " + uuid,
                     Status.NOT_FOUND);
@@ -307,36 +294,10 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         return cfg;
     }
 
-    @DeleteAfterWrite
     @Override
+    @DeleteAfterWrite
     public Path getClientInstanceConfiguration(Manifest.Key instanceId) {
-        return null;
-        // FIXME: DCS-396: client config shall not contain server config files.
-        //InstanceManifest imf = InstanceManifest.of(hive, instanceId);
-        //if (imf.getConfiguration().configTree == null) {
-        //    return null;
-        //}
-        //
-        //try {
-        //    Path tmp = Files.createTempFile(root.getTempDir(), "cfg", ".zip");
-        //    // file must not exist... :|
-        //    Files.deleteIfExists(tmp);
-        //    URI uri = UriBuilder.fromUri("jar:" + tmp.toUri()).build();
-        //    try (BHive zipHive = new BHive(uri, reporter)) {
-        //        TreeView content = hive.execute(new ScanOperation().setTree(imf.getConfiguration().configTree));
-        //        CopyOperation copy = new CopyOperation().setDestinationHive(zipHive).setPartialAllowed(true);
-        //        content.visit(new TreeVisitor.Builder().onBlob(b -> copy.addObject(b.getElementId())).onTree(t -> {
-        //            copy.addObject(t.getElementId());
-        //            return true;
-        //        }).build());
-        //
-        //        hive.execute(copy);
-        //    }
-        //    return tmp;
-        //} catch (IOException e) {
-        //    log.warn("cannot export config for instance " + instanceId, e);
-        //    throw new WebApplicationException("Cannot create configuration data", Status.INTERNAL_SERVER_ERROR);
-        //}
+        return null; // FIXME: DCS-396: client config shall not contain server config files.
     }
 
     @Override

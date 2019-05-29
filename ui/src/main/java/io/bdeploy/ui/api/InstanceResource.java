@@ -16,7 +16,7 @@ import javax.ws.rs.core.Response;
 
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
-import io.bdeploy.interfaces.descriptor.client.ClientDescriptor;
+import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.jersey.ActivityScope;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import io.bdeploy.ui.dto.DeploymentStateDto;
@@ -28,6 +28,8 @@ import io.bdeploy.ui.dto.InstanceVersionDto;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public interface InstanceResource {
+
+    public static final String PATH_DOWNLOAD_APP_ICON = "/{instance}/{applicationId}/icon";
 
     @GET
     public List<InstanceConfiguration> list();
@@ -79,11 +81,6 @@ public interface InstanceResource {
     public DeploymentStateDto getDeploymentStates(@ActivityScope @PathParam("instance") String instanceId);
 
     @GET
-    @Path("/{instance}/launcher/{processId}")
-    public ClientDescriptor getNewClientLauncherDescriptor(@PathParam("instance") String instance,
-            @PathParam("processId") String processId);
-
-    @GET
     @Path("/purposes")
     public List<InstancePurpose> getPurposes();
 
@@ -94,16 +91,27 @@ public interface InstanceResource {
     public ConfigFileResource getConfigResource(@ActivityScope @PathParam("instance") String instanceId);
 
     @GET
-    @Path("/{instance}/installerZip/{processId}")
+    @Path("/{instance}/{applicationId}/clickAndStart")
+    public ClickAndStartDescriptor getClickAndStartDescriptor(@PathParam("instance") String instanceId,
+            @PathParam("applicationId") String applicationId);
+
+    @GET
+    @Path("/{instance}/{applicationId}/installer/zip")
     @Produces(MediaType.TEXT_PLAIN)
-    public String createClientInstaller(@ActivityScope @PathParam("instance") String instanceId,
-            @PathParam("processId") String processId);
+    public String createClientInstaller(@PathParam("instance") String instanceId,
+            @PathParam("applicationId") String applicationId);
 
     @GET
     @Unsecured
-    @Path("/{instance}/installerDownload/{processId}")
+    @Path("/{instance}/{applicationId}/installer/download")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    public Response downloadClientInstaller(@ActivityScope @PathParam("instance") String instanceId,
-            @PathParam("processId") String processId);
+    public Response downloadClientInstaller(@PathParam("instance") String instanceId,
+            @PathParam("applicationId") String applicationId, @QueryParam("token") String token);
+
+    @GET
+    @Unsecured
+    @Path(PATH_DOWNLOAD_APP_ICON)
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response downloadIcon(@PathParam("instance") String instanceId, @PathParam("applicationId") String applicationId);
 
 }

@@ -2,6 +2,7 @@ package io.bdeploy.interfaces.manifest;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
@@ -35,6 +36,7 @@ import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.op.TreeLoadOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.util.RuntimeAssert;
+import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 
 /**
@@ -134,6 +136,24 @@ public class InstanceManifest {
         }
 
         return result;
+    }
+
+    /**
+     * Find the application with the given ID in this configuration.
+     *
+     * @param hive the hive where the manifest is stored
+     * @param applicationId unique name of the application
+     */
+    public ApplicationConfiguration getApplicationConfiguration(BHive hive, String applicationId) {
+        for (Map.Entry<String, Manifest.Key> entry : getInstanceNodeManifests().entrySet()) {
+            InstanceNodeManifest inmf = InstanceNodeManifest.of(hive, entry.getValue());
+            for (ApplicationConfiguration app : inmf.getConfiguration().applications) {
+                if (app.uid.equals(applicationId)) {
+                    return app;
+                }
+            }
+        }
+        return null;
     }
 
     /**

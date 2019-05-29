@@ -8,7 +8,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileAssoc", "FileAssoc\File
 		{C2AB7B6A-7555-4F7D-ABA7-8C087A9D01E4} = {C2AB7B6A-7555-4F7D-ABA7-8C087A9D01E4}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Launcher", "BDeploy\Launcher.csproj", "{D036ACCC-1C75-4E73-9EDD-E5C6EB48BDF3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Launcher", "Launcher\Launcher.csproj", "{D036ACCC-1C75-4E73-9EDD-E5C6EB48BDF3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Installer", "Installer\Installer.csproj", "{A58694D3-459E-4362-B995-265D4E818548}"
 	ProjectSection(ProjectDependencies) = postProject

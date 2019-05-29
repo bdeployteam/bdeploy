@@ -37,15 +37,5 @@ namespace Bdeploy.FileAssoc
             }
         }
 
-        /// <summary>
-        /// Returns the working directory of the current process.
-        /// </summary>
-        /// <returns></returns>
-        public static string GetWorkingDir()
-        {
-            FileInfo info = new FileInfo(Process.GetCurrentProcess().MainModule.FileName);
-            return info.DirectoryName;
-        }
-
     }
 }

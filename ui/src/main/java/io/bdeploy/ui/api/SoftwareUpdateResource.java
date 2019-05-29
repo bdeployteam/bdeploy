@@ -21,10 +21,13 @@ import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 /**
  * Provides API to remote-update the master as well as the launcher software.
  */
-@Path("/swup")
+@Path(SoftwareUpdateResource.ROOT_PATH)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public interface SoftwareUpdateResource {
+
+    public static final String ROOT_PATH = "/swup";
+    public static final String DOWNLOAD_PATH = "/download/{name : .+}/{tag}";
 
     @GET
     @Path("/bdeploy")
@@ -54,7 +57,7 @@ public interface SoftwareUpdateResource {
 
     @GET
     @Unsecured
-    @Path("/download/{name : .+}/{tag}")
+    @Path(DOWNLOAD_PATH)
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response downloadSoftware(@PathParam("name") String name, @PathParam("tag") String tag);
 

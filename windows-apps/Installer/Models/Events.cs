@@ -3,6 +3,19 @@
 namespace Bdeploy.Installer
 {
     /// <summary>
+    /// Data when icon has been loaded.
+    /// </summary>
+    public class IconEventArgs : EventArgs
+    {
+        public string Icon { get; private set; }
+
+        public IconEventArgs(string Icon)
+        {
+            this.Icon = Icon;
+        }
+    }
+
+    /// <summary>
     /// Data when an error occured.
     /// </summary>
     public class MessageEventArgs : EventArgs

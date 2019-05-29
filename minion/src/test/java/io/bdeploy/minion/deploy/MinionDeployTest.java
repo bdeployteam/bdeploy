@@ -51,7 +51,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlConfiguration;
-import io.bdeploy.interfaces.descriptor.client.ClientDescriptor;
+import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.descriptor.product.ProductDescriptor;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
@@ -150,8 +150,8 @@ public class MinionDeployTest {
         assertFalse(status.isAppRunningOrScheduled("app"));
 
         /* STEP 7: generate client .bdeploy file and feed launcher */
-        ClientDescriptor cdesc = new ClientDescriptor();
-        cdesc.clientId = "client";
+        ClickAndStartDescriptor cdesc = new ClickAndStartDescriptor();
+        cdesc.applicationId = "client";
         cdesc.groupId = "demo";
         cdesc.instanceId = uuid;
         cdesc.host = new RemoteService(remote.getUri(), master.getNamedMaster("demo").generateWeakToken("client"));

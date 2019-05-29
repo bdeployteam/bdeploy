@@ -13,9 +13,9 @@ namespace Bdeploy.Launcher
     /// <summary>
     /// Launches the companion script and passes the desired application to start.
     /// </summary>
-    partial class Launcher
+    public class Launcher
     {
-        // The name of the command line script to launch
+        // The name of the command line script to launch the application
         public static readonly string COMPANION = "launcher.bat";
 
         // The full path of the bdeploy file to launch
@@ -59,9 +59,11 @@ namespace Bdeploy.Launcher
         /// <returns> Exit code of the process.</returns>
         public int Start()
         {
-            using (StreamWriter writer = InitLogging())
+            using (StreamWriter writer = new StreamWriter(InitLogging(), false))
             using (Process process = new Process())
             {
+                writer.AutoFlush = true;
+
                 string launcher = Path.Combine(launcherWorkingDir, COMPANION);
                 string arguments = String.Format("\"{0}\"", application);
                 Log(writer, String.Format("Launcher: {0}", launcher));
@@ -99,15 +101,15 @@ namespace Bdeploy.Launcher
         /// Creates a new file where to store the log files of the current run. 
         /// Ensures that old log files are cleaned so that they do not stay forever.
         /// </summary>
-        /// <returns></returns>
-        private StreamWriter InitLogging()
+        private string InitLogging()
         {
             string name = Path.GetFileNameWithoutExtension(application);
 
             // Determine where to store logs
-            string logPath = Path.Combine(Utils.GetBdeployHome(), "log");
+            string logPath = PathProvider.GetLogsDir();
             Directory.CreateDirectory(logPath);
             DirectoryInfo dir = new DirectoryInfo(logPath);
+            Console.WriteLine(dir);
 
             // Cleanup old files of this application
             CleanupOldLogs(dir, name);
@@ -117,12 +119,7 @@ namespace Bdeploy.Launcher
             string logName = String.Format("{0}.{1}.log", name, logIndex);
 
             // Create a new writer that flushes on each output
-            string logFile = Path.Combine(logPath, logName);
-            StreamWriter writer = new StreamWriter(logFile, false)
-            {
-                AutoFlush = true
-            };
-            return writer;
+            return Path.Combine(logPath, logName);
         }
 
         /// <summary>
@@ -170,7 +167,7 @@ namespace Bdeploy.Launcher
                 }
                 if (IsExpired(file) || backups.Contains(logFile.application))
                 {
-                    TryDelete(file);
+                    FileHelper.DeleteFile(file);
                     continue;
                 }
                 backups.Add(logFile.application);
@@ -211,20 +208,6 @@ namespace Bdeploy.Launcher
         }
 
         /// <summary>
-        /// Tries to delete the given file. Fails silently if not posible
-        /// </summary>
-        private static void TryDelete(FileInfo file)
-        {
-            try
-            {
-                file.Delete();
-            }
-            catch (Exception)
-            {
-            }
-        }
-
-        /// <summary>
         /// Create a backup by renaming it to .bak. Existing files are overwritten
         /// </summary>
         private static void TryBackup(FileInfo file)
@@ -232,14 +215,14 @@ namespace Bdeploy.Launcher
             try
             {
                 // Do not try to move a file that is in use
-                if (IsFileLocked(file))
+                if (FileHelper.IsFileLocked(file))
                 {
                     return;
                 }
 
                 // Replace with the given file
                 FileInfo backup = new FileInfo(file.FullName + ".bak");
-                TryDelete(backup);
+                FileHelper.DeleteFile(backup);
                 file.MoveTo(backup.FullName);
             }
             catch (Exception)
@@ -264,18 +247,5 @@ namespace Bdeploy.Launcher
             writer.WriteLine("{0} | {1}", date, message);
         }
 
-        private static bool IsFileLocked(FileInfo file)
-        {
-            try
-            {
-                using (FileStream stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.None))
-                    return false;
-            }
-            catch (IOException)
-            {
-                return true;
-            }
-
-        }
     }
 }

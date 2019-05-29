@@ -1,6 +1,6 @@
-﻿using Bdeploy.Shared;
+﻿using Bdeploy.Installer.Models;
+using Bdeploy.Shared;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
@@ -11,17 +11,22 @@ namespace Bdeploy.Installer
     /// <summary>
     /// Downloads and unpacks the launcher.
     /// </summary>
-    public class Installer
+    public class AppInstaller
     {
         /// <summary>
         /// Directory where BDeploy stores all files 
         /// </summary>
-        private readonly string bdeployHome;
+        private readonly string bdeployHome = PathProvider.GetBdeployHome();
 
         /// <summary>
-        /// Directory where the launcher stores all files. (HOME_DIR\launcher) 
+        /// Directory where the launcher is stored. (HOME_DIR\launcher) 
         /// </summary>
-        private readonly string launcherHome;
+        private readonly string launcherHome = PathProvider.GetLauncherDir();
+
+        /// <summary>
+        /// Directory where the application are stored. (HOME_DIR\applications) 
+        /// </summary>
+        private readonly string applicationsHome = PathProvider.GetApplicationsDir();
 
         /// <summary>
         /// Flag indicating whether or not to cancel the operattion
@@ -44,39 +49,32 @@ namespace Bdeploy.Installer
         public event EventHandler<MessageEventArgs> Error;
 
         /// <summary>
+        /// Event that is raised when the icon has been loaded
+        /// </summary>
+        public event EventHandler<IconEventArgs> IconLoaded;
+
+        /// <summary>
+        /// Embedded configuration object
+        /// </summary>
+        public readonly Config config;
+
+        /// <summary>
         /// Creates a new installer instance.
         /// </summary>
-        public Installer()
+        public AppInstaller(Config config)
         {
-            bdeployHome = Utils.GetBdeployHome();
-            launcherHome = Path.Combine(bdeployHome, "launcher");
+            this.config = config;
         }
 
         /// <summary>
-        /// Checks if the desired application is already installed.
-        /// </summary>
-        public bool IsApplicationAlreadyInstalled()
-        {
-            string appDir = Path.Combine(bdeployHome, "applications");
-            string appUid = Properties.Resources.ApplicationUid;
-            string appShortcut = Path.Combine(appDir, appUid + ".bdeploy");
-            string appExe = Path.Combine(appDir, appUid + ".exe");
-
-            // Shortcut, Executable and launcher must be installed
-            return File.Exists(appShortcut) && File.Exists(appExe) && IsLauncherInstalled();
-        }
-
-        /// <summary>
-        /// Launches the application and waits for it to terminate
+        /// Launches the application. Does not wait for termination
         /// </summary>
         /// <returns></returns>
-        public int Launch()
+        public void Launch()
         {
-            string appDir = Path.Combine(bdeployHome, "applications");
-            string appUid = Properties.Resources.ApplicationUid;
-            string appShortcut = Path.Combine(appDir, appUid + ".bdeploy");
-            string launcher = Path.Combine(launcherHome, "BDeploy.exe");
-            return Utils.RunProcess(launcher, appShortcut);
+            string appUid = config.ApplicationUid;
+            string appShortcut = Path.Combine(applicationsHome, appUid + ".bdeploy");
+            Utils.RunProcess(PathProvider.GetLauncherExecutable(), appShortcut);
         }
 
         /// <summary>
@@ -88,6 +86,11 @@ namespace Bdeploy.Installer
             {
                 OnNewSubtask("Preparing...", -1);
                 Directory.CreateDirectory(bdeployHome);
+                Directory.CreateDirectory(launcherHome);
+                Directory.CreateDirectory(applicationsHome);
+
+                // Download and store icon
+                await DownloadIcon();
 
                 // Download and extract if not available
                 if (!IsLauncherInstalled())
@@ -95,14 +98,11 @@ namespace Bdeploy.Installer
                     await DownloadAndExtractLauncher();
                 }
 
-                // Extract application to launch from our executable
-                string appFile = ExtractApplication();
-
                 // Associate bdeploy files with the launcher
                 CreateFileAssociation();
 
                 // Launch application
-                CreateShortcut();
+                ExtractApplication();
                 return 0;
             }
             catch (Exception ex)
@@ -113,34 +113,12 @@ namespace Bdeploy.Installer
         }
 
         /// <summary>
-        /// Copies the current executable and create desktop shortcut
-        /// </summary>
-        private void CreateShortcut()
-        {
-            string appDir = Path.Combine(bdeployHome, "applications");
-            string appUid = Properties.Resources.ApplicationUid;
-            string appName = Properties.Resources.ApplicationName;
-
-            // Copy executable to the applications folder
-            string installer = Process.GetCurrentProcess().MainModule.FileName;
-            string persisted = Path.Combine(appDir, appUid + ".exe");
-            bool createShortcut = !File.Exists(persisted);
-            File.Copy(installer, persisted, true);
-
-            // Only create shortcut if the files does not exit
-            if (createShortcut)
-            {
-                Shortcut.Create(appName, persisted, launcherHome);
-            }
-        }
-
-        /// <summary>
         /// Associates .bdeploy files with the launcher
         /// </summary>
         private void CreateFileAssociation()
         {
-            string launcher = Path.Combine(launcherHome, "FileAssoc.exe");
-            string fileAssoc = Path.Combine(launcherHome, "FileAssoc.exe");
+            string launcher = PathProvider.GetLauncherExecutable();
+            string fileAssoc = PathProvider.GetFileAssocExecutable();
             string arguments = string.Format("{0} \"{1}\"", "/CreateForCurrentUser", launcher);
             Utils.RunProcess(fileAssoc, arguments);
         }
@@ -148,20 +126,22 @@ namespace Bdeploy.Installer
         /// <summary>
         /// Extracts the embedded application and writes a new file
         /// </summary>
-        private string ExtractApplication()
+        private void ExtractApplication()
         {
-            OnNewSubtask("Installing...", -1);
+            string appUid = config.ApplicationUid;
+            string appName = config.ApplicationName;
+            string appDescriptor = Path.Combine(applicationsHome, appUid + ".bdeploy");
+            string icon = Path.Combine(applicationsHome, appUid + ".ico");
 
-            // All applications are stored in a separate directory
-            string appDir = Path.Combine(bdeployHome, "applications");
-            Directory.CreateDirectory(appDir);
+            // Always write file as it might be outdated
+            bool createShortcut = !File.Exists(appDescriptor);
+            File.WriteAllText(appDescriptor, config.ApplicationJson);
 
-            // Write entire content into the file
-            string appUid = Properties.Resources.ApplicationUid;
-            string jsonContent = Properties.Resources.ApplicationJson;
-            string fileName = Path.Combine(appDir, appUid + ".bdeploy");
-            File.WriteAllText(fileName, jsonContent);
-            return fileName;
+            // Only create shortcut if we just have written the descriptor
+            if (createShortcut)
+            {
+                Shortcut.CreateLink(appName, appDescriptor, launcherHome, icon);
+            }
         }
 
         /// <summary>
@@ -171,10 +151,10 @@ namespace Bdeploy.Installer
         {
             // Launcher directory must not exist. 
             // Otherwise ZIP extraction fails
-            DeleteDir(launcherHome);
+            FileHelper.DeleteDir(launcherHome);
 
             // Prepare tmp directory
-            string tmpDir = Path.Combine(bdeployHome, "tmp");
+            string tmpDir = PathProvider.GetTmpDir();
             Directory.CreateDirectory(tmpDir);
 
             // Download and extract
@@ -182,7 +162,33 @@ namespace Bdeploy.Installer
             ExtractLauncher(launcherZip, launcherHome);
 
             // Cleanup. Download not required any more
-            DeleteDir(tmpDir);
+            FileHelper.DeleteDir(tmpDir);
+        }
+
+        /// <summary>
+        /// Downloads the icon and returns an input stream.
+        /// </summary>
+        public async Task DownloadIcon()
+        {
+            var iconFile = Path.Combine(applicationsHome, config.ApplicationUid + ".ico");
+            using (HttpClient client = new HttpClient())
+            {
+                Uri requestUrl = new Uri(config.IconUrl);
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+                HttpResponseMessage response = await client.GetAsync(requestUrl);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return;
+                }
+                using (Stream responseStream = await response.Content.ReadAsStreamAsync())
+                using (FileStream fileStream = new FileStream(iconFile, FileMode.Create))
+                {
+                    await responseStream.CopyToAsync(fileStream);
+                }
+
+                // Notify UI that we have an icon
+                OnIconLoaded(iconFile);
+            }
         }
 
         /// <summary>
@@ -194,9 +200,9 @@ namespace Bdeploy.Installer
             var tmpFileName = Path.Combine(tmpDir, Guid.NewGuid() + ".download");
             using (HttpClient client = new HttpClient())
             {
-                var requestUrl = new Uri(Properties.Resources.LauncherUrl);
-                var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
-                var response = await client.GetAsync(requestUrl, HttpCompletionOption.ResponseHeadersRead);
+                Uri requestUrl = new Uri(config.LauncherUrl);
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+                HttpResponseMessage response = await client.GetAsync(requestUrl, HttpCompletionOption.ResponseHeadersRead);
 
                 long? contentLength = response.Content.Headers.ContentLength;
                 if (contentLength.HasValue)
@@ -246,28 +252,52 @@ namespace Bdeploy.Installer
         /// <returns></returns>
         private void ExtractLauncher(string launcherZip, string targetDir)
         {
-            OnNewSubtask("Installing...", -1);
-            ZipFile.ExtractToDirectory(launcherZip, targetDir);
-        }
-
-        /// <summary>
-        /// Removes the directory and all contained files
-        /// </summary>
-        private void DeleteDir(string path)
-        {
-            DirectoryInfo dir = new DirectoryInfo(path);
-            if (dir.Exists)
+            using (ZipArchive archive = ZipFile.OpenRead(launcherZip))
             {
-                dir.Delete(true);
+                OnNewSubtask("Unpacking...", archive.Entries.Count);
+                // Enforce directory separator at the end. 
+                if (!targetDir.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
+                {
+                    targetDir += Path.DirectorySeparatorChar;
+                }
+                foreach (ZipArchiveEntry entry in archive.Entries)
+                {
+                    // ZIP contains a single directory with all files in it
+                    // Thus we remove the starting directory to unpack all files directly into the target directory
+                    string entryName = entry.FullName;
+                    string extractName = entryName.Substring(entryName.IndexOf('/') + 1);
+                    string destination = Path.GetFullPath(Path.Combine(targetDir, extractName));
+
+                    // Ensure we do not extract to a directory outside of our control
+                    if (!destination.StartsWith(targetDir, StringComparison.Ordinal))
+                    {
+                        Console.WriteLine("ZIP-Entry contains invalid path. Expecting: {0} but was {1}", targetDir, destination);
+                        continue;
+                    }
+
+                    // Directory entries do not have the name attribute
+                    bool isDirectory = entry.Name.Length == 0;
+                    if (isDirectory)
+                    {
+                        Directory.CreateDirectory(destination);
+                    }
+                    else
+                    {
+                        entry.ExtractToFile(destination);
+                    }
+
+                    // Notify about extraction progress
+                    OnWorked(1);
+                }
             }
         }
 
         /// <summary>
-        /// // Returns whether or not the launcher is already installed.
+        /// Returns whether or not the launcher is already installed.
         /// </summary>
         private bool IsLauncherInstalled()
         {
-            return File.Exists(Path.Combine(launcherHome, "BDeploy.exe"));
+            return File.Exists(PathProvider.GetLauncherExecutable());
         }
 
         /// <summary>
@@ -292,6 +322,14 @@ namespace Bdeploy.Installer
         private void OnError(string message)
         {
             Error?.Invoke(this, new MessageEventArgs(message));
+        }
+
+        /// <summary>
+        /// Notify that the icon has been downloaded
+        /// </summary>
+        private void OnIconLoaded(string iconPath)
+        {
+            IconLoaded?.Invoke(this, new IconEventArgs(iconPath));
         }
     }
 }

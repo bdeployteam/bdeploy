@@ -61,47 +61,11 @@ namespace Bdeploy.Installer.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;Json&gt;.
-        /// </summary>
-        internal static string ApplicationJson {
-            get {
-                return ResourceManager.GetString("ApplicationJson", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;AppName&gt;.
-        /// </summary>
-        internal static string ApplicationName {
-            get {
-                return ResourceManager.GetString("ApplicationName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;AppUid&gt;.
-        /// </summary>
-        internal static string ApplicationUid {
-            get {
-                return ResourceManager.GetString("ApplicationUid", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;LauncherUrl&gt;.
-        /// </summary>
-        internal static string LauncherUrl {
-            get {
-                return ResourceManager.GetString("LauncherUrl", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        internal static System.Drawing.Icon logo {
+        internal static System.Drawing.Icon icon {
             get {
-                object obj = ResourceManager.GetObject("logo", resourceCulture);
+                object obj = ResourceManager.GetObject("icon", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
             }
         }

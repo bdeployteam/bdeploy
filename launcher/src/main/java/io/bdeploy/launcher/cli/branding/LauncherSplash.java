@@ -24,19 +24,19 @@ import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationSplashAreaDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ApplicationSplashDescriptor;
-import io.bdeploy.interfaces.descriptor.client.ClientDescriptor;
+import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 
 public class LauncherSplash implements LauncherSplashDisplay {
 
     private static final Logger log = LoggerFactory.getLogger(LauncherSplash.class);
 
-    private final ClientDescriptor cd;
+    private final ClickAndStartDescriptor cd;
     private final Path imageCache;
     private Window splash;
 
     private SplashGraphics splashComp;
 
-    public LauncherSplash(ClientDescriptor cd, Path imageCache) {
+    public LauncherSplash(ClickAndStartDescriptor cd, Path imageCache) {
         this.cd = cd;
         this.imageCache = imageCache;
 
@@ -79,7 +79,7 @@ public class LauncherSplash implements LauncherSplashDisplay {
     }
 
     private Path getCachePath() {
-        return imageCache.resolve(cd.groupId).resolve(cd.instanceId).resolve(cd.clientId + ".json");
+        return imageCache.resolve(cd.groupId).resolve(cd.instanceId).resolve(cd.applicationId + ".json");
     }
 
     public void update(ClientApplicationConfiguration cfg) {

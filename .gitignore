@@ -8,3 +8,5 @@ bin
 
 **/.vscode
 **/*.swp
+
+.vs

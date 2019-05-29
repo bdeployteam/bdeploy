@@ -18,6 +18,7 @@ dependencies {
         project(":jersey"),
         project(":bhive"),
         project(":interfaces"),
+        'org.whitesource:pecoff4j:0.0.2.1'
     )
     testCompile project(path: ":jersey", configuration: 'testRuntime')
 }
@@ -75,7 +76,7 @@ task genDtos() {
         def classes = [
             // Descriptors
             'io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor',
-            'io.bdeploy.interfaces.descriptor.client.ClientDescriptor',
+            'io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor',
             // Configurations
             'io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration',
             'io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto',

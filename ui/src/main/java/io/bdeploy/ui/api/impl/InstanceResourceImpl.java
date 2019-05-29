@@ -1,8 +1,14 @@
 package io.bdeploy.ui.api.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -17,6 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
@@ -31,8 +38,10 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.StreamingOutput;
+import javax.ws.rs.core.UriBuilder;
 
 import org.glassfish.jersey.media.multipart.ContentDisposition;
+import org.glassfish.jersey.media.multipart.ContentDisposition.ContentDispositionBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,23 +54,31 @@ import io.bdeploy.bhive.op.ManifestExistsOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.ManifestNextIdOperation;
+import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.bhive.op.remote.TransferStatistics;
+import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
+import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
+import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.OsHelper.OperatingSystem;
+import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.NodeStatus;
+import io.bdeploy.interfaces.ScopedManifestKey;
+import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
-import io.bdeploy.interfaces.descriptor.client.ClientDescriptor;
+import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest.Builder;
@@ -77,6 +94,9 @@ import io.bdeploy.ui.api.ConfigFileResource;
 import io.bdeploy.ui.api.InstanceResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.ProcessResource;
+import io.bdeploy.ui.api.SoftwareUpdateResource;
+import io.bdeploy.ui.branding.Branding;
+import io.bdeploy.ui.branding.BrandingConfig;
 import io.bdeploy.ui.dto.DeploymentStateDto;
 import io.bdeploy.ui.dto.InstanceConfigurationDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationDto;
@@ -91,9 +111,16 @@ public class InstanceResourceImpl implements InstanceResource {
     private static final Logger log = LoggerFactory.getLogger(InstanceResourceImpl.class);
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
             .withLocale(Locale.getDefault()).withZone(ZoneId.systemDefault());
+    /**
+     * Name and path of the native Windows installer stored in the launcher ZIP
+     */
+    private static final String INSTALLER_EXE = "bin/Installer.bin";
 
     private final BHive hive;
     private final String group;
+
+    @Inject
+    private BHiveRegistry reg;
 
     @Inject
     private AuthService auth;
@@ -106,6 +133,9 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Context
     private ResourceContext rc;
+
+    @Inject
+    private Minion minion;
 
     public InstanceResourceImpl(String group, BHive hive) {
         this.group = group;
@@ -525,18 +555,17 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     @Override
-    public ClientDescriptor getNewClientLauncherDescriptor(String instanceId, String processId) {
+    public ClickAndStartDescriptor getClickAndStartDescriptor(String instanceId, String applicationId) {
         InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
 
-        MasterNamedResource master = ResourceProvider.getResource(im.getConfiguration().target, MasterRootResource.class)
-                .getNamedMaster(group);
+        RemoteService server = im.getConfiguration().target;
+        MasterNamedResource master = ResourceProvider.getResource(server, MasterRootResource.class).getNamedMaster(group);
 
-        ClientDescriptor desc = new ClientDescriptor();
-        desc.clientId = processId;
+        ClickAndStartDescriptor desc = new ClickAndStartDescriptor();
+        desc.applicationId = applicationId;
         desc.groupId = group;
         desc.instanceId = instanceId;
-        desc.host = new RemoteService(im.getConfiguration().target.getUri(),
-                master.generateWeakToken(context.getUserPrincipal().getName()));
+        desc.host = new RemoteService(server.getUri(), master.generateWeakToken(context.getUserPrincipal().getName()));
 
         return desc;
     }
@@ -552,24 +581,132 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     @Override
-    public String createClientInstaller(String instanceId, String processId) {
-        String randomId = UuidHelper.randomId();
-        return randomId;
+    public String createClientInstaller(String instanceId, String applicationId) {
+        String tokenName = UuidHelper.randomId();
+        File installer = minion.getDownloadDir().resolve(tokenName + ".bin").toFile();
+
+        // Determine latest version of launcher
+        SoftwareUpdateResourceImpl swr = rc.initResource(new SoftwareUpdateResourceImpl());
+        ScopedManifestKey launcherKey = swr.getNewestLauncher(OperatingSystem.WINDOWS);
+        if (launcherKey == null) {
+            throw new WebApplicationException(
+                    "Cannot find native Windows launcher. Ensure there is one available in the System Software.",
+                    Status.NOT_FOUND);
+        }
+        String launcherOsKey = ScopedManifestKey.createScopedName(launcherKey.getName(), OperatingSystem.WINDOWS);
+
+        // Try to load the installer stored in the manifest tree
+        BHive rootHive = reg.get(JerseyRemoteBHive.DEFAULT_NAME);
+        ManifestLoadOperation findManifestOp = new ManifestLoadOperation().setManifest(launcherKey.getKey());
+        Manifest mf = rootHive.execute(findManifestOp);
+        TreeEntryLoadOperation findInstallerOp = new TreeEntryLoadOperation().setRootTree(mf.getRoot())
+                .setRelativePath(INSTALLER_EXE);
+        try (InputStream in = rootHive.execute(findInstallerOp); FileOutputStream out = new FileOutputStream(installer)) {
+            in.transferTo(out);
+        } catch (IOException ioe) {
+            throw new WebApplicationException("Cannot create native Windows launcher.", ioe);
+        }
+
+        // Brand the executable and embed the required information
+        InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
+        ApplicationConfiguration appConfig = im.getApplicationConfiguration(hive, applicationId);
+        try {
+            ClickAndStartDescriptor clickAndStart = getClickAndStartDescriptor(instanceId, applicationId);
+            UriBuilder launcherUri = UriBuilder.fromUri(im.getConfiguration().target.getUri());
+            launcherUri.path(SoftwareUpdateResource.ROOT_PATH);
+            launcherUri.path(SoftwareUpdateResource.DOWNLOAD_PATH);
+
+            UriBuilder iconUri = UriBuilder.fromUri(im.getConfiguration().target.getUri());
+            iconUri.path("/group/{group}/instance/");
+            iconUri.path(InstanceResource.PATH_DOWNLOAD_APP_ICON);
+
+            BrandingConfig config = new BrandingConfig();
+            config.launcherUrl = launcherUri.build(new Object[] { launcherOsKey, launcherKey.getTag() }, false).toString();
+            config.iconUrl = iconUri.build(group, instanceId, applicationId).toString();
+            config.applicationUid = appConfig.uid;
+            config.applicationName = appConfig.name;
+            config.applicationJson = new String(StorageHelper.toRawBytes(clickAndStart));
+
+            Branding branding = new Branding(installer);
+            branding.updateConfig(config);
+            branding.write(installer);
+
+            // Return the name of the token for downloading
+            return tokenName;
+        } catch (Exception ioe) {
+            throw new WebApplicationException("Cannot create native Windows launcher.", ioe);
+        }
     }
 
     @Override
-    public Response downloadClientInstaller(String instanceId, String token) {
+    public Response downloadClientInstaller(String instanceId, String applicationId, String token) {
+        // File must be downloaded within a given timeout
+        Path targetFile = minion.getDownloadDir().resolve(token + ".bin");
+        File file = targetFile.toFile();
+        if (!file.isFile()) {
+            throw new WebApplicationException("Token to download client installer is not valid any more.", Status.BAD_REQUEST);
+        }
+
+        long lastModified = file.lastModified();
+        long validUntil = lastModified + TimeUnit.MINUTES.toMillis(5);
+        if (System.currentTimeMillis() > validUntil) {
+            throw new WebApplicationException("Token to download client installer is not valid any more.", Status.BAD_REQUEST);
+        }
+
+        // Build a response with the stream
         ResponseBuilder responeBuilder = Response.ok(new StreamingOutput() {
 
             @Override
             public void write(OutputStream output) throws IOException, WebApplicationException {
-                String content = "My custom installer: " + token;
-                output.write(content.getBytes());
+                try (InputStream is = Files.newInputStream(targetFile)) {
+                    is.transferTo(output);
+
+                    // Intentionally not in finally block to allow resuming of the download
+                    PathHelper.deleteRecursive(targetFile);
+                } catch (IOException ioe) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Could not fully write output", ioe);
+                    } else {
+                        log.warn("Could not fully write output: " + ioe.toString());
+                    }
+                }
             }
         }, MediaType.APPLICATION_OCTET_STREAM);
 
-        ContentDisposition contentDisposition = ContentDisposition.type("attachement").build();
-        responeBuilder.header("Content-Disposition", contentDisposition);
+        // Load metadata to give the file a nice name
+        InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
+        ApplicationConfiguration appConfig = im.getApplicationConfiguration(hive, applicationId);
+
+        // Serve file to the client
+        ContentDispositionBuilder<?, ?> builder = ContentDisposition.type("attachement");
+        builder.size(file.length()).fileName(appConfig.name + " Installer.exe").build();
+        responeBuilder.header("Content-Disposition", builder.build());
+        responeBuilder.header("Content-Length", file.length());
+        return responeBuilder.build();
+    }
+
+    @Override
+    public Response downloadIcon(String instanceId, String applicationId) {
+        InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
+        ApplicationConfiguration appConfig = im.getApplicationConfiguration(hive, applicationId);
+        ApplicationManifest appMf = ApplicationManifest.of(hive, appConfig.application);
+        byte[] brandingIcon = appMf.readBrandingIcon(hive);
+        if (brandingIcon == null) {
+            return Response.serverError().status(Status.NOT_FOUND).build();
+        }
+        ResponseBuilder responeBuilder = Response.ok(new StreamingOutput() {
+
+            @Override
+            public void write(OutputStream output) throws IOException, WebApplicationException {
+                try (InputStream is = new ByteArrayInputStream(brandingIcon)) {
+                    is.transferTo(output);
+                }
+            }
+        }, MediaType.APPLICATION_OCTET_STREAM);
+        ContentDispositionBuilder<?, ?> builder = ContentDisposition.type("attachement");
+        builder.size(brandingIcon.length).fileName(appConfig.name + ".ico").build();
+        responeBuilder.header("Content-Disposition", builder.build());
+        responeBuilder.header("Content-Length", brandingIcon.length);
         return responeBuilder.build();
     }
 

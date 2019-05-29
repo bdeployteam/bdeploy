@@ -39,6 +39,7 @@ import io.bdeploy.bhive.op.PruneOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
 import io.bdeploy.common.util.OsHelper;
+import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.NodeStatus;
@@ -180,6 +181,18 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
         responeBuilder.header("Content-Disposition", contentDisposition);
         responeBuilder.header("Content-Length", file.length());
         return responeBuilder.build();
+    }
+
+    /**
+     * Returns the manifest key under which the newest launcher for the given OS is stored.
+     *
+     * @param os the desired OS
+     * @return {@code null} if there is no launcher or the launcher key
+     */
+    public ScopedManifestKey getNewestLauncher(OperatingSystem os) {
+        List<Key> versions = getLauncherVersions();
+        return versions.stream().map(ScopedManifestKey::parse).filter(smk -> smk.getOperatingSystem() == os)
+                .reduce((first, second) -> second).orElse(null);
     }
 
 }

@@ -19,7 +19,7 @@ namespace Bdeploy.FileAssoc
 
         private void InitDefaults()
         {
-            LauncherPath.Text = Path.Combine(Launcher.GetWorkingDir(), "BDeploy.exe");
+            LauncherPath.Text = Path.Combine(Utils.GetWorkingDir(), "BDeploy.exe");
         }
 
         private void BrowseLauncher_Click(object sender, RoutedEventArgs e)

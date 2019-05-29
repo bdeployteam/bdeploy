@@ -117,23 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ApplicationJson" xml:space="preserve">
-    <value>&lt;Json&gt;</value>
-    <comment>The serialized bdeploy file</comment>
-  </data>
-  <data name="ApplicationName" xml:space="preserve">
-    <value>&lt;AppName&gt;</value>
-  </data>
-  <data name="ApplicationUid" xml:space="preserve">
-    <value>&lt;AppUid&gt;</value>
-    <comment>The unique ID of the application</comment>
-  </data>
-  <data name="LauncherUrl" xml:space="preserve">
-    <value>&lt;LauncherUrl&gt;</value>
-    <comment>URL of the launcher to download</comment>
-  </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="logo" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\logo.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\icon.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

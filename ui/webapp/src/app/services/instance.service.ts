@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ClientDescriptor, DeploymentStateDto, FileStatusDto, InstanceConfiguration, InstanceConfigurationDto, InstanceNodeConfigurationListDto, InstancePurpose, InstanceVersionDto, ManifestKey } from '../models/gen.dtos';
+import { ClickAndStartDescriptor, DeploymentStateDto, FileStatusDto, InstanceConfiguration, InstanceConfigurationDto, InstanceNodeConfigurationListDto, InstancePurpose, InstanceVersionDto, ManifestKey } from '../models/gen.dtos';
 import { ConfigService } from './config.service';
 import { InstanceGroupService } from './instance-group.service';
 import { Logger, LoggingService } from './logging.service';
@@ -133,24 +133,29 @@ export class InstanceService {
     return this.http.get<DeploymentStateDto>(url);
   }
 
-  public getNewClientDescriptor(
+  public createClickAndStartDescriptor(
     instanceGroupName: string,
     instanceName: string,
     appId: string,
-  ): Observable<ClientDescriptor> {
-    const url = this.buildInstanceUrl(instanceGroupName, instanceName) + '/launcher/' + appId;
-    this.log.debug('getNewClientDescriptor: ' + url);
-    return this.http.get<ClientDescriptor>(url);
+  ): Observable<ClickAndStartDescriptor> {
+    const url = this.buildInstanceUrl(instanceGroupName, instanceName) + '/' + appId + '/clickAndStart';
+    this.log.debug('createClickAndStartDescriptor: ' + url);
+    return this.http.get<ClickAndStartDescriptor>(url);
   }
 
   public createClientInstaller(instanceGroupName: string, instanceName: string, appId: string): Observable<string> {
-    const url = this.buildInstanceUrl(instanceGroupName, instanceName) + '/installerZip/' + appId;
+    const url = this.buildInstanceUrl(instanceGroupName, instanceName) + '/' + appId + '/installer/zip';
     this.log.debug('createClientInstaller: ' + url);
     return this.http.get(url, { responseType: 'text' });
   }
 
-  public downloadClientInstaller(instanceGroupName: string, instanceName: string, token: any): string {
-    return this.buildInstanceUrl(instanceGroupName, instanceName) + '/installerDownload/' + token;
+  public downloadClientInstaller(
+    instanceGroupName: string,
+    instanceName: string,
+    appId: string,
+    token: string,
+  ): string {
+    return this.buildInstanceUrl(instanceGroupName, instanceName) + '/' + appId + '/installer/download?token=' + token;
   }
 
   public buildGroupUrl(instanceGroupName: string): string {

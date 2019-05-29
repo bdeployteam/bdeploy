@@ -7,6 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -120,6 +121,20 @@ public class StorageHelper {
         } catch (IOException e) {
             throw new IllegalStateException("Cannot read JSON value", e);
         }
+    }
+
+    /**
+     * Copies the given input stream to the given output stream.
+     */
+    public static long copy(InputStream source, OutputStream sink) throws IOException {
+        long nread = 0L;
+        byte[] buf = new byte[8192];
+        int n;
+        while ((n = source.read(buf)) > 0) {
+            sink.write(buf, 0, n);
+            nread += n;
+        }
+        return nread;
     }
 
     private static ObjectMapper getMapper() {

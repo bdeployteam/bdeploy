@@ -7,17 +7,18 @@ namespace Bdeploy.Shared
     public class Shortcut
     {
         /// <summary>
-        /// Creates a shortcut for the given application on the desktop using the given name
+        /// Creates a shortcut for the given application on the desktop using the given name and icon
         /// </summary>
-        public static void Create(string appName, string targetPath, string workingDir)
+        public static void CreateLink(string appName, string targetPath, string workingDir,string iconFile)
         {
             var desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            var linkPath = Path.Combine(desktop, appName + ".lnk");
             var shell = new WshShell();
-            var shortCutLinkFilePath = Path.Combine(desktop, appName + ".lnk");
-            var windowsApplicationShortcut = (IWshShortcut)shell.CreateShortcut(shortCutLinkFilePath);
-            windowsApplicationShortcut.TargetPath = targetPath;
-            windowsApplicationShortcut.WorkingDirectory = workingDir;
-            windowsApplicationShortcut.Save();
+            var linkFile = (IWshShortcut)shell.CreateShortcut(linkPath);
+            linkFile.TargetPath = targetPath;
+            linkFile.WorkingDirectory = workingDir;
+            linkFile.IconLocation = iconFile;
+            linkFile.Save();
         }
 
     }

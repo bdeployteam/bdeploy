@@ -4,7 +4,6 @@
         WindowStyle="None" Title="Installer" Height="300" Width="650"
         MouseLeftButtonDown="Window_MouseLeftButtonDown">
     <Window.Resources>
-        <BitmapImage x:Key="Logo" UriSource="/Resources/logo.ico" />
         <BitmapImage x:Key="Error" UriSource="/Resources/error.png" />
     </Window.Resources>
     <Grid Margin="10">
@@ -23,7 +22,7 @@
                 x
             </Button>
         </StackPanel>
-        <Grid Name="ProgressGrid" Grid.Row="1" Visibility="Hidden">
+        <Grid Name="ProgressGrid" Grid.Row="1" Visibility="Visible">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
@@ -36,9 +35,9 @@
                 Some Progress Text...
             </TextBlock>
             <ProgressBar Name="ProgressBar" Grid.Row="1" Grid.Column="2" Margin="50 0 50 0" Height="16" />
-            <Image Name="ApplicationIcon" Grid.Row="3" Grid.Column="2" Source="{StaticResource Logo}" Width="48" Height="48" VerticalAlignment="Top"/>
+            <Image Name="ApplicationIcon" Grid.Row="3" Grid.Column="2" Width="48" Height="48" VerticalAlignment="Top"/>
         </Grid>
-        <Grid Name="ErrorGrid" Grid.Row="1" Visibility="Visible">
+        <Grid Name="ErrorGrid" Grid.Row="1" Visibility="Hidden">
             <Grid.RowDefinitions>
                 <RowDefinition Height="48" />
                 <RowDefinition Height="*" />

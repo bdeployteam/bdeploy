@@ -3,8 +3,6 @@ package io.bdeploy.interfaces.manifest;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Files;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
@@ -39,28 +37,28 @@ public class ApplicationManifest implements Comparable<ApplicationManifest> {
             return null;
         }
 
-        try (InputStream fis = hive.execute(
-                new TreeEntryLoadOperation().setRootTree(manifest.getRoot()).setRelativePath(desc.branding.splash.image));
-                ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            copy(fis, baos);
+        TreeEntryLoadOperation loadSplash = new TreeEntryLoadOperation().setRootTree(manifest.getRoot())
+                .setRelativePath(desc.branding.splash.image);
+        try (InputStream fis = hive.execute(loadSplash); ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            StorageHelper.copy(fis, baos);
             return baos.toByteArray();
         } catch (IOException e) {
             throw new RuntimeException("Failed to read splash screen for " + key);
         }
     }
 
-    /**
-     * @see Files.copy (required due to Java 8 compat).
-     */
-    private static long copy(InputStream source, OutputStream sink) throws IOException {
-        long nread = 0L;
-        byte[] buf = new byte[8192];
-        int n;
-        while ((n = source.read(buf)) > 0) {
-            sink.write(buf, 0, n);
-            nread += n;
+    public byte[] readBrandingIcon(BHive hive) {
+        if (desc.branding == null || desc.branding.icon == null) {
+            return null;
         }
-        return nread;
+        TreeEntryLoadOperation loadIcon = new TreeEntryLoadOperation().setRootTree(manifest.getRoot())
+                .setRelativePath(desc.branding.icon);
+        try (InputStream fis = hive.execute(loadIcon); ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            StorageHelper.copy(fis, baos);
+            return baos.toByteArray();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read icon for " + key);
+        }
     }
 
     public ApplicationDescriptor getDescriptor() {

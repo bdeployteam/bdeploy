@@ -1,7 +1,4 @@
-﻿using Bdeploy.Shared;
-using System.Drawing;
-using System.IO;
-using System.Reflection;
+﻿using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -15,9 +12,9 @@ namespace Bdeploy.Installer
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly Installer Installer;
+        private readonly AppInstaller Installer;
 
-        public MainWindow(Installer installer)
+        public MainWindow(AppInstaller installer)
         {
             InitializeComponent();
             Installer = installer;
@@ -29,19 +26,20 @@ namespace Bdeploy.Installer
             // Show error page on error
             Installer.Error += Installer_Error;
 
+            // Load icon when available
+            Installer.IconLoaded += Installer_IconLoaded;
+
             // Ensure progress page is visible
             ProgressGrid.Visibility = Visibility.Visible;
             ErrorGrid.Visibility = Visibility.Hidden;
+        }
 
-            // Load icon from executable
-            var path = Assembly.GetExecutingAssembly().Location;
-            var icon = System.Drawing.Icon.ExtractAssociatedIcon(path);
-            using (Bitmap bmp = icon.ToBitmap())
+        private void Installer_IconLoaded(object sender, IconEventArgs e)
+        {
+            Dispatcher.Invoke(() =>
             {
-                var stream = new MemoryStream();
-                bmp.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-                ApplicationIcon.Source = BitmapFrame.Create(stream);
-            }
+                ApplicationIcon.Source = BitmapFrame.Create(new System.Uri(e.Icon));
+            });
         }
 
         private void Installer_Error(object sender, MessageEventArgs e)
@@ -59,6 +57,7 @@ namespace Bdeploy.Installer
             Dispatcher.Invoke(() =>
             {
                 ProgressBar.IsIndeterminate = e.TotalWork == -1;
+                ProgressBar.Value = 0;
                 ProgressBar.Minimum = 0;
                 ProgressBar.Maximum = e.TotalWork;
                 ProgressText.Text = e.TaskName;
