@@ -29,6 +29,7 @@ import io.bdeploy.minion.cli.SlaveTool.SlaveConfig;
 import io.bdeploy.minion.remote.jersey.JerseyAwareMinionUpdateManager;
 import io.bdeploy.minion.remote.jersey.MinionStatusResourceImpl;
 import io.bdeploy.minion.remote.jersey.MinionUpdateResourceImpl;
+import io.bdeploy.minion.remote.jersey.SlaveCleanupResourceImpl;
 import io.bdeploy.minion.remote.jersey.SlaveDeploymentResourceImpl;
 import io.bdeploy.minion.remote.jersey.SlaveProcessResourceImpl;
 import io.bdeploy.ui.api.AuthService;
@@ -108,6 +109,7 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
 
                         delegate.setDelegate(srv.getSseActivityReporter());
                         registerCommonResources(srv, r, srv.getSseActivityReporter());
+                        r.setupServerTasks(false);
 
                         srv.start();
                         srv.join();
@@ -130,12 +132,11 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
         srv.register(new BHiveJacksonModule().binder());
         srv.register(MinionStatusResourceImpl.class);
         srv.register(MinionUpdateResourceImpl.class);
+        srv.register(SlaveCleanupResourceImpl.class);
         srv.register(SlaveProcessResourceImpl.class);
         srv.register(SlaveDeploymentResourceImpl.class);
         srv.register(new MinionCommonBinder(root));
         srv.registerResource(r);
-
-        root.setupServerTasks();
 
         return r;
     }

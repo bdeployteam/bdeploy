@@ -1,5 +1,6 @@
 package io.bdeploy.minion.deploy;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -7,6 +8,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,16 +22,21 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ImportOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
+import io.bdeploy.bhive.remote.RemoteBHive;
+import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
 import io.bdeploy.bhive.util.StorageHelper;
+import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.SlowTest;
 import io.bdeploy.common.TempDirectory;
 import io.bdeploy.common.TempDirectory.TempDir;
+import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.TestCliTool;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.ScopedManifestKey;
+import io.bdeploy.interfaces.cleanup.CleanupAction;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
@@ -43,8 +52,11 @@ import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.remote.MasterRootResource;
+import io.bdeploy.interfaces.remote.SlaveCleanupResource;
+import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 import io.bdeploy.launcher.cli.LauncherCli;
 import io.bdeploy.launcher.cli.LauncherTool;
+import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.pcu.TestAppFactory;
 import io.bdeploy.ui.api.Minion;
@@ -53,6 +65,7 @@ import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
 @ExtendWith(TestMinion.class)
 @ExtendWith(TestHive.class)
 @ExtendWith(TempDirectory.class)
+@ExtendWith(TestActivityReporter.class)
 public class MinionDeployTest {
 
     @RegisterExtension
@@ -60,8 +73,8 @@ public class MinionDeployTest {
 
     @Test
     @SlowTest
-    void testRemoteDeploy(BHive local, MasterRootResource master, RemoteService remote, @TempDir Path tmp)
-            throws IOException, InterruptedException {
+    void testRemoteDeploy(BHive local, MasterRootResource master, SlaveCleanupResource scr, RemoteService remote,
+            @TempDir Path tmp, ActivityReporter reporter, MinionRoot mr) throws IOException, InterruptedException {
         /* STEP 1: Applications and external Application provided by development teams */
         Path app = TestAppFactory.createDummyApp("app", tmp);
         Path client = TestAppFactory.createDummyApp("client", tmp);
@@ -144,6 +157,31 @@ public class MinionDeployTest {
         launcher.getTool(LauncherTool.class, "--cacheDir=" + tmp.resolve("launcher"), "--launch=" + bdeployFile).run();
 
         // if we reach here, launching succeeded. unfortunately no better way to check right now.
+
+        /* STEP 9: uninstall and cleanup - cleanup is a little whitebox, as usually the master cleanup job does this. */
+        SortedSet<Manifest.Key> toKeep = new TreeSet<>();
+        toKeep.add(Manifest.Key.parse(uuid + "/master:" + instance.getTag()));
+        List<CleanupAction> nothingToDo = scr.cleanup(toKeep, false);
+        assertTrue(nothingToDo.isEmpty());
+        master.getNamedMaster("demo").remove(instance);
+        List<CleanupAction> cleanInstall = scr.cleanup(new TreeSet<>(), false);
+
+        // 1 instance node manifest, 1 application manifest, 1 dependent manifest
+        // 1 instance data dir (last version removed), 2 stale pool dirs (application, dependent).
+        assertEquals(6, cleanInstall.size());
+        scr.perform(cleanInstall);
+
+        // no manifests should be left now
+        try (RemoteBHive rbh = RemoteBHive.forService(remote, JerseyRemoteBHive.DEFAULT_NAME, reporter)) {
+            assertTrue(rbh.getManifestInventory().isEmpty());
+        }
+
+        // only the deployment dir itself and the pool directory is allowed to be alive, no other path may exist after cleanup.
+        assertEquals(0,
+                Files.walk(mr.getDeploymentDir())
+                        .filter(p -> !p.equals(mr.getDeploymentDir())
+                                && !p.equals(mr.getDeploymentDir().resolve(SpecialDirectory.MANIFEST_POOL.getDirName())))
+                        .count());
     }
 
     /**

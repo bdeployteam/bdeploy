@@ -24,6 +24,10 @@ public class DeploymentPathProvider {
         private SpecialDirectory(String dirName) {
             this.dirName = dirName;
         }
+
+        public String getDirName() {
+            return dirName;
+        }
     }
 
     private final Path deploymentDir;

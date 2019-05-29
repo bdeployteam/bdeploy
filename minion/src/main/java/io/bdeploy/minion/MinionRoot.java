@@ -109,16 +109,13 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     private void cleanup() {
         PathHelper.deleteRecursive(getTempDir());
         PathHelper.mkdirs(getTempDir());
-
-        // cleanup deployments on disc which are no longer in the hive.
-        InstanceNodeController.cleanup(getHive(), getDeploymentDir());
     }
 
     /**
      * Setup tasks which should only run when this root is used for serving a
      * minion.
      */
-    public void setupServerTasks() {
+    public void setupServerTasks(boolean master) {
         // cleanup any stale things so periodic tasks don't get them wrong.
         cleanup();
 
@@ -126,6 +123,10 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         this.cleanupDownloadDirTask.start();
 
         initProcessController();
+
+        if (master) {
+            // FIXME: start the cleanup background job here.
+        }
     }
 
     @Override
@@ -319,6 +320,27 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         // Startup processes according to their configuration
         processController.setActiveVersions(getState().activeVersions);
         processController.autoStart();
+    }
+
+    /**
+     * Checks whether a given {@link Path} is under control of this {@link MinionRoot}, including managed directories, storage
+     * locations, etc.
+     *
+     * @param toCheck a {@link Path} to check
+     * @return whether the given {@link Path} "belongs" to the minion.
+     */
+    public boolean isManagedPath(Path toCheck) {
+        if (toCheck.startsWith(root)) {
+            return true;
+        }
+
+        for (Path loc : getStorageLocations()) {
+            if (toCheck.startsWith(loc)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 }

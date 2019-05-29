@@ -1,33 +1,33 @@
 package io.bdeploy.dcu;
 
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.SortedMap;
+import java.util.Optional;
 import java.util.SortedSet;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.ExportOperation;
-import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.util.StorageHelper;
+import io.bdeploy.common.util.OsHelper;
+import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.interfaces.cleanup.CleanupAction;
+import io.bdeploy.interfaces.cleanup.CleanupAction.CleanupType;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
+import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
+import io.bdeploy.interfaces.manifest.dependencies.LocalDependencyFetcher;
 import io.bdeploy.interfaces.variables.ApplicationParameterProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
@@ -196,55 +196,104 @@ public class InstanceNodeController {
      * @param source the source {@link BHive} to scan for available {@link InstanceNodeController}s.
      * @param root the {@link Path} where all deployments reside.
      */
-    public static void cleanup(BHive source, Path root) {
+    public static List<CleanupAction> cleanup(BHive source, Path root, SortedSet<Manifest.Key> toBeRemoved) {
+        List<CleanupAction> toRemove = new ArrayList<>();
         SortedSet<Manifest.Key> inHive = InstanceNodeManifest.scan(source);
-        SortedMap<ObjectId, List<Path>> onDisc = scan(root);
 
-        SortedSet<ObjectId> availableRoots = inHive.stream().map(k -> source.execute(new ManifestLoadOperation().setManifest(k)))
-                .filter(Objects::nonNull).map(Manifest::getRoot).collect(Collectors.toCollection(TreeSet::new));
+        // Manifests which are marked for removal can safely be assumed to be gone.
+        inHive.removeAll(toBeRemoved);
 
-        for (Map.Entry<ObjectId, List<Path>> candidate : onDisc.entrySet()) {
-            if (availableRoots.contains(candidate.getKey())) {
-                continue; // still available - OK
+        log.info("Collecting garbage in instance node deployments...");
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(root,
+                p -> !p.getFileName().toString().equals(SpecialDirectory.MANIFEST_POOL.getDirName()))) {
+            // name of each directory is an instance UUID.
+            for (Path dir : stream) {
+                cleanupBinDir(toRemove, inHive, dir);
             }
-
-            log.warn("Stale deployment(s) found: " + candidate.getValue());
-            candidate.getValue().forEach(PathHelper::deleteRecursive);
-        }
-    }
-
-    /**
-     * @param root the root deployment directory to scan for on-disc deployments of {@link InstanceNodeController}s.
-     * @return a set of found UUIDs which are deployed.
-     */
-    private static SortedMap<ObjectId, List<Path>> scan(Path root) {
-        SortedMap<ObjectId, List<Path>> result = new TreeMap<>();
-        try (Stream<Path> walk = Files.walk(root, 1)) {
-            walk.forEach(uuid -> {
-                scanKeys(uuid, result);
-            });
-            return result;
         } catch (IOException e) {
-            throw new IllegalStateException("Cannot list deployed UUIDs in " + root, e);
+            throw new IllegalStateException("Cannot scan deployment directories", e);
         }
+
+        cleanupPoolDir(source, root, toRemove, inHive);
+
+        return toRemove;
     }
 
-    /**
-     * @param uuidRoot the UUID root directory within the deployment root
-     * @param result a map to contribute to. places a mapping of root OID to actual deployment path.
-     */
-    private static void scanKeys(Path uuidRoot, SortedMap<ObjectId, List<Path>> result) {
-        try (Stream<Path> walk = Files.walk(uuidRoot, 1)) {
-            walk.forEach(oid -> {
-                // FIXME: this is WRONG now. filename is not the OID but the manifest tag
-                ObjectId id = ObjectId.parse(oid.getFileName().toString());
-                if (id != null) {
-                    result.computeIfAbsent(id, x -> new ArrayList<>()).add(oid);
+    private static void cleanupPoolDir(BHive source, Path root, List<CleanupAction> toRemove, SortedSet<Manifest.Key> inHive) {
+        log.info("Collecting garbage in application pool...");
+        OperatingSystem runningOs = OsHelper.getRunningOs();
+        TreeSet<String> requiredKeys = new TreeSet<>();
+        for (Manifest.Key key : inHive) {
+            InstanceNodeManifest inmf = InstanceNodeManifest.of(source, key);
+
+            // add all applications and all of their dependencies as resolved locally.
+            inmf.getConfiguration().applications.stream().map(a -> a.application).peek(a -> {
+                SortedSet<String> deps = ApplicationManifest.of(source, a).getDescriptor().runtimeDependencies;
+                if (deps == null) {
+                    return;
                 }
-            });
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot list deployed root trees in " + uuidRoot, e);
+                deps.stream().map(d -> LocalDependencyFetcher.resolveSingleLocal(source, d, runningOs))
+                        .map(Manifest.Key::directoryFriendlyName).forEach(requiredKeys::add);
+            }).map(Manifest.Key::directoryFriendlyName).forEach(requiredKeys::add);
         }
+
+        Path poolDir = root.resolve(SpecialDirectory.MANIFEST_POOL.getDirName());
+        if (Files.isDirectory(poolDir)) {
+            try (DirectoryStream<Path> poolStream = Files.newDirectoryStream(poolDir)) {
+                for (Path pooled : poolStream) {
+                    if (!requiredKeys.contains(pooled.getFileName().toString())) {
+                        toRemove.add(new CleanupAction(CleanupType.DELETE_FOLDER, pooled.toAbsolutePath().toString(),
+                                "Remove stale pooled application"));
+                    }
+                }
+            } catch (IOException e) {
+                throw new IllegalStateException("Cannot scan pool directory", e);
+            }
+        }
+    }
+
+    private static void cleanupBinDir(List<CleanupAction> toRemove, SortedSet<Manifest.Key> inHive, Path dir) throws IOException {
+        Path binDir = dir.resolve(SpecialDirectory.BIN.getDirName());
+
+        // if there is no bin-dir in there, remove it all together as spurious directory.
+        if (!Files.isDirectory(binDir)) {
+            toRemove.add(new CleanupAction(CleanupType.DELETE_FOLDER, dir.toAbsolutePath().toString(),
+                    "Remove spurious directory (no binary directory found)"));
+            return;
+        }
+
+        boolean hasChild = false;
+        try (DirectoryStream<Path> binStream = Files.newDirectoryStream(binDir)) {
+            // each directory is a tag.
+            for (Path tagPath : binStream) {
+                Optional<String> anyMatch = findAliveTag(inHive, dir, tagPath);
+                if (anyMatch.isPresent()) {
+                    hasChild = true; // keep parent directory alive.
+                } else {
+                    // delete AT LEAST this bin directory.
+                    toRemove.add(new CleanupAction(CleanupType.DELETE_FOLDER, tagPath.toAbsolutePath().toString(),
+                            "Delete stale binary folder"));
+                }
+            }
+        }
+
+        if (!hasChild) {
+            // remove the whole deployment, no active version anymore. ATTENTION: deletes logs, etc.
+            toRemove.add(new CleanupAction(CleanupType.DELETE_FOLDER, dir.toAbsolutePath().toString(),
+                    "Delete instance data (no more instance versions available)"));
+        }
+    }
+
+    private static Optional<String> findAliveTag(SortedSet<Manifest.Key> inHive, Path uuidPath, Path tagPath) {
+        return inHive.stream()
+                // filter for matching instance UUID.
+                .filter(k -> k.getName().startsWith(uuidPath.getFileName().toString() + "/"))
+                // map to the tags which are still present in the hive.
+                .map(k -> k.getTag())
+                // filter for the tag we're looking for.
+                .filter(t -> t.equals(tagPath.getFileName().toString()))
+                // check if such an element exists (yes or no).
+                .findAny();
     }
 
 }

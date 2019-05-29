@@ -83,10 +83,12 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
             throw new WebApplicationException("Key " + key + " has one ore more applications running.", Status.BAD_REQUEST);
         }
 
-        // Active version cannot be removed
+        // Remove active version from state if removed.
         Key activeVersion = root.getState().activeVersions.get(inm.getUUID());
         if (key.equals(activeVersion)) {
-            throw new WebApplicationException("Active version " + key + " cannot be removed.", Status.BAD_REQUEST);
+            root.modifyState(s -> {
+                s.activeVersions.remove(inm.getUUID());
+            });
         }
 
         // cleanup the deployment directory.
