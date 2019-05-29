@@ -94,7 +94,10 @@ public class TreeTool extends ConfiguredCliTool<TreeConfig> {
 
         // count size difference when updating to right - collect all only right or diff, but exclude objects with existing hash
         SortedSet<ObjectId> existingObjs = new TreeSet<>();
-        Function<ElementView, Boolean> enlist = (ev) -> existingObjs.add(ev.getElementId());
+        Function<ElementView, Boolean> enlist = (ev) -> {
+            existingObjs.add(ev.getElementId());
+            return true;
+        };
         original.visit(
                 new TreeVisitor.Builder().onBlob(enlist::apply).onTree(enlist::apply).onManifestRef(enlist::apply).build());
 
