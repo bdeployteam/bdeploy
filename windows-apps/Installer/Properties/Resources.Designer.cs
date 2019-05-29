@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Bdeploy.Properties {
+namespace Bdeploy.Installer.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace Bdeploy.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Bdeploy.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Bdeploy.Installer.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,7 +61,7 @@ namespace Bdeploy.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to SerializedJson.
+        ///   Looks up a localized string similar to &lt;Json&gt;.
         /// </summary>
         internal static string ApplicationJson {
             get {
@@ -70,7 +70,7 @@ namespace Bdeploy.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to My Application.
+        ///   Looks up a localized string similar to &lt;AppName&gt;.
         /// </summary>
         internal static string ApplicationName {
             get {
@@ -79,7 +79,7 @@ namespace Bdeploy.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ApplicationId.
+        ///   Looks up a localized string similar to &lt;AppUid&gt;.
         /// </summary>
         internal static string ApplicationUid {
             get {
@@ -88,7 +88,7 @@ namespace Bdeploy.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to http://artifacts.w5.wamas.com/targets/deployment/launcher-win64-1.0.0-SNAPSHOT.zip.
+        ///   Looks up a localized string similar to &lt;LauncherUrl&gt;.
         /// </summary>
         internal static string LauncherUrl {
             get {

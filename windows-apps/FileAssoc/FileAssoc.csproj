@@ -7,7 +7,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{48B3A247-559B-4450-9520-EAF6F4DE7720}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>Bdeploy</RootNamespace>
+    <RootNamespace>Bdeploy.FileAssoc</RootNamespace>
     <AssemblyName>FileAssoc</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -58,7 +58,7 @@
   <PropertyGroup />
   <PropertyGroup />
   <PropertyGroup>
-    <StartupObject>Bdeploy.App</StartupObject>
+    <StartupObject>Bdeploy.FileAssoc.App</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Costura, Version=4.0.0.0, Culture=neutral, PublicKeyToken=9919ef960d84173d, processorArchitecture=MSIL">
@@ -85,12 +85,18 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Models\FileAssociation.cs" />
     <Compile Include="Models\Launcher.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -100,11 +106,6 @@
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
@@ -113,6 +114,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
@@ -145,9 +147,9 @@
     <Resource Include="Resources\search.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Common\Common.csproj">
+    <ProjectReference Include="..\Common\Shared.csproj">
       <Project>{C2AB7B6A-7555-4F7D-ABA7-8C087A9D01E4}</Project>
-      <Name>Common</Name>
+      <Name>Shared</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{D036ACCC-1C75-4E73-9EDD-E5C6EB48BDF3}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>Bdeploy</RootNamespace>
+    <RootNamespace>Bdeploy.Launcher</RootNamespace>
     <AssemblyName>BDeploy</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -39,7 +39,7 @@
     <NoWin32Manifest>true</NoWin32Manifest>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>Bdeploy.Program</StartupObject>
+    <StartupObject>Bdeploy.Launcher.Program</StartupObject>
   </PropertyGroup>
   <PropertyGroup>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
@@ -56,7 +56,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Launcher.cs" />
-    <Compile Include="Launcher.LogFile.cs" />
+    <Compile Include="LogFile.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -67,9 +67,9 @@
     <Resource Include="Resources\logo.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Common\Common.csproj">
+    <ProjectReference Include="..\Common\Shared.csproj">
       <Project>{C2AB7B6A-7555-4F7D-ABA7-8C087A9D01E4}</Project>
-      <Name>Common</Name>
+      <Name>Shared</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,8 +1,8 @@
-using Bdeploy.Common;
+using Bdeploy.Shared;
 using System;
 using System.Windows;
 
-namespace Bdeploy
+namespace Bdeploy.FileAssoc
 {
     /// <summary>
     /// Interaction logic for App.xaml

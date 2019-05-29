@@ -1,4 +1,4 @@
-﻿<Window x:Class="Bdeploy.MainWindow"
+﻿<Window x:Class="Bdeploy.FileAssoc.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="BDeploy File Association" Height="450" MinHeight="450" Width="700" MinWidth="700" >

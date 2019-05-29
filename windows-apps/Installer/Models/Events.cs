@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Bdeploy.Models
+namespace Bdeploy.Installer
 {
     /// <summary>
     /// Data when an error occured.

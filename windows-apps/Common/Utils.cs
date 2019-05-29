@@ -2,12 +2,10 @@
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Reflection;
 using System.Security.Principal;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace Bdeploy.Common
+namespace Bdeploy.Shared
 {
     public class Utils
     {

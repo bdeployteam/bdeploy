@@ -1,8 +1,8 @@
-﻿using Bdeploy.Common;
+﻿using Bdeploy.Shared;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace Bdeploy
+namespace Bdeploy.Installer
 {
     /// <summary>
     /// Interaction logic for App.xaml

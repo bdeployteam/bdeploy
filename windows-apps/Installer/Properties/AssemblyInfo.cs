@@ -9,7 +9,7 @@ using System.Windows;
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("BDeploy Team")]
-[assembly: AssemblyProduct("Installer")]
+[assembly: AssemblyProduct("BDeploy: Installer")]
 [assembly: AssemblyCopyright("Copyright ©  2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
