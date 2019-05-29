@@ -18,6 +18,7 @@ import { ApplicationEditCommandPreviewComponent } from './application-edit-comma
 import { ApplicationEditManualComponent } from './application-edit-manual/application-edit-manual.component';
 import { ApplicationEditOptionalComponent } from './application-edit-optional/application-edit-optional.component';
 import { ApplicationEditComponent } from './application-edit/application-edit.component';
+import { ClientInfoComponent } from './client-info/client-info.component';
 import { ClickStopPropagationDirective } from './directives/click-stop-propagation.directive';
 import { FileDropDirective } from './directives/file-drop.directive';
 import { FileUploadComponent } from './file-upload/file-upload.component';
@@ -59,7 +60,9 @@ import { SoftwareRepositoriesBrowserComponent } from './software-repositories-br
 import { SoftwareRepositoryCardComponent } from './software-repository-card/software-repository-card.component';
 import { SoftwareRepositoryComponent } from './software-repository/software-repository.component';
 import { ThemeChooserComponent } from './theme-chooser/theme-chooser.component';
-import { ClientInfoComponent } from './client-info/client-info.component';
+import { UpdateBrowserComponent } from './update-browser/update-browser.component';
+import { UpdateCardComponent } from './update-card/update-card.component';
+import { UpdateDialogComponent } from './update-dialog/update-dialog.component';
 
 export function loadAppConfig(cfgService: ConfigService) {
   return () => cfgService.load();
@@ -114,7 +117,10 @@ export function loadAppConfig(cfgService: ConfigService) {
     ProcessListComponent,
     ApplicationEditCommandPreviewComponent,
     ProcessStartConfirmComponent,
-    ClientInfoComponent
+    ClientInfoComponent,
+    UpdateBrowserComponent,
+    UpdateCardComponent,
+    UpdateDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -176,6 +182,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     ApplicationEditCommandPreviewComponent,
     ProcessListComponent,
     ProcessStartConfirmComponent,
+    UpdateDialogComponent,
   ],
   bootstrap: [AppComponent],
 })

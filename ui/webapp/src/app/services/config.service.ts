@@ -1,8 +1,9 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { MatIconRegistry } from '@angular/material';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Observable } from 'rxjs';
+import { HttpErrorHandlerInterceptor } from '../interceptors/error-handler.interceptor';
 import { AppConfig } from '../models/config.model';
 import { LoggingService } from './logging.service';
 
@@ -18,7 +19,6 @@ export class ConfigService {
     iconRegistry: MatIconRegistry,
     sanitizer: DomSanitizer,
   ) {
-    iconRegistry.addSvgIcon('bee', sanitizer.bypassSecurityTrustResourceUrl('assets/bee.svg'));
     iconRegistry.addSvgIcon('bdeploy', sanitizer.bypassSecurityTrustResourceUrl('assets/logo-single-path-square.svg'));
     iconRegistry.addSvgIcon('progress', sanitizer.bypassSecurityTrustResourceUrl('assets/progress.svg'));
     iconRegistry.addSvgIcon('LINUX', sanitizer.bypassSecurityTrustResourceUrl('assets/linux.svg'));
@@ -39,5 +39,9 @@ export class ConfigService {
 
   public getBackendVersion(): Observable<string> {
     return this.http.get(this.config.api + '/backend-info/version', { responseType: 'text' });
+  }
+
+  public tryGetBackendVersion(): Observable<string> {
+    return this.http.get(this.config.api + '/backend-info/version', { responseType: 'text', headers: HttpErrorHandlerInterceptor.suppressGlobalErrorHandling(new HttpHeaders)});
   }
 }

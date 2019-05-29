@@ -81,7 +81,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
                 return;
             } else {
                 // same logic as remote update: push the content of the ZIP as new manifest to the local hive.
-                RemoteMasterTool.pushUpdate(new RemoteService(mr.getHiveDir().toUri()), Paths.get(config.dist()),
+                RemoteMasterTool.importAndPushUpdate(new RemoteService(mr.getHiveDir().toUri()), Paths.get(config.dist()),
                         getActivityReporter());
             }
         } catch (Exception e) {

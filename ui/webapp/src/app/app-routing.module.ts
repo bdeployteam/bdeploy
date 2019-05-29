@@ -13,6 +13,7 @@ import { ProductsComponent } from './products/products.component';
 import { SoftwareRepoAddEditComponent } from './software-repo-add-edit/software-repo-add-edit.component';
 import { SoftwareRepositoriesBrowserComponent } from './software-repositories-browser/software-repositories-browser.component';
 import { SoftwareRepositoryComponent } from './software-repository/software-repository.component';
+import { UpdateBrowserComponent } from './update-browser/update-browser.component';
 
 const routes: Routes = [
   {
@@ -109,6 +110,13 @@ const routes: Routes = [
     component: SoftwareRepositoryComponent,
     canActivate: [AuthGuard],
     data: { title: 'Software Repository (${params["name"]})' }
+  },
+  {
+    path: 'updatebrowser',
+    component: UpdateBrowserComponent,
+    canActivate: [AuthGuard],
+    canDeactivate: [CanDeactivateGuard],
+    data: { title: 'Browser available system versions' }
   },
 ];
 

@@ -14,6 +14,8 @@ public class UiResources {
 
         server.register(InstanceGroupResourceImpl.class);
         server.register(SoftwareRepositoryResourceImpl.class);
+
+        server.register(SoftwareUpdateResourceImpl.class);
     }
 
 }

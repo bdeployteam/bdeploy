@@ -42,10 +42,11 @@ public interface MasterRootResource {
      * Update all minions one after another, and (last) the master minion.
      *
      * @param version update to the given {@link Key}. The {@link Key} must have been pushed to the default hive before.
+     * @param clean whether to clean up old versions.
      */
     @PUT
     @Path("/update")
-    public void update(Manifest.Key version);
+    public void update(Manifest.Key version, @QueryParam("clean") boolean clean);
 
     /**
      * Software repository hives contain additional software which can be referenced when building products.

@@ -10,7 +10,8 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -59,7 +60,7 @@ public class MinionUpdateTest {
         local.execute(new ImportOperation().setManifest(updateKey).setSourcePath(updateSource));
         local.execute(new PushOperation().addManifest(updateKey).setRemote(remote));
 
-        resource.update(updateKey);
+        resource.update(updateKey, true);
 
         // update triggered only on windows, not on linux
         if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
@@ -78,13 +79,16 @@ public class MinionUpdateTest {
         root.setUpdateManager((t) -> updateTriggered.set(true));
 
         // generate test app into a ZIP
-        Path zip = tmp.resolve("bdeploy-linux64-2.0.0.zip");
+        Path zip = tmp.resolve("xxx-2.0.0.zip");
         Map<String, Object> env = new TreeMap<>();
         env.put("create", "true");
         env.put("useTempFile", Boolean.TRUE);
         try (FileSystem zfs = FileSystems.newFileSystem(URI.create("jar:" + zip.toUri()), env)) {
-            Path createDummyApp = TestAppFactory.createDummyApp("bdeploy-linux64-2.0.0", zfs.getPath("/"));
-            Files.write(createDummyApp.resolve("version.properties"), Collections.singleton("version=2.0.0"));
+            Path createDummyApp = TestAppFactory.createDummyApp("xxx-2.0.0", zfs.getPath("/"));
+            List<String> lines = new ArrayList<>();
+            lines.add("version=2.0.0");
+            lines.add("os=LINUX");
+            Files.write(createDummyApp.resolve("version.properties"), lines);
         }
 
         // this will unpack, import, push, and trigger the update

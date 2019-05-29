@@ -8,9 +8,11 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
+import org.jvnet.hk2.annotations.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +30,7 @@ import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.remote.MinionUpdateResource;
 import io.bdeploy.minion.MinionRoot;
+import io.bdeploy.ui.api.Minion;
 
 public class MinionUpdateResourceImpl implements MinionUpdateResource {
 
@@ -36,6 +39,11 @@ public class MinionUpdateResourceImpl implements MinionUpdateResource {
 
     @Inject
     private MinionRoot root;
+
+    @Inject
+    @Optional
+    @Named(Minion.MASTER)
+    private Boolean isMaster;
 
     @Override
     public void update(Manifest.Key key) {
@@ -50,7 +58,7 @@ public class MinionUpdateResourceImpl implements MinionUpdateResource {
     }
 
     @Override
-    public void prepare(Key key) {
+    public void prepare(Key key, boolean clean) {
         String currentVersion = VersionHelper.readVersion();
         if (currentVersion.equals(VersionHelper.UNKNOWN)) {
             // cannot prevent at LEAST for unit tests.
@@ -87,31 +95,33 @@ public class MinionUpdateResourceImpl implements MinionUpdateResource {
             log.warn("Cannot check space requirements for update", e);
         }
 
-        // never use a link provider here.
         h.execute(new ExportOperation().setManifest(key).setTarget(updateTarget));
 
-        // clean up any version from the hive which is not the currently running and not the new target version
-        SortedSet<String> tagsToKeep = new TreeSet<>();
-        tagsToKeep.add(key.getTag());
-        tagsToKeep.add(currentVersion);
+        // slaves /always/ clean, master might need to keep things (e.g. for web-ui).
+        if (clean || isMaster == null || !isMaster) {
+            // clean up any version from the hive which is not the currently running and not the new target version
+            SortedSet<String> tagsToKeep = new TreeSet<>();
+            tagsToKeep.add(key.getTag());
+            tagsToKeep.add(currentVersion);
 
-        // there is a tiny (acceptable) potential for left-over minion versions: if the 'name' of the
-        // to-be installed update diverges from the name of the currently installed version, versions
-        // with the old name are not cleaned up properly. Since the name is calculated by us, this
-        // is not much of a problem.
+            // there is a tiny (acceptable) potential for left-over minion versions: if the 'name' of the
+            // to-be installed update diverges from the name of the currently installed version, versions
+            // with the old name are not cleaned up properly. Since the name is calculated by us, this
+            // is not much of a problem.
 
-        String toList = key.getName();
-        ScopedManifestKey smk = ScopedManifestKey.parse(key);
-        if (smk != null) {
-            // rather use the name without OS part to be able to cleanup 'foreign' OS update packages
-            // as well.
-            toList = smk.getName();
+            String toList = key.getName();
+            ScopedManifestKey smk = ScopedManifestKey.parse(key);
+            if (smk != null) {
+                // rather use the name without OS part to be able to cleanup 'foreign' OS update packages
+                // as well.
+                toList = smk.getName();
+            }
+
+            SortedSet<Key> allVersions = h.execute(new ManifestListOperation().setManifestName(toList));
+            allVersions.stream().filter(k -> !tagsToKeep.contains(k.getTag())).forEach(k -> {
+                h.execute(new ManifestDeleteOperation().setToDelete(k));
+            });
         }
-
-        SortedSet<Key> allVersions = h.execute(new ManifestListOperation().setManifestName(toList));
-        allVersions.stream().filter(k -> !tagsToKeep.contains(k.getTag())).forEach(k -> {
-            h.execute(new ManifestDeleteOperation().setToDelete(k));
-        });
 
         // update is now prepared in the update dir of the root.
     }
