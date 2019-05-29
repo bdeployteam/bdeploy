@@ -1,14 +1,12 @@
 ﻿
 using System.Diagnostics;
-using System.ComponentModel;
-using System.Security.Principal;
 using System.IO;
 using System.Threading.Tasks;
 using System;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Linq;
 using System.Collections.Generic;
+using Bdeploy.Common;
 
 namespace Bdeploy
 {
@@ -25,7 +23,6 @@ namespace Bdeploy
 
         // working directory of the application
         private readonly string launcherWorkingDir;
-
 
         /// <summary>
         /// Creates a new instance of the launcher.
@@ -108,7 +105,7 @@ namespace Bdeploy
             string name = Path.GetFileNameWithoutExtension(application);
 
             // Determine where to store logs
-            string logPath = Path.Combine(GetBdeployHome(), "log");
+            string logPath = Path.Combine(Utils.GetBdeployHome(), "log");
             Directory.CreateDirectory(logPath);
             DirectoryInfo dir = new DirectoryInfo(logPath);
 
@@ -192,8 +189,10 @@ namespace Bdeploy
             {
                 return null;
             }
-            LogFile logFile = new LogFile();
-            logFile.application = match.Groups[1].Value;
+            LogFile logFile = new LogFile
+            {
+                application = match.Groups[1].Value
+            };
             Int32.TryParse(match.Groups[2].Value, out logFile.index);
             logFile.extension = match.Groups[3].Value;
             return logFile;
@@ -233,7 +232,7 @@ namespace Bdeploy
             try
             {
                 // Do not try to move a file that is in use
-                if(IsFileLocked(file))
+                if (IsFileLocked(file))
                 {
                     return;
                 }
@@ -263,24 +262,6 @@ namespace Bdeploy
         {
             string date = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
             writer.WriteLine("{0} | {1}", date, message);
-        }
-
-        /// <summary>
-        /// Returns the home directory where the applications are stored.
-        /// </summary>
-        /// <returns></returns>
-        private static string GetBdeployHome()
-        {
-            // Check if BDEPLOY_HOME is set
-            string home = Environment.GetEnvironmentVariable("BDEPLOY_HOME");
-            if (File.Exists(home))
-            {
-                return home;
-            }
-
-            // Otherwise store in local app-data folder of current user
-            string appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            return Path.Combine(appData, "BDeploy");
         }
 
         private static bool IsFileLocked(FileInfo file)

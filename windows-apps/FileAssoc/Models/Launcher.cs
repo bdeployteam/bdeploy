@@ -39,19 +39,6 @@ namespace Bdeploy
         }
 
         /// <summary>
-        /// Returns whether or not the current user has administrative privileges.
-        /// </summary>
-        /// <returns></returns>
-        public static bool IsAdmin()
-        {
-            using (WindowsIdentity identity = WindowsIdentity.GetCurrent())
-            {
-                WindowsPrincipal principal = new WindowsPrincipal(identity);
-                return principal.IsInRole(WindowsBuiltInRole.Administrator);
-            }
-        }
-
-        /// <summary>
         /// Returns the working directory of the current process.
         /// </summary>
         /// <returns></returns>

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Windows;
-using System.Diagnostics;
 using Microsoft.Win32;
 using System.IO;
+using Bdeploy.Common;
 
 namespace Bdeploy
 {
@@ -21,7 +21,6 @@ namespace Bdeploy
         {
             LauncherPath.Text = Path.Combine(Launcher.GetWorkingDir(), "BDeploy.exe");
         }
-
 
         private void BrowseLauncher_Click(object sender, RoutedEventArgs e)
         {
@@ -55,7 +54,7 @@ namespace Bdeploy
 
         private void CreateAssociationAsAdmin_Click(object sender, RoutedEventArgs e)
         {
-            if (Launcher.IsAdmin())
+            if (Utils.IsAdmin())
             {
                 string path = LauncherPath.Text.ToLower();
                 FileAssociation.CreateAssociationForAllUsers(path);
@@ -73,7 +72,7 @@ namespace Bdeploy
             FileAssociation.RemoveAssociation();
 
             // Remove for all others
-            if (Launcher.IsAdmin())
+            if (Utils.IsAdmin())
             {
                 FileAssociation.RemoveAssociationForAllUsers();
             }
