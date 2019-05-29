@@ -3,7 +3,7 @@
 }
 
 .sidenav {
-  width: 220px;
+  width: 300px;
 }
 
 .sidenav-content {
@@ -61,6 +61,12 @@ footer {
   display: flex;
   position: absolute;
   bottom: 0px;
+}
+
+.at-bottom {
+  position: absolute;
+  bottom: 40px;
+  width: 100%;
 }
 
 .footer-content {

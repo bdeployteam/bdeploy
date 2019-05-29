@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.jersey.JerseyServer;
 import io.bdeploy.minion.MinionUpdateManager;
 
@@ -13,10 +14,6 @@ import io.bdeploy.minion.MinionUpdateManager;
 @SuppressFBWarnings("DM_EXIT")
 public class JerseyAwareMinionUpdateManager implements MinionUpdateManager {
 
-    /**
-     * This must match what the launcher script(s) expect to perform an update.
-     */
-    private static final int CODE_UPDATE = 42;
     private static final Logger log = LoggerFactory.getLogger(JerseyAwareMinionUpdateManager.class);
     private final JerseyServer server;
 
@@ -37,7 +34,7 @@ public class JerseyAwareMinionUpdateManager implements MinionUpdateManager {
             log.info("Exiting to perform update");
 
             server.close();
-            System.exit(CODE_UPDATE);
+            System.exit(UpdateHelper.CODE_UPDATE);
         });
 
         updateThread.setDaemon(false);

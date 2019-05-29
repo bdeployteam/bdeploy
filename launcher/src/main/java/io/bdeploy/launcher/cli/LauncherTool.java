@@ -6,23 +6,44 @@ import java.lang.ProcessBuilder.Redirect;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.bhive.op.ExportOperation;
 import io.bdeploy.bhive.op.ManifestDeleteOldByIdOperation;
+import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
+import io.bdeploy.bhive.op.PruneOperation;
 import io.bdeploy.bhive.op.remote.FetchOperation;
+import io.bdeploy.bhive.remote.RemoteBHive;
 import io.bdeploy.bhive.util.StorageHelper;
+import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
+import io.bdeploy.common.Version;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
+import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.OsHelper;
+import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.dcu.InstanceNodeController;
+import io.bdeploy.interfaces.ScopedManifestKey;
+import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
@@ -50,6 +71,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         @Help("Local working directory for the launcher, defaults to the user's home/.bdeploy.")
         String cacheDir();
+
+        @Help("Set by the launcher script to determine the directory where to put updates for automatic application.")
+        String updateDir();
 
     }
 
@@ -88,10 +112,10 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         log.info("Using cache directory " + rootDir);
 
-        doLaunchFromConfig(cfg, rootDir.toAbsolutePath());
+        doLaunchFromConfig(cfg, rootDir.toAbsolutePath(), config.updateDir());
     }
 
-    private static void doLaunchFromConfig(Path cfg, Path rootDir) {
+    private static void doLaunchFromConfig(Path cfg, Path rootDir, String updateDir) {
         ClientDescriptor cd;
         try (InputStream is = Files.newInputStream(cfg)) {
             cd = StorageHelper.fromStream(is, ClientDescriptor.class);
@@ -104,27 +128,30 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         LauncherSplashReporter reporter = new LauncherSplashReporter(splash);
 
-        // yay, we have information
-        log.info("Launching " + cd.groupId + " / " + cd.instanceId + " / " + cd.clientId + " from " + cd.host.getUri());
-
-        // 1: fetch more information from the remote server.
-        MasterRootResource master = ResourceProvider.getResource(cd.host, MasterRootResource.class);
-        MasterNamedResource namedMaster = master.getNamedMaster(cd.groupId);
-
-        ClientApplicationConfiguration appCfg;
-        try (Activity info = reporter.start("Loading meta-data...")) {
-            // fails with 404 or other error, but never null.
-            log.info("fetching information from " + cd.host.getUri());
-            appCfg = namedMaster.getClientConfiguration(cd.instanceId, cd.clientId);
-        }
-
-        splash.update(appCfg);
-
-        // this /might/ lead to too much re-installs if unrelated things change, but there is not
-        // other/easy way (currently) to detect this...
-        Manifest.Key targetClientKey = new Manifest.Key(cd.clientId, appCfg.instanceKey.getTag());
-
         try (BHive hive = new BHive(rootDir.resolve("bhive").toUri(), reporter)) {
+            // 0: check for launcher updates.
+            doCheckForUpdate(cd, hive, reporter, updateDir);
+
+            // yay, we have information
+            log.info("Launching " + cd.groupId + " / " + cd.instanceId + " / " + cd.clientId + " from " + cd.host.getUri());
+
+            MasterRootResource master = ResourceProvider.getResource(cd.host, MasterRootResource.class);
+            MasterNamedResource namedMaster = master.getNamedMaster(cd.groupId);
+
+            // 1: fetch more information from the remote server.
+            ClientApplicationConfiguration appCfg;
+            try (Activity info = reporter.start("Loading meta-data...")) {
+                // fails with 404 or other error, but never null.
+                log.info("fetching information from " + cd.host.getUri());
+                appCfg = namedMaster.getClientConfiguration(cd.instanceId, cd.clientId);
+            }
+
+            splash.update(appCfg);
+
+            // this /might/ lead to too much re-installs if unrelated things change, but there is not
+            // other/easy way (currently) to detect this...
+            Manifest.Key targetClientKey = new Manifest.Key(cd.clientId, appCfg.instanceKey.getTag());
+
             if (hive.execute(new ManifestListOperation().setManifestName(targetClientKey.toString())).contains(targetClientKey)) {
                 // we have it already, no need to re-create.
                 log.info("re-using existing manifest: " + targetClientKey);
@@ -175,6 +202,75 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             } catch (InterruptedException e) {
                 log.warn("waiting for application exit interrupted");
                 Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    @SuppressFBWarnings("DM_EXIT")
+    private static void doCheckForUpdate(ClientDescriptor cd, BHive hive, ActivityReporter reporter, String updateDir) {
+        String running = VersionHelper.readVersion();
+        if (VersionHelper.UNKNOWN.equals(running)) {
+            log.info("Skipping update, as running version cannot be determined");
+            return;
+        }
+
+        Version currentVersion = Version.parse(running);
+        try (RemoteBHive rbh = RemoteBHive.forService(cd.host, null, reporter)) {
+            Version mostCurrent = null;
+            Map<String, Key> byTagForCurrentOs = new TreeMap<>();
+            try (Activity check = reporter.start("Checking for launcher updates...")) {
+                SortedMap<Key, ObjectId> launchers = rbh
+                        .getManifestInventory(UpdateHelper.SW_META_PREFIX + UpdateHelper.SW_LAUNCHER);
+
+                OperatingSystem runningOs = OsHelper.getRunningOs();
+
+                // map to ScopedManifestKey, filter by OS, memorize key, map to tag, map to Version, reverse sorted
+                List<Version> available = launchers.keySet().stream().map(ScopedManifestKey::parse)
+                        .filter(s -> s.getOperatingSystem() == runningOs).peek(s -> byTagForCurrentOs.put(s.getTag(), s.getKey()))
+                        .map(s -> s.getTag()).map(Version::parse).sorted(Collections.reverseOrder()).collect(Collectors.toList());
+
+                // the first element in the collection is the one with the highest version number.
+                if (!available.isEmpty()) {
+                    mostCurrent = available.get(0);
+                }
+            }
+
+            if (mostCurrent == null) {
+                log.warn("Cannot find any launcher version on the server");
+                return;
+            }
+
+            if (mostCurrent.compareTo(currentVersion) > 0) {
+                log.info("New launcher found, updating from " + currentVersion + " to " + mostCurrent);
+                doInstallUpdate(cd.host, hive, reporter, updateDir, currentVersion, mostCurrent,
+                        byTagForCurrentOs.get(mostCurrent.toString()));
+            } else {
+                log.info("No updates found (running=" + currentVersion + ", newest=" + mostCurrent + "), continue...");
+            }
+        }
+    }
+
+    private static void doInstallUpdate(RemoteService remote, BHive hive, ActivityReporter reporter, String updateDir,
+            Version currentVersion, Version mostCurrent, Key key) {
+        try (Activity updating = reporter.start("Updating launcher to " + mostCurrent)) {
+            // found a newer version to install.
+            hive.execute(new FetchOperation().addManifest(key).setRemote(remote));
+
+            // write to target directory
+            Path next = UpdateHelper.prepareUpdateDirectory(Paths.get(updateDir));
+            hive.execute(new ExportOperation().setManifest(key).setTarget(next));
+
+            try {
+                // cleanup all old versions of the launcher
+                SortedSet<Key> allVersions = hive.execute(
+                        new ManifestListOperation().setManifestName(UpdateHelper.SW_META_PREFIX + UpdateHelper.SW_LAUNCHER));
+                allVersions.stream()
+                        .filter(k -> !k.getTag().equals(mostCurrent.toString()) && !k.getTag().equals(currentVersion.toString()))
+                        .forEach(k -> hive.execute(new ManifestDeleteOperation().setToDelete(k)));
+
+                hive.execute(new PruneOperation());
+            } finally {
+                System.exit(UpdateHelper.CODE_UPDATE);
             }
         }
     }

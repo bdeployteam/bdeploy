@@ -224,11 +224,13 @@ public class ObjectManager {
             // always try to use hard-links, except in windows. On windows it is not possible to decrement
             // the link-count of a file which is locked (e.g. running executable), even if the executable
             // was started from a different path.
-            if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
+            Path objectFile = db.getObjectFile(obj);
+            if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS
+                    || objectFile.getFileSystem().provider() != child.getFileSystem().provider()) {
                 internalExportBlobByCopy(obj, child);
             } else {
                 // everywhere except windows: always hard-link :)
-                Files.createLink(child, db.getObjectFile(obj));
+                Files.createLink(child, objectFile);
                 setExecutable(child, null);
             }
         } catch (IOException e) {

@@ -202,6 +202,7 @@ subprojects {
 
     task genLinux64VersionProperties() {
         dependsOn genVersionProperties
+        outputs.upToDateWhen { false }
         outputs.file "$buildDir/resources/linux64/version.properties"
         doLast {
             file("$buildDir/resources/linux64").mkdirs()
@@ -216,6 +217,7 @@ subprojects {
 
     task genWin64VersionProperties() {
         dependsOn genVersionProperties
+        outputs.upToDateWhen { false }
         outputs.file "$buildDir/resources/win64/version.properties"
         doLast {
             file("$buildDir/resources/win64").mkdirs()
