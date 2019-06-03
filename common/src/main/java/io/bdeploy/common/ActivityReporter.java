@@ -162,7 +162,7 @@ public interface ActivityReporter {
          * further {@link Activity} processing will be done after this method finishes.
          * All remaining {@link Activity} instances are cleared (but not finished).
          */
-        public void stopReporting() {
+        public synchronized void stopReporting() {
             if (scheduled != null) {
                 scheduled.cancel(false);
             }
@@ -277,7 +277,7 @@ public interface ActivityReporter {
             return act;
         }
 
-        private void done(AsyncActivity act) {
+        private synchronized void done(AsyncActivity act) {
             activities.remove(act);
             reportDone(act);
         }
