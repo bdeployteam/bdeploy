@@ -34,7 +34,7 @@ public class RemoteDependencyFetcher implements DependencyFetcher {
     }
 
     @Override
-    public SortedSet<Manifest.Key> fetch(BHive hive, SortedSet<String> deps, OperatingSystem os) {
+    public synchronized SortedSet<Manifest.Key> fetch(BHive hive, SortedSet<String> deps, OperatingSystem os) {
         String group = this.instanceGroup;
         SortedSet<String> remaining = new TreeSet<>();
 
