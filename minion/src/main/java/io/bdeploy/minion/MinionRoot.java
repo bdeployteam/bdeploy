@@ -5,19 +5,35 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import org.apache.commons.codec.binary.Base64;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
+import org.quartz.impl.DirectSchedulerFactory;
+import org.quartz.simpl.RAMJobStore;
+import org.quartz.simpl.SimpleThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.objects.LockableDatabase;
+import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.util.PathHelper;
@@ -27,6 +43,7 @@ import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.jersey.audit.Auditor;
 import io.bdeploy.jersey.audit.RollingFileAuditor;
+import io.bdeploy.minion.cleanup.MasterCleanupJob;
 import io.bdeploy.minion.tasks.CleanupDownloadDirTask;
 import io.bdeploy.minion.user.UserDatabase;
 import io.bdeploy.pcu.InstanceProcessController;
@@ -36,8 +53,10 @@ import io.bdeploy.ui.api.Minion;
 /**
  * Represents the root directory and configuration of a minion installation.
  */
-//TODO: periodic cleanup of hive (HiveManager?).
 public class MinionRoot extends LockableDatabase implements Minion, AutoCloseable {
+
+    /** Default schedule for cleanup job - once a day at 2:00am. */
+    public static final String DEFAULT_CLEANUP_SCHEDULE = "0 0 2 * * ?";
 
     private static final Logger log = LoggerFactory.getLogger(MinionRoot.class);
 
@@ -56,6 +75,8 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
 
     private Path updates;
     private MinionUpdateManager updateManager = (t) -> log.error("No Update Manager, cannot update Minion!");
+
+    private Scheduler scheduler;
 
     public MinionRoot(Path root, ActivityReporter reporter) {
         super(root.resolve("etc"));
@@ -115,7 +136,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
      * Setup tasks which should only run when this root is used for serving a
      * minion.
      */
-    public void setupServerTasks(boolean master) {
+    public void setupServerTasks(boolean master, BHiveRegistry registry) {
         // cleanup any stale things so periodic tasks don't get them wrong.
         cleanup();
 
@@ -123,9 +144,71 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         this.cleanupDownloadDirTask.start();
 
         initProcessController();
+        createJobScheduler();
 
         if (master) {
-            // FIXME: start the cleanup background job here.
+            String cronSchedule = getState().cleanupSchedule;
+            if (cronSchedule == null) {
+                cronSchedule = DEFAULT_CLEANUP_SCHEDULE;
+            }
+
+            initCleanupJob(cronSchedule, registry);
+        }
+    }
+
+    /**
+     * @param cronSchedule the schedule for the cleanup job.
+     * @param registry
+     */
+    public void initCleanupJob(String cronSchedule, BHiveRegistry registry) {
+        Map<String, Object> jdm = new TreeMap<>();
+        jdm.put(MasterCleanupJob.DATA_ROOT, this);
+
+        JobDetail cleanupJob = JobBuilder.newJob(MasterCleanupJob.class).withDescription("Master Cleanup Job")
+                .withIdentity("Cleanup", "Master").usingJobData(new JobDataMap(jdm)).build();
+        Trigger trigger = createCronTrigger(cleanupJob.getKey(), cronSchedule);
+
+        try {
+            if (scheduler.checkExists(trigger.getKey())) {
+                scheduler.unscheduleJob(trigger.getKey());
+            }
+            scheduler.scheduleJob(cleanupJob, trigger);
+        } catch (SchedulerException e) {
+            throw new IllegalStateException("Cannot schedule cleanup job", e);
+        }
+    }
+
+    private Trigger createCronTrigger(JobKey job, String cronSchedule) {
+        Trigger trigger;
+        try {
+            trigger = TriggerBuilder.newTrigger().forJob(job).startNow()
+                    .withSchedule(CronScheduleBuilder.cronScheduleNonvalidatedExpression(cronSchedule)).build();
+        } catch (ParseException e) {
+            log.error("Invalid cron schedule: {} using default instead", cronSchedule);
+            trigger = TriggerBuilder.newTrigger().forJob(job).startNow()
+                    .withSchedule(CronScheduleBuilder.cronSchedule(DEFAULT_CLEANUP_SCHEDULE)).build();
+        }
+
+        return trigger;
+    }
+
+    private void createJobScheduler() {
+        try {
+            scheduler = DirectSchedulerFactory.getInstance().getScheduler(root.toString());
+
+            // might have been initialized before, e.g. tests in the same VM.
+            if (scheduler == null) {
+                SimpleThreadPool tp = new SimpleThreadPool(2, Thread.NORM_PRIORITY);
+                tp.setThreadNamePrefix("MinionScheduler");
+
+                DirectSchedulerFactory.getInstance().createScheduler(root.toString(), "MinionScheduler", tp, new RAMJobStore());
+                scheduler = DirectSchedulerFactory.getInstance().getScheduler(root.toString());
+                scheduler.start();
+            } else {
+                log.info("Re-using existing Scheduler {}", scheduler);
+            }
+        } catch (SchedulerException e) {
+            throw new IllegalStateException("Cannot create job scheduler", e);
         }
     }
 
@@ -133,6 +216,14 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     public void close() {
         hive.close();
         auditor.close();
+
+        if (scheduler != null) {
+            try {
+                scheduler.shutdown();
+            } catch (SchedulerException e) {
+                log.error("Cannot shutdown job scheduler", e);
+            }
+        }
     }
 
     /**

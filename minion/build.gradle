@@ -17,7 +17,8 @@ dependencies {
         project(":ui"),
 
         'org.bouncycastle:bcpkix-jdk15on:1.61',
-        'org.bouncycastle:bcprov-jdk15on:1.61'
+        'org.bouncycastle:bcprov-jdk15on:1.61',
+        'org.quartz-scheduler:quartz:2.3.1'
     )
 
     testCompile project(path: ":jersey", configuration: 'testRuntime')

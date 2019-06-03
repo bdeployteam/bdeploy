@@ -63,4 +63,14 @@ public class MinionState {
      * Storage directories hosting hives.
      */
     public List<Path> storageLocations = new ArrayList<>();
+
+    /**
+     * 'Cron' format schedule for cleanup job.
+     */
+    public String cleanupSchedule;
+
+    /**
+     * Timestamp of last successful cleanup execution on this minion (only relevant for master).
+     */
+    public long cleanupLastRun;
 }

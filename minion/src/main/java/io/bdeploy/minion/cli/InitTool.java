@@ -105,6 +105,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
 
         state.officialName = hostname;
         state.port = port;
+        state.cleanupSchedule = MinionRoot.DEFAULT_CLEANUP_SCHEDULE;
 
         state.deploymentDir = root.resolve("deploy");
         if (deployments != null) {

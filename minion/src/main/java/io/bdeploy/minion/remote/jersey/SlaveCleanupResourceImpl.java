@@ -12,15 +12,10 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.bdeploy.bhive.BHive;
-import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
-import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.ManifestRefScanOperation;
 import io.bdeploy.bhive.op.PruneOperation;
 import io.bdeploy.common.util.PathHelper;
@@ -31,8 +26,6 @@ import io.bdeploy.interfaces.remote.SlaveCleanupResource;
 import io.bdeploy.minion.MinionRoot;
 
 public class SlaveCleanupResourceImpl implements SlaveCleanupResource {
-
-    private static final Logger log = LoggerFactory.getLogger(SlaveCleanupResourceImpl.class);
 
     @Inject
     private MinionRoot root;
@@ -49,12 +42,10 @@ public class SlaveCleanupResourceImpl implements SlaveCleanupResource {
         SortedSet<Key> allRefs = new TreeSet<>();
 
         for (Key keep : toKeep) {
-            Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(keep));
-            if (mf == null) {
-                log.warn("Missing manifest which should have been kept alive: " + keep);
+            // toKepp may contain way more manifests than actually exist in our hive, since it's the list of all manifests in all groups
+            if (!allMfs.contains(keep)) {
                 continue;
             }
-
             SortedMap<String, Key> refs = hive.execute(new ManifestRefScanOperation().setManifest(keep));
             allRefs.add(keep);
             allRefs.addAll(refs.values());

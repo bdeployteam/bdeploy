@@ -108,8 +108,8 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
                         r.setUpdateManager(new JerseyAwareMinionUpdateManager(srv));
 
                         delegate.setDelegate(srv.getSseActivityReporter());
-                        registerCommonResources(srv, r, srv.getSseActivityReporter());
-                        r.setupServerTasks(false);
+                        BHiveRegistry reg = registerCommonResources(srv, r, srv.getSseActivityReporter());
+                        r.setupServerTasks(false, reg);
 
                         srv.start();
                         srv.join();

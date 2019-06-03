@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -19,6 +20,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.ImportOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
@@ -58,6 +61,7 @@ import io.bdeploy.launcher.cli.LauncherCli;
 import io.bdeploy.launcher.cli.LauncherTool;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestMinion;
+import io.bdeploy.minion.cleanup.MasterCleanupJob;
 import io.bdeploy.pcu.TestAppFactory;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
@@ -163,17 +167,18 @@ public class MinionDeployTest {
         toKeep.add(Manifest.Key.parse(uuid + "/master:" + instance.getTag()));
         List<CleanupAction> nothingToDo = scr.cleanup(toKeep, false);
         assertTrue(nothingToDo.isEmpty());
-        master.getNamedMaster("demo").remove(instance);
-        List<CleanupAction> cleanInstall = scr.cleanup(new TreeSet<>(), false);
 
-        // 1 instance node manifest, 1 application manifest, 1 dependent manifest
-        // 1 instance data dir (last version removed), 2 stale pool dirs (application, dependent).
-        assertEquals(6, cleanInstall.size());
-        scr.perform(cleanInstall);
+        try (RemoteBHive rbh = RemoteBHive.forService(remote, "demo", reporter)) {
+            rbh.removeManifest(instance); // remove top level instance.
+        }
+
+        // use the job code to perform the actual cleanup
+        new MasterCleanupJob().performCleanup(mr);
 
         // no manifests should be left now
         try (RemoteBHive rbh = RemoteBHive.forService(remote, JerseyRemoteBHive.DEFAULT_NAME, reporter)) {
-            assertTrue(rbh.getManifestInventory().isEmpty());
+            SortedMap<Key, ObjectId> inventory = rbh.getManifestInventory();
+            assertTrue(inventory.isEmpty());
         }
 
         // only the deployment dir itself and the pool directory is allowed to be alive, no other path may exist after cleanup.

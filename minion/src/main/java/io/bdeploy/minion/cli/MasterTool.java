@@ -89,7 +89,7 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
     public static void registerMasterResources(RegistrationTarget srv, boolean webapp, boolean allowcors, MinionRoot minionRoot,
             ActivityReporter reporter) {
         BHiveRegistry reg = SlaveTool.registerCommonResources(srv, minionRoot, reporter);
-        minionRoot.setupServerTasks(true);
+        minionRoot.setupServerTasks(true, reg);
         srv.register(MasterRootResourceImpl.class);
         srv.register(new AbstractBinder() {
 
