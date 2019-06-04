@@ -9,6 +9,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -34,6 +35,7 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.objects.LockableDatabase;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.dcu.InstanceNodeController;
 import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
@@ -113,6 +115,11 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
      */
     public MinionUpdateManager getUpdateManager() {
         return updateManager;
+    }
+
+    @Override
+    public SortedMap<String, RemoteService> getMinions() {
+        return getState().minions;
     }
 
     @Override

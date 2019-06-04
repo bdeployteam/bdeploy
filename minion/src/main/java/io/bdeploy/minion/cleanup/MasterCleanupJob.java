@@ -1,10 +1,7 @@
 package io.bdeploy.minion.cleanup;
 
-import java.util.Map;
 import java.util.Objects;
 import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -12,17 +9,12 @@ import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.interfaces.cleanup.CleanupHelper;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
-import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
-import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
-import io.bdeploy.interfaces.remote.ResourceProvider;
-import io.bdeploy.interfaces.remote.SlaveCleanupResource;
 import io.bdeploy.minion.MinionRoot;
 
 public class MasterCleanupJob implements Job {
@@ -61,47 +53,12 @@ public class MasterCleanupJob implements Job {
     public void performCleanup(MinionRoot mr) {
         log.info("Performing cleanup on all slaves");
 
-        SortedSet<Key> allUniqueKeysToKeep = new TreeSet<>();
-
         // no activity reporting on local hives right now (outside request scope, could only use Stream instead).
         try (BHiveRegistry registry = new BHiveRegistry(new ActivityReporter.Null())) {
             mr.getStorageLocations().forEach(registry::scanLocation);
 
-            for (Map.Entry<String, BHive> entry : registry.getAll().entrySet()) {
-                BHive toCheck = entry.getValue();
-                InstanceGroupConfiguration ig = new InstanceGroupManifest(toCheck).read();
-                if (ig == null) {
-                    // not an instance group, skip.
-                    // this is either the default hive (slave hive), or a software repository.
-                }
-                log.info("Gathering information for instance group {} ({})", ig.name, ig.description);
-
-                // instance manifests
-                SortedSet<Key> imfs = InstanceManifest.scan(toCheck, false);
-
-                // instance node manifests
-                SortedSet<Key> inmfs = imfs.stream().map(key -> InstanceManifest.of(toCheck, key))
-                        .flatMap(im -> im.getInstanceNodeManifests().values().stream())
-                        .collect(Collectors.toCollection(TreeSet::new));
-
-                log.info("Collected {} node manifests", inmfs.size());
-
-                allUniqueKeysToKeep.addAll(inmfs);
-            }
-
-            for (Map.Entry<String, RemoteService> slave : mr.getState().minions.entrySet()) {
-                log.info("Cleaning on {}, using {} anchors.", slave.getKey(), allUniqueKeysToKeep.size());
-
-                SlaveCleanupResource scr = ResourceProvider.getResource(slave.getValue(), SlaveCleanupResource.class);
-                try {
-                    scr.cleanup(allUniqueKeysToKeep, true);
-                } catch (Exception e) {
-                    log.warn("Cannot perform cleanup on slave {}", slave.getKey());
-                    if (log.isDebugEnabled()) {
-                        log.debug("Error details", e);
-                    }
-                }
-            }
+            SortedSet<Key> allUniqueKeysToKeep = CleanupHelper.findAllUniqueKeys(registry);
+            CleanupHelper.cleanAllMinions(mr.getMinions(), allUniqueKeysToKeep, true);
 
             mr.modifyState(s -> s.cleanupLastRun = System.currentTimeMillis());
             log.info("Cleanup finished");

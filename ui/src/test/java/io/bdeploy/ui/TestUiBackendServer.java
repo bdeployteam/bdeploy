@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.TreeMap;
 
 import javax.annotation.Priority;
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import io.bdeploy.bhive.remote.jersey.BHiveLocatorImpl;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.jersey.TestServer;
 import io.bdeploy.ui.api.AuthService;
@@ -163,6 +165,11 @@ public class TestUiBackendServer extends TestServer {
         @Override
         public Path getTempDir() {
             return tmpDir;
+        }
+
+        @Override
+        public SortedMap<String, RemoteService> getMinions() {
+            return new TreeMap<>();
         }
     }
 

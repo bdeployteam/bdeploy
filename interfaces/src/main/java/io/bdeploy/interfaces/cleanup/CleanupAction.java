@@ -42,4 +42,9 @@ public class CleanupAction {
         this.description = description;
     }
 
+    @Override
+    public String toString() {
+        return type.name() + " " + what;
+    }
+
 }

@@ -16,6 +16,7 @@ public class UiResources {
         server.register(SoftwareRepositoryResourceImpl.class);
 
         server.register(SoftwareUpdateResourceImpl.class);
+        server.register(CleanupResourceImpl.class);
     }
 
 }

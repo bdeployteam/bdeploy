@@ -26,6 +26,7 @@ import io.bdeploy.bhive.op.ImportOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.bhive.remote.RemoteBHive;
+import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
@@ -40,6 +41,8 @@ import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.cleanup.CleanupAction;
+import io.bdeploy.interfaces.cleanup.CleanupGroup;
+import io.bdeploy.interfaces.cleanup.CleanupHelper;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
@@ -61,7 +64,6 @@ import io.bdeploy.launcher.cli.LauncherCli;
 import io.bdeploy.launcher.cli.LauncherTool;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestMinion;
-import io.bdeploy.minion.cleanup.MasterCleanupJob;
 import io.bdeploy.pcu.TestAppFactory;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
@@ -172,8 +174,24 @@ public class MinionDeployTest {
             rbh.removeManifest(instance); // remove top level instance.
         }
 
-        // use the job code to perform the actual cleanup
-        new MasterCleanupJob().performCleanup(mr);
+        // fake the registry containing all instance groups available on the master.
+        BHiveRegistry fakeRegistry = new BHiveRegistry(reporter);
+        mr.getStorageLocations().forEach(fakeRegistry::scanLocation);
+
+        // same code as used by cleanup job and cleanup UI.
+        SortedSet<Key> shouldBeEmpty = CleanupHelper.findAllUniqueKeys(fakeRegistry);
+        List<CleanupGroup> groups = CleanupHelper.cleanAllMinions(mr.getMinions(), shouldBeEmpty, false);
+
+        assertEquals(1, groups.size());
+        assertEquals("master", groups.get(0).minion);
+
+        // 1 instance node manifest, 1 application manifest, 1 dependent manifest
+        // 1 instance version dir (not uninstalled before)
+        // 1 instance data dir (last version removed), 2 stale pool dirs (application, dependent).
+        assertEquals(7, groups.get(0).actions.size());
+
+        // now actually do it.
+        CleanupHelper.cleanAllMinions(groups, mr.getMinions());
 
         // no manifests should be left now
         try (RemoteBHive rbh = RemoteBHive.forService(remote, JerseyRemoteBHive.DEFAULT_NAME, reporter)) {

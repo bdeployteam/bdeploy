@@ -65,6 +65,7 @@ import { ThemeChooserComponent } from './theme-chooser/theme-chooser.component';
 import { UpdateBrowserComponent } from './update-browser/update-browser.component';
 import { UpdateCardComponent } from './update-card/update-card.component';
 import { UpdateDialogComponent } from './update-dialog/update-dialog.component';
+import { MasterCleanupComponent } from './master-cleanup/master-cleanup.component';
 
 
 export function loadAppConfig(cfgService: ConfigService) {
@@ -124,7 +125,8 @@ export function loadAppConfig(cfgService: ConfigService) {
     ConfigFilesBrowserComponent,
     UpdateBrowserComponent,
     UpdateCardComponent,
-    UpdateDialogComponent
+    UpdateDialogComponent,
+    MasterCleanupComponent
   ],
   imports: [
     BrowserModule,

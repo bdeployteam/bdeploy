@@ -1,9 +1,11 @@
 package io.bdeploy.ui.api;
 
 import java.nio.file.Path;
+import java.util.SortedMap;
 
 import javax.inject.Named;
 
+import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.NodeStatus;
 
 /**
@@ -33,5 +35,10 @@ public interface Minion {
      * Returns a directory which is suitable to place temporary directories/files within.
      */
     public Path getTempDir();
+
+    /**
+     * Retrieve registered slaves. This makes only sense if the current VM hosts a master, otherwise only 'self' is returned.
+     */
+    public SortedMap<String, RemoteService> getMinions();
 
 }

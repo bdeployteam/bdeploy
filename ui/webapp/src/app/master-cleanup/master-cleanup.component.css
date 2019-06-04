@@ -1,0 +1,30 @@
+.page-container {
+  width: calc(100% - 20px);
+  margin: 20px;
+}
+
+.spinner-container {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 5px;
+}
+
+.spinner-container > div {
+  margin: 15px;
+}
+
+.action-table {
+  margin: 20px;
+  width: calc(100% - 60px);
+}
+
+.offline-minion {
+  color: red;
+}
+
+.margin-button {
+  margin-left: 10px;
+}

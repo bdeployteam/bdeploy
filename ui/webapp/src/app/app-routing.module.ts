@@ -9,6 +9,7 @@ import { InstanceBrowserComponent } from './instance-browser/instance-browser.co
 import { InstanceGroupAddEditComponent } from './instance-group-add-edit/instance-group-add-edit.component';
 import { InstanceGroupBrowserComponent } from './instance-group-browser/instance-group-browser.component';
 import { LoginComponent } from './login/login.component';
+import { MasterCleanupComponent } from './master-cleanup/master-cleanup.component';
 import { ProcessConfigurationComponent } from './process-configuration/process-configuration.component';
 import { ProductsComponent } from './products/products.component';
 import { SoftwareRepoAddEditComponent } from './software-repo-add-edit/software-repo-add-edit.component';
@@ -125,6 +126,13 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
     data: { title: 'Browser available system versions' }
+  },
+  {
+    path: 'mastercleanup',
+    component: MasterCleanupComponent,
+    canActivate: [AuthGuard],
+    canDeactivate: [CanDeactivateGuard],
+    data: { title: 'Manual Cleanup' }
   },
 ];
 
