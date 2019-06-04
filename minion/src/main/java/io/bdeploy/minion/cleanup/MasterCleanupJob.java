@@ -1,6 +1,7 @@
 package io.bdeploy.minion.cleanup;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -29,12 +30,21 @@ public class MasterCleanupJob implements Job {
     private static final Logger log = LoggerFactory.getLogger(MasterCleanupJob.class);
 
     public static final String DATA_ROOT = MinionRoot.class.getSimpleName();
+    public static final String SCHEDULE = "CronSchedule";
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
         MinionRoot mr = (MinionRoot) context.getMergedJobDataMap().get(DATA_ROOT);
         if (mr == null) {
             throw new IllegalStateException("No minion root set");
+        }
+
+        String cachedSchedule = context.getMergedJobDataMap().getString(SCHEDULE);
+        String currentSchedule = mr.getState().cleanupSchedule;
+        if (!Objects.equals(cachedSchedule, currentSchedule)) {
+            // update schedule of self, but continue with execution
+            log.info("Cleanup schedule changed, updating to '{}'", currentSchedule);
+            mr.initCleanupJob(currentSchedule);
         }
 
         performCleanup(mr);

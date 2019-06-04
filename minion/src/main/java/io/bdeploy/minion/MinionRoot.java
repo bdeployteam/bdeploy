@@ -7,10 +7,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.SortedSet;
-import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -33,7 +32,6 @@ import org.slf4j.LoggerFactory;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.objects.LockableDatabase;
-import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.util.PathHelper;
@@ -136,7 +134,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
      * Setup tasks which should only run when this root is used for serving a
      * minion.
      */
-    public void setupServerTasks(boolean master, BHiveRegistry registry) {
+    public void setupServerTasks(boolean master) {
         // cleanup any stale things so periodic tasks don't get them wrong.
         cleanup();
 
@@ -152,27 +150,28 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
                 cronSchedule = DEFAULT_CLEANUP_SCHEDULE;
             }
 
-            initCleanupJob(cronSchedule, registry);
+            initCleanupJob(cronSchedule);
         }
     }
 
     /**
+     * Initializes (or updates) the cleanup job to the given schedule.
+     *
      * @param cronSchedule the schedule for the cleanup job.
-     * @param registry
      */
-    public void initCleanupJob(String cronSchedule, BHiveRegistry registry) {
-        Map<String, Object> jdm = new TreeMap<>();
-        jdm.put(MasterCleanupJob.DATA_ROOT, this);
-
+    public void initCleanupJob(String cronSchedule) {
         JobDetail cleanupJob = JobBuilder.newJob(MasterCleanupJob.class).withDescription("Master Cleanup Job")
-                .withIdentity("Cleanup", "Master").usingJobData(new JobDataMap(jdm)).build();
+                .withIdentity("Cleanup", "Master")
+                .usingJobData(new JobDataMap(Collections.singletonMap(MasterCleanupJob.DATA_ROOT, this))).build();
         Trigger trigger = createCronTrigger(cleanupJob.getKey(), cronSchedule);
 
         try {
             if (scheduler.checkExists(trigger.getKey())) {
-                scheduler.unscheduleJob(trigger.getKey());
+                log.info("Re-scheduling cleanup job to '" + cronSchedule + "'");
+                scheduler.rescheduleJob(trigger.getKey(), trigger);
+            } else {
+                scheduler.scheduleJob(cleanupJob, trigger);
             }
-            scheduler.scheduleJob(cleanupJob, trigger);
         } catch (SchedulerException e) {
             throw new IllegalStateException("Cannot schedule cleanup job", e);
         }
@@ -181,7 +180,8 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     private Trigger createCronTrigger(JobKey job, String cronSchedule) {
         Trigger trigger;
         try {
-            trigger = TriggerBuilder.newTrigger().forJob(job).startNow()
+            trigger = TriggerBuilder.newTrigger().forJob(job).withIdentity("CleanupTrigger", "Master").startNow()
+                    .usingJobData(MasterCleanupJob.SCHEDULE, cronSchedule)
                     .withSchedule(CronScheduleBuilder.cronScheduleNonvalidatedExpression(cronSchedule)).build();
         } catch (ParseException e) {
             log.error("Invalid cron schedule: {} using default instead", cronSchedule);
