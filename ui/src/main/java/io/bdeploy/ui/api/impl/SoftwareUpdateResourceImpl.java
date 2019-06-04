@@ -14,7 +14,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -156,12 +155,6 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
                 log.error("Failed to package download", e);
                 throw new WebApplicationException("Error packaging download", e);
             }
-        }
-
-        long lastModified = file.lastModified();
-        long validUntil = lastModified + TimeUnit.MINUTES.toMillis(5);
-        if (System.currentTimeMillis() > validUntil) {
-            throw new WebApplicationException("Token to download product is not valid any more.", Status.BAD_REQUEST);
         }
 
         // Build a response with the stream
