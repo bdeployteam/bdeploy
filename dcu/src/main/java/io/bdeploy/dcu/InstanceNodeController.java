@@ -133,9 +133,20 @@ public class InstanceNodeController {
     public boolean isInstalled() {
         Path dir = getDeploymentDir();
         if (Files.exists(dir)) {
-            return true;
+            // check if all required applications exist
+            long missingApps = getManifest().getConfiguration().applications.stream()
+                    .map(a -> a.application.directoryFriendlyName()).filter(a -> !isPooled(a)).count();
+            if (missingApps > 0) {
+                return false;
+            }
+
+            return Files.exists(paths.get(SpecialDirectory.RUNTIME).resolve(PCU_JSON));
         }
         return false;
+    }
+
+    private boolean isPooled(String appName) {
+        return Files.isDirectory(paths.get(SpecialDirectory.MANIFEST_POOL).resolve(appName));
     }
 
     /**
@@ -168,6 +179,7 @@ public class InstanceNodeController {
 
     private void installConfigurationTo(InstanceNodeConfiguration dc) {
         Path targetDir = paths.get(SpecialDirectory.BIN);
+        PathHelper.deleteRecursive(targetDir);
 
         ApplicationPoolingReferenceHandler aprh = new ApplicationPoolingReferenceHandler(hive,
                 paths.getAndCreate(SpecialDirectory.MANIFEST_POOL), targetDir.resolve(InstanceNodeManifest.MANIFEST_TREE));
@@ -203,31 +215,41 @@ public class InstanceNodeController {
         // Manifests which are marked for removal can safely be assumed to be gone.
         inHive.removeAll(toBeRemoved);
 
+        // Only keep things which are actually installed, so check all manifests
+        List<InstanceNodeController> toKeep = new ArrayList<>();
+        for (Manifest.Key key : inHive) {
+            InstanceNodeManifest inmf = InstanceNodeManifest.of(source, key);
+            InstanceNodeController inc = new InstanceNodeController(source, root, inmf);
+
+            if (inc.isInstalled()) {
+                toKeep.add(inc);
+            }
+        }
+
         log.info("Collecting garbage in instance node deployments...");
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(root,
                 p -> !p.getFileName().toString().equals(SpecialDirectory.MANIFEST_POOL.getDirName()))) {
             // name of each directory is an instance UUID.
             for (Path dir : stream) {
-                cleanupBinDir(toRemove, inHive, dir);
+                cleanupBinDir(toRemove, toKeep, dir);
             }
         } catch (IOException e) {
             throw new IllegalStateException("Cannot scan deployment directories", e);
         }
 
-        cleanupPoolDir(source, root, toRemove, inHive);
+        cleanupPoolDir(source, root, toRemove, toKeep);
 
         return toRemove;
     }
 
-    private static void cleanupPoolDir(BHive source, Path root, List<CleanupAction> toRemove, SortedSet<Manifest.Key> inHive) {
+    private static void cleanupPoolDir(BHive source, Path root, List<CleanupAction> toRemove,
+            List<InstanceNodeController> toKeep) {
         log.info("Collecting garbage in application pool...");
         OperatingSystem runningOs = OsHelper.getRunningOs();
         TreeSet<String> requiredKeys = new TreeSet<>();
-        for (Manifest.Key key : inHive) {
-            InstanceNodeManifest inmf = InstanceNodeManifest.of(source, key);
-
+        for (InstanceNodeController inc : toKeep) {
             // add all applications and all of their dependencies as resolved locally.
-            inmf.getConfiguration().applications.stream().map(a -> a.application).peek(a -> {
+            inc.getManifest().getConfiguration().applications.stream().map(a -> a.application).peek(a -> {
                 SortedSet<String> deps = ApplicationManifest.of(source, a).getDescriptor().runtimeDependencies;
                 if (deps == null) {
                     return;
@@ -252,7 +274,8 @@ public class InstanceNodeController {
         }
     }
 
-    private static void cleanupBinDir(List<CleanupAction> toRemove, SortedSet<Manifest.Key> inHive, Path dir) throws IOException {
+    private static void cleanupBinDir(List<CleanupAction> toRemove, List<InstanceNodeController> toKeep, Path dir)
+            throws IOException {
         Path binDir = dir.resolve(SpecialDirectory.BIN.getDirName());
 
         // if there is no bin-dir in there, remove it all together as spurious directory.
@@ -266,7 +289,7 @@ public class InstanceNodeController {
         try (DirectoryStream<Path> binStream = Files.newDirectoryStream(binDir)) {
             // each directory is a tag.
             for (Path tagPath : binStream) {
-                Optional<String> anyMatch = findAliveTag(inHive, dir, tagPath);
+                Optional<String> anyMatch = findAliveTag(toKeep, dir, tagPath);
                 if (anyMatch.isPresent()) {
                     hasChild = true; // keep parent directory alive.
                 } else {
@@ -284,8 +307,8 @@ public class InstanceNodeController {
         }
     }
 
-    private static Optional<String> findAliveTag(SortedSet<Manifest.Key> inHive, Path uuidPath, Path tagPath) {
-        return inHive.stream()
+    private static Optional<String> findAliveTag(List<InstanceNodeController> toKeep, Path uuidPath, Path tagPath) {
+        return toKeep.stream().map(inc -> inc.getManifest().getKey())
                 // filter for matching instance UUID.
                 .filter(k -> k.getName().startsWith(uuidPath.getFileName().toString() + "/"))
                 // map to the tags which are still present in the hive.
