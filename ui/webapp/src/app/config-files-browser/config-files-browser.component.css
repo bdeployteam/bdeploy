@@ -1,0 +1,46 @@
+.fill-space {
+  flex: 1 1 auto;
+}
+
+.box {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  height: 100%;
+}
+
+.config-card {
+  margin: 20px;
+  min-width: 90%;
+}
+
+.config-title-icon {
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+}
+
+.filelist-table {
+  width: 100%;
+}
+
+.wide-column {
+  width: 100%;
+}
+
+.icon-column {
+  min-width: 40px;
+}
+
+.deletedFile {
+  text-decoration: line-through;
+}
+
+.path-field {
+  margin-top: 15px !important;
+  width: 100%;
+}
+
+.content-field {
+  width: 100%;
+}

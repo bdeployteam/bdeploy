@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { ConfigFileStatus } from '../config-files-browser/config-files-browser.component';
 import { ClientDescriptor, DeploymentStateDto, InstanceConfiguration, InstanceConfigurationDto, InstanceNodeConfigurationListDto, InstancePurpose, InstanceVersionDto, ManifestKey } from '../models/gen.dtos';
 import { ConfigService } from './config.service';
 import { InstanceGroupService } from './instance-group.service';
@@ -71,6 +72,41 @@ export class InstanceService {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/' + tag;
     this.log.debug('getInstanceVersion: ' + url);
     return this.http.get<InstanceConfiguration>(url);
+  }
+
+  public listConfigurationFiles(instanceGroupName: string, instanceName: string, tag: string): Observable<string[]> {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/configurationFiles';
+    this.log.debug('listConfigurationFiles: ' + url);
+    // return this.http.get<string[]>(url);
+    const result: string[] = [];
+
+    result.push('logging/log4j-standard.xml');
+    result.push('logging/log4j-Desktop-Client.xml');
+    result.push('admin/servers.json');
+    return of(result);
+  }
+
+  public getConfigurationFile(instanceGroupName: string, instanceName: string, tag: string, filename: string): Observable<string> {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/configurationFile/' + filename;
+    this.log.debug('getConfigurationFile: ' + url);
+    // return this.http.get<string[]>(url);
+    const result: string = 'Content of config file ' + filename;
+    return of(result);
+  }
+
+  public updateConfigurationFiles(instanceGroupName: string, instanceName: string, tag: string, configFiles: Map<string, ConfigFileStatus>) {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/configurationFiles';
+    this.log.debug('updateConfigurationFiles: ' + url);
+
+    console.log('-----------------------------------');
+    const keys: string[] = Array.from(configFiles.keys());
+    keys.forEach(key => {
+      console.log('path = "' + key + '", value="' + JSON.stringify(configFiles.get(key)));
+    });
+    console.log('-----------------------------------');
+
+    // TODO
+    return this.http.post(url, configFiles);
   }
 
   public listPurpose(instanceGroupName: string): Observable<InstancePurpose[]> {

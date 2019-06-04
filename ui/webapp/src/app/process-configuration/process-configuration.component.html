@@ -63,6 +63,10 @@
         <button mat-menu-item [routerLink]="['/instanceedit', groupParam, uuidParam]" [disabled]="!isEditable()">
           Edit Instance...
         </button>
+        <button mat-menu-item [routerLink]="['/configfilesbrowser', groupParam, uuidParam, selectedConfig?.version.key.tag]" [disabled]="!isEditable()">
+          Configuration Files...
+        </button>
+        <mat-divider></mat-divider>
         <button mat-menu-item (click)="setSidenavApplications()" [disabled]="isSidenavApplications() || !isEditable()">
           Configure Applications...
         </button>

@@ -19,6 +19,7 @@ import { ApplicationEditManualComponent } from './application-edit-manual/applic
 import { ApplicationEditOptionalComponent } from './application-edit-optional/application-edit-optional.component';
 import { ApplicationEditComponent } from './application-edit/application-edit.component';
 import { ClientInfoComponent } from './client-info/client-info.component';
+import { ConfigFilesBrowserComponent } from './config-files-browser/config-files-browser.component';
 import { ClickStopPropagationDirective } from './directives/click-stop-propagation.directive';
 import { FileDropDirective } from './directives/file-drop.directive';
 import { FileUploadComponent } from './file-upload/file-upload.component';
@@ -118,6 +119,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     ApplicationEditCommandPreviewComponent,
     ProcessStartConfirmComponent,
     ClientInfoComponent,
+	ConfigFilesBrowserComponent,    
     UpdateBrowserComponent,
     UpdateCardComponent,
     UpdateDialogComponent
