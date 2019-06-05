@@ -49,8 +49,6 @@ import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.util.FutureHelper;
-import io.bdeploy.common.util.OsHelper;
-import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 
 /**
@@ -195,7 +193,7 @@ public class ObjectManager {
                 case BLOB:
                     filesOnLevel.add(fileOps.submit(() -> {
                         try {
-                            internalExportBlob(obj, child);
+                            internalExportBlobByCopy(obj, child);
                         } finally {
                             exporting.workAndCancelIfRequested(1);
                         }
@@ -217,25 +215,6 @@ public class ObjectManager {
         FutureHelper.awaitAll(filesOnLevel);
 
         exporting.workAndCancelIfRequested(1);
-    }
-
-    private void internalExportBlob(ObjectId obj, Path child) {
-        try {
-            // always try to use hard-links, except in windows. On windows it is not possible to decrement
-            // the link-count of a file which is locked (e.g. running executable), even if the executable
-            // was started from a different path.
-            Path objectFile = db.getObjectFile(obj);
-            if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS
-                    || objectFile.getFileSystem().provider() != child.getFileSystem().provider()) {
-                internalExportBlobByCopy(obj, child);
-            } else {
-                // everywhere except windows: always hard-link :)
-                Files.createLink(child, objectFile);
-                setExecutable(child, null);
-            }
-        } catch (IOException e) {
-            internalExportBlobByCopy(obj, child);
-        }
     }
 
     private void internalExportBlobByCopy(ObjectId obj, Path child) {
