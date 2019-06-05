@@ -90,6 +90,9 @@ public interface InstanceResource {
     @Path("/{instance}/processes")
     public ProcessResource getProcessResource(@ActivityScope @PathParam("instance") String instanceId);
 
+    @Path("/{instance}/cfgFiles")
+    public ConfigFileResource getConfigResource(@ActivityScope @PathParam("instance") String instanceId);
+
     @GET
     @Path("/{instance}/installerZip/{processId}")
     @Produces(MediaType.TEXT_PLAIN)

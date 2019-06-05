@@ -32,6 +32,11 @@ public class JerseyWriteLockService {
     @Retention(RUNTIME)
     @Target(ElementType.TYPE)
     public @interface LockingResource {
+
+        /**
+         * The name of the lock. If not given, uses the path of the resource.
+         */
+        String value() default "";
     }
 
     /**

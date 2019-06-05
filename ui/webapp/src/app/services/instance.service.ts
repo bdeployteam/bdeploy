@@ -1,8 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { ConfigFileStatus } from '../config-files-browser/config-files-browser.component';
-import { ClientDescriptor, DeploymentStateDto, InstanceConfiguration, InstanceConfigurationDto, InstanceNodeConfigurationListDto, InstancePurpose, InstanceVersionDto, ManifestKey } from '../models/gen.dtos';
+import { Observable } from 'rxjs';
+import { ClientDescriptor, DeploymentStateDto, FileStatusDto, InstanceConfiguration, InstanceConfigurationDto, InstanceNodeConfigurationListDto, InstancePurpose, InstanceVersionDto, ManifestKey } from '../models/gen.dtos';
 import { ConfigService } from './config.service';
 import { InstanceGroupService } from './instance-group.service';
 import { Logger, LoggingService } from './logging.service';
@@ -75,38 +74,24 @@ export class InstanceService {
   }
 
   public listConfigurationFiles(instanceGroupName: string, instanceName: string, tag: string): Observable<string[]> {
-    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/configurationFiles';
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/cfgFiles/' + tag;
     this.log.debug('listConfigurationFiles: ' + url);
-    // return this.http.get<string[]>(url);
-    const result: string[] = [];
-
-    result.push('logging/log4j-standard.xml');
-    result.push('logging/log4j-Desktop-Client.xml');
-    result.push('admin/servers.json');
-    return of(result);
+    return this.http.get<string[]>(url);
   }
 
   public getConfigurationFile(instanceGroupName: string, instanceName: string, tag: string, filename: string): Observable<string> {
-    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/configurationFile/' + filename;
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/cfgFiles/' + tag + '/' + filename;
     this.log.debug('getConfigurationFile: ' + url);
-    // return this.http.get<string[]>(url);
-    const result: string = 'Content of config file ' + filename;
-    return of(result);
+    return this.http.get(url, { responseType: 'text' });
   }
 
-  public updateConfigurationFiles(instanceGroupName: string, instanceName: string, tag: string, configFiles: Map<string, ConfigFileStatus>) {
-    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/configurationFiles';
+  public updateConfigurationFiles(instanceGroupName: string, instanceName: string, tag: string, configFiles: FileStatusDto[]) {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/cfgFiles';
     this.log.debug('updateConfigurationFiles: ' + url);
-
-    console.log('-----------------------------------');
-    const keys: string[] = Array.from(configFiles.keys());
-    keys.forEach(key => {
-      console.log('path = "' + key + '", value="' + JSON.stringify(configFiles.get(key)));
-    });
-    console.log('-----------------------------------');
-
-    // TODO
-    return this.http.post(url, configFiles);
+    const options = {
+      params: new HttpParams().set('expect', tag),
+    };
+    return this.http.post(url, configFiles, options);
   }
 
   public listPurpose(instanceGroupName: string): Observable<InstancePurpose[]> {
