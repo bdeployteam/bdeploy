@@ -39,6 +39,7 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.UuidHelper;
+import io.bdeploy.interfaces.InstanceImportExportHelper;
 import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.cleanup.CleanupAction;
 import io.bdeploy.interfaces.cleanup.CleanupGroup;
@@ -81,53 +82,10 @@ public class MinionDeployTest {
     @SlowTest
     void testRemoteDeploy(BHive local, MasterRootResource master, SlaveCleanupResource scr, RemoteService remote,
             @TempDir Path tmp, ActivityReporter reporter, MinionRoot mr) throws IOException, InterruptedException {
-        /* STEP 1: Applications and external Application provided by development teams */
-        Path app = TestAppFactory.createDummyApp("app", tmp);
-        Path client = TestAppFactory.createDummyApp("client", tmp);
-        Path jdk = TestAppFactory.createDummyAppNoDescriptor("jdk", tmp);
+        Manifest.Key instance = createApplicationsAndInstance(local, master, remote, tmp);
 
-        Manifest.Key prodKey = new Manifest.Key("customer/product", "1.0.0.1234");
-        Manifest.Key appKey = new Manifest.Key(ScopedManifestKey.createScopedName("demo", OsHelper.getRunningOs()), "1.0.0.1234");
-        Manifest.Key clientKey = new Manifest.Key(ScopedManifestKey.createScopedName("demo-client", OsHelper.getRunningOs()),
-                "1.0.0.1234");
-        Manifest.Key jdkKey = new Manifest.Key(ScopedManifestKey.createScopedName("jdk", OsHelper.getRunningOs()), "1.8.0");
-
-        local.execute(new ImportOperation().setManifest(appKey).setSourcePath(app));
-        local.execute(new ImportOperation().setManifest(clientKey).setSourcePath(client));
-        local.execute(new ImportOperation().setManifest(jdkKey).setSourcePath(jdk));
-
-        Path cfgs = tmp.resolve("config-templates");
-        PathHelper.mkdirs(cfgs);
-        Files.write(cfgs.resolve("myconfig.json"), Arrays.asList("{ \"cfg\": \"value\" }"));
-
-        ProductDescriptor pd = new ProductDescriptor();
-        pd.name = "Dummy Product";
-        pd.product = "customer";
-        pd.applications.add("demo");
-        pd.configTemplates = "config-templates";
-        new ProductManifest.Builder(pd).add(appKey).add(clientKey).setConfigTemplates(cfgs).insert(local, prodKey,
-                "Demo Product for Unit Test");
-
-        /* STEP 2: Create customer (normally via Web UI) and associated hive on remote */
-        InstanceGroupConfiguration desc = new InstanceGroupConfiguration();
-        desc.name = "demo";
-        desc.description = "For Unit Test";
-        /* (note: usually this would be once locally (local HiveRegistry) as well as on the master). */
-        /* (this test creates the named hive only on the target "remote" server - see below) */
-
-        /* STEP 3a: Configuration created (normally via Web UI) */
-        Manifest.Key instance = createDemoInstance(local, prodKey, tmp, remote, appKey, clientKey);
         String uuid = local.execute(new ManifestLoadOperation().setManifest(instance)).getLabels()
                 .get(InstanceManifest.INSTANCE_LABEL);
-
-        /* STEP 3b: Establish sync with designated remote master */
-        /* NOTE: alternative: sync via exported property file and master CLI in offline mode */
-        master.addInstanceGroup(desc, master.getStorageLocations().iterator().next());
-        // TODO: create CLI to do it via property file (e.g.) on master
-
-        /* STEP 4: push instance manifest to remote master */
-        /* NOTE: instance manifest references all other required things */
-        local.execute(new PushOperation().setRemote(remote).setHiveName("demo").addManifest(instance));
 
         /* STEP 5: deploy, activate on remote master */
         assertFalse(master.getNamedMaster("demo").getAvailableDeployments().containsKey(uuid));
@@ -207,12 +165,87 @@ public class MinionDeployTest {
                         .count());
     }
 
+    @Test
+    void testImportedDeploy(BHive local, MasterRootResource master, SlaveCleanupResource scr, RemoteService remote,
+            @TempDir Path tmp, ActivityReporter reporter, MinionRoot mr) throws IOException, InterruptedException {
+        Manifest.Key instance = createApplicationsAndInstance(local, master, remote, tmp);
+
+        /* STEP 1: export and re-import instance */
+        Path tmpZip = tmp.resolve("export.zip");
+        InstanceImportExportHelper.exportTo(tmpZip, local, InstanceManifest.of(local, instance));
+        Manifest.Key importedInstance = InstanceImportExportHelper.importFrom(tmpZip, local, UuidHelper.randomId());
+
+        /* STEP 2: push to remote */
+        local.execute(new PushOperation().setRemote(remote).setHiveName("demo").addManifest(importedInstance));
+
+        String uuid = local.execute(new ManifestLoadOperation().setManifest(importedInstance)).getLabels()
+                .get(InstanceManifest.INSTANCE_LABEL);
+
+        /* STEP 5: deploy, activate on remote master */
+        assertFalse(master.getNamedMaster("demo").getAvailableDeployments().containsKey(uuid));
+        assertFalse(master.getNamedMaster("demo").getAvailableDeployments(Minion.DEFAULT_MASTER_NAME).containsKey(uuid));
+        master.getNamedMaster("demo").install(importedInstance);
+        assertTrue(master.getNamedMaster("demo").getAvailableDeployments().containsKey(uuid));
+        assertTrue(master.getNamedMaster("demo").getAvailableDeployments(Minion.DEFAULT_MASTER_NAME).containsKey(uuid));
+        master.getNamedMaster("demo").activate(importedInstance);
+    }
+
+    private static Manifest.Key createApplicationsAndInstance(BHive local, MasterRootResource master, RemoteService remote,
+            Path tmp) throws IOException {
+        /* STEP 1: Applications and external Application provided by development teams */
+        Path app = TestAppFactory.createDummyApp("app", tmp);
+        Path client = TestAppFactory.createDummyApp("client", tmp);
+        Path jdk = TestAppFactory.createDummyAppNoDescriptor("jdk", tmp);
+
+        Manifest.Key prodKey = new Manifest.Key("customer/product", "1.0.0.1234");
+        Manifest.Key appKey = new Manifest.Key(ScopedManifestKey.createScopedName("demo", OsHelper.getRunningOs()), "1.0.0.1234");
+        Manifest.Key clientKey = new Manifest.Key(ScopedManifestKey.createScopedName("demo-client", OsHelper.getRunningOs()),
+                "1.0.0.1234");
+        Manifest.Key jdkKey = new Manifest.Key(ScopedManifestKey.createScopedName("jdk", OsHelper.getRunningOs()), "1.8.0");
+
+        local.execute(new ImportOperation().setManifest(appKey).setSourcePath(app));
+        local.execute(new ImportOperation().setManifest(clientKey).setSourcePath(client));
+        local.execute(new ImportOperation().setManifest(jdkKey).setSourcePath(jdk));
+
+        Path cfgs = tmp.resolve("config-templates");
+        PathHelper.mkdirs(cfgs);
+        Files.write(cfgs.resolve("myconfig.json"), Arrays.asList("{ \"cfg\": \"value\" }"));
+
+        ProductDescriptor pd = new ProductDescriptor();
+        pd.name = "Dummy Product";
+        pd.product = "customer";
+        pd.applications.add("demo");
+        pd.configTemplates = "config-templates";
+        new ProductManifest.Builder(pd).add(appKey).add(clientKey).setConfigTemplates(cfgs).insert(local, prodKey,
+                "Demo Product for Unit Test");
+
+        /* STEP 2: Create instance group (normally via Web UI) and associated hive on remote */
+        InstanceGroupConfiguration desc = new InstanceGroupConfiguration();
+        desc.name = "demo";
+        desc.description = "For Unit Test";
+        /* (note: usually this would be once locally (local HiveRegistry) as well as on the master). */
+        /* (this test creates the named hive only on the target "remote" server - see below) */
+
+        /* STEP 3a: Configuration created (normally via Web UI) */
+        Manifest.Key instance = createDemoInstance(local, prodKey, tmp, remote, appKey, clientKey);
+
+        /* STEP 3b: Establish sync with designated remote master */
+        /* NOTE: alternative: sync via exported property file and master CLI in offline mode */
+        master.addInstanceGroup(desc, master.getStorageLocations().iterator().next());
+
+        /* STEP 4: push instance manifest to remote master */
+        /* NOTE: instance manifest references all other required things */
+        local.execute(new PushOperation().setRemote(remote).setHiveName("demo").addManifest(instance));
+
+        return instance;
+    }
+
     /**
      * Fakes the configuration UI.
      *
      * @param remote
      */
-    private Manifest.Key createDemoInstance(BHive local, Manifest.Key product, Path tmp, RemoteService remote,
+    private static Manifest.Key createDemoInstance(BHive local, Manifest.Key product, Path tmp, RemoteService remote,
             Manifest.Key serverApp, Manifest.Key clientApp) throws IOException {
         String uuid = UuidHelper.randomId();
 

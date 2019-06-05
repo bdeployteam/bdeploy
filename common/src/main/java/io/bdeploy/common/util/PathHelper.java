@@ -2,9 +2,14 @@ package io.bdeploy.common.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Stream;
 
 /**
@@ -64,6 +69,13 @@ public class PathHelper {
             throw new IllegalStateException("Cannot delete " + path, e);
         }
 
+    }
+
+    public static FileSystem openZip(Path zipFile) throws IOException {
+        Map<String, Object> env = new TreeMap<>();
+        env.put("create", "true");
+        env.put("useTempFile", Boolean.TRUE);
+        return FileSystems.newFileSystem(URI.create("jar:" + zipFile.toUri()), env);
     }
 
 }

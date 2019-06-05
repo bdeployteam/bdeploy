@@ -5,15 +5,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -23,7 +20,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
-import javax.ws.rs.core.UriBuilder;
 
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.slf4j.Logger;
@@ -140,10 +136,7 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
                 try {
                     PathHelper.deleteRecursive(tmpFile);
 
-                    Map<String, Object> env = new TreeMap<>();
-                    env.put("create", "true");
-                    env.put("useTempFile", Boolean.TRUE);
-                    try (FileSystem zfs = FileSystems.newFileSystem(UriBuilder.fromUri("jar:" + tmpFile.toUri()).build(), env)) {
+                    try (FileSystem zfs = PathHelper.openZip(tmpFile)) {
                         Path exportTo = zfs.getPath("/").resolve(key.directoryFriendlyName());
                         getHive().execute(new ExportOperation().setManifest(key).setTarget(exportTo));
                     }

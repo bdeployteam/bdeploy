@@ -1,0 +1,150 @@
+package io.bdeploy.interfaces;
+
+import java.io.IOException;
+import java.nio.file.FileSystem;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Map;
+import java.util.Objects;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.bhive.op.ExportTreeOperation;
+import io.bdeploy.bhive.op.ImportTreeOperation;
+import io.bdeploy.bhive.op.ManifestExistsOperation;
+import io.bdeploy.bhive.util.StorageHelper;
+import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
+import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
+import io.bdeploy.interfaces.manifest.InstanceManifest;
+import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
+
+/**
+ * Helps with importing and exporting instance configurations
+ * <p>
+ * Creates and reads "bundles" which contain the complete configuration for the instance and all nodes, along with all
+ * configuration files.
+ */
+public class InstanceImportExportHelper {
+
+    private static final Logger log = LoggerFactory.getLogger(InstanceImportExportHelper.class);
+
+    private static final String CONFIG_DIR = "config";
+    private static final String INSTANCE_JSON = "instance.json";
+
+    /**
+     * @param zipFilePath the {@link Path} to the ZIP file to create. The file may NOT exist yet.
+     * @param source the source {@link BHive} to read data from.
+     * @param imf the {@link InstanceManifest} to export.
+     */
+    public static void exportTo(Path zipFilePath, BHive source, InstanceManifest imf) {
+        if (Files.exists(zipFilePath)) {
+            throw new IllegalArgumentException("ZIP may not yet exist: " + zipFilePath);
+        }
+
+        InstanceCompleteConfigDto export = new InstanceCompleteConfigDto();
+
+        export.config = imf.getConfiguration();
+        for (Map.Entry<String, Key> node : imf.getInstanceNodeManifests().entrySet()) {
+            InstanceNodeManifest inmf = InstanceNodeManifest.of(source, node.getValue());
+            export.minions.put(node.getKey(), inmf.getConfiguration());
+        }
+
+        try (FileSystem zfs = PathHelper.openZip(zipFilePath)) {
+            Path zroot = zfs.getPath("/");
+
+            Files.write(zroot.resolve(INSTANCE_JSON), StorageHelper.toRawBytes(export));
+
+            if (imf.getConfiguration().configTree != null) {
+                source.execute(new ExportTreeOperation().setSourceTree(imf.getConfiguration().configTree)
+                        .setTargetPath(zroot.resolve(CONFIG_DIR)));
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot create ZIP: " + zipFilePath, e);
+        }
+    }
+
+    /**
+     * @param zipFilePath the {@link Path} to the ZIP file to read from.
+     * @param target the target {@link BHive} to import to.
+     * @param uuid the target UUID for the instance. All existing UUIDs contained in the provided ZIP will be replaced by this
+     *            UUID. The target {@link BHive} may already contain an {@link InstanceManifest} with the given UUID, in which
+     *            case a new version will be created. If the UUID is not yet used, a new {@link InstanceManifest} will be created
+     *            instead.
+     * @return the resulting {@link Key} in the target {@link BHive}
+     */
+    public static Manifest.Key importFrom(Path zipFilePath, BHive target, String uuid) {
+        try (FileSystem zfs = PathHelper.openZip(zipFilePath)) {
+            Path zroot = zfs.getPath("/");
+
+            InstanceCompleteConfigDto cfg = StorageHelper.fromRawBytes(Files.readAllBytes(zroot.resolve(INSTANCE_JSON)),
+                    InstanceCompleteConfigDto.class);
+
+            ObjectId cfgId = null;
+            Path cfgDir = zroot.resolve(CONFIG_DIR);
+            if (Files.exists(cfgDir)) {
+                cfgId = target.execute(new ImportTreeOperation().setSourcePath(cfgDir));
+            }
+
+            return importFromData(target, cfg, cfgId, uuid);
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot read ZIP: " + zipFilePath, e);
+        }
+    }
+
+    private static Manifest.Key importFromData(BHive target, InstanceCompleteConfigDto dto, ObjectId cfgId, String uuid) {
+        if (!Objects.equals(dto.config.configTree, cfgId)) {
+            log.warn("Configuration tree has unexpected ID: " + dto.config.configTree + " <-> " + cfgId);
+        }
+
+        InstanceConfiguration icfg = dto.config;
+        icfg.configTree = cfgId;
+        icfg.uuid = uuid;
+
+        Manifest.Key requiredProduct = icfg.product;
+        if (!target.execute(new ManifestExistsOperation().setManifest(requiredProduct))) {
+            throw new IllegalStateException("Required product does not exist: " + requiredProduct);
+        }
+
+        InstanceManifest.Builder imfb = new InstanceManifest.Builder().setInstanceConfiguration(icfg);
+
+        for (Map.Entry<String, InstanceNodeConfiguration> node : dto.minions.entrySet()) {
+            InstanceNodeManifest.Builder inmBuilder = new InstanceNodeManifest.Builder();
+            InstanceNodeConfiguration nodeCfg = node.getValue();
+
+            // align redundant copies of certain falgs
+            nodeCfg.uuid = icfg.uuid;
+            nodeCfg.name = icfg.name;
+            nodeCfg.autoStart = icfg.autoStart;
+
+            inmBuilder.setConfigTreeId(cfgId);
+            inmBuilder.setInstanceNodeConfiguration(nodeCfg);
+            inmBuilder.setMinionName(node.getKey());
+
+            imfb.addInstanceNodeManifest(node.getKey(), inmBuilder.insert(target));
+        }
+
+        return imfb.insert(target);
+    }
+
+    /**
+     * {@link InstanceManifest} and {@link InstanceNodeManifest} hold the {@link InstanceConfiguration} and
+     * {@link InstanceNodeConfiguration} separately. This helper class bundles them together for hierarchical storage in an
+     * export.
+     */
+    private static final class InstanceCompleteConfigDto {
+
+        public InstanceConfiguration config = new InstanceConfiguration();
+
+        public final SortedMap<String, InstanceNodeConfiguration> minions = new TreeMap<>();
+
+    }
+
+}

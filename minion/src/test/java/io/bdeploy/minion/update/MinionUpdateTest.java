@@ -4,16 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Test;
@@ -31,6 +27,7 @@ import io.bdeploy.common.TestCliTool;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
+import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.minion.MinionRoot;
@@ -80,10 +77,8 @@ public class MinionUpdateTest {
 
         // generate test app into a ZIP
         Path zip = tmp.resolve("xxx-2.0.0.zip");
-        Map<String, Object> env = new TreeMap<>();
-        env.put("create", "true");
-        env.put("useTempFile", Boolean.TRUE);
-        try (FileSystem zfs = FileSystems.newFileSystem(URI.create("jar:" + zip.toUri()), env)) {
+
+        try (FileSystem zfs = PathHelper.openZip(zip)) {
             Path createDummyApp = TestAppFactory.createDummyApp("xxx-2.0.0", zfs.getPath("/"));
             List<String> lines = new ArrayList<>();
             lines.add("version=2.0.0");

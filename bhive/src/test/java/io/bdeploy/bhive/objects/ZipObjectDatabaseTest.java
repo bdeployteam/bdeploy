@@ -4,22 +4,18 @@
 package io.bdeploy.bhive.objects;
 
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.util.Map;
-import java.util.TreeMap;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import io.bdeploy.bhive.objects.ObjectDatabase;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.TempDirectory.TempDir;
+import io.bdeploy.common.TestActivityReporter;
+import io.bdeploy.common.util.PathHelper;
 
 /**
  * Runs all tests from {@link ObjectDatabaseTest} but with a ZIP compressed DB.
@@ -36,10 +32,7 @@ public class ZipObjectDatabaseTest extends ObjectDatabaseTest {
     @BeforeEach
     public void initZipDb(@TempDir Path tmp, ActivityReporter r) throws IOException {
         zipPath = tmp.resolve("zip-hive.zip");
-        Map<String, Object> env = new TreeMap<>();
-        env.put("create", "true");
-        env.put("useTempFile", Boolean.TRUE);
-        zfs = FileSystems.newFileSystem(URI.create("jar:" + zipPath.toUri()), env);
+        zfs = PathHelper.openZip(zipPath);
 
         dbRoot = zfs.getPath("/");
         zipDb = new ObjectDatabase(dbRoot, tmp.resolve("objtmp"), r);
