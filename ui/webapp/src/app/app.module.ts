@@ -9,6 +9,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LoadingBarHttpClientModule } from '@ngx-loading-bar/http-client';
 import { LoadingBarRouterModule } from '@ngx-loading-bar/router';
+import { AceEditorModule } from 'ng2-ace-editor';
 import { CookieService } from 'ngx-cookie-service';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -65,6 +66,7 @@ import { UpdateBrowserComponent } from './update-browser/update-browser.componen
 import { UpdateCardComponent } from './update-card/update-card.component';
 import { UpdateDialogComponent } from './update-dialog/update-dialog.component';
 
+
 export function loadAppConfig(cfgService: ConfigService) {
   return () => cfgService.load();
 }
@@ -119,7 +121,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     ApplicationEditCommandPreviewComponent,
     ProcessStartConfirmComponent,
     ClientInfoComponent,
-	ConfigFilesBrowserComponent,    
+    ConfigFilesBrowserComponent,
     UpdateBrowserComponent,
     UpdateCardComponent,
     UpdateDialogComponent
@@ -165,6 +167,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     MatTreeModule,
     MatPaginatorModule,
     MatSortModule,
+    AceEditorModule,
   ],
   providers: [
     ConfigService,

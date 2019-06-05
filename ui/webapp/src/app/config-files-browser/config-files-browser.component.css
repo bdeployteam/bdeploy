@@ -44,3 +44,11 @@
 .content-field {
   width: 100%;
 }
+
+.ace-editor {
+  margin-top: 10px;
+  height: 400px;
+  width: 100%;
+  border-top: 1px gray solid;
+  border-bottom: 1px gray solid;
+}

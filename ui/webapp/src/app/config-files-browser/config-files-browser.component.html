@@ -74,9 +74,7 @@
           <input class="input-field" matInput formControlName="path" placeholder="New Path" />
           <mat-error *ngIf="pathControl.invalid">{{getErrorMessage(pathControl)}}</mat-error>
         </mat-form-field>
-        <mat-form-field class="content-field">
-          <textarea matInput formControlName="content" placeholder="Content" rows="20"></textarea>
-        </mat-form-field>
+        <ace-editor class="ace-editor" [(text)]="editorContent" [theme]="editorTheme" [mode]="editorMode"></ace-editor>
       </mat-card-content>
     </form>
   </mat-card>

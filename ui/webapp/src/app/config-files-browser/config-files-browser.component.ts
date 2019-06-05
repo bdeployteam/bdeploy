@@ -1,12 +1,20 @@
 import { Location } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, ValidatorFn, Validators } from '@angular/forms';
-import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
+import 'brace/mode/batchfile';
+import 'brace/mode/json';
+import 'brace/mode/sh';
+import 'brace/mode/text';
+import 'brace/mode/xml';
+import 'brace/theme/eclipse';
+import 'brace/theme/twilight';
 import { cloneDeep } from 'lodash';
+import { Subscription } from 'rxjs';
 import { FileStatusDto, FileStatusType, InstanceConfiguration } from '../models/gen.dtos';
 import { InstanceService } from '../services/instance.service';
 import { Logger, LoggingService } from '../services/logging.service';
+import { ThemeService } from '../services/theme.service';
 
 
 export class ConfigFileStatus {
@@ -24,13 +32,15 @@ export const EMPTY_CONFIG_FILE_STATUS: ConfigFileStatus = {
   templateUrl: './config-files-browser.component.html',
   styleUrls: ['./config-files-browser.component.css']
 })
-export class ConfigFilesBrowserComponent implements OnInit {
+export class ConfigFilesBrowserComponent implements OnInit, OnDestroy {
 
   private log: Logger = this.loggingService.getLogger('ConfigFilesBrowserComponent');
 
   groupParam: string = this.route.snapshot.paramMap.get('group');
   uuidParam: string = this.route.snapshot.paramMap.get('uuid');
   versionParam: string = this.route.snapshot.paramMap.get('version');
+
+  private themeSubscription: Subscription;
 
   public instanceVersion: InstanceConfiguration;
 
@@ -39,11 +49,21 @@ export class ConfigFilesBrowserComponent implements OnInit {
 
   // used in edit mode:
   public editMode = false; // switching edit/list mode
+
   public editKey: string = null; // original config file name on edit
   public configFileFormGroup = this.fb.group({
     path: ['', [Validators.required, this.duplicateNameValidator()]],
-    content: [''],
   });
+  public editorContent = '';
+  public editorMode = 'text';
+  private editorModeMap = new Map([
+    ['json', 'json'],
+    ['xml', 'xml'],
+    ['bat', 'batchfile'],
+    ['sh', 'sh']
+  ]);
+  public editorTheme = '';
+
   get pathControl() {
     return this.configFileFormGroup.get('path');
   }
@@ -56,7 +76,7 @@ export class ConfigFilesBrowserComponent implements OnInit {
     private instanceService: InstanceService,
     private loggingService: LoggingService,
     public location: Location,
-    private dialog: MatDialog
+    private themeService: ThemeService
   ) {}
 
 
@@ -70,6 +90,27 @@ export class ConfigFilesBrowserComponent implements OnInit {
     this.instanceService.listConfigurationFiles(this.groupParam, this.uuidParam, this.versionParam).subscribe(
       configFilePaths => {configFilePaths.forEach(p => this.statusCache.set(p, cloneDeep(EMPTY_CONFIG_FILE_STATUS))); }
     );
+
+    this.themeSubscription = this.themeService.getThemeSubject().subscribe(theme => {
+      this.editorTheme = this.themeService.getAceTheme();
+    });
+
+    this.pathControl.valueChanges.subscribe(e => {
+      const regex = /(?:\.([^.]+))?$/;
+      const ext = regex.exec(e)[1];
+      if (ext) {
+        const newMode: string = this.editorModeMap.get(ext);
+        if (newMode) {
+          this.editorMode = newMode;
+          return;
+        }
+      }
+      this.editorMode = 'text';
+    });
+  }
+
+  public ngOnDestroy(): void {
+    this.themeSubscription.unsubscribe();
   }
 
   public duplicateNameValidator(): ValidatorFn {
@@ -96,7 +137,8 @@ export class ConfigFilesBrowserComponent implements OnInit {
 
   public addFile(): void {
     this.editKey = null;
-    this.configFileFormGroup.setValue({path: '', content: ''});
+    this.configFileFormGroup.setValue({path: ''});
+    this.editorContent = '';
     this.editMode = true;
   }
 
@@ -107,11 +149,13 @@ export class ConfigFilesBrowserComponent implements OnInit {
 
     const intialName = copy ? path + ' (copy)' : path;
     if (cached.content) {
-      this.configFileFormGroup.setValue({path: intialName, content: cached.content});
+      this.configFileFormGroup.setValue({path: intialName});
+      this.editorContent = cached.content;
     } else {
       this.instanceService.getConfigurationFile(this.groupParam, this.uuidParam, this.versionParam, path).subscribe(
         content => {
-          this.configFileFormGroup.setValue({path: intialName, content: content});
+          this.configFileFormGroup.setValue({path: intialName});
+          this.editorContent = content;
           this.originalContentCache.set(path, content);
         });
     }
@@ -123,19 +167,19 @@ export class ConfigFilesBrowserComponent implements OnInit {
       // new file
       const status = cloneDeep(EMPTY_CONFIG_FILE_STATUS);
       status.type = FileStatusType.ADD;
-      status.content = formValue['content'];
+      status.content = this.editorContent;
       this.statusCache.set(formValue['path'], status);
     } else {
       const cached = this.statusCache.get(this.editKey);
       if (this.editKey === formValue['path']) {
         // file content changed?
         const originalContent = this.originalContentCache.get(this.editKey);
-        if (formValue['content'] === originalContent) {
+        if (this.editorContent === originalContent) {
           cached.type = null;
         } else if (!cached.type) { // set if unset, keep ADD, can't be DELETE
           cached.type = FileStatusType.EDIT;
         }
-        cached.content = formValue['content'];
+        cached.content = this.editorContent;
       } else {
         // file renamed -- delete old, create a new
         if (cached.type === FileStatusType.ADD) {
@@ -145,7 +189,7 @@ export class ConfigFilesBrowserComponent implements OnInit {
         }
         const status = cloneDeep(EMPTY_CONFIG_FILE_STATUS);
         status.type = FileStatusType.ADD;
-        status.content = formValue['content'];
+        status.content = this.editorContent;
         this.statusCache.set(formValue['path'], status);
       }
     }
@@ -160,6 +204,7 @@ export class ConfigFilesBrowserComponent implements OnInit {
     this.editMode = false;
     this.editKey = null;
     this.configFileFormGroup.reset();
+    this.editorContent = '';
   }
 
   public deleteFile(path: string): void {
