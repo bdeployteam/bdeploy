@@ -93,6 +93,7 @@ task genDtos() {
             'io.bdeploy.ui.dto.HiveEntryDto',
             'io.bdeploy.ui.dto.InstanceVersionDto',
             'io.bdeploy.ui.dto.DeploymentStateDto',
+            'io.bdeploy.ui.dto.FileStatusDto',
             // Other, generic
             'io.bdeploy.common.ActivitySnapshot',
         ]

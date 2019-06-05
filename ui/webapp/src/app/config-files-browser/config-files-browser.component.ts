@@ -4,19 +4,13 @@ import { AbstractControl, FormBuilder, FormControl, ValidatorFn, Validators } fr
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
 import { cloneDeep } from 'lodash';
-import { InstanceConfiguration } from '../models/gen.dtos';
+import { FileStatusDto, FileStatusType, InstanceConfiguration } from '../models/gen.dtos';
 import { InstanceService } from '../services/instance.service';
 import { Logger, LoggingService } from '../services/logging.service';
 
 
-export enum ConfigFileStatusType {
-  ADD = 'ADD',
-  EDIT = 'EDIT',
-  DELETE = 'DELETE'
-}
-
 export class ConfigFileStatus {
-  type: ConfigFileStatusType;
+  type: FileStatusType;
   content: string;
 }
 
@@ -97,7 +91,7 @@ export class ConfigFilesBrowserComponent implements OnInit {
 
   public listConfigFiles(): string[] {
     const paths: string[] = Array.from(this.statusCache.keys());
-    return paths.filter(p => this.statusCache.get(p).type !== ConfigFileStatusType.DELETE);
+    return paths.filter(p => this.statusCache.get(p).type !== FileStatusType.DELETE);
   }
 
   public addFile(): void {
@@ -128,7 +122,7 @@ export class ConfigFilesBrowserComponent implements OnInit {
     if (this.editKey === null) {
       // new file
       const status = cloneDeep(EMPTY_CONFIG_FILE_STATUS);
-      status.type = ConfigFileStatusType.ADD;
+      status.type = FileStatusType.ADD;
       status.content = formValue['content'];
       this.statusCache.set(formValue['path'], status);
     } else {
@@ -139,18 +133,18 @@ export class ConfigFilesBrowserComponent implements OnInit {
         if (formValue['content'] === originalContent) {
           cached.type = null;
         } else if (!cached.type) { // set if unset, keep ADD, can't be DELETE
-          cached.type = ConfigFileStatusType.EDIT;
+          cached.type = FileStatusType.EDIT;
         }
         cached.content = formValue['content'];
       } else {
         // file renamed -- delete old, create a new
-        if (cached.type === ConfigFileStatusType.ADD) {
+        if (cached.type === FileStatusType.ADD) {
           this.statusCache.delete(this.editKey);
         } else {
-          cached.type = ConfigFileStatusType.DELETE;
+          cached.type = FileStatusType.DELETE;
         }
         const status = cloneDeep(EMPTY_CONFIG_FILE_STATUS);
-        status.type = ConfigFileStatusType.ADD;
+        status.type = FileStatusType.ADD;
         status.content = formValue['content'];
         this.statusCache.set(formValue['path'], status);
       }
@@ -170,10 +164,10 @@ export class ConfigFilesBrowserComponent implements OnInit {
 
   public deleteFile(path: string): void {
     const cached = this.statusCache.get(path);
-    if (cached.type === ConfigFileStatusType.ADD) {
+    if (cached.type === FileStatusType.ADD) {
       this.statusCache.delete(path);
     } else {
-      cached.type = ConfigFileStatusType.DELETE;
+      cached.type = FileStatusType.DELETE;
     }
   }
 
@@ -183,13 +177,13 @@ export class ConfigFilesBrowserComponent implements OnInit {
     if (cached.content === null || cached.content === originalContent) {
       cached.type = null;
     } else {
-      cached.type = ConfigFileStatusType.EDIT;
+      cached.type = FileStatusType.EDIT;
     }
   }
 
   public isDeleted(path: string) {
     const action: ConfigFileStatus = this.statusCache.get(path);
-    return action && action.type === ConfigFileStatusType.DELETE;
+    return action && action.type === FileStatusType.DELETE;
   }
 
   public isDirty(): boolean {
@@ -200,22 +194,25 @@ export class ConfigFilesBrowserComponent implements OnInit {
   }
 
   public onSave(): void {
-    const resultMap = new Map<string, ConfigFileStatus>();
+    const result: FileStatusDto[] = [];
     const keys: string[] = Array.from(this.statusCache.keys());
     keys.forEach(key => {
       const value: ConfigFileStatus = this.statusCache.get(key);
-      if (value.type === ConfigFileStatusType.DELETE) {
-        // don't transfer file content for delete
-        const deleteStatus = cloneDeep(EMPTY_CONFIG_FILE_STATUS);
-        deleteStatus.type = ConfigFileStatusType.DELETE;
-        resultMap.set(key, deleteStatus);
-      } else  if (value.type) {
-        resultMap.set(key, value);
+      if (!value.type) {
+        return; // no update, don't send one.
       }
+
+      const dto: FileStatusDto = {
+        type: value.type,
+        content: value.type === FileStatusType.DELETE ? null : value.content,
+        file: key
+      };
+
+      result.push(dto);
     });
 
-    this.instanceService.updateConfigurationFiles(this.groupParam, this.uuidParam, this.versionParam, resultMap)
-    .subscribe(result => {
+    this.instanceService.updateConfigurationFiles(this.groupParam, this.uuidParam, this.versionParam, result)
+    .subscribe(_ => {
       this.log.info('stored configuration files for ' + this.groupParam + ', ' + this.uuidParam + ', ' + this.versionParam);
       this.location.back();
     });

@@ -42,13 +42,14 @@ public class JerseyWriteLockFilter implements ContainerRequestFilter, ContainerR
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
-        if (!ri.getResourceClass().isAnnotationPresent(LockingResource.class)) {
+        LockingResource lr = ri.getResourceClass().getAnnotation(LockingResource.class);
+        if (lr == null) {
             return;
         }
 
         // find, lock, remember
         String path = requestContext.getUriInfo().getPath(false);
-        ReadWriteLock lock = lockService.getLock(path);
+        ReadWriteLock lock = lockService.getLock(lr.value().isEmpty() ? path : lr.value());
 
         boolean write = ri.getResourceMethod().isAnnotationPresent(WriteLock.class);
         Lock rwLock;

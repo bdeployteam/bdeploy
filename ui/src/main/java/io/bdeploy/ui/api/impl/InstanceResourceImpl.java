@@ -73,6 +73,7 @@ import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyWriteLockService.LockingResource;
 import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
 import io.bdeploy.ui.api.AuthService;
+import io.bdeploy.ui.api.ConfigFileResource;
 import io.bdeploy.ui.api.InstanceResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.ProcessResource;
@@ -82,8 +83,10 @@ import io.bdeploy.ui.dto.InstanceNodeConfigurationDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
 import io.bdeploy.ui.dto.InstanceVersionDto;
 
-@LockingResource
+@LockingResource(InstanceResourceImpl.GLOBAL_INSTANCE_LOCK)
 public class InstanceResourceImpl implements InstanceResource {
+
+    protected static final String GLOBAL_INSTANCE_LOCK = "GlobalInstanceLock";
 
     private static final Logger log = LoggerFactory.getLogger(InstanceResourceImpl.class);
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
@@ -541,6 +544,11 @@ public class InstanceResourceImpl implements InstanceResource {
     @Override
     public ProcessResource getProcessResource(String instanceId) {
         return rc.initResource(new ProcessResourceImpl(hive, group, instanceId));
+    }
+
+    @Override
+    public ConfigFileResource getConfigResource(String instanceId) {
+        return rc.initResource(new ConfigFileResourceImpl(hive, instanceId));
     }
 
     @Override
