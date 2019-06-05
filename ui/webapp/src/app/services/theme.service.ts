@@ -1,5 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
 // keep in sync with app-theme.scss
 enum Theme {
@@ -13,6 +14,8 @@ enum Theme {
   providedIn: 'root',
 })
 export class ThemeService {
+
+  activeTheme$: BehaviorSubject<Theme> = new BehaviorSubject(Theme.DEFAULT);
 
   constructor(@Inject(DOCUMENT) private document: Document) {
     if (localStorage.getItem('theme') === null) {
@@ -37,6 +40,19 @@ export class ThemeService {
     }
 
     this.document.body.classList.add(theme);
+
+    this.activeTheme$.next(theme);
   }
 
+  public getThemeSubject(): BehaviorSubject<Theme> {
+    return this.activeTheme$;
+  }
+
+  public getAceTheme(): string {
+    const theme = this.getCurrentTheme();
+    if (theme === Theme.DARK || theme === Theme.DARK_YELLOW) {
+      return 'twilight';
+    }
+    return 'eclipse';
+  }
 }
