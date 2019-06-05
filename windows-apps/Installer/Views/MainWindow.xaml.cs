@@ -1,5 +1,4 @@
-﻿using Bdeploy.Common;
-using Bdeploy.Models;
+﻿using Bdeploy.Shared;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
@@ -9,7 +8,7 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
-namespace Bdeploy
+namespace Bdeploy.Installer
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

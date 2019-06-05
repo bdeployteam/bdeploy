@@ -1,5 +1,4 @@
-﻿using Bdeploy.Common;
-using Bdeploy.Models;
+﻿using Bdeploy.Shared;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -7,7 +6,7 @@ using System.IO.Compression;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Bdeploy
+namespace Bdeploy.Installer
 {
     /// <summary>
     /// Downloads and unpacks the launcher.
@@ -195,7 +194,7 @@ namespace Bdeploy
             var tmpFileName = Path.Combine(tmpDir, Guid.NewGuid() + ".download");
             using (HttpClient client = new HttpClient())
             {
-                var requestUrl = new Uri(Bdeploy.Properties.Resources.LauncherUrl);
+                var requestUrl = new Uri(Properties.Resources.LauncherUrl);
                 var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
                 var response = await client.GetAsync(requestUrl, HttpCompletionOption.ResponseHeadersRead);
 

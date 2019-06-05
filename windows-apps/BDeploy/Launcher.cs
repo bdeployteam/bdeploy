@@ -6,9 +6,9 @@ using System;
 using System.Text.RegularExpressions;
 using System.Linq;
 using System.Collections.Generic;
-using Bdeploy.Common;
+using Bdeploy.Shared;
 
-namespace Bdeploy
+namespace Bdeploy.Launcher
 {
     /// <summary>
     /// Launches the companion script and passes the desired application to start.
@@ -27,7 +27,7 @@ namespace Bdeploy
         /// <summary>
         /// Creates a new instance of the launcher.
         /// </summary>
-        /// <param name="application">The bdeploy file to pass to the compantion script</param>
+        /// <param name="application">The bdeploy file to pass to the companion script</param>
         public Launcher(string application)
         {
             FileInfo info = new FileInfo(Process.GetCurrentProcess().MainModule.FileName);

@@ -118,18 +118,18 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ApplicationJson" xml:space="preserve">
-    <value>SerializedJson</value>
+    <value>&lt;Json&gt;</value>
     <comment>The serialized bdeploy file</comment>
   </data>
   <data name="ApplicationName" xml:space="preserve">
-    <value>My Application</value>
+    <value>&lt;AppName&gt;</value>
   </data>
   <data name="ApplicationUid" xml:space="preserve">
-    <value>ApplicationId</value>
+    <value>&lt;AppUid&gt;</value>
     <comment>The unique ID of the application</comment>
   </data>
   <data name="LauncherUrl" xml:space="preserve">
-    <value>http://artifacts.w5.wamas.com/targets/deployment/launcher-win64-1.0.0-SNAPSHOT.zip</value>
+    <value>&lt;LauncherUrl&gt;</value>
     <comment>URL of the launcher to download</comment>
   </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />

@@ -7,7 +7,7 @@
     <ProjectGuid>{C2AB7B6A-7555-4F7D-ABA7-8C087A9D01E4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Bdeploy</RootNamespace>
+    <RootNamespace>Bdeploy.Shared</RootNamespace>
     <AssemblyName>Common</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

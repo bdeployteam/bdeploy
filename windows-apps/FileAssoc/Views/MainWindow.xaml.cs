@@ -2,9 +2,9 @@
 using System.Windows;
 using Microsoft.Win32;
 using System.IO;
-using Bdeploy.Common;
+using Bdeploy.Shared;
 
-namespace Bdeploy
+namespace Bdeploy.FileAssoc
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

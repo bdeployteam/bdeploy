@@ -1,10 +1,9 @@
 ﻿
 using System.Diagnostics;
 using System.ComponentModel;
-using System.Security.Principal;
 using System.IO;
 
-namespace Bdeploy
+namespace Bdeploy.FileAssoc
 {
     /// <summary>
     /// Utility class to launch a process

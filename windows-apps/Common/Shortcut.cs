@@ -2,7 +2,7 @@
 using System;
 using System.IO;
 
-namespace Bdeploy
+namespace Bdeploy.Shared
 {
     public class Shortcut
     {

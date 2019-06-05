@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Win32;
 
-namespace Bdeploy
+namespace Bdeploy.FileAssoc
 {
     /// <summary>
     /// Provides API to create or delete associations of a given executable with the .bdeploy extension.
