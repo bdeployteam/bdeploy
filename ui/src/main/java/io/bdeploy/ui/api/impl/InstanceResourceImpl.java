@@ -746,6 +746,7 @@ public class InstanceResourceImpl implements InstanceResource {
         return responeBuilder.build();
     }
 
+    @WriteLock
     @Override
     public List<Key> importInstance(InputStream inputStream, String instanceId) {
         Path zip = minion.getDownloadDir().resolve(UuidHelper.randomId() + ".zip");
