@@ -293,6 +293,8 @@ public class InstanceResourceImpl implements InstanceResource {
                 }
 
                 nodeConfig.autoStart = cfg.autoStart;
+                nodeConfig.purpose = cfg.purpose;
+                nodeConfig.product = cfg.product;
 
                 RuntimeAssert.assertEquals(nodeDto.nodeConfiguration.uuid, instance, "Instance ID not set on nodes");
                 String mfName = instance + "/" + minionName;
