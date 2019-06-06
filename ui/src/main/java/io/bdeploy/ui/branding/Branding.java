@@ -2,6 +2,7 @@ package io.bdeploy.ui.branding;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import org.boris.pecoff4j.PE;
 import org.boris.pecoff4j.SectionData;
@@ -43,18 +44,18 @@ public class Branding {
 
         // Find block that we are going to exchange
         byte[] codeBlock = codeContent.getData();
-        int startBlock = Bytes.indexOf(codeBlock, START_BDEPLOY.getBytes("UTF-8"));
-        int endBlock = Bytes.indexOf(codeBlock, END_BDEPLOY.getBytes("UTF-8")) + END_BDEPLOY.length();
+        int startBlock = Bytes.indexOf(codeBlock, START_BDEPLOY.getBytes(StandardCharsets.UTF_8));
+        int endBlock = Bytes.indexOf(codeBlock, END_BDEPLOY.getBytes(StandardCharsets.UTF_8)) + END_BDEPLOY.length();
         int length = endBlock - startBlock;
 
         // Build a block of the same size. Fill with dummy at the end
         StringBuilder replacement = new StringBuilder();
         replacement.append(START_BDEPLOY);
         replacement.append(START_CONFIG);
-        replacement.append(new String(StorageHelper.toRawBytes(config)));
+        replacement.append(new String(StorageHelper.toRawBytes(config), StandardCharsets.UTF_8));
         replacement.append(END_CONFIG);
 
-        int currentSize = replacement.toString().getBytes("UTF-8").length;
+        int currentSize = replacement.toString().getBytes(StandardCharsets.UTF_8).length;
         int charsToWrite = length - currentSize - END_BDEPLOY.length();
         for (int i = 0; i < charsToWrite; i++) {
             replacement.append("0");
@@ -62,7 +63,7 @@ public class Branding {
         replacement.append(END_BDEPLOY);
 
         // Replace previous block with the new one
-        byte[] configBlock = replacement.toString().getBytes("UTF-8");
+        byte[] configBlock = replacement.toString().getBytes(StandardCharsets.UTF_8);
         byte[] newData = new byte[codeBlock.length];
         System.arraycopy(codeBlock, 0, newData, 0, startBlock);
         System.arraycopy(configBlock, 0, newData, startBlock, configBlock.length);

@@ -149,7 +149,7 @@ public interface ActivityReporter {
          * avoid stalling of running actions while catching up with dynamic updates to
          * progress values.
          */
-        public void beginReporting() {
+        public synchronized void beginReporting() {
             if (updater == null) {
                 updater = Executors
                         .newSingleThreadScheduledExecutor(new NamedDaemonThreadFactory(() -> "Activity Reporter (Console)"));

@@ -680,7 +680,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
         // Serve file to the client
         ContentDispositionBuilder<?, ?> builder = ContentDisposition.type("attachement");
-        builder.size(file.length()).fileName(appConfig.name + " Installer.exe").build();
+        builder.size(file.length()).fileName(appConfig.name + " Installer.exe");
         responeBuilder.header("Content-Disposition", builder.build());
         responeBuilder.header("Content-Length", file.length());
         return responeBuilder.build();
@@ -705,7 +705,7 @@ public class InstanceResourceImpl implements InstanceResource {
             }
         }, MediaType.APPLICATION_OCTET_STREAM);
         ContentDispositionBuilder<?, ?> builder = ContentDisposition.type("attachement");
-        builder.size(brandingIcon.length).fileName(appConfig.name + ".ico").build();
+        builder.size(brandingIcon.length).fileName(appConfig.name + ".ico");
         responeBuilder.header("Content-Disposition", builder.build());
         responeBuilder.header("Content-Length", brandingIcon.length);
         return responeBuilder.build();
