@@ -5,9 +5,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -15,15 +13,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import org.apache.commons.codec.binary.Base64;
-import org.quartz.CronScheduleBuilder;
-import org.quartz.JobBuilder;
-import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
-import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.quartz.Trigger;
-import org.quartz.TriggerBuilder;
 import org.quartz.impl.DirectSchedulerFactory;
 import org.quartz.simpl.RAMJobStore;
 import org.quartz.simpl.SimpleThreadPool;
@@ -43,8 +34,8 @@ import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.jersey.audit.Auditor;
 import io.bdeploy.jersey.audit.RollingFileAuditor;
-import io.bdeploy.minion.cleanup.MasterCleanupJob;
-import io.bdeploy.minion.tasks.CleanupDownloadDirTask;
+import io.bdeploy.minion.job.CleanupDownloadDirJob;
+import io.bdeploy.minion.job.MasterCleanupJob;
 import io.bdeploy.minion.user.UserDatabase;
 import io.bdeploy.pcu.InstanceProcessController;
 import io.bdeploy.pcu.MinionProcessController;
@@ -54,9 +45,6 @@ import io.bdeploy.ui.api.Minion;
  * Represents the root directory and configuration of a minion installation.
  */
 public class MinionRoot extends LockableDatabase implements Minion, AutoCloseable {
-
-    /** Default schedule for cleanup job - once a day at 2:00am. */
-    public static final String DEFAULT_CLEANUP_SCHEDULE = "0 0 2 * * ?";
 
     private static final Logger log = LoggerFactory.getLogger(MinionRoot.class);
 
@@ -71,7 +59,6 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     private final Path downloadDir;
 
     private final MinionProcessController processController;
-    private CleanupDownloadDirTask cleanupDownloadDirTask;
 
     private Path updates;
     private MinionUpdateManager updateManager = (t) -> log.error("No Update Manager, cannot update Minion!");
@@ -117,6 +104,13 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         return updateManager;
     }
 
+    /**
+     * Returns the job scheduler
+     */
+    public Scheduler getScheduler() {
+        return scheduler;
+    }
+
     @Override
     public SortedMap<String, RemoteService> getMinions() {
         return getState().minions;
@@ -132,71 +126,22 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         return tmpDir;
     }
 
-    private void cleanup() {
-        PathHelper.deleteRecursive(getTempDir());
-        PathHelper.mkdirs(getTempDir());
-    }
-
     /**
      * Setup tasks which should only run when this root is used for serving a
      * minion.
      */
     public void setupServerTasks(boolean master) {
         // cleanup any stale things so periodic tasks don't get them wrong.
-        cleanup();
-
-        this.cleanupDownloadDirTask = new CleanupDownloadDirTask(downloadDir);
-        this.cleanupDownloadDirTask.start();
+        PathHelper.deleteRecursive(getTempDir());
+        PathHelper.mkdirs(getTempDir());
 
         initProcessController();
         createJobScheduler();
 
         if (master) {
-            String cronSchedule = getState().cleanupSchedule;
-            if (cronSchedule == null) {
-                cronSchedule = DEFAULT_CLEANUP_SCHEDULE;
-            }
-
-            initCleanupJob(cronSchedule);
+            MasterCleanupJob.create(this, getState().cleanupSchedule);
         }
-    }
-
-    /**
-     * Initializes (or updates) the cleanup job to the given schedule.
-     *
-     * @param cronSchedule the schedule for the cleanup job.
-     */
-    public void initCleanupJob(String cronSchedule) {
-        JobDetail cleanupJob = JobBuilder.newJob(MasterCleanupJob.class).withDescription("Master Cleanup Job")
-                .withIdentity("Cleanup", "Master")
-                .usingJobData(new JobDataMap(Collections.singletonMap(MasterCleanupJob.DATA_ROOT, this))).build();
-        Trigger trigger = createCronTrigger(cleanupJob.getKey(), cronSchedule);
-
-        try {
-            if (scheduler.checkExists(trigger.getKey())) {
-                log.info("Re-scheduling cleanup job to '" + cronSchedule + "'");
-                scheduler.rescheduleJob(trigger.getKey(), trigger);
-            } else {
-                scheduler.scheduleJob(cleanupJob, trigger);
-            }
-        } catch (SchedulerException e) {
-            throw new IllegalStateException("Cannot schedule cleanup job", e);
-        }
-    }
-
-    private Trigger createCronTrigger(JobKey job, String cronSchedule) {
-        Trigger trigger;
-        try {
-            trigger = TriggerBuilder.newTrigger().forJob(job).withIdentity("CleanupTrigger", "Master").startNow()
-                    .usingJobData(MasterCleanupJob.SCHEDULE, cronSchedule)
-                    .withSchedule(CronScheduleBuilder.cronScheduleNonvalidatedExpression(cronSchedule)).build();
-        } catch (ParseException e) {
-            log.error("Invalid cron schedule: {} using default instead", cronSchedule);
-            trigger = TriggerBuilder.newTrigger().forJob(job).startNow()
-                    .withSchedule(CronScheduleBuilder.cronSchedule(DEFAULT_CLEANUP_SCHEDULE)).build();
-        }
-
-        return trigger;
+        CleanupDownloadDirJob.create(scheduler, downloadDir);
     }
 
     private void createJobScheduler() {

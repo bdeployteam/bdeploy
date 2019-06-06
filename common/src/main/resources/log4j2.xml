@@ -12,9 +12,15 @@
 		</Console>
 	</Appenders>
 	<Loggers>
-		<Root level="info">
+		<!-- Disable logging for all unless enabled -->
+		<Root level="OFF">
 			<AppenderRef ref="Console" />
 		</Root>
+		
+		<!-- By default we are using INFO for all our classes -->
+		<Logger name="io.bdeploy" level="info" additivity="false">
+			<AppenderRef ref="Console" />
+		</Logger>
 
 		<!-- JerseyServer's log level also controls Grizzly and Jersey log levels! -->
 		<Logger name="io.bdeploy.jersey.JerseyServer" level="info" additivity="false">

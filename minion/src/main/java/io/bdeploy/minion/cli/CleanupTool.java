@@ -18,6 +18,7 @@ import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.cli.CleanupTool.CleanupConfig;
+import io.bdeploy.minion.job.MasterCleanupJob;
 
 @Help("Manage cleanup settings")
 @CliName("cleanup")
@@ -30,7 +31,7 @@ public class CleanupTool extends ConfiguredCliTool<CleanupConfig> {
         String root();
 
         @Help("Set/update the schedule ('cron' syntax) for the master cleanup job, default: '"
-                + MinionRoot.DEFAULT_CLEANUP_SCHEDULE + "'")
+                + MasterCleanupJob.DEFAULT_CLEANUP_SCHEDULE + "'")
         String setSchedule();
     }
 
