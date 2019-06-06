@@ -16,7 +16,7 @@ namespace Bdeploy.Shared
         {
             // Check if BDEPLOY_HOME is set
             string home = Environment.GetEnvironmentVariable("BDEPLOY_HOME");
-            if (File.Exists(home))
+            if (home != null)
             {
                 return home;
             }
