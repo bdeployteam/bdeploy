@@ -3,16 +3,14 @@ package io.bdeploy.interfaces.configuration.dcu;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import io.bdeploy.common.util.TemplateHelper;
 
 /**
  * Describes a single parameter as configured in a configuration UI.
  */
 public class ParameterConfiguration {
-
-    private static final Pattern VAR_PATTERN = Pattern.compile("\\$\\{([^\\}]*)\\}");
 
     /**
      * The ID of the parameter, which can be used to reference it from other
@@ -49,38 +47,7 @@ public class ParameterConfiguration {
      * @return a resolved {@link String}.
      */
     public static String process(String value, Function<String, String> valueProvider) {
-        if (value == null || !value.contains("${")) {
-            return value;
-        }
-
-        String processed = value;
-        // repeat process as long as the value contains something to expand. This can
-        // happen when the value of a variable is another variable.
-        while (processed.contains("${")) {
-            Matcher m = VAR_PATTERN.matcher(processed);
-            StringBuilder builder = new StringBuilder();
-            int currentStart = 0;
-            while (m.find()) {
-                String r = valueProvider.apply(m.group(1));
-                if (r == null) {
-                    throw new IllegalArgumentException(
-                            "Cannot find replacement for variable " + m.group(1) + " while processing " + value);
-                }
-                // append string from beginning or previous end to start of variable match
-                // not using appendReplacement and appendTail since they are slow.
-                builder.append(processed.substring(currentStart, m.start()));
-
-                // append substituted variable contents
-                builder.append(r);
-
-                // update current "start" position for next find.
-                currentStart = m.end();
-            }
-            builder.append(processed.substring(currentStart));
-            processed = builder.toString();
-        }
-
-        return processed;
+        return TemplateHelper.process(value, valueProvider, "${", "}");
     }
 
 }
