@@ -1,5 +1,6 @@
 package io.bdeploy.ui.api;
 
+import java.io.InputStream;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -14,6 +15,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.glassfish.jersey.media.multipart.FormDataParam;
+
+import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
@@ -114,4 +118,15 @@ public interface InstanceResource {
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response downloadIcon(@PathParam("instance") String instanceId, @PathParam("applicationId") String applicationId);
 
+    @GET
+    @Unsecured
+    @Path("/{instance}/export/{tag}")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response exportInstance(@ActivityScope @PathParam("instance") String instanceId, @PathParam("tag") String tag);
+
+    @POST
+    @Path("/{instance}/import")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public List<Key> importInstance(@FormDataParam("file") InputStream inputStream,
+            @ActivityScope @PathParam("instance") String instanceId);
 }

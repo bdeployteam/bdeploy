@@ -1,12 +1,13 @@
 import { CdkDrag, CdkDragDrop, CdkDragStart, CdkDropList } from '@angular/cdk/drag-drop';
 import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { MatSlideToggle } from '@angular/material';
+import { MatDialog, MatDialogConfig, MatSlideToggle } from '@angular/material';
 import { ActivatedRoute, Params } from '@angular/router';
 import { cloneDeep, isEqual } from 'lodash';
 import { BehaviorSubject, forkJoin, Observable, of, Subscription } from 'rxjs';
 import { finalize, mergeMap } from 'rxjs/operators';
 import { ApplicationEditComponent } from '../application-edit/application-edit.component';
+import { FileUploadComponent } from '../file-upload/file-upload.component';
 import { InstanceVersionCardComponent } from '../instance-version-card/instance-version-card.component';
 import { MessageBoxMode } from '../messagebox/messagebox.component';
 import { ApplicationGroup } from '../models/application.model';
@@ -95,6 +96,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     private processService: ProcessService,
     public location: Location,
     public downloadService: DownloadService,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit() {
@@ -726,5 +728,28 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       return false;
     }
     return this.sidenavMode === SidenavMode.ProcessStatus || this.sidenavMode === SidenavMode.Versions;
+  }
+
+  importInstanceVersion() {
+    const config = new MatDialogConfig();
+    config.width = '80%';
+    config.height = '60%';
+    config.data = {
+      title: 'Import Instance Version',
+      headerMessage: `Import a new instance version from a previously exported instance version. The target server of the imported version is ignored.`,
+      url: this.instanceService.getImportUrl(this.groupParam, this.uuidParam),
+      mimeTypes: ['application/x-zip-compressed', 'application/zip'],
+      mimeTypeErrorMessage: 'Only ZIP files can be uploaded.'
+    };
+    this.dialog
+      .open(FileUploadComponent, config)
+      .afterClosed()
+      .subscribe(e => {
+        this.loadVersions();
+      });
+  }
+
+  exportInstanceVersion(key: ManifestKey) {
+    window.location.href = this.instanceService.getExportUrl(this.groupParam, this.uuidParam, key.tag);
   }
 }

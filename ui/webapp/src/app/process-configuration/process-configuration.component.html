@@ -63,6 +63,9 @@
         <button mat-menu-item [routerLink]="['/instanceedit', groupParam, uuidParam]" [disabled]="!isEditable()">
           Edit Instance...
         </button>
+        <button mat-menu-item (click)="importInstanceVersion()">
+          Import Instance Version...
+        </button>
         <button mat-menu-item [routerLink]="['/configfilesbrowser', groupParam, uuidParam, selectedConfig?.version.key.tag]" [disabled]="!isEditable()">
           Configuration Files...
         </button>
@@ -184,6 +187,7 @@
                 (activate)="doActivateVersion($event, appVersionCard)"
                 (install)="doInstallVersion($event, appVersionCard)"
                 (uninstall)="doUninstallVersion($event, appVersionCard)"
+                (export)="exportInstanceVersion($event)"
                 [state]='deploymentState'
                 [isRunningOrScheduled]='isRunningOrScheduledVersion(config.version.key.tag)'
                 [selected]="isVersionSelected(config)"

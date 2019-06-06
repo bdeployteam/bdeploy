@@ -70,6 +70,7 @@ import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.common.util.UuidHelper;
+import io.bdeploy.interfaces.InstanceImportExportHelper;
 import io.bdeploy.interfaces.NodeStatus;
 import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
@@ -128,14 +129,14 @@ public class InstanceResourceImpl implements InstanceResource {
     @Inject
     private ActivityReporter reporter;
 
+    @Inject
+    private Minion minion;
+
     @Context
     private SecurityContext context;
 
     @Context
     private ResourceContext rc;
-
-    @Inject
-    private Minion minion;
 
     public InstanceResourceImpl(String group, BHive hive) {
         this.group = group;
@@ -708,6 +709,52 @@ public class InstanceResourceImpl implements InstanceResource {
         responeBuilder.header("Content-Disposition", builder.build());
         responeBuilder.header("Content-Length", brandingIcon.length);
         return responeBuilder.build();
+    }
+
+    @Override
+    public Response exportInstance(String instanceId, String tag) {
+        Path zip;
+        try {
+            zip = Files.createTempFile(minion.getTempDir(), "exp-", ".zip");
+            Files.deleteIfExists(zip);
+        } catch (IOException e) {
+            throw new WebApplicationException("Cannot create temporary file", e);
+        }
+
+        String rootName = InstanceManifest.getRootName(instanceId);
+        Manifest.Key key = new Manifest.Key(rootName, tag);
+
+        InstanceImportExportHelper.exportTo(zip, hive, InstanceManifest.of(hive, key));
+
+        ResponseBuilder responeBuilder = Response.ok(new StreamingOutput() {
+
+            @Override
+            public void write(OutputStream output) throws IOException, WebApplicationException {
+                try (InputStream is = Files.newInputStream(zip)) {
+                    is.transferTo(output);
+                } finally {
+                    Files.deleteIfExists(zip);
+                }
+            }
+        }, MediaType.APPLICATION_OCTET_STREAM);
+
+        ContentDisposition contentDisposition = ContentDisposition.type("attachement").fileName(instanceId + "-" + tag + ".zip")
+                .build();
+        responeBuilder.header("Content-Disposition", contentDisposition);
+        return responeBuilder.build();
+    }
+
+    @Override
+    public List<Key> importInstance(InputStream inputStream, String instanceId) {
+        Path zip = minion.getDownloadDir().resolve(UuidHelper.randomId() + ".zip");
+        try {
+            Files.copy(inputStream, zip);
+            return Collections.singletonList(InstanceImportExportHelper.importFrom(zip, hive, instanceId));
+        } catch (IOException e) {
+            throw new WebApplicationException("Cannot import from uploaded ZIP", e);
+        } finally {
+            PathHelper.deleteRecursive(zip);
+        }
     }
 
 }

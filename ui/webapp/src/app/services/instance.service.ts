@@ -158,6 +158,14 @@ export class InstanceService {
     return this.buildInstanceUrl(instanceGroupName, instanceName) + '/' + appId + '/installer/download?token=' + token;
   }
 
+  public getExportUrl(instanceGroupName: string, instanceName: string, tag: string) {
+    return this.buildInstanceUrl(instanceGroupName, instanceName) + '/export/' + tag;
+  }
+
+  public getImportUrl(instanceGroupName: string, instanceName: string) {
+    return this.buildInstanceUrl(instanceGroupName, instanceName) + '/import';
+  }
+
   public buildGroupUrl(instanceGroupName: string): string {
     return this.cfg.config.api + InstanceGroupService.BASEPATH + '/' + instanceGroupName + '/instance';
   }

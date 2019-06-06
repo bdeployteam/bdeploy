@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Input, OnChanges, Output, Predicate } from '@angular/core';
 import { DeploymentStateDto, InstanceVersionDto, ManifestKey } from '../models/gen.dtos';
-import { ProcessService } from '../services/process.service';
 
 @Component({
   selector: 'app-instance-version-card',
@@ -18,6 +17,7 @@ export class InstanceVersionCardComponent implements OnChanges {
   @Output() install = new EventEmitter<ManifestKey>();
   @Output() activate = new EventEmitter<ManifestKey>();
   @Output() uninstall = new EventEmitter<ManifestKey>();
+  @Output() export = new EventEmitter<ManifestKey>();
 
   isLoading: boolean;
   isActive: boolean;
@@ -25,7 +25,7 @@ export class InstanceVersionCardComponent implements OnChanges {
   isOffline: boolean;
   isRunning: boolean;
 
-  constructor(private processService: ProcessService) {}
+  constructor() {}
 
   ngOnChanges() {
     if (!this.state || this.dirty) {

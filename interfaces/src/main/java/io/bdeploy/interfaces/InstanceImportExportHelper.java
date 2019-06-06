@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -19,6 +20,7 @@ import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.ExportTreeOperation;
 import io.bdeploy.bhive.op.ImportTreeOperation;
 import io.bdeploy.bhive.op.ManifestExistsOperation;
+import io.bdeploy.bhive.op.ManifestMaxIdOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
@@ -107,6 +109,20 @@ public class InstanceImportExportHelper {
         InstanceConfiguration icfg = dto.config;
         icfg.configTree = cfgId;
         icfg.uuid = uuid;
+
+        // if there is an existing instance, re-use the configured target server to avoid confusion!
+        String rootName = InstanceManifest.getRootName(uuid);
+        Optional<Long> latest = target.execute(new ManifestMaxIdOperation().setManifestName(rootName));
+        if (latest.isPresent()) {
+            InstanceManifest existing = InstanceManifest.of(target, new Manifest.Key(rootName, String.valueOf(latest.get())));
+            icfg.target = existing.getConfiguration().target;
+
+            // disallow product switch!
+            if (!icfg.product.getName().equals(existing.getConfiguration().product.getName())) {
+                throw new IllegalStateException(
+                        "Product switch not allowed: old=" + existing.getConfiguration().product + ", new=" + icfg.product);
+            }
+        }
 
         Manifest.Key requiredProduct = icfg.product;
         if (!target.execute(new ManifestExistsOperation().setManifest(requiredProduct))) {
