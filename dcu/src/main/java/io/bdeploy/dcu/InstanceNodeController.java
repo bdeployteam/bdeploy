@@ -187,9 +187,11 @@ public class InstanceNodeController {
         // write all the manifest content to the according target location, but specially handle applications
         hive.execute(new ExportOperation().setManifest(manifest.getKey()).setTarget(targetDir).setReferenceHandler(aprh));
 
-        // render the PCU information.
+        // create a variable resolver which can expand all supported variables.
         VariableResolver resolver = new VariableResolver(paths, new ManifestRefPathProvider(paths, aprh.getExportedManifests()),
                 new ApplicationParameterProvider(dc), additionalResolvers);
+
+        // render the PCU information.
         ProcessGroupConfiguration processGroupConfig = dc.renderDescriptor(resolver);
 
         try {
