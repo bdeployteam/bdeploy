@@ -7,6 +7,7 @@ import 'brace/mode/json';
 import 'brace/mode/sh';
 import 'brace/mode/text';
 import 'brace/mode/xml';
+import 'brace/mode/yaml';
 import 'brace/theme/eclipse';
 import 'brace/theme/twilight';
 import { cloneDeep } from 'lodash';
@@ -60,6 +61,7 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy {
     ['json', 'json'],
     ['xml', 'xml'],
     ['bat', 'batchfile'],
+    ['yaml', 'yaml'],
     ['sh', 'sh']
   ]);
   public editorTheme = '';
@@ -87,9 +89,7 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy {
     );
 
     // get list of config files
-    this.instanceService.listConfigurationFiles(this.groupParam, this.uuidParam, this.versionParam).subscribe(
-      configFilePaths => {configFilePaths.forEach(p => this.statusCache.set(p, cloneDeep(EMPTY_CONFIG_FILE_STATUS))); }
-    );
+    this.reload();
 
     this.themeSubscription = this.themeService.getThemeSubject().subscribe(theme => {
       this.editorTheme = this.themeService.getAceTheme();
@@ -107,6 +107,10 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy {
       }
       this.editorMode = 'text';
     });
+  }
+
+  private reload() {
+    this.instanceService.listConfigurationFiles(this.groupParam, this.uuidParam, this.versionParam).subscribe(configFilePaths => { configFilePaths.forEach(p => this.statusCache.set(p, cloneDeep(EMPTY_CONFIG_FILE_STATUS))); });
   }
 
   public ngOnDestroy(): void {
@@ -131,8 +135,7 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy {
   }
 
   public listConfigFiles(): string[] {
-    const paths: string[] = Array.from(this.statusCache.keys());
-    return paths.filter(p => this.statusCache.get(p).type !== FileStatusType.DELETE);
+    return Array.from(this.statusCache.keys());
   }
 
   public addFile(): void {
