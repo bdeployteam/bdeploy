@@ -96,6 +96,8 @@ export const EMPTY_APPLICATION_CONFIGURATION: ApplicationConfiguration = {
 export const EMPTY_INSTANCE_NODE_CONFIGURATION: InstanceNodeConfiguration = {
   uuid: null,
   autoStart: false,
+  purpose: null,
+  product: null,
   name: null,
   applications: [],
 };

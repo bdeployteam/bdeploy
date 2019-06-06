@@ -139,6 +139,8 @@ public class InstanceImportExportHelper {
             nodeCfg.uuid = icfg.uuid;
             nodeCfg.name = icfg.name;
             nodeCfg.autoStart = icfg.autoStart;
+            nodeCfg.purpose = icfg.purpose;
+            nodeCfg.product = icfg.product;
 
             inmBuilder.setConfigTreeId(cfgId);
             inmBuilder.setInstanceNodeConfiguration(nodeCfg);

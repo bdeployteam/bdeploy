@@ -23,11 +23,15 @@ public class InstanceVariableResolver implements Function<String, String> {
             String var = t.substring(SpecialVariablePrefix.INSTANCE_VALUE.getPrefix().length());
             switch (var) {
                 case "SYSTEM_PURPOSE":
-                    return "DEVELOPMENT"; // TODO: actual values from INMF
+                    return incf.purpose == null ? "" : incf.purpose.name();
                 case "UUID":
                     return incf.uuid;
                 case "NAME":
                     return incf.name;
+                case "PRODUCT_ID":
+                    return incf.product == null ? "" : incf.product.getName();
+                case "PRODUCT_TAG":
+                    return incf.product == null ? "" : incf.product.getTag();
                 default:
                     return null;
             }
