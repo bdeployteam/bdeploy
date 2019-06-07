@@ -1,6 +1,7 @@
 package io.bdeploy.dcu;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,6 +22,7 @@ import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.interfaces.cleanup.CleanupAction;
 import io.bdeploy.interfaces.cleanup.CleanupAction.CleanupType;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
@@ -191,6 +193,9 @@ public class InstanceNodeController {
         VariableResolver resolver = new VariableResolver(paths, new ManifestRefPathProvider(paths, aprh.getExportedManifests()),
                 new ApplicationParameterProvider(dc), additionalResolvers);
 
+        // render configuration files.
+        processConfigurationTemplates(paths.get(SpecialDirectory.CONFIG), resolver);
+
         // render the PCU information.
         ProcessGroupConfiguration processGroupConfig = dc.renderDescriptor(resolver);
 
@@ -199,6 +204,28 @@ public class InstanceNodeController {
                     StorageHelper.toRawBytes(processGroupConfig));
         } catch (IOException e) {
             throw new IllegalStateException("Cannot write PCU information", e);
+        }
+    }
+
+    private void processConfigurationTemplates(Path path, VariableResolver resolver) {
+        try {
+            Files.walk(path).filter(Files::isRegularFile).forEach(p -> processConfigurationFile(p, resolver));
+        } catch (IOException e) {
+            log.error("Cannot walk configuration file tree", e);
+        }
+    }
+
+    private void processConfigurationFile(Path file, VariableResolver resolver) {
+        try {
+            String content = new String(Files.readAllBytes(file), StandardCharsets.UTF_8);
+            String processed = TemplateHelper.process(content, resolver, "{{", "}}");
+            Files.write(file, processed.getBytes(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            // might have missing variable references, since we only 'see' what is on our node. Applications from other nodes are not available.
+            log.warn("Cannot process configuration file " + file);
+            if (log.isDebugEnabled()) {
+                log.debug("Error details", e);
+            }
         }
     }
 
