@@ -12,9 +12,11 @@ import 'brace/theme/eclipse';
 import 'brace/theme/twilight';
 import { cloneDeep } from 'lodash';
 import { Subscription } from 'rxjs';
+import { MessageBoxMode } from '../messagebox/messagebox.component';
 import { FileStatusDto, FileStatusType, InstanceConfiguration } from '../models/gen.dtos';
 import { InstanceService } from '../services/instance.service';
 import { Logger, LoggingService } from '../services/logging.service';
+import { MessageboxService } from '../services/messagebox.service';
 import { ThemeService } from '../services/theme.service';
 
 
@@ -78,7 +80,8 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy {
     private instanceService: InstanceService,
     private loggingService: LoggingService,
     public location: Location,
-    private themeService: ThemeService
+    private themeService: ThemeService,
+    private messageBoxService: MessageboxService
   ) {}
 
 
@@ -199,8 +202,21 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy {
     this.resetEdit();
   }
 
-  public onCancelChanges() {
-    this.resetEdit();
+  async onCancelChanges(): Promise<void> {
+    if (!this.isEditorDirty()) {
+      this.resetEdit();
+    } else {
+      const result = await this.messageBoxService.openAsync({
+        title: 'Cancel',
+        message: 'Are you sure?',
+        mode: MessageBoxMode.QUESTION,
+      });
+
+      if (!result) {
+        return;
+      }
+      this.resetEdit();
+    }
   }
 
   private resetEdit(): void {
@@ -229,9 +245,37 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy {
     }
   }
 
+  public getStatus(path: string) {
+    const cached = this.statusCache.get(path);
+    if (cached.type === FileStatusType.ADD) {
+      return '[new]';
+    } else if (cached.type === FileStatusType.EDIT) {
+      return '[modified]';
+    }
+    return '';
+  }
+
   public isDeleted(path: string) {
     const action: ConfigFileStatus = this.statusCache.get(path);
     return action && action.type === FileStatusType.DELETE;
+  }
+
+  public isEditorDirty(): boolean {
+    // editor for new file is always dirty
+    if (this.editKey === null) {
+      return true;
+    }
+    // rename? -> dirty
+    const formValue = this.configFileFormGroup.getRawValue();
+    if (this.editKey !== formValue['path']) {
+      return true;
+    }
+    // compare content
+    const originalContent = this.originalContentCache.get(this.editKey);
+    if (this.editorContent !== originalContent) {
+      return true;
+    }
+    return false;
   }
 
   public isDirty(): boolean {
@@ -265,4 +309,18 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy {
       this.location.back();
     });
   }
+
+  async onDiscardChanges(): Promise<void> {
+    const result = await this.messageBoxService.openAsync({
+      title: 'Discard changes',
+      message: 'Are you sure you want to discard all local changes?',
+      mode: MessageBoxMode.QUESTION,
+    });
+
+    if (!result) {
+      return;
+    }
+    this.location.back();
+  }
+
 }
