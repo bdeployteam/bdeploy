@@ -1,9 +1,8 @@
-:prewrap!:
-= UI Front- and Backend
+== UI Front- and Backend
 
 Contains the angular configuration frontend as well as the matching backend.
 
-== Theming
+=== Theming
 
 The `app-theme.scss` currently supports a dark and a light theme. Components can contribute their own themes using SCSS mixins. This has the advantage that the component theme can access theme colors without knowing their exact definition. Whether the theme is dark or light (generally speaking) can be queried, so defining new (own) colors can be made dependent on that.
 
@@ -50,7 +49,7 @@ Now you need to include and import the theme in the global `app-theme.scss` file
 ... (rest of file)
 ----
 
-=== Accessing theme properties in a mixin
+==== Accessing theme properties in a mixin
 
 Angular material defines a few properties. Those can be accessed from within a mixin easily. Basically a SCSS selector/mixin is just a map, so `map-get` can be used to access the actual values.
 
@@ -80,7 +79,7 @@ Available attributes are:
 - `foreground` - complex map containing various foreground colors.
 - `background` - complex map containing various background colors.
 
-=== Palettes
+==== Palettes
 
 Every theme has a `primary`, `accent` and `warn` palette. You can access those colors using `mat-color`.
 
@@ -100,7 +99,7 @@ Every theme has a `primary`, `accent` and `warn` palette. You can access those c
 
 `mat-color` accepts a palette as argument. This can be either of the theme palettes. An optional second argument can be either `lighter`, `darker` or a dedicated index into the palette to choose a certain color intensity explicitly.
 
-=== Foreground Colors
+==== Foreground Colors
 
 The complex foreground map has the following named color definitions:
 
@@ -134,7 +133,7 @@ Each of those can be accessed by `map-get`-ting them:
 
 This example will use the `app-bar` map key in the complex `background` map entry of the current theme.
 
-=== Background Colors
+==== Background Colors
 
 Analogous to foreground colors, these background colors are defined.
 

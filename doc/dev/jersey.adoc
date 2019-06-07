@@ -1,4 +1,4 @@
-= Jersey based remote infrastructure
+== Jersey based remote infrastructure
 
 This project provides the required abstractions and framework parts for the remote stack (HTTPS based client/server).
 
@@ -12,7 +12,7 @@ The stack is composed of:
 * https://github.com/FasterXML/jackson[Jackson JSON ObjectMapper]
 * https://github.com/FasterXML/jackson-modules-java8[Jackson JDK8 and JSR310 support]
 
-== Troubleshooting
+=== Troubleshooting
 
 . JerseyServer registers a writer and reader which transparently maps `Path` objects to streams of their content. This works only if the endpoint `@Produces` or `@Consumes` a media type `application/octet-stream`. Don't forget to add that media type. In case you do forget, the actual `Path` instead of it's content will be transferred.
 . The auditing filter which writes all service call audit logs reacts on the *response*, which means that you need to take that into account when associating Hive audit logs with request on the container.

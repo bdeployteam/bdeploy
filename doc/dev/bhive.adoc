@@ -1,4 +1,4 @@
-= BHive
+== BHive
 
 The BHive (short: hive) provides a mechanism to store and transfer files over the network. It decouples storage of file content and hierarchical filesystem layout descriptions (trees). The mechanism is similar to how GIT stores files. File content is stored and identified by using the content's checksum.
 
@@ -16,14 +16,14 @@ Here some properties of BHive:
 * A `io.bdeploy.bhive.BHive` does not expose API, use `Hive.Operation` defined in the `io.bdeploy.bhive.op` package to programmatically interact with a hive.
 * `Hive.Operation` can be implemented externally, to provide new functionality operating on a BHive from the outside.
 
-== BHive Tour
+=== BHive Tour
 
 This chapter, along with the launch configuration available in the bhive project, will give a short tour around most
 of the functionality that bhive provides.
 
 All launch configurations used will use a BHive target in a runtime workspace in the containing workspace (`${workspace_loc}/runtime-hive`) in case you want to have a look at it.
 
-=== Import
+==== Import
 
 _Import_ is the act of digesting a folder recursively into a BHive storage. There are two important parameters: the source folder and the destination BHive. Since BHive creates an empty hive automatically in the destination, the target BHive directory is allowed to be non-existant. The source folder is not required to follow _any_ rules at this low-level stage. BHive will simply digest any file found recursively. While doing so, it separates each files content from it's name. They are stored in separate locations (content as 'blob', name is stored in a 'tree' as 'pointer' to the 'blob' for this file's content).
 
@@ -34,11 +34,11 @@ Use the *Hive-Import* launch configuration to import a directory into the BHive.
 
 Note that all BHive objects are immutable, meaning that there are never changes to any existing file. This is analogous to GIT. Manifests are *not* BHive objects but more special (they just *reference* a root tree BHive object). They are mutable in that labels can be added and removed from the manifest.
 
-=== List
+==== List
 
 You can list the content of the BHive after importing by running the *Hive-Manifest-List* launch configuration. It will simply list all available manifests in the BHive.
 
-=== Export
+==== Export
 
 The inverse operation of an _Import_ is (surprise) an _Export_, which means restoring a file/folder tree exactly as it was imported. The export will scan a manifest for 'tree' objects and write all 'blob' objects to the locations described there.
 
@@ -46,7 +46,7 @@ Run the *Hive-Export* launch configuration and specify a target folder (which ma
 
 Check the directory, you will notice that all files have been written back on disc, and the folder content is equal to the one imported. 
 
-=== Remote Serve
+==== Remote Serve
 
 BHive provides a small embedded server which allows serving any number of local hives through HTTPS.
 
@@ -54,13 +54,13 @@ Run the *Hive-Remote-Serve* launch configuration to run the server, serving the 
 
 Note: the sample launch configurations use the test-only pre-built certificates from the _jersey_ project.
 
-=== Remote List
+==== Remote List
 
 The same list operation as before (*Hive-Manifest-List*) can be performed on the remote server as well, as long as *Hive-Remote-Serve* is still running.
 
 Run *Hive-Remote-List* to try it - this will go through the HTTPS stack and perform the manifest listing remotely.
 
-=== Remote Fetch & Push
+==== Remote Fetch & Push
 
 The two tools _fetch_ and _push_ allow to fetch and push manifests along with all required objects from and to a remote hive.
 
@@ -68,23 +68,23 @@ Both operations are practically identical, just reversed. To demonstrate fetch, 
 
 If you are interested, you can try to _import_ another folder which shares some parts with the first one you imported. Due to the separation of content and location, each common file will be stored only once, regardless of it's location (name) in the tree. This will also enable fetch/push to transfer only missing objects.
 
-=== FSCK
+==== FSCK
 
 The _FSCK_ (short for 'filesystem check') will check consistency of all objects and manifests in e BHive. Run *Hive-FSCK* to execute a _FSCK_ on the sample BHive.
 
-=== Delete
+==== Delete
 
 Manifests can be deleted from a BHive as well. Run *Hive-Manifest-Delete* to delete a manifest. Be sure to give the same manifest key as with *Hive-Import*.
 
 Note that this operation only deletes the manifest, but *not* automatically all now-unreferenced objects from the object database. This is done by <<Prune>>.
 
-=== Prune
+==== Prune
 
 _Pruning_ is a cleanup operation which removes unreferenced objects from the storage. It is comparable to a _git gc_.
 
 Run *Hive-Prune* after running *Hive-Manifest-Delete* to see the effects of pruning remaining objects. If you had only one manifest and deleted that, the result should be that the _objects_ directory in the hive contains no files anymore (only empty directories).
 
-== TreeSnapshot & Co.
+=== TreeSnapshot & Co.
 
 The `ScanOperation` allows to fetch a `TreeSnapshot` of a `MANIFEST` root tree. This allows to recursively retrieve all available/relevant information about a `MANIFEST`. This includes a listing of `TREE`, `BLOB`, `MREF`, missing/damaged objects, etc.
 
