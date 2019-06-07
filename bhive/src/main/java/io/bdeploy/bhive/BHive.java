@@ -68,6 +68,10 @@ public class BHive implements AutoCloseable, BHiveExecution {
         Path relRoot;
         if (uri.getScheme().equals("jar") || (uri.getScheme().equals("file") && uri.toString().toLowerCase().endsWith(".zip"))) {
             try {
+                if (!uri.getScheme().equals("jar")) {
+                    uri = URI.create("jar:" + uri);
+                }
+
                 Map<String, Object> env = new TreeMap<>();
                 env.put("create", "true");
                 env.put("useTempFile", Boolean.TRUE);

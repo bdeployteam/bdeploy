@@ -1,21 +1,13 @@
 package io.bdeploy.interfaces;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.PosixFileAttributeView;
-import java.nio.file.attribute.PosixFilePermission;
-import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.Properties;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +18,7 @@ import io.bdeploy.bhive.op.ImportOperation;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
+import io.bdeploy.common.util.ZipHelper;
 
 /**
  * Provides shared functionality for dealing with updates.
@@ -90,7 +83,7 @@ public class UpdateHelper {
 
         // extract ZIP to src dir
         PathHelper.mkdirs(tmpDir);
-        unzip(updateZipFile, tmpDir);
+        ZipHelper.unzip(updateZipFile, tmpDir);
 
         // expecting a single directory in the ZIP containing all the things.
         Path updContent = null;
@@ -156,79 +149,6 @@ public class UpdateHelper {
         }
 
         return new ScopedManifestKey(name, os, version).getKey();
-    }
-
-    /**
-     * Unzip single ZIP file
-     */
-    private static void unzip(final Path zipFile, final Path target) {
-        // need to use commons compress to be able to unzip file attributes
-        try (ZipFile zf = new ZipFile(zipFile.toFile())) {
-            Enumeration<ZipArchiveEntry> entries = zf.getEntries();
-            while (entries.hasMoreElements()) {
-                ZipArchiveEntry entry = entries.nextElement();
-                Path path = target.resolve(entry.getName());
-                if (!path.startsWith(target)) {
-                    // path was absolute?!
-                    throw new IllegalStateException("The given zip contains absolute paths: " + zipFile);
-                }
-                if (entry.isDirectory()) {
-                    PathHelper.mkdirs(path);
-                } else {
-                    try (InputStream is = zf.getInputStream(entry)) {
-                        Files.copy(is, path);
-                    }
-                    updatePermissions(path, entry.getUnixMode());
-                }
-            }
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot unzip update package", e);
-        }
-    }
-
-    private static void updatePermissions(Path file, int unixMode) throws IOException {
-        if (isPosixFileStore(file)) {
-            Set<PosixFilePermission> permissions = getPosixPermissionsAsSet(unixMode);
-            if (!permissions.isEmpty()) {
-                Files.setPosixFilePermissions(file, permissions);
-            }
-        }
-    }
-
-    private static boolean isPosixFileStore(Path path) throws IOException {
-        return Files.getFileAttributeView(path, PosixFileAttributeView.class) != null;
-    }
-
-    private static Set<PosixFilePermission> getPosixPermissionsAsSet(int mode) {
-        Set<PosixFilePermission> permissionSet = new HashSet<>();
-        if ((mode & 0400) == 0400) {
-            permissionSet.add(PosixFilePermission.OWNER_READ);
-        }
-        if ((mode & 0200) == 0200) {
-            permissionSet.add(PosixFilePermission.OWNER_WRITE);
-        }
-        if ((mode & 0100) == 0100) {
-            permissionSet.add(PosixFilePermission.OWNER_EXECUTE);
-        }
-        if ((mode & 0040) == 0040) {
-            permissionSet.add(PosixFilePermission.GROUP_READ);
-        }
-        if ((mode & 0020) == 0020) {
-            permissionSet.add(PosixFilePermission.GROUP_WRITE);
-        }
-        if ((mode & 0010) == 0010) {
-            permissionSet.add(PosixFilePermission.GROUP_EXECUTE);
-        }
-        if ((mode & 0004) == 0004) {
-            permissionSet.add(PosixFilePermission.OTHERS_READ);
-        }
-        if ((mode & 0002) == 0002) {
-            permissionSet.add(PosixFilePermission.OTHERS_WRITE);
-        }
-        if ((mode & 0001) == 0001) {
-            permissionSet.add(PosixFilePermission.OTHERS_EXECUTE);
-        }
-        return permissionSet;
     }
 
 }
