@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -208,8 +209,8 @@ public class InstanceNodeController {
     }
 
     private void processConfigurationTemplates(Path path, VariableResolver resolver) {
-        try {
-            Files.walk(path).filter(Files::isRegularFile).forEach(p -> processConfigurationFile(p, resolver));
+        try (Stream<Path> paths = Files.walk(path)) {
+            paths.filter(Files::isRegularFile).forEach(p -> processConfigurationFile(p, resolver));
         } catch (IOException e) {
             log.error("Cannot walk configuration file tree", e);
         }
