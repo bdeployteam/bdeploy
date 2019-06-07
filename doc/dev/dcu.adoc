@@ -1,4 +1,4 @@
-= DCU (Deployment Control Unit)
+== DCU (Deployment Control Unit)
 
 The DCU's `InstanceNodeController` is responsible for consuming an `InstanceNodeManifest`. An `InstanceNodeManifest` is an artificial BHive manifest created by a configuration application, typically the web UI.
 
@@ -6,7 +6,7 @@ The DCU assumes that any referenced BHive `MANIFEST` is locally available, i.e. 
 
 Note that the DCU does not know about multiple nodes in a system. It assumes that everything is local, and so do all data structures in the DCU. The minion controlling the local DCU may have additional higher level structures to allow multiple DCUs distributed among nodes deploying for a single `InstanceManifest`.
 
-== Backends
+=== Backends
 
 Right now, there is only a single DCU, which has the nodes physical disc as manifestation target.
 

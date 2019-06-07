@@ -1,6 +1,6 @@
-= Interfaces
+== Interfaces
 
-== Model Class Naming
+=== Model Class Naming
 
 The classes in this project follow a strict naming scheme.
 
@@ -29,11 +29,11 @@ The classes in this project follow a strict naming scheme.
 
 |===
 
-== Variable Expansion
+=== Variable Expansion
 
 This project contains the logic for resolving variables when deploying to a minion. The following schemes are supported.
 
-Expansion of variables happens for launcher paths and parameter values.
+Expansion of variables happens for launcher paths and parameter values. Additionally, all configuration files are post-processed on the target to perform the exact same expansion.
 
 [%header,cols=5*]
 |===
@@ -44,47 +44,49 @@ Expansion of variables happens for launcher paths and parameter values.
 |Description
 
 | `ApplicationParameterProvider`
-| `${V:[APP:]PARAM}`
+| `{{V:[APP:]PARAM}}`
 a| * `APP`: _(optional)_ The name of the application to reference. If not given, the parameter is referenced within the same application as the referencing parameter
  * `PARAM`: The name of the parameter
-| `${V:MyServer:my.param.uid}`
+| `{{V:MyServer:my.param.uid}}`
 | Expand the value of another parameter inline into the value of this parameter.
 
 | `DeploymentPathProvider`
-| `${P:PATH_ID}`
+| `{{P:PATH_ID}}`
 a| * `CONFIG`: directory where all configuration files will be placed by deployment
  * `BIN`: directory where all binaries are placed by deployment
  * `RUNTIME`: directory with runtime data (e.d. stdout/stderr capture files)
  * `DATA`: persistent data directory - the only directory shared by multiple deployments of the same instance.
-| `${P:CONFIG}/myFile.json`
+| `{{P:CONFIG}}/myFile.json`
 | Expand one of the special directories (see `SpecialDirectory`) know by the deployment process.
 
 | `InstanceVariableResolver`
-| `${I:VAR}`
+| `{{I:VAR}}`
 a| * `SYSTEM_PURPOSE`: the purpose of the instance, see `InstancePurpose`
  * `UUID`: UUID of the instance
  * `NAME`: name of the instance
-| `${I:SYSTEM_PURPOSE}`
+ * `PRODUCT_ID`: name of the `MANIFEST` key's name of the configured product
+ * `PRODUCT_TAG`: the tag (i.e. 'version') of the configured product
+| `{{I:SYSTEM_PURPOSE}}`
 | Expand values related to the instance containing the parameter's process
 
 | `ManifestRefPathProvider`
-| `${M:MANIFEST_NAME[:TAG]}`
+| `{{M:MANIFEST_NAME[:TAG]}}`
 a| * `MANIFEST_NAME`: the name of the manifest to reference. The variable will expand to the installation path of that other manifest.
  * TAG: _(optional)_ if given expand to the exact manifest version.
-| `${M:openjdk/jre8}/bin/java`
+| `{{M:openjdk/jre8}}/bin/java`
 | Expand the absolute installation path to another manifest's path on the target system.
 
 | `OsConditionalProvider`
-| `${OSNAME:VALUE}`
+| `{{OSNAME:VALUE}}`
 a| * `OSNAME`: either `OperatingSystem` value (`WINDOWS`, `LINUX`, `AIX`).
  * `VALUE`: the target value to expand if the target OS matches the `OSNAME` value.
-| `.../bin/java${WINDOWS:.exe}`
+| `.../bin/java{{WINDOWS:.exe}}`
 | Insert the given `VALUE` if and only if the given `OSNAME` (see `OperatingSystem`) matches.
 
 | `MinionConfigVariableResolver`
-| `${H:HOSTNAME}`
+| `{{H:HOSTNAME}}`
 a| * `HOSTNAME`: expands to the hostname of the target minion where the application is deployed.
-| `${H:HOSTNAME}`
+| `{{H:HOSTNAME}}`
 | Expands to target minion properties - currently only `HOSTNAME` is supported.
 
 |===

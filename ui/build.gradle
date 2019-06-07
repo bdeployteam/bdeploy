@@ -44,6 +44,10 @@ ext.sharedNpmLogic = { task, List<String> target ->
     }
 }
 
+task cleanAngular(type:Delete) {
+    delete "$webappDir/dist"
+}
+
 task buildAngular(type:Exec) { t ->
     inputs.dir "$webappDir/src"
     outputs.dir "$webappDir/dist"
@@ -56,6 +60,12 @@ task installAngular(type:Exec) { t ->
     inputs.file "$webappDir/package.json"
     outputs.dir "$webappDir/node_modules"
     sharedNpmLogic(t, ["install"])
+}
+
+evaluationDependsOn(':doc')
+task copyUserDoc(type:Copy, dependsOn:':doc:userDoc') {
+    from tasks.getByPath(':doc:userDoc').outputs
+    into "$webappDir/dist/webapp/assets/doc"
 }
 
 task genDtos() {
@@ -132,4 +142,6 @@ task genDtos() {
 }
 
 processResources.dependsOn "buildAngular"
+processResources.dependsOn "copyUserDoc"
+clean.dependsOn "cleanAngular"
 

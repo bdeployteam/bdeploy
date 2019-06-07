@@ -1,4 +1,4 @@
-= Minion (master/slave) Server
+== Minion (master/slave) Server
 
 The minion is the main BDeploy deliverable. It contains all the command tools as well as the server for remote services and the configuration web UI.
 

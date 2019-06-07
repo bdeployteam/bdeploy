@@ -2,8 +2,28 @@ plugins {
     id 'org.asciidoctor.jvm.convert' version '2.2.0'
 }
 
-asciidoctor {
-    sourceDir = file('.')
+task developerDoc(type: org.asciidoctor.gradle.jvm.AsciidoctorTask) {
+    sourceDir = file('dev')
+    sources {
+        include 'index.adoc'
+    }
+    outputDir = "${buildDir}/docs/dev"
+    baseDirFollowsSourceDir()
 }
 
-build.dependsOn asciidoctor
+task userDoc(type: org.asciidoctor.gradle.jvm.AsciidoctorTask) {
+    sourceDir = file('user')
+    sources {
+        include 'index.adoc'
+    }
+    outputDir = "${buildDir}/docs/user"
+    baseDirFollowsSourceDir()
+}
+
+asciidoctorj {
+    attributes 'toc2': '',
+               'linkcss': ''
+}
+
+build.dependsOn developerDoc
+build.dependsOn userDoc

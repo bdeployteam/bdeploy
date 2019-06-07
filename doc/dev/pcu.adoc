@@ -1,4 +1,4 @@
-= PCU (Process Control Unit)
+== PCU (Process Control Unit)
 
 The PCU consumes a pre-rendered (meaning all parameter value variables are resolved, all paths are absolute, etc.) configuration to control and run locally.
 

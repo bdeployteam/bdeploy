@@ -1,4 +1,6 @@
-= BDeploy Documentation
+:prewrap!:
+
+= BDeploy Developer Documentation
 
 BDeploy is a speed and disc-usage optimized deployment solution for (tiny to large scale) applications.
 
@@ -43,13 +45,11 @@ In such environments, orchestration and management of the plethora of clusters i
 
 BDeploy is built in a way that it can act as bridge to such systems (e.g. Kubernetes) in the future (support pending). It understands most of the concepts behind such cluster solutions and can be used to manage "clusters" instead of physical machines. This not only creates a tooling to manage clusters, but also allows to create hybrid solutions where a single setup is composed of a single configuration spanning physical, virtual, clustered and client nodes.
 
-== Component documentation
-
-* <<bhive.adoc#,BHive>>
-* <<pcu.adoc#,PCU>>
-* <<dcu.adoc#,DCU>>
-* <<common.adoc#,Common>>
-* <<minion.adoc#,Minion (Server)>>
-* <<launcher.adoc#,Client Launcher>>
-* <<interfaces.adoc#,Common interfaces, descriptors, DTOs>>
-* <<ui.adoc#,UI Front- and Backend>>
+include::bhive.adoc[]
+include::pcu.adoc[]
+include::dcu.adoc[]
+include::common.adoc[]
+include::minion.adoc[]
+include::launcher.adoc[]
+include::interfaces.adoc[]
+include::ui.adoc[]
