@@ -12,8 +12,17 @@
       <a mat-list-item (click)='drawer.close()' [routerLink]="['/mastercleanup']"><mat-icon class="nav-icon">delete_sweep</mat-icon>Manual Cleanup</a>
       <a mat-list-item (click)='drawer.close()' [routerLink]="['/hivebrowser']"><mat-icon class="nav-icon">sd_storage</mat-icon>Hive Browser</a>
     </mat-nav-list>
-    <footer>
-        <div class="footer-content">Server: {{ backendVersion | async }}</div>
+    <footer class="footer-container">
+      <mat-divider></mat-divider>
+      <div class="footer-content">Server: {{ backendVersion | async }}</div>
+      <!-- Log Level: -->
+      <mat-select  class="footer-logging" [value]="getLogLevel()" (selectionChange)="setLogLevel($event)">
+        <mat-option value='0'>Error</mat-option>
+        <mat-option value='1'>Warning</mat-option>
+        <mat-option value='2'>Info</mat-option>
+        <mat-option value='3'>Debug</mat-option>
+        <mat-option value='4'>Trace</mat-option>
+      </mat-select>
     </footer>
   </mat-sidenav>
   <mat-sidenav-content class="sidenav-content">

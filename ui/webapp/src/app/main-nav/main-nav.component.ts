@@ -1,11 +1,12 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { MatToolbar } from '@angular/material';
+import { MatSelectChange, MatToolbar } from '@angular/material';
 import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AuthenticationService } from '../services/authentication.service';
 import { ConfigService } from '../services/config.service';
+import { LoggingService, LogLevel } from '../services/logging.service';
 import { ThemeService } from '../services/theme.service';
 
 
@@ -28,6 +29,7 @@ export class MainNavComponent implements OnInit {
     private router: Router,
     public theme: ThemeService,
     public title: Title,
+    public logging: LoggingService
   ) {}
 
   ngOnInit(): void {
@@ -46,6 +48,15 @@ export class MainNavComponent implements OnInit {
         this.authService.logout();
       }
     });
+  }
+
+  getLogLevel() {
+    return this.logging.getLogger(null).getLogLevel().toString();
+  }
+
+  setLogLevel(event: MatSelectChange) {
+    const lvl = +event.value as LogLevel;
+    this.logging.getLogger(null).setLogLevel(lvl);
   }
 
 }
