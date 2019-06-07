@@ -2,11 +2,11 @@ package io.bdeploy.ui.api.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.ZoneId;
@@ -586,7 +586,8 @@ public class InstanceResourceImpl implements InstanceResource {
     @Override
     public String createClientInstaller(String instanceId, String applicationId) {
         String tokenName = UuidHelper.randomId();
-        File installer = minion.getDownloadDir().resolve(tokenName + ".bin").toFile();
+        Path intallerPath = minion.getDownloadDir().resolve(tokenName + ".bin");
+        File installer = intallerPath.toFile();
 
         // Determine latest version of launcher
         SoftwareUpdateResourceImpl swr = rc.initResource(new SoftwareUpdateResourceImpl());
@@ -604,8 +605,8 @@ public class InstanceResourceImpl implements InstanceResource {
         Manifest mf = rootHive.execute(findManifestOp);
         TreeEntryLoadOperation findInstallerOp = new TreeEntryLoadOperation().setRootTree(mf.getRoot())
                 .setRelativePath(INSTALLER_EXE);
-        try (InputStream in = rootHive.execute(findInstallerOp); FileOutputStream out = new FileOutputStream(installer)) {
-            in.transferTo(out);
+        try (InputStream in = rootHive.execute(findInstallerOp); OutputStream os = Files.newOutputStream(intallerPath)) {
+            in.transferTo(os);
         } catch (IOException ioe) {
             throw new WebApplicationException("Cannot create native Windows launcher.", ioe);
         }
@@ -628,7 +629,7 @@ public class InstanceResourceImpl implements InstanceResource {
             config.iconUrl = iconUri.build(group, instanceId, applicationId).toString();
             config.applicationUid = appConfig.uid;
             config.applicationName = appConfig.name;
-            config.applicationJson = new String(StorageHelper.toRawBytes(clickAndStart));
+            config.applicationJson = new String(StorageHelper.toRawBytes(clickAndStart), StandardCharsets.UTF_8);
 
             Branding branding = new Branding(installer);
             branding.updateConfig(config);
