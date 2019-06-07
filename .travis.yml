@@ -1,6 +1,10 @@
 language: java
 jdk: openjdk10
 
+# Don't use shallow clone to allow sonarcloud to track changes
+git:
+  depth: false
+
 addons:
   sonarcloud:
     organization: "bdeployteam"
