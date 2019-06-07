@@ -12,6 +12,15 @@
 .config-card {
   margin: 20px;
   min-width: 90%;
+  flex: 1 1 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.config-card-content {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .config-title-icon {
@@ -34,6 +43,12 @@
 
 .deletedFile {
   text-decoration: line-through;
+  color: red;
+}
+
+.modifiedFile {
+  margin-left: 10px;
+  color: red;
 }
 
 .path-field {
@@ -45,9 +60,15 @@
   width: 100%;
 }
 
+.config-card-form {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
 .ace-editor {
+  flex: 1 1 auto;
   margin-top: 10px;
-  height: 400px;
   width: 100%;
   border-top: 1px gray solid;
   border-bottom: 1px gray solid;
@@ -59,6 +80,7 @@
   bottom: 40px !important;
   left: auto !important;
   position: fixed !important;
+  z-index: 10;
 }
 
 .mat-column-delete {
