@@ -1,4 +1,4 @@
 {
   "api": "https://localhost:7701/api",
-  "logLevel": 5
+  "logLevel": 4
 }

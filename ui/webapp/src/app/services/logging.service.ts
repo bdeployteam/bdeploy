@@ -44,7 +44,6 @@ export class Logger {
 
   constructor(private parent: Logger, private loggerId, private appValve: AppValve, private appender?: Appender) {
     this.loggerPath = (parent == null || parent.getId().length === 0 ? '' : parent.getId() + '.') + loggerId;
-    this.loglevel = parent == null ? LogLevel.TRACE : parent.getLogLevel();
     if (appender != null) {
       this.appenders.push(appender);
     }
@@ -83,7 +82,7 @@ export class Logger {
   }
 
   public getLogLevel(): LogLevel {
-    return this.loglevel;
+    return this.loglevel || (this.parent ? this.parent.getLogLevel() : LogLevel.INFO);
   }
 
   public error(msg: string|ErrorMessage): void {
@@ -112,7 +111,7 @@ export class Logger {
   }
 
   private log(messageLogLevel: LogLevel, logger: Logger, msg: string|ErrorMessage): void {
-    if (messageLogLevel <= logger.loglevel && this.appenders != null) {
+    if (messageLogLevel <= logger.getLogLevel() && this.appenders != null) {
       for (let i = 0; i < this.appenders.length; i++) {
         this.appenders[i].log(messageLogLevel, logger, msg);
       }
