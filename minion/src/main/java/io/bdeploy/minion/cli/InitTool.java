@@ -19,6 +19,7 @@ import io.bdeploy.jersey.audit.AuditRecord;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.MinionState;
 import io.bdeploy.minion.cli.InitTool.InitConfig;
+import io.bdeploy.minion.job.MasterCleanupJob;
 import io.bdeploy.ui.api.Minion;
 
 @Help("Initialize a minion root directory")
@@ -105,7 +106,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
 
         state.officialName = hostname;
         state.port = port;
-        state.cleanupSchedule = MinionRoot.DEFAULT_CLEANUP_SCHEDULE;
+        state.cleanupSchedule = MasterCleanupJob.DEFAULT_CLEANUP_SCHEDULE;
 
         state.deploymentDir = root.resolve("deploy");
         if (deployments != null) {
