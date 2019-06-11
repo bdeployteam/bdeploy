@@ -11,7 +11,8 @@ import 'brace/mode/yaml';
 import 'brace/theme/eclipse';
 import 'brace/theme/twilight';
 import { cloneDeep } from 'lodash';
-import { Subscription } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
+import { CanComponentDeactivate } from '../guards/can-deactivate.guard';
 import { MessageBoxMode } from '../messagebox/messagebox.component';
 import { FileStatusDto, FileStatusType, InstanceConfiguration } from '../models/gen.dtos';
 import { InstanceService } from '../services/instance.service';
@@ -35,7 +36,7 @@ export const EMPTY_CONFIG_FILE_STATUS: ConfigFileStatus = {
   templateUrl: './config-files-browser.component.html',
   styleUrls: ['./config-files-browser.component.css']
 })
-export class ConfigFilesBrowserComponent implements OnInit, OnDestroy {
+export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanComponentDeactivate {
 
   private log: Logger = this.loggingService.getLogger('ConfigFilesBrowserComponent');
 
@@ -283,6 +284,17 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy {
     let changeCount = 0;
     values.forEach(v => { changeCount += v.type ? 1 : 0; });
     return changeCount > 0;
+  }
+
+  canDeactivate(): Observable<boolean> {
+    if (!this.isDirty()) {
+      return of(true);
+    }
+    return this.messageBoxService.open({
+      title: 'Unsaved changes',
+      message: 'Configuration files were modified. Close without saving?',
+      mode: MessageBoxMode.CONFIRM_WARNING,
+    });
   }
 
   public onSave(): void {
