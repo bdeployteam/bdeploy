@@ -209,6 +209,10 @@ public class InstanceNodeController {
     }
 
     private void processConfigurationTemplates(Path path, VariableResolver resolver) {
+        if (!Files.isDirectory(path)) {
+            return; // nothing to do.
+        }
+
         try (Stream<Path> paths = Files.walk(path)) {
             paths.filter(Files::isRegularFile).forEach(p -> processConfigurationFile(p, resolver));
         } catch (IOException e) {

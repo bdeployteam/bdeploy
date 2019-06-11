@@ -23,6 +23,4 @@ public class MinionBasicClientTest {
         assertThat(minions.get(Minion.DEFAULT_MASTER_NAME), is(notNullValue()));
     }
 
-    // TODO: much more testing.
-
 }

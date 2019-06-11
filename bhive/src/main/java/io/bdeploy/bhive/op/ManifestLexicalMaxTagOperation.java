@@ -19,9 +19,8 @@ public class ManifestLexicalMaxTagOperation extends BHive.Operation<Optional<Str
         RuntimeAssert.assertNotNull(key, "No Manifest to inspect");
 
         try (Activity activity = getActivityReporter().start("Evaluating latest manifest version...", -1)) {
-            Optional<String> max = getManifestDatabase().getAllForName(key).stream().map(Manifest.Key::getTag)
+            return getManifestDatabase().getAllForName(key).stream().map(Manifest.Key::getTag)
                     .sorted((a, b) -> b.compareTo(a)).findFirst();
-            return max;
         }
     }
 

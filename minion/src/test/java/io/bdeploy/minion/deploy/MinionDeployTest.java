@@ -10,8 +10,6 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +24,6 @@ import io.bdeploy.bhive.op.ImportOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.bhive.remote.RemoteBHive;
-import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
@@ -41,9 +38,7 @@ import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.InstanceImportExportHelper;
 import io.bdeploy.interfaces.ScopedManifestKey;
-import io.bdeploy.interfaces.cleanup.CleanupAction;
 import io.bdeploy.interfaces.cleanup.CleanupGroup;
-import io.bdeploy.interfaces.cleanup.CleanupHelper;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
@@ -66,6 +61,7 @@ import io.bdeploy.launcher.cli.LauncherTool;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.pcu.TestAppFactory;
+import io.bdeploy.ui.api.CleanupResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
 
@@ -80,8 +76,8 @@ public class MinionDeployTest {
 
     @Test
     @SlowTest
-    void testRemoteDeploy(BHive local, MasterRootResource master, SlaveCleanupResource scr, RemoteService remote,
-            @TempDir Path tmp, ActivityReporter reporter, MinionRoot mr) throws IOException, InterruptedException {
+    void testRemoteDeploy(BHive local, MasterRootResource master, CleanupResource cr, RemoteService remote, @TempDir Path tmp,
+            ActivityReporter reporter, MinionRoot mr) throws IOException, InterruptedException {
         Manifest.Key instance = createApplicationsAndInstance(local, master, remote, tmp);
 
         String uuid = local.execute(new ManifestLoadOperation().setManifest(instance)).getLabels()
@@ -93,7 +89,18 @@ public class MinionDeployTest {
         master.getNamedMaster("demo").install(instance);
         assertTrue(master.getNamedMaster("demo").getAvailableDeployments().containsKey(uuid));
         assertTrue(master.getNamedMaster("demo").getAvailableDeployments(Minion.DEFAULT_MASTER_NAME).containsKey(uuid));
+
+        // test uninstall, re-install once
+        master.getNamedMaster("demo").remove(instance);
+        assertFalse(master.getNamedMaster("demo").getAvailableDeployments().containsKey(uuid));
+        assertFalse(master.getNamedMaster("demo").getAvailableDeployments(Minion.DEFAULT_MASTER_NAME).containsKey(uuid));
+        master.getNamedMaster("demo").install(instance);
+        assertTrue(master.getNamedMaster("demo").getAvailableDeployments().containsKey(uuid));
+        assertTrue(master.getNamedMaster("demo").getAvailableDeployments(Minion.DEFAULT_MASTER_NAME).containsKey(uuid));
+
         master.getNamedMaster("demo").activate(instance);
+        assertTrue(master.getNamedMaster("demo").getActiveDeployments().containsKey(uuid));
+        assertTrue(master.getNamedMaster("demo").getActiveDeployments(Minion.DEFAULT_MASTER_NAME).containsKey(uuid));
 
         /* STEP 6: run/control processes on the remote */
         master.getNamedMaster("demo").start(uuid, "app");
@@ -122,24 +129,16 @@ public class MinionDeployTest {
 
         // if we reach here, launching succeeded. unfortunately no better way to check right now.
 
-        /* STEP 9: uninstall and cleanup - cleanup is a little whitebox, as usually the master cleanup job does this. */
-        SortedSet<Manifest.Key> toKeep = new TreeSet<>();
-        toKeep.add(Manifest.Key.parse(uuid + "/master:" + instance.getTag()));
-        List<CleanupAction> nothingToDo = scr.cleanup(toKeep, false);
-        assertTrue(nothingToDo.isEmpty());
+        /* STEP 9: uninstall and cleanup */
+        List<CleanupGroup> nothingToDo = cr.calculate();
+        assertEquals(1, nothingToDo.size());
+        assertEquals(0, nothingToDo.get(0).actions.size());
 
         try (RemoteBHive rbh = RemoteBHive.forService(remote, "demo", reporter)) {
             rbh.removeManifest(instance); // remove top level instance.
         }
 
-        // fake the registry containing all instance groups available on the master.
-        BHiveRegistry fakeRegistry = new BHiveRegistry(reporter);
-        mr.getStorageLocations().forEach(fakeRegistry::scanLocation);
-
-        // same code as used by cleanup job and cleanup UI.
-        SortedSet<Key> shouldBeEmpty = CleanupHelper.findAllUniqueKeys(fakeRegistry);
-        List<CleanupGroup> groups = CleanupHelper.cleanAllMinions(mr.getMinions(), shouldBeEmpty, false);
-
+        List<CleanupGroup> groups = cr.calculate();
         assertEquals(1, groups.size());
         assertEquals("master", groups.get(0).minion);
 
@@ -149,7 +148,7 @@ public class MinionDeployTest {
         assertEquals(7, groups.get(0).actions.size());
 
         // now actually do it.
-        CleanupHelper.cleanAllMinions(groups, mr.getMinions());
+        cr.perform(groups);
 
         // no manifests should be left now
         try (RemoteBHive rbh = RemoteBHive.forService(remote, JerseyRemoteBHive.DEFAULT_NAME, reporter)) {
@@ -190,7 +189,7 @@ public class MinionDeployTest {
         master.getNamedMaster("demo").activate(importedInstance);
     }
 
-    private static Manifest.Key createApplicationsAndInstance(BHive local, MasterRootResource master, RemoteService remote,
+    public static Manifest.Key createApplicationsAndInstance(BHive local, MasterRootResource master, RemoteService remote,
             Path tmp) throws IOException {
         /* STEP 1: Applications and external Application provided by development teams */
         Path app = TestAppFactory.createDummyApp("app", tmp);
@@ -309,6 +308,7 @@ public class MinionDeployTest {
         ic.product = pmf.getKey();
         ic.target = remote;
         ic.uuid = uuid;
+        ic.configTree = pmf.getConfigTemplateTreeId();
 
         /* STEP 3: create an InstanceManifest with all instance node configurations. */
         // TODO: record the product manifest to enable updates late

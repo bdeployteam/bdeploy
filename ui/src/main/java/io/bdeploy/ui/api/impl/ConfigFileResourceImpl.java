@@ -145,6 +145,7 @@ public class ConfigFileResourceImpl implements ConfigFileResource {
 
                 switch (update.type) {
                     case ADD:
+                        PathHelper.mkdirs(file.getParent());
                         Files.write(file, update.content.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE_NEW);
                         break;
                     case DELETE:

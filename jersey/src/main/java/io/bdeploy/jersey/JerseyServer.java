@@ -205,6 +205,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
                 server.getServerConfiguration().addHttpHandler(root, HttpHandlerRegistration.ROOT);
             }
 
+            server.getHttpHandler().setAllowEncodedSlash(true);
             server.start();
         } catch (GeneralSecurityException | IOException e) {
             throw new IllegalStateException("Cannot start server", e);
