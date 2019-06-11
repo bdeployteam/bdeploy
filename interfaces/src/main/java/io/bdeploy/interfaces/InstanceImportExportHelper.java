@@ -7,8 +7,10 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +25,8 @@ import io.bdeploy.bhive.op.ManifestExistsOperation;
 import io.bdeploy.bhive.op.ManifestMaxIdOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.common.util.UuidHelper;
+import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
@@ -113,6 +117,7 @@ public class InstanceImportExportHelper {
         // if there is an existing instance, re-use the configured target server to avoid confusion!
         String rootName = InstanceManifest.getRootName(uuid);
         Optional<Long> latest = target.execute(new ManifestMaxIdOperation().setManifestName(rootName));
+        Set<String> uuidPool = new TreeSet<>();
         if (latest.isPresent()) {
             InstanceManifest existing = InstanceManifest.of(target, new Manifest.Key(rootName, String.valueOf(latest.get())));
             icfg.target = existing.getConfiguration().target;
@@ -121,6 +126,16 @@ public class InstanceImportExportHelper {
             if (!icfg.product.getName().equals(existing.getConfiguration().product.getName())) {
                 throw new IllegalStateException(
                         "Product switch not allowed: old=" + existing.getConfiguration().product + ", new=" + icfg.product);
+            }
+
+            // gather all UUIDs for every artifact which has an UUID except for the instance itself (currently only applications).
+            // all UUIDs which are NOT yet known to the instance MUST be re-assigned to avoid clashes when "copying" an instance.
+            // in case there is no existing (latest) version yet, the pool stays empty and all UUIDs are re-assigned.
+            for (Manifest.Key inmfKey : existing.getInstanceNodeManifests().values()) {
+                InstanceNodeManifest inmf = InstanceNodeManifest.of(target, inmfKey);
+                for (ApplicationConfiguration app : inmf.getConfiguration().applications) {
+                    uuidPool.add(app.uid);
+                }
             }
         }
 
@@ -141,6 +156,17 @@ public class InstanceImportExportHelper {
             nodeCfg.autoStart = icfg.autoStart;
             nodeCfg.purpose = icfg.purpose;
             nodeCfg.product = icfg.product;
+
+            for (ApplicationConfiguration app : nodeCfg.applications) {
+                if (uuidPool.contains(app.uid)) {
+                    // all is well, this is an update for an existing application
+                    continue;
+                }
+
+                // need to re-assign ID, as this might be a copy of an application on the same server.
+                // this would create various issues when installing (clash of IDs), especially on the client(s).
+                app.uid = UuidHelper.randomId();
+            }
 
             inmBuilder.setConfigTreeId(cfgId);
             inmBuilder.setInstanceNodeConfiguration(nodeCfg);
