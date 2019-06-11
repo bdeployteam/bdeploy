@@ -1,6 +1,7 @@
 package io.bdeploy.ui.api.impl;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
@@ -68,6 +70,7 @@ import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.common.util.StringHelper;
+import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.InstanceImportExportHelper;
@@ -116,6 +119,11 @@ public class InstanceResourceImpl implements InstanceResource {
      * Name and path of the native Windows installer stored in the launcher ZIP
      */
     private static final String INSTALLER_EXE = "bin/Installer.bin";
+
+    /**
+     * Name and path of the native Linux (shell script) installer template stored in the launcher ZIP
+     */
+    private static final String INSTALLER_SH = "bin/installer.tpl";
 
     private final BHive hive;
     private final String group;
@@ -585,58 +593,107 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Override
     public String createClientInstaller(String instanceId, String applicationId) {
+        InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
+        ApplicationConfiguration appConfig = im.getApplicationConfiguration(hive, applicationId);
+
         String tokenName = UuidHelper.randomId();
-        Path intallerPath = minion.getDownloadDir().resolve(tokenName + ".bin");
-        File installer = intallerPath.toFile();
+        Path installerPath = minion.getDownloadDir().resolve(tokenName + ".bin");
+
+        // Determine the target OS, and build the according installer.
+        ScopedManifestKey applicationKey = ScopedManifestKey.parse(appConfig.application);
 
         // Determine latest version of launcher
         SoftwareUpdateResourceImpl swr = rc.initResource(new SoftwareUpdateResourceImpl());
-        ScopedManifestKey launcherKey = swr.getNewestLauncher(OperatingSystem.WINDOWS);
+        ScopedManifestKey launcherKey = swr.getNewestLauncher(applicationKey.getOperatingSystem());
         if (launcherKey == null) {
             throw new WebApplicationException(
-                    "Cannot find native Windows launcher. Ensure there is one available in the System Software.",
+                    "Cannot find launcher for target OS. Ensure there is one available in the System Software.",
                     Status.NOT_FOUND);
         }
-        String launcherOsKey = ScopedManifestKey.createScopedName(launcherKey.getName(), OperatingSystem.WINDOWS);
 
+        UriBuilder launcherUri = UriBuilder.fromUri(im.getConfiguration().target.getUri());
+        launcherUri.path(SoftwareUpdateResource.ROOT_PATH);
+        launcherUri.path(SoftwareUpdateResource.DOWNLOAD_PATH);
+
+        UriBuilder iconUri = UriBuilder.fromUri(im.getConfiguration().target.getUri());
+        iconUri.path("/group/{group}/instance/");
+        iconUri.path(InstanceResource.PATH_DOWNLOAD_APP_ICON);
+
+        URI launcherLocation = launcherUri.build(new Object[] { launcherKey.getKey().getName(), launcherKey.getTag() }, false);
+        URI iconLocation = iconUri.build(group, im.getConfiguration().uuid, appConfig.uid);
+
+        if (applicationKey.getOperatingSystem() == OperatingSystem.WINDOWS) {
+            createWindowsInstaller(im, appConfig, installerPath, launcherKey, launcherLocation, iconLocation);
+        } else if (applicationKey.getOperatingSystem() == OperatingSystem.LINUX) {
+            createLinuxInstaller(im, appConfig, installerPath, launcherKey, launcherLocation, iconLocation);
+        } else {
+            throw new WebApplicationException("No installer provided for the target OS");
+        }
+
+        // Return the name of the token for downloading
+        return tokenName;
+    }
+
+    private void createLinuxInstaller(InstanceManifest im, ApplicationConfiguration appConfig, Path installerPath,
+            ScopedManifestKey launcherKey, URI launcherLocation, URI iconLocation) {
+        BHive rootHive = reg.get(JerseyRemoteBHive.DEFAULT_NAME);
+        Manifest mf = rootHive.execute(new ManifestLoadOperation().setManifest(launcherKey.getKey()));
+        TreeEntryLoadOperation findInstallerOp = new TreeEntryLoadOperation().setRootTree(mf.getRoot())
+                .setRelativePath(INSTALLER_SH);
+        String template;
+        try (InputStream in = rootHive.execute(findInstallerOp); ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+            in.transferTo(os);
+            template = os.toString(StandardCharsets.UTF_8);
+        } catch (IOException ioe) {
+            throw new WebApplicationException("Cannot create native Windows launcher.", ioe);
+        }
+
+        ClickAndStartDescriptor clickAndStart = getClickAndStartDescriptor(im.getConfiguration().uuid, appConfig.uid);
+
+        // must match the values required in the installer.tpl file
+        Map<String, String> values = new TreeMap<>();
+        values.put("LAUNCHER_URL", launcherLocation.toString());
+        values.put("ICON_URL", iconLocation.toString());
+        values.put("APP_UID", appConfig.uid);
+        values.put("APP_NAME", im.getConfiguration().name + " - " + appConfig.name);
+        values.put("BDEPLOY_FILE", new String(StorageHelper.toRawBytes(clickAndStart), StandardCharsets.UTF_8));
+
+        String content = TemplateHelper.process(template, (k) -> values.get(k), "{{", "}}");
+        try {
+            Files.write(installerPath, content.getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new WebApplicationException("Cannot write installer " + installerPath, e);
+        }
+    }
+
+    private void createWindowsInstaller(InstanceManifest im, ApplicationConfiguration appConfig, Path installerPath,
+            ScopedManifestKey launcherKey, URI launcherLocation, URI iconLocation) {
+        File installer = installerPath.toFile();
         // Try to load the installer stored in the manifest tree
         BHive rootHive = reg.get(JerseyRemoteBHive.DEFAULT_NAME);
-        ManifestLoadOperation findManifestOp = new ManifestLoadOperation().setManifest(launcherKey.getKey());
-        Manifest mf = rootHive.execute(findManifestOp);
+        Manifest mf = rootHive.execute(new ManifestLoadOperation().setManifest(launcherKey.getKey()));
         TreeEntryLoadOperation findInstallerOp = new TreeEntryLoadOperation().setRootTree(mf.getRoot())
                 .setRelativePath(INSTALLER_EXE);
-        try (InputStream in = rootHive.execute(findInstallerOp); OutputStream os = Files.newOutputStream(intallerPath)) {
+        try (InputStream in = rootHive.execute(findInstallerOp); OutputStream os = Files.newOutputStream(installerPath)) {
             in.transferTo(os);
         } catch (IOException ioe) {
             throw new WebApplicationException("Cannot create native Windows launcher.", ioe);
         }
 
         // Brand the executable and embed the required information
-        InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
-        ApplicationConfiguration appConfig = im.getApplicationConfiguration(hive, applicationId);
         try {
-            ClickAndStartDescriptor clickAndStart = getClickAndStartDescriptor(instanceId, applicationId);
-            UriBuilder launcherUri = UriBuilder.fromUri(im.getConfiguration().target.getUri());
-            launcherUri.path(SoftwareUpdateResource.ROOT_PATH);
-            launcherUri.path(SoftwareUpdateResource.DOWNLOAD_PATH);
-
-            UriBuilder iconUri = UriBuilder.fromUri(im.getConfiguration().target.getUri());
-            iconUri.path("/group/{group}/instance/");
-            iconUri.path(InstanceResource.PATH_DOWNLOAD_APP_ICON);
+            ClickAndStartDescriptor clickAndStart = getClickAndStartDescriptor(im.getConfiguration().uuid, appConfig.uid);
 
             BrandingConfig config = new BrandingConfig();
-            config.launcherUrl = launcherUri.build(new Object[] { launcherOsKey, launcherKey.getTag() }, false).toString();
-            config.iconUrl = iconUri.build(group, instanceId, applicationId).toString();
+            config.launcherUrl = launcherLocation.toString();
+            config.iconUrl = iconLocation.toString();
             config.applicationUid = appConfig.uid;
-            config.applicationName = appConfig.name;
+            config.applicationName = im.getConfiguration().name + " - " + appConfig.name;
             config.applicationJson = new String(StorageHelper.toRawBytes(clickAndStart), StandardCharsets.UTF_8);
 
             Branding branding = new Branding(installer);
             branding.updateConfig(config);
             branding.write(installer);
-
-            // Return the name of the token for downloading
-            return tokenName;
         } catch (Exception ioe) {
             throw new WebApplicationException("Cannot create native Windows launcher.", ioe);
         }
@@ -680,10 +737,20 @@ public class InstanceResourceImpl implements InstanceResource {
         // Load metadata to give the file a nice name
         InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
         ApplicationConfiguration appConfig = im.getApplicationConfiguration(hive, applicationId);
+        ScopedManifestKey appKey = ScopedManifestKey.parse(appConfig.application);
+
+        String fileName;
+        if (appKey.getOperatingSystem() == OperatingSystem.WINDOWS) {
+            fileName = im.getConfiguration().name + "-" + appConfig.name + "-Installer.exe";
+        } else if (appKey.getOperatingSystem() == OperatingSystem.LINUX) {
+            fileName = im.getConfiguration().name + "-" + appConfig.name + "-Installer.run";
+        } else {
+            throw new WebApplicationException("Unsupported OS for installer download: " + appKey.getOperatingSystem());
+        }
 
         // Serve file to the client
         ContentDispositionBuilder<?, ?> builder = ContentDisposition.type("attachement");
-        builder.size(file.length()).fileName(appConfig.name + " Installer.exe");
+        builder.size(file.length()).fileName(fileName);
         responeBuilder.header("Content-Disposition", builder.build());
         responeBuilder.header("Content-Length", file.length());
         return responeBuilder.build();
