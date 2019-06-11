@@ -2,6 +2,7 @@ package io.bdeploy.minion.deploy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -168,11 +169,37 @@ public class MinionDeployTest {
     void testImportedDeploy(BHive local, MasterRootResource master, SlaveCleanupResource scr, RemoteService remote,
             @TempDir Path tmp, ActivityReporter reporter, MinionRoot mr) throws IOException, InterruptedException {
         Manifest.Key instance = createApplicationsAndInstance(local, master, remote, tmp);
+        InstanceManifest im1 = InstanceManifest.of(local, instance);
 
         /* STEP 1: export and re-import instance */
         Path tmpZip = tmp.resolve("export.zip");
-        InstanceImportExportHelper.exportTo(tmpZip, local, InstanceManifest.of(local, instance));
+        InstanceImportExportHelper.exportTo(tmpZip, local, im1);
         Manifest.Key importedInstance = InstanceImportExportHelper.importFrom(tmpZip, local, UuidHelper.randomId());
+
+        // check application UIDs
+        InstanceManifest im2 = InstanceManifest.of(local, importedInstance);
+
+        InstanceNodeManifest master1 = InstanceNodeManifest.of(local,
+                im1.getInstanceNodeManifests().get(Minion.DEFAULT_MASTER_NAME));
+        InstanceNodeManifest master2 = InstanceNodeManifest.of(local,
+                im2.getInstanceNodeManifests().get(Minion.DEFAULT_MASTER_NAME));
+
+        // IDs may NEVER match.
+        assertEquals(master1.getConfiguration().applications.get(0).name, master2.getConfiguration().applications.get(0).name);
+        assertNotEquals(master1.getConfiguration().applications.get(0).uid, master2.getConfiguration().applications.get(0).uid);
+
+        // test re-import for same instance (new version) - applications UID must stay the same.
+        Manifest.Key importedVersion = InstanceImportExportHelper.importFrom(tmpZip, local, im1.getConfiguration().uuid);
+        assertEquals("2", importedVersion.getTag()); // new version
+        assertEquals(instance.getName(), importedVersion.getName());
+
+        InstanceManifest im3 = InstanceManifest.of(local, importedVersion);
+        InstanceNodeManifest master3 = InstanceNodeManifest.of(local,
+                im3.getInstanceNodeManifests().get(Minion.DEFAULT_MASTER_NAME));
+
+        // IDs MUST match.
+        assertEquals(master1.getConfiguration().applications.get(0).name, master3.getConfiguration().applications.get(0).name);
+        assertEquals(master1.getConfiguration().applications.get(0).uid, master3.getConfiguration().applications.get(0).uid);
 
         /* STEP 2: push to remote */
         local.execute(new PushOperation().setRemote(remote).setHiveName("demo").addManifest(importedInstance));
