@@ -53,6 +53,8 @@ public class InstanceTool extends ConfiguredCliTool<InstanceConfig> {
                 doExport(Paths.get(config.exportTo()), hive, config.uuid(), config.tag());
             } else if (config.importFrom() != null) {
                 doImport(Paths.get(config.importFrom()), hive, config.uuid());
+            } else {
+                helpAndFail("Nothing to do...");
             }
         }
     }
