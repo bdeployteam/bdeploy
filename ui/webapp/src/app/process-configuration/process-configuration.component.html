@@ -192,6 +192,7 @@
                 [isRunningOrScheduled]='isRunningOrScheduledVersion(config.version.key.tag)'
                 [selected]="isVersionSelected(config)"
                 [dirty]="config.dirty"
+                [productAvailable]="isProductAvailable(config)"
                 [disabled]="loading">
               </app-instance-version-card>
             </ng-container>

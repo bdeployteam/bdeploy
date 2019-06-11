@@ -160,12 +160,18 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       );
     const call2 = this.instanceService.getNodeConfiguration(this.groupParam, this.uuidParam, selectedVersion.key.tag); // => results[1]
     const call3 = this.instanceService.getDeploymentStates(this.groupParam, this.uuidParam); // => results[2]
+    const call4 = this.productService.getProducts(this.groupParam); // => result[3];
 
-    forkJoin([call1, call2, call3]).subscribe(results => {
+    forkJoin([call1, call2, call3, call4]).subscribe(results => {
       newSelectedConfig.setNodeList(results[1]);
       newSelectedConfig.setApplications(results[0]);
       this.deploymentState = results[2];
       this.selectedConfig = newSelectedConfig;
+
+      const filtered = results[3].filter(x => x.key.name === this.selectedConfig.version.product.name);
+      filtered.sort((a, b) => b.key.tag.localeCompare(a.key.tag));
+      this.productTags = filtered;
+
       this.loading = false;
       this.updateDirtyStateAndValidate();
       this.onProcessStatusChanged();
@@ -260,15 +266,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
   setSidenavProducts(): void {
     this.sidenavMode = SidenavMode.Products;
-    this.productsLoading = true;
     this.disableAutoRefresh();
-
-    const productPromise = this.productService.getProducts(this.groupParam);
-    productPromise.pipe(finalize(() => (this.productsLoading = false))).subscribe(r => {
-      const filtered = r.filter(x => x.key.name === this.selectedConfig.version.product.name);
-      filtered.sort((a, b) => b.key.tag.localeCompare(a.key.tag));
-      this.productTags = filtered;
-    });
   }
 
   public hasClientApplications(): boolean {
@@ -300,12 +298,16 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     return false; // Do not allow dragging apps from nodes to the sidebar
   }
 
+  public isProductAvailable(config: ProcessConfigDto): boolean {
+    return this.productTags.find(p => isEqual(p.key, config.version.product)) !== undefined;
+  }
+
   /**
    * Called to switch the active configuration. Needs some special treatment as we have
    * a virtual configuration in our list that is only shown if we have local changes.
    */
   onSelectConfig(config: ProcessConfigDto): void {
-    if (this.loading) {
+    if (this.loading || !this.isProductAvailable(config)) {
       return;
     }
 
