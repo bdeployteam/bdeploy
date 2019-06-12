@@ -63,7 +63,6 @@ public class RemoteDeploymentTool extends RemoteServiceTool<RemoteDeployConfig> 
                     Manifest.Key activeKey = active.get(uuid);
 
                     for (Manifest.Key k : entry.getValue()) {
-                        // TODO: will list any manifest which is in the remote hive. also display whether a deployment is fully deployed on disk on all minions
                         out().println(
                                 String.format("%1$-15s %2$-30s %3$-10s", uuid, k.toString(), k.equals(activeKey) ? "*" : ""));
                     }

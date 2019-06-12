@@ -41,11 +41,6 @@ import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 
 /**
  * Stores and reads instances from/to manifests.
- * <p>
- * TODO: This works different than e.g. InstanceGroupManifest or ProductManifest or InstanceNodeManifest... find a common way of
- * treating these kind of manifests which are basically versioned "wrappers" around configuration data.
- * <p>
- * TODO: updating of instances is currently implicit by building an instance with an existing ID - good?
  */
 public class InstanceManifest {
 

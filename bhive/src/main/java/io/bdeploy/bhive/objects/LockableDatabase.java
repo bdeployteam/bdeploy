@@ -27,8 +27,8 @@ abstract public class LockableDatabase {
         try {
             return root.resolve(".dblock").toFile();
         } catch (UnsupportedOperationException e) {
-            // TODO: future work: support other lock file locations in this case.
             // in case of zip file, ... toFile not supported, no locking.
+            // the assumption is that not multiple VMs access the same ZIP file concurrently.
             return null;
         }
     }

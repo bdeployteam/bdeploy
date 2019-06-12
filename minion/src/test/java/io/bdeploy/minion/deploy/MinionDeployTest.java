@@ -338,7 +338,6 @@ public class MinionDeployTest {
         ic.configTree = pmf.getConfigTemplateTreeId();
 
         /* STEP 3: create an InstanceManifest with all instance node configurations. */
-        // TODO: record the product manifest to enable updates late
         Manifest.Key imKey = new InstanceManifest.Builder().setInstanceConfiguration(ic)
                 .addInstanceNodeManifest(Minion.DEFAULT_MASTER_NAME, inmKey)
                 .addInstanceNodeManifest(InstanceNodeConfigurationListDto.CLIENT_NODE_NAME, cinmKey).insert(local);

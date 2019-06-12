@@ -95,8 +95,6 @@ public class SoftwareResourceImpl implements SoftwareResource {
             return;
         }
 
-        // TODO: any dependencies that can be deleted as well?
-
         hive.execute(new ManifestDeleteOperation().setToDelete(key));
     }
 

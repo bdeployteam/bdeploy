@@ -20,8 +20,6 @@ import io.bdeploy.jersey.JerseyAuthenticationProvider.WeakTokenAllowed;
 
 /**
  * Manages a certain hive on the master
- * <p>
- * TODO: some APIs are not optimal.
  */
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)

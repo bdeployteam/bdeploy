@@ -23,8 +23,8 @@ import javax.ws.rs.core.SecurityContext;
 import com.google.common.io.ByteStreams;
 
 import io.bdeploy.bhive.BHive;
-import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.ImportObjectOperation;
 import io.bdeploy.bhive.op.ObjectLoadOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
@@ -140,6 +140,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
 
     @Override
     public String createUuid(String group) {
+        // TODO: actually assure that the UUID is unique for the use in instance and application UUIDs.
         return UuidHelper.randomId();
     }
 

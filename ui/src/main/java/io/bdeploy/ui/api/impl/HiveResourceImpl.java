@@ -25,9 +25,9 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
-import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.Tree.EntryType;
 import io.bdeploy.bhive.objects.view.ElementView;
 import io.bdeploy.bhive.op.FsckOperation;
@@ -152,7 +152,6 @@ public class HiveResourceImpl implements HiveResource {
                     entry.name = entry.name + " (missing)";
                 }
             }
-            // TODO length;
             result.add(entry);
         }
         return sort(result);

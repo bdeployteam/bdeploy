@@ -50,7 +50,6 @@ import org.slf4j.LoggerFactory;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
-import io.bdeploy.bhive.op.InsertManifestOperation;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestExistsOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
@@ -300,9 +299,7 @@ public class InstanceResourceImpl implements InstanceResource {
                     nodeConfig.name = cfg.name;
                 }
 
-                nodeConfig.autoStart = cfg.autoStart;
-                nodeConfig.purpose = cfg.purpose;
-                nodeConfig.product = cfg.product;
+                nodeConfig.copyRedundantFields(cfg);
 
                 RuntimeAssert.assertEquals(nodeDto.nodeConfiguration.uuid, instance, "Instance ID not set on nodes");
                 String mfName = instance + "/" + minionName;
@@ -312,29 +309,20 @@ public class InstanceResourceImpl implements InstanceResource {
                 newConfig.addInstanceNodeManifest(minionName, instanceNodeKey);
             }
         } else {
-            // no new node config - apply existing one.
-
-            // BUG: DCS-197: we need to copy the instance node manifests to a new version to force re-deploy.
-            // This is required to allow undeploy unconditionally and have a proper "deployed" flag.
-            // Ideally no modification to the nodes would mean no need to update something on the node. But
-            // we cannot (currently) identify whether a single node config version is used by multiple
-            // instance configurations, thus we need to artificially keep them separate.
-
-            // in addition, version number is right now fully aligned with the root instance manifest. The
-            // node manifest tag is used when manifesting to the target slave. Diverging tags is not really
-            // nice for the user when navigating the deploy directory directly..
-
+            // no new node config - re-apply existing one with new tag, align redundant fields.
             for (Map.Entry<String, Manifest.Key> entry : oldConfig.getInstanceNodeManifests().entrySet()) {
-                // no logic, simply assign the new manifest version to the exact same "thing".
-                Manifest.Builder builder = new Manifest.Builder(new Manifest.Key(entry.getValue().getName(), rootTag));
+                InstanceNodeManifest oldInmf = InstanceNodeManifest.of(hive, entry.getValue());
+                InstanceNodeManifest.Builder inmBuilder = new InstanceNodeManifest.Builder();
+                InstanceNodeConfiguration nodeConfig = oldInmf.getConfiguration();
 
-                // TODO: update redundant data (autoStart, description, ...)
-                Manifest oldMf = hive.execute(new ManifestLoadOperation().setManifest(entry.getValue()));
-                builder.setRoot(oldMf.getRoot());
-                oldMf.getLabels().forEach((k, v) -> builder.addLabel(k, v));
-                hive.execute(new InsertManifestOperation().addManifest(builder.build()));
+                nodeConfig.copyRedundantFields(cfg);
 
-                newConfig.addInstanceNodeManifest(entry.getKey(), builder.getKey());
+                inmBuilder.setConfigTreeId(cfg.configTree);
+                inmBuilder.setInstanceNodeConfiguration(nodeConfig);
+                inmBuilder.setMinionName(entry.getKey());
+                inmBuilder.setKey(new Manifest.Key(entry.getValue().getName(), rootTag)); // make sure tag is equal.
+
+                newConfig.addInstanceNodeManifest(entry.getKey(), inmBuilder.insert(hive));
             }
         }
 
@@ -351,6 +339,7 @@ public class InstanceResourceImpl implements InstanceResource {
         // cleanup is done periodically in background.
 
         // TODO: remote delete on master?
+        // TODO: PREVENT delete if processes are still running.
     }
 
     @Override
@@ -489,10 +478,8 @@ public class InstanceResourceImpl implements InstanceResource {
                         + tag + " because it has running or scheduled applications", Status.FORBIDDEN);
             }
 
-            // 1: tell master to undeploy
+            // 2: tell master to undeploy
             master.getNamedMaster(group).remove(instance.getManifest());
-
-            // 2: TODO: cleanup in hives - how, where, who?
         }
     }
 

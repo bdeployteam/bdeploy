@@ -79,4 +79,15 @@ public class InstanceNodeConfiguration {
 
         return dd;
     }
+
+    /**
+     * Applies redundant copies of informative fields from the "parent" {@link InstanceConfiguration}
+     */
+    public void copyRedundantFields(InstanceConfiguration cfg) {
+        uuid = cfg.uuid;
+        name = cfg.name;
+        autoStart = cfg.autoStart;
+        purpose = cfg.purpose;
+        product = cfg.product;
+    }
 }

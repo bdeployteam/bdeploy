@@ -114,7 +114,7 @@ public class ObjectDatabase extends LockableDatabase {
             }
         } else {
             // can read fully in memory buffer;
-            // FIXME: seems to fail sometimes for large files on JDK11 (in Eclipse only?).
+            // TODO: seems to fail sometimes for large files on JDK11 (in Eclipse only?).
             byte[] bytes = Files.readAllBytes(file);
             return addObject(bytes);
         }

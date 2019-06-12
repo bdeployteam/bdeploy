@@ -151,11 +151,7 @@ public class InstanceImportExportHelper {
             InstanceNodeConfiguration nodeCfg = node.getValue();
 
             // align redundant copies of certain falgs
-            nodeCfg.uuid = icfg.uuid;
-            nodeCfg.name = icfg.name;
-            nodeCfg.autoStart = icfg.autoStart;
-            nodeCfg.purpose = icfg.purpose;
-            nodeCfg.product = icfg.product;
+            nodeCfg.copyRedundantFields(icfg);
 
             for (ApplicationConfiguration app : nodeCfg.applications) {
                 if (uuidPool.contains(app.uid)) {
