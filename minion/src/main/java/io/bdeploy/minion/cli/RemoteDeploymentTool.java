@@ -31,14 +31,14 @@ public class RemoteDeploymentTool extends RemoteServiceTool<RemoteDeployConfig> 
         @Help(value = "List deployments on the remote", arg = false)
         boolean list() default false;
 
-        @Help(value = "Deploy a new version from the local hive", arg = false)
-        boolean deploy() default false;
+        @Help(value = "Install the given instance version on the remote", arg = false)
+        boolean install() default false;
 
-        @Help(value = "Activate a deployed version on the remote. Running processes must be stopped before this!", arg = false)
+        @Help(value = "Activate an installed version on the remote. Running processes must be stopped before this!", arg = false)
         boolean activate() default false;
 
-        @Help(value = "Remove a deployment from the remote", arg = false)
-        boolean remove() default false;
+        @Help(value = "Uninstall an instance version from the remote", arg = false)
+        boolean uninstall() default false;
     }
 
     public RemoteDeploymentTool() {
@@ -74,11 +74,11 @@ public class RemoteDeploymentTool extends RemoteServiceTool<RemoteDeployConfig> 
             helpAndFailIfMissing(config.manifest(), "Missing --manifest");
             Manifest.Key key = Manifest.Key.parse(config.manifest());
 
-            if (config.deploy()) {
+            if (config.install()) {
                 client.getNamedMaster(config.target()).install(key);
             } else if (config.activate()) {
                 client.getNamedMaster(config.target()).activate(key);
-            } else if (config.remove()) {
+            } else if (config.uninstall()) {
                 client.getNamedMaster(config.target()).remove(key);
             }
         } catch (Exception e) {
