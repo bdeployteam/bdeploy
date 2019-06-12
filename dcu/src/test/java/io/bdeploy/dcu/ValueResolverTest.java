@@ -59,11 +59,11 @@ public class ValueResolverTest {
         a1c.start = new CommandConfiguration();
         a1c.start.executable = "rel/to/launcher.sh";
         a1c.start.parameters.add(fakeParam("a1p1", "a1p1-value", "--param=a1p1-value"));
-        a1c.start.parameters.add(fakeParam("a1p2", "${V:a1p1}", "--other", "${V:a1p1}"));
-        a1c.start.parameters.add(fakeParam("a1p3", "${M:a:v1}", "--mref", "${M:a:v1}"));
-        a1c.start.parameters.add(fakeParam("a1p4", "${P:CONFIG}/file.json", "--cfg=${P:CONFIG}/file.json"));
+        a1c.start.parameters.add(fakeParam("a1p2", "{{V:a1p1}}", "--other", "{{V:a1p1}}"));
+        a1c.start.parameters.add(fakeParam("a1p3", "{{M:a:v1}}", "--mref", "{{M:a:v1}}"));
+        a1c.start.parameters.add(fakeParam("a1p4", "{{P:CONFIG}}/file.json", "--cfg={{P:CONFIG}}/file.json"));
         a1c.start.parameters
-                .add(fakeParam("a1p5", "${V:Application Number One:a1p4}.bak", "--bak=${V:Application Number One:a1p4}.bak"));
+                .add(fakeParam("a1p5", "{{V:Application Number One:a1p4}}.bak", "--bak={{V:Application Number One:a1p4}}.bak"));
 
         dc.applications.add(a1c);
 
@@ -80,7 +80,7 @@ public class ValueResolverTest {
                 is(dpp.get(SpecialDirectory.CONFIG).toString()));
 
         // resolver does not expand recursively - ParameterConfiguration does.
-        assertThat(resolver.apply(SpecialVariablePrefix.PARAMETER_VALUE.format("Application Number One:a1p2")), is("${V:a1p1}"));
+        assertThat(resolver.apply(SpecialVariablePrefix.PARAMETER_VALUE.format("Application Number One:a1p2")), is("{{V:a1p1}}"));
 
         // but the descriptor expand recursively.
         boolean found = false;
@@ -109,8 +109,8 @@ public class ValueResolverTest {
         OperatingSystem current = OsHelper.getRunningOs();
         OperatingSystem notCurrent = current == OperatingSystem.LINUX ? OperatingSystem.WINDOWS : OperatingSystem.LINUX;
 
-        assertEquals("xx", ParameterConfiguration.process("x${" + notCurrent.name() + ":value}x", resolver));
-        assertEquals("xvaluex", ParameterConfiguration.process("x${" + current.name() + ":value}x", resolver));
+        assertEquals("xx", ParameterConfiguration.process("x{{" + notCurrent.name() + ":value}}x", resolver));
+        assertEquals("xvaluex", ParameterConfiguration.process("x{{" + current.name() + ":value}}x", resolver));
     }
 
 }

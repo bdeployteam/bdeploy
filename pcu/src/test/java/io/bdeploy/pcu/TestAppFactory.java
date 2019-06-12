@@ -108,7 +108,7 @@ public class TestAppFactory {
         cfg.startCommand.parameters.add(sleepParam);
         cfg.startCommand.parameters.add(getParam("--param1", "Parameter 1", "test"));
         cfg.startCommand.parameters.add(getParam("--param2", "Parameter 2", "more"));
-        cfg.startCommand.parameters.add(getParam("--jdk", "Parameter 2", "${M:jdk}"));
+        cfg.startCommand.parameters.add(getParam("--jdk", "Parameter 2", "{{M:jdk}}"));
 
         try {
             Files.write(target.resolve(ApplicationDescriptor.FILE_NAME),
