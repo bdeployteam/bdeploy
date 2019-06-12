@@ -11,6 +11,7 @@ export class InstanceVersionCardComponent implements OnChanges {
   @Input() selected: boolean;
   @Input() dirty: boolean;
   @Input() disabled: boolean;
+  @Input() productAvailable: boolean;
   @Input() state: DeploymentStateDto;
   @Input() isRunningOrScheduled: boolean;
 
@@ -46,7 +47,7 @@ export class InstanceVersionCardComponent implements OnChanges {
     if (this.dirty) {
       styles.push('instance-version-modified');
     }
-    if (this.disabled) {
+    if (this.disabled || !this.productAvailable) {
       styles.push('instance-version-disabled');
     }
     if (this.selected) {
