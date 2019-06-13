@@ -7,8 +7,8 @@ import java.security.KeyStore;
 
 import io.bdeploy.bhive.cli.TokenTool.TokenConfig;
 import io.bdeploy.common.cfg.Configuration.Help;
-import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
+import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.SecurityHelper;
 
@@ -58,7 +58,6 @@ public class TokenTool extends ConfiguredCliTool<TokenConfig> {
         char[] pass = config.passphrase() == null ? null : config.passphrase().toCharArray();
 
         if (config.create()) {
-            // TODO: something else?
             String issuedTo = System.getProperty("user.name");
 
             createNewToken(ksPath, pass, issuedTo);

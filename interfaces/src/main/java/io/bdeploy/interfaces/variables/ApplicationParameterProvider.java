@@ -29,8 +29,6 @@ public class ApplicationParameterProvider {
         List<String> appAndParameter = Splitter.on(':').splitToList(name);
         assertTrue(appAndParameter.size() == 2, "Illegal parameter reference: " + name);
 
-        // TODO: support integer arithmetic for ports, ...
-
         String app = appAndParameter.get(0);
         String parameter = appAndParameter.get(1);
 

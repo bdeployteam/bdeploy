@@ -16,8 +16,6 @@ public class UuidHelper {
 
     /**
      * @return a pseudo-UUID generated from random data.
-     *         <p>
-     *         TODO: only chars in first and last group...?
      */
     public static String randomId() {
         StringBuilder builder = new StringBuilder();

@@ -29,8 +29,8 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.CopyOperation;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestExistsOperation;
@@ -89,9 +89,12 @@ public class ProductResourceImpl implements ProductResource {
             throw new WebApplicationException("Product version is still in use", Status.BAD_REQUEST);
         }
 
-        // TODO: find referenced application manifests and check if they can be deleted as well.
+        // This assumes that no single application version is used in multiple products.
+        ProductManifest pmf = ProductManifest.of(hive, key);
+        SortedSet<Key> apps = pmf.getApplications();
 
         hive.execute(new ManifestDeleteOperation().setToDelete(key));
+        apps.forEach(a -> hive.execute(new ManifestDeleteOperation().setToDelete(a)));
     }
 
     @Override
