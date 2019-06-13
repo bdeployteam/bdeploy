@@ -154,3 +154,39 @@ Also allows to fix found errors (by deletion). After this, missing *Manifests* m
 |===
 
 === Environment Variables
+
+*BDeploy* and *BHive* CLIs provide a set of environment variables that allow you to provide environment defaults for certain command line arguments.
+
+Each command will include information for the according environment fallback in it's help output, for instance:
+
+----
+$ bhive push --help
+Help:
+
+Usage: PushTool <args...>
+               --token=ARG: Token for the remote access. Can be given alternatively to a keystore.
+                            (Environment variable 'BDEPLOY_TOKEN' is used as fallback if not given)
+              --remote=ARG: URI of remote BHive. Supports file:, jar:file:, bhive:
+                            (Environment variable 'BDEPLOY_REMOTE' is used as fallback if not given)
+              ...
+----
+
+[%header,cols="25,85"]
+|===
+|Variable
+|Description
+
+|`BDEPLOY_REMOTE`
+|URL to the remote *BDeploy* server which commands should connect to, e.g. `https://hostname:7701/api`.
+|`BDEPLOY_ROOT`
+|The root directory to use for `init`, `master` and `slave` (primarily).
+|`BDEPLOY_TOKEN`
+|The actual _security token_ used to access the remote *BDeploy* server.
+|`BDEPLOY_TOKENFILE`
+|A file containing the _security token_ (as text content) used to access the remote *BDeploy* server.
+|`BHIVE`
+|Path to the *BHive* to operate on for local commands (e.g. `import`, `export`).
+|`REMOTE_BHIVE`
+|The name of the remote *BHive*. In case of *BDeploy* this is usually the name of an *Instance Group* or *Software Repository*.
+
+|===
