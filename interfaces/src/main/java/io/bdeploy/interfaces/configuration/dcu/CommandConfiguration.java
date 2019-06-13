@@ -11,7 +11,7 @@ public class CommandConfiguration {
 
     /**
      * The executable. Either a relative path, or a path with a manifest reference
-     * (e.g. ${M:jdk}/bin/java).
+     * (e.g. {{M:jdk}}/bin/java).
      */
     public String executable;
 

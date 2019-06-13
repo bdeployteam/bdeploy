@@ -12,7 +12,7 @@ public class ExecutableDescriptor {
      * Relative path to the launcher executable (relative to application
      * installation directory).
      * <p>
-     * Alternatively may reference another manifest, e.g. ${M:jdk}/bin/java.
+     * Alternatively may reference another manifest, e.g. {{M:jdk}}/bin/java.
      */
     public String launcherPath;
 

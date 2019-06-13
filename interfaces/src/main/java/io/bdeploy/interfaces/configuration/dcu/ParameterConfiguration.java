@@ -47,8 +47,7 @@ public class ParameterConfiguration {
      * @return a resolved {@link String}.
      */
     public static String process(String value, Function<String, String> valueProvider) {
-        String tmp = TemplateHelper.process(value, valueProvider, "${", "}");
-        return TemplateHelper.process(tmp, valueProvider, "{{", "}}");
+        return TemplateHelper.process(value, valueProvider, "{{", "}}");
     }
 
 }
