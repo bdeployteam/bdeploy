@@ -1,5 +1,4 @@
 :prewrap!:
-:stylesheet: plain.css
 :favicon: images/logo.ico
 
 = BDeploy Developer Documentation

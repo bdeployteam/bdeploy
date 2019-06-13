@@ -4,25 +4,53 @@ plugins {
 
 task developerDoc(type: org.asciidoctor.gradle.jvm.AsciidoctorTask) {
     sourceDir = file('dev')
+
     sources {
         include 'index.adoc'
     }
+
+    resources {
+        from("${projectDir}/css") {
+            include '*.css'
+        }
+        into '.'
+
+        from(sourceDir) {
+            include 'images/**'
+        }
+    }
+
     outputDir = "${buildDir}/docs/dev"
     baseDirFollowsSourceDir()
 }
 
 task userDoc(type: org.asciidoctor.gradle.jvm.AsciidoctorTask) {
     sourceDir = file('user')
+
     sources {
         include 'index.adoc'
     }
+
+    resources {
+        from("${projectDir}/css") {
+            include '*.css'
+        }
+        into '.'
+
+        from(sourceDir) {
+            include 'images/**'
+        }
+    }
+ 
     outputDir = "${buildDir}/docs/user"
     baseDirFollowsSourceDir()
 }
 
 asciidoctorj {
+    // stylesheets are copied AFTER the build, so ignore warning about missing stylesheet.
     attributes 'toc2': '',
-               'linkcss': ''
+               'linkcss': '',
+               'stylesheet': 'plain.css'
 }
 
 build.dependsOn developerDoc
