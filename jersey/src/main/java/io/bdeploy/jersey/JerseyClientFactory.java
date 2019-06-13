@@ -11,6 +11,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 import javax.ws.rs.Path;
@@ -42,6 +43,11 @@ import io.bdeploy.common.util.NamedDaemonThreadFactory;
  * A factory for Jersey based JAX-RS clients.
  */
 public class JerseyClientFactory {
+
+    static {
+        // you don't want to know. if you do, see DCS-417 or https://github.com/eclipse-ee4j/jersey/issues/3293
+        HttpsURLConnection.getDefaultSSLSocketFactory();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(JerseyClientFactory.class);
 
@@ -168,7 +174,7 @@ public class JerseyClientFactory {
      *         registrations for the {@link RemoteService} associated with this
      *         factory.
      */
-    public WebTarget getBaseTarget(Object... additionalRegistrations) {
+    public synchronized WebTarget getBaseTarget(Object... additionalRegistrations) {
         if (additionalRegistrations.length == 0 && cachedTarget != null) {
             return cachedTarget;
         }
