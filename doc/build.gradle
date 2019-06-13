@@ -51,6 +51,10 @@ asciidoctorj {
     attributes 'toc2': '',
                'linkcss': '',
                'stylesheet': 'plain.css'
+
+    modules {
+       diagram.version '1.5.18'
+    }
 }
 
 build.dependsOn developerDoc
