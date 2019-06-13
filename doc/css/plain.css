@@ -31,6 +31,7 @@ blockquote{color:var(--secondarycolor) !important}
 .quoteblock{color:var(--black)}
 .quoteblock blockquote:before{color:var(--black)}
 code{color:var(--white);background-color: var(--secondarycolor) !important}
+p.tableblock>code:only-child {padding: .1em .5ex}
 .listingblock code {background-color: inherit !important}
 mark{background-color: var(--tertiarycolor)} /* Text highlighting color */
 

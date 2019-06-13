@@ -2,7 +2,7 @@
 
 The BHive (short: hive) provides a mechanism to store and transfer files over the network. It decouples storage of file content and hierarchical filesystem layout descriptions (trees). The mechanism is similar to how GIT stores files. File content is stored and identified by using the content's checksum.
 
-image::images/merkle.png[Merkle Hash Tree]
+image::images/merkle.png[Merkle Hash Tree,{thumbnail},role="thumb",link="images/merkle.png"]
 
 Here some properties of BHive:
 

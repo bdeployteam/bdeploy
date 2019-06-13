@@ -2,6 +2,12 @@
 :favicon: images/logo.ico
 :source-highlighter: coderay
 :icons: font
+ifdef::backend-html5[]
+:thumbnail: width='150'
+endif::[]
+ifdef::backend-pdf[]
+:thumbnail: pdfwidth='100vw'
+endif::[]
 
 = BDeploy Developer Documentation
 
