@@ -44,6 +44,7 @@ public class CleanupTool extends ConfiguredCliTool<CleanupConfig> {
 
     @Override
     protected void run(CleanupConfig config) {
+        helpAndFailIfMissing(config.root(), "Missing --root");
         Path root = Paths.get(config.root());
         if (!Files.isDirectory(root)) {
             helpAndFail("Root " + root + " does not exists!");

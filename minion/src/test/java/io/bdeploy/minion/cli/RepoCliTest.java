@@ -47,10 +47,10 @@ public class RepoCliTest {
 
     @Test
     public void toolCreate(MasterRootResource master, RemoteService service, @AuthPack String auth, MinionRoot root) {
-        tools.getTool(RepoTool.class, "--remote=" + service.getUri(), "--token=" + auth,
+        tools.getTool(RemoteRepoTool.class, "--remote=" + service.getUri(), "--token=" + auth,
                 "--storage=" + root.getStorageLocations().get(0).toString(), "--add=test", "--description=desc").run();
 
-        tools.getTool(RepoTool.class, "--remote=" + service.getUri(), "--token=" + auth, "--list").run();
+        tools.getTool(RemoteRepoTool.class, "--remote=" + service.getUri(), "--token=" + auth, "--list").run();
 
         List<SoftwareRepositoryConfiguration> repos = master.getSoftwareRepositories();
         assertEquals(1, repos.size());

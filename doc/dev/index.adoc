@@ -1,6 +1,7 @@
 :prewrap!:
 :favicon: images/logo.ico
 :source-highlighter: coderay
+:icons: font
 
 = BDeploy Developer Documentation
 
@@ -25,3 +26,5 @@ include::launcher.adoc[]
 include::interfaces.adoc[]
 
 include::ui.adoc[]
+
+include::devenv.adoc[]

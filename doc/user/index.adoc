@@ -1,5 +1,8 @@
 :prewrap!:
+:prewrap!:
 :favicon: images/logo.ico
+:source-highlighter: coderay
+:icons: font
 
 = BDeploy End User Documentation
 
@@ -8,3 +11,9 @@ ATTENTION: Newline in between includes required for correct document structure.
 ////
 
 include::../dev/intro.adoc[]
+
+include::ui/index.adoc[]
+
+include::cli/index.adoc[]
+
+include::advanced/index.adoc[]

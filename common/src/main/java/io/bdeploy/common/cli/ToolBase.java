@@ -124,6 +124,13 @@ public abstract class ToolBase {
             instance.setOutput(output);
             instance.setVerbose(verbose);
             instance.setActivityReporter(reporter);
+
+            if (instance instanceof ConfiguredCliTool) {
+                if (((ConfiguredCliTool<?>) instance).getRawConfiguration().getAllRawObjects().containsKey("help")) {
+                    ((ConfiguredCliTool<?>) instance).helpAndFail("Help:");
+                }
+            }
+
             try (Timer.Context timer = Metrics.getMetric(MetricGroup.CLI)
                     .timer(instance.getClass().getSimpleName() + "/" + args[toolArgNum]).time()) {
                 instance.run();

@@ -7,10 +7,9 @@ import java.util.List;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
-import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.jersey.audit.AuditRecord;
-import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.cli.StorageTool.StorageConfig;
 
@@ -19,7 +18,7 @@ import io.bdeploy.minion.cli.StorageTool.StorageConfig;
  */
 @Help("Manage storage locations for the minion.")
 @CliName("storage")
-public class StorageTool extends RemoteServiceTool<StorageConfig> {
+public class StorageTool extends ConfiguredCliTool<StorageConfig> {
 
     public @interface StorageConfig {
 
@@ -42,7 +41,7 @@ public class StorageTool extends RemoteServiceTool<StorageConfig> {
     }
 
     @Override
-    protected void run(StorageConfig config, @RemoteOptional RemoteService svc) {
+    protected void run(StorageConfig config) {
         helpAndFailIfMissing(config.root(), "Missing --root");
 
         try (MinionRoot r = new MinionRoot(Paths.get(config.root()), getActivityReporter())) {

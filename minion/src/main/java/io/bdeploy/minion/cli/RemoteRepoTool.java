@@ -7,14 +7,14 @@ import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfigurat
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
-import io.bdeploy.minion.cli.RepoTool.RepoConfig;
+import io.bdeploy.minion.cli.RemoteRepoTool.RepoConfig;
 
 /**
  * Manages storage locations.
  */
 @Help("Manage software repositories for the minion.")
-@CliName("repo")
-public class RepoTool extends RemoteServiceTool<RepoConfig> {
+@CliName("remote-repo")
+public class RemoteRepoTool extends RemoteServiceTool<RepoConfig> {
 
     public @interface RepoConfig {
 
@@ -31,7 +31,7 @@ public class RepoTool extends RemoteServiceTool<RepoConfig> {
         boolean list() default false;
     }
 
-    public RepoTool() {
+    public RemoteRepoTool() {
         super(RepoConfig.class);
     }
 

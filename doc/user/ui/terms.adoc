@@ -1,0 +1,41 @@
+=== Terms and Concepts
+
+BDeploy has a few very important terms and concepts which should be known before diving into details of the application itself. These terms will be used all over the documentation to cross-reference other parts of the application.
+
+[%header,cols="25,75"]
+|===
+|Term
+|Meaning
+
+| *Manifest*
+| Actually a *BHive* concept (the underlying distributed storage technology of *BDeploy*). Simplified, a *Manifest* is a unique *Key* which identifies a *Tree* of *Files*.
+
+| *Application*
+a| A *Manifest* with special content:
+
+* The actual application binaries.
+* An <<_app_info_yaml,app-info.yaml>>
+
+*Applications* are not stand-alone. They are always bundled to a *Product*.
+
+| *Product*
+a| A bundle of *Applications* along with some meta-information required by *BDeploy*. Again, much like an *Application*, this is a special *Manifest* in the underlying storage:
+
+* Contains *BDeploy* meta-information, see <<_product_info_yaml,product-info.yaml>>
+* References all *Applications* which are part of the *Product*
+* Contains default configuration files for all *Applications*.
+
+| *Instance*
+| An *Instance* is actual configuration of a *Product*. The term *Instance* is used as this compares similarily to a *Product* as an *Object* in programming relates to a *Class*. The *Product* (and it's *Applications*) describes the _possible_ configuration values (e.g. configuration files, command line parameters, etc.) - the *Instance* provides _actual_ values for these.
+
+| *Instance Group*
+a| In *Instance Group* is the main top-level element used in *BDeploy*. It provides a grouping of *Instances* (as the name suggests).
+
+An *Instance Group* (and a *Software Repository*) is always stored in a separate underlying *BHive*. This provides the means of easily moving an *Instance Group* (or a *Software Repository*) from one *BDeploy* server to another.
+
+| *Software Repository*
+a| A *Software Repository* is a named *BHive* which is dedicated to storing *Manifests* which contain arbitrary _deliverables_. This is not neccessarily a piece of software. It may be _any_ set of files and directories.
+
+When building a *Product*, it's declared dependencies are resolved by querying *Software Repositories* on the target *BDeploy* server.
+
+|===

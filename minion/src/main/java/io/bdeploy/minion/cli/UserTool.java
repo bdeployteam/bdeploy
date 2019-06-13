@@ -6,10 +6,9 @@ import java.util.Collections;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
+import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.security.ApiAccessToken;
-import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.jersey.audit.AuditRecord;
-import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.cli.UserTool.UserConfig;
 
@@ -18,7 +17,7 @@ import io.bdeploy.minion.cli.UserTool.UserConfig;
  */
 @Help("Manage (configuration UI) users on a master.")
 @CliName("user")
-public class UserTool extends RemoteServiceTool<UserConfig> {
+public class UserTool extends ConfiguredCliTool<UserConfig> {
 
     public @interface UserConfig {
 
@@ -50,7 +49,7 @@ public class UserTool extends RemoteServiceTool<UserConfig> {
     }
 
     @Override
-    protected void run(UserConfig config, @RemoteOptional RemoteService svc) {
+    protected void run(UserConfig config) {
         helpAndFailIfMissing(config.root(), "Missing --root");
 
         try (MinionRoot r = new MinionRoot(Paths.get(config.root()), getActivityReporter())) {

@@ -1,0 +1,19 @@
+=== Defining your own Product
+
+To define your own *Product* which can be deployed with *BDeploy*, you will need to provide some information to *BDeploy* about the actual applications and some additional meta-data. This chapter will walk you through the required artifacts and how to define them.
+
+==== app-info.yaml
+
+==== product-info.yaml
+
+==== product-version.yaml
+
+=== Dependencies, third party Software
+
+=== Building a Product
+
+Now that you have a well-defined *Product* with one or more *Applications*, you will want to build/package that *Product* to be usable with *BDeploy*.
+
+==== Via CLI
+
+==== Via Eclipse TEA

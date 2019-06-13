@@ -1,0 +1,80 @@
+== Development Setup
+
+BDeploy uses the *Eclipse IDE* for backend- and *VSCode* for frontend-development. You will need:
+
+* https://adoptopenjdk.net/?variant=openjdk10&jvmVariant=hotspot[OpenJDK 10]
+* https://www.eclipse.org/downloads/[Eclipse IDE]
+** You need to have the https://marketplace.eclipse.org/content/launch-configuration-dsl[Launch Configuration DSL (LcDsl)] extension installed.
+* https://code.visualstudio.com/download[VSCode]
+** You need to have the https://marketplace.visualstudio.com/items?itemName=johnpapa.angular-essentials[Angular Essentials] extension installed.
+* https://www.npmjs.com/get-npm[NPM]
+* https://git-scm.com/downloads[GIT]
+
+[WARNING]
+*Java 11* is not yet supported, since required dependencies of BDeploy do not yet support *Java 11*.
+
+
+=== Environment Setup
+
+* You will want to set the `JAVA_HOME` environment variable to point to the path where you extracted the *OpenJDK 10* package to assure that the build picks up the correct Java.
+* Make sure that the `npm` command works from the command line where you will run `gradle` builds (`cmd.exe` on Windows, `bash` on Linux).
+* Install the *Angular CLI* globally for easier working by running `npm install -g @angular/cli`.
+
+=== Repository and Gradle Build
+
+This documentation will assume the path `/work/bdeploy` to be available, if not substitute it with any other path that works for you.
+
+* Clone the repository: `cd /work/bdeploy && git clone https://github.com/bdeployteam/bdeploy.git`
+* Change to the repository directory: `cd bdeploy`
+* Start the `gradle` build
+** `./gradlew build` on Linux (`bash`)
+** `.\gradlew.bat build` on Windows (`cmd.exe`)
+** The build should conclude with a `BUILD SUCCESSFUL` message
+
+The `gradle` build will build test and package BDeploy. You can find build artifacts after the build here:
+
+* `./launcher/build/distributions` - Distributable packages of the launcher application which is used to start client applications.
+* `./minion/build/distributions` - Distributable packages of the main BDeploy binaries. They contains the *master* and *slave* server commands as well as all CLI commands available to BDeploy Administrators.
+* `./interfaces/build/libs/bdeploy-api-*-all.jar` - The distributable API bundle including all external dependencies. This can be used to create additional integrations for BDeploy.
+
+Additionally, documentation deliverables can be found in the `./doc/build/docs/dev` and `./doc/build/docs/user` directories (developer and end-user documentation respectively).
+
+=== Eclipse Workspace
+
+To be able to build, start and debug BDeploy backend applications from the Eclipse IDE, you need to perform some extra setup steps:
+
+* On the command line (see <<Repository and Gradle Build>>) generate the *Eclipse IDE* project files by running `./gradlew eclipse`.
+* Start the *Eclipse IDE* - choose a workspace, e.g. `/work/bdeploy/workspace`.
+* Open the *Git Repositories* view.
+* Click *Add existing local repository*, browse to the repository location (e.g. `/work/bdeploy/bdeploy`) and add it.
+* Right click the repository in the *Git Repositories* view and select *Import Projects...*.
+** Select all projects with type *Eclipse project* (and only those) and proceed.
+
+This results in a complete BDeploy workspace setup which compiles automatically.
+
+==== Running BDeploy from Eclipse
+
+BDeploy uses *LcDsl* launch configurations to run binaries. You can find launch configurations in the *Launch Configurations* view.
+
+* Find and run (hint: right clik) the `Master-Init` launch configuration.
+** This will initialize a BDeploy *master root* inside the chosen workspace directory, e.g. `/work/bdeploy/workspace/runtime/master`.
+* Find and run the `Master-AddUser` launch configuration to add a user to the BDeploy *master root* (so you can authenticate through the Web UI later).
+* Finally find and run the `Master` launch configuration to spin up a BDeploy *master*.
+
+[NOTE]
+The BDeploy master will host the Web UI also when started from the *Eclipse IDE*, but it will not work due to slightly different setup. You must use *VSCode* to host a matching Web UI for the backend run from *Eclipse*.
+
+==== Running BDeploy's Web UI from VSCode
+
+To spin up a matching frontend for the master started in <<Running BDeploy from Eclipse>> you need to start the *Angular* application from within *VSCode*.
+
+* On the command line, navigate the the `./ui/webapp` directory in the repository (e.g. `/work/bdeploy/bdeploy/ui/webapp`) and run *VSCode* in the current directory using `code .`
+* Open a terminal in *VSCode* (_CTRL+\`_) and run `ng serve` to start the *Angular* development server. This will take a while to compile the Web UI.
+** The application will be started at http://localhost:4200 by default.
+
+[WARNING]
+====
+BDeploy's backend is HTTPS *only*. It uses a self-signed certificate by default. This will require to accept the certificate in the browser before *any* communication (especially from within the Web UI) can happen.
+
+This makes it necessary to open a second tab in the browser and navigate to https://localhost:7701 to accept the security exception before the Web UI can communicate with the backend properly. Note that this URL will also load the Web UI once the security exception is in place, but will fail to start (see note above).
+====
