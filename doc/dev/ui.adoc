@@ -15,6 +15,7 @@ To create a theme mixin for any component:
 
 A very simple custom component's scss file could look like this:
 
+[source,sass]
 ----
 @import '~@angular/material/theming';
 
@@ -29,6 +30,7 @@ This will create a CSS class using the current themes 'warn' color as background
 
 Now you need to include and import the theme in the global `app-theme.scss` file:
 
+[source,sass]
 ----
 @import '~@angular/material/theming';
 @include mat-core();
@@ -53,6 +55,7 @@ Now you need to include and import the theme in the global `app-theme.scss` file
 
 Angular material defines a few properties. Those can be accessed from within a mixin easily. Basically a SCSS selector/mixin is just a map, so `map-get` can be used to access the actual values.
 
+[source,sass]
 ----
 @import '~@angular/material/theming';
 
@@ -83,6 +86,7 @@ Available attributes are:
 
 Every theme has a `primary`, `accent` and `warn` palette. You can access those colors using `mat-color`.
 
+[source,sass]
 ----
 @mixin my-component-theme($theme) {
   $accent-palette: map-get($theme, accent);
@@ -121,6 +125,7 @@ The complex foreground map has the following named color definitions:
 
 Each of those can be accessed by `map-get`-ting them:
 
+[source,sass]
 ----
 @mixin my-component-theme($theme) {
   $background-colors: map-get($theme, background);
