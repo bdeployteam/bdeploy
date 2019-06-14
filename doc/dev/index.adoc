@@ -4,6 +4,7 @@
 :icons: font
 :docinfo: shared
 :docinfodir: ../common
+:experimental:
 ifdef::backend-html5[]
 :thumbnail: width='150'
 endif::[]

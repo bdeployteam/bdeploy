@@ -1,5 +1,6 @@
 plugins {
     id 'org.asciidoctor.jvm.convert' version '2.2.0'
+    id 'org.asciidoctor.jvm.pdf' version '2.2.0'
 }
 
 task developerDoc(type: org.asciidoctor.gradle.jvm.AsciidoctorTask) {
@@ -49,6 +50,17 @@ task userDoc(type: org.asciidoctor.gradle.jvm.AsciidoctorTask) {
     }
  
     outputDir = "${buildDir}/docs/user"
+    baseDirFollowsSourceDir()
+}
+
+task userDocPdf(type: org.asciidoctor.gradle.jvm.AsciidoctorPdfTask) {
+    sourceDir = file('user')
+
+    sources {
+        include 'index.adoc'
+    }
+
+    outputDir = "${buildDir}/docs/userPdf"
     baseDirFollowsSourceDir()
 }
 

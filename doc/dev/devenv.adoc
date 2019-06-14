@@ -64,12 +64,12 @@ BDeploy uses *LcDsl* launch configurations to run binaries. You can find launch 
 [NOTE]
 The BDeploy master will host the Web UI also when started from the *Eclipse IDE*, but it will not work due to slightly different setup. You must use *VSCode* to host a matching Web UI for the backend run from *Eclipse*.
 
-==== Running BDeploy's Web UI from VSCode
+=== Running BDeploy's Web UI from VSCode
 
 To spin up a matching frontend for the master started in <<Running BDeploy from Eclipse>> you need to start the *Angular* application from within *VSCode*.
 
 * On the command line, navigate the the `./ui/webapp` directory in the repository (e.g. `/work/bdeploy/bdeploy/ui/webapp`) and run *VSCode* in the current directory using `code .`
-* Open a terminal in *VSCode* (_CTRL+\`_) and run `ng serve` to start the *Angular* development server. This will take a while to compile the Web UI.
+* Open a terminal in *VSCode* (kbd:[Ctrl+\`]) and run `ng serve` to start the *Angular* development server. This will take a while to compile the Web UI.
 ** The application will be started at http://localhost:4200 by default.
 
 [WARNING]
