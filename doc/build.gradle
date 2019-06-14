@@ -18,6 +18,9 @@ task developerDoc(type: org.asciidoctor.gradle.jvm.AsciidoctorTask) {
         from(sourceDir) {
             include 'images/**'
         }
+        from("${projectDir}/common") {
+            include '*/**'
+        }
     }
 
     outputDir = "${buildDir}/docs/dev"
@@ -39,6 +42,9 @@ task userDoc(type: org.asciidoctor.gradle.jvm.AsciidoctorTask) {
 
         from(sourceDir) {
             include 'images/**'
+        }
+        from("${projectDir}/common") {
+            include '*/**'
         }
     }
  

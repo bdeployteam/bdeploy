@@ -2,6 +2,8 @@
 :favicon: images/logo.ico
 :source-highlighter: coderay
 :icons: font
+:docinfo: shared
+:docinfodir: ../common
 ifdef::backend-html5[]
 :thumbnail: width='150'
 endif::[]

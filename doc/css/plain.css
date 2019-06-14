@@ -2,6 +2,7 @@
 
 @import url(https://fonts.googleapis.com/css?family=Noto+Sans);
 @import "asciidoctor.css"; /* Default asciidoc style framework - important */
+@import "css/lightgallery.min.css";
 
 /* CUSTOMISATIONS */
 /* Change the values in root for quick customisation. If you want even more fine grain... venture further. */
