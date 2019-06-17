@@ -196,11 +196,11 @@ public class ProductResourceImpl implements ProductResource {
     }
 
     @Override
-    public List<ProductDto> upload(InputStream inputStream) {
+    public List<Manifest.Key> upload(InputStream inputStream) {
         String tmpHiveName = UuidHelper.randomId() + ".zip";
         Path targetFile = minion.getDownloadDir().resolve(tmpHiveName);
         try {
-            List<ProductDto> imported = new ArrayList<>();
+            List<Manifest.Key> imported = new ArrayList<>();
 
             // Download the hive to a temporary location
             Files.copy(inputStream, targetFile);
@@ -221,8 +221,7 @@ public class ProductResourceImpl implements ProductResource {
                     if (hive.execute(new ManifestExistsOperation().setManifest(productKey))) {
                         continue;
                     }
-                    ProductManifest manifest = ProductManifest.of(zipHive, productKey);
-                    imported.add(ProductDto.create(manifest));
+                    imported.add(productKey);
                     copy.addManifest(productKey);
                     scan.addManifest(productKey);
                 }

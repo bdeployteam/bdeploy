@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
+import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import io.bdeploy.ui.dto.ProductDto;
 
@@ -55,6 +56,6 @@ public interface ProductResource {
     @POST
     @Path("/upload")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public List<ProductDto> upload(@FormDataParam("file") InputStream inputStream);
+    public List<Manifest.Key> upload(@FormDataParam("file") InputStream inputStream);
 
 }
