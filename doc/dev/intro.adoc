@@ -1,3 +1,5 @@
+image::images/logo.svg[Logo,200,align="center"]
+
 == Introduction
 
 BDeploy is a speed and disc-usage optimized deployment solution for (tiny to large scale) applications.
