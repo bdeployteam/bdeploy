@@ -7,9 +7,19 @@ image::images/BDeploy_Instance_Menu.png[Instance Menu,{thumbnail},role="thumb",l
 
 image::images/BDeploy_DnD_Applications.png[Drag & Drop Applications,{thumbnail},role="thumb",link="images/BDeploy_DnD_Applications.png"]
 image::images/BDeploy_Process_Config.png[Process Parameter Configuration,{thumbnail},role="thumb",link="images/BDeploy_Process_Config.png"]
+image::images/BDeploy_Process_configured.png[Completed Process Configuration,{thumbnail},role="thumb",link="images/BDeploy_Process_configured.png"]
+
+===== Optional Parameters
+
 image::images/BDeploy_Process_Optional_parameters.png[Manage Optional Parameter(s),{thumbnail},role="thumb",link="images/BDeploy_Process_Optional_parameters.png"]
 image::images/BDeploy_Process_Optional_configured.png[Configuring Optional Parameter(s),{thumbnail},role="thumb",link="images/BDeploy_Process_Optional_configured.png"]
-image::images/BDeploy_Process_configured.png[Completed Process Configuration,{thumbnail},role="thumb",link="images/BDeploy_Process_configured.png"]
+
+===== Custom Parameters
+
+image::images/BDeploy_Process_Custom_Empty.png[Custom Parameters (empty),{thumbnail},role="thumb",link="images/BDeploy_Process_Custom_Empty.png"]
+image::images/BDeploy_Process_Custom_Create.png[Create Custom Parameter,{thumbnail},role="thumb",link="images/BDeploy_Process_Custom_Create.png"]
+image::images/BDeploy_Process_Custom_Value.png[Configure Custom Parameter,{thumbnail},role="thumb",link="images/BDeploy_Process_Custom_Value.png"]
+image::images/BDeploy_Process_Custom_Preview.png[Preview Command Line with Custom Parameter,{thumbnail},role="thumb",link="images/BDeploy_Process_Custom_Preview.png"]
 
 ===== Variable Expansion
 
