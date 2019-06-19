@@ -75,6 +75,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         @Help("Set by the launcher script to determine the directory where to put updates for automatic application.")
         String updateDir();
 
+        @Help(value = "Makes the launcher quit immediately after updating and launching the application.", arg = false)
+        boolean dontWait() default false;
+
     }
 
     public LauncherTool() {
@@ -112,10 +115,10 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         log.info("Using cache directory " + rootDir);
 
-        doLaunchFromConfig(cfg, rootDir.toAbsolutePath(), config.updateDir());
+        doLaunchFromConfig(cfg, rootDir.toAbsolutePath(), config.updateDir(), !config.dontWait());
     }
 
-    private static void doLaunchFromConfig(Path cfg, Path rootDir, String updateDir) {
+    private static void doLaunchFromConfig(Path cfg, Path rootDir, String updateDir, boolean wait) {
         ClickAndStartDescriptor cd;
         try (InputStream is = Files.newInputStream(cfg)) {
             cd = StorageHelper.fromStream(is, ClickAndStartDescriptor.class);
@@ -197,11 +200,15 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             cleanupOldInstalls(rootDir, cd, hive);
 
             // 7. wait for the process to exit
-            try {
-                p.waitFor();
-            } catch (InterruptedException e) {
-                log.warn("waiting for application exit interrupted");
-                Thread.currentThread().interrupt();
+            if (wait) {
+                try {
+                    p.waitFor();
+                } catch (InterruptedException e) {
+                    log.warn("waiting for application exit interrupted");
+                    Thread.currentThread().interrupt();
+                }
+            } else {
+                log.info("Detaching...");
             }
         }
     }
@@ -278,7 +285,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /**
      * Fetch the application and all its requirements from the remote hive.
      */
-    private static void fetchApplicationAndRequirements(BHive hive, ClickAndStartDescriptor cd, ClientApplicationConfiguration appCfg) {
+    private static void fetchApplicationAndRequirements(BHive hive, ClickAndStartDescriptor cd,
+            ClientApplicationConfiguration appCfg) {
         FetchOperation fetchOp = new FetchOperation().setHiveName(cd.groupId).setRemote(cd.host)
                 .addManifest(appCfg.clientConfig.application);
         appCfg.resolvedRequires.forEach(fetchOp::addManifest);
@@ -323,8 +331,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
      * Cleanup the installation directory and the hive. Keeps a max. of 2 existing installations per client around.
      */
     private static void cleanupOldInstalls(Path rootDir, ClickAndStartDescriptor cd, BHive hive) {
-        hive.execute(new ManifestDeleteOldByIdOperation().setAmountToKeep(2).setRunGarbageCollector(true).setToDelete(cd.applicationId)
-                .setPreDeleteHook(k -> {
+        hive.execute(new ManifestDeleteOldByIdOperation().setAmountToKeep(2).setRunGarbageCollector(true)
+                .setToDelete(cd.applicationId).setPreDeleteHook(k -> {
                     log.info("uninstall and delete old version " + k);
                     InstanceNodeController c = new InstanceNodeController(hive, rootDir, InstanceNodeManifest.of(hive, k));
                     if (c.isInstalled()) {
