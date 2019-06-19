@@ -317,6 +317,7 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
 
     this.instanceService.updateConfigurationFiles(this.groupParam, this.uuidParam, this.versionParam, result)
     .subscribe(_ => {
+      this.statusCache.clear(); // avoid isDirty
       this.log.info('stored configuration files for ' + this.groupParam + ', ' + this.uuidParam + ', ' + this.versionParam);
       this.location.back();
     });
