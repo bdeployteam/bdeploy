@@ -332,14 +332,27 @@ public class InstanceResourceImpl implements InstanceResource {
     @WriteLock
     @Override
     public void delete(String instance) {
+        // prevent delete if processes are running.
+        InstanceConfiguration cfg = read(instance);
+        RemoteService svc = cfg.target;
+        try (Activity deploy = reporter.start("Deleting " + instance + "...");
+                NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
+            MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class);
+            InstanceStatusDto status = master.getNamedMaster(group).getStatus(instance);
+            for (String app : status.getAppStatus().keySet()) {
+                if (status.isAppRunningOrScheduled(app)) {
+                    throw new WebApplicationException("Application still running, cannot delete: " + app,
+                            Status.EXPECTATION_FAILED);
+                }
+            }
+        }
+
         // find all root and node manifests by uuid
         SortedSet<Key> allInstanceObjects = hive.execute(new ManifestListOperation().setManifestName(instance));
         allInstanceObjects.forEach(x -> hive.execute(new ManifestDeleteOperation().setToDelete(x)));
 
         // cleanup is done periodically in background.
-
-        // TODO: remote delete on master?
-        // TODO: PREVENT delete if processes are still running.
+        // TODO: remote delete on master? cleanup to prevent PCU from picking up processes, see DCS-470
     }
 
     @Override
