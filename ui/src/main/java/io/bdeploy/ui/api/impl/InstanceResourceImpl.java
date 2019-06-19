@@ -345,14 +345,17 @@ public class InstanceResourceImpl implements InstanceResource {
                             Status.EXPECTATION_FAILED);
                 }
             }
+
+            // cleanup is done periodically in background, still uninstall installed versions to prevent re-start of processes later
+            List<InstanceVersionDto> versions = listVersions(instance);
+            for (InstanceVersionDto dto : versions) {
+                master.getNamedMaster(group).remove(dto.key);
+            }
         }
 
         // find all root and node manifests by uuid
         SortedSet<Key> allInstanceObjects = hive.execute(new ManifestListOperation().setManifestName(instance));
         allInstanceObjects.forEach(x -> hive.execute(new ManifestDeleteOperation().setToDelete(x)));
-
-        // cleanup is done periodically in background.
-        // TODO: remote delete on master? cleanup to prevent PCU from picking up processes, see DCS-470
     }
 
     @Override

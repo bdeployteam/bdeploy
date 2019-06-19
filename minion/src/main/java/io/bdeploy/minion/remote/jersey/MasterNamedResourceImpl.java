@@ -171,6 +171,10 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     public void remove(Key key) {
         InstanceManifest imf = InstanceManifest.of(hive, key);
 
+        if (!isFullyDeployed(imf)) {
+            return; // no need to.
+        }
+
         root.modifyState(s -> {
             if (key.equals(s.activeMasterVersions.get(imf.getConfiguration().uuid))) {
                 log.warn("Removing active version for " + imf.getConfiguration().uuid);
