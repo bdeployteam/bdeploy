@@ -14,6 +14,9 @@ public class BDeployConfig implements TaskingConfigurationExtension {
     @TaskingConfigProperty(description = "Absolute path to product descriptor", headlessOnly = true)
     public String bdeployProductFile;
 
+    @TaskingConfigProperty(description = "Key of the product to push", headlessOnly = true)
+    public String bdeployProductPushKey;
+
     @TaskingConfigProperty(description = "Path to the product list file, may contain string substitutions.")
     public String bdeployProductListFile;
 

@@ -25,7 +25,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.e4.core.di.extensions
 Service-Component: OSGI-INF/io.bdeploy.tea.plugin.BDeployConfig.xml,
  OSGI-INF/io.bdeploy.tea.plugin.BDeployProductTaskChain.xml,
- OSGI-INF/io.bdeploy.tea.plugin.rcp.RcpProductBuildService.xml
+ OSGI-INF/io.bdeploy.tea.plugin.rcp.RcpProductBuildService.xml,
+ OSGI-INF/io.bdeploy.tea.plugin.BDeployProductPushTaskChain.xml
 Bundle-ActivationPolicy: lazy
 Export-Package: io.bdeploy.common.util,
  io.bdeploy.tea.plugin,
