@@ -45,6 +45,10 @@ public class BDeployProductPushTaskChain implements TaskChain {
 
     @TaskChainContextInit
     public void init(TaskExecutionContext c, TaskingLog log, BDeployConfig cfg, BuildDirectories dirs) throws CoreException {
+        if (product == null) {
+            product = Manifest.Key.parse(cfg.bdeployProductPushKey);
+        }
+
         File hive = new File(dirs.getProductDirectory(), "bhive");
         c.addTask(new BDeployProductPushTask(hive, product));
     }
