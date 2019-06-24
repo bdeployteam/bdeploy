@@ -1,9 +1,18 @@
 package io.bdeploy.minion.remote.jersey;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
@@ -15,8 +24,12 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.dcu.InstanceNodeController;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
+import io.bdeploy.interfaces.directory.EntryChunk;
+import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.remote.SlaveDeploymentResource;
+import io.bdeploy.interfaces.variables.DeploymentPathProvider;
+import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 import io.bdeploy.minion.MinionConfigVariableResolver;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.pcu.InstanceProcessController;
@@ -112,6 +125,90 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
     @Override
     public SortedMap<String, Key> getActiveDeployments() {
         return root.getState().activeVersions;
+    }
+
+    @Override
+    public List<InstanceDirectoryEntry> getDataDirectoryEntries(String instanceId) {
+        List<InstanceDirectoryEntry> result = new ArrayList<>();
+        Key key = getActiveDeployments().get(instanceId);
+
+        if (key == null) {
+            throw new WebApplicationException("Cannot find active version for instance " + instanceId, Status.NOT_FOUND);
+        }
+
+        InstanceNodeController inc = new InstanceNodeController(root.getHive(), root.getDeploymentDir(),
+                InstanceNodeManifest.of(root.getHive(), key));
+
+        Path dataRoot = inc.getDeploymentPathProvider().get(SpecialDirectory.DATA);
+
+        try (Stream<Path> paths = Files.walk(dataRoot)) {
+            paths.filter(Files::isRegularFile).forEach(f -> {
+                InstanceDirectoryEntry entry = new InstanceDirectoryEntry();
+                File asFile = f.toFile();
+
+                entry.path = dataRoot.relativize(f).toString();
+                entry.lastModified = asFile.lastModified();
+                entry.size = asFile.length();
+                entry.root = SpecialDirectory.DATA;
+                entry.uuid = instanceId;
+                entry.tag = null; // not tag bound.
+
+                result.add(entry);
+            });
+        } catch (IOException e) {
+            throw new WebApplicationException("Cannot list files in data directory for instance " + instanceId, e);
+        }
+
+        return result;
+    }
+
+    @Override
+    public EntryChunk getEntryContent(InstanceDirectoryEntry entry, long offset, long limit) {
+        // determine file first...
+        DeploymentPathProvider dpp = new DeploymentPathProvider(root.getDeploymentDir().resolve(entry.uuid), entry.tag);
+
+        Path rootDir = dpp.get(entry.root).toAbsolutePath();
+        Path actual = rootDir.resolve(entry.path);
+
+        if (!actual.startsWith(rootDir)) {
+            throw new WebApplicationException("Trying to escape " + rootDir, Status.BAD_REQUEST);
+        }
+
+        if (!Files.exists(actual)) {
+            throw new WebApplicationException("Cannot find " + actual, Status.NOT_FOUND);
+        }
+
+        if (limit == 0) {
+            limit = Long.MAX_VALUE;
+        }
+
+        File file = actual.toFile();
+        long currentSize = file.length();
+        if (currentSize < offset) {
+            // file has been reset.
+            return EntryChunk.ROLLOVER_CHUNK;
+        } else if (currentSize > offset) {
+            try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
+                raf.seek(offset);
+                try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+                    int b;
+                    long c = 0;
+                    while ((b = raf.read()) != -1) {
+                        if (c++ >= limit) {
+                            break;
+                        }
+
+                        baos.write(b);
+                    }
+
+                    return new EntryChunk(baos.toByteArray(), offset, raf.getFilePointer());
+                }
+            } catch (IOException e) {
+                throw new WebApplicationException("Cannot read chunk of " + actual, e);
+            }
+        }
+
+        return null; // offset == size...
     }
 
 }

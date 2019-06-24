@@ -54,7 +54,7 @@ public class ProcessController {
     private final MdcLogger logger = new MdcLogger(ProcessController.class);
 
     /** File that holds the standard out as well as standard error written by the process */
-    private static final String OUT_TXT = "out.txt";
+    public static final String OUT_TXT = "out.txt";
     private static final String OUT_TMP = "out.tmp";
 
     /** Name of the file stored on-disk. Holds information to re-attach to the process */

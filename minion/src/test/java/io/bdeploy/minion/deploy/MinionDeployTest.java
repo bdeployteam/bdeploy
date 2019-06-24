@@ -3,9 +3,11 @@ package io.bdeploy.minion.deploy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -50,6 +52,9 @@ import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlConfiguration;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.descriptor.product.ProductDescriptor;
+import io.bdeploy.interfaces.directory.EntryChunk;
+import io.bdeploy.interfaces.directory.InstanceDirectory;
+import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
@@ -61,6 +66,7 @@ import io.bdeploy.launcher.cli.LauncherCli;
 import io.bdeploy.launcher.cli.LauncherTool;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestMinion;
+import io.bdeploy.pcu.ProcessController;
 import io.bdeploy.pcu.TestAppFactory;
 import io.bdeploy.ui.api.CleanupResource;
 import io.bdeploy.ui.api.Minion;
@@ -110,10 +116,32 @@ public class MinionDeployTest {
         System.out.println(status);
         assertTrue(status.isAppRunningOrScheduled("app"));
 
+        // give the script a bit to write output
+        Thread.sleep(200);
+
         master.getNamedMaster("demo").stop(uuid, "app");
         status = master.getNamedMaster("demo").getStatus(uuid);
         System.out.println(status);
         assertFalse(status.isAppRunningOrScheduled("app"));
+
+        // instance has a single server application, fetch its id and query output
+        InstanceManifest imf = InstanceManifest.of(local, instance);
+        Key nodeKey = imf.getInstanceNodeManifests().get("master");
+        InstanceNodeManifest inmf = InstanceNodeManifest.of(local, nodeKey);
+        String appId = inmf.getConfiguration().applications.get(0).uid;
+
+        InstanceDirectory id = master.getNamedMaster("demo").getOutputEntry(uuid, instance.getTag(), appId);
+        assertNotNull(id);
+        assertEquals(1, id.entries.size());
+
+        InstanceDirectoryEntry ide = id.entries.get(0);
+        assertEquals(SpecialDirectory.RUNTIME, ide.root);
+        assertEquals(appId + "/" + ProcessController.OUT_TXT, ide.path);
+
+        // output may contain additional output, e.g. "demo-linux_1.0.0.1234/launch.sh: line 3: 29390 Terminated              sleep $1"
+        EntryChunk output = master.getNamedMaster("demo").getEntryContent(id.minion, ide, 0, "Hello script\n".length());
+        assertNotNull(output);
+        assertEquals("Hello script\n", new String(output.content, StandardCharsets.UTF_8));
 
         /* STEP 7: generate client .bdeploy file and feed launcher */
         ClickAndStartDescriptor cdesc = new ClickAndStartDescriptor();

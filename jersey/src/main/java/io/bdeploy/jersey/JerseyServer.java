@@ -34,6 +34,7 @@ import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.server.ServerProperties;
 import org.glassfish.jersey.server.spi.Container;
 import org.glassfish.jersey.server.spi.ContainerLifecycleListener;
 import org.slf4j.Logger;
@@ -199,6 +200,9 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             rc.register(new JerseyLazySseInitializer());
             rc.register(new JerseyServerReporterContextResolver());
             rc.register(new JerseyWriteLockFilter());
+
+            // disable output content buffer to allow "real" streaming. jersey will always use chunked encoding.
+            rc.property(ServerProperties.OUTBOUND_CONTENT_LENGTH_BUFFER, 0);
 
             server = GrizzlyHttpServerFactory.createHttpServer(jerseyUri, rc, true, sslEngine, false);
             if (root != null) {

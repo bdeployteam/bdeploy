@@ -1,13 +1,20 @@
 package io.bdeploy.minion.remote.jersey;
 
+import java.io.File;
+import java.nio.file.Path;
+
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
+import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
 import io.bdeploy.interfaces.remote.SlaveProcessResource;
+import io.bdeploy.interfaces.variables.DeploymentPathProvider;
+import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.pcu.InstanceProcessController;
 import io.bdeploy.pcu.MinionProcessController;
+import io.bdeploy.pcu.ProcessController;
 
 public class SlaveProcessResourceImpl implements SlaveProcessResource {
 
@@ -59,6 +66,28 @@ public class SlaveProcessResourceImpl implements SlaveProcessResource {
         MinionProcessController processController = root.getProcessController();
         InstanceProcessController instanceController = processController.getOrCreate(instanceId);
         return instanceController.getStatus();
+    }
+
+    @Override
+    public InstanceDirectoryEntry getOutputEntry(String instanceId, String tag, String applicationId) {
+        DeploymentPathProvider dpp = new DeploymentPathProvider(root.getDeploymentDir().resolve(instanceId), tag);
+        Path root = dpp.get(SpecialDirectory.RUNTIME);
+        Path out = root.resolve(applicationId).resolve(ProcessController.OUT_TXT);
+        File file = out.toFile();
+
+        if (file.exists()) {
+            InstanceDirectoryEntry ide = new InstanceDirectoryEntry();
+            ide.path = root.relativize(out).toString();
+            ide.root = SpecialDirectory.RUNTIME;
+            ide.lastModified = file.lastModified();
+            ide.size = file.length();
+            ide.tag = tag;
+            ide.uuid = instanceId;
+
+            return ide;
+        }
+
+        return null;
     }
 
 }

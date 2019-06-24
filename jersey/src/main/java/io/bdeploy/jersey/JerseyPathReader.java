@@ -11,7 +11,6 @@ import java.nio.file.Path;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
@@ -33,6 +32,8 @@ import io.bdeploy.jersey.JerseyStreamingHelper.StreamDirection;
 @Consumes(MediaType.APPLICATION_OCTET_STREAM)
 public class JerseyPathReader implements MessageBodyReader<Path> {
 
+    static final String PATH_SIZE_HDR = "X-File-Size"; // don't use Content-Length = restricted.
+
     @Context
     private Providers providers;
 
@@ -44,7 +45,7 @@ public class JerseyPathReader implements MessageBodyReader<Path> {
     @Override
     public Path readFrom(Class<Path> type, Type genericType, Annotation[] annotations, MediaType mediaType,
             MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException, WebApplicationException {
-        String cl = httpHeaders.getFirst(HttpHeaders.CONTENT_LENGTH);
+        String cl = httpHeaders.getFirst(PATH_SIZE_HDR);
         long length = -1l;
         try {
             length = Long.parseLong(cl);

@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedMap;
@@ -30,11 +32,16 @@ import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.interfaces.ScopedManifestKey;
+import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
+import io.bdeploy.interfaces.directory.EntryChunk;
+import io.bdeploy.interfaces.directory.InstanceDirectory;
+import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
+import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.dependencies.LocalDependencyFetcher;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
@@ -267,6 +274,49 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
+    public List<InstanceDirectory> getDataDirectorySnapshots(String instanceId) {
+        List<InstanceDirectory> result = new ArrayList<>();
+
+        Key key = getActiveDeployments().get(instanceId);
+        if (key == null) {
+            throw new WebApplicationException("Cannot find active version for instance " + instanceId, Status.NOT_FOUND);
+        }
+
+        SortedMap<String, RemoteService> minions = root.getState().minions;
+        InstanceStatusDto status = getStatus(instanceId);
+        for (String nodeName : status.getNodesWithApps()) {
+            InstanceDirectory idd = new InstanceDirectory();
+            idd.minion = nodeName;
+            idd.uuid = instanceId;
+
+            try {
+                RemoteService service = minions.get(nodeName);
+
+                SlaveDeploymentResource sdr = ResourceProvider.getResource(service, SlaveDeploymentResource.class);
+                List<InstanceDirectoryEntry> iddes = sdr.getDataDirectoryEntries(instanceId);
+                idd.entries.addAll(iddes);
+            } catch (Exception e) {
+                log.warn("Problem fetching data directory of " + nodeName, e);
+                idd.problem = e.toString();
+            }
+
+            result.add(idd);
+        }
+
+        return result;
+    }
+
+    @Override
+    public EntryChunk getEntryContent(String minion, InstanceDirectoryEntry entry, long offset, long limit) {
+        RemoteService svc = root.getMinions().get(minion);
+        if (svc == null) {
+            throw new WebApplicationException("Cannot find minion " + minion, Status.NOT_FOUND);
+        }
+        SlaveDeploymentResource sdr = ResourceProvider.getResource(svc, SlaveDeploymentResource.class);
+        return sdr.getEntryContent(entry, offset, limit);
+    }
+
+    @Override
     public ClientApplicationConfiguration getClientConfiguration(String uuid, String application) {
         Manifest.Key active = getActiveDeployments().get(uuid);
 
@@ -374,6 +424,44 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             SlaveProcessResource spc = ResourceProvider.getResource(service, SlaveProcessResource.class);
             spc.stop(instanceId, applicationId);
         }
+    }
+
+    @Override
+    public InstanceDirectory getOutputEntry(String instanceId, String tag, String applicationId) {
+        // master has the instance manifest.
+        Manifest.Key instanceKey = new Manifest.Key(InstanceManifest.getRootName(instanceId), tag);
+        InstanceManifest imf = InstanceManifest.of(hive, instanceKey);
+
+        for (Map.Entry<String, Manifest.Key> entry : imf.getInstanceNodeManifests().entrySet()) {
+            InstanceNodeManifest inmf = InstanceNodeManifest.of(hive, entry.getValue());
+            for (ApplicationConfiguration app : inmf.getConfiguration().applications) {
+                if (app.uid.equals(applicationId)) {
+                    // this is our app :)
+                    InstanceDirectory id = new InstanceDirectory();
+                    id.minion = entry.getKey();
+                    id.uuid = instanceId;
+
+                    try {
+                        RemoteService svc = root.getMinions().get(entry.getKey());
+                        SlaveProcessResource spr = ResourceProvider.getResource(svc, SlaveProcessResource.class);
+                        InstanceDirectoryEntry oe = spr.getOutputEntry(instanceId, tag, applicationId);
+
+                        if (oe != null) {
+                            id.entries.add(oe);
+                        }
+                    } catch (Exception e) {
+                        log.warn("Problem fetching output entry from " + entry.getKey() + " for " + instanceId + ", " + tag + ", "
+                                + applicationId, e);
+                        id.problem = e.toString();
+                    }
+
+                    return id;
+                }
+            }
+        }
+
+        throw new WebApplicationException("Cannot find application " + applicationId + " in " + instanceId + ":" + tag,
+                Status.NOT_FOUND);
     }
 
     @Override

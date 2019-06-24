@@ -1,5 +1,6 @@
 package io.bdeploy.interfaces.remote;
 
+import java.util.List;
 import java.util.SortedMap;
 import java.util.SortedSet;
 
@@ -9,9 +10,12 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.interfaces.directory.EntryChunk;
+import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
 
 @Path("/deployments")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -50,5 +54,23 @@ public interface SlaveDeploymentResource {
     @GET
     @Path("/active")
     public SortedMap<String, Manifest.Key> getActiveDeployments();
+
+    /**
+     * @param instanceId the instance UUID to fetch DATA directory content for
+     * @return a list of the entries of the DATA directory.
+     */
+    @GET
+    @Path("/dataDir")
+    public List<InstanceDirectoryEntry> getDataDirectoryEntries(@QueryParam("u") String instanceId);
+
+    /**
+     * @param entry the {@link InstanceDirectoryEntry} to fetch content from.
+     * @param offset the offset into the underlying file.
+     * @param limit maximum bytes to read. 0 means no limit.
+     * @return a chunk of the given entry, starting at offset until the <b>current</b> end of the file.
+     */
+    @POST
+    @Path("/dataDir/entry")
+    public EntryChunk getEntryContent(InstanceDirectoryEntry entry, @QueryParam("o") long offset, @QueryParam("l") long limit);
 
 }
