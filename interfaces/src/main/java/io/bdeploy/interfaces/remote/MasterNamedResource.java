@@ -1,5 +1,6 @@
 package io.bdeploy.interfaces.remote;
 
+import java.util.List;
 import java.util.SortedMap;
 import java.util.SortedSet;
 
@@ -16,6 +17,9 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
+import io.bdeploy.interfaces.directory.EntryChunk;
+import io.bdeploy.interfaces.directory.InstanceDirectory;
+import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.WeakTokenAllowed;
 
 /**
@@ -86,6 +90,24 @@ public interface MasterNamedResource {
     public SortedMap<String, Manifest.Key> getActiveDeployments(@QueryParam("m") String minion);
 
     /**
+     * @param instanceId the instance UUID to fetch directory content for
+     * @return a snapshot of the DATA directory for the given instance for each minion.
+     */
+    @GET
+    @Path("/dataDir")
+    public List<InstanceDirectory> getDataDirectorySnapshots(@QueryParam("u") String instanceId);
+
+    /**
+     * Delegates to the specified minion to receive a file.
+     *
+     * @see SlaveDeploymentResource#getEntryContent(InstanceDirectoryEntry, long, long)
+     */
+    @POST
+    @Path("/dataDir/entry")
+    public EntryChunk getEntryContent(@QueryParam("m") String minion, InstanceDirectoryEntry entry, @QueryParam("o") long offset,
+            @QueryParam("l") long limit);
+
+    /**
      * @param instanceId the deployment/instance uuid
      * @param application the application id
      * @return the applications configuration
@@ -148,6 +170,18 @@ public interface MasterNamedResource {
     @POST
     @Path("/stopAll")
     public void stop(@QueryParam("u") String instanceId);
+
+    /**
+     * @param instanceId the unique id of the instance
+     * @param tag the tag of the instance version to fetch for.
+     * @param applicationId the unique id of the application to fetch the output entry for.
+     * @return an {@link InstanceDirectory} specifying the minion the entry resides on. The {@link InstanceDirectoryEntry} list
+     *         might be empty in case no output file exists.
+     */
+    @GET
+    @Path("/output")
+    public InstanceDirectory getOutputEntry(@QueryParam("u") String instanceId, @QueryParam("t") String tag,
+            @QueryParam("a") String applicationId);
 
     /**
      * Returns status information about applications running in this instance.

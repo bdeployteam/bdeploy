@@ -9,6 +9,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
+import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
 
 @Path("/processes")
 @Produces(MediaType.APPLICATION_JSON)
@@ -69,5 +70,17 @@ public interface SlaveProcessResource {
     @GET
     @Path("/status")
     public InstanceNodeStatusDto getStatus(@QueryParam("u") String instanceId);
+
+    /**
+     * @param instanceId the instance UUID
+     * @param tag the tag for which to retrieve the output file entry.
+     * @param applicationId the application ID for which to retrieve the output file entry.
+     * @return an {@link InstanceDirectoryEntry}, can be used with
+     *         {@link SlaveDeploymentResource#getEntryContent(InstanceDirectoryEntry, long, long)}.
+     */
+    @GET
+    @Path("/output")
+    public InstanceDirectoryEntry getOutputEntry(@QueryParam("u") String instanceId, @QueryParam("t") String tag,
+            @QueryParam("a") String applicationId);
 
 }

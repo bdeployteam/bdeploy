@@ -38,7 +38,7 @@ public class TestAppFactory {
 
         sleepScriptContent.put(OperatingSystem.LINUX, //
                 "#!/usr/bin/env bash\n" + //
-                        "echo 'hello script'\n" + //
+                        "echo 'Hello script'\n" + //
                         "sleep $1\n" //
         );
     }

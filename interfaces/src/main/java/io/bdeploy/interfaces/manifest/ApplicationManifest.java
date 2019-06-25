@@ -9,6 +9,7 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.util.StorageHelper;
+import io.bdeploy.common.util.StreamHelper;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 
 public class ApplicationManifest implements Comparable<ApplicationManifest> {
@@ -40,7 +41,7 @@ public class ApplicationManifest implements Comparable<ApplicationManifest> {
         TreeEntryLoadOperation loadSplash = new TreeEntryLoadOperation().setRootTree(manifest.getRoot())
                 .setRelativePath(desc.branding.splash.image);
         try (InputStream fis = hive.execute(loadSplash); ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            StorageHelper.copy(fis, baos);
+            StreamHelper.copy(fis, baos);
             return baos.toByteArray();
         } catch (IOException e) {
             throw new RuntimeException("Failed to read splash screen for " + key);
@@ -54,7 +55,7 @@ public class ApplicationManifest implements Comparable<ApplicationManifest> {
         TreeEntryLoadOperation loadIcon = new TreeEntryLoadOperation().setRootTree(manifest.getRoot())
                 .setRelativePath(desc.branding.icon);
         try (InputStream fis = hive.execute(loadIcon); ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            StorageHelper.copy(fis, baos);
+            StreamHelper.copy(fis, baos);
             return baos.toByteArray();
         } catch (IOException e) {
             throw new RuntimeException("Failed to read icon for " + key);

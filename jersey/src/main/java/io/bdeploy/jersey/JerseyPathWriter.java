@@ -59,7 +59,7 @@ public class JerseyPathWriter implements MessageBodyWriter<Path> {
             MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException {
         long size = Files.size(t);
 
-        httpHeaders.addFirst("Content-Length", size);
+        httpHeaders.addFirst(JerseyPathReader.PATH_SIZE_HDR, size);
 
         try (InputStream in = Files.newInputStream(t)) {
             JerseyStreamingHelper.streamWithProgress(providers.getContextResolver(ActivityReporter.class, MediaType.WILDCARD_TYPE)
