@@ -54,6 +54,10 @@ export class UpdateBrowserComponent implements OnInit {
   private groupKeysByTag(keys: ManifestKey[], currentVersion: string) {
     const tags: { [key: string]: GroupedKeys } = {};
 
+    keys.sort((a, b) => {
+      return b.tag.localeCompare(a.tag);
+    });
+
     keys.forEach(k => {
       if (!(k.tag in tags)) {
         tags[k.tag] = new GroupedKeys();
