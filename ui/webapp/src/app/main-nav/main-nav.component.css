@@ -56,27 +56,25 @@
 
 footer {
   width: 100%;
-  height: 60px;
+  height: 65px;
   display: flex;
   flex-direction: column;
   position: absolute;
   bottom: 0px;
 }
 
+.footer-content {
+  margin: 10px;
+  display: grid;
+  grid-row-gap: 5px;
+  grid-template-columns: 120px auto;
+  grid-template-rows: auto;
+}
+
 .at-bottom {
   position: absolute;
   bottom: 70px;
   width: 100%;
-}
-
-.footer-content {
-  flex: 0 1 auto;
-  margin: 5px;
-}
-
-.footer-logging {
-  margin: 5px;
-  width: 280px;
 }
 
 .logo {
