@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 
+import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
 import io.bdeploy.interfaces.remote.SlaveProcessResource;
@@ -77,7 +78,7 @@ public class SlaveProcessResourceImpl implements SlaveProcessResource {
 
         if (file.exists()) {
             InstanceDirectoryEntry ide = new InstanceDirectoryEntry();
-            ide.path = root.relativize(out).toString();
+            ide.path = PathHelper.separatorsToUnix(root.relativize(out));
             ide.root = SpecialDirectory.RUNTIME;
             ide.lastModified = file.lastModified();
             ide.size = file.length();

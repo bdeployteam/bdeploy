@@ -48,7 +48,8 @@ public class ConfigFileResourceTest {
         assertEquals(1, files.size());
 
         // see MinionDeployTest.createApplicationsAndInstance
-        assertEquals("{ \"cfg\": \"value\" }\n", cfr.loadConfigFile(instance.getTag(), "myconfig.json"));
+        String cfgFile = cfr.loadConfigFile(instance.getTag(), "myconfig.json");
+        assertEquals("{ \"cfg\": \"value\" }" + System.lineSeparator(), cfgFile);
 
         List<FileStatusDto> updates = new ArrayList<>();
 

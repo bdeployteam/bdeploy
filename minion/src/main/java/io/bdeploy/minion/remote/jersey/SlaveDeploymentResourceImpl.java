@@ -22,6 +22,7 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
+import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.dcu.InstanceNodeController;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.directory.EntryChunk;
@@ -146,7 +147,7 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
                 InstanceDirectoryEntry entry = new InstanceDirectoryEntry();
                 File asFile = f.toFile();
 
-                entry.path = dataRoot.relativize(f).toString();
+                entry.path = PathHelper.separatorsToUnix(dataRoot.relativize(f));
                 entry.lastModified = asFile.lastModified();
                 entry.size = asFile.length();
                 entry.root = SpecialDirectory.DATA;

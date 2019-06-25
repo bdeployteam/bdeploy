@@ -139,9 +139,11 @@ public class MinionDeployTest {
         assertEquals(appId + "/" + ProcessController.OUT_TXT, ide.path);
 
         // output may contain additional output, e.g. "demo-linux_1.0.0.1234/launch.sh: line 3: 29390 Terminated              sleep $1"
-        EntryChunk output = master.getNamedMaster("demo").getEntryContent(id.minion, ide, 0, "Hello script\n".length());
+        String expectedText = "Hello script" + System.lineSeparator();
+        EntryChunk output = master.getNamedMaster("demo").getEntryContent(id.minion, ide, 0, expectedText.length());
         assertNotNull(output);
-        assertEquals("Hello script\n", new String(output.content, StandardCharsets.UTF_8));
+        String content = new String(output.content, StandardCharsets.UTF_8);
+        assertEquals(expectedText, content);
 
         /* STEP 7: generate client .bdeploy file and feed launcher */
         ClickAndStartDescriptor cdesc = new ClickAndStartDescriptor();

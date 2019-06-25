@@ -68,7 +68,13 @@ public class PathHelper {
         } catch (IOException e) {
             throw new IllegalStateException("Cannot delete " + path, e);
         }
+    }
 
+    /**
+     * Converts all Windows separators ('\\') to the Unix separator ('/').
+     */
+    public static String separatorsToUnix(Path path) {
+        return path.toString().replace("\\", "/");
     }
 
     public static FileSystem openZip(Path zipFile) throws IOException {
