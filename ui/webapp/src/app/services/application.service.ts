@@ -353,7 +353,9 @@ export class ApplicationService {
         return paraDef.name + ': Invalid value configured. Expecting true or false but was ' + value;
       }
       case ParameterType.NUMERIC: {
-        if (Number(value)) {
+        // Convert string to number. Returns NaN if conversion is not possible
+        const numeric = Number(value);
+        if (!Number.isNaN(numeric)) {
           return;
         }
         return paraDef.name + ': Invalid value configured. Expecting a number but was ' + value;
