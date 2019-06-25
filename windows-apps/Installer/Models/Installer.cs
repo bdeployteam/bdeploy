@@ -107,7 +107,7 @@ namespace Bdeploy.Installer
             }
             catch (Exception ex)
             {
-                OnError(string.Format("Error Message. {0}", ex.Message));
+                OnError(ex.Message);
                 return -1;
             }
         }
