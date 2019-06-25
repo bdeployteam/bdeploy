@@ -1,0 +1,25 @@
+.term-card {
+  width: 100%;
+  height: 100%;
+
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  width: 100%;
+  height: 100%;
+
+  overflow: auto;
+}
+
+.spacer {
+  flex: 1 0 auto;
+}
+
+.smaller-toggle {
+  padding-top: 4px;
+  font-size: smaller;
+}

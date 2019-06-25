@@ -72,3 +72,8 @@ mat-divider {
   margin-top: 1em;
   font-size: 24px;
 }
+
+.output-overlay {
+  max-width: 100%;
+  min-width: 100%;
+}

@@ -82,6 +82,9 @@ import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
+import io.bdeploy.interfaces.directory.EntryChunk;
+import io.bdeploy.interfaces.directory.InstanceDirectory;
+import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest.Builder;
@@ -105,6 +108,7 @@ import io.bdeploy.ui.dto.InstanceConfigurationDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
 import io.bdeploy.ui.dto.InstanceVersionDto;
+import io.bdeploy.ui.dto.StringEntryChunkDto;
 
 @LockingResource(InstanceResourceImpl.GLOBAL_INSTANCE_LOCK)
 public class InstanceResourceImpl implements InstanceResource {
@@ -829,6 +833,33 @@ public class InstanceResourceImpl implements InstanceResource {
         } finally {
             PathHelper.deleteRecursive(zip);
         }
+    }
+
+    @Override
+    public InstanceDirectory getOutputEntry(String instanceId, String tag, String app) {
+        InstanceConfiguration cfg = readVersion(instanceId, tag);
+        if (cfg == null) {
+            throw new WebApplicationException("Cannot load " + instanceId + ":" + tag, Status.NOT_FOUND);
+        }
+
+        MasterRootResource root = ResourceProvider.getResource(cfg.target, MasterRootResource.class);
+        return root.getNamedMaster(group).getOutputEntry(instanceId, tag, app);
+    }
+
+    @Override
+    public StringEntryChunkDto getContentChunk(String instanceId, String minion, InstanceDirectoryEntry entry, long offset,
+            long limit) {
+        InstanceConfiguration cfg = readVersion(instanceId, entry.tag);
+        if (cfg == null) {
+            throw new WebApplicationException("Cannot load " + instanceId + ":" + entry.tag, Status.NOT_FOUND);
+        }
+
+        MasterRootResource root = ResourceProvider.getResource(cfg.target, MasterRootResource.class);
+        EntryChunk chunk = root.getNamedMaster(group).getEntryContent(minion, entry, offset, limit);
+        if (chunk == null) {
+            return null;
+        }
+        return new StringEntryChunkDto(chunk);
     }
 
 }

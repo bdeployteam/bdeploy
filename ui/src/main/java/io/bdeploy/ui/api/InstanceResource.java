@@ -21,12 +21,15 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
+import io.bdeploy.interfaces.directory.InstanceDirectory;
+import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
 import io.bdeploy.jersey.ActivityScope;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import io.bdeploy.ui.dto.DeploymentStateDto;
 import io.bdeploy.ui.dto.InstanceConfigurationDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
 import io.bdeploy.ui.dto.InstanceVersionDto;
+import io.bdeploy.ui.dto.StringEntryChunkDto;
 
 @Path("/")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -129,4 +132,15 @@ public interface InstanceResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public List<Key> importInstance(@FormDataParam("file") InputStream inputStream,
             @ActivityScope @PathParam("instance") String instanceId);
+
+    @GET
+    @Path("/{instance}/output/{tag}/{app}")
+    public InstanceDirectory getOutputEntry(@ActivityScope @PathParam("instance") String instanceId,
+            @ActivityScope @PathParam("tag") String tag, @PathParam("app") String app);
+
+    @POST
+    @Path("/{instance}/content/{minion}")
+    public StringEntryChunkDto getContentChunk(@ActivityScope @PathParam("instance") String instanceId,
+            @PathParam("minion") String minion, InstanceDirectoryEntry entry, @QueryParam("offset") long offset,
+            @QueryParam("limit") long limit);
 }

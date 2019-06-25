@@ -105,9 +105,11 @@ task genDtos() {
             'io.bdeploy.ui.dto.InstanceVersionDto',
             'io.bdeploy.ui.dto.DeploymentStateDto',
             'io.bdeploy.ui.dto.FileStatusDto',
+            'io.bdeploy.ui.dto.StringEntryChunkDto',
             // Other, generic
             'io.bdeploy.common.ActivitySnapshot',
             'io.bdeploy.interfaces.cleanup.CleanupGroup',
+            'io.bdeploy.interfaces.directory.InstanceDirectory',
         ]
         settings.customTypeMappings.put('java.net.URI', 'string');
         settings.customTypeNaming.put('io.bdeploy.bhive.model.Manifest$Key', 'ManifestKey');

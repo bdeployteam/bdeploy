@@ -1,11 +1,14 @@
-import { Component, Input, OnChanges, OnDestroy, OnInit } from '@angular/core';
+import { Overlay, OverlayRef } from '@angular/cdk/overlay';
+import { TemplatePortal } from '@angular/cdk/portal';
+import { Component, Input, OnChanges, OnDestroy, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
 import { MatBottomSheet, MatBottomSheetRef, MatDialog } from '@angular/material';
 import { distanceInWordsStrict, format } from 'date-fns';
-import { Subscription } from 'rxjs';
-import { finalize } from 'rxjs/operators';
-import { ApplicationConfiguration, ApplicationStartType, ProcessDetailDto, ProcessState, ProcessStatusDto } from '../models/gen.dtos';
+import { Observable, Subscription } from 'rxjs';
+import { finalize, map, mergeMap } from 'rxjs/operators';
+import { ApplicationConfiguration, ApplicationStartType, InstanceDirectoryEntry, ProcessDetailDto, ProcessState, ProcessStatusDto, StringEntryChunkDto } from '../models/gen.dtos';
 import { ProcessListComponent } from '../process-list/process-list.component';
 import { ProcessStartConfirmComponent } from '../process-start-confirm/process-start-confirm.component';
+import { InstanceService } from '../services/instance.service';
 import { ProcessService } from '../services/process.service';
 import { unsubscribe } from '../utils/object.utils';
 
@@ -31,7 +34,10 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
 
   processSheet: MatBottomSheetRef<ProcessListComponent>;
 
-  constructor(private processService: ProcessService, private bottomSheet: MatBottomSheet, private dialog: MatDialog) {}
+  private overlayRef: OverlayRef;
+
+  constructor(private overlay: Overlay,
+    private viewContainerRef: ViewContainerRef, private processService: ProcessService, private instanceService: InstanceService, private bottomSheet: MatBottomSheet, private dialog: MatDialog) {}
 
   ngOnInit() {
     this.subscription = this.processService.subscribe(() => this.onStatusChanged());
@@ -315,5 +321,50 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
       number += this.countProcessRecursive(child);
     });
     return number;
+  }
+
+  getCurrentOutputEntryFetcher(): () => Observable<InstanceDirectoryEntry> {
+    return () => this.instanceService.getApplicationOutputEntry(this.instanceGroup, this.instanceId, this.instanceTag, this.appConfig.uid, false).pipe(
+      map(dir => {
+        if (!dir.entries || !dir.entries.length) {
+          return null;
+        }
+
+        return dir.entries[0];
+      })
+    );
+  }
+
+  getOutputContentFetcher(): (offset: number, limit: number) => Observable<StringEntryChunkDto> {
+    return (offset, limit) => {
+      return this.instanceService.getApplicationOutputEntry(this.instanceGroup, this.instanceId, this.instanceTag, this.appConfig.uid, true).pipe(
+        mergeMap(dir => this.instanceService.getContentChunk(this.instanceGroup, this.instanceId, dir, dir.entries[0], offset, limit, true))
+      );
+    };
+  }
+
+  /** Opens a modal overlay popup showing the given template */
+  openOutputOverlay(template: TemplateRef<any>) {
+    this.closeOutputOverlay();
+
+    this.overlayRef = this.overlay.create({
+      height: '90%',
+      width: '90%',
+      positionStrategy: this.overlay.position().global().centerHorizontally().centerVertically(),
+      hasBackdrop: true
+    });
+    this.overlayRef.backdropClick().subscribe(() => this.closeOutputOverlay());
+
+    const portal = new TemplatePortal(template, this.viewContainerRef);
+    this.overlayRef.attach(portal);
+  }
+
+  /** Closes the overlay if present */
+  closeOutputOverlay() {
+    if (this.overlayRef) {
+      this.overlayRef.detach();
+      this.overlayRef.dispose();
+      this.overlayRef = null;
+    }
   }
 }
