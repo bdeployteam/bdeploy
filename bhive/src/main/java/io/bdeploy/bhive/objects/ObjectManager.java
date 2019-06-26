@@ -31,7 +31,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.j256.simplemagic.ContentInfo;
 import com.j256.simplemagic.ContentInfoInputStreamWrapper;
-import com.j256.simplemagic.ContentInfoUtil;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
@@ -240,58 +239,18 @@ public class ObjectManager {
     private void setExecutable(Path child, ContentInfo hint) throws IOException {
         PosixFileAttributeView view = Files.getFileAttributeView(child, PosixFileAttributeView.class);
         if (view != null) {
-            hint = getContentInfo(child, hint);
+            hint = PathHelper.getContentInfo(child, hint);
             if (hint == null) {
                 return;
             }
 
-            if (isExecutableHint(hint)) {
+            if (PathHelper.isExecutable(hint)) {
                 Set<PosixFilePermission> perms = view.readAttributes().permissions();
                 perms.add(PosixFilePermission.OWNER_EXECUTE);
                 perms.add(PosixFilePermission.GROUP_EXECUTE);
                 view.setPermissions(perms);
             }
         }
-    }
-
-    private boolean isExecutableHint(ContentInfo hint) {
-        if (hint.getMimeType() != null) {
-            // match known mime types.
-            switch (hint.getMimeType()) {
-                case "application/x-sharedlib":
-                case "application/x-executable":
-                case "application/x-dosexec":
-                case "text/x-shellscript":
-                case "text/x-msdos-batch":
-                    return true;
-                default:
-                    break;
-            }
-        }
-
-        if (hint.getMessage() != null && hint.getMessage().toLowerCase().contains("script text executable")) {
-            // and additionally all with message containing:
-            //  'script text executable' -> matches all shebangs (#!...) for scripts
-            //  (this is due to https://github.com/j256/simplemagic/issues/59).
-            return true;
-        }
-
-        return false;
-    }
-
-    private ContentInfo getContentInfo(Path child, ContentInfo hint) throws IOException {
-        // hint might have been calculated already while streaming file.
-        if (hint == null) {
-            ContentInfoUtil util = new ContentInfoUtil();
-            try (InputStream is = Files.newInputStream(child)) {
-                hint = util.findMatch(is);
-            }
-            if (hint == null) {
-                // just any unknown file type.
-                return null;
-            }
-        }
-        return hint;
     }
 
     /**

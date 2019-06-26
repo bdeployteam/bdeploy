@@ -2,6 +2,7 @@ package io.bdeploy.common.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -11,6 +12,9 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Stream;
+
+import com.j256.simplemagic.ContentInfo;
+import com.j256.simplemagic.ContentInfoUtil;
 
 /**
  * Helps in handling different {@link String}s in the context of {@link Path}s.
@@ -77,11 +81,73 @@ public class PathHelper {
         return path.toString().replace("\\", "/");
     }
 
+    /**
+     * @param zipFile the ZIP file to open (or create)
+     * @return a {@link FileSystem} which can be used to access (and modify) the ZIP file.
+     * @throws IOException
+     */
     public static FileSystem openZip(Path zipFile) throws IOException {
         Map<String, Object> env = new TreeMap<>();
         env.put("create", "true");
         env.put("useTempFile", Boolean.TRUE);
         return FileSystems.newFileSystem(URI.create("jar:" + zipFile.toUri()), env);
+    }
+
+    /**
+     * @param hint the {@link ContentInfo} to check whether it describes something which should be executable.
+     * @return whether the file described by the given hint should be executable.
+     */
+    public static boolean isExecutable(ContentInfo hint) {
+        if (hint == null) {
+            return false;
+        }
+
+        if (hint.getMimeType() != null) {
+            // match known mime types.
+            switch (hint.getMimeType()) {
+                case "application/x-sharedlib":
+                case "application/x-executable":
+                case "application/x-dosexec":
+                case "text/x-shellscript":
+                case "text/x-msdos-batch":
+                    return true;
+                default:
+                    break;
+            }
+        }
+
+        if (hint.getMessage() != null && hint.getMessage().toLowerCase().contains("script text executable")) {
+            // and additionally all with message containing:
+            //  'script text executable' -> matches all shebangs (#!...) for scripts
+            //  (this is due to https://github.com/j256/simplemagic/issues/59).
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Determine the content type of the given file. A potentially pre-calculated {@link ContentInfo} will be passed through as-is
+     * if given.
+     *
+     * @param child the path to check
+     * @param hint the potential pre-calculated hint
+     * @return a {@link ContentInfo} describing the file.
+     * @throws IOException
+     */
+    public static ContentInfo getContentInfo(Path child, ContentInfo hint) throws IOException {
+        // hint might have been calculated already while streaming file.
+        if (hint == null) {
+            ContentInfoUtil util = new ContentInfoUtil();
+            try (InputStream is = Files.newInputStream(child)) {
+                hint = util.findMatch(is);
+            }
+            if (hint == null) {
+                // just any unknown file type.
+                return null;
+            }
+        }
+        return hint;
     }
 
 }
