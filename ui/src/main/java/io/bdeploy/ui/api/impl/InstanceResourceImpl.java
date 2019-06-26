@@ -265,19 +265,7 @@ public class InstanceResourceImpl implements InstanceResource {
         InstanceConfiguration cfg;
 
         if (config != null) {
-            RuntimeAssert.assertEquals(oldConfig.getConfiguration().uuid, config.uuid, "Instance UUID changed");
-            RuntimeAssert.assertEquals(oldConfig.getConfiguration().uuid, instance, "Instance UUID changed");
-
-            // Client will only send a token if he wants to update it
-            // Thus we take the token from the old version if it is empty
-            RemoteService newTarget = config.target;
-            RemoteService oldTarget = oldConfig.getConfiguration().target;
-            if (StringHelper.isNullOrEmpty(newTarget.getAuthPack())) {
-                config.target = new RemoteService(newTarget.getUri(), oldTarget.getAuthPack());
-            }
-
-            // apply node configurations from the previous instance version on update.
-            cfg = config;
+            cfg = applyExistingTarget(instance, oldConfig, config);
         } else {
             // no new config - load existing one.
             cfg = oldConfig.getConfiguration();
@@ -287,49 +275,74 @@ public class InstanceResourceImpl implements InstanceResource {
 
         if (dto.nodeDtos != null) {
             // Update the node assignment and the configuration
-            for (InstanceNodeConfigurationDto nodeDto : dto.nodeDtos) {
-                String minionName = nodeDto.nodeName;
-                InstanceNodeConfiguration nodeConfig = nodeDto.nodeConfiguration;
-
-                // when a user removes all applications then we also delete the node configuration
-                if (nodeConfig == null || nodeConfig.applications.isEmpty()) {
-                    continue;
-                }
-
-                // make sure redundant data is equal to instance data.
-                if (!cfg.name.equals(nodeConfig.name)) {
-                    log.warn("Instance name of node ({}) not equal to instance name ({}) - aligning.", nodeConfig.name, cfg.name);
-                    nodeConfig.name = cfg.name;
-                }
-
-                nodeConfig.copyRedundantFields(cfg);
-
-                RuntimeAssert.assertEquals(nodeDto.nodeConfiguration.uuid, instance, "Instance ID not set on nodes");
-                String mfName = instance + "/" + minionName;
-                Key instanceNodeKey = new InstanceNodeManifest.Builder().setInstanceNodeConfiguration(nodeConfig)
-                        .setMinionName(minionName).setConfigTreeId(cfg.configTree).setKey(new Manifest.Key(mfName, rootTag))
-                        .insert(hive);
-                newConfig.addInstanceNodeManifest(minionName, instanceNodeKey);
-            }
+            updateNewNodes(instance, dto, newConfig, rootTag, cfg);
         } else {
             // no new node config - re-apply existing one with new tag, align redundant fields.
-            for (Map.Entry<String, Manifest.Key> entry : oldConfig.getInstanceNodeManifests().entrySet()) {
-                InstanceNodeManifest oldInmf = InstanceNodeManifest.of(hive, entry.getValue());
-                InstanceNodeManifest.Builder inmBuilder = new InstanceNodeManifest.Builder();
-                InstanceNodeConfiguration nodeConfig = oldInmf.getConfiguration();
-
-                nodeConfig.copyRedundantFields(cfg);
-
-                inmBuilder.setConfigTreeId(cfg.configTree);
-                inmBuilder.setInstanceNodeConfiguration(nodeConfig);
-                inmBuilder.setMinionName(entry.getKey());
-                inmBuilder.setKey(new Manifest.Key(entry.getValue().getName(), rootTag)); // make sure tag is equal.
-
-                newConfig.addInstanceNodeManifest(entry.getKey(), inmBuilder.insert(hive));
-            }
+            updateExistingNodes(oldConfig, newConfig, rootTag, cfg);
         }
 
         newConfig.setKey(rootKey).insert(hive);
+    }
+
+    private void updateExistingNodes(InstanceManifest oldConfig, Builder newConfig, String rootTag, InstanceConfiguration cfg) {
+        for (Map.Entry<String, Manifest.Key> entry : oldConfig.getInstanceNodeManifests().entrySet()) {
+            InstanceNodeManifest oldInmf = InstanceNodeManifest.of(hive, entry.getValue());
+            InstanceNodeManifest.Builder inmBuilder = new InstanceNodeManifest.Builder();
+            InstanceNodeConfiguration nodeConfig = oldInmf.getConfiguration();
+
+            nodeConfig.copyRedundantFields(cfg);
+
+            inmBuilder.setConfigTreeId(cfg.configTree);
+            inmBuilder.setInstanceNodeConfiguration(nodeConfig);
+            inmBuilder.setMinionName(entry.getKey());
+            inmBuilder.setKey(new Manifest.Key(entry.getValue().getName(), rootTag)); // make sure tag is equal.
+
+            newConfig.addInstanceNodeManifest(entry.getKey(), inmBuilder.insert(hive));
+        }
+    }
+
+    private void updateNewNodes(String instance, InstanceConfigurationDto dto, Builder newConfig, String rootTag,
+            InstanceConfiguration cfg) {
+        for (InstanceNodeConfigurationDto nodeDto : dto.nodeDtos) {
+            String minionName = nodeDto.nodeName;
+            InstanceNodeConfiguration nodeConfig = nodeDto.nodeConfiguration;
+
+            // when a user removes all applications then we also delete the node configuration
+            if (nodeConfig == null || nodeConfig.applications.isEmpty()) {
+                continue;
+            }
+
+            // make sure redundant data is equal to instance data.
+            if (!cfg.name.equals(nodeConfig.name)) {
+                log.warn("Instance name of node ({}) not equal to instance name ({}) - aligning.", nodeConfig.name, cfg.name);
+                nodeConfig.name = cfg.name;
+            }
+
+            nodeConfig.copyRedundantFields(cfg);
+
+            RuntimeAssert.assertEquals(nodeDto.nodeConfiguration.uuid, instance, "Instance ID not set on nodes");
+            String mfName = instance + "/" + minionName;
+            Key instanceNodeKey = new InstanceNodeManifest.Builder().setInstanceNodeConfiguration(nodeConfig)
+                    .setMinionName(minionName).setConfigTreeId(cfg.configTree).setKey(new Manifest.Key(mfName, rootTag))
+                    .insert(hive);
+            newConfig.addInstanceNodeManifest(minionName, instanceNodeKey);
+        }
+    }
+
+    private InstanceConfiguration applyExistingTarget(String instance, InstanceManifest oldConfig, InstanceConfiguration config) {
+        RuntimeAssert.assertEquals(oldConfig.getConfiguration().uuid, config.uuid, "Instance UUID changed");
+        RuntimeAssert.assertEquals(oldConfig.getConfiguration().uuid, instance, "Instance UUID changed");
+
+        // Client will only send a token if he wants to update it
+        // Thus we take the token from the old version if it is empty
+        RemoteService newTarget = config.target;
+        RemoteService oldTarget = oldConfig.getConfiguration().target;
+        if (StringHelper.isNullOrEmpty(newTarget.getAuthPack())) {
+            config.target = new RemoteService(newTarget.getUri(), oldTarget.getAuthPack());
+        }
+
+        // apply node configurations from the previous instance version on update.
+        return config;
     }
 
     @WriteLock
@@ -368,38 +381,11 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Override
     public InstanceNodeConfigurationListDto getNodeConfigurations(String instance, String versionTag) {
-        Map<String, InstanceNodeConfigurationDto> node2Dto = new HashMap<>();
-
         // List all manifest that are stored configured along with the target nodes
         InstanceManifest thisIm = InstanceManifest.load(hive, instance, versionTag);
 
         // Request a list of all nodes from the master
-        RemoteService rsvc = thisIm.getConfiguration().target;
-        try (Activity fetchNodes = reporter.start("Fetching nodes from master");
-                AutoCloseable proxy = reporter.proxyActivities(rsvc)) {
-            MasterRootResource master = ResourceProvider.getResource(rsvc, MasterRootResource.class);
-            for (Map.Entry<String, NodeStatus> entry : master.getMinions().entrySet()) {
-                String nodeName = entry.getKey();
-                NodeStatus nodeStatus = entry.getValue();
-                if (node2Dto.containsKey(nodeName)) {
-                    continue;
-                }
-                node2Dto.put(nodeName,
-                        new InstanceNodeConfigurationDto(nodeName, nodeStatus,
-                                (nodeStatus != null
-                                        ? "Up since " + FORMATTER.format(nodeStatus.startup) + ", version: " + nodeStatus.version
-                                        : "Node not currently online")));
-            }
-        } catch (Exception e) {
-            log.warn("Master offline: {}", thisIm.getConfiguration().target.getUri());
-            if (log.isTraceEnabled()) {
-                log.trace("Exception", e);
-            }
-
-            // make sure there is at least a master... even if the master is not reachable.
-            node2Dto.put(Minion.DEFAULT_MASTER_NAME, new InstanceNodeConfigurationDto(Minion.DEFAULT_MASTER_NAME, null,
-                    "Error contacting master: " + e.getMessage()));
-        }
+        Map<String, InstanceNodeConfigurationDto> node2Dto = getExistingNodes(thisIm);
 
         // Get all instance manifests in this hive
         for (Manifest.Key instanceManifestKey : InstanceManifest.scan(hive, true)) {
@@ -448,6 +434,38 @@ public class InstanceResourceImpl implements InstanceResource {
             instanceDto.applications.put(applicationKey.getName(), manifest.getDescriptor());
         }
         return instanceDto;
+    }
+
+    private Map<String, InstanceNodeConfigurationDto> getExistingNodes(InstanceManifest thisIm) {
+        Map<String, InstanceNodeConfigurationDto> node2Dto = new HashMap<>();
+        RemoteService rsvc = thisIm.getConfiguration().target;
+        try (Activity fetchNodes = reporter.start("Fetching nodes from master");
+                AutoCloseable proxy = reporter.proxyActivities(rsvc)) {
+            MasterRootResource master = ResourceProvider.getResource(rsvc, MasterRootResource.class);
+            for (Map.Entry<String, NodeStatus> entry : master.getMinions().entrySet()) {
+                String nodeName = entry.getKey();
+                NodeStatus nodeStatus = entry.getValue();
+                if (node2Dto.containsKey(nodeName)) {
+                    continue;
+                }
+                node2Dto.put(nodeName,
+                        new InstanceNodeConfigurationDto(nodeName, nodeStatus,
+                                (nodeStatus != null
+                                        ? "Up since " + FORMATTER.format(nodeStatus.startup) + ", version: " + nodeStatus.version
+                                        : "Node not currently online")));
+            }
+        } catch (Exception e) {
+            log.warn("Master offline: {}", thisIm.getConfiguration().target.getUri());
+            if (log.isTraceEnabled()) {
+                log.trace("Exception", e);
+            }
+
+            // make sure there is at least a master... even if the master is not reachable.
+            node2Dto.put(Minion.DEFAULT_MASTER_NAME, new InstanceNodeConfigurationDto(Minion.DEFAULT_MASTER_NAME, null,
+                    "Error contacting master: " + e.getMessage()));
+        }
+
+        return node2Dto;
     }
 
     /** Clears the token from the remote service */

@@ -83,9 +83,9 @@ public class MasterRootResourceImpl implements MasterRootResource {
 
     @Override
     public void update(Manifest.Key version, boolean clean) {
-        BHive h = registry.get(JerseyRemoteBHive.DEFAULT_NAME);
+        BHive bhive = registry.get(JerseyRemoteBHive.DEFAULT_NAME);
 
-        SortedSet<Key> keys = h.execute(new ManifestListOperation().setManifestName(version.toString()));
+        SortedSet<Key> keys = bhive.execute(new ManifestListOperation().setManifestName(version.toString()));
         if (!keys.contains(version)) {
             throw new WebApplicationException("Key not found: + " + version, Status.NOT_FOUND);
         }
@@ -96,6 +96,71 @@ public class MasterRootResourceImpl implements MasterRootResource {
         // check each minion's state and OS and push the update.
         SortedMap<String, RemoteService> minions = root.getState().minions;
         SortedMap<String, MinionUpdateResource> toUpdate = new TreeMap<>();
+        String masterName = pushUpdate(version, bhive, updateOs, minions, toUpdate);
+
+        if (masterName == null) {
+            log.warn("Cannot identify node running master from node registrations");
+            masterName = ""; // to make comparator for sorting nodes happy.
+        }
+
+        // DON'T check for cancel from here on anymore to avoid inconsistent setups
+        // (inconsistent setups can STILL occur in mixed-OS setups)
+
+        prepareUpdate(version, clean, toUpdate);
+
+        // now schedule update on all but the master minions.
+        List<Throwable> problems = performUpdate(version, toUpdate, masterName);
+
+        if (!problems.isEmpty()) {
+            WebApplicationException ex = new WebApplicationException("Problem(s) updating minion(s)",
+                    Status.INTERNAL_SERVER_ERROR);
+            problems.forEach(ex::addSuppressed);
+            throw ex;
+        }
+    }
+
+    private List<Throwable> performUpdate(Manifest.Key version, SortedMap<String, MinionUpdateResource> toUpdate,
+            String masterName) {
+        List<Throwable> problems = new ArrayList<>();
+        String finalMaster = masterName;
+        toUpdate.entrySet().stream().sorted((a, b) -> {
+            if (finalMaster.equals(a.getKey())) {
+                return 1;
+            } else if (finalMaster.equals(b.getKey())) {
+                return -1;
+            }
+            return a.getKey().compareTo(b.getKey());
+        }).forEach((entry) -> {
+            try {
+                entry.getValue().update(version); // update schedules and delays, so we have a chance to return this call.
+            } catch (Exception e) {
+                // don't immediately throw to update as many minions as possible.
+                // this Exception should actually never happen according to the contract.
+                log.error("Cannot schedule update on minion: {}", entry.getKey(), e);
+                problems.add(e);
+            }
+        });
+        return problems;
+    }
+
+    private void prepareUpdate(Manifest.Key version, boolean clean, SortedMap<String, MinionUpdateResource> toUpdate) {
+        Activity preparing = reporter.start("Preparing update on Minions...", toUpdate.size());
+        // prepare the update on all minions
+        for (Map.Entry<String, MinionUpdateResource> ur : toUpdate.entrySet()) {
+            try {
+                ur.getValue().prepare(version, clean);
+            } catch (Exception e) {
+                // don't immediately throw to update as many minions as possible.
+                // this Exception should actually never happen according to the contract.
+                throw new WebApplicationException("Cannot preapre update on " + ur.getKey(), e);
+            }
+            preparing.worked(1);
+        }
+        preparing.done();
+    }
+
+    private String pushUpdate(Manifest.Key version, BHive h, OperatingSystem updateOs, SortedMap<String, RemoteService> minions,
+            SortedMap<String, MinionUpdateResource> toUpdate) {
         String masterName = null;
         Activity pushing = reporter.start("Pushing update to Minions...", minions.size());
         for (Entry<String, RemoteService> entry : minions.entrySet()) {
@@ -134,56 +199,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
             pushing.workAndCancelIfRequested(1);
         }
         pushing.done();
-
-        if (masterName == null) {
-            log.warn("Cannot identify node running master from node registrations");
-            masterName = ""; // to make comparator for sorting nodes happy.
-        }
-
-        // DON'T check for cancel from here on anymore to avoid inconsistent setups
-        // (inconsistent setups can STILL occur in mixed-OS setups)
-
-        Activity preparing = reporter.start("Preparing update on Minions...", minions.size());
-        // prepare the update on all minions
-        for (Map.Entry<String, MinionUpdateResource> ur : toUpdate.entrySet()) {
-            try {
-                ur.getValue().prepare(version, clean);
-            } catch (Exception e) {
-                // don't immediately throw to update as many minions as possible.
-                // this Exception should actually never happen according to the contract.
-                throw new WebApplicationException("Cannot preapre update on " + ur.getKey(), e);
-            }
-            preparing.worked(1);
-        }
-        preparing.done();
-
-        // now schedule update on all but the master minions.
-        List<Throwable> problems = new ArrayList<>();
-        String finalMaster = masterName;
-        toUpdate.entrySet().stream().sorted((a, b) -> {
-            if (finalMaster.equals(a.getKey())) {
-                return 1;
-            } else if (finalMaster.equals(b.getKey())) {
-                return -1;
-            }
-            return a.getKey().compareTo(b.getKey());
-        }).forEach((entry) -> {
-            try {
-                entry.getValue().update(version); // update schedules and delays, so we have a chance to return this call.
-            } catch (Exception e) {
-                // don't immediately throw to update as many minions as possible.
-                // this Exception should actually never happen according to the contract.
-                log.error("Cannot schedule update on minion: {}", entry.getKey(), e);
-                problems.add(e);
-            }
-        });
-
-        if (!problems.isEmpty()) {
-            WebApplicationException ex = new WebApplicationException("Problem(s) updating minion(s)",
-                    Status.INTERNAL_SERVER_ERROR);
-            problems.forEach(ex::addSuppressed);
-            throw ex;
-        }
+        return masterName;
     }
 
     private OperatingSystem getTargetOsFromUpdate(Key version) {
