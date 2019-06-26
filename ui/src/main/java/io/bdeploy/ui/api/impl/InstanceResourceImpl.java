@@ -34,6 +34,7 @@ import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -112,6 +113,8 @@ import io.bdeploy.ui.dto.StringEntryChunkDto;
 
 @LockingResource(InstanceResourceImpl.GLOBAL_INSTANCE_LOCK)
 public class InstanceResourceImpl implements InstanceResource {
+
+    private static final String ATTACHMENT_DISPOSITION = "attachment";
 
     protected static final String GLOBAL_INSTANCE_LOCK = "GlobalInstanceLock";
 
@@ -402,25 +405,7 @@ public class InstanceResourceImpl implements InstanceResource {
                 // other version of myself, ignore.
             }
 
-            for (Map.Entry<String, Manifest.Key> entry : im.getInstanceNodeManifests().entrySet()) {
-                String nodeName = entry.getKey();
-                Manifest.Key manifestKey = entry.getValue();
-
-                InstanceNodeManifest manifest = InstanceNodeManifest.of(hive, manifestKey);
-                InstanceNodeConfiguration configuration = manifest.getConfiguration();
-
-                InstanceNodeConfigurationDto descriptor = node2Dto.get(nodeName);
-                if (descriptor == null) {
-                    descriptor = new InstanceNodeConfigurationDto(nodeName, null,
-                            "Node '" + nodeName + "' not configured on master, or master offline.");
-                    node2Dto.put(nodeName, descriptor);
-                }
-                if (!isForeign) {
-                    descriptor.nodeConfiguration = configuration;
-                } else {
-                    descriptor.foreignNodeConfigurations.add(configuration);
-                }
-            }
+            gatherNodeConfigurations(node2Dto, im, isForeign);
         }
 
         InstanceNodeConfigurationListDto instanceDto = new InstanceNodeConfigurationListDto();
@@ -434,6 +419,29 @@ public class InstanceResourceImpl implements InstanceResource {
             instanceDto.applications.put(applicationKey.getName(), manifest.getDescriptor());
         }
         return instanceDto;
+    }
+
+    private void gatherNodeConfigurations(Map<String, InstanceNodeConfigurationDto> node2Dto, InstanceManifest im,
+            boolean isForeign) {
+        for (Map.Entry<String, Manifest.Key> entry : im.getInstanceNodeManifests().entrySet()) {
+            String nodeName = entry.getKey();
+            Manifest.Key manifestKey = entry.getValue();
+
+            InstanceNodeManifest manifest = InstanceNodeManifest.of(hive, manifestKey);
+            InstanceNodeConfiguration configuration = manifest.getConfiguration();
+
+            InstanceNodeConfigurationDto descriptor = node2Dto.get(nodeName);
+            if (descriptor == null) {
+                descriptor = new InstanceNodeConfigurationDto(nodeName, null,
+                        "Node '" + nodeName + "' not configured on master, or master offline.");
+                node2Dto.put(nodeName, descriptor);
+            }
+            if (!isForeign) {
+                descriptor.nodeConfiguration = configuration;
+            } else {
+                descriptor.foreignNodeConfigurations.add(configuration);
+            }
+        }
     }
 
     private Map<String, InstanceNodeConfigurationDto> getExistingNodes(InstanceManifest thisIm) {
@@ -669,7 +677,7 @@ public class InstanceResourceImpl implements InstanceResource {
             in.transferTo(os);
             template = os.toString(StandardCharsets.UTF_8);
         } catch (IOException ioe) {
-            throw new WebApplicationException("Cannot create native Windows launcher.", ioe);
+            throw new WebApplicationException("Cannot create linux installer.", ioe);
         }
 
         ClickAndStartDescriptor clickAndStart = getClickAndStartDescriptor(im.getConfiguration().uuid, appConfig.uid);
@@ -701,7 +709,7 @@ public class InstanceResourceImpl implements InstanceResource {
         try (InputStream in = rootHive.execute(findInstallerOp); OutputStream os = Files.newOutputStream(installerPath)) {
             in.transferTo(os);
         } catch (IOException ioe) {
-            throw new WebApplicationException("Cannot create native Windows launcher.", ioe);
+            throw new WebApplicationException("Cannot create windows installer.", ioe);
         }
 
         // Brand the executable and embed the required information
@@ -719,7 +727,7 @@ public class InstanceResourceImpl implements InstanceResource {
             branding.updateConfig(config);
             branding.write(installer);
         } catch (Exception ioe) {
-            throw new WebApplicationException("Cannot create native Windows launcher.", ioe);
+            throw new WebApplicationException("Cannot apply branding to windows installer.", ioe);
         }
     }
 
@@ -773,10 +781,10 @@ public class InstanceResourceImpl implements InstanceResource {
         }
 
         // Serve file to the client
-        ContentDispositionBuilder<?, ?> builder = ContentDisposition.type("attachement");
+        ContentDispositionBuilder<?, ?> builder = ContentDisposition.type(ATTACHMENT_DISPOSITION);
         builder.size(file.length()).fileName(fileName);
-        responeBuilder.header("Content-Disposition", builder.build());
-        responeBuilder.header("Content-Length", file.length());
+        responeBuilder.header(HttpHeaders.CONTENT_DISPOSITION, builder.build());
+        responeBuilder.header(HttpHeaders.CONTENT_LENGTH, file.length());
         return responeBuilder.build();
     }
 
@@ -798,10 +806,10 @@ public class InstanceResourceImpl implements InstanceResource {
                 }
             }
         }, MediaType.APPLICATION_OCTET_STREAM);
-        ContentDispositionBuilder<?, ?> builder = ContentDisposition.type("attachement");
+        ContentDispositionBuilder<?, ?> builder = ContentDisposition.type(ATTACHMENT_DISPOSITION);
         builder.size(brandingIcon.length).fileName(appConfig.name + ".ico");
-        responeBuilder.header("Content-Disposition", builder.build());
-        responeBuilder.header("Content-Length", brandingIcon.length);
+        responeBuilder.header(HttpHeaders.CONTENT_DISPOSITION, builder.build());
+        responeBuilder.header(HttpHeaders.CONTENT_LENGTH, brandingIcon.length);
         return responeBuilder.build();
     }
 
@@ -832,9 +840,9 @@ public class InstanceResourceImpl implements InstanceResource {
             }
         }, MediaType.APPLICATION_OCTET_STREAM);
 
-        ContentDisposition contentDisposition = ContentDisposition.type("attachement").fileName(instanceId + "-" + tag + ".zip")
-                .build();
-        responeBuilder.header("Content-Disposition", contentDisposition);
+        ContentDisposition contentDisposition = ContentDisposition.type(ATTACHMENT_DISPOSITION)
+                .fileName(instanceId + "-" + tag + ".zip").build();
+        responeBuilder.header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition);
         return responeBuilder.build();
     }
 
