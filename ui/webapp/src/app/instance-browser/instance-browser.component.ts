@@ -79,7 +79,11 @@ export class InstanceBrowserComponent implements OnInit {
   }
 
   getInstancesByPurpose(purpose: InstancePurpose): InstanceConfiguration[] {
-    return this.instanceList.filtered.filter(instance => instance.purpose === purpose);
+    const filtered = this.instanceList.filtered.filter(instance => instance.purpose === purpose);
+    const sorted = filtered.sort((a, b) => {
+      return a.name.localeCompare(b.name);
+    });
+    return sorted;
   }
 
   remove(instance: InstanceConfiguration) {
