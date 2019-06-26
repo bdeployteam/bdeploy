@@ -12,7 +12,8 @@
   width: 100%;
   height: 100%;
 
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .spacer {
@@ -22,4 +23,8 @@
 .smaller-toggle {
   padding-top: 4px;
   font-size: smaller;
+}
+
+pre {
+  white-space: pre-line;
 }
