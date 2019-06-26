@@ -8,5 +8,8 @@
       <button mat-icon-button (click)='closeEvent.emit()'><mat-icon>close</mat-icon></button>
     </mat-toolbar-row>
   </mat-toolbar>
-  <div class="content" #contentDiv><pre>{{ content }}</pre></div>
+  <div class="content" #contentDiv>
+    <pre>{{ content }}</pre>
+    <mat-spinner *ngIf='follow' [diameter]='16'></mat-spinner>
+  </div>
 </mat-card>

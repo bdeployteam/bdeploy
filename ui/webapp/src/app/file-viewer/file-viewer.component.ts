@@ -24,7 +24,7 @@ export class FileViewerComponent implements OnInit, OnDestroy {
   content: String = '';
 
   private timer;
-  private offset;
+  private offset = 0;
 
   constructor(private instanceService: InstanceService) { }
 
@@ -55,6 +55,7 @@ export class FileViewerComponent implements OnInit, OnDestroy {
   }
 
   onToggleFollow(checked: boolean) {
+    this.follow = checked;
     if (checked) {
       this.timer = setInterval(() => this.updateTail(), 1000);
     } else {
