@@ -68,6 +68,8 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     public MinionRoot(Path root, ActivityReporter reporter) {
         super(root.resolve("etc"));
 
+        root = root.toAbsolutePath();
+
         this.root = root;
         this.config = create(root.resolve("etc"));
         this.updates = root.resolve("update");
