@@ -114,19 +114,13 @@ public class InstanceImportExportHelper {
         icfg.configTree = cfgId;
         icfg.uuid = uuid;
 
-        // if there is an existing instance, re-use the configured target server to avoid confusion!
+        // if there is an existing instance, re-use the configured target server, name & description, etc. to avoid confusion!
         String rootName = InstanceManifest.getRootName(uuid);
         Optional<Long> latest = target.execute(new ManifestMaxIdOperation().setManifestName(rootName));
         Set<String> uuidPool = new TreeSet<>();
         if (latest.isPresent()) {
             InstanceManifest existing = InstanceManifest.of(target, new Manifest.Key(rootName, String.valueOf(latest.get())));
-            icfg.target = existing.getConfiguration().target;
-
-            // disallow product switch!
-            if (!icfg.product.getName().equals(existing.getConfiguration().product.getName())) {
-                throw new IllegalStateException(
-                        "Product switch not allowed: old=" + existing.getConfiguration().product + ", new=" + icfg.product);
-            }
+            alignInstanceInformation(icfg, existing);
 
             // gather all UUIDs for every artifact which has an UUID except for the instance itself (currently only applications).
             // all UUIDs which are NOT yet known to the instance MUST be re-assigned to avoid clashes when "copying" an instance.
@@ -153,16 +147,7 @@ public class InstanceImportExportHelper {
             // align redundant copies of certain falgs
             nodeCfg.copyRedundantFields(icfg);
 
-            for (ApplicationConfiguration app : nodeCfg.applications) {
-                if (uuidPool.contains(app.uid)) {
-                    // all is well, this is an update for an existing application
-                    continue;
-                }
-
-                // need to re-assign ID, as this might be a copy of an application on the same server.
-                // this would create various issues when installing (clash of IDs), especially on the client(s).
-                app.uid = UuidHelper.randomId();
-            }
+            reAssignAppUuids(uuidPool, nodeCfg);
 
             inmBuilder.setConfigTreeId(cfgId);
             inmBuilder.setInstanceNodeConfiguration(nodeCfg);
@@ -172,6 +157,32 @@ public class InstanceImportExportHelper {
         }
 
         return imfb.insert(target);
+    }
+
+    private static void reAssignAppUuids(Set<String> uuidPool, InstanceNodeConfiguration nodeCfg) {
+        for (ApplicationConfiguration app : nodeCfg.applications) {
+            if (uuidPool.contains(app.uid)) {
+                // all is well, this is an update for an existing application
+                continue;
+            }
+
+            // need to re-assign ID, as this might be a copy of an application on the same server.
+            // this would create various issues when installing (clash of IDs), especially on the client(s).
+            app.uid = UuidHelper.randomId();
+        }
+    }
+
+    private static void alignInstanceInformation(InstanceConfiguration icfg, InstanceManifest existing) {
+        icfg.target = existing.getConfiguration().target;
+        icfg.name = existing.getConfiguration().name;
+        icfg.description = existing.getConfiguration().description;
+        icfg.purpose = existing.getConfiguration().purpose;
+
+        // disallow product switch!
+        if (!icfg.product.getName().equals(existing.getConfiguration().product.getName())) {
+            throw new IllegalStateException(
+                    "Product switch not allowed: old=" + existing.getConfiguration().product + ", new=" + icfg.product);
+        }
     }
 
     /**
