@@ -117,7 +117,7 @@ public class InstanceManifest {
             // only manifest refs to minion config is allowed here.
             if (entry.getKey().getType() != Tree.EntryType.MANIFEST) {
                 if (!entry.getKey().getName().equals(InstanceConfiguration.FILE_NAME)) {
-                    log.warn("Unsupported file in instance manifest: " + entry.getKey());
+                    log.warn("Unsupported file in instance manifest: {}", entry.getKey());
                 }
                 continue;
             }

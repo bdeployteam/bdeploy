@@ -227,7 +227,7 @@ public class InstanceNodeController {
             Files.write(file, processed.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             // might have missing variable references, since we only 'see' what is on our node. Applications from other nodes are not available.
-            log.warn("Cannot process configuration file " + file);
+            log.warn("Cannot process configuration file: {}", file);
             if (log.isDebugEnabled()) {
                 log.debug("Error details", e);
             }

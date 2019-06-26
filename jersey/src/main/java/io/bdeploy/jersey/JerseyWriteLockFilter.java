@@ -54,10 +54,14 @@ public class JerseyWriteLockFilter implements ContainerRequestFilter, ContainerR
         boolean write = ri.getResourceMethod().isAnnotationPresent(WriteLock.class);
         Lock rwLock;
         if (write) {
-            log.debug("Write-locking " + path);
+            if (log.isTraceEnabled()) {
+                log.trace("Write-locking {}", path);
+            }
             rwLock = lock.writeLock();
         } else {
-            log.debug("Read-locking " + path);
+            if (log.isTraceEnabled()) {
+                log.trace("Read-locking {}", path);
+            }
             rwLock = lock.readLock();
         }
 
@@ -82,7 +86,9 @@ public class JerseyWriteLockFilter implements ContainerRequestFilter, ContainerR
         // find remembered, unlock
         Lock rwLock = (Lock) requestContext.getProperty(LOCK_KEY);
         if (rwLock != null) {
-            log.debug("Unlocking " + requestContext.getUriInfo().getPath(false));
+            if (log.isTraceEnabled()) {
+                log.trace("Unlocking {}", requestContext.getUriInfo().getPath(false));
+            }
             rwLock.unlock();
         }
     }

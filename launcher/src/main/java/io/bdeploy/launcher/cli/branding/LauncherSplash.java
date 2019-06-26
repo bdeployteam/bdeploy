@@ -64,7 +64,7 @@ public class LauncherSplash implements LauncherSplashDisplay {
                 LauncherSplashCacheDto cache = StorageHelper.fromPath(cached, LauncherSplashCacheDto.class);
                 update(cache.data, cache.spec);
             } catch (Exception e) {
-                log.warn("Cannot load splash from cache from " + cached, e);
+                log.warn("Cannot load splash from cache: {}", cached, e);
                 initSplash();
             }
         }
@@ -96,7 +96,7 @@ public class LauncherSplash implements LauncherSplashDisplay {
         try (OutputStream os = Files.newOutputStream(cached)) {
             os.write(StorageHelper.toRawBytes(cache));
         } catch (IOException e) {
-            log.warn("Cannot cache splash screen to " + cached, e);
+            log.warn("Cannot cache splash screen to {}", cached, e);
         }
     }
 

@@ -31,7 +31,7 @@ public class SseTest {
         CountDownLatch latch = new CountDownLatch(10);
 
         JerseyEventSubscription sub = f.getEventSource("/sse/simple").register((ie) -> {
-            log.info("Received Event: " + ie);
+            log.info("Received Event: {}", ie);
             latch.countDown();
         });
 
@@ -47,12 +47,12 @@ public class SseTest {
         CountDownLatch latch2 = new CountDownLatch(10);
 
         JerseyEventSubscription eventSource1 = f.getEventSource("/sse/broadcast").register((ie) -> {
-            log.info("1: Received Event: " + ie);
+            log.info("1: Received Event: {}", ie);
             latch1.countDown();
         });
 
         JerseyEventSubscription eventSource2 = f.getEventSource("/sse/broadcast").register((ie) -> {
-            log.info("2: Received Event: " + ie);
+            log.info("2: Received Event: {}", ie);
             latch2.countDown();
         });
 
@@ -71,7 +71,7 @@ public class SseTest {
 
         JerseySseRegistrar reg = f.getEventSource("/activities");
         JerseyEventSubscription sub = reg.register(e -> {
-            log.info("Received activities: " + e);
+            log.info("Received activities: {}", e);
             for (ActivitySnapshot snap : e.readData(ActivitySnapshot.LIST_TYPE)) {
                 if ("test-scope".equals(snap.scope.get(0))) {
                     latch.countDown();

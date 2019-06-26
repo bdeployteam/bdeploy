@@ -32,7 +32,7 @@ public class LockedResourceImpl implements LockedResource {
                 throw new IllegalStateException("Only on thread allowed in update");
             }
 
-            log.info("setting value to " + value);
+            log.info("setting value to {}", value);
             this.value = value;
             Thread.sleep(500);
 

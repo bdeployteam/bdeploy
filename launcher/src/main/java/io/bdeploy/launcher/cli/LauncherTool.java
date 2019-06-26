@@ -113,7 +113,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             }
         }
 
-        log.info("Using cache directory " + rootDir);
+        log.info("Using cache directory {}", rootDir);
 
         doLaunchFromConfig(cfg, rootDir.toAbsolutePath(), config.updateDir(), !config.dontWait());
     }
@@ -136,7 +136,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             doCheckForUpdate(cd, hive, reporter, updateDir);
 
             // yay, we have information
-            log.info("Launching " + cd.groupId + " / " + cd.instanceId + " / " + cd.applicationId + " from " + cd.host.getUri());
+            log.info("Launching {} / {} / {} from {}", cd.groupId, cd.instanceId, cd.applicationId, cd.host.getUri());
 
             MasterRootResource master = ResourceProvider.getResource(cd.host, MasterRootResource.class);
             MasterNamedResource namedMaster = master.getNamedMaster(cd.groupId);
@@ -145,7 +145,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             ClientApplicationConfiguration appCfg;
             try (Activity info = reporter.start("Loading meta-data...")) {
                 // fails with 404 or other error, but never null.
-                log.info("fetching information from " + cd.host.getUri());
+                log.info("fetching information from {}", cd.host.getUri());
                 appCfg = namedMaster.getClientConfiguration(cd.instanceId, cd.applicationId);
             }
 
@@ -157,9 +157,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
             if (hive.execute(new ManifestListOperation().setManifestName(targetClientKey.toString())).contains(targetClientKey)) {
                 // we have it already, no need to re-create.
-                log.info("re-using existing manifest: " + targetClientKey);
+                log.info("re-using existing manifest: {}", targetClientKey);
             } else {
-                log.info("fetching updated applications/configurations for " + targetClientKey);
+                log.info("fetching updated applications/configurations for {}", targetClientKey);
                 try (Activity info = reporter.start("Loading requirements...")) {
                     // 2: fetch the underlying application and it's requirements into local cache (BHive)
                     fetchApplicationAndRequirements(hive, cd, appCfg);
@@ -248,11 +248,11 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             }
 
             if (mostCurrent.compareTo(currentVersion) > 0) {
-                log.info("New launcher found, updating from " + currentVersion + " to " + mostCurrent);
+                log.info("New launcher found, updating from {} to {}", currentVersion, mostCurrent);
                 doInstallUpdate(cd.host, hive, reporter, updateDir, currentVersion, mostCurrent,
                         byTagForCurrentOs.get(mostCurrent.toString()));
             } else {
-                log.info("No updates found (running=" + currentVersion + ", newest=" + mostCurrent + "), continue...");
+                log.info("No updates found (running={}, newest={}), continue...", currentVersion, mostCurrent);
             }
         }
     }
@@ -319,10 +319,10 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         InstanceNodeController controller = new InstanceNodeController(hive, rootDir, fakeInmf);
         controller.addAdditionalVariableResolver(new LocalHostnameResolver());
         if (!controller.isInstalled()) {
-            log.info("installing " + targetClientKey + " to " + rootDir);
+            log.info("installing {} to {}", targetClientKey, rootDir);
             controller.install();
         } else {
-            log.info("re-using previous installation of " + targetClientKey);
+            log.info("re-using previous installation of {}", targetClientKey);
         }
         return controller;
     }
@@ -333,7 +333,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     private static void cleanupOldInstalls(Path rootDir, ClickAndStartDescriptor cd, BHive hive) {
         hive.execute(new ManifestDeleteOldByIdOperation().setAmountToKeep(2).setRunGarbageCollector(true)
                 .setToDelete(cd.applicationId).setPreDeleteHook(k -> {
-                    log.info("uninstall and delete old version " + k);
+                    log.info("uninstall and delete old version {}", k);
                     InstanceNodeController c = new InstanceNodeController(hive, rootDir, InstanceNodeManifest.of(hive, k));
                     if (c.isInstalled()) {
                         c.uninstall();
@@ -345,7 +345,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
      * Launches the client process.
      */
     private static Process launchProcess(Manifest.Key targetClientKey, InstanceNodeController controller) {
-        log.info("launching " + targetClientKey);
+        log.info("launching {}", targetClientKey);
         ProcessGroupConfiguration pgc = controller.getProcessGroupConfiguration();
         ProcessConfiguration pc = pgc.applications.get(0);
 
@@ -356,7 +356,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         try {
             Process p = b.start();
-            log.info("started " + targetClientKey + ", PID=" + p.pid());
+            log.info("started {}, PID={}", targetClientKey, p.pid());
             return p;
         } catch (IOException e) {
             throw new IllegalStateException("Cannot start " + targetClientKey, e);

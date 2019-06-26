@@ -79,7 +79,7 @@ public class JerseySseActivityReporter implements ActivityReporter {
                 if (parent != null) {
                     currentActivity.set(parent);
                 } else {
-                    log.warn("Parent activity no longer available: " + act);
+                    log.warn("Parent activity no longer available: {}", act);
                 }
             } else {
                 // no parent set - we are top-level.
@@ -87,9 +87,9 @@ public class JerseySseActivityReporter implements ActivityReporter {
             }
         } else if (current != null) {
             // we're finishing something which is not current -> warn & ignore
-            log.warn("Finished activity is not current for this thread: " + act + ", current: " + current);
+            log.warn("Finished activity is not current for this thread: {}, current: {}", act, current);
         } else {
-            log.warn("Finished activity but there is no current activity for this thread: " + act);
+            log.warn("Finished activity but there is no current activity for this thread: {}", act);
         }
 
         globalActivities.remove(act);

@@ -107,7 +107,7 @@ public class InstanceImportExportHelper {
 
     private static Manifest.Key importFromData(BHive target, InstanceCompleteConfigDto dto, ObjectId cfgId, String uuid) {
         if (!Objects.equals(dto.config.configTree, cfgId)) {
-            log.warn("Configuration tree has unexpected ID: " + dto.config.configTree + " <-> " + cfgId);
+            log.warn("Configuration tree has unexpected ID: {} <-> {}", dto.config.configTree, cfgId);
         }
 
         InstanceConfiguration icfg = dto.config;

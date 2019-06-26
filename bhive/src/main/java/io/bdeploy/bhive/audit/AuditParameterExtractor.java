@@ -91,7 +91,7 @@ public class AuditParameterExtractor {
             AuditParameterExtractor.NoAudit na = field.getAnnotation(AuditParameterExtractor.NoAudit.class);
             if (na != null) {
                 if (log.isTraceEnabled()) {
-                    log.trace("Skipping audit of " + field);
+                    log.trace("Skipping audit of {}", field);
                 }
                 continue;
             }
@@ -114,7 +114,7 @@ public class AuditParameterExtractor {
                     result.put(field.getName(), converter.apply(fieldValue));
                 }
             } catch (IllegalArgumentException | IllegalAccessException e) {
-                log.debug("Cannot read value of " + field, e);
+                log.debug("Cannot read value of {}", field, e);
             }
         }
 

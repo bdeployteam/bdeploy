@@ -14,8 +14,8 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.objects.view.ElementView;
 import io.bdeploy.bhive.op.ImportObjectOperation;
 import io.bdeploy.bhive.op.InsertArtificialTreeOperation;
@@ -137,7 +137,7 @@ public class UserDatabase implements AuthService {
 
     public void removeUser(String user) {
         SortedSet<Key> mfs = target.execute(new ManifestListOperation().setManifestName(NAMESPACE + user));
-        log.info("Deleting " + mfs.size() + " manifests for user " + user);
+        log.info("Deleting {} manifests for user {}", mfs.size(), user);
         mfs.forEach(k -> target.execute(new ManifestDeleteOperation().setToDelete(k)));
     }
 
@@ -170,14 +170,14 @@ public class UserDatabase implements AuthService {
         // check the manifest for manipulation to prevent from manually making somebody admin, etc.
         List<ElementView> result = target.execute(new ObjectConsistencyCheckOperation().addRoot(key));
         if (!result.isEmpty()) {
-            log.error("User corruption detected for " + name);
+            log.error("User corruption detected for {}", name);
             return null;
         }
 
         try (InputStream is = target.execute(new TreeEntryLoadOperation().setRelativePath(FILE_NAME).setRootTree(mf.getRoot()))) {
             return StorageHelper.fromStream(is, UserInfo.class);
         } catch (IOException e) {
-            log.error("Cannot load user: " + name, e);
+            log.error("Cannot load user: {}", name, e);
             return null;
         }
     }

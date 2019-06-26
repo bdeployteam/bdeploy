@@ -108,7 +108,7 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
         }
 
         if (log.isTraceEnabled()) {
-            log.trace("Authenticating " + path);
+            log.trace("Authenticating {}", path);
         }
 
         // Get the Authorization header from the request

@@ -81,7 +81,7 @@ public class ProductResourceImpl implements ProductResource {
         Manifest.Key key = new Manifest.Key(name, tag);
         SortedSet<Key> existing = hive.execute(new ManifestListOperation().setManifestName(key.toString()));
         if (existing.size() != 1) {
-            log.warn("Cannot uniquely identify " + key + " to delete");
+            log.warn("Cannot uniquely identify {} to delete", key);
             return;
         }
 
@@ -175,7 +175,7 @@ public class ProductResourceImpl implements ProductResource {
                     if (log.isDebugEnabled()) {
                         log.debug("Could not fully write output", ioe);
                     } else {
-                        log.warn("Could not fully write output: " + ioe.toString());
+                        log.warn("Could not fully write output: {}", ioe.toString());
                     }
                 }
             }

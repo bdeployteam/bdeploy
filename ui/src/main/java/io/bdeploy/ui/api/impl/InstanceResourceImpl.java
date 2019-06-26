@@ -180,7 +180,7 @@ public class InstanceResourceImpl implements InstanceResource {
                 dto.product = imf.getConfiguration().product;
                 result.add(dto);
             } catch (Exception e) {
-                log.error("cannot load instance from key " + key, e);
+                log.error("cannot load instance from key {}", key, e);
             }
         }
         return result;
@@ -298,8 +298,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
                 // make sure redundant data is equal to instance data.
                 if (!cfg.name.equals(nodeConfig.name)) {
-                    log.warn("Instance name of node (" + nodeConfig.name + ") not equal to instance name (" + cfg.name
-                            + ") - aligning.");
+                    log.warn("Instance name of node ({}) not equal to instance name ({}) - aligning.", nodeConfig.name, cfg.name);
                     nodeConfig.name = cfg.name;
                 }
 
@@ -392,7 +391,7 @@ public class InstanceResourceImpl implements InstanceResource {
                                         : "Node not currently online")));
             }
         } catch (Exception e) {
-            log.warn("Master offline: " + thisIm.getConfiguration().target.getUri());
+            log.warn("Master offline: {}", thisIm.getConfiguration().target.getUri());
             if (log.isTraceEnabled()) {
                 log.trace("Exception", e);
             }
@@ -470,8 +469,8 @@ public class InstanceResourceImpl implements InstanceResource {
             TransferStatistics stats = hive
                     .execute(new PushOperation().setRemote(svc).addManifest(instance.getManifest()).setHiveName(group));
 
-            log.info("Pushed " + instance.getManifest() + " to " + svc.getUri() + "; trees=" + stats.sumMissingTrees + ", objs="
-                    + stats.sumMissingObjects + ", size=" + UnitHelper.formatFileSize(stats.transferSize));
+            log.info("Pushed {} to {}; trees={}, objs={}, size={}", instance.getManifest(), svc.getUri(), stats.sumMissingTrees,
+                    stats.sumMissingObjects, UnitHelper.formatFileSize(stats.transferSize));
 
             // 2: tell master to deploy
             MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class);
@@ -551,7 +550,7 @@ public class InstanceResourceImpl implements InstanceResource {
                     Key active = groupActiveDeployments.get(instanceId);
                     if (active != null) {
                         if (result.activatedVersion != null) {
-                            log.warn("Multiple active versions found for " + instanceId + " of group " + group);
+                            log.warn("Multiple active versions found for {} of group {}", instanceId, group);
                         }
                         result.activatedVersion = active.getTag();
                     }
@@ -735,7 +734,7 @@ public class InstanceResourceImpl implements InstanceResource {
                     if (log.isDebugEnabled()) {
                         log.debug("Could not fully write output", ioe);
                     } else {
-                        log.warn("Could not fully write output: " + ioe.toString());
+                        log.warn("Could not fully write output: {}", ioe.toString());
                     }
                 }
             }

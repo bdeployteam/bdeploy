@@ -64,7 +64,7 @@ public class UpdateHelper {
     public static Path prepareUpdateDirectory(Path updateDir) {
         Path updateTarget = updateDir.resolve(UpdateHelper.UPDATE_DIR);
         if (Files.isDirectory(updateTarget)) {
-            log.warn("Removing stale update folder at " + updateTarget);
+            log.warn("Removing stale update folder at {}", updateTarget);
             PathHelper.deleteRecursive(updateTarget);
         }
         return updateTarget;

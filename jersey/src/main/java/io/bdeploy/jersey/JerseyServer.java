@@ -228,13 +228,13 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
         // Close all registered resources
         for (AutoCloseable closeable : closeableResources) {
             try {
-                log.info("Closing resource '" + closeable + "'");
+                log.info("Closing resource '{}'", closeable);
                 closeable.close();
                 if (log.isDebugEnabled()) {
-                    log.debug("Resource '" + closeable + "' closed");
+                    log.debug("Resource '{}' closed", closeable);
                 }
             } catch (Exception ex) {
-                log.error("Failed to close resource '" + closeable + "'", ex);
+                log.error("Failed to close resource '{}'", closeable, ex);
             }
         }
         closeableResources.clear();

@@ -41,7 +41,9 @@ public class JerseyMetricsFilter implements ContainerRequestFilter, ContainerRes
             context.close();
         } else {
             // happens in case of errors in sub-resource locators, e.g. throwing a WAE.
-            log.debug("No timer running for request: " + requestContext);
+            if (log.isTraceEnabled()) {
+                log.trace("No timer running for request: {}", requestContext);
+            }
         }
     }
 

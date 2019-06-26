@@ -162,12 +162,16 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             SlaveDeploymentResource deployment = ResourceProvider.getResource(minion, SlaveDeploymentResource.class);
             SortedMap<String, SortedSet<Key>> uuidMapped = deployment.getAvailableDeployments();
             if (!uuidMapped.containsKey(imf.getConfiguration().uuid)) {
-                log.debug("Minion " + minionName + " does not contain any deployment for " + imf.getConfiguration().uuid);
+                if (log.isDebugEnabled()) {
+                    log.debug("Minion {} does not contain any deployment for {}", minionName, imf.getConfiguration().uuid);
+                }
                 return false;
             }
 
             if (!uuidMapped.get(imf.getConfiguration().uuid).contains(toDeploy)) {
-                log.debug("Minion " + minionName + " does not have " + toDeploy + " available");
+                if (log.isDebugEnabled()) {
+                    log.debug("Minion {} does not have {} available", minionName, toDeploy);
+                }
                 return false;
             }
         }
@@ -184,7 +188,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
         root.modifyState(s -> {
             if (key.equals(s.activeMasterVersions.get(imf.getConfiguration().uuid))) {
-                log.warn("Removing active version for " + imf.getConfiguration().uuid);
+                log.warn("Removing active version for {}", imf.getConfiguration().uuid);
                 s.activeMasterVersions.remove(imf.getConfiguration().uuid);
             }
         });
@@ -232,7 +236,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                     continue;
                 }
             } catch (Exception e) {
-                log.warn("Cannot check deployment state of: " + imf.getManifest());
+                log.warn("Cannot check deployment state of: {}", imf.getManifest());
                 continue;
             }
 
@@ -296,7 +300,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 List<InstanceDirectoryEntry> iddes = sdr.getDataDirectoryEntries(instanceId);
                 idd.entries.addAll(iddes);
             } catch (Exception e) {
-                log.warn("Problem fetching data directory of " + nodeName, e);
+                log.warn("Problem fetching data directory of {}", nodeName, e);
                 idd.problem = e.toString();
             }
 
@@ -450,8 +454,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                             id.entries.add(oe);
                         }
                     } catch (Exception e) {
-                        log.warn("Problem fetching output entry from " + entry.getKey() + " for " + instanceId + ", " + tag + ", "
-                                + applicationId, e);
+                        log.warn("Problem fetching output entry from {} for {}, {}, {}", entry.getKey(), instanceId, tag,
+                                applicationId, e);
                         id.problem = e.toString();
                     }
 
@@ -477,7 +481,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                     InstanceNodeStatusDto nodeStatus = spc.getStatus(instanceId);
                     instanceStatus.add(minion, nodeStatus);
                 } catch (Exception e) {
-                    log.error("Cannot fetch process status of " + minion);
+                    log.error("Cannot fetch process status of {}", minion);
                     if (log.isDebugEnabled()) {
                         log.debug("Exception:", e);
                     }

@@ -353,7 +353,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
                 InstanceProcessController instanceController = processController.getOrCreate(inm.getUUID());
                 instanceController.addProcessGroup(paths, inm.getKey().getTag(), pgc);
             } catch (Exception e) {
-                log.error("Cannot setup process control for " + key, e);
+                log.error("Cannot setup process control for {}", key, e);
             }
         }
 

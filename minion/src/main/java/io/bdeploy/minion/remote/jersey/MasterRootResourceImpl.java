@@ -68,7 +68,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
                     MinionStatusResource client = ResourceProvider.getResource(entry.getValue(), MinionStatusResource.class);
                     result.put(entry.getKey(), client.getStatus());
                 } catch (Exception e) {
-                    log.warn("Problem while contacting minion: " + entry.getKey());
+                    log.warn("Problem while contacting minion: {}", entry.getKey());
                     if (log.isTraceEnabled()) {
                         log.trace("Exception", e);
                     }
@@ -115,12 +115,12 @@ public class MasterRootResourceImpl implements MasterRootResource {
                     MinionUpdateResource resource = ResourceProvider.getResource(service, MinionUpdateResource.class);
                     toUpdate.put(entry.getKey(), resource);
                 } else {
-                    log.warn("Not updating " + entry.getKey() + ", wrong os (" + status.os + " != " + updateOs + ")");
+                    log.warn("Not updating {}, wrong os ({} != {})", entry.getKey(), status.os, updateOs);
                     pushing.workAndCancelIfRequested(1);
                     continue;
                 }
             } catch (Exception e) {
-                log.warn("Cannot contact minion: " + entry.getKey() + " - not updating.");
+                log.warn("Cannot contact minion: {} - not updating.", entry.getKey());
                 pushing.workAndCancelIfRequested(1);
                 continue;
             }
@@ -128,7 +128,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
             try {
                 h.execute(new PushOperation().addManifest(version).setRemote(service));
             } catch (Exception e) {
-                log.error("Cannot push update to minion: " + entry.getKey(), e);
+                log.error("Cannot push update to minion: {}", entry.getKey(), e);
                 throw new WebApplicationException("Cannot push update to minions", e, Status.BAD_GATEWAY);
             }
             pushing.workAndCancelIfRequested(1);
@@ -173,7 +173,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
             } catch (Exception e) {
                 // don't immediately throw to update as many minions as possible.
                 // this Exception should actually never happen according to the contract.
-                log.error("Cannot schedule update on minion: " + entry.getKey(), e);
+                log.error("Cannot schedule update on minion: {}", entry.getKey(), e);
                 problems.add(e);
             }
         });
@@ -214,7 +214,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
         }
 
         if (!getStorageLocations().contains(storage)) {
-            log.warn("Tried to use storage location: " + storage + ", valid are: " + getStorageLocations());
+            log.warn("Tried to use storage location: {}, valid are: {}", storage, getStorageLocations());
             throw new WebApplicationException("Invalid Storage Location", Status.NOT_FOUND);
         }
 
@@ -240,7 +240,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
         }
 
         if (!getStorageLocations().contains(storage)) {
-            log.warn("Tried to use storage location: " + storage + ", valid are: " + getStorageLocations());
+            log.warn("Tried to use storage location: {}, valid are: {}", storage, getStorageLocations());
             throw new WebApplicationException("Invalid Storage Location", Status.NOT_FOUND);
         }
 
