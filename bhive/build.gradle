@@ -5,7 +5,6 @@ mainClassName = 'io.bdeploy.bhive.cli.BHiveCli'
 dependencies {
     implementation project(":common")
     implementation project(":jersey")
-    implementation 'com.j256.simplemagic:simplemagic:1.16'
     testCompile    project(path: ":common", configuration: 'testRuntime')
     testCompile    project(path: ":jersey", configuration: 'testRuntime')
 }

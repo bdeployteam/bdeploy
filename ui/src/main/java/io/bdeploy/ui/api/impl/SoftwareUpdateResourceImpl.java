@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -38,6 +37,7 @@ import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.UuidHelper;
+import io.bdeploy.common.util.ZipHelper;
 import io.bdeploy.interfaces.NodeStatus;
 import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.UpdateHelper;
@@ -134,12 +134,11 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
                 Path tmpFolder = minion.getTempDir().resolve(key.directoryFriendlyName());
 
                 try {
-                    PathHelper.deleteRecursive(tmpFile);
+                    // add once more the directoryFriendlyName, as it should be included in the ZIP!
+                    getHive().execute(
+                            new ExportOperation().setManifest(key).setTarget(tmpFolder.resolve(key.directoryFriendlyName())));
 
-                    try (FileSystem zfs = PathHelper.openZip(tmpFile)) {
-                        Path exportTo = zfs.getPath("/").resolve(key.directoryFriendlyName());
-                        getHive().execute(new ExportOperation().setManifest(key).setTarget(exportTo));
-                    }
+                    ZipHelper.zip(tmpFile, tmpFolder);
                     Files.copy(tmpFile, targetFile);
                 } finally {
                     Files.deleteIfExists(tmpFile);
