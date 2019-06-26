@@ -24,6 +24,7 @@ import { ConfigFilesBrowserComponent } from './config-files-browser/config-files
 import { ClickStopPropagationDirective } from './directives/click-stop-propagation.directive';
 import { FileDropDirective } from './directives/file-drop.directive';
 import { FileUploadComponent } from './file-upload/file-upload.component';
+import { FileViewerComponent } from './file-viewer/file-viewer.component';
 import { GlobalErrorHandler } from './global-error-handler';
 import { HiveBrowserComponent } from './hive-browser/hive-browser.component';
 import { HiveComponent } from './hive/hive.component';
@@ -41,6 +42,7 @@ import { httpInterceptorProviders } from './interceptors';
 import { LoginComponent } from './login/login.component';
 import { LogoComponent } from './logo/logo.component';
 import { MainNavComponent } from './main-nav/main-nav.component';
+import { MasterCleanupComponent } from './master-cleanup/master-cleanup.component';
 import { MessageboxComponent } from './messagebox/messagebox.component';
 import { ProcessConfigurationComponent } from './process-configuration/process-configuration.component';
 import { ProcessDetailsComponent } from './process-details/process-details.component';
@@ -65,8 +67,6 @@ import { ThemeChooserComponent } from './theme-chooser/theme-chooser.component';
 import { UpdateBrowserComponent } from './update-browser/update-browser.component';
 import { UpdateCardComponent } from './update-card/update-card.component';
 import { UpdateDialogComponent } from './update-dialog/update-dialog.component';
-import { MasterCleanupComponent } from './master-cleanup/master-cleanup.component';
-
 
 export function loadAppConfig(cfgService: ConfigService) {
   return () => cfgService.load();
@@ -126,7 +126,8 @@ export function loadAppConfig(cfgService: ConfigService) {
     UpdateBrowserComponent,
     UpdateCardComponent,
     UpdateDialogComponent,
-    MasterCleanupComponent
+    MasterCleanupComponent,
+    FileViewerComponent
   ],
   imports: [
     BrowserModule,

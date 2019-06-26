@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ClickAndStartDescriptor, DeploymentStateDto, FileStatusDto, InstanceConfiguration, InstanceConfigurationDto, InstanceNodeConfigurationListDto, InstancePurpose, InstanceVersionDto, ManifestKey } from '../models/gen.dtos';
+import { ClickAndStartDescriptor, DeploymentStateDto, FileStatusDto, InstanceConfiguration, InstanceConfigurationDto, InstanceDirectory, InstanceDirectoryEntry, InstanceNodeConfigurationListDto, InstancePurpose, InstanceVersionDto, ManifestKey, StringEntryChunkDto } from '../models/gen.dtos';
 import { ConfigService } from './config.service';
 import { InstanceGroupService } from './instance-group.service';
 import { Logger, LoggingService } from './logging.service';
@@ -131,6 +131,28 @@ export class InstanceService {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/state';
     this.log.debug('getDeploymentStates: ' + url);
     return this.http.get<DeploymentStateDto>(url);
+  }
+
+  public getApplicationOutputEntry(instanceGroupName: string, instanceName: string, instanceTag: string, appUid: string, silent: boolean): Observable<InstanceDirectory> {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/output/' + instanceTag + '/' + appUid;
+    this.log.debug('getApplicationOutputEntry: ' + url);
+    const options = {
+      headers: { 'ignoreLoadingBar': ''},
+    };
+    return this.http.get<InstanceDirectory>(url, silent ? options : {});
+  }
+
+  public getContentChunk(instanceGroupName: string, instanceName: string, id: InstanceDirectory, ide: InstanceDirectoryEntry, offset: number, limit: number, silent: boolean): Observable<StringEntryChunkDto> {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/content/' + id.minion;
+    this.log.debug('getContentChunk: ' + url);
+    const options = {
+      headers: null,
+      params: new HttpParams().set('offset', offset.toString()).set('limit', limit.toString()),
+    };
+    if (silent) {
+      options.headers = { 'ignoreLoadingBar': ''};
+    }
+    return this.http.post<StringEntryChunkDto>(url, ide, options);
   }
 
   public createClickAndStartDescriptor(

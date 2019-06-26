@@ -69,6 +69,10 @@
       [matBadge]="getProcessCount()" [matBadgeHidden]="!isRunningOrUnstable()" matBadgeSize="medium">
       <mat-icon>settings</mat-icon>
     </button>
+    <ng-template #terminal>
+      <app-file-viewer class='output-overlay' (closeEvent)='closeOutputOverlay()' [title]='"Output of " + appConfig.name' [initialEntry]='getCurrentOutputEntryFetcher()' [contentFetcher]='getOutputContentFetcher()' [follow]='isRunning()'></app-file-viewer>
+    </ng-template>
+    <button mat-icon-button (click)='openOutputOverlay(terminal)'><mat-icon>message</mat-icon></button>
   </div>
 
 </div>
