@@ -165,7 +165,7 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
                 .header(HttpHeaders.WWW_AUTHENTICATE, AUTHENTICATION_SCHEME + " realm=\"" + REALM + "\"").build());
     }
 
-    private ApiAccessToken validateToken(String tokenValue) throws Exception {
+    private ApiAccessToken validateToken(String tokenValue) {
         try {
             ApiAccessToken token = security.getVerifiedPayload(tokenValue, ApiAccessToken.class, store);
 

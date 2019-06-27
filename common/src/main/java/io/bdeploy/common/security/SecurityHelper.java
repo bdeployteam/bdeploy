@@ -70,9 +70,8 @@ public class SecurityHelper {
      *            within.
      * @return an encoded and signed token containing all security relevant
      *         information for a client to connect to this server.
-     * @throws Exception
      */
-    public <T> String createSignaturePack(T payload, KeyStore keystore, char[] passphrase) throws Exception {
+    public <T> String createSignaturePack(T payload, KeyStore keystore, char[] passphrase) throws GeneralSecurityException {
         SignaturePack pack = new SignaturePack();
 
         pack.t = createToken(payload, keystore, passphrase);
@@ -101,9 +100,9 @@ public class SecurityHelper {
      *            within.
      * @return an encoded and signed token containing all security relevant
      *         information for a client to connect to this server.
-     * @throws Exception
      */
-    public <T> String createSignaturePack(T payload, Path keystore, char[] passphrase) throws Exception {
+    public <T> String createSignaturePack(T payload, Path keystore, char[] passphrase)
+            throws GeneralSecurityException, IOException {
         KeyStore ks = loadPrivateKeyStore(keystore, passphrase);
         SignaturePack pack = new SignaturePack();
 
@@ -283,7 +282,7 @@ public class SecurityHelper {
         return ks;
     }
 
-    private PrivateKey getPrivateKey(KeyStore ks, char[] passphrase) throws Exception {
+    private PrivateKey getPrivateKey(KeyStore ks, char[] passphrase) throws GeneralSecurityException {
         String alias = ks.aliases().nextElement();
         return (PrivateKey) ks.getKey(alias, passphrase);
     }
@@ -300,7 +299,7 @@ public class SecurityHelper {
         throw new IllegalStateException("KeyStore does not contain a certificate");
     }
 
-    private String getRawSignature(String data, PrivateKey pk) throws Exception {
+    private String getRawSignature(String data, PrivateKey pk) throws GeneralSecurityException {
         Signature rsa = getSignatureAlgorithm();
         rsa.initSign(pk);
         rsa.update(data.getBytes(StandardCharsets.UTF_8));
@@ -313,7 +312,7 @@ public class SecurityHelper {
         return Signature.getInstance("SHA256withRSA");
     }
 
-    private SignedPayload getSignedToken(Object payload, PrivateKey pk) throws Exception {
+    private SignedPayload getSignedToken(Object payload, PrivateKey pk) throws GeneralSecurityException, IOException {
         String toSign = getMapper().writeValueAsString(payload);
         String signature = getRawSignature(toSign, pk);
 

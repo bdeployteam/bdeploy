@@ -39,7 +39,7 @@ public class ImportOperation extends BHive.Operation<Manifest.Key> {
             Manifest.Builder builder = new Manifest.Builder(manifest);
 
             builder.setRoot(execute(new ImportTreeOperation().setSourcePath(toImport)));
-            labels.forEach((k, v) -> builder.addLabel(k, v));
+            labels.forEach(builder::addLabel);
 
             getManifestDatabase().addManifest(builder.build());
         }

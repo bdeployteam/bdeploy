@@ -81,7 +81,7 @@ public class JerseyCachedEventSource implements JerseySseRegistrar {
     }
 
     private void onComplete() {
-        onCompleteHandlers.forEach(h -> unthrow(() -> h.run()));
+        onCompleteHandlers.forEach(h -> unthrow(h::run));
     }
 
     private void unthrow(Runnable action) {
@@ -139,7 +139,7 @@ public class JerseyCachedEventSource implements JerseySseRegistrar {
     void doExpire() {
         onEventHandlers.clear();
         onErrorHandlers.clear();
-        onCompleteHandlers.forEach(a -> unthrow(() -> a.run()));
+        onCompleteHandlers.forEach(a -> unthrow(a::run));
         delegate.close();
     }
 

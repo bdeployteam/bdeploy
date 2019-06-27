@@ -46,7 +46,7 @@ public class ObjectListOperation extends BHive.Operation<SortedSet<ObjectId>> {
             }
 
             if (trees.isEmpty()) {
-                return getObjectManager().db(x -> x.getAllObjects());
+                return getObjectManager().db(ObjectDatabase::getAllObjects);
             }
 
             SortedSet<ObjectId> result = new TreeSet<>();

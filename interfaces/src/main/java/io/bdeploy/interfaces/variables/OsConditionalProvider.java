@@ -1,6 +1,6 @@
 package io.bdeploy.interfaces.variables;
 
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
@@ -8,7 +8,7 @@ import io.bdeploy.common.util.OsHelper.OperatingSystem;
 /**
  * Conditionally output text based on the current os. E.g. {{LINUX:somevalue}} will only expand if the OS is linux.
  */
-public class OsConditionalProvider implements Function<String, String> {
+public class OsConditionalProvider implements UnaryOperator<String> {
 
     @Override
     public String apply(String t) {

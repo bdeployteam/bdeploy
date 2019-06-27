@@ -6,7 +6,6 @@ import org.glassfish.hk2.utilities.Binder;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.KeyDeserializer;
@@ -41,8 +40,7 @@ public class BHiveJacksonModule extends SimpleModule {
     private static class MKS extends JsonSerializer<Manifest.Key> {
 
         @Override
-        public void serialize(Manifest.Key value, JsonGenerator gen, SerializerProvider serializers)
-                throws IOException, JsonProcessingException {
+        public void serialize(Manifest.Key value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
             gen.writeFieldName(value.toString());
         }
     }
@@ -50,7 +48,7 @@ public class BHiveJacksonModule extends SimpleModule {
     private static class MKD extends KeyDeserializer {
 
         @Override
-        public Object deserializeKey(String key, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+        public Object deserializeKey(String key, DeserializationContext ctxt) throws IOException {
             return Manifest.Key.parse(key);
         }
     }

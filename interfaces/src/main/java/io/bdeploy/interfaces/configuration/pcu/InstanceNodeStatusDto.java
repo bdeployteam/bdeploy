@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import com.google.common.base.Joiner;
-
 /**
  * Status information what is running on a given node. Note that there could be applications
  * running from multiple different tags.
@@ -25,7 +23,7 @@ public class InstanceNodeStatusDto {
 
     @Override
     public String toString() {
-        return Joiner.on("\n").join(log());
+        return String.join("\n", log());
     }
 
     /**

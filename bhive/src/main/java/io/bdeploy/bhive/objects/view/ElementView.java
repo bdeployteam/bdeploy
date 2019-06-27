@@ -5,8 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import com.google.common.base.Joiner;
-
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.op.ScanOperation;
@@ -43,7 +41,7 @@ public abstract class ElementView implements Comparable<ElementView> {
      * @return {@link #getPath()} as human readable relative {@link String}.
      */
     public String getPathString() {
-        return Joiner.on("/").join(path);
+        return String.join("/", path);
     }
 
     /**
@@ -65,6 +63,36 @@ public abstract class ElementView implements Comparable<ElementView> {
     @Override
     public int compareTo(ElementView o) {
         return id.compareTo(o.id);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        ElementView other = (ElementView) obj;
+        if (id == null) {
+            if (other.id != null) {
+                return false;
+            }
+        } else if (!id.equals(other.id)) {
+            return false;
+        }
+        return true;
     }
 
 }

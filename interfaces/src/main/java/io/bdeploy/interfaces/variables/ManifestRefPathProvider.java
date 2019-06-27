@@ -40,7 +40,7 @@ public class ManifestRefPathProvider {
     public Path getManifestPath(String name) {
         if (name.contains(":")) {
             Manifest.Key fullKey = Manifest.Key.parse(name);
-            return paths.entrySet().stream().filter(e -> e.getValue().equals(fullKey)).map(e -> e.getKey()).findFirst()
+            return paths.entrySet().stream().filter(e -> e.getValue().equals(fullKey)).map(Map.Entry::getKey).findFirst()
                     .orElse(null);
         }
 
@@ -49,10 +49,8 @@ public class ManifestRefPathProvider {
         // check OS specific
         for (Map.Entry<Path, Manifest.Key> entry : paths.entrySet()) {
             ScopedManifestKey smk = ScopedManifestKey.parse(entry.getValue());
-            if (smk != null) {
-                if (smk.getName().equals(name)) {
-                    candidates.add(entry.getKey());
-                }
+            if (smk != null && smk.getName().equals(name)) {
+                candidates.add(entry.getKey());
             }
         }
 

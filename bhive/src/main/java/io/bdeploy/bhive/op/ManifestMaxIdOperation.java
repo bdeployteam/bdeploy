@@ -19,7 +19,7 @@ public class ManifestMaxIdOperation extends BHive.Operation<Optional<Long>> {
         RuntimeAssert.assertNotNull(key, "No Manifest to inspect");
 
         try (Activity activity = getActivityReporter().start("Evaluating latest manifest version...", -1)) {
-            return getManifestDatabase().getAllForName(key).stream().map(Manifest.Key::getTag).map(t -> Long.parseLong(t))
+            return getManifestDatabase().getAllForName(key).stream().map(Manifest.Key::getTag).map(Long::parseLong)
                     .max(Long::compare);
         } catch (NumberFormatException e) {
             return Optional.empty();

@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +19,7 @@ public class TemplateHelperTest {
         VARS.put("y-pattern2", "${x}");
     }
 
-    private static Function<String, String> RESOLVER = s -> VARS.get(s);
+    private static UnaryOperator<String> RESOLVER = s -> VARS.get(s);
 
     @Test
     void patterns() {

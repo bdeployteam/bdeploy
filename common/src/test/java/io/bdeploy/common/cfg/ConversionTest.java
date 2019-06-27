@@ -14,8 +14,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-import io.bdeploy.common.cfg.Configuration;
-
 public class ConversionTest {
 
     @Test
@@ -27,25 +25,25 @@ public class ConversionTest {
                 "--testLongArray=1,2,3,4,5", "--testBoolean");
 
         TestConfig tc = c.get(TestConfig.class);
-        assertEquals(tc.testByte(), 3);
-        assertEquals(tc.testChar(), 'a');
-        assertEquals(tc.testInt(), 9);
-        assertEquals(tc.testShort(), 8);
-        assertEquals(tc.testLong(), 7);
-        assertEquals(tc.testFloat(), 0.9f);
-        assertEquals(tc.testDouble(), 0.9);
-        assertEquals(tc.testEnum(), TestEnum.TEST1);
-        assertEquals(tc.testString(), "abc");
-        assertEquals(tc.testStringArray().length, 3);
-        assertEquals(tc.testStringArray()[0], "abc");
-        assertEquals(tc.testStringArray()[1], "def");
-        assertEquals(tc.testStringArray()[2], "ghi");
-        assertEquals(tc.testLongArray().length, 5);
-        assertEquals(tc.testLongArray()[0], 1);
-        assertEquals(tc.testLongArray()[1], 2);
-        assertEquals(tc.testLongArray()[2], 3);
-        assertEquals(tc.testLongArray()[3], 4);
-        assertEquals(tc.testLongArray()[4], 5);
+        assertEquals(3, tc.testByte());
+        assertEquals('a', tc.testChar());
+        assertEquals(9, tc.testInt());
+        assertEquals(8, tc.testShort());
+        assertEquals(7, tc.testLong());
+        assertEquals(0.9f, tc.testFloat());
+        assertEquals(0.9, tc.testDouble());
+        assertEquals(TestEnum.TEST1, tc.testEnum());
+        assertEquals("abc", tc.testString());
+        assertEquals(3, tc.testStringArray().length);
+        assertEquals("abc", tc.testStringArray()[0]);
+        assertEquals("def", tc.testStringArray()[1]);
+        assertEquals("ghi", tc.testStringArray()[2]);
+        assertEquals(5, tc.testLongArray().length);
+        assertEquals(1, tc.testLongArray()[0]);
+        assertEquals(2, tc.testLongArray()[1]);
+        assertEquals(3, tc.testLongArray()[2]);
+        assertEquals(4, tc.testLongArray()[3]);
+        assertEquals(5, tc.testLongArray()[4]);
     }
 
     @Test
@@ -58,11 +56,11 @@ public class ConversionTest {
 
         TestConfig tc = c.get(TestConfig.class);
 
-        assertEquals(tc.testStringArray().length, 4);
-        assertEquals(tc.testStringArray()[0], "1");
-        assertEquals(tc.testStringArray()[1], "2");
-        assertEquals(tc.testStringArray()[2], "3");
-        assertEquals(tc.testStringArray()[3], "4");
+        assertEquals(4, tc.testStringArray().length);
+        assertEquals("1", tc.testStringArray()[0]);
+        assertEquals("2", tc.testStringArray()[1]);
+        assertEquals("3", tc.testStringArray()[2]);
+        assertEquals("4", tc.testStringArray()[3]);
     }
 
     @Test
@@ -73,9 +71,9 @@ public class ConversionTest {
 
         TestConfig tc = c.get(TestConfig.class);
 
-        assertEquals(tc.testStringArray().length, 2);
-        assertEquals(tc.testStringArray()[0], "this=test");
-        assertEquals(tc.testStringArray()[1], "some=other");
+        assertEquals(2, tc.testStringArray().length);
+        assertEquals("this=test", tc.testStringArray()[0]);
+        assertEquals("some=other", tc.testStringArray()[1]);
     }
 
     private @interface TestConfig {

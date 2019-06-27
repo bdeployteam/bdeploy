@@ -2,12 +2,12 @@ package io.bdeploy.launcher.cli;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 /**
  * An additional variable resolver used by the DCU to resolve the local hostname.
  */
-public class LocalHostnameResolver implements Function<String, String> {
+public class LocalHostnameResolver implements UnaryOperator<String> {
 
     @Override
     public String apply(String t) {

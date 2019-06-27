@@ -143,7 +143,7 @@ public class BHive implements AutoCloseable, BHiveExecution {
      * Base class for all operations that need to access internals of the
      * {@link BHive} they are executed on.
      */
-    abstract public static class Operation<T> implements Callable<T>, BHiveExecution {
+    public abstract static class Operation<T> implements Callable<T>, BHiveExecution {
 
         private BHive hive;
         private ObjectManager mgr;

@@ -66,7 +66,7 @@ public class JerseyClientFactory {
             }).build();
 
     private final Cache<String, JerseyCachedEventSource> sseCache = CacheBuilder.newBuilder().maximumSize(20)
-            .removalListener((i) -> {
+            .removalListener(i -> {
                 JerseyCachedEventSource ses = (JerseyCachedEventSource) i.getValue();
                 ses.doExpire();
             }).build();
@@ -160,8 +160,8 @@ public class JerseyClientFactory {
         // Sub-Resources that are provided by another resource have - by convention - no path declared
         // Trying to directly resolve them could lead to troubles that are hard to discover and debug
         if (path == null) {
-            log.error("Resource '" + clazz + "' does not have a @Path annotation."
-                    + "Seems to be a sub-resource that needs to be queried via a parent resource.");
+            log.error("Resource '{}' does not have a @Path annotation."
+                    + "Seems to be a sub-resource that needs to be queried via a parent resource.", clazz);
         }
         return WebResourceFactory.newResource(clazz, getBaseTarget(additionalRegistrations));
     }
@@ -192,7 +192,7 @@ public class JerseyClientFactory {
         builder.register(JerseyPathReader.class);
         builder.register(JerseyPathWriter.class);
         builder.register(new JerseyClientReporterResolver());
-        builder.register(new JerseySseActivityProxyClientFilter(() -> proxyUuid.get()));
+        builder.register(new JerseySseActivityProxyClientFilter(proxyUuid::get));
 
         for (Object reg : additionalRegistrations) {
             if (reg instanceof Class<?>) {

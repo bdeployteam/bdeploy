@@ -34,6 +34,9 @@ import io.bdeploy.common.util.JacksonHelper.MapperType;
  */
 public class StorageHelper {
 
+    private static final String JSON_READ_ERROR = "Cannot read JSON value";
+    private static final String JSON_WRITE_ERROR = "Cannot write JSON value";
+
     public interface CustomMapper {
 
         public byte[] write(Object obj);
@@ -58,7 +61,7 @@ public class StorageHelper {
         try {
             return getMapper().writeValueAsBytes(o);
         } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Cannot write JSON value", e);
+            throw new IllegalStateException(JSON_WRITE_ERROR, e);
         }
     }
 
@@ -69,7 +72,7 @@ public class StorageHelper {
         try {
             return getMapper(MapperType.YAML).writeValueAsBytes(o);
         } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Cannot write JSON value", e);
+            throw new IllegalStateException(JSON_WRITE_ERROR, e);
         }
     }
 
@@ -80,7 +83,7 @@ public class StorageHelper {
         try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes)) {
             return fromStream(bis, clazz);
         } catch (IOException e) {
-            throw new IllegalStateException("Cannot read JSON value", e);
+            throw new IllegalStateException(JSON_READ_ERROR, e);
         }
     }
 
@@ -107,7 +110,7 @@ public class StorageHelper {
         try (InputStreamReader r = new InputStreamReader(is, StandardCharsets.UTF_8)) {
             return getMapper().readValue(is, clazz);
         } catch (IOException e) {
-            throw new IllegalStateException("Cannot read JSON value", e);
+            throw new IllegalStateException(JSON_READ_ERROR, e);
         }
     }
 
@@ -118,7 +121,7 @@ public class StorageHelper {
         try (InputStreamReader r = new InputStreamReader(is, StandardCharsets.UTF_8)) {
             return getMapper(MapperType.YAML).readValue(is, clazz);
         } catch (IOException e) {
-            throw new IllegalStateException("Cannot read JSON value", e);
+            throw new IllegalStateException(JSON_READ_ERROR, e);
         }
     }
 

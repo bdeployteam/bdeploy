@@ -10,7 +10,7 @@ import java.nio.file.Path;
  * Base class for a database which requires locked modifications for
  * parallel-safety (JVM overarching).
  */
-abstract public class LockableDatabase {
+public abstract class LockableDatabase {
 
     private final File lockFile;
 

@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-import io.bdeploy.common.cfg.Configuration;
 import io.bdeploy.common.cfg.Configuration.ConfigurationNameMapping;
 
 public class PropertyTest {
@@ -21,7 +20,7 @@ public class PropertyTest {
 
         TestConfig tc = c.get(TestConfig.class);
 
-        assertEquals(tc.userHome(), value);
+        assertEquals(value, tc.userHome());
     }
 
     private @interface TestConfig {

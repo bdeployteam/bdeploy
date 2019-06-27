@@ -15,8 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-import io.bdeploy.common.cfg.Configuration;
-
 public class BasicTest {
 
     @Test
@@ -26,7 +24,7 @@ public class BasicTest {
 
         TestConfig tc = c.get(TestConfig.class);
         assertTrue(tc.booleanArg());
-        assertEquals(tc.intArg(), 3);
+        assertEquals(3, tc.intArg());
     }
 
     @Test
@@ -35,7 +33,7 @@ public class BasicTest {
 
         TestConfig tc = c.get(TestConfig.class);
         assertTrue(!tc.booleanArg());
-        assertEquals(tc.intArg(), 1);
+        assertEquals(1, tc.intArg());
     }
 
     private @interface TestConfig {

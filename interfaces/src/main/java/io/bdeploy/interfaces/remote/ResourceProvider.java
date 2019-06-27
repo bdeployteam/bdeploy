@@ -9,6 +9,9 @@ import io.bdeploy.jersey.JerseyClientFactory;
  */
 public class ResourceProvider {
 
+    private ResourceProvider() {
+    }
+
     /**
      * Returns a client factory for the given remote minion.
      */

@@ -3,7 +3,7 @@ package io.bdeploy.interfaces.variables;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
@@ -13,7 +13,7 @@ import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
  *
  * @see SpecialVariablePrefix
  */
-public class VariableResolver implements Function<String, String> {
+public class VariableResolver implements UnaryOperator<String> {
 
     public enum SpecialVariablePrefix {
         /**
@@ -62,10 +62,10 @@ public class VariableResolver implements Function<String, String> {
     private final DeploymentPathProvider paths;
     private final ManifestRefPathProvider manifests;
     private final ApplicationParameterProvider parameters;
-    private final List<Function<String, String>> additionalResolvers;
+    private final List<UnaryOperator<String>> additionalResolvers;
 
     public VariableResolver(DeploymentPathProvider paths, ManifestRefPathProvider manifests,
-            ApplicationParameterProvider parameters, List<Function<String, String>> additionalResolvers) {
+            ApplicationParameterProvider parameters, List<UnaryOperator<String>> additionalResolvers) {
         this.paths = paths;
         this.manifests = manifests;
         this.parameters = parameters;
@@ -96,7 +96,7 @@ public class VariableResolver implements Function<String, String> {
             return parameters.getParameterValue(v);
         }
 
-        for (Function<String, String> resolver : additionalResolvers) {
+        for (UnaryOperator<String> resolver : additionalResolvers) {
             v = resolver.apply(varName);
             if (v != null) {
                 return v;
@@ -113,8 +113,8 @@ public class VariableResolver implements Function<String, String> {
         return null;
     }
 
-    public Function<String, String> scopedTo(String application, Manifest.Key manifest) {
-        return (s) -> {
+    public UnaryOperator<String> scopedTo(String application, Manifest.Key manifest) {
+        return s -> {
             String v = getVariableValue(SpecialVariablePrefix.PARAMETER_VALUE, s);
             if (v != null && !v.contains(":")) {
                 return apply(SpecialVariablePrefix.PARAMETER_VALUE.format(application + ":" + v));

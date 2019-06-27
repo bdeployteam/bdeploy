@@ -13,8 +13,8 @@ import io.bdeploy.bhive.remote.jersey.BHiveJacksonModule;
 import io.bdeploy.bhive.remote.jersey.BHiveLocatorImpl;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.cfg.Configuration.Help;
-import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
+import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.jersey.JerseyServer;
 
@@ -78,7 +78,7 @@ public class ServeTool extends ConfiguredCliTool<ServeConfig> {
         }
     }
 
-    private void runServer(short port, Map<String, BHive> hives, KeyStore ks, char[] passphrase) throws Exception {
+    private void runServer(short port, Map<String, BHive> hives, KeyStore ks, char[] passphrase) {
         try (JerseyServer server = new JerseyServer(port, ks, passphrase)) {
             BHiveRegistry reg = new BHiveRegistry(getActivityReporter());
 

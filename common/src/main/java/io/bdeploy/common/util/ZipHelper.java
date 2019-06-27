@@ -23,6 +23,9 @@ public class ZipHelper {
     private static final int DEFAULT_NONEXEC_MODE = 0644;
     private static final int DEFAULT_EXEC_MODE = 0755;
 
+    private ZipHelper() {
+    }
+
     /**
      * Creates a ZIP file from the given source directory. The targets parent directory must exist.
      * <p>
@@ -107,7 +110,7 @@ public class ZipHelper {
         }
     }
 
-    private static boolean isPosixFileStore(Path path) throws IOException {
+    private static boolean isPosixFileStore(Path path) {
         return Files.getFileAttributeView(path, PosixFileAttributeView.class) != null;
     }
 

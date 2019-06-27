@@ -2,7 +2,7 @@ package io.bdeploy.interfaces.configuration.dcu;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import io.bdeploy.common.util.TemplateHelper;
@@ -32,7 +32,7 @@ public class ParameterConfiguration {
      */
     public final List<String> preRendered = new ArrayList<>();
 
-    public List<String> renderDescriptor(Function<String, String> valueResolver) {
+    public List<String> renderDescriptor(UnaryOperator<String> valueResolver) {
         return preRendered.stream().map(a -> process(a, valueResolver)).collect(Collectors.toList());
     }
 
@@ -46,7 +46,7 @@ public class ParameterConfiguration {
      *            references.
      * @return a resolved {@link String}.
      */
-    public static String process(String value, Function<String, String> valueProvider) {
+    public static String process(String value, UnaryOperator<String> valueProvider) {
         return TemplateHelper.process(value, valueProvider, "{{", "}}");
     }
 

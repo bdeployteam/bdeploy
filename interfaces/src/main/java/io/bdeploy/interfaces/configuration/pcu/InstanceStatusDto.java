@@ -10,7 +10,6 @@ import java.util.TreeSet;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Joiner;
 
 /**
  * Holds the deployment and runtime status of an entire instance.
@@ -35,7 +34,7 @@ public class InstanceStatusDto {
 
     @Override
     public String toString() {
-        return Joiner.on("\n").join(log());
+        return String.join("\n", log());
     }
 
     /**

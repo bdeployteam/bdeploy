@@ -30,7 +30,6 @@ public class JerseyCorsFilter implements ContainerResponseFilter, ContainerReque
         // response filter method below.
         if (isPreflightRequest(request)) {
             request.abortWith(Response.ok().build());
-            return;
         }
     }
 

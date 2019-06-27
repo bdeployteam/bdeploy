@@ -46,7 +46,7 @@ public class SimpleTreeMapper implements CustomMapper {
                 builder.add(new Tree.Key(parts.get(3), EntryType.valueOf(parts.get(0))), ObjectId.parse(parts.get(1)));
             }
         } catch (IOException e) {
-            throw new RuntimeException("Cannot read tree", e);
+            throw new IllegalStateException("Cannot read tree", e);
         }
         return builder.build();
     }

@@ -1,12 +1,12 @@
 package io.bdeploy.minion;
 
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 /**
  * An additional variable resolver used by the DCU to resolve variables which
  * are specific to the Minion configuration.
  */
-public class MinionConfigVariableResolver implements Function<String, String> {
+public class MinionConfigVariableResolver implements UnaryOperator<String> {
 
     private final MinionRoot root;
 

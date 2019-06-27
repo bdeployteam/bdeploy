@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.google.common.base.Joiner;
-
 /**
  * Contains detailed information about a given process and its children.
  */
@@ -35,7 +33,7 @@ public class ProcessDetailDto {
 
     @Override
     public String toString() {
-        return Joiner.on("\n").join(log());
+        return String.join("\n", log());
     }
 
     /**

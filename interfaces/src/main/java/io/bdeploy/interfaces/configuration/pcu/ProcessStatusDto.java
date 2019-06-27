@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.google.common.base.Joiner;
-
 /**
  * DTO provided by the PCU with details about deployed application.
  */
@@ -47,7 +45,7 @@ public class ProcessStatusDto {
         List<String> logs = new ArrayList<>();
         logs.addAll(logStatusDetails());
         logProcessDetails().forEach(l -> logs.add("\t" + l));
-        return Joiner.on("\n").join(logs);
+        return String.join("\n", logs);
     }
 
     /**
@@ -76,7 +74,7 @@ public class ProcessStatusDto {
     public List<String> logProcessDetails() {
         List<String> logs = new ArrayList<>();
         if (processDetails != null) {
-            processDetails.log().forEach(l -> logs.add(l));
+            processDetails.log().forEach(logs::add);
         }
         return logs;
     }

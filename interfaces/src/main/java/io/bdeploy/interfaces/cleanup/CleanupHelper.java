@@ -30,6 +30,9 @@ public class CleanupHelper {
 
     private static final Logger log = LoggerFactory.getLogger(CleanupHelper.class);
 
+    private CleanupHelper() {
+    }
+
     /**
      * Performs the calculation (and optionally the actual cleanup immediately) of things that require cleaning upon all given
      * minions.

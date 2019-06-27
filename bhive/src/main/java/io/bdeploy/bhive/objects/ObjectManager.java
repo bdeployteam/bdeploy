@@ -180,7 +180,7 @@ public class ObjectManager {
     private void internalExportTree(ObjectId tree, Path topLevel, ObjectId topLevelTree, Path location, Activity exporting,
             ReferenceHandler handler) throws IOException {
         PathHelper.mkdirs(location);
-        Tree t = loadObject(tree, (is) -> StorageHelper.fromStream(is, Tree.class));
+        Tree t = loadObject(tree, is -> StorageHelper.fromStream(is, Tree.class));
 
         List<Future<?>> filesOnLevel = new ArrayList<>();
         for (Map.Entry<Tree.Key, ObjectId> entry : t.getChildren().entrySet()) {
@@ -301,7 +301,7 @@ public class ObjectManager {
                 }
 
                 try {
-                    Tree mrt = loadObject(mf.getRoot(), (is) -> StorageHelper.fromStream(is, Tree.class));
+                    Tree mrt = loadObject(mf.getRoot(), is -> StorageHelper.fromStream(is, Tree.class));
                     scanChildren(mrs, mrt, path, maxDepth, followReferences);
                 } catch (Exception e) {
                     mrs.addChild(new DamagedObjectView(mf.getRoot(), type, path));
@@ -309,7 +309,7 @@ public class ObjectManager {
                 return mrs;
             case TREE:
                 try {
-                    Tree t = loadObject(object, (is) -> StorageHelper.fromStream(is, Tree.class));
+                    Tree t = loadObject(object, is -> StorageHelper.fromStream(is, Tree.class));
                     TreeView ts = new TreeView(object, path);
                     scanChildren(ts, t, path, maxDepth, followReferences);
                     return ts;
@@ -336,7 +336,7 @@ public class ObjectManager {
      * @throws IOException
      */
     public InputStream getStreamForRelativePath(ObjectId tree, String... path) throws IOException {
-        Tree t = loadObject(tree, (is) -> StorageHelper.fromStream(is, Tree.class));
+        Tree t = loadObject(tree, is -> StorageHelper.fromStream(is, Tree.class));
 
         if (path.length > 1) {
             // must be tree or manifest - skip to next tree

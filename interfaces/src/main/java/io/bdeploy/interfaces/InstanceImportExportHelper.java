@@ -45,6 +45,9 @@ public class InstanceImportExportHelper {
     private static final String CONFIG_DIR = "config";
     private static final String INSTANCE_JSON = "instance.json";
 
+    private InstanceImportExportHelper() {
+    }
+
     /**
      * @param zipFilePath the {@link Path} to the ZIP file to create. The file may NOT exist yet.
      * @param source the source {@link BHive} to read data from.

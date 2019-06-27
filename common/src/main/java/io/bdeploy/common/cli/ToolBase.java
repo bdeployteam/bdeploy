@@ -101,7 +101,7 @@ public abstract class ToolBase {
                 System.out.println("  -o <f>  Write output to file <f>. No effect on progress output.");
                 System.out.println("  -op <f> Write progress tracking output to file <f>. No effect on normal output.");
                 System.out.println("  Tools:");
-                tools.entrySet().stream().forEach((e) -> {
+                tools.entrySet().stream().forEach(e -> {
                     Help h = e.getValue().getAnnotation(Help.class);
                     if (h != null) {
                         System.out.println("  " + String.format("%1$12s: %2$s", e.getKey(), h.value()));
@@ -289,7 +289,7 @@ public abstract class ToolBase {
         /**
          * Execute the tool.
          */
-        abstract public void run();
+        public abstract void run();
     }
 
     /**
@@ -308,7 +308,7 @@ public abstract class ToolBase {
             run(args);
         }
 
-        abstract protected void run(String[] args);
+        protected abstract void run(String[] args);
 
     }
 
@@ -405,7 +405,7 @@ public abstract class ToolBase {
          *
          * @param config the configuration instance for the tool.
          */
-        abstract protected void run(T config);
+        protected abstract void run(T config);
     }
 
 }

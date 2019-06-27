@@ -2,7 +2,7 @@ package io.bdeploy.interfaces.configuration.dcu;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
@@ -59,7 +59,7 @@ public class ApplicationConfiguration {
      * This happens after deploying applications, when all paths for all deployed
      * artifacts are existing and fixed.
      */
-    public ProcessConfiguration renderDescriptor(Function<String, String> valueResolver) {
+    public ProcessConfiguration renderDescriptor(UnaryOperator<String> valueResolver) {
         ProcessConfiguration add = new ProcessConfiguration();
 
         add.uid = uid;

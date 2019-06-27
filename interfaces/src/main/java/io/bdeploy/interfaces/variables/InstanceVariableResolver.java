@@ -1,6 +1,6 @@
 package io.bdeploy.interfaces.variables;
 
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.variables.VariableResolver.SpecialVariablePrefix;
@@ -9,7 +9,7 @@ import io.bdeploy.interfaces.variables.VariableResolver.SpecialVariablePrefix;
  * An additional variable resolver used by the DCU to resolve variables which
  * are specific to the instance configuration.
  */
-public class InstanceVariableResolver implements Function<String, String> {
+public class InstanceVariableResolver implements UnaryOperator<String> {
 
     private final InstanceNodeConfiguration incf;
 

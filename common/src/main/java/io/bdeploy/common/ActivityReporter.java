@@ -120,7 +120,7 @@ public interface ActivityReporter {
 
         private static final Logger log = LoggerFactory.getLogger(Stream.class);
 
-        private final PrintStream stream;
+        private final PrintStream output;
         private ScheduledExecutorService updater;
         private ScheduledFuture<?> scheduled;
         private boolean verbose;
@@ -132,8 +132,8 @@ public interface ActivityReporter {
         private String lastReportedActivity = "init";
         private long lastReportedAmount;
 
-        public Stream(PrintStream stream) {
-            this.stream = stream;
+        public Stream(PrintStream output) {
+            this.output = output;
         }
 
         /**
@@ -174,7 +174,7 @@ public interface ActivityReporter {
             reportSummary();
 
             activities.clear();
-            stream.flush();
+            output.flush();
         }
 
         private void catchAll(Runnable x) {
@@ -202,33 +202,33 @@ public interface ActivityReporter {
                 return;
             }
 
-            stream.print('\r');
+            output.print('\r');
 
             Long max = current.getMaxAmount();
             if (max < 0) {
-                stream.print(String.format("[%1$08d] %2$-70s", current.duration(), current.activity));
+                output.print(String.format("[%1$08d] %2$-70s", current.duration(), current.activity));
             } else if (max == 0) {
-                stream.print(
+                output.print(
                         String.format("[%1$08d] %2$-70s         /%3$8d", current.duration(), current.activity, currentAmount));
             } else {
-                stream.print(
+                output.print(
                         String.format("[%1$08d] %2$-70s %3$8d/%4$8d", current.duration(), current.activity, currentAmount, max));
             }
         }
 
         private synchronized void reportDone(AsyncActivity act) {
-            stream.print('\r');
+            output.print('\r');
 
             Long max = act.getMaxAmount();
             if (max < 0) {
-                stream.print(String.format("[%1$08d] %2$-70s     DONE%n", act.duration(), act.activity));
+                output.print(String.format("[%1$08d] %2$-70s     DONE%n", act.duration(), act.activity));
             } else if (max == 0) {
-                stream.print(
+                output.print(
                         String.format("[%1$08d] %2$-70s     DONE/%3$8d%n", act.duration(), act.activity, act.getCurrentAmount()));
             } else {
-                stream.print(String.format("[%1$08d] %2$-70s     DONE/%3$8d%n", act.duration(), act.activity, max));
+                output.print(String.format("[%1$08d] %2$-70s     DONE/%3$8d%n", act.duration(), act.activity, max));
             }
-            stream.flush();
+            output.flush();
             lastReportedActivity = null; // avoid newline on next report :)
         }
 
@@ -238,14 +238,14 @@ public interface ActivityReporter {
             }
 
             if (verbose) {
-                stream.println();
-                stream.println(String.format("%1$-81s %2$s", "ACTIVITY", "DURATION"));
-                stream.println(repeat("=", 90));
+                output.println();
+                output.println(String.format("%1$-81s %2$s", "ACTIVITY", "DURATION"));
+                output.println(repeat("=", 90));
                 for (AsyncActivity act : allActivities) {
                     if (act.isNested) {
-                        stream.println(String.format("  %1$-79s %2$8d ms", act.activity, act.duration()));
+                        output.println(String.format("  %1$-79s %2$8d ms", act.activity, act.duration()));
                     } else {
-                        stream.println(String.format("%1$-81s %2$8d ms", act.activity, act.duration()));
+                        output.println(String.format("%1$-81s %2$8d ms", act.activity, act.duration()));
                     }
                 }
             }
@@ -355,9 +355,9 @@ public interface ActivityReporter {
             }
 
             private void onMessage(InboundSseEvent event) {
-                List<ActivitySnapshot> activities = event.readData(ActivitySnapshot.LIST_TYPE);
-                for (ActivitySnapshot act : activities) {
-                    stream.println("SRV: " + act);
+                List<ActivitySnapshot> activityList = event.readData(ActivitySnapshot.LIST_TYPE);
+                for (ActivitySnapshot act : activityList) {
+                    output.println("SRV: " + act);
                 }
             }
 

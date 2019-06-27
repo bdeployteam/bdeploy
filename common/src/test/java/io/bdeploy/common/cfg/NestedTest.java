@@ -14,8 +14,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-import io.bdeploy.common.cfg.Configuration;
-
 public class NestedTest {
 
     @Test
@@ -24,8 +22,8 @@ public class NestedTest {
         c.add("--testChar=x");
 
         TestConfig tc = c.get(TestConfig.class);
-        assertEquals(tc.testChar(), 'x');
-        assertEquals(tc.testConfig2().testChar(), 'x');
+        assertEquals('x', tc.testChar());
+        assertEquals('x', tc.testConfig2().testChar());
     }
 
     private @interface TestConfig {

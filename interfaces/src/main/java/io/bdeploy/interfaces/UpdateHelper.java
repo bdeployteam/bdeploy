@@ -57,6 +57,9 @@ public class UpdateHelper {
 
     private static final Logger log = LoggerFactory.getLogger(UpdateHelper.class);
 
+    private UpdateHelper() {
+    }
+
     /**
      * @param updateDir the update directory root
      * @return the path to the update directory to use.

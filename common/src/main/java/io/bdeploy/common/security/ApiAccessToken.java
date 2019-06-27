@@ -54,8 +54,7 @@ public class ApiAccessToken {
         return wt;
     }
 
-    public static enum Capability {
-        // TODO: more/less?
+    public enum Capability {
         CREATE,
         READ,
         UPDATE,

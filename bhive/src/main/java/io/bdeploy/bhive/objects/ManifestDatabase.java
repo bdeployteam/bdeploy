@@ -78,9 +78,7 @@ public class ManifestDatabase extends LockableDatabase {
      * @param key the manifest to remove
      */
     public void removeManifest(Manifest.Key key) {
-        locked(() -> {
-            Files.deleteIfExists(getPathForKey(key));
-        });
+        locked(() -> Files.deleteIfExists(getPathForKey(key)));
     }
 
     /**

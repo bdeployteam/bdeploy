@@ -121,7 +121,7 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
      */
     private SortedSet<TreeView> scanAllTreeSnapshots(List<TreeView> toPush) {
         SortedSet<TreeView> allTrees = new TreeSet<>();
-        TreeVisitor visitor = new TreeVisitor.Builder().onTree(x -> allTrees.add(x)).build();
+        TreeVisitor visitor = new TreeVisitor.Builder().onTree(allTrees::add).build();
         for (TreeView snapshot : toPush) {
             snapshot.visit(visitor);
         }
@@ -137,7 +137,7 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
     private SortedSet<ObjectId> scanAllObjectSnapshots(SortedSet<TreeView> missingTreeSnapshots) {
         return missingTreeSnapshots.parallelStream().map(t -> {
             SortedSet<ObjectId> objectsOfTree = new TreeSet<>();
-            t.visit(new TreeVisitor.Builder().onTree(check -> t.equals(check)).onBlob(b -> objectsOfTree.add(b.getElementId()))
+            t.visit(new TreeVisitor.Builder().onTree(t::equals).onBlob(b -> objectsOfTree.add(b.getElementId()))
                     .onSkipped(m -> objectsOfTree.add(m.getElementId())).build());
             objectsOfTree.add(t.getElementId());
             return objectsOfTree;

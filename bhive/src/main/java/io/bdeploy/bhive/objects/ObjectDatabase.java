@@ -108,12 +108,12 @@ public class ObjectDatabase extends LockableDatabase {
     public ObjectId addObject(Path file) throws IOException {
         long size = Files.size(file);
         if (size >= MAX_BUFFER_SIZE) {
-            // need to stream;
+            // need to stream
             try (InputStream is = Files.newInputStream(file)) {
                 return addObject(is);
             }
         } else {
-            // can read fully in memory buffer;
+            // can read fully in memory buffer
             // TODO: seems to fail sometimes for large files on JDK11 (in Eclipse only?).
             byte[] bytes = Files.readAllBytes(file);
             return addObject(bytes);
@@ -129,26 +129,11 @@ public class ObjectDatabase extends LockableDatabase {
      * @throws IOException in case of an error.
      */
     public ObjectId addObject(byte[] bytes) throws IOException {
-        ObjectId id = ObjectId.create(bytes, 0, bytes.length);
-        Path tmp = Files.createTempFile(this.tmp, id.toString(), ".tmp");
+        return internalAddObject(p -> {
+            Files.write(p, bytes);
+            return ObjectId.create(bytes, 0, bytes.length);
+        });
 
-        try {
-            Files.write(tmp, bytes);
-
-            Path target = getObjectFile(id);
-
-            locked(() -> {
-                if (hasObject(id)) {
-                    return;
-                }
-                PathHelper.mkdirs(target.getParent());
-                Files.move(tmp, target);
-            });
-
-            return id;
-        } finally {
-            Files.deleteIfExists(tmp);
-        }
     }
 
     /**
@@ -165,9 +150,13 @@ public class ObjectDatabase extends LockableDatabase {
      * @throws IOException in case of an error.
      */
     public ObjectId addObject(InputStream stream) throws IOException {
-        Path tmp = Files.createTempFile(this.tmp, "obj", ".tmp");
+        return internalAddObject(p -> ObjectId.createByCopy(stream, p));
+    }
+
+    private ObjectId internalAddObject(ObjectWriter writer) throws IOException {
+        Path tmpFile = Files.createTempFile(this.tmp, "obj", ".tmp");
         try {
-            ObjectId id = ObjectId.createByCopy(stream, tmp);
+            ObjectId id = writer.write(tmpFile);
             Path target = getObjectFile(id);
 
             locked(() -> {
@@ -175,11 +164,11 @@ public class ObjectDatabase extends LockableDatabase {
                     return;
                 }
                 PathHelper.mkdirs(target.getParent());
-                Files.move(tmp, target);
+                Files.move(tmpFile, target);
             });
             return id;
         } finally {
-            Files.deleteIfExists(tmp);
+            Files.deleteIfExists(tmpFile);
         }
     }
 
@@ -205,9 +194,7 @@ public class ObjectDatabase extends LockableDatabase {
         }
 
         Path file = getObjectFile(id);
-        locked(() -> {
-            Files.delete(file);
-        });
+        locked(() -> Files.delete(file));
     }
 
     /**

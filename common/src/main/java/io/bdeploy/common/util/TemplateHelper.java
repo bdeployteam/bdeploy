@@ -1,10 +1,13 @@
 package io.bdeploy.common.util;
 
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TemplateHelper {
+
+    private TemplateHelper() {
+    }
 
     /**
      * Resolves all variable references in the given String, using the given
@@ -16,7 +19,7 @@ public class TemplateHelper {
      *            references.
      * @return a resolved {@link String}.
      */
-    public static String process(String value, Function<String, String> valueProvider, String patternStart, String patternEnd) {
+    public static String process(String value, UnaryOperator<String> valueProvider, String patternStart, String patternEnd) {
         if (value == null || !value.contains(patternStart)) {
             return value;
         }

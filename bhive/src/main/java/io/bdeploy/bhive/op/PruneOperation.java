@@ -34,7 +34,7 @@ public class PruneOperation extends BHive.Operation<SortedMap<ObjectId, Long>> {
                 referenced = new TreeSet<>();
             }
 
-            SortedSet<ObjectId> orig = getObjectManager().db(x -> x.getAllObjects());
+            SortedSet<ObjectId> orig = getObjectManager().db(ObjectDatabase::getAllObjects);
             SortedSet<ObjectId> all = new TreeSet<>(orig);
             all.removeAll(referenced);
 

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -53,7 +53,7 @@ public class InstanceNodeController {
 
     private final BHive hive;
     private final InstanceNodeManifest manifest;
-    private final List<Function<String, String>> additionalResolvers = new ArrayList<>();
+    private final List<UnaryOperator<String>> additionalResolvers = new ArrayList<>();
     private final Path root;
     private final DeploymentPathProvider paths;
 
@@ -79,7 +79,7 @@ public class InstanceNodeController {
      *            variable and expected to return a value if known, or
      *            <code>null</code> if not able to resolve the variable.
      */
-    public void addAdditionalVariableResolver(Function<String, String> external) {
+    public void addAdditionalVariableResolver(UnaryOperator<String> external) {
         additionalResolvers.add(external);
     }
 
@@ -171,9 +171,9 @@ public class InstanceNodeController {
      */
     public ProcessGroupConfiguration getProcessGroupConfiguration() {
         Path deploymentRoot = root.resolve(manifest.getUUID());
-        DeploymentPathProvider paths = new DeploymentPathProvider(deploymentRoot, manifest.getKey().getTag());
+        DeploymentPathProvider dpp = new DeploymentPathProvider(deploymentRoot, manifest.getKey().getTag());
 
-        Path processConfigFile = paths.getAndCreate(SpecialDirectory.RUNTIME).resolve(PCU_JSON);
+        Path processConfigFile = dpp.getAndCreate(SpecialDirectory.RUNTIME).resolve(PCU_JSON);
         if (!Files.exists(processConfigFile)) {
             return null;
         }
@@ -213,8 +213,8 @@ public class InstanceNodeController {
             return; // nothing to do.
         }
 
-        try (Stream<Path> paths = Files.walk(path)) {
-            paths.filter(Files::isRegularFile).forEach(p -> processConfigurationFile(p, resolver));
+        try (Stream<Path> allPaths = Files.walk(path)) {
+            allPaths.filter(Files::isRegularFile).forEach(p -> processConfigurationFile(p, resolver));
         } catch (IOException e) {
             log.error("Cannot walk configuration file tree", e);
         }
@@ -346,7 +346,7 @@ public class InstanceNodeController {
                 // filter for matching instance UUID.
                 .filter(k -> k.getName().startsWith(uuidPath.getFileName().toString() + "/"))
                 // map to the tags which are still present in the hive.
-                .map(k -> k.getTag())
+                .map(Manifest.Key::getTag)
                 // filter for the tag we're looking for.
                 .filter(t -> t.equals(tagPath.getFileName().toString()))
                 // check if such an element exists (yes or no).

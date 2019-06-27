@@ -76,9 +76,8 @@ public class ManifestTool extends RemoteServiceTool<ManifestConfig> {
                 if (mfs.isEmpty()) {
                     out().println("No manifests found");
                 } else {
-                    mfs.entrySet().stream().filter(e -> matches(e.getKey(), config)).forEach(e -> {
-                        out().println(String.format("%1$-70s %2$s", e.getKey(), e.getValue()));
-                    });
+                    mfs.entrySet().stream().filter(e -> matches(e.getKey(), config))
+                            .forEach(e -> out().println(String.format("%1$-70s %2$s", e.getKey(), e.getValue())));
                 }
             }
         }
@@ -92,7 +91,7 @@ public class ManifestTool extends RemoteServiceTool<ManifestConfig> {
                 if (manifests.isEmpty()) {
                     out().println("No manifests found");
                 } else {
-                    manifests.stream().filter(x -> matches(x, config)).forEach((e) -> {
+                    manifests.stream().filter(x -> matches(x, config)).forEach(e -> {
                         Manifest m = hive.execute(new ManifestLoadOperation().setManifest(e));
                         out().println(String.format("%1$-70s %2$s", e, m.getRoot()));
                     });
@@ -112,10 +111,8 @@ public class ManifestTool extends RemoteServiceTool<ManifestConfig> {
             return true;
         }
 
-        if (!config.manifest().contains(":")) {
-            if (!x.getName().equals(config.manifest())) {
-                return false;
-            }
+        if (!config.manifest().contains(":") && !x.getName().equals(config.manifest())) {
+            return false;
         }
         return Manifest.Key.parse(config.manifest()).equals(x);
     }
