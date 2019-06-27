@@ -44,7 +44,7 @@ public class InstanceGroupResourceTest {
         assertNull(list.get(0).logo);
 
         // cannot call update image directly to properly fake a form.
-        try (InputStream logoStream = InstanceGroupResourceTest.class.getClassLoader().getResourceAsStream("logo.png")) {
+        try (InputStream logoStream = InstanceGroupResourceTest.class.getClassLoader().getResourceAsStream("logo64.png")) {
             MultiPart mp = new MultiPart();
             StreamDataBodyPart bp = new StreamDataBodyPart("image", logoStream);
             bp.setFilename("logo.png");
