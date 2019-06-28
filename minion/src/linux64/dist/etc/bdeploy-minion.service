@@ -13,7 +13,7 @@ User=APPLICATION_USER
 Type=simple
 Restart=always
 RestartSec=10
-ExecStart=/opt/bdeploy/master/bin/minion [master|slave] --root=/opt/bdeploy/data
+ExecStart=/opt/bdeploy/master/bin/bdeploy [master|slave] --root=/opt/bdeploy/data
 
 [Install]
 WantedBy=multi-user.target
