@@ -46,11 +46,11 @@ public class LauncherErrorDialog extends JFrame {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
-            throw new RuntimeException("Cannot set system look&feel", e);
+            throw new IllegalStateException("Cannot set system look&feel", e);
         }
     }
 
-    private final Object lock = new Object();
+    private final transient Object lock = new Object();
 
     /** Flag which page is displayed in the content */
     private boolean messagePage = true;
@@ -192,7 +192,7 @@ public class LauncherErrorDialog extends JFrame {
         try (InputStream in = LauncherErrorDialog.class.getResourceAsStream(iconName)) {
             return ImageIO.read(in);
         } catch (IOException ex) {
-            throw new RuntimeException(ex);
+            throw new IllegalStateException(ex);
         }
     }
 
@@ -213,7 +213,7 @@ public class LauncherErrorDialog extends JFrame {
     private void doClose() {
         dispose();
         synchronized (lock) {
-            lock.notify();
+            lock.notifyAll();
         }
     }
 

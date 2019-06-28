@@ -430,12 +430,8 @@ public class InstanceResourceImpl implements InstanceResource {
             InstanceNodeManifest manifest = InstanceNodeManifest.of(hive, manifestKey);
             InstanceNodeConfiguration configuration = manifest.getConfiguration();
 
-            InstanceNodeConfigurationDto descriptor = node2Dto.get(nodeName);
-            if (descriptor == null) {
-                descriptor = new InstanceNodeConfigurationDto(nodeName, null,
-                        "Node '" + nodeName + "' not configured on master, or master offline.");
-                node2Dto.put(nodeName, descriptor);
-            }
+            InstanceNodeConfigurationDto descriptor = node2Dto.computeIfAbsent(nodeName, k -> new InstanceNodeConfigurationDto(k,
+                    null, "Node '" + k + "' not configured on master, or master offline."));
             if (!isForeign) {
                 descriptor.nodeConfiguration = configuration;
             } else {
