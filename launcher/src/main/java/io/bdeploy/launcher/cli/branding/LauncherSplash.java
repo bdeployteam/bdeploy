@@ -1,7 +1,6 @@
 package io.bdeploy.launcher.cli.branding;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GraphicsEnvironment;
 import java.awt.Label;
@@ -25,6 +24,7 @@ import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfigurati
 import io.bdeploy.interfaces.descriptor.application.ApplicationSplashAreaDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ApplicationSplashDescriptor;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
+import io.bdeploy.launcher.cli.WindowHelper;
 
 public class LauncherSplash implements LauncherSplashDisplay {
 
@@ -53,7 +53,7 @@ public class LauncherSplash implements LauncherSplashDisplay {
         splash = new Window(null);
         splash.setSize(480, 280);
         splash.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
-        centerSplash();
+        WindowHelper.center(splash);
         splash.setVisible(true);
 
         Path cached = getCachePath();
@@ -149,18 +149,8 @@ public class LauncherSplash implements LauncherSplashDisplay {
         splash.add(splashComp);
 
         splash.setSize(splashComp.getWidth(), splashComp.getHeight());
-        centerSplash();
+        WindowHelper.center(splash);
         splash.repaint();
-    }
-
-    private void centerSplash() {
-        Dimension windowSize = splash.getSize();
-        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        Rectangle bounds = ge.getDefaultScreenDevice().getDefaultConfiguration().getBounds();
-
-        int dx = bounds.x + (bounds.width / 2) - windowSize.width / 2;
-        int dy = bounds.y + (bounds.height / 2) - windowSize.height / 2;
-        splash.setLocation(dx, dy);
     }
 
     private Rectangle convert(ApplicationSplashAreaDescriptor area) {

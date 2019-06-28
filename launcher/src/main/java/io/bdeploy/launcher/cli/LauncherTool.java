@@ -113,9 +113,14 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             }
         }
 
+        // 1: Launch application. Show dialog if launching fails
         log.info("Using cache directory {}", rootDir);
-
-        doLaunchFromConfig(cfg, rootDir.toAbsolutePath(), config.updateDir(), !config.dontWait());
+        try {
+            doLaunchFromConfig(cfg, rootDir.toAbsolutePath(), config.updateDir(), !config.dontWait());
+        } catch (Exception ex) {
+            LauncherErrorDialog dialog = new LauncherErrorDialog();
+            dialog.showError(ex);
+        }
     }
 
     private static void doLaunchFromConfig(Path cfg, Path rootDir, String updateDir, boolean wait) {
