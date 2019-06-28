@@ -261,7 +261,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
 
         @Override
         protected void configure() {
-            Function<ApiAccessToken, String> signer = (a) -> SecurityHelper.getInstance().createToken(a, store, passphrase);
+            Function<ApiAccessToken, String> signer = a -> SecurityHelper.getInstance().createToken(a, store, passphrase);
 
             bind(JerseySseActivityReporter.class).in(Singleton.class).to(JerseySseActivityReporter.class);
             bind(JerseyWriteLockService.class).in(Singleton.class).to(JerseyWriteLockService.class);

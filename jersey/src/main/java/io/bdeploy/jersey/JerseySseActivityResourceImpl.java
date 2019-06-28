@@ -68,13 +68,11 @@ public class JerseySseActivityResourceImpl {
 
     private void broadcast() {
         try {
-            List<ActivitySnapshot> list = reporter.getGlobalActivities().stream().filter(Objects::nonNull).map(a -> a.snapshot())
-                    .collect(Collectors.toList());
+            List<ActivitySnapshot> list = reporter.getGlobalActivities().stream().filter(Objects::nonNull)
+                    .map(JerseySseActivity::snapshot).collect(Collectors.toList());
             long now = System.currentTimeMillis();
-            if (list.isEmpty() && lastBroadcastWasEmpty) {
-                if ((now - lastBroadcastTime) < TimeUnit.SECONDS.toMillis(30)) {
-                    return; // don't broadcast empty lists more than once every 30 seconds.
-                }
+            if (list.isEmpty() && lastBroadcastWasEmpty && (now - lastBroadcastTime) < TimeUnit.SECONDS.toMillis(30)) {
+                return; // don't broadcast empty lists more than once every 30 seconds.
             }
             lastBroadcastWasEmpty = list.isEmpty();
             lastBroadcastTime = now;

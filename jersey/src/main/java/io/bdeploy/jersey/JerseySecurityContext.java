@@ -25,7 +25,7 @@ public class JerseySecurityContext implements SecurityContext {
 
     @Override
     public Principal getUserPrincipal() {
-        return () -> token.getIssuedTo();
+        return token::getIssuedTo;
     }
 
     @Override

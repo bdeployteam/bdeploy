@@ -79,7 +79,7 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
         MinionProcessController processController = root.getProcessController();
         InstanceProcessController controller = processController.getOrCreate(inm.getUUID());
         controller.setActiveTag(key.getTag());
-        root.modifyState((s) -> s.activeVersions.put(inm.getUUID(), key));
+        root.modifyState(s -> s.activeVersions.put(inm.getUUID(), key));
     }
 
     @Override
@@ -100,9 +100,7 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
         // Remove active version from state if removed.
         Key activeVersion = root.getState().activeVersions.get(inm.getUUID());
         if (key.equals(activeVersion)) {
-            root.modifyState(s -> {
-                s.activeVersions.remove(inm.getUUID());
-            });
+            root.modifyState(s -> s.activeVersions.remove(inm.getUUID()));
         }
 
         // cleanup the deployment directory.

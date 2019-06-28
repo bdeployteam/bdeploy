@@ -6,7 +6,6 @@ import java.io.OutputStream;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
@@ -95,7 +94,7 @@ public class HiveResourceImpl implements HiveResource {
         BHive hive = registry.get(hiveParam);
         ObjectId treeId = ObjectId.parse(id);
         if (treeId == null) {
-            throw new RuntimeException("Invalid object ID " + id);
+            throw new WebApplicationException("Invalid object ID " + id);
         }
         return list(hive, treeId);
     }
@@ -109,7 +108,7 @@ public class HiveResourceImpl implements HiveResource {
         StreamingOutput fileStream = new StreamingOutput() {
 
             @Override
-            public void write(OutputStream output) throws IOException, WebApplicationException {
+            public void write(OutputStream output) throws IOException {
                 output.write(StorageHelper.toRawBytes(manifest));
                 output.flush();
             }
@@ -124,7 +123,7 @@ public class HiveResourceImpl implements HiveResource {
         StreamingOutput fileStream = new StreamingOutput() {
 
             @Override
-            public void write(OutputStream output) throws IOException, WebApplicationException {
+            public void write(OutputStream output) throws IOException {
                 try (InputStream is = hive.execute(new ObjectLoadOperation().setObject(ObjectId.parse(id)))) {
                     is.transferTo(output);
                 }
@@ -158,27 +157,23 @@ public class HiveResourceImpl implements HiveResource {
     }
 
     private List<HiveEntryDto> sort(List<HiveEntryDto> list) {
-        list.sort(new Comparator<HiveEntryDto>() {
-
-            @Override
-            public int compare(HiveEntryDto a, HiveEntryDto b) {
-                if (a.type.equals(b.type)) {
-                    Collator col = Collator.getInstance();
-                    col.setStrength(Collator.PRIMARY);
-                    return col.compare(a.name, b.name);
-                } else if (a.type.equals(Tree.EntryType.MANIFEST)) {
-                    return -1;
-                } else if (a.type.equals(Tree.EntryType.TREE)) {
-                    if (b.type.equals(Tree.EntryType.MANIFEST)) {
-                        return 1;
-                    } else if (b.type.equals(Tree.EntryType.BLOB)) {
-                        return -1;
-                    }
-                } else {
+        list.sort((a, b) -> {
+            if (a.type.equals(b.type)) {
+                Collator col = Collator.getInstance();
+                col.setStrength(Collator.PRIMARY);
+                return col.compare(a.name, b.name);
+            } else if (a.type.equals(Tree.EntryType.MANIFEST)) {
+                return -1;
+            } else if (a.type.equals(Tree.EntryType.TREE)) {
+                if (b.type.equals(Tree.EntryType.MANIFEST)) {
                     return 1;
+                } else if (b.type.equals(Tree.EntryType.BLOB)) {
+                    return -1;
                 }
-                return 0;
+            } else {
+                return 1;
             }
+            return 0;
         });
         return list;
     }
@@ -189,7 +184,7 @@ public class HiveResourceImpl implements HiveResource {
         BHive hive = registry.get(hiveParam);
 
         SortedMap<ObjectId, Long> pruned = hive.execute(new PruneOperation());
-        Long sumFreedBytes = pruned.entrySet().stream().collect(Collectors.summingLong(e -> e.getValue()));
+        Long sumFreedBytes = pruned.entrySet().stream().collect(Collectors.summingLong(Map.Entry::getValue));
 
         return UnitHelper.formatFileSize(sumFreedBytes);
     }

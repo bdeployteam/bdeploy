@@ -125,9 +125,8 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
         }
 
         if (getActivityReporter() instanceof ActivityReporter.Stream) {
-            ((ActivityReporter.Stream) getActivityReporter()).setProxyConnector((s, c) -> {
-                return JerseyClientFactory.get(s).getEventSource("/activities").register(c);
-            });
+            ((ActivityReporter.Stream) getActivityReporter())
+                    .setProxyConnector((s, c) -> JerseyClientFactory.get(s).getEventSource("/activities").register(c));
         }
 
         try (NoThrowAutoCloseable proxy = getActivityReporter().proxyActivities(svc)) {

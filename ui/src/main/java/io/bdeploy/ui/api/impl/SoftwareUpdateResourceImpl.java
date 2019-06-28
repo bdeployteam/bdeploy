@@ -86,9 +86,7 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
                 return a.getOperatingSystem() == OsHelper.getRunningOs() ? 1 : -1;
             }
             return a.getKey().toString().compareTo(b.getKey().toString());
-        }).forEach(k -> {
-            master.update(k.getKey(), false);
-        });
+        }).forEach(k -> master.update(k.getKey(), false));
     }
 
     @Override
@@ -144,8 +142,7 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
                     Files.deleteIfExists(tmpFile);
                     PathHelper.deleteRecursive(tmpFolder);
                 }
-            } catch (Exception e) {
-                log.error("Failed to package download", e);
+            } catch (IOException e) {
                 throw new WebApplicationException("Error packaging download", e);
             }
         }
@@ -154,14 +151,14 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
         ResponseBuilder responeBuilder = Response.ok(new StreamingOutput() {
 
             @Override
-            public void write(OutputStream output) throws IOException, WebApplicationException {
+            public void write(OutputStream output) throws IOException {
                 try (InputStream is = Files.newInputStream(targetFile)) {
                     is.transferTo(output);
                 } catch (IOException ioe) {
                     if (log.isDebugEnabled()) {
                         log.debug("Could not fully write output", ioe);
                     } else {
-                        log.warn("Could not fully write output: {}", ioe.toString());
+                        log.warn("Could not fully write output: {}", ioe);
                     }
                 }
             }

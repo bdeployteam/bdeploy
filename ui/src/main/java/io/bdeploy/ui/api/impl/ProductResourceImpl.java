@@ -69,9 +69,7 @@ public class ProductResourceImpl implements ProductResource {
         List<ProductDto> result = new ArrayList<>();
         SortedSet<Key> scan = ProductManifest.scan(hive);
 
-        scan.stream().map(k -> ProductManifest.of(hive, k)).forEach(pm -> {
-            result.add(ProductDto.create(pm));
-        });
+        scan.stream().map(k -> ProductManifest.of(hive, k)).forEach(pm -> result.add(ProductDto.create(pm)));
 
         return result;
     }
@@ -165,7 +163,7 @@ public class ProductResourceImpl implements ProductResource {
         ResponseBuilder responeBuilder = Response.ok(new StreamingOutput() {
 
             @Override
-            public void write(OutputStream output) throws IOException, WebApplicationException {
+            public void write(OutputStream output) throws IOException {
                 try (InputStream is = Files.newInputStream(targetFile)) {
                     is.transferTo(output);
 
@@ -175,7 +173,7 @@ public class ProductResourceImpl implements ProductResource {
                     if (log.isDebugEnabled()) {
                         log.debug("Could not fully write output", ioe);
                     } else {
-                        log.warn("Could not fully write output: {}", ioe.toString());
+                        log.warn("Could not fully write output: {}", ioe);
                     }
                 }
             }

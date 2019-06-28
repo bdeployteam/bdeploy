@@ -52,9 +52,9 @@ public class JerseySseActivityProxy implements NoThrowAutoCloseable {
                 continue;
             }
 
-            String mappedUuid = uuidMapping.computeIfAbsent(snap.uuid, (s) -> UuidHelper.randomId());
+            String mappedUuid = uuidMapping.computeIfAbsent(snap.uuid, s -> UuidHelper.randomId());
             String mappedParentUuid = snap.parentUuid == null ? null
-                    : uuidMapping.computeIfAbsent(snap.parentUuid, (s) -> UuidHelper.randomId());
+                    : uuidMapping.computeIfAbsent(snap.parentUuid, s -> UuidHelper.randomId());
 
             if (proxiedActivities.containsKey(mappedUuid)) {
                 updateExistingActivity(snap, mappedUuid);
@@ -79,7 +79,7 @@ public class JerseySseActivityProxy implements NoThrowAutoCloseable {
             entry.getValue().activity.done();
             toRemove.add(entry.getKey());
         }
-        toRemove.forEach(x -> proxiedActivities.remove(x));
+        toRemove.forEach(proxiedActivities::remove);
     }
 
     private void createNewActivity(ActivitySnapshot snap, String mappedUuid, String mappedParentUuid) {
@@ -95,7 +95,7 @@ public class JerseySseActivityProxy implements NoThrowAutoCloseable {
         }
 
         // create activities which we don't have yet.
-        ActivityNode node = new ActivityNode(snap, parent, this::onDone, this::onCancel, mappedUuid, parentUuid, proxyUuid);
+        ActivityNode node = new ActivityNode(snap, parent, this::onDone, this::onCancel, mappedUuid, parentUuid);
         proxiedActivities.put(mappedUuid, node);
         reporter.addProxyActivity(node.activity);
     }
@@ -122,7 +122,7 @@ public class JerseySseActivityProxy implements NoThrowAutoCloseable {
     private void onCancel(JerseySseActivity activity) {
         // cancel requested - delegate to remote
         String actualUuid = uuidMapping.entrySet().stream().filter(e -> e.getValue().equals(activity.getUuid())).findFirst()
-                .map(e -> e.getKey()).orElse(null);
+                .map(Map.Entry::getKey).orElse(null);
         if (actualUuid == null) {
             return;
         }
@@ -148,7 +148,7 @@ public class JerseySseActivityProxy implements NoThrowAutoCloseable {
         public long max = -1;
 
         public ActivityNode(ActivitySnapshot snapshot, JerseySseActivity root, Consumer<JerseySseActivity> onDone,
-                Consumer<JerseySseActivity> onCancel, String uuid, String parentUuid, String proxyUuid) {
+                Consumer<JerseySseActivity> onCancel, String uuid, String parentUuid) {
             this.current = snapshot.current;
             this.max = snapshot.max;
 

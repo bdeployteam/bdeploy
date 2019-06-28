@@ -6,6 +6,9 @@ import io.bdeploy.jersey.RegistrationTarget;
 
 public class UiResources {
 
+    private UiResources() {
+    }
+
     public static void register(RegistrationTarget server) {
         server.registerRoot(new CLStaticHttpHandler(UiResources.class.getClassLoader(), "/webapp/"));
         server.register(AuthResourceImpl.class);

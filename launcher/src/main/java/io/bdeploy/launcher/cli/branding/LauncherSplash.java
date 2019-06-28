@@ -122,16 +122,12 @@ public class LauncherSplash implements LauncherSplashDisplay {
         Color textColor = Color.BLACK;
         Color progressColor = Color.DARK_GRAY;
 
-        if (splashCfg.textRect != null) {
-            if (splashCfg.textRect.foreground != null) {
-                textColor = Color.decode(splashCfg.textRect.foreground);
-            }
+        if (splashCfg.textRect != null && splashCfg.textRect.foreground != null) {
+            textColor = Color.decode(splashCfg.textRect.foreground);
         }
 
-        if (splashCfg.progressRect != null) {
-            if (splashCfg.progressRect.foreground != null) {
-                progressColor = Color.decode(splashCfg.progressRect.foreground);
-            }
+        if (splashCfg.progressRect != null && splashCfg.progressRect.foreground != null) {
+            progressColor = Color.decode(splashCfg.progressRect.foreground);
         }
 
         if (splash == null) {

@@ -73,7 +73,7 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
                 out().println(zip + " does not seem to be a launcher package");
             }
 
-            pushLauncher(config, svc, client, zip);
+            pushLauncher(svc, zip);
         }
     }
 
@@ -103,7 +103,7 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
         }
     }
 
-    private void pushLauncher(RemoteMasterConfig config, RemoteService svc, MasterRootResource client, Path zip) {
+    private void pushLauncher(RemoteService svc, Path zip) {
         try {
             Manifest.Key key = importAndPushUpdate(svc, zip, getActivityReporter());
             out().println("Pushed launcher as " + key);

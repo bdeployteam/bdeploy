@@ -9,7 +9,7 @@ import java.awt.image.BufferedImage;
 final class SplashGraphics extends PanelDoubleBuffered implements LauncherSplashDisplay {
 
     private static final long serialVersionUID = 1L;
-    private transient final BufferedImage image;
+    private final transient BufferedImage image;
     private final Rectangle text;
     private final Rectangle progress;
 

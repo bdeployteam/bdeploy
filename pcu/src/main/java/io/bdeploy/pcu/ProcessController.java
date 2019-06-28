@@ -547,9 +547,7 @@ public class ProcessController {
     /** Attaches an exit handle to be notified when the process terminates */
     private void monitorProcess() {
         // Notify when the status changes
-        processExit.thenRunAsync(() -> {
-            executeLocked("ExitHook", true, () -> onTerminated());
-        });
+        processExit.thenRunAsync(() -> executeLocked("ExitHook", true, this::onTerminated));
 
         // Set to running if launched from stopped or crashed
         if (processState == ProcessState.STOPPED || processState == ProcessState.CRASHED_PERMANENTLY) {
@@ -570,8 +568,7 @@ public class ProcessController {
             if (rateInSeconds == 0) {
                 rateInSeconds = 1;
             }
-            uptimeTask = executorService.scheduleAtFixedRate(() -> doCheckUptime(), rateInSeconds, rateInSeconds,
-                    TimeUnit.SECONDS);
+            uptimeTask = executorService.scheduleAtFixedRate(this::doCheckUptime, rateInSeconds, rateInSeconds, TimeUnit.SECONDS);
             String requiredUptime = Formatter.formatDuration(stableThreshold);
             logger.log(l -> l.info("Application will be marked as stable after: {}", requiredUptime));
         }
@@ -638,7 +635,7 @@ public class ProcessController {
         }
 
         // Schedule restarting of application based on configured delay
-        Runnable task = () -> executeLocked("Restart", true, () -> doRestart());
+        Runnable task = () -> executeLocked("Restart", true, this::doRestart);
         if (delay.isZero()) {
             logger.log(l -> l.info("Re-launching application immediatly."));
             recoverTask = executorService.schedule(task, 0, TimeUnit.SECONDS);

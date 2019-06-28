@@ -77,10 +77,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
             }
 
             // import original version of minion into new bhive for future updates.
-            if ("ignore".equals(config.dist())) {
-                // explicitly skip importing the initial package
-                return;
-            } else {
+            if (!"ignore".equals(config.dist())) {
                 // same logic as remote update: push the content of the ZIP as new manifest to the local hive.
                 RemoteMasterTool.importAndPushUpdate(new RemoteService(mr.getHiveDir().toUri()), Paths.get(config.dist()),
                         getActivityReporter());

@@ -139,7 +139,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
         ResponseBuilder responeBuilder = Response.ok(new StreamingOutput() {
 
             @Override
-            public void write(OutputStream output) throws IOException, WebApplicationException {
+            public void write(OutputStream output) throws IOException {
                 try (InputStream is = Files.newInputStream(targetFile)) {
                     is.transferTo(output);
 
@@ -149,7 +149,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
                     if (log.isDebugEnabled()) {
                         log.debug("Could not fully write output", ioe);
                     } else {
-                        log.warn("Could not fully write output: {}", ioe.toString());
+                        log.warn("Could not fully write output: {}", ioe);
                     }
                 }
             }

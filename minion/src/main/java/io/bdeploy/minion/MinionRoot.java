@@ -61,7 +61,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     private final MinionProcessController processController;
 
     private Path updates;
-    private MinionUpdateManager updateManager = (t) -> log.error("No Update Manager, cannot update Minion!");
+    private MinionUpdateManager updateManager = t -> log.error("No Update Manager, cannot update Minion!");
 
     private Scheduler scheduler;
 
@@ -258,7 +258,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             PathHelper.mkdirs(defPath);
             List<Path> p = new ArrayList<>();
             p.add(defPath);
-            modifyState((s) -> {
+            modifyState(s -> {
                 s.storageLocations = p;
             });
             return p;

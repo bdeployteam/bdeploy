@@ -35,8 +35,6 @@ import io.bdeploy.ui.api.impl.UiResources;
 @CliName("master")
 public class MasterTool extends ConfiguredCliTool<MasterConfig> {
 
-    private JerseyServer srv;
-
     public @interface MasterConfig {
 
         @Help("Root directory for the master minion. Must be initialized using the init command.")
@@ -72,7 +70,7 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
 
             SecurityHelper sh = SecurityHelper.getInstance();
             KeyStore ks = sh.loadPrivateKeyStore(state.keystorePath, state.keystorePass);
-            srv = new JerseyServer(state.port, ks, state.keystorePass);
+            JerseyServer srv = new JerseyServer(state.port, ks, state.keystorePass);
             srv.setAuditor(new RollingFileAuditor(r.getAuditLogDir()));
             r.setUpdateManager(new JerseyAwareMinionUpdateManager(srv));
 

@@ -38,7 +38,7 @@ public class Branding {
     /**
      * Updates the embedded configuration file.
      */
-    public void updateConfig(BrandingConfig config) throws Exception {
+    public void updateConfig(BrandingConfig config) {
         SectionTable sectionTable = app.getSectionTable();
         SectionData codeContent = sectionTable.findSection(".text");
 

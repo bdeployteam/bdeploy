@@ -321,7 +321,7 @@ public class InstanceResourceTest {
         assertEquals("2", listVersions.get(1).key.getTag());
 
         InstanceConfiguration readVersion = res.readVersion(instance.uuid, "1");
-        assertEquals(readVersion.name, "My Instance");
+        assertEquals("My Instance", readVersion.name);
 
         assertThrows(NotFoundException.class, () -> res.readVersion(instance.uuid, "3"));
     }

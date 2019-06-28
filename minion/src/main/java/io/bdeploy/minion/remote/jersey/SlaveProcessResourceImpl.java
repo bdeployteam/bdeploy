@@ -72,13 +72,13 @@ public class SlaveProcessResourceImpl implements SlaveProcessResource {
     @Override
     public InstanceDirectoryEntry getOutputEntry(String instanceId, String tag, String applicationId) {
         DeploymentPathProvider dpp = new DeploymentPathProvider(root.getDeploymentDir().resolve(instanceId), tag);
-        Path root = dpp.get(SpecialDirectory.RUNTIME);
-        Path out = root.resolve(applicationId).resolve(ProcessController.OUT_TXT);
+        Path runtime = dpp.get(SpecialDirectory.RUNTIME);
+        Path out = runtime.resolve(applicationId).resolve(ProcessController.OUT_TXT);
         File file = out.toFile();
 
         if (file.exists()) {
             InstanceDirectoryEntry ide = new InstanceDirectoryEntry();
-            ide.path = PathHelper.separatorsToUnix(root.relativize(out));
+            ide.path = PathHelper.separatorsToUnix(runtime.relativize(out));
             ide.root = SpecialDirectory.RUNTIME;
             ide.lastModified = file.lastModified();
             ide.size = file.length();

@@ -24,7 +24,7 @@ import org.apache.logging.log4j.util.StringMap;
  */
 public class RollingFileAuditor implements Auditor {
 
-    private final static String LOG_PATTERN = "%d{dd-HH:mm:ss.SSS} | %-5level | AUD/%-11X{WHO} | %-7X{METHOD} | %-40X{WHAT} | %-40msg | %X{PARAMETERS}%n";
+    private static final String LOG_PATTERN = "%d{dd-HH:mm:ss.SSS} | %-5level | AUD/%-11X{WHO} | %-7X{METHOD} | %-40X{WHAT} | %-40msg | %X{PARAMETERS}%n";
 
     private final Path logDir;
     private final RollingFileAppender logAppender;

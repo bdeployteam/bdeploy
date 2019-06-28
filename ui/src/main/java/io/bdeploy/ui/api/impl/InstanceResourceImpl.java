@@ -163,7 +163,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
         // Clear security token before sending via REST
         List<InstanceConfiguration> configurations = internalList();
-        configurations.forEach(c -> clearToken(c));
+        configurations.forEach(this::clearToken);
         return configurations;
     }
 
@@ -544,7 +544,7 @@ public class InstanceResourceImpl implements InstanceResource {
         DeploymentStateDto result = new DeploymentStateDto();
         AtomicLong max = new AtomicLong(-1);
         LongAdder current = new LongAdder();
-        try (Activity deploy = reporter.start("Fetching deployment state...", () -> max.get(), () -> current.longValue())) {
+        try (Activity deploy = reporter.start("Fetching deployment state...", max::get, current::longValue)) {
             // need to fetch information from all master URIs that are historically available.
             String rootName = InstanceManifest.getRootName(instanceId);
             List<InstanceManifest> allMfs = InstanceManifest.scan(hive, false).stream().filter(m -> m.getName().equals(rootName))
@@ -552,7 +552,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
             Map<URI, List<InstanceManifest>> remotes = new HashMap<>();
             for (InstanceManifest imf : allMfs) {
-                remotes.computeIfAbsent(imf.getConfiguration().target.getUri(), (k) -> new ArrayList<>()).add(imf);
+                remotes.computeIfAbsent(imf.getConfiguration().target.getUri(), k -> new ArrayList<>()).add(imf);
             }
 
             // switch from indeterminate to determinate progress
@@ -690,7 +690,7 @@ public class InstanceResourceImpl implements InstanceResource {
         values.put("APP_NAME", im.getConfiguration().name + " - " + appConfig.name);
         values.put("BDEPLOY_FILE", new String(StorageHelper.toRawBytes(clickAndStart), StandardCharsets.UTF_8));
 
-        String content = TemplateHelper.process(template, (k) -> values.get(k), "{{", "}}");
+        String content = TemplateHelper.process(template, values::get, "{{", "}}");
         try {
             Files.write(installerPath, content.getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
@@ -750,7 +750,7 @@ public class InstanceResourceImpl implements InstanceResource {
         ResponseBuilder responeBuilder = Response.ok(new StreamingOutput() {
 
             @Override
-            public void write(OutputStream output) throws IOException, WebApplicationException {
+            public void write(OutputStream output) throws IOException {
                 try (InputStream is = Files.newInputStream(targetFile)) {
                     is.transferTo(output);
 
@@ -760,7 +760,7 @@ public class InstanceResourceImpl implements InstanceResource {
                     if (log.isDebugEnabled()) {
                         log.debug("Could not fully write output", ioe);
                     } else {
-                        log.warn("Could not fully write output: {}", ioe.toString());
+                        log.warn("Could not fully write output: {}", ioe);
                     }
                 }
             }
@@ -800,7 +800,7 @@ public class InstanceResourceImpl implements InstanceResource {
         ResponseBuilder responeBuilder = Response.ok(new StreamingOutput() {
 
             @Override
-            public void write(OutputStream output) throws IOException, WebApplicationException {
+            public void write(OutputStream output) throws IOException {
                 try (InputStream is = new ByteArrayInputStream(brandingIcon)) {
                     is.transferTo(output);
                 }
@@ -831,7 +831,7 @@ public class InstanceResourceImpl implements InstanceResource {
         ResponseBuilder responeBuilder = Response.ok(new StreamingOutput() {
 
             @Override
-            public void write(OutputStream output) throws IOException, WebApplicationException {
+            public void write(OutputStream output) throws IOException {
                 try (InputStream is = Files.newInputStream(zip)) {
                     is.transferTo(output);
                 } finally {

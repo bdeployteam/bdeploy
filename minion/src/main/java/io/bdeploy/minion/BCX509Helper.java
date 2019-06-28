@@ -1,9 +1,11 @@
 package io.bdeploy.minion;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
@@ -23,6 +25,7 @@ import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.operator.OperatorException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
 /**
@@ -35,7 +38,11 @@ public class BCX509Helper {
     private static final String SIGNATURE_ALGORITHM = "SHA256withRSA";
     private static final String SECURITY_PROVIDER_ID = "BC";
 
-    public static void createKeyStore(Path target, char[] passphrase) throws Exception {
+    private BCX509Helper() {
+    }
+
+    public static void createKeyStore(Path target, char[] passphrase)
+            throws GeneralSecurityException, IOException, OperatorException {
         // set security Provider
         Security.addProvider(new BouncyCastleProvider());
 

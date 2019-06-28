@@ -130,7 +130,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
                 return -1;
             }
             return a.getKey().compareTo(b.getKey());
-        }).forEach((entry) -> {
+        }).forEach(entry -> {
             try {
                 entry.getValue().update(version); // update schedules and delays, so we have a chance to return this call.
             } catch (Exception e) {

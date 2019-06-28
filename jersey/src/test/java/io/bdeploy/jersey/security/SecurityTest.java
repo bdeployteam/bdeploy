@@ -35,7 +35,7 @@ public class SecurityTest {
 
         response = secured.request().get();
 
-        assertEquals(response.getStatus(), 401);
+        assertEquals(401, response.getStatus());
     }
 
     @Test

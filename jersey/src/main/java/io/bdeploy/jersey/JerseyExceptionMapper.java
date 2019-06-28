@@ -36,10 +36,8 @@ public class JerseyExceptionMapper implements ExceptionMapper<RuntimeException> 
             code = ((WebApplicationException) exception).getResponse().getStatus();
         }
 
-        String reasonPhrase = mapExceptionCausesToReason(exception);
-
         // a little hacky: provide the exception string representations as reason.
-        return Response.status(code, reasonPhrase).build();
+        return Response.status(code, mapExceptionCausesToReason(exception)).build();
     }
 
     private boolean hasCancelException(Throwable e) {
@@ -81,8 +79,7 @@ public class JerseyExceptionMapper implements ExceptionMapper<RuntimeException> 
                 current = current.getCause();
             }
         } while (current != null);
-        String reasonPhrase = reason.toString();
-        return reasonPhrase;
+        return reason.toString();
     }
 
 }

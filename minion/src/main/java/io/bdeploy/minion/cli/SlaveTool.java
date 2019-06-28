@@ -87,7 +87,7 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
                 if (config.add() != null) {
                     helpAndFailIfMissing(svc, "Missing --remote");
                     try {
-                        assertTrue(svc.getUri().getScheme().toLowerCase().equals("https"), "Only HTTPS slaves supported");
+                        assertTrue(svc.getUri().getScheme().equalsIgnoreCase("https"), "Only HTTPS slaves supported");
                         state.minions.put(config.add(), svc);
                     } catch (Exception e) {
                         throw new IllegalStateException("Cannot add slave", e);

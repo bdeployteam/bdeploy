@@ -53,7 +53,7 @@ public class JerseyWriteLockService {
     private final Map<String, ReadWriteLock> locks = new TreeMap<>();
 
     public ReadWriteLock getLock(String id) {
-        return locks.computeIfAbsent(id, (k) -> new ReentrantReadWriteLock());
+        return locks.computeIfAbsent(id, k -> new ReentrantReadWriteLock());
     }
 
 }

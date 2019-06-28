@@ -113,9 +113,8 @@ public class MinionUpdateResourceImpl implements MinionUpdateResource {
             }
 
             SortedSet<Key> allVersions = h.execute(new ManifestListOperation().setManifestName(toList));
-            allVersions.stream().filter(k -> !tagsToKeep.contains(k.getTag())).forEach(k -> {
-                h.execute(new ManifestDeleteOperation().setToDelete(k));
-            });
+            allVersions.stream().filter(k -> !tagsToKeep.contains(k.getTag()))
+                    .forEach(k -> h.execute(new ManifestDeleteOperation().setToDelete(k)));
         }
 
         // update is now prepared in the update dir of the root.
