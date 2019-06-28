@@ -1,35 +1,73 @@
-=== Instance Configuration
+=== Process Configuration
+
+The btn:[Process Configuration] page is the central dialog for configuring and managing instances.
+
+To configure an *Instance*, the first step is to select the required applications from the *Configure Applications* panel available in the *Product Version* and distribute them to the *Nodes* in the *Instance* using drag and drop.
+
+The *Configure Applications* panel is called up via the pull-down menu of the dialog.
 
 image::images/BDeploy_Instance_Config.png[Instance Configuration,{thumbnail},role="thumb",link="images/BDeploy_Instance_Config.png"]
 image::images/BDeploy_Instance_Menu.png[Instance Menu,{thumbnail},role="thumb",link="images/BDeploy_Instance_Menu.png"]
 
-==== Process Configuration
+The *Configure Applications* panel contains all server applications and all client applications of the product. Server applications can be dragged to *Server Nodes* (e.g. _master_), client applications can only be dragged to the (virtual) *Client Applications Node*. Clients that are available for more than one operating system expand to single cards per operating system on the *Client Node*.
+
+[NOTE]
+The *Client Application Node* is not available if the product does not contain any client applications.
+
+==== Process Settings
+
+Each *Process* of an *Instance* is configured via its own dialog, which can be accessed via the pull-down menu on the respective *Process Card*.
+Colored markings on the *Process Card* indicate whether a process still lacks mandatory configurations or whether there are still unsaved changes to the *Process Settings*.
 
 image::images/BDeploy_DnD_Applications.png[Drag & Drop Applications,{thumbnail},role="thumb",link="images/BDeploy_DnD_Applications.png"]
 image::images/BDeploy_Process_Config.png[Process Parameter Configuration,{thumbnail},role="thumb",link="images/BDeploy_Process_Config.png"]
 image::images/BDeploy_Process_configured.png[Completed Process Configuration,{thumbnail},role="thumb",link="images/BDeploy_Process_configured.png"]
 
+The *Process Settings* dialog groups the parameters into categories, between which you can jump back and forth via btn:[Previous] and btn:[Next]. 
+
+Behind each parameter there is a small popup that can contain a short description, a *Default Value* and a button for resetting the parameter to the *Default Value*.
+
+*Validation Issues* are displayed per group in the respective title. Only complete configurations can be accepted.
+
 ===== Optional Parameters
+
+*Optional Parameters* can be selected for each group using the btn:[Manage Optional Parameters] dialog (available only if *Optional Parameters* are available) and then configured like other parameters.
 
 image::images/BDeploy_Process_Optional_parameters.png[Manage Optional Parameter(s),{thumbnail},role="thumb",link="images/BDeploy_Process_Optional_parameters.png"]
 image::images/BDeploy_Process_Optional_configured.png[Configuring Optional Parameter(s),{thumbnail},role="thumb",link="images/BDeploy_Process_Optional_configured.png"]
 
 ===== Custom Parameters
 
+*Custom Parameters* can be maintained in the last parameter group. Because all *Parameters* must have a determined sequence, *Custom Parameters* must define a predecessor parameter after which they are put on the command line.
+
 image::images/BDeploy_Process_Custom_Empty.png[Custom Parameters (empty),{thumbnail},role="thumb",link="images/BDeploy_Process_Custom_Empty.png"]
 image::images/BDeploy_Process_Custom_Create.png[Create Custom Parameter,{thumbnail},role="thumb",link="images/BDeploy_Process_Custom_Create.png"]
 image::images/BDeploy_Process_Custom_Value.png[Configure Custom Parameter,{thumbnail},role="thumb",link="images/BDeploy_Process_Custom_Value.png"]
 image::images/BDeploy_Process_Custom_Preview.png[Preview Command Line with Custom Parameter,{thumbnail},role="thumb",link="images/BDeploy_Process_Custom_Preview.png"]
 
+===== Global Parameters
+
+*Global Parameters* are valid for all *Processes* of an *Instance*. They are also configured in the *Process*, but changes are copied to all other processes that also use this parameter. *Global Parameters* are matched by their parameter UID, and marked with a small globe in the *Process Configuration* dialog.
+
 ===== Variable Expansion
 
+TBD
+
 ==== Configuration Files
+
+The *Configuration Files* of all *Processes* of an *Instance* are maintained together in one dialog.
+The initial set of *Configuration Files* is derived from the default set delivered with the product, see <<_product_info_yaml,`product-info.yaml`>>.
 
 image::images/BDeploy_CfgFiles_Browser.png[Configuration File Browser,{thumbnail},role="thumb",link="images/BDeploy_CfgFiles_Browser.png"]
 image::images/BDeploy_CfgFile_New.png[Create New Configuration File,{thumbnail},role="thumb",link="images/BDeploy_CfgFile_New.png"]
 image::images/BDeploy_CfgFiles_Save.png[Modified Configuration Files,{thumbnail},role="thumb",link="images/BDeploy_CfgFiles_Save.png"]
 
+The integrated editor provides syntax highlighting and rudimentary syntax checking for some basic file types (yaml, json, xml). Displayed problems are only to be seen as help and never interfere with the process, e.g. by preventing the saving of a file.
+
 ==== Product Configuration
+
+*Instances* are based on a *Product Version*. While the *Product* of the *Instance* cannot be changed afterwards, the *Version* used can be chosen arbitrarily from the available *Product Versions* (upgrade to a newer version / downgrade to an older version).
+Changing the *Product Version* can result in validation issues and automated adjustment of parameters. *Product Versions* can contain different *Applications*, so that with the change of the *Product Version* e.g. a previously configured *Application* must be deleted. If parameters definitions are changed, validation errors may occur which must be corrected before saving (e.g. new mandatory parameters).
 
 image::images/BDeploy_Product_Change.png[Change Current Product Tag,{thumbnail},role="thumb",link="images/BDeploy_Product_Change.png"]
 image::images/BDeploy_Product_Upgrade_Local_Changes.png[Successful Product Tag Change,{thumbnail},role="thumb",link="images/BDeploy_Product_Upgrade_Local_Changes.png"]
@@ -37,17 +75,52 @@ image::images/BDeploy_Product_Downgrade_Missing_Apps.png[Validation Issues After
 
 ==== Export/Import of Instance Versions
 
+*Instance Versions* can be exported and imported. For the export, select the desired *Instance Version* and start the export in the pull-down menu with the action btn:[Export...].
+
+The action btn:[Import Instance Version...] in the *Instance Version* pulldown menu imports a new *Instance Version*. The import data is compared with the existing *Instance* data before a new *Instance Version* is created.
+
+[NOTE]
+Only process configuration is imported to existing instances, the instance configuration (target master URI, name, description, purpose) are left intact.
+
 ==== Install, Activate, Uninstall
+
+All *Instance Versions* can be installed via the action btn:[Install], i.e. the configured *Processes* of an *Instance Version* are exported from the *BHive* into a corresponding directory on the file system on the target node.
+
+Whether a version is already installed is indicated by an icon on the *Version Card* to the left of the *Product Version*.
+
+One of the installed *Instance Versions* can be marked as _active_ with the action btn:[Activate]. The process control always refers to the activated *Instance Version*.
 
 image::images/BDeploy_Instance_Version_Menu.png[Instance Version Context Menu,{thumbnail},role="thumb",link="images/BDeploy_Instance_Version_Menu.png"]
 image::images/BDeploy_Instance_Version_Installed.png[Installed Instance Version,{thumbnail},role="thumb",link="images/BDeploy_Instance_Version_Installed.png"]
 image::images/BDeploy_Instance_Version_Activated.png[Activated Instance Version,{thumbnail},role="thumb",link="images/BDeploy_Instance_Version_Activated.png"]
 
+In general, any number of *Instance Versions* can be installed (e.g. for fast upgrade / downgrade). Versions that are no longer needed can be uninstalled using the btn:[Uninstall] action. Uninstalling deletes the files exported to the file system during installation. In *BHive* the version remains available and could be reinstalled at any time.
+
 ==== Client Download
+
+*Client Applications* can be installed by downloading the *Installer* or even started directly from the BDeploy UI.
+In both cases the local installation of the *Launcher* Application (see <<_system_software, System Software>>) is required, as well as the association of the file extension ".bdeploy" with the *Launcher*.
+
+A *Client Application* is always started via a .bdeploy file.
+
+The *Installer* bundles the installation of the *Launcher*, the registration of the file extension and the download of the .bdeploy file belonging to the client. In addition, the *Installer* creates an icon on the desktop that can be used to start the *Client Application*.
+
+Alternatively, the *Launcher* can be downloaded from the <<_system_software, System Software>> section and unpacked manually. By starting the file _FileAssoc.exe_ on Windows or _file-assoc.sh_ on Linux contained in the archive, the file extension .bdeploy can be registered.
+
+As soon as the *Installer* and .bdeploy registration have been completed (in one of the ways described above), a *Client Application* can be started directly from the interface at any time using btn:[Click & Start]. In this case no icon will be created on the desktop.
 
 image::images/BDeploy_Client_Download.png[Client Application Download,{thumbnail},role="thumb",link="images/BDeploy_Client_Download.png"]
 
+The *Installer* stores launcher and .bdeploy files under _%LOCALAPPDATA%\BDeploy_ on Windows or _$HOME/.bdeploy_ on Linux. This location can be changed by setting the environment variable *BDEPLOY_HOME*.
+
+[NOTE]
+Each *Installer* run checks whether the *Launcher* is installed in the default directory, installs it there if necessary and associates the file extension .bdeploy with this *Launcher*.
+
 ==== Process Control
+
+For the activated *Instance Version*, the *Process Control* of this *Process* can be displayed by clicking on a *Process Card*.
+The upper part of the *Process Control Panel* shows the current process status. Below this, the control elements for _starting_, _stopping_ or _restarting_ the process can be found.
+In addition to the actions for individual processes, the pull-down menu of the dialog contains the actions for _starting_, _stopping_ or _restarting_ the entire *Instance*, i.e. all *Processes* configured with start type `INSTANCE`.
 
 image::images/BDeploy_Process_Started.png[Running Server Process,{thumbnail},role="thumb",link="images/BDeploy_Process_Started.png"]
 image::images/BDeploy_Process_Crashed.png[Crashed Server Process (temporarily),{thumbnail},role="thumb",link="images/BDeploy_Process_Crashed.png"]
