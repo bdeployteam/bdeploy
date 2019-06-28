@@ -70,15 +70,16 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
 
             SecurityHelper sh = SecurityHelper.getInstance();
             KeyStore ks = sh.loadPrivateKeyStore(state.keystorePath, state.keystorePass);
-            JerseyServer srv = new JerseyServer(state.port, ks, state.keystorePass);
-            srv.setAuditor(new RollingFileAuditor(r.getAuditLogDir()));
-            r.setUpdateManager(new JerseyAwareMinionUpdateManager(srv));
+            try (JerseyServer srv = new JerseyServer(state.port, ks, state.keystorePass)) {
+                srv.setAuditor(new RollingFileAuditor(r.getAuditLogDir()));
+                r.setUpdateManager(new JerseyAwareMinionUpdateManager(srv));
 
-            delegate.setDelegate(srv.getSseActivityReporter());
-            registerMasterResources(srv, config.publishWebapp(), config.allowCors(), r, srv.getSseActivityReporter());
+                delegate.setDelegate(srv.getSseActivityReporter());
+                registerMasterResources(srv, config.publishWebapp(), config.allowCors(), r, srv.getSseActivityReporter());
 
-            srv.start();
-            srv.join();
+                srv.start();
+                srv.join();
+            }
         } catch (Exception e) {
             throw new IllegalStateException("Cannot start master server", e);
         }

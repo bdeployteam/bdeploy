@@ -1,9 +1,11 @@
 package io.bdeploy.minion.cli;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.GeneralSecurityException;
 
 import javax.ws.rs.core.UriBuilder;
 
@@ -89,7 +91,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
     }
 
     public static String initMinionRoot(Path root, MinionRoot mr, String hostname, int port, String deployments)
-            throws Exception {
+            throws GeneralSecurityException, IOException {
         MinionState state = mr.initKeys();
 
         SecurityHelper helper = SecurityHelper.getInstance();
