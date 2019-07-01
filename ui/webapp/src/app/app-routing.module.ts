@@ -125,7 +125,7 @@ const routes: Routes = [
     component: UpdateBrowserComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Browser available system versions' }
+    data: { title: 'Browse available system versions' }
   },
   {
     path: 'mastercleanup',
