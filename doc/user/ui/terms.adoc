@@ -29,7 +29,7 @@ a| A bundle of *Applications* along with some meta-information required by *BDep
 | An *Instance* is actual configuration of a *Product*. The term *Instance* is used as this compares similarily to a *Product* as an *Object* in programming relates to a *Class*. The *Product* (and it's *Applications*) describes the _possible_ configuration values (e.g. configuration files, command line parameters, etc.) - the *Instance* provides _actual_ values for these.
 
 | *Instance Group*
-a| In *Instance Group* is the main top-level element used in *BDeploy*. It provides a grouping of *Instances* (as the name suggests).
+a| An *Instance Group* is the main top-level element used in *BDeploy*. It provides a grouping of *Instances* (as the name suggests).
 
 An *Instance Group* (and a *Software Repository*) is always stored in a separate underlying *BHive*. This provides the means of easily moving an *Instance Group* (or a *Software Repository*) from one *BDeploy* server to another.
 
