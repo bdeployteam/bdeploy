@@ -9,17 +9,33 @@ namespace Bdeploy.Shared
         /// <summary>
         /// Creates a shortcut for the given application on the desktop using the given name and icon
         /// </summary>
-        public static void CreateLink(string appName, string targetPath, string workingDir,string iconFile)
+        public static void CreateDesktopLink(string appName, string targetPath, string workingDir,string iconFile)
         {
-            var desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            var linkPath = Path.Combine(desktop, appName + ".lnk");
-            var shell = new WshShell();
-            var linkFile = (IWshShortcut)shell.CreateShortcut(linkPath);
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            string linkPath = Path.Combine(path, appName + ".lnk");
+            WshShell shell = new WshShell();
+            IWshShortcut linkFile = (IWshShortcut)shell.CreateShortcut(linkPath);
             linkFile.TargetPath = targetPath;
             linkFile.WorkingDirectory = workingDir;
             linkFile.IconLocation = iconFile;
+            linkFile.Description = appName;
             linkFile.Save();
         }
 
+        /// <summary>
+        /// Creates a shortcut for the given application in the start menu of the user.
+        /// </summary>
+        public static void CreateStartMenuLink(string appName, string targetPath, string workingDir, string iconFile)
+        {
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.Programs);
+            string linkPath = Path.Combine(path, appName + ".lnk");
+            WshShell shell = new WshShell();
+            IWshShortcut linkFile = (IWshShortcut)shell.CreateShortcut(linkPath);
+            linkFile.TargetPath = targetPath;
+            linkFile.WorkingDirectory = workingDir;
+            linkFile.IconLocation = iconFile;
+            linkFile.Description = appName;
+            linkFile.Save();
+        }
     }
 }
