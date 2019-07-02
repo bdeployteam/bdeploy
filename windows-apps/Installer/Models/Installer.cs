@@ -140,7 +140,8 @@ namespace Bdeploy.Installer
             // Only create shortcut if we just have written the descriptor
             if (createShortcut)
             {
-                Shortcut.CreateLink(appName, appDescriptor, launcherHome, icon);
+                Shortcut.CreateDesktopLink(appName, appDescriptor, launcherHome, icon);
+                Shortcut.CreateStartMenuLink(appName, appDescriptor, launcherHome, icon);
             }
         }
 
@@ -264,7 +265,7 @@ namespace Bdeploy.Installer
                 {
                     // ZIP contains a single directory with all files in it
                     // Thus we remove the starting directory to unpack all files directly into the target directory
-                    string entryName = entry.FullName;
+                    string entryName = entry.FullName.Replace('\\', '/');
                     string extractName = entryName.Substring(entryName.IndexOf('/') + 1);
                     string destination = Path.GetFullPath(Path.Combine(targetDir, extractName));
 

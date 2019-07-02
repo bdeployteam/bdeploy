@@ -43,7 +43,8 @@ public class ZipHelper {
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
                     // leave out the source directory itself, it would resolve to '/' - we don't want that!
                     if (!dir.equals(source)) {
-                        zaos.putArchiveEntry(zaos.createArchiveEntry(dir.toFile(), source.relativize(dir).toString()));
+                        String entryName = PathHelper.separatorsToUnix(source.relativize(dir));
+                        zaos.putArchiveEntry(zaos.createArchiveEntry(dir.toFile(), entryName));
                         zaos.closeArchiveEntry();
                     }
                     return super.preVisitDirectory(dir, attrs);
