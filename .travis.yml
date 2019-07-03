@@ -1,5 +1,4 @@
 language: java
-jdk: openjdk10
 
 # Don't use shallow clone to allow sonarcloud to track changes
 git:
@@ -16,8 +15,11 @@ env:
 
 before_install:
   - nvm install $NODE_VERSION
+  - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
 
-install: true
+install:
+  - . ./install-jdk.sh -F 10 -L GPL
+
 script:
   - ./gradlew clean sonarqube --scan -s -PverboseTest
 
