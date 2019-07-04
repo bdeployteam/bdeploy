@@ -120,6 +120,7 @@ public class BDeployProductTaskChain implements TaskChain {
 
         ProductDesc pd = new ProductDesc();
         pd.productInfo = bdeployProductFile.getParent().resolve(desc.productInfoYaml);
+        pd.productTag = desc.productTag;
 
         for (BDeployApplicationDescriptor app : desc.applications) {
             Optional<BDeployApplicationService> handler = appServices.stream().filter(s -> s.canHandle(app.type)).findFirst();

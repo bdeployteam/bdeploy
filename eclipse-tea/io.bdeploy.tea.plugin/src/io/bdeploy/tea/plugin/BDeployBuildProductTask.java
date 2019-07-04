@@ -62,7 +62,7 @@ public class BDeployBuildProductTask {
     }
 
     @Execute
-    public void build(BuildDirectories dirs, TaskingLog log, TeaBuildVersionService bvs, BDeployConfig cfg) throws Exception {
+    public void build(BuildDirectories dirs, TaskingLog log, BDeployConfig cfg, TeaBuildVersionService bvs) throws Exception {
         File prodInfoDir = new File(dirs.getProductDirectory(), "prod-info");
         target = new File(dirs.getProductDirectory(), "bhive");
 
@@ -172,6 +172,10 @@ public class BDeployBuildProductTask {
         Date date = new Date();
         SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
 
+        if (desc.productTag != null) {
+            return desc.productTag.replace("%D", format.format(date));
+        }
+
         String q = bvs.getQualifierFormat();
         if (!q.contains("%D")) {
             q += "%D";
@@ -183,6 +187,7 @@ public class BDeployBuildProductTask {
     static class ProductDesc {
 
         Path productInfo;
+        String productTag;
         List<BDeployApplicationBuild> apps = new ArrayList<>();
     }
 
