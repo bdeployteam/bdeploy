@@ -4,126 +4,92 @@
 @rem  ${applicationName} startup script for Windows
 @rem
 @rem ##########################################################################
-
-@rem Set local scope for the variables with windows NT shell
-if "%OS%"=="Windows_NT" setlocal
-
-set DIRNAME=%~dp0
-if "%DIRNAME%" == "" set DIRNAME=.\
-
-set APP_BASE_NAME=%~n0
-set APP_HOME=%DIRNAME%${appHomeRelativePath}
-
-@rem Add default JVM options here. You can also use JAVA_OPTS and ${optsEnvironmentVar} to pass JVM options to this script.
-set DEFAULT_JVM_OPTS=${defaultJvmOpts}
-
-@rem BDEPLOY EXTENSION
-set JAVA_EXE=%APP_HOME%\\jre\\bin\\java.exe
-%JAVA_EXE% -version >NUL 2>&1
-if "%ERRORLEVEL%" == "0" goto init
-@rem BDEPLOY EXTENSION END
-
-@rem Find java.exe
-if defined JAVA_HOME goto findJavaFromJavaHome
-
-set JAVA_EXE=java.exe
-%JAVA_EXE% -version >NUL 2>&1
-if "%ERRORLEVEL%" == "0" goto init
-
-echo.
-echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
-echo.
-echo Please set the JAVA_HOME variable in your environment to match the
-echo location of your Java installation.
-
-goto fail
-
-:findJavaFromJavaHome
-set JAVA_HOME=%JAVA_HOME:"=%
-set JAVA_EXE=%JAVA_HOME%/bin/java.exe
-
-if exist "%JAVA_EXE%" goto init
-
-echo.
-echo ERROR: JAVA_HOME is set to an invalid directory: %JAVA_HOME%
-echo.
-echo Please set the JAVA_HOME variable in your environment to match the
-echo location of your Java installation.
-
-goto fail
-
-:init
-@rem Get command-line arguments, handling Windows variants
-
-if not "%OS%" == "Windows_NT" goto win9xME_args
-
-:win9xME_args
-@rem Slurp the command line arguments.
-set CMD_LINE_ARGS=
-set _SKIP=2
-
-:win9xME_args_slurp
-if "x%~1" == "x" goto execute
-
-set CMD_LINE_ARGS=%*
+setlocal enabledelayedexpansion
 
 :execute
-@rem Setup the command line
+set DIRNAME=%~dp0
+set CMD_LINE_ARGS=%*
+set APP_BASE_NAME=%~n0
+set APP_HOME=%DIRNAME%${appHomeRelativePath}
+set APP_UPDATE_NEXT=%APP_HOME%\\update\\next
+set APP_UPDATE_BAK=%APP_HOME%\\update\\bak
 
-@rem BDEPLOY EXTENSION
-@rem set CLASSPATH=$classpath
+set DEFAULT_JVM_OPTS=${defaultJvmOpts}
+set JAVA_EXE=%APP_HOME%\\jre\\bin\\java.exe
 set CLASSPATH="%APP_HOME%\\lib\\*"
-@rem BDEPLOY EXTENSION END
 
-@rem Execute ${applicationName} (--updateDir BDEPLOY EXTENSION)
-"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %${optsEnvironmentVar}% <% if ( appNameSystemProperty ) { %>"-D${appNameSystemProperty}=%APP_BASE_NAME%"<% } %> -classpath %CLASSPATH% ${mainClassName} %CMD_LINE_ARGS% "--updateDir=%APP_HOME%\\update"
-
-@rem BDEPLOY EXTENSION
-if NOT "%ERRORLEVEL%"=="42" goto :end
-
-@rem update requested (exit code == 42)
-echo "Minion signalled update request, restarting"
-
-@rem backup lib, copy lib from update, clean update dir
-echo "Updating from %APP_HOME%\\update\\next"
-
-if EXIST "%APP_HOME%\\update\\bak" (
-    rmdir /s /q "%APP_HOME%\\update\\bak"
-)
-
-if NOT EXIST "%APP_HOME%\\update\\next\\lib" (
-    echo "Unexpected directory structure in update dir, not applying!"
+@rem Execute JAVA to check if all is OK
+"%JAVA_EXE%" -version >NUL 2>&1
+if NOT "%ERRORLEVEL%" == "0" (
+    echo ERROR: Embedded JRE terminated with exit code %ERRORLEVEL%.
+    echo JRE located in "%JAVA_EXE%" is corrupt or missing.
     goto :fail
 )
 
-mkdir "%APP_HOME%\\update\\bak"
-move /y "%APP_HOME%\\lib" "%APP_HOME%\\update\\bak\\"
-xcopy /Y /E /I /H "%APP_HOME%\\update\\next\\lib" "%APP_HOME%\\lib"
+@rem Execute ${applicationName} (--updateDir BDEPLOY EXTENSION)
+echo "Starting minion with embedded JVM."
+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %${optsEnvironmentVar}% <% if ( appNameSystemProperty ) { %>"-D${appNameSystemProperty}=%APP_BASE_NAME%"<% } %> -classpath %CLASSPATH% ${mainClassName} %CMD_LINE_ARGS% "--updateDir=%APP_HOME%\\update"
 
-if EXIST "%APP_HOME%\\update\\next\\jre" (
-    if EXIST "%APP_HOME%\\jre" (
-        move /y "%APP_HOME%\\jre" "%APP_HOME%\\update\\bak\\"
-    )
-    xcopy /Y /E /I /H "%APP_HOME%\\update\\next\\jre" "%APP_HOME%\\jre"
+@rem update requested (exit code == 42)
+IF NOT "%ERRORLEVEL%"=="42" (
+    echo "Minion terminated with exit code %ERRORLEVEL%."
+    goto :end
+)
+echo "Minion signalled update request."
+
+@rem Check if we have the expected update in place
+if NOT EXIST "%APP_UPDATE_NEXT%\\lib" (
+    echo "Unexpected directory structure in update dir. Update will not be applied. Terminating."
+    goto :fail
 )
 
-rmdir /s /q "%APP_HOME%\\update\\next"
+@rem Remove old backups before creating a new one
+echo "Removing old backups."
+FOR /d %%D in ("%APP_UPDATE_BAK%*") DO (
+    echo "Deleting %%~D"
+    rmdir /s /q "%%~D"
+)
 
+@rem Find the next available backup directory
+set /A COUNTER=1
+:findBackupDir
+IF EXIST "%APP_UPDATE_BAK%" (
+    if "!COUNTER!" == "1" (
+        echo "Not all old backups could be deleted. Another minion might still be running."
+    )
+    set TMP_BAK=!APP_UPDATE_BAK!-!COUNTER!
+    IF EXIST !TMP_BAK! (
+        set /A COUNTER=COUNTER+1
+        goto findBackupDir
+    )
+    set APP_UPDATE_BAK="!TMP_BAK!"
+)
+
+@rem Backup current installation
+echo "Using backup directory %APP_UPDATE_BAK%"
+mkdir "%APP_UPDATE_BAK%"
+xcopy /Y /E /I /H /Q "%APP_HOME%\\lib" "%APP_UPDATE_BAK%\\lib" > nul
+xcopy /Y /E /I /H /Q "%APP_HOME%\\jre" "%APP_UPDATE_BAK%\\jre" > nul
+move /y "%APP_HOME%\\BDeploy.exe" "%APP_UPDATE_BAK%\\BDeploy.exe" > nul
+move /y "%APP_HOME%\\FileAssoc.exe" "%APP_UPDATE_BAK%\\FileAssoc.exe" > nul
+move /y "%APP_HOME%\\version.properties" "%APP_UPDATE_BAK%\\version.properties" > nul
+
+@rem Copy files from update to current directory
+echo "Copying new files from update directory."
+xcopy /Y /E /I /H /Q "%APP_UPDATE_NEXT%\\lib" "%APP_HOME%\\lib" > nul
+xcopy /Y /E /I /H "%APP_UPDATE_NEXT%\\jre" "%APP_HOME%\\jre" > nul
+copy /y "%APP_UPDATE_NEXT%\\BDeploy.exe" "%APP_HOME%\\BDeploy.exe" > nul
+copy /y "%APP_UPDATE_NEXT%\\FileAssoc.exe" "%APP_HOME%\\FileAssoc.exe" > nul
+copy /y "%APP_UPDATE_NEXT%\\version.properties" "%APP_HOME%\\version.properties" > nul
+
+@rem Remove update after all files have been copied
+echo "Cleanup update directory."
+rmdir /s /q "%APP_UPDATE_NEXT%"
+echo "Update applied. Restarting application"
 goto :execute
-@rem BDEPLOY EXTENSION END
-
-
-:end
-@rem End local scope for the variables with windows NT shell
-if "%ERRORLEVEL%"=="0" goto mainEnd
 
 :fail
-rem Set variable ${exitEnvironmentVar} if you need the _script_ return code instead of
-rem the _cmd.exe /c_ return code!
-if  not "" == "%${exitEnvironmentVar}%" exit 1
 exit /b 1
 
-:mainEnd
-if "%OS%"=="Windows_NT" endlocal
-
-:omega
+:end
+endlocal
