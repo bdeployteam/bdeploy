@@ -2,6 +2,7 @@ package io.bdeploy.ui.api;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Collection;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -19,6 +20,7 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.jersey.ActivityScope;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
+import io.bdeploy.ui.dto.InstanceClientAppsDto;
 
 @Path("/group")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -70,4 +72,9 @@ public interface InstanceGroupResource {
 
     @Path("/{group}/product")
     public ProductResource getProductResource(@ActivityScope @PathParam("group") String group);
+
+    @GET
+    @Path("/{group}/client-apps")
+    public Collection<InstanceClientAppsDto> listClientApps(@ActivityScope @PathParam("group") String group);
+
 }

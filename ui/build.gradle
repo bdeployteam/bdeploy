@@ -97,6 +97,8 @@ task genDtos() {
             // UI only DTOs
             'io.bdeploy.ui.dto.ApplicationDto',
             'io.bdeploy.ui.dto.CredentialsDto',
+            'io.bdeploy.ui.dto.ClientApplicationDto',
+            'io.bdeploy.ui.dto.InstanceClientAppsDto',
             'io.bdeploy.ui.dto.InstanceConfigurationDto',
             'io.bdeploy.ui.dto.InstanceNodeConfigurationDto',
             'io.bdeploy.ui.dto.InstanceNodeConfigurationListDto',

@@ -12,8 +12,6 @@ import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
  */
 public class InstanceNodeConfigurationListDto {
 
-    public static final String CLIENT_NODE_NAME = "__ClientApplications";
-
     /** Maps an application manifest key to its descriptor */
     public final Map<String, ApplicationDescriptor> applications = new HashMap<>();
 

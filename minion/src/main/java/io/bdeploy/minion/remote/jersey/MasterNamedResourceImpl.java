@@ -50,7 +50,6 @@ import io.bdeploy.interfaces.remote.SlaveProcessResource;
 import io.bdeploy.jersey.JerseyPathWriter.DeleteAfterWrite;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.MinionState;
-import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
 
 public class MasterNamedResourceImpl implements MasterNamedResource {
 
@@ -74,7 +73,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         try (Activity deploying = reporter.start("Deploying to minions...", fragmentReferences.size())) {
             for (Map.Entry<String, Manifest.Key> entry : fragmentReferences.entrySet()) {
                 String minionName = entry.getKey();
-                if (InstanceNodeConfigurationListDto.CLIENT_NODE_NAME.equals(minionName)) {
+                if (InstanceManifest.CLIENT_NODE_NAME.equals(minionName)) {
                     continue;
                 }
                 Manifest.Key toDeploy = entry.getValue();
@@ -112,7 +111,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         try (Activity activating = reporter.start("Activating on minions...", fragments.size())) {
             for (Map.Entry<String, Manifest.Key> entry : fragments.entrySet()) {
                 String minionName = entry.getKey();
-                if (InstanceNodeConfigurationListDto.CLIENT_NODE_NAME.equals(minionName)) {
+                if (InstanceManifest.CLIENT_NODE_NAME.equals(minionName)) {
                     continue;
                 }
                 Manifest.Key toDeploy = entry.getValue();
@@ -150,7 +149,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         // check all minions for their respective availability.
         for (Map.Entry<String, Manifest.Key> entry : imfs.entrySet()) {
             String minionName = entry.getKey();
-            if (InstanceNodeConfigurationListDto.CLIENT_NODE_NAME.equals(minionName)) {
+            if (InstanceManifest.CLIENT_NODE_NAME.equals(minionName)) {
                 continue;
             }
             Manifest.Key toDeploy = entry.getValue();
@@ -199,7 +198,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         try {
             for (Map.Entry<String, Manifest.Key> entry : fragments.entrySet()) {
                 String minionName = entry.getKey();
-                if (InstanceNodeConfigurationListDto.CLIENT_NODE_NAME.equals(minionName)) {
+                if (InstanceManifest.CLIENT_NODE_NAME.equals(minionName)) {
                     continue;
                 }
                 Manifest.Key toRemove = entry.getValue();

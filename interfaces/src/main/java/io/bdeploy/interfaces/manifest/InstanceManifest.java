@@ -48,6 +48,11 @@ public class InstanceManifest {
 
     public static final String INSTANCE_LABEL = "X-Instance";
 
+    /**
+     * The name of the node that is used to store client applications
+     */
+    public static final String CLIENT_NODE_NAME = "__ClientApplications";
+
     private final InstanceConfiguration config;
     private final SortedMap<String, Manifest.Key> nodes = new TreeMap<>();
     private final Manifest.Key key;

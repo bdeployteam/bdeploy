@@ -8,8 +8,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.stream.Collectors;
 
@@ -29,16 +31,25 @@ import io.bdeploy.bhive.op.ImportObjectOperation;
 import io.bdeploy.bhive.op.ObjectLoadOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.common.util.UuidHelper;
+import io.bdeploy.interfaces.ScopedManifestKey;
+import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
+import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
+import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
+import io.bdeploy.interfaces.remote.MasterRootResource;
+import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
 import io.bdeploy.ui.api.ProductResource;
+import io.bdeploy.ui.dto.ClientApplicationDto;
+import io.bdeploy.ui.dto.InstanceClientAppsDto;
 
 public class InstanceGroupResourceImpl implements InstanceGroupResource {
 
@@ -151,6 +162,51 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
 
         return scan.stream().filter(Objects::nonNull).map(k -> InstanceManifest.of(hive, k).getConfiguration())
                 .filter(x -> x.target != null).map(x -> x.target.getUri()).distinct().collect(Collectors.toList());
+    }
+
+    @Override
+    public Collection<InstanceClientAppsDto> listClientApps(String group) {
+        Collection<InstanceClientAppsDto> result = new ArrayList<>();
+
+        BHive hive = getGroupHive(group);
+        InstanceResource resource = getInstanceResource(group);
+        for (InstanceConfiguration ic : resource.list()) {
+            String instanceId = ic.uuid;
+            RemoteService remote = ic.target;
+
+            // Contact master to find out the active version. Skip if no version is active
+            MasterRootResource root = ResourceProvider.getResource(remote, MasterRootResource.class);
+            SortedMap<String, Key> groupActiveDeployments = root.getNamedMaster(group).getActiveDeployments();
+            Key active = groupActiveDeployments.get(instanceId);
+            if (active == null) {
+                continue;
+            }
+
+            // Get a list of all node manifests - clients are stored in a special node
+            InstanceManifest im = InstanceManifest.load(hive, instanceId, active.getTag());
+            SortedMap<String, Key> manifests = im.getInstanceNodeManifests();
+            Key clientKey = manifests.get(InstanceManifest.CLIENT_NODE_NAME);
+            if (clientKey == null) {
+                continue;
+            }
+            InstanceClientAppsDto clientApps = new InstanceClientAppsDto();
+            clientApps.instance = ic;
+            clientApps.applications = new ArrayList<>();
+
+            // Add all configured client applications
+            InstanceNodeManifest instanceNode = InstanceNodeManifest.of(hive, clientKey);
+            for (ApplicationConfiguration appConfig : instanceNode.getConfiguration().applications) {
+                ClientApplicationDto clientApp = new ClientApplicationDto();
+                clientApp.uuid = appConfig.uid;
+                clientApp.description = appConfig.name;
+
+                ScopedManifestKey scopedKey = ScopedManifestKey.parse(appConfig.application);
+                clientApp.os = scopedKey.getOperatingSystem();
+                clientApps.applications.add(clientApp);
+            }
+            result.add(clientApps);
+        }
+        return result;
     }
 
     @Override

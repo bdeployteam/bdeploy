@@ -22,8 +22,8 @@ import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.remote.MasterRootResource;
+import io.bdeploy.minion.TestFactory;
 import io.bdeploy.minion.TestMinion;
-import io.bdeploy.minion.deploy.MinionDeployTest;
 import io.bdeploy.ui.api.ConfigFileResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
@@ -38,7 +38,7 @@ public class ConfigFileResourceTest {
     @Test
     void updates(BHive local, MasterRootResource master, InstanceGroupResource igr, RemoteService remote, @TempDir Path tmp)
             throws Exception {
-        Manifest.Key instance = MinionDeployTest.createApplicationsAndInstance(local, master, remote, tmp);
+        Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, master, remote, tmp);
         InstanceManifest im = InstanceManifest.of(local, instance);
 
         InstanceResource ir = igr.getInstanceResource("demo");

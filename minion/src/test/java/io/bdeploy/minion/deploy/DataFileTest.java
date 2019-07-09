@@ -30,6 +30,7 @@ import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.minion.MinionRoot;
+import io.bdeploy.minion.TestFactory;
 import io.bdeploy.minion.TestMinion;
 
 @ExtendWith(TestMinion.class)
@@ -40,7 +41,7 @@ public class DataFileTest {
     @Test
     void testDataFile(BHive local, MasterRootResource master, RemoteService remote, @TempDir Path tmp, MinionRoot mr)
             throws IOException, InterruptedException {
-        Manifest.Key instance = MinionDeployTest.createApplicationsAndInstance(local, master, remote, tmp);
+        Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, master, remote, tmp);
 
         String uuid = local.execute(new ManifestLoadOperation().setManifest(instance)).getLabels()
                 .get(InstanceManifest.INSTANCE_LABEL);
