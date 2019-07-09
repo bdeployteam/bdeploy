@@ -94,6 +94,12 @@ export class InstanceService {
     return this.http.post(url, configFiles, options);
   }
 
+  public listDataDirSnapshot(instanceGroupName: string, instanceName: string): Observable<InstanceDirectory[]> {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/processes/dataDirSnapshot';
+    this.log.debug('getDataDirSnapshot: ' + url);
+    return this.http.get<InstanceDirectory[]>(url);
+  }
+
   public listPurpose(instanceGroupName: string): Observable<InstancePurpose[]> {
     const url: string = this.buildGroupUrl(instanceGroupName) + '/purposes';
     return this.http.get<InstancePurpose[]>(url);

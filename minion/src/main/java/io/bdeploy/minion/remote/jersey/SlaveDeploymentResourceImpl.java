@@ -150,7 +150,7 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
                 entry.size = asFile.length();
                 entry.root = SpecialDirectory.DATA;
                 entry.uuid = instanceId;
-                entry.tag = null; // not tag bound.
+                entry.tag = key.getTag(); // providing the tag of the active version here
 
                 result.add(entry);
             });
