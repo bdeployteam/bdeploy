@@ -143,6 +143,7 @@ public class LauncherErrorDialog extends JFrame {
         content.add(errorSummary);
 
         errorDetails = new JTextArea();
+        errorDetails.setEditable(false);
         errorDetails.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
         JScrollPane scrollPane = new JScrollPane(errorDetails);
         content.add(scrollPane);

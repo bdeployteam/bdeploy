@@ -165,6 +165,12 @@
       <Name>Shared</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\debug.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\copy.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy "$(TargetPath)" "$(SolutionDir)\..\launcher\src\win64\dist\bin\$(ProjectName).bin" /Y</PostBuildEvent>

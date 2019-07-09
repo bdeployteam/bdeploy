@@ -5,20 +5,21 @@
         MouseLeftButtonDown="Window_MouseLeftButtonDown">
     <Window.Resources>
         <BitmapImage x:Key="Error" UriSource="/Resources/error.png" />
+        <BitmapImage x:Key="Copy" UriSource="/Resources/copy.png" />
     </Window.Resources>
-    <Grid Margin="10">
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="46" />
+            <RowDefinition Height="32" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Name="MinimizeWindowButton" Click="Window_MinimizeButton_Click" Background="Transparent" BorderThickness="0" FontSize="20" FontWeight="Bold" Padding="10">
+        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0 0 15 0">
+            <Button Name="MinimizeWindowButton" Click="Window_MinimizeButton_Click" Background="Transparent" BorderThickness="0" FontSize="20" FontWeight="Bold" Margin="10 0" >
                 -
             </Button>
-            <Button Name="CloseWindowButton" Click="Window_CloseButton_Click" Background="Transparent" BorderThickness="0" FontSize="20" FontWeight="Bold" Padding="10">
+            <Button Name="CloseWindowButton" Click="Window_CloseButton_Click" Background="Transparent" BorderThickness="0" FontSize="20" FontWeight="Bold">
                 x
             </Button>
         </StackPanel>
@@ -47,19 +48,37 @@
                  <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
-                <Image Name="ErrorIcon" Source="{StaticResource Error}" Width="32" Height="32" Margin="0 0 15 0"  />
-                <TextBlock Name="ErrorText" FontSize="18" FontWeight="SemiBold" Foreground="#FF4F49" VerticalAlignment="Center">
-                    <Run Text="Unexpected error occured during installation."/>
+                <Image Name="ErrorTitleIcon" Source="{StaticResource Error}" Width="32" Height="32" Margin="0 0 15 0"  />
+                <TextBlock Name="ErrorTitleText" FontSize="18" FontWeight="SemiBold" Foreground="#FF4F49" VerticalAlignment="Center">
+                    <Run Text="Application could not be installed" />
                 </TextBlock>
             </StackPanel>
-            <TextBlock Name="ErrorDetails" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="14">
-                Addtional Error Details
+            <TextBlock Name="ErrorMessage" Visibility="Visible" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="14" FontWeight="SemiBold">
+                <Run Text="Unexpected error occured while installing the application." /><LineBreak />
+                <Run Text="If the problem persists, contact the system administrator." />
             </TextBlock>
-            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Name="CloseButton" Grid.Row="2" Padding="15 10" Click="CloseButton_Click" >
+            <TextBox Name="ErrorDetails" Visibility="Hidden" Grid.Row="1" BorderThickness="1" Margin="10" Padding="5" AcceptsReturn="True" IsReadOnly="True"
+                     ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto"
+                     FontFamily="Consolas" FontSize="12">
+                Technical details will be displayed here.
+            </TextBox>
+            <Grid Grid.Row="3" Background="#F0F0F0">
+                <Grid.ColumnDefinitions >
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Button Name="DetailsButton" Grid.Column="0" Margin="10" Padding="15 5" Click="DetailsButton_Click" FontWeight="SemiBold">
+                    Show Details
+                </Button>
+                <Button Name="ClipboardButton" Grid.Column="1" Margin="10" Padding="15 5" Click="ClipboardButton_Click" ToolTip="Copy to Clipboard">
+                    <Image Source="{StaticResource Copy}" Width="16" Height="16" />
+                </Button>
+                <Button Name="CloseButton" Grid.Column="3" Margin="10" Padding="15 0" Click="CloseButton_Click" FontWeight="SemiBold">
                     Close
                 </Button>
-            </StackPanel>
+            </Grid>
         </Grid>
     </Grid>
 </Window>

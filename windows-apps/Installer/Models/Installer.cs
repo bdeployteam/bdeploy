@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Bdeploy.Installer
@@ -95,7 +96,11 @@ namespace Bdeploy.Installer
                 // Download and extract if not available
                 if (!IsLauncherInstalled())
                 {
-                    await DownloadAndExtractLauncher();
+                    bool success = await DownloadAndExtractLauncher();
+                    if(!success)
+                    {
+                        return -1;
+                    }
                 }
 
                 // Associate bdeploy files with the launcher
@@ -148,7 +153,7 @@ namespace Bdeploy.Installer
         /// <summary>
         /// Downloads and extracts the launcher.
         /// </summary>
-        private async Task DownloadAndExtractLauncher()
+        private async Task<bool> DownloadAndExtractLauncher()
         {
             // Launcher directory must not exist. 
             // Otherwise ZIP extraction fails
@@ -160,10 +165,16 @@ namespace Bdeploy.Installer
 
             // Download and extract
             string launcherZip = await DownloadLauncher(tmpDir);
+            if(launcherZip == null)
+            {
+                return false;
+            }
+
             ExtractLauncher(launcherZip, launcherHome);
 
             // Cleanup. Download not required any more
             FileHelper.DeleteDir(tmpDir);
+            return true;
         }
 
         /// <summary>
@@ -179,6 +190,7 @@ namespace Bdeploy.Installer
                 HttpResponseMessage response = await client.GetAsync(requestUrl);
                 if (!response.IsSuccessStatusCode)
                 {
+                    Console.WriteLine("Cannot download application icon. Error {0} - {1} ", response.ReasonPhrase, request.RequestUri);
                     return;
                 }
                 using (Stream responseStream = await response.Content.ReadAsStreamAsync())
@@ -204,6 +216,16 @@ namespace Bdeploy.Installer
                 Uri requestUrl = new Uri(config.LauncherUrl);
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
                 HttpResponseMessage response = await client.GetAsync(requestUrl, HttpCompletionOption.ResponseHeadersRead);
+                if (!response.IsSuccessStatusCode)
+                {
+                    StringBuilder builder = new StringBuilder();
+                    builder.Append("Failed to download application launcher.").AppendLine().AppendLine();
+                    builder.AppendFormat("Request: {0}", request.RequestUri).AppendLine();
+                    builder.AppendFormat("Status: {0}", response.StatusCode).AppendLine();
+                    builder.AppendFormat("Response: {0}", response.ReasonPhrase);
+                    OnError(builder.ToString());
+                    return null;
+                }
 
                 long? contentLength = response.Content.Headers.ContentLength;
                 if (contentLength.HasValue)
