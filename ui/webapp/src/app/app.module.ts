@@ -19,6 +19,7 @@ import { ApplicationEditCommandPreviewComponent } from './application-edit-comma
 import { ApplicationEditManualComponent } from './application-edit-manual/application-edit-manual.component';
 import { ApplicationEditOptionalComponent } from './application-edit-optional/application-edit-optional.component';
 import { ApplicationEditComponent } from './application-edit/application-edit.component';
+import { ClientAppsComponent } from './client-apps/client-apps.component';
 import { ClientInfoComponent } from './client-info/client-info.component';
 import { ConfigFilesBrowserComponent } from './config-files-browser/config-files-browser.component';
 import { DataFilesBrowserComponent } from './data-files-browser/data-files-browser.component';
@@ -129,7 +130,8 @@ export function loadAppConfig(cfgService: ConfigService) {
     UpdateDialogComponent,
     MasterCleanupComponent,
     FileViewerComponent,
-    DataFilesBrowserComponent
+    DataFilesBrowserComponent,
+    ClientAppsComponent
   ],
   imports: [
     BrowserModule,

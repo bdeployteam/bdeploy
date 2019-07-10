@@ -1,0 +1,73 @@
+  <mat-toolbar class="mat-elevation-z1 header-toolbar">
+    <button mat-icon-button type="button" (click)='location.back()'><mat-icon>chevron_left</mat-icon></button>
+    <span>Client Applications @ {{instanceGroupName}}</span>
+    <span class="fill-space"></span>
+    <ng-container *ngIf="hasLaunchers && !launcherLoading">
+      <span class="toolbar-text">Download Click & Start Launcher</span>
+      <div class="toolbar-icons">
+        <ng-container *ngFor="let launcher of launcherDto.launchers | keyvalue">
+          <button mat-icon-button  matTooltip="Download for {{launcher.key}}" (click)='downloadLauncher(launcher.key)'>
+            <mat-icon class="icon" [svgIcon]='launcher.key'></mat-icon>
+          </button>
+        </ng-container>
+      </div>
+    </ng-container>
+  </mat-toolbar>
+
+  <div *ngIf="loading" class="loading-container">
+    <mat-progress-spinner [mode]="'indeterminate'" class="loading-spinner" mode></mat-progress-spinner>
+  </div>
+  <ng-container *ngIf="!loading">
+    <p class="banner banner-info-theme" *ngIf="!hasApps">
+      <span class="material-icons headerIcon">computer</span>
+      <span class="headerText">No client applications are published in this instance group.</span>
+    </p>
+    <p class="banner banner-warn-theme" *ngIf="hasApps && !hasLaunchers">
+      <span class="material-icons headerIcon">launch</span>
+      <span class="headerText">No launchers are available. The Click & Start application as well as the client installers cannot be downloaded. Please contact the administrator. </span>
+    </p>
+    <div *ngFor="let purpose of getPurposes()">
+      <p class="list-heading">{{purpose}}</p>
+
+      <ng-container *ngFor="let instance of getInstances(purpose)">
+        <div [ngClass]="['instance-card','instance-card-theme', 'instance-card-' + instance.purpose]">
+          <div class="instance-card-header instance-card-header-theme">
+            <div class="instance-card-header-logo">
+              <app-instance-group-logo [instanceGroupName]='instanceGroupName'></app-instance-group-logo>
+            </div>
+            <div class="instance-card-header-text">
+              <div class="instance-card-header-title">{{instance.name}}</div>
+              <div class="instance-card-header-subheading" *ngIf="instance.description">{{instance.description}}</div>
+            </div>
+            <div class="instance-card-header-version">{{instance.product.tag}}</div>
+          </div>
+          <ng-container *ngFor="let app of getApps(instance)">
+            <div class="app-card">
+              <div class="app-card-icon">
+                <mat-icon [svgIcon]='app.os'></mat-icon>
+              </div>
+              <div class="app-card-description">
+                {{app.description}}
+              </div>
+              <div class="app-card-content">
+                <div class="app-card-links">
+                  <button mat-button class="app-card-link" (click)="downloadClickAndRun(instance, app)" matTooltip="Download Click & Start">
+                    <mat-icon>play_arrow</mat-icon>
+                    <span>Click & Start</span>
+                  </button>
+                  <button mat-button class="app-card-link" (click)="downloadInstaller(instance, app)" matTooltip="Download Installer" [disabled]="!hasLaunchers">
+                    <mat-icon>cloud_download</mat-icon>
+                    <span>Installer</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          <mat-divider></mat-divider>
+        </ng-container>
+      </div>
+    </ng-container>
+  </div>
+</ng-container>
+
+
+

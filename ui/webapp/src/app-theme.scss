@@ -20,6 +20,7 @@
 @import 'app/process-details/process-details-theme.scss';
 @import 'app/process-status/process-status-theme.scss';
 @import 'app/client-info/client-info-theme.scss';
+@import 'app/client-apps/client-apps-theme.scss';
 
 @mixin all-themes($theme) {
   // general angular material theme
@@ -44,6 +45,7 @@
   @include process-details-theme($theme);
   @include process-status-theme($theme);
   @include client-info-theme($theme);
+  @include client-apps-theme($theme);
 }
 
 @mixin theme-chooser($theme) {

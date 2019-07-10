@@ -17,6 +17,7 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.interfaces.NodeStatus;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
+import io.bdeploy.ui.dto.LauncherDto;
 
 /**
  * Provides API to remote-update the master as well as the launcher software.
@@ -47,6 +48,10 @@ public interface SoftwareUpdateResource {
     @GET
     @Path("/launcher")
     public List<Manifest.Key> getLauncherVersions();
+
+    @GET
+    @Path("launcherLatest")
+    public LauncherDto getLatestLaunchers();
 
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)

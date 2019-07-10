@@ -44,6 +44,7 @@ import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
+import io.bdeploy.ui.dto.LauncherDto;
 
 public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
 
@@ -170,6 +171,19 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
         responeBuilder.header("Content-Disposition", contentDisposition);
         responeBuilder.header("Content-Length", file.length());
         return responeBuilder.build();
+    }
+
+    @Override
+    public LauncherDto getLatestLaunchers() {
+        LauncherDto dto = new LauncherDto();
+        for (OperatingSystem os : OperatingSystem.values()) {
+            ScopedManifestKey scopedKey = getNewestLauncher(os);
+            if (scopedKey == null) {
+                continue;
+            }
+            dto.launchers.put(os, scopedKey.getKey());
+        }
+        return dto;
     }
 
     /**

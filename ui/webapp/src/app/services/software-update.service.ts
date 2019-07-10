@@ -1,17 +1,17 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ManifestKey, NodeStatus } from '../models/gen.dtos';
+import { LauncherDto, ManifestKey, NodeStatus } from '../models/gen.dtos';
 import { ConfigService } from './config.service';
 import { Logger, LoggingService } from './logging.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class UpdateDataService {
+export class SoftwareUpdateService {
 
   private static BASEPATH = '/swup';
-  private log: Logger = this.loggingService.getLogger('SoftwareRepositoryService');
+  private readonly log: Logger = this.loggingService.getLogger('SoftwareUpdateService');
 
   constructor(
     private cfg: ConfigService,
@@ -20,41 +20,47 @@ export class UpdateDataService {
   ) {}
 
   public listBDeployVersions(): Observable<ManifestKey[]> {
-    const url: string = this.cfg.config.api + UpdateDataService.BASEPATH + '/bdeploy';
+    const url: string = this.cfg.config.api + SoftwareUpdateService.BASEPATH + '/bdeploy';
     this.log.debug('listBDeployVersions: ' + url);
     return this.http.get<ManifestKey[]>(url);
   }
 
   public listLauncherVersions(): Observable<ManifestKey[]> {
-    const url: string = this.cfg.config.api + UpdateDataService.BASEPATH + '/launcher';
+    const url: string = this.cfg.config.api + SoftwareUpdateService.BASEPATH + '/launcher';
     this.log.debug('listLauncherVersions: ' + url);
     return this.http.get<ManifestKey[]>(url);
   }
 
+  public getLatestLaunchers(): Observable<LauncherDto> {
+    const url: string = this.cfg.config.api + SoftwareUpdateService.BASEPATH + '/launcherLatest';
+    this.log.debug('getLatestLaunchers: ' + url);
+    return this.http.get<LauncherDto>(url);
+  }
+
   public deleteVersion(keys: ManifestKey[]) {
-    const url: string = this.cfg.config.api + UpdateDataService.BASEPATH;
+    const url: string = this.cfg.config.api + SoftwareUpdateService.BASEPATH;
     this.log.debug('deleteVersion: ' + url);
     return this.http.post(url, keys);
   }
 
   public getNodeStates() {
-    const url: string = this.cfg.config.api + UpdateDataService.BASEPATH + '/bdeploy/minions';
+    const url: string = this.cfg.config.api + SoftwareUpdateService.BASEPATH + '/bdeploy/minions';
     this.log.debug('getNodeStates: ' + url);
     return this.http.get<NodeStatus[]>(url);
   }
 
   public updateBdeploy(keys: ManifestKey[]) {
-    const url: string = this.cfg.config.api + UpdateDataService.BASEPATH + '/selfUpdate';
+    const url: string = this.cfg.config.api + SoftwareUpdateService.BASEPATH + '/selfUpdate';
     this.log.debug('updateBdeploy: ' + url);
     return this.http.post(url, keys);
   }
 
   public getUploadUrl() {
-    return this.cfg.config.api + UpdateDataService.BASEPATH;
+    return this.cfg.config.api + SoftwareUpdateService.BASEPATH;
   }
 
   public getDownloadUrl(key: ManifestKey) {
-    return this.cfg.config.api + UpdateDataService.BASEPATH + '/download/' + key.name + '/' + key.tag;
+    return this.cfg.config.api + SoftwareUpdateService.BASEPATH + '/download/' + key.name + '/' + key.tag;
   }
 
 }

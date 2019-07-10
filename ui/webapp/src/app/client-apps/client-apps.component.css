@@ -1,0 +1,114 @@
+.loading-container {
+  flex: 1 0 auto;
+  flex-direction: row;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 15px;
+}
+
+.fill-space {
+  flex: 1 0 auto;
+}
+
+.toolbar-icons {
+  float: right;
+  margin-left: 1.5em;
+}
+
+.toolbar-text {
+  font-size: 0.9em;
+  font-weight: lighter;
+}
+
+.banner {
+  padding: 5px;
+  margin: 15px;
+  border-radius: 5px;
+}
+
+.headerText {
+  font-size: 1em;
+  margin-left: 15px;
+  vertical-align: middle;
+}
+
+.headerIcon {
+  font-size: 1.8em;
+  vertical-align: middle;
+}
+
+.list-heading {
+  font-weight: bold;
+  margin-top: 30px;
+  margin-left: 15px;
+}
+
+.instance-card {
+  margin-left: 2em;
+  margin-right: 2em;
+  margin-bottom: 1em;
+  max-width: 100%;
+  border-radius: 5px;
+}
+
+.instance-card-header {
+  display: grid;
+  grid-column-gap: 10px;
+  grid-template-columns: 45px 3fr 1fr;
+  padding: 8px 20px;
+}
+
+.instance-card-header-logo {
+  height: 40px;
+  width: 40px;
+}
+
+.instance-card-header-text {
+  display: grid;
+}
+
+.instance-card-header-title {
+  font-weight: bold;
+  align-self: center;
+}
+
+.instance-card-header-version {
+  font-weight: lighter;
+  justify-self: end;
+  align-self: center;
+}
+
+.instance-card-header-subheading {
+  font-weight: lighter;
+  align-self: center;
+}
+
+.app-card {
+  display: grid;
+  grid-column-gap: 10px;
+  grid-template-columns: 45px 2fr 3fr;
+  padding: 8px 20px;
+  margin-top: 1em;
+}
+
+.app-card-content {
+  justify-self: left;
+}
+
+.app-card-icon {
+  justify-self: center;
+}
+
+.app-card-description {
+  font-weight: bolder;
+  justify-self: left;
+}
+
+.app-card-link {
+  margin-left: 0.5em;
+}
+
+.app-card-link span {
+  margin-left: 0.5em;
+}
