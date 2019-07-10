@@ -30,12 +30,19 @@ export class FileViewerComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     // fetch initial content tail...
-    this.loadInitial();
+    if (this.initialEntry) {
+      this.initialEntry().subscribe(entry => {
+        if (entry == null) {
+          this.content = 'File not found';
+          return;
+        }
+        this.setInitialEntry(entry);
+      });
+      }
     this.onToggleFollow(this.follow);
   }
 
   loadInitial() {
-    this.content = '';
     this.initialEntry().subscribe(entry => {
       if (entry == null) {
         this.content = 'File not found';
@@ -50,8 +57,21 @@ export class FileViewerComponent implements OnInit, OnDestroy {
     });
   }
 
+  public setInitialEntry(entry: InstanceDirectoryEntry) {
+    let offset = 0;
+    if (entry.size > MAX_TAIL) {
+      offset = entry.size - MAX_TAIL;
+    }
+    this.offset = offset;
+    this.updateTail();
+  }
+
   ngOnDestroy() {
     this.clearTimer();
+  }
+
+  public canFollow(): boolean {
+    return !(typeof(this.contentFetcher) === 'undefined');
   }
 
   onToggleFollow(checked: boolean) {

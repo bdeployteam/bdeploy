@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { ConfigFilesBrowserComponent } from './config-files-browser/config-files-browser.component';
+import { DataFilesBrowserComponent } from './data-files-browser/data-files-browser.component';
 import { AuthGuard } from './guards/authentication.guard';
 import { CanDeactivateGuard } from './guards/can-deactivate.guard';
 import { HiveBrowserComponent } from './hive-browser/hive-browser.component';
@@ -87,6 +88,13 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
     data: { title: '${params["group"]} - ${params["uuid"]} ${params["version"]} - Configuration Files' }
+  },
+  {
+    path: 'datafilesbrowser/:group/:uuid/:version',
+    component: DataFilesBrowserComponent,
+    canActivate: [AuthGuard],
+    canDeactivate: [CanDeactivateGuard],
+    data: { title: '${params["group"]} - ${params["uuid"]} ${params["version"]} - Data Files' }
   },
   {
     path: 'products/:group',

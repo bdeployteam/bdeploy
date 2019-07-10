@@ -1,5 +1,6 @@
 package io.bdeploy.ui.api;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.GET;
@@ -7,6 +8,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
+import io.bdeploy.interfaces.directory.InstanceDirectory;
 import io.bdeploy.jersey.ActivityScope;
 
 @Path("/processes")
@@ -44,4 +46,7 @@ public interface ProcessResource {
     @Path("/restart")
     public void restart();
 
+    @GET
+    @Path("/dataDirSnapshot")
+    public List<InstanceDirectory> getDataDirSnapshot();
 }

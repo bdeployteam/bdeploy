@@ -4,7 +4,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { APP_INITIALIZER, ErrorHandler, NgModule } from '@angular/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatAutocompleteModule, MatBadgeModule, MatBottomSheetModule, MatButtonModule, MatCardModule, MatCheckboxModule, MatChipsModule, MatDialogModule, MatDividerModule, MatExpansionModule, MatFormFieldModule, MatGridListModule, MatIconModule, MatInputModule, MatListModule, MatMenuModule, MatPaginatorModule, MatProgressBarModule, MatProgressSpinnerModule, MatRippleModule, MatSelectModule, MatSidenavModule, MatSlideToggleModule, MatSnackBarModule, MatSortModule, MatTableModule, MatToolbarModule, MatTooltipModule, MatTreeModule } from '@angular/material';
+import { MatAutocompleteModule, MatBadgeModule, MatBottomSheetModule, MatButtonModule, MatCardModule, MatCheckboxModule, MatChipsModule, MatDialogModule, MatDividerModule, MatExpansionModule, MatFormFieldModule, MatGridListModule, MatIconModule, MatInputModule, MatListModule, MatMenuModule, MatPaginatorModule, MatProgressBarModule, MatProgressSpinnerModule, MatRippleModule, MatSelectModule, MatSidenavModule, MatSlideToggleModule, MatSnackBarModule, MatSortModule, MatTableModule, MatTabsModule, MatToolbarModule, MatTooltipModule, MatTreeModule } from '@angular/material';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LoadingBarHttpClientModule } from '@ngx-loading-bar/http-client';
@@ -21,6 +21,7 @@ import { ApplicationEditOptionalComponent } from './application-edit-optional/ap
 import { ApplicationEditComponent } from './application-edit/application-edit.component';
 import { ClientInfoComponent } from './client-info/client-info.component';
 import { ConfigFilesBrowserComponent } from './config-files-browser/config-files-browser.component';
+import { DataFilesBrowserComponent } from './data-files-browser/data-files-browser.component';
 import { ClickStopPropagationDirective } from './directives/click-stop-propagation.directive';
 import { FileDropDirective } from './directives/file-drop.directive';
 import { FileUploadComponent } from './file-upload/file-upload.component';
@@ -127,7 +128,8 @@ export function loadAppConfig(cfgService: ConfigService) {
     UpdateCardComponent,
     UpdateDialogComponent,
     MasterCleanupComponent,
-    FileViewerComponent
+    FileViewerComponent,
+    DataFilesBrowserComponent
   ],
   imports: [
     BrowserModule,
@@ -171,6 +173,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     MatPaginatorModule,
     MatSortModule,
     AceEditorModule,
+    MatTabsModule
   ],
   providers: [
     ConfigService,

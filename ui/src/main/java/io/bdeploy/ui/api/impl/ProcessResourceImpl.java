@@ -1,11 +1,13 @@
 package io.bdeploy.ui.api.impl;
 
+import java.util.List;
 import java.util.Map;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
+import io.bdeploy.interfaces.directory.InstanceDirectory;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
@@ -73,6 +75,11 @@ public class ProcessResourceImpl implements ProcessResource {
     public void restart() {
         stopAll();
         startAll();
+    }
+
+    public List<InstanceDirectory> getDataDirSnapshot() {
+        MasterNamedResource master = getMasterResource();
+        return master.getDataDirectorySnapshots(instanceId);
     }
 
     private MasterNamedResource getMasterResource() {

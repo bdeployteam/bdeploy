@@ -3,7 +3,7 @@
     <mat-toolbar-row>
       <span>{{ title }}</span>
       <div class='spacer'></div>
-      <mat-slide-toggle (change)='onToggleFollow($event.checked)' [checked]='follow' class='smaller-toggle'>Follow</mat-slide-toggle>
+      <mat-slide-toggle (change)='onToggleFollow($event.checked)' [checked]='follow' class='smaller-toggle' [disabled]='!canFollow()'>Follow</mat-slide-toggle>
       <button mat-icon-button (click)='loadInitial()'><mat-icon>refresh</mat-icon></button>
       <button mat-icon-button (click)='closeEvent.emit()'><mat-icon>close</mat-icon></button>
     </mat-toolbar-row>
