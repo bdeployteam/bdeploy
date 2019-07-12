@@ -6,7 +6,7 @@ import { MessageBoxMode } from '../messagebox/messagebox.component';
 import { ManifestKey, OperatingSystem } from '../models/gen.dtos';
 import { ConfigService } from '../services/config.service';
 import { MessageboxService } from '../services/messagebox.service';
-import { UpdateDataService } from '../services/update-data.service';
+import { SoftwareUpdateService } from '../services/software-update.service';
 import { UpdateDialogComponent } from '../update-dialog/update-dialog.component';
 
 export class GroupedKeys {
@@ -30,7 +30,7 @@ export class UpdateBrowserComponent implements OnInit {
   public systemLoading = false;
   public launcherLoading = false;
 
-  constructor(private updService: UpdateDataService, private cfgService: ConfigService, private mbService: MessageboxService, private dialog: MatDialog) {}
+  constructor(private updService: SoftwareUpdateService, private cfgService: ConfigService, private mbService: MessageboxService, private dialog: MatDialog) {}
 
   ngOnInit() {
     this.systemLoading = true;
@@ -138,7 +138,7 @@ export class UpdateBrowserComponent implements OnInit {
 
     for (const os of requiredOs) {
       if (!keys.oss.includes(os)) {
-        const ok = await this.mbService.openAsync({title: 'Missing OS package', message: `At least one node requires a ${os} update, which is missing in the selected version, continue anway?`, mode: MessageBoxMode.QUESTION});
+        const ok = await this.mbService.openAsync({title: 'Missing OS package', message: `At least one node requires a ${os} update, which is missing in the selected version, continue anyway?`, mode: MessageBoxMode.QUESTION});
         if (!ok) {
           return;
         }

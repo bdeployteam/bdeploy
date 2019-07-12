@@ -9,12 +9,12 @@
     </mat-toolbar-row>
   </mat-toolbar>
 <div class='flex-column'>
-  <button class="align-left" mat-button (click)="downloadClickAndStart()" matTooltip="Download client installer">
+  <button class="align-left" mat-button (click)="downloadClickAndStart()" matTooltip="Download Click & Start">
     <mat-icon>play_arrow</mat-icon>
     <span class="button-text">Click & Start</span>
   </button>
 
-  <button class="align-left" mat-button (click)="downloadInstaller()" [disabled]="downloading" matTooltip="Download client installer">
+  <button class="align-left" mat-button (click)="downloadInstaller()" [disabled]="downloading" matTooltip="Download Installer">
     <mat-icon *ngIf="!downloading">cloud_download</mat-icon>
     <mat-progress-spinner *ngIf="downloading" [mode]="'indeterminate'" diameter='24' class="progress-spinner"> </mat-progress-spinner>
     <span class="button-text">Installer</span>

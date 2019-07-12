@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { OperatingSystem } from '../models/gen.dtos';
-import { UpdateDataService } from '../services/update-data.service';
+import { SoftwareUpdateService } from '../services/software-update.service';
 import { GroupedKeys } from '../update-browser/update-browser.component';
 
 @Component({
@@ -15,7 +15,7 @@ export class UpdateCardComponent implements OnInit {
   @Output() public update = new EventEmitter<GroupedKeys>();
   @Output() public delete = new EventEmitter<GroupedKeys>();
 
-  constructor(private updService: UpdateDataService) { }
+  constructor(private updService: SoftwareUpdateService) { }
 
   ngOnInit() {
   }

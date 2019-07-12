@@ -14,6 +14,14 @@
   position: fixed !important;
 }
 
+.clientApps-button {
+  top: auto !important;
+  right: 40px !important;
+  bottom: 180px !important;
+  left: auto !important;
+  position: fixed !important;
+}
+
 .card-menu {
   float: right;
 }

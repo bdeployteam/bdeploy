@@ -172,7 +172,10 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
         InstanceResource resource = getInstanceResource(group);
         for (InstanceConfiguration ic : resource.list()) {
             String instanceId = ic.uuid;
-            RemoteService remote = ic.target;
+
+            // Always use latest version to lookup remote service
+            InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
+            RemoteService remote = im.getConfiguration().target;
 
             // Contact master to find out the active version. Skip if no version is active
             MasterRootResource root = ResourceProvider.getResource(remote, MasterRootResource.class);
@@ -183,7 +186,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
             }
 
             // Get a list of all node manifests - clients are stored in a special node
-            InstanceManifest im = InstanceManifest.load(hive, instanceId, active.getTag());
+            im = InstanceManifest.load(hive, instanceId, active.getTag());
             SortedMap<String, Key> manifests = im.getInstanceNodeManifests();
             Key clientKey = manifests.get(InstanceManifest.CLIENT_NODE_NAME);
             if (clientKey == null) {

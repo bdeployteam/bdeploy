@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { ClientAppsComponent } from './client-apps/client-apps.component';
 import { ConfigFilesBrowserComponent } from './config-files-browser/config-files-browser.component';
 import { DataFilesBrowserComponent } from './data-files-browser/data-files-browser.component';
 import { AuthGuard } from './guards/authentication.guard';
@@ -141,6 +142,13 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
     data: { title: 'Manual Cleanup' }
+  },
+  {
+    path: 'clientapps/:group',
+    component: ClientAppsComponent,
+    canActivate: [AuthGuard],
+    canDeactivate: [CanDeactivateGuard],
+    data: { title: 'Client Applications (${params["group"]})' }
   },
 ];
 

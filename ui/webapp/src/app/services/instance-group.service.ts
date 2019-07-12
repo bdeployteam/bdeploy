@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpErrorHandlerInterceptor } from '../interceptors/error-handler.interceptor';
-import { InstanceGroupConfiguration } from '../models/gen.dtos';
+import { InstanceClientAppsDto, InstanceGroupConfiguration } from '../models/gen.dtos';
 import { ConfigService } from './config.service';
 import { Logger, LoggingService } from './logging.service';
 
@@ -12,7 +12,7 @@ import { Logger, LoggingService } from './logging.service';
 export class InstanceGroupService {
   public static BASEPATH = '/group';
 
-  private log: Logger = this.loggingService.getLogger('InstanceGroupService');
+  private readonly log: Logger = this.loggingService.getLogger('InstanceGroupService');
 
   constructor(private cfg: ConfigService, private http: HttpClient, private loggingService: LoggingService) {}
 
@@ -20,6 +20,12 @@ export class InstanceGroupService {
     const url: string = this.cfg.config.api + InstanceGroupService.BASEPATH;
     this.log.debug('listInstanceGroups: ' + url);
     return this.http.get<InstanceGroupConfiguration[]>(url);
+  }
+
+  public listClientApps(name: string): Observable<InstanceClientAppsDto[]> {
+    const url: string = this.cfg.config.api + InstanceGroupService.BASEPATH + '/' + name + '/client-apps';
+    this.log.debug('listClientApps: ' + url);
+    return this.http.get<InstanceClientAppsDto[]>(url);
   }
 
   public createInstanceGroup(group: InstanceGroupConfiguration) {

@@ -1,0 +1,27 @@
+@import '~@angular/material/theming';
+
+@mixin client-apps-theme($theme) {
+  $dark: map-get($theme, 'is-dark');
+  $warn: map-get($theme, 'warn');
+  $info: map-get($theme, 'accent');
+
+  .banner-warn-theme {
+    color: #fff;
+    background-color: mat-color($warn);
+  }
+
+  .banner-info-theme {
+    color: #fff;
+    background-color: mat-color($info);
+  }
+
+  .instance-card-theme {
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.24), 0 0 2px rgba(0, 0, 0, 0.12);
+    background-color: if($dark, #424242, #fff);
+  }
+
+  .instance-card-header-theme {
+    background: if($dark, rgba(0, 0, 0, 0.2),rgba(0, 0, 0, 0.03));
+  }
+
+}
