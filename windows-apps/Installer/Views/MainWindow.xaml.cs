@@ -1,4 +1,9 @@
-﻿using System.IO;
+﻿using Microsoft.Win32;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -13,6 +18,7 @@ namespace Bdeploy.Installer
     public partial class MainWindow : Window
     {
         private readonly AppInstaller Installer;
+        private bool detailsVisible = false;
 
         public MainWindow(AppInstaller installer)
         {
@@ -32,6 +38,8 @@ namespace Bdeploy.Installer
             // Ensure progress page is visible
             ProgressGrid.Visibility = Visibility.Visible;
             ErrorGrid.Visibility = Visibility.Hidden;
+            ErrorMessage.Visibility = Visibility.Visible;
+            ErrorDetails.Visibility = Visibility.Hidden;
         }
 
         private void Installer_IconLoaded(object sender, IconEventArgs e)
@@ -48,7 +56,7 @@ namespace Bdeploy.Installer
             {
                 ProgressGrid.Visibility = Visibility.Hidden;
                 ErrorGrid.Visibility = Visibility.Visible;
-                ErrorDetails.Text = e.Message;
+                ErrorDetails.Text = GetDetailedErrorMessage(e.Message);
             });
         }
 
@@ -85,6 +93,10 @@ namespace Bdeploy.Installer
         private void Window_CloseButton_Click(object sender, RoutedEventArgs e)
         {
             Installer.Canceled = true;
+            if (ErrorGrid.Visibility == Visibility.Visible)
+            {
+                Close();
+            }
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
@@ -92,6 +104,63 @@ namespace Bdeploy.Installer
             Close();
         }
 
+        private void DetailsButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (detailsVisible)
+            {
+                ErrorMessage.Visibility = Visibility.Visible;
+                ErrorDetails.Visibility = Visibility.Hidden;
+                DetailsButton.Content = "Show Details";
+                Height = 300;
+            }
+            else
+            {
+                ErrorMessage.Visibility = Visibility.Hidden;
+                ErrorDetails.Visibility = Visibility.Visible;
+                DetailsButton.Content = "Hide Details";
+                Height = 450;
+            }
+            detailsVisible = !detailsVisible;
+        }
+
+        private void ClipboardButton_Click(object sender, RoutedEventArgs e)
+        {
+            Clipboard.SetText(ErrorDetails.Text);
+        }
+
+        private string GetDetailedErrorMessage(string message)
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.AppendFormat("*** Date: {0}", DateTime.Now.ToString("dd.MM.yyyy hh:mm:ss"));
+            builder.AppendLine().AppendLine();
+
+            builder.AppendFormat("*** Error:").AppendLine();
+            builder.Append(message);
+            builder.AppendLine().AppendLine();
+
+            builder.AppendFormat("*** Application:").AppendLine();
+            builder.Append(Environment.CommandLine);
+            builder.AppendLine().AppendLine();
+
+            builder.Append("*** System environment variables: ").AppendLine();
+            foreach (DictionaryEntry entry in Environment.GetEnvironmentVariables())
+            {
+                builder.AppendFormat("{0}={1}", entry.Key, entry.Value).AppendLine();
+            }
+            builder.AppendLine();
+
+            builder.Append("*** Operating system: ").AppendLine();
+            builder.Append(ReadValueName("ProductName")).Append(Environment.NewLine);
+            builder.AppendFormat("Version {0} (OS Build {1}.{2})", ReadValueName("ReleaseId"), ReadValueName("CurrentBuildNumber"), ReadValueName("UBR"));
+            builder.AppendLine();
+
+            return builder.ToString();
+        }
+
+        private string ReadValueName(String valueName)
+        {
+            return Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion", valueName, "").ToString();
+        }
     }
 
 }
