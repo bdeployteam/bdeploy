@@ -28,17 +28,19 @@
 
 .icon-column {
   min-width: 40px;
+  cursor: pointer;
 }
 
 .wide-column {
   width: 100%;
+  cursor: pointer;
 }
 
 .size-column {
   min-width: 80px;
 }
 
-.timestamp-column {
+.lastModified-column {
   min-width: 180px;
 }
 

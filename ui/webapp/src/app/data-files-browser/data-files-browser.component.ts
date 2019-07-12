@@ -2,7 +2,7 @@ import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Location } from '@angular/common';
 import { Component, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
-import { PageEvent } from '@angular/material';
+import { PageEvent, Sort } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { InstanceDirectory, InstanceDirectoryEntry, StringEntryChunkDto } from '../models/gen.dtos';
@@ -23,9 +23,10 @@ export class DataFilesBrowserComponent implements OnInit {
   uuidParam: string = this.route.snapshot.paramMap.get('uuid');
   versionParam: string = this.route.snapshot.paramMap.get('version');
 
-  public displayedColumns: string[] = ['icon', 'path', 'size', 'timestamp', 'download'];
+  public displayedColumns: string[] = ['icon', 'path', 'size', 'lastModified', 'download'];
 
-  public pageEvents = new Map<string, PageEvent>();
+  public pageEvents: Map<string, PageEvent> = new Map<string, PageEvent>();
+  public sortEvents: Map<string, Sort> = new Map<string, Sort>();
 
   public instanceDirectories: InstanceDirectory[];
   public activeInstanceDirectory: InstanceDirectory = null;
@@ -53,7 +54,6 @@ export class DataFilesBrowserComponent implements OnInit {
   public reload() {
     this.instanceService.listDataDirSnapshot(this.groupParam, this.uuidParam).subscribe(
       instanceDirectories =>  {
-        console.log(JSON.stringify(instanceDirectories, null, '\t'));
         this.instanceDirectories = instanceDirectories.sort((a, b) => {
           if (a.minion === 'master') {
             return -1;
@@ -76,16 +76,42 @@ export class DataFilesBrowserComponent implements OnInit {
 
   public getCurrentPage(instanceDirectory: InstanceDirectory) {
     const pageEvent = this.pageEvents.get(instanceDirectory.minion);
+    const sortEvent = this.sortEvents.get(instanceDirectory.minion);
 
     const pageIndex = pageEvent ? pageEvent.pageIndex : this.getInitialPageIndex();
     const pageSize = pageEvent ? pageEvent.pageSize : this.getInitialPageSize();
 
     const firstIdx = pageIndex * pageSize;
-    return instanceDirectory.entries.slice(firstIdx, firstIdx + pageSize);
+    const page = instanceDirectory.entries.slice(firstIdx, firstIdx + pageSize);
+
+    if (sortEvent && sortEvent.direction) {
+      page.sort((a, b) => {
+        let v1 = a[sortEvent.active];
+        let v2 = b[sortEvent.active];
+        if (typeof(v1) === 'string' && typeof(v2) === 'string') {
+          v1 = v1.toLocaleLowerCase();
+          v2 = v2.toLocaleLowerCase();
+        }
+        const res = v1 < v2 ? -1 : (v1 > v2 ? 1 : 0);
+        return res * (sortEvent.direction === 'asc' ? 1 : -1);
+      });
+    }
+
+    return page;
   }
 
-  public formatTimestamp(timestamp: number): string {
-    return new Date(timestamp).toLocaleString();
+  public sortFiles(instanceDirectory: InstanceDirectory, event: Sort) {
+    this.sortEvents.set(instanceDirectory.minion, event);
+  }
+
+
+  public formatSize(size: number): string {
+    const i: number = size === 0 ? 0 : Math.min(4, Math.floor(Math.log(size) / Math.log(1024)));
+    return (i === 0 ? size : ((size / Math.pow(1024, i)).toFixed(2))) + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
+  }
+
+  public formatLastModified(lastModified: number): string {
+    return new Date(lastModified).toLocaleString();
   }
 
   public download(instanceDirectory: InstanceDirectory, instanceDirectoryEntry: InstanceDirectoryEntry) {
