@@ -32,7 +32,7 @@
       <span class="headerText"><a color="primary" [routerLink]="['/instanceadd', instanceGroupName]">Create Instance</a></span>
     </p>
   </div>
-  <div *ngFor="let purpose of purposes">
+  <div class="purpose-box" *ngFor="let purpose of purposes">
     <p class="list-heading">{{purpose}}</p>
     <div *ngFor="let instance of getInstancesByPurpose(purpose)">
       <app-instance-card [instance]='instance' [instanceGroupName]='instanceGroupName' (removeEvent)='remove(instance)'></app-instance-card>
