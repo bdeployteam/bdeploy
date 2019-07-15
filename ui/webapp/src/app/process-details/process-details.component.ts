@@ -324,7 +324,8 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   getCurrentOutputEntryFetcher(): () => Observable<InstanceDirectoryEntry> {
-    return () => this.instanceService.getApplicationOutputEntry(this.instanceGroup, this.instanceId, this.instanceTag, this.appConfig.uid, false).pipe(
+    const tag: string = this.status ? this.status.instanceTag : (this.activatedInstanceTag ? this.activatedInstanceTag : this.instanceTag);
+    return () => this.instanceService.getApplicationOutputEntry(this.instanceGroup, this.instanceId, tag, this.appConfig.uid, false).pipe(
       map(dir => {
         if (!dir.entries || !dir.entries.length) {
           return null;
@@ -337,7 +338,8 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
 
   getOutputContentFetcher(): (offset: number, limit: number) => Observable<StringEntryChunkDto> {
     return (offset, limit) => {
-      return this.instanceService.getApplicationOutputEntry(this.instanceGroup, this.instanceId, this.instanceTag, this.appConfig.uid, true).pipe(
+      const tag: string = this.status ? this.status.instanceTag : (this.activatedInstanceTag ? this.activatedInstanceTag : this.instanceTag);
+      return this.instanceService.getApplicationOutputEntry(this.instanceGroup, this.instanceId, tag, this.appConfig.uid, true).pipe(
         mergeMap(dir => this.instanceService.getContentChunk(this.instanceGroup, this.instanceId, dir, dir.entries[0], offset, limit, true))
       );
     };
