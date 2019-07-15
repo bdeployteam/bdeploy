@@ -78,6 +78,7 @@ export class FileViewerComponent implements OnInit, OnDestroy {
     this.follow = checked;
     if (checked) {
       this.timer = setInterval(() => this.updateTail(), 1000);
+      this.scrollToBottom();
     } else {
       this.clearTimer();
     }
