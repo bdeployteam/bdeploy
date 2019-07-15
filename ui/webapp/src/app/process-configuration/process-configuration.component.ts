@@ -134,8 +134,20 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       // Add specialized entry that is shown in case we have local modifications
       this.processConfigs.unshift(new ProcessConfigDto(this.processConfigs[0].version, false));
 
-      // set active version
-      this.loadInstance(this.processConfigs[0]);
+      // get deployment states
+      this.instanceService.getDeploymentStates(this.groupParam, this.uuidParam).subscribe(deploymentState => {
+        this.deploymentState = deploymentState;
+        // try to load the activated version
+        if (this.deploymentState.activatedVersion) {
+          const initialConfig = this.processConfigs.find(cfg => cfg.version.key.tag === this.deploymentState.activatedVersion);
+          if (initialConfig) {
+            this.loadInstance(initialConfig);
+            return;
+          }
+        }
+        // start with first version otherwise
+        this.loadInstance(this.processConfigs[0]);
+      });
     });
   }
 
