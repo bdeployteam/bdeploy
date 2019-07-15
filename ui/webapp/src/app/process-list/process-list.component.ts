@@ -1,7 +1,7 @@
 import { Component, Inject, OnInit, ViewChild } from '@angular/core';
 import { MatPaginator, MatSort, MatTable, MatTableDataSource, MAT_BOTTOM_SHEET_DATA } from '@angular/material';
-import { ApplicationGroup } from '../models/application.model';
 import { ApplicationConfiguration, OperatingSystem, ProcessDetailDto, ProcessStatusDto } from '../models/gen.dtos';
+import { getAppOs } from '../utils/manifest.utils';
 
 @Component({
   selector: 'app-process-list',
@@ -59,7 +59,7 @@ export class ProcessListComponent implements OnInit {
   initTableColumns() {
     // On windows the arguments are always empty due to permissions
     // We cannot determine them for a running application
-    const os = ApplicationGroup.getAppOs(this.appConfig.application);
+    const os = getAppOs(this.appConfig.application);
     if (os === OperatingSystem.WINDOWS) {
       return ['pid', 'user', 'totalCpuDuration', 'command'];
     }

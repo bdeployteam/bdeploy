@@ -29,6 +29,15 @@
   margin-top: 5px;
 }
 
+.launcher-warn {
+  padding: 5px;
+  border-radius: 5px;
+}
+
+.launcher-warn mat-icon {
+  vertical-align: bottom;
+}
+
 mat-divider {
   margin-top: 10px;
   margin-bottom: 10px;

@@ -18,6 +18,7 @@ import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper;
+import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.minion.TestFactory;
@@ -37,6 +38,7 @@ public class InstanceGroupResourceTest {
     @Test
     public void testListClientApps(InstanceGroupResource resource, BHive local, MasterRootResource root, RemoteService remote,
             @TempDir Path tmp) throws IOException, InterruptedException {
+        OperatingSystem runningOs = OsHelper.getRunningOs();
 
         // Create install a small demo instance
         Key instance = TestFactory.createApplicationsAndInstance(local, root, remote, tmp);
@@ -44,12 +46,12 @@ public class InstanceGroupResourceTest {
         master.install(instance);
 
         // Non-activated versions should not be contained in the result
-        Collection<InstanceClientAppsDto> clientApps = resource.listClientApps(GROUP_NAME);
+        Collection<InstanceClientAppsDto> clientApps = resource.listClientApps(GROUP_NAME, runningOs);
         assertEquals(0, clientApps.size());
 
         // Activate and check if we now get the desired result
         master.activate(instance);
-        clientApps = resource.listClientApps(GROUP_NAME);
+        clientApps = resource.listClientApps(GROUP_NAME, runningOs);
         assertEquals(1, clientApps.size());
 
         // A single application for the current OS must be contained

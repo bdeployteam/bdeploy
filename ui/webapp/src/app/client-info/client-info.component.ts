@@ -1,7 +1,8 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { ApplicationGroup } from '../models/application.model';
 import { EventWithCallback } from '../models/event';
 import { ApplicationConfiguration } from '../models/gen.dtos';
+import { LauncherService } from '../services/launcher.service';
+import { getAppOs } from '../utils/manifest.utils';
 
 @Component({
   selector: 'app-client-info',
@@ -19,12 +20,12 @@ export class ClientInfoComponent implements OnInit {
 
   downloading = false;
 
-  constructor() {}
+  constructor(private launcherService: LauncherService) {}
 
   ngOnInit() {}
 
   getAppOs() {
-    return ApplicationGroup.getAppOs(this.appConfig.application);
+    return getAppOs(this.appConfig.application);
   }
 
   downloadClickAndStart() {
@@ -34,5 +35,9 @@ export class ClientInfoComponent implements OnInit {
   downloadInstaller() {
     this.downloading = true;
     this.downloadInstallerEvent.emit(new EventWithCallback(this.appConfig, () => (this.downloading = false)));
+  }
+
+  hasLauncher() {
+    return this.launcherService.hasLauncherForOs(this.getAppOs());
   }
 }

@@ -1,4 +1,5 @@
 import { cloneDeep } from 'lodash';
+import { getAppKeyName } from '../utils/manifest.utils';
 import { ApplicationGroup } from './application.model';
 import { CLIENT_NODE_NAME, EMPTY_INSTANCE_NODE_CONFIGURATION, EMPTY_INSTANCE_NODE_CONFIGURATION_DTO } from './consts';
 import { ApplicationConfiguration, ApplicationDto, InstanceConfiguration, InstanceNodeConfigurationDto, InstanceNodeConfigurationListDto, InstanceVersionDto } from './gen.dtos';
@@ -111,7 +112,7 @@ export class ProcessConfigDto {
   groupApplications(apps: ApplicationDto[]): ApplicationGroup[] {
     const groups = new Map<String, ApplicationGroup>();
     for (const app of apps) {
-      const name = ApplicationGroup.getAppKeyName(app.key);
+      const name = getAppKeyName(app.key);
       let group = groups.get(name);
       if (group == null) {
         group = new ApplicationGroup();

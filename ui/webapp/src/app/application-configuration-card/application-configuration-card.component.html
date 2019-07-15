@@ -12,7 +12,7 @@
         <button mat-menu-item (click)="downloadClickAndStart()">
           <span>Click & Start</span>
         </button>
-        <button mat-menu-item [disabled]="downloading" (click)="downloadInstaller()">
+        <button mat-menu-item [disabled]="downloading ||! hasLauncher()" (click)="downloadInstaller()">
           <span>Download Installer</span>
         </button>
         <mat-divider></mat-divider>

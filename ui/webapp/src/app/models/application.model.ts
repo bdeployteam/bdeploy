@@ -1,5 +1,6 @@
 import { ApplicationService } from '../services/application.service';
-import { ApplicationDto, ApplicationType, ManifestKey, OperatingSystem, ParameterConfiguration, ParameterDescriptor, ParameterType } from './gen.dtos';
+import { getAppKeyName, getAppOs } from '../utils/manifest.utils';
+import { ApplicationDto, ApplicationType, OperatingSystem, ParameterConfiguration, ParameterDescriptor, ParameterType } from './gen.dtos';
 
 /**
  * Default group names used in the application
@@ -159,31 +160,14 @@ export class ApplicationGroup {
   /** The type of the applications */
   public appType: ApplicationType;
 
-  /**
-   * Returns the base name of the application manifest key.
-   */
-  public static getAppKeyName(appKey: ManifestKey) {
-    const fullName = appKey.name;
-    const lastSlashIdx = fullName.lastIndexOf('/');
-    return fullName.substring(0, lastSlashIdx);
-  }
 
-  /**
-   * Returns the OS supported by this application
-   */
-  public static getAppOs(appKey: ManifestKey): OperatingSystem {
-    const fullName = appKey.name;
-    const lastSlashIdx = fullName.lastIndexOf('/') + 1;
-    const osName = fullName.substring(lastSlashIdx).toUpperCase();
-    return OperatingSystem[osName];
-  }
 
   /**
    * Adds a new application to this list. Must have the same base name.
    */
   public add(dto: ApplicationDto) {
-    const keyName = ApplicationGroup.getAppKeyName(dto.key);
-    const os = ApplicationGroup.getAppOs(dto.key);
+    const keyName = getAppKeyName(dto.key);
+    const os = getAppOs(dto.key);
 
     // Name must match the previous ones
     if (this.applications.length === 0) {
@@ -208,7 +192,7 @@ export class ApplicationGroup {
    */
   public getAppFor(os: OperatingSystem): ApplicationDto {
     return this.applications.find(app => {
-      const appOs = ApplicationGroup.getAppOs(app.key);
+      const appOs = getAppOs(app.key);
       return appOs === os;
     });
   }

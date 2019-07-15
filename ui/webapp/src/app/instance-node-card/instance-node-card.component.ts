@@ -12,6 +12,7 @@ import { ApplicationService } from '../services/application.service';
 import { DownloadService } from '../services/download.service';
 import { InstanceService } from '../services/instance.service';
 import { Logger, LoggingService } from '../services/logging.service';
+import { getAppOs } from '../utils/manifest.utils';
 import { indexOf } from '../utils/object.utils';
 
 /** Data attached to a drag event when dragging apps between nodes */
@@ -142,7 +143,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy, AfterViewIn
         if (!nodeStatus) {
           cardClassList.add(this.INVALID_DROP_ZONE_CLASS);
         } else {
-          const appOs = ApplicationGroup.getAppOs(appCard.appConfig.application);
+          const appOs = getAppOs(appCard.appConfig.application);
           if (nodeStatus.os === appOs) {
             cardClassList.add(this.VALID_DROP_ZONE_CLASS);
           } else {
@@ -329,7 +330,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy, AfterViewIn
         return false;
       }
       const nodeOs = this.node.status.os;
-      const appOs = ApplicationGroup.getAppOs(appCard.appConfig.application);
+      const appOs = getAppOs(appCard.appConfig.application);
       if (nodeOs !== appOs) {
         return false;
       }

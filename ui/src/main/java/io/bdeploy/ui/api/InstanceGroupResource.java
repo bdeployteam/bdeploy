@@ -13,10 +13,12 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
+import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.jersey.ActivityScope;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
@@ -75,6 +77,7 @@ public interface InstanceGroupResource {
 
     @GET
     @Path("/{group}/client-apps")
-    public Collection<InstanceClientAppsDto> listClientApps(@ActivityScope @PathParam("group") String group);
+    public Collection<InstanceClientAppsDto> listClientApps(@ActivityScope @PathParam("group") String group,
+            @QueryParam("os") OperatingSystem os);
 
 }

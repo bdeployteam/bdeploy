@@ -9,12 +9,19 @@
     </mat-toolbar-row>
   </mat-toolbar>
 <div class='flex-column'>
+  <ng-container *ngIf="!hasLauncher()">
+    <div class="launcher-warn launcher-warn-theme">
+      <mat-icon>warning</mat-icon>
+      <span>Launcher for the operating system of this application is not available.</span>
+      </div>
+    <mat-divider></mat-divider>
+  </ng-container>
   <button class="align-left" mat-button (click)="downloadClickAndStart()" matTooltip="Download Click & Start">
     <mat-icon>play_arrow</mat-icon>
     <span class="button-text">Click & Start</span>
   </button>
 
-  <button class="align-left" mat-button (click)="downloadInstaller()" [disabled]="downloading" matTooltip="Download Installer">
+  <button class="align-left" mat-button (click)="downloadInstaller()" [disabled]="!hasLauncher() || downloading" matTooltip="Download Installer">
     <mat-icon *ngIf="!downloading">cloud_download</mat-icon>
     <mat-progress-spinner *ngIf="downloading" [mode]="'indeterminate'" diameter='24' class="progress-spinner"> </mat-progress-spinner>
     <span class="button-text">Installer</span>
