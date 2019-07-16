@@ -190,7 +190,7 @@ export class InstanceAddEditComponent implements OnInit {
         .subscribe(result => {
           this.clonedInstance = instance;
           this.log.info('created new instance ' + this.uuidParam);
-          this.router.navigate(['/instancebrowser', this.groupParam]);
+          this.location.back();
         });
     } else {
       this.instanceService
@@ -199,7 +199,7 @@ export class InstanceAddEditComponent implements OnInit {
         .subscribe(result => {
           this.clonedInstance = instance;
           this.log.info('updated instance ' + this.uuidParam);
-          this.router.navigate(['/instancebrowser', this.groupParam]);
+          this.location.back();
         });
     }
   }
