@@ -35,42 +35,42 @@
 
     <div *ngFor="let purpose of getPurposes()">
       <p class="list-heading">{{purpose}}</p>
-      <ng-container *ngFor="let instance of getInstances(purpose)">
-        <div [ngClass]="['instance-card','instance-card-theme', 'instance-card-' + instance.purpose]">
-          <div class="instance-card-header instance-card-header-theme">
-            <div class="instance-card-header-logo">
-              <app-instance-group-logo [instanceGroupName]='instanceGroupName'></app-instance-group-logo>
-            </div>
-            <div class="instance-card-header-text">
-              <div class="instance-card-header-title">{{instance.name}}</div>
-              <div class="instance-card-header-subheading" *ngIf="instance.description">{{instance.description}}</div>
-            </div>
-            <div class="instance-card-header-version">{{instance.product.tag}}</div>
-          </div>
-          <ng-container *ngFor="let app of getApps(instance)">
-            <div class="app-card">
-              <div class="app-card-icon">
-                <mat-icon [svgIcon]='app.os'></mat-icon>
+      <div class="card" *ngFor="let instance of getInstances(purpose)">
+        <mat-card [ngClass]="['instance-card','instance-card-theme', 'instance-card-' + instance.purpose]">
+          <mat-card-header>
+            <app-instance-group-logo mat-card-avatar [instanceGroupName]='instanceGroupName'></app-instance-group-logo>
+            <mat-card-title class="instance-card-title">{{instance.name}}</mat-card-title>
+            <mat-card-subtitle *ngIf="instance.description" class="instance-card-subtitle">{{instance.description}}</mat-card-subtitle>
+            <span class="fill-space"></span>
+            <div class="instance-card-toolbar">{{instance.product.tag}}</div>
+          </mat-card-header>
+          <mat-card-content>
+            <ng-container *ngFor="let app of getApps(instance); last as isLast">
+              <div class="app-card">
+                <div class="app-card-icon">
+                  <mat-icon [svgIcon]='app.os'></mat-icon>
+                </div>
+                <div class="app-card-description">
+                  <span>{{app.description}}</span>
+                </div>
+                <button mat-button class="app-card-link" (click)="downloadClickAndRun(instance, app)" matTooltip="Download Click & Start">
+                  <mat-icon>play_arrow</mat-icon>
+                  <span>Click & Start</span>
+                </button>
+                <button mat-button class="app-card-link" (click)="downloadInstaller(instance, app)"
+                  matTooltip="Download Installer" [disabled]="!launcherService.hasLauncherForOs(app.os)">
+                  <mat-icon>cloud_download</mat-icon>
+                  <span>Installer</span>
+                </button>
               </div>
-              <div class="app-card-description">
-                {{app.description}}
-              </div>
-              <button mat-button class="app-card-link" (click)="downloadClickAndRun(instance, app)" matTooltip="Download Click & Start">
-                <mat-icon>play_arrow</mat-icon>
-                <span>Click & Start</span>
-              </button>
-              <button mat-button class="app-card-link" (click)="downloadInstaller(instance, app)"
-                matTooltip="Download Installer" [disabled]="!launcherService.hasLauncherForOs(app.os)">
-                <mat-icon>cloud_download</mat-icon>
-                <span>Installer</span>
-              </button>
-            </div>
-          <mat-divider></mat-divider>
-        </ng-container>
+              <mat-divider *ngIf="!isLast" class="list-divider"></mat-divider>
+            </ng-container>
+          </mat-card-content>
+        </mat-card>
       </div>
-    </ng-container>
-  </div>
-</ng-container>
+      <mat-divider class="list-divider"></mat-divider>
+    </div>
+  </ng-container>
 
 
 

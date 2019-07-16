@@ -49,7 +49,11 @@
 
 .content-toolbar-item {
   align-self: flex-end;
-  margin-right: 25px;
+  margin-right: 60px;
+}
+
+.content-toolbar button {
+  font-weight: normal;
 }
 
 .content-toolbar mat-icon {
@@ -57,43 +61,25 @@
 }
 
 .content-toolbar button {
-  font-weight: bold;
   font-size: 1em;
 }
 
 .list-heading {
-  font-weight: bold;
   margin-top: 30px;
   margin-left: 15px;
 }
 
+.card {
+  margin-left: 40px;
+  margin-right: 40px;
+}
+
 .instance-card {
-  margin-left: 2em;
-  margin-right: 2em;
   margin-bottom: 1em;
   max-width: 100%;
-  border-radius: 5px;
-}
-
-.instance-card-header {
-  display: grid;
-  grid-column-gap: 10px;
-  grid-template-columns: 45px 3fr 1fr;
-  padding: 8px 20px;
-}
-
-.instance-card-header-logo {
-  height: 40px;
-  width: 40px;
-}
-
-.instance-card-header-text {
-  display: grid;
-}
-
-.instance-card-header-title {
-  font-weight: bold;
-  align-self: center;
+  margin-top: 2em;
+  margin-left: 2em;
+  margin-right: 2em;
 }
 
 .instance-card-header-version {
@@ -102,30 +88,43 @@
   align-self: center;
 }
 
-.instance-card-header-subheading {
-  font-weight: lighter;
+.instance-card-title {
+  justify-self: center;
   align-self: center;
+}
+
+.instance-card-subtitle {
+  margin-bottom: 0px;
+}
+
+.mat-card-content {
+  margin-top: 1em;
 }
 
 .app-card {
   display: grid;
   grid-column-gap: 10px;
   grid-template-columns: 45px 2fr 2fr 3fr;
-  padding: 8px 20px;
   margin-top: 1em;
 }
 
 .app-card-icon {
   justify-self: center;
+  align-self: center;
 }
 
 .app-card-description {
-  font-weight: bolder;
   justify-self: left;
+  align-self: center;
+
+  /** Apply same style as mat-button */
+  line-height: 36px;
+  font-weight: 500;
 }
 
 .app-card-link {
   justify-self: left;
+  align-self: center;
 }
 
 .app-card-link span {
