@@ -1,8 +1,8 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpErrorHandlerInterceptor } from '../interceptors/error-handler.interceptor';
-import { InstanceClientAppsDto, InstanceGroupConfiguration } from '../models/gen.dtos';
+import { InstanceClientAppsDto, InstanceGroupConfiguration, OperatingSystem } from '../models/gen.dtos';
 import { ConfigService } from './config.service';
 import { Logger, LoggingService } from './logging.service';
 
@@ -22,10 +22,13 @@ export class InstanceGroupService {
     return this.http.get<InstanceGroupConfiguration[]>(url);
   }
 
-  public listClientApps(name: string): Observable<InstanceClientAppsDto[]> {
+  public listClientApps(name: string, os: OperatingSystem): Observable<InstanceClientAppsDto[]> {
     const url: string = this.cfg.config.api + InstanceGroupService.BASEPATH + '/' + name + '/client-apps';
+    const options = {
+      params: new HttpParams().set('os', os.toUpperCase())
+    };
     this.log.debug('listClientApps: ' + url);
-    return this.http.get<InstanceClientAppsDto[]>(url);
+    return this.http.get<InstanceClientAppsDto[]>(url, options);
   }
 
   public createInstanceGroup(group: InstanceGroupConfiguration) {
@@ -88,5 +91,4 @@ export class InstanceGroupService {
     formData.append('image', file, file.name);
     return this.http.post<Response>(url, formData);
   }
-
 }

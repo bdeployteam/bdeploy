@@ -19,6 +19,7 @@ import { ProcessDetailsComponent } from '../process-details/process-details.comp
 import { ApplicationService } from '../services/application.service';
 import { DownloadService } from '../services/download.service';
 import { InstanceService } from '../services/instance.service';
+import { LauncherService } from '../services/launcher.service';
 import { Logger, LoggingService } from '../services/logging.service';
 import { MessageboxService } from '../services/messagebox.service';
 import { ProcessService } from '../services/process.service';
@@ -36,7 +37,7 @@ export enum SidenavMode {
   selector: 'app-process-configuration',
   templateUrl: './process-configuration.component.html',
   styleUrls: ['./process-configuration.component.css'],
-  providers: [ApplicationService],
+  providers: [ApplicationService, LauncherService],
 })
 export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   public static readonly DROPLIST_APPLICATIONS = 'APPLICATIONS';
@@ -91,6 +92,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     private loggingService: LoggingService,
     private instanceService: InstanceService,
     private applicationService: ApplicationService,
+    private clientApps: LauncherService,
     private messageBoxService: MessageboxService,
     private productService: ProductService,
     private processService: ProcessService,

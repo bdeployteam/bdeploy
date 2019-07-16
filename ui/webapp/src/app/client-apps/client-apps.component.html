@@ -2,33 +2,39 @@
     <button mat-icon-button type="button" (click)='location.back()'><mat-icon>chevron_left</mat-icon></button>
     <span>Client Applications @ {{instanceGroupName}}</span>
     <span class="fill-space"></span>
-    <ng-container *ngIf="hasLaunchers && !launcherLoading">
-      <span class="toolbar-text">Download Click & Start Launcher</span>
+    <ng-container *ngIf="!isLoading()">
+      <span class="toolbar-text">Platform:</span>
       <div class="toolbar-icons">
-        <ng-container *ngFor="let launcher of launcherDto.launchers | keyvalue">
-          <button mat-icon-button  matTooltip="Download for {{launcher.key}}" (click)='downloadLauncher(launcher.key)'>
-            <mat-icon class="icon" [svgIcon]='launcher.key'></mat-icon>
+        <ng-container *ngFor="let os of CLIENT_OS">
+          <button mat-icon-button (click)='switchOs(os)' matTooltip="{{os}}">
+            <mat-icon [ngClass]="['toolbar-icon', os === activeOs ? 'toolbar-icon-active' : 'none']" [svgIcon]='os'></mat-icon>
           </button>
         </ng-container>
       </div>
     </ng-container>
   </mat-toolbar>
 
-  <div *ngIf="loading" class="loading-container">
-    <mat-progress-spinner [mode]="'indeterminate'" class="loading-spinner" mode></mat-progress-spinner>
+  <div *ngIf="isLoading()" class="loading-container">
+    <mat-progress-spinner [mode]="'indeterminate'" class="loading-spinner"></mat-progress-spinner>
   </div>
-  <ng-container *ngIf="!loading">
-    <p class="banner banner-info-theme" *ngIf="!hasApps">
+  <ng-container *ngIf="!isLoading()">
+    <p class="banner banner-warn-theme" *ngIf="!hasApps">
       <span class="material-icons headerIcon">computer</span>
-      <span class="headerText">No client applications are published in this instance group.</span>
+      <span class="headerText">No client applications are published for your operating system. Please contact the administrator.</span>
     </p>
-    <p class="banner banner-warn-theme" *ngIf="hasApps && !hasLaunchers">
+    <p class="banner banner-warn-theme" *ngIf="!launcherService.hasLauncherForOs(activeOs)">
       <span class="material-icons headerIcon">launch</span>
-      <span class="headerText">No launchers are available. The Click & Start application as well as the client installers cannot be downloaded. Please contact the administrator. </span>
+      <span class="headerText">Launcher for your operating system is not available. Please contact the administrator.</span>
     </p>
+    <div class="content-toolbar" *ngIf="launcherService.hasLauncherForOs(activeOs)">
+      <button class="content-toolbar-item" mat-button (click)="downloadLauncher()">
+        <mat-icon>cloud_download</mat-icon>
+        <span>Download Click & Start Launcher</span>
+      </button>
+    </div>
+
     <div *ngFor="let purpose of getPurposes()">
       <p class="list-heading">{{purpose}}</p>
-
       <ng-container *ngFor="let instance of getInstances(purpose)">
         <div [ngClass]="['instance-card','instance-card-theme', 'instance-card-' + instance.purpose]">
           <div class="instance-card-header instance-card-header-theme">
@@ -49,18 +55,15 @@
               <div class="app-card-description">
                 {{app.description}}
               </div>
-              <div class="app-card-content">
-                <div class="app-card-links">
-                  <button mat-button class="app-card-link" (click)="downloadClickAndRun(instance, app)" matTooltip="Download Click & Start">
-                    <mat-icon>play_arrow</mat-icon>
-                    <span>Click & Start</span>
-                  </button>
-                  <button mat-button class="app-card-link" (click)="downloadInstaller(instance, app)" matTooltip="Download Installer" [disabled]="!hasLaunchers">
-                    <mat-icon>cloud_download</mat-icon>
-                    <span>Installer</span>
-                  </button>
-                </div>
-              </div>
+              <button mat-button class="app-card-link" (click)="downloadClickAndRun(instance, app)" matTooltip="Download Click & Start">
+                <mat-icon>play_arrow</mat-icon>
+                <span>Click & Start</span>
+              </button>
+              <button mat-button class="app-card-link" (click)="downloadInstaller(instance, app)"
+                matTooltip="Download Installer" [disabled]="!launcherService.hasLauncherForOs(app.os)">
+                <mat-icon>cloud_download</mat-icon>
+                <span>Installer</span>
+              </button>
             </div>
           <mat-divider></mat-divider>
         </ng-container>

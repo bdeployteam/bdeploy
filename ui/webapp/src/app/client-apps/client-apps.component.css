@@ -16,6 +16,10 @@
   margin-left: 1.5em;
 }
 
+.toolbar-icon {
+  padding: 4px;
+}
+
 .toolbar-text {
   font-size: 0.9em;
   font-weight: lighter;
@@ -36,6 +40,25 @@
 .headerIcon {
   font-size: 1.8em;
   vertical-align: middle;
+}
+
+.content-toolbar {
+  float: right;
+  margin-top: 10px;
+}
+
+.content-toolbar-item {
+  align-self: flex-end;
+  margin-right: 25px;
+}
+
+.content-toolbar mat-icon {
+  margin-right: 10px;
+}
+
+.content-toolbar button {
+  font-weight: bold;
+  font-size: 1em;
 }
 
 .list-heading {
@@ -87,13 +110,9 @@
 .app-card {
   display: grid;
   grid-column-gap: 10px;
-  grid-template-columns: 45px 2fr 3fr;
+  grid-template-columns: 45px 2fr 2fr 3fr;
   padding: 8px 20px;
   margin-top: 1em;
-}
-
-.app-card-content {
-  justify-self: left;
 }
 
 .app-card-icon {
@@ -106,7 +125,7 @@
 }
 
 .app-card-link {
-  margin-left: 0.5em;
+  justify-self: left;
 }
 
 .app-card-link span {

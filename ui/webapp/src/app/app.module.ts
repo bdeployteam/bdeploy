@@ -11,6 +11,7 @@ import { LoadingBarHttpClientModule } from '@ngx-loading-bar/http-client';
 import { LoadingBarRouterModule } from '@ngx-loading-bar/router';
 import { AceEditorModule } from 'ng2-ace-editor';
 import { CookieService } from 'ngx-cookie-service';
+import { DeviceDetectorModule } from 'ngx-device-detector';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ApplicationConfigurationCardComponent } from './application-configuration-card/application-configuration-card.component';
@@ -175,7 +176,8 @@ export function loadAppConfig(cfgService: ConfigService) {
     MatPaginatorModule,
     MatSortModule,
     AceEditorModule,
-    MatTabsModule
+    MatTabsModule,
+    DeviceDetectorModule.forRoot()
   ],
   providers: [
     ConfigService,

@@ -3,26 +3,29 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { SORT_PURPOSE } from '../models/consts';
-import { ClientApplicationDto, InstanceClientAppsDto, InstanceConfiguration, InstancePurpose, LauncherDto, OperatingSystem } from '../models/gen.dtos';
+import { ClientApplicationDto, InstanceClientAppsDto, InstanceConfiguration, InstancePurpose, OperatingSystem } from '../models/gen.dtos';
 import { DownloadService } from '../services/download.service';
 import { InstanceGroupService } from '../services/instance-group.service';
 import { InstanceService } from '../services/instance.service';
+import { LauncherService } from '../services/launcher.service';
 import { SoftwareUpdateService } from '../services/software-update.service';
 
 @Component({
   selector: 'app-client-apps',
   templateUrl: './client-apps.component.html',
   styleUrls: ['./client-apps.component.css'],
+  providers: [LauncherService],
 })
 export class ClientAppsComponent implements OnInit {
+
+  public readonly CLIENT_OS: OperatingSystem[] = [OperatingSystem.WINDOWS, OperatingSystem.LINUX];
+
   instanceGroupName: string = this.route.snapshot.paramMap.get('group');
-  loading = true;
-  hasApps = false;
-  hasLaunchers = false;
   instanceApps: InstanceClientAppsDto[];
 
-  launcherLoading = true;
-  launcherDto: LauncherDto;
+  loading = true;
+  hasApps = false;
+  activeOs: OperatingSystem;
 
   constructor(
     public route: ActivatedRoute,
@@ -31,17 +34,19 @@ export class ClientAppsComponent implements OnInit {
     public instanceService: InstanceService,
     public downloadService: DownloadService,
     public updateService: SoftwareUpdateService,
+    public launcherService: LauncherService,
   ) {}
 
   ngOnInit() {
-    const instancePromise = this.instanceGroupService.listClientApps(this.instanceGroupName);
+    this.activeOs = this.launcherService.getRunningOs();
+    this.loadApps();
+  }
+
+  loadApps() {
+    this.loading = true;
+    const instancePromise = this.instanceGroupService.listClientApps(this.instanceGroupName, this.activeOs);
     instancePromise.pipe(finalize(() => (this.loading = false))).subscribe(apps => {
       this.onClientAppsLoaded(apps);
-    });
-
-    const launcherPromise = this.updateService.getLatestLaunchers();
-    launcherPromise.pipe(finalize(() => (this.launcherLoading = false))).subscribe(launchers => {
-      this.onLauncherLoaded(launchers);
     });
   }
 
@@ -50,13 +55,17 @@ export class ClientAppsComponent implements OnInit {
     this.hasApps = apps.length > 0;
   }
 
-  onLauncherLoaded(launchers: LauncherDto) {
-    this.launcherDto = launchers;
-    this.hasLaunchers = Object.keys(launchers.launchers).length > 0;
+  isLoading() {
+    return this.loading || this.launcherService.loading;
   }
 
-  downloadLauncher(os: OperatingSystem) {
-    const key = this.launcherDto.launchers[os];
+  switchOs(os: OperatingSystem) {
+    this.activeOs = os;
+    this.loadApps();
+  }
+
+  downloadLauncher() {
+    const key = this.launcherService.getLauncherForOs(this.activeOs);
     window.location.href = this.updateService.getDownloadUrl(key);
   }
 
@@ -89,7 +98,7 @@ export class ClientAppsComponent implements OnInit {
       purpose.push(instancePurpose);
     }
 
-    // Sort by purpose priority
+    // Sort by purpose
     return purpose.sort(SORT_PURPOSE);
   }
 
@@ -116,12 +125,7 @@ export class ClientAppsComponent implements OnInit {
       }
       filtered = filtered.concat(instanceApp.applications);
     }
-    // Sort by OS (Windows first), then name
     return filtered.sort((a, b) => {
-      const compareOs = b.os.localeCompare(a.os);
-      if (compareOs !== 0) {
-        return compareOs;
-      }
       return a.description.localeCompare(b.description);
     });
   }

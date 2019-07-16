@@ -32,6 +32,7 @@ import io.bdeploy.bhive.op.ObjectLoadOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.common.util.UuidHelper;
@@ -165,7 +166,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
     }
 
     @Override
-    public Collection<InstanceClientAppsDto> listClientApps(String group) {
+    public Collection<InstanceClientAppsDto> listClientApps(String group, OperatingSystem os) {
         Collection<InstanceClientAppsDto> result = new ArrayList<>();
 
         BHive hive = getGroupHive(group);
@@ -202,10 +203,17 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
                 ClientApplicationDto clientApp = new ClientApplicationDto();
                 clientApp.uuid = appConfig.uid;
                 clientApp.description = appConfig.name;
-
                 ScopedManifestKey scopedKey = ScopedManifestKey.parse(appConfig.application);
                 clientApp.os = scopedKey.getOperatingSystem();
+                if (clientApp.os != os) {
+                    continue;
+                }
                 clientApps.applications.add(clientApp);
+            }
+
+            // Only add if we have at least one application
+            if (clientApps.applications.isEmpty()) {
+                continue;
             }
             result.add(clientApps);
         }

@@ -1,10 +1,11 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MessageBoxMode } from '../messagebox/messagebox.component';
-import { ApplicationGroup } from '../models/application.model';
 import { EventWithCallback } from '../models/event';
 import { ApplicationConfiguration, InstanceVersionDto, OperatingSystem } from '../models/gen.dtos';
 import { ApplicationService } from '../services/application.service';
+import { LauncherService } from '../services/launcher.service';
 import { MessageboxService } from '../services/messagebox.service';
+import { getAppOs } from '../utils/manifest.utils';
 
 @Component({
   selector: 'app-application-configuration-card',
@@ -27,10 +28,14 @@ export class ApplicationConfigurationCardComponent implements OnInit {
   appOs: OperatingSystem;
   downloading = false;
 
-  constructor(private mbService: MessageboxService, private appService: ApplicationService) {}
+  constructor(
+    private mbService: MessageboxService,
+    private appService: ApplicationService,
+    private launcherService: LauncherService,
+  ) {}
 
   ngOnInit() {
-    this.appOs = ApplicationGroup.getAppOs(this.appConfig.application);
+    this.appOs = getAppOs(this.appConfig.application);
   }
 
   onEdit() {
@@ -77,6 +82,10 @@ export class ApplicationConfigurationCardComponent implements OnInit {
 
   isMissing() {
     return this.appService.isMissing(this.appConfig.application);
+  }
+
+  hasLauncher() {
+    return this.launcherService.hasLauncherForOs(this.appOs);
   }
 
   downloadClickAndStart() {
