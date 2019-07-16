@@ -32,9 +32,9 @@
       <span class="headerText"><a color="primary" [routerLink]="['/instanceadd', instanceGroupName]">Create Instance</a></span>
     </p>
   </div>
-  <div class="purpose-box" *ngFor="let purpose of purposes">
+  <div *ngFor="let purpose of purposes">
     <p class="list-heading">{{purpose}}</p>
-    <div *ngFor="let instance of getInstancesByPurpose(purpose)">
+    <div  class="card" *ngFor="let instance of getInstancesByPurpose(purpose)">
       <app-instance-card [instance]='instance' [instanceGroupName]='instanceGroupName' (removeEvent)='remove(instance)'></app-instance-card>
     </div>
     <mat-divider class="list-divider"></mat-divider>
