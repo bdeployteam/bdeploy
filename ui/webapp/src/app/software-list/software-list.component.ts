@@ -3,6 +3,7 @@ import { finalize } from 'rxjs/operators';
 import { ManifestKey } from '../models/gen.dtos';
 import { LoggingService } from '../services/logging.service';
 import { SoftwareService } from '../services/software.service';
+import { compareTags } from '../utils/manifest.utils';
 
 @Component({
   selector: 'app-software-list',
@@ -13,8 +14,23 @@ export class SoftwareListComponent implements OnInit {
 
   private log = this.loggingService.getLogger('SoftwareListComponent');
 
+  private _softwareVersions: ManifestKey[];
+
   @Input() softwareRepositoryName: string;
-  @Input() softwareVersions: ManifestKey[];
+
+  @Input() set softwareVersions(softwareVersions: ManifestKey[]) {
+    this._softwareVersions = softwareVersions ? softwareVersions.sort((a, b) => {
+      if (a.name === b.name) {
+        return -1 * compareTags(a.tag, b.tag);
+      } else {
+        return a.name.localeCompare(b.name);
+      }
+    }) : [];
+  }
+  get softwareVersions() {
+    return this._softwareVersions;
+  }
+
   @Output() public deleted = new EventEmitter();
 
   public exporting: ManifestKey = null;

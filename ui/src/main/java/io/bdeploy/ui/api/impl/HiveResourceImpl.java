@@ -3,7 +3,6 @@ package io.bdeploy.ui.api.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -76,7 +75,7 @@ public class HiveResourceImpl implements HiveResource {
             entry.mTag = m.getTag();
             result.add(entry);
         });
-        return sort(result);
+        return result;
     }
 
     @Override
@@ -153,29 +152,7 @@ public class HiveResourceImpl implements HiveResource {
             }
             result.add(entry);
         }
-        return sort(result);
-    }
-
-    private List<HiveEntryDto> sort(List<HiveEntryDto> list) {
-        list.sort((a, b) -> {
-            if (a.type.equals(b.type)) {
-                Collator col = Collator.getInstance();
-                col.setStrength(Collator.PRIMARY);
-                return col.compare(a.name, b.name);
-            } else if (a.type.equals(Tree.EntryType.MANIFEST)) {
-                return -1;
-            } else if (a.type.equals(Tree.EntryType.TREE)) {
-                if (b.type.equals(Tree.EntryType.MANIFEST)) {
-                    return 1;
-                } else if (b.type.equals(Tree.EntryType.BLOB)) {
-                    return -1;
-                }
-            } else {
-                return 1;
-            }
-            return 0;
-        });
-        return list;
+        return result;
     }
 
     @Override

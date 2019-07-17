@@ -7,6 +7,7 @@ import { HiveEntryDto, TreeEntryType } from '../models/gen.dtos';
 import { HiveService } from '../services/hive.service';
 import { Logger, LoggingService } from '../services/logging.service';
 import { MessageboxService } from '../services/messagebox.service';
+import { compareTags } from '../utils/manifest.utils';
 
 
 @Component({
@@ -39,8 +40,32 @@ export class HiveComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.entries = [];
+    this.setEntries([]);
     this.selectTop();
+  }
+
+  private setEntries(entries: HiveEntryDto[]): void {
+    // sort by name ascending + sort by tag descending (newest first)
+    this.entries = entries.sort((a, b) => {
+      if (a.type === b.type) {
+        const c = a.mName.localeCompare(b.mName);
+        if (c === 0) {
+          return -1 * compareTags(a.mTag, b.mTag);
+        }
+        return c;
+      } else if (this.isManifest(a)) {
+        return -1;
+      } else if (this.isTree(a)) {
+        if (this.isManifest(b)) {
+          return 1;
+        } else if (this.isBlob(b)) {
+          return -1;
+        }
+      } else {
+        return 1;
+      }
+      return 0;
+    });
   }
 
   public selectHive(hive: string): void {
@@ -58,10 +83,10 @@ export class HiveComponent implements OnInit {
     this.log.debug('selectTop()');
     this.paths[this._hive] = [];
     if (this._hive == null) {
-      this.entries = [];
+      this.setEntries([]);
     } else {
       this.hiveService.listManifests(this._hive).subscribe(entries => {
-        this.entries = entries;
+        this.setEntries(entries);
       });
     }
   }
@@ -78,12 +103,12 @@ export class HiveComponent implements OnInit {
     if (this.isManifest(entry)) {
       this.hiveService.listManifest(this._hive, entry.mName, entry.mTag).subscribe(entries => {
         this.paths[this._hive].push(entry);
-        this.entries = entries;
+        this.setEntries(entries);
       });
     } else if (this.isTree(entry)) {
       this.hiveService.list(this._hive, entry.id).subscribe(entries => {
         this.paths[this._hive].push(entry);
-        this.entries = entries;
+        this.setEntries(entries);
       });
     }
   }
