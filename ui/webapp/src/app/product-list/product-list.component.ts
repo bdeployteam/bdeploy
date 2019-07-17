@@ -4,6 +4,7 @@ import { finalize, flatMap, tap } from 'rxjs/operators';
 import { ManifestKey, ProductDto } from '../models/gen.dtos';
 import { LoggingService } from '../services/logging.service';
 import { ProductService } from '../services/product.service';
+import { sortByTags } from '../utils/manifest.utils';
 
 @Component({
   selector: 'app-product-list',
@@ -28,6 +29,9 @@ export class ProductListComponent implements OnInit {
 
   @Input() public set products(products: ProductDto[]) {
     this._products = products;
+    if (this._products) {
+      sortByTags(this.products, p => p.key.tag, false);
+    }
     this.usageCounts = new Map();
     if (this._products) {
       from(this._products)

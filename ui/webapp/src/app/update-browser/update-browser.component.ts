@@ -8,6 +8,7 @@ import { ConfigService } from '../services/config.service';
 import { MessageboxService } from '../services/messagebox.service';
 import { SoftwareUpdateService } from '../services/software-update.service';
 import { UpdateDialogComponent } from '../update-dialog/update-dialog.component';
+import { sortByTags } from '../utils/manifest.utils';
 
 export class GroupedKeys {
   public tag: String;
@@ -54,9 +55,7 @@ export class UpdateBrowserComponent implements OnInit {
   private groupKeysByTag(keys: ManifestKey[], currentVersion: string) {
     const tags: { [key: string]: GroupedKeys } = {};
 
-    keys.sort((a, b) => {
-      return b.tag.localeCompare(a.tag);
-    });
+    sortByTags(keys, k => k.tag, false);
 
     keys.forEach(k => {
       if (!(k.tag in tags)) {

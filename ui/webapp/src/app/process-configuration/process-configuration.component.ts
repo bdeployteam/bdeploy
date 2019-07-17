@@ -24,6 +24,7 @@ import { Logger, LoggingService } from '../services/logging.service';
 import { MessageboxService } from '../services/messagebox.service';
 import { ProcessService } from '../services/process.service';
 import { ProductService } from '../services/product.service';
+import { sortByTags } from '../utils/manifest.utils';
 
 export enum SidenavMode {
   Applications,
@@ -183,8 +184,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       this.selectedConfig = newSelectedConfig;
 
       const filtered = results[3].filter(x => x.key.name === this.selectedConfig.version.product.name);
-      filtered.sort((a, b) => b.key.tag.localeCompare(a.key.tag));
-      this.productTags = filtered;
+      this.productTags = sortByTags(filtered, p => p.key.tag, false);
 
       this.loading = false;
       this.updateDirtyStateAndValidate();

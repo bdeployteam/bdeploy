@@ -13,6 +13,7 @@ import { InstanceService } from '../services/instance.service';
 import { Logger, LoggingService } from '../services/logging.service';
 import { MessageboxService } from '../services/messagebox.service';
 import { ProductService } from '../services/product.service';
+import { sortByTags } from '../utils/manifest.utils';
 import { InstanceValidators } from '../validators/instance.validators';
 
 @Component({
@@ -176,7 +177,7 @@ export class InstanceAddEditComponent implements OnInit {
   public getTagsForProduct(): string[] {
     const selectedProduct = this.productNameControl.value;
     const productVersions = this.products.filter((value, index, array) => value.key.name === selectedProduct);
-    return Array.from(productVersions, p => p.key.tag).sort();
+    return sortByTags(Array.from(productVersions, p => p.key.tag), p => p, false);
   }
 
   public onSubmit(): void {
