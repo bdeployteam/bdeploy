@@ -30,6 +30,11 @@ namespace Bdeploy.Installer
         private readonly string applicationsHome = PathProvider.GetApplicationsDir();
 
         /// <summary>
+        /// Lock file that is created to avoid that multiple installers run simultaneously
+        /// </summary>
+        private readonly string lockFile = Path.Combine(PathProvider.GetBdeployHome(), ".lock");
+
+        /// <summary>
         /// Flag indicating whether or not to cancel the operattion
         /// </summary>
         public bool Canceled { get; internal set; }
@@ -45,7 +50,7 @@ namespace Bdeploy.Installer
         public event EventHandler<SubTaskEventArgs> NewSubtask;
 
         /// <summary>
-        /// Event that is raised when an error occured
+        /// Event that is raised when an error occurred
         /// </summary>
         public event EventHandler<MessageEventArgs> Error;
 
@@ -83,14 +88,37 @@ namespace Bdeploy.Installer
         /// </summary>
         public async Task<int> Setup()
         {
+            FileStream lockStream = null;
             try
             {
-                OnNewSubtask("Preparing...", -1);
+                // Show error message if configuration is invalid
+                if(config == null || !config.IsValid())
+                {
+                    StringBuilder builder = new StringBuilder();
+                    builder.Append("Configuration is invalid or corrupt.").AppendLine().AppendLine();
+                    builder.AppendFormat("Configuration:").AppendLine();
+                    builder.Append(config == null ? "<null>" : config.ToString()).AppendLine();
+                    builder.AppendFormat("Embedded:").AppendLine();
+                    builder.Append(ConfigStorage.ReadEmbeddedConfigFile()).AppendLine();
+                    OnError(builder.ToString());
+                    return -1;
+                }
                 Directory.CreateDirectory(bdeployHome);
                 Directory.CreateDirectory(launcherHome);
                 Directory.CreateDirectory(applicationsHome);
 
+                // Installers should not run simultaneously to avoid conflicts when extracting files
+                // Thus we try to create a lockfile. If it exists we wait until it is removed
+                OnNewSubtask("Waiting for other installations to finish...", -1);
+                lockStream = WaitForExclusiveLock();
+                if(lockStream == null)
+                {
+                    OnError("Installation has been canceled by the user.");
+                    return -1;
+                }
+
                 // Download and store icon
+                OnNewSubtask("Preparing...", -1);
                 await DownloadIcon();
 
                 // Download and extract if not available
@@ -114,7 +142,38 @@ namespace Bdeploy.Installer
             {
                 OnError(ex.Message);
                 return -1;
+            } finally
+            {
+                // Release lock
+                if(lockStream != null)
+                {
+                    lockStream.Dispose();
+                }
+                FileHelper.DeleteFile(new FileInfo(lockFile));
             }
+        }
+
+        /// <summary>
+        /// Waits until this installer gets an exclusive lock.
+        /// </summary>
+        private FileStream WaitForExclusiveLock()
+        {
+            while (!Canceled)
+            {
+                try
+                {
+                    return new FileStream(lockFile, FileMode.OpenOrCreate, FileAccess.ReadWrite,
+                            FileShare.None, 100);
+                }
+                catch (Exception)
+                {
+                    // Another installer is currently running. Wait for some time
+                    System.Threading.Thread.Sleep(500);
+                }
+            }
+
+            // User canceled waiting to get lock. Abort
+            return null;
         }
 
         /// <summary>
@@ -340,7 +399,7 @@ namespace Bdeploy.Installer
         }
 
         /// <summary>
-        /// Notify that an error occured
+        /// Notify that an error occurred
         /// </summary>
         private void OnError(string message)
         {

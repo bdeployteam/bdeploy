@@ -16,7 +16,7 @@ namespace Bdeploy.Installer
     }
 
     /// <summary>
-    /// Data when an error occured.
+    /// Data when an error occurred.
     /// </summary>
     public class MessageEventArgs : EventArgs
     {

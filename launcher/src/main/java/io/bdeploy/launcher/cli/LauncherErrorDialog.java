@@ -188,7 +188,7 @@ public class LauncherErrorDialog extends JFrame {
         setVisible(true);
 
         // Default error summary
-        errorSummary.setText("<html>Unexpected error occured while launching the application. " + //
+        errorSummary.setText("<html>Unexpected error occurred while launching the application. " + //
                 "If the problem persists, contact the system administrator.</html>");
 
         // Detailed error message

@@ -769,7 +769,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
         String fileName;
         if (appKey.getOperatingSystem() == OperatingSystem.WINDOWS) {
-            fileName = im.getConfiguration().name + "-" + appConfig.name + "-Installer.exe";
+            fileName = im.getConfiguration().name + " - " + appConfig.name + " - Installer.exe";
         } else if (appKey.getOperatingSystem() == OperatingSystem.LINUX) {
             fileName = im.getConfiguration().name + "-" + appConfig.name + "-Installer.run";
         } else {

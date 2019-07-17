@@ -85,7 +85,7 @@ namespace Bdeploy.Installer
 
         private void Installer_Error(object sender, MessageEventArgs e)
         {
-            Console.WriteLine("Error occured during installation: ${0}", e.Message);
+            Console.WriteLine("Error occurred during installation: ${0}", e.Message);
         }
 
         private void Installer_NewSubtask(object sender, SubTaskEventArgs e)
