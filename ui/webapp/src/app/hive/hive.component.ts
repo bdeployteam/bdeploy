@@ -47,12 +47,14 @@ export class HiveComponent implements OnInit {
   private setEntries(entries: HiveEntryDto[]): void {
     // sort by name ascending + sort by tag descending (newest first)
     this.entries = entries.sort((a, b) => {
-      if (a.type === b.type) {
+      if (this.isManifest(a) && this.isManifest(b)) {
         const c = a.mName.localeCompare(b.mName);
         if (c === 0) {
           return -1 * compareTags(a.mTag, b.mTag);
         }
         return c;
+      } else if (a.type === b.type) { // Tree or Blob
+        return a.name.localeCompare(b.name);
       } else if (this.isManifest(a)) {
         return -1;
       } else if (this.isTree(a)) {
