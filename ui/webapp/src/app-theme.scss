@@ -182,7 +182,7 @@ $app-dark-theme: override-theme-background($app-dark-theme, app-bar, #3d3c3e);
 
 /* dark yellow theme */
 $app-dark-yellow-primary: $app-yellow-palette;
-$app-dark-yellow-accent: mat-palette($mat-blue-grey, 500);
+$app-dark-yellow-accent: mat-palette($mat-blue, 700);
 $app-dark-yellow-warning: mat-palette($mat-deep-orange);
 $app-dark-yellow-theme: add-toolbar-color(mat-dark-theme($app-dark-yellow-primary, $app-dark-yellow-accent, $app-dark-yellow-warning), $app-yellow-palette);
 $app-dark-yellow-theme: override-theme-background($app-dark-yellow-theme, app-bar, #3d3c3e);
