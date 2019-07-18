@@ -47,11 +47,26 @@ namespace Bdeploy.Installer.Models
         /// </summary>
         internal void LogToConsole()
         {
-            Console.WriteLine("Id: {0}", ApplicationUid);
-            Console.WriteLine("Name: {0}", ApplicationName);
-            Console.WriteLine("URL: {0}", LauncherUrl);
-            Console.WriteLine("Icon: {0}", IconUrl);
-            Console.WriteLine("Payload: {0}", ApplicationJson);
+            Console.WriteLine(ToString());
+        }
+
+        public override string ToString()
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.AppendFormat("Id: {0}", ApplicationUid).AppendLine();
+            builder.AppendFormat("Name: {0}", ApplicationName).AppendLine();
+            builder.AppendFormat("URL: {0}", LauncherUrl).AppendLine();
+            builder.AppendFormat("Icon: {0}", IconUrl).AppendLine();
+            builder.AppendFormat("Payload: {0}", ApplicationJson).AppendLine();
+            return builder.ToString();
+        }
+
+        /// <summary>
+        /// Returns whether or not all required parameters are set to a non-null value. 
+        /// </summary>
+        public bool IsValid()
+        {
+            return LauncherUrl != null && IconUrl != null && ApplicationJson != null && ApplicationName != null && ApplicationUid != null;
         }
     }
 
@@ -173,7 +188,7 @@ namespace Bdeploy.Installer.Models
         /// Reads the embedded configuration file and returns the payload as string
         /// </summary>
         /// <returns></returns>
-        private static string ReadEmbeddedConfigFile()
+        public static string ReadEmbeddedConfigFile()
         {
             var assembly = Assembly.GetExecutingAssembly();
             using (Stream stream = assembly.GetManifestResourceStream(RESOURCE_NAME))

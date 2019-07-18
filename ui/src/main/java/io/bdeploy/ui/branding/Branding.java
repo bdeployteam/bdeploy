@@ -13,6 +13,7 @@ import org.boris.pecoff4j.io.PEParser;
 import com.google.common.primitives.Bytes;
 
 import io.bdeploy.bhive.util.StorageHelper;
+import io.bdeploy.common.util.StringHelper;
 
 /**
  * Responsible for branding the native Windows executable so that it uses the icon defined by the application descriptor.
@@ -49,21 +50,22 @@ public class Branding {
         int length = endBlock - startBlock;
 
         // Build a block of the same size. Fill with dummy at the end
-        StringBuilder replacement = new StringBuilder();
-        replacement.append(START_BDEPLOY);
-        replacement.append(START_CONFIG);
-        replacement.append(new String(StorageHelper.toRawBytes(config), StandardCharsets.UTF_8));
-        replacement.append(END_CONFIG);
+        StringBuilder builder = new StringBuilder();
+        builder.append(START_BDEPLOY);
+        builder.append(START_CONFIG);
+        builder.append(new String(StorageHelper.toRawBytes(config), StandardCharsets.UTF_8));
+        builder.append(END_CONFIG);
 
-        int currentSize = replacement.toString().getBytes(StandardCharsets.UTF_8).length;
+        int currentSize = builder.toString().getBytes(StandardCharsets.UTF_8).length;
         int charsToWrite = length - currentSize - END_BDEPLOY.length();
         for (int i = 0; i < charsToWrite; i++) {
-            replacement.append("0");
+            builder.append("0");
         }
-        replacement.append(END_BDEPLOY);
+        builder.append(END_BDEPLOY);
+        String replacement = StringHelper.removeLineBreaks(builder.toString());
 
         // Replace previous block with the new one
-        byte[] configBlock = replacement.toString().getBytes(StandardCharsets.UTF_8);
+        byte[] configBlock = replacement.getBytes(StandardCharsets.UTF_8);
         byte[] newData = new byte[codeBlock.length];
         System.arraycopy(codeBlock, 0, newData, 0, startBlock);
         System.arraycopy(configBlock, 0, newData, startBlock, configBlock.length);

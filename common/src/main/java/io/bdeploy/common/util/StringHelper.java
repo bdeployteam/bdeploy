@@ -19,4 +19,11 @@ public class StringHelper {
         return s == null || s.isEmpty();
     }
 
+    /**
+     * Removes all line breaks from the given string
+     */
+    public static String removeLineBreaks(String s) {
+        return s.replace("\n", "").replace("\r", "");
+    }
+
 }

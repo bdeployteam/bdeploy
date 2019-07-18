@@ -54,7 +54,7 @@
                 </TextBlock>
             </StackPanel>
             <TextBlock Name="ErrorMessage" Visibility="Visible" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="14" FontWeight="SemiBold">
-                <Run Text="Unexpected error occured while installing the application." /><LineBreak />
+                <Run Text="Unexpected error occurred while installing the application." /><LineBreak />
                 <Run Text="If the problem persists, contact the system administrator." />
             </TextBlock>
             <TextBox Name="ErrorDetails" Visibility="Hidden" Grid.Row="1" BorderThickness="1" Margin="10" Padding="5" AcceptsReturn="True" IsReadOnly="True"
