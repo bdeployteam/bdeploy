@@ -3,7 +3,6 @@
     <button mat-icon-button type="button" (click)='location.back()'><mat-icon>chevron_left</mat-icon></button>
     <span>Data Files</span>
     <span class="fill-space"></span>
-    <app-remote-progress [scope]='[groupParam]'></app-remote-progress>
     <button mat-button (click)="reload()"><mat-icon>refresh</mat-icon></button>
   </mat-toolbar>
 
@@ -26,7 +25,6 @@
               matSort matSortActive="lastModified" matSortDirection="asc" (matSortChange)="sortFiles(instanceDirectory, $event)"
               #filetable
             >
-
               <ng-container matColumnDef="icon">
                 <th mat-header-cell *matHeaderCellDef></th>
                 <td mat-cell *matCellDef="let entry" class="icon-column" (click)='openOutputOverlay(instanceDirectory, entry, terminal)'><mat-icon>subject</mat-icon></td>
