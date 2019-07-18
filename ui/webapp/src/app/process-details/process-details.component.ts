@@ -2,7 +2,7 @@ import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, Input, OnChanges, OnDestroy, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
 import { MatBottomSheet, MatBottomSheetRef, MatDialog } from '@angular/material';
-import { distanceInWordsStrict, format } from 'date-fns';
+import { format } from 'date-fns';
 import { Observable, Subscription } from 'rxjs';
 import { finalize, map, mergeMap } from 'rxjs/operators';
 import { ApplicationConfiguration, ApplicationStartType, InstanceDirectoryEntry, ProcessDetailDto, ProcessState, ProcessStatusDto, StringEntryChunkDto } from '../models/gen.dtos';
@@ -32,6 +32,9 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
   restartProgressText: string;
   restartProgressHandle: any;
 
+  uptimeString = '';
+  uptimeCalculateHandle: any;
+
   processSheet: MatBottomSheetRef<ProcessListComponent>;
 
   private overlayRef: OverlayRef;
@@ -57,6 +60,9 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
     if (this.restartProgressHandle) {
       clearInterval(this.restartProgressHandle);
     }
+    if (this.uptimeCalculateHandle) {
+      clearTimeout(this.uptimeCalculateHandle);
+    }
   }
 
   /** Called when the status of the process changed */
@@ -73,6 +79,15 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
     if (this.isCrashedWaiting()) {
       this.restartProgressHandle = setInterval(() => this.doUpdateRestartProgress(), 1000);
       this.doUpdateRestartProgress();
+    }
+
+    // Clear uptimeString handle
+    if (this.uptimeCalculateHandle) {
+      clearTimeout(this.uptimeCalculateHandle);
+    }
+
+    if (this.isRunningOrUnstable()) {
+      this.uptimeCalculateHandle = setTimeout(() => this.calculateUptimeString(), 1);
     }
 
     // Update sheet when open
@@ -218,11 +233,40 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
     return format(new Date(this.status.recoverAt), 'DD.MM.YYYY HH:mm');
   }
 
-  getUpTimeInWords() {
-    return distanceInWordsStrict(Date.now(), this.status.processDetails.startTime, {
-      unit: 'm' || 'h' || 'd' || 'M' || 'Y',
-      partialMethod: 'ceil',
-    });
+  private calculateUptimeString() {
+    this.uptimeCalculateHandle = null;
+    if (this.isRunningOrUnstable()) {
+      const now = Date.now();
+      const ms = now - this.status.processDetails.startTime;
+      const sec = Math.floor(ms / 1000) % 60;
+      const min = Math.floor(ms / 60000) % 60;
+      const hours = Math.floor(ms / 3600000) % 24;
+      const days = Math.floor(ms / 86400000);
+
+      let s = '';
+      if (days > 0) {
+        s = s + days + (days === 1 ? ' day ' : ' days ');
+      }
+      if (hours > 0 || days > 0) {
+        s = s + hours + (hours === 1 ? ' hour ' : ' hours ');
+      }
+      if (min > 0 || hours > 0 || days > 0) {
+        s = s + min + (min === 1 ? ' minute' : ' minutes');
+      }
+      let delay = 0;
+      if (days === 0 && hours === 0 && min === 0) {
+        s = s + sec + (sec === 1 ? ' second' : ' seconds');
+        // calculate reschedule for next second
+        delay = 1000 - (ms - Math.floor(ms / 1000) * 1000);
+      } else {
+        // calculate reschedule for next minute
+        delay = 60000 - (ms - Math.floor(ms / 60000) * 60000);
+      }
+      this.uptimeString = s;
+      this.uptimeCalculateHandle = setTimeout(() => this.calculateUptimeString(), delay);
+    } else {
+      this.uptimeString = '';
+    }
   }
 
   getStartTypeText() {
