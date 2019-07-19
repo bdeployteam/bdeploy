@@ -600,6 +600,10 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       .pipe(
         finalize(() => {
           this.loadDeploymentStates(() => (card.isLoading = false));
+          const newSelectedConfig = this.processConfigs.find(cfg => cfg.version.key.tag === manifest.tag);
+          if (newSelectedConfig) {
+            this.loadInstance(newSelectedConfig);
+          }
         }),
       )
       .subscribe(_ => {});
