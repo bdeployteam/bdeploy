@@ -38,10 +38,10 @@
       <span class="fill-space"></span>
       <app-remote-progress [scope]='[groupParam, uuidParam]'></app-remote-progress>
       <ng-container *ngIf="isAutoRefreshVisible() && autoRefresh">
-        <button mat-icon-button (click)="toggleAutoRefresh()" class="toolbar-progress">
-          <mat-progress-spinner [value]="autoRefreshProgress" color="primary" [diameter]="24"
-            matTooltip="Auto refresh of process status enabled. Next refresh in {{nextAutoRefreshSec}} seconds. Click to disable.">
-          </mat-progress-spinner>
+        <button mat-icon-button (click)="toggleAutoRefresh()"
+          matTooltip="Auto refresh of process status enabled. Next refresh in {{nextAutoRefreshSec}} seconds. Click to disable.">
+          <div class="toolbar-progress">{{getAutoRefreshSecFormatted()}}</div>
+          <mat-icon>sync</mat-icon>
         </button>
       </ng-container>
       <ng-container *ngIf="isAutoRefreshVisible() && !autoRefresh">

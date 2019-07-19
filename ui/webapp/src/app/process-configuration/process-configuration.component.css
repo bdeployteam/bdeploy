@@ -124,7 +124,12 @@
 }
 
 .toolbar-progress {
-  padding-left: 8px;
+  position: absolute;
+  top: -5px;
+  left: 15px;
+  width: 40px;
+  line-height: 20px;
+  font-size: smaller;
 }
 
 .card-list-container {

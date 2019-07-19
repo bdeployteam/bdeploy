@@ -84,7 +84,6 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   public lastAutoRefresh = Date.now();
   public autoRefresh = false;
   public autoRefreshHandle: any;
-  public autoRefreshProgress: number;
   public nextAutoRefreshSec: number;
   public processSubscription: Subscription;
 
@@ -734,12 +733,17 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   doUpdateAutoRefreshProgress() {
     const nextRefreshMs = this.lastAutoRefresh + this.AUTO_REFRESH_INTERVAL_SEC * 1000;
     const diff = nextRefreshMs - Date.now();
-    if (diff < 0) {
+    this.nextAutoRefreshSec = Math.round(diff / 1000);
+    if (this.nextAutoRefreshSec <= 0) {
       this.doTriggerProcessStatusUpdate();
-    } else {
-      this.nextAutoRefreshSec = Math.round(diff / 1000);
-      this.autoRefreshProgress = 100 - 100 * (this.nextAutoRefreshSec / this.AUTO_REFRESH_INTERVAL_SEC);
     }
+  }
+
+  /** Return a formatted string for this.nextAutoRefreshSec (assumes times less than 10:00 min) */
+  public getAutoRefreshSecFormatted(): string {
+    const date = new Date(null);
+    date.setSeconds(this.nextAutoRefreshSec);
+    return date.toISOString().substr(15, 4);
   }
 
   /** Returns whether or not the auto-refresh UI is visible */
