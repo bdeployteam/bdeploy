@@ -15,6 +15,8 @@ export class UpdateCardComponent implements OnInit {
   @Output() public update = new EventEmitter<GroupedKeys>();
   @Output() public delete = new EventEmitter<GroupedKeys>();
 
+  public deleteRunning = false;
+
   constructor(private updService: SoftwareUpdateService) { }
 
   ngOnInit() {
@@ -32,4 +34,8 @@ export class UpdateCardComponent implements OnInit {
     // should never happen
   }
 
+  public onDelete(version: GroupedKeys) {
+    this.deleteRunning = true;
+    this.delete.emit(version);
+  }
 }

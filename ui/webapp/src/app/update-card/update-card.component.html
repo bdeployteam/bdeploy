@@ -2,9 +2,9 @@
     <div class='flex-line'>
       <b>{{version.tag}}</b>&nbsp;({{version.snapshot ? 'SNAPSHOT' : 'RELEASE'}})<ng-container *ngIf='version.current'> - current</ng-container>
       <div class='spacer'></div>
-      <ng-container *ngFor='let os of version.oss'><button mat-icon-button (click)='getDownload(os)'><mat-icon [svgIcon]='os' class='os-icon'></mat-icon></button></ng-container>
+      <ng-container *ngFor='let os of version.oss'><button mat-icon-button (click)='getDownload(os)' [disabled]='deleteRunning'><mat-icon [svgIcon]='os' class='os-icon'></mat-icon></button></ng-container>
       <mat-divider [vertical]='true' class='divider'></mat-divider>
-      <button mat-icon-button matTooltip='Remove this version.' [disabled]='version.current' (click)='delete.emit(version)'><mat-icon>delete</mat-icon></button>
-      <button mat-icon-button matTooltip='Install this version.' [disabled]='version.current' (click)='update.emit(version)' *ngIf='allowUpdate'><mat-icon>system_update</mat-icon></button>
+      <button mat-icon-button matTooltip='Remove this version.' [disabled]='version.current || deleteRunning' (click)='onDelete(version)'><mat-icon>delete</mat-icon></button>
+      <button mat-icon-button matTooltip='Install this version.' [disabled]='version.current || deleteRunning' (click)='update.emit(version)' *ngIf='allowUpdate'><mat-icon>system_update</mat-icon></button>
     </div>
 </mat-card>
