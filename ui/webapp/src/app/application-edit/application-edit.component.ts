@@ -592,7 +592,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     const c = a
       ? a.successor
       : this.linkedDescriptors.size > 0
-      ? this.linkedDescriptors.values().next().value
+      ? Array.from(this.linkedDescriptors.values()).find(lp => !lp.predecessor)
       : undefined;
 
     // Insert B into the current chain
