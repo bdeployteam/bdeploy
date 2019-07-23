@@ -19,6 +19,11 @@ export class DataFilesBrowserComponent implements OnInit {
 
   private log: Logger = this.loggingService.getLogger('DataFilesBrowserComponent');
 
+  public INITIAL_PAGE_SIZE = 10;
+  public INITIAL_PAGE_INDEX = 0;
+  public INITIAL_SORT_COLUMN = 'lastModified';
+  public INITIAL_SORT_DIRECTION = 'asc';
+
   groupParam: string = this.route.snapshot.paramMap.get('group');
   uuidParam: string = this.route.snapshot.paramMap.get('uuid');
   versionParam: string = this.route.snapshot.paramMap.get('version');
@@ -66,38 +71,31 @@ export class DataFilesBrowserComponent implements OnInit {
     });
   }
 
-  public getInitialPageSize() {
-    return 10;
-  }
-
-  public getInitialPageIndex() {
-    return 0;
-  }
-
   public getCurrentPage(instanceDirectory: InstanceDirectory) {
     const pageEvent = this.pageEvents.get(instanceDirectory.minion);
-    const sortEvent = this.sortEvents.get(instanceDirectory.minion);
-
-    const pageIndex = pageEvent ? pageEvent.pageIndex : this.getInitialPageIndex();
-    const pageSize = pageEvent ? pageEvent.pageSize : this.getInitialPageSize();
-
+    const pageIndex = pageEvent ? pageEvent.pageIndex : this.INITIAL_PAGE_INDEX;
+    const pageSize = pageEvent ? pageEvent.pageSize : this.INITIAL_PAGE_SIZE;
     const firstIdx = pageIndex * pageSize;
-    const page = instanceDirectory.entries.slice(firstIdx, firstIdx + pageSize);
 
-    if (sortEvent && sortEvent.direction) {
-      page.sort((a, b) => {
-        let v1 = a[sortEvent.active];
-        let v2 = b[sortEvent.active];
+    const sortEvent = this.sortEvents.get(instanceDirectory.minion);
+    const sortColumn = sortEvent ? sortEvent.active : this.INITIAL_SORT_COLUMN;
+    const sortDirection = sortEvent ? sortEvent.direction : this.INITIAL_SORT_DIRECTION;
+
+    const all = instanceDirectory.entries.slice(); // use copy for sorting -- keep original array
+    if (sortColumn && sortDirection) {
+      all.sort((a, b) => {
+        let v1 = a[sortColumn];
+        let v2 = b[sortColumn];
         if (typeof(v1) === 'string' && typeof(v2) === 'string') {
           v1 = v1.toLocaleLowerCase();
           v2 = v2.toLocaleLowerCase();
         }
         const res = v1 < v2 ? -1 : (v1 > v2 ? 1 : 0);
-        return res * (sortEvent.direction === 'asc' ? 1 : -1);
+        return res * (sortDirection === 'asc' ? 1 : -1);
       });
     }
 
-    return page;
+    return all.slice(firstIdx, firstIdx + pageSize);
   }
 
   public sortFiles(instanceDirectory: InstanceDirectory, event: Sort) {

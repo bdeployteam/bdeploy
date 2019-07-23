@@ -22,7 +22,7 @@
       <mat-tab-group animationDuration="0ms">
           <mat-tab *ngFor="let instanceDirectory of instanceDirectories" label="{{instanceDirectory.minion}}">
             <table mat-table class="filelist-table" [dataSource]="getCurrentPage(instanceDirectory)"
-              matSort matSortActive="lastModified" matSortDirection="asc" (matSortChange)="sortFiles(instanceDirectory, $event)"
+              matSort [matSortActive]="INITIAL_SORT_COLUMN" [matSortDirection]="INITIAL_SORT_DIRECTION" (matSortChange)="sortFiles(instanceDirectory, $event)"
               #filetable
             >
               <ng-container matColumnDef="icon">
@@ -57,8 +57,8 @@
             <mat-paginator
               [pageSizeOptions]="[10, 20, 50, 100, 1000]"
               showFirstLastButtons
-              [pageSize]="getInitialPageSize()"
-              [pageIndex]="getInitialPageIndex()"
+              [pageSize]="INITIAL_PAGE_SIZE"
+              [pageIndex]="INITIAL_PAGE_INDEX"
               [length]="instanceDirectory.entries.length"
               (page)="pageEvents.set(instanceDirectory.minion, $event)">
             </mat-paginator>

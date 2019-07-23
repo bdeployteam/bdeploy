@@ -30,19 +30,12 @@ export class FileViewerComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     // fetch initial content tail...
-    if (this.initialEntry) {
-      this.initialEntry().subscribe(entry => {
-        if (entry == null) {
-          this.content = 'File not found';
-          return;
-        }
-        this.setInitialEntry(entry);
-      });
-      }
+    this.loadInitial();
     this.onToggleFollow(this.follow);
   }
 
   loadInitial() {
+    this.content = '';
     this.initialEntry().subscribe(entry => {
       if (entry == null) {
         this.content = 'File not found';
@@ -57,15 +50,6 @@ export class FileViewerComponent implements OnInit, OnDestroy {
     });
   }
 
-  public setInitialEntry(entry: InstanceDirectoryEntry) {
-    let offset = 0;
-    if (entry.size > MAX_TAIL) {
-      offset = entry.size - MAX_TAIL;
-    }
-    this.offset = offset;
-    this.updateTail();
-  }
-
   ngOnDestroy() {
     this.clearTimer();
   }
@@ -78,7 +62,7 @@ export class FileViewerComponent implements OnInit, OnDestroy {
     this.follow = checked;
     if (checked) {
       this.timer = setInterval(() => this.updateTail(), 1000);
-      this.scrollToBottom();
+      this.scrollToBottom(); // reveal spinner at EOF
     } else {
       this.clearTimer();
     }
@@ -105,10 +89,7 @@ export class FileViewerComponent implements OnInit, OnDestroy {
   }
 
   private scrollToBottom() {
-    // follow is enabled if timer is set.
-    if (this.timer) {
-      setTimeout(() => this.contentDiv.nativeElement.scrollTop = this.contentDiv.nativeElement.scrollHeight, 50);
-    }
+    setTimeout(() => this.contentDiv.nativeElement.scrollTop = this.contentDiv.nativeElement.scrollHeight, 50);
   }
 
 }
