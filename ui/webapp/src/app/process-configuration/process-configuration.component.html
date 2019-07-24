@@ -36,6 +36,10 @@
         </div>
       </div>
       <span class="fill-space"></span>
+      <button mat-flat-button class="app-process-out-of-sync-text" (click)="setSidenavProducts()" *ngIf="isProductUpgradeAvailable() && !editMode">
+        Newer product version available!
+      </button>
+      <span class="spacer"></span>
       <app-remote-progress [scope]='[groupParam, uuidParam]'></app-remote-progress>
       <ng-container *ngIf="isAutoRefreshVisible() && autoRefresh">
         <button mat-icon-button (click)="toggleAutoRefresh()"
@@ -178,7 +182,7 @@
         </div>
         <div *ngIf="isSidenavVersions()">
           <mat-toolbar class='default-toolbar'>
-            <mat-slide-toggle #showAllVersions>Show all versions</mat-slide-toggle>
+            <mat-slide-toggle #showAllVersions>Show all</mat-slide-toggle>
           </mat-toolbar>
           <div class='card-list-container'>
             <ng-container *ngFor='let config of processConfigs'>

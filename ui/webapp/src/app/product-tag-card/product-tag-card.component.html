@@ -5,12 +5,13 @@
     <button
       class="option-button"
       mat-icon-button
-      [disabled]="current.tag === product.key.tag"
+      [disabled]="isCurrent"
       (click)="select.emit(product)"
-      [matTooltip]="current.tag > product.key.tag ? 'Downgrade...' : 'Upgrade...'">
-      <mat-icon *ngIf='current.tag === product.key.tag'>check</mat-icon>
-      <mat-icon *ngIf='current.tag > product.key.tag'>arrow_downward</mat-icon>
-      <mat-icon *ngIf='current.tag < product.key.tag'>arrow_upward</mat-icon>
+      [matTooltip]="isDowngrade ? 'Downgrade...' : isUpgrade ? 'Upgrade...' : ''"
+    >
+      <mat-icon *ngIf='isCurrent'>check</mat-icon>
+      <mat-icon *ngIf='isDowngrade'>arrow_downward</mat-icon>
+      <mat-icon *ngIf='isUpgrade'>arrow_upward</mat-icon>
     </button>
   </div>
 </mat-card>

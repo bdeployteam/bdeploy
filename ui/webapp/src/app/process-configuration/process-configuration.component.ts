@@ -315,6 +315,13 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     return this.productTags.find(p => isEqual(p.key, config.version.product)) !== undefined;
   }
 
+  public isProductUpgradeAvailable(): boolean {
+    if (this.processConfigs && this.processConfigs.length > 0 && this.productTags && this.productTags.length > 0) {
+      return this.processConfigs[0].version.product.tag !== this.productTags[0].key.tag;
+    }
+    return false;
+  }
+
   /**
    * Called to switch the active configuration. Needs some special treatment as we have
    * a virtual configuration in our list that is only shown if we have local changes.
