@@ -22,7 +22,7 @@ export class DataFilesBrowserComponent implements OnInit {
   public INITIAL_PAGE_SIZE = 10;
   public INITIAL_PAGE_INDEX = 0;
   public INITIAL_SORT_COLUMN = 'lastModified';
-  public INITIAL_SORT_DIRECTION = 'asc';
+  public INITIAL_SORT_DIRECTION = 'desc';
 
   groupParam: string = this.route.snapshot.paramMap.get('group');
   uuidParam: string = this.route.snapshot.paramMap.get('uuid');
