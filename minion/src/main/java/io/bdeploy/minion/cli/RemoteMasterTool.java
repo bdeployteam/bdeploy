@@ -33,9 +33,7 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
     public @interface RemoteMasterConfig {
 
         @Help(value = "List available minions", arg = false)
-        boolean minions()
-
-        default false;
+        boolean minions() default false;
 
         @Help("Path to an updated distribution (ZIP) which will be pushed to the master for update")
         String update();
