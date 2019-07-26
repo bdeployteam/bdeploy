@@ -32,7 +32,7 @@ if "%MINION_TYPE_ARG%"=="--slave" (
 )
 if "%MINION_TYPE%"=="" goto usage
 
-@rem The full qualified path to the minion executable
+@rem The full qualified path to the minion executable (bdeploy.bat)
 set MINION_EXE=%~f2
 if "%MINION_EXE%"=="" goto usage
 
@@ -49,13 +49,14 @@ if ERRORLEVEL 1 goto serviceFailure
 %DIRNAME%\nssm.exe set %MINION_SERVICE_NAME% Description "Deployment Control Service" > nul
 %DIRNAME%\nssm.exe set %MINION_SERVICE_NAME% AppStdout %MINION_DATA%\log\service.log > nul
 %DIRNAME%\nssm.exe set %MINION_SERVICE_NAME% AppStderr %MINION_DATA%\log\service.log > nul
+%DIRNAME%\nssm.exe set %MINION_SERVICE_NAME% DependOnService LanmanServer
 echo Service "%MINION_SERVICE_NAME%" successfully created!
 goto done
 
 :usage
 @echo Failed to create service. One or more mandatory parameters are missing
 @echo.
-@echo Usage: bdeploy-service-install.bat ^<--master^|--slave^> ^<Path-to-minion-exe^> ^<Path-where-to-store-files^> 
+@echo Usage: bdeploy-service-install.bat ^<--master^|--slave^> ^<Path-to-bdeploy-bat^> ^<Path-where-to-store-files^> 
 exit /B 1
 
 :restricted 
