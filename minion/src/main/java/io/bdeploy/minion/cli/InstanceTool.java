@@ -27,7 +27,7 @@ public class InstanceTool extends ConfiguredCliTool<InstanceConfig> {
         @EnvironmentFallback("BHIVE")
         String hive();
 
-        @Help("Path to a ZIP file containing an export produces with this command")
+        @Help("Path to a ZIP file containing an export produced with this command")
         String importFrom();
 
         @Help("Path to a non-existing ZIP file where to export a given instance configuration")

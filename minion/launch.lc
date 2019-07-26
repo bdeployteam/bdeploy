@@ -56,6 +56,13 @@ java configuration Slave : minion-base {
 }
 
 /**
+ * Launches an interactive shell to type in some commands.
+ */
+java configuration InteractiveShell : minion-base {
+	argument "shell";
+}
+
+/**
  * Runs the master on the previously initialized root.
  */
 java configuration Master : minion-base {
