@@ -4,6 +4,8 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
+using System.Runtime.Serialization.Json;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -92,7 +94,7 @@ namespace Bdeploy.Installer
             try
             {
                 // Show error message if configuration is invalid
-                if(config == null || !config.IsValid())
+                if (config == null || !config.IsValid())
                 {
                     StringBuilder builder = new StringBuilder();
                     builder.Append("Configuration is invalid or corrupt.").AppendLine().AppendLine();
@@ -111,7 +113,7 @@ namespace Bdeploy.Installer
                 // Thus we try to create a lockfile. If it exists we wait until it is removed
                 OnNewSubtask("Waiting for other installations to finish...", -1);
                 lockStream = WaitForExclusiveLock();
-                if(lockStream == null)
+                if (lockStream == null)
                 {
                     OnError("Installation has been canceled by the user.");
                     return -1;
@@ -125,7 +127,7 @@ namespace Bdeploy.Installer
                 if (!IsLauncherInstalled())
                 {
                     bool success = await DownloadAndExtractLauncher();
-                    if(!success)
+                    if (!success)
                     {
                         return -1;
                     }
@@ -142,10 +144,11 @@ namespace Bdeploy.Installer
             {
                 OnError(ex.Message);
                 return -1;
-            } finally
+            }
+            finally
             {
                 // Release lock
-                if(lockStream != null)
+                if (lockStream != null)
                 {
                     lockStream.Dispose();
                 }
@@ -199,7 +202,7 @@ namespace Bdeploy.Installer
 
             // Always write file as it might be outdated
             bool createShortcut = !File.Exists(appDescriptor);
-            File.WriteAllText(appDescriptor, config.ApplicationJson);
+            File.WriteAllText(appDescriptor, config.ClickAndStartDescriptor);
 
             // Only create shortcut if we just have written the descriptor
             if (createShortcut)
@@ -224,7 +227,7 @@ namespace Bdeploy.Installer
 
             // Download and extract
             string launcherZip = await DownloadLauncher(tmpDir);
-            if(launcherZip == null)
+            if (launcherZip == null)
             {
                 return false;
             }
@@ -241,12 +244,12 @@ namespace Bdeploy.Installer
         /// </summary>
         public async Task DownloadIcon()
         {
-            var iconFile = Path.Combine(applicationsHome, config.ApplicationUid + ".ico");
-            using (HttpClient client = new HttpClient())
+            string iconFile = Path.Combine(applicationsHome, config.ApplicationUid + ".ico");
+            Uri requestUrl = new Uri(config.IconUrl);
+            using (HttpClient client = CreateHttpClient())
+            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl))
+            using (HttpResponseMessage response = await client.GetAsync(requestUrl))
             {
-                Uri requestUrl = new Uri(config.IconUrl);
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
-                HttpResponseMessage response = await client.GetAsync(requestUrl);
                 if (!response.IsSuccessStatusCode)
                 {
                     Console.WriteLine("Cannot download application icon. Error {0} - {1} ", response.ReasonPhrase, request.RequestUri);
@@ -264,17 +267,32 @@ namespace Bdeploy.Installer
         }
 
         /// <summary>
+        /// Creates a new HTTP client that validates the certificate provided by the server against the embedded.
+        /// </summary>
+        /// <returns></returns>
+        private HttpClient CreateHttpClient()
+        {
+            WebRequestHandler handler = new WebRequestHandler();
+            handler.ServerCertificateValidationCallback += (sender, cert, chain, error) =>
+             {
+                 RemoteService remoteService = config.DeserializeDescriptor().RemoteService;
+                 X509Certificate2 root = SecurityHelper.LoadCertificate(remoteService);
+                 return SecurityHelper.Verify(root, (X509Certificate2)cert);
+             };
+            return new HttpClient(handler, true);
+        }
+
+        /// <summary>
         /// Downloads the launcher and stores it in the given directory
         /// </summary>
         private async Task<string> DownloadLauncher(string tmpDir)
         {
-            // Send request and download launcher to a local file
-            var tmpFileName = Path.Combine(tmpDir, Guid.NewGuid() + ".download");
-            using (HttpClient client = new HttpClient())
+            Uri requestUrl = new Uri(config.LauncherUrl);
+            string tmpFileName = Path.Combine(tmpDir, Guid.NewGuid() + ".download");
+            using (HttpClient client = CreateHttpClient())
+            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl))
+            using (HttpResponseMessage response = await client.GetAsync(requestUrl, HttpCompletionOption.ResponseHeadersRead))
             {
-                Uri requestUrl = new Uri(config.LauncherUrl);
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
-                HttpResponseMessage response = await client.GetAsync(requestUrl, HttpCompletionOption.ResponseHeadersRead);
                 if (!response.IsSuccessStatusCode)
                 {
                     StringBuilder builder = new StringBuilder();

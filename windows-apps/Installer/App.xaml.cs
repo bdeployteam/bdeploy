@@ -20,14 +20,10 @@ namespace Bdeploy.Installer
             {
                 Config embedded = ConfigStorage.ReadEmbeddedConfiguration();
                 Console.WriteLine("Embedded configuration data: ");
-                embedded.LogToConsole();
+                Console.WriteLine(embedded.ToString());
                 Current.Shutdown(0);
                 return;
             }
-
-            // FIXME: Get token from embedded configuration file
-            // Token contains the certificate. Pass this to the HttpClient
-            Utils.AllowUntrustedCertificates();
 
             // Whether or not to perform an unattended installation
             bool unattended = Utils.HasArgument(e.Args, "/Unattended");

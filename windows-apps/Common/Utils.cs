@@ -27,14 +27,6 @@ namespace Bdeploy.Shared
         }
 
         /// <summary>
-        /// Disables TSL/SSL validation
-        /// </summary>
-        public static void AllowUntrustedCertificates()
-        {
-            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
-        }
-
-        /// <summary>
         /// Returns the working directory of the current process.
         /// </summary>
         /// <returns></returns>

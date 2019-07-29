@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
-using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -9,67 +8,6 @@ using System.Windows;
 
 namespace Bdeploy.Installer.Models
 {
-    [DataContract]
-    public class Config
-    {
-        /// <summary>
-        /// The URL to download the launcher ZIP. 
-        /// </summary>
-        [DataMember(Name="launcherUrl")]
-        public string LauncherUrl;
-
-        /// <summary>
-        /// The URL to download the ICON. 
-        /// </summary>
-        [DataMember(Name = "iconUrl")]
-        public string IconUrl;
-
-        /// <summary>
-        /// The serialized .beploy file that is written to the local storage
-        /// </summary>
-        [DataMember(Name = "applicationJson")]
-        public string ApplicationJson;
-
-        /// <summary>
-        /// The human readable application name. Used to name the desktop shortcut
-        /// </summary>
-        [DataMember(Name = "applicationName")]
-        public string ApplicationName;
-
-        /// <summary>
-        /// The unique name of the application. Used to store the .bdeploy file
-        /// </summary>
-        [DataMember(Name = "applicationUid")]
-        public string ApplicationUid;
-
-        /// <summary>
-        /// Prints the configuration to the console
-        /// </summary>
-        internal void LogToConsole()
-        {
-            Console.WriteLine(ToString());
-        }
-
-        public override string ToString()
-        {
-            StringBuilder builder = new StringBuilder();
-            builder.AppendFormat("Id: {0}", ApplicationUid).AppendLine();
-            builder.AppendFormat("Name: {0}", ApplicationName).AppendLine();
-            builder.AppendFormat("URL: {0}", LauncherUrl).AppendLine();
-            builder.AppendFormat("Icon: {0}", IconUrl).AppendLine();
-            builder.AppendFormat("Payload: {0}", ApplicationJson).AppendLine();
-            return builder.ToString();
-        }
-
-        /// <summary>
-        /// Returns whether or not all required parameters are set to a non-null value. 
-        /// </summary>
-        public bool IsValid()
-        {
-            return LauncherUrl != null && IconUrl != null && ApplicationJson != null && ApplicationName != null && ApplicationUid != null;
-        }
-    }
-
     /// <summary>
     /// Knows how to read and write the embedded configuration file. 
     /// 
@@ -197,6 +135,5 @@ namespace Bdeploy.Installer.Models
                 return reader.ReadToEnd();
             }
         }
-
     }
 }
