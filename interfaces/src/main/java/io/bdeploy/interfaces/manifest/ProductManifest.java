@@ -139,6 +139,10 @@ public class ProductManifest {
         return manifest.getKey();
     }
 
+    public Map<String, String> getLabels() {
+        return manifest.getLabels();
+    }
+
     /**
      * @return the applications grouped by this product
      */

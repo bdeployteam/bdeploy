@@ -1,0 +1,16 @@
+.info {
+  min-width: 500px;
+  max-width: 800px;
+}
+
+.info-backdrop {
+  opacity: 10;
+}
+
+.labels-card {
+  margin-top: 16px;
+}
+
+.label-key {
+  font-weight: lighter;
+}
