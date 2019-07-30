@@ -139,6 +139,8 @@ subprojects {
         testLogging {
             reports.html.enabled = false
         }
+
+        rootProject.updateJavaPath(test)
     }
 
     // this is required to allow dependencies to test classes in src/test/java
@@ -346,6 +348,14 @@ private String readJdk(String which) {
     return System.getProperty("java.home")
 }
 
+private void updateJavaPath(ProcessForkOptions options) {
+    if(org.gradle.internal.os.OperatingSystem.current().isLinux()) {
+        options.executable = "${rootProject.buildDir}/jlink/linux64/jre/bin/java"
+    } else {
+        options.executable = "${rootProject.buildDir}/jlink/win64/jre/bin/java.exe"
+    }
+}
+
 ext.configureJlink = { task, String modHome, String outDir ->
     configure(task) {
         outputs.dir "$outDir"
@@ -388,6 +398,18 @@ task jlinkWin64(type:Exec) { t ->
             throw new InvalidUserDataException("$win64jdk does not seem to be a windows JDK, please set -Pwin64jdk=/path/to/jdk")
         }
     }
+}
+
+task jlinkAny() {
+    if(org.gradle.internal.os.OperatingSystem.current().isLinux()) {
+        dependsOn jlinkLinux64
+    } else {
+        dependsOn jlinkWin64
+    }
+}
+
+subprojects*.test {
+    dependsOn rootProject.tasks["jlinkAny"]
 }
 
 if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
