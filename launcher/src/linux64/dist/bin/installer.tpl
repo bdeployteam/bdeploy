@@ -32,8 +32,30 @@ require_tool unzip
 require_tool xdg-desktop-menu
 require_tool convert
 require_tool identify
+require_tool sed
+require_tool grep
+require_tool cat
+require_tool base64
+require_tool openssl
 
 dl() {
+  # find certificate from embedded JSON
+  cert=$(cat "${T_BDEPLOY_FILE}" | grep authPack | sed -e 's,.*:[ \t]*"\([^"]*\)".*,\1,g' | base64 -d | grep '"c"' | sed -e 's,.*:[ \t]*"\([^"]*\)".*,\1,g')
+  url=$(cat "${T_BDEPLOY_FILE}" | grep uri | sed -e 's,.*:[ \t]*"\([^"]*\)".*,\1,g')
+  cat > "${T}/cert" <<EOF
+-----BEGIN CERTIFICATE-----
+$cert
+-----END CERTIFICATE-----
+EOF
+
+  cert1="$(openssl x509 -in "${T}/cert")"
+  cert2="$(echo | openssl s_client -showcerts -connect $(echo "$url" | sed -e 's,.*/\([^/]*\)/api,\1,g') -prexit 2>/dev/null | openssl x509)"
+
+  if [[ "$cert1" != "$cert2" ]]; then
+    echo "Certificate Mismatch"
+    exit 1
+  fi
+
   curl -sS -k "$1" --output "$2" > /dev/null
 }
 
