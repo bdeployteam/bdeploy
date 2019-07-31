@@ -186,10 +186,13 @@ The *Installer* bundles the installation of the *Launcher*, the registration of 
 
 Alternatively, the *Launcher* can be downloaded from the <<_system_software, System Software>> section and unpacked manually. By starting the file _FileAssoc.exe_ on Windows or _file-assoc.sh_ on Linux contained in the archive, the file extension .bdeploy can be registered.
 
+[NOTE]
+In case the panel shows a warning about a missing launcher, upload binaries in <<_system_software,System Software>>.
+
 As soon as the *Installer* and .bdeploy registration have been completed (in one of the ways described above), a *Client Application* can be started directly from the interface at any time using btn:[Click & Start]. In this case no icon will be created on the desktop.
 
 [NOTE]
-TODO: Document missing launcher and client download page.
+The *Instance Overview* page contains a link to a dedicated *Client Applications* page for each *Instance Group*. This provides a simple mechanism to download any *Client Application* from any *Instance* in this *Instance Group*.
 
 image::images/BDeploy_Client_Missing_Launcher.png[Client Application Download - Missing Launcher,{thumbnail},role="thumb",link="images/BDeploy_Client_Missing_Launcher.png"]
 image::images/BDeploy_Client_Download.png[Client Application Download,{thumbnail},role="thumb",link="images/BDeploy_Client_Download.png"]
