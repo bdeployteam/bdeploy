@@ -139,6 +139,14 @@ image::images/BDeploy_CfgFiles_Save.png[Modified Configuration Files,{thumbnail}
 
 The integrated editor provides syntax highlighting and rudimentary syntax checking for some basic file types (yaml, json, xml). Displayed problems are only to be seen as help and never interfere with the process, e.g. by preventing the saving of a file.
 
+==== Data Files
+
+[NOTE]
+TODO: Add documentation
+
+image::images/BDeploy_DataFiles_Browser.png[Data File Browser,{thumbnail},role="thumb",link="images/BDeploy_DataFiles_Browser.png"]
+image::images/BDeploy_DataFiles_Show.png[Show Data File,{thumbnail},role="thumb",link="images/BDeploy_DataFiles_Show.png"]
+
 ==== Product Configuration
 
 *Instances* are based on a *Product Version*. While the *Product* of the *Instance* cannot be changed afterwards, the *Version* used can be chosen arbitrarily from the available *Product Versions* (upgrade to a newer version / downgrade to an older version).
@@ -184,7 +192,12 @@ Alternatively, the *Launcher* can be downloaded from the <<_system_software, Sys
 
 As soon as the *Installer* and .bdeploy registration have been completed (in one of the ways described above), a *Client Application* can be started directly from the interface at any time using btn:[Click & Start]. In this case no icon will be created on the desktop.
 
+[NOTE]
+TODO: Document missing launcher and client download page.
+
+image::images/BDeploy_Client_Missing_Launcher.png[Client Application Download - Missing Launcher,{thumbnail},role="thumb",link="images/BDeploy_Client_Missing_Launcher.png"]
 image::images/BDeploy_Client_Download.png[Client Application Download,{thumbnail},role="thumb",link="images/BDeploy_Client_Download.png"]
+image::images/BDeploy_Client_Download_Page.png[Application Download Page,{thumbnail},role="thumb",link="images/BDeploy_Client_Download_Page.png"]
 
 The *Installer* stores launcher and .bdeploy files under _%LOCALAPPDATA%\BDeploy_ on Windows or _$HOME/.bdeploy_ on Linux. This location can be changed by setting the environment variable *BDEPLOY_HOME*.
 
@@ -197,7 +210,11 @@ For the activated *Instance Version*, the *Process Control* of this *Process* ca
 The upper part of the *Process Control Panel* shows the current process status. Below this, the control elements for _starting_, _stopping_ or _restarting_ the process can be found.
 In addition to the actions for individual processes, the pull-down menu of the dialog contains the actions for _starting_, _stopping_ or _restarting_ the entire *Instance*, i.e. all *Processes* configured with start type `INSTANCE`.
 
+[NOTE]
+The *Process Control Panel* allows to view additional information directly. Both the list of actual operating system processes as well as the *stdout*/*stderr* stream of the started *Process* can be viewed and followed.
+
 image::images/BDeploy_Process_Started.png[Running Server Process,{thumbnail},role="thumb",link="images/BDeploy_Process_Started.png"]
 image::images/BDeploy_Process_Crashed.png[Crashed Server Process (temporarily),{thumbnail},role="thumb",link="images/BDeploy_Process_Crashed.png"]
 image::images/BDeploy_Process_Crashed_Repeatedly.png[Crashed Server Process (permanently),{thumbnail},role="thumb",link="images/BDeploy_Process_Crashed_Repeatedly.png"]
 image::images/BDeploy_Process_List.png[List of Operating System Processes,{thumbnail},role="thumb",link="images/BDeploy_Process_List.png"]
+image::images/BDeploy_Process_Output.png[Show and Follow Process Output,{thumbnail},role="thumb",link="images/BDeploy_Process_Output.png"]
