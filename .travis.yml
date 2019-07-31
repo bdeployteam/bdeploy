@@ -18,7 +18,7 @@ before_install:
   - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
 
 install:
-  - . ./install-jdk.sh -F 10 -L GPL
+  - . ./install-jdk.sh --url 'https://api.adoptopenjdk.net/v2/binary/releases/openjdk10?openjdk_impl=hotspot&os=linux&arch=x64&release=latest&heap_size=normal&type=jdk'
 
 script:
   - ./gradlew clean sonarqube --scan -s -PverboseTest
