@@ -98,6 +98,11 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
             r = UriBuilder.fromUri(rc.remote()).build();
         }
 
+        if (rc.tokenFile() != null && rc.token() != null) {
+            out().println(
+                    "WARNING: both tokenFile and token are given, preferring tokenFile (Hint: check arguments and environment)");
+        }
+
         RemoteService svc = null;
         if (rc.tokenFile() != null) {
             try {
