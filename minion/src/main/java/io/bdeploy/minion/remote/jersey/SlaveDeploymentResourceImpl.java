@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Stream;
 
@@ -108,17 +107,21 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
     }
 
     @Override
-    public SortedMap<String, SortedSet<Key>> getAvailableDeployments() {
-        SortedSet<Key> scan = InstanceNodeManifest.scan(root.getHive());
-        SortedMap<String, SortedSet<Key>> uuidMappedKeys = new TreeMap<>();
-
-        scan.stream()
-                .map(k -> new InstanceNodeController(root.getHive(), root.getDeploymentDir(),
-                        InstanceNodeManifest.of(root.getHive(), k)))
-                .filter(InstanceNodeController::isInstalled).forEach(x -> uuidMappedKeys
-                        .computeIfAbsent(x.getManifest().getUUID(), y -> new TreeSet<>()).add(x.getManifest().getKey()));
-
-        return uuidMappedKeys;
+    public SortedSet<Key> getAvailableDeploymentsOfInstance(String instanceId) {
+        SortedSet<Key> manifests = InstanceNodeManifest.scan(root.getHive());
+        TreeSet<Key> result = new TreeSet<>();
+        for (Key key : manifests) {
+            InstanceNodeManifest mf = InstanceNodeManifest.of(root.getHive(), key);
+            if (!mf.getUUID().equals(instanceId)) {
+                continue;
+            }
+            InstanceNodeController controller = new InstanceNodeController(root.getHive(), root.getDeploymentDir(), mf);
+            if (!controller.isInstalled()) {
+                continue;
+            }
+            result.add(mf.getKey());
+        }
+        return result;
     }
 
     @Override

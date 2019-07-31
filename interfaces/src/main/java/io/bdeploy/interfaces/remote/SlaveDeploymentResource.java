@@ -42,11 +42,13 @@ public interface SlaveDeploymentResource {
     public void remove(Manifest.Key key);
 
     /**
-     * @return lists of deployed manifests grouped by deployment UUID.
+     * Returns a collection of deployed manifests.
+     *
+     * @return the deployed manifests
      */
     @GET
-    @Path("/available")
-    public SortedMap<String, SortedSet<Manifest.Key>> getAvailableDeployments();
+    @Path("/available-i")
+    public SortedSet<Manifest.Key> getAvailableDeploymentsOfInstance(@QueryParam("i") String instanceId);
 
     /**
      * @return lists of active deployed manifests by UUID.

@@ -1,6 +1,5 @@
 package io.bdeploy.minion.cli;
 
-import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.SortedSet;
 
@@ -10,6 +9,8 @@ import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
+import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
@@ -48,23 +49,21 @@ public class RemoteDeploymentTool extends RemoteServiceTool<RemoteDeployConfig> 
     @Override
     protected void run(RemoteDeployConfig config, RemoteService svc) {
         try {
-            MasterRootResource client = ResourceProvider.getResource(svc, MasterRootResource.class);
             helpAndFailIfMissing(config.target(), "Missing --target");
 
+            MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class);
+            MasterNamedResource master = root.getNamedMaster(config.target());
             if (config.list()) {
-
-                SortedMap<String, SortedSet<Key>> available = client.getNamedMaster(config.target()).getAvailableDeployments();
-                SortedMap<String, Key> active = client.getNamedMaster(config.target()).getActiveDeployments();
-
                 out().println(String.format("%1$-15s %2$-30s %3$-10s", "UUID", "MANIFEST", "ACTIVE"));
 
-                for (Entry<String, SortedSet<Key>> entry : available.entrySet()) {
-                    String uuid = entry.getKey();
-                    Manifest.Key activeKey = active.get(uuid);
-
-                    for (Manifest.Key k : entry.getValue()) {
-                        out().println(
-                                String.format("%1$-15s %2$-30s %3$-10s", uuid, k.toString(), k.equals(activeKey) ? "*" : ""));
+                SortedMap<String, Key> active = master.getActiveDeployments();
+                for (InstanceConfiguration ic : master.listInstanceConfigurations()) {
+                    String uuid = ic.uuid;
+                    SortedSet<Key> deployments = master.getAvailableDeploymentsOfInstance(uuid);
+                    for (Manifest.Key k : deployments) {
+                        Manifest.Key activeKey = active.get(uuid);
+                        boolean isActive = k.equals(activeKey);
+                        out().println(String.format("%1$-15s %2$-30s %3$-10s", uuid, k, isActive ? "*" : ""));
                     }
                 }
                 return;
@@ -74,13 +73,15 @@ public class RemoteDeploymentTool extends RemoteServiceTool<RemoteDeployConfig> 
             Manifest.Key key = Manifest.Key.parse(config.manifest());
 
             if (config.install()) {
-                client.getNamedMaster(config.target()).install(key);
+                master.install(key);
             } else if (config.activate()) {
-                client.getNamedMaster(config.target()).activate(key);
+                master.activate(key);
             } else if (config.uninstall()) {
-                client.getNamedMaster(config.target()).remove(key);
+                master.remove(key);
             }
-        } catch (Exception e) {
+        } catch (
+
+        Exception e) {
             throw new IllegalStateException("Cannot communicate with remote", e);
         }
     }

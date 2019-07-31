@@ -1,5 +1,6 @@
 package io.bdeploy.interfaces.remote;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -16,6 +17,7 @@ import javax.ws.rs.core.MediaType;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
+import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.InstanceDirectory;
@@ -62,32 +64,35 @@ public interface MasterNamedResource {
     public void remove(Manifest.Key key);
 
     /**
-     * @return available manifests to deploy.
-     */
-    @GET
-    @Path("/available")
-    public SortedMap<String, SortedSet<Manifest.Key>> getAvailableDeployments();
-
-    /**
-     * @return return active deployments.
+     * Returns all activated deployments of all instance groups of this hive.
+     *
+     * @return return active deployments. Key=Unique ID of the instance group. Value=The activated version
      */
     @GET
     @Path("/active")
     public SortedMap<String, Manifest.Key> getActiveDeployments();
 
     /**
-     * @return available manifests to deploy on a certain minion.
+     * @return available manifests to deploy on a certain minion for a certain instance.
      */
     @GET
     @Path("/available-m")
-    public SortedMap<String, SortedSet<Manifest.Key>> getAvailableDeployments(@QueryParam("m") String minion);
+    public SortedSet<Manifest.Key> getAvailableDeploymentsOfMinion(@QueryParam("m") String minion,
+            @QueryParam("i") String instance);
 
     /**
      * @return return active deployments on a certain minion.
      */
     @GET
     @Path("/active-m")
-    public SortedMap<String, Manifest.Key> getActiveDeployments(@QueryParam("m") String minion);
+    public SortedMap<String, Manifest.Key> getActiveDeploymentsOfMinion(@QueryParam("m") String minion);
+
+    /**
+     * @return available manifests to deploy for the given instance.
+     */
+    @GET
+    @Path("/available-i")
+    public SortedSet<Manifest.Key> getAvailableDeploymentsOfInstance(@QueryParam("i") String instance);
 
     /**
      * @param instanceId the instance UUID to fetch directory content for
@@ -201,5 +206,14 @@ public interface MasterNamedResource {
     @POST
     @Path("/weak-token")
     public String generateWeakToken(String principal);
+
+    /**
+     * Returns a list of instance configurations available in this hive.
+     *
+     * @return the list of instance configurations.
+     */
+    @GET
+    @Path("/instances")
+    public Collection<InstanceConfiguration> listInstanceConfigurations();
 
 }

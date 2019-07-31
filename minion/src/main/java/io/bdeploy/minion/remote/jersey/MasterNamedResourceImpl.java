@@ -13,8 +13,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
@@ -34,6 +34,7 @@ import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
+import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.directory.EntryChunk;
@@ -147,6 +148,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             return false;
         }
         // check all minions for their respective availability.
+        String instanceId = imf.getConfiguration().uuid;
         for (Map.Entry<String, Manifest.Key> entry : imfs.entrySet()) {
             String minionName = entry.getKey();
             if (InstanceManifest.CLIENT_NODE_NAME.equals(minionName)) {
@@ -158,16 +160,15 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             assertNotNull(minion, "Cannot lookup minion on master: " + minionName);
             assertNotNull(toDeploy, "Cannot lookup minion manifest on master: " + toDeploy);
 
-            SlaveDeploymentResource deployment = ResourceProvider.getResource(minion, SlaveDeploymentResource.class);
-            SortedMap<String, SortedSet<Key>> uuidMapped = deployment.getAvailableDeployments();
-            if (!uuidMapped.containsKey(imf.getConfiguration().uuid)) {
+            SlaveDeploymentResource slave = ResourceProvider.getResource(minion, SlaveDeploymentResource.class);
+            SortedSet<Key> deployments = slave.getAvailableDeploymentsOfInstance(instanceId);
+            if (deployments.isEmpty()) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Minion {} does not contain any deployment for {}", minionName, imf.getConfiguration().uuid);
+                    log.debug("Minion {} does not contain any deployment for {}", minionName, instanceId);
                 }
                 return false;
             }
-
-            if (!uuidMapped.get(imf.getConfiguration().uuid).contains(toDeploy)) {
+            if (!deployments.contains(toDeploy)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Minion {} does not have {} available", minionName, toDeploy);
                 }
@@ -224,25 +225,28 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
-    public SortedMap<String, SortedSet<Key>> getAvailableDeployments() {
+    public SortedSet<Key> getAvailableDeploymentsOfInstance(String instance) {
         SortedSet<Key> scan = InstanceManifest.scan(hive, false);
-        SortedMap<String, SortedSet<Key>> uuidMapped = new TreeMap<>();
+        SortedSet<Key> result = new TreeSet<>();
 
         for (Manifest.Key k : scan) {
             InstanceManifest imf = InstanceManifest.of(hive, k);
+            String instanceId = imf.getConfiguration().uuid;
+            if (!instanceId.equals(instance)) {
+                continue;
+            }
             try {
                 if (!isFullyDeployed(imf)) {
                     continue;
                 }
+                result.add(imf.getManifest());
             } catch (Exception e) {
-                log.warn("Cannot check deployment state of: {}", imf.getManifest());
+                log.warn("{}: Cannot check deployment state of: {}", instance, imf.getManifest());
                 continue;
             }
 
-            uuidMapped.computeIfAbsent(imf.getConfiguration().uuid, y -> new TreeSet<>()).add(imf.getManifest());
         }
-
-        return uuidMapped;
+        return result;
     }
 
     @Override
@@ -251,20 +255,20 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
-    public SortedMap<String, SortedSet<Key>> getAvailableDeployments(String minion) {
+    public SortedSet<Key> getAvailableDeploymentsOfMinion(String minion, String instance) {
         RemoteService m = root.getState().minions.get(minion);
         assertNotNull(m, "Cannot find minion " + minion);
 
         SlaveDeploymentResource client = ResourceProvider.getResource(m, SlaveDeploymentResource.class);
         try {
-            return client.getAvailableDeployments();
+            return client.getAvailableDeploymentsOfInstance(instance);
         } catch (Exception e) {
             throw new WebApplicationException("Cannot read deployments from minion " + minion, e, Status.INTERNAL_SERVER_ERROR);
         }
     }
 
     @Override
-    public SortedMap<String, Key> getActiveDeployments(String minion) {
+    public SortedMap<String, Key> getActiveDeploymentsOfMinion(String minion) {
         RemoteService m = root.getState().minions.get(minion);
         assertNotNull(m, "Cannot find minion " + minion);
 
@@ -509,6 +513,12 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         } catch (Exception e) {
             throw new WebApplicationException("Cannot create weak token", e);
         }
+    }
+
+    @Override
+    public Collection<InstanceConfiguration> listInstanceConfigurations() {
+        SortedSet<Key> scan = InstanceManifest.scan(hive, true);
+        return scan.stream().map(k -> InstanceManifest.of(hive, k).getConfiguration()).collect(Collectors.toList());
     }
 
 }
