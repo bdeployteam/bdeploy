@@ -70,6 +70,7 @@ import { ThemeChooserComponent } from './theme-chooser/theme-chooser.component';
 import { UpdateBrowserComponent } from './update-browser/update-browser.component';
 import { UpdateCardComponent } from './update-card/update-card.component';
 import { UpdateDialogComponent } from './update-dialog/update-dialog.component';
+import { ProductInfoCardComponent } from './product-info-card/product-info-card.component';
 
 export function loadAppConfig(cfgService: ConfigService) {
   return () => cfgService.load();
@@ -132,7 +133,8 @@ export function loadAppConfig(cfgService: ConfigService) {
     MasterCleanupComponent,
     FileViewerComponent,
     DataFilesBrowserComponent,
-    ClientAppsComponent
+    ClientAppsComponent,
+    ProductInfoCardComponent
   ],
   imports: [
     BrowserModule,

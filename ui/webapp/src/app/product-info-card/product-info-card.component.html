@@ -1,0 +1,16 @@
+<ng-template #infoPopup>
+    <mat-card class="info">
+        <div class="mat-title">{{product.description}}</div>
+        <p>Product: <b>{{product.key.name}}</b> Tag: <b>{{product.key.tag}}</b></p>
+        <hr>
+        <mat-card-content class="labels-card">
+          <mat-chip-list>
+            <mat-chip *ngFor="let labelKey of getLabelKeys()"><span class="label-key">{{labelKey}}: </span><span>{{product.labels[labelKey]}}</span></mat-chip>
+          </mat-chip-list>
+        </mat-card-content>
+    </mat-card>
+  </ng-template>
+
+  <button mat-icon-button type="button" #infoButton (click)="openOverlay(infoButton, infoPopup)">
+    <mat-icon class="info-icon">info</mat-icon>
+  </button>

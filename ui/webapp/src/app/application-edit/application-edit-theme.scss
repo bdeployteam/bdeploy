@@ -58,4 +58,18 @@
     border-color: transparent $card-color $card-color transparent;
     box-shadow: #{rgba($mat-elevation-color, $mat-elevation-opacity * 0.12)} 2px 2px 2px;
   }
+
+  .info-card-below::after {
+    content: '';
+    position: absolute;
+    transform: rotate(45deg);
+    top: -10px;
+    right: 25px;
+    margin-left: -10px;
+    border-width: 10px;
+    border-style: solid;
+    border-color: $card-color transparent transparent $card-color;
+    box-shadow: #{rgba($mat-elevation-color, $mat-elevation-opacity * 0.12)} -1px -2px 5px;
+  }
+
 }
