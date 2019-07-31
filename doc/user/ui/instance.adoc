@@ -139,22 +139,18 @@ image::images/BDeploy_CfgFiles_Save.png[Modified Configuration Files,{thumbnail}
 
 The integrated editor provides syntax highlighting and rudimentary syntax checking for some basic file types (yaml, json, xml). Displayed problems are only to be seen as help and never interfere with the process, e.g. by preventing the saving of a file.
 
-==== Data Files
-
-[NOTE]
-TODO: Add documentation
-
-image::images/BDeploy_DataFiles_Browser.png[Data File Browser,{thumbnail},role="thumb",link="images/BDeploy_DataFiles_Browser.png"]
-image::images/BDeploy_DataFiles_Show.png[Show Data File,{thumbnail},role="thumb",link="images/BDeploy_DataFiles_Show.png"]
-
 ==== Product Configuration
 
 *Instances* are based on a *Product Version*. While the *Product* of the *Instance* cannot be changed afterwards, the *Version* used can be chosen arbitrarily from the available *Product Versions* (upgrade to a newer version / downgrade to an older version).
-Changing the *Product Version* can result in validation issues and automated adjustment of parameters. *Product Versions* can contain different *Applications*, so that with the change of the *Product Version* e.g. a previously configured *Application* must be deleted. If parameters definitions are changed, validation errors may occur which must be corrected before saving (e.g. new mandatory parameters).
+If there's a newer *Product Version* available (newer than the one that is configured for the latest *Instance Version*), a notification is shown.
+
+The btn:[Info] Popup provides a list of all Labels on that *Product* version.
 
 image::images/BDeploy_Product_Change.png[Change Current Product Tag,{thumbnail},role="thumb",link="images/BDeploy_Product_Change.png"]
 image::images/BDeploy_Product_Upgrade_Local_Changes.png[Successful Product Tag Change,{thumbnail},role="thumb",link="images/BDeploy_Product_Upgrade_Local_Changes.png"]
 image::images/BDeploy_Product_Downgrade_Missing_Apps.png[Validation Issues After Product Tag Change,{thumbnail},role="thumb",link="images/BDeploy_Product_Downgrade_Missing_Apps.png"]
+
+Changing the *Product Version* can result in validation issues and automated adjustment of parameters. *Product Versions* can contain different *Applications*, so that with the change of the *Product Version* e.g. a previously configured *Application* must be deleted. If parameters definitions are changed, validation errors may occur which must be corrected before saving (e.g. new mandatory parameters).
 
 ==== Export/Import of Instance Versions
 
@@ -218,3 +214,10 @@ image::images/BDeploy_Process_Crashed.png[Crashed Server Process (temporarily),{
 image::images/BDeploy_Process_Crashed_Repeatedly.png[Crashed Server Process (permanently),{thumbnail},role="thumb",link="images/BDeploy_Process_Crashed_Repeatedly.png"]
 image::images/BDeploy_Process_List.png[List of Operating System Processes,{thumbnail},role="thumb",link="images/BDeploy_Process_List.png"]
 image::images/BDeploy_Process_Output.png[Show and Follow Process Output,{thumbnail},role="thumb",link="images/BDeploy_Process_Output.png"]
+
+==== Data Files
+
+The *Data Files* Browser provides access to the server side data directory. Files can be downloaded or opened in the UI. When opened in place, the btn:[Follow] toggle allows to grab new output as it is written on the server.
+
+image::images/BDeploy_DataFiles_Browser.png[Data File Browser,{thumbnail},role="thumb",link="images/BDeploy_DataFiles_Browser.png"]
+image::images/BDeploy_DataFiles_Show.png[Show Data File,{thumbnail},role="thumb",link="images/BDeploy_DataFiles_Show.png"]

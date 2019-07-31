@@ -42,7 +42,7 @@ image::images/BDeploy_Instance_List.png[Instance Browser,{thumbnail},role="thumb
 
 Click the btn:[+] button to upload new *Products*. *Products* can be obtained by <<_building_a_product,building a *Product*>> or by downloading an existing version from another *Instance Group* on the same or another *BDeploy* server, using the btn:[Download] button on the *Product* details panel.
 
-Once a *Product* is available, you can click it to open the *Product* details panel. This panel allows you to btn:[Download] a *Product* version as _ZIP_, or btn:[Delete] individual versions of the *Product* as long as it is not currently required by an *Instance* version.
+Once a *Product* is available, you can click it to open the *Product* details panel. This panel allows you to btn:[Download] a *Product* version as _ZIP_, or btn:[Delete] individual versions of the *Product* as long as it is not currently required by an *Instance* version. The btn:[Info] popup provides a list of all tags on that *Product* version.
 
 image::images/BDeploy_Empty_Products.png[Empty Products Page,{thumbnail},role="thumb",link="images/BDeploy_Empty_Products.png"]
 image::images/BDeploy_Product_Upload_Before.png[Upload Product(s),{thumbnail},role="thumb",link="images/BDeploy_Product_Upload_Before.png"]
