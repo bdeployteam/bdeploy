@@ -30,6 +30,8 @@ import java.util.TreeMap;
 
 import com.google.common.base.Splitter;
 
+import io.bdeploy.common.cli.ToolBase;
+
 /**
  * The {@link Configuration} is basically a wrapper around a {@link Map} which
  * exposes access to the {@link Map} through {@link Annotation}s.
@@ -149,7 +151,7 @@ public class Configuration {
         }
 
         Object value = objects.get(key);
-        if (value == null) {
+        if (value == null && !ToolBase.isTestMode()) {
             EnvironmentFallback fallback = method.getAnnotation(EnvironmentFallback.class);
             if (fallback != null) {
                 value = System.getenv(fallback.value());

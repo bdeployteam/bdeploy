@@ -34,11 +34,31 @@ import io.bdeploy.common.util.VersionHelper;
 @SuppressFBWarnings
 public abstract class ToolBase {
 
+    private static boolean testMode = false;
     private static boolean failWithException = false;
     private final Map<String, Class<? extends CliTool>> tools = new TreeMap<>();
 
+    /**
+     * Indicate that the tools are executed in the context of a JUNIT test. In this mode the tools
+     * will NOT take values from the environmental as fallback for command line arguments. Only arguments directly passed to the
+     * tool are evaluated. Additionally the tools will fail with an exception without exiting the JVM.
+     */
     public static void setTestMode(boolean test) {
-        failWithException = test;
+        testMode = test;
+    }
+
+    /**
+     * Indicates whether or not the tool should fail with an exception or should print out the errors to the command line.
+     */
+    public static void setFailWithException(boolean fail) {
+        failWithException = fail;
+    }
+
+    /**
+     * Returns whether or not the test mode has been enabled
+     */
+    public static boolean isTestMode() {
+        return testMode;
     }
 
     public void toolMain(String... args) throws Exception {
@@ -109,7 +129,7 @@ public abstract class ToolBase {
                         System.out.println("  " + String.format("%1$12s:", e.getKey()));
                     }
                 });
-                if (failWithException) {
+                if (failWithException || testMode) {
                     throw new IllegalArgumentException("Wrong number of arguments");
                 } else {
                     System.exit(1);
@@ -149,7 +169,7 @@ public abstract class ToolBase {
         }
 
         // don't system.exit in unit tests
-        if (failWithException) {
+        if (failWithException || testMode) {
             if (exc != null) {
                 throw exc;
             } else {
@@ -393,7 +413,7 @@ public abstract class ToolBase {
             for (Class<? extends Annotation> x : getConfigsForHelp()) {
                 Configuration.formatHelp(x, System.out, "  ");
             }
-            if (failWithException) {
+            if (failWithException || testMode) {
                 throw new IllegalArgumentException(message);
             } else {
                 System.exit(1);

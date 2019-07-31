@@ -21,14 +21,14 @@ public class InteractiveShell extends CliTool {
     @Override
     public void run() {
         try {
-            MinionServerCli.setTestMode(true);
+            MinionServerCli.setFailWithException(true);
             System.out.println("Interactive shell started.");
             boolean readNextCommand = true;
             while (readNextCommand) {
                 readNextCommand = readAndExecute();
             }
         } finally {
-            MinionServerCli.setTestMode(false);
+            MinionServerCli.setFailWithException(false);
         }
     }
 
