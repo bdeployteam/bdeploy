@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -83,16 +84,18 @@ public class DataFileTest {
         assertEquals(uuid, idd.uuid);
         assertEquals(2, idd.entries.size());
 
-        // dfs, so sub/test.txt is first.
-        assertEquals("sub/test.txt", idd.entries.get(0).path);
-        assertEquals(4, idd.entries.get(0).size);
-        assertTrue(idd.entries.get(0).lastModified >= beforeWrite);
+        List<InstanceDirectoryEntry> sorted = new ArrayList<>(idd.entries);
+        sorted.sort((a, b) -> a.path.compareTo(b.path));
 
-        assertEquals("test.txt", idd.entries.get(1).path);
-        assertEquals(4, idd.entries.get(1).size);
-        assertTrue(idd.entries.get(1).lastModified >= beforeWrite);
+        assertEquals("sub/test.txt", sorted.get(0).path);
+        assertEquals(4, sorted.get(0).size);
+        assertTrue(sorted.get(0).lastModified >= beforeWrite);
 
-        InstanceDirectoryEntry sub = idd.entries.get(0);
+        assertEquals("test.txt", sorted.get(1).path);
+        assertEquals(4, sorted.get(1).size);
+        assertTrue(sorted.get(1).lastModified >= beforeWrite);
+
+        InstanceDirectoryEntry sub = sorted.get(0);
 
         EntryChunk chunk = master.getNamedMaster("demo").getEntryContent("master", sub, 0, 0);
         assertArrayEquals("Test".getBytes(StandardCharsets.UTF_8), chunk.content);
