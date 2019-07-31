@@ -541,6 +541,7 @@ public class InstanceResourceImpl implements InstanceResource {
         AtomicLong max = new AtomicLong(-1);
         LongAdder current = new LongAdder();
         try (Activity deploy = reporter.start("Fetching deployment state...", max::get, current::longValue)) {
+
             // need to fetch information from all master URIs that are historically available.
             String rootName = InstanceManifest.getRootName(instanceId);
             List<InstanceManifest> allMfs = InstanceManifest.scan(hive, false).stream().filter(m -> m.getName().equals(rootName))
@@ -566,10 +567,10 @@ public class InstanceResourceImpl implements InstanceResource {
 
                 try (NoThrowAutoCloseable proxy = reporter.proxyActivities(remote)) {
                     MasterRootResource r = ResourceProvider.getResource(remote, MasterRootResource.class);
-                    SortedMap<String, SortedSet<Key>> groupDeployments = r.getNamedMaster(group).getAvailableDeployments();
-                    SortedMap<String, Key> groupActiveDeployments = r.getNamedMaster(group).getActiveDeployments();
+                    MasterNamedResource master = r.getNamedMaster(group);
 
-                    Key active = groupActiveDeployments.get(instanceId);
+                    SortedMap<String, Key> activeDeployments = master.getActiveDeployments();
+                    Key active = activeDeployments.get(instanceId);
                     if (active != null) {
                         if (result.activatedVersion != null) {
                             log.warn("Multiple active versions found for {} of group {}", instanceId, group);
@@ -577,10 +578,8 @@ public class InstanceResourceImpl implements InstanceResource {
                         result.activatedVersion = active.getTag();
                     }
 
-                    SortedSet<Key> deployed = groupDeployments.get(instanceId);
-                    if (deployed != null) {
-                        deployed.forEach(d -> result.deployedVersions.add(d.getTag()));
-                    }
+                    SortedSet<Key> deployed = master.getAvailableDeploymentsOfInstance(instanceId);
+                    deployed.forEach(d -> result.deployedVersions.add(d.getTag()));
                 } catch (Exception e) {
                     // mark all as offline.
                     entry.getValue().forEach(im -> result.offlineMasterVersions.add(im.getManifest().getTag()));

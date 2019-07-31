@@ -36,7 +36,7 @@ public class InteractiveShell extends CliTool {
     private boolean readAndExecute() {
         MinionServerCli cli = new MinionServerCli();
         try {
-            System.out.println("> ");
+            System.out.print("> ");
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
             String command = br.readLine();
             if (command == null || command.equals("exit")) {

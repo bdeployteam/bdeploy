@@ -75,23 +75,23 @@ public class MinionDeployTest {
                 .get(InstanceManifest.INSTANCE_LABEL);
 
         /* STEP 5: deploy, activate on remote master */
-        assertFalse(master.getNamedMaster("demo").getAvailableDeployments().containsKey(uuid));
-        assertFalse(master.getNamedMaster("demo").getAvailableDeployments(Minion.DEFAULT_MASTER_NAME).containsKey(uuid));
+        assertTrue(master.getNamedMaster("demo").getAvailableDeploymentsOfInstance(uuid).isEmpty());
+        assertTrue(master.getNamedMaster("demo").getAvailableDeploymentsOfMinion(Minion.DEFAULT_MASTER_NAME, uuid).isEmpty());
         master.getNamedMaster("demo").install(instance);
-        assertTrue(master.getNamedMaster("demo").getAvailableDeployments().containsKey(uuid));
-        assertTrue(master.getNamedMaster("demo").getAvailableDeployments(Minion.DEFAULT_MASTER_NAME).containsKey(uuid));
+        assertFalse(master.getNamedMaster("demo").getAvailableDeploymentsOfInstance(uuid).isEmpty());
+        assertFalse(master.getNamedMaster("demo").getAvailableDeploymentsOfMinion(Minion.DEFAULT_MASTER_NAME, uuid).isEmpty());
 
         // test uninstall, re-install once
         master.getNamedMaster("demo").remove(instance);
-        assertFalse(master.getNamedMaster("demo").getAvailableDeployments().containsKey(uuid));
-        assertFalse(master.getNamedMaster("demo").getAvailableDeployments(Minion.DEFAULT_MASTER_NAME).containsKey(uuid));
+        assertTrue(master.getNamedMaster("demo").getAvailableDeploymentsOfInstance(uuid).isEmpty());
+        assertTrue(master.getNamedMaster("demo").getAvailableDeploymentsOfMinion(Minion.DEFAULT_MASTER_NAME, uuid).isEmpty());
         master.getNamedMaster("demo").install(instance);
-        assertTrue(master.getNamedMaster("demo").getAvailableDeployments().containsKey(uuid));
-        assertTrue(master.getNamedMaster("demo").getAvailableDeployments(Minion.DEFAULT_MASTER_NAME).containsKey(uuid));
+        assertFalse(master.getNamedMaster("demo").getAvailableDeploymentsOfInstance(uuid).isEmpty());
+        assertFalse(master.getNamedMaster("demo").getAvailableDeploymentsOfMinion(Minion.DEFAULT_MASTER_NAME, uuid).isEmpty());
 
         master.getNamedMaster("demo").activate(instance);
         assertTrue(master.getNamedMaster("demo").getActiveDeployments().containsKey(uuid));
-        assertTrue(master.getNamedMaster("demo").getActiveDeployments(Minion.DEFAULT_MASTER_NAME).containsKey(uuid));
+        assertTrue(master.getNamedMaster("demo").getActiveDeploymentsOfMinion(Minion.DEFAULT_MASTER_NAME).containsKey(uuid));
 
         /* STEP 6: run/control processes on the remote */
         master.getNamedMaster("demo").start(uuid, "app");
@@ -222,11 +222,11 @@ public class MinionDeployTest {
                 .get(InstanceManifest.INSTANCE_LABEL);
 
         /* STEP 5: deploy, activate on remote master */
-        assertFalse(master.getNamedMaster("demo").getAvailableDeployments().containsKey(uuid));
-        assertFalse(master.getNamedMaster("demo").getAvailableDeployments(Minion.DEFAULT_MASTER_NAME).containsKey(uuid));
+        assertTrue(master.getNamedMaster("demo").getAvailableDeploymentsOfInstance(uuid).isEmpty());
+        assertTrue(master.getNamedMaster("demo").getAvailableDeploymentsOfMinion(Minion.DEFAULT_MASTER_NAME, uuid).isEmpty());
         master.getNamedMaster("demo").install(importedInstance);
-        assertTrue(master.getNamedMaster("demo").getAvailableDeployments().containsKey(uuid));
-        assertTrue(master.getNamedMaster("demo").getAvailableDeployments(Minion.DEFAULT_MASTER_NAME).containsKey(uuid));
+        assertFalse(master.getNamedMaster("demo").getAvailableDeploymentsOfInstance(uuid).isEmpty());
+        assertFalse(master.getNamedMaster("demo").getAvailableDeploymentsOfMinion(Minion.DEFAULT_MASTER_NAME, uuid).isEmpty());
         master.getNamedMaster("demo").activate(importedInstance);
     }
 

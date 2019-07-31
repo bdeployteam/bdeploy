@@ -23,7 +23,7 @@ public class InstanceTool extends ConfiguredCliTool<InstanceConfig> {
 
     public @interface InstanceConfig {
 
-        @Help("Path to the local hive used for loading application descriptors and storing the dfeployment manifests when loading")
+        @Help("Path to the local hive used for loading application descriptors and storing the deployment manifests when loading")
         @EnvironmentFallback("BHIVE")
         String hive();
 
