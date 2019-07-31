@@ -1,4 +1,4 @@
-<mat-card class="software-repository-card" [routerLink]="['/softwarerepository', repository.name]">
+<mat-card class="software-repository-card" [routerLink]="['/softwarerepo/packages', repository.name]">
   <mat-card-header>
     <!--
     <app-instance-group-logo mat-card-avatar [instanceGroupName]='repository.name'></app-instance-group-logo>
@@ -7,11 +7,11 @@
     <mat-card-subtitle>Software Repository</mat-card-subtitle>
     <span class="spacer"></span>
     <mat-menu #appMenu="matMenu" xPosition="before">
-      <button mat-menu-item [routerLink]="['/softwarerepository', repository.name]">Open</button>
-      <button mat-menu-item [routerLink]="['/softwarerepoedit', repository.name]">Edit</button>
+      <button mat-menu-item [routerLink]="['/softwarerepo/packages', repository.name]">Open</button>
+      <button mat-menu-item [routerLink]="['/softwarerepo/edit', repository.name]">Edit</button>
       <button mat-menu-item (click)="delete()">Delete</button>
       <mat-divider></mat-divider>
-      <button mat-menu-item [routerLink]="['/hivebrowser', {hive: repository.name}]">Hive</button>
+      <button mat-menu-item [routerLink]="['/hive/browser', {hive: repository.name}]">Hive</button>
     </mat-menu>
     <button class="option-button" mat-icon-button [matMenuTriggerFor]="appMenu" appClickStopPropagation>
       <mat-icon>more_vert</mat-icon>

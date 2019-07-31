@@ -23,7 +23,7 @@ const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'instancegroupbrowser',
+    redirectTo: 'instancegroup/browser',
   },
   {
     path: 'login',
@@ -31,113 +31,113 @@ const routes: Routes = [
     data: { title: 'Login' }
   },
   {
-    path: 'instancegroupbrowser',
+    path: 'instancegroup/browser',
     component: InstanceGroupBrowserComponent,
     canActivate: [AuthGuard],
     data: { title: 'Instance Groups' }
   },
   {
-    path: 'instancegroupadd',
+    path: 'instancegroup/add',
     component: InstanceGroupAddEditComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
     data: { title: 'Add Instance Group' }
   },
   {
-    path: 'instancegroupedit/:name',
+    path: 'instancegroup/edit/:name',
     component: InstanceGroupAddEditComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Edit Instance Group (${params["name"]})' }
+    data: { title: 'Edit Instance Group (${params["name"]})', header: 'Edit Instance Group' }
   },
   {
-    path: 'hivebrowser',
+    path: 'hive/browser',
     component: HiveBrowserComponent,
     canActivate: [AuthGuard],
     data: { title: 'Hive Browser' }
   },
   {
-    path: 'instancebrowser/:name',
+    path: 'instance/browser/:name',
     component: InstanceBrowserComponent,
     canActivate: [AuthGuard],
-    data: { title: 'Instances (${params["name"]})' }
+    data: { title: 'Instances (${params["name"]})', header: 'Instances' }
   },
   {
-    path: 'instanceadd/:group',
+    path: 'instance/add/:group',
     component: InstanceAddEditComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Add Instance (${params["group"]})' }
+    data: { title: 'Add Instance (${params["group"]})', header: 'Add Instance' }
   },
   {
-    path: 'instanceedit/:group/:uuid',
+    path: 'instance/edit/:group/:uuid',
     component: InstanceAddEditComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Edit Instance (${params["group"]} - ${params["uuid"]})' }
+    data: { title: 'Edit Instance (${params["group"]} - ${params["uuid"]})', header: 'Edit Instance' }
   },
   {
-    path: 'processconfiguration/:group/:uuid',
+    path: 'instance/overview/:group/:uuid',
     component: ProcessConfigurationComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Process Configuration (${params["group"]} - ${params["uuid"]})' }
+    data: { title: 'Instance Overview (${params["group"]} - ${params["uuid"]})', header: 'Instance Overview' }
   },
   {
-    path: 'configfilesbrowser/:group/:uuid/:version',
+    path: 'configfiles/:group/:uuid/:version',
     component: ConfigFilesBrowserComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: '${params["group"]} - ${params["uuid"]} ${params["version"]} - Configuration Files' }
+    data: { title: 'Configuration Files (${params["group"]} - ${params["uuid"]})', header: 'Configuration Files' }
   },
   {
-    path: 'datafilesbrowser/:group/:uuid/:version',
+    path: 'datafiles/:group/:uuid/:version',
     component: DataFilesBrowserComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: '${params["group"]} - ${params["uuid"]} ${params["version"]} - Data Files' }
+    data: { title: 'Data Files (${params["group"]} - ${params["uuid"]})', header: 'Data Files' }
   },
   {
     path: 'products/:group',
     component: ProductsComponent,
     canActivate: [AuthGuard],
-    data: { title: 'Products (${params["group"]})' }
+    data: { title: 'Manage Products (${params["group"]})', header: 'Manage Products' }
   },
   {
-    path: 'softwarerepositoriesbrowser',
+    path: 'softwarerepo/browser',
     component: SoftwareRepositoriesBrowserComponent,
     canActivate: [AuthGuard],
     data: { title: 'Software Repositories' }
   },
   {
-    path: 'softwarerepoadd',
+    path: 'softwarerepo/add',
     component: SoftwareRepoAddEditComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
     data: { title: 'Add Software Repository' }
   },
   {
-    path: 'softwarerepoedit/:name',
+    path: 'softwarerepo/edit/:name',
     component: SoftwareRepoAddEditComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Edit Software Repository (${params["name"]})' }
+    data: { title: 'Edit Software Repository (${params["name"]})', header: 'Edit Software Repository' }
   },
   {
-    path: 'softwarerepository/:name',
+    path: 'softwarerepo/packages/:name',
     component: SoftwareRepositoryComponent,
     canActivate: [AuthGuard],
-    data: { title: 'Software Repository (${params["name"]})' }
+    data: { title: 'Software Packages (${params["name"]})', header: 'Software Packages' }
   },
   {
-    path: 'updatebrowser',
+    path: 'systemsoftware',
     component: UpdateBrowserComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Browse available system versions' }
+    data: { title: 'System Software' }
   },
   {
-    path: 'mastercleanup',
+    path: 'manualcleanup',
     component: MasterCleanupComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
@@ -148,7 +148,7 @@ const routes: Routes = [
     component: ClientAppsComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Client Applications (${params["group"]})' }
+    data: { title: 'Client Applications (${params["group"]})', header: 'Client Applications' }
   },
 ];
 

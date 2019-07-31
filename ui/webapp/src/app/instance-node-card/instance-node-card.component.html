@@ -75,7 +75,7 @@
         <div *ngFor="let nodeCfg of node.foreignNodeConfigurations">
           <div class="foreign-header">
             Foreign Applications of Instance
-            <a [routerLink]="['/processconfiguration', instanceGroupName, nodeCfg.uuid]">{{ nodeCfg.name }}</a>
+            <a [routerLink]="['/instance/overview', instanceGroupName, nodeCfg.uuid]">{{ nodeCfg.name }}</a>
           </div>
           <div class="app-foreign-card-container">
             <div *ngFor="let cfg of nodeCfg.applications">

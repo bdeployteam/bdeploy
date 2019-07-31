@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
+import { HeaderTitleService } from './services/header-title.service';
 import { Logger, LoggingService } from './services/logging.service';
 
 @Component({
@@ -19,6 +20,7 @@ export class AppComponent implements OnInit {
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private titleService: Title,
+    private headerService: HeaderTitleService,
   ) {
     this.log.info('----------------------------------------');
     this.log.info(this.title + ' started...');
@@ -46,6 +48,13 @@ export class AppComponent implements OnInit {
           // tslint:disable-next-line:no-eval
           const expanded = eval('`' + url.data.title + '`');
           title += ` - ${expanded}`;
+        }
+        if (url.data && url.data.header) {
+          // explicit other header than title.
+          this.headerService.setHeaderTitle(url.data.header); // no variable expansion for now.
+        } else {
+          // make sure header is taken from title.
+          this.headerService.setHeaderTitle(null);
         }
         this.titleService.setTitle(title);
       });

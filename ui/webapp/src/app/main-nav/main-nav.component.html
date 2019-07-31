@@ -9,13 +9,13 @@
       <a mat-icon-button href="/assets/doc/index.html" target="_blank"><mat-icon>help</mat-icon></a>
     </mat-toolbar>
     <mat-nav-list>
-      <a mat-list-item (click)='drawer.close()' [routerLink]="['/instancegroupbrowser']"><mat-icon class="nav-icon">view_carousel</mat-icon>Instance Groups</a>
-      <a mat-list-item (click)='drawer.close()' [routerLink]="['/softwarerepositoriesbrowser']"><mat-icon class="nav-icon">storage</mat-icon>Software Repositories</a>
+      <a mat-list-item (click)='drawer.close()' [routerLink]="['/instancegroup/browser']"><mat-icon class="nav-icon">view_carousel</mat-icon>Instance Groups</a>
+      <a mat-list-item (click)='drawer.close()' [routerLink]="['/softwarerepo/browser']"><mat-icon class="nav-icon">storage</mat-icon>Software Repositories</a>
     </mat-nav-list>
     <mat-nav-list class='at-bottom'>
-      <a mat-list-item (click)='drawer.close()' [routerLink]="['/updatebrowser']"><mat-icon class="nav-icon">system_update</mat-icon>System Software</a>
-      <a mat-list-item (click)='drawer.close()' [routerLink]="['/mastercleanup']"><mat-icon class="nav-icon">delete_sweep</mat-icon>Manual Cleanup</a>
-      <a mat-list-item (click)='drawer.close()' [routerLink]="['/hivebrowser']"><mat-icon class="nav-icon">sd_storage</mat-icon>Hive Browser</a>
+      <a mat-list-item (click)='drawer.close()' [routerLink]="['/systemsoftware']"><mat-icon class="nav-icon">system_update</mat-icon>System Software</a>
+      <a mat-list-item (click)='drawer.close()' [routerLink]="['/manualcleanup']"><mat-icon class="nav-icon">delete_sweep</mat-icon>Manual Cleanup</a>
+      <a mat-list-item (click)='drawer.close()' [routerLink]="['/hive/browser']"><mat-icon class="nav-icon">sd_storage</mat-icon>Hive Browser</a>
     </mat-nav-list>
     <footer class="footer-container">
       <mat-divider ></mat-divider>
@@ -44,7 +44,7 @@
         *ngIf="(isAuth$ | async)">
         <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
       </button>
-      <app-logo class='logo' [size]='48'></app-logo>{{title.getTitle()}}
+      <app-logo class='logo' [size]='48'></app-logo>{{title.getHeaderTitle()}}
       <span class="spacer"></span>
       <app-theme-chooser></app-theme-chooser>
       <ng-container *ngIf="isAuth$ | async">

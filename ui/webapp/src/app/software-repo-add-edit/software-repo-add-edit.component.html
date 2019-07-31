@@ -2,8 +2,7 @@
   <form [formGroup]="softwareRepoFormGroup" (ngSubmit)="onSubmit()">
     <mat-toolbar class="mat-elevation-z1 header-toolbar">
       <button mat-icon-button type="button" [disabled]="loading" (click)='location.back()'><mat-icon>chevron_left</mat-icon></button>
-      <span *ngIf="isCreate() == true">Create Software Repository</span>
-      <span *ngIf="isCreate() == false">Edit Software Repository</span>
+      <span *ngIf="isCreate() == false">Software Repository: {{nameParam}}</span>
       <span class="fill-space"></span>
       <button mat-raised-button color="primary" type="submit" [disabled]="loading || !isModified() || !softwareRepoFormGroup.valid">SAVE</button>
     </mat-toolbar>
