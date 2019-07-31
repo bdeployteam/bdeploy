@@ -3,15 +3,13 @@
     <mat-toolbar class="mat-elevation-z1 header-toolbar">
       <mat-toolbar-row>
         <button mat-icon-button type="button" [disabled]="loading" (click)='location.back()'><mat-icon>chevron_left</mat-icon></button>
-        <span *ngIf="isCreate()">Create New Instance</span>
-        <span *ngIf="!isCreate()">Edit Instance '{{nameControl.value}}'</span>
+        <span *ngIf="isCreate()">Instance Group: {{groupParam}}</span>
+        <span *ngIf="!isCreate()">Instance: {{groupParam}} - {{nameControl.value}}</span>
         <span class="fill-space"></span>
         <button mat-raised-button color="primary" type="submit" [disabled]="loading || !isModified() || !instanceFormGroup.valid">SAVE</button>
       </mat-toolbar-row>
       <mat-toolbar-row class="subHeader">
         <span> UUID: <b>{{uuidControl.value}}</b> </span>
-        <span class="spacer"></span>
-        <span> Instance Group: <b>{{groupParam}}</b> </span>
       </mat-toolbar-row>
     </mat-toolbar>
 

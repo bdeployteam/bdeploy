@@ -21,7 +21,7 @@ import { InstanceGroupValidators } from '../validators/instance-group.validator'
 export class SoftwareRepoAddEditComponent implements OnInit {
   log: Logger = this.loggingService.getLogger('SoftwareRepoAddEditComponent');
 
-  private nameParam: string;
+  nameParam: string;
 
   public loading = false;
 
@@ -100,7 +100,7 @@ export class SoftwareRepoAddEditComponent implements OnInit {
         .subscribe(result => {
           this.log.info('created new software repository ' + softwareRepo.name);
           this.clonedSoftwareRepo = softwareRepo;
-          this.router.navigate(['/softwarerepositoriesbrowser']);
+          this.router.navigate(['/softwarerepo/browser']);
         });
     } else {
       this.softwareRepoService
@@ -113,7 +113,7 @@ export class SoftwareRepoAddEditComponent implements OnInit {
         .subscribe(result => {
           this.log.info('updated software repository ' + this.nameParam);
           this.clonedSoftwareRepo = softwareRepo;
-          this.router.navigate(['/softwarerepositoriesbrowser']);
+          this.router.navigate(['/softwarerepo/browser']);
         });
     }
   }

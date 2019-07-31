@@ -22,7 +22,7 @@ import { InstanceGroupValidators } from '../validators/instance-group.validator'
 export class InstanceGroupAddEditComponent implements OnInit {
   log: Logger = this.loggingService.getLogger('InstanceGroupAddEditComponent');
 
-  private nameParam: string;
+  nameParam: string;
 
   public loading = false;
 
@@ -216,12 +216,12 @@ export class InstanceGroupAddEditComponent implements OnInit {
     if (this.newLogoFile != null) {
       this.instanceGroupService.updateInstanceGroupImage(group, this.newLogoFile).pipe(finalize(() => this.loading = false)).subscribe(
         response => {
-          this.router.navigate(['/instancegroupbrowser']);
+          this.router.navigate(['/instancegroup/browser']);
           this.loading = false;
         }
       );
     } else {
-      this.router.navigate(['/instancegroupbrowser']);
+      this.router.navigate(['/instancegroup/browser']);
       this.loading = false;
     }
   }

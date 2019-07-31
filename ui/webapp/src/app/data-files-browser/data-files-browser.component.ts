@@ -5,10 +5,9 @@ import { Component, OnInit, TemplateRef, ViewContainerRef } from '@angular/core'
 import { PageEvent, Sort } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { InstanceDirectory, InstanceDirectoryEntry, StringEntryChunkDto } from '../models/gen.dtos';
+import { InstanceConfiguration, InstanceDirectory, InstanceDirectoryEntry, StringEntryChunkDto } from '../models/gen.dtos';
 import { InstanceService } from '../services/instance.service';
 import { Logger, LoggingService } from '../services/logging.service';
-import { MessageboxService } from '../services/messagebox.service';
 
 @Component({
   selector: 'app-data-files-browser',
@@ -33,6 +32,8 @@ export class DataFilesBrowserComponent implements OnInit {
   public pageEvents: Map<string, PageEvent> = new Map<string, PageEvent>();
   public sortEvents: Map<string, Sort> = new Map<string, Sort>();
 
+  public instanceVersion: InstanceConfiguration;
+
   public instanceDirectories: InstanceDirectory[];
   public activeInstanceDirectory: InstanceDirectory = null;
   public activeInstanceDirectoryEntry: InstanceDirectoryEntry = null;
@@ -47,12 +48,15 @@ export class DataFilesBrowserComponent implements OnInit {
     private route: ActivatedRoute,
     private instanceService: InstanceService,
     private loggingService: LoggingService,
-    public location: Location,
-    private messageBoxService: MessageboxService
+    public location: Location
   ) {}
 
 
   public ngOnInit(): void {
+    this.instanceService.getInstanceVersion(this.groupParam, this.uuidParam, this.versionParam).subscribe(
+      instanceVersion => {this.instanceVersion = instanceVersion; }
+    );
+
     this.reload();
   }
 

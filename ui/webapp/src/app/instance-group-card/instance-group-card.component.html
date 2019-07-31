@@ -1,15 +1,15 @@
-<mat-card class="instance-group-card" [routerLink]="['/instancebrowser', currentGroup.name]">
+<mat-card class="instance-group-card" [routerLink]="['/instance/browser', currentGroup.name]">
   <mat-card-header>
     <app-instance-group-logo mat-card-avatar [instanceGroupName]='currentGroup.name'></app-instance-group-logo>
     <mat-card-title class="title">{{currentGroup.name}}</mat-card-title>
     <mat-card-subtitle>Instance Group</mat-card-subtitle>
     <span class="spacer"></span>
     <mat-menu #appMenu="matMenu" xPosition="before">
-      <button mat-menu-item [routerLink]="['/instancebrowser', currentGroup.name]">Open</button>
-      <button mat-menu-item [routerLink]="['/instancegroupedit', currentGroup.name]">Edit</button>
+      <button mat-menu-item [routerLink]="['/instance/browser', currentGroup.name]">Open</button>
+      <button mat-menu-item [routerLink]="['/instancegroup/edit', currentGroup.name]">Edit</button>
       <button mat-menu-item (click)="delete()">Delete</button>
       <mat-divider></mat-divider>
-      <button mat-menu-item [routerLink]="['/hivebrowser', {hive: currentGroup.name}]">Hive</button>
+      <button mat-menu-item [routerLink]="['/hive/browser', {hive: currentGroup.name}]">Hive</button>
       <button mat-menu-item [routerLink]="['/products', currentGroup.name]">Products</button>
     </mat-menu>
     <button class="option-button" mat-icon-button [matMenuTriggerFor]="appMenu" appClickStopPropagation>

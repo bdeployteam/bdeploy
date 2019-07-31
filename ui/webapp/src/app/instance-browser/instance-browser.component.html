@@ -1,6 +1,6 @@
 <mat-toolbar class="mat-elevation-z1 header-toolbar">
   <button mat-icon-button type="button" (click)='location.back()'><mat-icon>chevron_left</mat-icon></button>
-  <span>Instance Overview: {{instanceGroupName}}</span>
+  <span>Instance Group: {{instanceGroupName}}</span>
   <span class="fill-space"></span>
   <app-remote-progress [scope]='[instanceGroupName]'></app-remote-progress>
   <mat-form-field class="search">
@@ -29,7 +29,7 @@
     </p>
     <p>
       <span class="material-icons headerIcon">add</span>
-      <span class="headerText"><a color="primary" [routerLink]="['/instanceadd', instanceGroupName]">Create Instance</a></span>
+      <span class="headerText"><a color="primary" [routerLink]="['/instance/add', instanceGroupName]">Create Instance</a></span>
     </p>
   </div>
   <div *ngFor="let purpose of purposes">
@@ -41,7 +41,7 @@
   </div>
 </ng-container>
 
-<a mat-fab class="add-button" [routerLink]="['/instanceadd', instanceGroupName]" [disabled]="!hasProducts">
+<a mat-fab class="add-button" [routerLink]="['/instance/add', instanceGroupName]" [disabled]="!hasProducts">
   <mat-icon>add</mat-icon>
 </a>
 <a mat-fab class="products-button" matTooltip="Manage Products..." [routerLink]="['/products', instanceGroupName]" color="primary">

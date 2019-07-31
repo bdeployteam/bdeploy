@@ -2,8 +2,7 @@
   <form [formGroup]="instanceGroupFormGroup" (ngSubmit)="onSubmit()">
     <mat-toolbar class="mat-elevation-z1 header-toolbar">
       <button mat-icon-button type="button" [disabled]="loading" (click)='location.back()'><mat-icon>chevron_left</mat-icon></button>
-      <span *ngIf="isCreate() == true">Create Instance Group</span>
-      <span *ngIf="isCreate() == false">Edit Instance Group</span>
+      <span *ngIf="isCreate() == false">Instance Group: {{nameParam}}</span>
       <span class="fill-space"></span>
       <button mat-raised-button color="primary" type="submit" [disabled]="loading || !isModified() || !instanceGroupFormGroup.valid">SAVE</button>
     </mat-toolbar>
