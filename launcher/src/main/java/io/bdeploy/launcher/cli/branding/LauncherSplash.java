@@ -1,6 +1,7 @@
 package io.bdeploy.launcher.cli.branding;
 
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.GraphicsEnvironment;
 import java.awt.Label;
@@ -146,7 +147,8 @@ public class LauncherSplash implements LauncherSplashDisplay {
 
         splash.setSize(splashComp.getWidth(), splashComp.getHeight());
         WindowHelper.center(splash);
-        splash.repaint();
+
+        EventQueue.invokeLater(() -> splash.repaint());
     }
 
     private Rectangle convert(ApplicationSplashAreaDescriptor area) {
