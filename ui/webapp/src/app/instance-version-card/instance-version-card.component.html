@@ -12,11 +12,11 @@
     <span class="spacer"></span>
     <mat-menu #appMenu="matMenu" xPosition="before">
       <button mat-menu-item (click)="install.emit(instanceVersionDto.key)" [disabled]='dirty || !productAvailable || isDeployed || isActive'>Install</button>
-      <button mat-menu-item (click)="uninstall.emit(instanceVersionDto.key)" [disabled]='dirty || !productAvailable || !isDeployed || isActive || isRunningOrScheduled'>Uninstall</button>
+      <button mat-menu-item (click)="uninstall.emit(instanceVersionDto.key)" [disabled]='dirty || !isDeployed || isActive || isRunningOrScheduled'>Uninstall</button>
       <mat-divider></mat-divider>
       <button mat-menu-item (click)="activate.emit(instanceVersionDto.key)" [disabled]='dirty || !productAvailable || !isDeployed'>Activate</button>
       <mat-divider></mat-divider>
-      <button mat-menu-item (click)="export.emit(instanceVersionDto.key)" [disabled]='!productAvailable'>Export...</button>
+      <button mat-menu-item (click)="export.emit(instanceVersionDto.key)">Export...</button>
     </mat-menu>
     <button class="option-button" mat-icon-button [matMenuTriggerFor]="appMenu" appClickStopPropagation>
       <mat-icon>more_vert</mat-icon>
