@@ -844,10 +844,16 @@ public class InstanceResourceImpl implements InstanceResource {
     @WriteLock
     @Override
     public List<Key> importInstance(InputStream inputStream, String instanceId) {
+        InstanceConfiguration cfg = read(instanceId);
+        if (cfg == null) {
+            throw new WebApplicationException("Cannot load " + instanceId, Status.NOT_FOUND);
+        }
+
+        MasterRootResource root = ResourceProvider.getResource(cfg.target, MasterRootResource.class);
         Path zip = minion.getDownloadDir().resolve(UuidHelper.randomId() + ".zip");
         try {
             Files.copy(inputStream, zip);
-            return Collections.singletonList(InstanceImportExportHelper.importFrom(zip, hive, instanceId));
+            return Collections.singletonList(InstanceImportExportHelper.importFrom(zip, hive, instanceId, root));
         } catch (IOException e) {
             throw new WebApplicationException("Cannot import from uploaded ZIP", e);
         } finally {

@@ -188,7 +188,7 @@ public class MinionDeployTest {
         /* STEP 1: export and re-import instance */
         Path tmpZip = tmp.resolve("export.zip");
         InstanceImportExportHelper.exportTo(tmpZip, local, im1);
-        Manifest.Key importedInstance = InstanceImportExportHelper.importFrom(tmpZip, local, UuidHelper.randomId());
+        Manifest.Key importedInstance = InstanceImportExportHelper.importFrom(tmpZip, local, UuidHelper.randomId(), null);
 
         // check application UIDs
         InstanceManifest im2 = InstanceManifest.of(local, importedInstance);
@@ -203,7 +203,7 @@ public class MinionDeployTest {
         assertNotEquals(master1.getConfiguration().applications.get(0).uid, master2.getConfiguration().applications.get(0).uid);
 
         // test re-import for same instance (new version) - applications UID must stay the same.
-        Manifest.Key importedVersion = InstanceImportExportHelper.importFrom(tmpZip, local, im1.getConfiguration().uuid);
+        Manifest.Key importedVersion = InstanceImportExportHelper.importFrom(tmpZip, local, im1.getConfiguration().uuid, null);
         assertEquals("2", importedVersion.getTag()); // new version
         assertEquals(instance.getName(), importedVersion.getName());
 
