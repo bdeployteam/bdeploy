@@ -1,7 +1,7 @@
 <mat-nav-list>
   <mat-list-item *ngFor='let prod of products'>
     <div class='prod-row'>
-        <div>{{prod.key.name}}:{{prod.key.tag}}</div>
+        <div>{{prod.key.tag}}</div>
         <div class='spacer'></div>
         <app-product-info-card [product]="prod"></app-product-info-card>
         <button mat-icon-button *ngIf='exporting !== prod' [disabled]='exporting' (click)="export(prod)" class="icon-button" matTooltip='Download product version as ZIP'><mat-icon>cloud_download</mat-icon></button>
