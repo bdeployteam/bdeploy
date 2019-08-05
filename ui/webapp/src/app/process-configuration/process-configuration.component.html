@@ -81,7 +81,7 @@
           Configure Applications...
         </button>
         <button mat-menu-item (click)="setSidenavProducts()" [disabled]="isSidenavProducts() || !isEditable()">
-          Change Product Tag...
+          Change Product Version...
         </button>
       </mat-menu>
       <button class="option-button" mat-icon-button [matMenuTriggerFor]="appMenu" appClickStopPropagation>
@@ -129,7 +129,7 @@
       <mat-toolbar class="fixed-toolbar mat-elevation-z1">
         <div *ngIf="isSidenavApplications()">Configure Applications</div>
         <div *ngIf="isSidenavVersions()">Instance Versions</div>
-        <div *ngIf="isSidenavProducts()">Change Product Tag</div>
+        <div *ngIf="isSidenavProducts()">Change Product Version</div>
         <div *ngIf="isSidenavProcessStatus()">Process Control</div>
         <div *ngIf="isSidenavClientInfo()">Client Application</div>
         <span class="fill-space"></span>
