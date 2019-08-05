@@ -28,20 +28,20 @@ const routes: Routes = [
   {
     path: 'login',
     component: LoginComponent,
-    data: { title: 'Login' }
+    data: { title: 'Login', header: 'Login' }
   },
   {
     path: 'instancegroup/browser',
     component: InstanceGroupBrowserComponent,
     canActivate: [AuthGuard],
-    data: { title: 'Instance Groups' }
+    data: { title: 'Instance Groups', header: 'Instance Groups' }
   },
   {
     path: 'instancegroup/add',
     component: InstanceGroupAddEditComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Add Instance Group' }
+    data: { title: 'Add Instance Group', header: 'Add Instance Group' }
   },
   {
     path: 'instancegroup/edit/:name',
@@ -54,7 +54,7 @@ const routes: Routes = [
     path: 'hive/browser',
     component: HiveBrowserComponent,
     canActivate: [AuthGuard],
-    data: { title: 'Hive Browser' }
+    data: { title: 'Hive Browser', header: 'Hive Browser' }
   },
   {
     path: 'instance/browser/:name',
@@ -107,14 +107,14 @@ const routes: Routes = [
     path: 'softwarerepo/browser',
     component: SoftwareRepositoriesBrowserComponent,
     canActivate: [AuthGuard],
-    data: { title: 'Software Repositories' }
+    data: { title: 'Software Repositories', header: 'Software Repositories' }
   },
   {
     path: 'softwarerepo/add',
     component: SoftwareRepoAddEditComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Add Software Repository' }
+    data: { title: 'Add Software Repository', header: 'Add Software Repository' }
   },
   {
     path: 'softwarerepo/edit/:name',
@@ -134,14 +134,14 @@ const routes: Routes = [
     component: UpdateBrowserComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'System Software' }
+    data: { title: 'System Software', header: 'System Software' }
   },
   {
     path: 'manualcleanup',
     component: MasterCleanupComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Manual Cleanup' }
+    data: { title: 'Manual Cleanup', header: 'Manual Cleanup' }
   },
   {
     path: 'clientapps/:group',
