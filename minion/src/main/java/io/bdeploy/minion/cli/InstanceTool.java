@@ -68,7 +68,7 @@ public class InstanceTool extends ConfiguredCliTool<InstanceConfig> {
         if (uuid == null) {
             uuid = UuidHelper.randomId();
         }
-        Manifest.Key created = InstanceImportExportHelper.importFrom(zip, hive, uuid);
+        Manifest.Key created = InstanceImportExportHelper.importFrom(zip, hive, uuid, null);
         InstanceManifest imf = InstanceManifest.of(hive, created);
         out().println("Created '" + imf.getConfiguration().uuid + "': " + imf.getConfiguration().name);
     }
