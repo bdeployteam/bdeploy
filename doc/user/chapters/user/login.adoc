@@ -1,0 +1,7 @@
+=== Login
+
+The first page that is displayed is the login screen. You need to authenticate with a username and password to get access to all parts of the system. An anonymous access is not available.
+
+image::images/BDeploy_Login.png[BDeploy Login,{thumbnail},role="thumb",link="images/BDeploy_Login.png"]
+
+image::images/BDeploy_Main_Menu.png[BDeploy Main Menu,{thumbnail},role="thumb",link="images/BDeploy_Main_Menu.png"]

@@ -1,0 +1,192 @@
+=== Command Line Interface
+
+*BDeploy* provides a rich CLI which allows automating most interactions with *BDeploy*, e.g. for use in build pipelines, etc.
+
+Each of the binaries provides a set of _commands_ along with available _options_. This chapter describes the available _commands_. The _options_ are well-described when calling the according _command_ with the `--help` _option_.
+
+==== BDeploy CLI
+
+[%header,cols="25,10,65"]
+|===
+|Command
+|Remote
+|Description
+
+| `bhive`
+| No
+| Wraps around to the <<_bhive_cli,BHive CLI>>. Can be used to access *BHive* CLI commands if ther *BHive* stand-alone binaries are not available. Usage: `bdeploy bhive <command>`
+
+| `cleanup`
+| No
+|Manage the schedule at which the _master_ performs background cleanup operations on all _slaves_ (including himself).
+
+a| `init`
+| No
+| Initializes a _root_ directory for use with either the `slave` or `master` commands.
+
+The `init` command also generates the initial _security token_, see <<_security,Security>>. It is suggested to use the `--tokenFile` parameter if the token should be stored for later use.
+
+| `instance`
+| No
+| Tooling to *export* (to _ZIP_) and *import* (from _ZIP_) *Instances* locally.
+
+| `master`
+| No
+a| Runs the *BDeploy* _minion_ in _master_ mode. Requires a root directory initialized with the `init` command.
+
+[NOTE]
+A _master_ is always a _slave_ as well. The _master_ just has the additional capability to control other _slaves_, and provides the configuration Web UI.
+
+| `product`
+| Mixed
+| List or create *Products* locally. Fetches required dependencies from the given remote *BDeploy* server. Has the ability to push the resulting *Product* to the target *BDeploy* server.
+
+| `remote-deployment`
+| Yes
+| Manage *Instance* deployment (_install_, _activate_, _uninstall_) on a remote *BDeploy* server.
+
+| `remote-group`
+| Yes
+| Manage *Instance Groups* on a remote *BDeploy* server.
+
+| `remote-master`
+| Yes
+| Query and manage system information on a remote *BDeploy* server. Allows to update both the *BDeploy* system software as well as the *BDeploy* launcher binaries.
+
+| `remote-process`
+| Yes
+| Query and manage application processes managed by *BDeploy* on a remote *BDeploy* server.
+
+| `remote-repo`
+| Yes
+| Query and manage *Software Repositories* on a remote *BDeploy* server.
+
+| `slave`
+| No
+a| Runs the *BDeploy* _minion_ in _slave_ mode. Requires a root directory initialized with the `init` command.
+
+Also used to register a _slave_ with the _master_. For this, the `slave` command is run on the _master_ with the `--add` option.
+
+| `storage`
+| No
+| Manages available _storage locations_. A _storage location_ is a folder where the *BDeploy* _master_ puts the *BHives* required to store data for *Instance Groups* and *Software Repositories*.
+
+| `token`
+| No
+| Allows generation of new _access tokens_, see <<_security,Security>>.
+
+| `user`
+| No
+| Manages local users for a _master_. These users can be used to authenticate through the Web UI login dialog.
+
+|===
+
+==== BHive CLI
+
+*BHive* is the underlying storage used by *BDeploy*. *BDeploy* serves *BHives* for all minions (_master_ and _slave_), and has additional *BHives* per *Instance Group* and *Software Repository* on the _master_.
+
+*BHive* itself is does not know about *BDeploy*, it is 'just' a dumb storage backend (which is responsible for de-duplicated, distributed, fail-tolerant (failure-recoverable) storage of file contents).
+
+Much like Git, *BHive* only knows two commands that actually perform remote communication: `fetch` and `push`. All other commands are performing their work locally.
+
+[%header,cols="25,10,65"]
+|===
+|Command
+|Remote
+|Description
+
+| `export`
+| No
+| Reads a *Manifest* from the given *BHive* and writes it's content to a given target folder.
+
+| `fetch`
+| Yes
+| Fetches the given *Manifests* from a given remote *BHive*.
+
+| `fsck`
+| No
+a| Performs a file system check (_fsck_). This involves resolving all inter-*Manifest* dependencies, as well as re-hashing all objects in the underlying storage to assert that all objects in the storage are valid.
+
+Also allows to fix found errors (by deletion). After this, missing *Manifests* must be re-pushed from a *BHive* which still has the required objects.
+
+| `import`
+| No
+| Import a given folder into a given *BHive* and associate the given *Manifest* key with it.
+
+| `manifest`
+| No
+| Manage existing *Manifests* in a given *BHive*.
+
+|`prune`
+| No
+| Remove unreferenced objects from the given *BHive* to free up disc space.
+
+| `push`
+| Yes
+| Push the given *Manifests* to the given remote *BHive*
+
+| `serve`
+| No
+| Serves one or more given *BHives* over the network. The same thing as *BDeploy* does internally, provided as CLI tool for maintenance reasons.
+
+| `token`
+| No
+| Allows generation of new _access tokens_, see <<_security,Security>>.
+
+| `tree`
+| No
+| Read and diff *Manifests* from the given *BHive*. Allows to compare the contents of *Manifests*, view differences and the estimated data transfer required to perform a delta 'update' if a potential remote *BHive* already has one of them.
+
+|===
+
+==== Launcher CLI
+
+[%header,cols="25,10,65"]
+|===
+|Command
+|Remote
+|Description
+
+| `launcher`
+| No
+| Reads a given `.bdeploy` file, which describes all required information for the launcher to contact a *BDeploy* server and download a _client_ application.
+
+|===
+
+==== Environment Variables
+
+*BDeploy* and *BHive* CLIs provide a set of environment variables that allow you to provide environment defaults for certain command line arguments.
+
+Each command will include information for the according environment fallback in it's help output, for instance:
+
+----
+$ bhive push --help
+Help:
+
+Usage: PushTool <args...>
+               --token=ARG: Token for the remote access. Can be given alternatively to a keystore.
+                            (Environment variable 'BDEPLOY_TOKEN' is used as fallback if not given)
+              --remote=ARG: URI of remote BHive. Supports file:, jar:file:, bhive:
+                            (Environment variable 'BDEPLOY_REMOTE' is used as fallback if not given)
+              ...
+----
+
+[%header,cols="25,85"]
+|===
+|Variable
+|Description
+
+|`BDEPLOY_REMOTE`
+|URL to the remote *BDeploy* server which commands should connect to, e.g. `https://hostname:7701/api`.
+|`BDEPLOY_ROOT`
+|The root directory to use for `init`, `master` and `slave` (primarily).
+|`BDEPLOY_TOKEN`
+|The actual _security token_ used to access the remote *BDeploy* server.
+|`BDEPLOY_TOKENFILE`
+|A file containing the _security token_ (as text content) used to access the remote *BDeploy* server.
+|`BHIVE`
+|Path to the *BHive* to operate on for local commands (e.g. `import`, `export`).
+|`REMOTE_BHIVE`
+|The name of the remote *BHive*. In case of *BDeploy* this is usually the name of an *Instance Group* or *Software Repository*.
+
+|===
