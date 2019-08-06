@@ -55,7 +55,6 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
                 }
 
                 // explicitly push and create on the remote any referenced manifests.
-                // TODO: there is /some/ potential here: ref scan does all the scanning which happens below separately again.
                 manifests.forEach(m -> toPush.addAll(execute(new ManifestRefScanOperation().setManifest(m)).values()));
 
                 if (toPush.isEmpty()) {
@@ -65,7 +64,6 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
                 stats.sumManifests = toPush.size();
 
                 // create a view of every manifest on our side. does not follow references as references are scanned above.
-                // TODO: ref scan above already calculated all this internally - maybe we can avoid double scanning (although it is cached).
                 List<TreeView> snapshots = toPush.stream()
                         .map(m -> execute(new ScanOperation().setManifest(m).setFollowReferences(false)))
                         .collect(Collectors.toList());

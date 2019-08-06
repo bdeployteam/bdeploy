@@ -18,9 +18,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
-import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.Tree.EntryType;
 import io.bdeploy.bhive.objects.DbTestBase;
 import io.bdeploy.bhive.op.ExportOperation;
@@ -37,8 +37,8 @@ import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ContentHelper;
 import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.TempDirectory.TempDir;
+import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.security.RemoteService;
 
 @ExtendWith(TestHive.class)
@@ -124,7 +124,7 @@ public class RemoteHiveTest extends RemoteHiveTestBase {
         builder.add(new Tree.Key("top-lvl", EntryType.BLOB), hive.execute(new ImportFileOperation().setFile(topLvlFile)));
 
         ObjectId root = hive.execute(new InsertArtificialTreeOperation().setTree(builder));
-        hive.execute(new InsertManifestOperation().addManifest(rmb.setRoot(root).build()));
+        hive.execute(new InsertManifestOperation().addManifest(rmb.setRoot(root).build(hive)));
 
         Path exp = tmp.resolve("exp");
         hive.execute(new ExportOperation().setTarget(exp).setManifest(keyD));

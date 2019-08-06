@@ -164,7 +164,7 @@ public class InstanceNodeManifest {
             mfb.setRoot(hive.execute(new InsertArtificialTreeOperation().setTree(tb)));
             mfb.addLabel(INSTANCE_NODE_LABEL, cfg.uuid);
 
-            hive.execute(new InsertManifestOperation().addManifest(mfb.build()));
+            hive.execute(new InsertManifestOperation().addManifest(mfb.build(hive)));
             return key;
         }
 

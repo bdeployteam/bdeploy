@@ -7,10 +7,20 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.bdeploy.bhive.BHiveExecution;
+import io.bdeploy.bhive.objects.view.MissingObjectView;
+import io.bdeploy.bhive.objects.view.TreeView;
+import io.bdeploy.bhive.objects.view.scanner.TreeVisitor;
+import io.bdeploy.bhive.op.ManifestExistsOperation;
+import io.bdeploy.bhive.op.ManifestRefScanOperation;
+import io.bdeploy.bhive.op.ScanOperation;
 
 /**
  * Represents a manifest. A manifest is a top-level object making {@link Tree}s
@@ -26,13 +36,16 @@ public class Manifest implements Serializable, Comparable<Manifest> {
     private final Key key;
     private final ObjectId root;
     private final SortedMap<String, String> labels;
+    private final SortedSet<ReferenceKey> references;
 
     @JsonCreator
     private Manifest(@JsonProperty("key") Key key, @JsonProperty("root") ObjectId root,
-            @JsonProperty("labels") SortedMap<String, String> labels) {
+            @JsonProperty("labels") SortedMap<String, String> labels,
+            @JsonProperty("references") SortedSet<ReferenceKey> references) {
         this.key = key;
         this.root = root;
         this.labels = labels;
+        this.references = references;
     }
 
     /**
@@ -55,6 +68,43 @@ public class Manifest implements Serializable, Comparable<Manifest> {
      */
     public Map<String, String> getLabels() {
         return Collections.unmodifiableMap(labels);
+    }
+
+    /**
+     * Retrieves a set of cached dependencies. This cache is created when inserting the {@link Manifest}. {@link Manifest}s
+     * created by previous versions before the cache existed will return <code>null</code> always.
+     * <p>
+     * This cache is meant to be used internally in {@link ManifestRefScanOperation} only, not directly by business logic.
+     *
+     * @param hive used to verify existence of referenced manifests.
+     * @param depth up to which depth references should be returned.
+     * @param allowMissing whether it is acceptable to have references to missing manifests.
+     * @return all referenced {@link Manifest}s if cached information is available, <code>null</code> otherwise.
+     */
+    public SortedMap<String, Manifest.Key> getCachedReferences(BHiveExecution hive, int depth, boolean allowMissing) {
+        if (references == null) {
+            return null;
+        }
+
+        SortedMap<String, Manifest.Key> result = new TreeMap<>();
+
+        for (ReferenceKey rk : references) {
+            if (rk.depth > depth) {
+                continue;
+            }
+
+            if (!allowMissing) {
+                Boolean exists = hive.execute(new ManifestExistsOperation().setManifest(rk.key));
+                if (!Boolean.TRUE.equals(exists)) {
+                    throw new IllegalStateException(
+                            "Missing referenced manifest: " + rk.key + ", referenced from " + key + " [" + rk.path + "]");
+                }
+            }
+
+            result.put(rk.path, rk.key);
+        }
+
+        return result;
     }
 
     @Override
@@ -147,8 +197,28 @@ public class Manifest implements Serializable, Comparable<Manifest> {
         /**
          * @return create the immutable manifest.
          */
-        public Manifest build() {
-            return new Manifest(key, root, labels);
+        public Manifest build(BHiveExecution hive) {
+            return new Manifest(key, root, labels, findReferences(hive));
+        }
+
+        private SortedSet<ReferenceKey> findReferences(BHiveExecution hive) {
+            if (hive == null) {
+                return null;
+            }
+
+            // calculate references directly, and persistently cache them here.
+            SortedSet<ReferenceKey> referenced = new TreeSet<>();
+            TreeView state = hive.execute(new ScanOperation().setTree(root));
+            state.visit(new TreeVisitor.Builder().onMissing(this::missing)
+                    .onManifestRef(
+                            m -> referenced.add(new ReferenceKey(m.getPathString(), m.getReferenced(), m.getPath().size())))
+                    .build());
+
+            return referenced;
+        }
+
+        private void missing(MissingObjectView m) {
+            throw new IllegalStateException("Missing object: " + m.getElementId() + " at " + m.getPath());
         }
 
         public Key getKey() {
@@ -276,6 +346,71 @@ public class Manifest implements Serializable, Comparable<Manifest> {
             }
             return true;
         }
+    }
+
+    public static class ReferenceKey implements Serializable, Comparable<ReferenceKey> {
+
+        private static final long serialVersionUID = 1L;
+
+        private final String path;
+        private final Manifest.Key key;
+        private final long depth;
+
+        @JsonCreator
+        public ReferenceKey(@JsonProperty("path") String path, @JsonProperty("key") Manifest.Key key,
+                @JsonProperty("depth") long depth) {
+            this.path = path;
+            this.key = key;
+            this.depth = depth;
+        }
+
+        public long getDepth() {
+            return depth;
+        }
+
+        public String getPath() {
+            return path;
+        }
+
+        public Manifest.Key getKey() {
+            return key;
+        }
+
+        @Override
+        public int compareTo(ReferenceKey o) {
+            return path.compareTo(o.path);
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((path == null) ? 0 : path.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            ReferenceKey other = (ReferenceKey) obj;
+            if (path == null) {
+                if (other.path != null) {
+                    return false;
+                }
+            } else if (!path.equals(other.path)) {
+                return false;
+            }
+            return true;
+        }
+
     }
 
 }
