@@ -1,13 +1,10 @@
 === Software Repositories
 
-The btn:[Software Repositories] page allows maintenance of external software that a specific product requires. See <<_dependencies_third_party_software,Dependencies>>.
+The *Software Repositories* page allows maintenance of external software that a specific product requires. A *Software Repository* shares its namespace with *Instance Groups*, which means that the unique name of a *Software Repository* must not collide with any name of a *Software Repository* or *Instance Group*.
 
-A *Software Repository* shares its namespace with *Instance Groups*, which means that the unique name of a *Software Repository* must not collide with any name of a *Software Repository* or *Instance Group*.
+image::images/BDeploy_SWRepos.png[Software Repositories,align=center,width=480,link="images/BDeploy_SWRepos.png"]
 
-image::images/BDeploy_SWRepos.png[Software Repositories,{thumbnail},role="thumb",link="images/BDeploy_SWRepos.png"]
-image::images/BDeploy_SWRepo_Empty.png[Empty Software Repository,{thumbnail},role="thumb",link="images/BDeploy_SWRepo_Empty.png"]
-image::images/BDeploy_SWRepo_Ext_Software.png[Software Repository with External Software,{thumbnail},role="thumb",link="images/BDeploy_SWRepo_Ext_Software.png"]
-image::images/BDeploy_SWRepo_Ext_Software_Details.png[Software Details,{thumbnail},role="thumb",link="images/BDeploy_SWRepo_Ext_Software_Details.png"]
+The available software packages can be viewed and downloaded if required. Please note that uploading a new software package requires a special data structure. Simply uploading an arbitrary ZIP file is not working as the required *Metadata* is missing.
 
-[NOTE]
-<<_building_a_product,*BDeploy* integrations>> search _all_ available *Software Repositories* on the target *BDeploy* server when looking up dependencies. Additionally, external dependencies are always resolved from the target *Instance Group* first (if one is configured).
+image::images/BDeploy_SWRepo_Ext_Software.png[Software Repository with External Software,align=center,width=480,link="images/BDeploy_SWRepo_Ext_Software.png"]
+image::images/BDeploy_SWRepo_Ext_Software_Details.png[Software Details,align=center,width=480,link="images/BDeploy_SWRepo_Ext_Software_Details.png"]

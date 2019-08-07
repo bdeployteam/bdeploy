@@ -1,0 +1,29 @@
+=== Deployment
+
+The process of making one *Instance Version* up and running is called *Deployment*. This includes the steps *Installation*, *Activation* and *Process Control*
+
+==== Installation
+
+All available *Instance Versions* can be installed via the action btn:[Install]. Clicking on that button will transfer all files that the application requires to the configured target nodes. More specific that means the applications are extracted from the internal storage that *BDeploy* is using and written to the hard disk. 
+
+image::images/BDeploy_Instance_Version_Menu.png[Instance Version Context Menu,align=center,width=480,link="images/BDeploy_Instance_Version_Menu.png"]
+
+Installed versions occupy additional disk space on the target node. Applications are installed in a shared *Pool* directory on the target node. Thus multiple different *Processes* referring to the same *Application* are written only once to the hard disk. This minimizes the required disk space and leads to faster *Installation* times as only the first *Process* needs to be be written to the hard disk. 
+
+image::images/BDeploy_Instance_Version_Installed.png[Installed Instance Version,align=center,width=480,link="images/BDeploy_Instance_Version_Installed.png"]
+
+Whether a version is already installed is indicated by an icon on the *Version Card* to the left of the *Product Version*. Versions that are no longer needed can be uninstalled using the btn:[Uninstall] action. Uninstalling deletes the files written to the file system during installation. The version remains available and can be reinstalled at any time.
+
+==== Activation
+
+One of the installed *Instance Versions* can be marked as _active_ with the action btn:[Activate]. The *Process Control* always refers to the _active_ version. Versions that are just installed cannot be started. Only *Processes* from the *Active* version can be started.
+
+image::images/BDeploy_Instance_Version_Activated.png[Activated Instance Version,align=center,width=480,link="images/BDeploy_Instance_Version_Activated.png"]
+
+Marking a desired version as _active_ does not require to stop all running *Processes*. A warning message is displayed when processes from _non-active_ versions are still running. They can be manually stopped if desired and then started from the currently active version.
+
+
+
+
+
+

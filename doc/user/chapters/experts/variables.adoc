@@ -1,0 +1,78 @@
+=== Variable Expansion
+
+*BDeploy* provides a mechanism for variable expansion. There is a set of predefined possibilities. Currently, it is not possible to define your own variables, only the predefined set is available. Variable expansion can happen on the following:
+
+* Launcher path specified in <<_app_info_yaml,`app-info.yaml`>>.
+* Any parameter value. Either user-set value or the `defaultValue` specified in <<_app_info_yaml,`app-info.yaml`>>.
+* Any configuration file content.
+
+Any of the above will be processed _as late as possible_, i.e. on the target node, right before writing the final content to the target directories.
+
+The general syntax for variables is `{{TYPE:VARNAME:SUBVAR}}`. There are various types, usually denoted by a single character. The following table gives an overview of types, variables, and possible sub-variables.
+
+[%header,cols=3*]
+|===
+|Pattern
+|Supported Values
+|Description
+
+| `{{V:[APP:]PARAM}}`
+
+Examples: +
+`{{V:MyServer:my.param.uid}}` +
+`{{V:my.param.uid}}`
+a| * `APP`: _(optional)_ The name of the application to reference. If not given, the parameter is referenced within the same application as the referencing parameter
+ * `PARAM`: The name of the parameter
+| Expand the value of another parameter inline at this location.
+
+| `{{P:PATH_ID}}`
+
+Example: +
+`{{P:CONFIG}}/myFile.json`
+a| * `CONFIG`: directory where all configuration files will be placed by deployment
+ * `BIN`: directory where all binaries are placed by deployment
+ * `RUNTIME`: directory with runtime data (e.d. stdout/stderr capture files)
+ * `DATA`: persistent data directory - the only directory shared by multiple deployments of the same instance.
+| Expand one of the special directories (see `SpecialDirectory`) know by the deployment process.
+
+| `{{I:VAR}}`
+
+Example: +
+`{{I:SYSTEM_PURPOSE}}`
+a| * `SYSTEM_PURPOSE`: the purpose of the instance, see `InstancePurpose`
+ * `UUID`: UUID of the instance
+ * `NAME`: name of the instance
+ * `PRODUCT_ID`: name of the `MANIFEST` key's name of the configured product
+ * `PRODUCT_TAG`: the tag (i.e. 'version') of the configured product
+| Expand values related to the instance containing the parameter's process
+
+| `{{M:MANIFEST_NAME[:TAG]}}`
+
+Example: +
+`{{M:openjdk/jre8}}/bin/java`
+a| * `MANIFEST_NAME`: the name of the manifest to reference. The variable will expand to the installation path of that other manifest.
+ * TAG: _(optional)_ if given expand to the exact manifest version.
+a| Expand the absolute installation path to another manifest's path on the target system.
+
+[NOTE]
+A tag is not required here, but can be given. In case no tag is given, a single dependency with a matching name must be declared, see <<_app_info_yaml,`app-info.yaml`>> for details on dependencies.
+
+| `{{OSNAME:VALUE}}`
+
+Example: +
+`.../bin/java{{WINDOWS:.exe}}`
+a| * `OSNAME`: either `OperatingSystem` value (`WINDOWS`, `LINUX`, `AIX`).
+ * `VALUE`: the target value to expand if the target OS matches the `OSNAME` value.
+| Insert the given `VALUE` if and only if the given `OSNAME` (see `OperatingSystem`) matches.
+
+| `{{H:HOSTNAME}}`
+
+Example: +
+`{{H:HOSTNAME}}`
+a| * `HOSTNAME`: expands to the hostname of the target minion where the application is deployed.
+a| Expands to target minion properties - currently only `HOSTNAME` is supported.
+
+[WARNING]
+Beware that due to the nature of variable expansion (the point in time this happens), `HOSTNAME` may not be what you expect, _especially_ on global parameters used by multiple processes (it can be a different hostname for each process, if they are configured to different nodes). Even more precaution is required when using `HOSTNAME` on client applications, as it will expand to the _clients_ hostname.
+
+|===

@@ -4,8 +4,7 @@ The *Instance Overview* page is the central dialog for configuring and managing 
 
 The *Configure Applications* panel is called up via the pull-down menu of the dialog.
 
-image::images/BDeploy_Instance_Config.png[Instance Configuration,{thumbnail},role="thumb",link="images/BDeploy_Instance_Config.png"]
-image::images/BDeploy_Instance_Menu.png[Instance Menu,{thumbnail},role="thumb",link="images/BDeploy_Instance_Menu.png"]
+image::images/BDeploy_Instance_Menu.png[Instance Menu,align=center, width=480, link="images/BDeploy_Instance_Menu.png"]
 
 The *Configure Applications* panel contains all server applications and all client applications of the product. Server applications can be dragged to *Server Nodes* (e.g. _master_), client applications can only be dragged to the (virtual) *Client Applications Node*. Clients that are available for more than one operating system expand to single cards per operating system on the *Client Node*.
 
@@ -17,11 +16,11 @@ The *Client Application Node* is not available if the product does not contain a
 Each *Process* of an *Instance* is configured via its own dialog, which can be accessed via the pull-down menu on the respective *Process Card*.
 Colored markings on the *Process Card* indicate whether a process still lacks mandatory configurations or whether there are still unsaved changes to the *Process Settings*.
 
-image::images/BDeploy_DnD_Applications.png[Drag & Drop Applications,{thumbnail},role="thumb",link="images/BDeploy_DnD_Applications.png"]
-image::images/BDeploy_Process_Config.png[Process Parameter Configuration,{thumbnail},role="thumb",link="images/BDeploy_Process_Config.png"]
-image::images/BDeploy_Process_configured.png[Completed Process Configuration,{thumbnail},role="thumb",link="images/BDeploy_Process_configured.png"]
+image::images/BDeploy_DnD_Applications.png[Drag & Drop Applications,align=center, width=480, link="images/BDeploy_DnD_Applications.png"]
 
 The *Process Settings* dialog groups the parameters into categories, between which you can jump back and forth via btn:[Previous] and btn:[Next]. 
+
+image::images/BDeploy_Process_Config.png[Process Parameter Configuration,align=center, width=480, link="images/BDeploy_Process_Config.png"]
 
 Behind each parameter there is a small popup that can contain a short description, a *Default Value* and a button for resetting the parameter to the *Default Value*.
 
@@ -31,124 +30,65 @@ Behind each parameter there is a small popup that can contain a short descriptio
 
 *Optional Parameters* can be selected for each group using the btn:[Manage Optional Parameters] dialog (available only if *Optional Parameters* are available) and then configured like other parameters.
 
-image::images/BDeploy_Process_Optional_parameters.png[Manage Optional Parameter(s),{thumbnail},role="thumb",link="images/BDeploy_Process_Optional_parameters.png"]
-image::images/BDeploy_Process_Optional_configured.png[Configuring Optional Parameter(s),{thumbnail},role="thumb",link="images/BDeploy_Process_Optional_configured.png"]
+image::images/BDeploy_Process_Optional_parameters.png[Manage Optional Parameter(s),align=center, width=480, link="images/BDeploy_Process_Optional_parameters.png"]
+image::images/BDeploy_Process_Optional_configured.png[Configuring Optional Parameter(s), align=center, width=480, link="images/BDeploy_Process_Optional_configured.png"]
 
 ===== Custom Parameters
 
 *Custom Parameters* can be maintained in the last parameter group. Because all *Parameters* must have a determined sequence, *Custom Parameters* must define a predecessor parameter after which they are put on the command line.
 
-image::images/BDeploy_Process_Custom_Empty.png[Custom Parameters (empty),{thumbnail},role="thumb",link="images/BDeploy_Process_Custom_Empty.png"]
-image::images/BDeploy_Process_Custom_Create.png[Create Custom Parameter,{thumbnail},role="thumb",link="images/BDeploy_Process_Custom_Create.png"]
-image::images/BDeploy_Process_Custom_Value.png[Configure Custom Parameter,{thumbnail},role="thumb",link="images/BDeploy_Process_Custom_Value.png"]
-image::images/BDeploy_Process_Custom_Preview.png[Preview Command Line with Custom Parameter,{thumbnail},role="thumb",link="images/BDeploy_Process_Custom_Preview.png"]
+image::images/BDeploy_Process_Custom_Create.png[Create Custom Parameter,align=center, width=480, link="images/BDeploy_Process_Custom_Create.png"]
+image::images/BDeploy_Process_Custom_Value.png[Configure Custom Parameter,align=center, width=480, link="images/BDeploy_Process_Custom_Value.png"]
 
 ===== Global Parameters
 
 *Global Parameters* are valid for all *Processes* of an *Instance*. They are also configured in the *Process*, but changes are copied to all other processes that also use this parameter. *Global Parameters* are matched by their parameter UID, and marked with a small globe in the *Process Configuration* dialog.
 
-===== Variable Expansion
+===== Variables
 
-*BDeploy* provides a mechanism for variable expansion. There is a set of predefined possibilities. Currently, it is not possible to define your own variables, only the predefined set is available. Variable expansion can happen on the following:
+*BDeploy* provides a mechanism for defining that a parameter should hold a dynamically computed value instead of a fixed one. The general syntax for variables is `{{TYPE:VARNAME:SUBVAR}}`. With that mechanism it is possible to define that a certain parameter holds different values for different operating systems or to refer to parameters defined in a different process. See <<_variable_expansion,Variable Expansion>> for more details.
 
-* Launcher path specified in <<_app_info_yaml,`app-info.yaml`>>.
-* Any parameter value. Either user-set value or the `defaultValue` specified in <<_app_info_yaml,`app-info.yaml`>>.
-* Any configuration file content.
+===== Command Line Preview
 
-Any of the above will be processed _as late as possible_, i.e. on the target node, right before writing the final content to the target directories.
+A preview of the command that is executed to launch this process can be viewed by clicking on the btn:[Show Command Line Preview] button that is displayed at the right side of the *Parameter Settings* header. The preview is especially useful in case of custom parameters to ensure that they are added as expected in the correct order.
 
-The general syntax for variables is `{{TYPE:VARNAME:SUBVAR}}`. There are various types, usually denoted by a single character. The following table gives an overview of types, variables, and possible sub-variables.
-
-[%header,cols=3*]
-|===
-|Pattern
-|Supported Values
-|Description
-
-| `{{V:[APP:]PARAM}}`
-
-Examples: +
-`{{V:MyServer:my.param.uid}}` +
-`{{V:my.param.uid}}`
-a| * `APP`: _(optional)_ The name of the application to reference. If not given, the parameter is referenced within the same application as the referencing parameter
- * `PARAM`: The name of the parameter
-| Expand the value of another parameter inline at this location.
-
-| `{{P:PATH_ID}}`
-
-Example: +
-`{{P:CONFIG}}/myFile.json`
-a| * `CONFIG`: directory where all configuration files will be placed by deployment
- * `BIN`: directory where all binaries are placed by deployment
- * `RUNTIME`: directory with runtime data (e.d. stdout/stderr capture files)
- * `DATA`: persistent data directory - the only directory shared by multiple deployments of the same instance.
-| Expand one of the special directories (see `SpecialDirectory`) know by the deployment process.
-
-| `{{I:VAR}}`
-
-Example: +
-`{{I:SYSTEM_PURPOSE}}`
-a| * `SYSTEM_PURPOSE`: the purpose of the instance, see `InstancePurpose`
- * `UUID`: UUID of the instance
- * `NAME`: name of the instance
- * `PRODUCT_ID`: name of the `MANIFEST` key's name of the configured product
- * `PRODUCT_TAG`: the tag (i.e. 'version') of the configured product
-| Expand values related to the instance containing the parameter's process
-
-| `{{M:MANIFEST_NAME[:TAG]}}`
-
-Example: +
-`{{M:openjdk/jre8}}/bin/java`
-a| * `MANIFEST_NAME`: the name of the manifest to reference. The variable will expand to the installation path of that other manifest.
- * TAG: _(optional)_ if given expand to the exact manifest version.
-a| Expand the absolute installation path to another manifest's path on the target system.
-
-[NOTE]
-A tag is not required here, but can be given. In case no tag is given, a single dependency with a matching name must be declared, see <<_app_info_yaml,`app-info.yaml`>> for details on dependencies.
-
-| `{{OSNAME:VALUE}}`
-
-Example: +
-`.../bin/java{{WINDOWS:.exe}}`
-a| * `OSNAME`: either `OperatingSystem` value (`WINDOWS`, `LINUX`, `AIX`).
- * `VALUE`: the target value to expand if the target OS matches the `OSNAME` value.
-| Insert the given `VALUE` if and only if the given `OSNAME` (see `OperatingSystem`) matches.
-
-| `{{H:HOSTNAME}}`
-
-Example: +
-`{{H:HOSTNAME}}`
-a| * `HOSTNAME`: expands to the hostname of the target minion where the application is deployed.
-a| Expands to target minion properties - currently only `HOSTNAME` is supported.
-
-[WARNING]
-Beware that due to the nature of variable expansion (the point in time this happens), `HOSTNAME` may not be what you expect, _especially_ on global parameters used by multiple processes (it can be a different hostname for each process, if they are configured to different nodes). Even more precaution is required when using `HOSTNAME` on client applications, as it will expand to the _clients_ hostname.
-
-|===
+image::images/BDeploy_Process_Custom_Preview.png[Preview Command Line with Custom Parameter,align=center, width=480, link="images/BDeploy_Process_Custom_Preview.png"]
 
 ==== Configuration Files
 
-The *Configuration Files* of all *Processes* of an *Instance* are maintained together in one dialog.
-The initial set of *Configuration Files* is derived from the default set delivered with the product, see <<_product_info_yaml,`product-info.yaml`>>.
+The *Configuration Files* of all *Processes* of an *Instance* are maintained together in one dialog. It can be opened by clicking on the btn:[Configuration Files] button in the pull-down menu of the *Instance*. The initial set of *Configuration Files* is derived from the default set delivered with the product, see <<_product_info_yaml,`product-info.yaml`>>.
 
-image::images/BDeploy_CfgFiles_Browser.png[Configuration File Browser,{thumbnail},role="thumb",link="images/BDeploy_CfgFiles_Browser.png"]
-image::images/BDeploy_CfgFile_New.png[Create New Configuration File,{thumbnail},role="thumb",link="images/BDeploy_CfgFile_New.png"]
-image::images/BDeploy_CfgFiles_Save.png[Modified Configuration Files,{thumbnail},role="thumb",link="images/BDeploy_CfgFiles_Save.png"]
+image::images/BDeploy_CfgFiles_Browser.png[Configuration File Browser,align=center,width=480,link="images/BDeploy_CfgFiles_Browser.png"]
 
 The integrated editor provides syntax highlighting and rudimentary syntax checking for some basic file types (yaml, json, xml). Displayed problems are only to be seen as help and never interfere with the process, e.g. by preventing the saving of a file.
 
+image::images/BDeploy_CfgFile_New.png[Create New Configuration File,align=center,width=480,link="images/BDeploy_CfgFile_New.png"]
+image::images/BDeploy_CfgFiles_Save.png[Modified Configuration Files,align=center,width=480,link="images/BDeploy_CfgFiles_Save.png"]
+
+[NOTE]
+Changes done in configuration files must be *Saved* and they result in a new *Instance Version* that must be *Installed* and *Activated* so that the changes have an impact. 
+
 ==== Product Configuration
 
-*Instances* are based on a *Product Version*. While the *Product* of the *Instance* cannot be changed afterwards, the *Version* used can be chosen arbitrarily from the available *Product Versions* (upgrade to a newer version / downgrade to an older version).
-If there's a newer *Product Version* available (newer than the one that is configured for the latest *Instance Version*), a notification is shown.
+*Instances* are based on a *Product Version*. While the *Product* of the *Instance* cannot be changed afterwards, the *Version* can be chosen from the available *Product Versions* (upgrade to a newer version / downgrade to an older version). 
+
+
+If there's a newer *Product Version* available (newer than the one that is configured for the latest *Instance Version*), a notification is shown. Clicking on the notification opens the *Product Version* sidebar. The same sidebar can also be opened opened by clicking on the btn:[Change Product Version] button in the pull-down menu of the *Instance*. If the menu entry is disabled verify that the latest *Instance Version* is selected.
+
+image::images/BDeploy_Product_Change.png[Change Current Product Tag,align=center,width=480,link="images/BDeploy_Product_Change.png"]
 
 The btn:[Info] Popup provides a list of all Labels on that *Product* version.
 
-image::images/BDeploy_Product_Change.png[Change Current Product Tag,{thumbnail},role="thumb",link="images/BDeploy_Product_Change.png"]
-image::images/BDeploy_Product_Upgrade_Local_Changes.png[Successful Product Tag Change,{thumbnail},role="thumb",link="images/BDeploy_Product_Upgrade_Local_Changes.png"]
-image::images/BDeploy_Product_Downgrade_Missing_Apps.png[Validation Issues After Product Tag Change,{thumbnail},role="thumb",link="images/BDeploy_Product_Downgrade_Missing_Apps.png"]
+Changing the version can be done by clicking on the btn:[Upgrade] or btn:[Downgrade] button displayed at the right side of the product version card. Selecting another product version will automatically close the *Product Version* sidebar. The *Instance Version* sidebar is displayed and a new locally modified version has been created. 
 
-Changing the *Product Version* can result in validation issues and automated adjustment of parameters. *Product Versions* can contain different *Applications*, so that with the change of the *Product Version* e.g. a previously configured *Application* must be deleted. If parameters definitions are changed, validation errors may occur which must be corrected before saving (e.g. new mandatory parameters).
+image::images/BDeploy_Product_Upgrade_Local_Changes.png[Successful Product Tag Change,align=center,width=480,link="images/BDeploy_Product_Upgrade_Local_Changes.png"]
+
+[NOTE]
+All *Applications* are marked as modified as they are now based on a different *Product Version*.
+
+Changing the *Product Version* can result in validation issues and automated adjustment of parameters. *Product Versions* can contain different *Applications*, so that with the change of the *Product Version* e.g. a previously configured *Application* must be deleted because it has been removed from the product. If parameters definitions are changed, validation errors may occur which must be corrected before saving (e.g. new mandatory parameters).
+
+image::images/BDeploy_Product_Downgrade_Missing_Apps.png[Validation Issues After Product Tag Change,align=center,width=480,link="images/BDeploy_Product_Downgrade_Missing_Apps.png"]
 
 ==== Export/Import of Instance Versions
 
@@ -159,66 +99,10 @@ The action btn:[Import Instance Version...] in the *Instance Version* pulldown m
 [NOTE]
 Only process configuration is imported to existing instances, the instance configuration (target master URI, name, description, purpose) are left intact.
 
-==== Install, Activate, Uninstall
-
-All *Instance Versions* can be installed via the action btn:[Install], i.e. the configured *Processes* of an *Instance Version* are exported from the *BHive* into a corresponding directory on the file system on the target node.
-
-Whether a version is already installed is indicated by an icon on the *Version Card* to the left of the *Product Version*.
-
-One of the installed *Instance Versions* can be marked as _active_ with the action btn:[Activate]. The process control always refers to the activated *Instance Version*.
-
-image::images/BDeploy_Instance_Version_Menu.png[Instance Version Context Menu,{thumbnail},role="thumb",link="images/BDeploy_Instance_Version_Menu.png"]
-image::images/BDeploy_Instance_Version_Installed.png[Installed Instance Version,{thumbnail},role="thumb",link="images/BDeploy_Instance_Version_Installed.png"]
-image::images/BDeploy_Instance_Version_Activated.png[Activated Instance Version,{thumbnail},role="thumb",link="images/BDeploy_Instance_Version_Activated.png"]
-
-In general, any number of *Instance Versions* can be installed (e.g. for fast upgrade / downgrade). Versions that are no longer needed can be uninstalled using the btn:[Uninstall] action. Uninstalling deletes the files exported to the file system during installation. In *BHive* the version remains available and could be reinstalled at any time.
-
-==== Client Download
-
-*Client Applications* can be installed by downloading the *Installer* or even started directly from the BDeploy UI.
-In both cases the local installation of the *Launcher* Application (see <<_system_software, System Software>>) is required, as well as the association of the file extension ".bdeploy" with the *Launcher*.
-
-A *Client Application* is always started via a .bdeploy file.
-
-The *Installer* bundles the installation of the *Launcher*, the registration of the file extension and the download of the .bdeploy file belonging to the client. In addition, the *Installer* creates an icon on the desktop that can be used to start the *Client Application*.
-
-Alternatively, the *Launcher* can be downloaded from the <<_system_software, System Software>> section and unpacked manually. By starting the file _FileAssoc.exe_ on Windows or _file-assoc.sh_ on Linux contained in the archive, the file extension .bdeploy can be registered.
-
-[NOTE]
-In case the panel shows a warning about a missing launcher, upload binaries in <<_system_software,System Software>>.
-
-As soon as the *Installer* and .bdeploy registration have been completed (in one of the ways described above), a *Client Application* can be started directly from the interface at any time using btn:[Click & Start]. In this case no icon will be created on the desktop.
-
-[NOTE]
-The *Instance Overview* page contains a link to a dedicated *Client Applications* page for each *Instance Group*. This provides a simple mechanism to download any *Client Application* from any *Instance* in this *Instance Group*.
-
-image::images/BDeploy_Client_Missing_Launcher.png[Client Application Download - Missing Launcher,{thumbnail},role="thumb",link="images/BDeploy_Client_Missing_Launcher.png"]
-image::images/BDeploy_Client_Download.png[Client Application Download,{thumbnail},role="thumb",link="images/BDeploy_Client_Download.png"]
-image::images/BDeploy_Client_Download_Page.png[Application Download Page,{thumbnail},role="thumb",link="images/BDeploy_Client_Download_Page.png"]
-
-The *Installer* stores launcher and .bdeploy files under _%LOCALAPPDATA%\BDeploy_ on Windows or _$HOME/.bdeploy_ on Linux. This location can be changed by setting the environment variable *BDEPLOY_HOME*.
-
-[NOTE]
-Each *Installer* run checks whether the *Launcher* is installed in the default directory, installs it there if necessary and associates the file extension .bdeploy with this *Launcher*.
-
-==== Process Control
-
-For the activated *Instance Version*, the *Process Control* of this *Process* can be displayed by clicking on a *Process Card*.
-The upper part of the *Process Control Panel* shows the current process status. Below this, the control elements for _starting_, _stopping_ or _restarting_ the process can be found.
-In addition to the actions for individual processes, the pull-down menu of the dialog contains the actions for _starting_, _stopping_ or _restarting_ the entire *Instance*, i.e. all *Processes* configured with start type `INSTANCE`.
-
-[NOTE]
-The *Process Control Panel* allows to view additional information directly. Both the list of actual operating system processes as well as the *stdout*/*stderr* stream of the started *Process* can be viewed and followed.
-
-image::images/BDeploy_Process_Started.png[Running Server Process,{thumbnail},role="thumb",link="images/BDeploy_Process_Started.png"]
-image::images/BDeploy_Process_Crashed.png[Crashed Server Process (temporarily),{thumbnail},role="thumb",link="images/BDeploy_Process_Crashed.png"]
-image::images/BDeploy_Process_Crashed_Repeatedly.png[Crashed Server Process (permanently),{thumbnail},role="thumb",link="images/BDeploy_Process_Crashed_Repeatedly.png"]
-image::images/BDeploy_Process_List.png[List of Operating System Processes,{thumbnail},role="thumb",link="images/BDeploy_Process_List.png"]
-image::images/BDeploy_Process_Output.png[Show and Follow Process Output,{thumbnail},role="thumb",link="images/BDeploy_Process_Output.png"]
-
 ==== Data Files
 
 The *Data Files* Browser provides access to the server side data directory. Files can be downloaded or opened in the UI. When opened in place, the btn:[Follow] toggle allows to grab new output as it is written on the server.
 
 image::images/BDeploy_DataFiles_Browser.png[Data File Browser,{thumbnail},role="thumb",link="images/BDeploy_DataFiles_Browser.png"]
 image::images/BDeploy_DataFiles_Show.png[Show Data File,{thumbnail},role="thumb",link="images/BDeploy_DataFiles_Show.png"]
+

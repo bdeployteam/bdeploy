@@ -8,4 +8,10 @@ include::instancegroup.adoc[]
 
 include::instance.adoc[]
 
+include::deployment.adoc[]
+
+include::processcontrol.adoc[]
+
+include::clientapps.adoc[]
+
 include::swrepo.adoc[]

@@ -1,0 +1,86 @@
+=== Process Control
+
+For the activated *Instance Version*, the *Process Control* of this *Process* can be displayed by clicking on a *Process Card*. The upper part of the *Process Control Sidebar* shows the current Process Status*. Below this, the control elements for _starting_, _stopping_ or _restarting_ the process can be found.
+
+image::images/BDeploy_Process_Started.png[Running Server Process,align=center,width=480,link="images/BDeploy_Process_Started.png"]
+
+In addition to the actions for individual processes, the pull-down menu of the dialog contains the actions for _starting_, _stopping_ or _restarting_ the entire *Instance*, i.e. all *Processes* configured with start type `INSTANCE`.
+
+==== Process Status
+
+The process status is visualized with an icon in the bottom right corner of each *Process Card* and on the *Process Control Sidebar*. The *Instance Version* card displays the cumulated status of all *Processes* running in this version. A *Process* can have one of the following states:
+
+[%header,cols="1,6"]
+|===
+| Icon
+| Description
+
+| 
+| Process is *stopped*.
+
+a| image::images/BDeploy_Process_Status_Running.png[width=32,align=center]
+| Process is *running*.
+
+a| image::images/BDeploy_Process_Status_Running_Version.png[align=center,width=32]
+| Process is *running* in another version.
+
+a| image::images/BDeploy_Process_Status_Crashed_Temporary.png[align=center,width=32]
+| Process *crashed* unexpectedly. *Process Control* scheduled an automatic restart. No interaction required.
+
+a| image::images/BDeploy_Process_Status_Crashed.png[align=center,width=32]
+| Process *crashed* unexpectedly. *Process Control* gave up restarting as the last 5 attempts failed. *Manual interaction required*.
+
+|===
+
+The life cycle of a process is visualized in the following state graph:
+
+image::images/BDeploy_Process_State_Graph.png[Process State Graph,align=center,width=480,link="images/BDeploy_Process_State_Graph.png"]
+
+==== Process Start Type
+
+The *Start Type* of a *Process* can be configured in the *Process Configuration* dialog. The available options are depending on the *Application*. That means the publisher of an *Application* defines which *Start Types* are supported. The following types are available:
+
+[%header,cols="1,6"]
+|===
+| Name
+| Description
+
+| MANUAL
+| Process must be started manually. No automatic startup will be done.
+
+| MANUAL_CONFIRM
+| Process must be started manually and an additional confirmation is required. 
+
+| INSTANCE
+| Process will be started automatically *if* the *Auto-Start* flag of the *Instance* is set. 
+
+|===
+
+It is a common requirement that certain *Processes* should be automatically started whenever the *BDeploy* server itself is started. To accomplish that the *Auto-Start* flag of the *Instance* must be set. This can be done in the *Instance Configuration* dialog. Additionally the *Start Type* of the *Process* must set to *Instance*. This can be done in the *Process Configuration* dialog.
+
+
+*Processes* that are executing actions that cannot be reverted or that are potentially dangerous in productive environments (dropping a database, deleting files) should be configured with the start type *MANUAL CONFIRM*. Doing that results in an additional popup dialog that enforces the user to enter the name of the *Process* before it is started. The idea is, that the user takes an additional moment to ensure that he is really starting the desired *Process*.
+
+image::images/BDeploy_Process_Manual_Confirm.png[Manual Confirmation On Startup,align=center,width=480,link="images/BDeploy_Process_Manual_Confirm.png"]
+
+==== Keep Alive
+
+If the *Keep Alive* flag for a *Process* is configured then the *Process Control* restarts it when it crashes unexpectedly. The first restart attempt is immediately executed after the process terminates. Subsequent attempts are delayed. That means the *Process Control* waits a given time period until the next start attempt is executed. Such a situation is visualized in the UI with a red-warning icon where normally the green heart is displayed.
+
+image::images/BDeploy_Process_Crashed.png[Crashed Server Process (temporarily),align=center,width=480,link="images/BDeploy_Process_Crashed.png"]
+
+The *Process Control* will give up restarting a process after a total of 5 unsuccessful restart attempts. Such a situation is visualized in the UI with a red error icon. This icon means that the user has to manually check why it is failing and restart it if desired.
+
+image::images/BDeploy_Process_Crashed_Repeatedly.png[Crashed Server Process (permanently),align=center,width=480,link="images/BDeploy_Process_Crashed_Repeatedly.png"]
+
+==== View stdout / stderr
+
+Clicking on the terminal icon displayed below the process control actions will open a live stream of the *stdout* as well as *stderr* stream of the running *Process*. This allows a quick health check to ensure that everything is as expected.
+
+image::images/BDeploy_Process_Output.png[Show and Follow Process Output,align=center,width=480,link="images/BDeploy_Process_Output.png"]
+
+==== Process listing
+
+Clicking on the gear icon below the process control will open a popup showing all operating system processes that have been started by this *Process*. 
+
+image::images/BDeploy_Process_List.png[List of Operating System Processes,align=center,width=480,link="images/BDeploy_Process_List.png"]

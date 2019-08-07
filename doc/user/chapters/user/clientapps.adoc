@@ -1,0 +1,30 @@
+=== Client Applications
+
+A dedicated overview page shows all configured *Client Applications* of an entire *Instance Group*. This page can be opened by navigating to the *Instance Browser* of the desired *Instance Group*. Clicking on the btn:[Client Applications] icon in the bottom right corner opens the overview page.
+
+image::images/BDeploy_Client_Download_Page.png[Application Download Page,align=center,width=480,link="images/BDeploy_Client_Download_Page.png"]
+
+The page will offer the appropriate *Client Application* based on the operating system that the user is currently using. Switching the OS can be done by clicking the desired operating system in the top right corner.
+
+==== Launcher
+*Client Application* are started through a special *Launcher* that needs to be installed on all client computers. The launcher is responsible for keeping the application up-to-date and to pass the configured parameters to the application.
+
+==== Installer
+An *Installer* is provided for each *Client Application* to make the installation as easy as possible. The installer does not have any prerequisite's and can be downloaded and executed by any user. No administrative privileges are required. 
+
+
+The *Installer* will check if the latest version of the *Launcher* is already installed. If not then the *Launcher* is downloaded and stored on the client computer. The user can then start a *Client Application* with the branded *Link* that is stored on the *Desktop* or in the *Start Menu*.
+
+[NOTE]
+The *Installer* stores the *Launcher* and all *Client Applications* under _%LOCALAPPDATA%\BDeploy_ on Windows or _$HOME/.bdeploy_ on Linux. This location can be changed by setting the environment variable *BDEPLOY_HOME*.
+
+==== Click & Start
+*Click & Start* enables the launching of *Client Application* by simply clicking a link in the web browser. A prerequisite is that the *.bdeploy* file extension is associated with the launcher. This task is done by the *Installer* but can also be done manually by starting the file _FileAssoc.exe_ on Windows or _file-assoc.sh_ on Linux contained in the launcher.
+
+
+The *Browser* will either download a *.bdeploy* file that can be directly executed. A more elegant way is to configure the *Browser* to directly open the *.bdeploy* file type. Firefox as well as Chrome allows to configure this after the file has been downloaded.
+
+
+
+
+
