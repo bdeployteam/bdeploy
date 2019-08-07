@@ -21,7 +21,7 @@ image::images/BDeploy_System_With_Launcher.png[BDeploy System Software,{thumbnai
 You can use the btn:[Manual Cleanup] page from the main menu to perform manual cleanup on a _master_. This page is only available and useful on _master_ nodes.
 
 [NOTE]
-The dialog allows to manuall execute the exact same cleanup (and reviewing of the actions performed _before_ doing so) as the master _cleanup job_ performs automatically on its `<<_bdeploy_cli,bdeploy cleanup>>` schedule.
+The dialog allows to manual execute the exact same cleanup (and reviewing of the actions performed _before_ doing so) as the master _cleanup job_ performs automatically on its `<<_bdeploy_cli,bdeploy cleanup>>` schedule.
 
 Press the btn:[Calculate Cleanup Actions] button to perform cleanup calculation. The result will be a list of actions to be performed on each connected slave.
 

@@ -1,10 +1,8 @@
 === Software Repositories
 
-The btn:[Software Repositories] page allows maintenance of repositories for arbitrary software, also see <<_dependencies_third_party_software,Dependencies>>.
+The btn:[Software Repositories] page allows maintenance of external software that a specific product requires. See <<_dependencies_third_party_software,Dependencies>>.
 
 A *Software Repository* shares its namespace with *Instance Groups*, which means that the unique name of a *Software Repository* must not collide with any name of a *Software Repository* or *Instance Group*.
-
-A *Software Repository* is nothing more than a _named_ *BHive* dedicated to storing a certain set of <<_terms_and_concepts,*Manifests*>>.
 
 image::images/BDeploy_SWRepos.png[Software Repositories,{thumbnail},role="thumb",link="images/BDeploy_SWRepos.png"]
 image::images/BDeploy_SWRepo_Empty.png[Empty Software Repository,{thumbnail},role="thumb",link="images/BDeploy_SWRepo_Empty.png"]

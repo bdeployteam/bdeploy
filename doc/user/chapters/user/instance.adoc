@@ -1,8 +1,6 @@
-=== Process Configuration
+=== Instance Configuration
 
-The btn:[Process Configuration] page is the central dialog for configuring and managing instances.
-
-To configure an *Instance*, the first step is to select the required applications from the *Configure Applications* panel available in the *Product Version* and distribute them to the *Nodes* in the *Instance* using drag and drop.
+The *Instance Overview* page is the central dialog for configuring and managing instances. The first step is to select the required applications from the *Configure Applications* panel available in the *Product Version* and distribute them to the *Nodes* in the *Instance* using drag and drop.
 
 The *Configure Applications* panel is called up via the pull-down menu of the dialog.
 
