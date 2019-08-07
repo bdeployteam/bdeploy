@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.bhive.objects.ManifestDatabase;
 import io.bdeploy.common.TempDirectory;
 import io.bdeploy.common.TempDirectory.TempDir;
 
@@ -33,7 +32,7 @@ public class ManifestDatabaseTest extends DbTestBase {
         Manifest.Key key = new Manifest.Key("test/app1", "v1.0");
         Manifest.Builder mf = new Manifest.Builder(key).setRoot(randomId()).addLabel("test", "label");
 
-        db.addManifest(mf.build());
+        db.addManifest(mf.build(null));
 
         db = new ManifestDatabase(dbDir);
         assertTrue(db.hasManifest(key));

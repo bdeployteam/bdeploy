@@ -117,7 +117,7 @@ public class ObjectManagerTest extends DbTestBase {
             ObjectId tree = mgr.importTree(mySource);
 
             Manifest.Key refKey = new Manifest.Key("ref", "1");
-            mdb.addManifest(new Manifest.Builder(refKey).setRoot(tree).build());
+            mdb.addManifest(new Manifest.Builder(refKey).setRoot(tree).build(null));
 
             ObjectId testTree = mgr.insertTree(
                     new Tree.Builder().add(new Tree.Key("app", EntryType.MANIFEST), mgr.insertManifestReference(refKey))

@@ -258,7 +258,7 @@ public class InstanceManifest {
                     .setRoot(hive.execute(new InsertArtificialTreeOperation().setTree(root)))
                     .addLabel(INSTANCE_LABEL, config.uuid);
 
-            hive.execute(new InsertManifestOperation().addManifest(mb.build()));
+            hive.execute(new InsertManifestOperation().addManifest(mb.build(hive)));
             return key;
         }
 

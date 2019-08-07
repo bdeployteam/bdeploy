@@ -129,8 +129,8 @@ public class UserDatabase implements AuthService {
         root.add(new Tree.Key(FILE_NAME, Tree.EntryType.BLOB),
                 target.execute(new ImportObjectOperation().setData(StorageHelper.toRawBytes(info))));
 
-        target.execute(new InsertManifestOperation().addManifest(
-                new Manifest.Builder(key).setRoot(target.execute(new InsertArtificialTreeOperation().setTree(root))).build()));
+        target.execute(new InsertManifestOperation().addManifest(new Manifest.Builder(key)
+                .setRoot(target.execute(new InsertArtificialTreeOperation().setTree(root))).build(null)));
 
         target.execute(new ManifestDeleteOldByIdOperation().setAmountToKeep(10).setToDelete(NAMESPACE + user));
     }

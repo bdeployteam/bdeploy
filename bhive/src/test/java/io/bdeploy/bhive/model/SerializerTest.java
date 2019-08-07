@@ -12,9 +12,6 @@ import java.io.ByteArrayInputStream;
 
 import org.junit.jupiter.api.Test;
 
-import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.bhive.model.ObjectId;
-import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.objects.DbTestBase;
 import io.bdeploy.bhive.util.StorageHelper;
 
@@ -90,7 +87,7 @@ public class SerializerTest extends DbTestBase {
 
         String timeStr = Long.toString(System.currentTimeMillis());
         Manifest m = new Manifest.Builder(new Manifest.Key("test-app", "v1")).setRoot(id1).addLabel("build-time", timeStr)
-                .build();
+                .build(null);
         Manifest r = roundtrip(m);
 
         assertThat(r.getRoot().compareTo(id1), is(0));

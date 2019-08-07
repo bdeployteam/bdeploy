@@ -67,7 +67,7 @@ public class InstanceGroupManifest {
         }
 
         mfb.setRoot(hive.execute(new InsertArtificialTreeOperation().setTree(tb)));
-        hive.execute(new InsertManifestOperation().addManifest(mfb.build()));
+        hive.execute(new InsertManifestOperation().addManifest(mfb.build(hive)));
     }
 
 }

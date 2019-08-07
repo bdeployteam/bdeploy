@@ -375,7 +375,7 @@ public class ProductManifest {
             Manifest.Builder m = new Manifest.Builder(manifest);
             labels.forEach(m::addLabel);
             m.addLabel(PRODUCT_LABEL, productName).setRoot(hive.execute(new InsertArtificialTreeOperation().setTree(tree)));
-            hive.execute(new InsertManifestOperation().addManifest(m.build()));
+            hive.execute(new InsertManifestOperation().addManifest(m.build(hive)));
         }
     }
 

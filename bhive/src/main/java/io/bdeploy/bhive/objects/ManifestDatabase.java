@@ -9,7 +9,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -24,6 +28,13 @@ import io.bdeploy.common.util.PathHelper;
 public class ManifestDatabase extends LockableDatabase {
 
     private final Path root;
+
+    /**
+     * A cache for Manifest objects which need to actually be loaded from disk.
+     * <p>
+     * Assuming a max object size of ~4K (manifest includes cached references), this cache would grow to ~10MB.
+     */
+    private final Cache<Manifest.Key, Manifest> manifestCache = CacheBuilder.newBuilder().maximumSize(2_500).build();
 
     /**
      * @param root the root path of the database, created empty if it does not yet
@@ -144,13 +155,19 @@ public class ManifestDatabase extends LockableDatabase {
      * @return the {@link Manifest} loaded from its backing file.
      */
     public Manifest getManifest(Manifest.Key key) {
-        if (!hasManifest(key)) {
-            throw new IllegalArgumentException("Don't have manifest " + key);
-        }
-        try (InputStream is = Files.newInputStream(getPathForKey(key))) {
-            return StorageHelper.fromStream(is, Manifest.class);
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot read manifest " + key, e);
+        try {
+            return manifestCache.get(key, () -> {
+                if (!hasManifest(key)) {
+                    throw new IllegalArgumentException("Don't have manifest " + key);
+                }
+                try (InputStream is = Files.newInputStream(getPathForKey(key))) {
+                    return StorageHelper.fromStream(is, Manifest.class);
+                } catch (IOException e) {
+                    throw new IllegalStateException("Cannot read manifest " + key, e);
+                }
+            });
+        } catch (ExecutionException e) {
+            throw new IllegalStateException("Cannot load manifest into cache: " + key, e);
         }
     }
 

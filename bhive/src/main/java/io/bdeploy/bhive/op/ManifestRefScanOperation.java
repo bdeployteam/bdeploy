@@ -25,9 +25,15 @@ public class ManifestRefScanOperation extends BHive.Operation<SortedMap<String, 
     public SortedMap<String, Manifest.Key> call() throws Exception {
         RuntimeAssert.assertNotNull(manifest, "Nothing to scan");
 
+        Manifest mf = execute(new ManifestLoadOperation().setManifest(manifest));
+        SortedMap<String, Manifest.Key> cachedReferences = mf.getCachedReferences(this, maxDepth, allowMissing);
+        if (cachedReferences != null) {
+            return cachedReferences;
+        }
+
         SortedMap<String, Manifest.Key> referenced = new TreeMap<>();
         try (Activity activity = getActivityReporter().start("Scanning for manifests references...", -1)) {
-            ObjectId root = execute(new ManifestLoadOperation().setManifest(manifest)).getRoot();
+            ObjectId root = mf.getRoot();
             if (allowMissing && !execute(new ObjectExistsOperation().addObject(root)).contains(root)) {
                 // root tree is not here, but this is OK if copying from a partial hive
                 return referenced;
