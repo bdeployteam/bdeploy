@@ -102,7 +102,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     public void activate(Key key) {
         InstanceManifest imf = InstanceManifest.of(hive, key);
 
-        if (!isFullyDeployed(imf)) {
+        if (!isFullyDeployed(imf, false)) {
             throw new WebApplicationException(
                     "Given manifest for UUID " + imf.getConfiguration().uuid + " is not fully deployed: " + key,
                     Status.NOT_FOUND);
@@ -139,9 +139,10 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
     /**
      * @param imf the {@link InstanceManifest} to check.
+     * @param ignoreOffline whether to regard an instance as deployed even if a participating node is offline.
      * @return whether the given {@link InstanceManifest} is fully deployed to all required minions.
      */
-    private boolean isFullyDeployed(InstanceManifest imf) {
+    private boolean isFullyDeployed(InstanceManifest imf, boolean ignoreOffline) {
         SortedMap<String, Key> imfs = imf.getInstanceNodeManifests();
         // No configuration -> cannot be deployed
         if (imfs.isEmpty()) {
@@ -160,8 +161,18 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             assertNotNull(minion, "Cannot lookup minion on master: " + minionName);
             assertNotNull(toDeploy, "Cannot lookup minion manifest on master: " + toDeploy);
 
-            SlaveDeploymentResource slave = ResourceProvider.getResource(minion, SlaveDeploymentResource.class);
-            SortedSet<Key> deployments = slave.getAvailableDeploymentsOfInstance(instanceId);
+            SortedSet<Key> deployments;
+            try {
+                SlaveDeploymentResource slave = ResourceProvider.getResource(minion, SlaveDeploymentResource.class);
+                deployments = slave.getAvailableDeploymentsOfInstance(instanceId);
+            } catch (Exception e) {
+                if (ignoreOffline) {
+                    log.info("Ignoring offline node while checking deployment state: " + minionName);
+                    continue;
+                }
+                throw new IllegalStateException("Node offline while checking state: " + minionName);
+            }
+
             if (deployments.isEmpty()) {
                 if (log.isDebugEnabled()) {
                     log.debug("Minion {} does not contain any deployment for {}", minionName, instanceId);
@@ -182,7 +193,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     public void remove(Key key) {
         InstanceManifest imf = InstanceManifest.of(hive, key);
 
-        if (!isFullyDeployed(imf)) {
+        if (!isFullyDeployed(imf, false)) {
             return; // no need to.
         }
 
@@ -236,7 +247,10 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 continue;
             }
             try {
-                if (!isFullyDeployed(imf)) {
+                // ignore offline nodes. we still want to show the user the instance as installed even if "only"
+                // online nodes have it fully deployed. otherwise it is possible to have processes running from
+                // an instance which is shown as "not installed" in the UI.
+                if (!isFullyDeployed(imf, true)) {
                     continue;
                 }
                 result.add(imf.getManifest());
