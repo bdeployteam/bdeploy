@@ -359,7 +359,11 @@ public class ProcessController {
         try {
             process = launch(processConfig.start).toHandle();
             processExit = process.onExit();
-            startTime = process.info().startInstant().orElse(Instant.now());
+            startTime = process.info().startInstant().orElseGet(() -> {
+                logger.log(l -> l.error("Start time of process not available, falling back to current time. PID = {}.",
+                        process.pid()));
+                return Instant.now();
+            });
 
             // Persist the process that we just started to recover it if required
             ProcessControllerDto dto = new ProcessControllerDto();
@@ -438,11 +442,16 @@ public class ProcessController {
         processExit = process.onExit();
 
         // make sure that this is still the process we're looking for.
-        startTime = process.info().startInstant().orElse(Instant.now());
+        startTime = process.info().startInstant().orElseGet(() -> {
+            logger.log(l -> l.warn("Recovering process handle does not have a start time! PID = {}", dto.pid));
+            return Instant.now();
+        });
         if (startTime.compareTo(dto.startTime) == 0) {
             logger.log(l -> l.info("Successfully attached to application. PID = {}.", dto.pid));
             monitorProcess();
         } else {
+            logger.log(l -> l.info("Discarding existing process information due to start time mismatch. {} != {}, PID = {}.",
+                    startTime, dto.startTime, dto.pid));
             PathHelper.deleteRecursive(pidFile);
             cleanup();
         }
