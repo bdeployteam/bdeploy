@@ -173,16 +173,14 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
         }),
       );
     const call2 = this.instanceService.getNodeConfiguration(this.groupParam, this.uuidParam, selectedVersion.key.tag); // => results[1]
-    const call3 = this.instanceService.getDeploymentStates(this.groupParam, this.uuidParam); // => results[2]
-    const call4 = this.productService.getProducts(this.groupParam); // => result[3];
+    const call3 = this.productService.getProducts(this.groupParam); // => result[3];
 
-    forkJoin([call1, call2, call3, call4]).subscribe(results => {
+    forkJoin([call1, call2, call3]).subscribe(results => {
       newSelectedConfig.setNodeList(results[1]);
       newSelectedConfig.setApplications(results[0]);
-      this.deploymentState = results[2];
       this.selectedConfig = newSelectedConfig;
 
-      const filtered = results[3].filter(x => x.key.name === this.selectedConfig.version.product.name);
+      const filtered = results[2].filter(x => x.key.name === this.selectedConfig.version.product.name);
       this.productTags = sortByTags(filtered, p => p.key.tag, false);
 
       this.loading = false;

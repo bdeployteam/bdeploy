@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -102,7 +103,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     public void activate(Key key) {
         InstanceManifest imf = InstanceManifest.of(hive, key);
 
-        if (!isFullyDeployed(imf, false)) {
+        if (!isFullyDeployed(imf)) {
             throw new WebApplicationException(
                     "Given manifest for UUID " + imf.getConfiguration().uuid + " is not fully deployed: " + key,
                     Status.NOT_FOUND);
@@ -142,7 +143,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
      * @param ignoreOffline whether to regard an instance as deployed even if a participating node is offline.
      * @return whether the given {@link InstanceManifest} is fully deployed to all required minions.
      */
-    private boolean isFullyDeployed(InstanceManifest imf, boolean ignoreOffline) {
+    private boolean isFullyDeployed(InstanceManifest imf) {
         SortedMap<String, Key> imfs = imf.getInstanceNodeManifests();
         // No configuration -> cannot be deployed
         if (imfs.isEmpty()) {
@@ -166,10 +167,6 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 SlaveDeploymentResource slave = ResourceProvider.getResource(minion, SlaveDeploymentResource.class);
                 deployments = slave.getAvailableDeploymentsOfInstance(instanceId);
             } catch (Exception e) {
-                if (ignoreOffline) {
-                    log.info("Ignoring offline node while checking deployment state: " + minionName);
-                    continue;
-                }
                 throw new IllegalStateException("Node offline while checking state: " + minionName);
             }
 
@@ -193,7 +190,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     public void remove(Key key) {
         InstanceManifest imf = InstanceManifest.of(hive, key);
 
-        if (!isFullyDeployed(imf, false)) {
+        if (!isFullyDeployed(imf)) {
             return; // no need to.
         }
 
@@ -237,29 +234,59 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
     @Override
     public SortedSet<Key> getAvailableDeploymentsOfInstance(String instance) {
-        SortedSet<Key> scan = InstanceManifest.scan(hive, false);
         SortedSet<Key> result = new TreeSet<>();
 
+        // figure out which instance versions and which node manifests exist on which node (configuration wise).
+        SortedMap<Key, SortedMap<String, Manifest.Key>> requirements = new TreeMap<>();
+        SortedSet<Key> scan = InstanceManifest.scan(hive, false);
         for (Manifest.Key k : scan) {
             InstanceManifest imf = InstanceManifest.of(hive, k);
             String instanceId = imf.getConfiguration().uuid;
             if (!instanceId.equals(instance)) {
                 continue;
             }
-            try {
-                // ignore offline nodes. we still want to show the user the instance as installed even if "only"
-                // online nodes have it fully deployed. otherwise it is possible to have processes running from
-                // an instance which is shown as "not installed" in the UI.
-                if (!isFullyDeployed(imf, true)) {
-                    continue;
-                }
-                result.add(imf.getManifest());
-            } catch (Exception e) {
-                log.warn("{}: Cannot check deployment state of: {}", instance, imf.getManifest());
+
+            // found one, calculate which minion needs which manifest installed
+            requirements.put(k, imf.getInstanceNodeManifests());
+        }
+
+        // figure out which minions we need to contact in total.
+        SortedSet<String> minions = requirements.values().stream().flatMap(v -> v.entrySet().stream()).map(e -> e.getKey())
+                .collect(Collectors.toCollection(TreeSet::new));
+
+        // for each required minion, figure out available versions.
+        SortedMap<String, SortedSet<Key>> available = new TreeMap<>();
+        SortedSet<String> offline = new TreeSet<>();
+        for (String minion : minions) {
+            // don't check client node, it will never be online, and is not required (offline = OK).
+            if (minion.equals(InstanceManifest.CLIENT_NODE_NAME)) {
+                offline.add(minion);
                 continue;
             }
 
+            RemoteService remote = root.getMinions().get(minion);
+            try {
+                SlaveDeploymentResource sdr = ResourceProvider.getResource(remote, SlaveDeploymentResource.class);
+                available.put(minion, sdr.getAvailableDeploymentsOfInstance(instance));
+            } catch (Exception e) {
+                log.warn("Problem contacting minion to fetch available deployments: {}", minion);
+                offline.add(minion);
+                continue;
+            }
         }
+
+        // cross check which requirement is fulfilled, regarding offline minions as OK.
+        check: for (Entry<Key, SortedMap<String, Key>> entry : requirements.entrySet()) {
+            SortedMap<String, Key> rqs = entry.getValue();
+            for (Entry<String, Key> toFulfill : rqs.entrySet()) {
+                if (!offline.contains(toFulfill.getKey()) && !available.get(toFulfill.getKey()).contains(toFulfill.getValue())) {
+                    // at least one requirement failed, continue with next version.
+                    continue check;
+                }
+            }
+            result.add(entry.getKey());
+        }
+
         return result;
     }
 
