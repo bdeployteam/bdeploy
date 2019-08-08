@@ -314,7 +314,7 @@ products:
 
 The path to the `products.yaml` has to be configured in the *Eclipse TEA* preferences
 
-image::images/TEA_preferences_products.png[TEA Integration Products Preference,{thumbnail},role="thumb",link="images/TEA_preferences_products.png"]
+image::images/TEA_preferences_products.png[TEA Integration Products Preference,align=center,width=480,link="images/TEA_preferences_products.png"]
 
 ===== `product-build.yaml`
 

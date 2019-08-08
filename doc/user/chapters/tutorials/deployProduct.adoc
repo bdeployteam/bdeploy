@@ -1,3 +1,37 @@
 === How can i deploy a new product version?
 
-TODO
+Upgrading the *Product Version* that is used in an *Instance* requires two distinct steps:
+
+. Uploading the new *Product Version*
+. Upgrading the *Instance*
+
+==== Upload Product Version
+
+Uploading a new *Product Version* is done in the *Manage Products* page:
+
+ . Click on the desired *Instance Group*
+ . Click on btn:[Manage Products] in the bottom right corner of the *Instance Browser* dialog
+ . A card for each *Product* is displayed. Clicking on the card shows all available versions
+ . Click on the btn:[Upload] button in the bottom right corner
+ . Select the ZIP archive containing the new *Product Version*. This archive is typically created by your *Build* tool
+ . Click on Upload to transfer the file to the server.
+
+The *Product Version* is now available and can be used in all *Instances* of this *Instance Group*.
+
+==== Upgrade Instance
+
+Changing the *Product Version* of an *Instance* is done in the *Instance Overview* dialog:
+
+ . Navigate back to the *Instance Browser* dialog by clicking on the back button
+ . Open the desired *Instance*
+ . A hint is displayed that a newer *Product Version* is available
+ . Clicking on this hint opens the *Product Version* sidebar
+ . Click on the btn:[Upgrade] button of the desired version
+ . The sidebar is closed and a new locally modified *Instance Version* is created
+ . All Applications are marked as modified as they are now based on a different *Product Version*
+  _Hint:_ Changing the *Product Version* can result in validation issues if new mandatory parameters are introduced
+ . Adopt the configuration of the *Processes* as required
+ . Click on *Save* in the top right corner to save this version
+
+The *Instance* is now based on the new *Product Version*. Remember that the new *Instance Version* must be *Installed* and *Activated* so that the changes have an impact. Please read the <<_how_can_i_change_a_process_configuration,Process Configuration>> tutorial about more details how to do that.
+

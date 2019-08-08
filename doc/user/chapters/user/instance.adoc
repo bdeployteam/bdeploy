@@ -101,8 +101,11 @@ Only process configuration is imported to existing instances, the instance confi
 
 ==== Data Files
 
-The *Data Files* Browser provides access to the server side data directory. Files can be downloaded or opened in the UI. When opened in place, the btn:[Follow] toggle allows to grab new output as it is written on the server.
+The *Data Files* dialog lists all files that are stored in the data directory of each minion. Files can be downloaded or opened directly in the the UI. The table is by default sorted by the last modification timestamp. Thus the newest files displayed first. The dialog utilizes pagination and only the top 10 files are shown. This can be changed using the toolbar below the table.
 
-image::images/BDeploy_DataFiles_Browser.png[Data File Browser,{thumbnail},role="thumb",link="images/BDeploy_DataFiles_Browser.png"]
-image::images/BDeploy_DataFiles_Show.png[Show Data File,{thumbnail},role="thumb",link="images/BDeploy_DataFiles_Show.png"]
+image::images/BDeploy_DataFiles_Browser.png[Data File Browser,align=center,width=480,link="images/BDeploy_DataFiles_Browser.png"]
+
+When opened in place, the btn:[Follow] toggle allows to grab new output as it is written on the server.
+
+image::images/BDeploy_DataFiles_Show.png[Show Data File,align=center,width=480,link="images/BDeploy_DataFiles_Show.png"]
 
