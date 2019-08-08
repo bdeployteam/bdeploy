@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.bdeploy.bhive.model.Tree;
@@ -132,6 +133,7 @@ public class StorageHelper {
     private static ObjectMapper getMapper(MapperType type) {
         ObjectMapper dm = JacksonHelper.createObjectMapper(type);
 
+        dm.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         dm.registerModule(new BHiveJacksonModule());
 
         return dm;
