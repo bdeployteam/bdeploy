@@ -4,42 +4,43 @@ There are several components in the Web UI which allow maintenance of *BDeploy*.
 
 ==== System Software
 
-The btn:[System Software] page offers a mechanism to upload new *BDeploy* software versions, deploy these versions (_upgrade_ and _downgrade_ possible) to the running *BDeploy* _master_ and attached _slaves_.
+The *System Software* page offers a mechanism to upload new *BDeploy* software versions, deploy these versions (_upgrade_ and _downgrade_ possible) to the running *BDeploy* _master_ and attached _slaves_.
 
-It also offers a way to upload, and more important also to _download_ *BDeploy Launcher* binaries. These binaries are required when <<_app_info_yaml,`CLIENT` type *Applications*>> are configured.
+image::images/BDeploy_System_With_Launcher.png[BDeploy System Software,align=center,width=480,link="images/BDeploy_System_With_Launcher.png"]
 
-Initially, the btn:[System Software] page contains only the running *BDeploy* system software version, and no *BDeploy Launcher*. Use the btn:[+] button to upload either new *BDeploy* or *BDeploy Launcher* versions from their respective binary distributions (_ZIP_).
+It also offers a way to upload, and more important also to _download_ *BDeploy Launcher* binaries. These binaries are required when <<_app_info_yaml,`CLIENT` *Applications*>> are configured.
 
-The page can also be used to download the binaries of *BDeploy* (e.g. to setup additional _slaves_) and the *BDeploy Launcher* binaries (e.g. for manual setup of the *BDeploy Launcher* on client PCs, see <<_client_download,Client Download>>).
+image::images/BDeploy_System_Launcher_Upload.png[BDeploy Launcher Version Upload,align=center,width=480,link="images/BDeploy_System_Launcher_Upload.png"]
 
-image::images/BDeploy_System_No_Launcher.png[BDeploy Initial System Software Page,{thumbnail},role="thumb",link="images/BDeploy_System_No_Launcher.png"]
-image::images/BDeploy_System_Launcher_Upload.png[BDeploy Launcher Version Upload,{thumbnail},role="thumb",link="images/BDeploy_System_Launcher_Upload.png"]
-image::images/BDeploy_System_With_Launcher.png[BDeploy System Software,{thumbnail},role="thumb",link="images/BDeploy_System_With_Launcher.png"]
+Initially, the *System Software* page contains only the running *BDeploy* system software version, and no *BDeploy Launcher*. Use the btn:[+] button to upload either new *BDeploy* or *BDeploy Launcher* versions from their respective binary distributions (_ZIP_).
+
+image::images/BDeploy_System_No_Launcher.png[BDeploy Initial System Software Page,align=center,width=480,link="images/BDeploy_System_No_Launcher.png"]
+
+The page can also be used to download the binaries of *BDeploy* (e.g. to setup additional _slaves_) and the *BDeploy Launcher* binaries (e.g. for manual setup of the *BDeploy Launcher* on client PCs, see <<_client_applications,Client Applications>>).
 
 ==== Manual Cleanup
 
-You can use the btn:[Manual Cleanup] page from the main menu to perform manual cleanup on a _master_. This page is only available and useful on _master_ nodes.
+You can use the *Manual Cleanup* page from the main menu to trigger a manual cleanup of stuff that is not needed any more. There is no need to trigger this manually as a job is scheduled that performs the exact same operation every night. This dialog can be used to immediately trigger a cleanup and to reviewing of the actions performed _before_ doing so. 
 
-[NOTE]
-The dialog allows to manual execute the exact same cleanup (and reviewing of the actions performed _before_ doing so) as the master _cleanup job_ performs automatically on its `<<_bdeploy_cli,bdeploy cleanup>>` schedule.
+image::images/BDeploy_Cleanup.png[BDeploy Cleanup Page,align=center,width=480,link="images/BDeploy_Cleanup.png"]
 
 Press the btn:[Calculate Cleanup Actions] button to perform cleanup calculation. The result will be a list of actions to be performed on each connected slave.
+
+image::images/BDeploy_Cleanup_Actions.png[BDeploy Cleanup Actions,align=center,width=480,link="images/BDeploy_Cleanup_Actions.png"]
 
 Press the btn:[Execute all Actions] button to actually perform the calculated actions.
 
 [NOTE]
 The dialog automatically resets itself after a certain timeout. This is to prevent execution of too old actions which might no longer be valid.
 
-image::images/BDeploy_Cleanup.png[BDeploy Cleanup Page,{thumbnail},role="thumb",link="images/BDeploy_Cleanup.png"]
-image::images/BDeploy_Cleanup_Actions.png[BDeploy Cleanup Actions,{thumbnail},role="thumb",link="images/BDeploy_Cleanup_Actions.png"]
-
 ==== BHive Browser
+The BHive Browser is an internal tool for administrative purposes. It allows viewing and browsing the internals of the *BDeploy* storage. The drop-down at the top of the dialog is used to switch between the available hives. The _default_ hive is the internal storage where metadata about users and outer hives are stored. The actual data is stored in the individual hives itself.
 
 [CAUTION]
-The BHive Browser is an internal tool for administrative purposes. It has the power to destroy _everything_ - use with extreme caution.
+It has the power to destroy _everything_ - use with extreme caution.
 
 ==== Log Level
 
 You can adjust the log level of the Web UI (i.e. logging in the Browser Console) using the drop down at the bottom of the BDeploy main menu. The default value depends on whether the application is started in development (i.e. from VSCode) or production mode.
 
-image::images/BDeploy_Main_Menu.png[BDeploy Main Menu,{thumbnail},role="thumb",link="images/BDeploy_Main_Menu.png"]
+image::images/BDeploy_Main_Menu.png[BDeploy Main Menu,align=center,width=480,link="images/BDeploy_Main_Menu.png"]

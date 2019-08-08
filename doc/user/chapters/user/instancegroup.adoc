@@ -6,7 +6,7 @@ image::images/BDeploy_Empty_IG.png[Empty Instance Group Overview, align=center, 
 
 Use the btn:[+] button to create a new *Instance Group*.
 
-image::images/BDeploy_Create_IG.png[Create Instance Group,{thumbnail}, align=center, width=480, link="images/BDeploy_Create_IG.png"]
+image::images/BDeploy_Create_IG.png[Create Instance Group, align=center, width=480, link="images/BDeploy_Create_IG.png"]
 
 [NOTE]
 The name of an instance group cannot be changed. Be carful when choosing the name.

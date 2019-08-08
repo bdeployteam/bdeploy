@@ -36,6 +36,13 @@ The life cycle of a process is visualized in the following state graph:
 
 image::images/BDeploy_Process_State_Graph.png[Process State Graph,align=center,width=480,link="images/BDeploy_Process_State_Graph.png"]
 
+==== Process Out-Of-Sync
+An warning message - *Out-Of-Sync* - is displayed whenever one or more *Processes* are running in a version that is currently not *Activated*. This happens when *Deploying* a new version while *Processes* are still running. 
+
+image::images/BDeploy_Process_Out_Of_Sync.png[align=center, width=480, link="images/BDeploy_Process_Out_Of_Sync.png"]
+
+In principle this is nothing to worry about. It is just a remainder that the configuration has changed. The *Processes* will remain running in their current version until they are actively restarted. The message cannot be confirmed / closed as it automatically disappear once all *Processes* are running in the *Activated* version.
+
 ==== Process Start Type
 
 The *Start Type* of a *Process* can be configured in the *Process Configuration* dialog. The available options are depending on the *Application*. That means the publisher of an *Application* defines which *Start Types* are supported. The following types are available:
