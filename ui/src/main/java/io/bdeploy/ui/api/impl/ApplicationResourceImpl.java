@@ -4,6 +4,12 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.stream.Collectors;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response.Status;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -15,6 +21,8 @@ import io.bdeploy.ui.dto.ApplicationDto;
 
 public class ApplicationResourceImpl implements ApplicationResource {
 
+    private static final Logger log = LoggerFactory.getLogger(ApplicationResourceImpl.class);
+
     private final BHive productBHive;
     private final Manifest.Key productKey;
 
@@ -25,15 +33,22 @@ public class ApplicationResourceImpl implements ApplicationResource {
 
     @Override
     public List<ApplicationDto> list() {
-        ProductManifest productManifest = ProductManifest.of(productBHive, productKey);
-        SortedSet<Key> applications = productManifest.getApplications();
-        return applications.stream().map(k -> ApplicationManifest.of(productBHive, k)).map(mf -> {
-            ApplicationDto descriptor = new ApplicationDto();
-            descriptor.key = mf.getKey();
-            descriptor.name = mf.getDescriptor().name;
-            descriptor.descriptor = mf.getDescriptor();
-            return descriptor;
-        }).collect(Collectors.toList());
+        try {
+            ProductManifest productManifest = ProductManifest.of(productBHive, productKey);
+            SortedSet<Key> applications = productManifest.getApplications();
+            return applications.stream().map(k -> ApplicationManifest.of(productBHive, k)).map(mf -> {
+                ApplicationDto descriptor = new ApplicationDto();
+                descriptor.key = mf.getKey();
+                descriptor.name = mf.getDescriptor().name;
+                descriptor.descriptor = mf.getDescriptor();
+                return descriptor;
+            }).collect(Collectors.toList());
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Cannot load product {}", productKey, e);
+            }
+            throw new WebApplicationException("Cannot load product " + productKey, Status.NOT_FOUND);
+        }
     }
 
     @Override

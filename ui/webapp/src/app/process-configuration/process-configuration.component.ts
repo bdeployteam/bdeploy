@@ -5,7 +5,7 @@ import { MatDialog, MatDialogConfig, MatSlideToggle } from '@angular/material';
 import { ActivatedRoute, Params } from '@angular/router';
 import { cloneDeep, isEqual } from 'lodash';
 import { BehaviorSubject, forkJoin, Observable, of, Subscription } from 'rxjs';
-import { finalize, mergeMap } from 'rxjs/operators';
+import { catchError, finalize, mergeMap } from 'rxjs/operators';
 import { ApplicationEditComponent } from '../application-edit/application-edit.component';
 import { FileUploadComponent } from '../file-upload/file-upload.component';
 import { InstanceVersionCardComponent } from '../instance-version-card/instance-version-card.component';
@@ -169,7 +169,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       .pipe(
         mergeMap(instance => {
           newSelectedConfig.setInstance(instance);
-          return this.applicationService.listApplications(this.groupParam, newSelectedConfig.instance.product); // => results[0]
+          return this.applicationService.listApplications(this.groupParam, newSelectedConfig.instance.product, true).pipe(catchError(e => of([]))); // => results[0]
         }),
       );
     const call2 = this.instanceService.getNodeConfiguration(this.groupParam, this.uuidParam, selectedVersion.key.tag); // => results[1]
@@ -325,7 +325,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
    * a virtual configuration in our list that is only shown if we have local changes.
    */
   onSelectConfig(config: ProcessConfigDto): void {
-    if (this.loading || !this.isProductAvailable(config)) {
+    if (this.loading /*|| !this.isProductAvailable(config)*/) {
       return;
     }
 
@@ -553,6 +553,9 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       this.selectedConfig.valid = this.applicationService.isAllValid();
     } else {
       this.applicationService.clearState();
+      if (!this.isProductAvailable(this.selectedConfig)) {
+        this.applicationService.setProductMissing(this.selectedConfig);
+      }
     }
 
     // Cancel is always enabled if we are finished with loading
@@ -634,7 +637,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
     // Fetch applications of the new product and update the config
     this.applicationService
-      .listApplications(this.groupParam, product.key)
+      .listApplications(this.groupParam, product.key, false)
       .pipe(finalize(() => (this.productsLoading = false)))
       .subscribe(apps => {
         this.updateApplications(apps);

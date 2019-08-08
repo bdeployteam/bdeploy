@@ -3,6 +3,7 @@
 @mixin instance-version-card-theme($theme) {
   $dark: map-get($theme, 'is-dark');
   $selected-color: mat-color(map-get($theme, 'accent'));
+  $fg-color: mat-color(map-get($theme, 'accent'), default-contrast);
   $running-color: if($dark, #55da08, #146400);
 
   .instance-version-selected {
@@ -25,5 +26,15 @@
 
   .instance-version-running {
     color: $running-color !important;
+  }
+
+  .product-unavailable {
+    margin-right: 5px;
+    border-radius: 10px;
+    padding: 5px;
+    font-size: smaller;
+    font-weight: bold;
+    color: $fg-color;
+    background-color: $selected-color;
   }
 }

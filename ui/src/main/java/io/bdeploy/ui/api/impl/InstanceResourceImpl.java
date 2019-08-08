@@ -413,10 +413,15 @@ public class InstanceResourceImpl implements InstanceResource {
 
         // Load all available applications
         Key productKey = thisIm.getConfiguration().product;
-        ProductManifest productManifest = ProductManifest.of(hive, productKey);
-        for (Key applicationKey : productManifest.getApplications()) {
-            ApplicationManifest manifest = ApplicationManifest.of(hive, applicationKey);
-            instanceDto.applications.put(applicationKey.getName(), manifest.getDescriptor());
+
+        try {
+            ProductManifest productManifest = ProductManifest.of(hive, productKey);
+            for (Key applicationKey : productManifest.getApplications()) {
+                ApplicationManifest manifest = ApplicationManifest.of(hive, applicationKey);
+                instanceDto.applications.put(applicationKey.getName(), manifest.getDescriptor());
+            }
+        } catch (Exception e) {
+            log.warn("Cannot load product of instance version {}: {}", thisIm.getManifest(), productKey);
         }
         return instanceDto;
     }

@@ -8,8 +8,9 @@
           <mat-icon class='icon-margin' *ngIf="isOffline" matTooltip="Designated master not reachable">sync_problem</mat-icon>
         </ng-container>
     </div>
-    <div class="mat-title title"><span *ngIf="!productAvailable">(</span>{{ instanceVersionDto.product.tag }}<span *ngIf="!productAvailable">)</span></div>
+    <div class="mat-title title">{{ instanceVersionDto.product.tag }}</div>
     <span class="spacer"></span>
+    <span *ngIf="!productAvailable" class="product-unavailable" matTooltip="Required product version is not available.">N/A</span>
     <mat-menu #appMenu="matMenu" xPosition="before">
       <button mat-menu-item (click)="install.emit(instanceVersionDto.key)" [disabled]='dirty || !productAvailable || isDeployed || isActive'>Install</button>
       <button mat-menu-item (click)="uninstall.emit(instanceVersionDto.key)" [disabled]='dirty || !isDeployed || isActive || isRunningOrScheduled'>Uninstall</button>

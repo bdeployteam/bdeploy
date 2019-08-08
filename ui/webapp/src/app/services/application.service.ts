@@ -1,7 +1,8 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { cloneDeep, isEqual } from 'lodash';
 import { Observable } from 'rxjs';
+import { HttpErrorHandlerInterceptor } from '../interceptors/error-handler.interceptor';
 import { CLIENT_NODE_NAME, EMPTY_COMMAND_CONFIGURATION, EMPTY_PARAMETER_CONFIGURATION } from '../models/consts';
 import { ApplicationConfiguration, ApplicationDescriptor, ApplicationDto, ApplicationType, InstanceNodeConfigurationDto, ManifestKey, ParameterConfiguration, ParameterDescriptor, ParameterType } from '../models/gen.dtos';
 import { ProcessConfigDto } from '../models/process.model';
@@ -34,10 +35,16 @@ export class ApplicationService {
     private groupService: InstanceGroupService,
   ) {}
 
-  public listApplications(instanceGroupName: string, product: ManifestKey): Observable<ApplicationDto[]> {
+  public listApplications(instanceGroupName: string, product: ManifestKey, customErrorHandling: boolean): Observable<ApplicationDto[]> {
     const url: string = this.buildAppUrl(instanceGroupName, product);
     this.log.debug('listApplications: ' + url);
-    return this.http.get<ApplicationDto[]>(url);
+
+    let hdrs = {};
+    if (customErrorHandling) {
+      hdrs = HttpErrorHandlerInterceptor.suppressGlobalErrorHandling(new HttpHeaders);
+    }
+
+    return this.http.get<ApplicationDto[]>(url, { headers: hdrs });
   }
 
   public getDescriptor(
@@ -507,6 +514,16 @@ export class ApplicationService {
     this.dirtyStates.clear();
     this.validationStates.clear();
     this.missingApps.splice(0, this.missingApps.length);
+  }
+
+  /**
+   * Usually historic versions are not validated. We still want to tell the user if a product has
+   * been removed and thus the historic version broken retrospectively.
+   */
+  public setProductMissing(configDto: ProcessConfigDto) {
+    for (const app of this.getAllApps(configDto)) {
+      this.missingApps.push(app.application);
+    }
   }
 
   /** Returns a list of all apps of the given process configuration  */

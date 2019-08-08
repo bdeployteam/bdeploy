@@ -26,7 +26,7 @@
           Product: <b *ngIf="!loading">{{ selectedConfig.version.product.name }}</b>
         </div>
         <div>
-          Tag: <b *ngIf="!loading">{{ selectedConfig.instance.product.tag }}</b>
+          Tag: <b *ngIf="!loading">{{ selectedConfig.instance.product.tag }}</b>&nbsp;<span *ngIf="!loading && !isProductAvailable(selectedConfig)" class="product-unavailable" matTooltip="Required product version is not available.">N/A</span>
         </div>
         <div>
           Purpose: <b *ngIf="!loading">{{ selectedConfig.instance.purpose }}</b>
@@ -77,7 +77,7 @@
           Data Files...
         </button>
         <mat-divider></mat-divider>
-        <button mat-menu-item (click)="setSidenavApplications()" [disabled]="isSidenavApplications() || !isEditable()">
+        <button mat-menu-item (click)="setSidenavApplications()" [disabled]="isSidenavApplications() || !isEditable() || !isProductAvailable(selectedConfig)">
           Configure Applications...
         </button>
         <button mat-menu-item (click)="setSidenavProducts()" [disabled]="isSidenavProducts() || !isEditable()">

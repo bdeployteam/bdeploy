@@ -59,5 +59,4 @@ export class InstanceVersionCardComponent implements OnChanges {
   tagPredicate(): Predicate<string> {
     return x => x === this.instanceVersionDto.key.tag;
   }
-
 }
