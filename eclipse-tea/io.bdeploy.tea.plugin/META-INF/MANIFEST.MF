@@ -7,7 +7,7 @@ Automatic-Module-Name: org.eclipse.tea.library.bdeploy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: %providerName
 Bundle-ClassPath: .,
- lib/bdeploy-api-1.0.0-SNAPSHOT-all.jar
+ lib/bdeploy-api-1.0.1-SNAPSHOT-all.jar
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.tea.core;bundle-version="1.1.0",
  org.eclipse.tea.core.ui;bundle-version="1.1.0",

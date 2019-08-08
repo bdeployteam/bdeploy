@@ -3,8 +3,10 @@ package io.bdeploy.pcu;
 import java.io.File;
 import java.io.IOException;
 import java.lang.ProcessHandle.Info;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -359,12 +361,16 @@ public class ProcessController {
         try {
             process = launch(processConfig.start).toHandle();
             processExit = process.onExit();
-            startTime = process.info().startInstant().orElse(Instant.now());
+            startTime = process.info().startInstant().orElseGet(() -> {
+                logger.log(l -> l.error("Start time of process not available, falling back to current time. PID = {}.",
+                        process.pid()));
+                return Instant.now();
+            });
 
             // Persist the process that we just started to recover it if required
             ProcessControllerDto dto = new ProcessControllerDto();
             dto.pid = process.pid();
-            dto.startTime = startTime;
+            dto.startTime = internalGetProcessStartTimestampCorrected(dto.pid, startTime);
             Files.write(infoFile, StorageHelper.toRawBytes(dto));
             logger.log(l -> l.info("Successfully started application. PID = {}.", dto.pid));
 
@@ -375,6 +381,28 @@ public class ProcessController {
             processState = ProcessState.CRASHED_PERMANENTLY;
             cleanup();
         }
+    }
+
+    private long internalGetProcessStartTimestampCorrected(long pid, Instant reportedStartTime) {
+        if (OsHelper.getRunningOs() == OperatingSystem.LINUX) {
+            // see bug DCS-546 - the JVM on linux uses an invalid formula to calculate the absolute timestamp at which a process was started.
+            // There are various dynamically updated offsets and timestamps in play, thus the value may change over time. There /is/ a stable
+            // value we can use, and actually what we do here is the very same thing as the JVM does when reading the start time. The read value
+            // is not absolute though, but relative to the kernel boot time (which is sufficient for what we want). We just omit addition
+            // of real time and boot time offsets as done in the linux kernel when querying the boottime of the kernel.
+            try {
+                // read the single line from /proc/[pid]/stat, field no 22 is the start time.
+                String line = new String(Files.readAllBytes(Paths.get("/proc", String.valueOf(pid), "stat")),
+                        StandardCharsets.UTF_8);
+                String[] split = line.split(" ");
+                return Long.valueOf(split[21]);
+            } catch (Exception e) {
+                logger.log(l -> l.warn("Cannot read corrected start time of process, PID = {}.", pid, e));
+            }
+        }
+
+        // we (for now) trust the OS to deliver a stable absolute timestamp.
+        return reportedStartTime.toEpochMilli();
     }
 
     /** Stops the application */
@@ -438,11 +466,18 @@ public class ProcessController {
         processExit = process.onExit();
 
         // make sure that this is still the process we're looking for.
-        startTime = process.info().startInstant().orElse(Instant.now());
-        if (startTime.compareTo(dto.startTime) == 0) {
+        startTime = process.info().startInstant().orElseGet(() -> {
+            logger.log(l -> l.warn("Recovering process handle does not have a start time! PID = {}", dto.pid));
+            return Instant.now();
+        });
+
+        long correctedStart = internalGetProcessStartTimestampCorrected(dto.pid, startTime);
+        if (Long.compare(correctedStart, dto.startTime) == 0) {
             logger.log(l -> l.info("Successfully attached to application. PID = {}.", dto.pid));
             monitorProcess();
         } else {
+            logger.log(l -> l.info("Discarding existing process information due to start time mismatch. {} != {}, PID = {}.",
+                    startTime, dto.startTime, dto.pid));
             PathHelper.deleteRecursive(pidFile);
             cleanup();
         }
@@ -869,8 +904,11 @@ public class ProcessController {
         /** The native process identifier */
         public long pid;
 
-        /** Time when the process was launched */
-        public Instant startTime;
+        /**
+         * Timestamp when the process was launched. OS dependent format, not meant for user display, no guarantee about format
+         * (relative, absolute, ...)
+         */
+        public long startTime;
 
     }
 
