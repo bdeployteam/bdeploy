@@ -287,14 +287,17 @@ public class ObjectManager {
             case BLOB:
                 return new BlobView(object, path);
             case MANIFEST:
-                if (!followReferences) {
-                    return new SkippedElementView(object, path);
-                }
                 Manifest mf = lookupManifestRef(object);
                 if (mf == null) {
                     return new MissingObjectView(object, type, path);
                 }
                 ManifestRefView mrs = new ManifestRefView(object, mf.getKey(), mf.getRoot(), path);
+
+                if (!followReferences) {
+                    mrs.addChild(new SkippedElementView(mf.getRoot(), path));
+                    return mrs;
+                }
+
                 if (!db.hasObject(mf.getRoot())) {
                     mrs.addChild(new MissingObjectView(mf.getRoot(), EntryType.TREE, path));
                     return mrs;

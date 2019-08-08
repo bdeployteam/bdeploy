@@ -13,8 +13,7 @@ import javax.ws.rs.core.UriBuilder;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
-import io.bdeploy.bhive.objects.view.BlobView;
-import io.bdeploy.bhive.objects.view.SkippedElementView;
+import io.bdeploy.bhive.objects.view.ManifestRefView;
 import io.bdeploy.bhive.objects.view.TreeView;
 import io.bdeploy.bhive.objects.view.scanner.TreeVisitor;
 import io.bdeploy.bhive.op.CopyOperation;
@@ -119,7 +118,13 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
      */
     private SortedSet<TreeView> scanAllTreeSnapshots(List<TreeView> toPush) {
         SortedSet<TreeView> allTrees = new TreeSet<>();
-        TreeVisitor visitor = new TreeVisitor.Builder().onTree(allTrees::add).build();
+        TreeVisitor visitor = new TreeVisitor.Builder().onTree(t -> {
+            if (t instanceof ManifestRefView) {
+                return false;
+            }
+            allTrees.add(t);
+            return true;
+        }).build();
         for (TreeView snapshot : toPush) {
             snapshot.visit(visitor);
         }
@@ -129,14 +134,14 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
     /**
      * Find all {@link ObjectId}s referenced by the given trees (flat).
      * <p>
-     * {@link SkippedElementView} is treated like {@link BlobView} as manifest references are assumed to be skipped but required
-     * to push.
+     * {@link ManifestRefView} is not followed, just the reference (since the reference is a standalone object just like a blob)
+     * is recorded.
      */
     private SortedSet<ObjectId> scanAllObjectSnapshots(SortedSet<TreeView> missingTreeSnapshots) {
         return missingTreeSnapshots.parallelStream().map(t -> {
             SortedSet<ObjectId> objectsOfTree = new TreeSet<>();
             t.visit(new TreeVisitor.Builder().onTree(t::equals).onBlob(b -> objectsOfTree.add(b.getElementId()))
-                    .onSkipped(m -> objectsOfTree.add(m.getElementId())).build());
+                    .onManifestRef(m -> objectsOfTree.add(m.getReferenceId())).build());
             objectsOfTree.add(t.getElementId());
             return objectsOfTree;
         }).flatMap(SortedSet::stream).collect(Collectors.toCollection(TreeSet::new));

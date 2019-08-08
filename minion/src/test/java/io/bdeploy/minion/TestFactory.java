@@ -12,7 +12,6 @@ import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.PathHelper;
-import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
@@ -90,7 +89,8 @@ public class TestFactory {
      */
     private static Manifest.Key createDemoInstance(BHive local, Manifest.Key product, Path tmp, RemoteService remote,
             Manifest.Key serverApp, Manifest.Key clientApp) throws IOException {
-        String uuid = UuidHelper.randomId();
+        //        String uuid = UuidHelper.randomId();
+        String uuid = "aaa-bbb-ccc";
 
         /* STEP 1a: read available applications from product manifest */
         ProductManifest pmf = ProductManifest.of(local, product);
