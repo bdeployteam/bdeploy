@@ -78,6 +78,7 @@ public class ManifestDatabase extends LockableDatabase {
             Path pathForKey = getPathForKey(manifest.getKey());
             PathHelper.mkdirs(pathForKey.getParent());
             Files.write(pathForKey, StorageHelper.toRawBytes(manifest));
+            manifestCache.put(manifest.getKey(), manifest);
         });
     }
 
@@ -89,7 +90,10 @@ public class ManifestDatabase extends LockableDatabase {
      * @param key the manifest to remove
      */
     public void removeManifest(Manifest.Key key) {
-        locked(() -> Files.deleteIfExists(getPathForKey(key)));
+        locked(() -> {
+            Files.deleteIfExists(getPathForKey(key));
+            manifestCache.invalidate(key);
+        });
     }
 
     /**
