@@ -18,7 +18,8 @@ export class HttpErrorHandlerInterceptor implements HttpInterceptor {
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(request).pipe(catchError(e => {
-      if (e instanceof HttpErrorResponse && !request.headers.has(HttpErrorHandlerInterceptor.NO_ERROR_HANDLING_HDR)) {
+      // let 401 pass through for logout redirection in the other interceptor :)
+      if (e instanceof HttpErrorResponse && e.status !== 401 && !request.headers.has(HttpErrorHandlerInterceptor.NO_ERROR_HANDLING_HDR)) {
         let displayPath = request.url;
         try {
           displayPath = new URL(request.url).pathname;

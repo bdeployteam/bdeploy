@@ -1,7 +1,7 @@
 import { HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { throwError } from 'rxjs';
+import { of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AuthenticationService } from '../services/authentication.service';
 import { Logger, LoggingService } from '../services/logging.service';
@@ -20,7 +20,7 @@ export class UnauthorizedInterceptor implements HttpInterceptor {
           this.log.debug('unauthorized request: ' + err.url);
           this.logout();
         }
-        return throwError(err);
+        return of(null);
       }),
     );
   }
