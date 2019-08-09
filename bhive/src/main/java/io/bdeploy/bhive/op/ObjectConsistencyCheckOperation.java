@@ -36,9 +36,21 @@ public class ObjectConsistencyCheckOperation extends BHive.Operation<List<Elemen
 
         Activity scanning = getActivityReporter().start("Scanning manifest trees...", roots.size());
         List<ElementView> existingElements = new ArrayList<>();
+        List<ElementView> broken = new ArrayList<>();
         try {
             for (Manifest.Key key : roots) {
+                if (!execute(new ManifestExistsOperation().setManifest(key))) {
+                    // does not even exist - happens if manifest consistency operation removed it.
+                    continue;
+                }
+
                 TreeView state = execute(new ScanOperation().setManifest(key));
+
+                if (state.getElementId() == null) {
+                    // well, well - pretty damaged.
+                    broken.add(state.getChildren().values().iterator().next());
+                    continue;
+                }
 
                 state.visit(new TreeVisitor.Builder().onBlob(existingElements::add).onTree(existingElements::add)
                         .onManifestRef(existingElements::add).build());
@@ -51,7 +63,6 @@ public class ObjectConsistencyCheckOperation extends BHive.Operation<List<Elemen
 
         Activity checking = getActivityReporter().start("Checking objects...", existingElements.size());
         try {
-            List<ElementView> broken = new ArrayList<>();
             for (ElementView obj : existingElements) {
                 if (!getObjectManager().checkObject(obj.getElementId(), !dryRun)) {
                     broken.add(obj);

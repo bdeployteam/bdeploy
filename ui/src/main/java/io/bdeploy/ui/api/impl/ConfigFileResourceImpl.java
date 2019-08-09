@@ -16,6 +16,9 @@ import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -40,6 +43,8 @@ import io.bdeploy.ui.dto.FileStatusDto;
 
 @LockingResource(InstanceResourceImpl.GLOBAL_INSTANCE_LOCK)
 public class ConfigFileResourceImpl implements ConfigFileResource {
+
+    private static final Logger log = LoggerFactory.getLogger(ConfigFileResourceImpl.class);
 
     private final BHive hive;
     private final String instanceId;
@@ -133,7 +138,13 @@ public class ConfigFileResourceImpl implements ConfigFileResource {
             Path cfgDir = tmpDir.resolve("cfg");
 
             // 1. export current tree to temp directory
-            hive.execute(new ExportTreeOperation().setSourceTree(configTree).setTargetPath(cfgDir));
+            try {
+                hive.execute(new ExportTreeOperation().setSourceTree(configTree).setTargetPath(cfgDir));
+            } catch (Exception e) {
+                // this can happen if the hive was damaged. we allow this case to have a way out
+                // if all things break badly.
+                log.error("Cannot load existing configuration files", e);
+            }
 
             // 2. apply updates to files
             for (FileStatusDto update : updates) {

@@ -16,6 +16,7 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
@@ -264,15 +265,29 @@ public class ObjectManager {
 
     /**
      * Create a traversable snapshot of the given {@link Tree} state up to a given maximum depth.
+     * <p>
+     * In case the root tree is damaged, it is wrapped in a dummy {@link TreeView} with a <code>null</code> {@link ObjectId}.
      *
      * @param tree the root tree to scan
      * @param maxDepth maximum scan depth. A depth of 1 will include only direct children at the root level, and so on.
      */
     public TreeView scan(ObjectId tree, int maxDepth, boolean followReferences) {
-        if (!db.hasObject(tree)) {
-            throw new IllegalArgumentException("Cannot find root tree to scan: " + tree);
+        ElementView ev;
+        if (db.hasObject(tree)) {
+            ev = scan(tree, EntryType.TREE, new ArrayDeque<>(), maxDepth, followReferences);
+        } else {
+            ev = new DamagedObjectView(tree, EntryType.TREE, Collections.emptyList());
         }
-        return (TreeView) scan(tree, EntryType.TREE, new ArrayDeque<>(), maxDepth, followReferences);
+
+        if (ev instanceof TreeView) {
+            return (TreeView) ev;
+        }
+
+        // wrap in dummy tree to allow type assumption. this happens if the root tree is already missing.
+        TreeView tv = new TreeView(null, Collections.emptyList());
+        tv.addChild(ev);
+
+        return tv;
     }
 
     private ElementView scan(ObjectId object, EntryType type, Deque<String> path, int maxDepth, boolean followReferences) {
