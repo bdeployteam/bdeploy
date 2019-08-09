@@ -5,13 +5,20 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class SplashGraphics extends PanelDoubleBuffered implements LauncherSplashDisplay {
+
+    private static final Logger log = LoggerFactory.getLogger(SplashGraphics.class);
 
     private static final long serialVersionUID = 1L;
     private final transient BufferedImage image;
     private final Rectangle text;
     private final Rectangle progress;
+    private final AtomicBoolean fcWarn = new AtomicBoolean(false);
 
     private String statusText = "Initializing...";
     private int progressMax = 0;
@@ -55,10 +62,18 @@ final class SplashGraphics extends PanelDoubleBuffered implements LauncherSplash
     public void paintBuffer(Graphics g) {
         g.drawImage(image, 0, 0, this);
 
-        g.setColor(textColor);
-        g.setClip(text.x, text.y, text.width, text.height);
-        FontMetrics metrics = g.getFontMetrics();
-        g.drawString(statusText, text.x, text.y + metrics.getHeight());
+        try {
+            g.setColor(textColor);
+            g.setClip(text.x, text.y, text.width, text.height);
+            FontMetrics metrics = g.getFontMetrics();
+            g.drawString(statusText, text.x, text.y + metrics.getHeight());
+        } catch (Throwable e) {
+            // on some systems drawing text does not work due to fontconfig issues.
+            // for now there is nothing we can do except catching the exception and logging it /once/.
+            if (fcWarn.compareAndSet(false, true)) {
+                log.warn("There seems to be a problem with font configuration on this machine...", e);
+            }
+        }
 
         if (progressMax <= 0 || progressCurrent <= 0 || progress == null) {
             return;

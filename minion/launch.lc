@@ -85,6 +85,9 @@ java configuration Launcher {
 	argument "-v";
 	argument "launcher";
 	argument "--launch=${file_prompt:.bdeploy file to launch}";
+	
+//	vm-argument "-Dsun.java2d.debugfonts=true";
+//	vm-argument "-Dsun.awt.fontconfig=/tmp/markus.properties";
 }
 
 /**
