@@ -174,6 +174,10 @@ export class InstanceAddEditComponent implements OnInit {
     return pNames.filter((value, index, array) => array.indexOf(value) === index).sort();
   }
 
+  public getProductDisplayName(pName: string): string {
+    return this.products.find(e => e.key.name === pName).description + ' (' + pName + ')';
+  }
+
   public getTagsForProduct(): string[] {
     const selectedProduct = this.productNameControl.value;
     const productVersions = this.products.filter((value, index, array) => value.key.name === selectedProduct);

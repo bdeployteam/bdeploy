@@ -14,6 +14,7 @@
   </mat-card-header>
   <mat-card-content>
     <p>{{instance.description}}</p>
-    <p>Product: <b>{{instance.product.name}}</b> Tag: <b>{{instance.product.tag}}</b></p>
+    <p *ngIf='product'>Product: <b [matTooltip]='product.name'>{{product.description}}</b> Tag: <b>{{product.key.tag}}</b></p>
+    <p *ngIf='!product'>Product: <b>{{instance.product.name}}</b> Tag: <b>{{instance.product.tag}}</b>&nbsp;<span class="product-unavailable" matTooltip="Required product version is not available.">N/A</span></p>
   </mat-card-content>
 </mat-card>

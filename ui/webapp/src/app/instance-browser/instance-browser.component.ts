@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { SORT_PURPOSE } from '../models/consts';
 import { DataList } from '../models/dataList';
-import { InstanceConfiguration, InstancePurpose } from '../models/gen.dtos';
+import { InstanceConfiguration, InstancePurpose, ProductDto } from '../models/gen.dtos';
 import { InstanceService } from '../services/instance.service';
 import { Logger, LoggingService } from '../services/logging.service';
 import { ProductService } from '../services/product.service';
@@ -21,6 +21,7 @@ export class InstanceBrowserComponent implements OnInit {
 
   loading = true;
   hasProducts = false;
+  products: ProductDto[];
   instanceList: DataList<InstanceConfiguration> = new DataList();
   purposes: InstancePurpose[] = [];
 
@@ -71,11 +72,19 @@ export class InstanceBrowserComponent implements OnInit {
     const productPromise = this.productService.getProducts(this.instanceGroupName);
     productPromise.subscribe(products => {
       this.hasProducts = products.length > 0;
+      this.products = products;
     });
 
     forkJoin(instancePromise, productPromise).subscribe(result => {
       this.loading = false;
     });
+  }
+
+  getProductOfInstance(instance: InstanceConfiguration): ProductDto {
+    if (!this.products) {
+      return null;
+    }
+    return this.products.find(p => p.key.name === instance.product.name && p.key.tag === instance.product.tag);
   }
 
   getInstancesByPurpose(purpose: InstancePurpose): InstanceConfiguration[] {
