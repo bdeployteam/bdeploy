@@ -50,7 +50,7 @@
         <mat-grid-tile>
           <mat-form-field>
             <mat-select formControlName="name" placeholder="Product">
-              <mat-option *ngFor="let pname of getProductNames()" value="{{pname}}">{{pname}}</mat-option>
+              <mat-option *ngFor="let pname of getProductNames()" value="{{pname}}">{{getProductDisplayName(pname)}}</mat-option>
             </mat-select>
             <mat-error *ngIf="productNameControl.invalid">{{getErrorMessage(productNameControl)}}</mat-error>
           </mat-form-field>

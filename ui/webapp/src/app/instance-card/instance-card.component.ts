@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MessageBoxMode } from '../messagebox/messagebox.component';
-import { InstanceConfiguration } from '../models/gen.dtos';
+import { InstanceConfiguration, ProductDto } from '../models/gen.dtos';
 import { InstanceService } from '../services/instance.service';
 import { LoggingService } from '../services/logging.service';
 import { MessageboxService } from '../services/messagebox.service';
@@ -15,6 +15,7 @@ export class InstanceCardComponent implements OnInit {
 
   @Input() instance: InstanceConfiguration;
   @Input() instanceGroupName: string;
+  @Input() product: ProductDto;
   @Output() removeEvent = new EventEmitter<boolean>();
 
   private log = this.loggingService.getLogger('InstanceCardComponent');

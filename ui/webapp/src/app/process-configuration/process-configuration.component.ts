@@ -190,6 +190,10 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     });
   }
 
+  getProductOfInstance(pcd: ProcessConfigDto): ProductDto {
+    return this.productTags.find(p => p.key.name === pcd.instance.product.name && p.key.tag === pcd.instance.product.tag);
+  }
+
   loadDeploymentStates(finalizer: () => void) {
     this.instanceService
       .getDeploymentStates(this.groupParam, this.uuidParam)

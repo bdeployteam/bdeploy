@@ -14,7 +14,7 @@
   <mat-progress-spinner [mode]="'indeterminate'" class="loading-spinner" mode></mat-progress-spinner>
 </div>
 <ng-container *ngIf="!loading">
-  <div *ngIf="!hasProducts" class="list-heading center">
+  <div *ngIf="!hasProducts && instanceList.isEmpty()" class="list-heading center">
     <p>
       <span class="headerText">No products are available in this instance. Start by uploading a new one so that a new instance can be created.</span>
     </p>
@@ -35,18 +35,18 @@
   <div *ngFor="let purpose of purposes">
     <p class="list-heading">{{purpose}}</p>
     <div  class="card" *ngFor="let instance of getInstancesByPurpose(purpose)">
-      <app-instance-card [instance]='instance' [instanceGroupName]='instanceGroupName' (removeEvent)='remove(instance)'></app-instance-card>
+      <app-instance-card [instance]='instance' [product]='getProductOfInstance(instance)' [instanceGroupName]='instanceGroupName' (removeEvent)='remove(instance)'></app-instance-card>
     </div>
     <mat-divider class="list-divider"></mat-divider>
   </div>
 </ng-container>
 
-<a mat-fab class="add-button" [routerLink]="['/instance/add', instanceGroupName]" [disabled]="!hasProducts">
+<button mat-fab class="add-button" [routerLink]="['/instance/add', instanceGroupName]" [disabled]="!hasProducts">
   <mat-icon>add</mat-icon>
-</a>
-<a mat-fab class="products-button" matTooltip="Manage Products..." [routerLink]="['/products', instanceGroupName]" color="primary">
+</button>
+<button mat-fab class="products-button" matTooltip="Manage Products..." [routerLink]="['/products', instanceGroupName]" color="primary">
   <mat-icon>apps</mat-icon>
-</a>
-<a mat-fab class="clientApps-button" matTooltip="Client Applications..." [routerLink]="['/clientapps', instanceGroupName]" color="primary">
+</button>
+<button mat-fab class="clientApps-button" matTooltip="Client Applications..." [routerLink]="['/clientapps', instanceGroupName]" color="primary">
   <mat-icon>computer</mat-icon>
-</a>
+</button>
