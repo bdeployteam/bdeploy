@@ -31,7 +31,6 @@ public class FsckOperation extends BHive.Operation<List<ElementView>> {
                 manifests.addAll(localManifests);
             }
 
-            // TODO: handle missing manifest refs
             // TODO: handle nested manifests (refs) so that they are checked only once!
             ManifestConsistencyCheckOperation mfCheck = new ManifestConsistencyCheckOperation().setDryRun(!repair);
             ObjectConsistencyCheckOperation objCheck = new ObjectConsistencyCheckOperation().setDryRun(!repair);

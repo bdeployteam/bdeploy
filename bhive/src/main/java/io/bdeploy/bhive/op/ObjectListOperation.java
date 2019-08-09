@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditStrategy;
 import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditWith;
@@ -28,6 +31,8 @@ import io.bdeploy.common.ActivityReporter.Activity;
  * {@link ObjectDatabase}.
  */
 public class ObjectListOperation extends BHive.Operation<SortedSet<ObjectId>> {
+
+    private static final Logger log = LoggerFactory.getLogger(ObjectListOperation.class);
 
     @AuditWith(AuditStrategy.COLLECTION_PEEK)
     private final SortedSet<Manifest.Key> manifests = new TreeSet<>();
@@ -53,6 +58,12 @@ public class ObjectListOperation extends BHive.Operation<SortedSet<ObjectId>> {
             for (ObjectId tree : trees) {
                 List<ElementView> scanned = new ArrayList<>();
                 TreeView state = execute(new ScanOperation().setTree(tree));
+
+                if (state.getElementId() == null) {
+                    // uh, damaged manifest
+                    log.warn("Skipping damaged tree: {}", tree);
+                    continue;
+                }
 
                 state.visit(new TreeVisitor.Builder().onBlob(scanned::add).onTree(t -> {
                     if (treeExcludes.contains(t.getElementId())) {

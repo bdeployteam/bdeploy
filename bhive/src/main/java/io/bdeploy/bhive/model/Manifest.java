@@ -15,7 +15,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.bdeploy.bhive.BHiveExecution;
-import io.bdeploy.bhive.objects.view.ElementView;
 import io.bdeploy.bhive.objects.view.MissingObjectView;
 import io.bdeploy.bhive.objects.view.TreeView;
 import io.bdeploy.bhive.objects.view.scanner.TreeVisitor;
@@ -208,25 +207,33 @@ public class Manifest implements Serializable, Comparable<Manifest> {
                 return null;
             }
 
+            return findNestedReferences(hive, root, "", 0);
+        }
+
+        private SortedSet<ReferenceKey> findNestedReferences(BHiveExecution hive, ObjectId tree, String path, long depth) {
+            if (hive == null) {
+                return null;
+            }
+
             // calculate references directly, and persistently cache them here.
             SortedSet<ReferenceKey> referenced = new TreeSet<>();
-            SortedSet<ElementView> cachedManifests = new TreeSet<>();
-            TreeView state = hive.execute(new ScanOperation().setTree(root));
-            state.visit(new TreeVisitor.Builder().onMissing(this::missing).onTree(t -> !cachedManifests.contains(t))
-                    .onManifestRef(m -> {
-                        referenced.add(new ReferenceKey(m.getPathString(), m.getReferenced(), m.getPath().size()));
-                        Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(m.getReferenced()));
-                        if (mf.references != null) {
-                            // manifest has cached references, expand instead of scan
-                            for (ReferenceKey rk : mf.references) {
-                                // adjust to the current depth and path.
-                                referenced.add(new ReferenceKey(m.getPathString() + "/" + rk.getPath(), rk.key,
-                                        m.getPath().size() + rk.depth));
-                            }
-
-                            cachedManifests.add(m);
-                        }
-                    }).build());
+            TreeView state = hive.execute(new ScanOperation().setTree(tree).setFollowReferences(false));
+            state.visit(new TreeVisitor.Builder().onMissing(this::missing).onManifestRef(m -> {
+                referenced.add(new ReferenceKey(path + m.getPathString(), m.getReferenced(), depth + m.getPath().size()));
+                Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(m.getReferenced()));
+                if (mf.references != null) {
+                    // manifest has cached references, expand instead of scan
+                    for (ReferenceKey rk : mf.references) {
+                        // adjust to the current depth and path.
+                        referenced.add(new ReferenceKey(path + m.getPathString() + "/" + rk.getPath(), rk.key,
+                                depth + m.getPath().size() + rk.depth));
+                    }
+                } else {
+                    // need to actually scan the manifest for references. could yield nested manifest references as well.
+                    referenced.addAll(
+                            findNestedReferences(hive, mf.getRoot(), path + m.getPathString() + "/", depth + m.getPath().size()));
+                }
+            }).build());
 
             return referenced;
         }
