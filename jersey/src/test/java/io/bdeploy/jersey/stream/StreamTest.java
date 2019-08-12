@@ -2,6 +2,7 @@ package io.bdeploy.jersey.stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -42,9 +43,11 @@ public class StreamTest {
 
     @Test
     void download(StreamTestResource rs) throws IOException {
-        Path localFile = rs.download();
-
         byte[] sourceBytes = Files.readAllBytes(src);
+
+        Path localFile = rs.download();
+        assertFalse(Files.exists(src)); // deleted after writing.
+
         byte[] targetBytes = Files.readAllBytes(localFile);
 
         assertEquals(sourceBytes.length, targetBytes.length);

@@ -11,7 +11,9 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
 import javax.ws.rs.Produces;
 import javax.ws.rs.container.ResourceInfo;
@@ -57,20 +59,26 @@ public class JerseyPathWriter implements MessageBodyWriter<Path> {
     public void writeTo(Path t, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType,
             MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException {
         long size = Files.size(t);
-
-        httpHeaders.addFirst(JerseyPathReader.PATH_SIZE_HDR, size);
-
-        try (InputStream in = Files.newInputStream(t)) {
-            JerseyStreamingHelper.streamWithProgress(providers.getContextResolver(ActivityReporter.class, MediaType.WILDCARD_TYPE)
-                    .getContext(ActivityReporter.class), StreamDirection.WRITE, in, entityStream, size);
-        }
+        boolean delete = false;
 
         if (info != null) {
             // on the server :)
             Method m = info.getResourceMethod();
             if (m != null && m.getAnnotation(DeleteAfterWrite.class) != null) {
-                Files.deleteIfExists(t);
+                delete = true;
             }
+        }
+
+        httpHeaders.addFirst(JerseyPathReader.PATH_SIZE_HDR, size);
+        OpenOption[] delOpt = delete ? new OpenOption[] { StandardOpenOption.DELETE_ON_CLOSE } : new OpenOption[0];
+
+        try (InputStream in = Files.newInputStream(t, delOpt)) {
+            JerseyStreamingHelper.streamWithProgress(providers.getContextResolver(ActivityReporter.class, MediaType.WILDCARD_TYPE)
+                    .getContext(ActivityReporter.class), StreamDirection.WRITE, in, entityStream, size);
+        }
+
+        if (delete) {
+            Files.deleteIfExists(t);
         }
     }
 
