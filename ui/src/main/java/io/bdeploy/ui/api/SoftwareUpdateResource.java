@@ -29,6 +29,7 @@ public interface SoftwareUpdateResource {
 
     public static final String ROOT_PATH = "/swup";
     public static final String DOWNLOAD_PATH = "/download/{name : .+}/{tag}";
+    public static final String DOWNLOAD_LATEST_PATH = "/download/latest/{os}";
 
     @GET
     @Path("/bdeploy")
@@ -59,6 +60,12 @@ public interface SoftwareUpdateResource {
 
     @POST // DELETE does not accept body for batch delete.
     public void deleteVersions(List<Manifest.Key> keys);
+
+    @GET
+    @Unsecured
+    @Path(DOWNLOAD_LATEST_PATH)
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response downloadLatestLauncherFor(@PathParam("os") String osName);
 
     @GET
     @Unsecured

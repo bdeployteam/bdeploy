@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -14,11 +15,14 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
+import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriInfo;
 
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.slf4j.Logger;
@@ -62,6 +66,9 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
 
     @Inject
     private Minion minion;
+
+    @Context
+    private UriInfo info;
 
     private BHive getHive() {
         return reg.get(JerseyRemoteBHive.DEFAULT_NAME);
@@ -118,6 +125,18 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
         BHive hive = getHive();
         keys.forEach(k -> hive.execute(new ManifestDeleteOperation().setToDelete(k)));
         hive.execute(new PruneOperation());
+    }
+
+    @Override
+    public Response downloadLatestLauncherFor(String osName) {
+        OperatingSystem os = OperatingSystem.valueOf(osName.toUpperCase());
+        LauncherDto latestLaunchers = getLatestLaunchers();
+        Manifest.Key key = latestLaunchers.launchers.get(os);
+
+        URI target = UriBuilder.fromUri(info.getBaseUri()).path(SoftwareUpdateResource.ROOT_PATH)
+                .path(SoftwareUpdateResource.DOWNLOAD_PATH).build(new Object[] { key.getName(), key.getTag() }, false);
+
+        return Response.temporaryRedirect(target).build();
     }
 
     @Override

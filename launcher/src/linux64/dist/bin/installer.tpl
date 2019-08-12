@@ -56,7 +56,7 @@ EOF
     exit 1
   fi
 
-  curl -sS -k "$1" --output "$2" > /dev/null
+  curl -sS -L -k "$1" --output "$2" > /dev/null
 }
 
 # Check that this file has been correctly pre-processed by the server

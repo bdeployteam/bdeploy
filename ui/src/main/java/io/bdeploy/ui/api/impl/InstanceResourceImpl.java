@@ -645,13 +645,14 @@ public class InstanceResourceImpl implements InstanceResource {
 
         UriBuilder launcherUri = UriBuilder.fromUri(im.getConfiguration().target.getUri());
         launcherUri.path(SoftwareUpdateResource.ROOT_PATH);
-        launcherUri.path(SoftwareUpdateResource.DOWNLOAD_PATH);
+        launcherUri.path(SoftwareUpdateResource.DOWNLOAD_LATEST_PATH);
 
         UriBuilder iconUri = UriBuilder.fromUri(im.getConfiguration().target.getUri());
         iconUri.path("/group/{group}/instance/");
         iconUri.path(InstanceResource.PATH_DOWNLOAD_APP_ICON);
 
-        URI launcherLocation = launcherUri.build(new Object[] { launcherKey.getKey().getName(), launcherKey.getTag() }, false);
+        URI launcherLocation = launcherUri.build(new Object[] { applicationKey.getOperatingSystem().name().toLowerCase() },
+                false);
         URI iconLocation = iconUri.build(group, im.getConfiguration().uuid, appConfig.uid);
 
         if (applicationKey.getOperatingSystem() == OperatingSystem.WINDOWS) {
