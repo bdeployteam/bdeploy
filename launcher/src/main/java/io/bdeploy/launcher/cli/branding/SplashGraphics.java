@@ -3,8 +3,12 @@ package io.bdeploy.launcher.cli.branding;
 import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
@@ -60,9 +64,8 @@ final class SplashGraphics extends PanelDoubleBuffered implements LauncherSplash
 
     @Override
     public void paintBuffer(Graphics g) {
+        ((Graphics2D) g).addRenderingHints(getHints());
         g.setClip(null);
-        super.paintBuffer(g);
-
         g.drawImage(image, 0, 0, this);
 
         try {
@@ -96,4 +99,15 @@ final class SplashGraphics extends PanelDoubleBuffered implements LauncherSplash
         g.setClip(null);
     }
 
+    private static Map<RenderingHints.Key, Object> hintsMap = null;
+
+    private static Map<RenderingHints.Key, Object> getHints() {
+        if (hintsMap == null) {
+            hintsMap = new HashMap<>();
+            hintsMap.put(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+            hintsMap.put(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            hintsMap.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        }
+        return hintsMap;
+    }
 }
