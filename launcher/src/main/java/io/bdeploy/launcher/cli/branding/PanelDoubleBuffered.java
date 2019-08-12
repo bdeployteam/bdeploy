@@ -23,6 +23,7 @@ class PanelDoubleBuffered extends Panel {
 
     @Override
     public void paint(final Graphics g) {
+        g.setClip(null);
         super.paint(g);
         // checks the buffersize with the current panelsize
         // or initialises the image with the first paint

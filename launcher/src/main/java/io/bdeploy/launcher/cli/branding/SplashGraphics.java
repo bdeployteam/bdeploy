@@ -60,6 +60,9 @@ final class SplashGraphics extends PanelDoubleBuffered implements LauncherSplash
 
     @Override
     public void paintBuffer(Graphics g) {
+        g.setClip(null);
+        super.paintBuffer(g);
+
         g.drawImage(image, 0, 0, this);
 
         try {
@@ -90,6 +93,7 @@ final class SplashGraphics extends PanelDoubleBuffered implements LauncherSplash
         g.setColor(progressColor);
         g.setClip(progress.x, progress.y, progress.width, progress.height);
         g.fillRect(progress.x, progress.y, fillWidth, progress.height);
+        g.setClip(null);
     }
 
 }

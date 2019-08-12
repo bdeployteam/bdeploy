@@ -3,10 +3,10 @@ package io.bdeploy.launcher.cli.branding;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
+import java.awt.Frame;
 import java.awt.GraphicsEnvironment;
 import java.awt.Label;
 import java.awt.Rectangle;
-import java.awt.Window;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -33,7 +33,7 @@ public class LauncherSplash implements LauncherSplashDisplay {
 
     private final ClickAndStartDescriptor cd;
     private final Path imageCache;
-    private Window splash;
+    private Frame splash;
 
     private SplashGraphics splashComp;
 
@@ -51,7 +51,8 @@ public class LauncherSplash implements LauncherSplashDisplay {
             return;
         }
 
-        splash = new Window(null);
+        splash = new Frame("Splash");
+        splash.setUndecorated(true);
         splash.setSize(480, 280);
         splash.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
         WindowHelper.center(splash);
