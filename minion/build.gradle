@@ -16,8 +16,8 @@ dependencies {
         project(":interfaces"),
         project(":ui"),
 
-        'org.bouncycastle:bcpkix-jdk15on:1.61',
-        'org.bouncycastle:bcprov-jdk15on:1.61',
+        'org.bouncycastle:bcpkix-jdk15on:1.62',
+        'org.bouncycastle:bcprov-jdk15on:1.62',
         'org.quartz-scheduler:quartz:2.3.1'
     )
 

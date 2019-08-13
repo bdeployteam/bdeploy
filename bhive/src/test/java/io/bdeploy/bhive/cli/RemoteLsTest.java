@@ -11,19 +11,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import io.bdeploy.bhive.cli.BHiveCli;
-import io.bdeploy.bhive.cli.ImportTool;
-import io.bdeploy.bhive.cli.ManifestTool;
 import io.bdeploy.common.ContentHelper;
 import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TestCliTool;
 import io.bdeploy.common.TempDirectory.TempDir;
+import io.bdeploy.common.TestCliTool;
 
 @ExtendWith(TempDirectory.class)
 public class RemoteLsTest {
 
     @RegisterExtension
-    private final TestCliTool tools = new TestCliTool(new BHiveCli());
+    final TestCliTool tools = new TestCliTool(new BHiveCli());
 
     @Test
     public void testRemoteLs(@TempDir Path tmp) throws Exception {

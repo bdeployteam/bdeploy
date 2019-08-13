@@ -45,7 +45,7 @@ import io.bdeploy.common.cli.ToolBase;
 public class BasicToolTest {
 
     @RegisterExtension
-    private final TestCliTool tools = new TestCliTool(new BHiveCli());
+    final TestCliTool tools = new TestCliTool(new BHiveCli());
 
     @SlowTest
     @Test

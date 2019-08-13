@@ -12,10 +12,10 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
 
+import org.glassfish.jersey.model.Parameter.Source;
 import org.glassfish.jersey.server.ExtendedUriInfo;
 import org.glassfish.jersey.server.internal.inject.MultivaluedParameterExtractorProvider;
 import org.glassfish.jersey.server.model.Parameter;
-import org.glassfish.jersey.server.model.Parameter.Source;
 import org.glassfish.jersey.server.model.ResourceMethod;
 
 @Provider
