@@ -8,6 +8,8 @@ import java.util.function.Function;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.NewCookie;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 
@@ -31,12 +33,15 @@ public class AuthResourceImpl implements AuthResource {
     private SecurityContext context;
 
     @Override
-    public String authenticate(CredentialsDto cred) {
+    public Response authenticate(CredentialsDto cred) {
         UserInfo info = auth.authenticate(cred.user, cred.password);
         if (info != null) {
             ApiAccessToken.Builder token = new ApiAccessToken.Builder().setIssuedTo(cred.user);
             info.capabilities.forEach(token::addCapability);
-            return signer.apply(token.build());
+            String st = signer.apply(token.build());
+
+            // cookie not set to 'secure' to allow sending durign development.
+            return Response.ok().cookie(new NewCookie("st", st, "/", null, null, 365, false)).entity(st).build();
         } else {
             throw new WebApplicationException("Invalid credentials", Status.UNAUTHORIZED);
         }

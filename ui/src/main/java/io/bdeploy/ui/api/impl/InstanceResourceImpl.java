@@ -174,22 +174,28 @@ public class InstanceResourceImpl implements InstanceResource {
                 // ignore: product not found
             }
 
-            MasterRootResource r = ResourceProvider.getResource(config.target, MasterRootResource.class);
-            MasterNamedResource master = r.getNamedMaster(group);
-            InstanceStateRecord state = master.getInstanceState(config.uuid);
-
             Key activeProduct = null;
             ProductDto activeProductDto = null;
-            if (state.activeTag != null) {
-                try {
-                    InstanceManifest mf = InstanceManifest.of(hive, new Manifest.Key(imKey.getName(), state.activeTag));
-                    if (mf.getConfiguration().product != null && !config.product.equals(mf.getConfiguration().product)) {
-                        activeProduct = mf.getConfiguration().product;
-                        activeProductDto = ProductDto.create(ProductManifest.of(hive, activeProduct));
+            try {
+                MasterRootResource r = ResourceProvider.getResource(config.target, MasterRootResource.class);
+                MasterNamedResource master = r.getNamedMaster(group);
+                InstanceStateRecord state = master.getInstanceState(config.uuid);
+
+                if (state.activeTag != null) {
+                    try {
+                        InstanceManifest mf = InstanceManifest.of(hive, new Manifest.Key(imKey.getName(), state.activeTag));
+                        if (mf.getConfiguration().product != null && !config.product.equals(mf.getConfiguration().product)) {
+                            activeProduct = mf.getConfiguration().product;
+                            activeProductDto = ProductDto.create(ProductManifest.of(hive, activeProduct));
+                        }
+                    } catch (Exception e) {
+                        // ignore: product of active version not found
                     }
-                } catch (Exception e) {
-                    // ignore: product of active version not found
                 }
+            } catch (Exception e) {
+                // in case the token is invalid, master not reachable, etc.
+                log.error("Cannot contact master {}.", config.target.getUri(), e);
+                log.info("Tried with token {}", config.target.getAuthPack());
             }
 
             // Clear security token before sending via REST

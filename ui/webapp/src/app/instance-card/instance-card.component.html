@@ -1,5 +1,5 @@
 <mat-card [ngClass]="['instance-card', 'instance-card-' + instanceDto.instanceConfiguration.purpose]"
-    [routerLink]="['/instance/overview', instanceGroupName, instanceDto.instanceConfiguration.uuid]">
+    [routerLink]="['/instance/overview', instanceGroupName, instanceDto.instanceConfiguration.uuid]" attr.cypress='instance-{{instanceDto.instanceConfiguration.name}}'>
   <mat-card-header>
     <app-instance-group-logo mat-card-avatar [instanceGroupName]='instanceGroupName'></app-instance-group-logo>
     <mat-card-title>{{instanceDto.instanceConfiguration.name}}</mat-card-title>

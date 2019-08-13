@@ -28,6 +28,7 @@ export class AuthenticationService {
         tap(
           result => {
             this.tokenSubject.next(result);
+            // this is required if the backend runs on a different server than the frontend (dev)
             this.cookies.set('st', result, 365, '/');
             this.username = username;
           }, error => {
@@ -62,7 +63,7 @@ export class AuthenticationService {
   }
 
   logout(): void {
-    this.log.info('destroying session for user "' + this.username + '"');
+    this.log.info('destroying session for user "' + this.getUsername() + '"');
     this.tokenSubject.next(null);
     this.cookies.delete('st', '/');
   }

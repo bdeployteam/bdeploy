@@ -1,0 +1,8 @@
+{
+  "projectId": "k88zyw",
+  "video": false,
+  "baseUrl": "https://localhost:7707",
+  "env": {
+    "backendBaseUrl": "https://localhost:7707/api"
+  }
+}

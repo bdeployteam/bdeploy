@@ -136,7 +136,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     DataFilesBrowserComponent,
     ClientAppsComponent,
     ProductInfoCardComponent,
-    InstanceVersionHistoryCardComponent
+    InstanceVersionHistoryCardComponent,
   ],
   imports: [
     BrowserModule,

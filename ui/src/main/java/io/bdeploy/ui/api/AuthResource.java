@@ -8,6 +8,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import io.bdeploy.ui.dto.CredentialsDto;
@@ -23,7 +24,7 @@ public interface AuthResource {
      */
     @POST
     @Unsecured
-    public String authenticate(CredentialsDto credentials);
+    public Response authenticate(CredentialsDto credentials);
 
     /**
      * Return a list of recently used instance groups.

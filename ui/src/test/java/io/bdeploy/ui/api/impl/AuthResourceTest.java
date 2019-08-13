@@ -1,12 +1,12 @@
 package io.bdeploy.ui.api.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.security.GeneralSecurityException;
 
-import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,9 +23,11 @@ public class AuthResourceTest {
     @Test
     void testAuth(AuthResource auth, TestUiBackendServer backend) throws GeneralSecurityException {
         // mocked auth service expects user == password
-        assertThrows(NotAuthorizedException.class, () -> auth.authenticate(new CredentialsDto("some", "value")));
+        Response notAuth = auth.authenticate(new CredentialsDto("some", "value"));
+        assertEquals(401, notAuth.getStatus());
 
-        String token = auth.authenticate(new CredentialsDto("same", "same"));
+        Response resp = auth.authenticate(new CredentialsDto("same", "same"));
+        String token = resp.readEntity(String.class);
         ApiAccessToken decoded = SecurityHelper.getInstance().getVerifiedPayload(token, ApiAccessToken.class,
                 backend.getServerStore());
 

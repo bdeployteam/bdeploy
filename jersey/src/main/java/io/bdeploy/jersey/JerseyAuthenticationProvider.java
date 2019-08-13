@@ -137,6 +137,7 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
             requestContext.setSecurityContext(new JerseySecurityContext(api));
 
         } catch (Exception e) {
+            log.error("Exception while parsing authorization", e);
             abortWithUnauthorized(requestContext);
         }
 

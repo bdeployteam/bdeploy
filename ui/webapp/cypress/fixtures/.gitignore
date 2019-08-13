@@ -1,0 +1,2 @@
+# don't update token when the build writes the file
+token.json
