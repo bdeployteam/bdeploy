@@ -180,6 +180,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             ctx.init(kmfactory.getKeyManagers(), null, null);
 
             SSLEngineConfigurator sslEngine = new SSLEngineConfigurator(ctx, false, false, false);
+            sslEngine.setEnabledProtocols(new String[] { "TLSv1", "TLSv1.1", "TLSv1.2" });
 
             // default features
             rc.register(new ServerObjectBinder());
