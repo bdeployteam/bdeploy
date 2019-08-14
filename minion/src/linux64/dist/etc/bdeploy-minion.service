@@ -3,7 +3,8 @@
 #  2) replace all [master|slave] in the file with EITHER 'master' or 'slave' depending on what you set up.
 #  3) fix all paths to be valid.
 #  4) set the correct application user which will be running the application.
-#  5) start and/or enable service using systemctl
+#  5) Change/remove the KillMode if child processes should be killed when stopping BDeploy. Default is to let them live on.
+#  6) start and/or enable service using systemctl
 
 [Unit]
 Description=BDeploy [Master|Slave]
@@ -14,6 +15,10 @@ Type=simple
 Restart=always
 RestartSec=10
 ExecStart=/opt/bdeploy/master/bin/bdeploy [master|slave] --root=/opt/bdeploy/data
+LimitNOFILE=65535
+LimitNPROC=65535
+KillMode=process
+Environment="JAVA_OPTS=-Xmx1G"
 
 [Install]
 WantedBy=multi-user.target
