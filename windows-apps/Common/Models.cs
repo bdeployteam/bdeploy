@@ -4,11 +4,13 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
 
-namespace Bdeploy.Installer.Models
+namespace Bdeploy.Shared
 {
+    /// <summary>
+    /// Represents the configuration of the Installer. 
+    /// The configuration is serialized and dynamically embedded into the exeuctable.
+    /// </summary>
     [DataContract]
-    [KnownType(typeof(ClickAndStartDescriptor))]
-    [KnownType(typeof(RemoteService))]
     public class Config
     {
         /// <summary>
@@ -62,21 +64,10 @@ namespace Bdeploy.Installer.Models
         {
             return LauncherUrl != null && IconUrl != null && ClickAndStartDescriptor != null && ApplicationName != null && ApplicationUid != null;
         }
-
-        /// <summary>
-        /// Deserializes the embedded JSON descriptor and returns the created object.
-        /// </summary>
-        public ClickAndStartDescriptor DeserializeDescriptor()
-        {
-            UTF8Encoding encoding = new UTF8Encoding(false);
-            DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ClickAndStartDescriptor));
-            MemoryStream stream = new MemoryStream(encoding.GetBytes(ClickAndStartDescriptor));
-            return (ClickAndStartDescriptor)ser.ReadObject(stream);
-        }
     }
 
     /// <summary>
-    /// Describes the content of the Click&Start file.
+    /// Represents the content of the Click&Start file.
     /// </summary>
     [DataContract]
     [KnownType(typeof(RemoteService))]
@@ -125,6 +116,27 @@ namespace Bdeploy.Installer.Models
         public bool IsValid()
         {
             return RemoteService != null && GroupId != null && InstanceId != null && ApplicationId != null;
+        }
+
+        /// <summary>
+        /// Deserializes the given JSON that represents the serialized descriptor. 
+        /// </summary>
+        public static ClickAndStartDescriptor FromString(string input)
+        {
+            UTF8Encoding encoding = new UTF8Encoding(false);
+            DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ClickAndStartDescriptor));
+            MemoryStream stream = new MemoryStream(encoding.GetBytes(input));
+            return (ClickAndStartDescriptor)ser.ReadObject(stream);
+        }
+
+        /// <summary>
+        /// Deserializes the given JSON that represents the serialized descriptor. 
+        /// </summary>
+        public static ClickAndStartDescriptor FromFile(string file)
+        {
+            UTF8Encoding encoding = new UTF8Encoding(false);
+            string content = File.ReadAllText(file, encoding);
+            return FromString(content);
         }
     }
 
