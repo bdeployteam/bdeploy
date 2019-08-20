@@ -1,6 +1,6 @@
 === Process Control
 
-For the activated *Instance Version*, the *Process Control* of this *Process* can be displayed by clicking on a *Process Card*. The upper part of the *Process Control Sidebar* shows the current Process Status*. Below this, the control elements for _starting_, _stopping_ or _restarting_ the process can be found.
+For the activated *Instance Version*, the *Process Control* of this *Process* can be displayed by clicking on a *Process Card*. The upper part of the *Process Control Sidebar* shows the current *Process Status*. Below this, the control elements for _starting_, _stopping_ or _restarting_ the process can be found.
 
 image::images/BDeploy_Process_Started.png[Running Server Process,align=center,width=480,link="images/BDeploy_Process_Started.png"]
 
