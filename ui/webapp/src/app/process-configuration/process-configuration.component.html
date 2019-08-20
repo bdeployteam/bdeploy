@@ -36,7 +36,7 @@
         </div>
       </div>
       <span class="fill-space"></span>
-      <button mat-flat-button class="app-process-out-of-sync-text" (click)="setSidenavProducts()" *ngIf="isProductUpgradeAvailable() && !editMode">
+      <button mat-flat-button class="app-process-out-of-sync-text" (click)="onNewerProductVersionAvailable()" *ngIf="isProductUpgradeAvailable() && !editMode">
         Newer product version available!
       </button>
       <span class="spacer"></span>
@@ -207,7 +207,7 @@
         </div>
         <div *ngIf='isSidenavProducts()'>
           <mat-toolbar class='products-toolbar'>
-            <mat-slide-toggle #showAll>Show all tags</mat-slide-toggle>
+            <mat-slide-toggle #showAll>Show all</mat-slide-toggle>
           </mat-toolbar>
           <div class='card-list-container'>
             <mat-progress-spinner *ngIf='productsLoading'></mat-progress-spinner>

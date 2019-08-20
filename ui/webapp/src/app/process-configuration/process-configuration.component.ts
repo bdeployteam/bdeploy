@@ -173,7 +173,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
         }),
       );
     const call2 = this.instanceService.getNodeConfiguration(this.groupParam, this.uuidParam, selectedVersion.key.tag); // => results[1]
-    const call3 = this.productService.getProducts(this.groupParam); // => result[3];
+    const call3 = this.productService.getProducts(this.groupParam); // => result[2];
 
     forkJoin([call1, call2, call3]).subscribe(results => {
       newSelectedConfig.setNodeList(results[1]);
@@ -325,11 +325,23 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Called when the user clicks on the hint that a newer product version is available.
+   */
+  onNewerProductVersionAvailable() {
+    // Switch versions so that the one allowing modifications is selected
+    const virtualConfig = this.processConfigs[0];
+    this.onSelectConfig(virtualConfig);
+
+    // Open sidebar to change product tag
+    this.setSidenavProducts();
+  }
+
+  /**
    * Called to switch the active configuration. Needs some special treatment as we have
    * a virtual configuration in our list that is only shown if we have local changes.
    */
   onSelectConfig(config: ProcessConfigDto): void {
-    if (this.loading /*|| !this.isProductAvailable(config)*/) {
+    if (this.loading) {
       return;
     }
 
