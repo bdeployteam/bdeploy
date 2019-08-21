@@ -10,7 +10,7 @@ The page will offer the appropriate *Client Application* based on the operating 
 *Client Application* are started through a special *Launcher* that needs to be installed on all client computers. The launcher is responsible for keeping the application up-to-date and to pass the configured parameters to the application.
 
 ==== Installer
-An *Installer* is provided for each *Client Application* to make the installation as easy as possible. The installer does not have any prerequisite's and can be downloaded and executed by any user. No administrative privileges are required. 
+An *Installer* is provided for each *Client Application* to make the installation as easy as possible. The installer does not have any prerequisites and can be downloaded and executed by any user. No administrative privileges are required. 
 
 
 The *Installer* will check if the latest version of the *Launcher* is already installed. If not then the *Launcher* is downloaded and stored on the client computer. The user can then start a *Client Application* with the branded *Link* that is stored on the *Desktop* or in the *Start Menu*.
