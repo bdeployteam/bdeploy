@@ -1,10 +1,16 @@
-=== Defining your own Product
+=== Integration of a new product
 
-To define your own *Product* which can be deployed with *BDeploy*, you will need to provide some information to *BDeploy* about the actual applications and some additional meta-data. This chapter will walk you through the required artifacts and how to define them.
+This chapter is intended for those who want to integrate their own *Product* to be deployed with *BDeploy*. Therefore a couple of YAML files are required. These files describe your product and all its applications together with some additional meta-data. These artifacts are required:
+
+<<_app-info.yaml, app-info.yaml>>:: YAML file to describe one single *Application*. It is required once for every client and server *Application* of the product. 
+<<_product-info.yaml, product-info.yaml>>:: YAML file with meta-data for the whole product.
+<<_product-version.yaml,product-version.yaml>>:: YAML file required for every *Product Version*. 
+
+This chapter will walk you through these artifacs, what they are for and how to define them.
 
 ==== app-info.yaml
 
-The `app-info.yaml` file is one of the most important parts of *BDeploy*. It describes an *Application*. This *Application* may be _any_ application which contains an _executable_ (whatever kind, script, executable, etc.) and which allows 'installation' by copy to a directory. This is important, as *BDeploy* will 'install' an application by ultimately copying the application to an automatically determined internal directory and launch it from there.
+The `app-info.yaml` file is one of the most important parts of *BDeploy*. It describes an *Application*, especially its start command. This *Application* may be _any_ application which contains an _executable_ (whatever kind, script, executable, etc.) and which allows 'installation' by copy to a directory. This is important, as *BDeploy* will 'install' an application by ultimately copying the application to an automatically determined internal directory and launch it from there.
 
 Basically, `app-info.yaml` allows you to specify which executable to run, and which parameters could *potentially* be used to configure the *Application*. The `app-info.yaml` does not specify an actual configuration, but describes all possible parameters for an *Application*.
 
@@ -68,15 +74,15 @@ runtimeDependencies: <8>
 ----
 
 <1> A human readable name of the *Application*. Will be displayed in the *Configure Application* pane, and is also used as _default_ name for any process _instantiated_ from this *Application*.
-<2> The type of the application, may be `SERVER` or `CLIENT`. `CLIENT` applications cannot be deployed on a *BDeploy* node, but are downloadable instead. `SERVER` applications cannot be downloaded by users, but are only deployable to *BDeploy* nodes.
+<2> The type of the application, may be `SERVER` or `CLIENT`. `SERVER` applications can be deployed to master or slave *Nodes* and there be started as server processes. `CLIENT` applications in comparison cannot be deployed on a *Node*, but run on a client PC instead.
 <3> List of supported operating systems. This list is solely used to verify during import of the *Product*, that the *Application* actually supports the operating system under which it is listed in the `product-version.yaml`.
-<4> The `branding` attribute controls the appearance of `CLIENT` type applications when downloaded by the user. It can be used to specify an `icon` (used to decorate desktop links created by the _client installer_), and a `splash` screen. For the `splash`, you can fine tune the exact location used to display progress text and a progress bar while the application is downloaded to the client PC by the <<_launcher_cli,Launcher CLI>>. Paths are interpreted relative to the root folder of the *Application*.
-<5> Process control parameters allow to fine tune how `SERVER` type *Applications* are treated by *BDeploy*. For details, see <<_supported_processcontrol_attributes,Supported `processControl` Attributes>>.
-<6> The start command of the *Application*. Contains the path to the _executable_ to launch, as well as all known and supported parameters. A single parameter is actually the most complex single object in *BDeploy*. For details, see <<_supported_parameters_attributes,Supported `parameters` Attributes>>. Both the `launcherPath` and each parameter's `defaultValue` can use <<_variable_expansion,Variable Expansion>> just the same as in the Web UI.
+<4> Only relevant for `CLIENT` applications: The `branding` attribute controls the appearance of `CLIENT` type *Applications* when downloaded by the user. It can be used to specify an `icon` (used to decorate desktop links created by the _client installer_), and a `splash` screen. For the `splash`, you can fine tune the exact location used to display progress text and a progress bar while the application is downloaded to the client PC by the <<_launcher_cli,Launcher CLI>>. Paths are interpreted relative to the root folder of the *Application*.
+<5> Only relevant for `SERVER` applications: Process control parameters allow to fine tune how `SERVER` type *Applications* are started and kept alive by *BDeploy*. For details, see the list of <<_supported_processcontrol_attributes, processControl>> attributes.
+<6> The start command of the *Application*. Contains the path to the _executable_ to launch, as well as all known and supported parameters. For details, see the full list of <<_supported_parameters_attributes,parameter>> attributes. To apply e.g. instance-specific values, <<_variable_expansion,Variable Expansion>> is a powerful tool. It can be used for the `launcherPath` and each parameter's `defaultValue`. In the Web UI it can be used for the parameter values.
 <7> The optional stop command can be specified to provide a mechanism for clean application shutdown once *BDeploy* tries to stop a process. This command may use <<_variable_expansion,Variable Expansion>> to access parameter values of the `startCommand` (e.g. configured 'stop port', etc.). It is *not* configurable through the Web UI though. All parameter values will have their (expanded) default values set when the command is run. If no `stopCommand` is specified, *BDeploy* will try to gracefully quit the process (i.e. `SIGTERM`). Both with and without `stopCommand`, *BDeploy* resorts to a `SIGKILL` after the `<<_supported_parameters_attributes,gracePeriod>>` has expired.
-<8> Optional additional dependencies. These dependencies are included in the *Product* when building it. Dependencies are fetched from *<<_software_repositories,Software Repositories>>*. `launcherPath` and parameter `defaultValue` (and of course the final configuration values) can access paths within each of the dependencies by using the `{{M:adoptopenjdk/jre:1.8.0_202-b08}}` <<_variable_expansion,Variable Expansion>>, e.g. `launcherPath: {{M:adoptopenjdk/jre:1.8.0_202-b08}}/bin/java`. Also note that the declared dependency does not specify an operating system. This will be resolved by *BDeploy* to either an exact match, e.g. `adoptopenjdk/jre/linux:1.8.0_202-b08` on `LINUX`.
+<8> Optional runtime dependencies. These dependencies are included in the *Product* when building it. Dependencies are fetched from *<<_software_repositories,Software Repositories>>*. `launcherPath` and parameter `defaultValue` (and of course the final configuration values) can access paths within each of the dependencies by using the `{{M:adoptopenjdk/jre:1.8.0_202-b08}}` <<_variable_expansion,Variable Expansion>>, e.g. `launcherPath: {{M:adoptopenjdk/jre:1.8.0_202-b08}}/bin/java`. Also note that the declared dependency does not specify an operating system. This will be resolved by *BDeploy* to either an exact match, e.g. `adoptopenjdk/jre/linux:1.8.0_202-b08` on `LINUX`.
 
-===== Supported `processControl` Attributes
+===== Supported `processControl` attributes
 
 [%header,cols="25,75"]
 |===
@@ -97,7 +103,7 @@ runtimeDependencies: <8>
 
 |===
 
-===== Supported `parameters` Attributes
+===== Supported `parameters` attributes
 
 [NOTE]
 Parameters appear on the final command line in *exact* the order as they appear in the `app-info.yaml` file, regardless of how they are presented in the Web UI, or how they are grouped using the `groupName` attribute. This allows to build complex command lines with positional parameters through `app-info.yaml`.
@@ -202,7 +208,7 @@ startCommand:
       fixed: true <1>
 ----
 
-<1> The fixed flag will cause the parameter to *always* use the defined default value and disable editing in the configuration UI.
+The fixed flag will cause the parameter to *always* use the defined default value and disable editing in the configuration UI.
 
 |`type`
 |`STRING`
@@ -216,7 +222,7 @@ startCommand:
 [NOTE]
 There is no actual requirement for the file to be named `product-info.yaml`. This is just the default, but you can specify another name on the command line or in build tool integrations.
 
-The `product-info.yaml` file describes which *Applications* are part of the final *Product*, as well as some basic *Product* properties.
+The `product-info.yaml` file describes which *Applications* are part of the final *Product*, as well as some additional *Product* meta-data.
 
 [source,yaml]
 ----
@@ -233,8 +239,8 @@ versionFile: my-versions.yaml <5>
 
 <1> A human readable name of the *Product* for display purposes in the Web UI
 <2> A unique ID of the *Product* which is used to base *Instances* of. This should not change, as changing the *Product* ID of an existing *Instance* is not supported.
-<3> The actual *Applications* which are part of the *Product*. These IDs can be anything, they just have to match the IDs used in the `product-version.yaml` referenced below.
-<4> An optional relative path to a directory containing configuration file templates, which will be used as the default set of configuration files when creating an *Instance* from the resulting *Product*.
+<3> The list of *Applications* which are part of the *Product*. These IDs can be anything, they just have to match the IDs used in the `product-version.yaml` referenced below.
+<4> Optional: An relative path to a directory containing configuration file templates, which will be used as the default set of configuration files when creating an *Instance* from the resulting *Product*.
 <5> The `product-version.yaml` which associates the *Application* IDs (used above) with actual paths to *Applications* on the file system.
 
 ==== product-version.yaml
@@ -244,7 +250,7 @@ There is no actual requirement for the file to be named `product-version.yaml` a
 
 The `product-version.yaml` file associates *Application* IDs used in the `product-info.yaml` with actual locations on the local disc. This is used to find an import each included *Application* when importing the *Product*.
 
-The reason why this file is separate from the `product-info.yaml` in the first place, is to allow generation of it's content by a build system. It may contain build specific data (version, path to application binaries per operating system, etc.).
+The reason why this file is separate from the `product-info.yaml` is because its content (e.g. version) is specific to a single product *Build* . Therfore the `product-version.yaml` ideally is created during the build process of the product by the build system of your choice. This is different to the `app-info.yaml` files and the `product-info.yaml` file as they are written manually. 
 
 [source,yaml]
 ----
@@ -258,28 +264,10 @@ appInfo:
     LINUX: "scripts/app2/app-info.yaml"
 ----
 
-<1> The version is used as *Manifest* _tag_, which is a more general concept. There is no requirement for any version-like syntax here, it can be basically anything. It should just be unique per *Product* version which can be installed on a *BDeploy* server.
+<1> A unique *Tag* to identify the product version. There is no requirement for any version-like syntax here, it can be basically anything. It should just be unique per *Product Version*.
 <2> The *Application* ID must match the one used in `product-info.yaml`.
 <3> You may have different binaries for a single application depending on the target operating system. It is not required to provide every application for every operating system. You can just leave out operating systems you don't care about.
-<4> You can also use the exact same *Application* directory to satisfy multiple operating system targets.
-
-=== Dependencies, third party Software
-
-As you saw before (`<<_app_info_yaml,app-info.yaml>>`), *Applications* can declare dependencies to third-party *Manifests*. These *Manifests* are hosted in *Software Repositories* on the *BDeploy* Server.
-
-To make them available on the server, you need to:
-
-* Use `bhive import` to import the directory containing the third-party software into a local *BHive*.
-* Use `bhive push` to push the created *Manifest* to the *Software Repository* of your choice.
-
-==== Manifest Naming
-
-Third party software *Manifests* can have basically any name. If you want to provide different *Manifests* per target operating system though, you will have to follow a simple naming rule: append the operating system name to the *Manifest* name part, e.g.:
-
-* `my/external/software/windows:1.0.0`
-* `my/external/software/linux:1.0.0`
-
-It can then be referenced by an `app-info.yaml` using the short-hand syntax `my/external/software:1.0.0` and *BDeploy* will choose the correct one depending on the target operating system.
+<4> You can also use the exact same *Application* directory and `app-info.yaml` to satisfy multiple operating system targets for one *Application*.
 
 === Building a Product
 

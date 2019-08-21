@@ -1,12 +1,9 @@
 == Experts 
 
-This chapter contains additional information for advanced users, administrators of the system as well as those that want to use the CLI for features that the UI does not provide.
-
-include::terms.adoc[]
-
-include::variables.adoc[]
+This chapter contains additional information for expert users, administrators of the system as well as those that want to use the CLI for features that the UI does not provide.
 
 include::system.adoc[]
 
 include::cli.adoc[]
 
+include::security.adoc[]
