@@ -112,7 +112,7 @@ namespace Bdeploy.Installer
                 // Installers should not run simultaneously to avoid conflicts when extracting files
                 // Thus we try to create a lockfile. If it exists we wait until it is removed
                 OnNewSubtask("Waiting for other installations to finish...", -1);
-                lockStream = WaitForExclusiveLock();
+                lockStream = FileHelper.WaitForExclusiveLock(lockFile,500,() => Canceled);
                 if (lockStream == null)
                 {
                     OnError("Installation has been canceled by the user.");
@@ -152,31 +152,8 @@ namespace Bdeploy.Installer
                 {
                     lockStream.Dispose();
                 }
-                FileHelper.DeleteFile(new FileInfo(lockFile));
+                FileHelper.DeleteFile(lockFile);
             }
-        }
-
-        /// <summary>
-        /// Waits until this installer gets an exclusive lock.
-        /// </summary>
-        private FileStream WaitForExclusiveLock()
-        {
-            while (!Canceled)
-            {
-                try
-                {
-                    return new FileStream(lockFile, FileMode.OpenOrCreate, FileAccess.ReadWrite,
-                            FileShare.None, 100);
-                }
-                catch (Exception)
-                {
-                    // Another installer is currently running. Wait for some time
-                    System.Threading.Thread.Sleep(500);
-                }
-            }
-
-            // User canceled waiting to get lock. Abort
-            return null;
         }
 
         /// <summary>
@@ -275,7 +252,8 @@ namespace Bdeploy.Installer
             WebRequestHandler handler = new WebRequestHandler();
             handler.ServerCertificateValidationCallback += (sender, cert, chain, error) =>
              {
-                 RemoteService remoteService = config.DeserializeDescriptor().RemoteService;
+                 ClickAndStartDescriptor descriptor = ClickAndStartDescriptor.FromString(config.ClickAndStartDescriptor);
+                 RemoteService remoteService = descriptor.RemoteService;
                  X509Certificate2 root = SecurityHelper.LoadCertificate(remoteService);
                  return SecurityHelper.Verify(root, (X509Certificate2)cert);
              };

@@ -44,13 +44,21 @@ namespace Bdeploy.Shared
         /// <returns></returns>
         public static int RunProcessAndWait(string fileName, string arguments)
         {
-            using (Process process = new Process())
+            try
             {
-                process.StartInfo.FileName = fileName;
-                process.StartInfo.Arguments = arguments;
-                process.Start();
-                process.WaitForExit();
-                return process.ExitCode;
+                using (Process process = new Process())
+                {
+                    process.StartInfo.FileName = fileName;
+                    process.StartInfo.Arguments = arguments;
+                    process.StartInfo.ErrorDialog = false;
+                    process.Start();
+                    process.WaitForExit();
+                    return process.ExitCode;
+                }
+            }
+            catch (Exception)
+            {
+                return -1;
             }
         }
 
@@ -60,13 +68,14 @@ namespace Bdeploy.Shared
         /// <param name="fileName"></param>
         /// <param name="arguments"></param>
         /// <returns></returns>
-        public static void RunProcess(string fileName, string arguments)
+        public static int RunProcess(string fileName, string arguments)
         {
             using (Process process = new Process())
             {
                 process.StartInfo.FileName = fileName;
                 process.StartInfo.Arguments = arguments;
                 process.Start();
+                return process.Id;
             }
         }
 

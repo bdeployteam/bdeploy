@@ -22,3 +22,10 @@ dependencies {
 applicationDefaultJvmArgs = [ "-Xmx256m" ]
 rootProject.addMultiPlatformDistBuild(project)
 
+// Native Windows C# executable is responsible for launching the application.
+// Thus we do not need to script and delete it again
+startScripts {
+    doLast {
+        delete windowsScript
+    }
+}
