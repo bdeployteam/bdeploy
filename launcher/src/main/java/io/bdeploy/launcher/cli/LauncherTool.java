@@ -48,6 +48,7 @@ import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfigurati
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
+import io.bdeploy.interfaces.descriptor.application.ApplicationBrandingDescriptor;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
@@ -118,6 +119,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         try {
             doLaunchFromConfig(cfg, rootDir.toAbsolutePath(), config.updateDir(), !config.dontWait());
         } catch (Exception ex) {
+            log.error("Failed to launch application.", ex);
             LauncherErrorDialog dialog = new LauncherErrorDialog();
             dialog.showError(ex);
         }
@@ -131,16 +133,18 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             throw new IllegalStateException("Failed to read " + cfg, e);
         }
 
-        LauncherSplash splash = new LauncherSplash(cd, rootDir.resolve(".splash"));
+        Path bhiveDir = rootDir.resolve("bhive");
+        Path appsDir = rootDir.resolve("apps");
+        Path appDir = appsDir.resolve(cd.applicationId);
+
+        // Show splash and progress of operations
+        LauncherSplash splash = new LauncherSplash(appDir);
         splash.show();
 
         LauncherSplashReporter reporter = new LauncherSplashReporter(splash);
-
-        try (BHive hive = new BHive(rootDir.resolve("bhive").toUri(), reporter)) {
+        try (BHive hive = new BHive(bhiveDir.toUri(), reporter)) {
             // 0: check for launcher updates.
             doCheckForUpdate(cd, hive, reporter, updateDir);
-
-            // yay, we have information
             log.info("Launching {} / {} / {} from {}", cd.groupId, cd.instanceId, cd.applicationId, cd.host.getUri());
 
             MasterRootResource master = ResourceProvider.getResource(cd.host, MasterRootResource.class);
@@ -154,7 +158,19 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 appCfg = namedMaster.getClientConfiguration(cd.instanceId, cd.applicationId);
             }
 
-            splash.update(appCfg);
+            // Update splash and store data
+            ApplicationBrandingDescriptor branding = appCfg.clientDesc.branding;
+            if (branding != null) {
+                if (appCfg.clientImageIcon != null) {
+                    splash.updateIconImage(branding.icon, appCfg.clientImageIcon);
+                }
+                if (appCfg.clientSplashData != null) {
+                    splash.updateSplashImage(branding.splash.image, appCfg.clientSplashData);
+                }
+                splash.updateSplashData(branding.splash);
+            } else {
+                log.warn("Client configuration does not contain any branding information.");
+            }
 
             // this /might/ lead to too much re-installs if unrelated things change, but there is not
             // other/easy way (currently) to detect this...
@@ -189,7 +205,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             InstanceNodeController controller;
             try (Activity info = reporter.start("Updating application...")) {
                 // 4: install using DCU to the target directory
-                controller = installApplication(rootDir, targetClientKey, hive);
+                controller = installApplication(appsDir, targetClientKey, hive);
             }
 
             Process p;
@@ -201,8 +217,10 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             reporter.stop();
             splash.dismiss();
 
-            // 6. cleanup old versions. keep the last 2 versions.
-            cleanupOldInstalls(rootDir, cd, hive);
+            // 6. Cleanup the installation directory and the hive.
+            // Keeps a max. of 2 existing installations per client around.
+            hive.execute(new ManifestDeleteOldByIdOperation().setAmountToKeep(2).setRunGarbageCollector(true)
+                    .setToDelete(cd.applicationId).setPreDeleteHook(k -> deleteVersion(rootDir, hive, k)));
 
             // 7. wait for the process to exit
             if (wait) {
@@ -334,17 +352,19 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     }
 
     /**
-     * Cleanup the installation directory and the hive. Keeps a max. of 2 existing installations per client around.
+     * Removes the given version if installed
      */
-    private static void cleanupOldInstalls(Path rootDir, ClickAndStartDescriptor cd, BHive hive) {
-        hive.execute(new ManifestDeleteOldByIdOperation().setAmountToKeep(2).setRunGarbageCollector(true)
-                .setToDelete(cd.applicationId).setPreDeleteHook(k -> {
-                    log.info("uninstall and delete old version {}", k);
-                    InstanceNodeController c = new InstanceNodeController(hive, rootDir, InstanceNodeManifest.of(hive, k));
-                    if (c.isInstalled()) {
-                        c.uninstall();
-                    }
-                }));
+    private static void deleteVersion(Path rootDir, BHive hive, Manifest.Key key) {
+        try {
+            log.info("Uninstall and delete old version {}", key);
+            InstanceNodeManifest mf = InstanceNodeManifest.of(hive, key);
+            InstanceNodeController c = new InstanceNodeController(hive, rootDir, mf);
+            if (c.isInstalled()) {
+                c.uninstall();
+            }
+        } catch (Exception ex) {
+            log.error("Failed to uninstall version", ex);
+        }
     }
 
     /**

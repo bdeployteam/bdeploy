@@ -36,12 +36,12 @@ namespace Bdeploy.Shared
         }
 
         /// <summary>
-        /// Directory where the application are stored. (HOME_DIR\applications) 
+        /// Directory where the application are stored. (HOME_DIR\apps) 
         /// </summary>
         /// <returns></returns>
         public static string GetApplicationsDir()
         {
-            return Path.Combine(GetBdeployHome(), "applications");
+            return Path.Combine(GetBdeployHome(), "apps");
         }
 
         /// <summary>

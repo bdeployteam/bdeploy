@@ -37,6 +37,7 @@ import io.bdeploy.ui.dto.StringEntryChunkDto;
 public interface InstanceResource {
 
     public static final String PATH_DOWNLOAD_APP_ICON = "/{instance}/{applicationId}/icon";
+    public static final String PATH_DOWNLOAD_APP_SPLASH = "/{instance}/{applicationId}/splash";
 
     @GET
     public List<InstanceConfiguration> list();
@@ -120,6 +121,12 @@ public interface InstanceResource {
     @Path(PATH_DOWNLOAD_APP_ICON)
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response downloadIcon(@PathParam("instance") String instanceId, @PathParam("applicationId") String applicationId);
+
+    @GET
+    @Unsecured
+    @Path(PATH_DOWNLOAD_APP_SPLASH)
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response downloadSplash(@PathParam("instance") String instanceId, @PathParam("applicationId") String applicationId);
 
     @GET
     @Unsecured

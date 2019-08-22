@@ -8,6 +8,7 @@ using System.Runtime.Serialization.Json;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 
 namespace Bdeploy.Installer
 {
@@ -27,9 +28,9 @@ namespace Bdeploy.Installer
         private readonly string launcherHome = PathProvider.GetLauncherDir();
 
         /// <summary>
-        /// Directory where the application are stored. (HOME_DIR\applications) 
+        /// Directory where the application are stored. (HOME_DIR\apps) 
         /// </summary>
-        private readonly string applicationsHome = PathProvider.GetApplicationsDir();
+        private readonly string appsHome = PathProvider.GetApplicationsDir();
 
         /// <summary>
         /// Lock file that is created to avoid that multiple installers run simultaneously
@@ -81,7 +82,7 @@ namespace Bdeploy.Installer
         public void Launch()
         {
             string appUid = config.ApplicationUid;
-            string appShortcut = Path.Combine(applicationsHome, appUid + ".bdeploy");
+            string appShortcut = Path.Combine(appsHome, appUid, "launch.bdeploy");
             Utils.RunProcess(PathProvider.GetLauncherExecutable(), appShortcut);
         }
 
@@ -107,21 +108,23 @@ namespace Bdeploy.Installer
                 }
                 Directory.CreateDirectory(bdeployHome);
                 Directory.CreateDirectory(launcherHome);
-                Directory.CreateDirectory(applicationsHome);
+                Directory.CreateDirectory(appsHome);
+                Directory.CreateDirectory(Path.Combine(appsHome, config.ApplicationUid));
 
                 // Installers should not run simultaneously to avoid conflicts when extracting files
                 // Thus we try to create a lockfile. If it exists we wait until it is removed
                 OnNewSubtask("Waiting for other installations to finish...", -1);
-                lockStream = FileHelper.WaitForExclusiveLock(lockFile,500,() => Canceled);
+                lockStream = FileHelper.WaitForExclusiveLock(lockFile, 500, () => Canceled);
                 if (lockStream == null)
                 {
                     OnError("Installation has been canceled by the user.");
                     return -1;
                 }
 
-                // Download and store icon
+                // Download and store icon and splash
                 OnNewSubtask("Preparing...", -1);
                 await DownloadIcon();
+                await DownloadSplash();
 
                 // Download and extract if not available
                 if (!IsLauncherInstalled())
@@ -174,8 +177,8 @@ namespace Bdeploy.Installer
         {
             string appUid = config.ApplicationUid;
             string appName = config.ApplicationName;
-            string appDescriptor = Path.Combine(applicationsHome, appUid + ".bdeploy");
-            string icon = Path.Combine(applicationsHome, appUid + ".ico");
+            string appDescriptor = Path.Combine(appsHome, appUid, "launch.bdeploy");
+            string icon = Path.Combine(appsHome, appUid, "icon.ico");
 
             // Always write file as it might be outdated
             bool createShortcut = !File.Exists(appDescriptor);
@@ -217,11 +220,10 @@ namespace Bdeploy.Installer
         }
 
         /// <summary>
-        /// Downloads the icon and returns an input stream.
+        /// Downloads the icon and stores it in the local file system.
         /// </summary>
         public async Task DownloadIcon()
         {
-            string iconFile = Path.Combine(applicationsHome, config.ApplicationUid + ".ico");
             Uri requestUrl = new Uri(config.IconUrl);
             using (HttpClient client = CreateHttpClient())
             using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl))
@@ -232,6 +234,13 @@ namespace Bdeploy.Installer
                     Console.WriteLine("Cannot download application icon. Error {0} - {1} ", response.ReasonPhrase, request.RequestUri);
                     return;
                 }
+
+                // Get the extension of the file from the headers. 
+                string iconName = GetFileName(response);
+                string iconFormat = Path.GetExtension(iconName);
+
+                string appUid = config.ApplicationUid;
+                string iconFile = Path.Combine(appsHome, appUid, "icon"+iconFormat);
                 using (Stream responseStream = await response.Content.ReadAsStreamAsync())
                 using (FileStream fileStream = new FileStream(iconFile, FileMode.Create))
                 {
@@ -241,6 +250,56 @@ namespace Bdeploy.Installer
                 // Notify UI that we have an icon
                 OnIconLoaded(iconFile);
             }
+        }
+
+        /// <summary>
+        /// Downloads the splash screen and stores it in the local file system.
+        /// </summary>
+        public async Task DownloadSplash()
+        {
+            // Splash screen is optional
+            if (config.SplashUrl == null)
+            {
+                return;
+            }
+            Uri requestUrl = new Uri(config.SplashUrl);
+            using (HttpClient client = CreateHttpClient())
+            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl))
+            using (HttpResponseMessage response = await client.GetAsync(requestUrl))
+            {
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine("Cannot download application splash. Error {0} - {1} ", response.ReasonPhrase, request.RequestUri);
+                    return;
+                }
+
+                // Get the extension of the file from the headers. 
+                string splashName = GetFileName(response);
+                string splashFormat = Path.GetExtension(splashName);
+
+                string appUid = config.ApplicationUid;
+                string splashFile = Path.Combine(appsHome, appUid, "splash" + splashFormat);
+                using (Stream responseStream = await response.Content.ReadAsStreamAsync())
+                using (FileStream fileStream = new FileStream(splashFile, FileMode.Create))
+                {
+                    await responseStream.CopyToAsync(fileStream);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns the file name set in the content disposition header
+        /// </summary>
+        /// <returns></returns>
+        private string GetFileName(HttpResponseMessage response)
+        {
+            // name might be quoted: "splash.bmp". Remove them
+            string fileName = response.Content.Headers.ContentDisposition.FileName;
+            if (fileName.StartsWith("\""))
+            {
+                fileName = fileName.Substring(1, fileName.Length - 2);
+            }
+            return fileName;
         }
 
         /// <summary>
