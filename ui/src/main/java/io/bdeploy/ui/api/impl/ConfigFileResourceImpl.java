@@ -138,35 +138,10 @@ public class ConfigFileResourceImpl implements ConfigFileResource {
             Path cfgDir = tmpDir.resolve("cfg");
 
             // 1. export current tree to temp directory
-            try {
-                hive.execute(new ExportTreeOperation().setSourceTree(configTree).setTargetPath(cfgDir));
-            } catch (Exception e) {
-                // this can happen if the hive was damaged. we allow this case to have a way out
-                // if all things break badly.
-                log.error("Cannot load existing configuration files", e);
-            }
+            exportConfigTree(configTree, cfgDir);
 
             // 2. apply updates to files
-            for (FileStatusDto update : updates) {
-                Path file = cfgDir.resolve(update.file);
-                if (!file.startsWith(cfgDir)) {
-                    throw new WebApplicationException("Update wants to write to file outside update directory",
-                            Status.BAD_REQUEST);
-                }
-
-                switch (update.type) {
-                    case ADD:
-                        PathHelper.mkdirs(file.getParent());
-                        Files.write(file, update.content.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE_NEW);
-                        break;
-                    case DELETE:
-                        Files.delete(file);
-                        break;
-                    case EDIT:
-                        Files.write(file, update.content.getBytes(StandardCharsets.UTF_8));
-                        break;
-                }
-            }
+            applyUpdates(updates, cfgDir);
 
             // 3. re-import new tree from temp directory
             return hive.execute(new ImportTreeOperation().setSourcePath(cfgDir));
@@ -175,6 +150,38 @@ public class ConfigFileResourceImpl implements ConfigFileResource {
         } finally {
             if (tmpDir != null) {
                 PathHelper.deleteRecursive(tmpDir);
+            }
+        }
+    }
+
+    private void exportConfigTree(ObjectId configTree, Path cfgDir) {
+        try {
+            hive.execute(new ExportTreeOperation().setSourceTree(configTree).setTargetPath(cfgDir));
+        } catch (Exception e) {
+            // this can happen if the hive was damaged. we allow this case to have a way out
+            // if all things break badly.
+            log.error("Cannot load existing configuration files", e);
+        }
+    }
+
+    private void applyUpdates(List<FileStatusDto> updates, Path cfgDir) throws IOException {
+        for (FileStatusDto update : updates) {
+            Path file = cfgDir.resolve(update.file);
+            if (!file.startsWith(cfgDir)) {
+                throw new WebApplicationException("Update wants to write to file outside update directory", Status.BAD_REQUEST);
+            }
+
+            switch (update.type) {
+                case ADD:
+                    PathHelper.mkdirs(file.getParent());
+                    Files.write(file, update.content.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE_NEW);
+                    break;
+                case DELETE:
+                    Files.delete(file);
+                    break;
+                case EDIT:
+                    Files.write(file, update.content.getBytes(StandardCharsets.UTF_8));
+                    break;
             }
         }
     }

@@ -242,16 +242,12 @@ public class LauncherErrorDialog extends JFrame {
 
         builder.append("*** System properties: \n");
         Map<Object, Object> properties = new TreeMap<>(System.getProperties());
-        properties.forEach((k, v) -> {
-            builder.append(k).append("=").append(v).append("\n");
-        });
+        properties.forEach((k, v) -> builder.append(k).append("=").append(v).append("\n"));
         builder.append("\n");
 
         builder.append("*** System environment variables: \n");
         Map<String, String> env = new TreeMap<>(System.getenv());
-        env.forEach((k, v) -> {
-            builder.append(k).append("=").append(v).append("\n");
-        });
+        env.forEach((k, v) -> builder.append(k).append("=").append(v).append("\n"));
         builder.append("\n");
 
         String osDetails = getOsDetails();
