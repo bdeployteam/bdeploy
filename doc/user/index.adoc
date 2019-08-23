@@ -23,6 +23,8 @@ ATTENTION: Newline in between includes required for correct document structure.
 
 include::chapters/intro/index.adoc[]
 
+include::chapters/setup/index.adoc[]
+
 include::chapters/user/index.adoc[]
 
 include::chapters/tutorials/index.adoc[]

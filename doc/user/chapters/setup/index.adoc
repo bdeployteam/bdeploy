@@ -1,0 +1,14 @@
+== Installation
+
+This chapter guides you through the installation of BDeploy. At the end you will have the backend and the frontend up and running
+so that you can start deploying your applications.
+
+include::download.adoc[]
+
+include::master.adoc[]
+
+include::slave.adoc[]
+
+include::service.adoc[]
+
+include::verify.adoc[]
