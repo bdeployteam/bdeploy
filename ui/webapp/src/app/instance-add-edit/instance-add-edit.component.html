@@ -57,7 +57,7 @@
         </mat-grid-tile>
         <mat-grid-tile>
           <mat-form-field>
-            <mat-select formControlName="tag" placeholder="Tag">
+            <mat-select formControlName="tag" placeholder="Version">
               <mat-option *ngFor="let tag of getTagsForProduct()" value="{{tag}}">{{tag}}</mat-option>
             </mat-select>
             <mat-error *ngIf="productTagControl.invalid">{{getErrorMessage(productTagControl)}}</mat-error>

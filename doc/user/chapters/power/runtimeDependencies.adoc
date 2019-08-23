@@ -1,4 +1,3 @@
-
 === Runtime Dependencies
 
 As you saw before (`<<_app_info_yaml,app-info.yaml>>`), *Applications* can declare dependencies to third-party *Manifests*. These *Manifests* are hosted in *Software Repositories* on the *BDeploy* Server.
@@ -16,3 +15,14 @@ Third party software *Manifests* can have basically any name. If you want to pro
 * `my/external/software/linux:1.0.0`
 
 It can then be referenced by an `app-info.yaml` using the short-hand syntax `my/external/software:1.0.0` and *BDeploy* will choose the correct one depending on the target operating system.
+
+=== Software Repositories
+
+The *Software Repositories* page allows maintenance of external software that a specific product requires. A *Software Repository* shares its namespace with *Instance Groups*, which means that the unique name of a *Software Repository* must not collide with any name of a *Software Repository* or *Instance Group*.
+
+image::images/BDeploy_SWRepos.png[Software Repositories,align=center,width=480,link="images/BDeploy_SWRepos.png"]
+
+The available software packages can be viewed and downloaded if required. Please note that uploading a new software package requires a special data structure. Simply uploading an arbitrary ZIP file is not working as the required *Metadata* is missing.
+
+image::images/BDeploy_SWRepo_Ext_Software.png[Software Repository with External Software,align=center,width=480,link="images/BDeploy_SWRepo_Ext_Software.png"]
+image::images/BDeploy_SWRepo_Ext_Software_Details.png[Software Details,align=center,width=480,link="images/BDeploy_SWRepo_Ext_Software_Details.png"]

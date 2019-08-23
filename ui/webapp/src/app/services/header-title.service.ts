@@ -6,15 +6,15 @@ import { Title } from '@angular/platform-browser';
 })
 export class HeaderTitleService {
 
-  private headerTitle: String;
+  private headerTitle: string;
 
   constructor(private title: Title) { }
 
-  public setHeaderTitle(title: String) {
+  public setHeaderTitle(title: string) {
     this.headerTitle = title;
   }
 
-  public getHeaderTitle(): String {
+  public getHeaderTitle(): string {
     if (!this.headerTitle) {
       return this.title.getTitle();
     }

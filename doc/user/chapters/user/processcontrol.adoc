@@ -91,3 +91,13 @@ image::images/BDeploy_Process_Output.png[Show and Follow Process Output,align=ce
 Clicking on the gear icon below the process control will open a popup showing all operating system processes that have been started by this *Process*. 
 
 image::images/BDeploy_Process_List.png[List of Operating System Processes,align=center,width=480,link="images/BDeploy_Process_List.png"]
+
+==== Data Files
+
+The *Data Files* dialog lists all files that are stored in the data directory of each minion. Files can be downloaded or opened directly in the the UI. The table is by default sorted by the last modification timestamp. Thus the newest files displayed first. The dialog utilizes pagination and only the top 10 files are shown. This can be changed using the toolbar below the table.
+
+image::images/BDeploy_DataFiles_Browser.png[Data File Browser,align=center,width=480,link="images/BDeploy_DataFiles_Browser.png"]
+
+When opened in place, the btn:[Follow] toggle allows to grab new output as it is written on the server.
+
+image::images/BDeploy_DataFiles_Show.png[Show Data File,align=center,width=480,link="images/BDeploy_DataFiles_Show.png"]
