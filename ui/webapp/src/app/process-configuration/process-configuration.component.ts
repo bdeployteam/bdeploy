@@ -101,6 +101,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     public downloadService: DownloadService,
     private dialog: MatDialog,
     private titleService: HeaderTitleService,
+    private clientApps: LauncherService,
   ) {}
 
   ngOnInit() {
