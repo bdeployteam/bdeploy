@@ -13,6 +13,9 @@ dependencies {
         project(":bhive"),
         project(":dcu"),
         project(":interfaces"),
+        
+        'com.twelvemonkeys.imageio:imageio-core:3.4.2',
+        'com.twelvemonkeys.imageio:imageio-bmp:3.4.2',
     )
 
     testCompile project(path: ":jersey", configuration: 'testRuntime')

@@ -367,7 +367,6 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     @Override
     public ClientApplicationConfiguration getClientConfiguration(String uuid, String application) {
         Manifest.Key active = getActiveDeployments().get(uuid);
-
         if (active == null) {
             throw new WebApplicationException("No active deployment for " + uuid, Status.NOT_FOUND);
         }
@@ -390,8 +389,9 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         cfg.resolvedRequires.addAll(
                 new LocalDependencyFetcher().fetch(hive, amf.getDescriptor().runtimeDependencies, smk.getOperatingSystem()));
 
-        // load splash screen from hive and send along.
+        // load splash screen and icon from hive and send along.
         cfg.clientSplashData = amf.readBrandingSplashScreen(hive);
+        cfg.clientImageIcon = amf.readBrandingIcon(hive);
 
         return cfg;
     }

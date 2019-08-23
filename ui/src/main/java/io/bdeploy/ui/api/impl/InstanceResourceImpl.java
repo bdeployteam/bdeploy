@@ -798,6 +798,7 @@ public class InstanceResourceImpl implements InstanceResource {
         if (brandingIcon == null) {
             return Response.serverError().status(Status.NOT_FOUND).build();
         }
+        String iconFormat = PathHelper.getExtension(appMf.getDescriptor().branding.icon);
         ResponseBuilder responeBuilder = Response.ok(new StreamingOutput() {
 
             @Override
@@ -808,9 +809,35 @@ public class InstanceResourceImpl implements InstanceResource {
             }
         }, MediaType.APPLICATION_OCTET_STREAM);
         ContentDispositionBuilder<?, ?> builder = ContentDisposition.type(ATTACHMENT_DISPOSITION);
-        builder.size(brandingIcon.length).fileName(appConfig.name + ".ico");
+        builder.size(brandingIcon.length).fileName("icon." + iconFormat);
         responeBuilder.header(HttpHeaders.CONTENT_DISPOSITION, builder.build());
         responeBuilder.header(HttpHeaders.CONTENT_LENGTH, brandingIcon.length);
+        return responeBuilder.build();
+    }
+
+    @Override
+    public Response downloadSplash(String instanceId, String applicationId) {
+        InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
+        ApplicationConfiguration appConfig = im.getApplicationConfiguration(hive, applicationId);
+        ApplicationManifest appMf = ApplicationManifest.of(hive, appConfig.application);
+        byte[] brandingSplash = appMf.readBrandingSplashScreen(hive);
+        if (brandingSplash == null) {
+            return Response.serverError().status(Status.NOT_FOUND).build();
+        }
+        String splashFormat = PathHelper.getExtension(appMf.getDescriptor().branding.splash.image);
+        ResponseBuilder responeBuilder = Response.ok(new StreamingOutput() {
+
+            @Override
+            public void write(OutputStream output) throws IOException {
+                try (InputStream is = new ByteArrayInputStream(brandingSplash)) {
+                    is.transferTo(output);
+                }
+            }
+        }, MediaType.APPLICATION_OCTET_STREAM);
+        ContentDispositionBuilder<?, ?> builder = ContentDisposition.type(ATTACHMENT_DISPOSITION);
+        builder.size(brandingSplash.length).fileName("splash." + splashFormat);
+        responeBuilder.header(HttpHeaders.CONTENT_DISPOSITION, builder.build());
+        responeBuilder.header(HttpHeaders.CONTENT_LENGTH, brandingSplash.length);
         return responeBuilder.build();
     }
 

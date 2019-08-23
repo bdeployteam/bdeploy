@@ -19,6 +19,8 @@ public class ClientApplicationConfiguration {
 
     public byte[] clientSplashData;
 
+    public byte[] clientImageIcon;
+
     public ObjectId configTreeId;
 
     public Manifest.Key instanceKey;

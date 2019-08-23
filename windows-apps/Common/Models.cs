@@ -26,6 +26,12 @@ namespace Bdeploy.Shared
         public string IconUrl;
 
         /// <summary>
+        /// The URL to download the SPLASH. 
+        /// </summary>
+        [DataMember(Name = "splashUrl")]
+        public string SplashUrl;
+
+        /// <summary>
         /// The serialized .beploy file that is written to the local storage
         /// </summary>
         [DataMember(Name = "applicationJson")]
@@ -53,6 +59,7 @@ namespace Bdeploy.Shared
             builder.AppendFormat("Name: {0}", ApplicationName).AppendLine();
             builder.AppendFormat("URL: {0}", LauncherUrl).AppendLine();
             builder.AppendFormat("Icon: {0}", IconUrl).AppendLine();
+            builder.AppendFormat("Splash: {0}", SplashUrl).AppendLine();
             builder.AppendFormat("Payload: {0}", ClickAndStartDescriptor).AppendLine();
             return builder.ToString();
         }

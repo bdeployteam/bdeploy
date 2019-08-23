@@ -82,6 +82,17 @@ public class PathHelper {
     }
 
     /**
+     * Returns the extension of a file.
+     */
+    public static String getExtension(String file) {
+        int position = file.lastIndexOf(".");
+        if (position == -1) {
+            return "";
+        }
+        return file.substring(position + 1);
+    }
+
+    /**
      * @param zipFile the ZIP file to open (or create)
      * @return a {@link FileSystem} which can be used to access (and modify) the ZIP file.
      * @throws IOException
