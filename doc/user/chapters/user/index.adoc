@@ -14,4 +14,3 @@ include::processcontrol.adoc[]
 
 include::clientapps.adoc[]
 
-include::swrepo.adoc[]

@@ -18,6 +18,7 @@ import { EditAppConfigContext, ProcessConfigDto } from '../models/process.model'
 import { ProcessDetailsComponent } from '../process-details/process-details.component';
 import { ApplicationService } from '../services/application.service';
 import { DownloadService } from '../services/download.service';
+import { HeaderTitleService } from '../services/header-title.service';
 import { InstanceService } from '../services/instance.service';
 import { LauncherService } from '../services/launcher.service';
 import { Logger, LoggingService } from '../services/logging.service';
@@ -52,6 +53,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
   public groupParam: string;
   public uuidParam: string;
+  public pageTitle: string;
 
   public selectedConfig: ProcessConfigDto;
   public processConfigs: ProcessConfigDto[] = [];
@@ -92,13 +94,13 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     private loggingService: LoggingService,
     private instanceService: InstanceService,
     private applicationService: ApplicationService,
-    private clientApps: LauncherService,
     private messageBoxService: MessageboxService,
     private productService: ProductService,
     private processService: ProcessService,
     public location: Location,
     public downloadService: DownloadService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private titleService: HeaderTitleService,
   ) {}
 
   ngOnInit() {
@@ -698,9 +700,12 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     this.editMode = editMode;
     if (editMode) {
       this.disableAutoRefresh();
+      this.pageTitle = this.titleService.getHeaderTitle();
+      this.titleService.setHeaderTitle('Process Settings');
     } else {
       this.enableAutoRefresh();
       this.updateDirtyStateAndValidate();
+      this.titleService.setHeaderTitle(this.pageTitle);
     }
   }
 

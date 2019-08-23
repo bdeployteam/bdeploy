@@ -1,26 +1,28 @@
-=== Instance Configuration
+=== Instance Overview
 
-The *Instance Overview* page is the central dialog for configuring and managing instances. The first step is to select the required applications from the *Configure Applications* panel available in the *Product Version* and distribute them to the *Nodes* in the *Instance* using drag and drop.
+The *Instance Overview* is the central dialog for configuring and managing instances. It provides an overview about all configured *Applications* and on which nodes they are running. Each *Application* is represented by a *Process Card*. Colored markings on the card indicate whether a process still lacks mandatory configurations or whether there are still unsaved changes.
 
-The *Configure Applications* panel is called up via the pull-down menu of the dialog.
+The first step is to select the desired applications from the *Configure Applications* panel distribute them to the *Nodes* in the *Instance* using drag and drop. The panel is called up via the pull-down menu of the dialog. The applications that are shown in this panel are defined by the *Product*. 
 
 image::images/BDeploy_Instance_Menu.png[Instance Menu,align=center, width=480, link="images/BDeploy_Instance_Menu.png"]
 
-The *Configure Applications* panel contains all server applications and all client applications of the product. Server applications can be dragged to *Server Nodes* (e.g. _master_), client applications can only be dragged to the (virtual) *Client Applications Node*. Clients that are available for more than one operating system expand to single cards per operating system on the *Client Node*.
+The *Configure Applications* panel contains all server applications and all client applications of the product. Server applications can be dragged to *Server Nodes* (e.g. _master_), client applications can only be dragged to the (virtual) *Client Applications Node*. Clients that are available for more than one operating system expand to single cards per operating system on the *Client Node*. 
 
 [NOTE]
 The *Client Application Node* is not available if the product does not contain any client applications.
 
 ==== Process Settings
 
-Each *Process* of an *Instance* is configured via its own dialog, which can be accessed via the pull-down menu on the respective *Process Card*.
-Colored markings on the *Process Card* indicate whether a process still lacks mandatory configurations or whether there are still unsaved changes to the *Process Settings*.
+A *Process* is started by executing the *Start* command that is defined by the *Application*. The parameters that are passed to the *Process* are configured in the *Process Settings* dialog. This dialog can be accessed via the pull-down menu on the respective *Process Card*.
 
 image::images/BDeploy_DnD_Applications.png[Drag & Drop Applications,align=center, width=480, link="images/BDeploy_DnD_Applications.png"]
 
-The *Process Settings* dialog groups the parameters into categories, between which you can jump back and forth via btn:[Previous] and btn:[Next]. 
+The available parameters, their type and whether or not they are mandatory or optional are defined by the *Application*. The dialog groups the available parameters into categories, between which you can jump back and forth via btn:[Previous] and btn:[Next]. 
 
 image::images/BDeploy_Process_Config.png[Process Parameter Configuration,align=center, width=480, link="images/BDeploy_Process_Config.png"]
+
+[NOTE]
+The *Application* defines in which order the parameters are passed to the *Process* this order cannot be changed for predefined parameters.
 
 Behind each parameter there is a small popup that can contain a short description, a *Default Value* and a button for resetting the parameter to the *Default Value*.
 
@@ -68,7 +70,7 @@ image::images/BDeploy_CfgFiles_Save.png[Modified Configuration Files,align=cente
 [NOTE]
 Changes done in configuration files must be *Saved* and they result in a new *Instance Version* that must be *Installed* and *Activated* so that the changes have an impact. 
 
-==== Product Configuration
+==== Change Product Version
 
 *Instances* are based on a *Product Version*. While the *Product* of the *Instance* cannot be changed afterwards, the *Version* can be chosen from the available *Product Versions* (upgrade to a newer version / downgrade to an older version). 
 
@@ -89,23 +91,4 @@ All *Applications* are marked as modified as they are now based on a different *
 Changing the *Product Version* can result in validation issues and automated adjustment of parameters. *Product Versions* can contain different *Applications*, so that with the change of the *Product Version* e.g. a previously configured *Application* must be deleted because it has been removed from the product. If parameters definitions are changed, validation errors may occur which must be corrected before saving (e.g. new mandatory parameters).
 
 image::images/BDeploy_Product_Downgrade_Missing_Apps.png[Validation Issues After Product Tag Change,align=center,width=480,link="images/BDeploy_Product_Downgrade_Missing_Apps.png"]
-
-==== Export/Import of Instance Versions
-
-*Instance Versions* can be exported and imported. For the export, select the desired *Instance Version* and start the export in the pull-down menu with the action btn:[Export...].
-
-The action btn:[Import Instance Version...] in the *Instance Version* pulldown menu imports a new *Instance Version*. The import data is compared with the existing *Instance* data before a new *Instance Version* is created.
-
-[NOTE]
-Only process configuration is imported to existing instances, the instance configuration (target master URI, name, description, purpose) are left intact.
-
-==== Data Files
-
-The *Data Files* dialog lists all files that are stored in the data directory of each minion. Files can be downloaded or opened directly in the the UI. The table is by default sorted by the last modification timestamp. Thus the newest files displayed first. The dialog utilizes pagination and only the top 10 files are shown. This can be changed using the toolbar below the table.
-
-image::images/BDeploy_DataFiles_Browser.png[Data File Browser,align=center,width=480,link="images/BDeploy_DataFiles_Browser.png"]
-
-When opened in place, the btn:[Follow] toggle allows to grab new output as it is written on the server.
-
-image::images/BDeploy_DataFiles_Show.png[Show Data File,align=center,width=480,link="images/BDeploy_DataFiles_Show.png"]
 
