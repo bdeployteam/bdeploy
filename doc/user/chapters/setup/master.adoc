@@ -4,7 +4,7 @@
 To start using BDeploy you will at least need a single master. The master needs to be initialized before it can be started.
 The root directory contains all runtime data. Make sure there is some room available:
 
- bdeploy init --root=/path/to/storage --dist=bdeploy-x.x.x.zip --hostname=$(hostname)
+ bdeploy init --root=/path/to/storage --dist=bdeploy-x.x.x.zip --hostname=$(hostname) # --tokenFile=token.txt
 
 The --dist argument receives the binaries .zip you used to unpack the binaries from. This argument can explicitly be
 set using '--dist=ignore' if you don't have this zip file. The effect is that this bdeploy will receive a larger (full)
@@ -17,7 +17,7 @@ remote BDeploy master.
 ==== Launch
 After the initialization - which needs to be done only once - the master can be started with the following command:
 
- bdeploy master
+ bdeploy master --root=/path/to/storage
 
 This will start the master server which also hosts the web UI: https://localhost:7701
 
@@ -27,7 +27,7 @@ The server is using a self-signed certificate. Thus you need to instruct your br
 ==== User
 Only authenticated users have access to the web UI. Thus a new user must be created in order to be able to use the web UI
 
- bdeploy user --add=admin --password=admin
+ bdeploy user --root=/path/to/storage --add=admin --password=admin
 
 All created users are administrators that have full access to the system. Permissions to restrict what a certain user can
 do will be added in a future release.

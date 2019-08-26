@@ -25,4 +25,4 @@ This is also the name displayed when configuring applications to run on certain 
 ==== Launch
 After the initialization and registration - which needs to be done only once - the slave can be started with the following command:
 
- bdeploy slave
+ bdeploy slave --root=/path/to/storage
