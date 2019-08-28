@@ -108,7 +108,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     this.subscription = this.route.params.subscribe((p: Params) => {
       this.groupParam = p['group'];
       this.uuidParam = p['uuid'];
-      this.loadVersions();
+      this.loadVersions(false);
       this.enableAutoRefresh();
       this.doTriggerProcessStatusUpdate();
     });
@@ -123,7 +123,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     this.processSubscription.unsubscribe();
   }
 
-  private loadVersions(): void {
+  private loadVersions(selectLatest: boolean): void {
     this.instanceService.listInstanceVersions(this.groupParam, this.uuidParam).subscribe(versions => {
       this.log.debug('got ' + versions.length + ' instance versions');
       versions.sort((a, b) => {
@@ -142,28 +142,32 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       // get deployment states
       this.instanceService.getDeploymentStates(this.groupParam, this.uuidParam).subscribe(deploymentState => {
         this.deploymentState = deploymentState;
-        // try to load the activated version
-        if (this.deploymentState.activatedVersion) {
+
+        if (selectLatest) {
+          this.loadInstance(this.processConfigs[0]);
+        } else if (this.selectedConfig) { // restore last selection
+          this.loadInstance(this.selectedConfig);
+        } else if (this.deploymentState.activatedVersion) { // look for activated version, use latest otherwise
           const initialConfig = this.processConfigs.find(cfg => cfg.version.key.tag === this.deploymentState.activatedVersion);
           if (initialConfig) {
             this.loadInstance(initialConfig);
-            return;
+          } else {
+            this.loadInstance(this.processConfigs[0]);
           }
         }
-        // start with first version otherwise
-        this.loadInstance(this.processConfigs[0]);
       });
     });
   }
 
   private loadInstance(newSelectedConfig: ProcessConfigDto) {
+    this.loading = true;
     // Check if we already loaded this version
     if (newSelectedConfig.instance) {
+      this.loading = false;
       this.selectedConfig = newSelectedConfig;
       this.updateDirtyStateAndValidate();
       return;
     }
-    this.loading = true;
 
     const selectedVersion = newSelectedConfig.version;
 
@@ -388,6 +392,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
    * Called when the user clicks the SAVE button in the process configuration
    */
   onSave(): void {
+    this.loading = true;
     const nodePromise = this.instanceService.updateInstance(
       this.groupParam,
       this.uuidParam,
@@ -395,9 +400,10 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       this.selectedConfig.nodeList,
       this.processConfigs[0].version.key.tag,
     );
-    nodePromise.subscribe(x => {
-      this.loadVersions();
-    });
+    nodePromise.subscribe(
+      x => { this.loadVersions(true); },
+      () => { this.loading = false; }
+    );
   }
 
   /**
@@ -467,6 +473,10 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   isVersionSelected(config: ProcessConfigDto) {
+    if (this.loading) {
+      return false;
+    }
+
     const versionMatch = isEqual(config.version.key, this.selectedConfig.version.key);
 
     // If we have local changes we show a specialized card
@@ -799,7 +809,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       .open(FileUploadComponent, config)
       .afterClosed()
       .subscribe(e => {
-        this.loadVersions();
+        this.loadVersions(true);
       });
   }
 
