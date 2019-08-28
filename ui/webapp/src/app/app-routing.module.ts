@@ -5,6 +5,7 @@ import { ConfigFilesBrowserComponent } from './config-files-browser/config-files
 import { DataFilesBrowserComponent } from './data-files-browser/data-files-browser.component';
 import { AuthGuard } from './guards/authentication.guard';
 import { CanDeactivateGuard } from './guards/can-deactivate.guard';
+import { BackButtonGuard } from './hive-browser/back-button.guard';
 import { HiveBrowserComponent } from './hive-browser/hive-browser.component';
 import { InstanceAddEditComponent } from './instance-add-edit/instance-add-edit.component';
 import { InstanceBrowserComponent } from './instance-browser/instance-browser.component';
@@ -54,6 +55,7 @@ const routes: Routes = [
     path: 'hive/browser',
     component: HiveBrowserComponent,
     canActivate: [AuthGuard],
+    canDeactivate: [BackButtonGuard],
     data: { title: 'Hive Browser', header: 'Hive Browser' }
   },
   {
