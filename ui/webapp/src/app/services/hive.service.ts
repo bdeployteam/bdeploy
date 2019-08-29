@@ -11,7 +11,17 @@ import { LoggingService } from './logging.service';
 export class HiveService {
   private log = this.loggingService.getLogger('HiveService');
 
+  private backClicked = false;
+
   constructor(private cfg: ConfigService, private http: HttpClient, private loggingService: LoggingService) {}
+
+  public getBackClicked(): boolean {
+    return this.backClicked;
+  }
+
+  public setBackClicked(backClicked: boolean): void {
+    this.backClicked = backClicked;
+  }
 
   public listHives(): Observable<string[]> {
     const url: string = this.cfg.config.api + '/hive/listHives';

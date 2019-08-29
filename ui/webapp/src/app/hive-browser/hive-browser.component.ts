@@ -1,7 +1,6 @@
-import { HttpClient } from '@angular/common/http';
+import { LocationStrategy } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { ConfigService } from '../services/config.service';
 import { HiveService } from '../services/hive.service';
 import { Logger, LoggingService } from '../services/logging.service';
 
@@ -17,8 +16,14 @@ export class HiveBrowserComponent implements OnInit {
   hiveKeys: string[] = [];
   selectedHive: string;
 
-  constructor(private http: HttpClient, private cfg: ConfigService, private hiveService: HiveService,
-    private route: ActivatedRoute, private loggingService: LoggingService) { }
+  constructor(private location: LocationStrategy, private hiveService: HiveService,
+    private route: ActivatedRoute, private loggingService: LoggingService,
+  ) {
+    this.location.onPopState(() => {
+      this.hiveService.setBackClicked(true);
+      return false;
+    });
+  }
 
   ngOnInit(): void {
     this.log.debug('initalizing...');
