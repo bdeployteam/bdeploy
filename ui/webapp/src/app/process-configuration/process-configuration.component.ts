@@ -143,18 +143,20 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       this.instanceService.getDeploymentStates(this.groupParam, this.uuidParam).subscribe(deploymentState => {
         this.deploymentState = deploymentState;
 
-        if (selectLatest) {
-          this.loadInstance(this.processConfigs[0]);
-        } else if (this.selectedConfig) { // restore last selection
-          this.loadInstance(this.selectedConfig);
-        } else if (this.deploymentState.activatedVersion) { // look for activated version, use latest otherwise
-          const initialConfig = this.processConfigs.find(cfg => cfg.version.key.tag === this.deploymentState.activatedVersion);
-          if (initialConfig) {
-            this.loadInstance(initialConfig);
-          } else {
-            this.loadInstance(this.processConfigs[0]);
+        if (!selectLatest) { // selectLatest overrides all
+          if (this.selectedConfig) { // restore last selection if available
+            this.loadInstance(this.selectedConfig);
+            return;
+          } else if (this.deploymentState.activatedVersion) { // look for activated version
+            const initialConfig = this.processConfigs.find(cfg => cfg.version.key.tag === this.deploymentState.activatedVersion);
+            if (initialConfig) {
+              this.loadInstance(initialConfig);
+              return;
+            }
           }
         }
+        // default or selectLatest
+        this.loadInstance(this.processConfigs[0]);
       });
     });
   }
