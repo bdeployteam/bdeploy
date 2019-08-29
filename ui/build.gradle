@@ -109,6 +109,7 @@ task genDtos() {
             'io.bdeploy.ui.dto.FileStatusDto',
             'io.bdeploy.ui.dto.StringEntryChunkDto',
             'io.bdeploy.ui.dto.LauncherDto',
+            'io.bdeploy.ui.dto.InstanceManifestHistoryDto',
             // Other, generic
             'io.bdeploy.common.ActivitySnapshot',
             'io.bdeploy.interfaces.cleanup.CleanupGroup',

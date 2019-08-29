@@ -41,6 +41,7 @@ import { InstanceGroupDeleteDialogComponent } from './instance-group-delete-dial
 import { InstanceGroupLogoComponent } from './instance-group-logo/instance-group-logo.component';
 import { InstanceNodeCardComponent } from './instance-node-card/instance-node-card.component';
 import { InstanceVersionCardComponent } from './instance-version-card/instance-version-card.component';
+import { InstanceVersionHistoryCardComponent } from './instance-version-history-card/instance-version-history-card.component';
 import { httpInterceptorProviders } from './interceptors';
 import { LoginComponent } from './login/login.component';
 import { LogoComponent } from './logo/logo.component';
@@ -53,6 +54,7 @@ import { ProcessListComponent } from './process-list/process-list.component';
 import { ProcessStartConfirmComponent } from './process-start-confirm/process-start-confirm.component';
 import { ProcessStatusComponent } from './process-status/process-status.component';
 import { ProductCardComponent } from './product-card/product-card.component';
+import { ProductInfoCardComponent } from './product-info-card/product-info-card.component';
 import { ProductListComponent } from './product-list/product-list.component';
 import { ProductTagCardComponent } from './product-tag-card/product-tag-card.component';
 import { ProductsComponent } from './products/products.component';
@@ -70,7 +72,6 @@ import { ThemeChooserComponent } from './theme-chooser/theme-chooser.component';
 import { UpdateBrowserComponent } from './update-browser/update-browser.component';
 import { UpdateCardComponent } from './update-card/update-card.component';
 import { UpdateDialogComponent } from './update-dialog/update-dialog.component';
-import { ProductInfoCardComponent } from './product-info-card/product-info-card.component';
 
 export function loadAppConfig(cfgService: ConfigService) {
   return () => cfgService.load();
@@ -134,7 +135,8 @@ export function loadAppConfig(cfgService: ConfigService) {
     FileViewerComponent,
     DataFilesBrowserComponent,
     ClientAppsComponent,
-    ProductInfoCardComponent
+    ProductInfoCardComponent,
+    InstanceVersionHistoryCardComponent
   ],
   imports: [
     BrowserModule,

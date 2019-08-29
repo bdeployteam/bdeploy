@@ -38,7 +38,7 @@ public class ConfigFileResourceTest {
     @Test
     void updates(BHive local, MasterRootResource master, InstanceGroupResource igr, RemoteService remote, @TempDir Path tmp)
             throws Exception {
-        Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, master, remote, tmp);
+        Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, master, remote, tmp, true);
         InstanceManifest im = InstanceManifest.of(local, instance);
 
         InstanceResource ir = igr.getInstanceResource("demo");

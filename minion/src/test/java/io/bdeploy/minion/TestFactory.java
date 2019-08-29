@@ -35,7 +35,7 @@ import io.bdeploy.ui.api.Minion;
 public class TestFactory {
 
     public static Manifest.Key createApplicationsAndInstance(BHive local, MasterRootResource master, RemoteService remote,
-            Path tmp) throws IOException {
+            Path tmp, boolean push) throws IOException {
         /* STEP 1: Applications and external Application provided by development teams */
         Path app = TestAppFactory.createDummyApp("app", tmp);
         Path client = TestAppFactory.createDummyApp("client", tmp);
@@ -73,13 +73,15 @@ public class TestFactory {
         /* STEP 3a: Configuration created (normally via Web UI) */
         Manifest.Key instance = createDemoInstance(local, prodKey, tmp, remote, appKey, clientKey);
 
-        /* STEP 3b: Establish sync with designated remote master */
-        /* NOTE: alternative: sync via exported property file and master CLI in offline mode */
-        master.addInstanceGroup(desc, master.getStorageLocations().iterator().next());
+        if (push) {
+            /* STEP 3b: Establish sync with designated remote master */
+            /* NOTE: alternative: sync via exported property file and master CLI in offline mode */
+            master.addInstanceGroup(desc, master.getStorageLocations().iterator().next());
 
-        /* STEP 4: push instance manifest to remote master */
-        /* NOTE: instance manifest references all other required things */
-        local.execute(new PushOperation().setRemote(remote).setHiveName("demo").addManifest(instance));
+            /* STEP 4: push instance manifest to remote master */
+            /* NOTE: instance manifest references all other required things */
+            local.execute(new PushOperation().setRemote(remote).setHiveName("demo").addManifest(instance));
+        }
 
         return instance;
     }

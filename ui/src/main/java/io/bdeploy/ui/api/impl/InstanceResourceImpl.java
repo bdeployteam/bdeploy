@@ -91,6 +91,8 @@ import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest.Builder;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
+import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory;
+import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
@@ -106,6 +108,7 @@ import io.bdeploy.ui.branding.Branding;
 import io.bdeploy.ui.branding.BrandingConfig;
 import io.bdeploy.ui.dto.DeploymentStateDto;
 import io.bdeploy.ui.dto.InstanceConfigurationDto;
+import io.bdeploy.ui.dto.InstanceManifestHistoryDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
 import io.bdeploy.ui.dto.InstanceVersionDto;
@@ -503,6 +506,7 @@ public class InstanceResourceImpl implements InstanceResource {
             MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class);
             master.getNamedMaster(group).install(instance.getManifest());
         }
+        instance.getHistory(hive).record(Action.INSTALL);
     }
 
     @Override
@@ -527,6 +531,7 @@ public class InstanceResourceImpl implements InstanceResource {
             // 2: tell master to undeploy
             master.getNamedMaster(group).remove(instance.getManifest());
         }
+        instance.getHistory(hive).record(Action.UNINSTALL);
     }
 
     @Override
@@ -536,8 +541,32 @@ public class InstanceResourceImpl implements InstanceResource {
         try (Activity deploy = reporter.start("Activating " + instanceId + ":" + tag);
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
             MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class);
+
+            // TODO: no more remote once state is kept local.
+            Key currentActive = master.getNamedMaster(group).getActiveDeployments().get(instanceId);
+            if (currentActive != null) {
+                InstanceManifest.of(hive, currentActive).getHistory(hive).record(Action.DEACTIVATE);
+            }
+
             master.getNamedMaster(group).activate(instance.getManifest());
         }
+        instance.getHistory(hive).record(Action.ACTIVATE);
+    }
+
+    @Override
+    public InstanceManifestHistoryDto getHistory(String instanceId, String tag) {
+        InstanceManifest instance = InstanceManifest.load(hive, instanceId, tag);
+        InstanceManifestHistory history = instance.getHistory(hive);
+
+        InstanceManifestHistoryDto dto = new InstanceManifestHistoryDto();
+
+        dto.createdAt = history.findFirst(Action.CREATE);
+        dto.lastInstall = history.findMostRecent(Action.INSTALL);
+        dto.lastUninstall = history.findMostRecent(Action.UNINSTALL);
+        dto.lastActivate = history.findMostRecent(Action.ACTIVATE);
+        dto.lastDeactivate = history.findMostRecent(Action.DEACTIVATE);
+
+        return dto;
     }
 
     @Override

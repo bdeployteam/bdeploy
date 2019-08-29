@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ClickAndStartDescriptor, DeploymentStateDto, FileStatusDto, InstanceConfiguration, InstanceConfigurationDto, InstanceDirectory, InstanceDirectoryEntry, InstanceNodeConfigurationListDto, InstancePurpose, InstanceVersionDto, ManifestKey, StringEntryChunkDto } from '../models/gen.dtos';
+import { ClickAndStartDescriptor, DeploymentStateDto, FileStatusDto, InstanceConfiguration, InstanceConfigurationDto, InstanceDirectory, InstanceDirectoryEntry, InstanceManifestHistoryDto, InstanceNodeConfigurationListDto, InstancePurpose, InstanceVersionDto, ManifestKey, StringEntryChunkDto } from '../models/gen.dtos';
 import { ConfigService } from './config.service';
 import { InstanceGroupService } from './instance-group.service';
 import { Logger, LoggingService } from './logging.service';
@@ -131,6 +131,12 @@ export class InstanceService {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/' + instance.tag + '/activate';
     this.log.debug('activate: ' + url);
     return this.http.get(url);
+  }
+
+  public getHistory(instanceGroupName: string, instanceName: string, instance: ManifestKey): Observable<InstanceManifestHistoryDto> {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/' + instance.tag + '/history';
+    this.log.debug('history: ' + url);
+    return this.http.get<InstanceManifestHistoryDto>(url);
   }
 
   public getDeploymentStates(instanceGroupName: string, instanceName: string): Observable<DeploymentStateDto> {
