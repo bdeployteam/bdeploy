@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { CookieService } from 'ngx-cookie-service';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { HttpErrorHandlerInterceptor } from '../interceptors/error-handler.interceptor';
 import { CredentialsDto } from '../models/gen.dtos';
 import { ConfigService } from './config.service';
@@ -21,19 +22,21 @@ export class AuthenticationService {
   authenticate(username: string, password: string): Observable<any> {
     this.log.debug('authenticate("' + username + '", <...>)');
 
-    const x = this.http.post(this.cfg.config.api + '/auth',
+    return this.http.post(this.cfg.config.api + '/auth',
      { user: username, password: password } as CredentialsDto,
-     { responseType: 'text', headers: HttpErrorHandlerInterceptor.suppressGlobalErrorHandling(new HttpHeaders) });
-    x.subscribe(result => {
-      this.tokenSubject.next(result);
-      this.cookies.set('st', result, 365, '/');
-      this.username = username;
-    }, error => {
-      this.tokenSubject.next(null);
-      this.cookies.delete('st', '/');
-      this.username = null;
-    });
-    return x;
+     { responseType: 'text', headers: HttpErrorHandlerInterceptor.suppressGlobalErrorHandling(new HttpHeaders) }).pipe(
+        tap(
+          result => {
+            this.tokenSubject.next(result);
+            this.cookies.set('st', result, 365, '/');
+            this.username = username;
+          }, error => {
+            this.tokenSubject.next(null);
+            this.cookies.delete('st', '/');
+            this.username = null;
+          }
+        )
+     );
   }
 
   isAuthenticated(): boolean {
