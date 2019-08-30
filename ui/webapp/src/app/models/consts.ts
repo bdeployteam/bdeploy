@@ -1,4 +1,4 @@
-import { ApplicationConfiguration, ApplicationStartType, CommandConfiguration, DeploymentStateDto, InstanceConfiguration, InstanceGroupConfiguration, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstancePurpose, InstanceVersionDto, ManifestKey, ParameterConfiguration, ParameterDescriptor, ParameterType, ProcessControlConfiguration, RemoteService, SoftwareRepositoryConfiguration } from './gen.dtos';
+import { ApplicationConfiguration, ApplicationStartType, CommandConfiguration, InstanceConfiguration, InstanceGroupConfiguration, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstancePurpose, InstanceStateRecord, InstanceVersionDto, ManifestKey, ParameterConfiguration, ParameterDescriptor, ParameterType, ProcessControlConfiguration, RemoteService, SoftwareRepositoryConfiguration } from './gen.dtos';
 
 // Defines the order in which instances should appear based on their purpose
 const PURPOSE_ORDER = [InstancePurpose.PRODUCTIVE, InstancePurpose.TEST, InstancePurpose.DEVELOPMENT];
@@ -78,10 +78,9 @@ export const EMPTY_PARAMETER_DESCRIPTOR: ParameterDescriptor = {
   valueSeparator: null,
 };
 
-export const EMPTY_DEPLOYMENT_STATE: DeploymentStateDto = {
-  activatedVersion: null,
-  deployedVersions: [],
-  offlineMasterVersions: [],
+export const EMPTY_DEPLOYMENT_STATE: InstanceStateRecord = {
+  activeTag: null,
+  installedTags: []
 };
 
 export const EMPTY_APPLICATION_CONFIGURATION: ApplicationConfiguration = {

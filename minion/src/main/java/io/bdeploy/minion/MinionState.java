@@ -24,12 +24,18 @@ public class MinionState {
     /**
      * Used only on the master; active versions, i.e. what has been activated
      * already.
+     *
+     * @deprecated only used to migrate old scheme to new scheme.
      */
+    @Deprecated
     public SortedMap<String, Manifest.Key> activeMasterVersions = new TreeMap<>();
 
     /**
      * Used on all minions, tracking the currently active manifest for each UUID.
+     *
+     * @deprecated only used to migrate old scheme to new scheme.
      */
+    @Deprecated
     public SortedMap<String, Manifest.Key> activeVersions = new TreeMap<>();
 
     /**

@@ -4,9 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +18,7 @@ import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.ImportOperation;
+import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestExistsOperation;
 import io.bdeploy.common.ContentHelper;
 import io.bdeploy.common.TempDirectory;
@@ -64,19 +67,22 @@ public class MetaManifestTest {
         assertNotNull(sharedMM.write(hive, metaShared));
 
         metaShared.value = "other value";
-        assertNotNull(sharedMM.write(hive, metaShared));
+        Key mmSkey = sharedMM.write(hive, metaShared);
+        assertNotNull(mmSkey);
 
         // initial version of manifest should be too old and deleted.
         assertFalse(hive.execute(new ManifestExistsOperation().setManifest(initialWrite)));
 
         MetaManifest<MyMeta> mf1MM = new MetaManifest<>(testMf1, true, MyMeta.class);
         assertNull(mf1MM.read(hive));
-        assertNotNull(mf1MM.write(hive, metaMf1));
+        Key mm1key = mf1MM.write(hive, metaMf1);
+        assertNotNull(mm1key);
         assertEquals(metaMf1.value, mf1MM.read(hive).value);
 
         MetaManifest<MyMeta> mf2MM = new MetaManifest<>(testMf2, true, MyMeta.class);
         assertNull(mf2MM.read(hive));
-        assertNotNull(mf2MM.write(hive, metaMf2));
+        Key mm2key = mf2MM.write(hive, metaMf2);
+        assertNotNull(mm2key);
         assertEquals(metaMf2.value, mf2MM.read(hive).value);
         assertNotNull(mf2MM.remove(hive));
 
@@ -84,6 +90,18 @@ public class MetaManifestTest {
         assertEquals(metaMf1.value, mf1MM.read(hive).value);
         assertNotNull(sharedMM.read(hive));
         assertEquals(metaShared.value, sharedMM.read(hive).value);
+
+        TreeSet<Key> empty = new TreeSet<>();
+        hive.execute(new ManifestDeleteOperation().setToDelete(testMf2));
+        assertFalse(MetaManifest.isParentAlive(mm2key, hive, empty));
+        assertTrue(MetaManifest.isParentAlive(mm1key, hive, empty));
+        assertTrue(MetaManifest.isParentAlive(mmSkey, hive, empty));
+
+        hive.execute(new ManifestDeleteOperation().setToDelete(testMf1));
+        assertFalse(MetaManifest.isParentAlive(mm2key, hive, empty));
+        assertFalse(MetaManifest.isParentAlive(mm1key, hive, empty));
+        assertFalse(MetaManifest.isParentAlive(mmSkey, hive, empty));
+
     }
 
 }

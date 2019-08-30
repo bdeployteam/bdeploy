@@ -40,6 +40,7 @@ import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory;
+import io.bdeploy.interfaces.manifest.state.InstanceState;
 
 /**
  * Stores and reads instances from/to manifests.
@@ -217,10 +218,18 @@ public class InstanceManifest {
      * Retrieve the history of this {@link InstanceManifest}.
      *
      * @param bhive the {@link BHiveExecution} used to perform operations on the history.
-     * @return the {@link InstanceManifestHistory}
+     * @return the {@link InstanceManifestHistory} which can be used to manipulate and query history.
      */
     public InstanceManifestHistory getHistory(BHiveExecution bhive) {
         return new InstanceManifestHistory(getManifest(), bhive);
+    }
+
+    /**
+     * @param bhive the {@link BHiveExecution} used to perform operations on the state.
+     * @return the {@link InstanceState} which can be use to manipulate and query state.
+     */
+    public InstanceState getState(BHiveExecution bhive) {
+        return new InstanceState(getManifest(), bhive);
     }
 
     public static class Builder {

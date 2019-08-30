@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnChanges, Output, Predicate } from '@angular/core';
-import { DeploymentStateDto, InstanceVersionDto, ManifestKey } from '../models/gen.dtos';
+import { InstanceStateRecord, InstanceVersionDto, ManifestKey } from '../models/gen.dtos';
 
 @Component({
   selector: 'app-instance-version-card',
@@ -12,7 +12,7 @@ export class InstanceVersionCardComponent implements OnChanges {
   @Input() dirty: boolean;
   @Input() disabled: boolean;
   @Input() productAvailable: boolean;
-  @Input() state: DeploymentStateDto;
+  @Input() state: InstanceStateRecord;
   @Input() isRunningOrScheduled: boolean;
   @Input() instanceGroup: string;
   @Input() instanceUuid: string;
@@ -25,7 +25,6 @@ export class InstanceVersionCardComponent implements OnChanges {
   isLoading: boolean;
   isActive: boolean;
   isDeployed: boolean;
-  isOffline: boolean;
   isRunning: boolean;
 
   constructor() {}
@@ -34,13 +33,11 @@ export class InstanceVersionCardComponent implements OnChanges {
     if (!this.state || this.dirty) {
       this.isActive = false;
       this.isDeployed = false;
-      this.isOffline = false;
     } else {
-      this.isActive = this.state.activatedVersion === this.instanceVersionDto.key.tag;
+      this.isActive = this.state.activeTag === this.instanceVersionDto.key.tag;
       this.isDeployed =
-        this.state.deployedVersions.findIndex(this.tagPredicate()) !== -1 &&
-        this.state.activatedVersion !== this.instanceVersionDto.key.tag;
-      this.isOffline = this.state.offlineMasterVersions.findIndex(this.tagPredicate()) !== -1;
+        this.state.installedTags.findIndex(this.tagPredicate()) !== -1 &&
+        this.state.activeTag !== this.instanceVersionDto.key.tag;
     }
   }
 

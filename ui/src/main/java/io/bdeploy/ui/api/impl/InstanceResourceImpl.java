@@ -16,18 +16,14 @@ import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -93,6 +89,7 @@ import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
+import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
@@ -106,7 +103,6 @@ import io.bdeploy.ui.api.ProcessResource;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
 import io.bdeploy.ui.branding.Branding;
 import io.bdeploy.ui.branding.BrandingConfig;
-import io.bdeploy.ui.dto.DeploymentStateDto;
 import io.bdeploy.ui.dto.InstanceConfigurationDto;
 import io.bdeploy.ui.dto.InstanceManifestHistoryDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationDto;
@@ -546,10 +542,9 @@ public class InstanceResourceImpl implements InstanceResource {
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
             MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class);
 
-            // TODO: no more remote once state is kept local.
-            Key currentActive = master.getNamedMaster(group).getActiveDeployments().get(instanceId);
-            if (currentActive != null) {
-                InstanceManifest.of(hive, currentActive).getHistory(hive).record(Action.DEACTIVATE,
+            String activeTag = master.getNamedMaster(group).getInstanceState(instanceId).activeTag;
+            if (activeTag != null) {
+                InstanceManifest.load(hive, instanceId, activeTag).getHistory(hive).record(Action.DEACTIVATE,
                         context.getUserPrincipal().getName(), null);
                 // this one is /not/ required, as the stateChanged at the end of the call should be enough.
                 // UiResources.getInstanceEventManager().stateChanged(instanceId, instance.getManifest());
@@ -573,60 +568,11 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     @Override
-    public DeploymentStateDto getDeploymentStates(String instanceId) {
-        DeploymentStateDto result = new DeploymentStateDto();
-        AtomicLong max = new AtomicLong(-1);
-        LongAdder current = new LongAdder();
-        try (Activity deploy = reporter.start("Fetching deployment state...", max::get, current::longValue)) {
-
-            // need to fetch information from all master URIs that are historically available.
-            String rootName = InstanceManifest.getRootName(instanceId);
-            List<InstanceManifest> allMfs = InstanceManifest.scan(hive, false).stream().filter(m -> m.getName().equals(rootName))
-                    .map(k -> InstanceManifest.of(hive, k)).collect(Collectors.toList());
-
-            Map<URI, List<InstanceManifest>> remotes = new HashMap<>();
-            for (InstanceManifest imf : allMfs) {
-                remotes.computeIfAbsent(imf.getConfiguration().target.getUri(), k -> new ArrayList<>()).add(imf);
-            }
-
-            // switch from indeterminate to determinate progress
-            max.set(remotes.size());
-
-            for (Map.Entry<URI, List<InstanceManifest>> entry : remotes.entrySet()) {
-                // use target of latest manifest
-                Optional<InstanceManifest> optManifest = entry.getValue().stream()
-                        .max(Comparator.comparing(mf -> Long.valueOf(mf.getManifest().getTag())));
-                if (!optManifest.isPresent()) {
-                    throw new WebApplicationException(
-                            "Cannot determine max version of " + instanceId + ": cannot find any version", Status.NOT_FOUND);
-                }
-                RemoteService remote = optManifest.get().getConfiguration().target;
-
-                try (NoThrowAutoCloseable proxy = reporter.proxyActivities(remote)) {
-                    MasterRootResource r = ResourceProvider.getResource(remote, MasterRootResource.class);
-                    MasterNamedResource master = r.getNamedMaster(group);
-
-                    SortedMap<String, Key> activeDeployments = master.getActiveDeployments();
-                    Key active = activeDeployments.get(instanceId);
-                    if (active != null) {
-                        if (result.activatedVersion != null) {
-                            log.warn("Multiple active versions found for {} of group {}", instanceId, group);
-                        }
-                        result.activatedVersion = active.getTag();
-                    }
-
-                    SortedSet<Key> deployed = master.getAvailableDeploymentsOfInstance(instanceId);
-                    deployed.forEach(d -> result.deployedVersions.add(d.getTag()));
-                } catch (Exception e) {
-                    // mark all as offline.
-                    entry.getValue().forEach(im -> result.offlineMasterVersions.add(im.getManifest().getTag()));
-                }
-                current.add(1);
-                deploy.workAndCancelIfRequested(0); // working is done through 'current'.
-            }
-
-        }
-        return result;
+    public InstanceStateRecord getDeploymentStates(String instanceId) {
+        InstanceManifest instance = InstanceManifest.load(hive, instanceId, null);
+        RemoteService svc = instance.getConfiguration().target;
+        MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class);
+        return master.getNamedMaster(group).getInstanceState(instanceId);
     }
 
     @Override

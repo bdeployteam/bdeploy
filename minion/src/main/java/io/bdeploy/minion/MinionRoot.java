@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -22,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.objects.LockableDatabase;
 import io.bdeploy.bhive.util.StorageHelper;
@@ -332,6 +334,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             log.info("No instances are currently deployed on any node.");
             return;
         }
+        SortedMap<String, Manifest.Key> activeVersions = new TreeMap<>();
         for (Key key : keys) {
             Path deploymentDir = getDeploymentDir();
 
@@ -354,6 +357,14 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
                 // Create controller and add to the affected instance
                 InstanceProcessController instanceController = processController.getOrCreate(inm.getUUID());
                 instanceController.addProcessGroup(paths, inm.getKey().getTag(), pgc);
+
+                // fetch and remember the active version for this uuid.
+                if (!activeVersions.containsKey(inm.getUUID())) {
+                    String active = inm.getState(hive).read().activeTag;
+                    if (active != null) {
+                        activeVersions.put(inm.getUUID(), new Manifest.Key(inm.getKey().getName(), active));
+                    }
+                }
             } catch (Exception e) {
                 log.error("Cannot setup process control for {}", key, e);
             }
@@ -363,7 +374,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         processController.recover();
 
         // Startup processes according to their configuration
-        processController.setActiveVersions(getState().activeVersions);
+        processController.setActiveVersions(activeVersions);
         processController.autoStart();
     }
 

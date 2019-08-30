@@ -8,6 +8,7 @@ import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -45,6 +46,8 @@ import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.dependencies.LocalDependencyFetcher;
+import io.bdeploy.interfaces.manifest.state.InstanceState;
+import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.interfaces.remote.SlaveDeploymentResource;
@@ -65,6 +68,99 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         this.root = root;
         this.hive = hive;
         this.reporter = reporter;
+    }
+
+    private InstanceState getState(InstanceManifest im, BHive hive) {
+        return im.getState(hive).setMigrationProvider(() -> migrate(im.getConfiguration().uuid));
+    }
+
+    private InstanceStateRecord migrate(String instance) {
+        SortedSet<String> installed = new TreeSet<>();
+
+        // figure out which instance versions and which node manifests exist on which node (configuration wise).
+        SortedMap<Key, SortedMap<String, Manifest.Key>> requirements = new TreeMap<>();
+        SortedSet<Key> scan = InstanceManifest.scan(hive, false);
+        for (Manifest.Key k : scan) {
+            InstanceManifest imf = InstanceManifest.of(hive, k);
+            String instanceId = imf.getConfiguration().uuid;
+            if (!instanceId.equals(instance)) {
+                continue;
+            }
+
+            if (imf.getInstanceNodeManifests().isEmpty()) {
+                continue;
+            } else {
+                boolean hasApps = false;
+                for (Manifest.Key inmk : imf.getInstanceNodeManifests().values()) {
+                    InstanceNodeManifest inmf = InstanceNodeManifest.of(hive, inmk);
+                    if (!inmf.getConfiguration().applications.isEmpty()) {
+                        hasApps = true;
+                        break;
+                    }
+                }
+                if (!hasApps) {
+                    continue; // ignore this version, cannot be "installed".
+                }
+            }
+
+            // found one, calculate which minion needs which manifest installed
+            requirements.put(k, imf.getInstanceNodeManifests());
+        }
+
+        // figure out which minions we need to contact in total.
+        SortedSet<String> minions = requirements.values().stream().flatMap(v -> v.entrySet().stream()).map(e -> e.getKey())
+                .collect(Collectors.toCollection(TreeSet::new));
+
+        // for each required minion, figure out available versions.
+        SortedMap<String, List<String>> available = new TreeMap<>();
+        SortedMap<String, String> active = new TreeMap<>();
+        SortedSet<String> offline = new TreeSet<>();
+        for (String minion : minions) {
+            // don't check client node, it will never be online, and is not required (offline = OK).
+            if (minion.equals(InstanceManifest.CLIENT_NODE_NAME)) {
+                offline.add(minion);
+                continue;
+            }
+
+            RemoteService remote = root.getMinions().get(minion);
+            try {
+                SlaveDeploymentResource sdr = ResourceProvider.getResource(remote, SlaveDeploymentResource.class);
+                InstanceStateRecord instanceState = sdr.getInstanceState(instance);
+                available.put(minion, instanceState == null ? Collections.emptyList() : instanceState.installedTags);
+            } catch (Exception e) {
+                log.warn("Problem contacting minion to fetch available deployments: {}", minion);
+                offline.add(minion);
+            }
+        }
+
+        // cross check which requirement is fulfilled, regarding offline minions as OK.
+        check: for (Entry<Key, SortedMap<String, Key>> entry : requirements.entrySet()) {
+            SortedMap<String, Key> rqs = entry.getValue();
+            for (Entry<String, Key> toFulfill : rqs.entrySet()) {
+                if (!offline.contains(toFulfill.getKey())
+                        && !available.get(toFulfill.getKey()).contains(toFulfill.getValue().getTag())) {
+                    // at least one requirement failed, continue with next version.
+                    continue check;
+                }
+            }
+            installed.add(entry.getKey().getTag());
+        }
+
+        InstanceStateRecord result = new InstanceStateRecord();
+        result.installedTags.addAll(installed);
+
+        Manifest.Key masterActive = root.getState().activeMasterVersions.get(instance);
+        if (masterActive != null) {
+            result.activeTag = masterActive.getTag();
+        }
+
+        return result;
+    }
+
+    @Override
+    public InstanceStateRecord getInstanceState(String instance) {
+        InstanceManifest im = InstanceManifest.load(hive, instance, null);
+        return getState(im, hive).read();
     }
 
     @Override
@@ -97,6 +193,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 deploying.worked(1);
             }
         }
+
+        getState(imf, hive).install(key.getTag());
     }
 
     @Override
@@ -133,9 +231,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             }
         }
 
-        // TODO: don't record this in the master state. Record in BHive instead. IMPORTANT as hive must be self-contained.
-        // record the master manifest as deployed.
-        root.modifyState(s -> s.activeMasterVersions.put(imf.getConfiguration().uuid, key));
+        getState(imf, hive).activate(key.getTag());
     }
 
     /**
@@ -162,21 +258,21 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             assertNotNull(minion, "Cannot lookup minion on master: " + minionName);
             assertNotNull(toDeploy, "Cannot lookup minion manifest on master: " + toDeploy);
 
-            SortedSet<Key> deployments;
+            InstanceStateRecord deployments;
             try {
                 SlaveDeploymentResource slave = ResourceProvider.getResource(minion, SlaveDeploymentResource.class);
-                deployments = slave.getAvailableDeploymentsOfInstance(instanceId);
+                deployments = slave.getInstanceState(instanceId);
             } catch (Exception e) {
                 throw new IllegalStateException("Node offline while checking state: " + minionName);
             }
 
-            if (deployments.isEmpty()) {
+            if (deployments.installedTags.isEmpty()) {
                 if (log.isDebugEnabled()) {
                     log.debug("Minion {} does not contain any deployment for {}", minionName, instanceId);
                 }
                 return false;
             }
-            if (!deployments.contains(toDeploy)) {
+            if (!deployments.installedTags.contains(toDeploy.getTag())) {
                 if (log.isDebugEnabled()) {
                     log.debug("Minion {} does not have {} available", minionName, toDeploy);
                 }
@@ -193,13 +289,6 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         if (!isFullyDeployed(imf)) {
             return; // no need to.
         }
-
-        root.modifyState(s -> {
-            if (key.equals(s.activeMasterVersions.get(imf.getConfiguration().uuid))) {
-                log.warn("Removing active version for {}", imf.getConfiguration().uuid);
-                s.activeMasterVersions.remove(imf.getConfiguration().uuid);
-            }
-        });
 
         SortedMap<String, Key> fragments = imf.getInstanceNodeManifests();
         Activity removing = reporter.start("Removing on minions...", fragments.size());
@@ -225,6 +314,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
                 removing.worked(1);
             }
+            getState(imf, hive).uninstall(key.getTag());
         } finally {
             removing.done();
         }
@@ -233,100 +323,11 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
-    public SortedSet<Key> getAvailableDeploymentsOfInstance(String instance) {
-        SortedSet<Key> result = new TreeSet<>();
-
-        // figure out which instance versions and which node manifests exist on which node (configuration wise).
-        SortedMap<Key, SortedMap<String, Manifest.Key>> requirements = new TreeMap<>();
-        SortedSet<Key> scan = InstanceManifest.scan(hive, false);
-        for (Manifest.Key k : scan) {
-            InstanceManifest imf = InstanceManifest.of(hive, k);
-            String instanceId = imf.getConfiguration().uuid;
-            if (!instanceId.equals(instance)) {
-                continue;
-            }
-
-            // found one, calculate which minion needs which manifest installed
-            requirements.put(k, imf.getInstanceNodeManifests());
-        }
-
-        // figure out which minions we need to contact in total.
-        SortedSet<String> minions = requirements.values().stream().flatMap(v -> v.entrySet().stream()).map(e -> e.getKey())
-                .collect(Collectors.toCollection(TreeSet::new));
-
-        // for each required minion, figure out available versions.
-        SortedMap<String, SortedSet<Key>> available = new TreeMap<>();
-        SortedSet<String> offline = new TreeSet<>();
-        for (String minion : minions) {
-            // don't check client node, it will never be online, and is not required (offline = OK).
-            if (minion.equals(InstanceManifest.CLIENT_NODE_NAME)) {
-                offline.add(minion);
-                continue;
-            }
-
-            RemoteService remote = root.getMinions().get(minion);
-            try {
-                SlaveDeploymentResource sdr = ResourceProvider.getResource(remote, SlaveDeploymentResource.class);
-                available.put(minion, sdr.getAvailableDeploymentsOfInstance(instance));
-            } catch (Exception e) {
-                log.warn("Problem contacting minion to fetch available deployments: {}", minion);
-                offline.add(minion);
-                continue;
-            }
-        }
-
-        // cross check which requirement is fulfilled, regarding offline minions as OK.
-        check: for (Entry<Key, SortedMap<String, Key>> entry : requirements.entrySet()) {
-            SortedMap<String, Key> rqs = entry.getValue();
-            for (Entry<String, Key> toFulfill : rqs.entrySet()) {
-                if (!offline.contains(toFulfill.getKey()) && !available.get(toFulfill.getKey()).contains(toFulfill.getValue())) {
-                    // at least one requirement failed, continue with next version.
-                    continue check;
-                }
-            }
-            result.add(entry.getKey());
-        }
-
-        return result;
-    }
-
-    @Override
-    public SortedMap<String, Key> getActiveDeployments() {
-        return root.getState().activeMasterVersions;
-    }
-
-    @Override
-    public SortedSet<Key> getAvailableDeploymentsOfMinion(String minion, String instance) {
-        RemoteService m = root.getState().minions.get(minion);
-        assertNotNull(m, "Cannot find minion " + minion);
-
-        SlaveDeploymentResource client = ResourceProvider.getResource(m, SlaveDeploymentResource.class);
-        try {
-            return client.getAvailableDeploymentsOfInstance(instance);
-        } catch (Exception e) {
-            throw new WebApplicationException("Cannot read deployments from minion " + minion, e, Status.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @Override
-    public SortedMap<String, Key> getActiveDeploymentsOfMinion(String minion) {
-        RemoteService m = root.getState().minions.get(minion);
-        assertNotNull(m, "Cannot find minion " + minion);
-
-        SlaveDeploymentResource client = ResourceProvider.getResource(m, SlaveDeploymentResource.class);
-        try {
-            return client.getActiveDeployments();
-        } catch (Exception e) {
-            throw new WebApplicationException("Cannot read deployments from minion " + minion, e, Status.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @Override
     public List<InstanceDirectory> getDataDirectorySnapshots(String instanceId) {
         List<InstanceDirectory> result = new ArrayList<>();
 
-        Key key = getActiveDeployments().get(instanceId);
-        if (key == null) {
+        String activeTag = getInstanceState(instanceId).activeTag;
+        if (activeTag == null) {
             throw new WebApplicationException("Cannot find active version for instance " + instanceId, Status.NOT_FOUND);
         }
 
@@ -366,12 +367,12 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
     @Override
     public ClientApplicationConfiguration getClientConfiguration(String uuid, String application) {
-        Manifest.Key active = getActiveDeployments().get(uuid);
-        if (active == null) {
+        String activeTag = getInstanceState(uuid).activeTag;
+        if (activeTag == null) {
             throw new WebApplicationException("No active deployment for " + uuid, Status.NOT_FOUND);
         }
 
-        InstanceManifest imf = InstanceManifest.of(hive, active);
+        InstanceManifest imf = InstanceManifest.load(hive, uuid, activeTag);
         ClientApplicationConfiguration cfg = new ClientApplicationConfiguration();
         cfg.clientConfig = imf.getApplicationConfiguration(hive, application);
         if (cfg.clientConfig == null) {
@@ -381,7 +382,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
         ApplicationManifest amf = ApplicationManifest.of(hive, cfg.clientConfig.application);
         cfg.clientDesc = amf.getDescriptor();
-        cfg.instanceKey = active;
+        cfg.instanceKey = imf.getManifest();
         cfg.configTreeId = imf.getConfiguration().configTree;
 
         // application key MUST be a ScopedManifestKey. dependencies /must/ be present

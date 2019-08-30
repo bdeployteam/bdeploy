@@ -1,15 +1,12 @@
 package io.bdeploy.minion.cli;
 
-import java.util.SortedMap;
-import java.util.SortedSet;
-
 import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
+import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
@@ -54,16 +51,14 @@ public class RemoteDeploymentTool extends RemoteServiceTool<RemoteDeployConfig> 
             MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class);
             MasterNamedResource master = root.getNamedMaster(config.target());
             if (config.list()) {
-                out().println(String.format("%1$-15s %2$-30s %3$-10s", "UUID", "MANIFEST", "ACTIVE"));
+                out().println(String.format("%1$-15s %2$-30s %3$-10s", "UUID", "TAG", "ACTIVE"));
 
-                SortedMap<String, Key> active = master.getActiveDeployments();
                 for (InstanceConfiguration ic : master.listInstanceConfigurations()) {
                     String uuid = ic.uuid;
-                    SortedSet<Key> deployments = master.getAvailableDeploymentsOfInstance(uuid);
-                    for (Manifest.Key k : deployments) {
-                        Manifest.Key activeKey = active.get(uuid);
-                        boolean isActive = k.equals(activeKey);
-                        out().println(String.format("%1$-15s %2$-30s %3$-10s", uuid, k, isActive ? "*" : ""));
+                    InstanceStateRecord state = master.getInstanceState(uuid);
+                    for (String tag : state.installedTags) {
+                        boolean isActive = tag.equals(state.activeTag); // activeTag may be null.
+                        out().println(String.format("%1$-15s %2$-30s %3$-10s", uuid, tag, isActive ? "*" : ""));
                     }
                 }
                 return;

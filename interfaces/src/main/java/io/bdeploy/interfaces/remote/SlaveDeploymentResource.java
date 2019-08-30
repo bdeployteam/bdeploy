@@ -1,8 +1,6 @@
 package io.bdeploy.interfaces.remote;
 
 import java.util.List;
-import java.util.SortedMap;
-import java.util.SortedSet;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -16,6 +14,7 @@ import javax.ws.rs.core.MediaType;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
+import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 
 @Path("/deployments")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -42,20 +41,13 @@ public interface SlaveDeploymentResource {
     public void remove(Manifest.Key key);
 
     /**
-     * Returns a collection of deployed manifests.
+     * Returns a the state of an instance.
      *
-     * @return the deployed manifests
+     * @return the state of the given instance.
      */
     @GET
-    @Path("/available-i")
-    public SortedSet<Manifest.Key> getAvailableDeploymentsOfInstance(@QueryParam("i") String instanceId);
-
-    /**
-     * @return lists of active deployed manifests by UUID.
-     */
-    @GET
-    @Path("/active")
-    public SortedMap<String, Manifest.Key> getActiveDeployments();
+    @Path("/state")
+    public InstanceStateRecord getInstanceState(@QueryParam("i") String instanceId);
 
     /**
      * @param instanceId the instance UUID to fetch DATA directory content for

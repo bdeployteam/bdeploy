@@ -103,7 +103,7 @@
             *ngIf="shouldShowNode(node)"
             [instanceGroupName]="groupParam"
             [instance]="selectedConfig.instance"
-            [activatedInstanceTag]="deploymentState.activatedVersion"
+            [activatedInstanceTag]="deploymentState.activeTag"
             [node]="node"
             [processConfig]="selectedConfig"
             [productApplications]="selectedConfig.productApplications"
@@ -227,7 +227,7 @@
             [instanceGroup]='groupParam'
             [instanceId]='uuidParam'
             [instanceTag]='selectedConfig.version.key.tag'
-            [activatedInstanceTag]="deploymentState.activatedVersion"
+            [activatedInstanceTag]="deploymentState.activeTag"
             [appConfig]='selectedProcess'>
           </app-process-details>
         </div>

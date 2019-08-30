@@ -1,5 +1,6 @@
 package io.bdeploy.minion.cli;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -29,7 +30,6 @@ import io.bdeploy.minion.TestMinion;
 import io.bdeploy.minion.TestMinion.AuthPack;
 import io.bdeploy.minion.deploy.MinionDeployTest;
 import io.bdeploy.ui.api.CleanupResource;
-import io.bdeploy.ui.api.Minion;
 
 /**
  * Basically the same test as {@link MinionDeployTest} but using the CLI.
@@ -52,12 +52,10 @@ public class RemoteCliTest {
                 .get(InstanceManifest.INSTANCE_LABEL);
 
         /* STEP 5: deploy, activate on remote master */
-        assertTrue(master.getNamedMaster("demo").getAvailableDeploymentsOfInstance(uuid).isEmpty());
-        assertTrue(master.getNamedMaster("demo").getAvailableDeploymentsOfMinion(Minion.DEFAULT_MASTER_NAME, uuid).isEmpty());
+        assertTrue(master.getNamedMaster("demo").getInstanceState(uuid).installedTags.isEmpty());
         tools.getTool(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--target=demo",
                 "--manifest=" + instance, "--install").run();
-        assertFalse(master.getNamedMaster("demo").getAvailableDeploymentsOfInstance(uuid).isEmpty());
-        assertFalse(master.getNamedMaster("demo").getAvailableDeploymentsOfMinion(Minion.DEFAULT_MASTER_NAME, uuid).isEmpty());
+        assertFalse(master.getNamedMaster("demo").getInstanceState(uuid).installedTags.isEmpty());
 
         tools.getTool(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--target=demo", "--list")
                 .run();
@@ -65,17 +63,14 @@ public class RemoteCliTest {
         // test uninstall, re-install once
         tools.getTool(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--target=demo",
                 "--manifest=" + instance, "--uninstall").run();
-        assertTrue(master.getNamedMaster("demo").getAvailableDeploymentsOfInstance(uuid).isEmpty());
-        assertTrue(master.getNamedMaster("demo").getAvailableDeploymentsOfMinion(Minion.DEFAULT_MASTER_NAME, uuid).isEmpty());
+        assertTrue(master.getNamedMaster("demo").getInstanceState(uuid).installedTags.isEmpty());
         tools.getTool(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--target=demo",
                 "--manifest=" + instance, "--install").run();
-        assertFalse(master.getNamedMaster("demo").getAvailableDeploymentsOfInstance(uuid).isEmpty());
-        assertFalse(master.getNamedMaster("demo").getAvailableDeploymentsOfMinion(Minion.DEFAULT_MASTER_NAME, uuid).isEmpty());
+        assertFalse(master.getNamedMaster("demo").getInstanceState(uuid).installedTags.isEmpty());
 
         tools.getTool(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--target=demo",
                 "--manifest=" + instance, "--activate").run();
-        assertTrue(master.getNamedMaster("demo").getActiveDeployments().containsKey(uuid));
-        assertTrue(master.getNamedMaster("demo").getActiveDeploymentsOfMinion(Minion.DEFAULT_MASTER_NAME).containsKey(uuid));
+        assertEquals(instance.getTag(), master.getNamedMaster("demo").getInstanceState(uuid).activeTag);
 
         /* STEP 6: run/control processes on the remote */
         tools.getTool(RemoteProcessTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--target=demo",

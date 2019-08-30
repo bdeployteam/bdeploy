@@ -6,6 +6,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveExecution;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
@@ -25,6 +26,7 @@ import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.manifest.dependencies.LocalDependencyFetcher;
+import io.bdeploy.interfaces.manifest.state.InstanceState;
 
 public class InstanceNodeManifest {
 
@@ -67,6 +69,15 @@ public class InstanceNodeManifest {
      */
     public String getUUID() {
         return config.uuid;
+    }
+
+    /**
+     * @param hive the {@link BHiveExecution} to operate on.
+     * @return the {@link InstanceState} fot this {@link InstanceNodeManifest}. State needs to be tracked both on the
+     *         {@link InstanceManifest} (master) and the {@link InstanceNodeManifest} (slave).
+     */
+    public InstanceState getState(BHiveExecution hive) {
+        return new InstanceState(getKey(), hive);
     }
 
     /**

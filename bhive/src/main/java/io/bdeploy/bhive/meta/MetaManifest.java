@@ -3,6 +3,7 @@ package io.bdeploy.bhive.meta;
 import java.io.InputStream;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.SortedSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,8 @@ import io.bdeploy.bhive.op.ImportObjectOperation;
 import io.bdeploy.bhive.op.InsertArtificialTreeOperation;
 import io.bdeploy.bhive.op.InsertManifestOperation;
 import io.bdeploy.bhive.op.ManifestDeleteOldByIdOperation;
+import io.bdeploy.bhive.op.ManifestExistsOperation;
+import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.ManifestMaxIdOperation;
 import io.bdeploy.bhive.op.TreeEntryLoadOperation;
@@ -35,6 +38,7 @@ public class MetaManifest<T> {
     private static final Logger log = LoggerFactory.getLogger(MetaManifest.class);
 
     private static final String META_PREFIX = "._meta/";
+    private static final String META_DEFTAG = "/._meta";
     private static final int META_HIST_SIZE = 2;
 
     private final Key parent;
@@ -53,8 +57,37 @@ public class MetaManifest<T> {
      */
     public MetaManifest(Manifest.Key parent, boolean useParentTag, Class<T> metaClazz) {
         this.parent = parent;
-        this.metaName = META_PREFIX + parent.getName() + (useParentTag ? ("/" + parent.getTag()) : "");
+        this.metaName = META_PREFIX + parent.getName() + (useParentTag ? ("/" + parent.getTag()) : META_DEFTAG);
         this.metaClazz = metaClazz;
+    }
+
+    public static SortedSet<Manifest.Key> listAllMetaManifests(BHiveExecution bhive) {
+        return bhive.execute(new ManifestListOperation().setManifestName(META_PREFIX));
+    }
+
+    public static boolean isMetaManifest(Manifest.Key meta) {
+        return meta.getName().startsWith(META_PREFIX);
+    }
+
+    public static boolean isParentAlive(Manifest.Key meta, BHiveExecution hive, SortedSet<Manifest.Key> ignore) {
+        if (!isMetaManifest(meta)) {
+            throw new IllegalArgumentException("Given manifest is not a meta manifest: " + meta);
+        }
+
+        String mfName = meta.getName().substring(META_PREFIX.length(), meta.getName().lastIndexOf('/'));
+
+        if (meta.getName().endsWith(META_DEFTAG)) {
+            // last segment of name is the deftag, strip and find newest of manifest.
+            SortedSet<Key> allKeys = hive.execute(new ManifestListOperation().setManifestName(mfName));
+            return allKeys.stream().filter(x -> !ignore.contains(x)).count() > 0;
+        } else {
+            String tag = meta.getName().substring(meta.getName().lastIndexOf('/') + 1);
+            Manifest.Key key = new Manifest.Key(mfName, tag);
+            if (ignore.contains(key)) {
+                return false;
+            }
+            return hive.execute(new ManifestExistsOperation().setManifest(key));
+        }
     }
 
     /**

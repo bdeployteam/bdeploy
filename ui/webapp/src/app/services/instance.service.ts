@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ClickAndStartDescriptor, DeploymentStateDto, FileStatusDto, InstanceConfiguration, InstanceConfigurationDto, InstanceDirectory, InstanceDirectoryEntry, InstanceManifestHistoryDto, InstanceNodeConfigurationListDto, InstancePurpose, InstanceVersionDto, ManifestKey, StringEntryChunkDto } from '../models/gen.dtos';
+import { ClickAndStartDescriptor, FileStatusDto, InstanceConfiguration, InstanceConfigurationDto, InstanceDirectory, InstanceDirectoryEntry, InstanceManifestHistoryDto, InstanceNodeConfigurationListDto, InstancePurpose, InstanceStateRecord, InstanceVersionDto, ManifestKey, StringEntryChunkDto } from '../models/gen.dtos';
 import { ConfigService } from './config.service';
 import { InstanceGroupService } from './instance-group.service';
 import { Logger, LoggingService } from './logging.service';
@@ -139,10 +139,10 @@ export class InstanceService {
     return this.http.get<InstanceManifestHistoryDto>(url);
   }
 
-  public getDeploymentStates(instanceGroupName: string, instanceName: string): Observable<DeploymentStateDto> {
+  public getDeploymentStates(instanceGroupName: string, instanceName: string): Observable<InstanceStateRecord> {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/state';
     this.log.debug('getDeploymentStates: ' + url);
-    return this.http.get<DeploymentStateDto>(url);
+    return this.http.get<InstanceStateRecord>(url);
   }
 
   public getApplicationOutputEntry(instanceGroupName: string, instanceName: string, instanceTag: string, appUid: string, silent: boolean): Observable<InstanceDirectory> {

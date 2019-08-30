@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.meta.MetaManifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
@@ -53,6 +54,12 @@ public class SlaveCleanupResourceImpl implements SlaveCleanupResource {
 
         toClean.removeAll(allRefs);
         for (Key clean : toClean) {
+            if (MetaManifest.isMetaManifest(clean)) {
+                // this check might keep alive meta manifests for one additional cleanup cycle.
+                if (MetaManifest.isParentAlive(clean, hive, toClean)) {
+                    continue;
+                }
+            }
             notExecuted.add(new CleanupAction(CleanupType.DELETE_MANIFEST, clean.toString(), "Delete manifest " + clean));
         }
 

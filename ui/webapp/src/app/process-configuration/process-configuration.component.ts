@@ -14,7 +14,7 @@ import { MessageBoxMode } from '../messagebox/messagebox.component';
 import { ApplicationGroup } from '../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_DEPLOYMENT_STATE } from '../models/consts';
 import { EventWithCallback } from '../models/event';
-import { ApplicationConfiguration, ApplicationDto, DeploymentStateDto, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstanceUpdateEventDto, InstanceUpdateEventType, ManifestKey, ProductDto } from '../models/gen.dtos';
+import { ApplicationConfiguration, ApplicationDto, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstanceStateRecord, InstanceUpdateEventDto, InstanceUpdateEventType, ManifestKey, ProductDto } from '../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../models/process.model';
 import { ProcessDetailsComponent } from '../process-details/process-details.component';
 import { ApplicationService } from '../services/application.service';
@@ -64,7 +64,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   public sidenavMode: SidenavMode = SidenavMode.Versions;
   private subscription: Subscription;
 
-  public deploymentState: DeploymentStateDto = EMPTY_DEPLOYMENT_STATE;
+  public deploymentState: InstanceStateRecord = EMPTY_DEPLOYMENT_STATE;
   public productTags: ProductDto[];
 
   public dragStop = new BehaviorSubject<any>(null);
@@ -217,8 +217,8 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
           if (this.selectedConfig) { // restore last selection if available
             this.loadInstance(this.selectedConfig);
             return;
-          } else if (this.deploymentState.activatedVersion) { // look for activated version
-            const initialConfig = this.processConfigs.find(cfg => cfg.version.key.tag === this.deploymentState.activatedVersion);
+          } else if (this.deploymentState.activeTag) { // look for activated version
+            const initialConfig = this.processConfigs.find(cfg => cfg.version.key.tag === this.deploymentState.activeTag);
             if (initialConfig) {
               this.loadInstance(initialConfig);
               return;
@@ -599,7 +599,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       return true;
     }
     // activated version
-    if (this.deploymentState && this.deploymentState.activatedVersion && v >= +this.deploymentState.activatedVersion) {
+    if (this.deploymentState && this.deploymentState.activeTag && v >= +this.deploymentState.activeTag) {
       return true;
     }
     // selected version
@@ -828,7 +828,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
   /** Called when the process state has been refreshed */
   onProcessStatusChanged() {
-    const activatedTag = this.deploymentState.activatedVersion;
+    const activatedTag = this.deploymentState.activeTag;
     if (!activatedTag) {
       this.isRunningOutOfSync = false;
     } else {

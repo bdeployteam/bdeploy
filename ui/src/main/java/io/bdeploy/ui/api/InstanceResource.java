@@ -23,9 +23,9 @@ import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.Instan
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.directory.InstanceDirectory;
 import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
+import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.jersey.ActivityScope;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
-import io.bdeploy.ui.dto.DeploymentStateDto;
 import io.bdeploy.ui.dto.InstanceConfigurationDto;
 import io.bdeploy.ui.dto.InstanceManifestHistoryDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
@@ -92,7 +92,7 @@ public interface InstanceResource {
 
     @GET
     @Path("/{instance}/state")
-    public DeploymentStateDto getDeploymentStates(@ActivityScope @PathParam("instance") String instanceId);
+    public InstanceStateRecord getDeploymentStates(@ActivityScope @PathParam("instance") String instanceId);
 
     @GET
     @Path("/purposes")

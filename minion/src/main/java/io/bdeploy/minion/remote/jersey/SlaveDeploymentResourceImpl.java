@@ -8,9 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
@@ -18,6 +16,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
@@ -27,11 +26,14 @@ import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
+import io.bdeploy.interfaces.manifest.state.InstanceState;
+import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.remote.SlaveDeploymentResource;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 import io.bdeploy.minion.MinionConfigVariableResolver;
 import io.bdeploy.minion.MinionRoot;
+import io.bdeploy.minion.MinionState;
 import io.bdeploy.pcu.InstanceProcessController;
 import io.bdeploy.pcu.MinionProcessController;
 
@@ -43,6 +45,40 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
     @Inject
     private ActivityReporter reporter;
 
+    /**
+     * @param inm the {@link InstanceNodeManifest} to read state from.
+     * @return the {@link InstanceState}, potentially migrated from "old" information in {@link MinionState}.
+     */
+    private InstanceState getState(InstanceNodeManifest inm, BHive hive) {
+        return inm.getState(hive).setMigrationProvider(() -> migrateState(inm.getUUID()));
+    }
+
+    /**
+     * @deprecated only used to migrate state, see {@link #getState(InstanceNodeManifest, BHive)}
+     */
+    @Deprecated
+    private InstanceStateRecord migrateState(String uuid) {
+        InstanceStateRecord record = new InstanceStateRecord();
+        // find all versions of the given INM.
+        SortedSet<Key> manifests = InstanceNodeManifest.scan(root.getHive());
+        for (Key key : manifests) {
+            InstanceNodeManifest mf = InstanceNodeManifest.of(root.getHive(), key);
+            if (!mf.getUUID().equals(uuid)) {
+                continue;
+            }
+            InstanceNodeController controller = new InstanceNodeController(root.getHive(), root.getDeploymentDir(), mf);
+            if (!controller.isInstalled()) {
+                continue;
+            }
+            record.installedTags.add(mf.getKey().getTag());
+        }
+
+        Manifest.Key active = root.getState().activeVersions.get(uuid);
+        record.activeTag = active == null ? null : active.getTag();
+
+        return record;
+    }
+
     @Override
     public void install(Key key) {
         BHive hive = root.getHive();
@@ -53,6 +89,7 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
             InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentDir(), inm);
             inc.addAdditionalVariableResolver(new MinionConfigVariableResolver(root));
             inc.install();
+            getState(inm, hive).install(key.getTag());
 
             // Notify that there is a new deployment
             MinionProcessController processController = root.getProcessController();
@@ -78,7 +115,7 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
         MinionProcessController processController = root.getProcessController();
         InstanceProcessController controller = processController.getOrCreate(inm.getUUID());
         controller.setActiveTag(key.getTag());
-        root.modifyState(s -> s.activeVersions.put(inm.getUUID(), key));
+        getState(inm, hive).activate(key.getTag());
     }
 
     @Override
@@ -97,49 +134,49 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
         }
 
         // Remove active version from state if removed.
-        Key activeVersion = root.getState().activeVersions.get(inm.getUUID());
-        if (key.equals(activeVersion)) {
-            root.modifyState(s -> s.activeVersions.remove(inm.getUUID()));
-        }
+        getState(inm, hive).uninstall(key.getTag());
 
         // cleanup the deployment directory.
         inc.uninstall();
     }
 
-    @Override
-    public SortedSet<Key> getAvailableDeploymentsOfInstance(String instanceId) {
+    private InstanceNodeManifest findInstanceNodeManifest(String instanceId) {
         SortedSet<Key> manifests = InstanceNodeManifest.scan(root.getHive());
-        TreeSet<Key> result = new TreeSet<>();
         for (Key key : manifests) {
             InstanceNodeManifest mf = InstanceNodeManifest.of(root.getHive(), key);
             if (!mf.getUUID().equals(instanceId)) {
                 continue;
             }
-            InstanceNodeController controller = new InstanceNodeController(root.getHive(), root.getDeploymentDir(), mf);
-            if (!controller.isInstalled()) {
-                continue;
-            }
-            result.add(mf.getKey());
+            return mf;
         }
-        return result;
+        return null;
     }
 
     @Override
-    public SortedMap<String, Key> getActiveDeployments() {
-        return root.getState().activeVersions;
+    public InstanceStateRecord getInstanceState(String instanceId) {
+        InstanceNodeManifest inmf = findInstanceNodeManifest(instanceId);
+        if (inmf == null) {
+            return null;
+        }
+        return getState(inmf, root.getHive()).read();
     }
 
     @Override
     public List<InstanceDirectoryEntry> getDataDirectoryEntries(String instanceId) {
         List<InstanceDirectoryEntry> result = new ArrayList<>();
-        Key key = getActiveDeployments().get(instanceId);
-
-        if (key == null) {
+        InstanceNodeManifest newest = findInstanceNodeManifest(instanceId);
+        if (newest == null) {
+            throw new WebApplicationException("Cannot find instance " + instanceId, Status.NOT_FOUND);
+        }
+        String activeTag = getState(newest, root.getHive()).read().activeTag;
+        if (activeTag == null) {
             throw new WebApplicationException("Cannot find active version for instance " + instanceId, Status.NOT_FOUND);
         }
 
+        Key activeKey = new Manifest.Key(newest.getKey().getName(), activeTag);
+
         InstanceNodeController inc = new InstanceNodeController(root.getHive(), root.getDeploymentDir(),
-                InstanceNodeManifest.of(root.getHive(), key));
+                InstanceNodeManifest.of(root.getHive(), activeKey));
 
         Path dataRoot = inc.getDeploymentPathProvider().get(SpecialDirectory.DATA);
 
@@ -153,7 +190,7 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
                 entry.size = asFile.length();
                 entry.root = SpecialDirectory.DATA;
                 entry.uuid = instanceId;
-                entry.tag = key.getTag(); // providing the tag of the active version here
+                entry.tag = activeKey.getTag(); // providing the tag of the active version here
 
                 result.add(entry);
             });

@@ -31,7 +31,6 @@ import io.bdeploy.bhive.op.ImportObjectOperation;
 import io.bdeploy.bhive.op.ObjectLoadOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
@@ -43,8 +42,6 @@ import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
-import io.bdeploy.interfaces.remote.MasterRootResource;
-import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
@@ -176,18 +173,18 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
 
             // Always use latest version to lookup remote service
             InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
-            RemoteService remote = im.getConfiguration().target;
 
             // Contact master to find out the active version. Skip if no version is active
-            MasterRootResource root = ResourceProvider.getResource(remote, MasterRootResource.class);
-            SortedMap<String, Key> groupActiveDeployments = root.getNamedMaster(group).getActiveDeployments();
-            Key active = groupActiveDeployments.get(instanceId);
+            String active = getInstanceResource(group).getDeploymentStates(instanceId).activeTag;
             if (active == null) {
                 continue;
             }
 
             // Get a list of all node manifests - clients are stored in a special node
-            im = InstanceManifest.load(hive, instanceId, active.getTag());
+            if (!active.equals(im.getManifest().getTag())) {
+                // make sure we do have the active version.
+                im = InstanceManifest.load(hive, instanceId, active);
+            }
             SortedMap<String, Key> manifests = im.getInstanceNodeManifests();
             Key clientKey = manifests.get(InstanceManifest.CLIENT_NODE_NAME);
             if (clientKey == null) {

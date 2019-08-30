@@ -2,8 +2,6 @@ package io.bdeploy.interfaces.remote;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.SortedMap;
-import java.util.SortedSet;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -22,6 +20,7 @@ import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.InstanceDirectory;
 import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
+import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.WeakTokenAllowed;
 
 /**
@@ -64,35 +63,14 @@ public interface MasterNamedResource {
     public void remove(Manifest.Key key);
 
     /**
-     * Returns all activated deployments of all instance groups of this hive.
+     * Fetches the persistent state of a single instance.
      *
-     * @return return active deployments. Key=Unique ID of the instance group. Value=The activated version
+     * @param instance the instance to query state for.
+     * @return the state of a single instance.
      */
     @GET
-    @Path("/active")
-    public SortedMap<String, Manifest.Key> getActiveDeployments();
-
-    /**
-     * @return available manifests to deploy on a certain minion for a certain instance.
-     */
-    @GET
-    @Path("/available-m")
-    public SortedSet<Manifest.Key> getAvailableDeploymentsOfMinion(@QueryParam("m") String minion,
-            @QueryParam("i") String instance);
-
-    /**
-     * @return return active deployments on a certain minion.
-     */
-    @GET
-    @Path("/active-m")
-    public SortedMap<String, Manifest.Key> getActiveDeploymentsOfMinion(@QueryParam("m") String minion);
-
-    /**
-     * @return available manifests to deploy for the given instance.
-     */
-    @GET
-    @Path("/available-i")
-    public SortedSet<Manifest.Key> getAvailableDeploymentsOfInstance(@QueryParam("i") String instance);
+    @Path("/state")
+    public InstanceStateRecord getInstanceState(@QueryParam("i") String instance);
 
     /**
      * @param instanceId the instance UUID to fetch directory content for
