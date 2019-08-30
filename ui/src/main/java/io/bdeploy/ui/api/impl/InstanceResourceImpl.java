@@ -118,7 +118,6 @@ import io.bdeploy.ui.dto.StringEntryChunkDto;
 public class InstanceResourceImpl implements InstanceResource {
 
     private static final String ATTACHMENT_DISPOSITION = "attachment";
-
     protected static final String GLOBAL_INSTANCE_LOCK = "GlobalInstanceLock";
 
     private static final Logger log = LoggerFactory.getLogger(InstanceResourceImpl.class);
@@ -240,7 +239,8 @@ public class InstanceResourceImpl implements InstanceResource {
         }
 
         instanceConfig.configTree = product.getConfigTemplateTreeId();
-        new InstanceManifest.Builder().setInstanceConfiguration(instanceConfig).insert(hive);
+        Manifest.Key key = new InstanceManifest.Builder().setInstanceConfiguration(instanceConfig).insert(hive);
+        InstanceManifest.of(hive, key).getHistory(hive).record(Action.CREATE, context.getUserPrincipal().getName(), null);
     }
 
     @Override
@@ -288,6 +288,7 @@ public class InstanceResourceImpl implements InstanceResource {
         }
 
         newConfig.setKey(rootKey).insert(hive);
+        InstanceManifest.of(hive, rootKey).getHistory(hive).record(Action.CREATE, context.getUserPrincipal().getName(), null);
         UiResources.getInstanceEventManager().create(instance, rootKey);
     }
 
@@ -507,7 +508,7 @@ public class InstanceResourceImpl implements InstanceResource {
             MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class);
             master.getNamedMaster(group).install(instance.getManifest());
         }
-        instance.getHistory(hive).record(Action.INSTALL);
+        instance.getHistory(hive).record(Action.INSTALL, context.getUserPrincipal().getName(), null);
         UiResources.getInstanceEventManager().stateChanged(instanceId, instance.getManifest());
     }
 
@@ -533,7 +534,7 @@ public class InstanceResourceImpl implements InstanceResource {
             // 2: tell master to undeploy
             master.getNamedMaster(group).remove(instance.getManifest());
         }
-        instance.getHistory(hive).record(Action.UNINSTALL);
+        instance.getHistory(hive).record(Action.UNINSTALL, context.getUserPrincipal().getName(), null);
         UiResources.getInstanceEventManager().stateChanged(instanceId, instance.getManifest());
     }
 
@@ -548,14 +549,15 @@ public class InstanceResourceImpl implements InstanceResource {
             // TODO: no more remote once state is kept local.
             Key currentActive = master.getNamedMaster(group).getActiveDeployments().get(instanceId);
             if (currentActive != null) {
-                InstanceManifest.of(hive, currentActive).getHistory(hive).record(Action.DEACTIVATE);
+                InstanceManifest.of(hive, currentActive).getHistory(hive).record(Action.DEACTIVATE,
+                        context.getUserPrincipal().getName(), null);
                 // this one is /not/ required, as the stateChanged at the end of the call should be enough.
                 // UiResources.getInstanceEventManager().stateChanged(instanceId, instance.getManifest());
             }
 
             master.getNamedMaster(group).activate(instance.getManifest());
         }
-        instance.getHistory(hive).record(Action.ACTIVATE);
+        instance.getHistory(hive).record(Action.ACTIVATE, context.getUserPrincipal().getName(), null);
         UiResources.getInstanceEventManager().stateChanged(instanceId, instance.getManifest());
     }
 
@@ -565,12 +567,7 @@ public class InstanceResourceImpl implements InstanceResource {
         InstanceManifestHistory history = instance.getHistory(hive);
 
         InstanceManifestHistoryDto dto = new InstanceManifestHistoryDto();
-
-        dto.createdAt = history.findFirst(Action.CREATE);
-        dto.lastInstall = history.findMostRecent(Action.INSTALL);
-        dto.lastUninstall = history.findMostRecent(Action.UNINSTALL);
-        dto.lastActivate = history.findMostRecent(Action.ACTIVATE);
-        dto.lastDeactivate = history.findMostRecent(Action.DEACTIVATE);
+        dto.records.addAll(history.getFullHistory());
 
         return dto;
     }

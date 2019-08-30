@@ -1,15 +1,29 @@
 <ng-template #infoPopup>
   <mat-card class="info">
-      <div class="mat-title">History of Version {{instanceVersionDto.key.tag}}</div>
-      <hr>
+      <div class="mat-title">History of Instance Version {{instanceVersionDto.key.tag}}</div>
       <mat-card-content class="labels-card">
-        <mat-chip-list *ngIf='!loading'>
-          <mat-chip *ngIf='history.createdAt'><span class="label-key">Created At:&nbsp;</span><span>{{formatTime(history.createdAt)}}</span></mat-chip>
-          <mat-chip *ngIf='history.lastInstall > history.lastUninstall'><span class="label-key">Installed At:&nbsp;</span><span>{{formatTime(history.lastInstall)}}</span></mat-chip>
-          <mat-chip *ngIf='history.lastActivate > history.lastDeactivate'><span class="label-key">Activated At:&nbsp;</span><span>{{formatTime(history.lastActivate)}}</span></mat-chip>
-          <mat-chip *ngIf='history.lastActivate < history.lastDeactivate'><span class="label-key">Deactivated At:&nbsp;</span><span>{{formatTime(history.lastDeactivate)}}</span></mat-chip>
-          <mat-chip *ngIf='history.lastInstall < history.lastUninstall'><span class="label-key">Uninstalled At:&nbsp;</span><span>{{formatTime(history.lastUninstall)}}</span></mat-chip>
-        </mat-chip-list>
+        <div class='table-container mat-elevation-z1' *ngIf='!loading'>
+          <table mat-table [dataSource]='dataSource'>
+            <ng-container matColumnDef="action">
+              <th mat-header-cell *matHeaderCellDef>Action</th>
+              <td mat-cell *matCellDef="let element">{{element.action}}</td>
+            </ng-container>
+            <ng-container matColumnDef="user">
+              <th mat-header-cell *matHeaderCellDef>User</th>
+              <td mat-cell *matCellDef="let element">{{element.user}}</td>
+            </ng-container>
+            <ng-container matColumnDef="timestamp">
+              <th mat-header-cell *matHeaderCellDef>Timestamp</th>
+              <td mat-cell *matCellDef="let element">{{formatTime(element.timestamp)}}</td>
+            </ng-container>
+            <ng-container matColumnDef="comment">
+              <th mat-header-cell *matHeaderCellDef>Comment</th>
+              <td mat-cell *matCellDef="let element">{{element.comment}}</td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef='displayedColumns; sticky: true'></tr>
+            <tr mat-row *matRowDef='let row; columns: displayedColumns'></tr>
+          </table>
+        </div>
         <span *ngIf='loading'>Loading...</span>
       </mat-card-content>
   </mat-card>

@@ -1,10 +1,10 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, Input, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
-import { MatButton } from '@angular/material';
+import { Component, Input, OnInit, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
+import { MatButton, MatTable, MatTableDataSource } from '@angular/material';
 import { format } from 'date-fns';
 import { finalize } from 'rxjs/operators';
-import { InstanceManifestHistoryDto, InstanceVersionDto } from '../models/gen.dtos';
+import { InstanceManifestHistoryRecord, InstanceVersionDto } from '../models/gen.dtos';
 import { InstanceService } from '../services/instance.service';
 
 @Component({
@@ -13,12 +13,16 @@ import { InstanceService } from '../services/instance.service';
   styleUrls: ['./instance-version-history-card.component.css']
 })
 export class InstanceVersionHistoryCardComponent implements OnInit {
+  @ViewChild(MatTable)
+  public table: MatTable<any>;
+
+  public displayedColumns = ['action', 'user', 'timestamp' /* FUTURE, 'comment' */];
+  public dataSource = new MatTableDataSource<InstanceManifestHistoryRecord>();
 
   @Input() instanceGroup: string;
   @Input() instanceUuid: string;
   @Input() instanceVersionDto: InstanceVersionDto;
 
-  history: InstanceManifestHistoryDto;
   loading: boolean;
 
   private overlayRef: OverlayRef;
@@ -34,7 +38,9 @@ export class InstanceVersionHistoryCardComponent implements OnInit {
 
   reload() {
     this.loading = true;
-    this.instanceService.getHistory(this.instanceGroup, this.instanceUuid, this.instanceVersionDto.key).pipe(finalize(() => this.loading = false)).subscribe(r => this.history = r);
+    this.instanceService.getHistory(this.instanceGroup, this.instanceUuid, this.instanceVersionDto.key).pipe(finalize(() => this.loading = false)).subscribe(r => {
+      this.dataSource = new MatTableDataSource<InstanceManifestHistoryRecord>(r.records.reverse());
+    });
   }
 
   formatTime(time: number): string {

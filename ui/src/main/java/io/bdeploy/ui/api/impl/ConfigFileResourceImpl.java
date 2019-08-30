@@ -14,7 +14,9 @@ import java.util.Map;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.SecurityContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +37,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest.Builder;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
+import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
 import io.bdeploy.jersey.JerseyWriteLockService.LockingResource;
 import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
 import io.bdeploy.ui.api.ConfigFileResource;
@@ -48,6 +51,9 @@ public class ConfigFileResourceImpl implements ConfigFileResource {
 
     private final BHive hive;
     private final String instanceId;
+
+    @Context
+    private SecurityContext context;
 
     @Inject
     private Minion minion;
@@ -129,6 +135,7 @@ public class ConfigFileResourceImpl implements ConfigFileResource {
         }
 
         newConfig.setKey(rootKey).insert(hive);
+        InstanceManifest.of(hive, rootKey).getHistory(hive).record(Action.CREATE, context.getUserPrincipal().getName(), null);
         UiResources.getInstanceEventManager().create(instanceId, rootKey);
     }
 
