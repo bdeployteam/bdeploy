@@ -20,6 +20,12 @@ export class RemoteEventsService {
 
   constructor(private cfg: ConfigService, private auth: AuthenticationService, private http: HttpClient, private loggingService: LoggingService) {}
 
+  public getUpdateEventSource() {
+    return new EventSourcePolyfill(this.cfg.config.api + '/instance-updates', {
+      headers: { Authorization: 'Bearer ' + this.auth.getToken() },
+    });
+  }
+
   public getGlobalEventSource(): EventSourcePolyfill {
     return new EventSourcePolyfill(this.cfg.config.api + '/activities', {
       headers: { Authorization: 'Bearer ' + this.auth.getToken() },

@@ -6,7 +6,13 @@ import io.bdeploy.jersey.RegistrationTarget;
 
 public class UiResources {
 
+    private static InstanceEventManager instanceEvents = new InstanceEventManager();
+
     private UiResources() {
+    }
+
+    public static InstanceEventManager getInstanceEventManager() {
+        return instanceEvents;
     }
 
     public static void register(RegistrationTarget server) {
@@ -20,6 +26,8 @@ public class UiResources {
 
         server.register(SoftwareUpdateResourceImpl.class);
         server.register(CleanupResourceImpl.class);
+
+        server.register(InstanceEventBroadcaster.class);
     }
 
 }

@@ -288,6 +288,7 @@ public class InstanceResourceImpl implements InstanceResource {
         }
 
         newConfig.setKey(rootKey).insert(hive);
+        UiResources.getInstanceEventManager().create(instance, rootKey);
     }
 
     private void updateExistingNodes(InstanceManifest oldConfig, Builder newConfig, String rootTag, InstanceConfiguration cfg) {
@@ -507,6 +508,7 @@ public class InstanceResourceImpl implements InstanceResource {
             master.getNamedMaster(group).install(instance.getManifest());
         }
         instance.getHistory(hive).record(Action.INSTALL);
+        UiResources.getInstanceEventManager().stateChanged(instanceId, instance.getManifest());
     }
 
     @Override
@@ -532,6 +534,7 @@ public class InstanceResourceImpl implements InstanceResource {
             master.getNamedMaster(group).remove(instance.getManifest());
         }
         instance.getHistory(hive).record(Action.UNINSTALL);
+        UiResources.getInstanceEventManager().stateChanged(instanceId, instance.getManifest());
     }
 
     @Override
@@ -546,11 +549,14 @@ public class InstanceResourceImpl implements InstanceResource {
             Key currentActive = master.getNamedMaster(group).getActiveDeployments().get(instanceId);
             if (currentActive != null) {
                 InstanceManifest.of(hive, currentActive).getHistory(hive).record(Action.DEACTIVATE);
+                // this one is /not/ required, as the stateChanged at the end of the call should be enough.
+                // UiResources.getInstanceEventManager().stateChanged(instanceId, instance.getManifest());
             }
 
             master.getNamedMaster(group).activate(instance.getManifest());
         }
         instance.getHistory(hive).record(Action.ACTIVATE);
+        UiResources.getInstanceEventManager().stateChanged(instanceId, instance.getManifest());
     }
 
     @Override
@@ -915,7 +921,9 @@ public class InstanceResourceImpl implements InstanceResource {
         Path zip = minion.getDownloadDir().resolve(UuidHelper.randomId() + ".zip");
         try {
             Files.copy(inputStream, zip);
-            return Collections.singletonList(InstanceImportExportHelper.importFrom(zip, hive, instanceId, root));
+            Key newKey = InstanceImportExportHelper.importFrom(zip, hive, instanceId, root);
+            UiResources.getInstanceEventManager().create(instanceId, newKey);
+            return Collections.singletonList(newKey);
         } catch (IOException e) {
             throw new WebApplicationException("Cannot import from uploaded ZIP", e);
         } finally {
