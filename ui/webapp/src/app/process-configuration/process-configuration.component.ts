@@ -4,6 +4,7 @@ import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogConfig, MatSlideToggle } from '@angular/material';
 import { ActivatedRoute, Params } from '@angular/router';
 import { cloneDeep, isEqual } from 'lodash';
+import { EventSourcePolyfill } from 'ng-event-source';
 import { BehaviorSubject, forkJoin, Observable, of, Subscription } from 'rxjs';
 import { catchError, finalize, mergeMap } from 'rxjs/operators';
 import { ApplicationEditComponent } from '../application-edit/application-edit.component';
@@ -13,7 +14,7 @@ import { MessageBoxMode } from '../messagebox/messagebox.component';
 import { ApplicationGroup } from '../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_DEPLOYMENT_STATE } from '../models/consts';
 import { EventWithCallback } from '../models/event';
-import { ApplicationConfiguration, ApplicationDto, DeploymentStateDto, InstanceNodeConfiguration, InstanceNodeConfigurationDto, ManifestKey, ProductDto } from '../models/gen.dtos';
+import { ApplicationConfiguration, ApplicationDto, DeploymentStateDto, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstanceUpdateEventDto, InstanceUpdateEventType, ManifestKey, ProductDto } from '../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../models/process.model';
 import { ProcessDetailsComponent } from '../process-details/process-details.component';
 import { ApplicationService } from '../services/application.service';
@@ -21,10 +22,11 @@ import { DownloadService } from '../services/download.service';
 import { HeaderTitleService } from '../services/header-title.service';
 import { InstanceService } from '../services/instance.service';
 import { LauncherService } from '../services/launcher.service';
-import { Logger, LoggingService } from '../services/logging.service';
+import { ErrorMessage, Logger, LoggingService } from '../services/logging.service';
 import { MessageboxService } from '../services/messagebox.service';
 import { ProcessService } from '../services/process.service';
 import { ProductService } from '../services/product.service';
+import { RemoteEventsService } from '../services/remote-events.service';
 import { sortByTags } from '../utils/manifest.utils';
 
 export enum SidenavMode {
@@ -89,6 +91,9 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   public nextAutoRefreshSec: number;
   public processSubscription: Subscription;
 
+  private updateEvents: EventSourcePolyfill;
+  private lastStateReload = 0;
+
   constructor(
     private route: ActivatedRoute,
     private loggingService: LoggingService,
@@ -102,6 +107,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     private dialog: MatDialog,
     private titleService: HeaderTitleService,
     private clientApps: LauncherService,
+    private eventService: RemoteEventsService,
   ) {}
 
   ngOnInit() {
@@ -111,6 +117,12 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       this.loadVersions(false);
       this.enableAutoRefresh();
       this.doTriggerProcessStatusUpdate();
+
+      this.updateEvents = this.eventService.getUpdateEventSource();
+      this.updateEvents.onerror = err => {
+        this.log.warn(new ErrorMessage('Error while listening to instance update events', err));
+      };
+      this.updateEvents.addEventListener(this.uuidParam, e => this.onRemoteInstanceUpdate(e as MessageEvent));
     });
     this.processSubscription = this.processService.subscribe(() => this.onProcessStatusChanged());
   }
@@ -121,6 +133,64 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       clearInterval(this.autoRefreshHandle);
     }
     this.processSubscription.unsubscribe();
+    if (this.updateEvents) {
+      this.updateEvents.close();
+      this.updateEvents = null;
+    }
+  }
+
+  private onRemoteInstanceUpdate(event: MessageEvent) {
+    const dto = JSON.parse(event.data) as InstanceUpdateEventDto;
+
+    // we need to wait a little here before checking as the event may be fired even before we
+    // finished our remote call in case /we/ are updating the instance, let along the loading
+    // of the new instance version after updating. So the timeout is generous.
+    if (dto.type === InstanceUpdateEventType.CREATE) {
+      setTimeout(() => this.onRemoteInstanceUpdateDirect(dto.key), 500);
+    } else if (dto.type === InstanceUpdateEventType.STATE_CHANGE) {
+      setTimeout(() => {
+        // avoid reload if we did it ourselves. still delay a little as the event may arrive
+        // before the actual call returned and a reload was initiated by the instance version card.
+        if ((new Date().getTime() - this.lastStateReload) >= 150) {
+          this.loadDeploymentStates(() => {});
+        }
+      }, 100);
+    }
+  }
+
+  private onRemoteInstanceUpdateDirect(newKey: ManifestKey) {
+    if (this.loading) {
+      // we'll check again a little later, seems we're still loading a new state.
+      setTimeout(() => this.onRemoteInstanceUpdateDirect(newKey), 50);
+      return;
+    }
+
+    for (const cfg of this.processConfigs) {
+      const key = cfg.version.key;
+      if (key.name !== newKey.name) {
+        this.log.warn(`Received update event for wrong version, or wrong version loaded in dialog: loaded: ${key}, received: ${newKey}`);
+        continue;
+      }
+      if (key.tag === newKey.tag) {
+        // we have it already. fine!
+        return;
+      }
+    }
+
+    // if we reach here, we received an event about a new instance version which we do not yet have.
+    // for now this will result in a hardcore messagebox :)
+    this.messageBoxService.open({
+      title: 'Change on Server detected',
+      message: 'The instance has been modified by somebody else. Pressing OK will reload instance versions.',
+      mode: MessageBoxMode.CONFIRM
+    }).subscribe(r => {
+      if (r) {
+        this.loadVersions(true);
+        if (this.editMode) {
+          this.setEditMode(false);
+        }
+      }
+    });
   }
 
   private loadVersions(selectLatest: boolean): void {
@@ -204,6 +274,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   loadDeploymentStates(finalizer: () => void) {
+    this.lastStateReload = new Date().getTime();
     this.instanceService
       .getDeploymentStates(this.groupParam, this.uuidParam)
       .pipe(finalize(finalizer))

@@ -129,6 +129,7 @@ public class ConfigFileResourceImpl implements ConfigFileResource {
         }
 
         newConfig.setKey(rootKey).insert(hive);
+        UiResources.getInstanceEventManager().create(instanceId, rootKey);
     }
 
     private ObjectId applyConfigUpdates(ObjectId configTree, List<FileStatusDto> updates) {
