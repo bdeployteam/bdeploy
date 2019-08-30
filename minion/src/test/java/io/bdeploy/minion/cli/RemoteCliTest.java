@@ -46,7 +46,7 @@ public class RemoteCliTest {
     @Test
     void testRemoteCli(BHive local, MasterRootResource master, CleanupResource cr, RemoteService remote, @TempDir Path tmp,
             ActivityReporter reporter, MinionRoot mr, @AuthPack String auth) throws IOException, InterruptedException {
-        Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, master, remote, tmp);
+        Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, master, remote, tmp, true);
 
         String uuid = local.execute(new ManifestLoadOperation().setManifest(instance)).getLabels()
                 .get(InstanceManifest.INSTANCE_LABEL);

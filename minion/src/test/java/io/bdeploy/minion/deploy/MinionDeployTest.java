@@ -69,7 +69,7 @@ public class MinionDeployTest {
     @SlowTest
     void testRemoteDeploy(BHive local, MasterRootResource master, CleanupResource cr, RemoteService remote, @TempDir Path tmp,
             ActivityReporter reporter, MinionRoot mr) throws IOException, InterruptedException {
-        Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, master, remote, tmp);
+        Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, master, remote, tmp, true);
 
         String uuid = local.execute(new ManifestLoadOperation().setManifest(instance)).getLabels()
                 .get(InstanceManifest.INSTANCE_LABEL);
@@ -182,7 +182,7 @@ public class MinionDeployTest {
     @Test
     void testImportedDeploy(BHive local, MasterRootResource master, SlaveCleanupResource scr, RemoteService remote,
             @TempDir Path tmp, ActivityReporter reporter, MinionRoot mr) throws IOException, InterruptedException {
-        Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, master, remote, tmp);
+        Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, master, remote, tmp, true);
         InstanceManifest im1 = InstanceManifest.of(local, instance);
 
         /* STEP 1: export and re-import instance */

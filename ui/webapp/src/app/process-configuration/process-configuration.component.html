@@ -189,6 +189,8 @@
               <app-instance-version-card #appVersionCard
                 *ngIf="shouldShowVersion(showAllVersions, config)"
                 [instanceVersionDto]="config.version"
+                [instanceGroup]='groupParam'
+                [instanceUuid]='uuidParam'
                 class="version-card"
                 (click)="onSelectConfig(config)"
                 (activate)="doActivateVersion($event, appVersionCard)"

@@ -1,0 +1,20 @@
+<ng-template #infoPopup>
+  <mat-card class="info">
+      <div class="mat-title">History of Version {{instanceVersionDto.key.tag}}</div>
+      <hr>
+      <mat-card-content class="labels-card">
+        <mat-chip-list *ngIf='!loading'>
+          <mat-chip *ngIf='history.createdAt'><span class="label-key">Created At:&nbsp;</span><span>{{formatTime(history.createdAt)}}</span></mat-chip>
+          <mat-chip *ngIf='history.lastInstall > history.lastUninstall'><span class="label-key">Installed At:&nbsp;</span><span>{{formatTime(history.lastInstall)}}</span></mat-chip>
+          <mat-chip *ngIf='history.lastActivate > history.lastDeactivate'><span class="label-key">Activated At:&nbsp;</span><span>{{formatTime(history.lastActivate)}}</span></mat-chip>
+          <mat-chip *ngIf='history.lastActivate < history.lastDeactivate'><span class="label-key">Deactivated At:&nbsp;</span><span>{{formatTime(history.lastDeactivate)}}</span></mat-chip>
+          <mat-chip *ngIf='history.lastInstall < history.lastUninstall'><span class="label-key">Uninstalled At:&nbsp;</span><span>{{formatTime(history.lastUninstall)}}</span></mat-chip>
+        </mat-chip-list>
+        <span *ngIf='loading'>Loading...</span>
+      </mat-card-content>
+  </mat-card>
+</ng-template>
+
+<button mat-icon-button type="button" #infoButton (click)="openOverlay(infoButton, infoPopup)">
+  <mat-icon class="info-icon">history</mat-icon>
+</button>

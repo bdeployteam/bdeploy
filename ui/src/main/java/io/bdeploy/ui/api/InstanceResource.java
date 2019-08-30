@@ -27,6 +27,7 @@ import io.bdeploy.jersey.ActivityScope;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import io.bdeploy.ui.dto.DeploymentStateDto;
 import io.bdeploy.ui.dto.InstanceConfigurationDto;
+import io.bdeploy.ui.dto.InstanceManifestHistoryDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
 import io.bdeploy.ui.dto.InstanceVersionDto;
 import io.bdeploy.ui.dto.StringEntryChunkDto;
@@ -83,6 +84,11 @@ public interface InstanceResource {
     @GET
     @Path("/{instance}/{tag}/activate")
     public void activate(@ActivityScope @PathParam("instance") String instanceId, @ActivityScope @PathParam("tag") String tag);
+
+    @GET
+    @Path("/{instance}/{tag}/history")
+    public InstanceManifestHistoryDto getHistory(@ActivityScope @PathParam("instance") String instanceId,
+            @ActivityScope @PathParam("tag") String tag);
 
     @GET
     @Path("/{instance}/state")

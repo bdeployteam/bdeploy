@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveExecution;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
@@ -38,6 +39,8 @@ import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
+import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory;
+import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
 
 /**
  * Stores and reads instances from/to manifests.
@@ -211,6 +214,16 @@ public class InstanceManifest {
         return result;
     }
 
+    /**
+     * Retrieve the history of this {@link InstanceManifest}.
+     *
+     * @param bhive the {@link BHiveExecution} used to perform operations on the history.
+     * @return the {@link InstanceManifestHistory}
+     */
+    public InstanceManifestHistory getHistory(BHiveExecution bhive) {
+        return new InstanceManifestHistory(getManifest(), bhive);
+    }
+
     public static class Builder {
 
         private final SortedMap<String, Manifest.Key> instanceNodeManifests = new TreeMap<>();
@@ -259,6 +272,8 @@ public class InstanceManifest {
                     .addLabel(INSTANCE_LABEL, config.uuid);
 
             hive.execute(new InsertManifestOperation().addManifest(mb.build(hive)));
+            new InstanceManifestHistory(key, hive).record(Action.CREATE);
+
             return key;
         }
 

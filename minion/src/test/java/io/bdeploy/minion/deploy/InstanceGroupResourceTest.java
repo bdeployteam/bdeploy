@@ -41,7 +41,7 @@ public class InstanceGroupResourceTest {
         OperatingSystem runningOs = OsHelper.getRunningOs();
 
         // Create install a small demo instance
-        Key instance = TestFactory.createApplicationsAndInstance(local, root, remote, tmp);
+        Key instance = TestFactory.createApplicationsAndInstance(local, root, remote, tmp, true);
         MasterNamedResource master = root.getNamedMaster(GROUP_NAME);
         master.install(instance);
 
