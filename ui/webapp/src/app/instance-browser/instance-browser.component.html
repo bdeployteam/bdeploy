@@ -5,7 +5,7 @@
   <app-remote-progress [scope]='[instanceGroupName]'></app-remote-progress>
   <mat-form-field class="search">
     <mat-label></mat-label>
-    <input matInput type="text" hint="Filter" [(ngModel)]="instanceList.searchString" (ngModelChange)="instanceList.applyFilter()">
+    <input matInput type="text" hint="Filter" [(ngModel)]="instanceDtoList.searchString" (ngModelChange)="instanceDtoList.applyFilter()">
     <mat-icon matSuffix>search</mat-icon>
   </mat-form-field>
 </mat-toolbar>
@@ -14,7 +14,7 @@
   <mat-progress-spinner [mode]="'indeterminate'" class="loading-spinner" mode></mat-progress-spinner>
 </div>
 <ng-container *ngIf="!loading">
-  <div *ngIf="!hasProducts && instanceList.isEmpty()" class="list-heading center">
+  <div *ngIf="!hasProducts && instanceDtoList.isEmpty()" class="list-heading center">
     <p>
       <span class="headerText">No products are available in this instance group. Start by uploading a new one so that a new instance can be created.</span>
     </p>
@@ -23,7 +23,7 @@
       <span class="headerText"><a [routerLink]="['/products', instanceGroupName]">Manage Products</a></span>
     </p>
   </div>
-  <div *ngIf="hasProducts && instanceList.isEmpty()" class="list-heading center">
+  <div *ngIf="hasProducts && instanceDtoList.isEmpty()" class="list-heading center">
     <p>
       <span class="headerText">No instances have been defined yet.</span>
     </p>
@@ -34,8 +34,8 @@
   </div>
   <div *ngFor="let purpose of purposes">
     <p class="list-heading">{{purpose}}</p>
-    <div  class="card" *ngFor="let instance of getInstancesByPurpose(purpose)">
-      <app-instance-card [instance]='instance' [product]='getProductOfInstance(instance)' [instanceGroupName]='instanceGroupName' (removeEvent)='remove(instance)'></app-instance-card>
+    <div  class="card" *ngFor="let instanceDto of getInstanceDtosByPurpose(purpose)">
+      <app-instance-card [instanceDto]='instanceDto' [instanceGroupName]='instanceGroupName' (removeEvent)='remove(instance)'></app-instance-card>
     </div>
     <mat-divider class="list-divider"></mat-divider>
   </div>

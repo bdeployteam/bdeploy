@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MessageBoxMode } from '../messagebox/messagebox.component';
-import { InstanceConfiguration, ProductDto } from '../models/gen.dtos';
+import { InstanceDto } from '../models/gen.dtos';
 import { InstanceService } from '../services/instance.service';
 import { LoggingService } from '../services/logging.service';
 import { MessageboxService } from '../services/messagebox.service';
@@ -13,9 +13,8 @@ import { MessageboxService } from '../services/messagebox.service';
 })
 export class InstanceCardComponent implements OnInit {
 
-  @Input() instance: InstanceConfiguration;
+  @Input() instanceDto: InstanceDto;
   @Input() instanceGroupName: string;
-  @Input() product: ProductDto;
   @Output() removeEvent = new EventEmitter<boolean>();
 
   private log = this.loggingService.getLogger('InstanceCardComponent');
@@ -32,7 +31,7 @@ export class InstanceCardComponent implements OnInit {
   delete(): void {
     this.mbService
       .open({
-        title: 'Delete Instance ' + this.instance.name,
+        title: 'Delete Instance ' + this.instanceDto.instanceConfiguration.name,
         message: 'Deleting an instance <b>cannot be undone</b>.',
         mode: MessageBoxMode.CONFIRM_WARNING
       })
@@ -41,7 +40,7 @@ export class InstanceCardComponent implements OnInit {
           return;
         }
         this.instanceService
-          .deleteInstance(this.instanceGroupName, this.instance.uuid)
+          .deleteInstance(this.instanceGroupName, this.instanceDto.instanceConfiguration.uuid)
           .subscribe(
             r => {
               this.removeEvent.emit(true);

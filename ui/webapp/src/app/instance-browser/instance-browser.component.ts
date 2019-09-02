@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { SORT_PURPOSE } from '../models/consts';
 import { DataList } from '../models/dataList';
-import { InstanceConfiguration, InstancePurpose, ProductDto } from '../models/gen.dtos';
+import { InstanceConfiguration, InstanceDto, InstancePurpose, ProductDto } from '../models/gen.dtos';
 import { InstanceService } from '../services/instance.service';
 import { Logger, LoggingService } from '../services/logging.service';
 import { ProductService } from '../services/product.service';
@@ -22,7 +22,7 @@ export class InstanceBrowserComponent implements OnInit {
   loading = true;
   hasProducts = false;
   products: ProductDto[];
-  instanceList: DataList<InstanceConfiguration> = new DataList();
+  instanceDtoList: DataList<InstanceDto> = new DataList();
   purposes: InstancePurpose[] = [];
 
   constructor(
@@ -34,20 +34,20 @@ export class InstanceBrowserComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.instanceList.searchCallback = (instance: InstanceConfiguration, text: string) => {
-      if (instance.name.toLowerCase().includes(text)) {
+    this.instanceDtoList.searchCallback = (instanceDto: InstanceDto, text: string) => {
+      if (instanceDto.instanceConfiguration.name.toLowerCase().includes(text)) {
         return true;
       }
-      if (instance.description.toLowerCase().includes(text)) {
+      if (instanceDto.instanceConfiguration.description.toLowerCase().includes(text)) {
         return true;
       }
-      if (instance.uuid.toLowerCase() === text) {
+      if (instanceDto.instanceConfiguration.uuid.toLowerCase() === text) {
         return true;
       }
-      if (instance.product.name.toLowerCase().includes(text)) {
+      if (instanceDto.productDto.key.name.toLowerCase().includes(text)) {
         return true;
       }
-      if (instance.product.tag.toLowerCase().startsWith(text)) {
+      if (instanceDto.productDto.key.tag.toLowerCase().startsWith(text)) {
         return true;
       }
       return false;
@@ -57,16 +57,16 @@ export class InstanceBrowserComponent implements OnInit {
 
   loadInstances() {
     this.purposes = [];
-    this.instanceList.clear();
+    this.instanceDtoList.clear();
     this.loading = true;
 
     const instancePromise = this.instanceService.listInstances(this.instanceGroupName);
-    instancePromise.subscribe(instances => {
+    instancePromise.subscribe(instanceDtos => {
       const unsortedSet = new Set<InstancePurpose>();
-      instances.forEach(instance => unsortedSet.add(instance.purpose));
+      instanceDtos.forEach(instanceDto => unsortedSet.add(instanceDto.instanceConfiguration.purpose));
       this.purposes = Array.from(unsortedSet).sort(SORT_PURPOSE);
-      this.instanceList.addAll(instances);
-      this.log.debug(`Got ${instances.length} instances grouped into ${this.purposes.length} purposes`);
+      this.instanceDtoList.addAll(instanceDtos);
+      this.log.debug(`Got ${instanceDtos.length} instances grouped into ${this.purposes.length} purposes`);
     });
 
     const productPromise = this.productService.getProducts(this.instanceGroupName);
@@ -87,10 +87,10 @@ export class InstanceBrowserComponent implements OnInit {
     return this.products.find(p => p.key.name === instance.product.name && p.key.tag === instance.product.tag);
   }
 
-  getInstancesByPurpose(purpose: InstancePurpose): InstanceConfiguration[] {
-    const filtered = this.instanceList.filtered.filter(instance => instance.purpose === purpose);
+  getInstanceDtosByPurpose(purpose: InstancePurpose): InstanceDto[] {
+    const filtered = this.instanceDtoList.filtered.filter(instanceDto => instanceDto.instanceConfiguration.purpose === purpose);
     const sorted = filtered.sort((a, b) => {
-      return a.name.localeCompare(b.name);
+      return a.instanceConfiguration.name.localeCompare(b.instanceConfiguration.name);
     });
     return sorted;
   }

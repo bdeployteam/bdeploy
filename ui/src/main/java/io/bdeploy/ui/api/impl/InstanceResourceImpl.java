@@ -104,10 +104,12 @@ import io.bdeploy.ui.api.SoftwareUpdateResource;
 import io.bdeploy.ui.branding.Branding;
 import io.bdeploy.ui.branding.BrandingConfig;
 import io.bdeploy.ui.dto.InstanceConfigurationDto;
+import io.bdeploy.ui.dto.InstanceDto;
 import io.bdeploy.ui.dto.InstanceManifestHistoryDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
 import io.bdeploy.ui.dto.InstanceVersionDto;
+import io.bdeploy.ui.dto.ProductDto;
 import io.bdeploy.ui.dto.StringEntryChunkDto;
 
 @LockingResource(InstanceResourceImpl.GLOBAL_INSTANCE_LOCK)
@@ -156,13 +158,48 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     @Override
-    public List<InstanceConfiguration> list() {
+    public List<InstanceDto> list() {
+        List<InstanceDto> result = new ArrayList<>();
         auth.addRecentlyUsedInstanceGroup(context.getUserPrincipal().getName(), group);
 
-        // Clear security token before sending via REST
-        List<InstanceConfiguration> configurations = internalList();
-        configurations.forEach(this::clearToken);
-        return configurations;
+        SortedSet<Key> imKeys = InstanceManifest.scan(hive, true);
+
+        if (!imKeys.isEmpty()) {
+            RemoteService remote = InstanceManifest.of(hive, imKeys.first()).getConfiguration().target;
+            MasterRootResource r = ResourceProvider.getResource(remote, MasterRootResource.class);
+            MasterNamedResource master = r.getNamedMaster(group);
+
+            imKeys.stream().forEach(imKey -> {
+                InstanceConfiguration config = InstanceManifest.of(hive, imKey).getConfiguration();
+                ProductDto productDto = null;
+                try {
+                    productDto = ProductDto.create(ProductManifest.of(hive, config.product));
+                } catch (Exception e) {
+                    // ignore: product not found
+                }
+
+                InstanceStateRecord state = master.getInstanceState(config.uuid);
+
+                Key activeProduct = null;
+                ProductDto activeProductDto = null;
+                if (state.activeTag != null) {
+                    try {
+                        InstanceManifest mf = InstanceManifest.of(hive, new Manifest.Key(imKey.getName(), state.activeTag));
+                        if (mf.getConfiguration().product != null && !config.product.equals(mf.getConfiguration().product)) {
+                            activeProduct = mf.getConfiguration().product;
+                            activeProductDto = ProductDto.create(ProductManifest.of(hive, activeProduct));
+                        }
+                    } catch (Exception e) {
+                        // ignore: product of active version not found
+                    }
+                }
+
+                // Clear security token before sending via REST
+                clearToken(config);
+                result.add(InstanceDto.create(config, productDto, activeProduct, activeProductDto));
+            });
+        }
+        return result;
     }
 
     @Override
@@ -197,11 +234,6 @@ public class InstanceResourceImpl implements InstanceResource {
         return InstanceManifest.of(hive, key).getConfiguration();
     }
 
-    private List<InstanceConfiguration> internalList() {
-        SortedSet<Key> scan = InstanceManifest.scan(hive, true);
-        return scan.stream().map(k -> InstanceManifest.of(hive, k).getConfiguration()).collect(Collectors.toList());
-    }
-
     @WriteLock
     @Override
     public void create(InstanceConfiguration instanceConfig) {
@@ -215,7 +247,9 @@ public class InstanceResourceImpl implements InstanceResource {
         // in this case we're looking up a target with the same URI from all other
         // available instances in the group.
         if (instanceConfig.target.getKeyStore() == null) {
-            List<InstanceConfiguration> list = internalList();
+            SortedSet<Key> scan = InstanceManifest.scan(hive, true);
+            List<InstanceConfiguration> list = scan.stream().map(k -> InstanceManifest.of(hive, k).getConfiguration())
+                    .collect(Collectors.toList());
             for (InstanceConfiguration config : list) {
                 if (config.target.getUri().equals(instanceConfig.target.getUri())) {
                     instanceConfig.target = config.target;

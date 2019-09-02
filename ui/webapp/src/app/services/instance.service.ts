@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ClickAndStartDescriptor, FileStatusDto, InstanceConfiguration, InstanceConfigurationDto, InstanceDirectory, InstanceDirectoryEntry, InstanceManifestHistoryDto, InstanceNodeConfigurationListDto, InstancePurpose, InstanceStateRecord, InstanceVersionDto, ManifestKey, StringEntryChunkDto } from '../models/gen.dtos';
+import { ClickAndStartDescriptor, FileStatusDto, InstanceConfiguration, InstanceConfigurationDto, InstanceDirectory, InstanceDirectoryEntry, InstanceDto, InstanceManifestHistoryDto, InstanceNodeConfigurationListDto, InstancePurpose, InstanceStateRecord, InstanceVersionDto, ManifestKey, StringEntryChunkDto } from '../models/gen.dtos';
 import { ConfigService } from './config.service';
 import { InstanceGroupService } from './instance-group.service';
 import { Logger, LoggingService } from './logging.service';
@@ -14,10 +14,10 @@ export class InstanceService {
 
   constructor(private cfg: ConfigService, private http: HttpClient, private loggingService: LoggingService) {}
 
-  public listInstances(instanceGroupName: string): Observable<InstanceConfiguration[]> {
+  public listInstances(instanceGroupName: string): Observable<InstanceDto[]> {
     const url: string = this.buildGroupUrl(instanceGroupName);
     this.log.debug('listInstances: ' + url);
-    return this.http.get<InstanceConfiguration[]>(url);
+    return this.http.get<InstanceDto[]>(url);
   }
 
   public createInstance(instanceGroupName: string, instance: InstanceConfiguration) {

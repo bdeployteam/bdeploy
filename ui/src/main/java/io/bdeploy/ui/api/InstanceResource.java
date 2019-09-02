@@ -27,6 +27,7 @@ import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.jersey.ActivityScope;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import io.bdeploy.ui.dto.InstanceConfigurationDto;
+import io.bdeploy.ui.dto.InstanceDto;
 import io.bdeploy.ui.dto.InstanceManifestHistoryDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
 import io.bdeploy.ui.dto.InstanceVersionDto;
@@ -41,7 +42,7 @@ public interface InstanceResource {
     public static final String PATH_DOWNLOAD_APP_SPLASH = "/{instance}/{applicationId}/splash";
 
     @GET
-    public List<InstanceConfiguration> list();
+    public List<InstanceDto> list();
 
     @GET
     @Path("/{instance}/versions")

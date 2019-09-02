@@ -37,7 +37,6 @@ import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
-import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
@@ -48,6 +47,7 @@ import io.bdeploy.ui.api.InstanceResource;
 import io.bdeploy.ui.api.ProductResource;
 import io.bdeploy.ui.dto.ClientApplicationDto;
 import io.bdeploy.ui.dto.InstanceClientAppsDto;
+import io.bdeploy.ui.dto.InstanceDto;
 
 public class InstanceGroupResourceImpl implements InstanceGroupResource {
 
@@ -168,8 +168,8 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
 
         BHive hive = getGroupHive(group);
         InstanceResource resource = getInstanceResource(group);
-        for (InstanceConfiguration ic : resource.list()) {
-            String instanceId = ic.uuid;
+        for (InstanceDto idto : resource.list()) {
+            String instanceId = idto.instanceConfiguration.uuid;
 
             // Always use latest version to lookup remote service
             InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
@@ -191,7 +191,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
                 continue;
             }
             InstanceClientAppsDto clientApps = new InstanceClientAppsDto();
-            clientApps.instance = ic;
+            clientApps.instance = idto.instanceConfiguration;
             clientApps.applications = new ArrayList<>();
 
             // Add all configured client applications

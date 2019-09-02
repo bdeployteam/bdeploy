@@ -1,11 +1,12 @@
-<mat-card [ngClass]="['instance-card', 'instance-card-' + instance.purpose]" [routerLink]="['/instance/overview', instanceGroupName, instance.uuid]">
+<mat-card [ngClass]="['instance-card', 'instance-card-' + instanceDto.instanceConfiguration.purpose]"
+    [routerLink]="['/instance/overview', instanceGroupName, instanceDto.instanceConfiguration.uuid]">
   <mat-card-header>
     <app-instance-group-logo mat-card-avatar [instanceGroupName]='instanceGroupName'></app-instance-group-logo>
-    <mat-card-title>{{instance.name}}</mat-card-title>
-    <mat-card-subtitle>Instance ({{instance.uuid}})</mat-card-subtitle>
+    <mat-card-title>{{instanceDto.instanceConfiguration.name}}</mat-card-title>
+    <mat-card-subtitle>Instance ({{instanceDto.instanceConfiguration.uuid}})</mat-card-subtitle>
     <span class="fill-space"></span>
     <mat-menu #appMenu="matMenu" xPosition="before">
-      <button mat-menu-item [routerLink]="['/instance/edit', instanceGroupName, instance.uuid]">Edit</button>
+      <button mat-menu-item [routerLink]="['/instance/edit', instanceGroupName, instanceDto.instanceConfiguration.uuid]">Edit</button>
       <button mat-menu-item (click)="delete()">Delete</button>
     </mat-menu>
     <button class="option-button" mat-icon-button [matMenuTriggerFor]="appMenu" appClickStopPropagation>
@@ -13,8 +14,16 @@
     </button>
   </mat-card-header>
   <mat-card-content>
-    <p>{{instance.description}}</p>
-    <p *ngIf='product'>Product: <b [matTooltip]='product.name'>{{product.description}}</b> Tag: <b>{{product.key.tag}}</b></p>
-    <p *ngIf='!product'>Product: <b>{{instance.product.name}}</b> Tag: <b>{{instance.product.tag}}</b>&nbsp;<span class="product-unavailable" matTooltip="Required product version is not available.">N/A</span></p>
+    <p>{{instanceDto.instanceConfiguration.description}}</p>
+
+    <p>
+        <span *ngIf='instanceDto.productDto'>Product: <b [matTooltip]='instanceDto.productDto.name'>{{instanceDto.productDto.description}}</b></span>
+        <span *ngIf='!instanceDto.productDto'>Product: <b>{{instanceDto.instanceConfiguration.product.name}}</b></span>
+        Tag: <b>{{instanceDto.instanceConfiguration.product.tag}}</b>
+        <span *ngIf='!instanceDto.productDto'>&nbsp;<span class="product-unavailable" matTooltip="Required product version is not available.">N/A</span></span>
+
+        <span *ngIf='instanceDto.activeProduct'>&nbsp; <b>(</b>currently running -- Product Tag: <b>{{instanceDto.activeProduct.tag}}
+          <span *ngIf='!instanceDto.activeProductDto'>&nbsp;<span class="product-unavailable" matTooltip="Required product version is not available.">N/A</span></span>)</b></span>
+    </p>
   </mat-card-content>
 </mat-card>
