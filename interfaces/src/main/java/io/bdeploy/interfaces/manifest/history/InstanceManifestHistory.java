@@ -3,9 +3,6 @@ package io.bdeploy.interfaces.manifest.history;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import io.bdeploy.bhive.BHiveExecution;
 import io.bdeploy.bhive.meta.MetaManifest;
 import io.bdeploy.bhive.model.Manifest;
@@ -40,29 +37,36 @@ public class InstanceManifestHistory {
      *
      * @param action the performed action.
      */
-    public void record(Action action) {
-        store(readOrCreate().append(new Record(action, System.currentTimeMillis())));
+    public void record(Action action, String user, String comment) {
+        store(readOrCreate().append(new InstanceManifestHistoryRecord(action, System.currentTimeMillis(), user, comment)));
     }
 
     /**
      * Finds the timestamp of the most recent record of the given {@link Action}.
      *
      * @param action the action to look up.
-     * @return the timestamp or 0 (zero) if no record has been found.
+     * @return the record, or <code>null</code> if none has been found.
      */
-    public long findMostRecent(Action action) {
+    public InstanceManifestHistoryRecord findMostRecent(Action action) {
         return readOrCreate().records.stream().filter(a -> a.action == action)
-                .sorted((a, b) -> Long.compare(b.timestamp, a.timestamp)).map(a -> a.timestamp).findFirst().orElse(0L);
+                .sorted((a, b) -> Long.compare(b.timestamp, a.timestamp)).findFirst().orElse(null);
     }
 
     /**
      * Finds the first occurrence of the given {@link Action}.
-     * 
+     *
      * @param action the action to look up.
-     * @return the timestamp or 0 (zero) if no record has been found.
+     * @return the record or <code>null</code> if none has been found.
      */
-    public long findFirst(Action action) {
-        return readOrCreate().records.stream().filter(a -> a.action == action).findFirst().map(a -> a.timestamp).orElse(0L);
+    public InstanceManifestHistoryRecord findFirst(Action action) {
+        return readOrCreate().records.stream().filter(a -> a.action == action).findFirst().orElse(null);
+    }
+
+    /**
+     * @return all of the history attached to the {@link InstanceManifest}.
+     */
+    public List<InstanceManifestHistoryRecord> getFullHistory() {
+        return readOrCreate().records;
     }
 
     private History readOrCreate() {
@@ -79,25 +83,12 @@ public class InstanceManifestHistory {
 
     private static final class History {
 
-        public List<Record> records = new ArrayList<>();
+        public List<InstanceManifestHistoryRecord> records = new ArrayList<>();
 
-        public History append(Record record) {
+        public History append(InstanceManifestHistoryRecord record) {
             this.records.add(record);
             return this;
         }
-    }
-
-    private static final class Record {
-
-        public Action action;
-        public long timestamp;
-
-        @JsonCreator
-        public Record(@JsonProperty("action") Action action, @JsonProperty("timestamp") long timestamp) {
-            this.action = action;
-            this.timestamp = timestamp;
-        }
-
     }
 
 }

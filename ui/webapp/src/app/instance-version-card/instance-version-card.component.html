@@ -11,7 +11,6 @@
     <div class="mat-title title">{{ instanceVersionDto.product.tag }}</div>
     <span class="spacer"></span>
     <span *ngIf="!productAvailable" class="product-unavailable" matTooltip="Required product version is not available.">N/A</span>
-    <app-instance-version-history-card [instanceVersionDto]='instanceVersionDto' [instanceGroup]='instanceGroup' [instanceUuid]='instanceUuid'></app-instance-version-history-card>
     <mat-menu #appMenu="matMenu" xPosition="before">
       <button mat-menu-item (click)="install.emit(instanceVersionDto.key)" [disabled]='dirty || !productAvailable || isDeployed || isActive'>Install</button>
       <button mat-menu-item (click)="uninstall.emit(instanceVersionDto.key)" [disabled]='dirty || !isDeployed || isActive || isRunningOrScheduled'>Uninstall</button>
@@ -27,8 +26,9 @@
   <div class="content-row">
     <div class="description" *ngIf="!dirty">[Version {{ instanceVersionDto.key.tag }}]</div>
     <div class="description" *ngIf="dirty">[Locally Modified]</div>
+    <app-instance-version-history-card class='show-on-hover' *ngIf='!dirty' [instanceVersionDto]='instanceVersionDto' [instanceGroup]='instanceGroup' [instanceUuid]='instanceUuid' appClickStopPropagation></app-instance-version-history-card>
     <span class="spacer"></span>
-    <div class="icons" *ngIf="!dirty">
+    <div *ngIf="!dirty" class='icons'>
       <app-process-status [instanceTag]="instanceVersionDto.key.tag" [activatedTag]="state.activatedVersion" [outOfSyncIcon]="true"></app-process-status>
     </div>
   </div>

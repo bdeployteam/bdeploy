@@ -11,6 +11,30 @@
   margin-top: 16px;
 }
 
-.label-key {
-  font-weight: lighter;
+.table-container {
+  max-height: 200px;
+  max-width: 1024px;
+  overflow-y: auto;
+}
+
+td.mat-cell,
+td.mat-footer-cell,
+th.mat-header-cell {
+  padding: 0px 10px;
+}
+
+.mat-column-action {
+  width: 110px;
+}
+
+.mat-column-user {
+  width: 165px;
+}
+
+.mat-column-timestamp {
+  width: 140px;
+}
+
+.mat-column-comment {
+  width: 100px;
 }

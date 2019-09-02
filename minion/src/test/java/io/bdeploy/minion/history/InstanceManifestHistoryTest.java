@@ -1,5 +1,6 @@
 package io.bdeploy.minion.history;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -33,13 +34,15 @@ public class InstanceManifestHistoryTest {
         InstanceManifestHistory history = new InstanceManifestHistory(instanceKey, local);
 
         long old = System.currentTimeMillis();
-        history.record(Action.INSTALL);
-        assertTrue(history.findMostRecent(Action.INSTALL) >= old);
+        history.record(Action.INSTALL, "test", "comment1");
+        assertTrue(history.findMostRecent(Action.INSTALL).timestamp >= old);
+        assertEquals("comment1", history.findMostRecent(Action.INSTALL).comment);
 
         Thread.sleep(10);
         long now = System.currentTimeMillis();
-        history.record(Action.INSTALL);
-        assertTrue(history.findMostRecent(Action.INSTALL) >= now);
+        history.record(Action.INSTALL, "test", "comment2");
+        assertTrue(history.findMostRecent(Action.INSTALL).timestamp >= now);
+        assertEquals("comment2", history.findMostRecent(Action.INSTALL).comment);
     }
 
 }

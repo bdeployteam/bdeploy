@@ -35,14 +35,15 @@ mat-card {
 }
 
 .content-row {
-  height: 28px;
+  height: 40px;
   display: flex;
   flex-direction: row;
+  align-items: center;
 }
 
 .description {
   margin-left: 32px;
-  align-self: center;
+  margin-right: 5px;
 }
 
 .spacer {
@@ -50,10 +51,5 @@ mat-card {
 }
 
 .icons {
-  align-self: flex-end;
   margin-right: 0.6em;
-}
-
-.icon {
-  align-self: center;
 }

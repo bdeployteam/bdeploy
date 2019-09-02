@@ -40,7 +40,6 @@ import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory;
-import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
 
 /**
  * Stores and reads instances from/to manifests.
@@ -272,8 +271,6 @@ public class InstanceManifest {
                     .addLabel(INSTANCE_LABEL, config.uuid);
 
             hive.execute(new InsertManifestOperation().addManifest(mb.build(hive)));
-            new InstanceManifestHistory(key, hive).record(Action.CREATE);
-
             return key;
         }
 
