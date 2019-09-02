@@ -35,7 +35,8 @@
               <mat-progress-bar mode="determinate" [value]="getUploadProgress(file) | async"></mat-progress-bar>
             </ng-container>
             <ng-container *ngIf="isProcessing(file)">
-              <span>Processing...</span>
+              <span *ngIf='!getUploadStatus(file).processingHint'>Processing...</span>
+              <span *ngIf='getUploadStatus(file).processingHint'>{{getUploadStatus(file).processingHint}}</span>
               <mat-progress-bar *ngIf="(file)" mode="indeterminate"></mat-progress-bar>
             </ng-container>
             <div *ngIf="isFinished(file)">
