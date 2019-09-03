@@ -35,6 +35,12 @@ export class UploadStatus {
 
   /** The error message if failed. Or the response body if OK */
   detail: any;
+
+  /** Activity scope ID */
+  scope: string;
+
+  /** Progress Hint */
+  processingHint: string;
 }
 
 @Injectable({
@@ -67,6 +73,7 @@ export class UploadService {
       uploadStatus.stateObservable.subscribe( state => {
         uploadStatus.state = state;
       });
+      uploadStatus.scope = this.uuidv4();
       result.set(file.name, uploadStatus);
       stateSubject.next(UploadState.UPLOADING);
 
@@ -77,7 +84,7 @@ export class UploadService {
       // Suppress global error handling and enable progress reporting
       const options = {
         reportProgress: true,
-        headers: HttpErrorHandlerInterceptor.suppressGlobalErrorHandling(new HttpHeaders()),
+        headers: HttpErrorHandlerInterceptor.suppressGlobalErrorHandling(new HttpHeaders({ 'X-Proxy-Activity-Scope': uploadStatus.scope })),
       };
 
       // create a http-post request and pass the form
@@ -108,5 +115,13 @@ export class UploadService {
       );
     });
     return result;
+  }
+
+  uuidv4() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      // tslint:disable-next-line:no-bitwise
+      const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
   }
 }

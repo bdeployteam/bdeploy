@@ -1,9 +1,12 @@
-import { Component, ElementRef, Inject, ViewChild } from '@angular/core';
+import { Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDialogRef, MatTable, MAT_DIALOG_DATA } from '@angular/material';
+import { EventSourcePolyfill } from 'ng-event-source';
 import { forkJoin } from 'rxjs';
 import { MessageBoxMode } from '../messagebox/messagebox.component';
 import { ManifestKey } from '../models/gen.dtos';
+import { ErrorMessage, LoggingService } from '../services/logging.service';
 import { MessageboxService } from '../services/messagebox.service';
+import { ActivitySnapshotTreeNode, RemoteEventsService } from '../services/remote-events.service';
 import { UploadService, UploadState, UploadStatus } from '../services/upload.service';
 
 export interface UploadData {
@@ -19,7 +22,7 @@ export interface UploadData {
   templateUrl: './file-upload.component.html',
   styleUrls: ['./file-upload.component.css']
 })
-export class FileUploadComponent {
+export class FileUploadComponent implements OnInit, OnDestroy {
   @ViewChild('file')
   public fileRef: ElementRef;
 
@@ -42,12 +45,33 @@ export class FileUploadComponent {
   public dropZoneActive = false;
   public uploadFinished = true;
 
+  private eventSource: EventSourcePolyfill;
+  private log = this.loggingService.getLogger('FileUploadComponent');
+
   constructor(
     @Inject(MAT_DIALOG_DATA) public uploadData: UploadData,
     public dialogRef: MatDialogRef<FileUploadComponent>,
     public uploadService: UploadService,
     public messageBoxService: MessageboxService,
-  ) {}
+    private eventService: RemoteEventsService,
+    private loggingService: LoggingService,
+    ) {}
+
+  ngOnInit(): void {
+    // start event source
+    this.eventSource = this.eventService.getGlobalEventSource();
+    this.eventSource.onerror = err => {
+      this.log.error(new ErrorMessage('Error while processing events', err));
+    };
+    this.eventSource.addEventListener('activities', e => this.onEventReceived(e as MessageEvent));
+  }
+
+  ngOnDestroy(): void {
+    if (this.eventSource) {
+      this.eventSource.close();
+      this.eventSource = null;
+    }
+  }
 
   addFiles() {
     this.fileRef.nativeElement.click();
@@ -178,6 +202,66 @@ export class FileUploadComponent {
       const softwares: ManifestKey[] = status.detail;
       return 'Upload successful. New software package(s): ' + softwares.map(key => key.name + ' ' + key.tag).join(',');
     }
+  }
+
+  onEventReceived(e: MessageEvent) {
+    // we accept all events as we don't know the scope we're looking for beforehand.
+    const rootEvents = this.eventService.parseEvent(e, []);
+
+    // each received event's root scope must match a scope of an UploadStatus object.
+    // discard all events where this is not true.
+    let needUpdate = false;
+    for (const event of rootEvents) {
+      if (!event.snapshot || !event.snapshot.scope || event.snapshot.scope.length < 1) {
+        continue;
+      }
+
+      const status = this.getUploadStatusByUUID(event.snapshot.scope[0]);
+      if (!status) {
+        continue; // discard, not ours.
+      }
+
+      // if we do have a match, extract the most relevant message, set it, and then flag a table repaint.
+      status.processingHint = this.extractMostRelevantMessage(event);
+      needUpdate = true;
+    }
+
+    if (needUpdate) {
+      this.table.renderRows();
+    }
+  }
+
+  extractMostRelevantMessage(node: ActivitySnapshotTreeNode): string {
+    // recurse down, always pick the /last/ child.
+    if (node.children && node.children.length > 0) {
+      return this.extractMostRelevantMessage(node.children[node.children.length - 1]);
+    }
+
+    if (!node.snapshot) {
+      return null;
+    }
+
+    if (node.snapshot.max <= 0) {
+      if (node.snapshot.current > 0) {
+        return `${node.snapshot.name} (${node.snapshot.current})`;
+      } else {
+        return node.snapshot.name;
+      }
+    } else {
+      return `${node.snapshot.name} (${node.snapshot.current}/${node.snapshot.max})`;
+    }
+  }
+
+  getUploadStatusByUUID(uuid: string): UploadStatus {
+    if (this.uploads === undefined) {
+      return null;
+    }
+    for (const s of Array.from(this.uploads.values())) {
+      if (s.scope === uuid) {
+        return s;
+      }
+    }
+    return null;
   }
 
   onOkButtonPressed() {

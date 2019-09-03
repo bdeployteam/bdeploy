@@ -57,15 +57,16 @@ export class RemoteEventsService {
         // it's a root node, check if we're interested in it
         const a = n.snapshot;
         if (!scope || scope.length === 0) {
-          return true; // interested in all
+          rootNodes.push(n);
+          return; // interested in all
         }
 
         if (!a.scope) {
-          return false; // no scope, but interested in scoped
+          return; // no scope, but interested in scoped
         }
 
         if (a.scope.length < scope.length) {
-          return false; // less scope than requested. can never match
+          return; // less scope than requested. can never match
         }
 
         // only compare as many scope elements as requested. this allows
