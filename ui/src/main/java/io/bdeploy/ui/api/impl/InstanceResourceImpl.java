@@ -164,40 +164,37 @@ public class InstanceResourceImpl implements InstanceResource {
 
         SortedSet<Key> imKeys = InstanceManifest.scan(hive, true);
 
-        if (!imKeys.isEmpty()) {
-            RemoteService remote = InstanceManifest.of(hive, imKeys.first()).getConfiguration().target;
-            MasterRootResource r = ResourceProvider.getResource(remote, MasterRootResource.class);
+        for (Key imKey : imKeys) {
+            InstanceConfiguration config = InstanceManifest.of(hive, imKey).getConfiguration();
+
+            ProductDto productDto = null;
+            try {
+                productDto = ProductDto.create(ProductManifest.of(hive, config.product));
+            } catch (Exception e) {
+                // ignore: product not found
+            }
+
+            MasterRootResource r = ResourceProvider.getResource(config.target, MasterRootResource.class);
             MasterNamedResource master = r.getNamedMaster(group);
+            InstanceStateRecord state = master.getInstanceState(config.uuid);
 
-            imKeys.stream().forEach(imKey -> {
-                InstanceConfiguration config = InstanceManifest.of(hive, imKey).getConfiguration();
-                ProductDto productDto = null;
+            Key activeProduct = null;
+            ProductDto activeProductDto = null;
+            if (state.activeTag != null) {
                 try {
-                    productDto = ProductDto.create(ProductManifest.of(hive, config.product));
-                } catch (Exception e) {
-                    // ignore: product not found
-                }
-
-                InstanceStateRecord state = master.getInstanceState(config.uuid);
-
-                Key activeProduct = null;
-                ProductDto activeProductDto = null;
-                if (state.activeTag != null) {
-                    try {
-                        InstanceManifest mf = InstanceManifest.of(hive, new Manifest.Key(imKey.getName(), state.activeTag));
-                        if (mf.getConfiguration().product != null && !config.product.equals(mf.getConfiguration().product)) {
-                            activeProduct = mf.getConfiguration().product;
-                            activeProductDto = ProductDto.create(ProductManifest.of(hive, activeProduct));
-                        }
-                    } catch (Exception e) {
-                        // ignore: product of active version not found
+                    InstanceManifest mf = InstanceManifest.of(hive, new Manifest.Key(imKey.getName(), state.activeTag));
+                    if (mf.getConfiguration().product != null && !config.product.equals(mf.getConfiguration().product)) {
+                        activeProduct = mf.getConfiguration().product;
+                        activeProductDto = ProductDto.create(ProductManifest.of(hive, activeProduct));
                     }
+                } catch (Exception e) {
+                    // ignore: product of active version not found
                 }
+            }
 
-                // Clear security token before sending via REST
-                clearToken(config);
-                result.add(InstanceDto.create(config, productDto, activeProduct, activeProductDto));
-            });
+            // Clear security token before sending via REST
+            clearToken(config);
+            result.add(InstanceDto.create(config, productDto, activeProduct, activeProductDto));
         }
         return result;
     }
