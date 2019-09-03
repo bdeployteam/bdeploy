@@ -113,7 +113,6 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
         // for each required minion, figure out available versions.
         SortedMap<String, List<String>> available = new TreeMap<>();
-        SortedMap<String, String> active = new TreeMap<>();
         SortedSet<String> offline = new TreeSet<>();
         for (String minion : minions) {
             // don't check client node, it will never be online, and is not required (offline = OK).

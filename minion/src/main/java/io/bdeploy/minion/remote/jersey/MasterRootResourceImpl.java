@@ -250,6 +250,18 @@ public class MasterRootResourceImpl implements MasterRootResource {
     }
 
     @Override
+    public List<InstanceGroupConfiguration> getInstanceGroups() {
+        List<InstanceGroupConfiguration> result = new ArrayList<>();
+        for (Map.Entry<String, BHive> entry : registry.getAll().entrySet()) {
+            InstanceGroupConfiguration cfg = new InstanceGroupManifest(entry.getValue()).read();
+            if (cfg != null) {
+                result.add(cfg);
+            }
+        }
+        return result;
+    }
+
+    @Override
     public void addInstanceGroup(InstanceGroupConfiguration meta, String storage) {
         if (storage == null) {
             storage = getStorageLocations().iterator().next();

@@ -57,6 +57,12 @@ public interface MasterRootResource {
     @Path("/softwareRepositories")
     public List<SoftwareRepositoryConfiguration> getSoftwareRepositories();
 
+    /**
+     * Add a new software repository at the given location.
+     *
+     * @param config the software repository meta-data
+     * @param storage the storage location where to put the new software repository
+     */
     @PUT
     @Path("/softwareRepositories")
     public void addSoftwareRepository(SoftwareRepositoryConfiguration config, @QueryParam("storage") String storage);
@@ -78,8 +84,17 @@ public interface MasterRootResource {
      * @param storage the location to create the hive in.
      */
     @PUT
-    @Path("/namedHives")
+    @Path("/instanceGroups")
     public void addInstanceGroup(InstanceGroupConfiguration meta, @QueryParam("storage") String storage);
+
+    /**
+     * Software repository hives contain additional software which can be referenced when building products.
+     *
+     * @return the list of available software repository hives on the master.
+     */
+    @GET
+    @Path("/instanceGroups")
+    public List<InstanceGroupConfiguration> getInstanceGroups();
 
     /**
      * Request the master that is responsible for the given named Hive.

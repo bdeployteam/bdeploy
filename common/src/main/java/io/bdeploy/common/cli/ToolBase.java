@@ -63,7 +63,8 @@ public abstract class ToolBase {
 
     public void toolMain(String... args) throws Exception {
         ActivityReporter.Stream streamReporter = new ActivityReporter.Stream(System.out);
-        ActivityReporter reporter = null;
+        ActivityReporter defaultReporter = new ActivityReporter.Null();
+        ActivityReporter reporter = defaultReporter;
         PrintStream output = null;
         PrintStream reporterOutput = null;
 
@@ -75,12 +76,18 @@ public abstract class ToolBase {
             for (int i = 0; i < args.length; ++i) {
                 if (args[i].startsWith("-")) {
                     switch (args[i]) {
+                        case "-vv":
+                            streamReporter.setVerboseSummary(true);
+                            reporter = null;
+                            verbose = true;
+                            break;
                         case "-v":
                             verbose = true;
-                            streamReporter.setVerboseSummary(true);
                             break;
                         case "-q":
+                            // explicit new instance to signal explicit quiet-ness
                             reporter = new ActivityReporter.Null();
+                            verbose = false;
                             break;
                         case "-o":
                             String of = args[++i];
@@ -91,7 +98,7 @@ public abstract class ToolBase {
                             String opf = args[++i];
                             reporterOutput = new PrintStream(new File(opf), StandardCharsets.UTF_8.name());
                             streamReporter = new ActivityReporter.Stream(reporterOutput);
-                            streamReporter.setVerboseSummary(verbose);
+                            streamReporter.setVerboseSummary(reporter == null);
                             break;
                         case "--version":
                             String version = VersionHelper.readVersion();
@@ -136,11 +143,29 @@ public abstract class ToolBase {
                 }
             }
 
+            CliTool instance = getTool(Arrays.copyOfRange(args, toolArgNum, args.length));
+            Class<? extends CliTool> clazz = instance.getClass();
+            ToolDefaultVerbose defVerbose = clazz.getAnnotation(ToolDefaultVerbose.class);
+            if (defVerbose != null) {
+                // switch to verbose, if we aren't already explicitly set up.
+                if (verbose || (verbose && reporter == streamReporter)) {
+                    // explicit verbose -v || -vv
+                } else if (reporter != defaultReporter) {
+                    // explicit quiet -q
+                } else {
+                    // nothing explicit, respect annotation.
+                    verbose = true;
+
+                    if (defVerbose.value()) {
+                        reporter = streamReporter;
+                    }
+                }
+            }
+
             if (reporter == streamReporter) {
                 streamReporter.beginReporting();
             }
 
-            CliTool instance = getTool(Arrays.copyOfRange(args, toolArgNum, args.length));
             instance.setOutput(output);
             instance.setVerbose(verbose);
             instance.setActivityReporter(reporter);

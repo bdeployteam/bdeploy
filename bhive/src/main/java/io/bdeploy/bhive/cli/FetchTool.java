@@ -10,6 +10,7 @@ import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
+import io.bdeploy.common.cli.ToolDefaultVerbose;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
@@ -21,6 +22,7 @@ import io.bdeploy.jersey.cli.RemoteServiceTool;
  */
 @Help("Fetch Manifest(s) from a remote BHive instance.")
 @CliName("fetch")
+@ToolDefaultVerbose(true)
 public class FetchTool extends RemoteServiceTool<FetchConfig> {
 
     public @interface FetchConfig {
