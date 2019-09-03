@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.SortedMap;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -86,6 +87,13 @@ public interface MasterRootResource {
     @PUT
     @Path("/instanceGroups")
     public void addInstanceGroup(InstanceGroupConfiguration meta, @QueryParam("storage") String storage);
+
+    /**
+     * @param name the name of the Instance Group to delete.
+     */
+    @DELETE
+    @Path("/instanceGroups")
+    public void deleteInstanceGroup(@QueryParam("name") String name);
 
     /**
      * Software repository hives contain additional software which can be referenced when building products.

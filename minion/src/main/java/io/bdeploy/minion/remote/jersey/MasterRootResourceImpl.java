@@ -31,6 +31,7 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
+import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.NodeStatus;
 import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
@@ -280,6 +281,16 @@ public class MasterRootResourceImpl implements MasterRootResource {
         BHive h = new BHive(hive.toUri(), reporter);
         new InstanceGroupManifest(h).update(meta);
         registry.register(meta.name, h);
+    }
+
+    @Override
+    public void deleteInstanceGroup(String name) {
+        BHive bHive = registry.get(name);
+        if (bHive == null) {
+            throw new WebApplicationException("Instance Group '" + name + "' does not exist", Status.NOT_FOUND);
+        }
+        registry.unregister(name);
+        PathHelper.deleteRecursive(Paths.get(bHive.getUri()));
     }
 
     @Override
