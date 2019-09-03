@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -161,15 +160,14 @@ public class ProductManifest {
      * @param descriptorPath a relative or absolute path to a directory or a product-info.yaml file.
      * @param hive the target hive to import to.
      * @param fetcher a {@link DependencyFetcher} capable of assuring that external dependencies are present.
+     * @param parallel whether it is allowed to spawn threads, or the import must happen on the calling thread.
      */
-    public static Manifest.Key importFromDescriptor(String descriptorPath, BHive hive, DependencyFetcher fetcher) {
+    public static Manifest.Key importFromDescriptor(Path descriptorPath, BHive hive, DependencyFetcher fetcher,
+            boolean parallel) {
         // 1. read product desc yaml.
-        Path impDesc = Paths.get(descriptorPath);
-        if (Files.isDirectory(impDesc)) {
-            impDesc = impDesc.resolve("product-info.yaml");
-        }
-        impDesc = impDesc.toAbsolutePath();
-        ProductDescriptor prod = readProductDescriptor(impDesc);
+        descriptorPath = getDescriptorPath(descriptorPath);
+        descriptorPath = descriptorPath.toAbsolutePath();
+        ProductDescriptor prod = readProductDescriptor(descriptorPath);
 
         // 2. read version descriptor.
         if (prod.versionFile == null || prod.versionFile.isEmpty()) {
@@ -177,13 +175,13 @@ public class ProductManifest {
                     "product descriptor does not reference a product version descriptor, which is required.");
         }
         // path is relative to product descriptor, or absolute.
-        Path vDesc = impDesc.getParent().resolve(prod.versionFile);
-        ProductVersionDescriptor versions = readProductVersionDescriptor(impDesc, vDesc);
+        Path vDesc = descriptorPath.getParent().resolve(prod.versionFile);
+        ProductVersionDescriptor versions = readProductVersionDescriptor(descriptorPath, vDesc);
 
         // 3. validate product and version info.
         RuntimeAssert.assertNotNull(versions.version, "no version defined in " + vDesc);
-        RuntimeAssert.assertNotNull(prod.name, "no name defined in " + impDesc);
-        RuntimeAssert.assertNotNull(prod.product, "no name defined in " + impDesc);
+        RuntimeAssert.assertNotNull(prod.name, "no name defined in " + descriptorPath);
+        RuntimeAssert.assertNotNull(prod.product, "no name defined in " + descriptorPath);
 
         // make sure that all applications are there in the version descriptor.
         Map<String, Map<OperatingSystem, String>> toImport = new TreeMap<>();
@@ -195,15 +193,15 @@ public class ProductManifest {
         Builder builder = new Builder(prod);
 
         // 5. find and import all applications to import.
-        Path impBasePath = impDesc.getParent();
-        importApplications(hive, fetcher, versions, toImport, baseName, builder, impBasePath);
+        Path impBasePath = descriptorPath.getParent();
+        importApplications(hive, fetcher, versions, toImport, baseName, builder, impBasePath, parallel);
 
         // 6. additional labels
         versions.labels.forEach(builder::addLabel);
 
         // 7. configuration templates
         if (prod.configTemplates != null) {
-            Path cfgDir = impDesc.getParent().resolve(prod.configTemplates);
+            Path cfgDir = descriptorPath.getParent().resolve(prod.configTemplates);
             if (!Files.isDirectory(cfgDir)) {
                 throw new IllegalStateException("Configuration template directory not found: " + cfgDir);
             }
@@ -214,6 +212,13 @@ public class ProductManifest {
         builder.insert(hive, prodKey, prod.product);
 
         return prodKey;
+    }
+
+    public static Path getDescriptorPath(Path descriptorPath) {
+        if (Files.isDirectory(descriptorPath)) {
+            descriptorPath = descriptorPath.resolve("product-info.yaml");
+        }
+        return descriptorPath;
     }
 
     private static void matchApplicationsWithDescriptor(ProductDescriptor prod, Path vDesc, ProductVersionDescriptor versions,
@@ -232,7 +237,8 @@ public class ProductManifest {
     }
 
     private static void importApplications(BHive hive, DependencyFetcher fetcher, ProductVersionDescriptor versions,
-            Map<String, Map<OperatingSystem, String>> toImport, String baseName, Builder builder, Path impBasePath) {
+            Map<String, Map<OperatingSystem, String>> toImport, String baseName, Builder builder, Path impBasePath,
+            boolean parallel) {
         List<Callable<ApplicationDescriptor>> tasks = new ArrayList<>();
 
         for (Map.Entry<String, Map<OperatingSystem, String>> entry : toImport.entrySet()) {
@@ -253,13 +259,23 @@ public class ProductManifest {
             }
         }
 
-        ForkJoinPool.commonPool().invokeAll(tasks).forEach(f -> {
-            try {
-                f.get();
-            } catch (Exception e) {
-                throw new IllegalStateException("Failed to import", e);
+        if (parallel) {
+            ForkJoinPool.commonPool().invokeAll(tasks).forEach(f -> {
+                try {
+                    f.get();
+                } catch (Exception e) {
+                    throw new IllegalStateException("Failed to import", e);
+                }
+            });
+        } else {
+            for (Callable<ApplicationDescriptor> c : tasks) {
+                try {
+                    c.call();
+                } catch (Exception e) {
+                    throw new IllegalStateException("Failed to import", e);
+                }
             }
-        });
+        }
     }
 
     private static ApplicationDescriptor importDependenciesAndApplication(BHive hive, DependencyFetcher fetcher,
@@ -284,7 +300,7 @@ public class ProductManifest {
         return appDesc;
     }
 
-    private static ProductVersionDescriptor readProductVersionDescriptor(Path impDesc, Path vDesc) {
+    public static ProductVersionDescriptor readProductVersionDescriptor(Path impDesc, Path vDesc) {
         if (!Files.exists(vDesc)) {
             throw new IllegalStateException("Cannot find version descriptor at " + vDesc);
         }
@@ -297,7 +313,7 @@ public class ProductManifest {
         return versions;
     }
 
-    private static ProductDescriptor readProductDescriptor(Path impDesc) {
+    public static ProductDescriptor readProductDescriptor(Path impDesc) {
         if (!Files.exists(impDesc)) {
             throw new IllegalArgumentException("Product descriptor does not exist: " + impDesc);
         }

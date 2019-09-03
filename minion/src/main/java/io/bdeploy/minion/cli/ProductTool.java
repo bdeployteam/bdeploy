@@ -76,7 +76,7 @@ public class ProductTool extends RemoteServiceTool<ProductConfig> {
             fetcher = new LocalDependencyFetcher();
         }
 
-        Manifest.Key key = ProductManifest.importFromDescriptor(config.imp(), hive, fetcher);
+        Manifest.Key key = ProductManifest.importFromDescriptor(Paths.get(config.imp()), hive, fetcher, true);
 
         if (config.push()) {
             helpAndFailIfMissing(svc, "missing --remote");

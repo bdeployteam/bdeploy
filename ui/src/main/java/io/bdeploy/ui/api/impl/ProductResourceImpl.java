@@ -5,10 +5,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.SortedSet;
 import java.util.concurrent.TimeUnit;
 
@@ -38,17 +42,25 @@ import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ObjectListOperation;
 import io.bdeploy.bhive.op.ObjectSizeOperation;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.common.util.UuidHelper;
+import io.bdeploy.interfaces.descriptor.product.ProductDescriptor;
+import io.bdeploy.interfaces.descriptor.product.ProductVersionDescriptor;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
+import io.bdeploy.interfaces.manifest.dependencies.DependencyFetcher;
+import io.bdeploy.interfaces.manifest.dependencies.LocalDependencyFetcher;
 import io.bdeploy.ui.api.ApplicationResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.ProductResource;
 import io.bdeploy.ui.dto.ProductDto;
 
 public class ProductResourceImpl implements ProductResource {
+
+    private static final String RELPATH_ERROR = "Only relative paths within the ZIP file are allowed, '..' is forbidden. Offending path: %1$s";
 
     private static final Logger log = LoggerFactory.getLogger(ProductResourceImpl.class);
 
@@ -198,46 +210,116 @@ public class ProductResourceImpl implements ProductResource {
         String tmpHiveName = UuidHelper.randomId() + ".zip";
         Path targetFile = minion.getDownloadDir().resolve(tmpHiveName);
         try {
-            List<Manifest.Key> imported = new ArrayList<>();
-
             // Download the hive to a temporary location
             Files.copy(inputStream, targetFile);
 
-            // Read all product manifests
-            URI targetUri = UriBuilder.fromUri("jar:" + targetFile.toUri()).build();
-            try (BHive zipHive = new BHive(targetUri, new ActivityReporter.Null())) {
-                SortedSet<Key> productKeys = ProductManifest.scan(zipHive);
-                if (productKeys.isEmpty()) {
-                    throw new WebApplicationException("ZIP file does not contain a product.", Status.BAD_REQUEST);
+            // check if the uploaded file is a hive or "something else".
+            boolean isHive = false;
+            boolean hasProductInfo = false;
+            try (FileSystem zfs = PathHelper.openZip(targetFile)) {
+                if (Files.exists(zfs.getPath("manifests")) && Files.exists(zfs.getPath("objects"))) {
+                    isHive = true;
                 }
 
-                // Determine required objects
-                CopyOperation copy = new CopyOperation().setDestinationHive(hive);
-                ObjectListOperation scan = new ObjectListOperation();
-                for (Key productKey : productKeys) {
-                    // Ignore existing products
-                    if (hive.execute(new ManifestExistsOperation().setManifest(productKey))) {
-                        continue;
-                    }
-                    imported.add(productKey);
-                    copy.addManifest(productKey);
-                    scan.addManifest(productKey);
+                if (Files.exists(zfs.getPath("product-info.yaml"))) {
+                    hasProductInfo = true;
                 }
+            }
 
-                // Add all required artifacts
-                SortedSet<ObjectId> objectIds = zipHive.execute(scan);
-                objectIds.forEach(copy::addObject);
-
-                // Execute import only if we have something to do
-                if (!imported.isEmpty()) {
-                    zipHive.execute(copy);
-                }
-                return imported;
+            if (isHive) {
+                return importFromUploadedBHive(targetFile);
+            } else if (hasProductInfo) {
+                return importFromUploadedProductInfo(targetFile);
+            } else {
+                throw new WebApplicationException("Uploaded ZIP is neither a BHive, nor has a product-info.yaml",
+                        Status.BAD_REQUEST);
             }
         } catch (IOException e) {
             throw new WebApplicationException("Failed to upload file: " + e.getMessage(), Status.BAD_REQUEST);
         } finally {
             PathHelper.deleteRecursive(targetFile);
+        }
+    }
+
+    /**
+     * Import a product from a ZIP file which contains the product definition as well as all applications.
+     * <p>
+     * Limitations:
+     * <ul>
+     * <li>All paths within product-info.yaml and product-version.yaml <b>MUST</b> be relative and may not contain '..'.
+     * <li>All external dependencies must already exist in the target instance group. Software repositories cannot be queried.
+     * </ul>
+     *
+     * @param targetFile the ZIP file uploaded by the user.
+     * @return the {@link Key} imported in a {@link Collections#singletonList(Object) singleton list}.
+     * @throws IOException in case of an I/O error
+     */
+    private List<Manifest.Key> importFromUploadedProductInfo(Path targetFile) throws IOException {
+        try (FileSystem zfs = PathHelper.openZip(targetFile)) {
+            // If we ever want to resolve dependencies from software repos, we need a master URL here (RemoteService).
+            DependencyFetcher fetcher = new LocalDependencyFetcher();
+
+            // validate paths, etc. neither product-info.yaml, nor product-version.yaml are allowed to use '..' in paths.
+            Path desc = ProductManifest.getDescriptorPath(zfs.getPath("/"));
+            ProductDescriptor pd = ProductManifest.readProductDescriptor(desc);
+
+            if (pd.configTemplates != null) {
+                RuntimeAssert.assertFalse(pd.configTemplates.contains("..") || pd.configTemplates.startsWith("/"),
+                        String.format(RELPATH_ERROR, pd.configTemplates));
+            }
+            if (pd.versionFile != null) {
+                RuntimeAssert.assertFalse(pd.versionFile.contains("..") || pd.versionFile.startsWith("/"),
+                        String.format(RELPATH_ERROR, pd.versionFile));
+            }
+
+            Path vDesc = desc.getParent().resolve(pd.versionFile);
+            ProductVersionDescriptor pvd = ProductManifest.readProductVersionDescriptor(desc, vDesc);
+
+            for (Entry<String, Map<OperatingSystem, String>> entry : pvd.appInfo.entrySet()) {
+                for (Entry<OperatingSystem, String> loc : entry.getValue().entrySet()) {
+                    RuntimeAssert.assertFalse(loc.getValue().contains("..") || loc.getValue().startsWith("/"),
+                            String.format(RELPATH_ERROR, loc.getValue()));
+                }
+            }
+
+            return Collections.singletonList(ProductManifest.importFromDescriptor(desc, hive, fetcher, false));
+        }
+    }
+
+    private List<Manifest.Key> importFromUploadedBHive(Path targetFile) {
+        List<Manifest.Key> imported = new ArrayList<>();
+
+        // Read all product manifests
+        URI targetUri = UriBuilder.fromUri("jar:" + targetFile.toUri()).build();
+
+        try (BHive zipHive = new BHive(targetUri, new ActivityReporter.Null())) {
+            SortedSet<Key> productKeys = ProductManifest.scan(zipHive);
+            if (productKeys.isEmpty()) {
+                throw new WebApplicationException("ZIP file does not contain a product.", Status.BAD_REQUEST);
+            }
+
+            // Determine required objects
+            CopyOperation copy = new CopyOperation().setDestinationHive(hive);
+            ObjectListOperation scan = new ObjectListOperation();
+            for (Key productKey : productKeys) {
+                // Ignore existing products
+                if (hive.execute(new ManifestExistsOperation().setManifest(productKey))) {
+                    continue;
+                }
+                imported.add(productKey);
+                copy.addManifest(productKey);
+                scan.addManifest(productKey);
+            }
+
+            // Add all required artifacts
+            SortedSet<ObjectId> objectIds = zipHive.execute(scan);
+            objectIds.forEach(copy::addObject);
+
+            // Execute import only if we have something to do
+            if (!imported.isEmpty()) {
+                zipHive.execute(copy);
+            }
+            return imported;
         }
     }
 }
