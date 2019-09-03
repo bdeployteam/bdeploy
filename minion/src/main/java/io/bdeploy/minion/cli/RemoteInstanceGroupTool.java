@@ -23,6 +23,9 @@ public class RemoteInstanceGroupTool extends RemoteServiceTool<RemoteInstanceGro
 
         @Help("Storage to create the new hive in, defaults to the first available storage.")
         String storage();
+
+        @Help(value = "List existing instance groups on the remote", arg = false)
+        boolean list() default false;
     }
 
     public RemoteInstanceGroupTool() {
@@ -31,16 +34,22 @@ public class RemoteInstanceGroupTool extends RemoteServiceTool<RemoteInstanceGro
 
     @Override
     protected void run(RemoteInstanceGroupConfig config, RemoteService svc) {
-        helpAndFailIfMissing(config.create(), "Missing instance group to create");
-        helpAndFailIfMissing(config.description(), "Missing description");
-
         MasterRootResource client = ResourceProvider.getResource(svc, MasterRootResource.class);
 
-        InstanceGroupConfiguration desc = new InstanceGroupConfiguration();
-        desc.name = config.create();
-        desc.description = config.description();
+        if (config.create() != null) {
+            helpAndFailIfMissing(config.description(), "Missing description");
 
-        client.addInstanceGroup(desc, config.storage());
+            InstanceGroupConfiguration desc = new InstanceGroupConfiguration();
+            desc.name = config.create();
+            desc.description = config.description();
+
+            client.addInstanceGroup(desc, config.storage());
+        } else if (config.list()) {
+            for (InstanceGroupConfiguration cfg : client.getInstanceGroups()) {
+                out().println(String.format("%1$-30s %2$s", cfg.name, cfg.description));
+            }
+        }
+
     }
 
 }

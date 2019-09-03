@@ -10,6 +10,7 @@ import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
+import io.bdeploy.common.cli.ToolDefaultVerbose;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
@@ -24,6 +25,7 @@ import io.bdeploy.jersey.cli.RemoteServiceTool;
  */
 @Help("Push Manifest(s) to a remote BHive instance.")
 @CliName("push")
+@ToolDefaultVerbose(true)
 public class PushTool extends RemoteServiceTool<PushConfig> {
 
     public @interface PushConfig {
