@@ -17,6 +17,8 @@ import io.bdeploy.minion.cli.RemoteDeploymentTool.RemoteDeployConfig;
 @CliName("remote-deployment")
 public class RemoteDeploymentTool extends RemoteServiceTool<RemoteDeployConfig> {
 
+    private static final String OUTPUT_FORMAT = "%1$-15s %2$-20s %3$-4s %4$11s %5$-25s %6$20s %7$s";
+
     public @interface RemoteDeployConfig {
 
         @Help("Target hive name, must be created up front.")
@@ -51,14 +53,21 @@ public class RemoteDeploymentTool extends RemoteServiceTool<RemoteDeployConfig> 
             MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class);
             MasterNamedResource master = root.getNamedMaster(config.target());
             if (config.list()) {
-                out().println(String.format("%1$-15s %2$-30s %3$-10s", "UUID", "TAG", "ACTIVE"));
+                out().println(String.format(OUTPUT_FORMAT, "UUID", "Name", "Tag", "Active", "Product", "Product Version",
+                        "Description"));
 
                 for (InstanceConfiguration ic : master.listInstanceConfigurations()) {
                     String uuid = ic.uuid;
                     InstanceStateRecord state = master.getInstanceState(uuid);
-                    for (String tag : state.installedTags) {
-                        boolean isActive = tag.equals(state.activeTag); // activeTag may be null.
-                        out().println(String.format("%1$-15s %2$-30s %3$-10s", uuid, tag, isActive ? "*" : ""));
+                    if (state.installedTags.isEmpty()) {
+                        out().println(String.format(OUTPUT_FORMAT, uuid, ic.name, "-", "no-install", ic.product.getName(),
+                                ic.product.getTag(), ic.description));
+                    } else {
+                        for (String tag : state.installedTags) {
+                            boolean isActive = tag.equals(state.activeTag); // activeTag may be null.
+                            out().println(String.format(OUTPUT_FORMAT, uuid, ic.name, tag, isActive ? "*" : "",
+                                    ic.product.getName(), ic.product.getTag(), ic.description));
+                        }
                     }
                 }
                 return;
