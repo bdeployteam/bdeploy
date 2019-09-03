@@ -227,6 +227,7 @@ public class ProcessController {
         ProcessStatusDto dto = new ProcessStatusDto();
         dto.processState = processState;
         dto.appUid = processConfig.uid;
+        dto.appName = processConfig.name;
         dto.instanceTag = instanceTag;
         dto.instanceUid = instanceUid;
 

@@ -19,6 +19,9 @@ public class ProcessStatusDto {
     /** Unique id of the application */
     public String appUid;
 
+    /** Human readable name of the application */
+    public String appName;
+
     /** Current process state */
     public ProcessState processState;
 

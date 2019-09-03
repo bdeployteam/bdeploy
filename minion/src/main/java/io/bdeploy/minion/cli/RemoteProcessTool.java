@@ -1,10 +1,18 @@
 package io.bdeploy.minion.cli;
 
+import java.text.SimpleDateFormat;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
+import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
+import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
@@ -14,6 +22,9 @@ import io.bdeploy.minion.cli.RemoteProcessTool.RemoteProcessConfig;
 @Help("Deploy to a remote master minion")
 @CliName("remote-process")
 public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
+
+    private static final String PROCESS_STATUS_FORMAT = "%1$-25s %2$-14s %3$-20s %4$-10s %5$-3s %6$20s %7$-10s %8$5s";
+    private static final SimpleDateFormat DF = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
     public @interface RemoteProcessConfig {
 
@@ -61,7 +72,54 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         }
 
         InstanceStatusDto status = master.getStatus(config.uuid());
-        out().println(status.log());
+        if (config.application() == null) {
+            out().println(
+                    String.format(PROCESS_STATUS_FORMAT, "Name", "ID", "Status", "Node", "Tag", "Started At", "OS User", "PID"));
+            for (Entry<String, InstanceNodeStatusDto> nodeEntry : status.node2Applications.entrySet()) {
+                InstanceNodeStatusDto node = nodeEntry.getValue();
+                if (node.activeTag == null) {
+                    continue;
+                }
+
+                String nodeName = nodeEntry.getKey();
+
+                Map<String, ProcessStatusDto> allProc = new TreeMap<>();
+                allProc.putAll(node.deployed.get(node.activeTag).deployed);
+                allProc.putAll(node.runningOrScheduled);
+
+                for (Map.Entry<String, ProcessStatusDto> procEntry : allProc.entrySet()) {
+                    ProcessStatusDto ps = procEntry.getValue();
+                    ProcessDetailDto detail = ps.processDetails;
+
+                    out().println(String.format(PROCESS_STATUS_FORMAT, ps.appName, ps.appUid, ps.processState.name(), nodeName,
+                            node.activeTag, detail == null ? "-" : DF.format(detail.startTime),
+                            detail == null ? "-" : detail.user, detail == null ? "-" : Long.toString(detail.pid)));
+
+                    if (isVerbose() && detail != null) {
+                        printProcessDetailsRec(detail, "  ");
+                    }
+                }
+            }
+        } else {
+            ProcessStatusDto appStatus = status.getAppStatus(config.application());
+            out().println(appStatus);
+        }
+    }
+
+    private void printProcessDetailsRec(ProcessDetailDto pdd, String indent) {
+        out().println(String.format("%1$s [pid=%2$d, cpu=%3$ds] %4$s %5$s", indent, pdd.pid, pdd.totalCpuDuration, pdd.command,
+                (pdd.arguments != null && pdd.arguments.length > 0 ? String.join(" ", pdd.arguments) : "")));
+
+        for (ProcessDetailDto child : pdd.children) {
+            printProcessDetailsRec(child, indent + "  ");
+        }
+    }
+
+    private String shortenFront(String str, int length) {
+        if (str.length() > length) {
+            return "..." + str.substring(str.length() - length - 3);
+        }
+        return str;
     }
 
 }
