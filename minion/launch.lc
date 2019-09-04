@@ -128,3 +128,7 @@ java configuration NewToken : minion-base {
 	argument "--passphrase=${password_prompt:Enter Password}";
 	argument "--create";
 }
+
+java configuration ProductImport : minion-base {
+	argument 'product' '--hive=/ssd/workspaces/deployment/git/deployment/test-data/build/prod2hive' '--imp=/ssd/workspaces/deployment/git/deployment/test-data/test-product-2';
+}

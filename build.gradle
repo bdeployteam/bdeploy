@@ -60,6 +60,9 @@ ext {
 
     // build SNAPSHOT replacement where needed.
     buildDate = new Date().format('yyyyMMddHHmm')
+
+    // all java projects. these projects are pre-configured by the root project with a ton of helpers.
+    actualSubprojects = subprojects - project(':test-data');
 }
 
 allprojects {
@@ -70,7 +73,7 @@ allprojects {
     }
 }
 
-subprojects {
+configure(actualSubprojects) {
     apply plugin: 'java'
     apply plugin: 'jacoco'
     apply plugin: 'com.adarshr.test-logger'
@@ -308,11 +311,11 @@ def void addMultiPlatformDistBuild(Project prj) {
 task testReport(type: TestReport) {
     destinationDir = file("$buildDir/reports/tests")
     // Include the results from the `test` task in all subprojects
-    reportOn subprojects*.test
+    reportOn actualSubprojects*.test
 }
 
 task test {
-    dependsOn subprojects*.test
+    dependsOn actualSubprojects*.test
     finalizedBy testReport
     finalizedBy jacocoFullReport
 }
@@ -320,9 +323,9 @@ task test {
 build.dependsOn test
 
 task genJavaDoc(type: Javadoc) {
-    source = subprojects*.sourceSets.main.allJava
+    source = actualSubprojects*.sourceSets.main.allJava
     destinationDir = reporting.file("javadoc")
-    classpath = files(subprojects*.sourceSets.main.compileClasspath)
+    classpath = files(actualSubprojects*.sourceSets.main.compileClasspath)
     options.addBooleanOption('html5', true)
     options.addStringOption('Xdoclint:-missing', '-quiet')
 }
@@ -416,7 +419,7 @@ task jlinkAny() {
     }
 }
 
-subprojects*.test {
+actualSubprojects*.test {
     dependsOn rootProject.tasks["jlinkAny"]
 }
 

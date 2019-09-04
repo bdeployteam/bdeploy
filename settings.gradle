@@ -10,5 +10,6 @@ include(
     'ui',
     'jersey',
     'doc',
-    'launcher'
+    'launcher',
+    'test-data'
 )

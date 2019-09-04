@@ -1,0 +1,61 @@
+name: "Server Application"
+
+supportedOperatingSystems:
+  - LINUX
+  - WINDOWS
+
+processControl:
+  gracePeriod: 3000
+  supportedStartTypes:
+   - MANUAL
+   - MANUAL_CONFIRM
+   - INSTANCE
+  supportsKeepAlive: true
+  noOfRetries: 2
+
+startCommand:
+  launcherPath: "{{WINDOWS:launch.bat}}{{LINUX:launch.sh}}"
+  parameters:
+    - uid: "param.sleep"
+      name: "Sleep Timeout"
+      longDescription: "A numeric parameter - controls how long the application stays alive"
+      groupName: "Sleep Configuration"
+      parameter: "--sleep"
+      defaultValue: "10"
+      type: NUMERIC
+    - uid: "param.text"
+      name: "Text"
+      longDescription: "A text parameter"
+      groupName: "Test Parameters"
+      parameter: "--text"
+      mandatory: false
+    - uid: "param.global"
+      name: "Global"
+      longDescription: "A global parameter"
+      groupName: "Test Parameters"
+      parameter: "--text"
+      mandatory: false
+      global: true
+    - uid: "param.pass"
+      name: "Password"
+      longDescription: "A password parameter"
+      groupName: "Test Parameters"
+      parameter: "--text"
+      mandatory: false
+      type: PASSWORD
+    - uid: "param.boolean"
+      name: "Boolean"
+      longDescription: "A boolean parameter"
+      groupName: "Test Parameters"
+      parameter: "--help"
+      hasValue: false
+      type: BOOLEAN
+    - uid: "param.fixed"
+      name: "Fixed"
+      longDescription: "A fixed parameter"
+      groupName: "Test Parameters"
+      parameter: "--text"
+      defaultValue: "FIXED"
+      mandatory: true
+      fixed: true
+      type: STRING

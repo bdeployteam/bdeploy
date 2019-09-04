@@ -1,0 +1,9 @@
+name: "Client Application"
+
+supportedOperatingSystems:
+  - LINUX
+  - WINDOWS
+
+type: "CLIENT"
+startCommand:
+  launcherPath: "{{WINDOWS:client.bat}}{{LINUX:client.sh}}"

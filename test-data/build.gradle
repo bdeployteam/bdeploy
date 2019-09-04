@@ -1,0 +1,128 @@
+plugins {
+    id 'base'
+    // need 0.1.12+ on update to gradle 5.6.0+
+    id "com.github.psxpaul.execfork" version "0.1.11"
+}
+
+ext {
+    testServerRoot = "${buildDir}/test-root"
+    testServerHost = InetAddress.getLocalHost().getCanonicalHostName()
+    testServerPort = 7707
+}
+
+void createTasks(String prodNum) {
+    task "product${prodNum}Zip" (type: Zip) {
+        from fileTree(dir: "${projectDir}/test-product-${prodNum}")
+        archiveName "test-product-${prodNum}-direct.zip"
+        destinationDir file("${buildDir}/distribution/")
+        inputs.dir file("${projectDir}/test-product-${prodNum}")
+    }
+
+    task "product${prodNum}Hive" (type: JavaExec) {
+        args = ["product", "--hive=${buildDir}/prod${prodNum}hive", "--import=${projectDir}/test-product-${prodNum}"]
+        main = project(":minion").mainClassName
+        classpath = project(":minion").sourceSets.main.runtimeClasspath
+        inputs.dir file("${projectDir}/test-product-${prodNum}")
+        outputs.dir file("${buildDir}/prod${prodNum}hive")
+    }
+
+    task "product${prodNum}HiveZip" (type: Zip) {
+        from tasks["product${prodNum}Hive"]
+        archiveName "test-product-${prodNum}-hive.zip"
+        destinationDir file("${buildDir}/distribution/")
+    }
+
+    task "importProduct${prodNum}" (type: JavaExec, dependsOn: createInstanceGroup) {
+        doFirst {
+            delete "${buildDir}/pushTmp${prodNum}"
+        }
+        outputs.upToDateWhen { false }
+        args = ["product", "--hive=${buildDir}/pushTmp${prodNum}", "--import=${projectDir}/test-product-${prodNum}", "--push"]
+    }
+
+    build {
+        dependsOn "product${prodNum}Zip"
+        dependsOn "product${prodNum}HiveZip"
+    }
+}
+
+void setupBDeployEnv(ProcessForkOptions options) {
+    options.environment += [
+        HOSTNAME: testServerHost,
+        BDEPLOY_ROOT: testServerRoot,
+    ]
+}
+
+void setupBDeployRemoteEnv(ProcessForkOptions options) {
+    setupBDeployEnv(options)
+    options.environment += [
+        BDEPLOY_REMOTE: "https://localhost:${testServerPort}/api",
+        BDEPLOY_TOKENFILE: "${buildDir}/test-token.txt",
+        REMOTE_BHIVE: "Test"
+    ]
+}
+
+void setupBDeployExec(JavaExec je) {
+    je.main = project(":minion").mainClassName
+    je.classpath = project(":minion").sourceSets.main.runtimeClasspath
+    setupBDeployRemoteEnv(je)
+}
+
+task initTestBDeploy(type: JavaExec) {
+    doFirst() {
+        delete "${testServerRoot}"
+    }
+
+    args = [ "init", "--port=${testServerPort}", "--dist=ignore" ]
+}
+
+task startTestBDeploy(type: com.github.psxpaul.task.JavaExecFork, dependsOn: initTestBDeploy) {
+    setupBDeployEnv(it)
+    main = project(":minion").mainClassName
+    classpath = project(":minion").sourceSets.main.runtimeClasspath
+    args = [ "master" ]
+    waitForPort = testServerPort
+}
+
+task addTestBDeployUser(type: JavaExec, dependsOn: startTestBDeploy) {
+    args = [ "user", "--add=admin", "--password=admin", "--description=Automated Test User" ]
+}
+
+task checkTestBDeploy(type: JavaExec, dependsOn: addTestBDeployUser) {
+    args = [ "remote-master", "--minions" ]
+}
+
+task createInstanceGroup(type: JavaExec, dependsOn: checkTestBDeploy) {
+    args = [ "remote-group", "--create=Test", "--description=Automatic Test" ]
+}
+
+// now define the dynamic tasks for each product
+createTasks("1")
+createTasks("2")
+
+// now all tasks that depend on any of the generated tasks
+task setupDemoServer() {
+    dependsOn(
+        importProduct1,
+        importProduct2
+    )
+
+    doFirst() {
+        println("----------------------------------------------------------------------------------------")
+        println("Successfully started demo server. Point your browser to https://localhost:${testServerPort}.")
+        println("User and password for the demo server are 'admin' and 'admin'.")
+        println("----------------------------------------------------------------------------------------")
+    }
+}
+
+task runDemoServer(dependsOn: setupDemoServer) {
+    doLast() {
+        // no println will work in doLast, it will appear only AFTER the question is answered.
+        def userInput = services.get(org.gradle.api.internal.tasks.userinput.UserInputHandler)
+        def answer = userInput.askQuestion("Enter any value (or press enter) to stop the server", "Stop");
+    }
+}
+
+// and fix all the common meta-data for all BDeploy JavaExec's.
+tasks.findAll { it instanceof JavaExec && !it.name.startsWith("product") }.each { setupBDeployExec(it) }
+

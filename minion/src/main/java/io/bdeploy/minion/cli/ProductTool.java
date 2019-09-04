@@ -43,7 +43,7 @@ public class ProductTool extends RemoteServiceTool<ProductConfig> {
         @EnvironmentFallback("REMOTE_BHIVE")
         String instanceGroup();
 
-        @Help(value = "When given, push the result in the specified instance group on the given remote")
+        @Help(value = "When given, push the result in the specified instance group on the given remote", arg = false)
         boolean push() default false;
 
         @Help(value = "When given, list all product manifests.", arg = false)
@@ -63,6 +63,8 @@ public class ProductTool extends RemoteServiceTool<ProductConfig> {
                 listProducts(hive);
             } else if (config.imp() != null) {
                 importProduct(config, svc, hive);
+            } else {
+                helpAndFail("Missing --list or --import argument");
             }
         }
 
