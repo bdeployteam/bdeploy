@@ -1,0 +1,13 @@
+.flex-row {
+  flex: 0 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row nowrap;
+  padding: 5px;
+}
+
+.icon {
+  text-align: center;
+  margin-bottom: 20px;
+}

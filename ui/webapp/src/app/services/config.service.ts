@@ -3,8 +3,8 @@ import { Injectable } from '@angular/core';
 import { MatIconRegistry } from '@angular/material';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Observable } from 'rxjs';
-import { HttpErrorHandlerInterceptor } from '../interceptors/error-handler.interceptor';
 import { AppConfig } from '../models/config.model';
+import { suppressGlobalErrorHandling } from '../utils/server.utils';
 import { LoggingService } from './logging.service';
 
 @Injectable({
@@ -42,6 +42,6 @@ export class ConfigService {
   }
 
   public tryGetBackendVersion(): Observable<string> {
-    return this.http.get(this.config.api + '/backend-info/version', { responseType: 'text', headers: HttpErrorHandlerInterceptor.suppressGlobalErrorHandling(new HttpHeaders)});
+    return this.http.get(this.config.api + '/backend-info/version', { responseType: 'text', headers: suppressGlobalErrorHandling(new HttpHeaders)});
   }
 }

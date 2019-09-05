@@ -2,8 +2,9 @@ import { NestedTreeControl } from '@angular/cdk/tree';
 import { Component, Input, OnDestroy, OnInit, TemplateRef } from '@angular/core';
 import { MatBottomSheet, MatTreeNestedDataSource } from '@angular/material';
 import { EventSourcePolyfill } from 'ng-event-source';
-import { ErrorMessage, LoggingService } from '../services/logging.service';
+import { LoggingService } from '../services/logging.service';
 import { ActivitySnapshotTreeNode, RemoteEventsService } from '../services/remote-events.service';
+import { SystemService } from '../services/system.service';
 
 @Component({
   selector: 'app-remote-progress',
@@ -27,7 +28,7 @@ export class RemoteProgressComponent implements OnInit, OnDestroy {
   treeDataSource = new MatTreeNestedDataSource<ActivitySnapshotTreeNode>();
   hasChild = (_: number, node: ActivitySnapshotTreeNode) => !!node.children && node.children.length > 0;
 
-  constructor(private events: RemoteEventsService, private loggingService: LoggingService, private bottomSheet: MatBottomSheet) {}
+  constructor(private events: RemoteEventsService, private loggingService: LoggingService, private bottomSheet: MatBottomSheet, private systemService: SystemService) {}
 
   ngOnInit() {}
 
@@ -48,7 +49,7 @@ export class RemoteProgressComponent implements OnInit, OnDestroy {
   private startEventListener() {
     this.eventSource = this.events.getGlobalEventSource();
     this.eventSource.onerror = err => {
-      this.log.warn(new ErrorMessage('Error while listening to server events', err));
+      this.systemService.backendUnreachable();
       this.remoteProgressElements = null;
     };
     this.eventSource.addEventListener('activities', e => this.updateRemoteEvents(e as MessageEvent, this._scope));

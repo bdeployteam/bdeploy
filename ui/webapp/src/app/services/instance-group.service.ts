@@ -1,8 +1,8 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { HttpErrorHandlerInterceptor } from '../interceptors/error-handler.interceptor';
 import { InstanceClientAppsDto, InstanceGroupConfiguration, OperatingSystem } from '../models/gen.dtos';
+import { suppressGlobalErrorHandling } from '../utils/server.utils';
 import { ConfigService } from './config.service';
 import { Logger, LoggingService } from './logging.service';
 
@@ -46,7 +46,7 @@ export class InstanceGroupService {
     const url: string = this.cfg.config.api + InstanceGroupService.BASEPATH + '/' + name;
     this.log.debug('getInstanceGroup: ' + url);
     return this.http.get<InstanceGroupConfiguration>(url, {
-      headers: HttpErrorHandlerInterceptor.suppressGlobalErrorHandling(new HttpHeaders()),
+      headers: suppressGlobalErrorHandling(new HttpHeaders()),
     });
   }
 

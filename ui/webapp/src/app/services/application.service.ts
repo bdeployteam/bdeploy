@@ -2,10 +2,10 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { cloneDeep, isEqual } from 'lodash';
 import { Observable } from 'rxjs';
-import { HttpErrorHandlerInterceptor } from '../interceptors/error-handler.interceptor';
 import { CLIENT_NODE_NAME, EMPTY_COMMAND_CONFIGURATION, EMPTY_PARAMETER_CONFIGURATION } from '../models/consts';
 import { ApplicationConfiguration, ApplicationDescriptor, ApplicationDto, ApplicationType, InstanceNodeConfigurationDto, ManifestKey, ParameterConfiguration, ParameterDescriptor, ParameterType } from '../models/gen.dtos';
 import { ProcessConfigDto } from '../models/process.model';
+import { suppressGlobalErrorHandling } from '../utils/server.utils';
 import { ConfigService } from './config.service';
 import { InstanceGroupService } from './instance-group.service';
 import { Logger, LoggingService } from './logging.service';
@@ -41,7 +41,7 @@ export class ApplicationService {
 
     let hdrs = {};
     if (customErrorHandling) {
-      hdrs = HttpErrorHandlerInterceptor.suppressGlobalErrorHandling(new HttpHeaders);
+      hdrs = suppressGlobalErrorHandling(new HttpHeaders);
     }
 
     return this.http.get<ApplicationDto[]>(url, { headers: hdrs });

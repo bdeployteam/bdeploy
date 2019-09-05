@@ -1,5 +1,8 @@
 import { ApplicationConfiguration, ApplicationStartType, CommandConfiguration, InstanceConfiguration, InstanceGroupConfiguration, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstancePurpose, InstanceStateRecord, InstanceVersionDto, ManifestKey, ParameterConfiguration, ParameterDescriptor, ParameterType, ProcessControlConfiguration, RemoteService, SoftwareRepositoryConfiguration } from './gen.dtos';
 
+// HTTP header constant used to suppress global error handling
+export const NO_ERROR_HANDLING_HDR = 'X-No-Global-Error-Handling';
+
 // Defines the order in which instances should appear based on their purpose
 const PURPOSE_ORDER = [InstancePurpose.PRODUCTIVE, InstancePurpose.TEST, InstancePurpose.DEVELOPMENT];
 
