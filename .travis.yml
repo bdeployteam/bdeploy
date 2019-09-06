@@ -5,6 +5,9 @@ git:
   depth: false
 
 addons:
+  apt:
+    packages:
+    - libgconf-2-4
   sonarcloud:
     organization: "bdeployteam"
     token:
@@ -30,4 +33,6 @@ cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
+    - $HOME/.npm
+    - $HOME/.cache
 
