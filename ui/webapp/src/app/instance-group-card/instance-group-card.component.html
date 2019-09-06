@@ -1,4 +1,4 @@
-<mat-card class="instance-group-card" [routerLink]="['/instance/browser', currentGroup.name]" attr.cypress="group-{{currentGroup.name}}">
+<mat-card class="instance-group-card" [routerLink]="['/instance/browser', currentGroup.name]" attr.data-cy="group-{{currentGroup.name}}">
   <mat-card-header>
     <app-instance-group-logo mat-card-avatar [instanceGroupName]='currentGroup.name'></app-instance-group-logo>
     <mat-card-title class="title">{{currentGroup.name}}</mat-card-title>

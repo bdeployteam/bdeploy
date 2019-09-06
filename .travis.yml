@@ -21,7 +21,7 @@ install:
   - . ./install-jdk.sh --url 'https://api.adoptopenjdk.net/v2/binary/releases/openjdk11?openjdk_impl=hotspot&os=linux&arch=x64&release=latest&heap_size=normal&type=jdk'
 
 script:
-  - ./gradlew clean sonarqube --scan -s -PverboseTest
+  - ./gradlew clean sonarqube --scan -s -PverboseTest -PrecordCypress
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock

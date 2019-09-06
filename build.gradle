@@ -120,10 +120,6 @@ configure(actualSubprojects) {
         lintOptions = [ 'all', '-try' ]
     }
 
-    jacoco {
-        toolVersion = "0.8.2"
-    }
-
     jacocoTestReport {
         shouldRunAfter "test"
         executionData fileTree(dir: "$buildDir/jacoco").matching { include '*.exec' }
@@ -312,6 +308,11 @@ task testReport(type: TestReport) {
     destinationDir = file("$buildDir/reports/tests")
     // Include the results from the `test` task in all subprojects
     reportOn actualSubprojects*.test
+}
+
+jacocoFullReport {
+    String dir = project(':test-data').buildDir
+    executionData fileTree(dir: "$dir/jacoco").matching { include '*.exec' }
 }
 
 task test {

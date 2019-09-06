@@ -64,7 +64,11 @@ task updateToken(dependsOn: ':test-data:setupDemoServer') {
 task runCypressHeadless(type: Exec, dependsOn: updateToken) {
     workingDir "$webappDir"
     group = BasePlugin.BUILD_GROUP
-    commandLine (["${webappDir}/node_modules/.bin/cypress", "run", "--record", "--key", "a32f4a49-c18e-4942-8fb3-38928b39318e"])
+    if(project.hasProperty('recordCypress')) {
+        commandLine (["${webappDir}/node_modules/.bin/cypress", "run", "--record", "--key", "a32f4a49-c18e-4942-8fb3-38928b39318e"])
+    } else {
+        commandLine (["${webappDir}/node_modules/.bin/cypress", "run" ])
+    }
 }
 
 task runCypress(type: Exec, dependsOn: updateToken) {
@@ -82,6 +86,18 @@ task runDevCypress(type: Exec) {
     workingDir "$webappDir"
     commandLine (["${webappDir}/node_modules/.bin/cypress", "open", "--config", "baseUrl=http://localhost:4200", "--env", "backendBaseUrl=https://localhost:7701/api"])
 }
+
+// this one is required to stop the server and accumulate coverage data
+task doneWithCypressHeadless(dependsOn: ':test-data:triggerStopBDeploy') {
+    doLast {
+        println('Cypress Testing done...')
+    }
+
+    dependsOn runCypressHeadless
+}
+
+project(':test-data').tasks['triggerStopBDeploy'].mustRunAfter runCypressHeadless
+test.dependsOn doneWithCypressHeadless
 
 task cleanAngular(type:Delete) {
     delete "$webappDir/dist"

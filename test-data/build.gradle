@@ -2,6 +2,7 @@ plugins {
     id 'base'
     // need 0.1.12+ on update to gradle 5.6.0+
     id "com.github.psxpaul.execfork" version "0.1.11"
+    id "jacoco"
 }
 
 ext {
@@ -40,6 +41,11 @@ void createTasks(String prodNum) {
         args = ["product", "--hive=${buildDir}/pushTmp${prodNum}", "--import=${projectDir}/test-product-${prodNum}", "--push"]
     }
 
+    jacoco {
+        applyTo tasks["importProduct${prodNum}"]
+        applyTo tasks["product${prodNum}Hive"]
+    }
+
     build {
         dependsOn "product${prodNum}Zip"
         dependsOn "product${prodNum}HiveZip"
@@ -76,12 +82,19 @@ task initTestBDeploy(type: JavaExec) {
     args = [ "init", "--port=${testServerPort}", "--dist=ignore" ]
 }
 
+task triggerStopBDeploy() {
+    doLast {
+        println("Stopped BDeploy Server")
+    }
+}
+
 task startTestBDeploy(type: com.github.psxpaul.task.JavaExecFork, dependsOn: initTestBDeploy) {
     setupBDeployEnv(it)
     main = project(":minion").mainClassName
     classpath = project(":minion").sourceSets.main.runtimeClasspath
     args = [ "master" ]
     waitForPort = testServerPort
+    stopAfter = triggerStopBDeploy
 }
 
 task addTestBDeployUser(type: JavaExec, dependsOn: startTestBDeploy) {
@@ -99,6 +112,15 @@ task createInstanceGroup(type: JavaExec, dependsOn: checkTestBDeploy) {
 // now define the dynamic tasks for each product
 createTasks("1")
 createTasks("2")
+
+// coverage for the rest of the tasks
+jacoco {
+    applyTo initTestBDeploy
+    applyTo startTestBDeploy
+    applyTo addTestBDeployUser
+    applyTo checkTestBDeploy
+    applyTo createInstanceGroup
+}
 
 // now all tasks that depend on any of the generated tasks
 task setupDemoServer() {
