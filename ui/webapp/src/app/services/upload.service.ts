@@ -1,7 +1,7 @@
 import { HttpClient, HttpEventType, HttpHeaders, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { HttpErrorHandlerInterceptor } from '../interceptors/error-handler.interceptor';
+import { suppressGlobalErrorHandling } from '../utils/server.utils';
 import { Logger, LoggingService } from './logging.service';
 
 /** Enumeration of the possible states of an upload */
@@ -84,7 +84,7 @@ export class UploadService {
       // Suppress global error handling and enable progress reporting
       const options = {
         reportProgress: true,
-        headers: HttpErrorHandlerInterceptor.suppressGlobalErrorHandling(new HttpHeaders({ 'X-Proxy-Activity-Scope': uploadStatus.scope })),
+        headers: suppressGlobalErrorHandling(new HttpHeaders({ 'X-Proxy-Activity-Scope': uploadStatus.scope })),
       };
 
       // create a http-post request and pass the form

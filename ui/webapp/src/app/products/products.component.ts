@@ -19,7 +19,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
   sidenav: MatDrawer;
 
   public instanceGroup: string;
-  public products: Map<string, ProductDto[]>;
+  public products: Map<string, ProductDto[]> = new Map();
   public selectedProductKey: string = null;
   public productsKeys: string[];
 

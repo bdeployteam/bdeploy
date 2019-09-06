@@ -23,6 +23,7 @@ import { ApplicationEditComponent } from './application-edit/application-edit.co
 import { ClientAppsComponent } from './client-apps/client-apps.component';
 import { ClientInfoComponent } from './client-info/client-info.component';
 import { ConfigFilesBrowserComponent } from './config-files-browser/config-files-browser.component';
+import { ConnectionLostComponent } from './connection-lost/connection-lost.component';
 import { DataFilesBrowserComponent } from './data-files-browser/data-files-browser.component';
 import { ClickStopPropagationDirective } from './directives/click-stop-propagation.directive';
 import { FileDropDirective } from './directives/file-drop.directive';
@@ -137,6 +138,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     ClientAppsComponent,
     ProductInfoCardComponent,
     InstanceVersionHistoryCardComponent,
+    ConnectionLostComponent
   ],
   imports: [
     BrowserModule,
@@ -195,6 +197,7 @@ export function loadAppConfig(cfgService: ConfigService) {
   entryComponents: [
     InstanceGroupDeleteDialogComponent,
     MessageboxComponent,
+    ConnectionLostComponent,
     FileUploadComponent,
     ApplicationEditManualComponent,
     ApplicationEditOptionalComponent,

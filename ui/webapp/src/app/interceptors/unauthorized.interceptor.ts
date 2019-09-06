@@ -3,9 +3,9 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { NO_ERROR_HANDLING_HDR } from '../models/consts';
 import { AuthenticationService } from '../services/authentication.service';
 import { Logger, LoggingService } from '../services/logging.service';
-import { HttpErrorHandlerInterceptor } from './error-handler.interceptor';
 
 @Injectable()
 export class UnauthorizedInterceptor implements HttpInterceptor {
@@ -16,7 +16,7 @@ export class UnauthorizedInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<any>, next: HttpHandler) {
     return next.handle(req).pipe(
       catchError(err => {
-        if (err.status === 401  && !req.headers.has(HttpErrorHandlerInterceptor.NO_ERROR_HANDLING_HDR)) {
+        if (err.status === 401  && !req.headers.has(NO_ERROR_HANDLING_HDR)) {
           // API request unauthorized, log out the application
           this.log.debug('unauthorized request: ' + err.url);
           this.logout();

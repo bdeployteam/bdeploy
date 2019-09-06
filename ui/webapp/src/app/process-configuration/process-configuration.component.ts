@@ -22,11 +22,12 @@ import { DownloadService } from '../services/download.service';
 import { HeaderTitleService } from '../services/header-title.service';
 import { InstanceService } from '../services/instance.service';
 import { LauncherService } from '../services/launcher.service';
-import { ErrorMessage, Logger, LoggingService } from '../services/logging.service';
+import { Logger, LoggingService } from '../services/logging.service';
 import { MessageboxService } from '../services/messagebox.service';
 import { ProcessService } from '../services/process.service';
 import { ProductService } from '../services/product.service';
 import { RemoteEventsService } from '../services/remote-events.service';
+import { SystemService } from '../services/system.service';
 import { sortByTags } from '../utils/manifest.utils';
 
 export enum SidenavMode {
@@ -108,6 +109,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     private titleService: HeaderTitleService,
     private clientApps: LauncherService,
     private eventService: RemoteEventsService,
+    private systemService: SystemService,
   ) {}
 
   ngOnInit() {
@@ -120,7 +122,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
       this.updateEvents = this.eventService.getUpdateEventSource();
       this.updateEvents.onerror = err => {
-        this.log.warn(new ErrorMessage('Error while listening to instance update events', err));
+        this.systemService.backendUnreachable();
       };
       this.updateEvents.addEventListener(this.uuidParam, e => this.onRemoteInstanceUpdate(e as MessageEvent));
     });
