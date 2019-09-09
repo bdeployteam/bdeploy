@@ -28,6 +28,9 @@ Since an *Instance* requires a *Product*, an empty *Instance Group* will display
 
 Click the btn:[+] button to upload new *Products*. *Products* can be obtained by <<_building_a_product,building a *Product*>> or by downloading an existing version from another *Instance Group* on the same or another *BDeploy* server, using the btn:[Download] button on the *Product* details panel.
 
+[NOTE]
+On the BDeploy Releases page you will find some sample products for each release, see https://github.com/bdeployteam/bdeploy/releases
+
 image::images/BDeploy_Empty_Products.png[Empty Products Page, align=center, width=480, link="images/BDeploy_Empty_Products.png"]
 image::images/BDeploy_Product_Upload_Before.png[Upload Product(s), align=center, width=480, link="images/BDeploy_Product_Upload_Before.png"]
 image::images/BDeploy_Product_Upload_Success.png[Upload Product(s) (success), align=center, width=480, link="images/BDeploy_Product_Upload_Success.png"]

@@ -8,6 +8,9 @@ This chapter is intended for those who want to integrate their own *Product* to 
 
 This chapter will walk you through these artifacs, what they are for and how to define them.
 
+[NOTE]
+On the BDeploy Releases page you will find some zipped sample products for each release, see https://github.com/bdeployteam/bdeploy/releases
+
 ==== app-info.yaml
 
 The `app-info.yaml` file is one of the most important parts of *BDeploy*. It describes an *Application*, especially its start command. This *Application* may be _any_ application which contains an _executable_ (whatever kind, script, executable, etc.) and which allows 'installation' by copy to a directory. This is important, as *BDeploy* will 'install' an application by ultimately copying the application to an automatically determined internal directory and launch it from there.
