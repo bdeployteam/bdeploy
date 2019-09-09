@@ -53,23 +53,7 @@ public class RemoteDeploymentTool extends RemoteServiceTool<RemoteDeployConfig> 
             MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class);
             MasterNamedResource master = root.getNamedMaster(config.target());
             if (config.list()) {
-                out().println(String.format(OUTPUT_FORMAT, "UUID", "Name", "Tag", "Active", "Product", "Product Version",
-                        "Description"));
-
-                for (InstanceConfiguration ic : master.listInstanceConfigurations()) {
-                    String uuid = ic.uuid;
-                    InstanceStateRecord state = master.getInstanceState(uuid);
-                    if (state.installedTags.isEmpty()) {
-                        out().println(String.format(OUTPUT_FORMAT, uuid, ic.name, "-", "no-install", ic.product.getName(),
-                                ic.product.getTag(), ic.description));
-                    } else {
-                        for (String tag : state.installedTags) {
-                            boolean isActive = tag.equals(state.activeTag); // activeTag may be null.
-                            out().println(String.format(OUTPUT_FORMAT, uuid, ic.name, tag, isActive ? "*" : "",
-                                    ic.product.getName(), ic.product.getTag(), ic.description));
-                        }
-                    }
-                }
+                list(master);
                 return;
             }
 
@@ -87,6 +71,25 @@ public class RemoteDeploymentTool extends RemoteServiceTool<RemoteDeployConfig> 
 
         Exception e) {
             throw new IllegalStateException("Cannot communicate with remote", e);
+        }
+    }
+
+    private void list(MasterNamedResource master) {
+        out().println(String.format(OUTPUT_FORMAT, "UUID", "Name", "Tag", "Active", "Product", "Product Version", "Description"));
+
+        for (InstanceConfiguration ic : master.listInstanceConfigurations()) {
+            String uuid = ic.uuid;
+            InstanceStateRecord state = master.getInstanceState(uuid);
+            if (state.installedTags.isEmpty()) {
+                out().println(String.format(OUTPUT_FORMAT, uuid, ic.name, "-", "no-install", ic.product.getName(),
+                        ic.product.getTag(), ic.description));
+            } else {
+                for (String tag : state.installedTags) {
+                    boolean isActive = tag.equals(state.activeTag); // activeTag may be null.
+                    out().println(String.format(OUTPUT_FORMAT, uuid, ic.name, tag, isActive ? "*" : "", ic.product.getName(),
+                            ic.product.getTag(), ic.description));
+                }
+            }
         }
     }
 

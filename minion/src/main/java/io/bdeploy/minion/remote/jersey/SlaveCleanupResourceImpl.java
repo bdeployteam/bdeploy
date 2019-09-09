@@ -54,11 +54,9 @@ public class SlaveCleanupResourceImpl implements SlaveCleanupResource {
 
         toClean.removeAll(allRefs);
         for (Key clean : toClean) {
-            if (MetaManifest.isMetaManifest(clean)) {
-                // this check might keep alive meta manifests for one additional cleanup cycle.
-                if (MetaManifest.isParentAlive(clean, hive, toClean)) {
-                    continue;
-                }
+            // this check might keep alive meta manifests for one additional cleanup cycle.
+            if (MetaManifest.isMetaManifest(clean) && MetaManifest.isParentAlive(clean, hive, toClean)) {
+                continue;
             }
             notExecuted.add(new CleanupAction(CleanupType.DELETE_MANIFEST, clean.toString(), "Delete manifest " + clean));
         }

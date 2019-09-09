@@ -12,6 +12,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.Future;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
@@ -259,22 +260,18 @@ public class ProductManifest {
             }
         }
 
-        if (parallel) {
-            ForkJoinPool.commonPool().invokeAll(tasks).forEach(f -> {
-                try {
+        try {
+            if (parallel) {
+                for (Future<ApplicationDescriptor> f : ForkJoinPool.commonPool().invokeAll(tasks)) {
                     f.get();
-                } catch (Exception e) {
-                    throw new IllegalStateException("Failed to import", e);
                 }
-            });
-        } else {
-            for (Callable<ApplicationDescriptor> c : tasks) {
-                try {
+            } else {
+                for (Callable<ApplicationDescriptor> c : tasks) {
                     c.call();
-                } catch (Exception e) {
-                    throw new IllegalStateException("Failed to import", e);
                 }
             }
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to import", e);
         }
     }
 

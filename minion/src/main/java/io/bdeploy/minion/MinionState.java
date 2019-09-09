@@ -27,7 +27,7 @@ public class MinionState {
      *
      * @deprecated only used to migrate old scheme to new scheme.
      */
-    @Deprecated
+    @Deprecated(forRemoval = true, since = "1.2.0")
     public SortedMap<String, Manifest.Key> activeMasterVersions = new TreeMap<>();
 
     /**
@@ -35,7 +35,7 @@ public class MinionState {
      *
      * @deprecated only used to migrate old scheme to new scheme.
      */
-    @Deprecated
+    @Deprecated(forRemoval = true, since = "1.2.0")
     public SortedMap<String, Manifest.Key> activeVersions = new TreeMap<>();
 
     /**

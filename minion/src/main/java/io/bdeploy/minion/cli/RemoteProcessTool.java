@@ -24,7 +24,6 @@ import io.bdeploy.minion.cli.RemoteProcessTool.RemoteProcessConfig;
 public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
 
     private static final String PROCESS_STATUS_FORMAT = "%1$-25s %2$-14s %3$-20s %4$-10s %5$-3s %6$20s %7$-10s %8$5s";
-    private static final SimpleDateFormat DF = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
     public @interface RemoteProcessConfig {
 
@@ -73,36 +72,42 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
 
         InstanceStatusDto status = master.getStatus(config.uuid());
         if (config.application() == null) {
-            out().println(
-                    String.format(PROCESS_STATUS_FORMAT, "Name", "ID", "Status", "Node", "Tag", "Started At", "OS User", "PID"));
-            for (Entry<String, InstanceNodeStatusDto> nodeEntry : status.node2Applications.entrySet()) {
-                InstanceNodeStatusDto node = nodeEntry.getValue();
-                if (node.activeTag == null) {
-                    continue;
-                }
-
-                String nodeName = nodeEntry.getKey();
-
-                Map<String, ProcessStatusDto> allProc = new TreeMap<>();
-                allProc.putAll(node.deployed.get(node.activeTag).deployed);
-                allProc.putAll(node.runningOrScheduled);
-
-                for (Map.Entry<String, ProcessStatusDto> procEntry : allProc.entrySet()) {
-                    ProcessStatusDto ps = procEntry.getValue();
-                    ProcessDetailDto detail = ps.processDetails;
-
-                    out().println(String.format(PROCESS_STATUS_FORMAT, ps.appName, ps.appUid, ps.processState.name(), nodeName,
-                            node.activeTag, detail == null ? "-" : DF.format(detail.startTime),
-                            detail == null ? "-" : detail.user, detail == null ? "-" : Long.toString(detail.pid)));
-
-                    if (isVerbose() && detail != null) {
-                        printProcessDetailsRec(detail, "  ");
-                    }
-                }
-            }
+            printAllProcessDetails(status);
         } else {
             ProcessStatusDto appStatus = status.getAppStatus(config.application());
             out().println(appStatus);
+        }
+    }
+
+    private void printAllProcessDetails(InstanceStatusDto status) {
+        SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+
+        out().println(
+                String.format(PROCESS_STATUS_FORMAT, "Name", "ID", "Status", "Node", "Tag", "Started At", "OS User", "PID"));
+        for (Entry<String, InstanceNodeStatusDto> nodeEntry : status.node2Applications.entrySet()) {
+            InstanceNodeStatusDto node = nodeEntry.getValue();
+            if (node.activeTag == null) {
+                continue;
+            }
+
+            String nodeName = nodeEntry.getKey();
+
+            Map<String, ProcessStatusDto> allProc = new TreeMap<>();
+            allProc.putAll(node.deployed.get(node.activeTag).deployed);
+            allProc.putAll(node.runningOrScheduled);
+
+            for (Map.Entry<String, ProcessStatusDto> procEntry : allProc.entrySet()) {
+                ProcessStatusDto ps = procEntry.getValue();
+                ProcessDetailDto detail = ps.processDetails;
+
+                out().println(String.format(PROCESS_STATUS_FORMAT, ps.appName, ps.appUid, ps.processState.name(), nodeName,
+                        node.activeTag, detail == null ? "-" : df.format(detail.startTime), detail == null ? "-" : detail.user,
+                        detail == null ? "-" : Long.toString(detail.pid)));
+
+                if (isVerbose() && detail != null) {
+                    printProcessDetailsRec(detail, "  ");
+                }
+            }
         }
     }
 
@@ -113,13 +118,6 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         for (ProcessDetailDto child : pdd.children) {
             printProcessDetailsRec(child, indent + "  ");
         }
-    }
-
-    private String shortenFront(String str, int length) {
-        if (str.length() > length) {
-            return "..." + str.substring(str.length() - length - 3);
-        }
-        return str;
     }
 
 }

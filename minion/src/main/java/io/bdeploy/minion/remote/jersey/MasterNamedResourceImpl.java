@@ -74,6 +74,10 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         return im.getState(hive).setMigrationProvider(() -> migrate(im.getConfiguration().uuid));
     }
 
+    /**
+     * @deprecated only used to migrate state, see {@link #getState(InstanceManifest, BHive)}
+     */
+    @Deprecated(forRemoval = true, since = "1.2.0")
     private InstanceStateRecord migrate(String instance) {
         SortedSet<String> installed = new TreeSet<>();
 
