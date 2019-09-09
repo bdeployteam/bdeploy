@@ -8,17 +8,17 @@ Cypress.Commands.add('createInstance', function(name) {
   // attention: the button contains 'add' not '+' (mat-icon('add') = '+')
   cy.get('button').contains('add').click();
 
-  cy.get('[placeholder="Name"]').type(name)
-  cy.get('[placeholder="Description"]').type('Test Instance for automated test')
+  cy.get('[placeholder=Name]').type(name)
+  cy.get('[placeholder=Description]').type('Test Instance for automated test')
 
   // angular drop down is something very different from a native HTML select/option
-  cy.get('[placeholder="Purpose"]').click()
+  cy.get('[placeholder=Purpose]').click()
   cy.get('mat-option').contains('TEST').click()
 
-  cy.get('[placeholder="Product"]').click()
+  cy.get('[placeholder=Product]').click()
   cy.get('mat-option').contains('demo/product').click();
 
-  cy.get('[placeholder="Version"]').click();
+  cy.get('[placeholder=Version]').click();
   cy.get('mat-option').contains('2.0.0').click();
 
   // finally the target, which is the configured backend with the configured token.
@@ -35,5 +35,9 @@ Cypress.Commands.add('createInstance', function(name) {
     }
   })
 
-  cy.get('button').contains('SAVE').click();
+  return cy.get('mat-toolbar-row').contains('UUID').get('b').then(el => {
+    cy.get('button').contains('SAVE').click();
+    return cy.wrap(el.text())
+  });
+
 })
