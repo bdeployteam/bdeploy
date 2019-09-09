@@ -273,6 +273,16 @@ appInfo:
 
 Now that you have a well-defined *Product* with one or more *Applications*, you will want to build/package that *Product* to be usable with *BDeploy*.
 
+==== Via ZIP File and Web UI
+
+The well-defined *Product* directory including *Applications* can be zipped and imported directly from the web interface.
+
+The following conditions must be fulfilled for a successful import:
+
+* ZIP files must be self-contained, e.g. only relative paths are allowed and no leaving of the zipped structure via ".." paths.
+* YAML files must follow standard naming (product-info.yaml).
+* External dependencies must either be included in the ZIP or already be available in the *Instance Group*. *Software Repositories* are not (yet) supported.
+
 ==== Via CLI
 
 Once you have a `product-info.yaml` with it's `product-version.yaml` and all the `app-info.yaml` files in their respective *Application* directories, you can use the CLI to import the product as a single piece.
