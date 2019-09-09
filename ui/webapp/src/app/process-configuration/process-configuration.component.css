@@ -54,7 +54,8 @@
   width: 100%;
   flex-direction: row;
 
-  height: 0px; /** Required so that FF scrolls the content **/
+  /** setting height destroys electron UI tests, use min-height */
+  min-height: 0px; /** Required so that FF scrolls the content **/
 }
 
 .side-nav-container {

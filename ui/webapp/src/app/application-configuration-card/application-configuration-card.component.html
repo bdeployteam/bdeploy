@@ -26,7 +26,8 @@
   </div>
   <mat-card-content>
     <div class="content-row">
-      <div class="mat-body app-description">{{ appConfig.application.tag }}</div>
+      <div *ngIf='!appConfig.start.executable' class="mat-body app-description"><mat-progress-spinner [diameter]='16'></mat-progress-spinner>Initializing...</div>
+      <div *ngIf='appConfig.start.executable' class="mat-body app-description">{{ appConfig.application.tag }}</div>
       <span class="spacer"></span>
       <div class="icons" *ngIf="isClient">
         <mat-icon class="icon" [svgIcon]='appOs' title="{{appOs}} Client Application"></mat-icon>

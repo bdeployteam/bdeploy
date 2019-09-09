@@ -69,6 +69,10 @@ public class ApplicationConfiguration {
         Path manifestInstallPath = Paths
                 .get(valueResolver.apply(SpecialVariablePrefix.MANIFEST_REFERENCE.format(application.toString())));
 
+        if (start.executable == null) {
+            throw new IllegalStateException("No executable set for application '" + name + "' (" + uid + ")");
+        }
+
         add.start.add(manifestInstallPath.resolve(ParameterConfiguration.process(start.executable, valueResolver)).toString());
         start.parameters.stream().map(pc -> pc.renderDescriptor(valueResolver)).forEach(add.start::addAll);
 
