@@ -85,7 +85,7 @@ public class PathHelper {
      * Returns the extension of a file.
      */
     public static String getExtension(String file) {
-        int position = file.lastIndexOf(".");
+        int position = file.lastIndexOf('.');
         if (position == -1) {
             return "";
         }

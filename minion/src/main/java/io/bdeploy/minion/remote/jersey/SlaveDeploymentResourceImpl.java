@@ -56,7 +56,7 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
     /**
      * @deprecated only used to migrate state, see {@link #getState(InstanceNodeManifest, BHive)}
      */
-    @Deprecated
+    @Deprecated(forRemoval = true, since = "1.2.0")
     private InstanceStateRecord migrateState(String uuid) {
         InstanceStateRecord record = new InstanceStateRecord();
         // find all versions of the given INM.

@@ -9,7 +9,6 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -115,17 +114,13 @@ public class LauncherSplash implements LauncherSplashDisplay {
 
     /** Tries to find an image file with the given prefix */
     private BufferedImage findFile(String prefix) {
-        Set<String> supportedTypes = Arrays.stream(ImageIO.getReaderFormatNames()).map(f -> f.toLowerCase())
+        Set<String> supportedTypes = Arrays.stream(ImageIO.getReaderFormatNames()).map(String::toLowerCase)
                 .collect(Collectors.toSet());
         File appFile = appDir.toFile();
-        File files[] = appFile.listFiles(new FileFilter() {
-
-            @Override
-            public boolean accept(File pathname) {
-                String name = pathname.getName();
-                String extension = PathHelper.getExtension(name).toLowerCase();
-                return name.startsWith(prefix) && supportedTypes.contains(extension);
-            }
+        File[] files = appFile.listFiles(pathname -> {
+            String name = pathname.getName();
+            String extension = PathHelper.getExtension(name).toLowerCase();
+            return name.startsWith(prefix) && supportedTypes.contains(extension);
         });
 
         // Take first applicable file
