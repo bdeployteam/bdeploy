@@ -61,19 +61,27 @@ task updateToken(dependsOn: ':test-data:setupDemoServer') {
     }
 }
 
+String cypressCmd() {
+    if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
+        return "cypress";
+    } else {
+        return "cypress.cmd";
+    }
+}
+
 task runCypressHeadless(type: Exec, dependsOn: updateToken) {
     workingDir "$webappDir"
     group = BasePlugin.BUILD_GROUP
     if(project.hasProperty('recordCypress')) {
-        commandLine (["${webappDir}/node_modules/.bin/cypress", "run", "--record", "--key", "a32f4a49-c18e-4942-8fb3-38928b39318e"])
+        commandLine (["${webappDir}/node_modules/.bin/" + cypressCmd(), "run", "--record", "--key", "a32f4a49-c18e-4942-8fb3-38928b39318e"])
     } else {
-        commandLine (["${webappDir}/node_modules/.bin/cypress", "run" ])
+        commandLine (["${webappDir}/node_modules/.bin/" + cypressCmd(), "run" ])
     }
 }
 
 task runCypress(type: Exec, dependsOn: updateToken) {
     workingDir "$webappDir"
-    commandLine (["${webappDir}/node_modules/.bin/cypress", "open"])
+    commandLine (["${webappDir}/node_modules/.bin/" + cypressCmd(), "open"])
 }
 
 task runDevCypress(type: Exec) {
@@ -84,7 +92,7 @@ task runDevCypress(type: Exec) {
         println("-----------------------------------------------------------------------------")
     }
     workingDir "$webappDir"
-    commandLine (["${webappDir}/node_modules/.bin/cypress", "open", "--config", "baseUrl=http://localhost:4200", "--env", "backendBaseUrl=https://localhost:7701/api"])
+    commandLine (["${webappDir}/node_modules/.bin/" + cypressCmd(), "open", "--config", "baseUrl=http://localhost:4200", "--env", "backendBaseUrl=https://localhost:7701/api"])
 }
 
 // this one is required to stop the server and accumulate coverage data
