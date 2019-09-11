@@ -26,3 +26,14 @@
 
 import './bdeploy.login'
 import './bdeploy.instance'
+import './bdeploy.node'
+import './dragdrop'
+
+Cypress.Commands.add('clickContextMenuItem', { prevSubject: true}, function(subject, item) {
+  let wrapped = cy.wrap(subject);
+
+  wrapped.find('button').contains('more_vert').click();
+  cy.get('[role=menuitem]').contains(item).should('be.enabled').click();
+
+  return wrapped;
+})

@@ -1,4 +1,4 @@
-<mat-card [ngClass]="getCardStyle()" matRipple>
+<mat-card [ngClass]="getCardStyle()" matRipple attr.data-cy='{{isActive ? "active" : "" }}'>
   <div class="flex-row">
     <div class='header-icon'>
         <mat-progress-spinner *ngIf="isLoading" diameter="24" color="accent" mode="indeterminate"></mat-progress-spinner>

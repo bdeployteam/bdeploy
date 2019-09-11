@@ -1,12 +1,13 @@
 Cypress.Commands.add('createInstance', function(name) {
   cy.visit('/');
-  cy.get('[data-cy=group-Test]').first().click();
+  cy.get('input[hint=Filter]').type('Test');
+  cy.get('[data-cy=group-Test]').should('have.length', 1).click();
 
   // wait until the progress spinner disappears
   cy.get('mat-progress-spinner').should('not.exist')
 
   // attention: the button contains 'add' not '+' (mat-icon('add') = '+')
-  cy.get('button').contains('add').click();
+  cy.contains('button', 'add').click();
 
   cy.get('[placeholder=Name]').type(name)
   cy.get('[placeholder=Description]').type('Test Instance for automated test')
@@ -25,8 +26,8 @@ Cypress.Commands.add('createInstance', function(name) {
   cy.get('[placeholder="Master URL"]').type(Cypress.env('backendBaseUrl'))
 
   cy.get('body').then($body => {
-    if($body.find('mat-option').length) {
-      cy.get('mat-option').contains('localhost').click();
+    if($body.find('mat-option:contains(localhost)').length) {
+      cy.contains('mat-option', 'localhost').click();
     } else {
       cy.fixture('token.json').then(fixture => {
         // don't use .type(fixture.token) as this mimiks a typing user (delay)
@@ -40,4 +41,28 @@ Cypress.Commands.add('createInstance', function(name) {
     return cy.wrap(el.text())
   });
 
+})
+
+Cypress.Commands.add('getLatestInstanceVersion', function() {
+  cy.contains('mat-toolbar', 'Instance Versions').should('exist').and('be.visible')
+  return cy.get('app-instance-version-card').first()
+})
+
+Cypress.Commands.add('getActiveInstanceVersion', function() {
+  return cy.get('mat-card[data-cy=active]').should('have.length', 1).closest('app-instance-version-card')
+})
+
+Cypress.Commands.add('addAndSetOptionalParameter', function(panel, name, value) {
+  cy.contains('mat-expansion-panel', panel).as('panel');
+
+  cy.get('@panel').click();
+  cy.get('@panel').contains('button', 'Manage Optional').click();
+
+  cy.get('[placeholder=Filter').type(name);
+
+  cy.get('mat-dialog-container').contains('td', name).closest('tr').find('mat-checkbox').click();
+  cy.get('mat-dialog-container').contains('button', 'Save').click();
+
+  cy.get('@panel').find('[placeholder="' + name + '"]').should('exist')
+  cy.get('@panel').find('[placeholder="' + name + '"]').clear().type(value)
 })

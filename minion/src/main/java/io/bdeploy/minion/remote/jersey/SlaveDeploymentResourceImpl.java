@@ -156,7 +156,8 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
     public InstanceStateRecord getInstanceState(String instanceId) {
         InstanceNodeManifest inmf = findInstanceNodeManifest(instanceId);
         if (inmf == null) {
-            return null;
+            // happens if no version of the instance was actually ever pushed to the slave.
+            return new InstanceStateRecord();
         }
         return getState(inmf, root.getHive()).read();
     }
