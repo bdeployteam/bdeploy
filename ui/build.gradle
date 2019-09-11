@@ -72,16 +72,18 @@ String cypressCmd() {
 task runCypressHeadless(type: Exec, dependsOn: updateToken) {
     workingDir "$webappDir"
     group = BasePlugin.BUILD_GROUP
+    def port = project(":test-data").testServerPort
     if(project.hasProperty('recordCypress')) {
-        commandLine (["${webappDir}/node_modules/.bin/" + cypressCmd(), "run", "--record", "--key", "a32f4a49-c18e-4942-8fb3-38928b39318e"])
+        commandLine (["${webappDir}/node_modules/.bin/" + cypressCmd(), "run", "--record", "--key", "a32f4a49-c18e-4942-8fb3-38928b39318e", "--config", "baseUrl=https://localhost:${port}", "--env", "backendBaseUrl=https://localhost:${port}/api"])
     } else {
-        commandLine (["${webappDir}/node_modules/.bin/" + cypressCmd(), "run" ])
+        commandLine (["${webappDir}/node_modules/.bin/" + cypressCmd(), "run", "--config", "baseUrl=https://localhost:${port}", "--env", "backendBaseUrl=https://localhost:${port}/api"])
     }
 }
 
 task runCypress(type: Exec, dependsOn: updateToken) {
     workingDir "$webappDir"
-    commandLine (["${webappDir}/node_modules/.bin/" + cypressCmd(), "open"])
+    def port = project(":test-data").testServerPort
+    commandLine (["${webappDir}/node_modules/.bin/" + cypressCmd(), "open", "--config", "baseUrl=https://localhost:${port}", "--env", "backendBaseUrl=https://localhost:${port}/api"])
 }
 
 task runDevCypress(type: Exec) {
