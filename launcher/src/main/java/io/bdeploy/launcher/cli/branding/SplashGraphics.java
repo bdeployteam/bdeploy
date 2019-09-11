@@ -33,8 +33,8 @@ final class SplashGraphics extends PanelDoubleBuffered implements LauncherSplash
     private String statusText;
     private int progressMax = 0;
     private int progressCurrent = 0;
-    private Color progressColor = Color.DARK_GRAY;
-    private Color textColor = Color.BLACK;
+    private Color progressColor = Color.WHITE;
+    private Color textColor = Color.WHITE;
 
     public void setText(Rectangle text) {
         this.text = text;

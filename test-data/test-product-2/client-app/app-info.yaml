@@ -1,5 +1,22 @@
 name: "Client Application"
 
+branding:
+  icon: "branding/app.ico"
+  splash:
+    image: "branding/splash.bmp"
+    textRect:
+      x: 15
+      y: 220
+      width: 450
+      height: 20
+      foreground: "#ffffff"
+    progressRect:
+      x: 15
+      y: 245
+      width: 450
+      height: 12
+      foreground: "#fbf315"
+
 supportedOperatingSystems:
   - LINUX
   - WINDOWS

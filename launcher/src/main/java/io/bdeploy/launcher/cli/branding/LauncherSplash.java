@@ -62,27 +62,27 @@ public class LauncherSplash implements LauncherSplashDisplay {
         splashComp.setStatusText("Loading");
         splash.add(splashComp);
 
-        // try to load previously stored splash
+        // try to load previously stored splash or use default
         BufferedImage splashImage = loadSplashImage();
         if (splashImage != null) {
             splashComp.setImage(splashImage);
         } else {
-            // Setup default text and alignment
-            int textWidth = 60;
-            int textHeight = 20;
-            splashComp.setText(new Rectangle((splash.getWidth() - textWidth) / 2, (splash.getHeight() - textHeight) / 2,
-                    textWidth, textHeight));
+            splashImage = loadResource("/splash.bmp");
+            if (splashImage != null) {
+                splashComp.setImage(splashImage);
+            }
+            splashComp.setText(new Rectangle(15, 220, 450, 20));
+            splashComp.setProgress(new Rectangle(15, 245, 450, 12));
         }
 
-        // Try to load previously stored icon
+        // Try to load previously stored icon or use default
         BufferedImage iconImage = loadIconImage();
         if (iconImage != null) {
             splash.setIconImage(iconImage);
         } else {
-            try (InputStream in = getClass().getResourceAsStream("/logo128.png")) {
-                splash.setIconImage(ImageIO.read(in));
-            } catch (Exception ex) {
-                log.warn("Cannot load embedded icon image.", ex);
+            iconImage = loadResource("/logo128.png");
+            if (iconImage != null) {
+                splash.setIconImage(iconImage);
             }
         }
 
@@ -100,6 +100,16 @@ public class LauncherSplash implements LauncherSplashDisplay {
         // Show splash
         WindowHelper.center(splash);
         splash.setVisible(true);
+    }
+
+    /** Tries to load an embedded resource */
+    private BufferedImage loadResource(String path) {
+        try (InputStream in = getClass().getResourceAsStream(path)) {
+            return ImageIO.read(in);
+        } catch (Exception ex) {
+            log.warn("Cannot load embedded resource {}.", path, ex);
+            return null;
+        }
     }
 
     /** Tries to load the stored splash screen */
@@ -184,21 +194,24 @@ public class LauncherSplash implements LauncherSplashDisplay {
         }
 
         // colors
-        Color textColor = Color.BLACK;
-        Color progressColor = Color.DARK_GRAY;
         if (splashCfg.textRect != null && splashCfg.textRect.foreground != null) {
-            textColor = Color.decode(splashCfg.textRect.foreground);
+            Color textColor = Color.decode(splashCfg.textRect.foreground);
+            splashComp.setTextColor(textColor);
         }
         if (splashCfg.progressRect != null && splashCfg.progressRect.foreground != null) {
-            progressColor = Color.decode(splashCfg.progressRect.foreground);
+            Color progressColor = Color.decode(splashCfg.progressRect.foreground);
+            splashComp.setProgressColor(progressColor);
         }
 
         // text and progress
-        splashComp.setTextColor(textColor);
-        splashComp.setText(convert(splashCfg.textRect));
-
-        splashComp.setProgressColor(progressColor);
-        splashComp.setProgress(convert(splashCfg.progressRect));
+        Rectangle textRect = convert(splashCfg.textRect);
+        if (textRect != null) {
+            splashComp.setText(textRect);
+        }
+        Rectangle progressRect = convert(splashCfg.progressRect);
+        if (progressRect != null) {
+            splashComp.setProgress(progressRect);
+        }
 
         // size and position
         splash.setSize(splashComp.getWidth(), splashComp.getHeight());
