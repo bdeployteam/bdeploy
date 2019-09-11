@@ -8,7 +8,13 @@ plugins {
 ext {
     testServerRoot = "${buildDir}/test-root"
     testServerHost = InetAddress.getLocalHost().getCanonicalHostName()
-    testServerPort = 7707
+    testServerPort = randomServerPort()
+}
+
+int randomServerPort() {
+    new ServerSocket(0).withCloseable {
+        return it.getLocalPort();
+    }
 }
 
 void createTasks(String prodNum) {
