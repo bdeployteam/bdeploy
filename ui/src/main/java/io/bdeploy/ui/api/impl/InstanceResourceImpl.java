@@ -184,10 +184,8 @@ public class InstanceResourceImpl implements InstanceResource {
                 if (state.activeTag != null) {
                     try {
                         InstanceManifest mf = InstanceManifest.of(hive, new Manifest.Key(imKey.getName(), state.activeTag));
-                        if (mf.getConfiguration().product != null && !config.product.equals(mf.getConfiguration().product)) {
-                            activeProduct = mf.getConfiguration().product;
-                            activeProductDto = ProductDto.create(ProductManifest.of(hive, activeProduct));
-                        }
+                        activeProduct = mf.getConfiguration().product;
+                        activeProductDto = ProductDto.create(ProductManifest.of(hive, activeProduct));
                     } catch (Exception e) {
                         // ignore: product of active version not found
                     }

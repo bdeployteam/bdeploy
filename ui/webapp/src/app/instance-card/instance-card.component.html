@@ -15,15 +15,19 @@
   </mat-card-header>
   <mat-card-content>
     <p>{{instanceDto.instanceConfiguration.description}}</p>
-
     <p>
-        <span *ngIf='instanceDto.productDto'>Product: <b [matTooltip]='instanceDto.productDto.name'>{{instanceDto.productDto.description}}</b></span>
-        <span *ngIf='!instanceDto.productDto'>Product: <b>{{instanceDto.instanceConfiguration.product.name}}</b></span>
-        Tag: <b>{{instanceDto.instanceConfiguration.product.tag}}</b>
-        <span *ngIf='!instanceDto.productDto'>&nbsp;<span class="product-unavailable" matTooltip="Required product version is not available.">N/A</span></span>
+      <span *ngIf='instanceDto.productDto'>Product: <b [matTooltip]='instanceDto.productDto.name'>{{instanceDto.productDto.description}}</b></span>
+      <span *ngIf='!instanceDto.productDto'>Product: <b>{{instanceDto.instanceConfiguration.product.name}}</b></span>
 
-        <span *ngIf='instanceDto.activeProduct'>&nbsp; <b>(</b>currently running -- Product Tag: <b>{{instanceDto.activeProduct.tag}}
-          <span *ngIf='!instanceDto.activeProductDto'>&nbsp;<span class="product-unavailable" matTooltip="Required product version is not available.">N/A</span></span>)</b></span>
+      <span *ngIf='instanceDto.activeProduct'>&nbsp;
+        Active Product Version: <b>{{instanceDto.activeProduct.tag}}</b>&nbsp;
+        <span *ngIf='!instanceDto.activeProductDto' class="product-unavailable" matTooltip="Required product version is not available.">N/A</span>
+      </span>
+
+      <span *ngIf='!instanceDto.activeProduct'>&nbsp;
+        Product Version: <b>{{instanceDto.instanceConfiguration.product.tag}}</b>&nbsp;
+        <span *ngIf='!instanceDto.productDto' class="product-unavailable" matTooltip="Required product version is not available.">N/A</span>
+      </span>
     </p>
-  </mat-card-content>
+</mat-card-content>
 </mat-card>
