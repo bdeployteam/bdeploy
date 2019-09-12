@@ -28,7 +28,7 @@ import { ProcessService } from '../services/process.service';
 import { ProductService } from '../services/product.service';
 import { RemoteEventsService } from '../services/remote-events.service';
 import { SystemService } from '../services/system.service';
-import { sortByTags } from '../utils/manifest.utils';
+import { compareTags, sortByTags } from '../utils/manifest.utils';
 
 export enum SidenavMode {
   Applications,
@@ -728,8 +728,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     if (toggle.checked) {
       return true;
     }
-
-    return tag.key.tag >= this.selectedConfig.version.product.tag;
+    return compareTags(tag.key.tag, this.selectedConfig.version.product.tag) >= 0;
   }
 
   /**
