@@ -1,11 +1,15 @@
 package io.bdeploy.minion.cli;
 
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
+import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
@@ -17,16 +21,22 @@ import io.bdeploy.minion.cli.RemoteDeploymentTool.RemoteDeployConfig;
 @CliName("remote-deployment")
 public class RemoteDeploymentTool extends RemoteServiceTool<RemoteDeployConfig> {
 
-    private static final String OUTPUT_FORMAT = "%1$-15s %2$-20s %3$-4s %4$11s %5$-25s %6$20s %7$s";
+    private static final String OUTPUT_FORMAT = "%1$-15s %2$-20s %3$-4s %4$9s %5$11s %6$-25s %7$20s %8$s";
 
     public @interface RemoteDeployConfig {
 
-        @Help("Target hive name, must be created up front.")
+        @Help("Target instance group name, must be created up front.")
         @EnvironmentFallback("REMOTE_BHIVE")
-        String target();
+        String instanceGroup();
 
-        @Help("Name of the manifest to deploy")
-        String manifest();
+        @Help("UUID of the instance to manipulate")
+        String uuid();
+
+        @Help("Tag of the instance to manipulate")
+        String tag();
+
+        @Help("Product tag to update to")
+        String updateTo();
 
         @Help(value = "List deployments on the remote", arg = false)
         boolean list() default false;
@@ -48,17 +58,25 @@ public class RemoteDeploymentTool extends RemoteServiceTool<RemoteDeployConfig> 
     @Override
     protected void run(RemoteDeployConfig config, RemoteService svc) {
         try {
-            helpAndFailIfMissing(config.target(), "Missing --target");
+            helpAndFailIfMissing(config.instanceGroup(), "Missing --instanceGroup");
 
             MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class);
-            MasterNamedResource master = root.getNamedMaster(config.target());
+            MasterNamedResource master = root.getNamedMaster(config.instanceGroup());
             if (config.list()) {
                 list(master);
                 return;
+            } else if (config.updateTo() != null) {
+                helpAndFailIfMissing(config.uuid(), "Missing --uuid");
+
+                // update the product tag...
+                master.updateTo(config.uuid(), config.updateTo());
+
+                return;
             }
 
-            helpAndFailIfMissing(config.manifest(), "Missing --manifest");
-            Manifest.Key key = Manifest.Key.parse(config.manifest());
+            helpAndFailIfMissing(config.uuid(), "Missing --uuid");
+            helpAndFailIfMissing(config.tag(), "Missing --tag");
+            Manifest.Key key = new Manifest.Key(InstanceManifest.getRootName(config.uuid()), config.tag());
 
             if (config.install()) {
                 master.install(key);
@@ -75,22 +93,28 @@ public class RemoteDeploymentTool extends RemoteServiceTool<RemoteDeployConfig> 
     }
 
     private void list(MasterNamedResource master) {
-        out().println(String.format(OUTPUT_FORMAT, "UUID", "Name", "Tag", "Active", "Product", "Product Version", "Description"));
+        out().println(String.format(OUTPUT_FORMAT, "UUID", "Name", "Tag", "Installed", "Active", "Product", "Product Version",
+                "Description"));
 
-        for (InstanceConfiguration ic : master.listInstanceConfigurations()) {
-            String uuid = ic.uuid;
-            InstanceStateRecord state = master.getInstanceState(uuid);
-            if (state.installedTags.isEmpty()) {
-                out().println(String.format(OUTPUT_FORMAT, uuid, ic.name, "-", "no-install", ic.product.getName(),
-                        ic.product.getTag(), ic.description));
-            } else {
-                for (String tag : state.installedTags) {
-                    boolean isActive = tag.equals(state.activeTag); // activeTag may be null.
-                    out().println(String.format(OUTPUT_FORMAT, uuid, ic.name, tag, isActive ? "*" : "", ic.product.getName(),
-                            ic.product.getTag(), ic.description));
-                }
+        SortedMap<String, InstanceStateRecord> stateCache = new TreeMap<>();
+        master.listInstanceConfigurations(false).entrySet().stream().sorted((a, b) -> {
+            int x = a.getValue().uuid.compareTo(b.getValue().uuid);
+            if (x != 0) {
+                return x;
             }
-        }
+            return Long.compare(Long.valueOf(b.getKey().getTag()), Long.valueOf(a.getKey().getTag()));
+        }).forEachOrdered(e -> {
+            String uuid = e.getValue().uuid;
+            InstanceStateRecord state = stateCache.computeIfAbsent(uuid, u -> master.getInstanceState(u));
+            InstanceConfiguration ic = e.getValue();
+
+            boolean isActive = e.getKey().getTag().equals(state.activeTag); // activeTag may be null.
+            boolean isInstalled = state.installedTags.contains(e.getKey().getTag());
+
+            out().println(
+                    String.format(OUTPUT_FORMAT, uuid, ic.name, e.getKey().getTag(), isInstalled ? "*" : "", isActive ? "*" : "",
+                            e.getValue().product.getName(), e.getValue().product.getTag(), e.getValue().description));
+        });
     }
 
 }

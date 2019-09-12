@@ -6,6 +6,7 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import io.bdeploy.common.util.TemplateHelper;
+import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
 
 /**
  * Describes a single parameter as configured in a configuration UI.
@@ -31,6 +32,21 @@ public class ParameterConfiguration {
      * line, but with variables still in place.
      */
     public final List<String> preRendered = new ArrayList<>();
+
+    public void preRender(ParameterDescriptor desc) {
+        preRendered.clear();
+
+        if (desc.hasValue) {
+            if (desc.valueAsSeparateArg) {
+                preRendered.add(desc.parameter);
+                preRendered.add(value);
+            } else {
+                preRendered.add(desc.parameter + desc.valueSeparator + value);
+            }
+        } else {
+            preRendered.add(desc.parameter);
+        }
+    }
 
     public List<String> renderDescriptor(UnaryOperator<String> valueResolver) {
         return preRendered.stream().map(a -> process(a, valueResolver)).collect(Collectors.toList());

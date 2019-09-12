@@ -14,7 +14,7 @@ processControl:
   noOfRetries: 2
 
 startCommand:
-  launcherPath: "{{WINDOWS:launch.bat}}{{LINUX:launch.sh}}"
+  launcherPath: "{{WINDOWS:launch2.bat}}{{LINUX:launch2.sh}}"
   parameters:
     - uid: "param.sleep"
       name: "Sleep Timeout"
@@ -55,7 +55,7 @@ startCommand:
       longDescription: "A fixed parameter"
       groupName: "Test Parameters"
       parameter: "--text"
-      defaultValue: "FIXED"
+      defaultValue: "SECOND FIXED VALUE"
       mandatory: true
       fixed: true
       type: STRING

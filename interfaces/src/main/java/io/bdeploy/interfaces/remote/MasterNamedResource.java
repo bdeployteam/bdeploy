@@ -1,7 +1,7 @@
 package io.bdeploy.interfaces.remote;
 
-import java.util.Collection;
 import java.util.List;
+import java.util.SortedMap;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -61,6 +61,16 @@ public interface MasterNamedResource {
     @POST
     @Path("/remove")
     public void remove(Manifest.Key key);
+
+    /**
+     * Create a new instance version by updating the underlying product to the given tag.
+     *
+     * @param uuid the UUID of the instance to update
+     * @param productTag the tag of the product to update to.
+     */
+    @POST
+    @Path("/updateTo")
+    public void updateTo(@QueryParam("u") String uuid, @QueryParam("t") String productTag);
 
     /**
      * Fetches the persistent state of a single instance.
@@ -192,6 +202,6 @@ public interface MasterNamedResource {
      */
     @GET
     @Path("/instances")
-    public Collection<InstanceConfiguration> listInstanceConfigurations();
+    public SortedMap<Manifest.Key, InstanceConfiguration> listInstanceConfigurations(@QueryParam("l") boolean latestOnly);
 
 }
