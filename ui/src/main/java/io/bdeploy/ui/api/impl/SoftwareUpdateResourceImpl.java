@@ -8,7 +8,6 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -111,7 +110,7 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
         try {
             // Download the hive to a temporary location
             Files.copy(inputStream, targetFile);
-            return Collections.singletonList(UpdateHelper.importUpdate(targetFile, unpackTmp, getHive()));
+            return UpdateHelper.importUpdate(targetFile, unpackTmp, getHive());
         } catch (IOException e) {
             throw new WebApplicationException("Failed to upload file: " + e.getMessage(), Status.BAD_REQUEST);
         } finally {

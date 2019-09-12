@@ -73,6 +73,7 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
             try (JerseyServer srv = new JerseyServer(state.port, ks, state.keystorePass)) {
                 srv.setAuditor(new RollingFileAuditor(r.getAuditLogDir()));
                 r.setUpdateManager(new JerseyAwareMinionUpdateManager(srv));
+                r.runPostUpdate(true);
 
                 delegate.setDelegate(srv.getSseActivityReporter());
                 registerMasterResources(srv, config.publishWebapp(), config.allowCors(), r, srv.getSseActivityReporter());

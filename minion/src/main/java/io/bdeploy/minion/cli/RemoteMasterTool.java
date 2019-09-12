@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.SortedMap;
@@ -103,22 +104,30 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
 
     private void pushLauncher(RemoteService svc, Path zip) {
         try {
-            Manifest.Key key = importAndPushUpdate(svc, zip, getActivityReporter());
-            out().println("Pushed launcher as " + key);
+            importAndPushUpdate(svc, zip, getActivityReporter());
+            out().println("Pushed launcher update");
         } catch (IOException e) {
             throw new IllegalStateException("Failed to process launcher", e);
         }
     }
 
+    /**
+     * Import an update ZIP. BDeploy update ZIPs may carry nested launcher updates, which are imported as well.
+     * <p>
+     * The key of the BDeploy update is returned for further update purposes.
+     */
     public static Manifest.Key importAndPushUpdate(RemoteService remote, Path updateZipFile, ActivityReporter reporter)
             throws IOException {
         Path tmpDir = Files.createTempDirectory("update-");
         try {
             Path hive = tmpDir.resolve("hive");
             try (BHive tmpHive = new BHive(hive.toUri(), reporter)) {
-                Manifest.Key key = UpdateHelper.importUpdate(updateZipFile, tmpDir.resolve("import"), tmpHive);
-                tmpHive.execute(new PushOperation().setRemote(remote).addManifest(key));
-                return key;
+                List<Manifest.Key> keys = UpdateHelper.importUpdate(updateZipFile, tmpDir.resolve("import"), tmpHive);
+                PushOperation pushOp = new PushOperation().setRemote(remote);
+                keys.forEach(pushOp::addManifest);
+                tmpHive.execute(pushOp);
+
+                return keys.stream().filter(UpdateHelper::isBDeployServerKey).findFirst().orElse(null);
             }
         } finally {
             PathHelper.deleteRecursive(tmpDir);
