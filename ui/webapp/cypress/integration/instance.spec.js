@@ -149,7 +149,7 @@ describe('Instance Tests', function () {
     cy.get('mat-progress-spinner', { timeout: 10000 }).should('not.exist');
 
     // the execute button should be there
-    cy.contains('button', 'Execute all Actions').as('Execute').should('exist')
+    cy.contains('button', 'Execute all Actions').as('Execute').should('exist').and('be.visible').and('be.enabled')
 
     // use td:contains to yield all cells which contain the text. .contains() only yields the first.
     // manifests on the slave are still there - meta (2 versions), node, app
@@ -162,14 +162,14 @@ describe('Instance Tests', function () {
     cy.get('@Execute').scrollIntoView().click();
 
     // the calculate button should be back. re-calculate
-    cy.contains('button', 'Calculate Cleanup Actions').should('exist');
+    cy.contains('button', 'Calculate Cleanup Actions').should('exist').and('be.visible').and('be.enabled');
     cy.contains('button', 'Calculate Cleanup Actions').click();
 
     cy.get('mat-progress-spinner', { timeout: 10000 }).should('not.exist');
-    cy.contains('button', 'Execute all Actions').should('be.disabled');
+    cy.contains('button', 'Execute all Actions').should('exist').and('be.disabled');
     cy.contains('td', 'No actions').should('exist');
 
     cy.contains('button', 'Reset').click();
-    cy.contains('button', 'Calculate Cleanup Actions').should('exist');
+    cy.contains('button', 'Calculate Cleanup Actions').should('exist').and('be.visible').and('be.enabled');
   })
 })

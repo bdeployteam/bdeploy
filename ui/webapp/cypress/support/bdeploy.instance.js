@@ -1,7 +1,7 @@
 Cypress.Commands.add('createInstance', function(name) {
   cy.visit('/');
   cy.get('input[hint=Filter]').type('Test');
-  cy.get('[data-cy=group-Test]').should('have.length', 1).click();
+  cy.get('[data-cy=group-Test]').first().click();
 
   // wait until the progress spinner disappears
   cy.get('mat-progress-spinner').should('not.exist')
