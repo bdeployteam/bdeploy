@@ -106,6 +106,7 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
                     try (JerseyServer srv = new JerseyServer(port, ks, state.keystorePass)) {
                         srv.setAuditor(new RollingFileAuditor(r.getAuditLogDir()));
                         r.setUpdateManager(new JerseyAwareMinionUpdateManager(srv));
+                        r.runPostUpdate(false);
 
                         delegate.setDelegate(srv.getSseActivityReporter());
                         registerCommonResources(srv, r, srv.getSseActivityReporter());

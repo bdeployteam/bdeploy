@@ -17,6 +17,7 @@ import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.jersey.audit.AuditRecord;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.MinionState;
@@ -48,6 +49,9 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         @EnvironmentFallback("BDEPLOY_TOKENFILE")
         String tokenFile();
 
+        @Help("Internal update directory.")
+        String updateDir();
+
         @Help("Port that the master will run on.")
         int port() default 7701;
     }
@@ -60,7 +64,6 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
     protected void run(InitConfig config) {
         helpAndFailIfMissing(config.root(), "Missing --root");
         helpAndFailIfMissing(config.hostname(), "Missing --hostname");
-        helpAndFailIfMissing(config.dist(), "Missing --dist, required for initial hive preparation");
 
         Path root = Paths.get(config.root());
         if (Files.isDirectory(root)) {
@@ -78,10 +81,22 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
                 out().println(pack);
             }
 
+            String dist = config.dist();
+
+            if (dist == null && config.updateDir() != null) {
+                // use the installation directory of the application as source for the initial import.
+                Path updRoot = Paths.get(config.updateDir()).getParent();
+                if (Files.exists(updRoot) && Files.exists(updRoot.resolve("version.properties"))) {
+                    out().println(
+                            "Using BDeploy distribution in " + updRoot + " for initial data import. Use --dist to override.");
+                    dist = updRoot.toString();
+                }
+            }
+
             // import original version of minion into new bhive for future updates.
-            if (!"ignore".equals(config.dist())) {
+            if (!"ignore".equals(dist)) {
                 // same logic as remote update: push the content of the ZIP as new manifest to the local hive.
-                RemoteMasterTool.importAndPushUpdate(new RemoteService(mr.getHiveDir().toUri()), Paths.get(config.dist()),
+                RemoteMasterTool.importAndPushUpdate(new RemoteService(mr.getHiveDir().toUri()), Paths.get(dist),
                         getActivityReporter());
             }
         } catch (Exception e) {
@@ -106,6 +121,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         state.officialName = hostname;
         state.port = port;
         state.cleanupSchedule = MasterCleanupJob.DEFAULT_CLEANUP_SCHEDULE;
+        state.fullyMigratedVersion = VersionHelper.readVersion();
 
         state.deploymentDir = root.resolve("deploy");
         if (deployments != null) {

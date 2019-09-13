@@ -193,7 +193,9 @@ configure(actualSubprojects) {
     }
 
     cleanEclipseJdt.finalizedBy cleanCustomEclipseJdt
+}
 
+configure([project(':minion'), project(':launcher')]) {
     task genVersionProperties() {
         outputs.upToDateWhen { false }
         outputs.file "$buildDir/resources/main/version.properties"

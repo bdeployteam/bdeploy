@@ -34,11 +34,35 @@ startScripts {
     applicationName = 'bdeploy'
 }
 
+evaluationDependsOn(':launcher')
+void addLauncherDist(Distribution dist) {
+    if(!project(':launcher').linux64DistZip.enabled) {
+        println("WARNING: Linux launcher dist not enabled, not included in BDeploy release ZIPs");
+    } else {
+        dist.contents {
+            from(project(':launcher').linux64DistZip) {
+                into 'launcher'
+            }
+        }
+    }
+    if(!project(':launcher').win64DistZip.enabled) {
+        println("WARNING: Windows launcher dist not enabled, not included in BDeploy release ZIPs");
+    } else {
+        dist.contents {
+            from(project(':launcher').win64DistZip) {
+                into 'launcher'
+            }
+        }
+    }
+}
+
 distributions {
     win64 {
         baseName = 'bdeploy-win64'
+        addLauncherDist(it)
     }
     linux64 {
         baseName = 'bdeploy-linux64'
+        addLauncherDist(it)
     }
 }

@@ -30,6 +30,7 @@ import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.dcu.InstanceNodeController;
 import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
@@ -38,6 +39,7 @@ import io.bdeploy.jersey.audit.Auditor;
 import io.bdeploy.jersey.audit.RollingFileAuditor;
 import io.bdeploy.minion.job.CleanupDownloadDirJob;
 import io.bdeploy.minion.job.MasterCleanupJob;
+import io.bdeploy.minion.migration.UpdatePackagingMigration;
 import io.bdeploy.minion.user.UserDatabase;
 import io.bdeploy.pcu.InstanceProcessController;
 import io.bdeploy.pcu.MinionProcessController;
@@ -106,6 +108,32 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
      */
     public MinionUpdateManager getUpdateManager() {
         return updateManager;
+    }
+
+    public void runPostUpdate(boolean isMaster) {
+        String current = VersionHelper.readVersion();
+        if (current == null || VersionHelper.UNKNOWN.equals(current)) {
+            log.debug("Skipping migration to " + current);
+            return;
+        }
+
+        String lastMigrated = getState().fullyMigratedVersion;
+        if (lastMigrated != null && lastMigrated.equals(current)) {
+            // already performed migration, skip
+            log.debug("Already fully migrated to " + lastMigrated);
+            return;
+        }
+
+        try {
+            UpdatePackagingMigration.run(this, isMaster);
+        } catch (Exception e) {
+            throw new RuntimeException("Minion update migration failed", e);
+        }
+
+        // if all migrations succeeded (did not throw), record version
+        modifyState(s -> {
+            s.fullyMigratedVersion = current;
+        });
     }
 
     /**

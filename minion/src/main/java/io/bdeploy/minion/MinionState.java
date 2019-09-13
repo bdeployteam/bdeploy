@@ -79,4 +79,9 @@ public class MinionState {
      * Timestamp of last successful cleanup execution on this minion (only relevant for master).
      */
     public long cleanupLastRun;
+
+    /**
+     * The last minion version which was successfully migrated to.
+     */
+    public String fullyMigratedVersion;
 }

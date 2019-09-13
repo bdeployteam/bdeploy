@@ -1,9 +1,12 @@
 package io.bdeploy.interfaces;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -15,9 +18,11 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.ImportOperation;
+import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
+import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.common.util.ZipHelper;
 
 /**
@@ -43,7 +48,7 @@ public class UpdateHelper {
     /**
      * Name of the 'bdeploy' software.
      */
-    private static final String SW_BDEPLOY = "bdeploy";
+    public static final String SW_BDEPLOY = "bdeploy";
 
     /**
      * Directory (within the update dir) where to put the "to-be-installed" software.
@@ -60,6 +65,10 @@ public class UpdateHelper {
     private UpdateHelper() {
     }
 
+    public static boolean isBDeployServerKey(Manifest.Key key) {
+        return key.getName().startsWith(SW_META_PREFIX + SW_BDEPLOY);
+    }
+
     /**
      * @param updateDir the update directory root
      * @return the path to the update directory to use.
@@ -74,54 +83,99 @@ public class UpdateHelper {
     }
 
     /**
-     * @param updateZipFile the update ZIP file containing the actual software
+     * @param updateZipFileOrDir the update ZIP file or the directory of the unpacked ZIP containing the actual software
      * @param tmpDir a (unique) directory where to place temporary files and directories (e.g. when unpacking the ZIP file). The
      *            directory is assumed to be deleted by the caller.
      * @param hive the hive to import into. may be (but does not have to be) located inside the temp directory.
      * @return the {@link Key} of the imported {@link Manifest}.
      * @throws IOException
      */
-    public static Manifest.Key importUpdate(Path updateZipFile, Path tmpDir, BHive hive) throws IOException {
-        Manifest.Key key = calculateKeyFromDistZip(updateZipFile);
+    public static List<Manifest.Key> importUpdate(Path updateZipFileOrDir, Path tmpDir, BHive hive) throws IOException {
+        List<Manifest.Key> result = new ArrayList<>();
+        Manifest.Key key;
 
-        // extract ZIP to src dir
         PathHelper.mkdirs(tmpDir);
-        ZipHelper.unzip(updateZipFile, tmpDir);
 
-        // expecting a single directory in the ZIP containing all the things.
         Path updContent = null;
-        try (DirectoryStream<Path> content = Files.newDirectoryStream(tmpDir)) {
-            for (Path path : content) {
-                if (Files.isDirectory(path)) {
-                    if (updContent != null) {
-                        throw new IllegalStateException("More than one directory in update package");
+        if (Files.isDirectory(updateZipFileOrDir)) {
+            Path vprops = updateZipFileOrDir.resolve("version.properties");
+            if (!Files.exists(vprops)) {
+                throw new IllegalStateException("Missing " + vprops);
+            }
+
+            Properties props = new Properties();
+            try (InputStream is = Files.newInputStream(vprops)) {
+                props.load(is);
+            }
+
+            key = calculateKeyFromProperties(props, null);
+            updContent = updateZipFileOrDir;
+        } else {
+            key = calculateKeyFromDistZip(updateZipFileOrDir);
+
+            // extract ZIP to src dir
+            Path zipDir = Files.createTempDirectory(tmpDir, "unzip-");
+            ZipHelper.unzip(updateZipFileOrDir, zipDir);
+
+            // expecting a single directory in the ZIP containing all the things.
+            try (DirectoryStream<Path> content = Files.newDirectoryStream(zipDir)) {
+                for (Path path : content) {
+                    if (Files.isDirectory(path)) {
+                        if (updContent != null) {
+                            throw new IllegalStateException("More than one directory in update package");
+                        }
+                        updContent = path;
                     }
-                    updContent = path;
                 }
             }
         }
+
         if (updContent == null) {
             throw new IllegalStateException("Cannot find update directory");
         }
-        RuntimeAssert.assertTrue(Files.isDirectory(updContent), "Cannot find update content directory: " + updContent);
-        Manifest.Key scopedKey = new Manifest.Key(SW_META_PREFIX + key.getName(), key.getTag());
 
-        hive.execute(new ImportOperation().setSourcePath(updContent).setManifest(scopedKey));
-        return scopedKey;
+        RuntimeAssert.assertTrue(Files.isDirectory(updContent), "Cannot find update content directory: " + updContent);
+
+        // check for included launcher update packages and import as well.
+        Path tmpLaunchers = null;
+        Path launchers = updContent.resolve(SW_LAUNCHER);
+        if (Files.exists(launchers)) {
+            tmpLaunchers = Files.createTempDirectory(tmpDir, "tmp-");
+            try (DirectoryStream<Path> nestedLaunchers = Files.newDirectoryStream(launchers, "launcher-*.zip")) {
+                for (Path launcherZip : nestedLaunchers) {
+                    log.info("Importing nested update: " + launcherZip.getFileName());
+                    result.addAll(importUpdate(launcherZip, tmpDir, hive));
+
+                    // move single files as /tmp might be on different file system, and directory move is not possible.
+                    Files.move(launcherZip, tmpLaunchers.resolve(launcherZip.getFileName()));
+                }
+            }
+
+            // avoid launchers being part of the actual bdeploy manifest, temporarily move them.
+        }
+
+        try {
+            hive.execute(new ImportOperation().setSourcePath(updContent).setManifest(key));
+            result.add(key);
+        } finally {
+            // restore nested launcher zips for follow up inits or updates.
+            if (tmpLaunchers != null) {
+                try (DirectoryStream<Path> allTmpLaunchers = Files.newDirectoryStream(tmpLaunchers)) {
+                    for (Path launcher : allTmpLaunchers) {
+                        Files.move(launcher, launchers.resolve(launcher.getFileName()));
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 
     /**
      * Extract name and version from dist ZIP, as defined in gradle build.
      */
     private static Key calculateKeyFromDistZip(Path zip) {
-        // check target OS for ZIP dist by checking filename.
-        String name = SW_BDEPLOY;
-
         // find a file version.properties in the ZIP
-        String project = null;
-        String version = null;
-        OperatingSystem os = null;
-        boolean snapshot = false;
         try (ZipInputStream zipInputStream = new ZipInputStream(Files.newInputStream(zip))) {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
@@ -129,14 +183,25 @@ public class UpdateHelper {
                     Properties props = new Properties();
                     props.load(zipInputStream);
 
-                    project = props.getProperty("project");
-                    version = props.getProperty("version");
-                    snapshot = Boolean.valueOf(props.getProperty("snapshot"));
-                    os = OperatingSystem.valueOf(props.getProperty("os").toUpperCase());
+                    return calculateKeyFromProperties(props, null);
                 }
             }
         } catch (IOException e) {
             throw new IllegalStateException("Cannot unzip update package", e);
+        }
+
+        throw new IllegalStateException("Cannot calculate update key for " + zip);
+    }
+
+    private static Key calculateKeyFromProperties(Properties props, OperatingSystem os) {
+        String name = SW_BDEPLOY;
+
+        String project = props.getProperty("project");
+        String version = props.getProperty("version");
+        boolean snapshot = Boolean.valueOf(props.getProperty("snapshot"));
+
+        if (os == null) {
+            os = OperatingSystem.valueOf(props.getProperty("os").toUpperCase());
         }
 
         if (SW_LAUNCHER.equals(project)) {
@@ -144,14 +209,21 @@ public class UpdateHelper {
         }
 
         if (version == null) {
-            throw new IllegalStateException("Cannot determin version for update package " + zip);
+            throw new IllegalStateException("Cannot determin version for update package");
         }
 
         if (snapshot) {
             name += SW_SNAPSHOT;
         }
 
-        return new ScopedManifestKey(name, os, version).getKey();
+        return new ScopedManifestKey(SW_META_PREFIX + name, os, version).getKey();
+    }
+
+    /**
+     * @return the {@link Key} representing the currently running version of the BDeploy minion.
+     */
+    public static Key getCurrentKey() {
+        return calculateKeyFromProperties(VersionHelper.readProperties(), OsHelper.getRunningOs());
     }
 
 }
