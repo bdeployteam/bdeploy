@@ -1,28 +1,31 @@
 === Master
 
 ==== Initialization
-To start using BDeploy you will at least need a single master. The master needs to be initialized before it can be started.
-The root directory contains all runtime data. Make sure there is some room available:
+To start using BDeploy you will at least need a single *master*. The *master* needs to be initialized before it can be started.
+The *root directory* contains all runtime data. Make sure there is some room available:
 
- bdeploy init --root=/path/to/storage --dist=bdeploy-x.x.x.zip --hostname=$(hostname) # --tokenFile=token.txt
+ bdeploy init --root=/path/to/storage --hostname=<hostname> # --tokenFile=token.txt
 
-The --dist argument receives the binaries .zip you used to unpack the binaries from. This argument can explicitly be
-set using '--dist=ignore' if you don't have this zip file. The effect is that this bdeploy will receive a larger (full)
-update package once it is updated to another version.
-
-The init command will print a token (you can capture the token in a file by giving '--tokenFile=token.txt' instead).
+The `init` command will print a token (you can capture the token in a file by giving `--tokenFile=token.txt` instead).
 You need to copy this token - you will need this to be able to access this master from a remote server, e.g. a central
-remote BDeploy master.
+remote *BDeploy master*.
+
+The result of the `init` command is a *root directory* which can be used by the *master* or *slave* commands.
+
+[NOTE]
+Before *BDeploy 1.2.0* it was necessary to specify a `--dist` argument. This is no longer required, but still supported. Also,
+the *BDeploy Launcher* used to be a separate binary distribution. It is now included in the main *BDeploy* distribution, and
+will be set up for you by the `init` command
 
 ==== Launch
-After the initialization - which needs to be done only once - the master can be started with the following command:
+After the initialization - which needs to be done only once - the *master* can be started with the following command:
 
  bdeploy master --root=/path/to/storage
 
-This will start the master server which also hosts the web UI: https://localhost:7701
+This will start the *master* server which also hosts the web UI: https://localhost:7701
 
 [NOTE]
-The server is using a self-signed certificate. Thus you need to instruct your browser to accept it.
+The server is using a self-signed certificate by default. Thus you need to instruct your browser to accept it.
 
 ==== User
 Only authenticated users have access to the web UI. Thus a new user must be created in order to be able to use the web UI
