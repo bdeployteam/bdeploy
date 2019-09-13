@@ -1,62 +1,6 @@
 [
 	{
-		"regex":"bhive/.*",
-		"reviewers": [
-			"markus.duft@ssi-schaefer.com",
-            "michael.heiss@ssi-schaefer.com",
-            "thomas.urlaub@ssi-schaefer.com"
-		]
-	},
-	{
-		"regex":"common/.*",
-		"reviewers": [
-			"markus.duft@ssi-schaefer.com",
-            "michael.heiss@ssi-schaefer.com",
-            "thomas.urlaub@ssi-schaefer.com"
-		]
-	},
-	{
-		"regex":"ui/.*",
-		"reviewers": [
-			"markus.duft@ssi-schaefer.com",
-            "michael.heiss@ssi-schaefer.com",
-            "thomas.urlaub@ssi-schaefer.com"
-		]
-	},
-	{
-		"regex":"minion/.*",
-		"reviewers": [
-			"markus.duft@ssi-schaefer.com",
-            "michael.heiss@ssi-schaefer.com",
-            "thomas.urlaub@ssi-schaefer.com"
-		]
-	},
-	{
-		"regex":"minion-client/.*",
-		"reviewers": [
-			"markus.duft@ssi-schaefer.com",
-            "michael.heiss@ssi-schaefer.com",
-            "thomas.urlaub@ssi-schaefer.com"
-		]
-	},
-	{
-		"regex":"dcu/.*",
-		"reviewers": [
-			"markus.duft@ssi-schaefer.com",
-            "michael.heiss@ssi-schaefer.com",
-            "thomas.urlaub@ssi-schaefer.com"
-		]
-	},
-	{
-		"regex":"pcu/.*",
-		"reviewers": [
-			"markus.duft@ssi-schaefer.com",
-            "michael.heiss@ssi-schaefer.com",
-            "thomas.urlaub@ssi-schaefer.com"
-		]
-	},
-	{
-		"regex":"jersey/.*",
+		"regex":".*",
 		"reviewers": [
 			"markus.duft@ssi-schaefer.com",
             "michael.heiss@ssi-schaefer.com",
