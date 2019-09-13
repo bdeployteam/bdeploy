@@ -12,7 +12,10 @@ It also offers a way to upload, and more important also to _download_ *BDeploy L
 
 image::images/BDeploy_System_Launcher_Upload.png[BDeploy Launcher Version Upload,align=center,width=480,link="images/BDeploy_System_Launcher_Upload.png"]
 
-Initially, the *System Software* page contains only the running *BDeploy* system software version, and no *BDeploy Launcher*. Use the btn:[+] button to upload either new *BDeploy* or *BDeploy Launcher* versions from their respective binary distributions (_ZIP_).
+Use the btn:[+] button to upload either new *BDeploy* or *BDeploy Launcher* versions from their respective binary distributions (_ZIP_). 
+
+[NOTE]
+The *BDeploy* binary distribution also contains the *BDeploy Launcher* binary distributions as of *BDeploy 1.2.0*.
 
 image::images/BDeploy_System_No_Launcher.png[BDeploy Initial System Software Page,align=center,width=480,link="images/BDeploy_System_No_Launcher.png"]
 
