@@ -33,9 +33,9 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         @Help("The name of the application to control, controls all applications for the given UUID if missing")
         String application();
 
-        @Help("The name of the remote hive to work on")
+        @Help("The name of the instance group to work on")
         @EnvironmentFallback("REMOTE_BHIVE")
-        String target();
+        String instanceGroup();
 
         @Help(value = "List process status on the remote", arg = false)
         boolean status() default false;
@@ -54,14 +54,14 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
     @Override
     protected void run(RemoteProcessConfig config, RemoteService svc) {
         helpAndFailIfMissing(config.uuid(), "Missing --uuid");
-        helpAndFailIfMissing(config.target(), "Missing --target");
+        helpAndFailIfMissing(config.instanceGroup(), "Missing --instanceGroup");
 
         if (!config.start() && !config.status() && !config.stop()) {
             helpAndFailIfMissing(null, "Missing --start or --stop or --status");
         }
 
         MasterRootResource proxy = ResourceProvider.getResource(svc, MasterRootResource.class);
-        MasterNamedResource master = proxy.getNamedMaster(config.target());
+        MasterNamedResource master = proxy.getNamedMaster(config.instanceGroup());
         if (config.start() || config.stop()) {
             if (config.start()) {
                 master.start(config.uuid(), config.application());

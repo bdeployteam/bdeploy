@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -27,6 +28,8 @@ import org.slf4j.LoggerFactory;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.op.ManifestExistsOperation;
+import io.bdeploy.bhive.op.ManifestNextIdOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
@@ -35,16 +38,22 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
+import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
+import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
 import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
+import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
+import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
+import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
 import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.InstanceDirectory;
 import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
+import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.dependencies.LocalDependencyFetcher;
 import io.bdeploy.interfaces.manifest.state.InstanceState;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
@@ -326,6 +335,138 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
+    public void updateTo(String uuid, String productTag) {
+        InstanceManifest latest = InstanceManifest.load(hive, uuid, null);
+        Manifest.Key product = latest.getConfiguration().product;
+        Manifest.Key updateTo = new Manifest.Key(product.getName(), productTag);
+
+        // validate that the product is there.
+        if (!hive.execute(new ManifestExistsOperation().setManifest(updateTo))) {
+            throw new WebApplicationException("Cannot find product tag " + productTag, Status.NOT_FOUND);
+        }
+
+        ProductManifest pm = ProductManifest.of(hive, updateTo);
+        InstanceConfiguration updatedIc = latest.getConfiguration();
+
+        // update product on manifest
+        updatedIc.product = pm.getKey();
+
+        SortedMap<String, InstanceNodeConfiguration> incs = new TreeMap<>();
+        for (Entry<String, Key> nodeEntry : latest.getInstanceNodeManifests().entrySet()) {
+            InstanceNodeManifest inm = InstanceNodeManifest.of(hive, nodeEntry.getValue());
+            InstanceNodeConfiguration cfg = inm.getConfiguration();
+
+            updateNodeTo(cfg, pm);
+
+            incs.put(nodeEntry.getKey(), cfg);
+        }
+
+        // update config tree if the instance does not yet have a config tree.
+        if (updatedIc.configTree == null) {
+            updatedIc.configTree = pm.getConfigTemplateTreeId();
+        }
+
+        // actually persist, calculate a new key.
+        String name = InstanceManifest.getRootName(uuid);
+        Long next = hive.execute(new ManifestNextIdOperation().setManifestName(name));
+        Manifest.Key target = new Manifest.Key(name, next.toString());
+
+        createInstanceVersion(target, pm, updatedIc, incs);
+    }
+
+    private void updateNodeTo(InstanceNodeConfiguration cfg, ProductManifest pm) {
+        cfg.product = pm.getKey();
+
+        // verify all applications are still there & update their version
+        for (ApplicationConfiguration appCfg : cfg.applications) {
+            String appName = appCfg.application.getName();
+            Manifest.Key updateAppTo = null;
+            for (Manifest.Key available : pm.getApplications()) {
+                if (available.getName().equals(appName)) {
+                    updateAppTo = available;
+                }
+            }
+            if (updateAppTo == null) {
+                throw new WebApplicationException(
+                        "Application " + appName + " used in instance configuration, but no longer available in " + pm.getKey(),
+                        Status.PRECONDITION_FAILED);
+            }
+            ApplicationManifest amf = ApplicationManifest.of(hive, updateAppTo);
+
+            updateApplicationTo(appCfg, amf);
+        }
+    }
+
+    private void updateApplicationTo(ApplicationConfiguration appCfg, ApplicationManifest amf) {
+        appCfg.application = amf.getKey();
+
+        // verify that all parameters which are currently configured are still there, update fixed parameter values
+        appCfg.start = updateApplicationCommandTo(appCfg, appCfg.start, amf.getDescriptor().startCommand);
+        appCfg.stop = updateApplicationCommandTo(appCfg, appCfg.stop, amf.getDescriptor().stopCommand);
+    }
+
+    private CommandConfiguration updateApplicationCommandTo(ApplicationConfiguration appCfg, CommandConfiguration command,
+            ExecutableDescriptor desc) {
+        if (desc == null) {
+            // command was removed, remove as well.
+            return null;
+        }
+
+        if (command == null) {
+            throw new WebApplicationException(
+                    "Headless update of application (" + appCfg.name + ") not possible, command has been added",
+                    Status.PRECONDITION_FAILED);
+        }
+
+        command.executable = desc.launcherPath;
+
+        Map<String, ParameterConfiguration> byUid = new TreeMap<>();
+        for (ParameterConfiguration cfg : command.parameters) {
+            // find according description.
+            Optional<ParameterDescriptor> match = desc.parameters.stream().filter(p -> p.uid.equals(cfg.uid)).findAny();
+            if (!match.isPresent()) {
+                throw new WebApplicationException("Headless update of application (" + appCfg.name
+                        + ") not possible, parameter not found (" + cfg.uid + ")", Status.PRECONDITION_FAILED);
+            }
+
+            if (match.get().fixed) {
+                cfg.value = match.get().defaultValue;
+                cfg.preRender(match.get());
+            }
+            byUid.put(cfg.uid, cfg);
+        }
+
+        for (ParameterDescriptor pd : desc.parameters) {
+            if (pd.mandatory && !byUid.containsKey(pd.uid)) {
+                throw new WebApplicationException("Headless update of application (" + appCfg.name
+                        + ") not possible, missing mandatory parameter (" + pd.uid + ")", Status.PRECONDITION_FAILED);
+            }
+        }
+
+        return command;
+    }
+
+    private void createInstanceVersion(Manifest.Key target, ProductManifest pm, InstanceConfiguration config,
+            SortedMap<String, InstanceNodeConfiguration> nodes) {
+
+        InstanceManifest.Builder builder = new InstanceManifest.Builder();
+        builder.setInstanceConfiguration(config);
+        builder.setKey(target);
+
+        for (Entry<String, InstanceNodeConfiguration> entry : nodes.entrySet()) {
+            InstanceNodeManifest.Builder inmb = new InstanceNodeManifest.Builder();
+            inmb.setConfigTreeId(config.configTree);
+            inmb.setMinionName(entry.getKey());
+            inmb.setInstanceNodeConfiguration(entry.getValue());
+            inmb.setKey(new Manifest.Key(config.uuid + '/' + entry.getKey(), target.getTag()));
+
+            builder.addInstanceNodeManifest(entry.getKey(), inmb.insert(hive));
+        }
+
+        builder.insert(hive);
+    }
+
+    @Override
     public List<InstanceDirectory> getDataDirectorySnapshots(String instanceId) {
         List<InstanceDirectory> result = new ArrayList<>();
 
@@ -561,9 +702,12 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
-    public Collection<InstanceConfiguration> listInstanceConfigurations() {
-        SortedSet<Key> scan = InstanceManifest.scan(hive, true);
-        return scan.stream().map(k -> InstanceManifest.of(hive, k).getConfiguration()).collect(Collectors.toList());
+    public SortedMap<Manifest.Key, InstanceConfiguration> listInstanceConfigurations(boolean latest) {
+        SortedSet<Key> scan = InstanceManifest.scan(hive, latest);
+        SortedMap<Manifest.Key, InstanceConfiguration> result = new TreeMap<>();
+
+        scan.stream().forEach(k -> result.put(k, InstanceManifest.of(hive, k).getConfiguration()));
+        return result;
     }
 
 }

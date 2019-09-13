@@ -1,7 +1,8 @@
 package io.bdeploy.minion.cli;
 
-import java.util.Collection;
+import java.util.SortedMap;
 
+import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.security.RemoteService;
@@ -55,7 +56,8 @@ public class RemoteInstanceGroupTool extends RemoteServiceTool<RemoteInstanceGro
         } else if (config.list()) {
             out().println(String.format(LIST_FORMAT, "Name", "Ins. Count", "Description"));
             for (InstanceGroupConfiguration cfg : client.getInstanceGroups()) {
-                Collection<InstanceConfiguration> ics = client.getNamedMaster(cfg.name).listInstanceConfigurations();
+                SortedMap<Manifest.Key, InstanceConfiguration> ics = client.getNamedMaster(cfg.name)
+                        .listInstanceConfigurations(true);
                 out().println(String.format(LIST_FORMAT, cfg.name, ics.size(), cfg.description));
             }
         } else if (config.delete() != null) {

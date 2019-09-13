@@ -43,7 +43,10 @@ A _master_ is always a _slave_ as well. The _master_ just has the additional cap
 
 | `remote-deployment`
 | Yes
-| Manage *Instance* deployment (_install_, _activate_, _uninstall_) on a remote *BDeploy* server.
+a| Manage *Instance* deployment (_install_, _activate_, _uninstall_, _updateTo_ (product version)) on a remote *BDeploy* server.
+
+[NOTE]
+The `--updateTo` command will only work if the new product version can be updated to without manual changes. If for example a mandatory parameter is added, or a configured application is removed from the product, the update will fail.
 
 | `remote-group`
 | Yes

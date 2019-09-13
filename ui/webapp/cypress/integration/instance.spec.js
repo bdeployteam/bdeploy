@@ -100,7 +100,7 @@ describe('Instance Tests', function () {
     cy.contains('mat-toolbar', 'Server Application').should('exist');
 
     cy.contains('app-process-details', 'Server Application').within(() => {
-      cy.contains('button', 'play_arrow').click();
+      cy.contains('button', 'play_arrow').should('be.enabled').click();
       cy.get('app-process-status').find('.app-process-running').should('exist')
     })
 
