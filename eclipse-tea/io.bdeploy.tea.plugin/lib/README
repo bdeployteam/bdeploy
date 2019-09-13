@@ -1,2 +1,1 @@
-Execute ../gradlew shadowJar in the 'interfaces' project of BDeploy and copy the
-build/libs/interfaces*-all.jar in here for now.
+Copy bdeploy-api-*-all.jar from interfaces/build/libs in here

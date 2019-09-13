@@ -48,6 +48,9 @@ import io.bdeploy.tea.plugin.services.BDeployApplicationBuild;
 @SuppressWarnings("restriction")
 public class BDeployBuildProductTask {
 
+    private static final String PRODUCT_INFO_YAML = "product-info.yaml";
+    private static final String PRODUCT_VERSIONS_YAML = "product-versions.yaml";
+
     private final ProductDesc desc;
     private Manifest.Key key;
     private File target;
@@ -100,15 +103,19 @@ public class BDeployBuildProductTask {
             FileUtils.deleteDirectory(prodInfoDir);
             FileUtils.mkdirs(prodInfoDir);
 
-            try (OutputStream os = new FileOutputStream(new File(prodInfoDir, "product-versions.yaml"))) {
+            try (OutputStream os = new FileOutputStream(new File(prodInfoDir, PRODUCT_VERSIONS_YAML))) {
                 os.write(StorageHelper.toRawYamlBytes(pvd));
             }
 
-            File prodInfoYaml = new File(prodInfoDir, "product-info.yaml");
-            try (InputStream is = Files.newInputStream(desc.productInfo); OutputStream os = new FileOutputStream(prodInfoYaml)) {
+            File prodInfoYaml = new File(prodInfoDir, PRODUCT_INFO_YAML);
+            try (InputStream is = Files.newInputStream(desc.productInfo)) {
                 ProductDescriptor pd = StorageHelper.fromYamlStream(is, ProductDescriptor.class);
-                pd.versionFile = "product-versions.yaml";
-                os.write(StorageHelper.toRawYamlBytes(pd));
+                if (pd.versionFile == null) {
+                    throw new RuntimeException("versionFile=" + PRODUCT_VERSIONS_YAML + " entry is missing.");
+                }
+                // Copy product descriptor so that we do not lose properties that we do not know
+                // (add fields are ignored during deserialization)
+                FileUtils.copyFile(desc.productInfo.toFile(), prodInfoYaml);
 
                 if (pd.configTemplates != null && !pd.configTemplates.isEmpty()) {
                     File source = desc.productInfo.getParent().resolve(pd.configTemplates).toFile();
@@ -134,7 +141,7 @@ public class BDeployBuildProductTask {
             }
 
             log.info("Importing product from " + prodInfoYaml);
-            key = ProductManifest.importFromDescriptor(prodInfoYaml.getAbsolutePath(), bhive, fetcher);
+            key = ProductManifest.importFromDescriptor(prodInfoYaml.toPath(), bhive, fetcher, true);
         }
 
     }
