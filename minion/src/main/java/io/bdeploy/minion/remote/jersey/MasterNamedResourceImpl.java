@@ -180,7 +180,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         InstanceManifest imf = InstanceManifest.of(hive, key);
         SortedMap<String, Key> fragmentReferences = imf.getInstanceNodeManifests();
 
-        try (Activity deploying = reporter.start("Deploying to minions...", fragmentReferences.size())) {
+        try (Activity deploying = reporter.start("Installing to minions...", fragmentReferences.size())) {
             for (Map.Entry<String, Manifest.Key> entry : fragmentReferences.entrySet()) {
                 String minionName = entry.getKey();
                 if (InstanceManifest.CLIENT_NODE_NAME.equals(minionName)) {
@@ -199,7 +199,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 try {
                     deployment.install(toDeploy);
                 } catch (Exception e) {
-                    throw new WebApplicationException("Cannot deploy to " + minionName, e, Status.INTERNAL_SERVER_ERROR);
+                    throw new WebApplicationException("Cannot install to " + minionName, e, Status.INTERNAL_SERVER_ERROR);
                 }
 
                 deploying.worked(1);
@@ -253,9 +253,9 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
      */
     private boolean isFullyDeployed(InstanceManifest imf) {
         SortedMap<String, Key> imfs = imf.getInstanceNodeManifests();
-        // No configuration -> cannot be deployed
+        // No configuration -> no requirements, so always fully deployed.
         if (imfs.isEmpty()) {
-            return false;
+            return true;
         }
         // check all minions for their respective availability.
         String instanceId = imf.getConfiguration().uuid;
