@@ -1,7 +1,9 @@
 name: "Demo Product"
 product: "io.bdeploy/demo"
+vendor: BDeploy Team
 applications:
 - "server-app"
 - "client-app"
 versionFile: "product-version.yaml"
+
 

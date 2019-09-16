@@ -177,6 +177,7 @@ namespace Bdeploy.Installer
         {
             string appUid = config.ApplicationUid;
             string appName = config.ApplicationName;
+            string productVendor = config.ProductVendor;
             string appDescriptor = Path.Combine(appsHome, appUid, "launch.bdeploy");
             string icon = Path.Combine(appsHome, appUid, "icon.ico");
 
@@ -188,7 +189,7 @@ namespace Bdeploy.Installer
             if (createShortcut)
             {
                 Shortcut.CreateDesktopLink(appName, appDescriptor, launcherHome, icon);
-                Shortcut.CreateStartMenuLink(appName, appDescriptor, launcherHome, icon);
+                Shortcut.CreateStartMenuLink(productVendor, appName, appDescriptor, launcherHome, icon);
             }
         }
 

@@ -26,7 +26,8 @@ namespace Bdeploy.Shared
         public string IconUrl;
 
         /// <summary>
-        /// The URL to download the SPLASH. 
+        /// The URL to download the SPLASH.
+        /// Optional parameter. Not all apps must have a splash.
         /// </summary>
         [DataMember(Name = "splashUrl")]
         public string SplashUrl;
@@ -42,6 +43,13 @@ namespace Bdeploy.Shared
         /// </summary>
         [DataMember(Name = "applicationName")]
         public string ApplicationName;
+
+        /// <summary>
+        /// The human readable product vendor. Used to group apps of the same vendor in the start menu.
+        /// Optional parameter. Not all apps must declare a vendor.
+        /// </summary>
+        [DataMember(Name = "productVendor")]
+        public string ProductVendor;
 
         /// <summary>
         /// The unique name of the application. Used to store the .bdeploy file

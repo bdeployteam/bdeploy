@@ -25,9 +25,10 @@ public class ProductDescriptor {
      */
     public String product;
 
-    // TODO: add product "capabilities" later.
-
-    // TODO: add product "instanceTemplates" later.
+    /**
+     * The name of the vendor of the product.
+     */
+    public String vendor;
 
     /**
      * A list of application names to include. Each of the mentioned applications

@@ -646,10 +646,11 @@ public class InstanceResourceImpl implements InstanceResource {
 
         // Determine the target OS, and build the according installer.
         ScopedManifestKey applicationKey = ScopedManifestKey.parse(appConfig.application);
+        OperatingSystem applicationOs = applicationKey.getOperatingSystem();
 
         // Determine latest version of launcher
         SoftwareUpdateResourceImpl swr = rc.initResource(new SoftwareUpdateResourceImpl());
-        ScopedManifestKey launcherKey = swr.getNewestLauncher(applicationKey.getOperatingSystem());
+        ScopedManifestKey launcherKey = swr.getNewestLauncher(applicationOs);
         if (launcherKey == null) {
             throw new WebApplicationException(
                     "Cannot find launcher for target OS. Ensure there is one available in the System Software.",
@@ -664,16 +665,20 @@ public class InstanceResourceImpl implements InstanceResource {
         iconUri.path("/group/{group}/instance/");
         iconUri.path(InstanceResource.PATH_DOWNLOAD_APP_ICON);
 
-        URI launcherLocation = launcherUri.build(new Object[] { applicationKey.getOperatingSystem().name().toLowerCase() },
-                false);
-        URI iconLocation = iconUri.build(group, im.getConfiguration().uuid, appConfig.uid);
+        UriBuilder splashUrl = UriBuilder.fromUri(im.getConfiguration().target.getUri());
+        splashUrl.path("/group/{group}/instance/");
+        splashUrl.path(InstanceResource.PATH_DOWNLOAD_APP_SPLASH);
 
-        if (applicationKey.getOperatingSystem() == OperatingSystem.WINDOWS) {
-            createWindowsInstaller(im, appConfig, installerPath, launcherKey, launcherLocation, iconLocation);
-        } else if (applicationKey.getOperatingSystem() == OperatingSystem.LINUX) {
+        URI launcherLocation = launcherUri.build(new Object[] { applicationOs.name().toLowerCase() }, false);
+        URI iconLocation = iconUri.build(group, im.getConfiguration().uuid, appConfig.uid);
+        URI splashLocation = splashUrl.build(group, im.getConfiguration().uuid, appConfig.uid);
+
+        if (applicationOs == OperatingSystem.WINDOWS) {
+            createWindowsInstaller(im, appConfig, installerPath, launcherKey, launcherLocation, iconLocation, splashLocation);
+        } else if (applicationOs == OperatingSystem.LINUX) {
             createLinuxInstaller(im, appConfig, installerPath, launcherKey, launcherLocation, iconLocation);
         } else {
-            throw new WebApplicationException("No installer provided for the target OS");
+            throw new WebApplicationException("Installer not supported for OS '" + applicationOs + "'");
         }
 
         // Return the name of the token for downloading
@@ -713,7 +718,7 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     private void createWindowsInstaller(InstanceManifest im, ApplicationConfiguration appConfig, Path installerPath,
-            ScopedManifestKey launcherKey, URI launcherLocation, URI iconLocation) {
+            ScopedManifestKey launcherKey, URI launcherLocation, URI iconLocation, URI splashLocation) {
         File installer = installerPath.toFile();
         // Try to load the installer stored in the manifest tree
         BHive rootHive = reg.get(JerseyRemoteBHive.DEFAULT_NAME);
@@ -726,6 +731,9 @@ public class InstanceResourceImpl implements InstanceResource {
             throw new WebApplicationException("Cannot create windows installer.", ioe);
         }
 
+        // Load product of instance to set the vendor
+        ProductManifest pm = ProductManifest.of(hive, im.getConfiguration().product);
+
         // Brand the executable and embed the required information
         try {
             ClickAndStartDescriptor clickAndStart = getClickAndStartDescriptor(im.getConfiguration().uuid, appConfig.uid);
@@ -733,9 +741,11 @@ public class InstanceResourceImpl implements InstanceResource {
             BrandingConfig config = new BrandingConfig();
             config.launcherUrl = launcherLocation.toString();
             config.iconUrl = iconLocation.toString();
+            config.splashUrl = splashLocation.toString();
             config.applicationUid = appConfig.uid;
             config.applicationName = im.getConfiguration().name + " - " + appConfig.name;
             config.applicationJson = new String(StorageHelper.toRawBytes(clickAndStart), StandardCharsets.UTF_8);
+            config.productVendor = pm.getProductDescriptor().vendor;
 
             Branding branding = new Branding(installer);
             branding.updateConfig(config);
