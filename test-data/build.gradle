@@ -26,6 +26,9 @@ void createTasks(String prodNum) {
     }
 
     task "product${prodNum}Hive" (type: JavaExec) {
+        doFirst {
+            delete "${buildDir}/prod${prodNum}hive"
+        }
         args = ["product", "--hive=${buildDir}/prod${prodNum}hive", "--import=${projectDir}/test-product-${prodNum}"]
         main = project(":minion").mainClassName
         classpath = project(":minion").sourceSets.main.runtimeClasspath
