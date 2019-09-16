@@ -77,8 +77,13 @@ public class UpdatePackagingMigration {
             // for each zip file in the exported tree, import a launcher :)
             try (DirectoryStream<Path> stream = Files.newDirectoryStream(zipDir, "launcher-*.zip")) {
                 for (Path zip : stream) {
-                    for (Manifest.Key k : UpdateHelper.importUpdate(zip, tmpDir, hive)) {
-                        log.info("Imported during migration: " + k);
+                    try {
+                        for (Manifest.Key k : UpdateHelper.importUpdate(zip, tmpDir, hive)) {
+                            log.info("Imported during migration: " + k);
+                        }
+                    } catch (Exception e) {
+                        // happens if the hive already contains the manifest, e.g. if imported manually (or via CLI) beforehand.
+                        log.warn("Cannot migrate nested update package " + zip, e);
                     }
                 }
             }
