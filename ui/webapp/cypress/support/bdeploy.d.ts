@@ -13,7 +13,14 @@ declare namespace Cypress {
      * @returns the UUID of the created instance as string
      * @example cy.createInstance('Test')
      */
-    createInstance(group: string, name: string): Chainable<string>;
+    createInstance(group: string, name: string, version?: '1.0.0' | '2.0.0'): Chainable<string>;
+
+    /**
+     * Delete a previously created instance and verify it is gone.
+     * @param group the name of the instance group the instance is found in.
+     * @param instanceUuid the UUID of the instance to delete.
+     */
+    deleteInstance(group: string, instanceUuid: string);
 
     /**
      * Finds the 'app-instance-node-card' for the given name.
@@ -37,6 +44,11 @@ declare namespace Cypress {
      * Finds the active instance version
      */
     getActiveInstanceVersion(): Chainable<Subject>;
+
+    /**
+     * Chained off an instance version card, will install and activate this instance version.
+     */
+    installAndActivate(): Chainable<Subject>;
 
     /**
      * Adds the named optional parameter in the given panel and sets its value.

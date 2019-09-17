@@ -77,27 +77,7 @@ describe('Instance Tests', function () {
    * Install, activate the given instance configuration.
    */
   it('Install & activate', function() {
-    cy.get('mat-loading-spinner').should('not.exist');
-
-    // should be in the instance version list now, install
-    cy.getLatestInstanceVersion().clickContextMenuItem('Install')
-
-    // wait for progress and the icon to appear
-    cy.getLatestInstanceVersion().find('mat-progress-spinner').should('not.exist')
-    cy.getLatestInstanceVersion().contains('mat-icon', 'check_circle_outline').should('exist')
-
-    // activate the installed instance version
-    cy.getLatestInstanceVersion().clickContextMenuItem('Activate')
-
-    // wait for progress and the icon to appear
-    cy.getLatestInstanceVersion().find('mat-progress-spinner').should('not.exist')
-    cy.getLatestInstanceVersion().contains('mat-icon', 'check_circle').should('exist')
-
-    // unfortunately due to the nested 'find' call cannot assert 'not.exist' above
-    cy.getActiveInstanceVersion().should('exist')
-
-    // no error should have popped up.
-    cy.get('snack-bar-container').should('not.exist')
+    cy.getLatestInstanceVersion().installAndActivate();
   })
 
   /**
@@ -172,25 +152,7 @@ describe('Instance Tests', function () {
    * Delete the instance with the well-known UUID
    */
   it('Delete the instance', function () {
-    // make sure we're on the correct page :) this allows delete to work if previous tests failed.
-    cy.visit('/#/instance/browser/Test')
-
-    // open the menu on the card
-    cy.contains('mat-card', instanceUuid).clickContextMenuItem('Delete')
-
-    // place a trigger on the endpoint, so we can later wait for it
-    cy.server()
-    cy.route('GET', '/api/group/Test/instance').as('reload')
-
-    // in the resulting dialog, click OK
-    cy.get('mat-dialog-container').contains('button', 'OK').click();
-
-    // wait for the dialog to disappear and the page to reload
-    cy.wait('@reload')
-    cy.get('mat-progress-spinner').should('not.exist')
-
-    // now NO trace of the UUID should be left.
-    cy.get('body').contains(instanceUuid).should('not.exist');
+    cy.deleteInstance('Test', instanceUuid)
   })
 
   it('Cleanup instance group', function() {
