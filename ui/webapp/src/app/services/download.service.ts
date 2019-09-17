@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { ConfigService } from './config.service';
 
 // defined in index.html directly to be as global as possible.
 declare var downloadLocation: { assign: (url: string) => {}, click: (link: HTMLAnchorElement) => {} };
@@ -10,11 +11,14 @@ declare var downloadLocation: { assign: (url: string) => {}, click: (link: HTMLA
   providedIn: 'root',
 })
 export class DownloadService {
+
+  constructor(private cfg: ConfigService) {}
+
   /**
    * Sends the given object as JSON string as download with the given file name
    *
    * @param name the file name the browser should save the file as
-   * @param data any object which can be JSON.stringify'ed
+   * @param data any object which can be JSON stringify'ed
    */
   public downloadJson(name: string, data: any) {
     const mediatype = 'application/json';
@@ -49,4 +53,12 @@ export class DownloadService {
   public download(url: string) {
     downloadLocation.assign(url);
   }
+
+  /**
+    * Creates a new URL to download a file that has been prepared by another call.
+    */
+  public createDownloadUrl(token: string) {
+    return this.cfg.config.api + '/download/file/' + token;
+  }
+
 }

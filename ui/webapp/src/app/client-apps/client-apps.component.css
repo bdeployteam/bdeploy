@@ -43,13 +43,10 @@
 }
 
 .content-toolbar {
-  float: right;
-  margin-top: 10px;
-}
-
-.content-toolbar-item {
-  align-self: flex-end;
-  margin-right: 60px;
+  display:flex;
+  flex-direction: row;
+  margin-top: 20px;
+  margin-right: 65px;
 }
 
 .content-toolbar button {

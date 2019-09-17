@@ -118,13 +118,6 @@ public interface InstanceResource {
 
     @GET
     @Unsecured
-    @Path("/{instance}/{applicationId}/installer/download")
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    public Response downloadClientInstaller(@PathParam("instance") String instanceId,
-            @PathParam("applicationId") String applicationId, @QueryParam("token") String token);
-
-    @GET
-    @Unsecured
     @Path(PATH_DOWNLOAD_APP_ICON)
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response downloadIcon(@PathParam("instance") String instanceId, @PathParam("applicationId") String applicationId);

@@ -9,6 +9,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -51,7 +52,7 @@ public interface SoftwareUpdateResource {
     public List<Manifest.Key> getLauncherVersions();
 
     @GET
-    @Path("launcherLatest")
+    @Path("/launcherLatest")
     public LauncherDto getLatestLaunchers();
 
     @POST
@@ -72,5 +73,10 @@ public interface SoftwareUpdateResource {
     @Path(DOWNLOAD_PATH)
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response downloadSoftware(@PathParam("name") String name, @PathParam("tag") String tag);
+
+    @GET
+    @Path("/createLauncherInstaller")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String createLauncherInstallerFor(@QueryParam("os") String osName);
 
 }

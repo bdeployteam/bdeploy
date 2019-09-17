@@ -27,12 +27,16 @@
       <span class="headerText">Launcher for your operating system is not available. Please contact the administrator.</span>
     </p>
     <div class="content-toolbar" *ngIf="launcherService.hasLauncherForOs(activeOs)">
-      <button class="content-toolbar-item" mat-button (click)="downloadLauncher()">
+      <span class="fill-space"></span>
+      <mat-menu #appMenu="matMenu" xPosition="before">
+        <button mat-menu-item (click)="downloadLauncherInstaller()">Installer</button>
+        <button mat-menu-item (click)="downloadLauncherZip()">ZIP (Manual Installation)</button>
+      </mat-menu>
+      <button mat-stroked-button color="primary" [matMenuTriggerFor]="appMenu" appClickStopPropagation>
         <mat-icon>cloud_download</mat-icon>
         <span>Download Click & Start Launcher</span>
       </button>
     </div>
-
     <div *ngFor="let purpose of getPurposes()">
       <p class="list-heading">{{purpose}}</p>
       <div class="card" *ngFor="let instance of getInstances(purpose)">

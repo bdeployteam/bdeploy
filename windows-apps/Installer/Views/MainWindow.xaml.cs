@@ -30,14 +30,37 @@ namespace Bdeploy.Installer
             // Show error page on error
             Installer.Error += Installer_Error;
 
-            // Load icon when available
-            Installer.IconLoaded += Installer_IconLoaded;
+            // Display launcher page when finished
+            Installer.LauncherInstalled += Installer_LauncherInstalled;
 
-            // Ensure progress page is visible
+            // Show metadata when available
+            Installer.IconLoaded += Installer_IconLoaded;
+            Installer.AppInfo += Installer_AppInfo;
+
+            // Ensure ONLY progress page is visible
             ProgressGrid.Visibility = Visibility.Visible;
             ErrorGrid.Visibility = Visibility.Hidden;
             ErrorMessage.Visibility = Visibility.Visible;
             ErrorDetails.Visibility = Visibility.Hidden;
+            LauncherGrid.Visibility = Visibility.Hidden;
+        }
+
+        private void Installer_LauncherInstalled(object sender, EventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                ProgressGrid.Visibility = Visibility.Hidden;
+                LauncherGrid.Visibility = Visibility.Visible;
+            });
+        }
+
+        private void Installer_AppInfo(object sender, AppInfoEventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                ApplicationName.Text = e.AppName ?? "";
+                ApplicationVendor.Text = e.VendorName ?? "";
+            });
         }
 
         private void Installer_IconLoaded(object sender, IconEventArgs e)
@@ -91,7 +114,9 @@ namespace Bdeploy.Installer
         private void Window_CloseButton_Click(object sender, RoutedEventArgs e)
         {
             Installer.Canceled = true;
-            if (ErrorGrid.Visibility == Visibility.Visible)
+
+            // Application cannot be closed while we do some task
+            if (ProgressGrid.Visibility == Visibility.Hidden)
             {
                 Close();
             }
@@ -108,14 +133,14 @@ namespace Bdeploy.Installer
             {
                 ErrorMessage.Visibility = Visibility.Visible;
                 ErrorDetails.Visibility = Visibility.Hidden;
-                DetailsButton.Content = "Show Details";
+                ErrorDetailsButton.Content = "Show Details";
                 Height = 300;
             }
             else
             {
                 ErrorMessage.Visibility = Visibility.Hidden;
                 ErrorDetails.Visibility = Visibility.Visible;
-                DetailsButton.Content = "Hide Details";
+                ErrorDetailsButton.Content = "Hide Details";
                 Height = 450;
             }
             detailsVisible = !detailsVisible;

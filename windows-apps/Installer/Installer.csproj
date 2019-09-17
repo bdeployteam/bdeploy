@@ -159,7 +159,7 @@
     <EmbeddedResource Include="Resources\config.txt" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\icon.ico" />
+    <Resource Include="Resources\icon.ico" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Shared.csproj">
@@ -168,10 +168,16 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\debug.txt" />
+    <Resource Include="Resources\copy.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\copy.png" />
+    <Resource Include="Resources\info.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\icon.png" />
+    <Content Include="TestData\.gitignore" />
+    <None Include="TestData\InstallApp.txt" />
+    <None Include="TestData\InstallLauncher.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

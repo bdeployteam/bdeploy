@@ -1,24 +1,30 @@
 package io.bdeploy.ui.api.impl;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
@@ -33,12 +39,17 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.ExportOperation;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
+import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.PruneOperation;
+import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
+import io.bdeploy.bhive.util.StorageHelper;
+import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.common.util.ZipHelper;
 import io.bdeploy.interfaces.NodeStatus;
@@ -47,15 +58,30 @@ import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
+import io.bdeploy.ui.branding.Branding;
+import io.bdeploy.ui.branding.BrandingConfig;
 import io.bdeploy.ui.dto.LauncherDto;
 
 public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
 
     private static final Logger log = LoggerFactory.getLogger(SoftwareUpdateResourceImpl.class);
 
+    /**
+     * Name and path of the native Windows installer stored in the launcher ZIP
+     */
+    public static final String INSTALLER_EXE = "bin/Installer.bin";
+
+    /**
+     * Name and path of the native Linux (shell script) installer template stored in the launcher ZIP
+     */
+    public static final String INSTALLER_SH = "bin/installer.tpl";
+
     private static final String BDEPLOY_MF_NAME = "meta/bdeploy";
     private static final String LAUNCHER_MF_NAME = "meta/launcher";
     private static final Comparator<Key> BY_TAG_NEWEST_LAST = (a, b) -> a.getTag().compareTo(b.getTag());
+
+    @Inject
+    private SecurityContext context;
 
     @Inject
     private MasterRootResource master;
@@ -68,6 +94,9 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
 
     @Context
     private UriInfo info;
+
+    @Context
+    private ResourceContext rc;
 
     private BHive getHive() {
         return reg.get(JerseyRemoteBHive.DEFAULT_NAME);
@@ -202,6 +231,97 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
             dto.launchers.put(os, scopedKey.getKey());
         }
         return dto;
+    }
+
+    @Override
+    public String createLauncherInstallerFor(String osName) {
+        OperatingSystem os = OperatingSystem.valueOf(osName.toUpperCase());
+        ScopedManifestKey launcherKey = getNewestLauncher(os);
+
+        // Request a new file where we can store the launcher
+        DownloadServiceImpl ds = rc.initResource(new DownloadServiceImpl());
+        String token = ds.createNewToken();
+        Path installerPath = ds.getStoragePath(token);
+
+        UriBuilder launcherUri = UriBuilder.fromUri(info.getBaseUri());
+        launcherUri.path(SoftwareUpdateResource.ROOT_PATH);
+        launcherUri.path(SoftwareUpdateResource.DOWNLOAD_LATEST_PATH);
+        URI launcherLocation = launcherUri.build(new Object[] { os.name().toLowerCase() }, false);
+
+        String fileName = null;
+        if (os == OperatingSystem.WINDOWS) {
+            fileName = "Launcher - Installer.exe";
+            createWindowsInstaller(installerPath, launcherKey, launcherLocation);
+        } else if (os == OperatingSystem.LINUX) {
+            fileName = "Launcher-Installer.run";
+            createLinuxInstaller(installerPath, launcherKey, launcherLocation);
+        }
+
+        // Register the file for downloading
+        ds.registerForDownload(token, fileName);
+        return token;
+    }
+
+    private void createLinuxInstaller(Path installerPath, ScopedManifestKey launcherKey, URI launcherLocation) {
+        BHive rootHive = reg.get(JerseyRemoteBHive.DEFAULT_NAME);
+        Manifest mf = rootHive.execute(new ManifestLoadOperation().setManifest(launcherKey.getKey()));
+        TreeEntryLoadOperation findInstallerOp = new TreeEntryLoadOperation().setRootTree(mf.getRoot())
+                .setRelativePath(INSTALLER_SH);
+        String template;
+        try (InputStream in = rootHive.execute(findInstallerOp); ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+            in.transferTo(os);
+            template = os.toString(StandardCharsets.UTF_8);
+        } catch (IOException ioe) {
+            throw new WebApplicationException("Cannot create linux installer.", ioe);
+        }
+
+        // must match the values required in the installer.tpl file
+        Map<String, String> values = new TreeMap<>();
+        values.put("LAUNCHER_URL", launcherLocation.toString());
+        values.put("REMOTE_SERVICE", new String(StorageHelper.toRawBytes(createRemoteService()), StandardCharsets.UTF_8));
+
+        String content = TemplateHelper.process(template, values::get, "{{", "}}");
+        try {
+            Files.write(installerPath, content.getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new WebApplicationException("Cannot write installer " + installerPath, e);
+        }
+    }
+
+    private void createWindowsInstaller(Path installerPath, ScopedManifestKey launcherKey, URI launcherLocation) {
+        File installer = installerPath.toFile();
+
+        // Try to load the installer stored in the manifest tree
+        BHive rootHive = reg.get(JerseyRemoteBHive.DEFAULT_NAME);
+        Manifest mf = rootHive.execute(new ManifestLoadOperation().setManifest(launcherKey.getKey()));
+        TreeEntryLoadOperation findInstallerOp = new TreeEntryLoadOperation().setRootTree(mf.getRoot())
+                .setRelativePath(INSTALLER_EXE);
+        try (InputStream in = rootHive.execute(findInstallerOp); OutputStream os = Files.newOutputStream(installerPath)) {
+            in.transferTo(os);
+        } catch (IOException ioe) {
+            throw new WebApplicationException("Cannot create windows installer.", ioe);
+        }
+
+        // Brand the executable and embed the required information
+        try {
+            BrandingConfig config = new BrandingConfig();
+            config.launcherUrl = launcherLocation.toString();
+            config.remoteService = createRemoteService();
+
+            Branding branding = new Branding(installer);
+            branding.updateConfig(config);
+            branding.write(installer);
+        } catch (Exception ioe) {
+            throw new WebApplicationException("Cannot apply branding to windows installer.", ioe);
+        }
+    }
+
+    /**
+     * Creates and returns a remote service with a weak token to download files provided by the minion.
+     */
+    private RemoteService createRemoteService() {
+        String userName = context.getUserPrincipal().getName();
+        return new RemoteService(info.getBaseUri(), minion.createWeakToken(userName));
     }
 
     /**

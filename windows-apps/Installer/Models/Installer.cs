@@ -58,9 +58,19 @@ namespace Bdeploy.Installer
         public event EventHandler<MessageEventArgs> Error;
 
         /// <summary>
+        /// Event that is raised when the launcher has been installed.
+        /// </summary>
+        public event EventHandler<EventArgs> LauncherInstalled;
+
+        /// <summary>
         /// Event that is raised when the icon has been loaded
         /// </summary>
         public event EventHandler<IconEventArgs> IconLoaded;
+
+        /// <summary>
+        /// Event that is raised to update text about the application to install.
+        /// </summary>
+        public event EventHandler<AppInfoEventArgs> AppInfo;
 
         /// <summary>
         /// Embedded configuration object
@@ -76,7 +86,7 @@ namespace Bdeploy.Installer
         }
 
         /// <summary>
-        /// Launches the application. Does not wait for termination
+        /// Launches the previously installed application. Does not wait for termination
         /// </summary>
         /// <returns></returns>
         public void Launch()
@@ -95,7 +105,7 @@ namespace Bdeploy.Installer
             try
             {
                 // Show error message if configuration is invalid
-                if (config == null || !config.IsValid())
+                if (config == null || !config.CanInstallLauncher())
                 {
                     StringBuilder builder = new StringBuilder();
                     builder.Append("Configuration is invalid or corrupt.").AppendLine().AppendLine();
@@ -106,10 +116,18 @@ namespace Bdeploy.Installer
                     OnError(builder.ToString());
                     return -1;
                 }
+                UpdateAppInfo();
+
+                // Prepare directories
                 Directory.CreateDirectory(bdeployHome);
                 Directory.CreateDirectory(launcherHome);
-                Directory.CreateDirectory(appsHome);
-                Directory.CreateDirectory(Path.Combine(appsHome, config.ApplicationUid));
+                Directory.CreateDirectory(appsHome);      
+                
+                // Prepare home directory of the application if required
+                if(config.CanInstallApp())
+                {
+                    Directory.CreateDirectory(Path.Combine(appsHome, config.ApplicationUid));
+                }
 
                 // Installers should not run simultaneously to avoid conflicts when extracting files
                 // Thus we try to create a lockfile. If it exists we wait until it is removed
@@ -139,8 +157,16 @@ namespace Bdeploy.Installer
                 // Associate bdeploy files with the launcher
                 CreateFileAssociation();
 
-                // Launch application
-                ExtractApplication();
+                // Store embedded application information
+                // Not present in case that just the launcher should be installed
+                if (config.CanInstallApp())
+                {
+                    ExtractApplication();
+                }
+                else
+                {
+                    LauncherInstalled?.Invoke(this, new EventArgs());
+                }
                 return 0;
             }
             catch (Exception ex)
@@ -225,6 +251,12 @@ namespace Bdeploy.Installer
         /// </summary>
         public async Task DownloadIcon()
         {
+            // Icon is optional
+            if (config.IconUrl == null)
+            {
+                return;
+            }
+
             Uri requestUrl = new Uri(config.IconUrl);
             using (HttpClient client = CreateHttpClient())
             using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl))
@@ -241,7 +273,7 @@ namespace Bdeploy.Installer
                 string iconFormat = Path.GetExtension(iconName);
 
                 string appUid = config.ApplicationUid;
-                string iconFile = Path.Combine(appsHome, appUid, "icon"+iconFormat);
+                string iconFile = Path.Combine(appsHome, appUid, "icon" + iconFormat);
                 using (Stream responseStream = await response.Content.ReadAsStreamAsync())
                 using (FileStream fileStream = new FileStream(iconFile, FileMode.Create))
                 {
@@ -249,7 +281,7 @@ namespace Bdeploy.Installer
                 }
 
                 // Notify UI that we have an icon
-                OnIconLoaded(iconFile);
+                IconLoaded?.Invoke(this, new IconEventArgs(iconFile));
             }
         }
 
@@ -289,6 +321,20 @@ namespace Bdeploy.Installer
         }
 
         /// <summary>
+        /// Notifies the UI about the application that is installed
+        /// </summary>
+        private void UpdateAppInfo()
+        {
+            // Skip if we do not install an application
+            if (!config.CanInstallApp())
+            {
+                AppInfo?.Invoke(this, new AppInfoEventArgs("Launcher", "BDeploy Team"));
+                return;
+            }
+            AppInfo?.Invoke(this, new AppInfoEventArgs(config.ApplicationName, config.ProductVendor));
+        }
+
+        /// <summary>
         /// Returns the file name set in the content disposition header
         /// </summary>
         /// <returns></returns>
@@ -312,9 +358,7 @@ namespace Bdeploy.Installer
             WebRequestHandler handler = new WebRequestHandler();
             handler.ServerCertificateValidationCallback += (sender, cert, chain, error) =>
              {
-                 ClickAndStartDescriptor descriptor = ClickAndStartDescriptor.FromString(config.ClickAndStartDescriptor);
-                 RemoteService remoteService = descriptor.RemoteService;
-                 X509Certificate2 root = SecurityHelper.LoadCertificate(remoteService);
+                 X509Certificate2 root = SecurityHelper.LoadCertificate(config.RemoteService);
                  return SecurityHelper.Verify(root, (X509Certificate2)cert);
              };
             return new HttpClient(handler, true);
@@ -460,14 +504,6 @@ namespace Bdeploy.Installer
         private void OnError(string message)
         {
             Error?.Invoke(this, new MessageEventArgs(message));
-        }
-
-        /// <summary>
-        /// Notify that the icon has been downloaded
-        /// </summary>
-        private void OnIconLoaded(string iconPath)
-        {
-            IconLoaded?.Invoke(this, new IconEventArgs(iconPath));
         }
     }
 }

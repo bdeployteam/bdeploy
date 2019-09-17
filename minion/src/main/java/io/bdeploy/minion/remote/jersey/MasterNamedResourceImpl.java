@@ -2,10 +2,7 @@ package io.bdeploy.minion.remote.jersey;
 
 import static io.bdeploy.common.util.RuntimeAssert.assertNotNull;
 
-import java.io.IOException;
 import java.nio.file.Path;
-import java.security.GeneralSecurityException;
-import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -33,9 +30,7 @@ import io.bdeploy.bhive.op.ManifestNextIdOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
-import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
-import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
@@ -63,7 +58,6 @@ import io.bdeploy.interfaces.remote.SlaveDeploymentResource;
 import io.bdeploy.interfaces.remote.SlaveProcessResource;
 import io.bdeploy.jersey.JerseyPathWriter.DeleteAfterWrite;
 import io.bdeploy.minion.MinionRoot;
-import io.bdeploy.minion.MinionState;
 
 public class MasterNamedResourceImpl implements MasterNamedResource {
 
@@ -683,22 +677,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
     @Override
     public String generateWeakToken(String principal) {
-        ApiAccessToken token = new ApiAccessToken.Builder().setIssuedTo(principal).setWeak(true).build();
-        SecurityHelper sh = SecurityHelper.getInstance();
-
-        MinionState state = root.getState();
-        KeyStore ks;
-        try {
-            ks = sh.loadPrivateKeyStore(state.keystorePath, state.keystorePass);
-        } catch (GeneralSecurityException | IOException e) {
-            throw new WebApplicationException("Cannot generate weak token", e);
-        }
-
-        try {
-            return SecurityHelper.getInstance().createSignaturePack(token, ks, state.keystorePass);
-        } catch (Exception e) {
-            throw new WebApplicationException("Cannot create weak token", e);
-        }
+        return root.createWeakToken(principal);
     }
 
     @Override

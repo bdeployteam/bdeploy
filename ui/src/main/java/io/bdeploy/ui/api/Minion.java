@@ -41,4 +41,13 @@ public interface Minion {
      */
     public SortedMap<String, RemoteService> getMinions();
 
+    /**
+     * Creates and returns a new weak token for the given principal. The weak token
+     * is only suitable for fetching fetching by launcher-like applications.
+     *
+     * @param principal the principal name to issue the token to.
+     * @return a "weak" token.
+     */
+    public String createWeakToken(String principal);
+
 }

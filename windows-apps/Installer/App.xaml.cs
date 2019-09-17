@@ -33,25 +33,28 @@ namespace Bdeploy.Installer
             AppInstaller installer = new AppInstaller(config);
 
             // Download and install application
-            int setupCode = await InstallIfMissing(installer, unattended);
+            int setupCode = await InstallIfMissing(installer, config, unattended);
             if (setupCode != 0)
             {
                 return;
             }
 
-            // Installation done when in unattended mode
+            // Shutdown application when in unattended mode
             if (unattended)
             {
-                Current.Shutdown(setupCode);
+                Current.Shutdown(0);
                 return;
             }
 
-            // Launch application and terminate installer
-            installer.Launch();
-            Current.Shutdown(0);
+            // Launch application if app installation successful
+            if (config.CanInstallApp())
+            {
+                installer.Launch();
+                Current.Shutdown(0);
+            }
         }
 
-        private async Task<int> InstallIfMissing(AppInstaller installer, bool unattended)
+        private async Task<int> InstallIfMissing(AppInstaller installer, Config config, bool unattended)
         {
             // Show progress during installation
             MainWindow mainWindow = null;
@@ -71,8 +74,8 @@ namespace Bdeploy.Installer
             int returnCode = await Task.Run(() => installer.Setup());
             Console.WriteLine("Setup finished with return code: ${0}", returnCode);
 
-            // Auto-Close window when installation was successfull
-            if (returnCode == 0 && mainWindow != null)
+            // Auto-Close window when installation of application was successfull
+            if (returnCode == 0 && mainWindow != null && config.CanInstallApp())
             {
                 mainWindow.Close();
             }

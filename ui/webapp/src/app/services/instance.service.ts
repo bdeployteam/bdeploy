@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ClickAndStartDescriptor, FileStatusDto, InstanceConfiguration, InstanceConfigurationDto, InstanceDirectory, InstanceDirectoryEntry, InstanceDto, InstanceManifestHistoryDto, InstanceNodeConfigurationListDto, InstancePurpose, InstanceStateRecord, InstanceVersionDto, ManifestKey, StringEntryChunkDto } from '../models/gen.dtos';
 import { ConfigService } from './config.service';
+import { DownloadService } from './download.service';
 import { InstanceGroupService } from './instance-group.service';
 import { Logger, LoggingService } from './logging.service';
 
@@ -12,7 +13,8 @@ import { Logger, LoggingService } from './logging.service';
 export class InstanceService {
   private readonly log: Logger = this.loggingService.getLogger('InstanceService');
 
-  constructor(private cfg: ConfigService, private http: HttpClient, private loggingService: LoggingService) {}
+  constructor(private cfg: ConfigService, private http: HttpClient, private loggingService: LoggingService,
+    private downloadService: DownloadService) {}
 
   public listInstances(instanceGroupName: string): Observable<InstanceDto[]> {
     const url: string = this.buildGroupUrl(instanceGroupName);
@@ -183,13 +185,9 @@ export class InstanceService {
     return this.http.get(url, { responseType: 'text' });
   }
 
-  public downloadClientInstaller(
-    instanceGroupName: string,
-    instanceName: string,
-    appId: string,
-    token: string,
-  ): string {
-    return this.buildInstanceUrl(instanceGroupName, instanceName) + '/' + appId + '/installer/download?token=' + token;
+  public downloadClientInstaller(token: string) {
+    const url =  this.downloadService.createDownloadUrl(token);
+    this.downloadService.download(url);
   }
 
   public getExportUrl(instanceGroupName: string, instanceName: string, tag: string) {

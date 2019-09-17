@@ -7,12 +7,17 @@ using System.Text;
 namespace Bdeploy.Shared
 {
     /// <summary>
-    /// Represents the configuration of the Installer. 
-    /// The configuration is serialized and dynamically embedded into the exeuctable.
+    /// Represents the configuration of the installer which is embedded into the executable.
     /// </summary>
     [DataContract]
     public class Config
     {
+        /// <summary>
+        /// The minion URL as well as the access token. 
+        /// </summary>
+        [DataMember(Name = "remoteService")]
+        public RemoteService RemoteService;
+
         /// <summary>
         /// The URL to download the launcher ZIP. 
         /// </summary>
@@ -20,7 +25,8 @@ namespace Bdeploy.Shared
         public string LauncherUrl;
 
         /// <summary>
-        /// The URL to download the ICON. 
+        /// The URL to download the application ICON. 
+        /// Optional parameter. Not all apps must have an icon.
         /// </summary>
         [DataMember(Name = "iconUrl")]
         public string IconUrl;
@@ -65,6 +71,7 @@ namespace Bdeploy.Shared
             StringBuilder builder = new StringBuilder();
             builder.AppendFormat("Id: {0}", ApplicationUid).AppendLine();
             builder.AppendFormat("Name: {0}", ApplicationName).AppendLine();
+            builder.AppendFormat("Vendor: {0}", ProductVendor).AppendLine();
             builder.AppendFormat("URL: {0}", LauncherUrl).AppendLine();
             builder.AppendFormat("Icon: {0}", IconUrl).AppendLine();
             builder.AppendFormat("Splash: {0}", SplashUrl).AppendLine();
@@ -73,11 +80,19 @@ namespace Bdeploy.Shared
         }
 
         /// <summary>
-        /// Returns whether or not all required parameters are set to a non-null value. 
+        /// Returns whether or not the required parameters are set to download and install the launcher.
         /// </summary>
-        public bool IsValid()
+        public bool CanInstallLauncher()
         {
-            return LauncherUrl != null && IconUrl != null && ClickAndStartDescriptor != null && ApplicationName != null && ApplicationUid != null;
+            return RemoteService != null && LauncherUrl != null;
+        }
+
+        /// <summary>
+        ///  Returns whether or not the required parameters are set to download and install an application.
+        /// </summary>
+        public bool CanInstallApp()
+        {
+            return ApplicationUid != null && ApplicationName != null && ClickAndStartDescriptor != null;
         }
     }
 
@@ -89,7 +104,7 @@ namespace Bdeploy.Shared
     public class ClickAndStartDescriptor
     {
         /// <summary>
-        /// The URL to download the launcher ZIP. 
+        /// The remote service as well as the access token. 
         /// </summary>
         [DataMember(Name = "host")]
         public RemoteService RemoteService;
@@ -156,7 +171,7 @@ namespace Bdeploy.Shared
     }
 
     /// <summary>
-    /// Describes where the remote service is running and contains the token to access it.
+    /// Describes where the minion is running and contains the token to access it.
     /// </summary>
     [DataContract]
     public class RemoteService
