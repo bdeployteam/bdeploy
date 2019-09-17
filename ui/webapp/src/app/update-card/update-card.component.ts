@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { OperatingSystem } from '../models/gen.dtos';
+import { DownloadService } from '../services/download.service';
 import { SoftwareUpdateService } from '../services/software-update.service';
 import { GroupedKeys } from '../update-browser/update-browser.component';
 
@@ -17,7 +18,7 @@ export class UpdateCardComponent implements OnInit {
 
   public deleteRunning = false;
 
-  constructor(private updService: SoftwareUpdateService) { }
+  constructor(private updService: SoftwareUpdateService, private downloadService: DownloadService) { }
 
   ngOnInit() {
   }
@@ -26,7 +27,7 @@ export class UpdateCardComponent implements OnInit {
     // find actual key for os.
     for (const k of this.version.keys) {
       if (k.name.includes(os.toLowerCase())) {
-        window.location.href = this.updService.getDownloadUrl(k);
+        this.downloadService.download(this.updService.getDownloadUrl(k));
         return;
       }
     }

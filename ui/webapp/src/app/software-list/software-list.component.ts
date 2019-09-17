@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { finalize } from 'rxjs/operators';
 import { ManifestKey } from '../models/gen.dtos';
+import { DownloadService } from '../services/download.service';
 import { LoggingService } from '../services/logging.service';
 import { SoftwareService } from '../services/software.service';
 import { compareTags } from '../utils/manifest.utils';
@@ -35,7 +36,7 @@ export class SoftwareListComponent implements OnInit {
 
   public exporting: ManifestKey = null;
 
-  constructor(private softwareService: SoftwareService, private loggingService: LoggingService) { }
+  constructor(private softwareService: SoftwareService, private loggingService: LoggingService, private downloadService: DownloadService) { }
 
   ngOnInit() {
   }
@@ -53,7 +54,7 @@ export class SoftwareListComponent implements OnInit {
       .createSoftwareZip(this.softwareRepositoryName, softwareVersion)
       .pipe(finalize(() => (this.exporting = null)))
       .subscribe(token => {
-        window.location.href = this.softwareService.downloadSoftware(this.softwareRepositoryName, token);
+        this.downloadService.download(this.softwareService.downloadSoftware(this.softwareRepositoryName, token));
       });
   }
 

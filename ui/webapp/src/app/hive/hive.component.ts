@@ -4,6 +4,7 @@ import { MatSnackBar } from '@angular/material';
 import { finalize } from 'rxjs/operators';
 import { MessageBoxMode } from '../messagebox/messagebox.component';
 import { HiveEntryDto, TreeEntryType } from '../models/gen.dtos';
+import { DownloadService } from '../services/download.service';
 import { HiveService } from '../services/hive.service';
 import { Logger, LoggingService } from '../services/logging.service';
 import { MessageboxService } from '../services/messagebox.service';
@@ -37,6 +38,7 @@ export class HiveComponent implements OnInit {
     private loggingService: LoggingService,
     private snackbarService: MatSnackBar,
     private mbService: MessageboxService,
+    private dlService: DownloadService,
   ) {}
 
   ngOnInit() {
@@ -136,17 +138,7 @@ export class HiveComponent implements OnInit {
       mediatype = 'application/json';
     }
     const blob = new Blob([data], { type: mediatype });
-    // this opens a simple save/cancel dialog (Firefox)
-    // const url = window.URL.createObjectURL(blob);
-    // window.open(url);
-
-    // this opens the well known open dialog with open with/save file options
-    const link = document.createElement('a');
-    link.href = window.URL.createObjectURL(blob);
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    this.dlService.downloadBlob(filename, blob);
   }
 
   delete(entry: HiveEntryDto) {

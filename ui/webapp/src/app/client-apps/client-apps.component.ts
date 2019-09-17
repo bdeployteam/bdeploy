@@ -66,25 +66,25 @@ export class ClientAppsComponent implements OnInit {
 
   downloadLauncher() {
     const key = this.launcherService.getLauncherForOs(this.activeOs);
-    window.location.href = this.updateService.getDownloadUrl(key);
+    this.downloadService.download(this.updateService.getDownloadUrl(key));
   }
 
   downloadClickAndRun(instance: InstanceConfiguration, app: ClientApplicationDto) {
     this.instanceService
       .createClickAndStartDescriptor(this.instanceGroupName, instance.uuid, app.uuid)
       .subscribe(data => {
-        this.downloadService.downloadData(app.description + '.bdeploy', data);
+        this.downloadService.downloadJson(app.description + '.bdeploy', data);
       });
   }
 
   downloadInstaller(instance: InstanceConfiguration, app: ClientApplicationDto) {
     this.instanceService.createClientInstaller(this.instanceGroupName, instance.uuid, app.uuid).subscribe(token => {
-      window.location.href = this.instanceService.downloadClientInstaller(
+      this.downloadService.download(this.instanceService.downloadClientInstaller(
         this.instanceGroupName,
         instance.uuid,
         app.uuid,
         token,
-      );
+      ));
     });
   }
 

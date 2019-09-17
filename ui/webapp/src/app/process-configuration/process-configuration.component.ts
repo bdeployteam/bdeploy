@@ -376,7 +376,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
   onDownloadClickAndStart(app: ApplicationConfiguration) {
     this.instanceService.createClickAndStartDescriptor(this.groupParam, this.uuidParam, app.uid).subscribe(data => {
-      this.downloadService.downloadData(app.name + '.bdeploy', data);
+      this.downloadService.downloadJson(app.name + '.bdeploy', data);
     });
   }
 
@@ -386,7 +386,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       .createClientInstaller(this.groupParam, this.uuidParam, app.uid)
       .pipe(finalize(() => event.done()))
       .subscribe(token => {
-        window.location.href = this.instanceService.downloadClientInstaller(this.groupParam, this.uuidParam, app.uid, token);
+        this.downloadService.download(this.instanceService.downloadClientInstaller(this.groupParam, this.uuidParam, app.uid, token));
       });
   }
 
@@ -892,6 +892,6 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   exportInstanceVersion(key: ManifestKey) {
-    window.location.href = this.instanceService.getExportUrl(this.groupParam, this.uuidParam, key.tag);
+    this.downloadService.download(this.instanceService.getExportUrl(this.groupParam, this.uuidParam, key.tag));
   }
 }
