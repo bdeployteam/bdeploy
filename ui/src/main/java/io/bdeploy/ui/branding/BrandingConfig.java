@@ -7,6 +7,8 @@ public class BrandingConfig {
 
     public String launcherUrl;
 
+    public String splashUrl;
+
     public String iconUrl;
 
     public String applicationJson;
@@ -14,5 +16,7 @@ public class BrandingConfig {
     public String applicationName;
 
     public String applicationUid;
+
+    public String productVendor;
 
 }

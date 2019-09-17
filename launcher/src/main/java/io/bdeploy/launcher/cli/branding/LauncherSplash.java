@@ -31,7 +31,7 @@ import io.bdeploy.interfaces.descriptor.application.ApplicationSplashDescriptor;
 import io.bdeploy.launcher.cli.WindowHelper;
 
 /**
- * Represents the splash screen with paints an image along with a progress text and progress bar.
+ * Represents the splash screen which paints an image along with a progress text and progress bar.
  */
 public class LauncherSplash implements LauncherSplashDisplay {
 
