@@ -8,11 +8,12 @@ declare namespace Cypress {
 
     /**
      * Create a new instance in the 'Test' instance group
+     * @param group the name of the instance group to create into.
      * @param name the name of the instance to create
      * @returns the UUID of the created instance as string
      * @example cy.createInstance('Test')
      */
-    createInstance(name: string): Chainable<string>;
+    createInstance(group: string, name: string): Chainable<string>;
 
     /**
      * Finds the 'app-instance-node-card' for the given name.

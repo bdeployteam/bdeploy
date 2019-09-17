@@ -9,7 +9,7 @@ describe('Instance Tests', function () {
    * Creates a new instance and sets the instanceUuid variable to the resulting UUID
    */
   it('Create a new instance', function () {
-    cy.createInstance('CreateInstanceTest').then(uuid => {
+    cy.createInstance('Test', 'CreateInstanceTest').then(uuid => {
       instanceUuid = uuid;
 
       cy.get('body').contains(instanceUuid).should('exist');
