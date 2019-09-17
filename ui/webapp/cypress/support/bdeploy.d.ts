@@ -60,6 +60,10 @@ declare namespace Cypress {
      */
     clickContextMenuItem(item: string): Chainable<Subject>;
 
-    downloadObjectUrl(link: HTMLAnchorElement): Promise<XMLHttpRequest>;
+    /**
+     * Chain off a clickable element which will trigger downloadLocation.click in the application.
+     * @param callback the callback to receive the response of the request (i.e. the downloaded data).
+     */
+    downloadBlobFileShould(callback: (any) => void);
   }
 }

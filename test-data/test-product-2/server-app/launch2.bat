@@ -25,6 +25,11 @@ IF NOT "%1" == "" (
         type %2
         SHIFT
     )
+    IF "%1" == "--out" (
+        echo "Writing to file: %2"
+        echo "TEST" > %2
+        SHIFT
+    )
 
     SHIFT
     GOTO :loop

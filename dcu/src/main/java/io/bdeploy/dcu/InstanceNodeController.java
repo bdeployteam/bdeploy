@@ -206,6 +206,9 @@ public class InstanceNodeController {
         } catch (IOException e) {
             throw new IllegalStateException("Cannot write PCU information", e);
         }
+
+        // make sure that the data directory always exists
+        paths.getAndCreate(SpecialDirectory.DATA);
     }
 
     private void processConfigurationTemplates(Path path, VariableResolver resolver) {

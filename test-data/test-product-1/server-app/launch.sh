@@ -18,7 +18,7 @@ while [[ $# -gt 0 ]]; do
         --cfg=*)
             CFGFILE=${1##--cfg=}
             echo "Got config file: ${CFGFILE}"
-            cat ${CFGFILE}
+            cat "${CFGFILE}"
             ;;
         *)
             echo "Unsupported argument: $1"

@@ -36,6 +36,16 @@ describe('Instance Tests', function () {
     cy.contains('button', 'SAVE').click();
   })
 
+  it('Create config file', () => {
+    cy.get('app-instance-group-logo').parent().clickContextMenuItem('Configuration Files...');
+    cy.contains('button', 'add').should('be.enabled').and('be.visible').click();
+    cy.get('input[placeholder="Enter path for file"]').clear().type('cypress.cfg')
+    cy.get('textarea').type('CY-CFG', {force: true})
+    cy.contains('button', 'APPLY').should('be.enabled').and('be.visible').click();
+    cy.contains('td', 'cypress.cfg').should('exist');
+    cy.contains('button', 'SAVE').should('be.enabled').and('be.visible').click();
+  })
+
   /**
    * Sets the sleep parameter to a high value.
    * <p>
@@ -50,6 +60,12 @@ describe('Instance Tests', function () {
     // set text parameter
     cy.addAndSetOptionalParameter('Test Parameters', 'Text', 'CYPRESS');
 
+    // set out parameter
+    cy.addAndSetOptionalParameter('Test Parameters', 'Output', '{{P:DATA}}/cypress.txt');
+
+    // set config file parameter
+    cy.addAndSetOptionalParameter('Test Parameters', 'Config File', '{{P:CONFIG}}/cypress.cfg');
+
     cy.contains('button', 'APPLY').click();
 
     cy.getApplicationConfigCard('master', 'Server Application').find('.app-config-modified').should('exist')
@@ -62,9 +78,6 @@ describe('Instance Tests', function () {
    */
   it('Install & activate', function() {
     cy.get('mat-loading-spinner').should('not.exist');
-
-    // close the configura applications panel.
-    cy.get('mat-toolbar').contains('Configure Applications').siblings('button').contains('close').click();
 
     // should be in the instance version list now, install
     cy.getLatestInstanceVersion().clickContextMenuItem('Install')
@@ -99,18 +112,59 @@ describe('Instance Tests', function () {
     cy.contains('mat-toolbar', 'Process Control').should('exist');
     cy.contains('mat-toolbar', 'Server Application').should('exist');
 
+    // start the process, show process list
     cy.contains('app-process-details', 'Server Application').within(() => {
       cy.contains('button', 'play_arrow').should('be.enabled').click();
       cy.get('app-process-status').find('.app-process-running').should('exist')
+
+      cy.contains('button', 'settings').should('be.enabled').click();
     })
 
+    // check that at least one process entry exists
+    cy.get('app-process-list').within(() => {
+      cy.get('tbody>tr').should('exist');
+    })
+
+    // close process list
+    cy.get('.cdk-overlay-backdrop').click('top', {force:true}); // click even if obstructed.
+
+    // click process output button
+    cy.contains('app-process-details', 'Server Application').within(() => {
+      cy.contains('button', 'message').should('be.enabled').click();
+    })
+
+    // check process output and close overlay
+    cy.get('app-file-viewer').within(() => {
+      cy.contains('pre', 'CYPRESS').should('exist'); // the text we previously configured...
+      cy.contains('pre', 'CY-CFG').should('exist'); // the text in the config file we created...
+      cy.contains('button', 'close').click();
+    })
+
+    // check that process is marked as running
     cy.getApplicationConfigCard('master', 'Server Application').within(() => {
       cy.get('app-process-status').find('.app-process-running').should('exist')
     })
 
+    // stop and check that the process is marked as stopped
     cy.contains('app-process-details', 'Server Application').within(() => {
       cy.contains('button', 'stop').click();
       cy.get('app-process-status').find('.app-process-stopped').should('exist')
+    })
+  })
+
+  it('Check data file browser', () => {
+    cy.get('app-instance-group-logo').parent().clickContextMenuItem('Data Files...');
+
+    cy.contains('td', 'cypress.txt').should('exist').click();
+
+    // check file content and close overlay
+    cy.get('app-file-viewer').within(() => {
+      cy.contains('pre', 'TEST').should('exist'); // the text written by the test product application
+      cy.contains('button', 'close').click();
+    })
+
+    cy.contains('tr', 'cypress.txt').contains('mat-icon', 'cloud_download').downloadBlobFileShould(resp => {
+      expect(resp).to.contain('TEST');
     })
   })
 
@@ -162,8 +216,7 @@ describe('Instance Tests', function () {
     cy.get('@Execute').scrollIntoView().click();
 
     // the calculate button should be back. re-calculate
-    cy.contains('button', 'Calculate Cleanup Actions').should('exist').and('be.visible').and('be.enabled');
-    cy.contains('button', 'Calculate Cleanup Actions').click();
+    cy.contains('button', 'Calculate Cleanup Actions').should('exist').and('be.visible').and('be.enabled').click();
 
     cy.get('mat-progress-spinner', { timeout: 10000 }).should('not.exist');
     cy.contains('button', 'Execute all Actions').should('exist').and('be.disabled');

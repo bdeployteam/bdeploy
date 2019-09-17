@@ -16,13 +16,6 @@ processControl:
 startCommand:
   launcherPath: "{{WINDOWS:launch.bat}}{{LINUX:launch.sh}}"
   parameters:
-    - uid: "param.sleep"
-      name: "Sleep Timeout"
-      longDescription: "A numeric parameter - controls how long the application stays alive"
-      groupName: "Sleep Configuration"
-      parameter: "--sleep"
-      defaultValue: "10"
-      type: NUMERIC
     - uid: "param.text"
       name: "Text"
       longDescription: "A text parameter"
@@ -59,3 +52,11 @@ startCommand:
       mandatory: true
       fixed: true
       type: STRING
+    - uid: "param.sleep"
+      name: "Sleep Timeout"
+      longDescription: "A numeric parameter - controls how long the application stays alive"
+      groupName: "Sleep Configuration"
+      parameter: "--sleep"
+      defaultValue: "10"
+      type: NUMERIC
+
