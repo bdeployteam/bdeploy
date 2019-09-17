@@ -163,6 +163,11 @@ public class ConfigFileResourceImpl implements ConfigFileResource {
     }
 
     private void exportConfigTree(ObjectId configTree, Path cfgDir) {
+        if (configTree == null) {
+            PathHelper.mkdirs(cfgDir);
+            return;
+        }
+
         try {
             hive.execute(new ExportTreeOperation().setSourceTree(configTree).setTargetPath(cfgDir));
         } catch (Exception e) {

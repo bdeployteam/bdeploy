@@ -48,3 +48,19 @@ Cypress.Commands.add('downloadObjectUrl', function(link) {
     xhr.send();
   });
 });
+
+Cypress.Commands.add('downloadBlobFileShould', { prevSubject: true },  function(subject, callback) {
+  cy.window().then(win => {
+    const stubbed = cy.stub(win.downloadLocation, 'click', (link) => {});
+
+    cy.wrap(subject).click().should(() => {
+      expect(stubbed).to.be.calledOnce;
+
+      const link = stubbed.args[0][0];
+      cy.downloadObjectUrl(link).then(rq => {
+        expect(rq.status).to.equal(200);
+        callback(rq.response);
+      });
+    });
+  });
+});

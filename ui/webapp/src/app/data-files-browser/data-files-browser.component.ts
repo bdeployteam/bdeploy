@@ -6,6 +6,7 @@ import { PageEvent, Sort } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { InstanceConfiguration, InstanceDirectory, InstanceDirectoryEntry, StringEntryChunkDto } from '../models/gen.dtos';
+import { DownloadService } from '../services/download.service';
 import { InstanceService } from '../services/instance.service';
 import { Logger, LoggingService } from '../services/logging.service';
 
@@ -48,7 +49,8 @@ export class DataFilesBrowserComponent implements OnInit {
     private route: ActivatedRoute,
     private instanceService: InstanceService,
     private loggingService: LoggingService,
-    public location: Location
+    public location: Location,
+    private dlService: DownloadService,
   ) {}
 
 
@@ -126,13 +128,7 @@ export class DataFilesBrowserComponent implements OnInit {
 
   private downloadFile(filename: string, data: string): void {
     const blob = new Blob([data], { type: 'text/plain' });
-
-    const link = document.createElement('a');
-    link.href = window.URL.createObjectURL(blob);
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    this.dlService.downloadBlob(filename, blob);
   }
 
   getCurrentOutputEntryFetcher(): () => Observable<InstanceDirectoryEntry> {

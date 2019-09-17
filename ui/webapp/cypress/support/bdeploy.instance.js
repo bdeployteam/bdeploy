@@ -64,5 +64,5 @@ Cypress.Commands.add('addAndSetOptionalParameter', function(panel, name, value) 
   cy.get('mat-dialog-container').contains('button', 'Save').click();
 
   cy.get('@panel').find('[placeholder="' + name + '"]').should('exist')
-  cy.get('@panel').find('[placeholder="' + name + '"]').clear().type(value)
+  cy.get('@panel').find('[placeholder="' + name + '"]').clear().type(value, { parseSpecialCharSequences: false })
 })

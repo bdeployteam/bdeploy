@@ -25,42 +25,21 @@ describe('BHive Browser Tests', function() {
   })
 
   it('Check download of manifest', function() {
-    cy.window().then(win => {
-      const stubbed = cy.stub(win.downloadLocation, 'click', (link) => {});
-
-      cy.contains('td', 'users/admin').siblings().contains('mat-icon', 'cloud_download').click().should(() => {
-        expect(stubbed).to.be.calledOnce
-
-        const link = stubbed.args[0][0];
-        cy.downloadObjectUrl(link).then(rq => {
-          expect(rq.status).to.be.equal(200)
-          const json = JSON.parse(rq.response);
-          expect(json).to.have.property('key')
-          expect(json.key).to.have.property('name', 'users/admin')
-          expect(json.key).to.have.property('tag')
-        })
-      })
+    cy.contains('td', 'users/admin').siblings().contains('mat-icon', 'cloud_download').downloadBlobFileShould(resp => {
+      const json = JSON.parse(resp);
+      expect(json).to.have.property('key')
+      expect(json.key).to.have.property('name', 'users/admin')
+      expect(json.key).to.have.property('tag')
     })
   })
 
   it('Check donwload of user json', function() {
     cy.contains('td', 'users/admin').click();
-
-    cy.window().then(win => {
-      const stubbed = cy.stub(win.downloadLocation, 'click', (link) => {});
-
-      cy.contains('td', 'user.json').siblings().contains('mat-icon', 'cloud_download').click().should(function() {
-        expect(stubbed).to.be.calledOnce
-
-        const link = stubbed.args[0][0];
-        cy.downloadObjectUrl(link).then(rq => {
-          expect(rq.status).to.be.equal(200)
-          const json = JSON.parse(rq.response);
-          expect(json).to.have.property('name', 'admin')
-          expect(json).to.have.property('password')
-          expect(json).to.have.property('capabilities')
-        })
-      });
+    cy.contains('td', 'user.json').siblings().contains('mat-icon', 'cloud_download').downloadBlobFileShould(resp => {
+      const json = JSON.parse(resp);
+      expect(json).to.have.property('name', 'admin')
+      expect(json).to.have.property('password')
+      expect(json).to.have.property('capabilities')
     })
   })
 
