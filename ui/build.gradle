@@ -45,7 +45,19 @@ ext.sharedNpmLogic = { task, List<String> target ->
 }
 
 evaluationDependsOn(':test-data')
-task updateToken(dependsOn: ':test-data:setupDemoServer') {
+task updateFixtureProducts(type: Copy) {
+    def prj = project(':test-data')
+    from prj.product1Zip.outputs
+    from prj.product2Zip.outputs
+
+    into "${webappDir}/cypress/fixtures"
+
+    doFirst {
+        delete fileTree("${webappDir}/cypress/fixtures").matching { include "*.zip" }
+    }
+}
+
+task updateFixtures(dependsOn: [':test-data:setupDemoServer', 'updateFixtureProducts']) {
     File dir = project(":test-data").buildDir
     File input = file("${dir}/test-token.txt")
     File output = file("${webappDir}/cypress/fixtures/token.json")
@@ -69,7 +81,7 @@ String cypressCmd() {
     }
 }
 
-task runCypressHeadless(type: Exec, dependsOn: updateToken) {
+task runCypressHeadless(type: Exec, dependsOn: updateFixtures) {
     workingDir "$webappDir"
     group = BasePlugin.BUILD_GROUP
     ignoreExitValue = true // for now, as jenkins fails very often due to the tests.
@@ -81,7 +93,7 @@ task runCypressHeadless(type: Exec, dependsOn: updateToken) {
     }
 }
 
-task runCypress(type: Exec, dependsOn: updateToken) {
+task runCypress(type: Exec, dependsOn: updateFixtures) {
     workingDir "$webappDir"
     def port = project(":test-data").testServerPort
     commandLine (["${webappDir}/node_modules/.bin/" + cypressCmd(), "open", "--config", "baseUrl=https://localhost:${port}", "--env", "backendBaseUrl=https://localhost:${port}/api"])
