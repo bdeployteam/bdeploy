@@ -28,6 +28,7 @@ import './bdeploy.login'
 import './bdeploy.instance'
 import './bdeploy.node'
 import './dragdrop'
+import 'cypress-file-upload'
 
 Cypress.Commands.add('clickContextMenuItem', { prevSubject: true}, function(subject, item) {
   let wrapped = cy.wrap(subject);
@@ -36,4 +37,14 @@ Cypress.Commands.add('clickContextMenuItem', { prevSubject: true}, function(subj
   cy.get('[role=menuitem]').contains(item).should('be.enabled').click();
 
   return wrapped;
-})
+});
+
+Cypress.Commands.add('downloadObjectUrl', function(link) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', link.href);
+    xhr.onload = () => { resolve(xhr) }
+    xhr.onerror = () => { reject(xhr) }
+    xhr.send();
+  });
+});

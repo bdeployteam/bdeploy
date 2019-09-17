@@ -7,6 +7,20 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="assets/logo.ico">
+  <script lang="javascript">
+    // used in download.service.ts
+    var downloadLocation = {
+      // used when assigning the target URL to the browser location directly
+      assign: function(loc) {
+        window.location.href = loc;
+      },
+
+      // used when clicking a temporary link element to download a blob from browser's memory.
+      click: function(link) {
+        link.click();
+      }
+    };
+  </script>
 
   <link rel="stylesheet" type="text/css" href="bootstrap.css">
   <script src="browsercheck.js"></script>

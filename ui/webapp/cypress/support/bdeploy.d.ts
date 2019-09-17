@@ -59,5 +59,7 @@ declare namespace Cypress {
      * @returns the original subject the command has been chained of.
      */
     clickContextMenuItem(item: string): Chainable<Subject>;
+
+    downloadObjectUrl(link: HTMLAnchorElement): Promise<XMLHttpRequest>;
   }
 }

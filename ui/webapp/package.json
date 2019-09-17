@@ -45,6 +45,7 @@
     "@types/node": "~8.9.4",
     "codelyzer": "~4.5.0",
     "cypress": "^3.4.1",
+    "cypress-file-upload": "^3.3.3",
     "ts-node": "~7.0.0",
     "tslint": "~5.11.0",
     "typescript": "~3.2.4"

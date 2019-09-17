@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { from } from 'rxjs';
 import { finalize, flatMap, tap } from 'rxjs/operators';
 import { ManifestKey, ProductDto } from '../models/gen.dtos';
+import { DownloadService } from '../services/download.service';
 import { LoggingService } from '../services/logging.service';
 import { ProductService } from '../services/product.service';
 import { sortByTags } from '../utils/manifest.utils';
@@ -21,7 +22,7 @@ export class ProductListComponent implements OnInit {
   private usageCounts: Map<ManifestKey, number> = new Map();
   public exporting: ProductDto;
 
-  constructor(private productService: ProductService, private loggingService: LoggingService) {}
+  constructor(private productService: ProductService, private loggingService: LoggingService, private downloadService: DownloadService) {}
 
   public get products(): ProductDto[] {
     return this._products;
@@ -73,7 +74,7 @@ export class ProductListComponent implements OnInit {
       .createProductZip(this.instanceGroup, product.key)
       .pipe(finalize(() => (this.exporting = null)))
       .subscribe(token => {
-        window.location.href = this.productService.downloadProduct(this.instanceGroup, token);
+        this.downloadService.download(this.productService.downloadProduct(this.instanceGroup, token));
       });
   }
 
