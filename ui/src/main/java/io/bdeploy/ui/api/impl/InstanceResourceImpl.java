@@ -696,6 +696,8 @@ public class InstanceResourceImpl implements InstanceResource {
         values.put("APP_UID", appConfig.uid);
         values.put("APP_NAME", im.getConfiguration().name + " - " + appConfig.name);
         values.put("BDEPLOY_FILE", new String(StorageHelper.toRawBytes(clickAndStart), StandardCharsets.UTF_8));
+        values.put("REMOTE_SERVICE_URL", ""); // not used, only in standalone
+        values.put("REMOTE_SERVICE_TOKEN", ""); // not used, only in standalone
 
         String content = TemplateHelper.process(template, values::get, "{{", "}}");
         try {

@@ -44,7 +44,6 @@ import io.bdeploy.bhive.op.PruneOperation;
 import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
-import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
@@ -278,7 +277,13 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
         // must match the values required in the installer.tpl file
         Map<String, String> values = new TreeMap<>();
         values.put("LAUNCHER_URL", launcherLocation.toString());
-        values.put("REMOTE_SERVICE", new String(StorageHelper.toRawBytes(createRemoteService()), StandardCharsets.UTF_8));
+        RemoteService rs = createRemoteService();
+        values.put("REMOTE_SERVICE_URL", rs.getUri().toString());
+        values.put("REMOTE_SERVICE_TOKEN", rs.getAuthPack());
+        values.put("ICON_URL", "");
+        values.put("APP_UID", "");
+        values.put("APP_NAME", "");
+        values.put("BDEPLOY_FILE", "");
 
         String content = TemplateHelper.process(template, values::get, "{{", "}}");
         try {

@@ -7,6 +7,9 @@ BDEPLOY_ICON_URL="{{ICON_URL}}"
 BDEPLOY_APP_UID="{{APP_UID}}"
 BDEPLOY_APP_NAME="{{APP_NAME}}"
 
+BDEPLOY_RS_URL="{{REMOTE_SERVICE_URL}}"
+BDEPLOY_RS_TOKEN="{{REMOTE_SERVICE_TOKEN}}"
+
 T="${TMPDIR:-/tmp}/bdeploy-$$"
 mkdir -p "${T}"
 trap "{ rm -rf ${T}; }" EXIT
@@ -40,8 +43,14 @@ require_tool openssl
 
 dl() {
   # find certificate from embedded JSON
-  cert=$(cat "${T_BDEPLOY_FILE}" | grep authPack | sed -e 's,.*:[ \t]*"\([^"]*\)".*,\1,g' | base64 -d | grep '"c"' | sed -e 's,.*:[ \t]*"\([^"]*\)".*,\1,g')
-  url=$(cat "${T_BDEPLOY_FILE}" | grep uri | sed -e 's,.*:[ \t]*"\([^"]*\)".*,\1,g')
+  if [[ -z "${BDEPLOY_RS_URL}" ]]; then
+      cert=$(cat "${T_BDEPLOY_FILE}" | grep authPack | sed -e 's,.*:[ \t]*"\([^"]*\)".*,\1,g' | base64 -d | grep '"c"' | sed -e 's,.*:[ \t]*"\([^"]*\)".*,\1,g')
+      url=$(cat "${T_BDEPLOY_FILE}" | grep uri | sed -e 's,.*:[ \t]*"\([^"]*\)".*,\1,g')
+  else
+      cert=$(echo "${BDEPLOY_RS_TOKEN}" | base64 -d | grep '"c"' | sed -e 's,.*:[ \t]*"\([^"]*\)".*,\1,g')
+      url="${BDEPLOY_RS_URL}"
+  fi
+
   cat > "${T}/cert" <<EOF
 -----BEGIN CERTIFICATE-----
 $cert
@@ -49,7 +58,7 @@ $cert
 EOF
 
   cert1="$(openssl x509 -in "${T}/cert")"
-  cert2="$(echo | openssl s_client -showcerts -connect $(echo "$url" | sed -e 's,.*/\([^/]*\)/api,\1,g') -prexit 2>/dev/null | openssl x509)"
+  cert2="$(echo | openssl s_client -showcerts -connect $(echo "$url" | sed -e 's,.*/\([^/]*\)/api/*,\1,g') -prexit 2>/dev/null | openssl x509)"
 
   if [[ "$cert1" != "$cert2" ]]; then
     echo "Certificate Mismatch"
@@ -100,6 +109,12 @@ else
 
     echo "Creating file association..."
     ${L_HOME}/bin/file-assoc.sh
+fi
+
+# stop here if only launcher install is requested
+if [[ -z "${BDEPLOY_APP_UID}" ]]; then
+    echo "Done installing launcher."
+    exit 0
 fi
 
 # STEP 2: Find the icon file or download
