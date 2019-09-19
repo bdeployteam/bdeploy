@@ -64,3 +64,25 @@ Cypress.Commands.add('downloadBlobFileShould', { prevSubject: true },  function(
     });
   });
 });
+
+Cypress.Commands.add('downloadFile', { prevSubject: true }, (subject, fileName) => {
+  cy.window().then(win => {
+    const stubbed = cy.stub(win.downloadLocation, 'assign', (link) => {});
+
+    cy.wrap(subject).click().then(() => {
+      expect(stubbed).to.be.calledOnce;
+
+      var url = stubbed.args[0][0];
+
+      if(url.startsWith('/api')) {
+        url = url.substring(4);
+      }
+      if(url.startsWith('/')) {
+         // URL argument is relative in production, see application config.json
+         url = Cypress.env('backendBaseUrl') + url;
+      }
+
+      cy.task('downloadFileFromUrl', { url: url, fileName: 'cypress/fixtures/' + fileName });
+    })
+  })
+})

@@ -78,5 +78,11 @@ declare namespace Cypress {
      * @param callback the callback to receive the response of the request (i.e. the downloaded data).
      */
     downloadBlobFileShould(callback: (any) => void);
+
+    /**
+     * Chain off a clickable element which will trigger downloadLocation.assign in the application.
+     * @param filename the name of the target file in the cypress/fixtures directory.
+     */
+    downloadFile(filename: string);
   }
 }
