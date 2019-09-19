@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { cloneDeep, isEqual } from 'lodash';
 import { Observable } from 'rxjs';
+import { UnknownParameter } from '../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_COMMAND_CONFIGURATION, EMPTY_PARAMETER_CONFIGURATION } from '../models/consts';
 import { ApplicationConfiguration, ApplicationDescriptor, ApplicationDto, ApplicationType, InstanceNodeConfigurationDto, ManifestKey, ParameterConfiguration, ParameterDescriptor, ParameterType } from '../models/gen.dtos';
 import { ProcessConfigDto } from '../models/process.model';
@@ -19,6 +20,9 @@ export class ApplicationService {
   /** The validation state. Key=UID of the application. Value=List of errors */
   private readonly validationStates = new Map<string, string[]>();
 
+  /** A list of parameters that where removed when upgrading / downgrading. Key = UID of application. Value=List of parameters  */
+  private readonly unknownParameters = new Map<string, UnknownParameter[]>();
+
   /** The modification state. Key=UID of the application. Value=dirty state */
   private readonly dirtyStates = new Map<string, boolean>();
 
@@ -35,16 +39,20 @@ export class ApplicationService {
     private groupService: InstanceGroupService,
   ) {}
 
-  public listApplications(instanceGroupName: string, product: ManifestKey, customErrorHandling: boolean): Observable<ApplicationDto[]> {
+  public listApplications(
+    instanceGroupName: string,
+    product: ManifestKey,
+    customErrorHandling: boolean,
+  ): Observable<ApplicationDto[]> {
     const url: string = this.buildAppUrl(instanceGroupName, product);
     this.log.debug('listApplications: ' + url);
 
-    let hdrs = {};
+    let headers = {};
     if (customErrorHandling) {
-      hdrs = suppressGlobalErrorHandling(new HttpHeaders);
+      headers = suppressGlobalErrorHandling(new HttpHeaders());
     }
 
-    return this.http.get<ApplicationDto[]>(url, { headers: hdrs });
+    return this.http.get<ApplicationDto[]>(url, { headers: headers });
   }
 
   public getDescriptor(
@@ -304,6 +312,12 @@ export class ApplicationService {
   public validateApp(isClientNode: boolean, cfg: ApplicationConfiguration, desc: ApplicationDescriptor) {
     const errors: string[] = [];
 
+    // Check if there are unknown parameters
+    const unknownAppParams = this.unknownParameters.get(cfg.uid);
+    if (unknownAppParams && unknownAppParams.length > 0) {
+      errors.push('One or more parameters are not defined any more in the current product version.');
+    }
+
     // Check application type (handle wrong types like missing apps)
     const isClientApp = desc.type === ApplicationType.CLIENT;
     if (isClientNode !== isClientApp) {
@@ -393,6 +407,29 @@ export class ApplicationService {
    */
   public isMissing(app: ManifestKey) {
     return this.missingApps.findIndex(a => isEqual(a, app)) !== -1;
+  }
+
+  /**
+   * Returns a read-only list of all unknown parameters of the given application
+   */
+  public getUnknownParameters(appUid: string) {
+    const values = this.unknownParameters.get(appUid);
+    if (!values) {
+      return [];
+    }
+    return cloneDeep(values);
+  }
+
+  /**
+   * Sets the given unknown parameter for the given application. An empty list means
+   * that the app has no unknown parameters.
+   */
+  public setUnknownParameters(appUid: string, params: UnknownParameter[]) {
+    if (params.length === 0) {
+      this.unknownParameters.delete(appUid);
+    } else {
+      this.unknownParameters.set(appUid, params);
+    }
   }
 
   /**
@@ -513,6 +550,7 @@ export class ApplicationService {
     this.dirtyState = false;
     this.dirtyStates.clear();
     this.validationStates.clear();
+    this.unknownParameters.clear();
     this.missingApps.splice(0, this.missingApps.length);
   }
 
@@ -545,19 +583,24 @@ export class ApplicationService {
    * Typically called after the product version has been changed.
    *
    * @param config the current version of the apps
-   * @param dtos the current version of the descriptor
+   * @param apps the current version of the descriptor
+   * @param oldApps the previous version of the descriptor
    */
-  updateApplications(config: ProcessConfigDto, dtos: ApplicationDto[]) {
+  updateApplications(config: ProcessConfigDto, apps: ApplicationDto[], oldApps: ApplicationDto[]) {
     const descriptors: { [index: string]: ApplicationDescriptor } = {};
     const keys: { [index: string]: ManifestKey } = {};
-    dtos.forEach(a => {
+    apps.forEach(a => {
       descriptors[a.key.name] = a.descriptor;
       keys[a.key.name] = a.key;
     });
+    const oldDescriptors: { [index: string]: ApplicationDescriptor } = {};
+    oldApps.forEach(a => {
+      oldDescriptors[a.key.name] = a.descriptor;
+    });
 
     // Collect all applications of all nodes
-    const apps = this.getAllApps(config);
-    for (const appDesc of this.getAllApps(config)) {
+    const appDescs = this.getAllApps(config);
+    for (const appDesc of appDescs) {
       const newAppManifest = keys[appDesc.application.name];
 
       // only set new application when found - otherwise leave the old version and leave it to validation
@@ -567,13 +610,15 @@ export class ApplicationService {
       }
 
       // Update reference to the new version
-      const newAppDescriptor: ApplicationDescriptor = descriptors[newAppManifest.name];
+      const newAppDescriptor = descriptors[newAppManifest.name];
+      const oldAppDescriptor = oldDescriptors[newAppManifest.name];
+
       appDesc.application = newAppManifest;
-      this.updateApplicationParams(appDesc, newAppDescriptor, apps);
+      this.updateApplicationParams(appDesc, newAppDescriptor, oldAppDescriptor, appDescs);
     }
 
     config.nodeList.applications = descriptors;
-    config.setApplications(dtos);
+    config.setApplications(apps);
   }
 
   /**
@@ -582,28 +627,45 @@ export class ApplicationService {
   updateApplicationParams(
     app: ApplicationConfiguration,
     desc: ApplicationDescriptor,
+    oldDesc: ApplicationDescriptor,
     templates: ApplicationConfiguration[],
   ) {
     if (desc.startCommand) {
       app.start.executable = desc.startCommand.launcherPath;
-      this.updateParameter(app.start.parameters, desc.startCommand.parameters, templates);
+      this.updateParameter(
+        app.uid,
+        app.start.parameters,
+        desc.startCommand.parameters,
+        oldDesc ? oldDesc.startCommand.parameters : [],
+        templates,
+      );
     }
     if (desc.stopCommand) {
       app.stop.executable = desc.stopCommand.launcherPath;
-      this.updateParameter(app.stop.parameters, desc.stopCommand.parameters, templates);
+      this.updateParameter(
+        app.uid,
+        app.stop.parameters,
+        desc.stopCommand.parameters,
+        oldDesc ? oldDesc.stopCommand.parameters : [],
+        templates,
+      );
     }
   }
 
   /**
-   * Updates the configuration according to the given descriptors. The following is done:
+   * Updates the configured parameters according to the given descriptors. The following is done:
    *
    * Create missing mandatory parameters.
    * Update fixed parameters to the newest value.
    * Set global parameters
+   * Check if previously configured parameter is not available any more
+   *
    */
   updateParameter(
+    appUid: string,
     configs: ParameterConfiguration[],
     descs: ParameterDescriptor[],
+    oldDescs: ParameterDescriptor[],
     templates: ApplicationConfiguration[],
   ) {
     // Order of parameters is important. Thus we need to insert a missing parameter
@@ -628,5 +690,23 @@ export class ApplicationService {
         this.updateParameterValue(config, desc, templates);
       }
     }
+
+    // Verify that all parameters are still defined in the new version
+    const unknownAppParams: UnknownParameter[] = [];
+    for (const config of configs) {
+      const oldDefinition = oldDescs.find(d => d.uid === config.uid);
+      const newDefinition = descs.find(d => d.uid === config.uid);
+      // Parameter was not defined in the old version -> must be a custom param
+      if (!oldDefinition) {
+        continue;
+      }
+      // Parameter is defined in both versions -> OK still there
+      if ((newDefinition && oldDefinition) || newDefinition) {
+        continue;
+      }
+      // Parameter defined in old but not present in new one
+      unknownAppParams.push(new UnknownParameter(oldDefinition, config));
+    }
+    this.setUnknownParameters(appUid, unknownAppParams);
   }
 }

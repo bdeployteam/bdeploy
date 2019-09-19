@@ -33,6 +33,10 @@
     color: if($dark, rgb(207, 0, 0), rgb(180, 0, 0));
   }
 
+  .unknown-parameter-theme {
+    background-color: if($dark, #984747, #efabab );
+  }
+
   .info-theme {
     color: if($dark, #bababa, #969696);
   }
@@ -71,5 +75,4 @@
     border-color: $card-color transparent transparent $card-color;
     box-shadow: #{rgba($mat-elevation-color, $mat-elevation-opacity * 0.12)} -1px -2px 5px;
   }
-
 }

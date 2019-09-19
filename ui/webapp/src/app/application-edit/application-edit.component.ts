@@ -9,12 +9,11 @@ import { ApplicationEditCommandPreviewComponent } from '../application-edit-comm
 import { ApplicationEditManualComponent, Context } from '../application-edit-manual/application-edit-manual.component';
 import { ApplicationEditOptionalComponent } from '../application-edit-optional/application-edit-optional.component';
 import { MessageBoxMode } from '../messagebox/messagebox.component';
-import { CustomParameter, GroupNames, LinkedParameter, NamedParameter } from '../models/application.model';
+import { CustomParameter, findFirstParameter, findLastParameter, GroupNames, LinkedParameter, NamedParameter, UnknownParameter } from '../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_PARAMETER_CONFIGURATION, EMPTY_PARAMETER_DESCRIPTOR } from '../models/consts';
 import { ApplicationConfiguration, ApplicationDescriptor, ApplicationStartType, ParameterDescriptor, ParameterType } from '../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../models/process.model';
 import { ApplicationService } from '../services/application.service';
-import { Logger, LoggingService } from '../services/logging.service';
 import { MessageboxService } from '../services/messagebox.service';
 import { ParameterValidators } from '../validators/parameter.validators';
 
@@ -24,8 +23,6 @@ import { ParameterValidators } from '../validators/parameter.validators';
   styleUrls: ['./application-edit.component.css'],
 })
 export class ApplicationEditComponent implements OnInit, OnDestroy {
-  private readonly log: Logger = this.loggingService.getLogger('ApplicationEditComponent');
-
   @Input()
   public instanceGroup: string;
 
@@ -61,9 +58,11 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
   /** All groups that we currently display. Sorted by their name */
   public sortedGroups: string[];
 
+  /** All parameters that have been removed during a product upgrade / downgrade */
+  public unknownParameters: UnknownParameter[];
+
   constructor(
-    private loggingService: LoggingService,
-    private appService: ApplicationService,
+    public appService: ApplicationService,
     private matDialog: MatDialog,
     private overlay: Overlay,
     private viewContainerRef: ViewContainerRef,
@@ -73,6 +72,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.clonedAppConfig = cloneDeep(this.appConfigContext.applicationConfiguration);
+    this.unknownParameters = this.appService.getUnknownParameters(this.appConfigContext.applicationConfiguration.uid);
 
     // Transform so that we can use them in the UI
     this.initParameters();
@@ -302,8 +302,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
 
   /**
    * Initializes all parameters that are defined by the product as well as the ones
-   * that are declared in the application. The returned array does not reflect the
-   * actual order of the parameter.
+   * that are declared in the application.
    */
   initParameters() {
     // Collect all parameters defined by the start command
@@ -338,6 +337,11 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
         linkedPara.conf = cloneDeep(paraCfg);
         linkedPara.rendered = true;
         previous = linkedPara;
+        continue;
+      }
+      // Skip parameters that have been removed during a product / upgrade downgrade
+      const upIdx = this.unknownParameters.findIndex(up => up.descriptor.uid === paraCfg.uid);
+      if (upIdx !== -1) {
         continue;
       }
 
@@ -577,7 +581,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Inserts the given manual parameter into the parameter array.
+   * Inserts the given custom parameter into the parameter array.
    *
    *    A    -    B      -    C
    *
@@ -589,11 +593,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
   insertCustomParameter(paraUid: string, predecessorId: string): LinkedParameter {
     const b = new LinkedParameter();
     const a = this.linkedDescriptors.get(predecessorId);
-    const c = a
-      ? a.successor
-      : this.linkedDescriptors.size > 0
-      ? Array.from(this.linkedDescriptors.values()).find(lp => !lp.predecessor)
-      : undefined;
+    const c = a ? a.successor : findFirstParameter(this.linkedDescriptors.values());
 
     // Insert B into the current chain
     b.predecessor = a;
@@ -766,7 +766,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     parameters.splice(0, parameters.length);
 
     // add all parameters in their defined order
-    let next = Array.from(this.linkedDescriptors.values()).find(lp => !lp.predecessor);
+    let next = findFirstParameter(this.linkedDescriptors.values());
     while (next) {
       if (!next.rendered) {
         next = next.successor;
@@ -819,5 +819,42 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
       types.push(ApplicationStartType.MANUAL);
     }
     return types;
+  }
+
+  /** Removes the given unknown parameter */
+  removeUnknownParameter(paramUid: string) {
+    const idx = this.unknownParameters.findIndex(v => v.config.uid === paramUid);
+    this.unknownParameters.splice(idx, 1);
+  }
+
+  /** Converts the given unknown parameter to a custom parameter */
+  covertUnknownToCustomParameter(paramUid: string) {
+    const param = this.unknownParameters.find(up => up.config.uid === paramUid);
+
+    // New custom will be added as last one
+    const lastParam = findLastParameter(this.linkedDescriptors.values());
+    const newParam = this.insertCustomParameter(paramUid, lastParam.desc.uid);
+
+    // render the parameter according to the descriptor
+    const value = this.appService.preRenderParameter(param.descriptor, param.config.value);
+
+    // Setup descriptor and value accordingly
+    // We are using a new UID to avoid conflicts when changing the version again
+    const newUid = paramUid + '.custom';
+    newParam.desc = cloneDeep(EMPTY_PARAMETER_DESCRIPTOR);
+    newParam.desc.uid = newUid;
+    newParam.desc.name = newUid;
+    newParam.desc.mandatory = true;
+    newParam.desc.groupName = GroupNames.CUSTOM_PARAMETERS;
+
+    newParam.conf = cloneDeep(EMPTY_PARAMETER_CONFIGURATION);
+    newParam.conf.uid = newUid;
+    newParam.conf.value = value.join(' ');
+    newParam.conf.preRendered = param.config.preRendered;
+
+    // Remove from the list of undefined
+    this.removeUnknownParameter(paramUid);
+    this.updateAppCfgParameterOrder();
+    this.updateFormGroup();
   }
 }

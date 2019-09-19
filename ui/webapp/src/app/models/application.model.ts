@@ -117,6 +117,22 @@ export class LinkedParameter {
 }
 
 /**
+ * Returns the parameter that has no predecessor. This is the first one.
+ */
+export function findFirstParameter(params: IterableIterator<LinkedParameter>): LinkedParameter {
+  const values = Array.from(params);
+  return values.find(lp => !lp.predecessor);
+}
+
+/**
+ * Returns the parameter that has no successor. This is the last one.
+ */
+export function findLastParameter(params: IterableIterator<LinkedParameter>): LinkedParameter {
+  const values = Array.from(params);
+  return values.find(lp => !lp.successor);
+}
+
+/**
  * Represents a custom parameter defined by the user
  */
 export class CustomParameter {
@@ -159,8 +175,6 @@ export class ApplicationGroup {
 
   /** The type of the applications */
   public appType: ApplicationType;
-
-
 
   /**
    * Adds a new application to this list. Must have the same base name.
@@ -210,4 +224,27 @@ export class ApplicationGroup {
   public isServerApp(): boolean {
     return this.appType === ApplicationType.SERVER;
   }
+}
+
+/** Represents a parameter that has been removed from the product  */
+export class UnknownParameter {
+  /** The parameter as described in the old version */
+  descriptor: ParameterDescriptor;
+
+  /** The current configured value */
+  config: ParameterConfiguration;
+
+  constructor(descriptor: ParameterDescriptor, config: ParameterConfiguration) {
+    this.descriptor = descriptor;
+    this.config = config;
+  }
+
+  /**
+   * Returns the pre-rendered value of the parameter as string.
+   */
+  public getValue(appService: ApplicationService) {
+    const value = appService.preRenderParameter(this.descriptor, this.config.value);
+    return value.join(' ');
+  }
+
 }

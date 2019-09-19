@@ -120,3 +120,9 @@ mat-form-field {
   font-style: italic;
   font-size: smaller;
 }
+
+.unknown-parameter-hint {
+  margin: 10px 5px;
+  border-radius: 5px;
+  padding: 10px;
+}

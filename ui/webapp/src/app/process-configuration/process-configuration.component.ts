@@ -153,7 +153,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       setTimeout(() => {
         // avoid reload if we did it ourselves. still delay a little as the event may arrive
         // before the actual call returned and a reload was initiated by the instance version card.
-        if ((new Date().getTime() - this.lastStateReload) >= 150) {
+        if (new Date().getTime() - this.lastStateReload >= 150) {
           this.loadDeploymentStates(() => {});
         }
       }, 100);
@@ -170,7 +170,9 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     for (const cfg of this.processConfigs) {
       const key = cfg.version.key;
       if (key.name !== newKey.name) {
-        this.log.warn(`Received update event for wrong version, or wrong version loaded in dialog: loaded: ${key}, received: ${newKey}`);
+        this.log.warn(
+          `Received update event for wrong version, or wrong version loaded in dialog: loaded: ${key}, received: ${newKey}`,
+        );
         continue;
       }
       if (key.tag === newKey.tag) {
@@ -181,18 +183,20 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
     // if we reach here, we received an event about a new instance version which we do not yet have.
     // for now this will result in a hardcore messagebox :)
-    this.messageBoxService.open({
-      title: 'Change on Server detected',
-      message: 'The instance has been modified by somebody else. Pressing OK will reload instance versions.',
-      mode: MessageBoxMode.CONFIRM
-    }).subscribe(r => {
-      if (r) {
-        this.loadVersions(true);
-        if (this.editMode) {
-          this.setEditMode(false);
+    this.messageBoxService
+      .open({
+        title: 'Change on Server detected',
+        message: 'The instance has been modified by somebody else. Pressing OK will reload instance versions.',
+        mode: MessageBoxMode.CONFIRM,
+      })
+      .subscribe(r => {
+        if (r) {
+          this.loadVersions(true);
+          if (this.editMode) {
+            this.setEditMode(false);
+          }
         }
-      }
-    });
+      });
   }
 
   private loadVersions(selectLatest: boolean): void {
@@ -215,12 +219,17 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       this.instanceService.getDeploymentStates(this.groupParam, this.uuidParam).subscribe(deploymentState => {
         this.deploymentState = deploymentState;
 
-        if (!selectLatest) { // selectLatest overrides all
-          if (this.selectedConfig) { // restore last selection if available
+        if (!selectLatest) {
+          // selectLatest overrides all
+          if (this.selectedConfig) {
+            // restore last selection if available
             this.loadInstance(this.selectedConfig);
             return;
-          } else if (this.deploymentState.activeTag) { // look for activated version
-            const initialConfig = this.processConfigs.find(cfg => cfg.version.key.tag === this.deploymentState.activeTag);
+          } else if (this.deploymentState.activeTag) {
+            // look for activated version
+            const initialConfig = this.processConfigs.find(
+              cfg => cfg.version.key.tag === this.deploymentState.activeTag,
+            );
             if (initialConfig) {
               this.loadInstance(initialConfig);
               return;
@@ -250,7 +259,9 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       .pipe(
         mergeMap(instance => {
           newSelectedConfig.setInstance(instance);
-          return this.applicationService.listApplications(this.groupParam, newSelectedConfig.instance.product, true).pipe(catchError(e => of([]))); // => results[0]
+          return this.applicationService
+            .listApplications(this.groupParam, newSelectedConfig.instance.product, true)
+            .pipe(catchError(e => of([]))); // => results[0]
         }),
       );
     const call2 = this.instanceService.getNodeConfiguration(this.groupParam, this.uuidParam, selectedVersion.key.tag); // => results[1]
@@ -272,7 +283,9 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   getProductOfInstance(pcd: ProcessConfigDto): ProductDto {
-    return this.productTags.find(p => p.key.name === pcd.instance.product.name && p.key.tag === pcd.instance.product.tag);
+    return this.productTags.find(
+      p => p.key.name === pcd.instance.product.name && p.key.tag === pcd.instance.product.tag,
+    );
   }
 
   loadDeploymentStates(finalizer: () => void) {
@@ -476,8 +489,12 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       this.processConfigs[0].version.key.tag,
     );
     nodePromise.subscribe(
-      x => { this.loadVersions(true); },
-      () => { this.loading = false; }
+      x => {
+        this.loadVersions(true);
+      },
+      () => {
+        this.loading = false;
+      },
     );
   }
 
@@ -499,6 +516,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     virtualConfig.discardChanges();
 
     // Update enabled state of buttons
+    this.applicationService.clearState();
     this.updateDirtyStateAndValidate();
   }
 
@@ -529,6 +547,9 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
     // Update global parameters of all apps
     this.applicationService.updateGlobalParameters(appDesc, updated, this.selectedConfig);
+
+    // Remove all resolved unknown parameters
+    this.applicationService.setUnknownParameters(updated.uid, this.editComponent.unknownParameters);
 
     // Exit edit mode and validate all
     this.setEditMode(false);
@@ -738,21 +759,27 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     return this.selectedConfig && !this.selectedConfig.readonly;
   }
 
-  updateProduct(product: ProductDto): void {
+  async updateProduct(product: ProductDto): Promise<void> {
+    const oldProduct = this.selectedConfig.instance.product;
     this.productsLoading = true;
     this.productService.updateProduct(this.selectedConfig, product);
 
-    // Fetch applications of the new product and update the config
-    this.applicationService
-      .listApplications(this.groupParam, product.key, false)
-      .pipe(finalize(() => (this.productsLoading = false)))
-      .subscribe(apps => {
-        this.updateApplications(apps);
-      });
+    // Fetch applications of the new product and old product
+    const newAppsPromise = this.applicationService.listApplications(this.groupParam, product.key, false).toPromise();
+    const oldAppsPromise = this.applicationService
+      .listApplications(this.groupParam, oldProduct, true)
+      .pipe(catchError(e => of([])))
+      .toPromise();
+
+    // Update application based on the new product
+    const newApps = await Promise.resolve(newAppsPromise);
+    const oldApps = await Promise.resolve(oldAppsPromise);
+    this.updateApplications(newApps, oldApps);
+    this.productsLoading = false;
   }
 
-  updateApplications(apps: ApplicationDto[]) {
-    this.applicationService.updateApplications(this.selectedConfig, apps);
+  updateApplications(newApps: ApplicationDto[], oldApps: ApplicationDto[]) {
+    this.applicationService.updateApplications(this.selectedConfig, newApps, oldApps);
     this.updateDirtyStateAndValidate();
     this.setSidenavVersions();
   }
@@ -881,7 +908,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       headerMessage: `Import a new instance version from a previously exported instance version. The target server of the imported version is ignored.`,
       url: this.instanceService.getImportUrl(this.groupParam, this.uuidParam),
       mimeTypes: ['application/x-zip-compressed', 'application/zip'],
-      mimeTypeErrorMessage: 'Only ZIP files can be uploaded.'
+      mimeTypeErrorMessage: 'Only ZIP files can be uploaded.',
     };
     this.dialog
       .open(FileUploadComponent, config)

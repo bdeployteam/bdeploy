@@ -50,6 +50,37 @@
       </div>
     </div>
 
+    <div class="container" *ngIf="unknownParameters.length > 0">
+      <mat-accordion>
+        <mat-expansion-panel [expanded]="true">
+          <mat-expansion-panel-header>
+            <mat-panel-title class="error-theme"> Unknown Parameters </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <div class="unknown-parameter-hint unknown-parameter-theme">
+            The application is using the following parameters that are not defined in the current product version. <br />
+            If they are still required they need to be converted to custom parameters. Otherwise they must be removed.
+          </div>
+
+          <mat-grid-list cols="2" rowHeight="5em">
+            <mat-grid-tile *ngFor="let param of unknownParameters" class='allow-overflow'>
+              <mat-form-field>
+                <input matInput placeholder="{{param.descriptor.name}}" value={{param.getValue(appService)}} readonly disabled />
+              </mat-form-field>
+              <div class="icons">
+                  <button mat-icon-button type="button" (click)="covertUnknownToCustomParameter(param.descriptor.uid)" matTooltip="Convert to custom parameter">
+                    <mat-icon>save_alt</mat-icon>
+                  </button>
+                  <button mat-icon-button type="button" (click)="removeUnknownParameter(param.descriptor.uid)" matTooltip="Delete parameter">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+            </mat-grid-tile>
+          </mat-grid-list>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+
     <div class="container">
       <mat-accordion>
         <mat-expansion-panel *ngFor="let groupName of sortedGroups; let i = index" (opened)="setExpandedGroup(groupName)" [expanded]="expandedGroup === groupName">
