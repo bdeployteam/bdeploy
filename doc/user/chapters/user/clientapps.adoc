@@ -19,10 +19,13 @@ The *Installer* will check if the latest version of the *Launcher* is already in
 The *Installer* stores the *Launcher* and all *Client Applications* under _%LOCALAPPDATA%\BDeploy_ on Windows or _$HOME/.bdeploy_ on Linux. This location can be changed by setting the environment variable *BDEPLOY_HOME*.
 
 ==== Click & Start
-*Click & Start* enables the launching of *Client Application* by simply clicking a link in the web browser. A prerequisite is that the *.bdeploy* file extension is associated with the launcher. This task is done by the *Installer* but can also be done manually by starting the file _FileAssoc.exe_ on Windows or _file-assoc.sh_ on Linux contained in the launcher.
+*Click & Start* enables the launching of *Client Application* by simply clicking a link in the web browser. In this case the applications are not integrated into the operating system (Start Menu, Desktop Shortcut). A prerequisite is that the *Click & Start Launcher* is deployed on the client computer. This can be done by using the *Click & Start Installer* available in the top-right corner of the *Client Applications* page. The installer will download the *Click & Start Launcher* and associate it with *.bdeploy* files. 
+
+[NOTE]
+The *Launcher* can also be manually deployed using the provided ZIP file. After downloading and unpacking the *Launcher* must be associated with *.bdeploy* files using the FileAssoc.exe on Windows or file-assoc.sh on Linux contained in the launcher.
 
 
-The *Browser* will either download a *.bdeploy* file that can be directly executed. A more elegant way is to configure the *Browser* to directly open the *.bdeploy* file type. Firefox as well as Chrome allows to configure this after the file has been downloaded.
+Clicking on a _Click & Start_ link in the *Browser* will download a *.bdeploy* file that can be directly executed. A more elegant way is to configure the *Browser* to directly open the *.bdeploy* file type. Firefox as well as Chrome allows to configure this after the file has been downloaded.
 
 
 

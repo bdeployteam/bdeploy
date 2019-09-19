@@ -249,10 +249,10 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
 
         String fileName = null;
         if (os == OperatingSystem.WINDOWS) {
-            fileName = "Launcher - Installer.exe";
+            fileName = "BDeploy Click & Start - Installer.exe";
             createWindowsInstaller(installerPath, launcherKey, launcherLocation);
         } else if (os == OperatingSystem.LINUX) {
-            fileName = "Launcher-Installer.run";
+            fileName = "BDeploy Click & Start-Installer.run";
             createLinuxInstaller(installerPath, launcherKey, launcherLocation);
         }
 

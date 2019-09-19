@@ -104,8 +104,8 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
                     <Image Source="{StaticResource Info}" Width="32" Height="32" Margin="0 0 15 0"  />
-                    <TextBlock FontSize="24" FontWeight="SemiBold" Foreground="#FF2FA801" VerticalAlignment="Center">
-                        <Run Text="Launcher successfully installed" />
+                    <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="#FF2FA801" VerticalAlignment="Center">
+                        <Run Text="BDeploy Click &amp; Start Launcher successfully installed" />
                     </TextBlock>
                 </StackPanel>
                 <StackPanel Grid.Row="1" VerticalAlignment="Center" Orientation="Vertical">

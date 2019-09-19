@@ -328,7 +328,7 @@ namespace Bdeploy.Installer
             // Skip if we do not install an application
             if (!config.CanInstallApp())
             {
-                AppInfo?.Invoke(this, new AppInfoEventArgs("Launcher", "BDeploy Team"));
+                AppInfo?.Invoke(this, new AppInfoEventArgs("BDeploy Click & Start Launcher", "BDeploy Team"));
                 return;
             }
             AppInfo?.Invoke(this, new AppInfoEventArgs(config.ApplicationName, config.ProductVendor));
