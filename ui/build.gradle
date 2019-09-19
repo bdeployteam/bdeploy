@@ -122,6 +122,18 @@ task doneWithCypressHeadless(dependsOn: ':test-data:triggerStopBDeploy') {
 project(':test-data').tasks['triggerStopBDeploy'].mustRunAfter runCypressHeadless
 test.dependsOn doneWithCypressHeadless
 
+task release(type: Copy, dependsOn: runCypressHeadless) {
+    from "${webappDir}/cypress/fixtures/export-test.zip"
+    into new File(project(':test-data').projectDir, "bin-test-data")
+    rename {
+        version + ".zip"
+    }
+
+    doLast {
+        println "Release seems to do well with UI tests"
+    }
+}
+
 task cleanAngular(type:Delete) {
     delete "$webappDir/dist"
 }

@@ -426,6 +426,14 @@ actualSubprojects*.test {
     dependsOn rootProject.tasks["jlinkAny"]
 }
 
+task release() {
+    doFirst {
+        if(version.contains('SNAPSHOT')) {
+            throw new RuntimeException("Cannot release a SNAPSHOT: " + version);
+        }
+    }
+}
+
 if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
     // need special JDK for win64 as module input dir
     if(!hasWinJdk()) {

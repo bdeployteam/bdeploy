@@ -2,6 +2,7 @@ plugins {
     id 'base'
     // need 0.1.12+ on update to gradle 5.6.0+
     id "com.github.psxpaul.execfork" version "0.1.11"
+    id "de.undercouch.download" version "4.0.0"
     id "jacoco"
 }
 
@@ -9,7 +10,25 @@ ext {
     testServerRoot = "${buildDir}/test-root"
     testServerHost = InetAddress.getLocalHost().getCanonicalHostName()
     testServerPort = randomServerPort()
+    _testBinVersions = [ "1.1.0", "1.2.0" ]
+
+    getTestBinVersions = {
+        result = []
+        _testBinVersions.each { 
+            def dataFile = file("${projectDir}/bin-test-data/${it}.zip")
+            if(!dataFile.exists()) {
+                println "WARNING: Skipping test server for " + it + ", file does not exist: " + dataFile
+            } else {
+                result.add(it)
+            }
+        }
+        return result;
+    }
+
+    bdeployBaseUrl = "https://github.com/bdeployteam/bdeploy/releases/download/"
 }
+
+evaluationDependsOn(':minion')
 
 int randomServerPort() {
     new ServerSocket(0).withCloseable {
@@ -77,7 +96,7 @@ void setupBDeployRemoteEnv(ProcessForkOptions options) {
     ]
 }
 
-void setupBDeployExec(JavaExec je) {
+void setupBDeployJavaExec(JavaExec je) {
     je.main = project(":minion").mainClassName
     je.classpath = project(":minion").sourceSets.main.runtimeClasspath
     setupBDeployRemoteEnv(je)
@@ -122,6 +141,190 @@ task createInstanceGroup(type: JavaExec, dependsOn: checkTestBDeploy) {
 createTasks("1")
 createTasks("2")
 
+// now the tasks for binary (upgrade) tests
+task binTestAllMigrations() {
+    // container to depend on all migration tests.
+}
+
+task release(dependsOn: binTestAllMigrations) {
+    doLast {
+        println "Release seems to do well with upgrades..."
+    }
+}
+
+void setupBinServerTasks(String version) {
+    def key = version.replace('.', '_')
+    def osName = "win64";
+    if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
+        osName = "linux64";
+    }
+    def fileKey = "bdeploy-" + osName + "-" + version;
+    def binFile = new File(buildDir, "bin-dist/" + fileKey + "/bin/bdeploy")
+    if (!org.gradle.internal.os.OperatingSystem.current().isLinux()) {
+        binFile = file(binFile.toString() + ".bat")
+    }
+
+    def setupTask = { e ->
+        e.executable binFile
+        setupBDeployRemoteEnv(e)
+    }
+
+    task "downloadBinaries_${key}" (type: Download) {
+        src bdeployBaseUrl + "v" + version + "/" + fileKey + ".zip"
+        dest new File(buildDir, version + "-bin.zip")
+        onlyIfModified true
+    }
+
+    task "unzipBinaries_${key}" (type: Copy, dependsOn: "downloadBinaries_${key}") {
+        from zipTree(tasks["downloadBinaries_${key}"].dest)
+        into new File(buildDir, "bin-dist")
+
+        doFirst {
+            delete "${buildDir}/bin-dist"
+        }
+    }
+
+    task "binInitTestBDeploy_${key}" (type: Exec, dependsOn: "unzipBinaries_${key}") {
+        setupTask(it)
+        doFirst {
+            delete "${testServerRoot}"
+        }
+
+        args = [ "init", "--port=${testServerPort}", "--dist=ignore" ]
+    }
+
+    task "binTriggerStopBDeploy_${key}"() {
+        doLast {
+            println("Stopped BDeploy Server (" + version + ")")
+        }
+    }
+
+    task "binStartTestBDeploy_${key}" (type: com.github.psxpaul.task.ExecFork, dependsOn: "binInitTestBDeploy_${key}") {
+        executable binFile
+        setupBDeployEnv(it)
+        args = [ "master" ]
+        waitForPort = testServerPort
+        stopAfter = tasks["binTriggerStopBDeploy_${key}"]
+        standardOutput = "${buildDir}/out_${key}.txt"
+    }
+
+    task "binAddTestBDeployUser_${key}"(type: Exec, dependsOn: "binStartTestBDeploy_${key}") {
+        setupTask(it)
+        args = [ "user", "--add=admin", "--password=admin", "--description=Automated Test User" ]
+    }
+
+    task "binCheckTestBDeploy_${key}"(type: Exec, dependsOn: "binAddTestBDeployUser_${key}") {
+        setupTask(it)
+        args = [ "remote-master", "--minions" ]
+    }
+
+    task "binCreateInstanceGroup_${key}" (type: Exec, dependsOn: "binCheckTestBDeploy_${key}") {
+        setupTask(it)
+        args = [ "remote-group", "--create=Test", "--description=Automatic Test" ]
+    }
+
+    ["1", "2"].each { prodNum ->
+        task "binImportProd${prodNum}_${key}" (type: Exec, dependsOn: "binCreateInstanceGroup_${key}") {
+            setupTask(it)
+            doFirst {
+                delete "${buildDir}/pushTmp${prodNum}"
+            }
+            outputs.upToDateWhen { false }
+            args = ["product", "--hive=${buildDir}/pushTmp${prodNum}", "--import=${projectDir}/test-product-${prodNum}", "--push"]
+        }
+    }
+
+    task "binSetupDemoServer_${key}"() {
+        dependsOn(
+            "binImportProd1_${key}",
+            "binImportProd2_${key}",
+        )
+
+        doFirst {
+            println("----------------------------------------------------------------------------------------")
+            println("Successfully started demo server (" + version + "). Point your browser to https://localhost:${testServerPort}.")
+            println("User and password for the demo server are 'admin' and 'admin'.")
+            println("----------------------------------------------------------------------------------------")
+        }
+    }
+
+    task "binMigrateToCurrent_${key}"(type: Exec, dependsOn: "binSetupDemoServer_${key}") {
+        def currentDistTask = project(":minion").win64DistZip
+        if(org.gradle.internal.os.OperatingSystem.current().isLinux()) {
+            currentDistTask = project(":minion").linux64DistZip
+        }
+
+        dependsOn currentDistTask
+        setupTask(it)
+
+        args = ["remote-master", "--yes", "--update=" + currentDistTask.outputs.files[0] ]
+    }
+
+    task "binWaitForMigrateToCurrent_${key}" (dependsOn: "binMigrateToCurrent_${key}") {
+        doLast {
+            // check the output file for the output we expect
+            println "waiting for migration to proceed"
+            def ok = false;
+            def rqFound = false;
+            for(int i = 0; i < 1000; ++i) {
+                String check = file("${buildDir}/out_${key}.txt").text
+
+                def exc = (check =~ /java\.lang\..*Exception/)
+                if(exc.size() > 0) {
+                    throw new RuntimeException("Upgrade log contains Exceptions!");
+                }
+
+                if(!rqFound) {
+                    def rq = (check =~ /Minion signalled update request/)
+                    if(rq.size() == 1) {
+                        println "Server received update request"
+                        rqFound = true;
+                    }
+                }
+
+                if(rqFound) {
+                    def match = (check =~ /Started listener bound to/)
+                    if(match.size() == 2) {
+                        println "Server successfully restarted after update"
+                        ok = true;
+                        break;
+                    }
+                }
+                sleep(1000);
+            }
+
+            if(!ok) {
+                throw new RuntimeException("Upgrade to current version failed");
+            }
+        }
+    }
+
+    binTestAllMigrations.dependsOn "binWaitForMigrateToCurrent_${key}"
+
+    // dependencies are defined by the tasks. This does not guarantee an execution order. we need to manually define it
+    // to be able to run multiple upgrade tests after each other.
+    tasks["binStartTestBDeploy_${key}"].mustRunAfter("binInitTestBDeploy_${key}")
+    tasks["binAddTestBDeployUser_${key}"].mustRunAfter("binStartTestBDeploy_${key}")
+    tasks["binCheckTestBDeploy_${key}"].mustRunAfter("binAddTestBDeployUser_${key}")
+    tasks["binCreateInstanceGroup_${key}"].mustRunAfter("binCheckTestBDeploy_${key}")
+    tasks["binImportProd1_${key}"].mustRunAfter("binCreateInstanceGroup_${key}")
+    tasks["binImportProd2_${key}"].mustRunAfter("binCreateInstanceGroup_${key}")
+    tasks["binSetupDemoServer_${key}"].mustRunAfter("binImportProd2_${key}")
+    tasks["binMigrateToCurrent_${key}"].mustRunAfter("binSetupDemoServer_${key}")
+    tasks["binWaitForMigrateToCurrent_${key}"].mustRunAfter("binMigrateToCurrent_${key}")
+    tasks["binWaitForMigrateToCurrent_${key}"].finalizedBy("binTriggerStopBDeploy_${key}")
+
+    task "binRunDemoServer_${key}" (dependsOn: "binSetupDemoServer_${key}") {
+        doLast() {
+            // no println will work in doLast, it will appear only AFTER the question is answered.
+            def userInput = services.get(org.gradle.api.internal.tasks.userinput.UserInputHandler)
+            def answer = userInput.askQuestion("Enter any value (or press enter) to stop the server", "Stop");
+        }
+    }
+}
+
+getTestBinVersions().each { setupBinServerTasks(it) }
+
 // coverage for the rest of the tasks
 jacoco {
     applyTo initTestBDeploy
@@ -155,5 +358,5 @@ task runDemoServer(dependsOn: setupDemoServer) {
 }
 
 // and fix all the common meta-data for all BDeploy JavaExec's.
-tasks.findAll { it instanceof JavaExec && !it.name.startsWith("product") }.each { setupBDeployExec(it) }
+tasks.findAll { it instanceof JavaExec && !it.name.startsWith("product") }.each { setupBDeployJavaExec(it) }
 
