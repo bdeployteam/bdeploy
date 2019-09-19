@@ -3,6 +3,21 @@
 namespace Bdeploy.Installer
 {
     /// <summary>
+    /// Data to pupulate information about the app to be installed.
+    /// </summary>
+    public class AppInfoEventArgs : EventArgs
+    {
+        public string AppName { get; private set; }
+        public string VendorName { get; private set; }
+
+        public AppInfoEventArgs(string AppName, string VendorName)
+        {
+            this.AppName = AppName;
+            this.VendorName = VendorName;
+        }
+    }
+
+    /// <summary>
     /// Data when icon has been loaded.
     /// </summary>
     public class IconEventArgs : EventArgs
@@ -16,7 +31,7 @@ namespace Bdeploy.Installer
     }
 
     /// <summary>
-    /// Data when an error occurred.
+    /// The message to display.
     /// </summary>
     public class MessageEventArgs : EventArgs
     {

@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedMap;
@@ -12,6 +14,8 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+
+import javax.ws.rs.WebApplicationException;
 
 import org.apache.commons.codec.binary.Base64;
 import org.quartz.Scheduler;
@@ -28,7 +32,9 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.objects.LockableDatabase;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.dcu.InstanceNodeController;
@@ -425,6 +431,26 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         }
 
         return false;
+    }
+
+    @Override
+    public String createWeakToken(String principal) {
+        ApiAccessToken token = new ApiAccessToken.Builder().setIssuedTo(principal).setWeak(true).build();
+        SecurityHelper sh = SecurityHelper.getInstance();
+
+        KeyStore ks;
+        MinionState state = getState();
+        try {
+            ks = sh.loadPrivateKeyStore(state.keystorePath, state.keystorePass);
+        } catch (GeneralSecurityException | IOException e) {
+            throw new WebApplicationException("Cannot generate weak token", e);
+        }
+
+        try {
+            return SecurityHelper.getInstance().createSignaturePack(token, ks, state.keystorePass);
+        } catch (Exception e) {
+            throw new WebApplicationException("Cannot create weak token", e);
+        }
     }
 
 }

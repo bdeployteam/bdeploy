@@ -1,7 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { LauncherDto, ManifestKey, NodeStatus } from '../models/gen.dtos';
+import { LauncherDto, ManifestKey, NodeStatus, OperatingSystem } from '../models/gen.dtos';
 import { ConfigService } from './config.service';
 import { Logger, LoggingService } from './logging.service';
 
@@ -61,6 +61,14 @@ export class SoftwareUpdateService {
 
   public getDownloadUrl(key: ManifestKey) {
     return this.cfg.config.api + SoftwareUpdateService.BASEPATH + '/download/' + key.name + '/' + key.tag;
+  }
+
+  public createLauncherInstaller(os: OperatingSystem): Observable<string> {
+    const url = this.cfg.config.api + SoftwareUpdateService.BASEPATH + '/createLauncherInstaller';
+    return this.http.get(url, {
+      params: new HttpParams().set('os', os.toLowerCase()),
+      responseType: 'text'
+    });
   }
 
 }

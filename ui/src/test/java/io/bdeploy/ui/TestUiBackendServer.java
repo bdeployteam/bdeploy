@@ -171,6 +171,11 @@ public class TestUiBackendServer extends TestServer {
         public SortedMap<String, RemoteService> getMinions() {
             return new TreeMap<>();
         }
+
+        @Override
+        public String createWeakToken(String principal) {
+            return "token-" + principal;
+        }
     }
 
 }

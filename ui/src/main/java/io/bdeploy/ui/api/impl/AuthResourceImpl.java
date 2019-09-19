@@ -40,7 +40,7 @@ public class AuthResourceImpl implements AuthResource {
             info.capabilities.forEach(token::addCapability);
             String st = signer.apply(token.build());
 
-            // cookie not set to 'secure' to allow sending durign development.
+            // cookie not set to 'secure' to allow sending during development.
             return Response.ok().cookie(new NewCookie("st", st, "/", null, null, 365, false)).entity(st).build();
         } else {
             throw new WebApplicationException("Invalid credentials", Status.UNAUTHORIZED);

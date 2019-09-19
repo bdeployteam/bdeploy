@@ -1,6 +1,5 @@
 package io.bdeploy.ui.api.impl;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -23,24 +22,17 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
 
-import org.glassfish.jersey.media.multipart.ContentDisposition;
-import org.glassfish.jersey.media.multipart.ContentDisposition.ContentDispositionBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,21 +107,11 @@ import io.bdeploy.ui.dto.StringEntryChunkDto;
 @LockingResource(InstanceResourceImpl.GLOBAL_INSTANCE_LOCK)
 public class InstanceResourceImpl implements InstanceResource {
 
-    private static final String ATTACHMENT_DISPOSITION = "attachment";
     protected static final String GLOBAL_INSTANCE_LOCK = "GlobalInstanceLock";
 
     private static final Logger log = LoggerFactory.getLogger(InstanceResourceImpl.class);
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
             .withLocale(Locale.getDefault()).withZone(ZoneId.systemDefault());
-    /**
-     * Name and path of the native Windows installer stored in the launcher ZIP
-     */
-    private static final String INSTALLER_EXE = "bin/Installer.bin";
-
-    /**
-     * Name and path of the native Linux (shell script) installer template stored in the launcher ZIP
-     */
-    private static final String INSTALLER_SH = "bin/installer.tpl";
 
     private final BHive hive;
     private final String group;
@@ -641,8 +623,10 @@ public class InstanceResourceImpl implements InstanceResource {
         InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
         ApplicationConfiguration appConfig = im.getApplicationConfiguration(hive, applicationId);
 
-        String tokenName = UuidHelper.randomId();
-        Path installerPath = minion.getDownloadDir().resolve(tokenName + ".bin");
+        // Request a new file where we can store the installer
+        DownloadServiceImpl ds = rc.initResource(new DownloadServiceImpl());
+        String token = ds.createNewToken();
+        Path installerPath = ds.getStoragePath(token);
 
         // Determine the target OS, and build the according installer.
         ScopedManifestKey applicationKey = ScopedManifestKey.parse(appConfig.application);
@@ -673,16 +657,20 @@ public class InstanceResourceImpl implements InstanceResource {
         URI iconLocation = iconUri.build(group, im.getConfiguration().uuid, appConfig.uid);
         URI splashLocation = splashUrl.build(group, im.getConfiguration().uuid, appConfig.uid);
 
+        String fileName;
         if (applicationOs == OperatingSystem.WINDOWS) {
+            fileName = im.getConfiguration().name + " - " + appConfig.name + " - Installer.exe";
             createWindowsInstaller(im, appConfig, installerPath, launcherKey, launcherLocation, iconLocation, splashLocation);
         } else if (applicationOs == OperatingSystem.LINUX) {
+            fileName = im.getConfiguration().name + "-" + appConfig.name + "-Installer.run";
             createLinuxInstaller(im, appConfig, installerPath, launcherKey, launcherLocation, iconLocation);
         } else {
-            throw new WebApplicationException("Installer not supported for OS '" + applicationOs + "'");
+            throw new WebApplicationException("Unsupported OS for installer download: " + applicationOs);
         }
 
         // Return the name of the token for downloading
-        return tokenName;
+        ds.registerForDownload(token, fileName);
+        return token;
     }
 
     private void createLinuxInstaller(InstanceManifest im, ApplicationConfiguration appConfig, Path installerPath,
@@ -690,7 +678,7 @@ public class InstanceResourceImpl implements InstanceResource {
         BHive rootHive = reg.get(JerseyRemoteBHive.DEFAULT_NAME);
         Manifest mf = rootHive.execute(new ManifestLoadOperation().setManifest(launcherKey.getKey()));
         TreeEntryLoadOperation findInstallerOp = new TreeEntryLoadOperation().setRootTree(mf.getRoot())
-                .setRelativePath(INSTALLER_SH);
+                .setRelativePath(SoftwareUpdateResourceImpl.INSTALLER_SH);
         String template;
         try (InputStream in = rootHive.execute(findInstallerOp); ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             in.transferTo(os);
@@ -724,7 +712,7 @@ public class InstanceResourceImpl implements InstanceResource {
         BHive rootHive = reg.get(JerseyRemoteBHive.DEFAULT_NAME);
         Manifest mf = rootHive.execute(new ManifestLoadOperation().setManifest(launcherKey.getKey()));
         TreeEntryLoadOperation findInstallerOp = new TreeEntryLoadOperation().setRootTree(mf.getRoot())
-                .setRelativePath(INSTALLER_EXE);
+                .setRelativePath(SoftwareUpdateResourceImpl.INSTALLER_EXE);
         try (InputStream in = rootHive.execute(findInstallerOp); OutputStream os = Files.newOutputStream(installerPath)) {
             in.transferTo(os);
         } catch (IOException ioe) {
@@ -739,6 +727,7 @@ public class InstanceResourceImpl implements InstanceResource {
             ClickAndStartDescriptor clickAndStart = getClickAndStartDescriptor(im.getConfiguration().uuid, appConfig.uid);
 
             BrandingConfig config = new BrandingConfig();
+            config.remoteService = im.getConfiguration().target;
             config.launcherUrl = launcherLocation.toString();
             config.iconUrl = iconLocation.toString();
             config.splashUrl = splashLocation.toString();
@@ -756,63 +745,6 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     @Override
-    public Response downloadClientInstaller(String instanceId, String applicationId, String token) {
-        // File must be downloaded within a given timeout
-        Path targetFile = minion.getDownloadDir().resolve(token + ".bin");
-        File file = targetFile.toFile();
-        if (!file.isFile()) {
-            throw new WebApplicationException("Token to download client installer is not valid any more.", Status.BAD_REQUEST);
-        }
-
-        long lastModified = file.lastModified();
-        long validUntil = lastModified + TimeUnit.MINUTES.toMillis(5);
-        if (System.currentTimeMillis() > validUntil) {
-            throw new WebApplicationException("Token to download client installer is not valid any more.", Status.BAD_REQUEST);
-        }
-
-        // Build a response with the stream
-        ResponseBuilder responeBuilder = Response.ok(new StreamingOutput() {
-
-            @Override
-            public void write(OutputStream output) throws IOException {
-                try (InputStream is = Files.newInputStream(targetFile)) {
-                    is.transferTo(output);
-
-                    // Intentionally not in finally block to allow resuming of the download
-                    PathHelper.deleteRecursive(targetFile);
-                } catch (IOException ioe) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Could not fully write output", ioe);
-                    } else {
-                        log.warn("Could not fully write output: {}", ioe);
-                    }
-                }
-            }
-        }, MediaType.APPLICATION_OCTET_STREAM);
-
-        // Load metadata to give the file a nice name
-        InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
-        ApplicationConfiguration appConfig = im.getApplicationConfiguration(hive, applicationId);
-        ScopedManifestKey appKey = ScopedManifestKey.parse(appConfig.application);
-
-        String fileName;
-        if (appKey.getOperatingSystem() == OperatingSystem.WINDOWS) {
-            fileName = im.getConfiguration().name + " - " + appConfig.name + " - Installer.exe";
-        } else if (appKey.getOperatingSystem() == OperatingSystem.LINUX) {
-            fileName = im.getConfiguration().name + "-" + appConfig.name + "-Installer.run";
-        } else {
-            throw new WebApplicationException("Unsupported OS for installer download: " + appKey.getOperatingSystem());
-        }
-
-        // Serve file to the client
-        ContentDispositionBuilder<?, ?> builder = ContentDisposition.type(ATTACHMENT_DISPOSITION);
-        builder.size(file.length()).fileName(fileName);
-        responeBuilder.header(HttpHeaders.CONTENT_DISPOSITION, builder.build());
-        responeBuilder.header(HttpHeaders.CONTENT_LENGTH, file.length());
-        return responeBuilder.build();
-    }
-
-    @Override
     public Response downloadIcon(String instanceId, String applicationId) {
         InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
         ApplicationConfiguration appConfig = im.getApplicationConfiguration(hive, applicationId);
@@ -822,20 +754,9 @@ public class InstanceResourceImpl implements InstanceResource {
             return Response.serverError().status(Status.NOT_FOUND).build();
         }
         String iconFormat = PathHelper.getExtension(appMf.getDescriptor().branding.icon);
-        ResponseBuilder responeBuilder = Response.ok(new StreamingOutput() {
 
-            @Override
-            public void write(OutputStream output) throws IOException {
-                try (InputStream is = new ByteArrayInputStream(brandingIcon)) {
-                    is.transferTo(output);
-                }
-            }
-        }, MediaType.APPLICATION_OCTET_STREAM);
-        ContentDispositionBuilder<?, ?> builder = ContentDisposition.type(ATTACHMENT_DISPOSITION);
-        builder.size(brandingIcon.length).fileName("icon." + iconFormat);
-        responeBuilder.header(HttpHeaders.CONTENT_DISPOSITION, builder.build());
-        responeBuilder.header(HttpHeaders.CONTENT_LENGTH, brandingIcon.length);
-        return responeBuilder.build();
+        DownloadServiceImpl ds = rc.initResource(new DownloadServiceImpl());
+        return ds.serveBytes(brandingIcon, "icon." + iconFormat);
     }
 
     @Override
@@ -848,20 +769,8 @@ public class InstanceResourceImpl implements InstanceResource {
             return Response.serverError().status(Status.NOT_FOUND).build();
         }
         String splashFormat = PathHelper.getExtension(appMf.getDescriptor().branding.splash.image);
-        ResponseBuilder responeBuilder = Response.ok(new StreamingOutput() {
-
-            @Override
-            public void write(OutputStream output) throws IOException {
-                try (InputStream is = new ByteArrayInputStream(brandingSplash)) {
-                    is.transferTo(output);
-                }
-            }
-        }, MediaType.APPLICATION_OCTET_STREAM);
-        ContentDispositionBuilder<?, ?> builder = ContentDisposition.type(ATTACHMENT_DISPOSITION);
-        builder.size(brandingSplash.length).fileName("splash." + splashFormat);
-        responeBuilder.header(HttpHeaders.CONTENT_DISPOSITION, builder.build());
-        responeBuilder.header(HttpHeaders.CONTENT_LENGTH, brandingSplash.length);
-        return responeBuilder.build();
+        DownloadServiceImpl ds = rc.initResource(new DownloadServiceImpl());
+        return ds.serveBytes(brandingSplash, "splash." + splashFormat);
     }
 
     @Override
@@ -879,22 +788,8 @@ public class InstanceResourceImpl implements InstanceResource {
 
         InstanceImportExportHelper.exportTo(zip, hive, InstanceManifest.of(hive, key));
 
-        ResponseBuilder responeBuilder = Response.ok(new StreamingOutput() {
-
-            @Override
-            public void write(OutputStream output) throws IOException {
-                try (InputStream is = Files.newInputStream(zip)) {
-                    is.transferTo(output);
-                } finally {
-                    Files.deleteIfExists(zip);
-                }
-            }
-        }, MediaType.APPLICATION_OCTET_STREAM);
-
-        ContentDisposition contentDisposition = ContentDisposition.type(ATTACHMENT_DISPOSITION)
-                .fileName(instanceId + "-" + tag + ".zip").build();
-        responeBuilder.header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition);
-        return responeBuilder.build();
+        DownloadServiceImpl ds = rc.initResource(new DownloadServiceImpl());
+        return ds.serveFile(zip, "icon." + instanceId + "-" + tag + ".zip");
     }
 
     @WriteLock

@@ -386,7 +386,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       .createClientInstaller(this.groupParam, this.uuidParam, app.uid)
       .pipe(finalize(() => event.done()))
       .subscribe(token => {
-        this.downloadService.download(this.instanceService.downloadClientInstaller(this.groupParam, this.uuidParam, app.uid, token));
+        this.instanceService.downloadClientInstaller(token);
       });
   }
 

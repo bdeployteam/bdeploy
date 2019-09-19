@@ -64,7 +64,15 @@ export class ClientAppsComponent implements OnInit {
     this.loadApps();
   }
 
-  downloadLauncher() {
+  downloadLauncherInstaller() {
+    const promise = this.updateService.createLauncherInstaller(this.activeOs);
+    promise.subscribe(token => {
+      const downloadUrl = this.downloadService.createDownloadUrl(token);
+      this.downloadService.download(downloadUrl);
+    });
+  }
+
+  downloadLauncherZip() {
     const key = this.launcherService.getLauncherForOs(this.activeOs);
     this.downloadService.download(this.updateService.getDownloadUrl(key));
   }
@@ -79,12 +87,7 @@ export class ClientAppsComponent implements OnInit {
 
   downloadInstaller(instance: InstanceConfiguration, app: ClientApplicationDto) {
     this.instanceService.createClientInstaller(this.instanceGroupName, instance.uuid, app.uuid).subscribe(token => {
-      this.downloadService.download(this.instanceService.downloadClientInstaller(
-        this.instanceGroupName,
-        instance.uuid,
-        app.uuid,
-        token,
-      ));
+      this.instanceService.downloadClientInstaller(token);
     });
   }
 
