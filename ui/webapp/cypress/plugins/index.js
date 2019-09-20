@@ -33,7 +33,6 @@ module.exports = (on, config) => {
               }
 
               fs.outputFileSync(fileName, body)
-              console.log('written ' + fileName);
               resolve(body);
           });
       });

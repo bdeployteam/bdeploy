@@ -213,6 +213,7 @@ childTerm() {
     wait
 }
 
+state=0
 if [[ \${ORIG_ARGS[0]} == "master" || \${ORIG_ARGS[0]} == "slave" ]]; then
     # slave and master must run in background.
     trap childTerm INT TERM
@@ -220,13 +221,17 @@ if [[ \${ORIG_ARGS[0]} == "master" || \${ORIG_ARGS[0]} == "slave" ]]; then
     "\$JAVACMD" "\$@" "--updateDir=\$APP_HOME/update" &
     export JAVA_PID=\$!
     wait \${JAVA_PID}
+    state=\$?
 else
     "\$JAVACMD" "\$@" "--updateDir=\$APP_HOME/update" 
+    state=\$?
 fi
 
-if [ \$? == 42 ]; then
+if [ \$state == 42 ]; then
     echo "Minion signalled update request, restarting"
     exec "\$0" "\${ORIG_ARGS[@]}"
 fi
+
+exit \$state
 ######## BDEPLOY EXTENSION END #########
 

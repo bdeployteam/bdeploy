@@ -37,6 +37,7 @@ describe('Instance Tests', function () {
   })
 
   it('Create config file', () => {
+    cy.visit('/#/instance/overview/Test/' + instanceUuid);
     cy.get('app-instance-group-logo').parent().clickContextMenuItem('Configuration Files...');
     cy.contains('button', 'add').should('be.enabled').and('be.visible').click();
     cy.get('input[placeholder="Enter path for file"]').clear().type('cypress.cfg')
@@ -52,6 +53,7 @@ describe('Instance Tests', function () {
    * Also sets the text parameter to a recognizable value.
    */
   it('Set server parameters', function() {
+    cy.visit('/#/instance/overview/Test/' + instanceUuid);
     cy.getApplicationConfigCard('master', 'Server Application').clickContextMenuItem('Configure...')
 
     // set sleep parameter
@@ -77,6 +79,7 @@ describe('Instance Tests', function () {
    * Install, activate the given instance configuration.
    */
   it('Install & activate', function() {
+    cy.visit('/#/instance/overview/Test/' + instanceUuid);
     cy.getLatestInstanceVersion().installAndActivate();
   })
 
@@ -84,6 +87,7 @@ describe('Instance Tests', function () {
    * Start, check and stop the server process.
    */
   it('Start & stop server process', function() {
+    cy.visit('/#/instance/overview/Test/' + instanceUuid);
     // don't click 'somewhere' on the card, as there are buttons preventing events or doing something else.
     // pick some label to click...
     cy.getActiveInstanceVersion().contains('Version').click();
@@ -133,6 +137,7 @@ describe('Instance Tests', function () {
   })
 
   it('Check data file browser', () => {
+    cy.visit('/#/instance/overview/Test/' + instanceUuid);
     cy.get('app-instance-group-logo').parent().clickContextMenuItem('Data Files...');
 
     cy.contains('td', 'cypress.txt').should('exist').click();
