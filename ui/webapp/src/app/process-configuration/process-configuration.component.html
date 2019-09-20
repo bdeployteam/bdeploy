@@ -70,10 +70,10 @@
         <button mat-menu-item (click)="importInstanceVersion()">
           Import Instance Version...
         </button>
-        <button mat-menu-item [routerLink]="['/configfiles', groupParam, uuidParam, selectedConfig?.version.key.tag]" [disabled]="!isEditable()">
+        <button mat-menu-item [disabled]='loading' [routerLink]="['/configfiles', groupParam, uuidParam, selectedConfig?.version.key.tag]" [disabled]="!isEditable()">
           Configuration Files...
         </button>
-        <button mat-menu-item [routerLink]="['/datafiles', groupParam, uuidParam, selectedConfig?.version.key.tag]">
+        <button mat-menu-item [disabled]='loading' [routerLink]="['/datafiles', groupParam, uuidParam, selectedConfig?.version.key.tag]">
           Data Files...
         </button>
         <mat-divider></mat-divider>
