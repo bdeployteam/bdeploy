@@ -29,16 +29,16 @@ namespace Bdeploy.Installer.Models
         }
 
         /// <summary>
-        /// Verifies that the provided certificate matches the given root certificate. 
+        /// Verifies that the provided certificate matches the given other certificate and that they are still valid.
         /// 
         /// <para>
-        /// Custom verification is required as our certificates are typically self-signed and not created by a root auhtority that the OS trusts.
-        /// Therefore we need to allow unknown certificate authorities and check if the root one is the one that we are expecting.
+        /// Custom verification is required as our certificates are typically self-signed and not created by a root authority that the OS trusts.
+        /// Therefore we need to allow unknown certificate authorities and check if the it is the one that we are expecting.
         /// See https://github.com/dotnet/corefx/issues/30284 for more details.
         /// </para>
         /// 
         /// </summary>
-        /// <param name="root">The trusted certificate. Might be a root certificate used to create other ones.</param>
+        /// <param name="root">The baseline to compare.</param>
         /// <param name="cert">The certificate to validate.</param>
         /// <returns></returns>
         public static bool Verify(X509Certificate2 root, X509Certificate2 cert)
@@ -48,8 +48,7 @@ namespace Bdeploy.Installer.Models
             chain.ChainPolicy.ExtraStore.Add(root);
             chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority;
             var isValid = chain.Build(cert);
-            var chainRoot = chain.ChainElements[chain.ChainElements.Count - 1].Certificate;
-            isValid = isValid && chainRoot.RawData.SequenceEqual(root.RawData);
+            isValid = isValid && cert.RawData.SequenceEqual(root.RawData);
             return isValid;
         }
     }
