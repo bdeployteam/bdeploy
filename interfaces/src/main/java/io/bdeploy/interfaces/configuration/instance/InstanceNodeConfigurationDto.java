@@ -1,4 +1,4 @@
-package io.bdeploy.ui.dto;
+package io.bdeploy.interfaces.configuration.instance;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.bdeploy.interfaces.NodeStatus;
-import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 
 /**
  * Describes which applications are running on a specific node

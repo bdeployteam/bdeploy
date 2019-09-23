@@ -1,4 +1,4 @@
-package io.bdeploy.ui.dto;
+package io.bdeploy.interfaces.configuration.instance;
 
 /**
  * Represents a file update.

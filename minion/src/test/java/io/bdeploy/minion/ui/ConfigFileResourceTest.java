@@ -20,6 +20,8 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.TempDirectory;
 import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
+import io.bdeploy.interfaces.configuration.instance.FileStatusDto.FileStatusType;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.minion.TestFactory;
@@ -27,8 +29,6 @@ import io.bdeploy.minion.TestMinion;
 import io.bdeploy.ui.api.ConfigFileResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
-import io.bdeploy.ui.dto.FileStatusDto;
-import io.bdeploy.ui.dto.FileStatusDto.FileStatusType;
 
 @ExtendWith(TestMinion.class)
 @ExtendWith(TestHive.class)

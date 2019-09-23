@@ -83,7 +83,7 @@ public class RemoteDeploymentTool extends RemoteServiceTool<RemoteDeployConfig> 
             } else if (config.activate()) {
                 master.activate(key);
             } else if (config.uninstall()) {
-                master.remove(key);
+                master.uninstall(key);
             }
         } catch (
 

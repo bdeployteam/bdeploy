@@ -11,7 +11,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import io.bdeploy.ui.dto.FileStatusDto;
+import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
 
 @Path("/cfgFiles")
 @Consumes(MediaType.APPLICATION_JSON)

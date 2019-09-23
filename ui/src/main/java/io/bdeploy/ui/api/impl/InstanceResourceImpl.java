@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -39,12 +40,14 @@ import org.slf4j.LoggerFactory;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestExistsOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
-import io.bdeploy.bhive.op.ManifestNextIdOperation;
 import io.bdeploy.bhive.op.TreeEntryLoadOperation;
+import io.bdeploy.bhive.op.TreeLoadOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
@@ -57,6 +60,7 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
+import io.bdeploy.common.util.StreamHelper;
 import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.UnitHelper;
@@ -65,9 +69,14 @@ import io.bdeploy.interfaces.InstanceImportExportHelper;
 import io.bdeploy.interfaces.NodeStatus;
 import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
+import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
+import io.bdeploy.interfaces.configuration.instance.FileStatusDto.FileStatusType;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
+import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
+import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfigurationDto;
+import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
@@ -76,7 +85,6 @@ import io.bdeploy.interfaces.directory.InstanceDirectory;
 import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
-import io.bdeploy.interfaces.manifest.InstanceManifest.Builder;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory;
@@ -85,7 +93,6 @@ import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
-import io.bdeploy.jersey.JerseyWriteLockService.LockingResource;
 import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.ConfigFileResource;
@@ -95,19 +102,14 @@ import io.bdeploy.ui.api.ProcessResource;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
 import io.bdeploy.ui.branding.Branding;
 import io.bdeploy.ui.branding.BrandingConfig;
-import io.bdeploy.ui.dto.InstanceConfigurationDto;
 import io.bdeploy.ui.dto.InstanceDto;
 import io.bdeploy.ui.dto.InstanceManifestHistoryDto;
-import io.bdeploy.ui.dto.InstanceNodeConfigurationDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
 import io.bdeploy.ui.dto.InstanceVersionDto;
 import io.bdeploy.ui.dto.ProductDto;
 import io.bdeploy.ui.dto.StringEntryChunkDto;
 
-@LockingResource(InstanceResourceImpl.GLOBAL_INSTANCE_LOCK)
 public class InstanceResourceImpl implements InstanceResource {
-
-    protected static final String GLOBAL_INSTANCE_LOCK = "GlobalInstanceLock";
 
     private static final Logger log = LoggerFactory.getLogger(InstanceResourceImpl.class);
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
@@ -217,15 +219,8 @@ public class InstanceResourceImpl implements InstanceResource {
         return InstanceManifest.of(hive, key).getConfiguration();
     }
 
-    @WriteLock
     @Override
     public void create(InstanceConfiguration instanceConfig) {
-        String rootName = InstanceManifest.getRootName(instanceConfig.uuid);
-        SortedSet<Key> existing = hive.execute(new ManifestListOperation().setManifestName(rootName));
-        if (!existing.isEmpty()) {
-            throw new WebApplicationException("Instance already exists: " + instanceConfig.uuid, Status.CONFLICT);
-        }
-
         // this means there is no token, and no way to establish a secure connection.
         // in this case we're looking up a target with the same URI from all other
         // available instances in the group.
@@ -251,9 +246,46 @@ public class InstanceResourceImpl implements InstanceResource {
             throw new WebApplicationException("Product not found: " + instanceConfig.product, Status.NOT_FOUND);
         }
 
-        instanceConfig.configTree = product.getConfigTemplateTreeId();
-        Manifest.Key key = new InstanceManifest.Builder().setInstanceConfiguration(instanceConfig).insert(hive);
+        Manifest.Key key = ResourceProvider.getResource(instanceConfig.target, MasterRootResource.class).getNamedMaster(group)
+                .update(new InstanceUpdateDto(new InstanceConfigurationDto(instanceConfig, Collections.emptyList()),
+                        getUpdatesFromTree("", new ArrayList<>(), product.getConfigTemplateTreeId())), null);
+
+        // TODO: move history to master
         InstanceManifest.of(hive, key).getHistory(hive).record(Action.CREATE, context.getUserPrincipal().getName(), null);
+    }
+
+    private List<FileStatusDto> getUpdatesFromTree(String path, List<FileStatusDto> target, ObjectId cfgTree) {
+        if (cfgTree == null) {
+            return target;
+        }
+
+        Tree tree = hive.execute(new TreeLoadOperation().setTree(cfgTree));
+        for (Entry<Tree.Key, ObjectId> entry : tree.getChildren().entrySet()) {
+            switch (entry.getKey().getType()) {
+                case BLOB:
+                    FileStatusDto fsd = new FileStatusDto();
+
+                    fsd.file = path + entry.getKey().getName();
+                    fsd.type = FileStatusType.ADD;
+                    try (InputStream is = hive.execute(
+                            new TreeEntryLoadOperation().setRootTree(cfgTree).setRelativePath(entry.getKey().getName()))) {
+                        fsd.content = StreamHelper.read(is, StandardCharsets.UTF_8);
+                    } catch (IOException ioe) {
+                        throw new IllegalStateException("Cannot read " + path + entry.getKey().getName() + " from config tree",
+                                ioe);
+                    }
+
+                    target.add(fsd);
+                    break;
+                case TREE:
+                    getUpdatesFromTree(path + entry.getKey().getName() + "/", target, entry.getValue());
+                    break;
+                default:
+                    throw new IllegalStateException("Unsupported entry type in config tree: " + entry);
+            }
+        }
+
+        return target;
     }
 
     @Override
@@ -264,7 +296,6 @@ public class InstanceResourceImpl implements InstanceResource {
         return configuration;
     }
 
-    @WriteLock
     @Override
     public void update(String instance, InstanceConfigurationDto dto, String expectedTag) {
         InstanceManifest oldConfig = InstanceManifest.load(hive, instance, null);
@@ -274,80 +305,19 @@ public class InstanceResourceImpl implements InstanceResource {
                     + oldConfig.getManifest().getTag(), Status.CONFLICT);
         }
 
-        Builder newConfig = new InstanceManifest.Builder();
-        InstanceConfiguration config = dto.config;
-
-        // calculate target key.
-        String rootName = InstanceManifest.getRootName(oldConfig.getConfiguration().uuid);
-        String rootTag = hive.execute(new ManifestNextIdOperation().setManifestName(rootName)).toString();
-        Manifest.Key rootKey = new Manifest.Key(rootName, rootTag);
-        InstanceConfiguration cfg;
-
-        if (config != null) {
-            cfg = applyExistingTarget(instance, oldConfig, config);
+        if (dto.config != null) {
+            dto.config = applyExistingTarget(instance, oldConfig, dto.config);
         } else {
             // no new config - load existing one.
-            cfg = oldConfig.getConfiguration();
+            dto.config = oldConfig.getConfiguration();
         }
 
-        newConfig.setInstanceConfiguration(cfg);
+        Manifest.Key key = ResourceProvider.getResource(dto.config.target, MasterRootResource.class).getNamedMaster(group)
+                .update(new InstanceUpdateDto(dto, Collections.emptyList()), expectedTag);
 
-        if (dto.nodeDtos != null) {
-            // Update the node assignment and the configuration
-            updateNewNodes(instance, dto, newConfig, rootTag, cfg);
-        } else {
-            // no new node config - re-apply existing one with new tag, align redundant fields.
-            updateExistingNodes(oldConfig, newConfig, rootTag, cfg);
-        }
-
-        newConfig.setKey(rootKey).insert(hive);
-        InstanceManifest.of(hive, rootKey).getHistory(hive).record(Action.CREATE, context.getUserPrincipal().getName(), null);
-        UiResources.getInstanceEventManager().create(instance, rootKey);
-    }
-
-    private void updateExistingNodes(InstanceManifest oldConfig, Builder newConfig, String rootTag, InstanceConfiguration cfg) {
-        for (Map.Entry<String, Manifest.Key> entry : oldConfig.getInstanceNodeManifests().entrySet()) {
-            InstanceNodeManifest oldInmf = InstanceNodeManifest.of(hive, entry.getValue());
-            InstanceNodeManifest.Builder inmBuilder = new InstanceNodeManifest.Builder();
-            InstanceNodeConfiguration nodeConfig = oldInmf.getConfiguration();
-
-            nodeConfig.copyRedundantFields(cfg);
-
-            inmBuilder.setConfigTreeId(cfg.configTree);
-            inmBuilder.setInstanceNodeConfiguration(nodeConfig);
-            inmBuilder.setMinionName(entry.getKey());
-            inmBuilder.setKey(new Manifest.Key(entry.getValue().getName(), rootTag)); // make sure tag is equal.
-
-            newConfig.addInstanceNodeManifest(entry.getKey(), inmBuilder.insert(hive));
-        }
-    }
-
-    private void updateNewNodes(String instance, InstanceConfigurationDto dto, Builder newConfig, String rootTag,
-            InstanceConfiguration cfg) {
-        for (InstanceNodeConfigurationDto nodeDto : dto.nodeDtos) {
-            String minionName = nodeDto.nodeName;
-            InstanceNodeConfiguration nodeConfig = nodeDto.nodeConfiguration;
-
-            // when a user removes all applications then we also delete the node configuration
-            if (nodeConfig == null || nodeConfig.applications.isEmpty()) {
-                continue;
-            }
-
-            // make sure redundant data is equal to instance data.
-            if (!cfg.name.equals(nodeConfig.name)) {
-                log.warn("Instance name of node ({}) not equal to instance name ({}) - aligning.", nodeConfig.name, cfg.name);
-                nodeConfig.name = cfg.name;
-            }
-
-            nodeConfig.copyRedundantFields(cfg);
-
-            RuntimeAssert.assertEquals(nodeDto.nodeConfiguration.uuid, instance, "Instance ID not set on nodes");
-            String mfName = instance + "/" + minionName;
-            Key instanceNodeKey = new InstanceNodeManifest.Builder().setInstanceNodeConfiguration(nodeConfig)
-                    .setMinionName(minionName).setConfigTreeId(cfg.configTree).setKey(new Manifest.Key(mfName, rootTag))
-                    .insert(hive);
-            newConfig.addInstanceNodeManifest(minionName, instanceNodeKey);
-        }
+        // TODO: move history to master
+        InstanceManifest.of(hive, key).getHistory(hive).record(Action.CREATE, context.getUserPrincipal().getName(), null);
+        UiResources.getInstanceEventManager().create(instance, key);
     }
 
     private InstanceConfiguration applyExistingTarget(String instance, InstanceManifest oldConfig, InstanceConfiguration config) {
@@ -366,9 +336,9 @@ public class InstanceResourceImpl implements InstanceResource {
         return config;
     }
 
-    @WriteLock
     @Override
     public void delete(String instance) {
+        // TODO: delegate to master
         // prevent delete if processes are running.
         InstanceConfiguration cfg = read(instance);
         RemoteService svc = cfg.target;
@@ -386,7 +356,7 @@ public class InstanceResourceImpl implements InstanceResource {
             // cleanup is done periodically in background, still uninstall installed versions to prevent re-start of processes later
             List<InstanceVersionDto> versions = listVersions(instance);
             for (InstanceVersionDto dto : versions) {
-                master.getNamedMaster(group).remove(dto.key);
+                master.getNamedMaster(group).uninstall(dto.key);
             }
         }
 
@@ -545,7 +515,7 @@ public class InstanceResourceImpl implements InstanceResource {
             }
 
             // 2: tell master to undeploy
-            master.getNamedMaster(group).remove(instance.getManifest());
+            master.getNamedMaster(group).uninstall(instance.getManifest());
         }
         instance.getHistory(hive).record(Action.UNINSTALL, context.getUserPrincipal().getName(), null);
         UiResources.getInstanceEventManager().stateChanged(instanceId, instance.getManifest());
@@ -615,7 +585,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Override
     public ConfigFileResource getConfigResource(String instanceId) {
-        return rc.initResource(new ConfigFileResourceImpl(hive, instanceId));
+        return rc.initResource(new ConfigFileResourceImpl(hive, group, instanceId));
     }
 
     @Override

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.SortedMap;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -16,6 +17,7 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
+import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.InstanceDirectory;
@@ -60,7 +62,22 @@ public interface MasterNamedResource {
      */
     @POST
     @Path("/remove")
-    public void remove(Manifest.Key key);
+    public void uninstall(Manifest.Key key);
+
+    /**
+     * @param update the state of the instance to write
+     * @param expectedTag the expected "current" tag of the instance to avoid conflicts
+     */
+    @POST
+    @Path("/update")
+    public Manifest.Key update(InstanceUpdateDto update, @QueryParam("e") String expectedTag);
+
+    /**
+     * @param instanceUuid the instance to delete
+     */
+    @DELETE
+    @Path("/delete")
+    public void delete(@QueryParam("u") String instanceUuid);
 
     /**
      * Create a new instance version by updating the underlying product to the given tag.
