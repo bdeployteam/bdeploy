@@ -262,7 +262,7 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
     }
 
     private void createLinuxInstaller(Path installerPath, ScopedManifestKey launcherKey, URI launcherLocation) {
-        BHive rootHive = reg.get(JerseyRemoteBHive.DEFAULT_NAME);
+        BHive rootHive = getHive();
         Manifest mf = rootHive.execute(new ManifestLoadOperation().setManifest(launcherKey.getKey()));
         TreeEntryLoadOperation findInstallerOp = new TreeEntryLoadOperation().setRootTree(mf.getRoot())
                 .setRelativePath(INSTALLER_SH);
@@ -297,7 +297,7 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
         File installer = installerPath.toFile();
 
         // Try to load the installer stored in the manifest tree
-        BHive rootHive = reg.get(JerseyRemoteBHive.DEFAULT_NAME);
+        BHive rootHive = getHive();
         Manifest mf = rootHive.execute(new ManifestLoadOperation().setManifest(launcherKey.getKey()));
         TreeEntryLoadOperation findInstallerOp = new TreeEntryLoadOperation().setRootTree(mf.getRoot())
                 .setRelativePath(INSTALLER_EXE);
