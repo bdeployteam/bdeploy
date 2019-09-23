@@ -142,11 +142,11 @@ createTasks("1")
 createTasks("2")
 
 // now the tasks for binary (upgrade) tests
-task binTestAllMigrations() {
+task releaseTest() {
     // container to depend on all migration tests.
 }
 
-task release(dependsOn: binTestAllMigrations) {
+task release(dependsOn: releaseTest) {
     doLast {
         println "Release seems to do well with upgrades..."
     }
@@ -234,10 +234,16 @@ void setupBinServerTasks(String version) {
         }
     }
 
+    task "binImportTestData_${key}" (type: Exec, dependsOn: "binImportProd2_${key}") {
+        setupTask(it)
+        args = [ "instance", "--importFrom=${projectDir}/bin-test-data/${version}.zip", "--hive=${testServerRoot}/storage/Test" ]
+    }
+
     task "binSetupDemoServer_${key}"() {
         dependsOn(
             "binImportProd1_${key}",
             "binImportProd2_${key}",
+            "binImportTestData_${key}"
         )
 
         doFirst {
@@ -299,7 +305,7 @@ void setupBinServerTasks(String version) {
         }
     }
 
-    binTestAllMigrations.dependsOn "binWaitForMigrateToCurrent_${key}"
+    releaseTest.dependsOn "binWaitForMigrateToCurrent_${key}"
 
     // dependencies are defined by the tasks. This does not guarantee an execution order. we need to manually define it
     // to be able to run multiple upgrade tests after each other.
@@ -309,6 +315,7 @@ void setupBinServerTasks(String version) {
     tasks["binCreateInstanceGroup_${key}"].mustRunAfter("binCheckTestBDeploy_${key}")
     tasks["binImportProd1_${key}"].mustRunAfter("binCreateInstanceGroup_${key}")
     tasks["binImportProd2_${key}"].mustRunAfter("binCreateInstanceGroup_${key}")
+    tasks["binImportTestData_${key}"].mustRunAfter("binImportProd2_${key}")
     tasks["binSetupDemoServer_${key}"].mustRunAfter("binImportProd2_${key}")
     tasks["binMigrateToCurrent_${key}"].mustRunAfter("binSetupDemoServer_${key}")
     tasks["binWaitForMigrateToCurrent_${key}"].mustRunAfter("binMigrateToCurrent_${key}")
