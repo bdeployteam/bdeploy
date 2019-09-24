@@ -45,6 +45,7 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.NamedDaemonThreadFactory;
+import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.JerseyAuthenticationUnprovider;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.JerseyAuthenticationWeakenerProvider;
 import io.bdeploy.jersey.audit.Auditor;
@@ -212,6 +213,8 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
 
             server.getHttpHandler().setAllowEncodedSlash(true);
             server.start();
+
+            log.info("Started Version " + VersionHelper.readVersion());
         } catch (GeneralSecurityException | IOException e) {
             throw new IllegalStateException("Cannot start server", e);
         }
