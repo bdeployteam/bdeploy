@@ -25,7 +25,6 @@ import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
-import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
@@ -94,7 +93,6 @@ public class ConfigFileResourceImpl implements ConfigFileResource {
         Manifest.Key rootKey = master.update(new InstanceUpdateDto(
                 new InstanceConfigurationDto(oldConfig.getConfiguration(), Collections.emptyList()), updates), expectedTag);
 
-        InstanceManifest.of(hive, rootKey).getHistory(hive).record(Action.CREATE, context.getUserPrincipal().getName(), null);
         UiResources.getInstanceEventManager().create(instanceId, rootKey);
     }
 

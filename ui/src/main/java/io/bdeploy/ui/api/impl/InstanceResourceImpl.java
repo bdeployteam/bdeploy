@@ -88,7 +88,6 @@ import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory;
-import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
@@ -246,12 +245,9 @@ public class InstanceResourceImpl implements InstanceResource {
             throw new WebApplicationException("Product not found: " + instanceConfig.product, Status.NOT_FOUND);
         }
 
-        Manifest.Key key = ResourceProvider.getResource(instanceConfig.target, MasterRootResource.class).getNamedMaster(group)
+        ResourceProvider.getResource(instanceConfig.target, MasterRootResource.class).getNamedMaster(group)
                 .update(new InstanceUpdateDto(new InstanceConfigurationDto(instanceConfig, Collections.emptyList()),
                         getUpdatesFromTree("", new ArrayList<>(), product.getConfigTemplateTreeId())), null);
-
-        // TODO: move history to master
-        InstanceManifest.of(hive, key).getHistory(hive).record(Action.CREATE, context.getUserPrincipal().getName(), null);
     }
 
     private List<FileStatusDto> getUpdatesFromTree(String path, List<FileStatusDto> target, ObjectId cfgTree) {
@@ -315,8 +311,6 @@ public class InstanceResourceImpl implements InstanceResource {
         Manifest.Key key = ResourceProvider.getResource(dto.config.target, MasterRootResource.class).getNamedMaster(group)
                 .update(new InstanceUpdateDto(dto, Collections.emptyList()), expectedTag);
 
-        // TODO: move history to master
-        InstanceManifest.of(hive, key).getHistory(hive).record(Action.CREATE, context.getUserPrincipal().getName(), null);
         UiResources.getInstanceEventManager().create(instance, key);
     }
 
@@ -491,7 +485,7 @@ public class InstanceResourceImpl implements InstanceResource {
             MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class);
             master.getNamedMaster(group).install(instance.getManifest());
         }
-        instance.getHistory(hive).record(Action.INSTALL, context.getUserPrincipal().getName(), null);
+
         UiResources.getInstanceEventManager().stateChanged(instanceId, instance.getManifest());
     }
 
@@ -517,7 +511,7 @@ public class InstanceResourceImpl implements InstanceResource {
             // 2: tell master to undeploy
             master.getNamedMaster(group).uninstall(instance.getManifest());
         }
-        instance.getHistory(hive).record(Action.UNINSTALL, context.getUserPrincipal().getName(), null);
+
         UiResources.getInstanceEventManager().stateChanged(instanceId, instance.getManifest());
     }
 
@@ -528,18 +522,9 @@ public class InstanceResourceImpl implements InstanceResource {
         try (Activity deploy = reporter.start("Activating " + instanceId + ":" + tag);
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
             MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class);
-
-            String activeTag = master.getNamedMaster(group).getInstanceState(instanceId).activeTag;
-            if (activeTag != null) {
-                InstanceManifest.load(hive, instanceId, activeTag).getHistory(hive).record(Action.DEACTIVATE,
-                        context.getUserPrincipal().getName(), null);
-                // this one is /not/ required, as the stateChanged at the end of the call should be enough.
-                // UiResources.getInstanceEventManager().stateChanged(instanceId, instance.getManifest());
-            }
-
             master.getNamedMaster(group).activate(instance.getManifest());
         }
-        instance.getHistory(hive).record(Action.ACTIVATE, context.getUserPrincipal().getName(), null);
+
         UiResources.getInstanceEventManager().stateChanged(instanceId, instance.getManifest());
     }
 

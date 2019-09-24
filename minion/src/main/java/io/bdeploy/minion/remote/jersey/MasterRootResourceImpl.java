@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.container.ResourceContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
@@ -57,6 +59,9 @@ public class MasterRootResourceImpl implements MasterRootResource {
 
     @Inject
     private ActivityReporter reporter;
+
+    @Context
+    private ResourceContext rc;
 
     @Override
     public SortedMap<String, NodeStatus> getMinions() {
@@ -300,7 +305,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
             throw new WebApplicationException("Hive not found: " + name, Status.NOT_FOUND);
         }
 
-        return new MasterNamedResourceImpl(root, h, reporter);
+        return rc.initResource(new MasterNamedResourceImpl(root, h, reporter));
     }
 
 }

@@ -66,6 +66,7 @@ import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.dependencies.LocalDependencyFetcher;
+import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
 import io.bdeploy.interfaces.manifest.state.InstanceState;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
@@ -223,6 +224,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         }
 
         getState(imf, hive).install(key.getTag());
+        imf.getHistory(hive).record(Action.INSTALL, context.getUserPrincipal().getName(), null);
     }
 
     @Override
@@ -233,6 +235,13 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             throw new WebApplicationException(
                     "Given manifest for UUID " + imf.getConfiguration().uuid + " is not fully deployed: " + key,
                     Status.NOT_FOUND);
+        }
+
+        // record de-activation
+        String activeTag = imf.getState(hive).read().activeTag;
+        if (activeTag != null) {
+            InstanceManifest.load(hive, imf.getConfiguration().uuid, activeTag).getHistory(hive).record(Action.DEACTIVATE,
+                    context.getUserPrincipal().getName(), null);
         }
 
         SortedMap<String, Key> fragments = imf.getInstanceNodeManifests();
@@ -260,6 +269,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         }
 
         getState(imf, hive).activate(key.getTag());
+        imf.getHistory(hive).record(Action.ACTIVATE, context.getUserPrincipal().getName(), null);
     }
 
     /**
@@ -347,6 +357,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             removing.done();
         }
 
+        imf.getHistory(hive).record(Action.UNINSTALL, context.getUserPrincipal().getName(), null);
         // no need to clean up the hive, this is done elsewhere.
     }
 
@@ -497,7 +508,9 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             builder.addInstanceNodeManifest(entry.getKey(), inmb.insert(hive));
         }
 
-        return builder.insert(hive);
+        Manifest.Key key = builder.insert(hive);
+        InstanceManifest.of(hive, key).getHistory(hive).record(Action.CREATE, context.getUserPrincipal().getName(), null);
+        return key;
     }
 
     @WriteLock
