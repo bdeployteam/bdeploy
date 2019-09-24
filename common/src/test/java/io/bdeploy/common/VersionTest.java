@@ -51,9 +51,9 @@ public class VersionTest {
 
         Version[] array = vs.stream().toArray(Version[]::new);
 
-        assertEquals("1.0.1", array[0].toString());
-        assertEquals("1.0.1-qualifier1", array[1].toString());
-        assertEquals("1.0.1-qualifier2", array[2].toString());
+        assertEquals("1.0.1-qualifier1", array[0].toString());
+        assertEquals("1.0.1-qualifier2", array[1].toString());
+        assertEquals("1.0.1", array[2].toString());
         assertEquals("1.2.1", array[3].toString());
         assertEquals("1.2.3", array[4].toString());
     }

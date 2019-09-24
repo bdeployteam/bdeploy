@@ -8,7 +8,6 @@ import { ConfigService } from '../services/config.service';
 import { MessageboxService } from '../services/messagebox.service';
 import { SoftwareUpdateService } from '../services/software-update.service';
 import { UpdateDialogComponent } from '../update-dialog/update-dialog.component';
-import { sortByTags } from '../utils/manifest.utils';
 
 export class GroupedKeys {
   public tag: String;
@@ -55,9 +54,8 @@ export class UpdateBrowserComponent implements OnInit {
   private groupKeysByTag(keys: ManifestKey[], currentVersion: string) {
     const tags: { [key: string]: GroupedKeys } = {};
 
-    sortByTags(keys, k => k.tag, false);
-
-    keys.forEach(k => {
+    // keys are already sorted by the backend. reverse the order to have the newest version on top.
+    keys.reverse().forEach(k => {
       if (!(k.tag in tags)) {
         tags[k.tag] = new GroupedKeys();
       }
