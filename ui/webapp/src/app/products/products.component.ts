@@ -8,6 +8,7 @@ import { finalize } from 'rxjs/operators';
 import { FileUploadComponent } from '../file-upload/file-upload.component';
 import { ProductDto } from '../models/gen.dtos';
 import { ProductService } from '../services/product.service';
+import { sortByTags } from '../utils/manifest.utils';
 
 @Component({
   selector: 'app-products',
@@ -50,18 +51,26 @@ export class ProductsComponent implements OnInit, OnDestroy {
     return this.selectedProductKey ? this.products.get(this.selectedProductKey) : null;
   }
 
+  public get selectedProductLatestVersion() {
+    const versions = this.selectedProductVersions;
+    return versions ? versions[0] : null;
+  }
+
   private loadProducts() {
     this.loading = true;
 
     const productPromise = this.productService.getProducts(this.instanceGroup);
     productPromise.pipe(finalize(() => this.loading = false)).subscribe(p => {
       this.products = new Map();
-      // FIXME: don't collect by name, but by key name.
       p.forEach(prod => {
         this.products.set(prod.name, this.products.get(prod.name) || []);
         this.products.get(prod.name).push(prod);
       });
       this.productsKeys = Array.from(this.products.keys());
+      this.productsKeys.forEach(key => {
+        const versions: ProductDto[] = this.products.get(key);
+          this.products.set(key, sortByTags(versions, v => v.key.tag, false));
+      });
       if (this.selectedProductKey && this.productsKeys.indexOf(this.selectedProductKey) === -1) {
         this.selectedProductKey = null;
       }

@@ -23,7 +23,7 @@
       <div class="spacer"></div>
       <div class="toolbar-info-grid">
         <div>
-          Product: <b *ngIf="!loading">{{ isProductAvailable(selectedConfig) ? getProductOfInstance(selectedConfig).description : selectedConfig.instance.product.name }}</b>
+          Product: <b *ngIf="!loading">{{ isProductAvailable(selectedConfig) ? getProductOfInstance(selectedConfig).name : selectedConfig.instance.product.name }}</b>
         </div>
         <div>
           Version: <b *ngIf="!loading">{{ selectedConfig.instance.product.tag }}</b>&nbsp;<span *ngIf="!loading && !isProductAvailable(selectedConfig)" class="product-unavailable" matTooltip="Required product version is not available.">N/A</span>

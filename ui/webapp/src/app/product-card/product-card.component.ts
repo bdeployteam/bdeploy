@@ -15,6 +15,10 @@ export class ProductCardComponent implements OnInit {
 
   public diskUsage = '(...)';
 
+  public get latestProductVersion() {
+    return this.productVersions && this.productVersions.length > 0 ? this.productVersions[0] : null;
+  }
+
   constructor(private productService: ProductService) {}
 
   ngOnInit() {

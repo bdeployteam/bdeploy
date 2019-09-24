@@ -1,11 +1,12 @@
 <ng-template #infoPopup>
     <mat-card class="info">
-        <div class="mat-title">{{product.description}}</div>
-        <p>Product: <b>{{product.key.name}}</b> Version: <b>{{product.key.tag}}</b></p>
+        <div class="mat-title">{{productDto.name}}</div>
+        <p>Product: <b>{{productDto.product}}</b> Version: <b>{{productDto.key.tag}}</b></p>
+        <p>Vendor: <b>{{productDto.vendor ? productDto.vendor : '(unknown)'}}</b></p>
         <hr>
         <mat-card-content class="labels-card">
           <mat-chip-list>
-            <mat-chip *ngFor="let labelKey of getLabelKeys()"><span class="label-key">{{labelKey}}: </span><span>{{product.labels[labelKey]}}</span></mat-chip>
+            <mat-chip *ngFor="let labelKey of getLabelKeys()"><span class="label-key">{{labelKey}}: </span><span>{{productDto.labels[labelKey]}}</span></mat-chip>
           </mat-chip-list>
         </mat-card-content>
     </mat-card>
