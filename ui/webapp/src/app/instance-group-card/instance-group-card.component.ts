@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { InstanceGroupDeleteDialogComponent } from '../instance-group-delete-dialog/instance-group-delete-dialog.component';
 import { InstanceGroupConfiguration } from '../models/gen.dtos';
 import { InstanceGroupService } from '../services/instance-group.service';

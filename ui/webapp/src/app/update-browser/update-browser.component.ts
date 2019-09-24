@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { MatDialog, MatDialogConfig } from '@angular/material';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { finalize } from 'rxjs/operators';
 import { FileUploadComponent } from '../file-upload/file-upload.component';
 import { MessageBoxMode } from '../messagebox/messagebox.component';

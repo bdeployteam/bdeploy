@@ -1,6 +1,6 @@
 import { CdkTable } from '@angular/cdk/table';
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { MatSnackBar } from '@angular/material';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { finalize } from 'rxjs/operators';
 import { MessageBoxMode } from '../messagebox/messagebox.component';
 import { HiveEntryDto, TreeEntryType } from '../models/gen.dtos';
@@ -31,7 +31,7 @@ export class HiveComponent implements OnInit {
   public paths: { [key: string]: HiveEntryDto[] } = {};
   public entries: HiveEntryDto[];
 
-  @ViewChild('hivetable') hivetable: CdkTable<any>;
+  @ViewChild('hivetable', { static: true }) hivetable: CdkTable<any>;
 
   constructor(
     private hiveService: HiveService,

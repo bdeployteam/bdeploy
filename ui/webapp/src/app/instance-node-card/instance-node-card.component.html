@@ -6,7 +6,7 @@
       <mat-icon class='instance-node-avatar' *ngIf='!node.status'>device_unknown</mat-icon>
     </div>
     <mat-card-title>{{ node.nodeName }}</mat-card-title>
-    <mat-card-subtitle class='node-card-subtitle'>Target Node</mat-card-subtitle>
+    <mat-card-subtitle class='node-card-subtitle'>Published server applications</mat-card-subtitle>
     <span class="fill-space"></span>
 
     <mat-icon class='instance-node-online' *ngIf='node.status' [matTooltip]="node.statusHint">flight_takeoff</mat-icon>
@@ -19,51 +19,36 @@
       <mat-icon class='instance-node-avatar'>computer</mat-icon>
     </div>
     <mat-card-title>Client Applications</mat-card-title>
-    <mat-card-subtitle class='node-card-subtitle'>Published Client Applications</mat-card-subtitle>
+    <mat-card-subtitle class='node-card-subtitle'>Published client applications</mat-card-subtitle>
   </mat-card-header>
 
   <mat-card-content class='node-card-content'>
-    <!-- placeholder must be first element -->
-    <div #appDropZone class="new-flex-container">
-      <div cdkDropList [cdkDropListEnterPredicate]="enterDropList" (cdkDropListDropped)="dropListDropped($event)" (cdkDropListExited)="dropListExited($event)" #placeholder>
-        <div #appDropPlaceholder>
-          <mat-card *ngIf="manageApplications" class="process-card init-drop-card">
-            <span *ngIf="!isClientApplicationsNode()">Drop Application here</span>
-            <span *ngIf="isClientApplicationsNode()">Drop Client Application here</span>
-          </mat-card>
-        </div>
+    <div class="new-flex-container" #dragulaContainer dragula="APPS" [dragulaModel]="nodeApps" [ngClass]="getDragulaNodeClasses()">
+      <div *ngIf='!hasApps() && manageApplications'>
+        <mat-card class="process-card init-drop-card">
+          <span *ngIf="!isClientApplicationsNode()">Drop server application here</span>
+          <span *ngIf="isClientApplicationsNode()">Drop client application here</span>
+        </mat-card>
       </div>
-      <div *ngIf='needEmptyHint()' class='empty-hint'>
-        <span *ngIf="!isClientApplicationsNode()">There are currently no applications assigned to this node.</span>
+      <div *ngIf='!hasApps() && !manageApplications' class='empty-hint'>
+        <span *ngIf="!isClientApplicationsNode()">There are currently no server applications assigned to this node.</span>
         <span *ngIf="isClientApplicationsNode()">There are currently no client applications assigned to this node.</span>
-        </div>
-      <ng-container *ngIf="node.nodeConfiguration">
-        <div
-          cdkDropList
-          [cdkDropListEnterPredicate]="enterDropList"
-          (cdkDropListExited)="dropListExited($event)"
-          (cdkDropListDropped)="dropListDropped($event)"
-          *ngFor="let process of node.nodeConfiguration.applications">
-          <app-application-configuration-card #card
-            class="process-card"
-            [appConfig]="process"
-            [instanceVersion]="processConfig.version"
-            [activatedTag]="activatedInstanceTag"
-            [productMissing]="productMissing"
-            cdkDrag
-            [cdkDragDisabled]="isDragDisabled(process)"
-            [cdkDragData]="getInterDragData(card)"
-            (cdkDragStarted)="dragStarted.next($event)"
-            (removeEvent)="removeProcess(process)"
-            (editEvent)="fireEditAppConfigEvent(process)"
-            (click)="onSelect(process)"
-            (downloadClickAndStartEvent)="downloadClickAndStartEvent.next($event)"
-            (downloadInstallerEvent)="downloadInstallerEvent.next($event)"
-            [isReadonly]="isReadonly"
-            [isClient]="isClientApplicationsNode()">
-          </app-application-configuration-card>
-        </div>
-      </ng-container>
+      </div>
+      <app-application-configuration-card *ngFor="let process of nodeApps"
+        class="process-card"
+        [ngClass]="getDragulaAppClasses(process)"
+        [appConfig]="process"
+        [instanceVersion]="processConfig.version"
+        [activatedTag]="activatedInstanceTag"
+        [productMissing]="productMissing"
+        (removeEvent)="removeProcess(process)"
+        (editEvent)="fireEditAppConfigEvent(process)"
+        (click)="onSelect(process)"
+        (downloadClickAndStartEvent)="downloadClickAndStartEvent.next($event)"
+        (downloadInstallerEvent)="downloadInstallerEvent.next($event)"
+        [isReadonly]="isReadonly"
+        [isClient]="isClientApplicationsNode()">
+      </app-application-configuration-card>
     </div>
 
     <div *ngIf='!isClientApplicationsNode() && node.foreignNodeConfigurations && node.foreignNodeConfigurations.length > 0'>

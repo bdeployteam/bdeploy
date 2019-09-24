@@ -1,11 +1,12 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { cloneDeep, isEqual } from 'lodash';
+import { cloneDeep, intersection, isEqual } from 'lodash';
 import { Observable } from 'rxjs';
 import { UnknownParameter } from '../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_COMMAND_CONFIGURATION, EMPTY_PARAMETER_CONFIGURATION } from '../models/consts';
 import { ApplicationConfiguration, ApplicationDescriptor, ApplicationDto, ApplicationType, InstanceNodeConfigurationDto, ManifestKey, ParameterConfiguration, ParameterDescriptor, ParameterType } from '../models/gen.dtos';
 import { ProcessConfigDto } from '../models/process.model';
+import { findEntry } from '../utils/object.utils';
 import { suppressGlobalErrorHandling } from '../utils/server.utils';
 import { ConfigService } from './config.service';
 import { InstanceGroupService } from './instance-group.service';
@@ -507,7 +508,9 @@ export class ApplicationService {
       // Calculate dirty state of existing ones
       for (const appCfg of updated) {
         const clonedAppCfg = clonedNodeConfig.applications.find(ca => ca.uid === appCfg.uid);
-        const appDirty = !isEqual(appCfg, clonedAppCfg);
+        const oldPosition = clonedApps.findIndex(b => appCfg.uid === b.uid);
+        const currentPosition = currentApps.findIndex(b => appCfg.uid === b.uid);
+        const appDirty = !isEqual(appCfg, clonedAppCfg) || (oldPosition !== currentPosition);
         this.dirtyStates.set(appCfg.uid, appDirty);
         if (appDirty) {
           this.log.debug('Application ' + appCfg.uid + ' has local changes. Setting dirty flag.');
@@ -708,5 +711,36 @@ export class ApplicationService {
       unknownAppParams.push(new UnknownParameter(oldDefinition, config));
     }
     this.setUnknownParameters(appUid, unknownAppParams);
+  }
+
+   /**
+   * Returns whether or not the given element can be dragged to the given target.
+   */
+  isAppCompatibleWithNode(el: Element, target: Element): boolean {
+    // Prevent that nodes are dragged back to the sidebar
+    if (target.className.includes('dragula-nodeType-template')) {
+      return false;
+    }
+
+    // Type of application (client, server) must match the type of the target
+    const elementType = findEntry(el.className.split(' '), 'dragula-appType-');
+    const containerType = findEntry(target.className.split(' '), 'dragula-nodeType-');
+    if (!isEqual(elementType, containerType)) {
+      return false;
+    }
+
+    // Element OS can contain multiple entries in case we drag a template
+    // We only check that the OS is matching in case of a server node
+    if (target.className.includes('dragula-nodeType-client')) {
+      return true;
+    }
+    const elementOs = findEntry(el.className.split(' '), 'dragula-appOs-');
+    const containerOs = findEntry(target.className.split(' '), 'dragula-nodeOs-');
+    if (intersection(elementOs, containerOs).length === 0) {
+      return false;
+    }
+
+    // App is supported by the target container
+    return true;
   }
 }

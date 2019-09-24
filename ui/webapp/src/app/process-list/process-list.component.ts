@@ -1,5 +1,8 @@
 import { Component, Inject, OnInit, ViewChild } from '@angular/core';
-import { MatPaginator, MatSort, MatTable, MatTableDataSource, MAT_BOTTOM_SHEET_DATA } from '@angular/material';
+import { MAT_BOTTOM_SHEET_DATA } from '@angular/material/bottom-sheet';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
+import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { ApplicationConfiguration, OperatingSystem, ProcessDetailDto, ProcessStatusDto } from '../models/gen.dtos';
 import { getAppOs } from '../utils/manifest.utils';
 
@@ -9,13 +12,13 @@ import { getAppOs } from '../utils/manifest.utils';
   styleUrls: ['./process-list.component.css'],
 })
 export class ProcessListComponent implements OnInit {
-  @ViewChild(MatTable)
+  @ViewChild(MatTable, { static: true })
   public table: MatTable<any>;
 
-  @ViewChild(MatPaginator)
+  @ViewChild(MatPaginator, { static: false })
   paginator: MatPaginator;
 
-  @ViewChild(MatSort)
+  @ViewChild(MatSort, { static: true })
   sort: MatSort;
 
   public isRunning = false;

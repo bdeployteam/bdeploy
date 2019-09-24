@@ -1,6 +1,7 @@
 import { Component, Inject, OnInit, ViewChild } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatDialogRef, MatTable, MatTableDataSource, MAT_DIALOG_DATA } from '@angular/material';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { cloneDeep, isEqual } from 'lodash';
 import { CustomParameter, GroupNames, NamedParameter } from '../models/application.model';
 import { ParameterValidators } from '../validators/parameter.validators';
@@ -40,7 +41,7 @@ export class ParameterRow {
   styleUrls: ['./application-edit-manual.component.css'],
 })
 export class ApplicationEditManualComponent implements OnInit {
-  @ViewChild(MatTable)
+  @ViewChild(MatTable, { static: true })
   public table: MatTable<ParameterRow>;
   public columnsToDisplay = ['uid', 'predecessor', 'actions'];
   public dataSource: MatTableDataSource<ParameterRow>;

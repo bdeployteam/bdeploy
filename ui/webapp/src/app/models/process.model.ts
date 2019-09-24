@@ -2,7 +2,7 @@ import { cloneDeep } from 'lodash';
 import { getAppKeyName } from '../utils/manifest.utils';
 import { ApplicationGroup } from './application.model';
 import { CLIENT_NODE_NAME, EMPTY_INSTANCE_NODE_CONFIGURATION, EMPTY_INSTANCE_NODE_CONFIGURATION_DTO } from './consts';
-import { ApplicationConfiguration, ApplicationDto, InstanceConfiguration, InstanceNodeConfigurationDto, InstanceNodeConfigurationListDto, InstanceVersionDto } from './gen.dtos';
+import { ApplicationConfiguration, ApplicationDto, ApplicationType, InstanceConfiguration, InstanceNodeConfigurationDto, InstanceNodeConfigurationListDto, InstanceVersionDto } from './gen.dtos';
 
 /**
  * Context information for EventEmitter
@@ -45,8 +45,11 @@ export class ProcessConfigDto {
   /** Original state of the instance */
   public clonedInstance: InstanceConfiguration;
 
-  /** Applications grouped according to their type */
-  public productApplications: ApplicationGroup[] = [];
+  /** Client applications grouped according to their type */
+  public clientApps: ApplicationGroup[] = [];
+
+  /** Server applications grouped according to their type */
+  public serverApps: ApplicationGroup[] = [];
 
   constructor(version: InstanceVersionDto, readonly: boolean) {
     this.version = cloneDeep(version);
@@ -77,7 +80,8 @@ export class ProcessConfigDto {
    * Sets the applications belonging to this configuration
    */
   public setApplications(apps: ApplicationDto[]) {
-    this.productApplications = this.groupApplications(apps);
+    this.serverApps = this.groupApplications(apps, ApplicationType.SERVER);
+    this.clientApps = this.groupApplications(apps, ApplicationType.CLIENT);
   }
 
   /**
@@ -109,9 +113,12 @@ export class ProcessConfigDto {
     return configs;
   }
 
-  groupApplications(apps: ApplicationDto[]): ApplicationGroup[] {
+  groupApplications(apps: ApplicationDto[], type: ApplicationType): ApplicationGroup[] {
     const groups = new Map<String, ApplicationGroup>();
     for (const app of apps) {
+      if (app.descriptor.type !== type) {
+        continue;
+      }
       const name = getAppKeyName(app.key);
       let group = groups.get(name);
       if (group == null) {
@@ -129,11 +136,11 @@ export class ProcessConfigDto {
   }
 
   hasClientApplications(): boolean {
-    return this.productApplications.filter(group => group.isClientApp()).length > 0;
+    return this.clientApps.length > 0;
   }
 
   hasServerApplications(): boolean {
-    return this.productApplications.filter(group => group.isServerApp()).length > 0;
+    return this.serverApps.length > 0;
   }
 
   initClientApplicationNode(): void {

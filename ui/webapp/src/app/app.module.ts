@@ -1,4 +1,3 @@
-import { DragDropModule } from '@angular/cdk/drag-drop';
 import { LayoutModule } from '@angular/cdk/layout';
 import { HttpClientModule } from '@angular/common/http';
 import { APP_INITIALIZER, ErrorHandler, NgModule } from '@angular/core';
@@ -10,6 +9,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LoadingBarHttpClientModule } from '@ngx-loading-bar/http-client';
 import { LoadingBarRouterModule } from '@ngx-loading-bar/router';
 import { AceEditorModule } from 'ng2-ace-editor';
+import { DragulaModule } from 'ng2-dragula';
 import { CookieService } from 'ngx-cookie-service';
 import { DeviceDetectorModule } from 'ngx-device-detector';
 import { AppRoutingModule } from './app-routing.module';
@@ -144,7 +144,6 @@ export function loadAppConfig(cfgService: ConfigService) {
     BrowserModule,
     BrowserAnimationsModule,
     AppRoutingModule,
-    DragDropModule,
     MatButtonModule,
     LayoutModule,
     MatToolbarModule,
@@ -183,7 +182,8 @@ export function loadAppConfig(cfgService: ConfigService) {
     MatSortModule,
     AceEditorModule,
     MatTabsModule,
-    DeviceDetectorModule.forRoot()
+    DeviceDetectorModule.forRoot(),
+    DragulaModule.forRoot()
   ],
   providers: [
     ConfigService,

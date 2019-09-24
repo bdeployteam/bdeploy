@@ -1,7 +1,8 @@
 import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MediaChange, MediaObserver } from '@angular/flex-layout';
-import { MatDialog, MatDialogConfig, MatDrawer } from '@angular/material';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatDrawer } from '@angular/material/sidenav';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FileUploadComponent } from '../file-upload/file-upload.component';
@@ -18,7 +19,7 @@ export class SoftwareRepositoryComponent implements OnInit, OnDestroy {
 
   private log: Logger = this.loggingService.getLogger('SoftwareRepositoryComponent');
 
-  @ViewChild('appsidenav')
+  @ViewChild('appsidenav', { static: true })
   sidenav: MatDrawer;
 
   public softwareRepositoryName: string = this.route.snapshot.paramMap.get('name');

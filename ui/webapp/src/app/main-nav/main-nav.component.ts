@@ -1,5 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { MatSelectChange, MatToolbar } from '@angular/material';
+import { MatSelectChange } from '@angular/material/select';
+import { MatToolbar } from '@angular/material/toolbar';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -17,7 +18,7 @@ import { ThemeService } from '../services/theme.service';
 })
 export class MainNavComponent implements OnInit {
 
-  @ViewChild('mainToolbar') mainTb: MatToolbar;
+  @ViewChild('mainToolbar', { static: true }) mainTb: MatToolbar;
 
   isAuth$: Observable<boolean> = this.authService.getTokenSubject().pipe(map(s => s !== null));
 

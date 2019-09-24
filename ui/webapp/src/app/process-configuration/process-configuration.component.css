@@ -176,3 +176,7 @@
   margin: 15px;
   border-radius: 5px;
 }
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}

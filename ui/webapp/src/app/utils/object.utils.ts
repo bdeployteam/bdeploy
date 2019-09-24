@@ -35,3 +35,24 @@ function changes(object: any, base: any) {
     }
   });
 }
+
+/**
+ * Finds a string starting with a given prefix in the given list of strings.
+ * All matching values without the prefix are returned.
+ */
+export function findEntry(input: string[], prefix: string) {
+  const result: string[] = [];
+  for (const entry of input) {
+    if (entry.startsWith(prefix)) {
+      result.push(entry.substr(prefix.length));
+    }
+  }
+  return result;
+}
+
+/**
+ * Returns a new array containing elements that are present in both arrays.
+ */
+export function intersection(a: any[], b: any[]) {
+  return a.filter(value => b.includes(value));
+}

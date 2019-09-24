@@ -1,7 +1,8 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, Input, OnChanges, OnDestroy, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
-import { MatBottomSheet, MatBottomSheetRef, MatDialog } from '@angular/material';
+import { MatBottomSheet, MatBottomSheetRef } from '@angular/material/bottom-sheet';
+import { MatDialog } from '@angular/material/dialog';
 import { format } from 'date-fns';
 import { Observable, Subscription } from 'rxjs';
 import { finalize, map, mergeMap } from 'rxjs/operators';
@@ -219,18 +220,18 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   getStartTime() {
-    return format(new Date(this.status.processDetails.startTime), 'DD.MM.YYYY HH:mm');
+    return format(new Date(this.status.processDetails.startTime), 'dd.MM.yyyy HH:mm');
   }
 
   getStopTime() {
     if (this.status.stopTime === -1) {
       return '-';
     }
-    return format(new Date(this.status.stopTime), 'DD.MM.YYYY HH:mm');
+    return format(new Date(this.status.stopTime), 'dd.MM.yyyy HH:mm');
   }
 
   getRestartTime() {
-    return format(new Date(this.status.recoverAt), 'DD.MM.YYYY HH:mm');
+    return format(new Date(this.status.recoverAt), 'dd.MM.yyyy HH:mm');
   }
 
   private calculateUptimeString() {

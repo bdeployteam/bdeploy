@@ -1,7 +1,8 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, Input, OnInit, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
-import { MatButton, MatTable, MatTableDataSource } from '@angular/material';
+import { MatButton } from '@angular/material/button';
+import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { format } from 'date-fns';
 import { finalize } from 'rxjs/operators';
 import { InstanceManifestHistoryRecord, InstanceVersionDto } from '../models/gen.dtos';
@@ -13,7 +14,7 @@ import { InstanceService } from '../services/instance.service';
   styleUrls: ['./instance-version-history-card.component.css']
 })
 export class InstanceVersionHistoryCardComponent implements OnInit {
-  @ViewChild(MatTable)
+  @ViewChild(MatTable, { static: false })
   public table: MatTable<any>;
 
   public displayedColumns = ['action', 'user', 'timestamp' /* FUTURE, 'comment' */];
@@ -44,7 +45,7 @@ export class InstanceVersionHistoryCardComponent implements OnInit {
   }
 
   formatTime(time: number): string {
-    return format(new Date(time), 'DD.MM.YYYY HH:mm:ss');
+    return format(new Date(time), 'dd.MM.yyyy HH:mm:ss');
   }
 
   openOverlay(relative: MatButton, template: TemplateRef<any>) {

@@ -1,11 +1,12 @@
-import { CdkDrag, CdkDragDrop, CdkDragStart, CdkDropList } from '@angular/cdk/drag-drop';
 import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { MatDialog, MatDialogConfig, MatSlideToggle } from '@angular/material';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { ActivatedRoute, Params } from '@angular/router';
 import { cloneDeep, isEqual } from 'lodash';
 import { EventSourcePolyfill } from 'ng-event-source';
-import { BehaviorSubject, forkJoin, Observable, of, Subscription } from 'rxjs';
+import { DragulaService } from 'ng2-dragula';
+import { forkJoin, Observable, of, Subscription } from 'rxjs';
 import { catchError, finalize, mergeMap } from 'rxjs/operators';
 import { ApplicationEditComponent } from '../application-edit/application-edit.component';
 import { FileUploadComponent } from '../file-upload/file-upload.component';
@@ -48,10 +49,10 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   public static readonly DROPLIST_APPLICATIONS = 'APPLICATIONS';
   private readonly log: Logger = this.loggingService.getLogger('ProcessConfigurationComponent');
 
-  @ViewChild(ApplicationEditComponent)
+  @ViewChild(ApplicationEditComponent, { static: false })
   private editComponent: ApplicationEditComponent;
 
-  @ViewChild(ProcessDetailsComponent)
+  @ViewChild(ProcessDetailsComponent, { static: false })
   private processDetails: ProcessDetailsComponent;
 
   public groupParam: string;
@@ -63,13 +64,9 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   public selectedProcess: ApplicationConfiguration;
 
   public sidenavMode: SidenavMode = SidenavMode.Versions;
-  private subscription: Subscription;
 
   public deploymentState: InstanceStateRecord = EMPTY_DEPLOYMENT_STATE;
   public productTags: ProductDto[];
-
-  public dragStop = new BehaviorSubject<any>(null);
-  public dragStart = new BehaviorSubject<any>(null);
 
   public editMode = false;
   public editAppConfigContext: EditAppConfigContext;
@@ -90,8 +87,8 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   public autoRefresh = false;
   public autoRefreshHandle: any;
   public nextAutoRefreshSec: number;
-  public processSubscription: Subscription;
 
+  private subscriptions = new Subscription();
   private updateEvents: EventSourcePolyfill;
   private lastStateReload = 0;
 
@@ -110,31 +107,65 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     private clientApps: LauncherService,
     private eventService: RemoteEventsService,
     private systemService: SystemService,
+    private dragulaService: DragulaService,
   ) {}
 
   ngOnInit() {
-    this.subscription = this.route.params.subscribe((p: Params) => {
-      this.groupParam = p['group'];
-      this.uuidParam = p['uuid'];
-      this.loadVersions(false);
-      this.enableAutoRefresh();
-      this.doTriggerProcessStatusUpdate();
+    this.subscriptions = new Subscription();
+    this.subscriptions.add(
+      this.route.params.subscribe((p: Params) => {
+        this.groupParam = p['group'];
+        this.uuidParam = p['uuid'];
+        this.loadVersions(false);
+        this.enableAutoRefresh();
+        this.doTriggerProcessStatusUpdate();
 
-      this.updateEvents = this.eventService.getUpdateEventSource();
-      this.updateEvents.onerror = err => {
-        this.systemService.backendUnreachable();
-      };
-      this.updateEvents.addEventListener(this.uuidParam, e => this.onRemoteInstanceUpdate(e as MessageEvent));
+        this.updateEvents = this.eventService.getUpdateEventSource();
+        this.updateEvents.onerror = err => {
+          this.systemService.backendUnreachable();
+        };
+        this.updateEvents.addEventListener(this.uuidParam, e => this.onRemoteInstanceUpdate(e as MessageEvent));
+      }),
+    );
+    this.subscriptions.add(this.processService.subscribe(() => this.onProcessStatusChanged()));
+
+    this.dragulaService.createGroup('APPS', {
+      // Prevent re-ordering of elements in the sidebar
+      copySortSource: false,
+
+      // Append at the end
+      direction: 'horizontal',
+
+      // Prevent moving until we are in edit mode
+      moves: () => {
+        return this.isSidenavApplications();
+      },
+
+      // Create a copy of the elements in the sidebar
+      copy: (el: Element, container: Element) => {
+        return container.className.includes('dragula-nodeType-template');
+      },
+
+      // Just clone the element when needed
+      copyItem: (item: any) => {
+        return cloneDeep(item);
+      },
+
+      // Limit which elements can be dragged to which nodes
+      accepts: (el: Element, target: Element) => {
+        return this.applicationService.isAppCompatibleWithNode(el, target);
+      },
     });
-    this.processSubscription = this.processService.subscribe(() => this.onProcessStatusChanged());
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.dragulaService.destroy('APPS');
+    this.subscriptions.unsubscribe();
+
     if (this.autoRefreshHandle) {
       clearInterval(this.autoRefreshHandle);
     }
-    this.processSubscription.unsubscribe();
+
     if (this.updateEvents) {
       this.updateEvents.close();
       this.updateEvents = null;
@@ -315,10 +346,6 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     };
   }
 
-  public getDropListData(): any {
-    return ProcessConfigurationComponent.DROPLIST_APPLICATIONS;
-  }
-
   canDeactivate(): Observable<boolean> {
     if (!this.isDirty()) {
       return of(true);
@@ -403,11 +430,6 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       });
   }
 
-  /** Predicate called when entering the drop zone */
-  enterDropList = (drag: CdkDrag, drop: CdkDropList) => {
-    return false; // Do not allow dragging apps from nodes to the sidebar
-  }
-
   public isProductAvailable(config: ProcessConfigDto): boolean {
     return this.productTags.find(p => isEqual(p.key, config.version.product)) !== undefined;
   }
@@ -460,20 +482,6 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
     // User clicked at any other node -> just load it
     this.loadInstance(config);
-  }
-
-  /**
-   * Called when the user drops an application in the sidebar.
-   */
-  public drop(event: CdkDragDrop<any>): void {
-    this.dragStop.next(event);
-  }
-
-  /**
-   * Called when the user starts dragging an application.
-   */
-  public dragStarted(event: CdkDragStart<ApplicationGroup>): void {
-    this.dragStart.next(event);
   }
 
   /**
@@ -920,5 +928,21 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
   exportInstanceVersion(key: ManifestKey) {
     this.downloadService.download(this.instanceService.getExportUrl(this.groupParam, this.uuidParam, key.tag));
+  }
+
+  /**
+   * Returns the drag&drop specific classes assigned to the template.
+   */
+  getDragulaClasses(group: ApplicationGroup): string[] {
+    const classes: string[] = [];
+
+    // Append type of template
+    classes.push('dragula-appType-' + group.appType.toLowerCase());
+
+    // Append OS of template
+    for (const groupOs of group.operatingSystems) {
+      classes.push('dragula-appOs-' + groupOs.toLowerCase());
+    }
+    return classes;
   }
 }

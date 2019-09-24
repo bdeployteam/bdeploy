@@ -19,7 +19,7 @@ export class FileViewerComponent implements OnInit, OnDestroy {
 
   @Output() closeEvent = new EventEmitter<void>();
 
-  @ViewChild('contentDiv') private contentDiv: ElementRef;
+  @ViewChild('contentDiv', { static: true }) private contentDiv: ElementRef;
 
   content: String = '';
 

@@ -91,7 +91,7 @@
   </mat-toolbar>
 
   <!-- Nodes overview and sidebar -->
-  <div class="drawer-container" cdkDropListGroup *ngIf="!editMode">
+  <div class="drawer-container" *ngIf="!editMode">
     <div class="nodes-container">
       <ng-container *ngIf="!loading">
         <div *ngIf="isRunningOutOfSync" class="app-process-out-of-sync-text">
@@ -106,8 +106,6 @@
             [node]="node"
             [processConfig]="selectedConfig"
             [productMissing]="!isProductAvailable(selectedConfig)"
-            [dragStopped]="dragStop"
-            [dragStarted]="dragStart"
             [manageApplications]="isSidenavApplications()"
             [isReadonly]="selectedConfig.readonly"
             (editAppConfigEvent)="onEditApp(node.nodeConfiguration, $event)"
@@ -138,45 +136,27 @@
       </mat-toolbar>
       <div class="side-nav-container-content">
         <div class='card-list-container' *ngIf="isSidenavApplications()">
-          <div *ngIf="hasServerApplications()"
-            cdkDropList
-            [cdkDropListEnterPredicate]="enterDropList"
-            [cdkDropListData]="getDropListData()"
-            (cdkDropListDropped)="drop($event)">
+          <div *ngIf="hasServerApplications()">
             <div class='application-caption'>
               <mat-icon class="icon">storage</mat-icon>
               <span class="application-caption-text">Server Applications</span>
             </div>
-            <ng-container *ngFor='let group of selectedConfig.productApplications'>
-              <app-application-descriptor-card
-                *ngIf="group.isServerApp()"
-                [applicationGroup]="group"
-                class="app-card"
-                cdkDrag
-                (cdkDragStarted)="dragStarted($event)"
-                [cdkDragData]="group">
-              </app-application-descriptor-card>
-            </ng-container>
+            <div class="dragula-container dragula-nodeType-template" dragula="APPS" [dragulaModel]="selectedConfig.serverApps">
+              <ng-container *ngFor='let group of selectedConfig.serverApps'>
+                <app-application-descriptor-card class="app-card" [ngClass]="getDragulaClasses(group)" [applicationGroup]="group"> </app-application-descriptor-card>
+              </ng-container>
+            </div>
           </div>
-          <div *ngIf="hasClientApplications()"
-            cdkDropList
-            [cdkDropListEnterPredicate]="enterDropList"
-            [cdkDropListData]="getDropListData()"
-            (cdkDropListDropped)="drop($event)">
+          <div *ngIf="hasClientApplications()">
             <div class='application-caption'>
               <mat-icon class="icon">computer</mat-icon>
               <span class="application-caption-text">Client Applications</span>
             </div>
-            <ng-container *ngFor='let group of selectedConfig.productApplications'>
-              <app-application-descriptor-card
-                *ngIf="group.isClientApp()"
-                [applicationGroup]="group"
-                class="app-card"
-                cdkDrag
-                (cdkDragStarted)="dragStarted($event)"
-                [cdkDragData]="group">
-              </app-application-descriptor-card>
-            </ng-container>
+            <div class="dragula-container dragula-nodeType-template" dragula="APPS" [dragulaModel]="selectedConfig.clientApps">
+              <ng-container *ngFor='let group of selectedConfig.clientApps'>
+                <app-application-descriptor-card class="app-card" [ngClass]="getDragulaClasses(group)" [applicationGroup]="group"> </app-application-descriptor-card>
+              </ng-container>
+            </div>
           </div>
         </div>
         <div *ngIf="isSidenavVersions()">

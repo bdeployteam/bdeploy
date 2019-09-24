@@ -1,5 +1,6 @@
 import { Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { MatDialogRef, MatTable, MAT_DIALOG_DATA } from '@angular/material';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatTable } from '@angular/material/table';
 import { EventSourcePolyfill } from 'ng-event-source';
 import { forkJoin } from 'rxjs';
 import { MessageBoxMode } from '../messagebox/messagebox.component';
@@ -23,10 +24,10 @@ export interface UploadData {
   styleUrls: ['./file-upload.component.css']
 })
 export class FileUploadComponent implements OnInit, OnDestroy {
-  @ViewChild('file')
+  @ViewChild('file', { static: true })
   public fileRef: ElementRef;
 
-  @ViewChild(MatTable)
+  @ViewChild(MatTable, { static: true })
   public table: MatTable<any>;
   public columnsToDisplay = ['status', 'fileName', 'progress', 'action'];
 
