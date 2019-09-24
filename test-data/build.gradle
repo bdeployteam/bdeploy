@@ -281,7 +281,7 @@ void setupBinServerTasks(String version) {
                 }
 
                 if(!rqFound) {
-                    def rq = (check =~ /Minion signalled update request/)
+                    def rq = (check =~ "Minion signalled update request")
                     if(rq.size() == 1) {
                         println "Server received update request"
                         rqFound = true;
@@ -289,8 +289,9 @@ void setupBinServerTasks(String version) {
                 }
 
                 if(rqFound) {
-                    def match = (check =~ /Started listener bound to/)
-                    if(match.size() == 2) {
+                    def search = "Started Version " + project.version.replaceAll('SNAPSHOT', rootProject.buildDate)
+                    def match = (check =~ search)
+                    if(match.find()) {
                         println "Server successfully restarted after update"
                         ok = true;
                         break;

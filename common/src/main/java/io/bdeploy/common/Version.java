@@ -53,8 +53,9 @@ public class Version implements Comparable<Version> {
 
     @Override
     public int compareTo(Version o) {
+        // nulls last: this means that a release version is newer than a snapshot.
         return ComparisonChain.start().compare(major, o.major).compare(minor, o.minor).compare(micro, o.micro)
-                .compare(qualifier, o.qualifier, Ordering.natural().nullsFirst()).result();
+                .compare(qualifier, o.qualifier, Ordering.natural().nullsLast()).result();
     }
 
     @Override

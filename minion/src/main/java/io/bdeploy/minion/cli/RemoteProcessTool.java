@@ -60,7 +60,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
             helpAndFailIfMissing(null, "Missing --start or --stop or --status");
         }
 
-        MasterRootResource proxy = ResourceProvider.getResource(svc, MasterRootResource.class);
+        MasterRootResource proxy = ResourceProvider.getResource(svc, MasterRootResource.class, null);
         MasterNamedResource master = proxy.getNamedMaster(config.instanceGroup());
         if (config.start() || config.stop()) {
             if (config.start()) {

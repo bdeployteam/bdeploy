@@ -1,11 +1,9 @@
-package io.bdeploy.ui.dto;
+package io.bdeploy.interfaces.configuration.instance;
 
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 
 /**
  * Allows updating of {@link InstanceConfiguration}

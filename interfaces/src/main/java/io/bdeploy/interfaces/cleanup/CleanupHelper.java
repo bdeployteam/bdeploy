@@ -50,7 +50,7 @@ public class CleanupHelper {
         for (Map.Entry<String, RemoteService> slave : minions.entrySet()) {
             log.info("Cleaning on {}, using {} anchors.", slave.getKey(), allUniqueKeysToKeep.size());
 
-            SlaveCleanupResource scr = ResourceProvider.getResource(slave.getValue(), SlaveCleanupResource.class);
+            SlaveCleanupResource scr = ResourceProvider.getResource(slave.getValue(), SlaveCleanupResource.class, null);
             try {
                 List<CleanupAction> actions = scr.cleanup(allUniqueKeysToKeep, immediate);
                 if (!immediate) {
@@ -95,7 +95,7 @@ public class CleanupHelper {
 
             log.info("Performing cleanup group {} on {}", group.name, group.minion);
 
-            SlaveCleanupResource scr = ResourceProvider.getResource(svc, SlaveCleanupResource.class);
+            SlaveCleanupResource scr = ResourceProvider.getResource(svc, SlaveCleanupResource.class, null);
             try {
                 scr.perform(group.actions);
             } catch (Exception e) {

@@ -63,7 +63,7 @@ public class RemoteDependencyFetcher implements DependencyFetcher {
 
         // 3. if not all dependencies have been found, fetch list of software repos from master
         if (!remaining.isEmpty()) {
-            MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class);
+            MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class, null);
 
             // 4. check every software repo for the required dependencies as long as something is missing.
             for (SoftwareRepositoryConfiguration repo : root.getSoftwareRepositories()) {

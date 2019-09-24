@@ -80,7 +80,7 @@ public class MinionDeployTest {
         assertFalse(master.getNamedMaster("demo").getInstanceState(uuid).installedTags.isEmpty());
 
         // test uninstall, re-install once
-        master.getNamedMaster("demo").remove(instance);
+        master.getNamedMaster("demo").uninstall(instance);
         assertTrue(master.getNamedMaster("demo").getInstanceState(uuid).installedTags.isEmpty());
         master.getNamedMaster("demo").install(instance);
         assertFalse(master.getNamedMaster("demo").getInstanceState(uuid).installedTags.isEmpty());

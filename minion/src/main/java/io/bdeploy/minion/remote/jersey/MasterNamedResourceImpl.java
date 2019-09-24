@@ -2,7 +2,11 @@ package io.bdeploy.minion.remote.jersey;
 
 import static io.bdeploy.common.util.RuntimeAssert.assertNotNull;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -17,7 +21,9 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.SecurityContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,19 +31,29 @@ import org.slf4j.LoggerFactory;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.bhive.op.ExportTreeOperation;
+import io.bdeploy.bhive.op.ImportTreeOperation;
 import io.bdeploy.bhive.op.ManifestExistsOperation;
+import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestNextIdOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
 import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
+import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
+import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
+import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfigurationDto;
+import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
@@ -50,6 +66,7 @@ import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.dependencies.LocalDependencyFetcher;
+import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
 import io.bdeploy.interfaces.manifest.state.InstanceState;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
@@ -57,8 +74,11 @@ import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.interfaces.remote.SlaveDeploymentResource;
 import io.bdeploy.interfaces.remote.SlaveProcessResource;
 import io.bdeploy.jersey.JerseyPathWriter.DeleteAfterWrite;
+import io.bdeploy.jersey.JerseyWriteLockService.LockingResource;
+import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
 import io.bdeploy.minion.MinionRoot;
 
+@LockingResource
 public class MasterNamedResourceImpl implements MasterNamedResource {
 
     private static final Logger log = LoggerFactory.getLogger(MasterNamedResourceImpl.class);
@@ -66,6 +86,9 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     private final BHive hive;
     private final ActivityReporter reporter;
     private final MinionRoot root;
+
+    @Context
+    private SecurityContext context;
 
     public MasterNamedResourceImpl(MinionRoot root, BHive hive, ActivityReporter reporter) {
         this.root = root;
@@ -130,7 +153,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
             RemoteService remote = root.getMinions().get(minion);
             try {
-                SlaveDeploymentResource sdr = ResourceProvider.getResource(remote, SlaveDeploymentResource.class);
+                SlaveDeploymentResource sdr = ResourceProvider.getResource(remote, SlaveDeploymentResource.class, context);
                 InstanceStateRecord instanceState = sdr.getInstanceState(instance);
                 available.put(minion, instanceState == null ? Collections.emptyList() : instanceState.installedTags);
             } catch (Exception e) {
@@ -189,7 +212,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 // make sure the minion has the manifest.
                 hive.execute(new PushOperation().setRemote(minion).addManifest(toDeploy));
 
-                SlaveDeploymentResource deployment = ResourceProvider.getResource(minion, SlaveDeploymentResource.class);
+                SlaveDeploymentResource deployment = ResourceProvider.getResource(minion, SlaveDeploymentResource.class, context);
                 try {
                     deployment.install(toDeploy);
                 } catch (Exception e) {
@@ -201,6 +224,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         }
 
         getState(imf, hive).install(key.getTag());
+        imf.getHistory(hive).record(Action.INSTALL, context.getUserPrincipal().getName(), null);
     }
 
     @Override
@@ -211,6 +235,13 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             throw new WebApplicationException(
                     "Given manifest for UUID " + imf.getConfiguration().uuid + " is not fully deployed: " + key,
                     Status.NOT_FOUND);
+        }
+
+        // record de-activation
+        String activeTag = imf.getState(hive).read().activeTag;
+        if (activeTag != null) {
+            InstanceManifest.load(hive, imf.getConfiguration().uuid, activeTag).getHistory(hive).record(Action.DEACTIVATE,
+                    context.getUserPrincipal().getName(), null);
         }
 
         SortedMap<String, Key> fragments = imf.getInstanceNodeManifests();
@@ -226,7 +257,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 assertNotNull(minion, "Cannot lookup minion on master: " + minionName);
                 assertNotNull(toDeploy, "Cannot lookup minion manifest on master: " + toDeploy);
 
-                SlaveDeploymentResource deployment = ResourceProvider.getResource(minion, SlaveDeploymentResource.class);
+                SlaveDeploymentResource deployment = ResourceProvider.getResource(minion, SlaveDeploymentResource.class, context);
                 try {
                     deployment.activate(toDeploy);
                 } catch (Exception e) {
@@ -238,6 +269,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         }
 
         getState(imf, hive).activate(key.getTag());
+        imf.getHistory(hive).record(Action.ACTIVATE, context.getUserPrincipal().getName(), null);
     }
 
     /**
@@ -266,7 +298,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
             InstanceStateRecord deployments;
             try {
-                SlaveDeploymentResource slave = ResourceProvider.getResource(minion, SlaveDeploymentResource.class);
+                SlaveDeploymentResource slave = ResourceProvider.getResource(minion, SlaveDeploymentResource.class, context);
                 deployments = slave.getInstanceState(instanceId);
             } catch (Exception e) {
                 throw new IllegalStateException("Node offline while checking state: " + minionName);
@@ -289,7 +321,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
-    public void remove(Key key) {
+    public void uninstall(Key key) {
         InstanceManifest imf = InstanceManifest.of(hive, key);
 
         if (!isFullyDeployed(imf)) {
@@ -311,7 +343,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 assertNotNull(minion, "Cannot lookup minion on master: " + minionName);
                 assertNotNull(toRemove, "Cannot lookup minion manifest on master: " + toRemove);
 
-                SlaveDeploymentResource deployment = ResourceProvider.getResource(minion, SlaveDeploymentResource.class);
+                SlaveDeploymentResource deployment = ResourceProvider.getResource(minion, SlaveDeploymentResource.class, context);
                 try {
                     deployment.remove(toRemove);
                 } catch (Exception e) {
@@ -325,9 +357,11 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             removing.done();
         }
 
+        imf.getHistory(hive).record(Action.UNINSTALL, context.getUserPrincipal().getName(), null);
         // no need to clean up the hive, this is done elsewhere.
     }
 
+    @WriteLock
     @Override
     public void updateTo(String uuid, String productTag) {
         InstanceManifest latest = InstanceManifest.load(hive, uuid, null);
@@ -365,7 +399,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         Long next = hive.execute(new ManifestNextIdOperation().setManifestName(name));
         Manifest.Key target = new Manifest.Key(name, next.toString());
 
-        createInstanceVersion(target, pm, updatedIc, incs);
+        createInstanceVersion(target, updatedIc, incs);
     }
 
     private void updateNodeTo(InstanceNodeConfiguration cfg, ProductManifest pm) {
@@ -440,24 +474,173 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         return command;
     }
 
-    private void createInstanceVersion(Manifest.Key target, ProductManifest pm, InstanceConfiguration config,
+    private Manifest.Key createInstanceVersion(Manifest.Key target, InstanceConfiguration config,
             SortedMap<String, InstanceNodeConfiguration> nodes) {
 
         InstanceManifest.Builder builder = new InstanceManifest.Builder();
         builder.setInstanceConfiguration(config);
-        builder.setKey(target);
+        if (target != null) {
+            builder.setKey(target);
+        }
 
         for (Entry<String, InstanceNodeConfiguration> entry : nodes.entrySet()) {
+            InstanceNodeConfiguration inc = entry.getValue();
+            if (inc.applications == null || inc.applications.isEmpty()) {
+                continue;
+            }
+
+            // make sure redundant data is equal to instance data.
+            if (!config.name.equals(inc.name)) {
+                log.warn("Instance name of node ({}) not equal to instance name ({}) - aligning.", inc.name, config.name);
+                inc.name = config.name;
+            }
+
+            inc.copyRedundantFields(config);
+
+            RuntimeAssert.assertEquals(inc.uuid, config.uuid, "Instance ID not set on nodes");
+
             InstanceNodeManifest.Builder inmb = new InstanceNodeManifest.Builder();
             inmb.setConfigTreeId(config.configTree);
             inmb.setMinionName(entry.getKey());
-            inmb.setInstanceNodeConfiguration(entry.getValue());
+            inmb.setInstanceNodeConfiguration(inc);
             inmb.setKey(new Manifest.Key(config.uuid + '/' + entry.getKey(), target.getTag()));
 
             builder.addInstanceNodeManifest(entry.getKey(), inmb.insert(hive));
         }
 
-        builder.insert(hive);
+        Manifest.Key key = builder.insert(hive);
+        InstanceManifest.of(hive, key).getHistory(hive).record(Action.CREATE, context.getUserPrincipal().getName(), null);
+        return key;
+    }
+
+    @WriteLock
+    @Override
+    public Manifest.Key update(InstanceUpdateDto update, String expectedTag) {
+        InstanceConfigurationDto state = update.config;
+        List<FileStatusDto> configUpdates = update.files;
+
+        InstanceConfiguration instanceConfig = state.config;
+        String rootName = InstanceManifest.getRootName(instanceConfig.uuid);
+        SortedSet<Key> existing = hive.execute(new ManifestListOperation().setManifestName(rootName));
+        InstanceManifest oldConfig = null;
+        if (expectedTag == null && !existing.isEmpty()) {
+            throw new WebApplicationException("Instance already exists: " + instanceConfig.uuid, Status.CONFLICT);
+        } else if (expectedTag != null) {
+            oldConfig = InstanceManifest.load(hive, instanceConfig.uuid, null);
+            if (!oldConfig.getManifest().getTag().equals(expectedTag)) {
+                throw new WebApplicationException("Expected version is not the current one: expected=" + expectedTag
+                        + ", current=" + oldConfig.getManifest().getTag(), Status.CONFLICT);
+            }
+        }
+
+        if (instanceConfig.target == null || instanceConfig.target.getKeyStore() == null) {
+            throw new WebApplicationException("No remote information for instance " + instanceConfig.uuid, Status.NOT_ACCEPTABLE);
+        }
+
+        if (configUpdates != null && !configUpdates.isEmpty()) {
+            // export existing tree and apply updates.
+            // set/reset config tree ID on instanceConfig.
+            instanceConfig.configTree = applyConfigUpdates(instanceConfig.configTree, configUpdates);
+        }
+
+        // calculate target key.
+        String rootTag = hive.execute(new ManifestNextIdOperation().setManifestName(rootName)).toString();
+        Manifest.Key rootKey = new Manifest.Key(rootName, rootTag);
+
+        if (state.nodeDtos == null || state.nodeDtos.isEmpty() && oldConfig != null) {
+            // no new node config - re-apply existing one with new tag, align redundant fields.
+            state.nodeDtos = readExistingNodeConfigs(oldConfig, rootTag, state.config);
+        }
+
+        // does NOT validate that the product exists, as it might still reside on the central server, not this one.
+
+        SortedMap<String, InstanceNodeConfiguration> nodes = new TreeMap<>();
+        if (state.nodeDtos != null) {
+            state.nodeDtos.forEach(n -> nodes.put(n.nodeName, n.nodeConfiguration));
+        }
+
+        return createInstanceVersion(rootKey, state.config, nodes);
+    }
+
+    private ObjectId applyConfigUpdates(ObjectId configTree, List<FileStatusDto> updates) {
+        Path tmpDir = null;
+        try {
+            tmpDir = Files.createTempDirectory(root.getTempDir(), "cfgUp-");
+            Path cfgDir = tmpDir.resolve("cfg");
+
+            // 1. export current tree to temp directory
+            exportConfigTree(configTree, cfgDir);
+
+            // 2. apply updates to files
+            applyUpdates(updates, cfgDir);
+
+            // 3. re-import new tree from temp directory
+            return hive.execute(new ImportTreeOperation().setSourcePath(cfgDir));
+        } catch (IOException e) {
+            throw new WebApplicationException("Cannot update configuration files", e);
+        } finally {
+            if (tmpDir != null) {
+                PathHelper.deleteRecursive(tmpDir);
+            }
+        }
+    }
+
+    private void exportConfigTree(ObjectId configTree, Path cfgDir) {
+        if (configTree == null) {
+            PathHelper.mkdirs(cfgDir);
+            return;
+        }
+
+        try {
+            hive.execute(new ExportTreeOperation().setSourceTree(configTree).setTargetPath(cfgDir));
+        } catch (Exception e) {
+            // this can happen if the hive was damaged. we allow this case to have a way out
+            // if all things break badly.
+            log.error("Cannot load existing configuration files", e);
+        }
+    }
+
+    private void applyUpdates(List<FileStatusDto> updates, Path cfgDir) throws IOException {
+        for (FileStatusDto update : updates) {
+            Path file = cfgDir.resolve(update.file);
+            if (!file.startsWith(cfgDir)) {
+                throw new WebApplicationException("Update wants to write to file outside update directory", Status.BAD_REQUEST);
+            }
+
+            switch (update.type) {
+                case ADD:
+                    PathHelper.mkdirs(file.getParent());
+                    Files.write(file, update.content.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE_NEW);
+                    break;
+                case DELETE:
+                    Files.delete(file);
+                    break;
+                case EDIT:
+                    Files.write(file, update.content.getBytes(StandardCharsets.UTF_8));
+                    break;
+            }
+        }
+    }
+
+    private List<InstanceNodeConfigurationDto> readExistingNodeConfigs(InstanceManifest oldConfig, String rootTag,
+            InstanceConfiguration cfg) {
+        List<InstanceNodeConfigurationDto> result = new ArrayList<>();
+        for (Map.Entry<String, Manifest.Key> entry : oldConfig.getInstanceNodeManifests().entrySet()) {
+            InstanceNodeManifest oldInmf = InstanceNodeManifest.of(hive, entry.getValue());
+            InstanceNodeConfiguration nodeConfig = oldInmf.getConfiguration();
+
+            InstanceNodeConfigurationDto dto = new InstanceNodeConfigurationDto(entry.getKey(), null, null);
+            dto.nodeConfiguration = nodeConfig;
+
+            result.add(dto);
+        }
+        return result;
+    }
+
+    @WriteLock
+    @Override
+    public void delete(String instanceUuid) {
+
     }
 
     @Override
@@ -479,7 +662,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             try {
                 RemoteService service = minions.get(nodeName);
 
-                SlaveDeploymentResource sdr = ResourceProvider.getResource(service, SlaveDeploymentResource.class);
+                SlaveDeploymentResource sdr = ResourceProvider.getResource(service, SlaveDeploymentResource.class, context);
                 List<InstanceDirectoryEntry> iddes = sdr.getDataDirectoryEntries(instanceId);
                 idd.entries.addAll(iddes);
             } catch (Exception e) {
@@ -499,7 +682,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         if (svc == null) {
             throw new WebApplicationException("Cannot find minion " + minion, Status.NOT_FOUND);
         }
-        SlaveDeploymentResource sdr = ResourceProvider.getResource(svc, SlaveDeploymentResource.class);
+        SlaveDeploymentResource sdr = ResourceProvider.getResource(svc, SlaveDeploymentResource.class, context);
         return sdr.getEntryContent(entry, offset, limit);
     }
 
@@ -547,7 +730,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         InstanceStatusDto status = getStatus(instanceId);
         for (String nodeName : status.getNodesWithApps()) {
             RemoteService service = minions.get(nodeName);
-            SlaveProcessResource spc = ResourceProvider.getResource(service, SlaveProcessResource.class);
+            SlaveProcessResource spc = ResourceProvider.getResource(service, SlaveProcessResource.class, context);
             spc.start(instanceId);
         }
     }
@@ -572,7 +755,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         try (Activity activity = reporter.start("Starting application...", -1)) {
             SortedMap<String, RemoteService> minions = root.getState().minions;
             RemoteService service = minions.get(minion);
-            SlaveProcessResource spc = ResourceProvider.getResource(service, SlaveProcessResource.class);
+            SlaveProcessResource spc = ResourceProvider.getResource(service, SlaveProcessResource.class, context);
             spc.start(instanceId, applicationId);
         }
     }
@@ -588,7 +771,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         try (Activity activity = reporter.start("Stopping applications...", nodes.size())) {
             for (String node : nodes) {
                 RemoteService service = minions.get(node);
-                SlaveProcessResource spc = ResourceProvider.getResource(service, SlaveProcessResource.class);
+                SlaveProcessResource spc = ResourceProvider.getResource(service, SlaveProcessResource.class, context);
                 spc.stop(instanceId);
                 activity.worked(1);
             }
@@ -608,7 +791,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         try (Activity activity = reporter.start("Stopping application...", -1)) {
             SortedMap<String, RemoteService> minions = root.getState().minions;
             RemoteService service = minions.get(nodeName);
-            SlaveProcessResource spc = ResourceProvider.getResource(service, SlaveProcessResource.class);
+            SlaveProcessResource spc = ResourceProvider.getResource(service, SlaveProcessResource.class, context);
             spc.stop(instanceId, applicationId);
         }
     }
@@ -630,7 +813,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
                     try {
                         RemoteService svc = root.getMinions().get(entry.getKey());
-                        SlaveProcessResource spr = ResourceProvider.getResource(svc, SlaveProcessResource.class);
+                        SlaveProcessResource spr = ResourceProvider.getResource(svc, SlaveProcessResource.class, context);
                         InstanceDirectoryEntry oe = spr.getOutputEntry(instanceId, tag, applicationId);
 
                         if (oe != null) {
@@ -659,7 +842,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         try (Activity activity = reporter.start("Get node status...", minions.size())) {
             for (Entry<String, RemoteService> entry : minions.entrySet()) {
                 String minion = entry.getKey();
-                SlaveProcessResource spc = ResourceProvider.getResource(entry.getValue(), SlaveProcessResource.class);
+                SlaveProcessResource spc = ResourceProvider.getResource(entry.getValue(), SlaveProcessResource.class, context);
                 try {
                     InstanceNodeStatusDto nodeStatus = spc.getStatus(instanceId);
                     instanceStatus.add(minion, nodeStatus);

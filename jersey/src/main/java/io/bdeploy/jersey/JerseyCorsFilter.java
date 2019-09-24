@@ -64,7 +64,8 @@ public class JerseyCorsFilter implements ContainerResponseFilter, ContainerReque
                         // put it in this list. And remove the ones you don't want.
                         "X-Requested-With, Authorization, Accept-Version, Content-Type, Content-MD5, CSRF-Token, "
                                 + "X-No-Global-Error-Handling, " // dummy header to supress error handling in web-app.
-                                + JerseySseActivityProxyClientFilter.PROXY_SCOPE_HEADER);
+                                + JerseySseActivityProxyClientFilter.PROXY_SCOPE_HEADER + ", "
+                                + JerseyOnBehalfOfFilter.ON_BEHALF_OF_HEADER);
             }
 
             // Cross origin requests can be either simple requests

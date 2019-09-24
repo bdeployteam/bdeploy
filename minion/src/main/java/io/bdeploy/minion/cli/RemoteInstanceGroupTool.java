@@ -43,7 +43,7 @@ public class RemoteInstanceGroupTool extends RemoteServiceTool<RemoteInstanceGro
 
     @Override
     protected void run(RemoteInstanceGroupConfig config, RemoteService svc) {
-        MasterRootResource client = ResourceProvider.getResource(svc, MasterRootResource.class);
+        MasterRootResource client = ResourceProvider.getResource(svc, MasterRootResource.class, null);
 
         if (config.create() != null) {
             helpAndFailIfMissing(config.description(), "Missing description");

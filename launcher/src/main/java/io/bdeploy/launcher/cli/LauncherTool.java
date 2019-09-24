@@ -147,7 +147,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             doCheckForUpdate(cd, hive, reporter, updateDir);
             log.info("Launching {} / {} / {} from {}", cd.groupId, cd.instanceId, cd.applicationId, cd.host.getUri());
 
-            MasterRootResource master = ResourceProvider.getResource(cd.host, MasterRootResource.class);
+            MasterRootResource master = ResourceProvider.getResource(cd.host, MasterRootResource.class, null);
             MasterNamedResource namedMaster = master.getNamedMaster(cd.groupId);
 
             // 1: fetch more information from the remote server.

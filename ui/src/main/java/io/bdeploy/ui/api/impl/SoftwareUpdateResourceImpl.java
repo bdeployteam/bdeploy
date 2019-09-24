@@ -44,6 +44,7 @@ import io.bdeploy.bhive.op.PruneOperation;
 import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
+import io.bdeploy.common.Version;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
@@ -77,7 +78,8 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
 
     private static final String BDEPLOY_MF_NAME = "meta/bdeploy";
     private static final String LAUNCHER_MF_NAME = "meta/launcher";
-    private static final Comparator<Key> BY_TAG_NEWEST_LAST = (a, b) -> a.getTag().compareTo(b.getTag());
+    private static final Comparator<Key> BY_TAG_NEWEST_LAST = (a, b) -> Version.parse(a.getTag())
+            .compareTo(Version.parse(b.getTag()));
 
     @Inject
     private SecurityContext context;
