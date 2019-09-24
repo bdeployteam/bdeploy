@@ -37,7 +37,7 @@ public class RemoteRepoTool extends RemoteServiceTool<RepoConfig> {
 
     @Override
     protected void run(RepoConfig config, RemoteService svc) {
-        MasterRootResource client = ResourceProvider.getResource(svc, MasterRootResource.class);
+        MasterRootResource client = ResourceProvider.getResource(svc, MasterRootResource.class, null);
         if (config.add() != null) {
             helpAndFailIfMissing(config.description(), "Missing --description");
 

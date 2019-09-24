@@ -60,7 +60,7 @@ public class RemoteDeploymentTool extends RemoteServiceTool<RemoteDeployConfig> 
         try {
             helpAndFailIfMissing(config.instanceGroup(), "Missing --instanceGroup");
 
-            MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class);
+            MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class, null);
             MasterNamedResource master = root.getNamedMaster(config.instanceGroup());
             if (config.list()) {
                 list(master);

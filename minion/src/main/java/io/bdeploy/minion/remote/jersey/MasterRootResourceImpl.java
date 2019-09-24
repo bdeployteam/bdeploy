@@ -18,6 +18,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.SecurityContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +64,9 @@ public class MasterRootResourceImpl implements MasterRootResource {
     @Context
     private ResourceContext rc;
 
+    @Context
+    private SecurityContext context;
+
     @Override
     public SortedMap<String, NodeStatus> getMinions() {
         SortedMap<String, RemoteService> minions = root.getState().minions;
@@ -71,7 +75,8 @@ public class MasterRootResourceImpl implements MasterRootResource {
         try (Activity contacting = reporter.start("Contacting Minions...", minions.size())) {
             for (Map.Entry<String, RemoteService> entry : minions.entrySet()) {
                 try {
-                    MinionStatusResource client = ResourceProvider.getResource(entry.getValue(), MinionStatusResource.class);
+                    MinionStatusResource client = ResourceProvider.getResource(entry.getValue(), MinionStatusResource.class,
+                            context);
                     result.put(entry.getKey(), client.getStatus());
                 } catch (Exception e) {
                     log.warn("Problem while contacting minion: {}", entry.getKey());
@@ -172,7 +177,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
         for (Entry<String, RemoteService> entry : minions.entrySet()) {
             RemoteService service = entry.getValue();
             try {
-                MinionStatusResource sr = ResourceProvider.getResource(service, MinionStatusResource.class);
+                MinionStatusResource sr = ResourceProvider.getResource(service, MinionStatusResource.class, context);
                 NodeStatus status = sr.getStatus();
 
                 if (status.master) {
@@ -183,7 +188,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
                 }
 
                 if (status.os == updateOs) {
-                    MinionUpdateResource resource = ResourceProvider.getResource(service, MinionUpdateResource.class);
+                    MinionUpdateResource resource = ResourceProvider.getResource(service, MinionUpdateResource.class, context);
                     toUpdate.put(entry.getKey(), resource);
                 } else {
                     log.warn("Not updating {}, wrong os ({} != {})", entry.getKey(), status.os, updateOs);

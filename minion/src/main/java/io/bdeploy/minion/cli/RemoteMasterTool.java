@@ -55,7 +55,7 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
 
     @Override
     protected void run(RemoteMasterConfig config, RemoteService svc) {
-        MasterRootResource client = ResourceProvider.getResource(svc, MasterRootResource.class);
+        MasterRootResource client = ResourceProvider.getResource(svc, MasterRootResource.class, null);
 
         if (config.minions()) {
             listMinions(client);

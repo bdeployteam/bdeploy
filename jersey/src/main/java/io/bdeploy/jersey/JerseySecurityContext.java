@@ -14,9 +14,11 @@ import io.bdeploy.common.security.ApiAccessToken.Capability;
 public class JerseySecurityContext implements SecurityContext {
 
     private final ApiAccessToken token;
+    private final String onBehalfOf;
 
-    public JerseySecurityContext(ApiAccessToken token) {
+    public JerseySecurityContext(ApiAccessToken token, String onBehalfOf) {
         this.token = token;
+        this.onBehalfOf = onBehalfOf;
     }
 
     public boolean hasCapability(String scope, Capability cap) {
@@ -25,6 +27,10 @@ public class JerseySecurityContext implements SecurityContext {
 
     @Override
     public Principal getUserPrincipal() {
+        if (onBehalfOf != null) {
+            return () -> "[" + onBehalfOf + "]";
+        }
+
         return token::getIssuedTo;
     }
 

@@ -3,6 +3,9 @@ package io.bdeploy.ui.api.impl;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.SecurityContext;
+
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
@@ -19,6 +22,9 @@ public class ProcessResourceImpl implements ProcessResource {
     private final BHive hive;
     private final String instanceGroup;
     private final String instanceId;
+
+    @Context
+    private SecurityContext context;
 
     public ProcessResourceImpl(BHive hive, String instanceGroup, String instanceId) {
         this.hive = hive;
@@ -77,6 +83,7 @@ public class ProcessResourceImpl implements ProcessResource {
         startAll();
     }
 
+    @Override
     public List<InstanceDirectory> getDataDirSnapshot() {
         MasterNamedResource master = getMasterResource();
         return master.getDataDirectorySnapshots(instanceId);
@@ -85,7 +92,7 @@ public class ProcessResourceImpl implements ProcessResource {
     private MasterNamedResource getMasterResource() {
         InstanceManifest manifest = InstanceManifest.load(hive, instanceId, null);
         RemoteService remote = manifest.getConfiguration().target;
-        MasterRootResource root = ResourceProvider.getResource(remote, MasterRootResource.class);
+        MasterRootResource root = ResourceProvider.getResource(remote, MasterRootResource.class, context);
         return root.getNamedMaster(instanceGroup);
     }
 

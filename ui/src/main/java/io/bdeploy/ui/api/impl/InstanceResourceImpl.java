@@ -160,7 +160,7 @@ public class InstanceResourceImpl implements InstanceResource {
             Key activeProduct = null;
             ProductDto activeProductDto = null;
             try {
-                MasterRootResource r = ResourceProvider.getResource(config.target, MasterRootResource.class);
+                MasterRootResource r = ResourceProvider.getResource(config.target, MasterRootResource.class, context);
                 MasterNamedResource master = r.getNamedMaster(group);
                 InstanceStateRecord state = master.getInstanceState(config.uuid);
 
@@ -245,7 +245,7 @@ public class InstanceResourceImpl implements InstanceResource {
             throw new WebApplicationException("Product not found: " + instanceConfig.product, Status.NOT_FOUND);
         }
 
-        ResourceProvider.getResource(instanceConfig.target, MasterRootResource.class).getNamedMaster(group)
+        ResourceProvider.getResource(instanceConfig.target, MasterRootResource.class, context).getNamedMaster(group)
                 .update(new InstanceUpdateDto(new InstanceConfigurationDto(instanceConfig, Collections.emptyList()),
                         getUpdatesFromTree("", new ArrayList<>(), product.getConfigTemplateTreeId())), null);
     }
@@ -308,8 +308,8 @@ public class InstanceResourceImpl implements InstanceResource {
             dto.config = oldConfig.getConfiguration();
         }
 
-        Manifest.Key key = ResourceProvider.getResource(dto.config.target, MasterRootResource.class).getNamedMaster(group)
-                .update(new InstanceUpdateDto(dto, Collections.emptyList()), expectedTag);
+        Manifest.Key key = ResourceProvider.getResource(dto.config.target, MasterRootResource.class, context)
+                .getNamedMaster(group).update(new InstanceUpdateDto(dto, Collections.emptyList()), expectedTag);
 
         UiResources.getInstanceEventManager().create(instance, key);
     }
@@ -338,7 +338,7 @@ public class InstanceResourceImpl implements InstanceResource {
         RemoteService svc = cfg.target;
         try (Activity deploy = reporter.start("Deleting " + instance + "...");
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
-            MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class);
+            MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class, context);
             InstanceStatusDto status = master.getNamedMaster(group).getStatus(instance);
             for (String app : status.getAppStatus().keySet()) {
                 if (status.isAppRunningOrScheduled(app)) {
@@ -432,7 +432,7 @@ public class InstanceResourceImpl implements InstanceResource {
         RemoteService rsvc = thisIm.getConfiguration().target;
         try (Activity fetchNodes = reporter.start("Fetching nodes from master");
                 AutoCloseable proxy = reporter.proxyActivities(rsvc)) {
-            MasterRootResource master = ResourceProvider.getResource(rsvc, MasterRootResource.class);
+            MasterRootResource master = ResourceProvider.getResource(rsvc, MasterRootResource.class, context);
             for (Map.Entry<String, NodeStatus> entry : master.getMinions().entrySet()) {
                 String nodeName = entry.getKey();
                 NodeStatus nodeStatus = entry.getValue();
@@ -482,7 +482,7 @@ public class InstanceResourceImpl implements InstanceResource {
                     stats.sumMissingObjects, UnitHelper.formatFileSize(stats.transferSize));
 
             // 2: tell master to deploy
-            MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class);
+            MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class, context);
             master.getNamedMaster(group).install(instance.getManifest());
         }
 
@@ -497,7 +497,7 @@ public class InstanceResourceImpl implements InstanceResource {
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
 
             // 1: check for running or scheduled applications
-            MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class);
+            MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class, context);
             MasterNamedResource namedMaster = master.getNamedMaster(group);
             InstanceStatusDto instanceStatus = namedMaster.getStatus(instanceId);
             Map<String, ProcessStatusDto> appStatus = instanceStatus.getAppStatus();
@@ -521,7 +521,7 @@ public class InstanceResourceImpl implements InstanceResource {
         RemoteService svc = instance.getConfiguration().target;
         try (Activity deploy = reporter.start("Activating " + instanceId + ":" + tag);
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
-            MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class);
+            MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class, context);
             master.getNamedMaster(group).activate(instance.getManifest());
         }
 
@@ -543,7 +543,7 @@ public class InstanceResourceImpl implements InstanceResource {
     public InstanceStateRecord getDeploymentStates(String instanceId) {
         InstanceManifest instance = InstanceManifest.load(hive, instanceId, null);
         RemoteService svc = instance.getConfiguration().target;
-        MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class);
+        MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class, context);
         return master.getNamedMaster(group).getInstanceState(instanceId);
     }
 
@@ -552,7 +552,8 @@ public class InstanceResourceImpl implements InstanceResource {
         InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
 
         RemoteService server = im.getConfiguration().target;
-        MasterNamedResource master = ResourceProvider.getResource(server, MasterRootResource.class).getNamedMaster(group);
+        MasterNamedResource master = ResourceProvider.getResource(server, MasterRootResource.class, context)
+                .getNamedMaster(group);
 
         ClickAndStartDescriptor desc = new ClickAndStartDescriptor();
         desc.applicationId = applicationId;
@@ -757,7 +758,7 @@ public class InstanceResourceImpl implements InstanceResource {
             throw new WebApplicationException("Cannot load " + instanceId, Status.NOT_FOUND);
         }
 
-        MasterRootResource root = ResourceProvider.getResource(cfg.target, MasterRootResource.class);
+        MasterRootResource root = ResourceProvider.getResource(cfg.target, MasterRootResource.class, context);
         Path zip = minion.getDownloadDir().resolve(UuidHelper.randomId() + ".zip");
         try {
             Files.copy(inputStream, zip);
@@ -778,7 +779,7 @@ public class InstanceResourceImpl implements InstanceResource {
             throw new WebApplicationException("Cannot load " + instanceId + ":" + tag, Status.NOT_FOUND);
         }
 
-        MasterRootResource root = ResourceProvider.getResource(cfg.target, MasterRootResource.class);
+        MasterRootResource root = ResourceProvider.getResource(cfg.target, MasterRootResource.class, context);
         return root.getNamedMaster(group).getOutputEntry(instanceId, tag, app);
     }
 
@@ -790,7 +791,7 @@ public class InstanceResourceImpl implements InstanceResource {
             throw new WebApplicationException("Cannot load " + instanceId + ":" + entry.tag, Status.NOT_FOUND);
         }
 
-        MasterRootResource root = ResourceProvider.getResource(cfg.target, MasterRootResource.class);
+        MasterRootResource root = ResourceProvider.getResource(cfg.target, MasterRootResource.class, context);
         EntryChunk chunk = root.getNamedMaster(group).getEntryContent(minion, entry, offset, limit);
         if (chunk == null) {
             return null;

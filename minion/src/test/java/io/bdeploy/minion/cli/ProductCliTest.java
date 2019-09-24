@@ -76,7 +76,7 @@ public class ProductCliTest {
         }
 
         // check ext software
-        BHiveResource extHive = ResourceProvider.getResource(svc, BHiveLocator.class).getNamedHive("ext");
+        BHiveResource extHive = ResourceProvider.getResource(svc, BHiveLocator.class, null).getNamedHive("ext");
         SortedMap<Key, ObjectId> inventory = extHive.getManifestInventory("external-dep");
 
         assertEquals(1, inventory.size());
