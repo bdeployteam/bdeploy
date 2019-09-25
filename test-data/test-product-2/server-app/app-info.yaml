@@ -48,7 +48,7 @@ startCommand:
       longDescription: "A fixed parameter"
       groupName: "Test Parameters"
       parameter: "--text"
-      defaultValue: "SECOND FIXED VALUE"
+      defaultValue: "SECOND_FIXED_VALUE"
       mandatory: true
       fixed: true
       type: STRING
