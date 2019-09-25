@@ -25,7 +25,9 @@ import org.glassfish.grizzly.http.server.CLStaticHttpHandler;
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.HttpHandlerRegistration;
 import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
+import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
 import org.glassfish.hk2.api.Factory;
 import org.glassfish.hk2.api.TypeLiteral;
 import org.glassfish.hk2.utilities.Binder;
@@ -209,6 +211,19 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             server = GrizzlyHttpServerFactory.createHttpServer(jerseyUri, rc, true, sslEngine, false);
             if (root != null) {
                 server.getServerConfiguration().addHttpHandler(root, HttpHandlerRegistration.ROOT);
+            }
+
+            for (NetworkListener listener : server.getListeners()) {
+                // default pool size restricts to num CPUs * 2.
+                // we want to have unrestricted thread counts to allow ALL requests to be processed in parallel.
+                // otherwise in-vm communication can soft-lock the process (e.g. push hangs because the reading
+                // thread is not started).
+                final int coresCount = Runtime.getRuntime().availableProcessors() * 2;
+                ThreadPoolConfig cfg = ThreadPoolConfig.defaultConfig().setPoolName("BDeploy-Transport-Worker")
+                        .setCorePoolSize(coresCount).setMaxPoolSize(Integer.MAX_VALUE)
+                        .setMemoryManager(listener.getTransport().getMemoryManager());
+
+                listener.getTransport().setWorkerThreadPoolConfig(cfg);
             }
 
             server.getHttpHandler().setAllowEncodedSlash(true);

@@ -181,6 +181,9 @@ public class JerseyClientFactory {
 
         ClientBuilder builder = ClientBuilder.newBuilder();
 
+        // for HttpUrlConnection to allow restricted headers, see https://eclipse-ee4j.github.io/jersey.github.io/documentation/latest/client.html#d0e4971
+        System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
+
         builder.property(ClientProperties.REQUEST_ENTITY_PROCESSING, RequestEntityProcessing.CHUNKED);
 
         builder.sslContext(sslContext);
