@@ -67,7 +67,7 @@ describe('Instance Group Tests', () => {
         .click();
     });
 
-    cy.contains('app-product-card', 'io.bdeploy/demo')
+    cy.contains('app-product-card', 'Demo Product')
       .should('exist')
       .click();
 
