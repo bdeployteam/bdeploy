@@ -286,9 +286,14 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Override
     public InstanceConfiguration read(String instance) {
+        InstanceConfiguration configuration = readInstanceConfiguration(instance);
+        clearToken(configuration);
+        return configuration;
+    }
+
+    private InstanceConfiguration readInstanceConfiguration(String instance) {
         InstanceManifest manifest = InstanceManifest.load(hive, instance, null);
         InstanceConfiguration configuration = manifest.getConfiguration();
-        clearToken(configuration);
         return configuration;
     }
 
@@ -334,7 +339,7 @@ public class InstanceResourceImpl implements InstanceResource {
     public void delete(String instance) {
         // TODO: delegate to master
         // prevent delete if processes are running.
-        InstanceConfiguration cfg = read(instance);
+        InstanceConfiguration cfg = readInstanceConfiguration(instance);
         RemoteService svc = cfg.target;
         try (Activity deploy = reporter.start("Deleting " + instance + "...");
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
@@ -753,7 +758,7 @@ public class InstanceResourceImpl implements InstanceResource {
     @WriteLock
     @Override
     public List<Key> importInstance(InputStream inputStream, String instanceId) {
-        InstanceConfiguration cfg = read(instanceId);
+        InstanceConfiguration cfg = readInstanceConfiguration(instanceId);
         if (cfg == null) {
             throw new WebApplicationException("Cannot load " + instanceId, Status.NOT_FOUND);
         }

@@ -88,6 +88,7 @@ public class RemoteService implements Serializable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + ((authPack == null) ? 0 : authPack.hashCode());
         result = prime * result + ((uri == null) ? 0 : uri.hashCode());
         return result;
     }
@@ -104,6 +105,13 @@ public class RemoteService implements Serializable {
             return false;
         }
         RemoteService other = (RemoteService) obj;
+        if (authPack == null) {
+            if (other.authPack != null) {
+                return false;
+            }
+        } else if (!authPack.equals(other.authPack)) {
+            return false;
+        }
         if (uri == null) {
             if (other.uri != null) {
                 return false;
