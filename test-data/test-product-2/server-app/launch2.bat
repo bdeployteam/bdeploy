@@ -22,12 +22,12 @@ IF NOT "%1" == "" (
     )
     IF "%1" == "--cfg" (
         echo "Got config file: %2"
-        type %2
+        powershell -command "get-content %2"
         SHIFT
     )
     IF "%1" == "--out" (
         echo "Writing to file: %2"
-        echo "TEST" > %2
+        echo TEST > "%2"
         SHIFT
     )
 
