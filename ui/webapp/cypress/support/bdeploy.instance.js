@@ -17,7 +17,7 @@ Cypress.Commands.add('createInstance', function(group, name, version = '2.0.0') 
   cy.get('mat-option').contains('TEST').click()
 
   cy.get('[placeholder=Product]').click()
-  cy.get('mat-option').contains('demo/product').click();
+  cy.get('mat-option').contains('Demo Product').click();
 
   cy.get('[placeholder=Version]').click();
   cy.get('mat-option').contains(version).click();
