@@ -84,7 +84,7 @@ String cypressCmd() {
 task runCypressHeadless(type: Exec, dependsOn: updateFixtures) {
     workingDir "$webappDir"
     group = BasePlugin.BUILD_GROUP
-    ignoreExitValue = true // for now, as jenkins fails very often due to the tests.
+    //ignoreExitValue = true // for now, as jenkins fails very often due to the tests.
     def port = project(":test-data").testServerPort
     if(project.hasProperty('recordCypress')) {
         commandLine (["${webappDir}/node_modules/.bin/" + cypressCmd(), "run", "--record", "--key", "a32f4a49-c18e-4942-8fb3-38928b39318e", "--config", "baseUrl=https://localhost:${port}", "--env", "backendBaseUrl=https://localhost:${port}/api"])
