@@ -16,7 +16,7 @@
   <mat-card-content>
     <p>{{instanceDto.instanceConfiguration.description}}</p>
     <p>
-      <span *ngIf='instanceDto.productDto'>Product: <b [matTooltip]='instanceDto.productDto.name'>{{instanceDto.productDto.description}}</b></span>
+      <span *ngIf='instanceDto.productDto'>Product: <b [matTooltip]='instanceDto.productDto.name'>{{instanceDto.productDto.name}}</b></span>
       <span *ngIf='!instanceDto.productDto'>Product: <b>{{instanceDto.instanceConfiguration.product.name}}</b></span>
 
       <span *ngIf='instanceDto.activeProduct'>&nbsp;

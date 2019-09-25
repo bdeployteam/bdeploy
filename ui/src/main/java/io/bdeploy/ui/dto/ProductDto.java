@@ -10,15 +10,15 @@ public class ProductDto {
 
     public String name;
     public String vendor;
-    public String description;
+    public String product;
     public Manifest.Key key;
     public Map<String, String> labels;
     public ObjectId configTree;
 
     public static ProductDto create(ProductManifest manifest) {
         ProductDto dto = new ProductDto();
-        dto.name = manifest.getProduct();
-        dto.description = manifest.getProductDescriptor().name;
+        dto.name = manifest.getProductDescriptor().name;
+        dto.product = manifest.getProduct();
         dto.vendor = manifest.getProductDescriptor().vendor;
         dto.key = manifest.getKey();
         dto.labels = manifest.getLabels();

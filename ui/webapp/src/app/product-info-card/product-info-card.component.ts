@@ -11,7 +11,7 @@ import { ProductDto } from '../models/gen.dtos';
 })
 export class ProductInfoCardComponent implements OnInit {
 
-  @Input() public product: ProductDto;
+  @Input() public productDto: ProductDto;
 
   private overlayRef: OverlayRef;
 
@@ -25,7 +25,7 @@ export class ProductInfoCardComponent implements OnInit {
   }
 
   public getLabelKeys(): string[] {
-    return this.product ? Object.keys(this.product.labels) : [];
+    return this.productDto ? Object.keys(this.productDto.labels) : [];
   }
 
   openOverlay(relative: MatButton, template: TemplateRef<any>) {

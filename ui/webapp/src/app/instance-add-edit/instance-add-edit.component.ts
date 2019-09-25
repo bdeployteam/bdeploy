@@ -175,7 +175,8 @@ export class InstanceAddEditComponent implements OnInit {
   }
 
   public getProductDisplayName(pName: string): string {
-    return this.products.find(e => e.key.name === pName).description + ' (' + pName + ')';
+    const product: ProductDto = this.products.find(e => e.key.name === pName);
+    return product.name + (product.vendor ? ' (' + product.vendor + ')' : '');
   }
 
   public getTagsForProduct(): string[] {
