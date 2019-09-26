@@ -126,13 +126,21 @@ configure(actualSubprojects) {
     }
 
     testlogger {
+        showStandardStreams true
+        showFailedStandardStreams true
+
         if(project.hasProperty('verboseTest')) {
+            showPassedStandardStreams true
+            showSkippedStandardStreams true
             theme 'standard'
-            showStandardStreams true
         } else {
+            showPassedStandardStreams false
+            showSkippedStandardStreams false
             theme 'mocha-parallel'
         }
+
         slowThreshold 6000
+        showFullStackTraces true
     }
 
     test {

@@ -42,10 +42,12 @@ public class StreamTest {
     }
 
     @Test
-    void download(StreamTestResource rs) throws IOException {
+    void download(StreamTestResource rs) throws Exception {
         byte[] sourceBytes = Files.readAllBytes(src);
 
         Path localFile = rs.download();
+
+        Thread.sleep(200); // might take some time on windows..
         assertFalse(Files.exists(src)); // deleted after writing.
 
         byte[] targetBytes = Files.readAllBytes(localFile);
