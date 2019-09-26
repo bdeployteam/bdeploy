@@ -690,7 +690,7 @@ public class InstanceResourceImpl implements InstanceResource {
             ClickAndStartDescriptor clickAndStart = getClickAndStartDescriptor(im.getConfiguration().uuid, appConfig.uid);
 
             BrandingConfig config = new BrandingConfig();
-            config.remoteService = im.getConfiguration().target;
+            config.remoteService = clickAndStart.host;
             config.launcherUrl = launcherLocation.toString();
             config.iconUrl = iconLocation.toString();
             config.splashUrl = splashLocation.toString();
