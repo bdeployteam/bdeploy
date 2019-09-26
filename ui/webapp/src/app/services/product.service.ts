@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { ManifestKey, ProductDto } from '../models/gen.dtos';
 import { ProcessConfigDto } from '../models/process.model';
 import { ConfigService } from './config.service';
+import { DownloadService } from './download.service';
 import { InstanceGroupService } from './instance-group.service';
 import { Logger, LoggingService } from './logging.service';
 
@@ -13,7 +14,11 @@ import { Logger, LoggingService } from './logging.service';
 export class ProductService {
   private log: Logger = this.loggingService.getLogger('ProductService');
 
-  constructor(private cfg: ConfigService, private http: HttpClient, private loggingService: LoggingService) {}
+  constructor(
+    private cfg: ConfigService,
+    private http: HttpClient,
+    private loggingService: LoggingService,
+    private downloadService: DownloadService) {}
 
   public getProducts(instanceGroupName: string): Observable<ProductDto[]> {
     const url: string = this.buildProductUrl(instanceGroupName) + '/list';
@@ -45,8 +50,8 @@ export class ProductService {
     return this.http.get(url, { responseType: 'text' });
   }
 
-  public downloadProduct(instanceGroupName: string, token: string): string {
-    return this.buildProductUrl(instanceGroupName) + '/download/' + token;
+  public downloadProduct(token: string): string {
+    return this.downloadService.createDownloadUrl(token);
   }
 
   public getProductUploadUrl(instanceGroupName: string): string {

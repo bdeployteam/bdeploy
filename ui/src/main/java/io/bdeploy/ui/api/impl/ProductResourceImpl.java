@@ -1,9 +1,7 @@
 package io.bdeploy.ui.api.impl;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URI;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
@@ -14,20 +12,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedSet;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
 
-import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -144,8 +136,9 @@ public class ProductResourceImpl implements ProductResource {
         SortedSet<ObjectId> objectIds = hive.execute(scan);
 
         // Copy objects into the target hive
-        String randomId = UuidHelper.randomId();
-        Path targetFile = minion.getDownloadDir().resolve(randomId + ".zip");
+        DownloadServiceImpl ds = rc.initResource(new DownloadServiceImpl());
+        String token = ds.createNewToken();
+        Path targetFile = ds.getStoragePath(token);
         URI targetUri = UriBuilder.fromUri("jar:" + targetFile.toUri()).build();
         try (BHive zipHive = new BHive(targetUri, new ActivityReporter.Null())) {
             CopyOperation op = new CopyOperation().setDestinationHive(zipHive);
@@ -153,56 +146,8 @@ public class ProductResourceImpl implements ProductResource {
             objectIds.forEach(op::addObject);
             hive.execute(op);
         }
-        return randomId;
-    }
-
-    @Override
-    public Response downloadProduct(String token) {
-        // File must be downloaded within a given timeout
-        Path targetFile = minion.getDownloadDir().resolve(token + ".zip");
-        File file = targetFile.toFile();
-        if (!file.isFile()) {
-            throw new WebApplicationException("Token to download product is not valid any more.", Status.BAD_REQUEST);
-        }
-
-        long lastModified = file.lastModified();
-        long validUntil = lastModified + TimeUnit.MINUTES.toMillis(5);
-        if (System.currentTimeMillis() > validUntil) {
-            throw new WebApplicationException("Token to download product is not valid any more.", Status.BAD_REQUEST);
-        }
-
-        // Build a response with the stream
-        ResponseBuilder responeBuilder = Response.ok(new StreamingOutput() {
-
-            @Override
-            public void write(OutputStream output) throws IOException {
-                try (InputStream is = Files.newInputStream(targetFile)) {
-                    is.transferTo(output);
-
-                    // Intentionally not in finally block to allow resuming of the download
-                    PathHelper.deleteRecursive(targetFile);
-                } catch (IOException ioe) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Could not fully write output", ioe);
-                    } else {
-                        log.warn("Could not fully write output: {}", ioe);
-                    }
-                }
-            }
-        }, MediaType.APPLICATION_OCTET_STREAM);
-
-        // Load and attach metadata to give the file a nice name
-        URI targetUri = UriBuilder.fromUri("jar:" + targetFile.toUri()).build();
-        try (BHive zipHive = new BHive(targetUri, new ActivityReporter.Null())) {
-            Key productKey = ProductManifest.scan(zipHive).first();
-            String fileName = productKey.directoryFriendlyName() + ".zip";
-
-            ContentDisposition contentDisposition = ContentDisposition.type("attachement").size(file.length()).fileName(fileName)
-                    .build();
-            responeBuilder.header("Content-Disposition", contentDisposition);
-            responeBuilder.header("Content-Length", file.length());
-        }
-        return responeBuilder.build();
+        ds.registerForDownload(token, key.directoryFriendlyName() + ".zip");
+        return token;
     }
 
     @Override

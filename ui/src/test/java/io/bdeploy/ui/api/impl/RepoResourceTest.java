@@ -37,6 +37,7 @@ import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.ui.TestUiBackendServer;
+import io.bdeploy.ui.api.DownloadService;
 import io.bdeploy.ui.api.SoftwareRepositoryResource;
 import io.bdeploy.ui.api.SoftwareResource;
 
@@ -81,8 +82,8 @@ public class RepoResourceTest {
     }
 
     @Test
-    void sw(SoftwareRepositoryResource repos, RemoteService service, @TempDir Path tmp, ActivityReporter reporter)
-            throws IOException {
+    void sw(SoftwareRepositoryResource repos, DownloadService dlService, RemoteService service, @TempDir Path tmp,
+            ActivityReporter reporter) throws IOException {
         assertTrue(repos.list().isEmpty());
 
         SoftwareRepositoryConfiguration cfg = new SoftwareRepositoryConfiguration();
@@ -121,7 +122,7 @@ public class RepoResourceTest {
         assertNotNull(softwareDiskUsage);
 
         String token = swr.createSoftwareZipFile(swKey.getName(), swKey.getTag());
-        Response download = swr.downloadSoftware(token);
+        Response download = dlService.download(token);
         assertEquals(200, download.getStatus());
 
         Path zip2 = tmp.resolve("tmp2.zip");

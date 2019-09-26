@@ -70,7 +70,7 @@ export class ProductListComponent implements OnInit {
       .createProductZip(this.instanceGroup, product.key)
       .pipe(finalize(() => (this.exporting = null)))
       .subscribe(token => {
-        this.downloadService.download(this.productService.downloadProduct(this.instanceGroup, token));
+        this.downloadService.download(this.productService.downloadProduct(token));
       });
   }
 

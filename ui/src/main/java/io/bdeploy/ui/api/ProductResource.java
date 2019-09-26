@@ -11,12 +11,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import io.bdeploy.ui.dto.ProductDto;
 
 @Path("/product")
@@ -46,12 +44,6 @@ public interface ProductResource {
     @GET
     @Path("/{name : .+}/{tag}/zip")
     public String createProductZipFile(@PathParam("name") String name, @PathParam("tag") String tag);
-
-    @GET
-    @Unsecured
-    @Path("/download/{token}")
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    public Response downloadProduct(@PathParam("token") String token);
 
     @POST
     @Path("/upload")
