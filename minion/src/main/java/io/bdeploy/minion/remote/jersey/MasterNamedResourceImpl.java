@@ -485,7 +485,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
         for (Entry<String, InstanceNodeConfiguration> entry : nodes.entrySet()) {
             InstanceNodeConfiguration inc = entry.getValue();
-            if (inc.applications == null || inc.applications.isEmpty()) {
+            if (inc == null || inc.applications == null || inc.applications.isEmpty()) {
                 continue;
             }
 
