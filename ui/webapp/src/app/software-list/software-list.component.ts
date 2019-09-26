@@ -54,7 +54,7 @@ export class SoftwareListComponent implements OnInit {
       .createSoftwareZip(this.softwareRepositoryName, softwareVersion)
       .pipe(finalize(() => (this.exporting = null)))
       .subscribe(token => {
-        this.downloadService.download(this.softwareService.downloadSoftware(this.softwareRepositoryName, token));
+        this.downloadService.download(this.softwareService.downloadSoftware(token));
       });
   }
 

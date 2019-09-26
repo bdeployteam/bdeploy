@@ -19,6 +19,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.ui.TestFactory;
+import io.bdeploy.ui.api.DownloadService;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.ProductResource;
 
@@ -43,17 +44,18 @@ public class ProductResourceTest {
     }
 
     @Test
-    void createZip(MinionRoot minion, InstanceGroupResource root, RemoteService remote, @TempDir Path tmp) throws IOException {
+    void createZip(MinionRoot minion, InstanceGroupResource root, RemoteService remote, DownloadService dlService,
+            @TempDir Path tmp) throws IOException {
         InstanceGroupConfiguration group = TestFactory.createInstanceGroup("Demo");
         root.create(group);
 
         Key prod = TestFactory.pushProduct(group.name, remote, tmp).getKey();
         ProductResource productResource = root.getProductResource("Demo");
         String zipToken = productResource.createProductZipFile(prod.getName(), prod.getTag());
-        Path zipFile = minion.getDownloadDir().resolve(zipToken + ".zip");
+        Path zipFile = minion.getDownloadDir().resolve(zipToken);
         assertTrue(zipFile.toFile().isFile());
 
-        Response response = productResource.downloadProduct(zipToken);
+        Response response = dlService.download(zipToken);
         assertEquals(Response.Status.OK, response.getStatusInfo().toEnum());
     }
 

@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ManifestKey } from '../models/gen.dtos';
 import { ConfigService } from './config.service';
+import { DownloadService } from './download.service';
 import { Logger, LoggingService } from './logging.service';
 import { SoftwareRepositoryService } from './software-repository.service';
 
@@ -17,6 +18,7 @@ export class SoftwareService {
     private cfg: ConfigService,
     private http: HttpClient,
     private loggingService: LoggingService,
+    private downloadService: DownloadService,
   ) {}
 
   public listSoftwares(softwareRepositoryName: string): Observable<ManifestKey[]> {
@@ -43,8 +45,8 @@ export class SoftwareService {
     return this.http.get(url, { responseType: 'text' });
   }
 
-  public downloadSoftware(softwareRepositoryName: string, token: string): string {
-    return this.buildSoftwareUrl(softwareRepositoryName) + '/download/' + token;
+  public downloadSoftware(token: string): string {
+    return this.downloadService.createDownloadUrl(token);
   }
 
   public getSoftwareUploadUrl(softwareRepositoryName: string): string {
