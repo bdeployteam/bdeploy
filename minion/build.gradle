@@ -1,7 +1,7 @@
 apply plugin: 'application'
 
 ext {
-    scriptDefVmArgs = [ '-Xms64m', '-Xmx512m' ]
+    scriptDefVmArgs = [ '-Xms64m', '-Xmx1g' ]
 }
 
 mainClassName = 'io.bdeploy.minion.cli.MinionServerCli'
