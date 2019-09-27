@@ -10,7 +10,7 @@ ext {
     testServerRoot = "${buildDir}/test-root"
     testServerHost = InetAddress.getLocalHost().getCanonicalHostName()
     testServerPort = randomServerPort()
-    _testBinVersions = [ "1.1.0", "1.2.0" ]
+    _testBinVersions = [ "1.2.1" ]
 
     getTestBinVersions = {
         result = []
