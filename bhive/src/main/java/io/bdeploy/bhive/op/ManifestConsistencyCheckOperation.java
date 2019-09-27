@@ -4,6 +4,7 @@ import static io.bdeploy.common.util.RuntimeAssert.assertFalse;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -25,16 +26,16 @@ import io.bdeploy.common.ActivityReporter.Activity;
  * This is a quick check for fundamental consistency, which is complemented by {@link ObjectConsistencyCheckOperation} - which
  * checks each <b>existing</b> and <b>reachable</b> object for actual data integrity.
  */
-public class ManifestConsistencyCheckOperation extends BHive.Operation<List<ElementView>> {
+public class ManifestConsistencyCheckOperation extends BHive.Operation<Set<ElementView>> {
 
     private final SortedSet<Manifest.Key> manifests = new TreeSet<>();
     private boolean dryRun = true;
 
     @Override
-    public List<ElementView> call() throws Exception {
+    public Set<ElementView> call() throws Exception {
         assertFalse(manifests.isEmpty(), "Nothing to check");
 
-        List<ElementView> dmg = new ArrayList<>();
+        Set<ElementView> dmg = new TreeSet<>();
         Activity check = getActivityReporter().start("Checking manifest tree consistency...", manifests.size());
 
         try {
