@@ -168,7 +168,7 @@ public class UserDatabase implements AuthService {
         Manifest mf = target.execute(new ManifestLoadOperation().setManifest(key));
 
         // check the manifest for manipulation to prevent from manually making somebody admin, etc.
-        List<ElementView> result = target.execute(new ObjectConsistencyCheckOperation().addRoot(key));
+        Set<ElementView> result = target.execute(new ObjectConsistencyCheckOperation().addRoot(key));
         if (!result.isEmpty()) {
             log.error("User corruption detected for {}", name);
             return null;

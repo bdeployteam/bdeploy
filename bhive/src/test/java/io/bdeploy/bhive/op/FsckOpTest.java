@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,9 +18,6 @@ import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.objects.view.ElementView;
-import io.bdeploy.bhive.op.ImportOperation;
-import io.bdeploy.bhive.op.ManifestConsistencyCheckOperation;
-import io.bdeploy.bhive.op.ObjectConsistencyCheckOperation;
 import io.bdeploy.common.ContentHelper;
 import io.bdeploy.common.TempDirectory;
 import io.bdeploy.common.TempDirectory.TempDir;
@@ -48,9 +45,9 @@ public class FsckOpTest {
 
         Files.write(fileToMessWith, Collections.singleton("This is something broken"));
 
-        List<ElementView> broken = hive.execute(new ObjectConsistencyCheckOperation().setDryRun(false).addRoot(key));
+        Set<ElementView> broken = hive.execute(new ObjectConsistencyCheckOperation().setDryRun(false).addRoot(key));
         assertThat(broken.size(), is(1));
-        assertThat(broken.get(0).getElementId(), is(ObjectId.parse(ContentHelper.TEST_TXT_OID)));
+        assertThat(broken.iterator().next().getElementId(), is(ObjectId.parse(ContentHelper.TEST_TXT_OID)));
         assertFalse(Files.exists(fileToMessWith));
 
         // the previous non-dry-run check removed the broken object. now is is no longer found by the object check
@@ -60,7 +57,7 @@ public class FsckOpTest {
         // but the manifest consistency check will find a missing object now.
         broken = hive.execute(new ManifestConsistencyCheckOperation().addRoot(key));
         assertThat(broken.size(), is(1));
-        assertThat(broken.get(0).getElementId(), is(ObjectId.parse(ContentHelper.TEST_TXT_OID)));
+        assertThat(broken.iterator().next().getElementId(), is(ObjectId.parse(ContentHelper.TEST_TXT_OID)));
     }
 
 }
