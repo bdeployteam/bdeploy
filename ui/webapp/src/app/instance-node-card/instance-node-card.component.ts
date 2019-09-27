@@ -6,7 +6,7 @@ import { ApplicationConfigurationCardComponent } from '../application-configurat
 import { ApplicationGroup } from '../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_APPLICATION_CONFIGURATION, EMPTY_INSTANCE_NODE_CONFIGURATION, EMPTY_PROCESS_CONTROL_CONFIG } from '../models/consts';
 import { EventWithCallback } from '../models/event';
-import { ApplicationConfiguration, ApplicationDto, InstanceConfiguration, InstanceNodeConfiguration, InstanceNodeConfigurationDto } from '../models/gen.dtos';
+import { ApplicationConfiguration, ApplicationDto, InstanceNodeConfiguration, InstanceNodeConfigurationDto } from '../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../models/process.model';
 import { ApplicationService } from '../services/application.service';
 import { DownloadService } from '../services/download.service';
@@ -36,10 +36,9 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy, AfterViewIn
   private readonly INVALID_DROP_ZONE_CLASS = 'instance-node-invalid-drop-zone';
 
   @Input() instanceGroupName: string;
-  @Input() instance: InstanceConfiguration;
   @Input() activatedInstanceTag: string;
   @Input() processConfig: ProcessConfigDto;
-  @Input() productApplications: ApplicationGroup[];
+  @Input() productMissing: boolean;
   @Input() node: InstanceNodeConfigurationDto;
   @Input() dragStopped: BehaviorSubject<any>;
   @Input() dragStarted: BehaviorSubject<any>;
@@ -402,8 +401,8 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy, AfterViewIn
   createNewNodeConfig() {
     this.nodeConfigCreated = true;
     this.node.nodeConfiguration = cloneDeep(EMPTY_INSTANCE_NODE_CONFIGURATION);
-    this.node.nodeConfiguration.uuid = this.instance.uuid;
-    this.node.nodeConfiguration.name = this.instance.name;
+    this.node.nodeConfiguration.uuid = this.processConfig.instance.uuid;
+    this.node.nodeConfiguration.name = this.processConfig.instance.name;
     this.node.nodeConfiguration.autoStart = true;
   }
 
@@ -428,7 +427,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy, AfterViewIn
     const apps = this.appService.getAllApps(this.processConfig);
 
     // Load descriptor and initialize configuration
-    const productKey = this.instance.product;
+    const productKey = this.processConfig.instance.product;
     const appKey = appConfig.application;
     this.appService.getDescriptor(this.instanceGroupName, productKey, appKey).subscribe(desc => {
       // Generate unique identifier

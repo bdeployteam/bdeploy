@@ -16,6 +16,7 @@ export class ApplicationConfigurationCardComponent implements OnInit {
   @Input() public instanceVersion: InstanceVersionDto;
   @Input() public appConfig: ApplicationConfiguration;
   @Input() public activatedTag: string;
+  @Input() productMissing: boolean;
   @Input() public isForeign = false;
   @Input() public isReadonly = false;
   @Input() public isClient = false;

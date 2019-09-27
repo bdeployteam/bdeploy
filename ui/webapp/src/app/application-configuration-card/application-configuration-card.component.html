@@ -1,4 +1,4 @@
-<mat-card [ngClass]="getCardStyle()" matTooltip='Application is missing in the current product tag' [matTooltipDisabled]='!isMissing()' matTooltipPosition='above'>
+<mat-card [ngClass]="getCardStyle()" [matTooltip]='productMissing ? "Product is missing" : "Application is missing in the current product tag"' [matTooltipDisabled]='!isMissing()' matTooltipPosition='above'>
   <div class="title-row">
     <span class="mat-title app-title">{{ appConfig.name }}</span>
     <span class="spacer"></span>

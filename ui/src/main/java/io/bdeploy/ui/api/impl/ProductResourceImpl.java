@@ -11,7 +11,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.SortedSet;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
@@ -121,9 +123,20 @@ public class ProductResourceImpl implements ProductResource {
     @Override
     public Long getProductUseCount(String name, String tag) {
         Manifest.Key checkKey = new Manifest.Key(name, tag);
-        SortedSet<Manifest.Key> scan = InstanceManifest.scan(hive, true);
-        return scan.stream().map(k -> InstanceManifest.of(hive, k).getConfiguration()).map(c -> c.product)
-                .filter(p -> p.equals(checkKey)).count();
+
+        // InstanceManifests using the product version grouped by instance
+        Map<String, Set<InstanceManifest>> uuid2imSet = InstanceManifest.scan(hive, false).stream()
+                .map(k -> InstanceManifest.of(hive, k)).filter(im -> im.getConfiguration().product.equals(checkKey))
+                .collect(Collectors.groupingBy(im -> im.getConfiguration().uuid, Collectors.toSet()));
+
+        // read instance state once per instance and count installed instance versions
+        long count = 0;
+        for (Set<InstanceManifest> mfSet : uuid2imSet.values()) {
+            List<String> installedTags = mfSet.stream().findFirst().get().getState(hive).read().installedTags;
+            count += mfSet.stream().map(mf -> mf.getManifest().getTag()).filter(t -> installedTags.contains(t)).count();
+        }
+
+        return count;
     }
 
     @Override
