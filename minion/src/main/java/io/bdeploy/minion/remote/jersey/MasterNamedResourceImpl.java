@@ -479,9 +479,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
         InstanceManifest.Builder builder = new InstanceManifest.Builder();
         builder.setInstanceConfiguration(config);
-        if (target != null) {
-            builder.setKey(target);
-        }
+        builder.setKey(target);
 
         for (Entry<String, InstanceNodeConfiguration> entry : nodes.entrySet()) {
             InstanceNodeConfiguration inc = entry.getValue();
@@ -547,7 +545,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         String rootTag = hive.execute(new ManifestNextIdOperation().setManifestName(rootName)).toString();
         Manifest.Key rootKey = new Manifest.Key(rootName, rootTag);
 
-        if (state.nodeDtos == null || state.nodeDtos.isEmpty() && oldConfig != null) {
+        if ((state.nodeDtos == null || state.nodeDtos.isEmpty()) && oldConfig != null) {
             // no new node config - re-apply existing one with new tag, align redundant fields.
             state.nodeDtos = readExistingNodeConfigs(oldConfig, rootTag, state.config);
         }

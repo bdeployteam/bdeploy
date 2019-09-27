@@ -29,7 +29,7 @@ public class JerseyStreamingHelper {
             long remaining = length <= 0 ? Long.MAX_VALUE : length;
             final byte[] buffer = new byte[1024 * 8];
             while (remaining > 0) {
-                int l = in.read(buffer, 0, (int) Math.min(1024 * 8, remaining));
+                int l = in.read(buffer, 0, (int) Math.min(1024 * 8l, remaining));
                 if (l == -1) {
                     break;
                 }
