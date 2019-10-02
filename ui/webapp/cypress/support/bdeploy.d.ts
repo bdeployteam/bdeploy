@@ -59,6 +59,19 @@ declare namespace Cypress {
     addAndSetOptionalParameter(panel: string, name: string, value: string): void;
 
     /**
+     * Converts the given missing parameter to a custom parameter.
+     * @param id the identifier of the parameter
+     * @param name the name of the missing parameter
+     */
+    convertMissingToCustomParameter(name: string): void;
+
+    /**
+     * Removes the given missing parameter.
+     * @param name the name of the missing parameter
+     */
+    deleteMissingParameter(name: string): void;
+
+    /**
      * Drag and drop emulation helper.
      * @param target the target to drop onto. Can be a selector or DOM element.
      * @param opts additional options

@@ -123,3 +123,19 @@ Cypress.Commands.add('addAndSetOptionalParameter', function(panel, name, value) 
   cy.get('@panel').find('[placeholder="' + name + '"]').should('exist')
   cy.get('@panel').find('[placeholder="' + name + '"]').clear().type(value, { parseSpecialCharSequences: false })
 })
+
+Cypress.Commands.add('convertMissingToCustomParameter', function(id, name) {
+  cy.contains('mat-expansion-panel', 'Unknown Parameters').as('panel');
+  cy.get('@panel').contains('mat-grid-tile', name).contains('button','save_alt').click();
+
+  cy.contains('mat-expansion-panel', 'Custom Parameters').as('panel');
+  cy.get('@panel').click();
+  cy.get('@panel').find('[placeholder="' + id + '.custom"]').should('exist')
+})
+
+Cypress.Commands.add('deleteMissingParameter', function(name) {
+  cy.contains('mat-expansion-panel', 'Unknown Parameters').as('panel');
+
+  cy.get('@panel').click();
+  cy.get('@panel').contains('mat-grid-tile', name).contains('button','delete').click();
+})

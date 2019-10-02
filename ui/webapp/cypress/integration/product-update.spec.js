@@ -56,9 +56,53 @@ describe('Product Tests', () => {
     cy.contains('app-instance-version-card', '2.0.0').should('exist');
   })
 
+  it('Configure new optional parameter', () => {
+    cy.getApplicationConfigCard('master', 'Server Application').clickContextMenuItem('Configure...')
+
+    // set out parameter
+    cy.addAndSetOptionalParameter('Test Parameters', 'Output', '{{P:DATA}}/cypress.txt');
+
+    // set config file parameter
+    cy.addAndSetOptionalParameter('Test Parameters', 'Config File', '{{P:CONFIG}}/cypress.cfg');
+
+    cy.contains('button', 'APPLY').click();
+
+    cy.getApplicationConfigCard('master', 'Server Application').find('.app-config-modified').should('exist')
+
+    cy.contains('button', 'SAVE').click();
+    cy.get('app-instance-version-card').find('.instance-version-modified').should('not.exist')
+  })
+
   it('Install & activate version 2.0.0', () => {
     cy.getLatestInstanceVersion().installAndActivate();
     cy.getActiveInstanceVersion().contains('2.0.0').should('exist');
+  })
+
+  it('Downgrade to version 1.0.0', () => {
+    cy.get('app-instance-group-logo').parent().clickContextMenuItem('Change Product Version...');
+    cy.contains('mat-toolbar', 'Change Product Version').should('exist');
+
+    cy.contains('app-product-tag-card', '2.0.0').should('exist').contains('button', 'check').and('be.visible');
+
+    cy.contains('mat-slide-toggle','Show all').should('not.be.checked').click();
+    cy.contains('app-product-tag-card', '1.0.0').should('exist').contains('button', 'arrow_downward').should('be.enabled').and('be.visible').click();
+
+    cy.contains('button', 'Newer product version available').should('be.visible').and('be.enabled');
+    cy.getApplicationConfigCard('master', 'Server Application').find('.app-config-invalid').should('exist');
+    cy.contains('button', 'SAVE').should('be.disabled');
+  })
+
+  it('Handle unknown parameters', () => {
+    cy.getApplicationConfigCard('master', 'Server Application').clickContextMenuItem('Configure...')
+
+    cy.convertMissingToCustomParameter('param.out','Output');
+    cy.deleteMissingParameter('Config File');
+
+    cy.contains('button', 'APPLY').click();
+    cy.getApplicationConfigCard('master', 'Server Application').find('.app-config-modified').should('exist')
+
+    cy.contains('button', 'SAVE').click();
+    cy.get('app-instance-version-card').find('.instance-version-modified').should('not.exist')
   })
 
   /**
