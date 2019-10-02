@@ -21,16 +21,26 @@ public class CleanupGroup {
     public String minion;
 
     /**
+     * The instance group name this group is 'bound' to (e.g. should be performed on).
+     */
+    public String instanceGroup;
+
+    /**
      * The list of {@link CleanupAction}s to be performed.
      */
     public List<CleanupAction> actions;
 
     @JsonCreator
     public CleanupGroup(@JsonProperty("name") String name, @JsonProperty("minion") String minion,
-            @JsonProperty("actions") List<CleanupAction> actions) {
+            @JsonProperty("instanceGroup") String instanceGroup, @JsonProperty("actions") List<CleanupAction> actions) {
         this.name = name;
         this.minion = minion;
+        this.instanceGroup = instanceGroup;
         this.actions = actions;
+
+        if (minion == null && instanceGroup == null) {
+            throw new IllegalStateException("Either minion or instance group must not be null");
+        }
     }
 
 }

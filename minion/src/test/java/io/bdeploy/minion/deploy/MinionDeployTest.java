@@ -141,22 +141,25 @@ public class MinionDeployTest {
 
         /* STEP 9: uninstall and cleanup */
         List<CleanupGroup> nothingToDo = cr.calculate();
-        assertEquals(1, nothingToDo.size());
+        assertEquals(2, nothingToDo.size());
         assertEquals(0, nothingToDo.get(0).actions.size());
+        assertEquals(0, nothingToDo.get(1).actions.size());
 
         try (RemoteBHive rbh = RemoteBHive.forService(remote, "demo", reporter)) {
             rbh.removeManifest(instance); // remove top level instance.
         }
 
         List<CleanupGroup> groups = cr.calculate();
-        assertEquals(1, groups.size());
-        assertEquals("master", groups.get(0).minion);
+        assertEquals(2, groups.size());
+        assertEquals("demo", groups.get(0).instanceGroup);
+        assertEquals(0, groups.get(0).actions.size());
 
+        assertEquals("master", groups.get(1).minion);
         // 1 instance node manifest, 1 application manifest, 1 dependent manifest
         // 1 instance version dir (not uninstalled before)
         // 1 instance data dir (last version removed), 2 stale pool dirs (application, dependent).
         // 2 meta manifests (state of instance).
-        assertEquals(9, groups.get(0).actions.size());
+        assertEquals(9, groups.get(1).actions.size());
 
         // now actually do it.
         cr.perform(groups);

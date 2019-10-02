@@ -26,6 +26,7 @@
 
 import './bdeploy.login'
 import './bdeploy.instance'
+import './bdeploy.instance-group'
 import './bdeploy.node'
 import './dragdrop'
 import 'cypress-file-upload'

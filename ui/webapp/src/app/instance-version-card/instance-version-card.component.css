@@ -21,6 +21,10 @@ mat-card {
   margin-right: 8px;
 }
 
+.icon-uninstall {
+  color: lightgray;
+}
+
 .header-icon {
   width: 32px;
   height: 24px;

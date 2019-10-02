@@ -38,6 +38,7 @@ describe('Product Tests', () => {
   })
 
   it('Install & activate version 1.0.0', () => {
+    cy.closeConfigureApplications();
     cy.getLatestInstanceVersion().installAndActivate();
     cy.getActiveInstanceVersion().contains('1.0.0').should('exist');
   })
@@ -74,6 +75,7 @@ describe('Product Tests', () => {
   })
 
   it('Install & activate version 2.0.0', () => {
+    cy.closeConfigureApplications();
     cy.getLatestInstanceVersion().installAndActivate();
     cy.getActiveInstanceVersion().contains('2.0.0').should('exist');
   })

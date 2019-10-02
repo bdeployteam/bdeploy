@@ -18,7 +18,6 @@ export class MasterCleanupComponent implements OnInit, OnDestroy {
   columns = ['description', 'type', 'what'];
 
   emptyActions: CleanupAction[] = [{ description: 'No actions to be performed', type: null, what: '' }];
-  offlineActions: CleanupAction[] = [{ description: 'The requested minion is offline!', type: null, what: '' }];
 
   constructor(private cleanupService: CleanupService) {}
 

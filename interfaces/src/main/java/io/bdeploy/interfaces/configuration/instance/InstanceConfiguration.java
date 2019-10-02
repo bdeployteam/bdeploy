@@ -56,4 +56,10 @@ public class InstanceConfiguration {
      * The target to push/deploy the instance to when requested.
      */
     public RemoteService target;
+
+    /**
+     * Schedule background uninstallation of old instance versions
+     */
+    public boolean autoUninstall;
+
 }

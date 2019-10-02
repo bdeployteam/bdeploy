@@ -1,6 +1,8 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { cloneDeep } from 'lodash';
 import { InstanceGroupDeleteDialogComponent } from '../instance-group-delete-dialog/instance-group-delete-dialog.component';
+import { EMPTY_INSTANCE_GROUP } from '../models/consts';
 import { InstanceGroupConfiguration } from '../models/gen.dtos';
 import { InstanceGroupService } from '../services/instance-group.service';
 import { LoggingService } from '../services/logging.service';
@@ -12,19 +14,13 @@ import { LoggingService } from '../services/logging.service';
 })
 export class InstanceGroupCardComponent implements OnInit {
 
-  private EMPTY_GROUP: InstanceGroupConfiguration = {
-    name: 'Loading...',
-    description: 'Loading...',
-    logo: null,
-  };
-
   private log = this.loggingService.getLogger('InstanceGroupCardComponent');
 
   @Input() instanceGroup: InstanceGroupConfiguration;
   @Input() instanceGroupId: string;
   @Output() removeEvent = new EventEmitter<boolean>();
 
-  public currentGroup = this.EMPTY_GROUP;
+  public currentGroup = cloneDeep(EMPTY_INSTANCE_GROUP);
 
   constructor(
     private loggingService: LoggingService,
@@ -40,11 +36,8 @@ export class InstanceGroupCardComponent implements OnInit {
       }
 
       // tell the user we're loading this group
-      this.currentGroup = {
-        name: this.instanceGroupId,
-        description: this.EMPTY_GROUP.description,
-        logo: this.EMPTY_GROUP.logo
-      };
+      this.currentGroup.name = this.instanceGroupId;
+      this.currentGroup.description = 'Loading...';
 
       // load the group and set once available.
       this.instanceGroupService.getInstanceGroup(this.instanceGroupId).subscribe(value => {

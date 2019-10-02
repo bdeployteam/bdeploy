@@ -1,6 +1,9 @@
+import { Overlay, OverlayRef } from '@angular/cdk/overlay';
+import { TemplatePortal } from '@angular/cdk/portal';
 import { Location } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
+import { MatButton } from '@angular/material';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { cloneDeep, isEqual } from 'lodash';
@@ -35,10 +38,13 @@ export class InstanceGroupAddEditComponent implements OnInit {
 
   public clonedInstanceGroup: InstanceGroupConfiguration;
 
+  private overlayRef: OverlayRef;
+
   public instanceGroupFormGroup = this.fb.group({
     name: ['', [Validators.required, InstanceGroupValidators.namePattern]],
     description: ['', Validators.required],
     logo: [''],
+    autoDelete: [''],
   });
 
   get nameControl() {
@@ -60,6 +66,8 @@ export class InstanceGroupAddEditComponent implements OnInit {
     private loggingService: LoggingService,
     private messageBoxService: MessageboxService,
     public location: Location,
+    private viewContainerRef: ViewContainerRef,
+    private overlay: Overlay,
   ) {}
 
   ngOnInit() {
@@ -68,6 +76,7 @@ export class InstanceGroupAddEditComponent implements OnInit {
 
     if (this.isCreate()) {
       const instanceGroup = cloneDeep(EMPTY_INSTANCE_GROUP);
+      instanceGroup.autoDelete = true;
       this.instanceGroupFormGroup.setValue(instanceGroup);
       this.clonedInstanceGroup = cloneDeep(instanceGroup);
     } else {
@@ -225,4 +234,44 @@ export class InstanceGroupAddEditComponent implements OnInit {
       this.loading = false;
     }
   }
+
+  openOverlay(relative: MatButton, template: TemplateRef<any>) {
+    this.closeOverlay();
+
+    this.overlayRef = this.overlay.create({
+      positionStrategy: this.overlay
+        .position()
+        .flexibleConnectedTo(relative._elementRef)
+        .withPositions([
+          {
+            overlayX: 'end',
+            overlayY: 'bottom',
+            originX: 'center',
+            originY: 'top',
+          },
+        ])
+        .withPush()
+        .withViewportMargin(0)
+        .withDefaultOffsetX(35)
+        .withDefaultOffsetY(-10),
+      scrollStrategy: this.overlay.scrollStrategies.close(),
+      hasBackdrop: true,
+      backdropClass: 'info-backdrop',
+    });
+    this.overlayRef.backdropClick().subscribe(() => this.closeOverlay());
+
+    const portal = new TemplatePortal(template, this.viewContainerRef);
+    this.overlayRef.attach(portal);
+  }
+
+  /** Closes the overlay if present */
+  closeOverlay() {
+    if (this.overlayRef) {
+      this.overlayRef.detach();
+      this.overlayRef.dispose();
+      this.overlayRef = null;
+    }
+  }
+
 }
+

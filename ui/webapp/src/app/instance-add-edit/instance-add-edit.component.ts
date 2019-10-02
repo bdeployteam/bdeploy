@@ -1,7 +1,10 @@
+import { Overlay, OverlayRef } from '@angular/cdk/overlay';
+import { TemplatePortal } from '@angular/cdk/portal';
 import { Location } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { MatButton } from '@angular/material';
+import { ActivatedRoute } from '@angular/router';
 import { cloneDeep, isEqual } from 'lodash';
 import { Observable, of } from 'rxjs';
 import { finalize, map, startWith } from 'rxjs/operators';
@@ -59,18 +62,22 @@ export class InstanceAddEditComponent implements OnInit {
       uri: ['', [Validators.required, InstanceValidators.urlPattern]],
       authPack: ['', Validators.required],
     }),
+    autoUninstall: [''],
   });
+
+  private overlayRef: OverlayRef;
 
   constructor(
     private formBuilder: FormBuilder,
     private instanceGroupService: InstanceGroupService,
     private productService: ProductService,
     private instanceService: InstanceService,
-    private router: Router,
     private route: ActivatedRoute,
     private loggingService: LoggingService,
     private messageBoxService: MessageboxService,
     public location: Location,
+    private viewContainerRef: ViewContainerRef,
+    private overlay: Overlay,
   ) {}
 
   ngOnInit() {
@@ -82,6 +89,7 @@ export class InstanceAddEditComponent implements OnInit {
       this.instanceGroupService.createUuid(this.groupParam).subscribe((uuid: string) => {
         this.log.debug('got uuid ' + uuid);
         const instance = cloneDeep(EMPTY_INSTANCE);
+        instance.autoUninstall = true;
         instance.uuid = uuid;
         this.instanceFormGroup.setValue(instance);
         this.clonedInstance = cloneDeep(instance);
@@ -273,4 +281,43 @@ export class InstanceAddEditComponent implements OnInit {
   get masterTokenControl() {
     return this.instanceFormGroup.get('target.authPack');
   }
+
+  openOverlay(relative: MatButton, template: TemplateRef<any>) {
+    this.closeOverlay();
+
+    this.overlayRef = this.overlay.create({
+      positionStrategy: this.overlay
+        .position()
+        .flexibleConnectedTo(relative._elementRef)
+        .withPositions([
+          {
+            overlayX: 'end',
+            overlayY: 'bottom',
+            originX: 'center',
+            originY: 'top',
+          },
+        ])
+        .withPush()
+        .withViewportMargin(0)
+        .withDefaultOffsetX(35)
+        .withDefaultOffsetY(-10),
+      scrollStrategy: this.overlay.scrollStrategies.close(),
+      hasBackdrop: true,
+      backdropClass: 'info-backdrop',
+    });
+    this.overlayRef.backdropClick().subscribe(() => this.closeOverlay());
+
+    const portal = new TemplatePortal(template, this.viewContainerRef);
+    this.overlayRef.attach(portal);
+  }
+
+  /** Closes the overlay if present */
+  closeOverlay() {
+    if (this.overlayRef) {
+      this.overlayRef.detach();
+      this.overlayRef.dispose();
+      this.overlayRef = null;
+    }
+  }
+
 }

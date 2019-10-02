@@ -81,6 +81,7 @@ describe('Instance Tests', function () {
    */
   it('Install & activate', function() {
     cy.visit('/#/instance/overview/Test/' + instanceUuid);
+    cy.closeConfigureApplications();
     cy.getLatestInstanceVersion().installAndActivate();
   })
 
@@ -156,7 +157,7 @@ describe('Instance Tests', function () {
 
   it('Export instance for future upgrade tests', () => {
     cy.visit('/#/instance/overview/Test/' + instanceUuid);
-
+    cy.closeConfigureApplications();
     cy.getLatestInstanceVersion().find('button').contains('more_vert').click();
     cy.get('[role=menuitem]').contains('Export...').should('be.enabled').downloadFile('export-test.zip');
   })

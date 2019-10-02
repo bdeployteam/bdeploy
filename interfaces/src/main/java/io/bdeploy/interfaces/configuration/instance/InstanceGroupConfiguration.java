@@ -24,4 +24,8 @@ public class InstanceGroupConfiguration {
      */
     public ObjectId logo;
 
+    /**
+     * Schedule background deletion of old and unused product versions
+     */
+    public boolean autoDelete;
 }

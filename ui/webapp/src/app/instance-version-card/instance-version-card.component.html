@@ -4,7 +4,8 @@
         <mat-progress-spinner *ngIf="isLoading" diameter="24" color="accent" mode="indeterminate"></mat-progress-spinner>
         <ng-container *ngIf="!isLoading">
           <mat-icon class='icon-margin' *ngIf="isActive" matTooltip="Installed and active">check_circle</mat-icon>
-          <mat-icon class='icon-margin' *ngIf="isDeployed" matTooltip="Installed">check_circle_outline</mat-icon>
+          <mat-icon class='icon-margin' *ngIf="isDeployed && !isAutoUninstall" matTooltip="Installed">check_circle_outline</mat-icon>
+          <mat-icon class='icon-margin icon-uninstall' *ngIf="isDeployed && isAutoUninstall" matTooltip="Will be uninstalled by cleanup">check_circle_outline</mat-icon>
         </ng-container>
     </div>
     <div class="mat-title title">{{ instanceVersionDto.product.tag }}</div>

@@ -8,23 +8,52 @@
     </mat-toolbar>
 
     <div class="field-container margin-container">
-      <mat-form-field>
-        <input class="input-field" matInput [readonly]="!isCreate()"
-          formControlName="name" placeholder="Instance group name (Cannot be changed after creation!)" />
-        <mat-error *ngIf="nameControl.invalid">{{getErrorMessage(nameControl)}}</mat-error>
-      </mat-form-field>
-      <mat-form-field>
-        <input class="input-field" matInput
-          formControlName="description" placeholder="Description" />
-        <mat-error *ngIf="descriptionControl.invalid">{{getErrorMessage(descriptionControl)}}</mat-error>
-      </mat-form-field>
+      <mat-grid-list cols="2" rowHeight="5em">
+        <mat-grid-tile>
+          <mat-form-field>
+            <input class="input-field" matInput [readonly]="!isCreate()"
+              formControlName="name" placeholder="Instance group name (Cannot be changed after creation!)" />
+            <mat-error *ngIf="nameControl.invalid">{{getErrorMessage(nameControl)}}</mat-error>
+          </mat-form-field>
+        </mat-grid-tile>
+
+        <mat-grid-tile>
+          <ng-template #infoPopup>
+            <mat-card class="info-card">
+              <div class="mat-title">Auto Delete</div>
+              <mat-card-content>
+                Enables automatic deletion of old product versions that<br>
+                are no longer used by instances of this instance group.
+              </mat-card-content>
+            </mat-card>
+          </ng-template>
+          <div class="boolean-param-field">
+            <mat-slide-toggle class="boolean-param-widget" formControlName="autoDelete"></mat-slide-toggle>
+            <label class="boolean-param-label">Auto Delete</label>
+          </div>
+          <div class="icons">
+            <button mat-icon-button type="button" #infoButton (click)="openOverlay(infoButton, infoPopup)">
+              <mat-icon class="info-icon">info</mat-icon>
+            </button>
+          </div>
+        </mat-grid-tile>
+
+        <mat-grid-tile [colspan]="2">
+          <mat-form-field>
+            <input class="input-field" matInput
+              formControlName="description" placeholder="Description" />
+            <mat-error *ngIf="descriptionControl.invalid">{{getErrorMessage(descriptionControl)}}</mat-error>
+          </mat-form-field>
+        </mat-grid-tile>
+      </mat-grid-list>
 
       <div class="logo-box">
-        <h3 class="logo-title">Logo</h3>
+        <span class="logo-title">Logo</span>
         <button mat-icon-button class="logo-button" type="button" [disabled]="loading" (click)="fileInput.click()"><mat-icon>folder_open</mat-icon></button>
         <button mat-icon-button class="logo-button" type="button" [disabled]="loading" (click)="deleteLogo()"><mat-icon>delete</mat-icon></button>
         <input type="file" hidden (change)="onLogoChange($event)" #fileInput>
       </div>
+
       <div class="logo-box logo-preview">
         <div class="logo-img" *ngIf="getLogoUrl() != null">
           <img class="logo" [src]="getLogoUrl()">

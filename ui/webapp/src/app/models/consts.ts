@@ -41,12 +41,14 @@ export const EMPTY_INSTANCE: InstanceConfiguration = {
   autoStart: false,
   product: EMPTY_MANIFEST_KEY,
   target: EMPTY_REMOTE_SERVICE,
+  autoUninstall: null
 };
 
 export const EMPTY_INSTANCE_GROUP: InstanceGroupConfiguration = {
   name: null,
   description: null,
   logo: null,
+  autoDelete: null
 };
 
 export const EMPTY_SOFTWARE_REPO: SoftwareRepositoryConfiguration = {
@@ -83,6 +85,7 @@ export const EMPTY_PARAMETER_DESCRIPTOR: ParameterDescriptor = {
 
 export const EMPTY_DEPLOYMENT_STATE: InstanceStateRecord = {
   activeTag: null,
+  lastActiveTag: null,
   installedTags: []
 };
 

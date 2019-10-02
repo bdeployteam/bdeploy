@@ -14,14 +14,14 @@
     </mat-toolbar>
 
     <div class="container">
-      <mat-grid-list cols="3" rowHeight="5em">
-        <mat-grid-tile>
+      <mat-grid-list cols="6" rowHeight="5em">
+        <mat-grid-tile [colspan]="2">
           <mat-form-field>
             <input type="text" class="input-field" matInput formControlName="name" placeholder="Name" />
             <mat-error *ngIf="nameControl.invalid">{{getErrorMessage(nameControl)}}</mat-error>
           </mat-form-field>
         </mat-grid-tile>
-        <mat-grid-tile>
+        <mat-grid-tile [colspan]="2">
           <mat-form-field>
             <mat-select formControlName="purpose" placeholder="Purpose">
               <mat-option *ngFor="let purpose of purposes" value="{{purpose}}">{{purpose}}</mat-option>
@@ -35,7 +35,28 @@
             <label class="boolean-param-label"> Auto Start </label>
           </div>
         </mat-grid-tile>
-        <mat-grid-tile [colspan]="3">
+        <mat-grid-tile>
+          <ng-template #infoPopup>
+            <mat-card class="info-card">
+              <div class="mat-title">Auto Uninstall</div>
+              <mat-card-content>
+                Enables automatic uninstall of old instance<br>
+                versions that are older than the activated<br>
+                and previously activated instance version.
+              </mat-card-content>
+            </mat-card>
+          </ng-template>
+          <div class="boolean-param-field">
+            <mat-slide-toggle class="boolean-param-widget" formControlName="autoUninstall"></mat-slide-toggle>
+            <label class="boolean-param-label">Auto Uninstall</label>
+          </div>
+          <div class="icons">
+            <button mat-icon-button type="button" #infoButton (click)="openOverlay(infoButton, infoPopup)">
+              <mat-icon class="info-icon">info</mat-icon>
+            </button>
+          </div>
+        </mat-grid-tile>
+        <mat-grid-tile [colspan]="6">
           <mat-form-field>
             <input type="text" class="input-field" matInput formControlName="description" placeholder="Description" />
             <mat-error *ngIf="descriptionControl.invalid">{{getErrorMessage(descriptionControl)}}</mat-error>
@@ -68,8 +89,8 @@
 
     <div formGroupName="target" class="container">
       <h3 class="header"> Master </h3>
-      <mat-grid-list cols="2" rowHeight="5em">
-        <mat-grid-tile>
+      <mat-grid-list cols="3" rowHeight="5em">
+        <mat-grid-tile [colspan]="masterTokenCheckboxVisible ? 2 : 3">
           <mat-form-field>
             <input type="text" placeholder="Master URL" matInput formControlName="uri" [matAutocomplete]="auto">
             <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
@@ -79,20 +100,20 @@
           </mat-form-field>
         </mat-grid-tile>
 
-        <mat-grid-tile>
-          <div class="boolean-param-field underline-field" *ngIf="masterTokenCheckboxVisible">
+        <mat-grid-tile *ngIf="masterTokenCheckboxVisible">
+          <div class="boolean-param-field underline-field">
             <mat-slide-toggle (change)="toggleUpdateMasterToken()"> </mat-slide-toggle>
             <label class="boolean-param-label"> Update Security Token </label>
           </div>
         </mat-grid-tile>
+      </mat-grid-list>
 
-        <mat-grid-tile [colspan]="2">
-          <mat-form-field *ngIf="masterTokenControlVisible">
-            <textarea matInput placeholder="Security Token" formControlName="authPack"></textarea>
+      <div class="tokenbox" *ngIf="masterTokenControlVisible">
+          <mat-form-field>
+            <textarea matInput placeholder="Security Token" formControlName="authPack" class="textarea-param-field"></textarea>
             <mat-error *ngIf="masterTokenControl.invalid">{{getErrorMessage(masterTokenControl)}}</mat-error>
           </mat-form-field>
-        </mat-grid-tile>
-      </mat-grid-list>
+      </div>
     </div>
   </form>
 </section>

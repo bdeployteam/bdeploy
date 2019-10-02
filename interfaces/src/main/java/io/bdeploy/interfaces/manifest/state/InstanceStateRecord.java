@@ -9,9 +9,11 @@ import java.util.List;
 public class InstanceStateRecord {
 
     public String activeTag;
+    public String lastActiveTag;
     public List<String> installedTags = new ArrayList<>();
 
     public InstanceStateRecord setActive(String tag) {
+        lastActiveTag = activeTag;
         activeTag = tag;
         return this;
     }
@@ -23,6 +25,7 @@ public class InstanceStateRecord {
 
     public InstanceStateRecord setUninstalled(String tag) {
         if (tag.equals(activeTag)) {
+            lastActiveTag = activeTag;
             activeTag = null;
         }
         installedTags.remove(tag);

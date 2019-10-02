@@ -27,17 +27,21 @@ export class InstanceVersionCardComponent implements OnChanges {
   isDeployed: boolean;
   isRunning: boolean;
 
+  isAutoUninstall: boolean;
+
   constructor() {}
 
   ngOnChanges() {
     if (!this.state || this.dirty) {
       this.isActive = false;
       this.isDeployed = false;
+      this.isAutoUninstall = false;
     } else {
       this.isActive = this.state.activeTag === this.instanceVersionDto.key.tag;
-      this.isDeployed =
-        this.state.installedTags.findIndex(this.tagPredicate()) !== -1 &&
-        this.state.activeTag !== this.instanceVersionDto.key.tag;
+      this.isDeployed = this.state.installedTags.findIndex(this.tagPredicate()) !== -1 && !this.isActive;
+
+      this.isAutoUninstall = (this.state.activeTag && +this.state.activeTag > +this.instanceVersionDto.key.tag) && //
+        (!this.state.lastActiveTag || +this.state.lastActiveTag > +this.instanceVersionDto.key.tag);
     }
   }
 

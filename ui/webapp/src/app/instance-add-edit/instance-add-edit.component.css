@@ -39,6 +39,14 @@ mat-form-field {
   margin-top: -10px;
 }
 
+.tokenbox {
+  display: flex;
+  margin-top: 10px;
+}
+.textarea-param-field {
+  min-height: 120px;
+}
+
 .boolean-param-field {
   flex: 1 1 auto;
   justify-content: left;

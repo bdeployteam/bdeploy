@@ -65,6 +65,13 @@ Cypress.Commands.add('deleteInstance', function(group, instanceUuid) {
   cy.get('body').contains(instanceUuid).should('not.exist');
 })
 
+Cypress.Commands.add('gotoInstance', function(groupName, instanceUuid) {
+   cy.visit('/');
+   cy.get('[data-cy=group-' + groupName + ']').first().click();
+   cy.get('mat-progress-spinner').should('not.exist')
+   cy.get('[data-cy=instance-' + instanceUuid + ']').first().click();
+})
+
 Cypress.Commands.add('installAndActivate', {prevSubject: true}, (subject) => {
   cy.get('mat-loading-spinner').should('not.exist');
 
@@ -88,13 +95,15 @@ Cypress.Commands.add('installAndActivate', {prevSubject: true}, (subject) => {
   return cy.wrap(subject);
 })
 
-Cypress.Commands.add('getLatestInstanceVersion', function() {
+Cypress.Commands.add('closeConfigureApplications', function() {
   cy.get('body').then($body => {
     if($body.find('mat-toolbar:contains("close")').length > 0) {
       cy.contains('button', 'close').click();
     }
   })
+})
 
+Cypress.Commands.add('getLatestInstanceVersion', function() {
   cy.contains('mat-toolbar', 'Instance Versions').should('exist').and('be.visible')
   return cy.get('app-instance-version-card').first()
 })
@@ -138,4 +147,16 @@ Cypress.Commands.add('deleteMissingParameter', function(name) {
 
   cy.get('@panel').click();
   cy.get('@panel').contains('mat-grid-tile', name).contains('button','delete').click();
+})
+
+Cypress.Commands.add('createNewInstanceVersionByDummyChange', function(instanceGroupName, instanceUuid, nodeName, applicationName) {
+  cy.gotoInstance(instanceGroupName, instanceUuid);
+  cy.getApplicationConfigCard(nodeName, applicationName).clickContextMenuItem('Configure...')
+
+  // toggle 'Keep Alive' slider
+  cy.contains('div', 'Keep Alive').find('.mat-slide-toggle-thumb').first().click();
+
+  cy.contains('button', 'APPLY').click();
+  cy.getApplicationConfigCard(nodeName, applicationName).find('.app-config-modified').should('exist')
+  cy.contains('button', 'SAVE').click();
 })

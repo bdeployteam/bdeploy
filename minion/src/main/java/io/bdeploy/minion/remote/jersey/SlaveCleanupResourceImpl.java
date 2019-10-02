@@ -54,7 +54,6 @@ public class SlaveCleanupResourceImpl implements SlaveCleanupResource {
 
         toClean.removeAll(allRefs);
         for (Key clean : toClean) {
-            // this check might keep alive meta manifests for one additional cleanup cycle.
             if (MetaManifest.isMetaManifest(clean) && MetaManifest.isParentAlive(clean, hive, toClean)) {
                 continue;
             }
@@ -89,6 +88,8 @@ public class SlaveCleanupResourceImpl implements SlaveCleanupResource {
                     needPrune = true;
                     doDeleteManifest(root.getHive(), Key.parse(action.what));
                     break;
+                default:
+                    throw new IllegalStateException("CleanupType " + action.type + " not supported here");
             }
         }
 

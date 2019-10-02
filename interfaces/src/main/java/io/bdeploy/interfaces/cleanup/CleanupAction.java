@@ -15,7 +15,8 @@ public class CleanupAction {
 
     public enum CleanupType {
         DELETE_MANIFEST,
-        DELETE_FOLDER
+        DELETE_FOLDER,
+        UNINSTALL_INSTANCE_VERSION
     }
 
     /**

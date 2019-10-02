@@ -4,7 +4,6 @@ import java.text.ParseException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Objects;
-import java.util.SortedSet;
 
 import org.quartz.CronScheduleBuilder;
 import org.quartz.Job;
@@ -21,7 +20,6 @@ import org.quartz.TriggerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.util.DateHelper;
@@ -120,8 +118,7 @@ public class MasterCleanupJob implements Job {
         try (BHiveRegistry registry = new BHiveRegistry(new ActivityReporter.Null())) {
             mr.getStorageLocations().forEach(registry::scanLocation);
 
-            SortedSet<Key> allUniqueKeysToKeep = CleanupHelper.findAllUniqueKeys(registry);
-            CleanupHelper.cleanAllMinions(mr.getMinions(), allUniqueKeysToKeep, true);
+            CleanupHelper.cleanAllMinions(null, mr.getMinions(), registry, true);
 
             mr.modifyState(s -> s.cleanupLastRun = System.currentTimeMillis());
             log.info("Cleanup finished");
