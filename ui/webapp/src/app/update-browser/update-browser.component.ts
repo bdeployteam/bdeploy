@@ -99,16 +99,16 @@ export class UpdateBrowserComponent implements OnInit {
     const doIt = await this.mbService.openAsync({title: 'Delete?', message: `Delete ${keys.keys.length} associated software packages from the server?`, mode: MessageBoxMode.QUESTION});
     if (doIt) {
       await this.updService.deleteVersion(keys.keys).toPromise();
-      this.reload();
     }
+    this.reload();
   }
 
   async deleteLauncherVersion(keys: GroupedKeys) {
     const doIt = await this.mbService.openAsync({title: 'Delete?', message: `Delete ${keys.keys.length} associated launcher packages from the server?`, mode: MessageBoxMode.QUESTION});
     if (doIt) {
       await this.updService.deleteVersion(keys.keys).toPromise();
-      this.reload();
     }
+    this.reload();
   }
 
   async updateSystemVersion(keys: GroupedKeys) {
