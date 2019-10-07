@@ -1,4 +1,4 @@
-=== How can i change a process configuration?
+=== How can I change a process configuration?
 
 Changing the configuration of a *Process* is done in the *Process Configuration Dialog*:
 

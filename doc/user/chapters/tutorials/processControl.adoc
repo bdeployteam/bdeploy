@@ -1,4 +1,4 @@
-=== How can i see what's up and running?
+=== How can I see what's up and running?
 
 The status of an *Instance* is visualized with icons in the *Instance Overview* page at several places:
 
@@ -6,15 +6,15 @@ The status of an *Instance* is visualized with icons in the *Instance Overview* 
 |===
 
 a| *Process Card*
-a| image:images/BDeploy_Tutorial_Process_Card.png[align=center]
+a| image::images/BDeploy_Tutorial_Process_Card.png[align=center,link="images/BDeploy_Tutorial_Process_Card.png"]
 a| An icon on card shows the current status. No icon means the process is stopped.
 
 a| *Process Control*
-a| image:images/BDeploy_Tutorial_Process_Control.png[align=center]
+a| image::images/BDeploy_Tutorial_Process_Control.png[align=center,link="images/BDeploy_Tutorial_Process_Control.png"]
 a| The sidebar shows the current process status along with some additional information about the uptime. No icon means the process is stopped.
 
 a| *Instance Version*
-a| image:images/BDeploy_Tutorial_Process_Versions.png[align=center]
+a| image::images/BDeploy_Tutorial_Process_Versions.png[align=center,link="images/BDeploy_Tutorial_Process_Versions.png"]
 a| An icon on the card shows the cumulated status of _all_ processes of this version. No icon means that nothing is running in this version.
 |===
 
