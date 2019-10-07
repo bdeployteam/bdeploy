@@ -60,7 +60,7 @@ export class ProductListComponent implements OnInit {
     }
     return (
       'Delete product version' +
-      (this.usageCount(product) ? ' (used in ' + this.usageCount(product) + ' instances)' : '')
+      (this.usageCount(product) ? ' (used in ' + this.usageCount(product) + ' instance versions)' : '')
     );
   }
 
