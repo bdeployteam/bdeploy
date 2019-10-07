@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.ActivityReporter.ActivityCancelledException;
+import io.bdeploy.common.util.ExceptionHelper;
 
 @Provider
 public class JerseyExceptionMapper implements ExceptionMapper<RuntimeException> {
@@ -37,7 +38,7 @@ public class JerseyExceptionMapper implements ExceptionMapper<RuntimeException> 
         }
 
         // a little hacky: provide the exception string representations as reason.
-        return Response.status(code, mapExceptionCausesToReason(exception)).build();
+        return Response.status(code, ExceptionHelper.mapExceptionCausesToReason(exception)).build();
     }
 
     private boolean hasCancelException(Throwable e) {
@@ -58,28 +59,6 @@ public class JerseyExceptionMapper implements ExceptionMapper<RuntimeException> 
             e = parent;
         }
         return false;
-    }
-
-    private String mapExceptionCausesToReason(RuntimeException exception) {
-        if (exception == null) {
-            return "<unknown>";
-        }
-
-        StringBuilder reason = new StringBuilder();
-        Throwable current = exception;
-        do {
-            reason.append(current.toString());
-            reason.append(" // ");
-            if (current instanceof InvocationTargetException) {
-                current = ((InvocationTargetException) current).getTargetException();
-            } else {
-                if (current == current.getCause()) {
-                    break;
-                }
-                current = current.getCause();
-            }
-        } while (current != null);
-        return reason.toString();
     }
 
 }

@@ -29,10 +29,12 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.metrics.Metrics;
 import io.bdeploy.common.metrics.Metrics.MetricGroup;
+import io.bdeploy.common.util.ExceptionHelper;
 import io.bdeploy.common.util.FutureHelper;
 import io.bdeploy.common.util.NamedDaemonThreadFactory;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.jersey.audit.AuditRecord;
+import io.bdeploy.jersey.audit.AuditRecord.Severity;
 import io.bdeploy.jersey.audit.Auditor;
 import io.bdeploy.jersey.audit.NullAuditor;
 import io.bdeploy.jersey.audit.RollingFileAuditor;
@@ -110,6 +112,13 @@ public class BHive implements AutoCloseable, BHiveExecution {
     }
 
     /**
+     * Retrieve the auditor for testing.
+     */
+    public Auditor getAuditor() {
+        return auditor;
+    }
+
+    /**
      * Execute the given {@link Operation} on this {@link BHive}.
      */
     @Override
@@ -120,6 +129,9 @@ public class BHive implements AutoCloseable, BHiveExecution {
                     .addParameters(new AuditParameterExtractor().extract(op)).build());
             return op.call();
         } catch (Exception e) {
+            auditor.audit(AuditRecord.Builder.fromSystem().setWhat(op.getClass().getSimpleName()).setSeverity(Severity.ERROR)
+                    .addParameters(new AuditParameterExtractor().extract(op))
+                    .setMessage(ExceptionHelper.mapExceptionCausesToReason(e)).build());
             throw new IllegalStateException("operation on hive " + uri + " failed", e);
         } finally {
             op.closeOperation();

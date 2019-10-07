@@ -23,7 +23,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import io.bdeploy.common.TempDirectory;
 import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.jersey.TestServer;
-import io.bdeploy.jersey.audit.RollingFileAuditor;
 
 @ExtendWith(TempDirectory.class)
 public class AuditTest {
@@ -41,6 +40,10 @@ public class AuditTest {
         @GET
         @Path("/notfound")
         public String lookup();
+
+        @GET
+        @Path("/throwSomething")
+        public String throwSomething();
     }
 
     public static class ServiceImpl implements Service {
@@ -60,6 +63,11 @@ public class AuditTest {
             throw new WebApplicationException(Status.NOT_FOUND);
         }
 
+        @Override
+        public String throwSomething() {
+            throw new RuntimeException("Something happened", new RuntimeException("With a cause"));
+        }
+
     }
 
     @RegisterExtension
@@ -77,12 +85,17 @@ public class AuditTest {
         assertThrows(NotFoundException.class, () -> {
             svc.lookup();
         });
+        assertThrows(RuntimeException.class, () -> {
+            svc.throwSomething();
+        });
 
         RollingFileAuditor auditor = (RollingFileAuditor) srv.getAuditor();
         List<String> lines = Files.readAllLines(auditor.getLogFile());
-        assertEquals(3, lines.size());
+        assertEquals(4, lines.size());
         assertTrue(lines.get(0).contains("q:x=[Test]"));
         assertTrue(lines.get(2).contains("Not Found"));
+        assertTrue(lines.get(3).contains("Something happened"));
+        assertTrue(lines.get(3).contains("With a cause"));
     }
 
 }
