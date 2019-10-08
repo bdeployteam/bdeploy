@@ -52,6 +52,7 @@ public class BHive implements AutoCloseable, BHiveExecution {
     private final URI uri;
     private final FileSystem zipFs;
     private final Path objTmp;
+    private final Path markerTmp;
     private final ObjectDatabase objects;
     private final ManifestDatabase manifests;
     private final ActivityReporter reporter;
@@ -91,7 +92,10 @@ public class BHive implements AutoCloseable, BHiveExecution {
 
         Path objRoot = relRoot.resolve("objects");
         try {
-            objTmp = zipFs == null ? objRoot : Files.createTempDirectory("objdb-");
+            objTmp = zipFs == null ? relRoot.resolve("tmp") : Files.createTempDirectory("objdb-");
+            markerTmp = zipFs == null ? relRoot.resolve("markers") : objTmp.resolve("markers");
+
+            PathHelper.mkdirs(markerTmp);
         } catch (IOException e) {
             throw new IllegalStateException("Cannot create temporary directory for zipped BHive", e);
         }
@@ -194,6 +198,13 @@ public class BHive implements AutoCloseable, BHiveExecution {
          */
         protected ManifestDatabase getManifestDatabase() {
             return hive.manifests;
+        }
+
+        /**
+         * @return the root path for marker databases which contribute to protected objects.
+         */
+        protected Path getMarkerRoot() {
+            return hive.markerTmp;
         }
 
         /**

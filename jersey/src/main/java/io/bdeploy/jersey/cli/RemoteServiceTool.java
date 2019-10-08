@@ -117,8 +117,12 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
             helpAndFailIfMissing(rc.passphrase(), "Missing --passphrase");
 
             svc = new RemoteService(r, new OnDiscKeyStore(Paths.get(rc.keystore()), rc.passphrase()));
-        } else if (r != null && !r.getScheme().equals("https")) {
-            svc = new RemoteService(UriBuilder.fromUri(r).build());
+        } else if (r != null && (r.getScheme() == null || !r.getScheme().equals("https"))) {
+            if (r.getScheme() == null) {
+                svc = new RemoteService(UriBuilder.fromUri(r).scheme("file").build());
+            } else {
+                svc = new RemoteService(UriBuilder.fromUri(r).build());
+            }
         } else {
             if (!optional) {
                 helpAndFail("Need either --tokenFile, --token or --keystore arguments to access remote service");
