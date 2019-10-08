@@ -92,6 +92,9 @@ export class UpdateBrowserComponent implements OnInit {
     if (upper.endsWith(OperatingSystem.AIX)) {
       return OperatingSystem.AIX;
     }
+    if (upper.endsWith(OperatingSystem.MACOS)) {
+      return OperatingSystem.MACOS;
+    }
     return OperatingSystem.UNKNOWN;
   }
 

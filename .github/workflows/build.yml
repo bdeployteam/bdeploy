@@ -6,7 +6,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
     - name: Checkout from GIT
@@ -23,4 +23,9 @@ jobs:
         node-version: '10.x'
 
     - name: Build and Test
+      if: matrix.os != 'macos-latest'
       run: ./gradlew --stacktrace clean build releaseTest -PrecordCypress -Dtestlogger.theme=plain-parallel
+
+    - name: Build and Test (Mac)
+      if: matrix.os == 'macos-latest'
+      run: ./gradlew --stacktrace clean build -PrecordCypress -Dtestlogger.theme=plain-parallel

@@ -5,7 +5,7 @@
     <ng-container *ngIf="!isLoading()">
       <span class="toolbar-text">Platform:</span>
       <div class="toolbar-icons">
-        <ng-container *ngFor="let os of CLIENT_OS">
+        <ng-container *ngFor="let os of getAllOs()">
           <button mat-icon-button (click)='switchOs(os)' matTooltip="{{os}}">
             <mat-icon [ngClass]="['toolbar-icon', os === activeOs ? 'toolbar-icon-active' : 'none']" [svgIcon]='os'></mat-icon>
           </button>

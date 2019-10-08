@@ -11,4 +11,8 @@ BDeploy Launcher is working!
 This file has been written by the demo client application on your system, and opened with your current text editor.
 EOF
 
-xdg-open demo.txt
+if [[ $(uname) == "Darwin" ]]; then
+    open -e demo.txt
+else
+    xdg-open demo.txt
+fi

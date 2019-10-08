@@ -1,6 +1,8 @@
 {
   "projectId": "k88zyw",
   "baseUrl": "https://localhost:7707",
+  "defaultCommandTimeout": 10000,
+  "requestTimeout": 10000,
   "env": {
     "backendBaseUrl": "https://localhost:7707/api"
   }

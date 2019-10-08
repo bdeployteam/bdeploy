@@ -3,6 +3,7 @@ name: "Server Application"
 supportedOperatingSystems:
   - LINUX
   - WINDOWS
+  - MACOS
 
 processControl:
   gracePeriod: 3000
@@ -14,7 +15,7 @@ processControl:
   noOfRetries: 2
 
 startCommand:
-  launcherPath: "{{WINDOWS:launch2.bat}}{{LINUX:launch2.sh}}"
+  launcherPath: "{{WINDOWS:launch2.bat}}{{LINUX:launch2.sh}}{{MACOS:launch2.sh}}"
   parameters:
     - uid: "param.text"
       name: "Text"

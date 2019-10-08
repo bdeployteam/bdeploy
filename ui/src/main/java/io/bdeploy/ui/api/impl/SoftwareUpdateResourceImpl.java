@@ -253,9 +253,11 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
         if (os == OperatingSystem.WINDOWS) {
             fileName = "BDeploy Click & Start - Installer.exe";
             createWindowsInstaller(installerPath, launcherKey, launcherLocation);
-        } else if (os == OperatingSystem.LINUX) {
+        } else if (os == OperatingSystem.LINUX || os == OperatingSystem.MACOS) {
             fileName = "BDeploy Click & Start-Installer.run";
             createLinuxInstaller(installerPath, launcherKey, launcherLocation);
+        } else {
+            throw new WebApplicationException("MAC OS Installer not yet supported");
         }
 
         // Register the file for downloading

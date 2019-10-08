@@ -57,6 +57,8 @@ ext {
     win64jdk = readJdk("win64jdk")
     // Defines the path to a LINUX JDK, to be able to build linux dist packages on windows
     linux64jdk = readJdk("linux64jdk")
+    // Defines the path to a WINDOWS JDK, to be able to build windows dist packages on linux
+    mac64jdk = readJdk("mac64jdk")
 
     // build SNAPSHOT replacement where needed.
     buildDate = new Date().format('yyyyMMddHHmm')
@@ -249,8 +251,25 @@ configure([project(':minion'), project(':launcher')]) {
         }
     }
 
+    task genMac64VersionProperties() {
+        dependsOn genVersionProperties
+        outputs.upToDateWhen { false }
+        outputs.file "$buildDir/resources/mac64/version.properties"
+        doLast {
+            file("$buildDir/resources/mac64").mkdirs()
+            file("$buildDir/resources/mac64/version.properties").withWriter { w ->
+                def p = new Properties()
+                file("$buildDir/resources/main/version.properties").withInputStream { is -> p.load is }
+                p['os'] = 'MACOS' // literal of OperatingSystem
+                p.store w, null
+            }
+        }
+    }
+
+
     processResources.dependsOn genLinux64VersionProperties
     processResources.dependsOn genWin64VersionProperties
+    processResources.dependsOn genMac64VersionProperties
 }
 
 def void addMultiPlatformDistBuild(Project prj) {
@@ -282,6 +301,14 @@ def void addMultiPlatformDistBuild(Project prj) {
                 from prj.genWin64VersionProperties.outputs
             }
         }
+
+        mac64 {
+            contents {
+                with prj.distributions.main.getContents()
+                from rootProject.jlinkMac64.outputs
+                from prj.genMac64VersionProperties.outputs
+            }
+        }
     }
 
     // don't build the ZIP dist without any JVM
@@ -291,6 +318,7 @@ def void addMultiPlatformDistBuild(Project prj) {
     prj.distTar.enabled = false
     prj.linux64DistTar.enabled = false
     prj.win64DistTar.enabled = false
+    prj.mac64DistTar.enabled = false
 
     if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
         // need special JDK for win64 as module input dir
@@ -299,16 +327,38 @@ def void addMultiPlatformDistBuild(Project prj) {
         if(!hasWinJdk()) {
             prj.win64DistZip.enabled = false
         }
-    } else {
+        if(!hasMacJdk()) {
+            prj.mac64DistZip.enabled = false
+        }
+    } else if(org.gradle.internal.os.OperatingSystem.current().isWindows()) {
         // need special JDK for linux64 as module input dir
         prj.build.dependsOn prj.win64DistZip
         prj.installDist.dependsOn prj.installWin64Dist
         if(!hasLinuxJdk()) {
             prj.linux64DistZip.enabled = false
         }
+        if(!hasMacJdk()) {
+            prj.mac64DistZip.enabled = false
+        }
+    } else if(org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
+        // need special JDK for linux64 as module input dir
+        prj.build.dependsOn prj.mac64DistZip
+        prj.installDist.dependsOn prj.installMac64Dist
+        if(!hasLinuxJdk()) {
+            prj.linux64DistZip.enabled = false
+        }
+        if(!hasWinJdk()) {
+            prj.win64DistZip.enabled = false
+        }
     }
 
     prj.installLinux64Dist.doFirst {
+        delete "$destinationDir"
+    }
+    prj.installWin64Dist.doFirst {
+        delete "$destinationDir"
+    }
+    prj.installMac64Dist.doFirst {
         delete "$destinationDir"
     }
 
@@ -359,7 +409,11 @@ private boolean hasWinJdk() {
 }
 
 private boolean hasLinuxJdk() {
-    return file("$linux64jdk/bin/java").exists();
+    return file("$linux64jdk/lib/libjava.so").exists();
+}
+
+private boolean hasMacJdk() {
+    return file("$mac64jdk/lib/libjava.dylib").exists();
 }
 
 private String readJdk(String which) {
@@ -373,8 +427,10 @@ private String readJdk(String which) {
 private void updateJavaPath(ProcessForkOptions options) {
     if(org.gradle.internal.os.OperatingSystem.current().isLinux()) {
         options.executable = "${rootProject.buildDir}/jlink/linux64/jre/bin/java"
-    } else {
+    } else if(org.gradle.internal.os.OperatingSystem.current().isWindows()) {
         options.executable = "${rootProject.buildDir}/jlink/win64/jre/bin/java.exe"
+    } else if(org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
+        options.executable = "${rootProject.buildDir}/jlink/mac64/jre/bin/java"
     }
 }
 
@@ -385,7 +441,9 @@ ext.configureJlink = { task, String modHome, String outDir ->
         def linkExec
         if(org.gradle.internal.os.OperatingSystem.current().isLinux()) {
             linkExec = [ "$linux64jdk/bin/jlink", "--module-path", "$modHome/jmods:mlib" ]
-        } else {
+        } else if(org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
+            linkExec = [ "$mac64jdk/bin/jlink", "--module-path", "$modHome/jmods:mlib" ]
+        } else if(org.gradle.internal.os.OperatingSystem.current().isWindows()) {
             linkExec = [ "$win64jdk\\bin\\jlink.exe", "--module-path", "$modHome\\jmods;mlib" ]
         }
 
@@ -422,11 +480,22 @@ task jlinkWin64(type:Exec) { t ->
     }
 }
 
+task jlinkMac64(type:Exec) { t ->
+    configureJlink(t, "$mac64jdk", "$buildDir/jlink/mac64")
+    doFirst {
+        if (!hasMacJdk()) {
+            throw new InvalidUserDataException("$mac64jdk does not seem to be a windows JDK, please set -Pmac64jdk=/path/to/jdk")
+        }
+    }
+}
+
 task jlinkAny() {
     if(org.gradle.internal.os.OperatingSystem.current().isLinux()) {
         dependsOn jlinkLinux64
-    } else {
+    } else if(org.gradle.internal.os.OperatingSystem.current().isWindows()) {
         dependsOn jlinkWin64
+    } else if(org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
+        dependsOn jlinkMac64
     }
 }
 
@@ -448,11 +517,29 @@ if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
         logger.warn("No windows JDK available, skipping windows distribution")
         jlinkWin64.enabled = false
     }
-} else {
+    if(!hasMacJdk()) {
+        logger.warn("No MacOS JDK available, skipping MacOs distribution")
+        jlinkMac64.enabled = false
+    }
+} else if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
     // need special JDK for linux64 as module input dir
     if(!hasLinuxJdk()) {
         logger.warn("No linux JDK available, skipping linux distribution")
         jlinkLinux64.enabled = false
+    }
+    if(!hasMacJdk()) {
+        logger.warn("No MacOS JDK available, skipping MacOs distribution")
+        jlinkMac64.enabled = false
+    }
+} else if (org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
+    // need special JDK for linux64 as module input dir
+    if(!hasLinuxJdk()) {
+        logger.warn("No linux JDK available, skipping linux distribution")
+        jlinkLinux64.enabled = false
+    }
+    if(!hasWinJdk()) {
+        logger.warn("No windows JDK available, skipping windows distribution")
+        jlinkWin64.enabled = false
     }
 }
 

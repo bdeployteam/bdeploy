@@ -18,8 +18,6 @@ import { SoftwareUpdateService } from '../services/software-update.service';
 })
 export class ClientAppsComponent implements OnInit {
 
-  public readonly CLIENT_OS: OperatingSystem[] = [OperatingSystem.WINDOWS, OperatingSystem.LINUX];
-
   instanceGroupName: string = this.route.snapshot.paramMap.get('group');
   instanceApps: InstanceClientAppsDto[];
 
@@ -40,6 +38,10 @@ export class ClientAppsComponent implements OnInit {
   ngOnInit() {
     this.activeOs = this.launcherService.getRunningOs();
     this.loadApps();
+  }
+
+  getAllOs() {
+    return Object.keys(OperatingSystem).filter(x => x !== OperatingSystem.UNKNOWN && x !== OperatingSystem.AIX);
   }
 
   loadApps() {

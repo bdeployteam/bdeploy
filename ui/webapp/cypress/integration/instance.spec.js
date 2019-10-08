@@ -26,6 +26,7 @@ describe('Instance Tests', function () {
     cy.get('app-instance-group-logo').parent().clickContextMenuItem('Configure Applications...');
 
     cy.getNodeCard('master').contains('Drop server application here').then(el => {
+      cy.get('[role=menuitem]').contains('Configure Applications...').should('not.exist');
       cy.contains('app-application-descriptor-card', 'Server Application').dragTo(el);
     })
 

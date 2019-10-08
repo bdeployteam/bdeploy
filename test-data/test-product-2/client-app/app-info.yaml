@@ -20,7 +20,8 @@ branding:
 supportedOperatingSystems:
   - LINUX
   - WINDOWS
+  - MACOS
 
 type: "CLIENT"
 startCommand:
-  launcherPath: "{{WINDOWS:client.bat}}{{LINUX:client.sh}}"
+  launcherPath: "{{WINDOWS:client.bat}}{{LINUX:client.sh}}{{MACOS:client.sh}}"

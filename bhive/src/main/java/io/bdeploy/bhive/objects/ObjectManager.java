@@ -219,7 +219,8 @@ public class ObjectManager {
 
     private void internalExportBlobByCopy(ObjectId obj, Path child) {
         // fallback only: create copy of file. determine content type as we go.
-        try (ContentInfoInputStreamWrapper is = new ContentInfoInputStreamWrapper(db.getStream(obj))) {
+        try (ContentInfoInputStreamWrapper is = new ContentInfoInputStreamWrapper(db.getStream(obj),
+                PathHelper.getContentInfoUtil())) {
             ObjectId finalId = ObjectId.createByCopy(is, child);
             if (!finalId.equals(obj)) {
                 // not good - object in DB seems corrupt.

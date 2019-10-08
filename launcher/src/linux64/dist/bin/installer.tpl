@@ -32,14 +32,14 @@ require_tool() {
 
 require_tool curl
 require_tool unzip
-require_tool xdg-desktop-menu
-require_tool convert
-require_tool identify
 require_tool sed
 require_tool grep
 require_tool cat
 require_tool base64
 require_tool openssl
+
+type xdg-desktop-menu > /dev/null
+HAVE_XDG_DESKTOP=$?
 
 dl() {
   # find certificate from embedded JSON
@@ -53,7 +53,7 @@ dl() {
 
   cat > "${T}/cert" <<EOF
 -----BEGIN CERTIFICATE-----
-$cert
+$(echo $cert | awk '{gsub(/.{64}/, "&\n")}1')
 -----END CERTIFICATE-----
 EOF
 
@@ -107,8 +107,10 @@ else
 
     rm -f ${T_DL}
 
-    echo "Creating file association..."
-    ${L_HOME}/bin/file-assoc.sh
+    if [[ ${HAVE_XDG_DESKTOP} == 0 ]]; then
+        echo "Creating file association..."
+        ${L_HOME}/bin/file-assoc.sh
+    fi
 fi
 
 # stop here if only launcher install is requested
@@ -122,7 +124,10 @@ echo "Updating icon..."
 B_ICONS="${B_HOME}/.icons"
 APP_ICON="${B_ICONS}/${BDEPLOY_APP_UID}.ico"
 APP_ICON_PNG="${B_ICONS}/${BDEPLOY_APP_UID}.png"
-if [[ -n "${BDEPLOY_ICON_URL}" ]]; then
+if [[ -n "${BDEPLOY_ICON_URL}" && ${HAVE_XDG_DESKTOP} == 0 ]]; then
+    require_tool convert
+    require_tool identify
+
     # Icon URL set, need download
     mkdir -p "${B_ICONS}"
     rm -f "${APP_ICON}"
@@ -160,7 +165,9 @@ Icon=${APP_ICON_PNG}
 Terminal=false
 EOF
 
-xdg-desktop-menu install "${T_LINK}"
+if [[ ${HAVE_XDG_DESKTOP} == 0 ]]; then
+    xdg-desktop-menu install "${T_LINK}"
+fi
 
 # STEP 4: Launch directly.
 echo "Launching ${BDEPLOY_APP_NAME}"

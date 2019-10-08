@@ -144,6 +144,9 @@ createTasks("2")
 // now the tasks for binary (upgrade) tests
 task releaseTest() {
     // container to depend on all migration tests.
+    if(project(":minion").mac64DistZip.enabled && !org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
+        throw new IllegalStateException("Release tests not supported with MAC support enabled right now")
+    }
 }
 
 task release(dependsOn: releaseTest) {
@@ -157,10 +160,12 @@ void setupBinServerTasks(String version) {
     def osName = "win64";
     if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
         osName = "linux64";
+    } else if(org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
+        osName = "mac64";
     }
     def fileKey = "bdeploy-" + osName + "-" + version;
     def binFile = new File(buildDir, "bin-dist/" + fileKey + "/bin/bdeploy")
-    if (!org.gradle.internal.os.OperatingSystem.current().isLinux()) {
+    if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
         binFile = file(binFile.toString() + ".bat")
     }
 
@@ -224,13 +229,28 @@ void setupBinServerTasks(String version) {
     }
 
     ["1", "2"].each { prodNum ->
-        task "binImportProd${prodNum}_${key}" (type: Exec, dependsOn: "binCreateInstanceGroup_${key}") {
+        task "binDownloadProd${prodNum}_${key}" (type: Download) {
+            src bdeployBaseUrl + "v" + version + "/test-product-" + prodNum + "-direct.zip"
+            dest new File(buildDir, version + "-prod" + prodNum + ".zip")
+            onlyIfModified true
+        }
+
+        task "binUnzipProd${prodNum}_${key}" (type: Copy, dependsOn: "binDownloadProd${prodNum}_${key}") {
+            from zipTree(tasks["binDownloadProd${prodNum}_${key}"].dest)
+            into new File(buildDir, "prod-dist-" + prodNum)
+
+            doFirst {
+                delete "${buildDir}/prod-dist-" + prodNum
+            }
+        }
+
+        task "binImportProd${prodNum}_${key}" (type: Exec, dependsOn: [ "binCreateInstanceGroup_${key}", "binUnzipProd${prodNum}_${key}" ]) {
             setupTask(it)
             doFirst {
                 delete "${buildDir}/pushTmp${prodNum}"
             }
             outputs.upToDateWhen { false }
-            args = ["product", "--hive=${buildDir}/pushTmp${prodNum}", "--import=${projectDir}/test-product-${prodNum}", "--push"]
+            args = ["product", "--hive=${buildDir}/pushTmp${prodNum}", "--import=${buildDir}/prod-dist-${prodNum}", "--push"]
         }
     }
 
@@ -258,6 +278,8 @@ void setupBinServerTasks(String version) {
         def currentDistTask = project(":minion").win64DistZip
         if(org.gradle.internal.os.OperatingSystem.current().isLinux()) {
             currentDistTask = project(":minion").linux64DistZip
+        } else if(org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
+            currentDistTask = project(":minion").mac64DistZip
         }
 
         dependsOn currentDistTask
@@ -314,8 +336,12 @@ void setupBinServerTasks(String version) {
     tasks["binAddTestBDeployUser_${key}"].mustRunAfter("binStartTestBDeploy_${key}")
     tasks["binCheckTestBDeploy_${key}"].mustRunAfter("binAddTestBDeployUser_${key}")
     tasks["binCreateInstanceGroup_${key}"].mustRunAfter("binCheckTestBDeploy_${key}")
-    tasks["binImportProd1_${key}"].mustRunAfter("binCreateInstanceGroup_${key}")
-    tasks["binImportProd2_${key}"].mustRunAfter("binCreateInstanceGroup_${key}")
+    tasks["binDownloadProd1_${key}"].mustRunAfter("binCreateInstanceGroup_${key}")
+    tasks["binDownloadProd2_${key}"].mustRunAfter("binCreateInstanceGroup_${key}")
+    tasks["binUnzipProd1_${key}"].mustRunAfter("binDownloadProd1_${key}")
+    tasks["binUnzipProd2_${key}"].mustRunAfter("binDownloadProd2_${key}")
+    tasks["binImportProd1_${key}"].mustRunAfter("binUnzipProd1_${key}")
+    tasks["binImportProd2_${key}"].mustRunAfter("binUnzipProd2_${key}")
     tasks["binImportTestData_${key}"].mustRunAfter("binImportProd2_${key}")
     tasks["binSetupDemoServer_${key}"].mustRunAfter("binImportProd2_${key}")
     tasks["binMigrateToCurrent_${key}"].mustRunAfter("binSetupDemoServer_${key}")

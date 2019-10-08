@@ -514,6 +514,9 @@ export class ApplicationService {
         this.dirtyStates.set(appCfg.uid, appDirty);
         if (appDirty) {
           this.log.debug('Application ' + appCfg.uid + ' has local changes. Setting dirty flag.');
+          this.log.trace('Current: ' + JSON.stringify(appCfg));
+          this.log.trace('Clone: ' + JSON.stringify(clonedAppCfg));
+          this.log.trace('Positions: ' + oldPosition + ', ' + currentPosition);
         } else {
           this.log.debug('Application ' + appCfg.uid + ' is in sync now. Removing dirty flag.');
         }

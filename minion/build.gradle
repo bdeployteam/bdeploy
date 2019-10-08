@@ -54,6 +54,15 @@ void addLauncherDist(Distribution dist) {
             }
         }
     }
+    if(!project(':launcher').mac64DistZip.enabled) {
+        println("WARNING: MacOS launcher dist not enabled, not included in BDeploy release ZIPs");
+    } else {
+        dist.contents {
+            from(project(':launcher').mac64DistZip) {
+                into 'launcher'
+            }
+        }
+    }
 }
 
 distributions {
@@ -63,6 +72,10 @@ distributions {
     }
     linux64 {
         baseName = 'bdeploy-linux64'
+        addLauncherDist(it)
+    }
+    mac64 {
+        baseName = 'bdeploy-mac64'
         addLauncherDist(it)
     }
 }

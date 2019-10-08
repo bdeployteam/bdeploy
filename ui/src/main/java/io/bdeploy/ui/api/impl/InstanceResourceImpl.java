@@ -622,11 +622,11 @@ public class InstanceResourceImpl implements InstanceResource {
         if (applicationOs == OperatingSystem.WINDOWS) {
             fileName = im.getConfiguration().name + " - " + appConfig.name + " - Installer.exe";
             createWindowsInstaller(im, appConfig, installerPath, launcherKey, launcherLocation, iconLocation, splashLocation);
-        } else if (applicationOs == OperatingSystem.LINUX) {
+        } else if (applicationOs == OperatingSystem.LINUX || applicationOs == OperatingSystem.MACOS) {
             fileName = im.getConfiguration().name + "-" + appConfig.name + "-Installer.run";
             createLinuxInstaller(im, appConfig, installerPath, launcherKey, launcherLocation, iconLocation);
         } else {
-            throw new WebApplicationException("Unsupported OS for installer download: " + applicationOs);
+            throw new WebApplicationException("Unsupported OS for installer: " + applicationOs);
         }
 
         // Return the name of the token for downloading

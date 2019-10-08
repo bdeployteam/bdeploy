@@ -144,7 +144,11 @@ public class UpdateHelper {
             try (DirectoryStream<Path> nestedLaunchers = Files.newDirectoryStream(launchers, "launcher-*.zip")) {
                 for (Path launcherZip : nestedLaunchers) {
                     log.info("Importing nested update: " + launcherZip.getFileName());
-                    result.addAll(importUpdate(launcherZip, tmpDir, hive));
+                    try {
+                        result.addAll(importUpdate(launcherZip, tmpDir, hive));
+                    } catch (Exception e) {
+                        log.error("Cannot import nested update package: " + launcherZip);
+                    }
 
                     // move single files as /tmp might be on different file system, and directory move is not possible.
                     Files.move(launcherZip, tmpLaunchers.resolve(launcherZip.getFileName()));

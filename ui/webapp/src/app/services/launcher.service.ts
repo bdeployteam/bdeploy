@@ -72,6 +72,8 @@ export class LauncherService {
       return OperatingSystem.WINDOWS;
     } else if (runningOs === 'Linux') {
       return OperatingSystem.LINUX;
+    } else if (runningOs === 'Mac') {
+      return OperatingSystem.MACOS;
     }
     return OperatingSystem.UNKNOWN;
   }

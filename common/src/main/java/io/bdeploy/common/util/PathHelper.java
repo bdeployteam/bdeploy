@@ -3,6 +3,7 @@ package io.bdeploy.common.util;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -20,6 +21,17 @@ import com.j256.simplemagic.ContentInfoUtil;
  * Helps in handling different {@link String}s in the context of {@link Path}s.
  */
 public class PathHelper {
+
+    private static final ContentInfoUtil CIU = loadCIU();
+
+    private static ContentInfoUtil loadCIU() {
+        try (InputStreamReader rdr = new InputStreamReader(
+                PathHelper.class.getClassLoader().getResourceAsStream("bdeploy-magic"))) {
+            return new ContentInfoUtil(rdr);
+        } catch (IOException e) {
+            throw new IllegalStateException("ERROR: Cannot load magic resource", e);
+        }
+    }
 
     private PathHelper() {
     }
@@ -119,8 +131,20 @@ public class PathHelper {
                 case "application/x-sharedlib":
                 case "application/x-executable":
                 case "application/x-dosexec":
+                case "application/x-mach-binary":
                 case "text/x-shellscript":
                 case "text/x-msdos-batch":
+                    return true;
+                default:
+                    break;
+            }
+        }
+
+        if (hint.getName() != null) {
+            switch (hint.getName()) {
+                case "ELF":
+                case "32+":
+                case "Mach-O":
                     return true;
                 default:
                     break;
@@ -149,9 +173,8 @@ public class PathHelper {
     public static ContentInfo getContentInfo(Path child, ContentInfo hint) throws IOException {
         // hint might have been calculated already while streaming file.
         if (hint == null) {
-            ContentInfoUtil util = new ContentInfoUtil();
             try (InputStream is = Files.newInputStream(child)) {
-                hint = util.findMatch(is);
+                hint = CIU.findMatch(is);
             }
             if (hint == null) {
                 // just any unknown file type.
@@ -159,6 +182,10 @@ public class PathHelper {
             }
         }
         return hint;
+    }
+
+    public static ContentInfoUtil getContentInfoUtil() {
+        return CIU;
     }
 
 }

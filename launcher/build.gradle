@@ -32,3 +32,11 @@ startScripts {
         delete windowsScript
     }
 }
+
+distributions {
+    mac64 {
+        contents {
+            from fileTree("${projectDir}/src/linux64/dist")
+        }
+    }
+}
