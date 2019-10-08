@@ -21,7 +21,7 @@ public class BDeployCheckServerOnlineTask {
             }
 
             RemoteService svc = new RemoteService(UriBuilder.fromUri(cfg.bdeployServer).build(), cfg.bdeployServerToken);
-            MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class);
+            MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class, null);
 
             // any actual remote call to verify the connection.
             master.getSoftwareRepositories();
