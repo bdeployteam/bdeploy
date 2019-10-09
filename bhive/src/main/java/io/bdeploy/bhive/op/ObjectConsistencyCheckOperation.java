@@ -13,7 +13,7 @@ import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditStrategy;
 import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditWith;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
-import io.bdeploy.bhive.objects.ObjectDatabase;
+import io.bdeploy.bhive.objects.MarkerDatabase;
 import io.bdeploy.bhive.objects.view.ElementView;
 import io.bdeploy.bhive.objects.view.ManifestRefView;
 import io.bdeploy.bhive.objects.view.TreeView;
@@ -27,8 +27,6 @@ import io.bdeploy.common.util.PathHelper;
  * will be collected, and returned.
  */
 public class ObjectConsistencyCheckOperation extends BHive.Operation<Set<ElementView>> {
-
-    private static final byte[] DEFAULT_MARKER = new byte[] { 0x1 };
 
     @AuditWith(AuditStrategy.COLLECTION_PEEK)
     private final SortedSet<Manifest.Key> roots = new TreeSet<>();
@@ -44,7 +42,7 @@ public class ObjectConsistencyCheckOperation extends BHive.Operation<Set<Element
         Activity scanning = getActivityReporter().start("Scanning manifest trees...", roots.size());
 
         Path markerPath = Files.createTempDirectory("markers-");
-        ObjectDatabase markerDb = new ObjectDatabase(markerPath, markerPath.resolve("tmp"), getActivityReporter());
+        MarkerDatabase markerDb = new MarkerDatabase(markerPath, getActivityReporter());
         Set<ElementView> broken = new TreeSet<>();
         try {
             for (Manifest.Key key : roots) {
@@ -70,9 +68,7 @@ public class ObjectConsistencyCheckOperation extends BHive.Operation<Set<Element
                         continue;
                     } else {
                         // write the marker ourselves, the content never matches the checksum (intentionally).
-                        Path markerFile = markerDb.getObjectFile(obj.getElementId());
-                        PathHelper.mkdirs(markerFile.getParent());
-                        Files.write(markerFile, DEFAULT_MARKER);
+                        markerDb.addMarker(obj.getElementId());
                     }
 
                     if (!getObjectManager().checkObject(obj.getElementId(), !dryRun)) {

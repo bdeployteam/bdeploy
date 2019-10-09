@@ -11,11 +11,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.bdeploy.bhive.model.ObjectId;
-import io.bdeploy.bhive.objects.ObjectDatabase;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.TempDirectory.TempDir;
+import io.bdeploy.common.TestActivityReporter;
 
 @ExtendWith(TestActivityReporter.class)
 @ExtendWith(TempDirectory.class)
@@ -27,7 +26,7 @@ public class DbTestBase {
     @BeforeEach
     private void initDb(@TempDir Path tmp, ActivityReporter reporter) throws IOException {
         dbPath = tmp.resolve("objdb");
-        db = new ObjectDatabase(dbPath, dbPath, reporter);
+        db = new ObjectDatabase(dbPath, tmp.resolve("objtmp"), reporter);
     }
 
     protected ObjectDatabase getObjectDatabase() {

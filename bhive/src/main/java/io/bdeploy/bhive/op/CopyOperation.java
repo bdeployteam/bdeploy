@@ -47,6 +47,9 @@ public class CopyOperation extends BHive.Operation<Void> {
                 execute(new ObjectListOperation()).forEach(objects::add);
             }
 
+            // Create markers in the destination hive
+            String markerUuid = destinationHive.execute(new CreateObjectMarkersOperation().setObjectIds(objects));
+
             // Scan for referenced manifests. Referenced manifests are found transitively.
             SortedSet<Manifest.Key> additional = new TreeSet<>();
             manifests.forEach(m -> additional
@@ -68,12 +71,14 @@ public class CopyOperation extends BHive.Operation<Void> {
                 destinationHive.execute(destinationManifestInsert);
 
                 if (!partialAllowed) {
-                    ManifestConsistencyCheckOperation destinationCheck = new ManifestConsistencyCheckOperation();
+                    // check manifests, REMOVE them in case they are damaged to not block future operations.
+                    ManifestConsistencyCheckOperation destinationCheck = new ManifestConsistencyCheckOperation().setDryRun(false);
                     manifests.forEach(destinationCheck::addRoot);
                     destinationHive.execute(destinationCheck);
                 }
             }
 
+            destinationHive.execute(new ClearObjectMarkersOperation().setMarkersUuuid(markerUuid));
         }
 
         return null;

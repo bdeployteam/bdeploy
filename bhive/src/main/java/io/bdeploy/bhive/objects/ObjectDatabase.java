@@ -153,7 +153,7 @@ public class ObjectDatabase extends LockableDatabase {
         return internalAddObject(p -> ObjectId.createByCopy(stream, p));
     }
 
-    private ObjectId internalAddObject(ObjectWriter writer) throws IOException {
+    protected ObjectId internalAddObject(ObjectWriter writer) throws IOException {
         Path tmpFile = Files.createTempFile(this.tmp, "obj", ".tmp");
         try {
             ObjectId id = writer.write(tmpFile);
