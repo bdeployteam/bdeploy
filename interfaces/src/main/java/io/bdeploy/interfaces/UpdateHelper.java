@@ -147,7 +147,10 @@ public class UpdateHelper {
                     try {
                         result.addAll(importUpdate(launcherZip, tmpDir, hive));
                     } catch (Exception e) {
-                        log.error("Cannot import nested update package: " + launcherZip);
+                        log.error("Cannot import nested update package, see debug logs for more info: " + launcherZip);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Underlying Exception: ", e);
+                        }
                     }
 
                     // move single files as /tmp might be on different file system, and directory move is not possible.
