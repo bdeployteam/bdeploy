@@ -1,6 +1,7 @@
 package io.bdeploy.dcu;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -23,6 +24,7 @@ import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.common.util.StreamHelper;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.interfaces.cleanup.CleanupAction;
 import io.bdeploy.interfaces.cleanup.CleanupAction.CleanupType;
@@ -224,6 +226,14 @@ public class InstanceNodeController {
     }
 
     private void processConfigurationFile(Path file, VariableResolver resolver) {
+        try (InputStream check = Files.newInputStream(file)) {
+            if (!StreamHelper.isTextFile(check)) {
+                return;
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot check if file is a text file: " + file, e);
+        }
+
         try {
             String content = new String(Files.readAllBytes(file), StandardCharsets.UTF_8);
             String processed = TemplateHelper.process(content, resolver, "{{", "}}");

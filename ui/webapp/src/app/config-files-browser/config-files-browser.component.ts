@@ -1,5 +1,7 @@
+import { Overlay, OverlayRef } from '@angular/cdk/overlay';
+import { TemplatePortal } from '@angular/cdk/portal';
 import { Location } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import 'brace/mode/batchfile';
@@ -10,6 +12,7 @@ import 'brace/mode/xml';
 import 'brace/mode/yaml';
 import 'brace/theme/eclipse';
 import 'brace/theme/twilight';
+import { Base64 } from 'js-base64';
 import { cloneDeep } from 'lodash';
 import { Observable, of, Subscription } from 'rxjs';
 import { CanComponentDeactivate } from '../guards/can-deactivate.guard';
@@ -50,9 +53,11 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
 
   public displayedColumns: string[] = ['icon', 'path', 'delete', 'copy', 'edit'];
   public statusCache = new Map<string, ConfigFileStatus>();
+  public typeCache = new Map<string, boolean>();
 
   // used in edit mode:
   public editMode = false; // switching edit/list mode
+  public editText = true; // whether the edited file is text
 
   public editKey: string = null; // original config file name on edit
   public configFileFormGroup = this.fb.group({
@@ -74,6 +79,8 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
   }
 
   public originalContentCache = new Map<string, string>();
+  private overlayRef: OverlayRef;
+  public dropZoneActive = false;
 
   constructor(
     private fb: FormBuilder,
@@ -82,7 +89,9 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
     private loggingService: LoggingService,
     public location: Location,
     private themeService: ThemeService,
-    private messageBoxService: MessageboxService
+    private messageBoxService: MessageboxService,
+    private overlay: Overlay,
+    private viewContainerRef: ViewContainerRef,
   ) {}
 
 
@@ -114,7 +123,13 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
   }
 
   private reload() {
-    this.instanceService.listConfigurationFiles(this.groupParam, this.uuidParam, this.versionParam).subscribe(configFilePaths => { configFilePaths.forEach(p => this.statusCache.set(p, cloneDeep(EMPTY_CONFIG_FILE_STATUS))); });
+    this.statusCache.clear();
+    this.typeCache.clear();
+
+    this.instanceService.listConfigurationFiles(this.groupParam, this.uuidParam, this.versionParam).subscribe(configFilePaths => { configFilePaths.forEach(p => {
+      this.statusCache.set(p.path, cloneDeep(EMPTY_CONFIG_FILE_STATUS));
+      this.typeCache.set(p.path, p.isText);
+    }); });
   }
 
   public ngOnDestroy(): void {
@@ -153,6 +168,7 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
     const cached = this.statusCache.get(path);
     this.editKey = copy ? null : path;
     this.editMode = true;
+    this.editText = this.typeCache.get(path);
 
     const intialName = copy ? path + ' (copy)' : path;
     if (cached.content) {
@@ -161,6 +177,9 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
     } else {
       this.instanceService.getConfigurationFile(this.groupParam, this.uuidParam, this.versionParam, path).subscribe(
         content => {
+          if (this.typeCache.get(path)) {
+            content = Base64.decode(content);
+          }
           this.configFileFormGroup.setValue({path: intialName});
           this.editorContent = content;
           this.originalContentCache.set(path, content);
@@ -176,6 +195,7 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
       status.type = FileStatusType.ADD;
       status.content = this.editorContent;
       this.statusCache.set(formValue['path'], status);
+      this.typeCache.set(formValue['path'], this.editText);
     } else {
       const cached = this.statusCache.get(this.editKey);
       if (this.editKey === formValue['path']) {
@@ -246,14 +266,18 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
     }
   }
 
-  public getStatus(path: string) {
+  public isModified(path: string) {
     const cached = this.statusCache.get(path);
-    if (cached.type === FileStatusType.ADD) {
-      return '[new]';
-    } else if (cached.type === FileStatusType.EDIT) {
-      return '[modified]';
-    }
-    return '';
+    return cached.type === FileStatusType.EDIT;
+  }
+
+  public isNew(path: string) {
+    const cached = this.statusCache.get(path);
+    return cached.type === FileStatusType.ADD;
+  }
+
+  public isText(path: string) {
+    return this.typeCache.get(path);
   }
 
   public isDeleted(path: string) {
@@ -306,9 +330,15 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
         return; // no update, don't send one.
       }
 
+      let c = value.content;
+      if (this.typeCache.get(key)) {
+        // it's text, re-encode. otherwise it is binary and already encoded.
+        c = Base64.encode(c);
+      }
+
       const dto: FileStatusDto = {
         type: value.type,
-        content: value.type === FileStatusType.DELETE ? null : value.content,
+        content: value.type === FileStatusType.DELETE ? null : c,
         file: key
       };
 
@@ -334,6 +364,62 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
       return;
     }
     this.location.back();
+  }
+
+
+  /** Opens a modal overlay popup showing the given template */
+  openOverlay(template: TemplateRef<any>) {
+    this.closeOverlay();
+
+    this.overlayRef = this.overlay.create({
+      positionStrategy: this.overlay.position().global().centerHorizontally().centerVertically(),
+      hasBackdrop: true
+    });
+
+    const portal = new TemplatePortal(template, this.viewContainerRef);
+    this.overlayRef.attach(portal);
+  }
+
+  /** Closes the overlay if present */
+  closeOverlay() {
+    if (this.overlayRef) {
+      this.overlayRef.detach();
+      this.overlayRef.dispose();
+      this.overlayRef = null;
+    }
+  }
+
+  dropZoneState($event: boolean) {
+    this.dropZoneActive = $event;
+  }
+
+  handleChange(fileName: HTMLInputElement, input: HTMLInputElement) {
+    fileName.value = input.files.item(0).name;
+  }
+
+  handleDrop(fileList: FileList, fileName: HTMLInputElement, input: HTMLInputElement) {
+    if (fileList.length > 1) {
+      this.log.error('Only single file uploads allowed');
+      return;
+    }
+    input.files = fileList;
+    this.handleChange(fileName, input);
+  }
+
+  createNewFile(fileName: HTMLInputElement, fileInput: HTMLInputElement) {
+    const name = fileName.value;
+
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const status = cloneDeep(EMPTY_CONFIG_FILE_STATUS);
+      status.type = FileStatusType.ADD;
+      const result = reader.result.toString();
+      status.content = result.substr(result.indexOf(',') + 1);
+      this.statusCache.set(name, status);
+      this.typeCache.set(name, false);
+      this.closeOverlay();
+    };
+    reader.readAsDataURL(fileInput.files.item(0));
   }
 
 }

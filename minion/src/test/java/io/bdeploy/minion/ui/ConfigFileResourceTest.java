@@ -3,6 +3,7 @@ package io.bdeploy.minion.ui;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,6 +12,7 @@ import java.util.List;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.InternalServerErrorException;
 
+import org.apache.commons.codec.binary.Base64;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -29,6 +31,7 @@ import io.bdeploy.minion.TestMinion;
 import io.bdeploy.ui.api.ConfigFileResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
+import io.bdeploy.ui.dto.ConfigFileDto;
 
 @ExtendWith(TestMinion.class)
 @ExtendWith(TestHive.class)
@@ -44,22 +47,23 @@ public class ConfigFileResourceTest {
         InstanceResource ir = igr.getInstanceResource("demo");
         ConfigFileResource cfr = ir.getConfigResource(im.getConfiguration().uuid);
 
-        List<String> files = cfr.listConfigFiles(instance.getTag());
+        List<ConfigFileDto> files = cfr.listConfigFiles(instance.getTag());
         assertEquals(1, files.size());
 
         // see MinionDeployTest.createApplicationsAndInstance
         String cfgFile = cfr.loadConfigFile(instance.getTag(), "myconfig.json");
-        assertEquals("{ \"cfg\": \"value\" }" + System.lineSeparator(), cfgFile);
+        assertEquals("{ \"cfg\": \"value\" }" + System.lineSeparator(),
+                new String(Base64.decodeBase64(cfgFile), StandardCharsets.UTF_8));
 
         List<FileStatusDto> updates = new ArrayList<>();
 
         FileStatusDto upd1 = new FileStatusDto();
-        upd1.content = "{ \"cfg\": \"new-value\" }\n";
+        upd1.content = Base64.encodeBase64String("{ \"cfg\": \"new-value\" }\n".getBytes());
         upd1.file = "myconfig.json";
         upd1.type = FileStatusType.EDIT;
 
         FileStatusDto upd2 = new FileStatusDto();
-        upd2.content = "NEW-FILE";
+        upd2.content = Base64.encodeBase64String("NEW-FILE".getBytes());
         upd2.file = "path/to/new.txt";
         upd2.type = FileStatusType.ADD;
 
@@ -71,8 +75,10 @@ public class ConfigFileResourceTest {
         String updatedTag = Long.toString(Long.valueOf(instance.getTag()) + 1);
 
         assertEquals(2, cfr.listConfigFiles(updatedTag).size());
-        assertEquals("NEW-FILE", cfr.loadConfigFile(updatedTag, "path/to/new.txt"));
-        assertEquals("{ \"cfg\": \"new-value\" }\n", cfr.loadConfigFile(updatedTag, "myconfig.json"));
+        assertEquals("NEW-FILE",
+                new String(Base64.decodeBase64(cfr.loadConfigFile(updatedTag, "path/to/new.txt")), StandardCharsets.UTF_8));
+        assertEquals("{ \"cfg\": \"new-value\" }\n",
+                new String(Base64.decodeBase64(cfr.loadConfigFile(updatedTag, "myconfig.json")), StandardCharsets.UTF_8));
 
         FileStatusDto del1 = new FileStatusDto();
         del1.file = "myconfig.json";
