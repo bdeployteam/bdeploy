@@ -7,6 +7,6 @@ var isEdge = !isIE && !!window.StyleMedia;
 var isSafari = window.safari !== undefined;
 
 if (isIE || isEdge || isSafari) {
-  window.location('/badbrowser.html');
+  window.location.assign('/badbrowser.html');
 }
 
