@@ -23,6 +23,12 @@ import io.bdeploy.common.ActivityReporter.Activity;
  */
 public class PruneOperation extends BHive.Operation<SortedMap<ObjectId, Long>> {
 
+    /**
+     *
+     */
+    /**
+     *
+     */
     @Override
     public SortedMap<ObjectId, Long> call() throws Exception {
         SortedMap<ObjectId, Long> result = new TreeMap<>();
@@ -38,6 +44,14 @@ public class PruneOperation extends BHive.Operation<SortedMap<ObjectId, Long>> {
                 referenced = new TreeSet<>();
             }
 
+            // Wait for other operations locking the marker root (e.g. another prune).
+            // The CreateObjectMarkersOperation and ClearObjectMarkersOperation will hold
+            // off until the root is unlocked again, so:
+            //  1) No NEW marker databases will be created and no concurrent prune operations will run.
+            //  2) Existing transactions will be allowed to continue using their existing marker databases.
+            //  3) Upon completion, existing trasactions will block removal of the markers until the root is unlocked.
+            MarkerDatabase.lockRoot(getMarkerRoot());
+
             // TODO: this might be /very/ memory intensive.
             SortedSet<ObjectId> orig = getObjectManager().db(ObjectDatabase::getAllObjects);
             SortedSet<ObjectId> all = new TreeSet<>(orig);
@@ -46,10 +60,17 @@ public class PruneOperation extends BHive.Operation<SortedMap<ObjectId, Long>> {
             // read all existing marker databases and regard any existing object as referenced.
             try (DirectoryStream<Path> markerDbs = Files.newDirectoryStream(getMarkerRoot())) {
                 for (Path markerDb : markerDbs) {
-                    MarkerDatabase mdb = new MarkerDatabase(markerDb, getActivityReporter());
-                    all.removeAll(mdb.getAllObjects());
+                    if (Files.isDirectory(markerDb)) {
+                        MarkerDatabase mdb = new MarkerDatabase(markerDb, getActivityReporter());
+                        all.removeAll(mdb.getAllObjects());
+                    }
                 }
             }
+
+            // Unlocking the root will allow:
+            //  1) Ongoing operations to continue clearing their markers
+            //  2) Other operations locking the root (e.g. another prune operation).
+            MarkerDatabase.unlockRoot(getMarkerRoot());
 
             for (ObjectId unreferenced : all) {
                 result.put(unreferenced, getObjectManager().db(x -> {

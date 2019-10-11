@@ -1,6 +1,7 @@
 package io.bdeploy.bhive.op;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.objects.MarkerDatabase;
 import io.bdeploy.common.util.PathHelper;
 
 /**
@@ -17,6 +18,7 @@ public class ClearObjectMarkersOperation extends BHive.Operation<Void> {
             return null;
         }
 
+        MarkerDatabase.waitRootLock(getMarkerRoot());
         PathHelper.deleteRecursive(getMarkerRoot().resolve(markerUuid));
         return null;
     }

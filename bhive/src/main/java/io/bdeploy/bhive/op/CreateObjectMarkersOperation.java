@@ -24,6 +24,7 @@ public class CreateObjectMarkersOperation extends BHive.Operation<String> {
             return null;
         }
 
+        MarkerDatabase.waitRootLock(getMarkerRoot());
         MarkerDatabase mdb = new MarkerDatabase(getMarkerRoot().resolve(markerUuid), getActivityReporter());
         ids.forEach(mdb::addMarker);
 
