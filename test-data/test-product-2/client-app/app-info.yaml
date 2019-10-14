@@ -20,7 +20,7 @@ branding:
 supportedOperatingSystems:
   - LINUX
   - WINDOWS
-  - MACOS
+  #- MACOS
 
 type: "CLIENT"
 startCommand:

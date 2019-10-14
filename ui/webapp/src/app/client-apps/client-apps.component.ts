@@ -41,7 +41,8 @@ export class ClientAppsComponent implements OnInit {
   }
 
   getAllOs() {
-    return Object.keys(OperatingSystem).filter(x => x !== OperatingSystem.UNKNOWN && x !== OperatingSystem.AIX);
+    // TODO: include MACOS once MACOS support is complete
+    return Object.keys(OperatingSystem).filter(x => x !== OperatingSystem.UNKNOWN && x !== OperatingSystem.AIX && x !== OperatingSystem.MACOS);
   }
 
   loadApps() {
