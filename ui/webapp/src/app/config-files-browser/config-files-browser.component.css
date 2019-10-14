@@ -41,16 +41,6 @@
   min-width: 40px;
 }
 
-.deletedFile {
-  text-decoration: line-through;
-  color: red;
-}
-
-.modifiedFile {
-  margin-left: 10px;
-  color: red;
-}
-
 .path-field {
   margin-top: 15px !important;
   width: 100%;
@@ -83,6 +73,15 @@
   z-index: 10;
 }
 
+.upload-button {
+  top: auto !important;
+  right: 40px !important;
+  bottom: 110px !important;
+  left: auto !important;
+  position: fixed !important;
+  z-index: 10;
+}
+
 .mat-column-delete {
   text-align: center;
 }
@@ -100,3 +99,58 @@
   margin-bottom: 0px !important;
 }
 
+.uploadDialogContent {
+  display: flex;
+  flex-direction: column;
+}
+
+.uploadDialogContent > * {
+  margin-top: 5px;
+}
+
+.upload-card {
+  min-width: 400px;
+}
+
+.dropZone {
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px dashed #ccc;
+}
+
+.dropZoneIcon {
+  margin-right: 10px;
+}
+
+.browseButton {
+  position: relative;
+  cursor: pointer;
+  background: transparent;
+  padding: 0;
+  border: 0;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.icon-stack {
+  position: relative;
+  width: 24px;
+  height: 24px;
+}
+
+.icon-stack-main {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.icon-stack-overlay {
+  position: absolute;
+  bottom: -2px;
+  right: -3px;
+
+  max-width: 10px;
+  max-height: 10px;
+}

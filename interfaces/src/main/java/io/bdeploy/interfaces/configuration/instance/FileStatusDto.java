@@ -25,7 +25,7 @@ public class FileStatusDto {
     public String file;
 
     /**
-     * The updated content of the file if applicable.
+     * The updated content of the file if applicable. The content is always base64 encoded.
      */
     public String content;
 

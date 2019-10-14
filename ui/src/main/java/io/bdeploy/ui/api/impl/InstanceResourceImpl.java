@@ -34,6 +34,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriBuilder;
 
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -265,7 +266,7 @@ public class InstanceResourceImpl implements InstanceResource {
                     fsd.type = FileStatusType.ADD;
                     try (InputStream is = hive.execute(
                             new TreeEntryLoadOperation().setRootTree(cfgTree).setRelativePath(entry.getKey().getName()))) {
-                        fsd.content = StreamHelper.read(is, StandardCharsets.UTF_8);
+                        fsd.content = Base64.encodeBase64String(StreamHelper.read(is));
                     } catch (IOException ioe) {
                         throw new IllegalStateException("Cannot read " + path + entry.getKey().getName() + " from config tree",
                                 ioe);

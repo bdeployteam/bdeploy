@@ -3,7 +3,6 @@ package io.bdeploy.minion.remote.jersey;
 import static io.bdeploy.common.util.RuntimeAssert.assertNotNull;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -25,6 +24,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -608,13 +608,13 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             switch (update.type) {
                 case ADD:
                     PathHelper.mkdirs(file.getParent());
-                    Files.write(file, update.content.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE_NEW);
+                    Files.write(file, Base64.decodeBase64(update.content), StandardOpenOption.CREATE_NEW);
                     break;
                 case DELETE:
                     Files.delete(file);
                     break;
                 case EDIT:
-                    Files.write(file, update.content.getBytes(StandardCharsets.UTF_8));
+                    Files.write(file, Base64.decodeBase64(update.content));
                     break;
             }
         }

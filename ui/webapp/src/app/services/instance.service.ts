@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ClickAndStartDescriptor, FileStatusDto, InstanceConfiguration, InstanceConfigurationDto, InstanceDirectory, InstanceDirectoryEntry, InstanceDto, InstanceManifestHistoryDto, InstanceNodeConfigurationListDto, InstancePurpose, InstanceStateRecord, InstanceVersionDto, ManifestKey, StringEntryChunkDto } from '../models/gen.dtos';
+import { ClickAndStartDescriptor, ConfigFileDto, FileStatusDto, InstanceConfiguration, InstanceConfigurationDto, InstanceDirectory, InstanceDirectoryEntry, InstanceDto, InstanceManifestHistoryDto, InstanceNodeConfigurationListDto, InstancePurpose, InstanceStateRecord, InstanceVersionDto, ManifestKey, StringEntryChunkDto } from '../models/gen.dtos';
 import { ConfigService } from './config.service';
 import { DownloadService } from './download.service';
 import { InstanceGroupService } from './instance-group.service';
@@ -75,10 +75,10 @@ export class InstanceService {
     return this.http.get<InstanceConfiguration>(url);
   }
 
-  public listConfigurationFiles(instanceGroupName: string, instanceName: string, tag: string): Observable<string[]> {
+  public listConfigurationFiles(instanceGroupName: string, instanceName: string, tag: string): Observable<ConfigFileDto[]> {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/cfgFiles/' + tag;
     this.log.debug('listConfigurationFiles: ' + url);
-    return this.http.get<string[]>(url);
+    return this.http.get<ConfigFileDto[]>(url);
   }
 
   public getConfigurationFile(instanceGroupName: string, instanceName: string, tag: string, filename: string): Observable<string> {

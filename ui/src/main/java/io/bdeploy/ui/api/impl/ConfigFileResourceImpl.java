@@ -3,7 +3,6 @@ package io.bdeploy.ui.api.impl;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,13 +12,18 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 
+import org.apache.commons.codec.binary.Base64;
+
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.bhive.objects.view.BlobView;
 import io.bdeploy.bhive.objects.view.TreeView;
 import io.bdeploy.bhive.objects.view.scanner.TreeVisitor;
+import io.bdeploy.bhive.op.ObjectLoadOperation;
 import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.bhive.op.TreeEntryLoadOperation;
+import io.bdeploy.common.util.StreamHelper;
 import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
@@ -29,6 +33,7 @@ import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.ui.api.ConfigFileResource;
+import io.bdeploy.ui.dto.ConfigFileDto;
 
 public class ConfigFileResourceImpl implements ConfigFileResource {
 
@@ -46,7 +51,7 @@ public class ConfigFileResourceImpl implements ConfigFileResource {
     }
 
     @Override
-    public List<String> listConfigFiles(String tag) {
+    public List<ConfigFileDto> listConfigFiles(String tag) {
         InstanceManifest manifest = InstanceManifest.load(hive, instanceId, tag);
         InstanceConfiguration configuration = manifest.getConfiguration();
         ObjectId cfgTree = configuration.configTree;
@@ -55,13 +60,22 @@ public class ConfigFileResourceImpl implements ConfigFileResource {
             return Collections.emptyList();
         }
 
-        List<String> cfgFilePaths = new ArrayList<>();
+        List<ConfigFileDto> cfgFilePaths = new ArrayList<>();
 
         // collect all blobs from the current config tree
         TreeView view = hive.execute(new ScanOperation().setTree(cfgTree));
-        view.visit(new TreeVisitor.Builder().onBlob(b -> cfgFilePaths.add(b.getPathString())).build());
+        view.visit(new TreeVisitor.Builder().onBlob(b -> cfgFilePaths.add(new ConfigFileDto(b.getPathString(), isTextFile(b))))
+                .build());
 
         return cfgFilePaths;
+    }
+
+    private boolean isTextFile(BlobView blob) {
+        try (InputStream is = hive.execute(new ObjectLoadOperation().setObject(blob.getElementId()))) {
+            return StreamHelper.isTextFile(is);
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot determine content type of BLOB: " + blob, e);
+        }
     }
 
     @Override
@@ -77,7 +91,7 @@ public class ConfigFileResourceImpl implements ConfigFileResource {
         try (InputStream is = hive.execute(new TreeEntryLoadOperation().setRootTree(cfgTree).setRelativePath(file));
                 ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             is.transferTo(baos);
-            return baos.toString(StandardCharsets.UTF_8);
+            return Base64.encodeBase64String(baos.toByteArray());
         } catch (IOException e) {
             throw new WebApplicationException("Cannot read configuration file: " + file, e);
         }

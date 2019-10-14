@@ -12,6 +12,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
+import io.bdeploy.ui.dto.ConfigFileDto;
 
 @Path("/cfgFiles")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -20,8 +21,11 @@ public interface ConfigFileResource {
 
     @GET
     @Path("/{tag}")
-    public List<String> listConfigFiles(@PathParam("tag") String tag);
+    public List<ConfigFileDto> listConfigFiles(@PathParam("tag") String tag);
 
+    /**
+     * Read the contents of a configuration file as base64 encoded string.
+     */
     @GET
     @Path("/{tag}/{file: .+}")
     public String loadConfigFile(@PathParam("tag") String tag, @PathParam("file") String file);
