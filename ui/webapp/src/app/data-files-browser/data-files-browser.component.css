@@ -48,3 +48,11 @@
   max-width: 100%;
   min-width: 100%;
 }
+
+.datafile-search-header {
+  margin-right: 64px;
+}
+
+.datafile-search-field {
+  min-width: 525px;
+}

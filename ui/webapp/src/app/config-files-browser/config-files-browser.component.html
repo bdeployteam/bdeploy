@@ -100,7 +100,7 @@
         <input #filePath placeholder="Enter path for file"/>
         <div class="dropZone" appFileDrop (filesDropped)="handleDrop($event, filePath, file)" (filesHovered)="dropZoneState($event)" [ngClass]="{'dropZoneActive': dropZoneActive}">
             <mat-icon class="dropZoneIcon">cloud_upload</mat-icon>
-            <span class="dropZoneText">Drop files to upload, or&nbsp;</span>
+            <span class="dropZoneText">Drop file to upload, or&nbsp;</span>
             <button (click)="file.click()" class="browseButton">browse.</button>
         </div>
         <input #file type='file' (change)='handleChange(filePath, file)' style="display: none" placeholder="File to upload"/>

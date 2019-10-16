@@ -1,25 +1,21 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Location } from '@angular/common';
-import { Component, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
-import { PageEvent } from '@angular/material/paginator';
-import { Sort } from '@angular/material/sort';
+import { Component, OnInit, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
+import { MatSort, MatTabChangeEvent, MatTable, MatTableDataSource } from '@angular/material';
+import { MatPaginator } from '@angular/material/paginator';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { InstanceConfiguration, InstanceDirectory, InstanceDirectoryEntry, StringEntryChunkDto } from '../models/gen.dtos';
 import { DownloadService } from '../services/download.service';
 import { InstanceService } from '../services/instance.service';
-import { Logger, LoggingService } from '../services/logging.service';
 
 @Component({
   selector: 'app-data-files-browser',
   templateUrl: './data-files-browser.component.html',
-  styleUrls: ['./data-files-browser.component.css']
+  styleUrls: ['./data-files-browser.component.css'],
 })
 export class DataFilesBrowserComponent implements OnInit {
-
-  private log: Logger = this.loggingService.getLogger('DataFilesBrowserComponent');
-
   public INITIAL_PAGE_SIZE = 10;
   public INITIAL_PAGE_INDEX = 0;
   public INITIAL_SORT_COLUMN = 'lastModified';
@@ -29,90 +25,65 @@ export class DataFilesBrowserComponent implements OnInit {
   uuidParam: string = this.route.snapshot.paramMap.get('uuid');
   versionParam: string = this.route.snapshot.paramMap.get('version');
 
+  @ViewChild(MatTable, { static: false })
+  table: MatTable<InstanceDirectoryEntry>;
+
+  @ViewChild(MatPaginator, { static: false })
+  paginator: MatPaginator;
+
+  @ViewChild(MatSort, { static: false })
+  sort: MatSort;
+
   public displayedColumns: string[] = ['icon', 'path', 'size', 'lastModified', 'download'];
 
-  public pageEvents: Map<string, PageEvent> = new Map<string, PageEvent>();
-  public sortEvents: Map<string, Sort> = new Map<string, Sort>();
-
   public instanceVersion: InstanceConfiguration;
-
   public instanceDirectories: InstanceDirectory[];
+  public dataSource: MatTableDataSource<InstanceDirectoryEntry>;
+  public filterRegex: RegExp;
+  public activeTabIndex = 0;
+
   public activeInstanceDirectory: InstanceDirectory = null;
   public activeInstanceDirectoryEntry: InstanceDirectoryEntry = null;
 
-  public get instanceDirectoryNames(): string[] {
-    return this.instanceDirectories ? this.instanceDirectories.map(id => id.minion) : [];
-  }
   private overlayRef: OverlayRef;
 
-  constructor(private overlay: Overlay,
+  constructor(
+    private overlay: Overlay,
     private viewContainerRef: ViewContainerRef,
     private route: ActivatedRoute,
     private instanceService: InstanceService,
-    private loggingService: LoggingService,
     public location: Location,
     private dlService: DownloadService,
   ) {}
 
-
   public ngOnInit(): void {
-    this.instanceService.getInstanceVersion(this.groupParam, this.uuidParam, this.versionParam).subscribe(
-      instanceVersion => {this.instanceVersion = instanceVersion; }
-    );
-
+    this.instanceService
+      .getInstanceVersion(this.groupParam, this.uuidParam, this.versionParam)
+      .subscribe(instanceVersion => {
+        this.instanceVersion = instanceVersion;
+      });
     this.reload();
   }
 
   public reload() {
-    this.instanceService.listDataDirSnapshot(this.groupParam, this.uuidParam).subscribe(
-      instanceDirectories =>  {
-        this.instanceDirectories = instanceDirectories.sort((a, b) => {
-          if (a.minion === 'master') {
-            return -1;
-          } else if (b.minion === 'master') {
-            return 1;
-          } else {
-            return a.minion.toLocaleLowerCase().localeCompare(b.minion.toLocaleLowerCase());
-          }
-        });
+    this.instanceService.listDataDirSnapshot(this.groupParam, this.uuidParam).subscribe(instanceDirectories => {
+      this.instanceDirectories = instanceDirectories.sort((a, b) => {
+        if (a.minion === 'master') {
+          return -1;
+        } else if (b.minion === 'master') {
+          return 1;
+        } else {
+          return a.minion.toLocaleLowerCase().localeCompare(b.minion.toLocaleLowerCase());
+        }
+      });
+      // Enqueue an update of the data source as soon as the tabs and the content is newly created
+      setTimeout(() => this.updateDataSource(), 0);
     });
   }
 
-  public getCurrentPage(instanceDirectory: InstanceDirectory) {
-    const pageEvent = this.pageEvents.get(instanceDirectory.minion);
-    const pageIndex = pageEvent ? pageEvent.pageIndex : this.INITIAL_PAGE_INDEX;
-    const pageSize = pageEvent ? pageEvent.pageSize : this.INITIAL_PAGE_SIZE;
-    const firstIdx = pageIndex * pageSize;
-
-    const sortEvent = this.sortEvents.get(instanceDirectory.minion);
-    const sortColumn = sortEvent ? sortEvent.active : this.INITIAL_SORT_COLUMN;
-    const sortDirection = sortEvent ? sortEvent.direction : this.INITIAL_SORT_DIRECTION;
-
-    const all = instanceDirectory.entries.slice(); // use copy for sorting -- keep original array
-    if (sortColumn && sortDirection) {
-      all.sort((a, b) => {
-        let v1 = a[sortColumn];
-        let v2 = b[sortColumn];
-        if (typeof(v1) === 'string' && typeof(v2) === 'string') {
-          v1 = v1.toLocaleLowerCase();
-          v2 = v2.toLocaleLowerCase();
-        }
-        const res = v1 < v2 ? -1 : (v1 > v2 ? 1 : 0);
-        return res * (sortDirection === 'asc' ? 1 : -1);
-      });
-    }
-
-    return all.slice(firstIdx, firstIdx + pageSize);
-  }
-
-  public sortFiles(instanceDirectory: InstanceDirectory, event: Sort) {
-    this.sortEvents.set(instanceDirectory.minion, event);
-  }
-
-
   public formatSize(size: number): string {
     const i: number = size === 0 ? 0 : Math.min(4, Math.floor(Math.log(size) / Math.log(1024)));
-    return (i === 0 ? size : ((size / Math.pow(1024, i)).toFixed(2))) + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
+    return (i === 0 ? size : (size / Math.pow(1024, i)).toFixed(2)) + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
   }
 
   public formatLastModified(lastModified: number): string {
@@ -120,16 +91,53 @@ export class DataFilesBrowserComponent implements OnInit {
   }
 
   public download(instanceDirectory: InstanceDirectory, instanceDirectoryEntry: InstanceDirectoryEntry) {
-    this.instanceService.getContentChunk(this.groupParam, this.uuidParam, instanceDirectory, instanceDirectoryEntry, 0, 0, true).subscribe(
-      dto => {
+    this.instanceService
+      .getContentChunk(this.groupParam, this.uuidParam, instanceDirectory, instanceDirectoryEntry, 0, 0, true)
+      .subscribe(dto => {
         this.downloadFile(instanceDirectoryEntry.path, dto.content);
-      }
-    );
+      });
   }
 
   private downloadFile(filename: string, data: string): void {
     const blob = new Blob([data], { type: 'text/plain' });
     this.dlService.downloadBlob(filename, blob);
+  }
+
+  updateDataSource() {
+    // Prepare data-source with sorting and paging
+    if (this.dataSource == null) {
+      this.dataSource = new MatTableDataSource();
+    }
+    this.dataSource.sort = this.sort;
+    this.dataSource.filterPredicate = (data, filter) => {
+      const fileName = data.path.toLowerCase();
+      const pattern = filter.trim().toLowerCase();
+      // Prefer regex if we have a valid one
+      if (this.filterRegex) {
+        const match = fileName.match(pattern) != null;
+        return match;
+      }
+      return fileName.includes(pattern);
+    };
+    this.dataSource.paginator = this.paginator;
+
+    // Pass list of entires to the table
+    const selectedDir = this.instanceDirectories[this.activeTabIndex];
+    this.dataSource.data = selectedDir.entries;
+  }
+
+  onTabChanged(event: MatTabChangeEvent) {
+    this.activeTabIndex = event.index;
+    this.updateDataSource();
+  }
+
+  applyFilter(filterValue: string) {
+    try {
+      this.filterRegex = new RegExp(filterValue.toLowerCase());
+    } catch (e) {
+      this.filterRegex = null;
+    }
+    this.dataSource.filter = filterValue;
   }
 
   getCurrentOutputEntryFetcher(): () => Observable<InstanceDirectoryEntry> {
@@ -138,11 +146,23 @@ export class DataFilesBrowserComponent implements OnInit {
 
   getOutputContentFetcher(): (offset: number, limit: number) => Observable<StringEntryChunkDto> {
     return (offset, limit) => {
-      return this.instanceService.getContentChunk(this.groupParam, this.uuidParam, this.activeInstanceDirectory, this.activeInstanceDirectoryEntry, offset, limit, true);
+      return this.instanceService.getContentChunk(
+        this.groupParam,
+        this.uuidParam,
+        this.activeInstanceDirectory,
+        this.activeInstanceDirectoryEntry,
+        offset,
+        limit,
+        true,
+      );
     };
   }
 
-  openOutputOverlay(instanceDirectory: InstanceDirectory, instanceDirectoryEntry: InstanceDirectoryEntry, template: TemplateRef<any>) {
+  openOutputOverlay(
+    instanceDirectory: InstanceDirectory,
+    instanceDirectoryEntry: InstanceDirectoryEntry,
+    template: TemplateRef<any>,
+  ) {
     this.activeInstanceDirectory = instanceDirectory;
     this.activeInstanceDirectoryEntry = instanceDirectoryEntry;
 
@@ -151,8 +171,12 @@ export class DataFilesBrowserComponent implements OnInit {
     this.overlayRef = this.overlay.create({
       height: '90%',
       width: '90%',
-      positionStrategy: this.overlay.position().global().centerHorizontally().centerVertically(),
-      hasBackdrop: true
+      positionStrategy: this.overlay
+        .position()
+        .global()
+        .centerHorizontally()
+        .centerVertically(),
+      hasBackdrop: true,
     });
     this.overlayRef.backdropClick().subscribe(() => this.closeOutputOverlay());
 
@@ -169,5 +193,4 @@ export class DataFilesBrowserComponent implements OnInit {
       this.overlayRef = null;
     }
   }
-
 }
