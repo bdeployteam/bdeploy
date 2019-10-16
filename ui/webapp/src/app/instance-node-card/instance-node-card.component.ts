@@ -20,6 +20,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
   /* CSS Classes attached to nodes to highligh valid / invalid drop zones */
   private readonly VALID_DROP_ZONE_CLASS = 'instance-node-valid-drop-zone';
   private readonly INVALID_DROP_ZONE_CLASS = 'instance-node-invalid-drop-zone';
+  private readonly CURRENT_DRAG_CONTAINER_CLASS = 'current-drag-container';
 
   @Input() instanceGroupName: string;
   @Input() activatedInstanceTag: string;
@@ -67,6 +68,14 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
     this.subscription.add(this.dragulaService.dragend().subscribe(( {} ) => {
       this.onDragEnd();
     }));
+
+    this.subscription.add(this.dragulaService.over().subscribe(({ container }) => {
+      this.onDragOver(container);
+    }));
+
+    this.subscription.add(this.dragulaService.out().subscribe(({ container }) => {
+      this.onDragOut(container);
+    }));
   }
 
   ngOnDestroy(): void {
@@ -78,6 +87,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
     const cardClassList = this.appNodeCard.nativeElement.classList;
     cardClassList.remove(this.VALID_DROP_ZONE_CLASS);
     cardClassList.remove(this.INVALID_DROP_ZONE_CLASS);
+    cardClassList.remove(this.CURRENT_DRAG_CONTAINER_CLASS);
   }
 
   /** Called when a drag operation started */
@@ -90,6 +100,22 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
     } else {
       cardClassList.remove(this.VALID_DROP_ZONE_CLASS);
       cardClassList.add(this.INVALID_DROP_ZONE_CLASS);
+    }
+  }
+
+  private onDragOver(target: Element) {
+    const id = 'dragula-nodeName-' + this.node.nodeName;
+    const isThisNodeTheTarget = target.className.includes(id);
+    if (isThisNodeTheTarget) {
+      this.appNodeCard.nativeElement.classList.add(this.CURRENT_DRAG_CONTAINER_CLASS);
+    }
+  }
+
+  private onDragOut(target: Element) {
+    const id = 'dragula-nodeName-' + this.node.nodeName;
+    const isThisNodeTheTarget = target.className.includes(id);
+    if (isThisNodeTheTarget) {
+      this.appNodeCard.nativeElement.classList.remove(this.CURRENT_DRAG_CONTAINER_CLASS);
     }
   }
 
@@ -265,6 +291,11 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
    */
   getDragulaNodeClasses(): string[] {
     const classes: string[] = [];
+
+    // when editing, set a minimum size here.
+    if (this.manageApplications) {
+      classes.push('init-zone');
+    }
 
     // Name is used to identify source and target node during drop handling
     classes.push('dragula-nodeName-' + this.node.nodeName);

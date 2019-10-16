@@ -23,13 +23,11 @@
   </mat-card-header>
 
   <mat-card-content class='node-card-content'>
+    <div *ngIf='!hasApps() && manageApplications' class='init-hint'>
+      <span *ngIf="!isClientApplicationsNode()" class='init-hint-center'>Drop server application here</span>
+      <span *ngIf="isClientApplicationsNode()" class='init-hint-center'>Drop client application here</span>
+    </div>
     <div class="new-flex-container" #dragulaContainer dragula="APPS" [dragulaModel]="nodeApps" [ngClass]="getDragulaNodeClasses()">
-      <div *ngIf='!hasApps() && manageApplications'>
-        <mat-card class="process-card init-drop-card">
-          <span *ngIf="!isClientApplicationsNode()">Drop server application here</span>
-          <span *ngIf="isClientApplicationsNode()">Drop client application here</span>
-        </mat-card>
-      </div>
       <div *ngIf='!hasApps() && !manageApplications' class='empty-hint'>
         <span *ngIf="!isClientApplicationsNode()">There are currently no server applications assigned to this node.</span>
         <span *ngIf="isClientApplicationsNode()">There are currently no client applications assigned to this node.</span>
