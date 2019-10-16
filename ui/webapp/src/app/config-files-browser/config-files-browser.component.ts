@@ -23,7 +23,6 @@ import { Logger, LoggingService } from '../services/logging.service';
 import { MessageboxService } from '../services/messagebox.service';
 import { ThemeService } from '../services/theme.service';
 
-
 export class ConfigFileStatus {
   type: FileStatusType;
   content: string;
@@ -37,10 +36,9 @@ export const EMPTY_CONFIG_FILE_STATUS: ConfigFileStatus = {
 @Component({
   selector: 'app-config-files-browser',
   templateUrl: './config-files-browser.component.html',
-  styleUrls: ['./config-files-browser.component.css']
+  styleUrls: ['./config-files-browser.component.css'],
 })
 export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanComponentDeactivate {
-
   private log: Logger = this.loggingService.getLogger('ConfigFilesBrowserComponent');
 
   groupParam: string = this.route.snapshot.paramMap.get('group');
@@ -70,7 +68,7 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
     ['xml', 'xml'],
     ['bat', 'batchfile'],
     ['yaml', 'yaml'],
-    ['sh', 'sh']
+    ['sh', 'sh'],
   ]);
   public editorTheme = '';
 
@@ -94,12 +92,13 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
     private viewContainerRef: ViewContainerRef,
   ) {}
 
-
   public ngOnInit(): void {
     // get instance version
-    this.instanceService.getInstanceVersion(this.groupParam, this.uuidParam, this.versionParam).subscribe(
-      instanceVersion => {this.instanceVersion = instanceVersion; }
-    );
+    this.instanceService
+      .getInstanceVersion(this.groupParam, this.uuidParam, this.versionParam)
+      .subscribe(instanceVersion => {
+        this.instanceVersion = instanceVersion;
+      });
 
     // get list of config files
     this.reload();
@@ -126,10 +125,14 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
     this.statusCache.clear();
     this.typeCache.clear();
 
-    this.instanceService.listConfigurationFiles(this.groupParam, this.uuidParam, this.versionParam).subscribe(configFilePaths => { configFilePaths.forEach(p => {
-      this.statusCache.set(p.path, cloneDeep(EMPTY_CONFIG_FILE_STATUS));
-      this.typeCache.set(p.path, p.isText);
-    }); });
+    this.instanceService
+      .listConfigurationFiles(this.groupParam, this.uuidParam, this.versionParam)
+      .subscribe(configFilePaths => {
+        configFilePaths.forEach(p => {
+          this.statusCache.set(p.path, cloneDeep(EMPTY_CONFIG_FILE_STATUS));
+          this.typeCache.set(p.path, p.isText);
+        });
+      });
   }
 
   public ngOnDestroy(): void {
@@ -137,10 +140,10 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
   }
 
   public duplicateNameValidator(): ValidatorFn {
-    return (control: AbstractControl): {[key: string]: any} | null => {
+    return (control: AbstractControl): { [key: string]: any } | null => {
       const cached = this.statusCache.get(control.value);
       const duplicate = cached && control.value !== this.editKey;
-      return duplicate ? {'duplicate': {value: control.value}} : null;
+      return duplicate ? { duplicate: { value: control.value } } : null;
     };
   }
 
@@ -159,7 +162,7 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
 
   public addFile(): void {
     this.editKey = null;
-    this.configFileFormGroup.setValue({path: ''});
+    this.configFileFormGroup.setValue({ path: '' });
     this.editorContent = '';
     this.editMode = true;
   }
@@ -170,17 +173,18 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
     this.editMode = true;
     this.editText = this.typeCache.get(path);
 
-    const intialName = copy ? path + ' (copy)' : path;
+    const initialName = copy ? path + ' (copy)' : path;
     if (cached.content) {
-      this.configFileFormGroup.setValue({path: intialName});
+      this.configFileFormGroup.setValue({ path: initialName });
       this.editorContent = cached.content;
     } else {
-      this.instanceService.getConfigurationFile(this.groupParam, this.uuidParam, this.versionParam, path).subscribe(
-        content => {
+      this.instanceService
+        .getConfigurationFile(this.groupParam, this.uuidParam, this.versionParam, path)
+        .subscribe(content => {
           if (this.typeCache.get(path)) {
             content = Base64.decode(content);
           }
-          this.configFileFormGroup.setValue({path: intialName});
+          this.configFileFormGroup.setValue({ path: initialName });
           this.editorContent = content;
           this.originalContentCache.set(path, content);
         });
@@ -203,7 +207,8 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
         const originalContent = this.originalContentCache.get(this.editKey);
         if (this.editorContent === originalContent) {
           cached.type = null;
-        } else if (!cached.type) { // set if unset, keep ADD, can't be DELETE
+        } else if (!cached.type) {
+          // set if unset, keep ADD, can't be DELETE
           cached.type = FileStatusType.EDIT;
         }
         cached.content = this.editorContent;
@@ -306,7 +311,9 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
   public isDirty(): boolean {
     const values: ConfigFileStatus[] = Array.from(this.statusCache.values());
     let changeCount = 0;
-    values.forEach(v => { changeCount += v.type ? 1 : 0; });
+    values.forEach(v => {
+      changeCount += v.type ? 1 : 0;
+    });
     return changeCount > 0;
   }
 
@@ -339,18 +346,21 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
       const dto: FileStatusDto = {
         type: value.type,
         content: value.type === FileStatusType.DELETE ? null : c,
-        file: key
+        file: key,
       };
 
       result.push(dto);
     });
 
-    this.instanceService.updateConfigurationFiles(this.groupParam, this.uuidParam, this.versionParam, result)
-    .subscribe(_ => {
-      this.statusCache.clear(); // avoid isDirty
-      this.log.info('stored configuration files for ' + this.groupParam + ', ' + this.uuidParam + ', ' + this.versionParam);
-      this.location.back();
-    });
+    this.instanceService
+      .updateConfigurationFiles(this.groupParam, this.uuidParam, this.versionParam, result)
+      .subscribe(_ => {
+        this.statusCache.clear(); // avoid isDirty
+        this.log.info(
+          'stored configuration files for ' + this.groupParam + ', ' + this.uuidParam + ', ' + this.versionParam,
+        );
+        this.location.back();
+      });
   }
 
   async onDiscardChanges(): Promise<void> {
@@ -366,14 +376,17 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
     this.location.back();
   }
 
-
   /** Opens a modal overlay popup showing the given template */
   openOverlay(template: TemplateRef<any>) {
     this.closeOverlay();
 
     this.overlayRef = this.overlay.create({
-      positionStrategy: this.overlay.position().global().centerHorizontally().centerVertically(),
-      hasBackdrop: true
+      positionStrategy: this.overlay
+        .position()
+        .global()
+        .centerHorizontally()
+        .centerVertically(),
+      hasBackdrop: true,
     });
 
     const portal = new TemplatePortal(template, this.viewContainerRef);
@@ -411,15 +424,25 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
 
     const reader = new FileReader();
     reader.onload = ev => {
-      const status = cloneDeep(EMPTY_CONFIG_FILE_STATUS);
-      status.type = FileStatusType.ADD;
+      let status = this.statusCache.get(name);
+
+      // We need to handle two cases here.
+      // -> New files that are uploaded
+      // -> Replacing of existing files by uploading the same file again
+      // -> Files in status ADD will remain in ADD if they are uploaded again
+      if (!status) {
+        status = cloneDeep(EMPTY_CONFIG_FILE_STATUS);
+        status.type = FileStatusType.ADD;
+        this.statusCache.set(name, status);
+      } else if (status.type !== FileStatusType.ADD) {
+        status.type = FileStatusType.EDIT;
+      }
+
       const result = reader.result.toString();
       status.content = result.substr(result.indexOf(',') + 1);
-      this.statusCache.set(name, status);
       this.typeCache.set(name, false);
       this.closeOverlay();
     };
     reader.readAsDataURL(fileInput.files.item(0));
   }
-
 }

@@ -70,7 +70,7 @@
         <span class="fill-space"></span>
         <span>
           <button mat-button type="button" (click)="onCancelChanges()">CANCEL</button>
-          <button mat-raised-button color="primary" type="submit" [disabled]="!isEditorDirty()">APPLY</button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="!isEditorDirty() || !configFileFormGroup.valid">APPLY</button>
         </span>
       </mat-card-header>
       <mat-card-content class="config-card-content">
@@ -84,10 +84,10 @@
     </form>
   </mat-card>
 
-  <button mat-fab class="add-button" (click)="addFile()">
+  <button mat-fab class="add-button" (click)="addFile()" *ngIf="!editMode">
     <mat-icon>add</mat-icon>
   </button>
-  <button mat-fab class="upload-button" (click)="openOverlay(uploadDialog)" color="primary">
+  <button mat-fab class="upload-button" (click)="openOverlay(uploadDialog)" color="primary" *ngIf="!editMode">
     <mat-icon>cloud_upload</mat-icon>
   </button>
 </div>

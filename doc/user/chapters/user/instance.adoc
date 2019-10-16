@@ -62,7 +62,39 @@ The *Configuration Files* of all *Processes* of an *Instance* are maintained tog
 
 image::images/BDeploy_CfgFiles_Browser.png[Configuration File Browser,align=center,width=480,link="images/BDeploy_CfgFiles_Browser.png"]
 
-The integrated editor provides syntax highlighting and rudimentary syntax checking for some basic file types (yaml, json, xml). Displayed problems are only to be seen as help and never interfere with the process, e.g. by preventing the saving of a file.
+New configuration files can be be created using the btn:[+] button. This will open the integrated editor. 
+Additionally to that existing files can be uploaded using the provided btn:[Upload] button.
+
+===== File types
+
+The type of a configuration file is automatically detected and visualized in the dialog. The following table shows the supported file types and how they are treated:
+
+[%header,cols="^a,3,3,3,2"]
+|===
+| Type
+| Online Editing
+| Variable Expansion
+| Encoding
+| Samples
+
+| image::images/BDeploy_CfgFiles_Text.png[width=32,align=center]
+Text
+| *Can* be edited online using the integrated editor.
+| Variables used in the file content are replaced. See <<_variable_expansion,Variable Expansion>> for more details. 
+| Files are always written using UTF-8 encoding. 
+| txt, log, xml, csv
+
+| image::images/BDeploy_CfgFiles_Binary.png[align=center,width=32]
+Binary 
+| *Cannot* be edited online.
+| Not available.
+| Files are written as they are without any modifications.
+| zip, pdf
+
+|===
+
+===== Editor
+The integrated editor provides syntax highlighting and rudimentary syntax checking for some basic file types (yaml, json, xml). Displayed problems are only to be seen as help and never interfere with the process, e.g. by preventing the saving of a file. Only files of type *Text* can be edited with the provided editor. *Binary* files can only be changed by uploading a new file with the same name.
 
 image::images/BDeploy_CfgFile_New.png[Create New Configuration File,align=center,width=480,link="images/BDeploy_CfgFile_New.png"]
 image::images/BDeploy_CfgFiles_Save.png[Modified Configuration Files,align=center,width=480,link="images/BDeploy_CfgFiles_Save.png"]
