@@ -56,17 +56,40 @@
   flex-wrap: wrap;
 }
 
-.init-drop-card {
-  border: 2px darkgray dotted;
-  opacity: 0.5;
-  margin: 5px;
-  min-height: 120px;
-  min-width: 340px;
-  flex: 1 0 auto;
-  display: flex;
-  align-items: center;
+.init-hint {
+  flex: 1 1 auto;
   justify-content: center;
-  box-sizing: border-box;
+  align-items: center;
+  display: flex;
+
+  position: absolute;
+  left: 50%;
+
+  min-height: 100px;
+  text-align: center;
+
+  color: grey;
+  opacity: 1;
+  transition: opacity 0.3s linear;
+
+  font-style: italic;
+  font-size: smaller;
+
+  pointer-events: none;
+}
+
+.init-hint-center {
+  position: relative;
+  left: -50%;
+}
+
+.init-zone {
+  min-height: 100px;
+}
+
+.current-drag-container .init-hint {
+  opacity: 0;
+  transition: opacity 0.3s linear;
 }
 
 .fill-space {
