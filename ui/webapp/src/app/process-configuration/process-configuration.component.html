@@ -216,6 +216,7 @@
             [instanceId]='uuidParam'
             [instanceTag]='selectedConfig.version.key.tag'
             [appConfig]='selectedProcess'
+            [deploymentState]='deploymentState'
             (downloadClickAndStartEvent)="onDownloadClickAndStart($event)"
             (downloadInstallerEvent)="onDownloadInstaller($event)">
           </app-client-info>

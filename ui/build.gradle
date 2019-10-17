@@ -200,7 +200,6 @@ task genDtos() {
             'io.bdeploy.ui.dto.ProductDto',
             'io.bdeploy.ui.dto.HiveEntryDto',
             'io.bdeploy.ui.dto.InstanceVersionDto',
-            'io.bdeploy.ui.dto.DeploymentStateDto',
             'io.bdeploy.ui.dto.StringEntryChunkDto',
             'io.bdeploy.ui.dto.LauncherDto',
             'io.bdeploy.ui.dto.InstanceManifestHistoryDto',

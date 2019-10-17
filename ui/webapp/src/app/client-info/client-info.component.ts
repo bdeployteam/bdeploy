@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { EventWithCallback } from '../models/event';
-import { ApplicationConfiguration } from '../models/gen.dtos';
+import { ApplicationConfiguration, InstanceStateRecord } from '../models/gen.dtos';
 import { LauncherService } from '../services/launcher.service';
 import { getAppOs } from '../utils/manifest.utils';
 
@@ -14,6 +14,7 @@ export class ClientInfoComponent implements OnInit {
   @Input() instanceId: string;
   @Input() instanceTag: string;
   @Input() appConfig: ApplicationConfiguration;
+  @Input() deploymentState: InstanceStateRecord;
 
   @Output() downloadClickAndStartEvent = new EventEmitter<ApplicationConfiguration>();
   @Output() downloadInstallerEvent = new EventEmitter<EventWithCallback<ApplicationConfiguration>>();
@@ -23,6 +24,10 @@ export class ClientInfoComponent implements OnInit {
   constructor(private launcherService: LauncherService) {}
 
   ngOnInit() {}
+
+  isActiveVersion() {
+    return this.instanceTag === this.deploymentState.activeTag;
+  }
 
   getAppOs() {
     return getAppOs(this.appConfig.application);
