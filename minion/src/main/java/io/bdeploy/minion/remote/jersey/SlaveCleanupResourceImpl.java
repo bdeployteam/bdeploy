@@ -5,6 +5,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -19,6 +20,7 @@ import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestRefScanOperation;
 import io.bdeploy.bhive.op.PruneOperation;
+import io.bdeploy.common.Version;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.dcu.InstanceNodeController;
 import io.bdeploy.interfaces.cleanup.CleanupAction;
@@ -36,12 +38,21 @@ public class SlaveCleanupResourceImpl implements SlaveCleanupResource {
         List<CleanupAction> notExecuted = new ArrayList<>();
 
         BHive hive = root.getHive();
+
+        Set<String> newestLauncherTags = hive.execute(new ManifestListOperation().setManifestName("meta/launcher")).stream() //
+                .map(key -> key.getTag()) //
+                .collect(Collectors.toCollection(() -> new TreeSet<>((a, b) -> Version.parse(b).compareTo(Version.parse(a))))) // reverse order
+                .stream().limit(2).collect(Collectors.toSet());
+
         SortedSet<Key> allMfs = hive.execute(new ManifestListOperation()); // list ALL
 
         // filter some well-known things.
-        SortedSet<Key> toClean = allMfs.stream().filter(this::isNotWellKnown).collect(Collectors.toCollection(TreeSet::new));
-        SortedSet<Key> allRefs = new TreeSet<>();
+        SortedSet<Key> toClean = allMfs.stream() //
+                .filter(this::isNotWellKnown) //
+                .filter(key -> !newestLauncherTags.contains(key.getTag())) //
+                .collect(Collectors.toCollection(TreeSet::new));
 
+        SortedSet<Key> allRefs = new TreeSet<>();
         for (Key keep : toKeep) {
             // toKepp may contain way more manifests than actually exist in our hive, since it's the list of all manifests in all groups
             if (!allMfs.contains(keep)) {
@@ -73,7 +84,8 @@ public class SlaveCleanupResourceImpl implements SlaveCleanupResource {
 
     private boolean isNotWellKnown(Key key) {
         // TODO: unify...?
-        return !(key.getName().startsWith("meta/") || key.getName().startsWith("users/"));
+        return !((key.getName().startsWith("meta/") && !key.getName().startsWith("meta/launcher"))
+                || key.getName().startsWith("users/"));
     }
 
     @Override
