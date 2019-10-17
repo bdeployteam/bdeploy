@@ -3,12 +3,12 @@
  */
 Cypress.Commands.add('createInstanceGroup', function(name) {
   cy.visit('/');
+  cy.waitUntilContentLoaded();
 
-  cy.get('mat-progress-spinner').should('not.exist');
   cy.contains('button', 'add').click();
 
   cy.get('input[placeholder^="Instance group name"]').type(name);
-  cy.get('input[placeholder=Description]').type('Automated Test Instance Group ' + name);
+  cy.get('input[placeholder=Description]').type(name);
 
   cy.fixture('bdeploy.png').then(fileContent => {
     cy.get('input[type=file]').upload({ fileContent: fileContent, fileName: 'bdeploy.png', mimeType: 'image/png' });
@@ -48,64 +48,54 @@ Cypress.Commands.add('deleteInstanceGroup', function(name) {
 })
 
 /**
- * Command: uploadProductsToEmptyGroup
+ * Command: uploadProductIntoGroup
  */
-Cypress.Commands.add('uploadProductsToEmptyGroup', function(groupName) {
+Cypress.Commands.add('uploadProductIntoGroup', function(groupName,fileName) {
+  cy.visit('/');
+  cy.waitUntilContentLoaded();
 
   cy.get('[data-cy=group-' + groupName + ']').first().should('exist').click();
+  cy.waitUntilContentLoaded();
 
-  cy.get('mat-progress-spinner').should('not.exist');
   cy.get('button[mattooltip="Manage Products..."]').should('be.visible').and('be.enabled').click();
-
   cy.contains('button', 'cloud_upload').should('be.visible').and('be.enabled').click();
 
   cy.get('mat-dialog-container').within(() => {
-    cy.fixture('test-product-1-direct.zip').then(zip => {
+    cy.fixture(fileName).then(zip => {
       cy.get('input[type=file]').upload({
-        fileName: 'test-product-1-direct.zip',
+        fileName: fileName,
         fileContent: zip,
-        mimeType: 'application/zip',
-      });
-    });
-    cy.fixture('test-product-2-direct.zip').then(zip => {
-      cy.get('input[type=file]').upload({
-        fileName: 'test-product-2-direct.zip',
-        fileContent: zip,
-        mimeType: 'application/zip',
+         mimeType: 'application/zip',
       });
     });
 
-    cy.contains('button', 'Upload')
-      .should('be.enabled')
-      .click();
-    cy.get('td:contains("Upload successful")').should('have.length', 2);
-    cy.contains('button', 'Close')
-      .should('be.visible')
-      .and('be.enabled')
-      .click();
+    cy.contains('button', 'Upload').should('be.enabled').click();
+    cy.get('td:contains("Upload successful")').should('have.length', 1);
+
+    cy.contains('button', 'Close').should('be.visible').and('be.enabled').click();
   });
+})
 
-  cy.contains('app-product-card', 'Demo Product')
-    .should('exist')
-    .click();
+ /**
+ * Command: verifyProductVersion
+ */
+Cypress.Commands.add('verifyProductVersion', function(groupName, productName, productId, productVersion) {
+  cy.visit('/');
+  cy.waitUntilContentLoaded();
 
-  cy.get('app-product-list')
-    .contains('2.0.0')
-    .should('exist');
-  cy.get('app-product-list')
-    .contains('1.0.0')
-    .should('exist');
+  cy.get('[data-cy=group-' + groupName + ']').first().should('exist').click();
+  cy.waitUntilContentLoaded();
 
-  cy.contains('app-product-list', '2.0.0').within(() => {
-    cy.contains('button', 'info')
-      .should('be.visible')
-      .click();
+  cy.get('button[mattooltip="Manage Products..."]').should('be.visible').and('be.enabled').click();
+  cy.contains('app-product-card', productName).should('exist').click();
+
+  cy.get('app-product-list').contains(productVersion).should('exist');
+  cy.contains('app-product-list', productVersion).within(() => {
+    cy.contains('button', 'info').should('be.visible').click();
   });
 
   cy.get('mat-card.info').within(() => {
-    cy.contains('mat-chip', 'X-Product')
-      .contains('io.bdeploy/demo')
-      .should('exist');
+    cy.contains('mat-chip', 'X-Product').contains(productId).should('exist');
   });
-
 })
+

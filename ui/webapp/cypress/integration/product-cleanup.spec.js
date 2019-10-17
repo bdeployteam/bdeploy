@@ -19,7 +19,8 @@ describe('Product Cleanup Test', function() {
    * Upload a Product
    */
   it('Uploads products', function() {
-    cy.uploadProductsToEmptyGroup(instanceGroupName);
+    cy.uploadProductIntoGroup(instanceGroupName, 'test-product-1-direct.zip');
+    cy.uploadProductIntoGroup(instanceGroupName, 'test-product-2-direct.zip');
   })
 
   /**
