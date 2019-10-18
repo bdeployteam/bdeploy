@@ -205,6 +205,7 @@ task genDtos() {
             'io.bdeploy.ui.dto.InstanceManifestHistoryDto',
             'io.bdeploy.ui.dto.InstanceUpdateEventDto',
             'io.bdeploy.ui.dto.ConfigFileDto',
+            'io.bdeploy.ui.dto.BackendInfoDto',
             // Other, generic
             'io.bdeploy.common.ActivitySnapshot',
             'io.bdeploy.interfaces.cleanup.CleanupGroup',

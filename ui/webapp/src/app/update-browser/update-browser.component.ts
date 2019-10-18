@@ -44,7 +44,7 @@ export class UpdateBrowserComponent implements OnInit {
     this.updService
       .listBDeployVersions()
       .pipe(finalize(() => (this.systemLoading = false)))
-      .subscribe(r => (this.systemVersions = this.groupKeysByTag(r, currentVersion)));
+      .subscribe(r => (this.systemVersions = this.groupKeysByTag(r, currentVersion.version)));
     this.updService
       .listLauncherVersions()
       .pipe(finalize(() => (this.launcherLoading = false)))

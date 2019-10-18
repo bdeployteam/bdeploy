@@ -29,6 +29,7 @@ import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.jersey.TestServer;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.Minion;
+import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.impl.UiResources;
 
 /**
@@ -175,6 +176,11 @@ public class TestUiBackendServer extends TestServer {
         @Override
         public String createWeakToken(String principal) {
             return "token-" + principal;
+        }
+
+        @Override
+        public MinionMode getMode() {
+            return MinionMode.STANDALONE;
         }
     }
 

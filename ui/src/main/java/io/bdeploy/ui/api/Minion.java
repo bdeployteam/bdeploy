@@ -50,4 +50,9 @@ public interface Minion {
      */
     public String createWeakToken(String principal);
 
+    /**
+     * @return the mode the hosting minion is run in.
+     */
+    public MinionMode getMode();
+
 }

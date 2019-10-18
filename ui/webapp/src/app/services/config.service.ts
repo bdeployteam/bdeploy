@@ -4,6 +4,7 @@ import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Observable } from 'rxjs';
 import { AppConfig } from '../models/config.model';
+import { BackendInfoDto } from '../models/gen.dtos';
 import { suppressGlobalErrorHandling } from '../utils/server.utils';
 import { LoggingService } from './logging.service';
 
@@ -40,11 +41,11 @@ export class ConfigService {
     });
   }
 
-  public getBackendVersion(): Observable<string> {
-    return this.http.get(this.config.api + '/backend-info/version', { responseType: 'text' });
+  public getBackendVersion(): Observable<BackendInfoDto> {
+    return this.http.get<BackendInfoDto>(this.config.api + '/backend-info/version');
   }
 
-  public tryGetBackendVersion(): Observable<string> {
-    return this.http.get(this.config.api + '/backend-info/version', { responseType: 'text', headers: suppressGlobalErrorHandling(new HttpHeaders)});
+  public tryGetBackendVersion(): Observable<BackendInfoDto> {
+    return this.http.get<BackendInfoDto>(this.config.api + '/backend-info/version', { headers: suppressGlobalErrorHandling(new HttpHeaders)});
   }
 }

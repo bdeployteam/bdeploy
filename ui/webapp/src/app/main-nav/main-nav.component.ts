@@ -4,6 +4,7 @@ import { MatToolbar } from '@angular/material/toolbar';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { BackendInfoDto, MinionMode } from '../models/gen.dtos';
 import { AuthenticationService } from '../services/authentication.service';
 import { ConfigService } from '../services/config.service';
 import { HeaderTitleService } from '../services/header-title.service';
@@ -22,7 +23,7 @@ export class MainNavComponent implements OnInit {
 
   isAuth$: Observable<boolean> = this.authService.getTokenSubject().pipe(map(s => s !== null));
 
-  backendVersion: BehaviorSubject<string> = new BehaviorSubject('No connection');
+  backendVersion: BehaviorSubject<BackendInfoDto> = new BehaviorSubject({ version: 'No connection', mode: MinionMode.STANDALONE });
 
   constructor(
     private authService: AuthenticationService,
