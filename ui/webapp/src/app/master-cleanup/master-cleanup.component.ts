@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { finalize } from 'rxjs/operators';
-import { CleanupAction, CleanupGroup } from '../models/gen.dtos';
+import { CleanupGroup } from '../models/gen.dtos';
 import { CleanupService } from '../services/cleanup.service';
 
 @Component({
@@ -16,8 +16,6 @@ export class MasterCleanupComponent implements OnInit, OnDestroy {
 
   performingCleanupModel = false;
   columns = ['description', 'type', 'what'];
-
-  emptyActions: CleanupAction[] = [{ description: 'No actions to be performed', type: null, what: '' }];
 
   constructor(private cleanupService: CleanupService) {}
 
@@ -40,6 +38,10 @@ export class MasterCleanupComponent implements OnInit, OnDestroy {
         this.clearCounter = 600;
         this.clearCountDownHandle = setInterval(() => this.clearCountDown(), 1000);
       });
+  }
+
+  public getNonemptyGroups(): CleanupGroup[] {
+    return this.cleanupModel.filter(g => g.actions.length > 0);
   }
 
   clearCountDown() {

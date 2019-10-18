@@ -89,7 +89,7 @@ public class CleanupHelper {
                 }
 
                 if (!immediate) {
-                    groups.add(new CleanupGroup("Perform cleanup on instance group " + cfg.name, null, cfg.name,
+                    groups.add(new CleanupGroup("Perform Cleanup on Instance Group " + cfg.name, null, cfg.name,
                             instanceGroupActions));
                 }
             }

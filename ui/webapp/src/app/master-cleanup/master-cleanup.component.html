@@ -20,10 +20,10 @@
     </div>
   </ng-container>
 
-  <ng-container *ngIf='cleanupModel'>
-    <ng-container *ngFor='let group of cleanupModel'>
+  <ng-container *ngIf='cleanupModel && hasAction()'>
+    <ng-container *ngFor='let group of getNonemptyGroups()'>
       <h3 [ngClass]='(group.minion == null && group.instanceGroup == null) ? "offline-minion" : null'>{{group.name}}</h3>
-      <table mat-table [dataSource]='group.actions.length == 0 ? emptyActions: group.actions' class='mat-elevation-z3 action-table'>
+      <table mat-table [dataSource]='group.actions' class='mat-elevation-z3 action-table'>
         <ng-container matColumnDef="description">
           <th mat-header-cell *matHeaderCellDef>Description</th>
           <td mat-cell *matCellDef="let element">{{ element.description }}</td>
@@ -44,4 +44,9 @@
       </table>
     </ng-container>
   </ng-container>
+
+  <ng-container *ngIf='cleanupModel && !hasAction()'>
+    <p>No actions to be performed...</p>
+  </ng-container>
+
 </div>

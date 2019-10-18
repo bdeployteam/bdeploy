@@ -197,7 +197,7 @@ describe('Instance Tests', function () {
 
     cy.get('mat-spinner', { timeout: 10000 }).should('not.exist');
     cy.contains('button', 'Execute all Actions').should('exist').and('be.disabled');
-    cy.contains('td', 'No actions').should('exist');
+    cy.contains('p', 'No actions').should('exist');
 
     cy.contains('button', 'Reset').click();
     cy.contains('button', 'Calculate Cleanup Actions').should('exist').and('be.visible').and('be.enabled');
