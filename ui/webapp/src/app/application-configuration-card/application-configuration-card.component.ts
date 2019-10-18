@@ -39,6 +39,10 @@ export class ApplicationConfigurationCardComponent implements OnInit {
     this.appOs = getAppOs(this.appConfig.application);
   }
 
+  isActive() {
+    return this.activatedTag === this.instanceVersion.key.tag;
+  }
+
   onEdit() {
     this.editEvent.emit(this.appConfig);
   }
