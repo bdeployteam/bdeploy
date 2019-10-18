@@ -9,10 +9,10 @@
       </button>
       <ng-container *ngIf='isClient'>
         <mat-divider></mat-divider>
-        <button mat-menu-item (click)="downloadClickAndStart()">
+        <button mat-menu-item [disabled]='!isActive()' (click)="downloadClickAndStart()">
           <span>Click & Start</span>
         </button>
-        <button mat-menu-item [disabled]="downloading ||! hasLauncher()" (click)="downloadInstaller()">
+        <button mat-menu-item [disabled]="!isActive() || downloading ||! hasLauncher()" (click)="downloadInstaller()">
           <span>Download Installer</span>
         </button>
         <mat-divider></mat-divider>
