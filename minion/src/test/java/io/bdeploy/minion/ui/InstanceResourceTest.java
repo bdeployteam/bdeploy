@@ -30,8 +30,8 @@ import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
-import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
+import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfigurationDto;
@@ -120,7 +120,7 @@ public class InstanceResourceTest {
         ProductManifest product = TestFactory.pushProduct(group.name, remote, tmpDir);
 
         // Prepare and push instance
-        InstanceConfiguration instanceConfig = TestFactory.createInstanceConfig("DemoInstance", remote, product);
+        InstanceConfiguration instanceConfig = TestFactory.createInstanceConfig("DemoInstance", product);
         instanceConfig.autoStart = true;
         instanceResource.create(instanceConfig);
 
@@ -172,7 +172,7 @@ public class InstanceResourceTest {
     private void createInstance(RemoteService remote, Path tmp, String groupName, ProductManifest product, String instanceName,
             String... nodeNames) {
 
-        InstanceConfiguration instanceConfig = TestFactory.createInstanceConfig(instanceName, remote, product);
+        InstanceConfiguration instanceConfig = TestFactory.createInstanceConfig(instanceName, product);
         try (BHive hive = new BHive(tmp.resolve("hive").toUri(), new ActivityReporter.Null())) {
             PushOperation pushOperation = new PushOperation();
             Builder instanceManifest = new InstanceManifest.Builder().setInstanceConfiguration(instanceConfig);
@@ -205,39 +205,6 @@ public class InstanceResourceTest {
     }
 
     @Test
-    void tokenReuse(InstanceGroupResource root, RemoteService remote, @TempDir Path tmp) throws IOException {
-        InstanceGroupConfiguration group = new InstanceGroupConfiguration();
-        group.name = "demo";
-        group.description = "Demo";
-        root.create(group);
-
-        Manifest.Key product = TestFactory.pushProduct(group.name, remote, tmp).getKey();
-
-        InstanceResource res = root.getInstanceResource(group.name);
-        assertTrue(res.list().isEmpty());
-
-        InstanceConfiguration instance = new InstanceConfiguration();
-        instance.product = product;
-        instance.uuid = root.createUuid(group.name);
-        instance.name = "My Instance";
-        instance.purpose = InstancePurpose.PRODUCTIVE;
-        instance.target = remote;
-
-        res.create(instance);
-
-        instance.uuid = root.createUuid(group.name);
-        instance.name = "Other Instance";
-        instance.target = new RemoteService(remote.getUri(), (String) null);
-
-        res.create(instance);
-
-        InstanceConfiguration reread = res.read(instance.uuid);
-        assertNull(instance.target.getKeyStore()); // only URI, not possible to obtain keystore
-        assertNotNull(reread.target.getKeyStore()); // token auto-completed, keystore available.
-        assertEquals("", reread.target.getAuthPack()); // token must not be exposed by the remote service
-    }
-
-    @Test
     void purposes(InstanceGroupResource root) {
         InstanceGroupConfiguration group = new InstanceGroupConfiguration();
         group.name = "demo";
@@ -264,7 +231,6 @@ public class InstanceResourceTest {
         instance.uuid = root.createUuid(group.name);
         instance.name = "My Instance";
         instance.purpose = InstancePurpose.PRODUCTIVE;
-        instance.target = remote;
 
         res.create(instance);
 
@@ -275,14 +241,12 @@ public class InstanceResourceTest {
         assertEquals(instance.uuid, read.uuid);
         assertEquals("My Instance", read.name);
         assertEquals(InstancePurpose.PRODUCTIVE, read.purpose);
-        assertEquals("", read.target.getAuthPack());
 
         read.name = "New Desc";
         res.update(instance.uuid, new InstanceConfigurationDto(read, null), "1");
 
         InstanceConfiguration reread = res.read(instance.uuid);
         assertEquals("New Desc", reread.name);
-        assertEquals(remote.getUri(), reread.target.getUri());
 
         res.delete(instance.uuid);
         assertTrue(res.list().isEmpty());
@@ -305,7 +269,6 @@ public class InstanceResourceTest {
         instance.uuid = root.createUuid(group.name);
         instance.name = "My Instance";
         instance.purpose = InstancePurpose.PRODUCTIVE;
-        instance.target = remote;
 
         res.create(instance);
 

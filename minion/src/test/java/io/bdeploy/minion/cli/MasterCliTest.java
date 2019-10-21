@@ -18,16 +18,13 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import io.bdeploy.bhive.cli.TokenTool;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.TempDirectory;
+import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.TestCliTool;
-import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.security.AuthPackAccessor;
 import io.bdeploy.minion.MinionRoot;
-import io.bdeploy.minion.cli.InitTool;
-import io.bdeploy.minion.cli.MinionServerCli;
-import io.bdeploy.minion.cli.StorageTool;
-import io.bdeploy.minion.cli.UserTool;
 import io.bdeploy.ui.api.Minion;
+import io.bdeploy.ui.api.MinionMode;
 
 @ExtendWith(TempDirectory.class)
 @ExtendWith(TestActivityReporter.class)
@@ -48,7 +45,7 @@ public class MasterCliTest {
         char[] pp;
         String pack;
 
-        try (MinionRoot mr = new MinionRoot(root, reporter)) {
+        try (MinionRoot mr = new MinionRoot(root, MinionMode.STANDALONE, reporter)) {
             assertEquals(2, mr.getStorageLocations().size());
             assertTrue(mr.getStorageLocations().contains(storage));
             assertTrue(mr.getUsers().getAllNames().contains("test"));
@@ -81,7 +78,7 @@ public class MasterCliTest {
         tools.getTool(UserTool.class, "--root=" + root, "--remove=test").run();
         tools.getTool(StorageTool.class, "--root=" + root, "--remove=" + storage.toString()).run();
 
-        try (MinionRoot mr = new MinionRoot(root, reporter)) {
+        try (MinionRoot mr = new MinionRoot(root, MinionMode.STANDALONE, reporter)) {
             assertEquals(1, mr.getStorageLocations().size());
             assertFalse(mr.getStorageLocations().contains(storage));
             assertFalse(mr.getUsers().getAllNames().contains("test"));

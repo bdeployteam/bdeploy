@@ -3,17 +3,13 @@ package io.bdeploy.ui.api.impl;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
@@ -151,15 +147,6 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
     public String createUuid(String group) {
         // TODO: actually assure that the UUID is unique for the use in instance and application UUIDs.
         return UuidHelper.randomId();
-    }
-
-    @Override
-    public List<URI> listMasterUrls(String group) {
-        BHive hive = getGroupHive(group);
-        SortedSet<Key> scan = InstanceManifest.scan(hive, true);
-
-        return scan.stream().filter(Objects::nonNull).map(k -> InstanceManifest.of(hive, k).getConfiguration())
-                .filter(x -> x.target != null).map(x -> x.target.getUri()).distinct().collect(Collectors.toList());
     }
 
     @Override

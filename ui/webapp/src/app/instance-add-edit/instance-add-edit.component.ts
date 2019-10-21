@@ -7,7 +7,7 @@ import { MatButton } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { cloneDeep, isEqual } from 'lodash';
 import { Observable, of } from 'rxjs';
-import { finalize, map, startWith } from 'rxjs/operators';
+import { finalize } from 'rxjs/operators';
 import { MessageBoxMode } from '../messagebox/messagebox.component';
 import { EMPTY_INSTANCE } from '../models/consts';
 import { InstanceConfiguration, InstancePurpose, InstanceVersionDto, ProductDto } from '../models/gen.dtos';
@@ -17,7 +17,6 @@ import { Logger, LoggingService } from '../services/logging.service';
 import { MessageboxService } from '../services/messagebox.service';
 import { ProductService } from '../services/product.service';
 import { sortByTags } from '../utils/manifest.utils';
-import { InstanceValidators } from '../validators/instance.validators';
 
 @Component({
   selector: 'app-instance-add-edit',
@@ -33,16 +32,7 @@ export class InstanceAddEditComponent implements OnInit {
   public purposes: InstancePurpose[];
   public products: ProductDto[] = [];
 
-  public masterURLsLoaded = false;
-  public masterURLs: string[] = [];
-
   public loading = false;
-  public isNewMasterUrl = false;
-  public filteredMasterURLs: Observable<string[]>;
-
-  public updateMasterTokenChecked = false;
-  public masterTokenCheckboxVisible = false;
-  public masterTokenControlVisible = false;
 
   public clonedInstance: InstanceConfiguration;
   private expectedVersion: InstanceVersionDto;
@@ -57,10 +47,6 @@ export class InstanceAddEditComponent implements OnInit {
     product: this.formBuilder.group({
       name: ['', Validators.required],
       tag: ['', Validators.required],
-    }),
-    target: this.formBuilder.group({
-      uri: ['', [Validators.required, InstanceValidators.urlPattern]],
-      authPack: ['', Validators.required],
     }),
     autoUninstall: [''],
   });
@@ -118,24 +104,6 @@ export class InstanceAddEditComponent implements OnInit {
       this.products = products;
       this.log.debug('got ' + products.length + ' products');
     });
-
-    this.instanceGroupService.getMasterUrls(this.groupParam).subscribe(masterUrls => {
-      this.masterURLs = masterUrls;
-      this.masterURLsLoaded = true;
-      this.log.debug('got master URLs ' + JSON.stringify(this.masterURLs));
-      this.updateTokenVisibilityAndValidity();
-
-      this.filteredMasterURLs = this.masterUrlControl.valueChanges.pipe(
-        startWith(''),
-        map(input => {
-          const inputToLowerCase = input == null ? null : input.toLowerCase();
-          return this.masterURLs.filter(uri => input == null || uri.toLowerCase().includes(inputToLowerCase));
-        }),
-      );
-    });
-
-    // check master on input
-    this.masterUrlControl.valueChanges.subscribe(input => this.updateTokenVisibilityAndValidity());
 
     // Clear tag if product changed
     this.productNameControl.valueChanges.subscribe(input => this.productTagControl.reset());
@@ -218,44 +186,6 @@ export class InstanceAddEditComponent implements OnInit {
     }
   }
 
-  public toggleUpdateMasterToken(): void {
-    this.updateMasterTokenChecked = !this.updateMasterTokenChecked;
-    this.updateTokenVisibilityAndValidity();
-  }
-
-  public updateTokenVisibilityAndValidity(): void {
-    // Do not perform anything until we loaded the master URLS
-    if (!this.masterURLsLoaded) {
-      return;
-    }
-
-    // Is the master URL one of the known ones?
-    let masterUrlValue = <string>this.masterUrlControl.value;
-    if (masterUrlValue != null) {
-      masterUrlValue = masterUrlValue.trim();
-    }
-    this.isNewMasterUrl = !this.masterURLs.some(e => e === masterUrlValue);
-
-    // Token field is visible and mandatory for unknown master URLS
-    if (this.isCreate()) {
-      this.masterTokenCheckboxVisible = false;
-      this.masterTokenControlVisible = this.isNewMasterUrl;
-    } else {
-      // Token field is visible when requested by the user
-      // or when the master URL has changed
-      this.masterTokenCheckboxVisible = !this.isNewMasterUrl;
-      this.masterTokenControlVisible = this.isNewMasterUrl || this.updateMasterTokenChecked;
-    }
-
-    // Field is mandatory if it is visible
-    if (this.masterTokenControlVisible) {
-      this.masterTokenControl.setValidators(Validators.required);
-    } else {
-      this.masterTokenControl.clearValidators();
-    }
-    this.masterTokenControl.updateValueAndValidity();
-  }
-
   get uuidControl() {
     return this.instanceFormGroup.get('uuid');
   }
@@ -274,12 +204,6 @@ export class InstanceAddEditComponent implements OnInit {
   }
   get productTagControl() {
     return this.instanceFormGroup.get('product.tag');
-  }
-  get masterUrlControl() {
-    return this.instanceFormGroup.get('target.uri');
-  }
-  get masterTokenControl() {
-    return this.instanceFormGroup.get('target.authPack');
   }
 
   openOverlay(relative: MatButton, template: TemplateRef<any>) {

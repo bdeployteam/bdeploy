@@ -1,7 +1,6 @@
 package io.bdeploy.ui.api;
 
 import java.io.InputStream;
-import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 
@@ -64,10 +63,6 @@ public interface InstanceGroupResource {
     @GET
     @Path("/{group}/new-uuid")
     public String createUuid(@ActivityScope @PathParam("group") String group);
-
-    @GET
-    @Path("/{group}/master-urls")
-    public List<URI> listMasterUrls(@ActivityScope @PathParam("group") String group);
 
     @Path("/{group}/instance")
     public InstanceResource getInstanceResource(@ActivityScope @PathParam("group") String group);

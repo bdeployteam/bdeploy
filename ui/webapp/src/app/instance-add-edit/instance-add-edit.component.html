@@ -85,34 +85,5 @@
         </mat-grid-tile>
       </mat-grid-list>
     </div>
-
-    <div formGroupName="target" class="container">
-      <h3 class="header"> Master </h3>
-      <mat-grid-list cols="3" rowHeight="5em">
-        <mat-grid-tile [colspan]="masterTokenCheckboxVisible ? 2 : 3">
-          <mat-form-field>
-            <input type="text" placeholder="Master URL" matInput formControlName="uri" [matAutocomplete]="auto">
-            <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
-              <mat-option *ngFor="let url of filteredMasterURLs | async" [value]="url">{{url}}</mat-option>
-            </mat-autocomplete>
-            <mat-error *ngIf="masterUrlControl.invalid">{{getErrorMessage(masterUrlControl)}}</mat-error>
-          </mat-form-field>
-        </mat-grid-tile>
-
-        <mat-grid-tile *ngIf="masterTokenCheckboxVisible">
-          <div class="boolean-param-field underline-field">
-            <mat-slide-toggle (change)="toggleUpdateMasterToken()"> </mat-slide-toggle>
-            <label class="boolean-param-label"> Update Security Token </label>
-          </div>
-        </mat-grid-tile>
-      </mat-grid-list>
-
-      <div class="tokenbox" *ngIf="masterTokenControlVisible">
-          <mat-form-field>
-            <textarea matInput placeholder="Security Token" formControlName="authPack" class="textarea-param-field"></textarea>
-            <mat-error *ngIf="masterTokenControl.invalid">{{getErrorMessage(masterTokenControl)}}</mat-error>
-          </mat-form-field>
-      </div>
-    </div>
   </form>
 </section>

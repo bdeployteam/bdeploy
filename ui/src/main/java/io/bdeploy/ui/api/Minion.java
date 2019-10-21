@@ -55,4 +55,9 @@ public interface Minion {
      */
     public MinionMode getMode();
 
+    /**
+     * @return the own {@link RemoteService} for loop-back communication
+     */
+    public RemoteService getSelf();
+
 }

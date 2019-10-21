@@ -65,25 +65,26 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
     @Override
     protected void run(MasterConfig config) {
         helpAndFailIfMissing(config.root(), "Missing --root");
-        out().println("Starting master...");
+
+        MinionMode mode = MinionMode.STANDALONE;
+        if (config.local() || config.central()) {
+            if (config.local() && config.central()) {
+                helpAndFail("Only --local OR --central are allowed, not both");
+            }
+
+            if (config.local()) {
+                mode = MinionMode.LOCAL;
+            } else {
+                mode = MinionMode.CENTRAL;
+            }
+        }
+        out().println("Starting " + mode + " master...");
 
         ActivityReporter.Delegating delegate = new ActivityReporter.Delegating();
-        try (MinionRoot r = new MinionRoot(Paths.get(config.root()), delegate)) {
+        try (MinionRoot r = new MinionRoot(Paths.get(config.root()), mode, delegate)) {
             if (config.updateDir() != null) {
                 Path upd = Paths.get(config.updateDir());
                 r.setUpdateDir(upd);
-            }
-
-            if (config.local() || config.central()) {
-                if (config.local() && config.central()) {
-                    helpAndFail("Only --local OR --central are allowed, not both");
-                }
-
-                if (config.local()) {
-                    r.setMode(MinionMode.LOCAL);
-                } else {
-                    r.setMode(MinionMode.CENTRAL);
-                }
             }
 
             MinionState state = r.getState();

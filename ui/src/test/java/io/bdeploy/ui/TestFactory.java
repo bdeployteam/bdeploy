@@ -105,18 +105,15 @@ public class TestFactory {
      *
      * @param name
      *            the name of the instance
-     * @param remote
-     *            the master URL
      * @param product
      *            the product to use
      * @return the create configuration
      */
-    public static InstanceConfiguration createInstanceConfig(String name, RemoteService remote, ProductManifest product) {
+    public static InstanceConfiguration createInstanceConfig(String name, ProductManifest product) {
         InstanceConfiguration instanceConfig = new InstanceConfiguration();
         instanceConfig.product = product.getKey();
         instanceConfig.uuid = name;
         instanceConfig.name = name;
-        instanceConfig.target = remote;
         return instanceConfig;
     }
 

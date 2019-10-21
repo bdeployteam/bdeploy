@@ -73,7 +73,7 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
 
         ActivityReporter.Delegating delegate = new ActivityReporter.Delegating();
         delegate.setDelegate(getActivityReporter());
-        try (MinionRoot r = new MinionRoot(Paths.get(config.root()), delegate)) {
+        try (MinionRoot r = new MinionRoot(Paths.get(config.root()), MinionMode.SLAVE, delegate)) {
             if (config.updateDir() != null) {
                 Path upd = Paths.get(config.updateDir());
                 r.setUpdateDir(upd);

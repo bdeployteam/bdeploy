@@ -9,8 +9,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 
-import javax.ws.rs.core.UriBuilder;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -22,7 +20,6 @@ import io.bdeploy.bhive.op.ManifestMaxIdOperation;
 import io.bdeploy.common.ContentHelper;
 import io.bdeploy.common.TempDirectory;
 import io.bdeploy.common.TempDirectory.TempDir;
-import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.UuidHelper;
@@ -154,7 +151,6 @@ public class SpecialManifestsTest {
 
             InstanceConfiguration ic = new InstanceConfiguration();
             ic.name = "Test";
-            ic.target = new RemoteService(UriBuilder.fromUri("https://dummy:123/api").build(), "DUMMY");
             ic.product = ProductManifest.of(hive, prodKey).getKey();
             ic.uuid = uuid;
 

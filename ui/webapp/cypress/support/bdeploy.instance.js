@@ -22,20 +22,6 @@ Cypress.Commands.add('createInstance', function(group, name, version = '2.0.0') 
   cy.get('[placeholder=Version]').click();
   cy.get('mat-option').contains(version).click();
 
-  // finally the target, which is the configured backend with the configured token.
-  cy.get('[placeholder="Master URL"]').type(Cypress.env('backendBaseUrl'))
-
-  cy.get('body').then($body => {
-    if($body.find('mat-option:contains(localhost)').length) {
-      cy.contains('mat-option', 'localhost').click();
-    } else {
-      cy.fixture('token.json').then(fixture => {
-        // don't use .type(fixture.token) as this mimiks a typing user (delay)
-        cy.get('[placeholder="Security Token"]').invoke('val', fixture.token).trigger('input')
-      })
-    }
-  })
-
   return cy.get('mat-toolbar-row').contains('UUID').get('b').then(el => {
     cy.get('button').contains('SAVE').click();
     return cy.wrap(el.text())

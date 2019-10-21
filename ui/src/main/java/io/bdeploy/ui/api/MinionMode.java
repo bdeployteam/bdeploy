@@ -19,6 +19,16 @@ public enum MinionMode {
     /**
      * In central mode, a minion will not host master/slave services, but can only remotely control 'local' minions.
      */
-    CENTRAL
+    CENTRAL,
+
+    /**
+     * The minion is a slave - no remote communication with a master is possible.
+     */
+    SLAVE,
+
+    /**
+     * A command line/short lived tool.
+     */
+    TOOL
 
 }

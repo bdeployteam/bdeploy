@@ -19,6 +19,7 @@ import io.bdeploy.jersey.TestServer;
 import io.bdeploy.jersey.audit.RollingFileAuditor;
 import io.bdeploy.minion.cli.InitTool;
 import io.bdeploy.minion.cli.MasterTool;
+import io.bdeploy.ui.api.MinionMode;
 
 public class TestMinion extends TestServer {
 
@@ -84,7 +85,7 @@ public class TestMinion extends TestServer {
         public CloseableMinionRoot(int port) {
             try {
                 root = Files.createTempDirectory("mr-");
-                mr = new MinionRoot(root, new ActivityReporter.Null());
+                mr = new MinionRoot(root, MinionMode.STANDALONE, new ActivityReporter.Null());
                 InitTool.initMinionRoot(root, mr, "localhost", port, null);
             } catch (Exception e) {
                 throw new IllegalStateException(e);

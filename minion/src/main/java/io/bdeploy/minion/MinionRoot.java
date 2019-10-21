@@ -77,7 +77,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
 
     private Scheduler scheduler;
 
-    public MinionRoot(Path root, ActivityReporter reporter) {
+    public MinionRoot(Path root, MinionMode mode, ActivityReporter reporter) {
         super(root.resolve("etc"));
 
         root = root.toAbsolutePath();
@@ -95,12 +95,6 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         this.downloadDir = create(root.resolve("downloads"));
 
         this.processController = new MinionProcessController();
-    }
-
-    /**
-     * @param mode the new mode of the hosting minion.
-     */
-    public void setMode(MinionMode mode) {
         this.mode = mode;
     }
 
@@ -110,6 +104,19 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     @Override
     public MinionMode getMode() {
         return mode;
+    }
+
+    /**
+     * @return the own {@link RemoteService} for loop-back communication
+     */
+    @Override
+    public RemoteService getSelf() {
+        MinionState state = getState();
+        if (state.self == null || state.self.isBlank()) {
+            return state.minions.get(DEFAULT_MASTER_NAME);
+        }
+
+        return state.minions.get(state.self);
     }
 
     /**
