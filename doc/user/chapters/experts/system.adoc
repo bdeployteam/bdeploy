@@ -23,11 +23,35 @@ The page can also be used to download the binaries of *BDeploy* (e.g. to setup a
 
 ==== Manual Cleanup
 
-You can use the *Manual Cleanup* page from the main menu to trigger a manual cleanup of stuff that is not needed any more. There is no need to trigger this manually as a job is scheduled that performs the exact same operation every night. This dialog can be used to immediately trigger a cleanup and to reviewing of the actions performed _before_ doing so. 
+You can use the *Manual Cleanup* page from the main menu to trigger a manual cleanup of stuff that is not needed any more. There is no need to trigger this manually as a job is scheduled that performs the exact same operation every night: 
+
+[%header,cols="1,6"]
+|===
+| Target
+| Description
+
+| Instance Group
+| Uninstall *Instance Versions* that are older than the activated and the previously activated *Instance Version*.
+
+| Instance Group
+| Delete *Product Versions* that are no longer in use, i.e installed anywhere
+
+| Slave
+| Delete *Manifests* that are not known by the master
+
+| Slave
+| Keep two *BDeploy Launcher* versions, delete all older versions.
+
+| Slave
+| Remove unused directories and files in the deployment (including pooled applications), download and temp directory.
+
+|===
+
+The dialog can be used to immediately trigger a cleanup and to reviewing of the actions performed _before_ doing so. 
 
 image::images/BDeploy_Cleanup.png[BDeploy Cleanup Page,align=center,width=480,link="images/BDeploy_Cleanup.png"]
 
-Press the btn:[Calculate Cleanup Actions] button to perform cleanup calculation. The result will be a list of actions to be performed on each connected slave.
+Press the btn:[Calculate Cleanup Actions] button to perform cleanup calculation. The result will be groups of actions to be performed on *Instance Groups* or *Slaves*. The result contains only *Instance Groups* and *Slaves* for which actions are actually calculated, i.e. empty lists are hidden. If no action is calculated at all, a corresponding message is displayed.
 
 image::images/BDeploy_Cleanup_Actions.png[BDeploy Cleanup Actions,align=center,width=480,link="images/BDeploy_Cleanup_Actions.png"]
 
