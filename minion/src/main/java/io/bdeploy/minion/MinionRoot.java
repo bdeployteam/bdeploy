@@ -50,6 +50,7 @@ import io.bdeploy.minion.user.UserDatabase;
 import io.bdeploy.pcu.InstanceProcessController;
 import io.bdeploy.pcu.MinionProcessController;
 import io.bdeploy.ui.api.Minion;
+import io.bdeploy.ui.api.MinionMode;
 
 /**
  * Represents the root directory and configuration of a minion installation.
@@ -72,10 +73,11 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
 
     private Path updates;
     private MinionUpdateManager updateManager = t -> log.error("No Update Manager, cannot update Minion!");
+    private MinionMode mode = MinionMode.STANDALONE;
 
     private Scheduler scheduler;
 
-    public MinionRoot(Path root, ActivityReporter reporter) {
+    public MinionRoot(Path root, MinionMode mode, ActivityReporter reporter) {
         super(root.resolve("etc"));
 
         root = root.toAbsolutePath();
@@ -93,6 +95,28 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         this.downloadDir = create(root.resolve("downloads"));
 
         this.processController = new MinionProcessController();
+        this.mode = mode;
+    }
+
+    /**
+     * @return the mode the hosting minion is run in.
+     */
+    @Override
+    public MinionMode getMode() {
+        return mode;
+    }
+
+    /**
+     * @return the own {@link RemoteService} for loop-back communication
+     */
+    @Override
+    public RemoteService getSelf() {
+        MinionState state = getState();
+        if (state.self == null || state.self.isBlank()) {
+            return state.minions.get(DEFAULT_MASTER_NAME);
+        }
+
+        return state.minions.get(state.self);
     }
 
     /**
@@ -168,15 +192,18 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
      * Setup tasks which should only run when this root is used for serving a
      * minion.
      */
-    public void setupServerTasks(boolean master) {
+    public void setupServerTasks(boolean master, MinionMode masterMode) {
         // cleanup any stale things so periodic tasks don't get them wrong.
         PathHelper.deleteRecursive(getTempDir());
         PathHelper.mkdirs(getTempDir());
 
-        initProcessController();
+        if (masterMode != MinionMode.CENTRAL) {
+            initProcessController();
+        }
+
         createJobScheduler();
 
-        if (master) {
+        if (master && masterMode != MinionMode.CENTRAL) {
             MasterCleanupJob.create(this, getState().cleanupSchedule);
         }
         CleanupDownloadDirJob.create(scheduler, downloadDir);

@@ -1,4 +1,4 @@
-import { ApplicationConfiguration, ApplicationStartType, CommandConfiguration, InstanceConfiguration, InstanceGroupConfiguration, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstancePurpose, InstanceStateRecord, InstanceVersionDto, ManifestKey, ParameterConfiguration, ParameterDescriptor, ParameterType, ProcessControlConfiguration, RemoteService, SoftwareRepositoryConfiguration } from './gen.dtos';
+import { ApplicationConfiguration, ApplicationStartType, CommandConfiguration, InstanceConfiguration, InstanceGroupConfiguration, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstancePurpose, InstanceStateRecord, InstanceVersionDto, ManifestKey, ParameterConfiguration, ParameterDescriptor, ParameterType, ProcessControlConfiguration, SoftwareRepositoryConfiguration } from './gen.dtos';
 
 // HTTP header constant used to suppress global error handling
 export const NO_ERROR_HANDLING_HDR = 'X-No-Global-Error-Handling';
@@ -27,11 +27,6 @@ export const EMPTY_MANIFEST_KEY: ManifestKey = {
   tag: null,
 };
 
-export const EMPTY_REMOTE_SERVICE: RemoteService = {
-  uri: null,
-  authPack: null,
-};
-
 export const EMPTY_INSTANCE: InstanceConfiguration = {
   uuid: null,
   name: null,
@@ -40,7 +35,6 @@ export const EMPTY_INSTANCE: InstanceConfiguration = {
   configTree: null,
   autoStart: false,
   product: EMPTY_MANIFEST_KEY,
-  target: EMPTY_REMOTE_SERVICE,
   autoUninstall: null
 };
 

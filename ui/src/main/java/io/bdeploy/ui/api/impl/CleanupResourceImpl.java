@@ -13,9 +13,10 @@ import org.jvnet.hk2.annotations.Optional;
 
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.interfaces.cleanup.CleanupGroup;
-import io.bdeploy.interfaces.cleanup.CleanupHelper;
 import io.bdeploy.ui.api.CleanupResource;
+import io.bdeploy.ui.api.MasterProvider;
 import io.bdeploy.ui.api.Minion;
+import io.bdeploy.ui.cleanup.CleanupHelper;
 
 public class CleanupResourceImpl implements CleanupResource {
 
@@ -28,6 +29,9 @@ public class CleanupResourceImpl implements CleanupResource {
     private Minion minion;
 
     @Inject
+    private MasterProvider provider;
+
+    @Inject
     private BHiveRegistry registry;
 
     @Context
@@ -36,13 +40,13 @@ public class CleanupResourceImpl implements CleanupResource {
     @Override
     public List<CleanupGroup> calculate() {
         checkMaster();
-        return CleanupHelper.cleanAllMinions(context, minion.getMinions(), registry, false);
+        return CleanupHelper.cleanAllMinions(context, minion, registry, false, provider);
     }
 
     @Override
     public void perform(List<CleanupGroup> groups) {
         checkMaster();
-        CleanupHelper.cleanAllMinions(context, groups, minion.getMinions(), registry);
+        CleanupHelper.cleanAllMinions(context, groups, minion, registry, provider);
     }
 
     private void checkMaster() {

@@ -25,6 +25,7 @@ import io.bdeploy.minion.cli.MasterTool.MasterConfig;
 import io.bdeploy.minion.remote.jersey.JerseyAwareMinionUpdateManager;
 import io.bdeploy.minion.remote.jersey.MasterRootResourceImpl;
 import io.bdeploy.ui.api.Minion;
+import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.impl.UiResources;
 
 /**
@@ -44,11 +45,17 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
         @Help("Specify the directory where any incoming updates should be placed in.")
         String updateDir();
 
-        @Help("Publish the web application, defaults to true.")
+        @Help(value = "Publish the web application, defaults to true.", arg = false)
         boolean publishWebapp() default true;
 
-        @Help("Allow CORS, allows the web-app to run on a different port than the backend.")
+        @Help(value = "Allow CORS, allows the web-app to run on a different port than the backend.", arg = false)
         boolean allowCors() default false;
+
+        @Help(value = "Start master in central mode - requires at least one local master counterpart.", arg = false)
+        boolean central() default false;
+
+        @Help(value = "Start master in local mode - requires a central counterpart to be operational.", arg = false)
+        boolean local() default false;
     }
 
     public MasterTool() {
@@ -58,14 +65,28 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
     @Override
     protected void run(MasterConfig config) {
         helpAndFailIfMissing(config.root(), "Missing --root");
-        out().println("Starting master...");
+
+        MinionMode mode = MinionMode.STANDALONE;
+        if (config.local() || config.central()) {
+            if (config.local() && config.central()) {
+                helpAndFail("Only --local OR --central are allowed, not both");
+            }
+
+            if (config.local()) {
+                mode = MinionMode.LOCAL;
+            } else {
+                mode = MinionMode.CENTRAL;
+            }
+        }
+        out().println("Starting " + mode + " master...");
 
         ActivityReporter.Delegating delegate = new ActivityReporter.Delegating();
-        try (MinionRoot r = new MinionRoot(Paths.get(config.root()), delegate)) {
+        try (MinionRoot r = new MinionRoot(Paths.get(config.root()), mode, delegate)) {
             if (config.updateDir() != null) {
                 Path upd = Paths.get(config.updateDir());
                 r.setUpdateDir(upd);
             }
+
             MinionState state = r.getState();
 
             SecurityHelper sh = SecurityHelper.getInstance();
@@ -89,13 +110,19 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
     public static void registerMasterResources(RegistrationTarget srv, boolean webapp, boolean allowcors, MinionRoot minionRoot,
             ActivityReporter reporter) {
         BHiveRegistry reg = SlaveTool.registerCommonResources(srv, minionRoot, reporter);
-        minionRoot.setupServerTasks(true);
-        srv.register(MasterRootResourceImpl.class);
+        minionRoot.setupServerTasks(true, minionRoot.getMode());
+
+        if (minionRoot.getMode() != MinionMode.CENTRAL) {
+            srv.register(MasterRootResourceImpl.class);
+        }
+
         srv.register(new AbstractBinder() {
 
             @Override
             protected void configure() {
                 bind(Boolean.TRUE).named(Minion.MASTER).to(Boolean.class);
+
+                // required for SoftwareUpdateResourceImpl.
                 bind(MasterRootResourceImpl.class).to(MasterRootResource.class);
             }
         });

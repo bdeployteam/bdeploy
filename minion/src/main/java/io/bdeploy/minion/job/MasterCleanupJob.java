@@ -23,10 +23,10 @@ import org.slf4j.LoggerFactory;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.util.DateHelper;
-import io.bdeploy.interfaces.cleanup.CleanupHelper;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.minion.MinionRoot;
+import io.bdeploy.ui.cleanup.CleanupHelper;
 
 /**
  * A job that cleans artifacts that are not referenced any more.
@@ -118,7 +118,7 @@ public class MasterCleanupJob implements Job {
         try (BHiveRegistry registry = new BHiveRegistry(new ActivityReporter.Null())) {
             mr.getStorageLocations().forEach(registry::scanLocation);
 
-            CleanupHelper.cleanAllMinions(null, mr.getMinions(), registry, true);
+            CleanupHelper.cleanAllMinions(null, mr, registry, true, (h, i) -> mr.getSelf());
 
             mr.modifyState(s -> s.cleanupLastRun = System.currentTimeMillis());
             log.info("Cleanup finished");

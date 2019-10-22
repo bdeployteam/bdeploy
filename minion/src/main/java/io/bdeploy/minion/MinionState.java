@@ -22,6 +22,11 @@ public class MinionState {
     public SortedMap<String, RemoteService> minions = new TreeMap<>();
 
     /**
+     * The own minion's name.
+     */
+    public String self;
+
+    /**
      * Used only on the master; active versions, i.e. what has been activated
      * already.
      *

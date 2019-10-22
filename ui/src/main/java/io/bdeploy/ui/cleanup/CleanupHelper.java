@@ -1,11 +1,10 @@
-package io.bdeploy.interfaces.cleanup;
+package io.bdeploy.ui.cleanup;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -21,7 +20,9 @@ import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.PruneOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.interfaces.cleanup.CleanupAction;
 import io.bdeploy.interfaces.cleanup.CleanupAction.CleanupType;
+import io.bdeploy.interfaces.cleanup.CleanupGroup;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
@@ -35,6 +36,8 @@ import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.interfaces.remote.SlaveCleanupResource;
+import io.bdeploy.ui.api.MasterProvider;
+import io.bdeploy.ui.api.Minion;
 
 /**
  * Shared logic for cleanups on the master. Both immediate and two-stage cleanup is supported.
@@ -51,14 +54,16 @@ public class CleanupHelper {
      * minions.
      *
      * @param context the caller's security context
-     * @param minions the minions to clean.
+     * @param minion the minion - required to be the running master.
      * @param registry the BHive registry.
      * @param immediate whether to immediately perform cleanup. In case this is <code>true</code>, the returned {@link List} is
      *            always empty.
+     * @param provider the {@link MasterProvider} which knows how to obtain a communication channel with an instance's controlling
+     *            master.
      * @return the {@link List} of {@link CleanupGroup}s per minion. Always empty if the immediate parameter is <code>true</code>.
      */
-    public static List<CleanupGroup> cleanAllMinions(SecurityContext context, SortedMap<String, RemoteService> minions,
-            BHiveRegistry registry, boolean immediate) {
+    public static List<CleanupGroup> cleanAllMinions(SecurityContext context, Minion minion, BHiveRegistry registry,
+            boolean immediate, MasterProvider provider) {
 
         List<CleanupGroup> groups = new ArrayList<>();
 
@@ -76,16 +81,18 @@ public class CleanupHelper {
                 for (Key key : latestImKeys) {
                     InstanceManifest im = InstanceManifest.of(hive, key);
                     if (im.getConfiguration().autoUninstall) {
-                        TreeSet<Key> instanceVersions4Uninstall = findInstanceVersions4Uninstall(context, group, hive, im);
+                        TreeSet<Key> instanceVersions4Uninstall = findInstanceVersions4Uninstall(context, group, hive, im,
+                                provider);
                         allInstanceVersions4Uninstall.addAll(instanceVersions4Uninstall);
-                        instanceGroupActions
-                                .addAll(uninstallInstanceVersions(context, hive, instanceVersions4Uninstall, immediate));
+                        instanceGroupActions.addAll(
+                                uninstallInstanceVersions(context, hive, instanceVersions4Uninstall, immediate, provider));
                     }
                 }
 
                 // cleanup of unused products
                 if (cfg.autoDelete) {
-                    instanceGroupActions.addAll(deleteUnusedProducts(context, hive, allInstanceVersions4Uninstall, immediate));
+                    instanceGroupActions
+                            .addAll(deleteUnusedProducts(context, hive, allInstanceVersions4Uninstall, immediate, provider));
                 }
 
                 if (!immediate) {
@@ -97,7 +104,7 @@ public class CleanupHelper {
 
         // minions cleanup
         SortedSet<Key> allUniqueKeysToKeep = findAllUniqueKeys(registry);
-        for (Map.Entry<String, RemoteService> slave : minions.entrySet()) {
+        for (Map.Entry<String, RemoteService> slave : minion.getMinions().entrySet()) {
             log.info("Cleaning on {}, using {} anchors.", slave.getKey(), allUniqueKeysToKeep.size());
 
             SlaveCleanupResource scr = ResourceProvider.getResource(slave.getValue(), SlaveCleanupResource.class, null);
@@ -123,17 +130,18 @@ public class CleanupHelper {
     }
 
     /**
-     * Performs all actions calculated by {@link #cleanAllMinions(SecurityContext, SortedMap, BHiveRegistry, boolean)} with
+     * Performs all actions calculated by
+     * {@link #cleanAllMinions(SecurityContext, Minion, BHiveRegistry, boolean, MasterProvider)} with
      * immediate set to <code>false</code>.
      *
      * @param context the caller's security context
      * @param groups the {@link List} of {@link CleanupGroup} calculated by
-     *            {@link #cleanAllMinions(SecurityContext, SortedMap, BHiveRegistry, boolean)}.
-     * @param minions the minions to clean.
+     *            {@link #cleanAllMinions(SecurityContext, Minion, BHiveRegistry, boolean, MasterProvider)}.
+     * @param minion the calling minion - required to be the master.
      * @param registry the BHive registry.
      */
-    public static void cleanAllMinions(SecurityContext context, List<CleanupGroup> groups,
-            SortedMap<String, RemoteService> minions, BHiveRegistry registry) {
+    public static void cleanAllMinions(SecurityContext context, List<CleanupGroup> groups, Minion minion, BHiveRegistry registry,
+            MasterProvider provider) {
         for (CleanupGroup group : groups) {
             if (group.instanceGroup != null) {
                 BHive hive = registry.get(group.instanceGroup);
@@ -141,7 +149,7 @@ public class CleanupHelper {
                     log.warn("Don't know how to perform cleanup group {}, instance group not found", group.name);
                     continue;
                 }
-                perform(context, hive, group.actions);
+                perform(context, hive, group.actions, provider);
                 continue;
             }
             if (group.minion == null) {
@@ -149,7 +157,7 @@ public class CleanupHelper {
                 continue;
             }
 
-            RemoteService svc = minions.get(group.minion);
+            RemoteService svc = minion.getMinions().get(group.minion);
             if (svc == null) {
                 log.warn("Minion {} associated with cleanup group {} not found", group.minion, group.name);
                 continue;
@@ -204,12 +212,12 @@ public class CleanupHelper {
     }
 
     public static TreeSet<Key> findInstanceVersions4Uninstall(SecurityContext context, String group, BHive hive,
-            InstanceManifest instanceManifest) {
+            InstanceManifest instanceManifest, MasterProvider provider) {
         InstanceStateRecord state = instanceManifest.getState(hive).read();
 
-        RemoteService rs = instanceManifest.getConfiguration().target;
-        MasterNamedResource namedMaster = ResourceProvider.getResource(rs, MasterRootResource.class, context)
-                .getNamedMaster(group);
+        MasterRootResource root = ResourceProvider.getResource(
+                provider.getControllingMaster(hive, instanceManifest.getManifest()), MasterRootResource.class, context);
+        MasterNamedResource namedMaster = root.getNamedMaster(group);
 
         Map<String, ProcessStatusDto> appStatus = namedMaster.getStatus(instanceManifest.getConfiguration().uuid).getAppStatus();
 
@@ -225,7 +233,7 @@ public class CleanupHelper {
     }
 
     public static List<CleanupAction> uninstallInstanceVersions(SecurityContext context, BHive hive, Set<Key> imVersionKeys,
-            boolean immediate) {
+            boolean immediate, MasterProvider provider) {
         List<CleanupAction> actions = new ArrayList<>();
 
         for (Key key : imVersionKeys) {
@@ -235,7 +243,7 @@ public class CleanupHelper {
         }
 
         if (immediate) {
-            perform(context, hive, actions);
+            perform(context, hive, actions, provider);
             return Collections.emptyList();
         }
 
@@ -243,7 +251,7 @@ public class CleanupHelper {
     }
 
     public static List<CleanupAction> deleteUnusedProducts(SecurityContext context, BHive hive,
-            Set<Key> instanceVersions4Uninstall, boolean immediate) {
+            Set<Key> instanceVersions4Uninstall, boolean immediate, MasterProvider provider) {
         List<CleanupAction> actions = new ArrayList<>();
 
         // map of available products grouped by product name
@@ -286,24 +294,23 @@ public class CleanupHelper {
         }
 
         if (immediate) {
-            perform(context, hive, actions);
+            perform(context, hive, actions, provider);
             return Collections.emptyList();
         }
 
         return actions;
     }
 
-    public static void perform(SecurityContext context, BHive hive, List<CleanupAction> actions) {
+    public static void perform(SecurityContext context, BHive hive, List<CleanupAction> actions, MasterProvider provider) {
         for (CleanupAction action : actions) {
             switch (action.type) {
                 case UNINSTALL_INSTANCE_VERSION:
                     Key imKey = Key.parse(action.what);
                     InstanceGroupConfiguration igc = new InstanceGroupManifest(hive).read();
-                    InstanceManifest im = InstanceManifest.of(hive, imKey);
-                    RemoteService svc = im.getConfiguration().target;
 
-                    MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class, context);
-                    master.getNamedMaster(igc.name).uninstall(imKey);
+                    MasterRootResource root = ResourceProvider.getResource(provider.getControllingMaster(hive, imKey),
+                            MasterRootResource.class, context);
+                    root.getNamedMaster(igc.name).uninstall(imKey);
                     break;
                 case DELETE_MANIFEST:
                     hive.execute(new ManifestDeleteOperation().setToDelete(Key.parse(action.what)));

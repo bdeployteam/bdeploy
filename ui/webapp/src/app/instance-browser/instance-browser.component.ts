@@ -75,7 +75,7 @@ export class InstanceBrowserComponent implements OnInit {
       this.products = products;
     });
 
-    forkJoin(instancePromise, productPromise).subscribe(result => {
+    forkJoin([instancePromise, productPromise]).subscribe(result => {
       this.loading = false;
     });
   }

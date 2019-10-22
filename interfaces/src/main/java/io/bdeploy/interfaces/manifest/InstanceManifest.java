@@ -257,7 +257,6 @@ public class InstanceManifest {
             RuntimeAssert.assertNotNull(config.name, "Missing description");
             RuntimeAssert.assertNotNull(config.uuid, "Missing uuid");
             RuntimeAssert.assertNotNull(config.product, "Missing product");
-            RuntimeAssert.assertNotNull(config.target, "Missing target");
 
             if (key == null) {
                 String name = getRootName(config.uuid);

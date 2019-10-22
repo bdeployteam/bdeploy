@@ -1,6 +1,7 @@
 {
   "version": "0.2.0",
   "configurations": [
+
     {
       "type": "edge",
       "request": "launch",
@@ -23,6 +24,20 @@
       "request": "launch",
       "name": "Launch Chrome",
       "url": "http://localhost:4200",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Launch Chrome (Central)",
+      "url": "http://localhost:4201",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Launch Chrome (Local)",
+      "url": "http://localhost:4202",
       "webRoot": "${workspaceFolder}"
     }
   ]

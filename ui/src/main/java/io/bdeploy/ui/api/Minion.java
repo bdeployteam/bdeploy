@@ -50,4 +50,14 @@ public interface Minion {
      */
     public String createWeakToken(String principal);
 
+    /**
+     * @return the mode the hosting minion is run in.
+     */
+    public MinionMode getMode();
+
+    /**
+     * @return the own {@link RemoteService} for loop-back communication
+     */
+    public RemoteService getSelf();
+
 }

@@ -224,7 +224,6 @@ public class InstanceImportExportHelper {
     }
 
     private static void alignInstanceInformation(InstanceConfiguration icfg, InstanceManifest existing) {
-        icfg.target = existing.getConfiguration().target;
         icfg.name = existing.getConfiguration().name;
         icfg.description = existing.getConfiguration().description;
         icfg.purpose = existing.getConfiguration().purpose;

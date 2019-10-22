@@ -28,7 +28,9 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.jersey.TestServer;
 import io.bdeploy.ui.api.AuthService;
+import io.bdeploy.ui.api.MasterProvider;
 import io.bdeploy.ui.api.Minion;
+import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.impl.UiResources;
 
 /**
@@ -47,7 +49,7 @@ public class TestUiBackendServer extends TestServer {
         getExtensionStore(context).put("UI_TEMP", tmp);
 
         // TestServiceBinder binds all mocked services
-        register(new TestServiceBinder(tmp));
+        register(new TestServiceBinder(tmp, getRemoteService()));
         register(BHiveLocatorImpl.class);
         register(new DummyAuthenticationProvider());
 
@@ -70,9 +72,11 @@ public class TestUiBackendServer extends TestServer {
     private static class TestServiceBinder extends AbstractBinder {
 
         private final Path tmp;
+        private final RemoteService self;
 
-        public TestServiceBinder(Path tmp) {
+        public TestServiceBinder(Path tmp, RemoteService self) {
             this.tmp = tmp;
+            this.self = self;
         }
 
         @Override
@@ -85,8 +89,8 @@ public class TestUiBackendServer extends TestServer {
 
             bind(reg).to(BHiveRegistry.class);
             bind(new EqualsAuthService()).to(AuthService.class);
-            bind(new DummyMinion(tmp.resolve("downloads"))).to(Minion.class);
-
+            bind(new DummyMinion(tmp.resolve("downloads"), self)).to(Minion.class);
+            bind(((MasterProvider) (h, i) -> self)).to(MasterProvider.class);
         }
     }
 
@@ -151,9 +155,11 @@ public class TestUiBackendServer extends TestServer {
     private static class DummyMinion implements Minion {
 
         private final Path tmpDir;
+        private final RemoteService self;
 
-        public DummyMinion(Path tmpDir) {
+        public DummyMinion(Path tmpDir, RemoteService self) {
             this.tmpDir = tmpDir;
+            this.self = self;
             PathHelper.mkdirs(tmpDir);
         }
 
@@ -175,6 +181,16 @@ public class TestUiBackendServer extends TestServer {
         @Override
         public String createWeakToken(String principal) {
             return "token-" + principal;
+        }
+
+        @Override
+        public MinionMode getMode() {
+            return MinionMode.STANDALONE;
+        }
+
+        @Override
+        public RemoteService getSelf() {
+            return self;
         }
     }
 

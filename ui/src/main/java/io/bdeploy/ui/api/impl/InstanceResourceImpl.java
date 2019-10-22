@@ -23,7 +23,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
@@ -33,6 +32,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
@@ -44,7 +44,6 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
-import io.bdeploy.bhive.op.ManifestExistsOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.TreeEntryLoadOperation;
@@ -60,9 +59,7 @@ import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
-import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.common.util.StreamHelper;
-import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.common.util.UuidHelper;
@@ -97,6 +94,7 @@ import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.ConfigFileResource;
 import io.bdeploy.ui.api.InstanceResource;
+import io.bdeploy.ui.api.MasterProvider;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.ProcessResource;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
@@ -130,11 +128,17 @@ public class InstanceResourceImpl implements InstanceResource {
     @Inject
     private Minion minion;
 
+    @Inject
+    private MasterProvider mp;
+
     @Context
     private SecurityContext context;
 
     @Context
     private ResourceContext rc;
+
+    @Context
+    private UriInfo info;
 
     public InstanceResourceImpl(String group, BHive hive) {
         this.group = group;
@@ -149,7 +153,8 @@ public class InstanceResourceImpl implements InstanceResource {
         SortedSet<Key> imKeys = InstanceManifest.scan(hive, true);
 
         for (Key imKey : imKeys) {
-            InstanceConfiguration config = InstanceManifest.of(hive, imKey).getConfiguration();
+            InstanceManifest im = InstanceManifest.of(hive, imKey);
+            InstanceConfiguration config = im.getConfiguration();
 
             ProductDto productDto = null;
             try {
@@ -161,8 +166,9 @@ public class InstanceResourceImpl implements InstanceResource {
             Key activeProduct = null;
             ProductDto activeProductDto = null;
             try {
-                MasterRootResource r = ResourceProvider.getResource(config.target, MasterRootResource.class, context);
-                MasterNamedResource master = r.getNamedMaster(group);
+                MasterRootResource root = ResourceProvider.getResource(mp.getControllingMaster(hive, imKey),
+                        MasterRootResource.class, context);
+                MasterNamedResource master = root.getNamedMaster(group);
                 InstanceStateRecord state = master.getInstanceState(config.uuid);
 
                 if (state.activeTag != null) {
@@ -176,12 +182,10 @@ public class InstanceResourceImpl implements InstanceResource {
                 }
             } catch (Exception e) {
                 // in case the token is invalid, master not reachable, etc.
-                log.error("Cannot contact master {}.", config.target.getUri(), e);
-                log.info("Tried with token {}", config.target.getAuthPack());
+                log.error("Cannot contact master for {}.", config.uuid, e);
             }
 
             // Clear security token before sending via REST
-            clearToken(config);
             result.add(InstanceDto.create(config, productDto, activeProduct, activeProductDto));
         }
         return result;
@@ -211,42 +215,22 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Override
     public InstanceConfiguration readVersion(String instanceId, String versionTag) {
-        String rootName = InstanceManifest.getRootName(instanceId);
-        Manifest.Key key = new Manifest.Key(rootName, versionTag);
-        if (!hive.execute(new ManifestExistsOperation().setManifest(key))) {
-            throw new WebApplicationException("Given instance version does not exist", Status.NOT_FOUND);
-        }
-        return InstanceManifest.of(hive, key).getConfiguration();
+        return readInstance(instanceId, versionTag).getConfiguration();
     }
 
     @Override
     public void create(InstanceConfiguration instanceConfig) {
-        // this means there is no token, and no way to establish a secure connection.
-        // in this case we're looking up a target with the same URI from all other
-        // available instances in the group.
-        if (instanceConfig.target.getKeyStore() == null) {
-            SortedSet<Key> scan = InstanceManifest.scan(hive, true);
-            List<InstanceConfiguration> list = scan.stream().map(k -> InstanceManifest.of(hive, k).getConfiguration())
-                    .collect(Collectors.toList());
-            for (InstanceConfiguration config : list) {
-                if (config.target.getUri().equals(instanceConfig.target.getUri())) {
-                    instanceConfig.target = config.target;
-                    break;
-                }
-            }
-        }
-
-        if (instanceConfig.target.getKeyStore() == null) {
-            // still null, no strategy here => error
-            throw new WebApplicationException("Cannot find existing master with given URL", Status.NOT_FOUND);
-        }
-
         ProductManifest product = ProductManifest.of(hive, instanceConfig.product);
         if (product == null) {
             throw new WebApplicationException("Product not found: " + instanceConfig.product, Status.NOT_FOUND);
         }
 
-        ResourceProvider.getResource(instanceConfig.target, MasterRootResource.class, context).getNamedMaster(group)
+        // FIXME: need to create association to "local server" from the configuration data passed in case mode = CENTRAL
+        // This needs to be done here AND in the code which syncs instances to central.
+        MasterRootResource root = ResourceProvider.getResource(mp.getControllingMaster(hive, null), MasterRootResource.class,
+                context);
+
+        root.getNamedMaster(group)
                 .update(new InstanceUpdateDto(new InstanceConfigurationDto(instanceConfig, Collections.emptyList()),
                         getUpdatesFromTree("", new ArrayList<>(), product.getConfigTemplateTreeId())), null);
     }
@@ -287,15 +271,20 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Override
     public InstanceConfiguration read(String instance) {
-        InstanceConfiguration configuration = readInstanceConfiguration(instance);
-        clearToken(configuration);
-        return configuration;
+        return readInstance(instance).getConfiguration();
     }
 
-    private InstanceConfiguration readInstanceConfiguration(String instance) {
-        InstanceManifest manifest = InstanceManifest.load(hive, instance, null);
-        InstanceConfiguration configuration = manifest.getConfiguration();
-        return configuration;
+    private InstanceManifest readInstance(String instance) {
+        return readInstance(instance, null);
+    }
+
+    private InstanceManifest readInstance(String instanceId, String versionTag) {
+        try {
+            return InstanceManifest.load(hive, instanceId, versionTag);
+        } catch (IllegalStateException e) {
+            throw new WebApplicationException("Cannot find instance id=" + instanceId + ", tag=" + versionTag, e,
+                    Status.NOT_FOUND);
+        }
     }
 
     @Override
@@ -307,45 +296,28 @@ public class InstanceResourceImpl implements InstanceResource {
                     + oldConfig.getManifest().getTag(), Status.CONFLICT);
         }
 
-        if (dto.config != null) {
-            dto.config = applyExistingTarget(instance, oldConfig, dto.config);
-        } else {
+        if (dto.config == null) {
             // no new config - load existing one.
             dto.config = oldConfig.getConfiguration();
         }
 
-        Manifest.Key key = ResourceProvider.getResource(dto.config.target, MasterRootResource.class, context)
-                .getNamedMaster(group).update(new InstanceUpdateDto(dto, Collections.emptyList()), expectedTag);
+        MasterRootResource root = ResourceProvider.getResource(mp.getControllingMaster(hive, oldConfig.getManifest()),
+                MasterRootResource.class, context);
+        Manifest.Key key = root.getNamedMaster(group).update(new InstanceUpdateDto(dto, Collections.emptyList()), expectedTag);
 
         UiResources.getInstanceEventManager().create(instance, key);
-    }
-
-    private InstanceConfiguration applyExistingTarget(String instance, InstanceManifest oldConfig, InstanceConfiguration config) {
-        RuntimeAssert.assertEquals(oldConfig.getConfiguration().uuid, config.uuid, "Instance UUID changed");
-        RuntimeAssert.assertEquals(oldConfig.getConfiguration().uuid, instance, "Instance UUID changed");
-
-        // Client will only send a token if he wants to update it
-        // Thus we take the token from the old version if it is empty
-        RemoteService newTarget = config.target;
-        RemoteService oldTarget = oldConfig.getConfiguration().target;
-        if (StringHelper.isNullOrEmpty(newTarget.getAuthPack())) {
-            config.target = new RemoteService(newTarget.getUri(), oldTarget.getAuthPack());
-        }
-
-        // apply node configurations from the previous instance version on update.
-        return config;
     }
 
     @Override
     public void delete(String instance) {
         // TODO: delegate to master
         // prevent delete if processes are running.
-        InstanceConfiguration cfg = readInstanceConfiguration(instance);
-        RemoteService svc = cfg.target;
+        InstanceManifest im = readInstance(instance);
+        RemoteService master = mp.getControllingMaster(hive, im.getManifest());
         try (Activity deploy = reporter.start("Deleting " + instance + "...");
-                NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
-            MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class, context);
-            InstanceStatusDto status = master.getNamedMaster(group).getStatus(instance);
+                NoThrowAutoCloseable proxy = reporter.proxyActivities(master)) {
+            MasterRootResource root = ResourceProvider.getResource(master, MasterRootResource.class, context);
+            InstanceStatusDto status = root.getNamedMaster(group).getStatus(instance);
             for (String app : status.getAppStatus().keySet()) {
                 if (status.isAppRunningOrScheduled(app)) {
                     throw new WebApplicationException("Application still running, cannot delete: " + app,
@@ -356,7 +328,7 @@ public class InstanceResourceImpl implements InstanceResource {
             // cleanup is done periodically in background, still uninstall installed versions to prevent re-start of processes later
             List<InstanceVersionDto> versions = listVersions(instance);
             for (InstanceVersionDto dto : versions) {
-                master.getNamedMaster(group).uninstall(dto.key);
+                root.getNamedMaster(group).uninstall(dto.key);
             }
         }
 
@@ -435,7 +407,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
     private Map<String, InstanceNodeConfigurationDto> getExistingNodes(InstanceManifest thisIm) {
         Map<String, InstanceNodeConfigurationDto> node2Dto = new HashMap<>();
-        RemoteService rsvc = thisIm.getConfiguration().target;
+        RemoteService rsvc = mp.getControllingMaster(hive, thisIm.getManifest());
         try (Activity fetchNodes = reporter.start("Fetching nodes from master");
                 AutoCloseable proxy = reporter.proxyActivities(rsvc)) {
             MasterRootResource master = ResourceProvider.getResource(rsvc, MasterRootResource.class, context);
@@ -452,7 +424,7 @@ public class InstanceResourceImpl implements InstanceResource {
                                         : "Node not currently online")));
             }
         } catch (Exception e) {
-            log.warn("Master offline: {}", thisIm.getConfiguration().target.getUri());
+            log.warn("Master offline: {}", thisIm.getConfiguration().uuid);
             if (log.isTraceEnabled()) {
                 log.trace("Exception", e);
             }
@@ -465,19 +437,10 @@ public class InstanceResourceImpl implements InstanceResource {
         return node2Dto;
     }
 
-    /** Clears the token from the remote service */
-    private void clearToken(InstanceConfiguration config) {
-        RemoteService service = config.target;
-        if (service == null) {
-            return;
-        }
-        config.target = new RemoteService(service.getUri(), "");
-    }
-
     @Override
     public void install(String instanceId, String tag) {
         InstanceManifest instance = InstanceManifest.load(hive, instanceId, tag);
-        RemoteService svc = instance.getConfiguration().target;
+        RemoteService svc = mp.getControllingMaster(hive, instance.getManifest());
         try (Activity deploy = reporter.start("Deploying " + instance.getConfiguration().name + ":" + tag);
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
             // 1. push manifest to remote
@@ -498,7 +461,7 @@ public class InstanceResourceImpl implements InstanceResource {
     @Override
     public void uninstall(String instanceId, String tag) {
         InstanceManifest instance = InstanceManifest.load(hive, instanceId, tag);
-        RemoteService svc = instance.getConfiguration().target;
+        RemoteService svc = mp.getControllingMaster(hive, instance.getManifest());
         try (Activity deploy = reporter.start("Undeploying " + instance.getConfiguration().name + ":" + tag);
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
 
@@ -524,7 +487,7 @@ public class InstanceResourceImpl implements InstanceResource {
     @Override
     public void activate(String instanceId, String tag) {
         InstanceManifest instance = InstanceManifest.load(hive, instanceId, tag);
-        RemoteService svc = instance.getConfiguration().target;
+        RemoteService svc = mp.getControllingMaster(hive, instance.getManifest());
         try (Activity deploy = reporter.start("Activating " + instanceId + ":" + tag);
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
             MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class, context);
@@ -548,7 +511,7 @@ public class InstanceResourceImpl implements InstanceResource {
     @Override
     public InstanceStateRecord getDeploymentStates(String instanceId) {
         InstanceManifest instance = InstanceManifest.load(hive, instanceId, null);
-        RemoteService svc = instance.getConfiguration().target;
+        RemoteService svc = mp.getControllingMaster(hive, instance.getManifest());
         MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class, context);
         return master.getNamedMaster(group).getInstanceState(instanceId);
     }
@@ -557,15 +520,14 @@ public class InstanceResourceImpl implements InstanceResource {
     public ClickAndStartDescriptor getClickAndStartDescriptor(String instanceId, String applicationId) {
         InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
 
-        RemoteService server = im.getConfiguration().target;
-        MasterNamedResource master = ResourceProvider.getResource(server, MasterRootResource.class, context)
-                .getNamedMaster(group);
+        RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
+        MasterNamedResource master = ResourceProvider.getResource(svc, MasterRootResource.class, context).getNamedMaster(group);
 
         ClickAndStartDescriptor desc = new ClickAndStartDescriptor();
         desc.applicationId = applicationId;
         desc.groupId = group;
         desc.instanceId = instanceId;
-        desc.host = new RemoteService(server.getUri(), master.generateWeakToken(context.getUserPrincipal().getName()));
+        desc.host = new RemoteService(info.getBaseUri(), master.generateWeakToken(context.getUserPrincipal().getName()));
 
         return desc;
     }
@@ -603,15 +565,15 @@ public class InstanceResourceImpl implements InstanceResource {
                     Status.NOT_FOUND);
         }
 
-        UriBuilder launcherUri = UriBuilder.fromUri(im.getConfiguration().target.getUri());
+        UriBuilder launcherUri = UriBuilder.fromUri(info.getBaseUri());
         launcherUri.path(SoftwareUpdateResource.ROOT_PATH);
         launcherUri.path(SoftwareUpdateResource.DOWNLOAD_LATEST_PATH);
 
-        UriBuilder iconUri = UriBuilder.fromUri(im.getConfiguration().target.getUri());
+        UriBuilder iconUri = UriBuilder.fromUri(info.getBaseUri());
         iconUri.path("/group/{group}/instance/");
         iconUri.path(InstanceResource.PATH_DOWNLOAD_APP_ICON);
 
-        UriBuilder splashUrl = UriBuilder.fromUri(im.getConfiguration().target.getUri());
+        UriBuilder splashUrl = UriBuilder.fromUri(info.getBaseUri());
         splashUrl.path("/group/{group}/instance/");
         splashUrl.path(InstanceResource.PATH_DOWNLOAD_APP_SPLASH);
 
@@ -759,12 +721,13 @@ public class InstanceResourceImpl implements InstanceResource {
     @WriteLock
     @Override
     public List<Key> importInstance(InputStream inputStream, String instanceId) {
-        InstanceConfiguration cfg = readInstanceConfiguration(instanceId);
-        if (cfg == null) {
+        InstanceManifest im = readInstance(instanceId);
+        if (im == null) {
             throw new WebApplicationException("Cannot load " + instanceId, Status.NOT_FOUND);
         }
 
-        MasterRootResource root = ResourceProvider.getResource(cfg.target, MasterRootResource.class, context);
+        RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
+        MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class, context);
         Path zip = minion.getDownloadDir().resolve(UuidHelper.randomId() + ".zip");
         try {
             Files.copy(inputStream, zip);
@@ -780,24 +743,26 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Override
     public InstanceDirectory getOutputEntry(String instanceId, String tag, String app) {
-        InstanceConfiguration cfg = readVersion(instanceId, tag);
-        if (cfg == null) {
+        InstanceManifest im = readInstance(instanceId, tag);
+        if (im == null) {
             throw new WebApplicationException("Cannot load " + instanceId + ":" + tag, Status.NOT_FOUND);
         }
 
-        MasterRootResource root = ResourceProvider.getResource(cfg.target, MasterRootResource.class, context);
+        RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
+        MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class, context);
         return root.getNamedMaster(group).getOutputEntry(instanceId, tag, app);
     }
 
     @Override
     public StringEntryChunkDto getContentChunk(String instanceId, String minion, InstanceDirectoryEntry entry, long offset,
             long limit) {
-        InstanceConfiguration cfg = readVersion(instanceId, entry.tag);
-        if (cfg == null) {
+        InstanceManifest im = readInstance(instanceId, entry.tag);
+        if (im == null) {
             throw new WebApplicationException("Cannot load " + instanceId + ":" + entry.tag, Status.NOT_FOUND);
         }
 
-        MasterRootResource root = ResourceProvider.getResource(cfg.target, MasterRootResource.class, context);
+        RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
+        MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class, context);
         EntryChunk chunk = root.getNamedMaster(group).getEntryContent(minion, entry, offset, limit);
         if (chunk == null) {
             return null;

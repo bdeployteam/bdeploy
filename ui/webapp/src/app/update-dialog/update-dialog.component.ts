@@ -42,7 +42,7 @@ export class UpdateDialogComponent implements OnInit {
       if (!r) {
         this.error = true;
       }
-      this.versionAfterUpdate = r;
+      this.versionAfterUpdate = r.version;
     });
   }
 

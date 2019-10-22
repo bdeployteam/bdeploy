@@ -56,7 +56,7 @@
 
 footer {
   width: 100%;
-  height: 65px;
+  height: 100px;
   display: flex;
   flex-direction: column;
   position: absolute;
@@ -66,14 +66,14 @@ footer {
 .footer-content {
   margin: 10px;
   display: grid;
-  grid-row-gap: 5px;
+  grid-row-gap: 10px;
   grid-template-columns: 120px auto;
   grid-template-rows: auto;
 }
 
 .at-bottom {
   position: absolute;
-  bottom: 70px;
+  bottom: 105px;
   width: 100%;
 }
 

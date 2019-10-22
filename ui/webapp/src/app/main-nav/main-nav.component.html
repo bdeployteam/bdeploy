@@ -21,7 +21,10 @@
       <mat-divider ></mat-divider>
       <div class="footer-content">
         <span>Version:</span>
-        <span>{{ backendVersion | async }}</span>
+        <span>{{ (backendVersion | async).version }}</span>
+
+        <span>Mode:</span>
+        <span>{{ (backendVersion | async).mode }}</span>
 
         <span>Log Level:</span>
         <mat-select [value]="getLogLevel()" (selectionChange)="setLogLevel($event)">

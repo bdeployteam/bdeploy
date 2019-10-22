@@ -3,11 +3,11 @@ package io.bdeploy.ui.api.impl;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.SecurityContext;
 
 import io.bdeploy.bhive.BHive;
-import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 import io.bdeploy.interfaces.directory.InstanceDirectory;
@@ -15,6 +15,7 @@ import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.ui.api.MasterProvider;
 import io.bdeploy.ui.api.ProcessResource;
 
 public class ProcessResourceImpl implements ProcessResource {
@@ -22,6 +23,9 @@ public class ProcessResourceImpl implements ProcessResource {
     private final BHive hive;
     private final String instanceGroup;
     private final String instanceId;
+
+    @Inject
+    private MasterProvider mp;
 
     @Context
     private SecurityContext context;
@@ -91,8 +95,8 @@ public class ProcessResourceImpl implements ProcessResource {
 
     private MasterNamedResource getMasterResource() {
         InstanceManifest manifest = InstanceManifest.load(hive, instanceId, null);
-        RemoteService remote = manifest.getConfiguration().target;
-        MasterRootResource root = ResourceProvider.getResource(remote, MasterRootResource.class, context);
+        MasterRootResource root = ResourceProvider.getResource(mp.getControllingMaster(hive, manifest.getManifest()),
+                MasterRootResource.class, context);
         return root.getNamedMaster(instanceGroup);
     }
 

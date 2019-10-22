@@ -72,8 +72,24 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "2mb",
-                  "maximumError": "5mb"
+                  "maximumWarning": "4mb",
+                  "maximumError": "6mb"
+                }
+              ]
+            },
+            "central": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.dev-central.ts"
+                }
+              ]
+            },
+            "local": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.dev-local.ts"
                 }
               ]
             }
@@ -87,6 +103,14 @@
           "configurations": {
             "production": {
               "browserTarget": "webapp:build:production"
+            },
+            "central": {
+              "browserTarget": "webapp:build:central",
+              "port": 4201
+            },
+            "local": {
+              "browserTarget": "webapp:build:local",
+              "port": 4202
             }
           }
         },

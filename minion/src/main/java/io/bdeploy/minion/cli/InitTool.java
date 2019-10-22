@@ -24,6 +24,7 @@ import io.bdeploy.minion.MinionState;
 import io.bdeploy.minion.cli.InitTool.InitConfig;
 import io.bdeploy.minion.job.MasterCleanupJob;
 import io.bdeploy.ui.api.Minion;
+import io.bdeploy.ui.api.MinionMode;
 
 @Help("Initialize a minion root directory")
 @CliName("init")
@@ -70,7 +71,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
             helpAndFail("Root " + root + " already exists!");
         }
 
-        try (MinionRoot mr = new MinionRoot(root, getActivityReporter())) {
+        try (MinionRoot mr = new MinionRoot(root, MinionMode.TOOL, getActivityReporter())) {
             mr.getAuditor().audit(AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("init").build());
             out().println("Initializing minion keys...");
             String pack = initMinionRoot(root, mr, config.hostname(), config.port(), config.deployments());
@@ -117,6 +118,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
 
         RemoteService master = new RemoteService(UriBuilder.fromUri("https://" + hostname + ":" + port + "/api").build(), pack);
         state.minions.put(Minion.DEFAULT_MASTER_NAME, master);
+        state.self = Minion.DEFAULT_MASTER_NAME;
 
         state.officialName = hostname;
         state.port = port;

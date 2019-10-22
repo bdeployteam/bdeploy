@@ -531,10 +531,6 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             }
         }
 
-        if (instanceConfig.target == null || instanceConfig.target.getKeyStore() == null) {
-            throw new WebApplicationException("No remote information for instance " + instanceConfig.uuid, Status.NOT_ACCEPTABLE);
-        }
-
         if (configUpdates != null && !configUpdates.isEmpty()) {
             // export existing tree and apply updates.
             // set/reset config tree ID on instanceConfig.

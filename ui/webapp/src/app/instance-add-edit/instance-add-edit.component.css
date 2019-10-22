@@ -39,10 +39,6 @@ mat-form-field {
   margin-top: -10px;
 }
 
-.tokenbox {
-  display: flex;
-  margin-top: 10px;
-}
 .textarea-param-field {
   min-height: 120px;
 }

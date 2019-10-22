@@ -36,6 +36,30 @@ java configuration Slave-Init : minion-base {
 }
 
 /**
+ * Initialize a new master root for a central server
+ */
+java configuration Central-Init : minion-base {
+	argument "init";
+	argument "--root=${workspace_loc}/runtime/central";
+	argument "--hostname=localhost";
+	argument "--port=7705";
+	argument "--dist=ignore";
+	argument "--tokenFile=${workspace_loc}/runtime/token-central.txt";
+}
+
+/**
+ * Initialize a new master root for a local server
+ */
+java configuration Local-Init : minion-base {
+	argument "init";
+	argument "--root=${workspace_loc}/runtime/local";
+	argument "--hostname=localhost";
+	argument "--port=7706";
+	argument "--dist=ignore";
+	argument "--tokenFile=${workspace_loc}/runtime/token-local.txt";
+}
+
+/**
  * Registers the slave with the master root.
  */
 java configuration Slave-Register : minion-base {
@@ -76,6 +100,30 @@ java configuration Master : minion-base {
 	memory max=256 MB;
 }
 
+/**
+ * Runs the master in central mode on the previously initialized root.
+ */
+java configuration Central-Master : minion-base {
+	argument "master";
+	argument "--central";
+	argument "--root=${workspace_loc}/runtime/central";
+	argument "--allowCors";
+	vm-argument "-XX:+HeapDumpOnOutOfMemoryError";
+	memory max=256 MB;
+}
+
+/**
+ * Runs the master in central mode on the previously initialized root.
+ */
+java configuration Local-Master : minion-base {
+	argument "master";
+	argument "--local";
+	argument "--root=${workspace_loc}/runtime/local";
+	argument "--allowCors";
+	vm-argument "-XX:+HeapDumpOnOutOfMemoryError";
+	memory max=256 MB;
+}
+
 java configuration Launcher {
 	project launcher;
 	main-class io.bdeploy.launcher.cli.LauncherCli;
@@ -97,6 +145,28 @@ java configuration Master-AddUser : minion-base {
 	argument "user";
 	argument "--admin"; // all users are global admin which are created using this config
 	argument "--root=${workspace_loc}/runtime/master";
+	argument "--add=${string_prompt:Enter Username}";
+	argument "--password=${password_prompt:Enter Password}";
+}
+
+/**
+ * Add a new user to the central master's user database
+ */
+java configuration Central-AddUser : minion-base {
+	argument "user";
+	argument "--admin"; // all users are global admin which are created using this config
+	argument "--root=${workspace_loc}/runtime/central";
+	argument "--add=${string_prompt:Enter Username}";
+	argument "--password=${password_prompt:Enter Password}";
+}
+
+/**
+ * Add a new user to the local master's user database
+ */
+java configuration Local-AddUser : minion-base {
+	argument "user";
+	argument "--admin"; // all users are global admin which are created using this config
+	argument "--root=${workspace_loc}/runtime/local";
 	argument "--add=${string_prompt:Enter Username}";
 	argument "--password=${password_prompt:Enter Password}";
 }

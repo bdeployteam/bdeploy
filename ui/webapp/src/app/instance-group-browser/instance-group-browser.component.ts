@@ -2,8 +2,9 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MediaChange, MediaObserver } from '@angular/flex-layout';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { DataList } from '../models/dataList';
-import { InstanceGroupConfiguration } from '../models/gen.dtos';
+import { InstanceGroupConfiguration, MinionMode } from '../models/gen.dtos';
 import { AuthenticationService } from '../services/authentication.service';
+import { ConfigService } from '../services/config.service';
 import { InstanceGroupService } from '../services/instance-group.service';
 import { Logger, LoggingService } from '../services/logging.service';
 
@@ -36,7 +37,8 @@ export class InstanceGroupBrowserComponent implements OnInit, OnDestroy {
     private mediaObserver: MediaObserver,
     private instanceGroupService: InstanceGroupService,
     private loggingService: LoggingService,
-    private authService: AuthenticationService) { }
+    private authService: AuthenticationService,
+    private config: ConfigService) { }
 
   ngOnInit(): void {
     this.log.debug('intializing...');
@@ -101,5 +103,17 @@ export class InstanceGroupBrowserComponent implements OnInit, OnDestroy {
       }
     }
     return result;
+  }
+
+  isAddAllowed(): boolean {
+    return this.config.config.mode === MinionMode.CENTRAL || this.config.config.mode === MinionMode.STANDALONE;
+  }
+
+  isAttachAllowed(): boolean {
+    return !this.isAddAllowed();
+  }
+
+  isAttachLocalAllowed(): boolean {
+    return this.config.config.mode === MinionMode.CENTRAL;
   }
 }

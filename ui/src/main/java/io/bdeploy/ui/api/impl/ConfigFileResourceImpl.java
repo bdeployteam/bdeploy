@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response.Status;
@@ -33,6 +34,7 @@ import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.ui.api.ConfigFileResource;
+import io.bdeploy.ui.api.MasterProvider;
 import io.bdeploy.ui.dto.ConfigFileDto;
 
 public class ConfigFileResourceImpl implements ConfigFileResource {
@@ -43,6 +45,9 @@ public class ConfigFileResourceImpl implements ConfigFileResource {
 
     @Context
     private SecurityContext context;
+
+    @Inject
+    private MasterProvider mp;
 
     public ConfigFileResourceImpl(BHive hive, String groupId, String instanceId) {
         this.hive = hive;
@@ -101,8 +106,9 @@ public class ConfigFileResourceImpl implements ConfigFileResource {
     public void updateConfigFiles(List<FileStatusDto> updates, String expectedTag) {
         InstanceManifest oldConfig = InstanceManifest.load(hive, instanceId, null);
 
-        MasterNamedResource master = ResourceProvider
-                .getResource(oldConfig.getConfiguration().target, MasterRootResource.class, context).getNamedMaster(groupId);
+        MasterRootResource root = ResourceProvider.getResource(mp.getControllingMaster(hive, oldConfig.getManifest()),
+                MasterRootResource.class, context);
+        MasterNamedResource master = root.getNamedMaster(groupId);
 
         Manifest.Key rootKey = master.update(new InstanceUpdateDto(
                 new InstanceConfigurationDto(oldConfig.getConfiguration(), Collections.emptyList()), updates), expectedTag);

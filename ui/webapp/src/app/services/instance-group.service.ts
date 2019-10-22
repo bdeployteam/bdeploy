@@ -68,12 +68,6 @@ export class InstanceGroupService {
     return this.http.get(url, { responseType: 'text' });
   }
 
-  public getMasterUrls(name: string): Observable<string[]> {
-    const url: string = this.cfg.config.api + InstanceGroupService.BASEPATH + '/' + name + '/master-urls';
-    this.log.debug('getMasterUrls: ' + url);
-    return this.http.get<string[]>(url);
-  }
-
   public getInstanceGroupImage(name: string) {
     const url: string = this.getInstanceGroupImageUrl(name);
     this.log.debug('getInstanceGroupImage: ' + url);

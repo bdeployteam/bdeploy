@@ -71,7 +71,7 @@ public class TestFactory {
         /* (this test creates the named hive only on the target "remote" server - see below) */
 
         /* STEP 3a: Configuration created (normally via Web UI) */
-        Manifest.Key instance = createDemoInstance(local, prodKey, tmp, remote, appKey, clientKey);
+        Manifest.Key instance = createDemoInstance(local, prodKey, tmp, appKey, clientKey);
 
         if (push) {
             /* STEP 3b: Establish sync with designated remote master */
@@ -89,8 +89,8 @@ public class TestFactory {
     /**
      * Fakes the configuration UI.
      */
-    private static Manifest.Key createDemoInstance(BHive local, Manifest.Key product, Path tmp, RemoteService remote,
-            Manifest.Key serverApp, Manifest.Key clientApp) throws IOException {
+    private static Manifest.Key createDemoInstance(BHive local, Manifest.Key product, Path tmp, Manifest.Key serverApp,
+            Manifest.Key clientApp) throws IOException {
         //        String uuid = UuidHelper.randomId();
         String uuid = "aaa-bbb-ccc";
 
@@ -152,7 +152,6 @@ public class TestFactory {
         InstanceConfiguration ic = new InstanceConfiguration();
         ic.name = "DemoInstance";
         ic.product = pmf.getKey();
-        ic.target = remote;
         ic.uuid = uuid;
         ic.configTree = pmf.getConfigTemplateTreeId();
 
