@@ -28,6 +28,12 @@
         <div>
           Version: <b *ngIf="!loading">{{ selectedConfig.instance.product.tag }}</b>&nbsp;<span *ngIf="!loading && !isProductAvailable(selectedConfig)" class="product-unavailable" matTooltip="Required product version is not available.">N/A</span>
         </div>
+        <div *ngIf='controllingServer'>
+          Controlling Server: <b *ngIf="!loading">{{controllingServer.name}}</b>
+        </div>
+        <div *ngIf='!controllingServer'>
+          &nbsp;
+        </div>
         <div>
           Purpose: <b *ngIf="!loading">{{ selectedConfig.instance.purpose }}</b>
         </div>

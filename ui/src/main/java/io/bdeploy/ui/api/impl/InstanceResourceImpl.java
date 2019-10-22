@@ -48,6 +48,7 @@ import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.op.TreeLoadOperation;
+import io.bdeploy.bhive.op.remote.FetchOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
@@ -91,15 +92,19 @@ import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
+import io.bdeploy.ui.LocalMasterAssociationMetaManifest;
+import io.bdeploy.ui.LocalMasterAttachmentsMetaManifest;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.ConfigFileResource;
 import io.bdeploy.ui.api.InstanceResource;
 import io.bdeploy.ui.api.MasterProvider;
 import io.bdeploy.ui.api.Minion;
+import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.ProcessResource;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
 import io.bdeploy.ui.branding.Branding;
 import io.bdeploy.ui.branding.BrandingConfig;
+import io.bdeploy.ui.dto.AttachIdentDto;
 import io.bdeploy.ui.dto.InstanceDto;
 import io.bdeploy.ui.dto.InstanceManifestHistoryDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
@@ -219,20 +224,38 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     @Override
-    public void create(InstanceConfiguration instanceConfig) {
+    public void create(InstanceConfiguration instanceConfig, String localServer) {
         ProductManifest product = ProductManifest.of(hive, instanceConfig.product);
         if (product == null) {
             throw new WebApplicationException("Product not found: " + instanceConfig.product, Status.NOT_FOUND);
         }
 
-        // FIXME: need to create association to "local server" from the configuration data passed in case mode = CENTRAL
-        // This needs to be done here AND in the code which syncs instances to central.
-        MasterRootResource root = ResourceProvider.getResource(mp.getControllingMaster(hive, null), MasterRootResource.class,
-                context);
+        RemoteService remote;
+        if (minion.getMode() == MinionMode.CENTRAL && localServer == null) {
+            throw new WebApplicationException("Local Server is not set on central", Status.EXPECTATION_FAILED);
+        } else if (minion.getMode() == MinionMode.CENTRAL) {
+            LocalMasterAttachmentsMetaManifest attached = LocalMasterAttachmentsMetaManifest.read(hive);
+            if (!attached.getAttachedLocalServers().containsKey(localServer)) {
+                throw new WebApplicationException("Local Server '" + localServer + "' is not attached to this instance group",
+                        Status.EXPECTATION_FAILED);
+            }
+            AttachIdentDto ident = attached.getAttachedLocalServers().get(localServer);
+            remote = new RemoteService(UriBuilder.fromUri(ident.uri).build(), ident.auth);
+        } else {
+            remote = mp.getControllingMaster(hive, null);
+        }
 
-        root.getNamedMaster(group)
+        MasterRootResource root = ResourceProvider.getResource(remote, MasterRootResource.class, context);
+
+        Manifest.Key key = root.getNamedMaster(group)
                 .update(new InstanceUpdateDto(new InstanceConfigurationDto(instanceConfig, Collections.emptyList()),
                         getUpdatesFromTree("", new ArrayList<>(), product.getConfigTemplateTreeId())), null);
+
+        if (minion.getMode() == MinionMode.CENTRAL) {
+            // immediately fetch back so we have it to create the association
+            hive.execute(new FetchOperation().addManifest(key).setRemote(remote).setHiveName(group));
+            LocalMasterAssociationMetaManifest.associate(hive, key, localServer);
+        }
     }
 
     private List<FileStatusDto> getUpdatesFromTree(String path, List<FileStatusDto> target, ObjectId cfgTree) {
@@ -288,7 +311,7 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     @Override
-    public void update(String instance, InstanceConfigurationDto dto, String expectedTag) {
+    public void update(String instance, InstanceConfigurationDto dto, String localServer, String expectedTag) {
         InstanceManifest oldConfig = InstanceManifest.load(hive, instance, null);
 
         if (!oldConfig.getManifest().getTag().equals(expectedTag)) {
@@ -301,9 +324,29 @@ public class InstanceResourceImpl implements InstanceResource {
             dto.config = oldConfig.getConfiguration();
         }
 
-        MasterRootResource root = ResourceProvider.getResource(mp.getControllingMaster(hive, oldConfig.getManifest()),
-                MasterRootResource.class, context);
+        RemoteService remote;
+        if (minion.getMode() == MinionMode.CENTRAL && localServer == null) {
+            throw new WebApplicationException("Local Server is not set on central", Status.EXPECTATION_FAILED);
+        } else if (minion.getMode() == MinionMode.CENTRAL) {
+            LocalMasterAttachmentsMetaManifest attached = LocalMasterAttachmentsMetaManifest.read(hive);
+            if (!attached.getAttachedLocalServers().containsKey(localServer)) {
+                throw new WebApplicationException("Local Server '" + localServer + "' is not attached to this instance group",
+                        Status.EXPECTATION_FAILED);
+            }
+            AttachIdentDto ident = attached.getAttachedLocalServers().get(localServer);
+            remote = new RemoteService(UriBuilder.fromUri(ident.uri).build(), ident.auth);
+        } else {
+            remote = mp.getControllingMaster(hive, null);
+        }
+
+        MasterRootResource root = ResourceProvider.getResource(remote, MasterRootResource.class, context);
         Manifest.Key key = root.getNamedMaster(group).update(new InstanceUpdateDto(dto, Collections.emptyList()), expectedTag);
+
+        if (minion.getMode() == MinionMode.CENTRAL) {
+            // immediately fetch back so we have it to create the association
+            hive.execute(new FetchOperation().addManifest(key).setRemote(remote).setHiveName(group));
+            LocalMasterAssociationMetaManifest.associate(hive, key, localServer);
+        }
 
         UiResources.getInstanceEventManager().create(instance, key);
     }

@@ -1,0 +1,21 @@
+@import '~@angular/material/theming';
+
+@mixin attach-central-theme($theme) {
+  $dark: map-get($theme, 'is-dark');
+
+  $drag-color: if($dark, mat-color($mat-grey, 800), mat-color($mat-yellow, 200));
+  $border-color: if($dark, mat-color($mat-grey, 300), mat-color($mat-grey, 700));
+  $success-color: if($dark, mat-color($mat-green, 300), mat-color($mat-green, 700));
+
+  .drag-card {
+    background-color: $drag-color !important;
+  }
+
+  .drop-card {
+    border: dashed 2px $border-color;
+  }
+
+  .success-icon mat-icon {
+    color: $success-color;
+  }
+}

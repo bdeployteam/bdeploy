@@ -22,10 +22,13 @@ export class InstanceService {
     return this.http.get<InstanceDto[]>(url);
   }
 
-  public createInstance(instanceGroupName: string, instance: InstanceConfiguration) {
+  public createInstance(instanceGroupName: string, instance: InstanceConfiguration, localServer: string) {
     const url: string = this.buildGroupUrl(instanceGroupName);
     this.log.debug('createInstance: ' + url);
-    return this.http.put(url, instance);
+    const options = {
+      params: new HttpParams().set('localServer', localServer),
+    };
+    return this.http.put(url, instance, options);
   }
 
   public getInstance(instanceGroupName: string, instanceName: string): Observable<InstanceConfiguration> {
@@ -39,6 +42,7 @@ export class InstanceService {
     instanceName: string,
     instance: InstanceConfiguration,
     nodeList: InstanceNodeConfigurationListDto,
+    localServer: string,
     expectedTag: string,
   ) {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceName);
@@ -48,7 +52,7 @@ export class InstanceService {
       nodeDtos: nodeList ? nodeList.nodeConfigDtos : null,
     };
     const options = {
-      params: new HttpParams().set('expect', expectedTag),
+      params: new HttpParams().set('expect', expectedTag).set('localServer', localServer),
     };
     return this.http.post(url, dto, options);
   }

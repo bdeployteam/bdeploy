@@ -3,7 +3,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { APP_INITIALIZER, ErrorHandler, NgModule } from '@angular/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatAutocompleteModule, MatBadgeModule, MatBottomSheetModule, MatButtonModule, MatCardModule, MatCheckboxModule, MatChipsModule, MatDialogModule, MatDividerModule, MatExpansionModule, MatFormFieldModule, MatGridListModule, MatIconModule, MatInputModule, MatListModule, MatMenuModule, MatPaginatorModule, MatProgressBarModule, MatProgressSpinnerModule, MatRippleModule, MatSelectModule, MatSidenavModule, MatSlideToggleModule, MatSnackBarModule, MatSortModule, MatTableModule, MatTabsModule, MatToolbarModule, MatTooltipModule, MatTreeModule } from '@angular/material';
+import { MatAutocompleteModule, MatBadgeModule, MatBottomSheetModule, MatButtonModule, MatCardModule, MatCheckboxModule, MatChipsModule, MatDialogModule, MatDividerModule, MatExpansionModule, MatFormFieldModule, MatGridListModule, MatIconModule, MatInputModule, MatListModule, MatMenuModule, MatPaginatorModule, MatProgressBarModule, MatProgressSpinnerModule, MatRippleModule, MatSelectModule, MatSidenavModule, MatSlideToggleModule, MatSnackBarModule, MatSortModule, MatStepperModule, MatTableModule, MatTabsModule, MatToolbarModule, MatTooltipModule, MatTreeModule } from '@angular/material';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LoadingBarHttpClientModule } from '@ngx-loading-bar/http-client';
@@ -20,6 +20,8 @@ import { ApplicationEditCommandPreviewComponent } from './application-edit-comma
 import { ApplicationEditManualComponent } from './application-edit-manual/application-edit-manual.component';
 import { ApplicationEditOptionalComponent } from './application-edit-optional/application-edit-optional.component';
 import { ApplicationEditComponent } from './application-edit/application-edit.component';
+import { AttachCentralComponent } from './attach-central/attach-central.component';
+import { AttachLocalComponent } from './attach-local/attach-local.component';
 import { ClientAppsComponent } from './client-apps/client-apps.component';
 import { ClientInfoComponent } from './client-info/client-info.component';
 import { ConfigFilesBrowserComponent } from './config-files-browser/config-files-browser.component';
@@ -73,8 +75,6 @@ import { ThemeChooserComponent } from './theme-chooser/theme-chooser.component';
 import { UpdateBrowserComponent } from './update-browser/update-browser.component';
 import { UpdateCardComponent } from './update-card/update-card.component';
 import { UpdateDialogComponent } from './update-dialog/update-dialog.component';
-import { AttachCentralComponent } from './attach-central/attach-central.component';
-import { AttachLocalComponent } from './attach-local/attach-local.component';
 
 export function loadAppConfig(cfgService: ConfigService) {
   return () => cfgService.load();
@@ -186,6 +186,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     MatSortModule,
     AceEditorModule,
     MatTabsModule,
+    MatStepperModule,
     DeviceDetectorModule.forRoot(),
     DragulaModule.forRoot()
   ],

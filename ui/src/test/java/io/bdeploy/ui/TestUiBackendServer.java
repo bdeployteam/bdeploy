@@ -192,6 +192,11 @@ public class TestUiBackendServer extends TestServer {
         public RemoteService getSelf() {
             return self;
         }
+
+        @Override
+        public String getSelfName() {
+            return "Unit_Test";
+        }
     }
 
 }

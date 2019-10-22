@@ -20,6 +20,24 @@
       "webRoot": "${workspaceFolder}"
     },
     {
+      "type": "firefox",
+      "request": "launch",
+      "name": "Launch Firefox (Central)",
+      "keepProfileChanges": true,
+      "profileDir": "${workspaceRoot}/.vscode/firefox-debug-profile/",
+      "url": "http://localhost:4201/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "type": "firefox",
+      "request": "launch",
+      "name": "Launch Firefox (Local)",
+      "keepProfileChanges": true,
+      "profileDir": "${workspaceRoot}/.vscode/firefox-debug-profile/",
+      "url": "http://localhost:4202/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
       "type": "chrome",
       "request": "launch",
       "name": "Launch Chrome",

@@ -1,11 +1,11 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AppConfig } from '../models/config.model';
-import { BackendInfoDto } from '../models/gen.dtos';
+import { AttachIdentDto, BackendInfoDto } from '../models/gen.dtos';
 import { suppressGlobalErrorHandling } from '../utils/server.utils';
 import { LoggingService } from './logging.service';
 
@@ -54,5 +54,25 @@ export class ConfigService {
 
   public tryGetBackendVersion(): Observable<BackendInfoDto> {
     return this.http.get<BackendInfoDto>(environment.apiUrl + '/backend-info/version', { headers: suppressGlobalErrorHandling(new HttpHeaders)});
+  }
+
+  public getAttachIdent(): Observable<AttachIdentDto> {
+    return this.http.get<AttachIdentDto>(environment.apiUrl + '/backend-info/attach-ident');
+  }
+
+  public tryAutoAttach(group: string, ident: AttachIdentDto): Observable<any> {
+    return this.http.put(environment.apiUrl + '/local-servers/auto-attach/' + group, ident, { headers: suppressGlobalErrorHandling(new HttpHeaders)});
+  }
+
+  public manualAttach(group: string, ident: AttachIdentDto): Observable<any> {
+    return this.http.put(environment.apiUrl + '/local-servers/manual-attach/' + group, ident);
+  }
+
+  public getLocalServerNames(group: string): Observable<string[]> {
+    return this.http.get<string[]>(environment.apiUrl + '/local-servers/list/' + group);
+  }
+
+  public getServerForInstance(group: string, instance: string, tag: string): Observable<AttachIdentDto> {
+    return this.http.get<AttachIdentDto>(environment.apiUrl + '/local-servers/controlling-server/' + group + '/' + instance, {params: new HttpParams().set('instanceTag', tag)});
   }
 }
