@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Observable } from 'rxjs';
+import { environment } from 'src/environments/environment';
 import { AppConfig } from '../models/config.model';
 import { BackendInfoDto } from '../models/gen.dtos';
 import { suppressGlobalErrorHandling } from '../utils/server.utils';
@@ -31,21 +32,27 @@ export class ConfigService {
   }
 
   load(): Promise<AppConfig> {
-    const file = 'assets/config.json';
     return new Promise(resolve => {
-      this.http.get<AppConfig>(file).subscribe((cfg: AppConfig) => {
-        this.config = cfg;
-        this.loggingService.getLogger(null).setLogLevel(cfg.logLevel);
-        resolve(cfg);
+      this.getBackendVersion().subscribe((bv) => {
+        this.config = {
+          api: environment.apiUrl,
+          logLevel: environment.logLevel,
+          mode: bv.mode
+        };
+        this.loggingService.getLogger(null).setLogLevel(this.config.logLevel);
+        this.loggingService.getLogger(null).info('API URL set to ' + this.config.api);
+        this.loggingService.getLogger(null).info('Remote reports mode ' + this.config.mode);
+        resolve(this.config);
       });
     });
   }
 
   public getBackendVersion(): Observable<BackendInfoDto> {
-    return this.http.get<BackendInfoDto>(this.config.api + '/backend-info/version');
+    // use environment instead of config here...
+    return this.http.get<BackendInfoDto>(environment.apiUrl + '/backend-info/version');
   }
 
   public tryGetBackendVersion(): Observable<BackendInfoDto> {
-    return this.http.get<BackendInfoDto>(this.config.api + '/backend-info/version', { headers: suppressGlobalErrorHandling(new HttpHeaders)});
+    return this.http.get<BackendInfoDto>(environment.apiUrl + '/backend-info/version', { headers: suppressGlobalErrorHandling(new HttpHeaders)});
   }
 }
