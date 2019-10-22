@@ -84,6 +84,8 @@ describe('Product Cleanup Test', function() {
     cy.contains('button', 'Calculate Cleanup Actions').should('be.visible').and('be.enabled').click();
     // wait for the calculation to complete
     cy.get('mat-spinner', { timeout: 10000 }).should('not.exist');
+    // the execute button should be there
+    cy.contains('button', 'Execute').as('Execute').should('exist').and('be.visible').and('be.disabled')
     // checks...
     cy.contains('td', 'UNINSTALL_INSTANCE_VERSION').should('not.exist');
     cy.contains('td', 'Delete product').should('not.exist');
@@ -113,8 +115,9 @@ describe('Product Cleanup Test', function() {
     cy.contains('button', 'Calculate Cleanup Actions').should('be.visible').and('be.enabled').click();
     // wait for the calculation to complete
     cy.get('mat-spinner', { timeout: 10000 }).should('not.exist');
+    // the execute button should be there
+    cy.contains('button', 'Execute').as('Execute').should('exist').and('be.visible').and('be.enabled')
     // checks...
-    cy.contains('button', 'Execute').as('Execute').should('exist').and('be.visible').and('be.enabled');
     cy.contains('td', 'Uninstall instance version "' + instanceName + '", version "2"').should('exist');
     cy.get('td:contains("UNINSTALL_INSTANCE_VERSION")').should('have.length', 1);
     cy.contains('td', 'Delete product').should('not.exist');
@@ -155,9 +158,10 @@ describe('Product Cleanup Test', function() {
     cy.contains('button', 'Calculate Cleanup Actions').should('be.visible').and('be.enabled').click();
     // wait for the calculation to complete
     cy.get('mat-spinner', { timeout: 10000 }).should('not.exist');
+    // the execute button should be there
+    cy.contains('button', 'Execute').as('Execute').should('exist').and('be.visible').and('be.enabled')
 
     // checks...
-    cy.contains('button', 'Execute').as('Execute').should('exist').and('be.visible').and('be.enabled');
     cy.get('td:contains("UNINSTALL_INSTANCE_VERSION")').should('have.length', 2);
     cy.contains('td', 'Uninstall instance version "' + instanceName + '", version "2"').should('exist');
     cy.contains('td', 'Uninstall instance version "' + instanceName + '", version "3"').should('exist');
@@ -188,9 +192,10 @@ describe('Product Cleanup Test', function() {
     cy.contains('button', 'Calculate Cleanup Actions').should('be.visible').and('be.enabled').click();
     // wait for the calculation to complete
     cy.get('mat-spinner', { timeout: 10000 }).should('not.exist');
+    // the execute button should be there
+    cy.contains('button', 'Execute').as('Execute').should('exist').and('be.visible').and('be.enabled')
 
     // checks...
-    cy.contains('button', 'Execute').as('Execute').should('exist').and('be.visible').and('be.enabled');
     cy.get('td:contains("UNINSTALL_INSTANCE_VERSION")').should('have.length', 3);
     cy.contains('td', 'Uninstall instance version "' + instanceName + '", version "2"').should('exist');
     cy.contains('td', 'Uninstall instance version "' + instanceName + '", version "3"').should('exist');
