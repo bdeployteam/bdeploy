@@ -18,6 +18,7 @@ export class InstanceGroupCardComponent implements OnInit {
 
   @Input() instanceGroup: InstanceGroupConfiguration;
   @Input() instanceGroupId: string;
+  @Input() isAttachAllowed: boolean;
   @Output() removeEvent = new EventEmitter<boolean>();
 
   public currentGroup = cloneDeep(EMPTY_INSTANCE_GROUP);
@@ -28,6 +29,7 @@ export class InstanceGroupCardComponent implements OnInit {
     private dialog: MatDialog) { }
 
   ngOnInit() {
+    console.log(this.isAttachAllowed)
     if (this.instanceGroup === undefined) {
       // either of the two inputs must be set.
       if (this.instanceGroupId === undefined) {

@@ -1,5 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { AttachCentralComponent } from './attach-central/attach-central.component';
+import { AttachLocalComponent } from './attach-local/attach-local.component';
 import { ClientAppsComponent } from './client-apps/client-apps.component';
 import { ConfigFilesBrowserComponent } from './config-files-browser/config-files-browser.component';
 import { DataFilesBrowserComponent } from './data-files-browser/data-files-browser.component';
@@ -151,6 +153,20 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
     data: { title: 'Client Applications (${params["group"]})', header: 'Client Applications' }
+  },
+  {
+    path: 'attach/central',
+    component: AttachCentralComponent,
+    canActivate: [AuthGuard],
+    canDeactivate: [CanDeactivateGuard],
+    data: { title: 'Attach to Central Server', header: 'Attach to Central Server' }
+  },
+  {
+    path: 'attach/local/:group',
+    component: AttachLocalComponent,
+    canActivate: [AuthGuard],
+    canDeactivate: [CanDeactivateGuard],
+    data: { title: 'Attach Local Server', header: 'Attach Local Server' }
   },
 ];
 
