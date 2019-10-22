@@ -25,16 +25,16 @@ The page can also be used to download the binaries of *BDeploy* (e.g. to setup a
 
 You can use the *Manual Cleanup* page from the main menu to trigger a manual cleanup of stuff that is not needed any more. There is no need to trigger this manually as a job is scheduled that performs the exact same operation every night: 
 
-[%header,cols="1,6"]
+[%header,cols="2,3"]
 |===
 | Target
 | Description
 
-| Instance Group
+| *Instances* with _Auto Uninstall_ enabled
 | Uninstall *Instance Versions* that are older than the activated and the previously activated *Instance Version*.
 
-| Instance Group
-| Delete *Product Versions* that are no longer in use, i.e installed anywhere
+| *Instance Groups* with _Auto Delete_ enabled
+| Delete *Product Versions* that are older than the oldest *Product Version* in use by an installed *Instance Version*
 
 | Slave
 | Delete *Manifests* that are not known by the master
