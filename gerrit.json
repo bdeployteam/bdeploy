@@ -6,5 +6,11 @@
             "michael.heiss@ssi-schaefer.com",
             "thomas.urlaub@ssi-schaefer.com"
 		]
-	}
+	},
+    {
+        "regex":"doc/.*,
+        "reviewers": [
+            "michael.heinrich@ssi-schaefer.com"
+        ]
+    }
 ]
