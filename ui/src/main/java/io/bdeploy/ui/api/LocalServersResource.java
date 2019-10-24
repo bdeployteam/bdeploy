@@ -1,6 +1,7 @@
 package io.bdeploy.ui.api;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -12,6 +13,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import io.bdeploy.interfaces.NodeStatus;
+import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.ui.dto.AttachIdentDto;
 
 @Path("/local-servers")
@@ -61,7 +64,7 @@ public interface LocalServersResource {
      */
     @GET
     @Path("/list/{group}")
-    public List<String> getServerNames(@PathParam("group") String instanceGroup);
+    public List<AttachIdentDto> getLocalServers(@PathParam("group") String instanceGroup);
 
     /**
      * Retrieve the controlling local server on the central server.
@@ -71,4 +74,22 @@ public interface LocalServersResource {
     public AttachIdentDto getServerForInstance(@PathParam("group") String instanceGroup,
             @PathParam("instanceId") String instanceId, @QueryParam("instanceTag") String instanceTag);
 
+    /**
+     * Find all instances controlled by the given server.
+     */
+    @GET
+    @Path("/controlled-instances/{group}/{server}")
+    public List<InstanceConfiguration> getInstancesControlledBy(@PathParam("group") String groupName,
+            @PathParam("server") String serverName);
+
+    @POST
+    @Path("/delete-server/{group}/{server}")
+    @Consumes(MediaType.TEXT_PLAIN)
+    public void deleteLocalServer(@PathParam("group") String groupName, @PathParam("server") String serverName);
+
+    @GET
+    @Path("/minions/{group}/{server}")
+    @Consumes(MediaType.TEXT_PLAIN)
+    public Map<String, NodeStatus> getMinionsOfLocalServer(@PathParam("group") String groupName,
+            @PathParam("server") String serverName);
 }

@@ -104,7 +104,7 @@
         <p *ngIf='attachPayload'>
           This local server {{serverNameControl.value}} has been attached.
         </p>
-        <button mat-raised-button routerLink='/instancegroup/browser'>Done</button>
+        <button mat-raised-button [routerLink]='["/servers", instanceGroupName]'>Done</button>
       </div>
     </mat-step>
   </mat-vertical-stepper>

@@ -2,6 +2,7 @@ package io.bdeploy.ui.api;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -41,7 +42,7 @@ public interface SoftwareUpdateResource {
      */
     @GET
     @Path("/bdeploy/minions")
-    public List<NodeStatus> getMinionNodes();
+    public Map<String, NodeStatus> getMinionNodes();
 
     @POST
     @Path("/selfUpdate")

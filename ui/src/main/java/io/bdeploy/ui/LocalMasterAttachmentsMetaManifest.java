@@ -43,4 +43,14 @@ public class LocalMasterAttachmentsMetaManifest {
         return value;
     }
 
+    public static void detach(BHive hive, String serverName) {
+        InstanceGroupManifest igm = new InstanceGroupManifest(hive);
+        MetaManifest<LocalMasterAttachmentsMetaManifest> mm = new MetaManifest<>(igm.getKey(), false,
+                LocalMasterAttachmentsMetaManifest.class);
+
+        LocalMasterAttachmentsMetaManifest value = read(hive);
+        value.attachedLocalServers.remove(serverName);
+        mm.write(hive, value);
+    }
+
 }

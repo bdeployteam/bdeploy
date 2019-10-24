@@ -11,8 +11,7 @@ import { AttachCentralComponent } from '../attach-central/attach-central.compone
 import { AttachIdentDto } from '../models/gen.dtos';
 import { ConfigService } from '../services/config.service';
 import { DownloadService } from '../services/download.service';
-import { InstanceGroupService } from '../services/instance-group.service';
-import { ErrorMessage, LoggingService } from '../services/logging.service';
+import { ErrorMessage } from '../services/logging.service';
 
 @Component({
   selector: 'app-attach-local',
@@ -41,8 +40,6 @@ export class AttachLocalComponent implements OnInit {
     private route: ActivatedRoute,
     private fb: FormBuilder,
     private config: ConfigService,
-    private logService: LoggingService,
-    private igService: InstanceGroupService,
     private dlService: DownloadService,
   ) {}
 

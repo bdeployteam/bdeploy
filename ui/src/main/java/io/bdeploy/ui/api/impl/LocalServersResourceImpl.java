@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
@@ -26,11 +29,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.op.ManifestDeleteOperation;
+import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ObjectLoadOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.StreamHelper;
+import io.bdeploy.interfaces.NodeStatus;
+import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
@@ -68,10 +77,7 @@ public class LocalServersResourceImpl implements LocalServersResource {
             }
         }
 
-        BHive hive = registry.get(groupName);
-        if (hive == null) {
-            throw new WebApplicationException("Cannot find Instance Group " + groupName + " locally", Status.NOT_FOUND);
-        }
+        BHive hive = getInstanceGroupHive(groupName);
 
         if (LocalMasterAttachmentsMetaManifest.read(hive).getAttachedLocalServers().containsKey(target.name)) {
             throw new WebApplicationException("Server with name " + target.name + " already exists!", Status.CONFLICT);
@@ -104,10 +110,7 @@ public class LocalServersResourceImpl implements LocalServersResource {
 
     @Override
     public void manualAttach(String groupName, AttachIdentDto target) {
-        BHive hive = registry.get(groupName);
-        if (hive == null) {
-            throw new WebApplicationException("Cannot find Instance Group " + groupName + " locally", Status.NOT_FOUND);
-        }
+        BHive hive = getInstanceGroupHive(groupName);
 
         if (LocalMasterAttachmentsMetaManifest.read(hive).getAttachedLocalServers().containsKey(target.name)) {
             throw new WebApplicationException("Server with name " + target.name + " already exists!", Status.CONFLICT);
@@ -152,10 +155,7 @@ public class LocalServersResourceImpl implements LocalServersResource {
 
     @Override
     public String getCentralIdent(String groupName, AttachIdentDto target) {
-        BHive hive = registry.get(groupName);
-        if (hive == null) {
-            throw new WebApplicationException("Cannot find Instance Group " + groupName + " locally", Status.NOT_FOUND);
-        }
+        BHive hive = getInstanceGroupHive(groupName);
 
         if (LocalMasterAttachmentsMetaManifest.read(hive).getAttachedLocalServers().containsKey(target.name)) {
             throw new WebApplicationException("Server with name " + target.name + " already exists!", Status.CONFLICT);
@@ -180,22 +180,19 @@ public class LocalServersResourceImpl implements LocalServersResource {
     }
 
     @Override
-    public List<String> getServerNames(String instanceGroup) {
-        BHive hive = registry.get(instanceGroup);
-        if (hive == null) {
-            throw new WebApplicationException("Cannot find Instance Group " + instanceGroup + " locally");
-        }
+    public List<AttachIdentDto> getLocalServers(String instanceGroup) {
+        BHive hive = getInstanceGroupHive(instanceGroup);
 
         LocalMasterAttachmentsMetaManifest masters = LocalMasterAttachmentsMetaManifest.read(hive);
-        return new ArrayList<>(masters.getAttachedLocalServers().keySet());
+        return masters.getAttachedLocalServers().values().stream().map(e -> {
+            e.auth = null;
+            return e;
+        }).collect(Collectors.toList());
     }
 
     @Override
     public AttachIdentDto getServerForInstance(String instanceGroup, String instanceId, String instanceTag) {
-        BHive hive = registry.get(instanceGroup);
-        if (hive == null) {
-            throw new WebApplicationException("Cannot find Instance Group " + instanceGroup + " locally");
-        }
+        BHive hive = getInstanceGroupHive(instanceGroup);
 
         LocalMasterAttachmentsMetaManifest masters = LocalMasterAttachmentsMetaManifest.read(hive);
         InstanceManifest im = InstanceManifest.load(hive, instanceId, instanceTag);
@@ -209,6 +206,58 @@ public class LocalServersResourceImpl implements LocalServersResource {
         dto.auth = null;
 
         return dto;
+    }
+
+    private BHive getInstanceGroupHive(String instanceGroup) {
+        BHive hive = registry.get(instanceGroup);
+        if (hive == null) {
+            throw new WebApplicationException("Cannot find Instance Group " + instanceGroup + " locally");
+        }
+        return hive;
+    }
+
+    @Override
+    public List<InstanceConfiguration> getInstancesControlledBy(String groupName, String serverName) {
+        List<InstanceConfiguration> instances = new ArrayList<>();
+        BHive hive = getInstanceGroupHive(groupName);
+
+        SortedSet<Manifest.Key> latestKeys = InstanceManifest.scan(hive, true);
+
+        for (Manifest.Key key : latestKeys) {
+            String associated = LocalMasterAssociationMetaManifest.read(hive, key);
+            if (serverName.equals(associated)) {
+                instances.add(InstanceManifest.of(hive, key).getConfiguration());
+            }
+        }
+        return instances;
+    }
+
+    @Override
+    public void deleteLocalServer(String groupName, String serverName) {
+        BHive hive = getInstanceGroupHive(groupName);
+        List<InstanceConfiguration> controlled = getInstancesControlledBy(groupName, serverName);
+
+        // delete all of the instances /LOCALLY/ on the central, but NOT using the remote master (we "just" detach).
+        for (InstanceConfiguration cfg : controlled) {
+            SortedSet<Key> allInstanceObjects = hive.execute(new ManifestListOperation().setManifestName(cfg.uuid));
+            allInstanceObjects.forEach(x -> hive.execute(new ManifestDeleteOperation().setToDelete(x)));
+        }
+
+        LocalMasterAttachmentsMetaManifest.detach(hive, serverName);
+    }
+
+    @Override
+    public Map<String, NodeStatus> getMinionsOfLocalServer(String groupName, String serverName) {
+        BHive hive = getInstanceGroupHive(groupName);
+
+        AttachIdentDto attached = LocalMasterAttachmentsMetaManifest.read(hive).getAttachedLocalServers().get(serverName);
+        if (attached == null) {
+            throw new WebApplicationException("Local server " + serverName + " not found for instance group " + groupName,
+                    Status.NOT_FOUND);
+        }
+
+        RemoteService svc = new RemoteService(UriBuilder.fromUri(attached.uri).build(), attached.auth);
+        return ResourceProvider.getResource(svc, MasterRootResource.class, context).getMinions();
     }
 
 }

@@ -43,7 +43,6 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
-import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.TreeEntryLoadOperation;
@@ -373,11 +372,9 @@ public class InstanceResourceImpl implements InstanceResource {
             for (InstanceVersionDto dto : versions) {
                 root.getNamedMaster(group).uninstall(dto.key);
             }
-        }
 
-        // find all root and node manifests by uuid
-        SortedSet<Key> allInstanceObjects = hive.execute(new ManifestListOperation().setManifestName(instance));
-        allInstanceObjects.forEach(x -> hive.execute(new ManifestDeleteOperation().setToDelete(x)));
+            root.getNamedMaster(group).delete(instance);
+        }
     }
 
     @Override

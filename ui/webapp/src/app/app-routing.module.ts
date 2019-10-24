@@ -13,6 +13,7 @@ import { InstanceAddEditComponent } from './instance-add-edit/instance-add-edit.
 import { InstanceBrowserComponent } from './instance-browser/instance-browser.component';
 import { InstanceGroupAddEditComponent } from './instance-group-add-edit/instance-group-add-edit.component';
 import { InstanceGroupBrowserComponent } from './instance-group-browser/instance-group-browser.component';
+import { LocalServersComponent } from './local-servers/local-servers.component';
 import { LoginComponent } from './login/login.component';
 import { MasterCleanupComponent } from './master-cleanup/master-cleanup.component';
 import { ProcessConfigurationComponent } from './process-configuration/process-configuration.component';
@@ -167,6 +168,13 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
     data: { title: 'Attach Local Server', header: 'Attach Local Server' }
+  },
+  {
+    path: 'servers/:group',
+    component: LocalServersComponent,
+    canActivate: [AuthGuard],
+    canDeactivate: [CanDeactivateGuard],
+    data: { title: 'Manage Local Servers', header: 'Manage Local Servers' }
   },
 ];
 

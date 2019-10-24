@@ -124,12 +124,13 @@ export class InstanceAddEditComponent implements OnInit {
     if (!this.isCreate()) {
       this.productNameControl.disable();
       this.productTagControl.disable();
+      this.localServerControl.disable();
     }
 
     if (this.isCentral()) {
       this.localServerControl.setValidators([Validators.required]);
-      this.config.getLocalServerNames(this.groupParam).subscribe(r => {
-        this.serverNames = r;
+      this.config.getLocalServers(this.groupParam).subscribe(r => {
+        this.serverNames = r.map(e => e.name).sort();
       });
     }
   }

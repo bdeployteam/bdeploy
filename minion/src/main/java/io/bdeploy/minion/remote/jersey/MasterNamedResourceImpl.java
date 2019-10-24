@@ -34,6 +34,7 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.ExportTreeOperation;
 import io.bdeploy.bhive.op.ImportTreeOperation;
+import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestExistsOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestNextIdOperation;
@@ -634,7 +635,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     @WriteLock
     @Override
     public void delete(String instanceUuid) {
-
+        SortedSet<Key> allInstanceObjects = hive.execute(new ManifestListOperation().setManifestName(instanceUuid));
+        allInstanceObjects.forEach(x -> hive.execute(new ManifestDeleteOperation().setToDelete(x)));
     }
 
     @Override

@@ -1,0 +1,15 @@
+.loading-container {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+.node-table-container {
+  display: flex;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.node-table {
+  flex: 1 0 auto;
+}

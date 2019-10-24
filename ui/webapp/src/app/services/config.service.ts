@@ -5,7 +5,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AppConfig } from '../models/config.model';
-import { AttachIdentDto, BackendInfoDto } from '../models/gen.dtos';
+import { AttachIdentDto, BackendInfoDto, InstanceConfiguration, NodeStatus } from '../models/gen.dtos';
 import { suppressGlobalErrorHandling } from '../utils/server.utils';
 import { LoggingService } from './logging.service';
 
@@ -76,11 +76,27 @@ export class ConfigService {
     return this.http.post(environment.apiUrl + '/local-servers/central-ident/' + group, ident, { responseType: 'text' });
   }
 
-  public getLocalServerNames(group: string): Observable<string[]> {
-    return this.http.get<string[]>(environment.apiUrl + '/local-servers/list/' + group);
+  public getLocalServers(group: string): Observable<AttachIdentDto[]> {
+    return this.http.get<AttachIdentDto[]>(environment.apiUrl + '/local-servers/list/' + group);
   }
 
   public getServerForInstance(group: string, instance: string, tag: string): Observable<AttachIdentDto> {
-    return this.http.get<AttachIdentDto>(environment.apiUrl + '/local-servers/controlling-server/' + group + '/' + instance, {params: new HttpParams().set('instanceTag', tag)});
+    const p = new HttpParams();
+    if (tag) {
+      p.set('instanceTag', tag);
+    }
+    return this.http.get<AttachIdentDto>(environment.apiUrl + '/local-servers/controlling-server/' + group + '/' + instance, {params: p});
+  }
+
+  public getInstancesForServer(group: string, server: string): Observable<InstanceConfiguration[]> {
+    return this.http.get<InstanceConfiguration[]>(environment.apiUrl + '/local-servers/controlled-instances/' + group + '/' + server);
+  }
+
+  public deleteLocalServer(group: string, server: string): Observable<any> {
+    return this.http.post(environment.apiUrl + '/local-servers/delete-server/' + group + '/' + server, server);
+  }
+
+  public minionsOfLocalServer(group: string, server: string): Observable<{[key: string]: NodeStatus}> {
+    return this.http.get<{[key: string]: NodeStatus}>(environment.apiUrl + '/local-servers/minions/' + group + '/' + server);
   }
 }

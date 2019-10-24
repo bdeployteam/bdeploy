@@ -214,6 +214,7 @@ task genDtos() {
             'io.bdeploy.interfaces.manifest.state.InstanceStateRecord',
         ]
         settings.customTypeMappings.put('java.net.URI', 'string');
+        settings.customTypeMappings.put('java.time.Instant', 'number');
         settings.customTypeNaming.put('io.bdeploy.bhive.model.Manifest$Key', 'ManifestKey');
         settings.customTypeNaming.put('io.bdeploy.bhive.model.Tree$EntryType', 'TreeEntryType');
         def excludeClasses = [

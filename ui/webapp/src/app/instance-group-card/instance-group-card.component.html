@@ -13,7 +13,7 @@
       <button mat-menu-item [routerLink]="['/products', currentGroup.name]">Products</button>
       <ng-container *ngIf='isAttachAllowed'>
           <mat-divider></mat-divider>
-          <button mat-menu-item [routerLink]="['/attach/local', currentGroup.name]">Attach Local Server...</button>
+          <button mat-menu-item [routerLink]="['/servers', currentGroup.name]">Manage Local Server...</button>
       </ng-container>
     </mat-menu>
     <button class="option-button" mat-icon-button [matMenuTriggerFor]="appMenu" appClickStopPropagation>

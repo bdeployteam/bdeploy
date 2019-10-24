@@ -75,6 +75,8 @@ import { ThemeChooserComponent } from './theme-chooser/theme-chooser.component';
 import { UpdateBrowserComponent } from './update-browser/update-browser.component';
 import { UpdateCardComponent } from './update-card/update-card.component';
 import { UpdateDialogComponent } from './update-dialog/update-dialog.component';
+import { LocalServersComponent } from './local-servers/local-servers.component';
+import { LocalServerDetailComponent } from './local-server-detail/local-server-detail.component';
 
 export function loadAppConfig(cfgService: ConfigService) {
   return () => cfgService.load();
@@ -142,7 +144,9 @@ export function loadAppConfig(cfgService: ConfigService) {
     InstanceVersionHistoryCardComponent,
     ConnectionLostComponent,
     AttachCentralComponent,
-    AttachLocalComponent
+    AttachLocalComponent,
+    LocalServersComponent,
+    LocalServerDetailComponent
   ],
   imports: [
     BrowserModule,

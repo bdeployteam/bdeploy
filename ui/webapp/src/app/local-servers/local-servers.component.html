@@ -1,0 +1,41 @@
+<mat-toolbar class="mat-elevation-z1 header-toolbar">
+  <button mat-icon-button type="button" (click)='location.back()'><mat-icon>chevron_left</mat-icon></button>
+  <span>Local Servers for Instance Group: {{instanceGroupName}}</span>
+</mat-toolbar>
+
+<div *ngIf="loading" class="loading-container">
+  <mat-progress-spinner [mode]="'indeterminate'" class="loading-spinner" mode></mat-progress-spinner>
+</div>
+
+<ng-container *ngIf="!loading">
+  <div *ngIf="!localServers || localServers.length == 0" class="list-heading center">
+    <p>
+      <span class="headerText">No local servers are attached to this instance group.</span>
+    </p>
+    <p>
+      <span class="material-icons headerIcon">link</span>
+      <span class="headerText"><a [routerLink]="['/attach/local', instanceGroupName]">Attach Local Server</a></span>
+    </p>
+  </div>
+  <div *ngIf="localServers && localServers.length > 0" class="content-container">
+    <mat-accordion>
+      <mat-expansion-panel *ngFor='let server of localServers' [disabled]='!isConnected(server)' #panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title class='header-title'>
+            {{server.name}} - {{server.description}}
+          </mat-panel-title>
+          <mat-panel-description class='header-description'>
+            {{server.uri}}
+          </mat-panel-description>
+          <button mat-icon-button *ngIf='!isConnected(server)' matTooltip="Connect to Server" (click)='setConnected(server, true)'><mat-icon>link</mat-icon></button>
+          <button mat-icon-button *ngIf='isConnected(server)' matTooltip="Disconnect from Server" (click)='setConnected(server, false); panel.close();'><mat-icon>link_off</mat-icon></button>
+        </mat-expansion-panel-header>
+        <ng-template matExpansionPanelContent>
+          <app-local-server-detail [server]='server' [instanceGroupName]='instanceGroupName' (delete)='load()'></app-local-server-detail>
+        </ng-template>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+</ng-container>
+
+<button mat-fab class="add-button" [routerLink]="['/attach/local', instanceGroupName]"><mat-icon>add</mat-icon></button>
