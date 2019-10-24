@@ -224,8 +224,6 @@ export class ApplicationEditManualComponent implements OnInit {
     const groupIdx = this.parameterGroups.indexOf(GroupNames.CUSTOM_PARAMETERS);
     if (this.dataSource.data.length > 0 && groupIdx === -1) {
       this.parameterGroups.push(GroupNames.CUSTOM_PARAMETERS);
-    } else if (this.dataSource.data.length === 0 && groupIdx !== 0) {
-      this.parameterGroups.splice(groupIdx, 1);
     }
 
     // Remove all entries referring to a custom group
