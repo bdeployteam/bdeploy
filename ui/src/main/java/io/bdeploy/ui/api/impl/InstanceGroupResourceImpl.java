@@ -84,11 +84,16 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
             throw new WebApplicationException("Hive path already exists: ", Status.NOT_ACCEPTABLE);
         }
 
-        BHive h = new BHive(hive.toUri(), reporter);
-        new InstanceGroupManifest(h).update(config);
-        registry.register(config.name, h);
+        try {
+            BHive h = new BHive(hive.toUri(), reporter);
+            new InstanceGroupManifest(h).update(config);
+            registry.register(config.name, h);
 
-        auth.addRecentlyUsedInstanceGroup(context.getUserPrincipal().getName(), config.name);
+            auth.addRecentlyUsedInstanceGroup(context.getUserPrincipal().getName(), config.name);
+        } catch (Exception e) {
+            PathHelper.deleteRecursive(hive);
+            throw e;
+        }
     }
 
     private BHive getGroupHive(String group) {

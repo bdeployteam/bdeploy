@@ -165,6 +165,47 @@ public class SecurityHelper {
     }
 
     /**
+     * Accepts a token in {@link String} form, extracts the payload from it (see
+     * {@link #createSignaturePack(Object, Path, char[])}) and verifies that the
+     * enclosed signature is valid for the decoded payload using the enclosed public certificate.
+     * <p>
+     * This does NOT verify that the enclosed signature is valid against a present private key.
+     *
+     * @param token the encoded payload and signature.
+     * @param clazz the {@link Class} of the payload - used for
+     *            de-serialization.
+     * @return the signed payload, if the signature is valid.
+     */
+    public <T> T getSelfVerifiedPayloadFromPack(String token, Class<T> clazz) throws GeneralSecurityException, IOException {
+        SignaturePack sp = SignaturePack.parse(token);
+        SignedPayload t = SignedPayload.parse(sp.t);
+
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        Certificate cert;
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(decode(sp.c))) {
+            cert = cf.generateCertificate(bais);
+        }
+
+        byte[] payloadBytes = decode(t.p);
+        T payload;
+        try {
+            payload = getMapper().readValue(payloadBytes, clazz);
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot read JSON", e);
+        }
+
+        Signature sig = getSignatureAlgorithm();
+        sig.initVerify(cert.getPublicKey());
+        sig.update(payloadBytes);
+
+        if (!sig.verify(decode(t.s))) {
+            return null;
+        }
+
+        return payload;
+    }
+
+    /**
      * Accepts an encoded and signed token and imports the enclosed security
      * relevant information into the given (JCEKS) keystore. The keystore is created
      * if it does not exist.

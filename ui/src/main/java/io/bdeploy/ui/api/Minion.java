@@ -65,4 +65,15 @@ public interface Minion {
      */
     public String getSelfName();
 
+    /**
+     * Encrypts and signs the given payload using the minions private keys, embedding the public certificate used for encryption
+     * in the payload.
+     */
+    public <T> String getEncryptedPayload(T payload);
+
+    /**
+     * Descrypts a payload encrypted using {@link #getEncryptedPayload(Object)}.
+     */
+    public <T> T getDecryptedPayload(String encrypted, Class<T> clazz);
+
 }

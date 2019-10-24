@@ -68,6 +68,14 @@ export class ConfigService {
     return this.http.put(environment.apiUrl + '/local-servers/manual-attach/' + group, ident);
   }
 
+  public manualAttachCentral(ident: string): Observable<string> {
+    return this.http.put(environment.apiUrl + '/local-servers/manual-attach-central', ident, {responseType: 'text'});
+  }
+
+  public getCentralIdent(group: string, ident: AttachIdentDto): Observable<string> {
+    return this.http.post(environment.apiUrl + '/local-servers/central-ident/' + group, ident, { responseType: 'text' });
+  }
+
   public getLocalServerNames(group: string): Observable<string[]> {
     return this.http.get<string[]>(environment.apiUrl + '/local-servers/list/' + group);
   }

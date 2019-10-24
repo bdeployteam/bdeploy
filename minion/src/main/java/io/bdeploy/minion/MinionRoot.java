@@ -468,20 +468,34 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     @Override
     public String createWeakToken(String principal) {
         ApiAccessToken token = new ApiAccessToken.Builder().setIssuedTo(principal).setWeak(true).build();
-        SecurityHelper sh = SecurityHelper.getInstance();
-
-        KeyStore ks;
         MinionState state = getState();
         try {
-            ks = sh.loadPrivateKeyStore(state.keystorePath, state.keystorePass);
+            KeyStore ks = SecurityHelper.getInstance().loadPrivateKeyStore(state.keystorePath, state.keystorePass);
+            return SecurityHelper.getInstance().createSignaturePack(token, ks, state.keystorePass);
         } catch (GeneralSecurityException | IOException e) {
             throw new WebApplicationException("Cannot generate weak token", e);
         }
+    }
+
+    @Override
+    public <T> String getEncryptedPayload(T payload) {
+        MinionState state = getState();
 
         try {
-            return SecurityHelper.getInstance().createSignaturePack(token, ks, state.keystorePass);
-        } catch (Exception e) {
-            throw new WebApplicationException("Cannot create weak token", e);
+            KeyStore ks = SecurityHelper.getInstance().loadPrivateKeyStore(state.keystorePath, state.keystorePass);
+            return SecurityHelper.getInstance().createSignaturePack(payload, ks, state.keystorePass);
+        } catch (GeneralSecurityException | IOException e) {
+            throw new WebApplicationException("Cannot create encrypted payload", e);
+        }
+
+    }
+
+    @Override
+    public <T> T getDecryptedPayload(String encrypted, Class<T> clazz) {
+        try {
+            return SecurityHelper.getInstance().getSelfVerifiedPayloadFromPack(encrypted, clazz);
+        } catch (GeneralSecurityException | IOException e) {
+            throw new WebApplicationException("Cannot decrypt payload", e);
         }
     }
 
