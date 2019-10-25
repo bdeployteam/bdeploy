@@ -1,3 +1,4 @@
+import { StepperSelectionEvent } from '@angular/cdk/stepper';
 import { Location } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
@@ -7,7 +8,7 @@ import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AttachCentralComponent } from '../attach-central/attach-central.component';
-import { AttachIdentDto, InstanceGroupConfiguration } from '../models/gen.dtos';
+import { AttachIdentDto } from '../models/gen.dtos';
 import { ConfigService } from '../services/config.service';
 import { DownloadService } from '../services/download.service';
 import { InstanceGroupService } from '../services/instance-group.service';
@@ -19,19 +20,21 @@ import { ErrorMessage, LoggingService } from '../services/logging.service';
   styleUrls: ['./attach-local.component.css'],
 })
 export class AttachLocalComponent implements OnInit {
-  private log = this.logService.getLogger('AttachLocalComponent');
   instanceGroupName: string = this.route.snapshot.paramMap.get('group');
-  instanceGroup: InstanceGroupConfiguration;
   attachPayload: AttachIdentDto;
   infoGroup: FormGroup;
   attachSuccess = false;
   attachError: ErrorMessage;
+  centralIdent: string;
 
   @ViewChild(MatStepper, { static: true })
   stepper: MatStepper;
 
   @ViewChild('doneStep', { static: true })
   doneStep: MatStep;
+
+  @ViewChild('manualStep', { static: true })
+  manualStep: MatStep;
 
   constructor(
     public location: Location,
@@ -48,11 +51,6 @@ export class AttachLocalComponent implements OnInit {
       name: ['', Validators.required],
       desc: ['', Validators.required],
       uri: ['', Validators.required],
-    });
-
-    this.igService.getInstanceGroup(this.instanceGroupName).subscribe(r => {
-      r.logo = null; // no logo for now!
-      this.instanceGroup = r;
     });
   }
 
@@ -102,13 +100,7 @@ export class AttachLocalComponent implements OnInit {
   }
 
   autoAddServer() {
-    const payload: AttachIdentDto = {
-      name: this.serverNameControl.value,
-      description: this.serverDescControl.value,
-      uri: this.serverUriControl.value,
-      auth: this.attachPayload.auth,
-    };
-
+    const payload = this.createIdent();
     this.config
       .tryAutoAttach(this.instanceGroupName, payload)
       .pipe(
@@ -128,16 +120,20 @@ export class AttachLocalComponent implements OnInit {
   }
 
   manualAddServer() {
-    const payload: AttachIdentDto = {
+    const payload = this.createIdent();
+
+    this.config.manualAttach(this.instanceGroupName, payload).subscribe(r => {
+      this.stepper.selected = this.doneStep;
+    });
+  }
+
+  private createIdent(): AttachIdentDto {
+    return {
       name: this.serverNameControl.value,
       description: this.serverDescControl.value,
       uri: this.serverUriControl.value,
       auth: this.attachPayload.auth,
     };
-
-    this.config.manualAttach(this.instanceGroupName, payload).subscribe(r => {
-      this.stepper.selected = this.doneStep;
-    });
   }
 
   getErrorMessage() {
@@ -152,14 +148,24 @@ export class AttachLocalComponent implements OnInit {
     }
   }
 
+  onStepChange($event: StepperSelectionEvent) {
+    if ($event.selectedStep === this.manualStep) {
+      this.loadCentralIdent();
+    }
+  }
+
+  loadCentralIdent() {
+    this.config.getCentralIdent(this.instanceGroupName, this.createIdent()).subscribe(r => {
+      this.centralIdent = r;
+    });
+  }
+
   onDragStart($event) {
-    // TODO: encryption, signing, scoping (only valid for a single host), ...
     $event.dataTransfer.effectAllowed = 'link';
-    $event.dataTransfer.setData(AttachCentralComponent.ATTACH_MIME_TYPE, JSON.stringify(this.instanceGroup));
+    $event.dataTransfer.setData(AttachCentralComponent.ATTACH_MIME_TYPE, this.centralIdent);
   }
 
   downloadManualJson() {
-    // TODO: encryption, signing, scoping (only valid for a single host), ...
-    this.dlService.downloadJson('central-' + this.serverNameControl.value + '.json', this.instanceGroup);
+    this.dlService.downloadBlob('central-' + this.serverNameControl.value + '.txt', new Blob([this.centralIdent], {type: 'text/plain'}));
   }
 }

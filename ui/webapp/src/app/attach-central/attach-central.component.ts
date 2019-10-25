@@ -2,7 +2,6 @@ import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatStep, MatStepper } from '@angular/material';
 import { EventSourcePolyfill } from 'ng-event-source';
-import { finalize } from 'rxjs/operators';
 import { AttachIdentDto, InstanceGroupConfiguration } from '../models/gen.dtos';
 import { ConfigService } from '../services/config.service';
 import { DownloadService } from '../services/download.service';
@@ -74,20 +73,28 @@ export class AttachCentralComponent implements OnInit, OnDestroy {
     this.dlService.downloadJson('server-' + this.attachPayload.name + '.json', this.attachPayload);
   }
 
-  onDrop($event: DragEvent) {
+  async onDrop($event: DragEvent) {
     $event.preventDefault();
 
+    let data;
     if ($event.dataTransfer.files.length > 0) {
-      const reader = new FileReader();
-      reader.onload = (e) => this.remoteAttached = JSON.parse(reader.result.toString());
-      reader.readAsText($event.dataTransfer.files[0]);
+      await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => { data = reader.result.toString(); resolve(); };
+        reader.onerror = (e) => reject();
+        reader.readAsText($event.dataTransfer.files[0]);
+      });
     } else if ($event.dataTransfer.types.includes(AttachCentralComponent.ATTACH_MIME_TYPE)) {
-      this.remoteAttached = JSON.parse($event.dataTransfer.getData(AttachCentralComponent.ATTACH_MIME_TYPE));
+      data = $event.dataTransfer.getData(AttachCentralComponent.ATTACH_MIME_TYPE);
     }
 
     this.manualLoading = true;
-    this.igService.createInstanceGroup(this.remoteAttached).pipe(finalize(() => this.manualLoading = false)).subscribe(r => {
-      this.stepper.selected = this.doneStep;
+
+    this.config.manualAttachCentral(data).subscribe(group => {
+      this.igService.getInstanceGroup(group).subscribe(r => {
+        this.remoteAttached = r;
+        this.stepper.selected = this.doneStep;
+      });
     });
   }
 

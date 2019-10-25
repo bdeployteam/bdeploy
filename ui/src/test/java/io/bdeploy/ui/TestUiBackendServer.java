@@ -197,6 +197,16 @@ public class TestUiBackendServer extends TestServer {
         public String getSelfName() {
             return "Unit_Test";
         }
+
+        @Override
+        public <T> String getEncryptedPayload(T payload) {
+            return null;
+        }
+
+        @Override
+        public <T> T getDecryptedPayload(String encrypted, Class<T> clazz) {
+            return null;
+        }
     }
 
 }
