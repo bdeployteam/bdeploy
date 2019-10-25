@@ -20,6 +20,7 @@ export class ApplicationConfigurationCardComponent implements OnInit {
   @Input() public isForeign = false;
   @Input() public isReadonly = false;
   @Input() public isClient = false;
+  @Input() public isInstanceDirty = false;
 
   @Output() editEvent = new EventEmitter<ApplicationConfiguration>();
   @Output() removeEvent = new EventEmitter<boolean>();
