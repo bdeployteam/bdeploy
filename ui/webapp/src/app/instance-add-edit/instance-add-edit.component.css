@@ -63,3 +63,17 @@ mat-form-field {
   font-size: 0.75em;
   text-overflow: ellipsis;
 }
+
+.warning-tile {
+  margin-left: 1em;
+  display: grid;
+  grid-template-columns: 30px auto;
+  grid-column-gap: 10px;
+  align-items: center;
+}
+
+.warning-icon {
+  width: 30px;
+  height: 30px;
+  font-size: 30px;
+}

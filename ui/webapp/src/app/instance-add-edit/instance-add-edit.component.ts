@@ -10,7 +10,8 @@ import { Observable, of } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { MessageBoxMode } from '../messagebox/messagebox.component';
 import { EMPTY_INSTANCE } from '../models/consts';
-import { InstanceConfiguration, InstancePurpose, InstanceVersionDto, ProductDto } from '../models/gen.dtos';
+import { InstanceConfiguration, InstancePurpose, InstanceVersionDto, MinionMode, ProductDto } from '../models/gen.dtos';
+import { ConfigService } from '../services/config.service';
 import { InstanceGroupService } from '../services/instance-group.service';
 import { InstanceService } from '../services/instance.service';
 import { Logger, LoggingService } from '../services/logging.service';
@@ -31,6 +32,7 @@ export class InstanceAddEditComponent implements OnInit {
 
   public purposes: InstancePurpose[];
   public products: ProductDto[] = [];
+  public serverNames: string[] = [];
 
   public loading = false;
 
@@ -49,6 +51,9 @@ export class InstanceAddEditComponent implements OnInit {
       tag: ['', Validators.required],
     }),
     autoUninstall: [''],
+    localServer: this.formBuilder.group({
+      name: ['']
+    })
   });
 
   private overlayRef: OverlayRef;
@@ -64,6 +69,7 @@ export class InstanceAddEditComponent implements OnInit {
     public location: Location,
     private viewContainerRef: ViewContainerRef,
     private overlay: Overlay,
+    private config: ConfigService,
   ) {}
 
   ngOnInit() {
@@ -77,13 +83,13 @@ export class InstanceAddEditComponent implements OnInit {
         const instance = cloneDeep(EMPTY_INSTANCE);
         instance.autoUninstall = true;
         instance.uuid = uuid;
-        this.instanceFormGroup.setValue(instance);
+        this.instanceFormGroup.patchValue(instance);
         this.clonedInstance = cloneDeep(instance);
       });
     } else {
       this.instanceService.getInstance(this.groupParam, this.uuidParam).subscribe(instance => {
         this.log.debug('got instance ' + this.uuidParam);
-        this.instanceFormGroup.setValue(instance);
+        this.instanceFormGroup.patchValue(instance);
         this.clonedInstance = cloneDeep(instance);
       });
       // TODO: this could be better (group with above request)
@@ -92,6 +98,11 @@ export class InstanceAddEditComponent implements OnInit {
           return +b.key.tag - +a.key.tag;
         });
         this.expectedVersion = vs[0];
+      });
+      this.config.getServerForInstance(this.groupParam, this.uuidParam, null).subscribe(r => {
+        if (r) {
+          this.localServerControl.setValue(r.name);
+        }
       });
     }
 
@@ -113,6 +124,13 @@ export class InstanceAddEditComponent implements OnInit {
     if (!this.isCreate()) {
       this.productNameControl.disable();
       this.productTagControl.disable();
+    }
+
+    if (this.isCentral()) {
+      this.localServerControl.setValidators([Validators.required]);
+      this.config.getLocalServerNames(this.groupParam).subscribe(r => {
+        this.serverNames = r;
+      });
     }
   }
 
@@ -167,7 +185,7 @@ export class InstanceAddEditComponent implements OnInit {
 
     if (this.isCreate()) {
       this.instanceService
-        .createInstance(this.groupParam, instance)
+        .createInstance(this.groupParam, instance, this.localServerControl.value)
         .pipe(finalize(() => (this.loading = false)))
         .subscribe(result => {
           this.clonedInstance = instance;
@@ -176,7 +194,7 @@ export class InstanceAddEditComponent implements OnInit {
         });
     } else {
       this.instanceService
-        .updateInstance(this.groupParam, this.uuidParam, instance, null, this.expectedVersion.key.tag)
+        .updateInstance(this.groupParam, this.uuidParam, instance, null, this.localServerControl.value, this.expectedVersion.key.tag)
         .pipe(finalize(() => (this.loading = false)))
         .subscribe(result => {
           this.clonedInstance = instance;
@@ -204,6 +222,10 @@ export class InstanceAddEditComponent implements OnInit {
   }
   get productTagControl() {
     return this.instanceFormGroup.get('product.tag');
+  }
+
+  get localServerControl() {
+    return this.instanceFormGroup.get('localServer.name');
   }
 
   openOverlay(relative: MatButton, template: TemplateRef<any>) {
@@ -242,6 +264,10 @@ export class InstanceAddEditComponent implements OnInit {
       this.overlayRef.dispose();
       this.overlayRef = null;
     }
+  }
+
+  isCentral() {
+    return this.config.config.mode === MinionMode.CENTRAL;
   }
 
 }

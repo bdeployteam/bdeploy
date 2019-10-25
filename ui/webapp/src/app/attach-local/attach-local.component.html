@@ -2,3 +2,109 @@
   <button mat-icon-button type="button" (click)='location.back()'><mat-icon>chevron_left</mat-icon></button>
   <span>Attach Local Server: {{instanceGroupName}}</span>
 </mat-toolbar>
+
+<div class='stepper-container'>
+  <mat-vertical-stepper #stepper class='stepper' linear>
+    <ng-template matStepperIcon="edit">
+      <mat-icon>done</mat-icon>
+    </ng-template>
+
+    <mat-step label="Introduction" #introStep>
+      <p>
+        This page can be used to attach a BDeploy server running in local mode to this central server. You will need the counterpart on
+        the local server which contains the local server identification as dragable element. This page can be found by clicking the
+        <b>Attach Instance Group</b> button on the <b>Instance Groups</b> page.
+      </p>
+      <div class='button-container'>
+        <button mat-raised-button matStepperNext>Next</button>
+      </div>
+    </mat-step>
+    <mat-step label="Attach Local Server" #attachStep [completed]='attachPayload'>
+      <p>
+        Drag the local server information from the local server's <b>Attach to Central Server</b> page and drop it on the zone below.
+      </p>
+      <div class='drag-container'>
+        <mat-card class='drag-card drop-card' (drop)='onDrop($event)' (dragover)='onOver($event)'>
+          Drop local server information here!
+        </mat-card>
+      </div>
+      <p *ngIf='attachPayload'>
+        Successfully read information for {{attachPayload.name}}.
+      </p>
+      <div class='button-container'>
+        <button mat-raised-button matStepperPrevious>Back</button>
+        <button mat-raised-button matStepperNext [disabled]='!attachPayload' (click)='updateFormDefaults()'>Next</button>
+      </div>
+    </mat-step>
+    <mat-step label="Additional Information">
+      <form [formGroup]='infoGroup'>
+        <div class='form-fields'>
+          <mat-form-field>
+            <input matInput placeholder="Name of the Local Server" formControlName="name" required>
+          </mat-form-field>
+          <mat-form-field>
+            <input matInput placeholder="Description" formControlName="desc" required>
+          </mat-form-field>
+          <mat-form-field>
+            <input matInput placeholder="Remote Server URI (change to match DNS/VPN/NAT configuration)" formControlName="uri" required>
+          </mat-form-field>
+        </div>
+      </form>
+      <div class='button-container'>
+        <button mat-raised-button matStepperPrevious>Back</button>
+        <button mat-raised-button matStepperNext [disabled]='infoGroup.invalid' (click)='autoAddServer()'>Next</button>
+      </div>
+    </mat-step>
+    <mat-step label="Setting up...">
+      <p *ngIf='!attachError'>
+        Please wait while we're trying to set up things automatically...
+      </p>
+      <ng-container  *ngIf='attachError'>
+        <p>
+          Failed to automatically attach to the remote local server. You can continue to setup manually.
+        </p>
+        <p>
+          Details:
+        </p>
+        <div class='error-details' [innerHTML]='getErrorMessage()'></div>
+      </ng-container>
+      <div class='button-container'>
+        <button mat-raised-button matStepperPrevious (click)='attachSuccess = false'>Back</button>
+        <button mat-raised-button matStepperNext>Continue Manually</button>
+        <ng-container *ngIf='!attachError && !attachSuccess'>
+          <div class='spacer'></div>
+          <span>Contacting Local Server...</span>
+          <mat-spinner diameter='24'></mat-spinner>
+        </ng-container>
+      </div>
+    </mat-step>
+    <mat-step label="Manual Configuration of Local Server" optional="true">
+      <p>
+        Note that this step is only necessary if this server cannot contact the configured local server (temporariliy or permanently).
+      </p>
+      <div class='drag-container'>
+        <button mat-raised-button (click)='downloadManualJson()'>Download for manual setup</button>
+        <mat-card draggable="true" (dragstart)='onDragStart($event)' class='drag-card'>
+          <div>
+            Drag me to the local server!
+          </div>
+        </mat-card>
+      </div>
+      <div class='button-container'>
+        <button mat-raised-button matStepperPrevious>Back</button>
+        <button mat-raised-button matTooltip="Finish with manually provided information. Connectivity to the target cannot be verified." (click)='manualAddServer()'>Finish</button>
+      </div>
+    </mat-step>
+    <mat-step label="Done" #doneStep>
+      <div class='success-icon'>
+        <mat-icon>check_circle_outline</mat-icon>
+        <p *ngIf='attachPayload'>
+          This local server {{serverNameControl.value}} has been attached.
+        </p>
+        <button mat-raised-button routerLink='/instancegroup/browser'>Done</button>
+      </div>
+    </mat-step>
+  </mat-vertical-stepper>
+</div>
+
+

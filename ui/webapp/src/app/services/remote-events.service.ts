@@ -26,6 +26,12 @@ export class RemoteEventsService {
     });
   }
 
+  public getAttachEventSource() {
+    return new EventSourcePolyfill(this.cfg.config.api + '/attach-events', {
+      headers: { Authorization: 'Bearer ' + this.auth.getToken() },
+    });
+  }
+
   public getGlobalEventSource(): EventSourcePolyfill {
     return new EventSourcePolyfill(this.cfg.config.api + '/activities', {
       headers: { Authorization: 'Bearer ' + this.auth.getToken() },

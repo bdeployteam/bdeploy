@@ -15,10 +15,11 @@ import { MessageBoxMode } from '../messagebox/messagebox.component';
 import { ApplicationGroup } from '../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_DEPLOYMENT_STATE } from '../models/consts';
 import { EventWithCallback } from '../models/event';
-import { ApplicationConfiguration, ApplicationDto, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstanceStateRecord, InstanceUpdateEventDto, InstanceUpdateEventType, ManifestKey, ProductDto } from '../models/gen.dtos';
+import { ApplicationConfiguration, ApplicationDto, AttachIdentDto, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstanceStateRecord, InstanceUpdateEventDto, InstanceUpdateEventType, ManifestKey, MinionMode, ProductDto } from '../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../models/process.model';
 import { ProcessDetailsComponent } from '../process-details/process-details.component';
 import { ApplicationService } from '../services/application.service';
+import { ConfigService } from '../services/config.service';
 import { DownloadService } from '../services/download.service';
 import { HeaderTitleService } from '../services/header-title.service';
 import { InstanceService } from '../services/instance.service';
@@ -58,6 +59,9 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   public groupParam: string;
   public uuidParam: string;
   public pageTitle: string;
+
+  // the controlling local server in central mode.
+  public controllingServer: AttachIdentDto;
 
   public selectedConfig: ProcessConfigDto;
   public processConfigs: ProcessConfigDto[] = [];
@@ -108,6 +112,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     private eventService: RemoteEventsService,
     private systemService: SystemService,
     private dragulaService: DragulaService,
+    private config: ConfigService
   ) {}
 
   ngOnInit() {
@@ -297,8 +302,12 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       );
     const call2 = this.instanceService.getNodeConfiguration(this.groupParam, this.uuidParam, selectedVersion.key.tag); // => results[1]
     const call3 = this.productService.getProducts(this.groupParam); // => result[2];
+    let call4 = of(null);
+    if (this.isCentral()) {
+      call4 = this.config.getServerForInstance(this.groupParam, this.uuidParam, selectedVersion.key.tag); // results[3]
+    }
 
-    forkJoin([call1, call2, call3]).subscribe(results => {
+    forkJoin([call1, call2, call3, call4]).subscribe(results => {
       newSelectedConfig.setNodeList(results[1]);
       newSelectedConfig.setApplications(results[0]);
       this.selectedConfig = newSelectedConfig;
@@ -306,11 +315,17 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       const filtered = results[2].filter(x => x.key.name === this.selectedConfig.version.product.name);
       this.productTags = sortByTags(filtered, p => p.key.tag, false);
 
+      this.controllingServer = results[3];
+
       this.loading = false;
       this.updateDirtyStateAndValidate();
       this.onProcessStatusChanged();
       this.createStickyHeader();
     });
+  }
+
+  isCentral() {
+    return this.config.config.mode === MinionMode.CENTRAL;
   }
 
   getProductOfInstance(pcd: ProcessConfigDto): ProductDto {
@@ -489,11 +504,18 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
    */
   onSave(): void {
     this.loading = true;
+
+    let server = null;
+    if (this.isCentral()) {
+      server = this.controllingServer.name;
+    }
+
     const nodePromise = this.instanceService.updateInstance(
       this.groupParam,
       this.uuidParam,
       this.selectedConfig.instance,
       this.selectedConfig.nodeList,
+      server,
       this.processConfigs[0].version.key.tag,
     );
     nodePromise.subscribe(

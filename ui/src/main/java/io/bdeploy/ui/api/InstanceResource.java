@@ -19,8 +19,8 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
-import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
+import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.directory.InstanceDirectory;
 import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
@@ -49,7 +49,7 @@ public interface InstanceResource {
     public List<InstanceVersionDto> listVersions(@ActivityScope @PathParam("instance") String instanceId);
 
     @PUT
-    public void create(InstanceConfiguration config);
+    public void create(InstanceConfiguration config, @QueryParam("localServer") String localServer);
 
     @GET
     @Path("/{instance}")
@@ -63,7 +63,7 @@ public interface InstanceResource {
     @POST
     @Path("/{instance}")
     public void update(@ActivityScope @PathParam("instance") String instanceId, InstanceConfigurationDto config,
-            @QueryParam("expect") String expectedTag);
+            @QueryParam("localServer") String localServer, @QueryParam("expect") String expectedTag);
 
     @DELETE
     @Path("/{instance}")

@@ -122,7 +122,7 @@ public class InstanceResourceTest {
         // Prepare and push instance
         InstanceConfiguration instanceConfig = TestFactory.createInstanceConfig("DemoInstance", product);
         instanceConfig.autoStart = true;
-        instanceResource.create(instanceConfig);
+        instanceResource.create(instanceConfig, null);
 
         // Create node configuration
         InstanceNodeConfigurationDto nodeDto = new InstanceNodeConfigurationDto("Node1", null, null);
@@ -135,7 +135,8 @@ public class InstanceResourceTest {
             nodeConfig.name = "DemoInstance-Node1-Config";
             nodeDto.nodeConfiguration = nodeConfig;
         }
-        instanceResource.update("DemoInstance", new InstanceConfigurationDto(null, Collections.singletonList(nodeDto)), "1");
+        instanceResource.update("DemoInstance", new InstanceConfigurationDto(null, Collections.singletonList(nodeDto)), null,
+                "1");
 
         // Check node configuration
         InstanceNodeConfigurationListDto instanceConfigDto = instanceResource.getNodeConfigurations("DemoInstance", "2");
@@ -157,7 +158,8 @@ public class InstanceResourceTest {
 
         // Remove all applications from Node1
         nodeDto.nodeConfiguration.applications.clear();
-        instanceResource.update("DemoInstance", new InstanceConfigurationDto(null, Collections.singletonList(nodeDto)), "2");
+        instanceResource.update("DemoInstance", new InstanceConfigurationDto(null, Collections.singletonList(nodeDto)), null,
+                "2");
 
         // Check the updated configuration
         instanceConfigDto = instanceResource.getNodeConfigurations("DemoInstance", "3");
@@ -232,7 +234,7 @@ public class InstanceResourceTest {
         instance.name = "My Instance";
         instance.purpose = InstancePurpose.PRODUCTIVE;
 
-        res.create(instance);
+        res.create(instance, null);
 
         assertEquals(1, res.list().size());
 
@@ -243,7 +245,7 @@ public class InstanceResourceTest {
         assertEquals(InstancePurpose.PRODUCTIVE, read.purpose);
 
         read.name = "New Desc";
-        res.update(instance.uuid, new InstanceConfigurationDto(read, null), "1");
+        res.update(instance.uuid, new InstanceConfigurationDto(read, null), null, "1");
 
         InstanceConfiguration reread = res.read(instance.uuid);
         assertEquals("New Desc", reread.name);
@@ -270,10 +272,10 @@ public class InstanceResourceTest {
         instance.name = "My Instance";
         instance.purpose = InstancePurpose.PRODUCTIVE;
 
-        res.create(instance);
+        res.create(instance, null);
 
         instance.name = "My modified Instance";
-        res.update(instance.uuid, new InstanceConfigurationDto(instance, null), "1");
+        res.update(instance.uuid, new InstanceConfigurationDto(instance, null), null, "1");
 
         InstanceConfiguration read = res.read(instance.uuid);
         assertEquals(read.name, instance.name);

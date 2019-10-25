@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.model.Tree.EntryType;
@@ -32,16 +33,27 @@ public class InstanceGroupManifest {
     }
 
     /**
-     * @return the current version of the {@link InstanceGroupConfiguration}, or <code>null</code> if none yet
+     * @return the {@link Key} of the latest version of the {@link Manifest}.
      */
-    public InstanceGroupConfiguration read() {
+    public Manifest.Key getKey() {
         Optional<Long> max = hive.execute(new ManifestMaxIdOperation().setManifestName(MANIFEST_NAME));
         if (!max.isPresent()) {
             return null;
         }
 
-        Manifest mf = hive
-                .execute(new ManifestLoadOperation().setManifest(new Manifest.Key(MANIFEST_NAME, max.get().toString())));
+        return new Manifest.Key(MANIFEST_NAME, max.get().toString());
+    }
+
+    /**
+     * @return the current version of the {@link InstanceGroupConfiguration}, or <code>null</code> if none yet
+     */
+    public InstanceGroupConfiguration read() {
+        Key key = getKey();
+        if (key == null) {
+            return null;
+        }
+
+        Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(key));
         try (InputStream is = hive.execute(
                 new TreeEntryLoadOperation().setRootTree(mf.getRoot()).setRelativePath(InstanceGroupConfiguration.FILE_NAME))) {
             return StorageHelper.fromStream(is, InstanceGroupConfiguration.class);

@@ -82,7 +82,7 @@ public class InstanceManifest {
      */
     public static InstanceManifest load(BHive hive, String instance, String versionTag) {
         Optional<Long> tag = Optional.empty();
-        if (versionTag == null) {
+        if (versionTag == null || versionTag.isEmpty()) {
             tag = hive.execute(new ManifestMaxIdOperation().setManifestName(getRootName(instance)));
         } else {
             try {
