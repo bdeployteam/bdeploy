@@ -50,7 +50,10 @@ export class InstanceAddEditComponent implements OnInit {
       name: ['', Validators.required],
       tag: ['', Validators.required],
     }),
-    autoUninstall: [''],
+    autoUninstall: ['']
+  });
+
+  public formGroup = this.formBuilder.group({
     localServer: this.formBuilder.group({
       name: ['']
     })
@@ -226,7 +229,7 @@ export class InstanceAddEditComponent implements OnInit {
   }
 
   get localServerControl() {
-    return this.instanceFormGroup.get('localServer.name');
+    return this.formGroup.get('localServer.name');
   }
 
   openOverlay(relative: MatButton, template: TemplateRef<any>) {

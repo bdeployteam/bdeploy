@@ -85,6 +85,8 @@
         </mat-grid-tile>
       </mat-grid-list>
     </div>
+  </form>
+  <form [formGroup]="formGroup">
     <div formGroupName="localServer" class="container" *ngIf='isCentral()'>
         <h3 class="header"> Local Server </h3>
         <mat-grid-list cols="1" rowHeight="5em">
