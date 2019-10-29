@@ -20,6 +20,7 @@ export class MessageboxService {
         minWidth: '300px',
         maxWidth: '800px',
         data: data,
+        closeOnNavigation: false,
       })
       .afterClosed()
       .pipe(
