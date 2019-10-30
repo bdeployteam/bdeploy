@@ -2,8 +2,11 @@ package io.bdeploy.ui.cleanup;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -74,25 +77,24 @@ public class CleanupHelper {
             InstanceGroupConfiguration cfg = new InstanceGroupManifest(hive).read();
             if (cfg != null) {
                 List<CleanupAction> instanceGroupActions = new ArrayList<>();
-                TreeSet<Key> allInstanceVersions4Uninstall = new TreeSet<>();
+                Map<String, TreeSet<Key>> instanceVersions4Uninstall = new HashMap<>();
 
                 // auto uninstall of old instance version
                 SortedSet<Key> latestImKeys = InstanceManifest.scan(hive, true);
                 for (Key key : latestImKeys) {
                     InstanceManifest im = InstanceManifest.of(hive, key);
                     if (im.getConfiguration().autoUninstall) {
-                        TreeSet<Key> instanceVersions4Uninstall = findInstanceVersions4Uninstall(context, group, hive, im,
-                                provider);
-                        allInstanceVersions4Uninstall.addAll(instanceVersions4Uninstall);
-                        instanceGroupActions.addAll(
-                                uninstallInstanceVersions(context, hive, instanceVersions4Uninstall, immediate, provider));
+                        instanceVersions4Uninstall.put(im.getManifest().getName(),
+                                findInstanceVersions4Uninstall(context, group, hive, im, provider));
+                        instanceGroupActions.addAll(uninstallInstanceVersions(context, hive,
+                                instanceVersions4Uninstall.get(im.getManifest().getName()), immediate, provider));
                     }
                 }
 
                 // cleanup of unused products
                 if (cfg.autoDelete) {
                     instanceGroupActions
-                            .addAll(deleteUnusedProducts(context, hive, allInstanceVersions4Uninstall, immediate, provider));
+                            .addAll(deleteUnusedProducts(context, hive, instanceVersions4Uninstall, immediate, provider));
                 }
 
                 if (!immediate) {
@@ -225,7 +227,7 @@ public class CleanupHelper {
 
         return InstanceManifest.scan(hive, false).stream()
                 .filter(im -> im.getName().equals(instanceManifest.getManifest().getName())) //
-                .filter(im -> (state.activeTag == null || im.getTag().compareTo(state.activeTag) < 0)
+                .filter(im -> (state.activeTag != null && im.getTag().compareTo(state.activeTag) < 0)
                         && !im.getTag().equals(state.lastActiveTag)) //
                 .filter(im -> state.installedTags.contains(im.getTag())) //
                 .filter(im -> !activeTags.contains(im.getTag())) //
@@ -251,29 +253,44 @@ public class CleanupHelper {
     }
 
     public static List<CleanupAction> deleteUnusedProducts(SecurityContext context, BHive hive,
-            Set<Key> instanceVersions4Uninstall, boolean immediate, MasterProvider provider) {
+            Map<String, TreeSet<Key>> instanceVersions4Uninstall, boolean immediate, MasterProvider provider) {
         List<CleanupAction> actions = new ArrayList<>();
 
         // map of available products grouped by product name
         Map<String, TreeSet<Key>> allProductsMap = ProductManifest.scan(hive).stream()
                 .collect(Collectors.groupingBy(Key::getName, Collectors.toCollection(TreeSet::new)));
 
-        // map of installed products grouped by product name
-        Map<String, InstanceStateRecord> statesMap = InstanceManifest.scan(hive, true).stream().collect(
-                Collectors.toMap(imKey -> imKey.getName(), imKey -> InstanceManifest.of(hive, imKey).getState(hive).read()));
+        // find the oldest instance version per instance that is "under protection", i.e. the product it uses must not be uninstalled
+        SortedSet<Key> latestInstanceManifests = InstanceManifest.scan(hive, true);
+        Map<String, List<String>> installedTagsMap = latestInstanceManifests.stream().collect(Collectors
+                .toMap(imKey -> imKey.getName(), imKey -> InstanceManifest.of(hive, imKey).getState(hive).read().installedTags));
+        // remove all to-be-uninstalled tags from installedTagsMap
+        latestInstanceManifests.stream().forEach(imKey -> {
+            instanceVersions4Uninstall.get(imKey.getName()).stream()
+                    .forEach(k -> installedTagsMap.get(imKey.getName()).remove(k.getTag()));
+        });
+
+        Comparator<String> intTagComparator = (a, b) -> Integer.compare(Integer.parseInt(a), Integer.parseInt(b));
+
+        Map<String, String> oldestTag = new HashMap<>();
+        for (String iName : installedTagsMap.keySet()) {
+            Optional<String> min = installedTagsMap.get(iName).stream().min(intTagComparator);
+            oldestTag.put(iName, min.isPresent() ? min.get() : "0");
+        }
+
         Map<String, TreeSet<Key>> usedProductsMap = InstanceManifest.scan(hive, false).stream()
-                .filter(imKey -> statesMap.get(imKey.getName()).installedTags.contains(imKey.getTag()))
-                .filter(imKey -> !instanceVersions4Uninstall.contains(imKey))
+                .filter(imKey -> intTagComparator.compare(imKey.getTag(), oldestTag.get(imKey.getName())) >= 0)
                 .map(imKey -> InstanceManifest.of(hive, imKey).getConfiguration().product).collect(Collectors.toSet()).stream()
                 .collect(Collectors.groupingBy(Key::getName, Collectors.toCollection(TreeSet::new)));
 
         // create actions for unused products (older than the oldest product in use)
         for (TreeSet<Key> pVersionKeys : allProductsMap.values()) {
             TreeSet<Key> usedProducts = usedProductsMap.get(pVersionKeys.first().getName());
-            Key oldestInUse = usedProducts != null && !usedProducts.isEmpty() ? usedProducts.first() : null;
+            // if the product is not used at all, take the newest product version to protect it
+            Key oldestInUse = usedProducts != null && !usedProducts.isEmpty() ? usedProducts.first() : pVersionKeys.last();
             for (Key versionKey : pVersionKeys) {
                 // stop at the oldest product in use)
-                if (oldestInUse != null && versionKey.compareTo(oldestInUse) >= 0) {
+                if (versionKey.compareTo(oldestInUse) >= 0) {
                     break;
                 }
                 // If sorting of tags is broken, it should affect both sets (allProductsMap AND usedProducts) and this should
