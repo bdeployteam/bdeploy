@@ -584,7 +584,8 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Override
     public String createClientInstaller(String instanceId, String applicationId) {
-        InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
+        InstanceStateRecord state = getDeploymentStates(instanceId);
+        InstanceManifest im = InstanceManifest.load(hive, instanceId, state.activeTag);
         ApplicationConfiguration appConfig = im.getApplicationConfiguration(hive, applicationId);
 
         // Request a new file where we can store the installer
