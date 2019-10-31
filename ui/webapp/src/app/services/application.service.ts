@@ -33,6 +33,9 @@ export class ApplicationService {
   /** Keeps track of applications which are now missing */
   private readonly missingApps: ManifestKey[] = [];
 
+  /** Keeps track of application names to prevent duplicate server application names */
+  private readonly serverAppNames: String[] = [];
+
   constructor(
     private cfg: ConfigService,
     private http: HttpClient,
@@ -259,6 +262,7 @@ export class ApplicationService {
     // Clear old state so that removed apps does not remain invalid
     this.validationStates.clear();
     this.missingApps.splice(0, this.missingApps.length);
+    this.serverAppNames.splice(0, this.serverAppNames.length);
 
     // Re-Validate all nodes
     for (const node of nodeListDto.nodeConfigDtos) {
@@ -350,6 +354,14 @@ export class ApplicationService {
         }
       }
     }
+
+    if (!isClientApp) {
+      const appName = cfg.name;
+      this.serverAppNames.includes(appName)
+        ? errors.push(appName + ': Server process name already configured')
+        : this.serverAppNames.push(appName);
+    }
+
     return errors;
   }
 
