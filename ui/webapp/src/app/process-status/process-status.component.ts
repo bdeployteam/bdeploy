@@ -20,6 +20,7 @@ export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
   @Input() outOfSyncIcon = false;
   @Input() outOfSyncText = false;
   @Input() iconWhenStopped = false;
+  @Input() isDirty = false;
 
   private subscription: Subscription;
   private processState: ProcessState;

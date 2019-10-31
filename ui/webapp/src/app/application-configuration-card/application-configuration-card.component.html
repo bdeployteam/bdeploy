@@ -32,7 +32,7 @@
       <div class="icons" *ngIf="isClient">
         <mat-icon class="icon" [svgIcon]='appOs' title="{{appOs}} Client Application"></mat-icon>
       </div>
-      <div class="icons" *ngIf="!isForeign">
+      <div class="icons" *ngIf="!isForeign && !isInstanceDirty" >
         <app-process-status [appId]="appConfig.uid" [instanceTag]="instanceVersion.key.tag" [activatedTag]="activatedTag" [outOfSyncIcon]="true" [outOfSyncText]="true"></app-process-status>
       </div>
     </div>

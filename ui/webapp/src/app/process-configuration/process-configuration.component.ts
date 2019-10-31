@@ -688,6 +688,20 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     return virtualConfig.dirty;
   }
 
+  public isDirtySelected() {
+    if (this.editMode && this.editComponent) {
+      return this.editComponent.isDirty();
+    }
+    // We always check the dirty flag of the virtual configuration
+    // to alert the user when there are unsaved changes and he wants to leaves the page
+    const virtualConfig = this.processConfigs[0];
+    if (!virtualConfig) {
+      return false;
+    }
+
+    return virtualConfig.dirty && virtualConfig === this.selectedConfig;
+  }
+
   /**
    * Called whenever an application on a node is added, removed or updated.
    */

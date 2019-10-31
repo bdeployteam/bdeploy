@@ -45,7 +45,8 @@
         (downloadClickAndStartEvent)="downloadClickAndStartEvent.next($event)"
         (downloadInstallerEvent)="downloadInstallerEvent.next($event)"
         [isReadonly]="isReadonly"
-        [isClient]="isClientApplicationsNode()">
+        [isClient]="isClientApplicationsNode()"
+        [isInstanceDirty]="isInstanceDirty">
       </app-application-configuration-card>
     </div>
 

@@ -29,6 +29,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
   @Input() node: InstanceNodeConfigurationDto;
   @Input() manageApplications: boolean;
   @Input() isReadonly: boolean;
+  @Input() isInstanceDirty: boolean;
 
   @Output() editAppConfigEvent = new EventEmitter<EditAppConfigContext>();
   @Output() editNodeAppsEvent = new EventEmitter<void>();

@@ -114,6 +114,7 @@
             [productMissing]="!isProductAvailable(selectedConfig)"
             [manageApplications]="isSidenavApplications()"
             [isReadonly]="selectedConfig.readonly"
+            [isInstanceDirty]="isDirtySelected()"
             (editAppConfigEvent)="onEditApp(node.nodeConfiguration, $event)"
             (editNodeAppsEvent)="onUpdateNodeApps()"
             (removeNodeAppEvent)="onUpdateNodeApps()"
