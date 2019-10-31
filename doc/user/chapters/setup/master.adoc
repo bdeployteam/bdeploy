@@ -2,7 +2,10 @@
 
 ==== Initialization
 To start using BDeploy you will at least need a single *master*. The *master* needs to be initialized before it can be started.
-The *root directory* contains all runtime data. Make sure there is some room available:
+
+The *root directory* contains all the runtime data. Best to select an empty directory in the data area of your system 
+(e.g. /var/bdeploy on Unix) that is intended exclusively for this purpose. Keep the root directory separate from the BDeploy
+binary installation. Make sure that there is enough space available. 
 
  bdeploy init --root=/path/to/storage --hostname=<hostname> # --tokenFile=token.txt
 
