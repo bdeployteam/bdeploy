@@ -48,15 +48,15 @@ java configuration Central-Init : minion-base {
 }
 
 /**
- * Initialize a new master root for a local server
+ * Initialize a new master root for a managed server
  */
 java configuration Managed-Init : minion-base {
 	argument "init";
-	argument "--root=${workspace_loc}/runtime/local";
+	argument "--root=${workspace_loc}/runtime/managed";
 	argument "--hostname=localhost";
 	argument "--port=7706";
 	argument "--dist=ignore";
-	argument "--tokenFile=${workspace_loc}/runtime/token-local.txt";
+	argument "--tokenFile=${workspace_loc}/runtime/token-managed.txt";
 }
 
 /**
@@ -118,7 +118,7 @@ java configuration Central-Master : minion-base {
 java configuration Managed-Master : minion-base {
 	argument "master";
 	argument "--managed";
-	argument "--root=${workspace_loc}/runtime/local";
+	argument "--root=${workspace_loc}/runtime/managed";
 	argument "--allowCors";
 	vm-argument "-XX:+HeapDumpOnOutOfMemoryError";
 	memory max=256 MB;
@@ -166,7 +166,7 @@ java configuration Central-AddUser : minion-base {
 java configuration Managed-AddUser : minion-base {
 	argument "user";
 	argument "--admin"; // all users are global admin which are created using this config
-	argument "--root=${workspace_loc}/runtime/local";
+	argument "--root=${workspace_loc}/runtime/managed";
 	argument "--add=${string_prompt:Enter Username}";
 	argument "--password=${password_prompt:Enter Password}";
 }
