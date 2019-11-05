@@ -60,6 +60,18 @@ java configuration Managed-Init : minion-base {
 }
 
 /**
+ * Initialize a new managed slave root.
+ */
+java configuration Managed-Slave-Init : minion-base {
+	argument "init";
+	argument "--root=${workspace_loc}/runtime/managed-slave";
+	argument "--hostname=localhost";
+	argument "--port=7707";
+	argument "--dist=ignore";
+	argument "--tokenFile=${workspace_loc}/runtime/token-managed-slave.txt";
+}
+
+/**
  * Registers the slave with the master root.
  */
 java configuration Slave-Register : minion-base {
@@ -71,11 +83,31 @@ java configuration Slave-Register : minion-base {
 }
 
 /**
+ * Registers the managed slave with the managed root.
+ */
+java configuration Managed-Slave-Register : minion-base {
+	argument "slave";
+	argument "--root=${workspace_loc}/runtime/managed";
+	argument "--add=slave";
+	argument "--remote=https://localhost:7707/api";
+	argument "--tokenFile=${workspace_loc}/runtime/token-managed-slave.txt";
+}
+
+/**
  * Run the slave.
  */
 java configuration Slave : minion-base {
 	argument "slave";
 	argument "--root=${workspace_loc}/runtime/slave";
+	memory max=256 MB;
+}
+
+/**
+ * Run the managed slave.
+ */
+java configuration Managed-Slave : minion-base {
+	argument "slave";
+	argument "--root=${workspace_loc}/runtime/managed-slave";
 	memory max=256 MB;
 }
 

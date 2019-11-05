@@ -23,6 +23,7 @@
 @import 'app/client-info/client-info-theme.scss';
 @import 'app/client-apps/client-apps-theme.scss';
 @import 'app/attach-central/attach-central.component.scss';
+@import 'app/managed-servers/managed-servers.component.scss';
 
 @mixin all-themes($theme) {
   // general angular material theme
@@ -49,6 +50,7 @@
   @include client-info-theme($theme);
   @include client-apps-theme($theme);
   @include attach-central-theme($theme);
+  @include managed-servers-theme($theme);
 }
 
 @mixin theme-chooser($theme) {
