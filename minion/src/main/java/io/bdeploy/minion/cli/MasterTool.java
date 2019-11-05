@@ -51,11 +51,11 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
         @Help(value = "Allow CORS, allows the web-app to run on a different port than the backend.", arg = false)
         boolean allowCors() default false;
 
-        @Help(value = "Start master in central mode - requires at least one local master counterpart.", arg = false)
+        @Help(value = "Start master in central mode - requires at least one managed master counterpart.", arg = false)
         boolean central() default false;
 
-        @Help(value = "Start master in local mode - requires a central counterpart to be operational.", arg = false)
-        boolean local() default false;
+        @Help(value = "Start master in managed mode - requires a central counterpart to be operational.", arg = false)
+        boolean managed() default false;
     }
 
     public MasterTool() {
@@ -67,13 +67,13 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
         helpAndFailIfMissing(config.root(), "Missing --root");
 
         MinionMode mode = MinionMode.STANDALONE;
-        if (config.local() || config.central()) {
-            if (config.local() && config.central()) {
-                helpAndFail("Only --local OR --central are allowed, not both");
+        if (config.managed() || config.central()) {
+            if (config.managed() && config.central()) {
+                helpAndFail("Only --managed OR --central are allowed, not both");
             }
 
-            if (config.local()) {
-                mode = MinionMode.LOCAL;
+            if (config.managed()) {
+                mode = MinionMode.MANAGED;
             } else {
                 mode = MinionMode.CENTRAL;
             }

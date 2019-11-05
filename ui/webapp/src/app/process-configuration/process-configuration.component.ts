@@ -60,7 +60,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   public uuidParam: string;
   public pageTitle: string;
 
-  // the controlling local server in central mode.
+  // the controlling managed server in central mode.
   public controllingServer: AttachIdentDto;
 
   public selectedConfig: ProcessConfigDto;

@@ -1,6 +1,6 @@
 <mat-toolbar class="mat-elevation-z1 header-toolbar">
   <button mat-icon-button type="button" (click)='location.back()'><mat-icon>chevron_left</mat-icon></button>
-  <span>Attach Local Server: {{instanceGroupName}}</span>
+  <span>Attach Managed Server: {{instanceGroupName}}</span>
 </mat-toolbar>
 
 <div class='stepper-container'>
@@ -11,21 +11,21 @@
 
     <mat-step label="Introduction" #introStep>
       <p>
-        This page can be used to attach a BDeploy server running in local mode to this central server. You will need the counterpart on
-        the local server which contains the local server identification as dragable element. This page can be found by clicking the
+        This page can be used to attach a BDeploy server running in managed mode to this central server. You will need the counterpart on
+        the managed server which contains the managed server identification as dragable element. This page can be found by clicking the
         <b>Attach Instance Group</b> button on the <b>Instance Groups</b> page.
       </p>
       <div class='button-container'>
         <button mat-raised-button matStepperNext>Next</button>
       </div>
     </mat-step>
-    <mat-step label="Attach Local Server" #attachStep [completed]='attachPayload'>
+    <mat-step label="Attach Managed Server" #attachStep [completed]='attachPayload'>
       <p>
-        Drag the local server information from the local server's <b>Attach to Central Server</b> page and drop it on the zone below.
+        Drag the managed server information from the managed server's <b>Attach to Central Server</b> page and drop it on the zone below.
       </p>
       <div class='drag-container'>
         <mat-card class='drag-card drop-card' (drop)='onDrop($event)' (dragover)='onOver($event)'>
-          Drop local server information here!
+          Drop managed server information here!
         </mat-card>
       </div>
       <p *ngIf='attachPayload'>
@@ -40,7 +40,7 @@
       <form [formGroup]='infoGroup'>
         <div class='form-fields'>
           <mat-form-field>
-            <input matInput placeholder="Name of the Local Server" formControlName="name" required>
+            <input matInput placeholder="Name of the Managed Server" formControlName="name" required>
           </mat-form-field>
           <mat-form-field>
             <input matInput placeholder="Description" formControlName="desc" required>
@@ -61,7 +61,7 @@
       </p>
       <ng-container  *ngIf='attachError'>
         <p>
-          Failed to automatically attach to the remote local server. You can continue to setup manually.
+          Failed to automatically attach to the remote managed server. You can continue to setup manually.
         </p>
         <p>
           Details:
@@ -73,14 +73,14 @@
         <button mat-raised-button matStepperNext>Continue Manually</button>
         <ng-container *ngIf='!attachError && !attachSuccess'>
           <div class='spacer'></div>
-          <span>Contacting Local Server...</span>
+          <span>Contacting Managed Server...</span>
           <mat-spinner diameter='24'></mat-spinner>
         </ng-container>
       </div>
     </mat-step>
-    <mat-step label="Manual Configuration of Local Server" optional="true" #manualStep>
+    <mat-step label="Manual Configuration of Managed Server" optional="true" #manualStep>
       <p>
-        Note that this step is only necessary if this server cannot contact the configured local server (temporariliy or permanently).
+        Note that this step is only necessary if this server cannot contact the configured managed server (temporariliy or permanently).
       </p>
       <div class='drag-container' *ngIf='!centralIdent'>
         <mat-spinner diameter="24"></mat-spinner>
@@ -89,7 +89,7 @@
         <button mat-raised-button (click)='downloadManualJson()'>Download for manual setup</button>
         <mat-card draggable="true" (dragstart)='onDragStart($event)' class='drag-card'>
           <div>
-            Drag me to the local server!
+            Drag me to the managed server!
           </div>
         </mat-card>
       </div>
@@ -102,7 +102,7 @@
       <div class='success-icon'>
         <mat-icon>check_circle_outline</mat-icon>
         <p *ngIf='attachPayload'>
-          This local server {{serverNameControl.value}} has been attached.
+          This managed server {{serverNameControl.value}} has been attached.
         </p>
         <button mat-raised-button [routerLink]='["/servers", instanceGroupName]'>Done</button>
       </div>

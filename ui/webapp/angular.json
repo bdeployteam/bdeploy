@@ -85,11 +85,11 @@
                 }
               ]
             },
-            "local": {
+            "managed": {
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.dev-local.ts"
+                  "with": "src/environments/environment.dev-managed.ts"
                 }
               ]
             }
@@ -108,8 +108,8 @@
               "browserTarget": "webapp:build:central",
               "port": 4201
             },
-            "local": {
-              "browserTarget": "webapp:build:local",
+            "managed": {
+              "browserTarget": "webapp:build:managed",
               "port": 4202
             }
           }

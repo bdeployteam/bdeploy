@@ -34,8 +34,8 @@ public class UiResources {
 
         server.register(InstanceEventBroadcaster.class);
 
-        server.register(LocalServersResourceImpl.class);
-        server.register(LocalServersAttachEventResourceImpl.class);
+        server.register(ManagedServersResourceImpl.class);
+        server.register(ManagedServersAttachEventResourceImpl.class);
 
         server.register(new AbstractBinder() {
 

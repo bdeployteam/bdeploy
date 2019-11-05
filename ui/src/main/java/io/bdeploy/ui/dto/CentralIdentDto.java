@@ -15,7 +15,8 @@ public class CentralIdentDto {
     /**
      * The target server's attachment identification. This is the information as seen by the central server.
      * <p>
-     * Name and description are informative only and may not match any known information on the local server, but auth <b>must</b>
+     * Name and description are informative only and may not match any known information on the managed server, but auth
+     * <b>must</b>
      * be a valid token on the target server for the identification to be accepted.
      */
     public AttachIdentDto local;

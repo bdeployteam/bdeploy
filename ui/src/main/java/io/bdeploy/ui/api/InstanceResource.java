@@ -49,7 +49,7 @@ public interface InstanceResource {
     public List<InstanceVersionDto> listVersions(@ActivityScope @PathParam("instance") String instanceId);
 
     @PUT
-    public void create(InstanceConfiguration config, @QueryParam("localServer") String localServer);
+    public void create(InstanceConfiguration config, @QueryParam("managedServer") String managedServer);
 
     @GET
     @Path("/{instance}")
@@ -63,7 +63,7 @@ public interface InstanceResource {
     @POST
     @Path("/{instance}")
     public void update(@ActivityScope @PathParam("instance") String instanceId, InstanceConfigurationDto config,
-            @QueryParam("localServer") String localServer, @QueryParam("expect") String expectedTag);
+            @QueryParam("managedServer") String managedServer, @QueryParam("expect") String expectedTag);
 
     @DELETE
     @Path("/{instance}")

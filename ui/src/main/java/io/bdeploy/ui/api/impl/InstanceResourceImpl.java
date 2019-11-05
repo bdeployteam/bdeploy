@@ -91,8 +91,8 @@ import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
-import io.bdeploy.ui.LocalMasterAssociationMetaManifest;
-import io.bdeploy.ui.LocalMasterAttachmentsMetaManifest;
+import io.bdeploy.ui.ManagedMasterAssociationMetaManifest;
+import io.bdeploy.ui.ManagedMasterAttachmentsMetaManifest;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.ConfigFileResource;
 import io.bdeploy.ui.api.InstanceResource;
@@ -223,22 +223,22 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     @Override
-    public void create(InstanceConfiguration instanceConfig, String localServer) {
+    public void create(InstanceConfiguration instanceConfig, String managedServer) {
         ProductManifest product = ProductManifest.of(hive, instanceConfig.product);
         if (product == null) {
             throw new WebApplicationException("Product not found: " + instanceConfig.product, Status.NOT_FOUND);
         }
 
         RemoteService remote;
-        if (minion.getMode() == MinionMode.CENTRAL && localServer == null) {
-            throw new WebApplicationException("Local Server is not set on central", Status.EXPECTATION_FAILED);
+        if (minion.getMode() == MinionMode.CENTRAL && managedServer == null) {
+            throw new WebApplicationException("Managed server is not set on central", Status.EXPECTATION_FAILED);
         } else if (minion.getMode() == MinionMode.CENTRAL) {
-            LocalMasterAttachmentsMetaManifest attached = LocalMasterAttachmentsMetaManifest.read(hive);
-            if (!attached.getAttachedLocalServers().containsKey(localServer)) {
-                throw new WebApplicationException("Local Server '" + localServer + "' is not attached to this instance group",
+            ManagedMasterAttachmentsMetaManifest attached = ManagedMasterAttachmentsMetaManifest.read(hive);
+            if (!attached.getAttachedManagedServers().containsKey(managedServer)) {
+                throw new WebApplicationException("Managed server '" + managedServer + "' is not attached to this instance group",
                         Status.EXPECTATION_FAILED);
             }
-            AttachIdentDto ident = attached.getAttachedLocalServers().get(localServer);
+            AttachIdentDto ident = attached.getAttachedManagedServers().get(managedServer);
             remote = new RemoteService(UriBuilder.fromUri(ident.uri).build(), ident.auth);
         } else {
             remote = mp.getControllingMaster(hive, null);
@@ -253,7 +253,7 @@ public class InstanceResourceImpl implements InstanceResource {
         if (minion.getMode() == MinionMode.CENTRAL) {
             // immediately fetch back so we have it to create the association
             hive.execute(new FetchOperation().addManifest(key).setRemote(remote).setHiveName(group));
-            LocalMasterAssociationMetaManifest.associate(hive, key, localServer);
+            ManagedMasterAssociationMetaManifest.associate(hive, key, managedServer);
         }
     }
 
@@ -310,7 +310,7 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     @Override
-    public void update(String instance, InstanceConfigurationDto dto, String localServer, String expectedTag) {
+    public void update(String instance, InstanceConfigurationDto dto, String managedServer, String expectedTag) {
         InstanceManifest oldConfig = InstanceManifest.load(hive, instance, null);
 
         if (!oldConfig.getManifest().getTag().equals(expectedTag)) {
@@ -324,15 +324,15 @@ public class InstanceResourceImpl implements InstanceResource {
         }
 
         RemoteService remote;
-        if (minion.getMode() == MinionMode.CENTRAL && localServer == null) {
-            throw new WebApplicationException("Local Server is not set on central", Status.EXPECTATION_FAILED);
+        if (minion.getMode() == MinionMode.CENTRAL && managedServer == null) {
+            throw new WebApplicationException("Managed server is not set on central", Status.EXPECTATION_FAILED);
         } else if (minion.getMode() == MinionMode.CENTRAL) {
-            LocalMasterAttachmentsMetaManifest attached = LocalMasterAttachmentsMetaManifest.read(hive);
-            if (!attached.getAttachedLocalServers().containsKey(localServer)) {
-                throw new WebApplicationException("Local Server '" + localServer + "' is not attached to this instance group",
+            ManagedMasterAttachmentsMetaManifest attached = ManagedMasterAttachmentsMetaManifest.read(hive);
+            if (!attached.getAttachedManagedServers().containsKey(managedServer)) {
+                throw new WebApplicationException("Managed server '" + managedServer + "' is not attached to this instance group",
                         Status.EXPECTATION_FAILED);
             }
-            AttachIdentDto ident = attached.getAttachedLocalServers().get(localServer);
+            AttachIdentDto ident = attached.getAttachedManagedServers().get(managedServer);
             remote = new RemoteService(UriBuilder.fromUri(ident.uri).build(), ident.auth);
         } else {
             remote = mp.getControllingMaster(hive, null);
@@ -344,7 +344,7 @@ public class InstanceResourceImpl implements InstanceResource {
         if (minion.getMode() == MinionMode.CENTRAL) {
             // immediately fetch back so we have it to create the association
             hive.execute(new FetchOperation().addManifest(key).setRemote(remote).setHiveName(group));
-            LocalMasterAssociationMetaManifest.associate(hive, key, localServer);
+            ManagedMasterAssociationMetaManifest.associate(hive, key, managedServer);
         }
 
         UiResources.getInstanceEventManager().create(instance, key);

@@ -17,13 +17,13 @@ import io.bdeploy.interfaces.NodeStatus;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.ui.dto.AttachIdentDto;
 
-@Path("/local-servers")
+@Path("/managed-servers")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public interface LocalServersResource {
+public interface ManagedServersResource {
 
     /**
-     * Used on a central server to auto-attach a local server
+     * Used on a central server to auto-attach a managed server
      */
     @PUT
     @Path("/auto-attach/{group}")
@@ -37,7 +37,7 @@ public interface LocalServersResource {
     public void manualAttach(@PathParam("group") String groupName, AttachIdentDto target);
 
     /**
-     * Used on a local server to manually (force) attach an instance group from a central server using it's encrypted
+     * Used on a managed server to manually (force) attach an instance group from a central server using it's encrypted
      * identification.
      * <p>
      * The central identification must be a string obtained using {@link #getCentralIdent(String, AttachIdentDto)} on the central
@@ -51,7 +51,7 @@ public interface LocalServersResource {
     public String manualAttachCentral(String central);
 
     /**
-     * Used on a central server to retrieve an identification for the given instance group to manually attach on a local server
+     * Used on a central server to retrieve an identification for the given instance group to manually attach on a managed server
      * <p>
      * The return value is an encrypted and signed CentralIdentDto.
      */
@@ -60,14 +60,14 @@ public interface LocalServersResource {
     public String getCentralIdent(@PathParam("group") String group, AttachIdentDto target);
 
     /**
-     * Retrieve all available local servers for an instance group on the central server
+     * Retrieve all available managed servers for an instance group on the central server
      */
     @GET
     @Path("/list/{group}")
-    public List<AttachIdentDto> getLocalServers(@PathParam("group") String instanceGroup);
+    public List<AttachIdentDto> getManagedServers(@PathParam("group") String instanceGroup);
 
     /**
-     * Retrieve the controlling local server on the central server.
+     * Retrieve the controlling managed server on the central server.
      */
     @GET
     @Path("/controlling-server/{group}/{instanceId}")
@@ -85,11 +85,11 @@ public interface LocalServersResource {
     @POST
     @Path("/delete-server/{group}/{server}")
     @Consumes(MediaType.TEXT_PLAIN)
-    public void deleteLocalServer(@PathParam("group") String groupName, @PathParam("server") String serverName);
+    public void deleteManagedServer(@PathParam("group") String groupName, @PathParam("server") String serverName);
 
     @GET
     @Path("/minions/{group}/{server}")
     @Consumes(MediaType.TEXT_PLAIN)
-    public Map<String, NodeStatus> getMinionsOfLocalServer(@PathParam("group") String groupName,
+    public Map<String, NodeStatus> getMinionsOfManagedServer(@PathParam("group") String groupName,
             @PathParam("server") String serverName);
 }

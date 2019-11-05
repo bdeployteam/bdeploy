@@ -6,14 +6,14 @@ import { AttachIdentDto } from '../models/gen.dtos';
 import { ConfigService } from '../services/config.service';
 
 @Component({
-  selector: 'app-local-servers',
-  templateUrl: './local-servers.component.html',
-  styleUrls: ['./local-servers.component.css']
+  selector: 'app-managed-servers',
+  templateUrl: './managed-servers.component.html',
+  styleUrls: ['./managed-servers.component.css']
 })
-export class LocalServersComponent implements OnInit {
+export class ManagedServersComponent implements OnInit {
 
   instanceGroupName: string = this.route.snapshot.paramMap.get('group');
-  localServers: AttachIdentDto[];
+  managedServers: AttachIdentDto[];
   loading = true;
 
   connected = new Map<AttachIdentDto, boolean>();
@@ -25,9 +25,9 @@ export class LocalServersComponent implements OnInit {
   }
 
   load() {
-    this.config.getLocalServers(this.instanceGroupName).pipe(finalize(() => this.loading = false)).subscribe(r => {
+    this.config.getManagedServers(this.instanceGroupName).pipe(finalize(() => this.loading = false)).subscribe(r => {
       r.forEach(a => {if (!this.connected.has(a)) {this.connected.set(a, false); }});
-      this.localServers = r.sort((a, b) => a.name.localeCompare(b.name));
+      this.managedServers = r.sort((a, b) => a.name.localeCompare(b.name));
     });
   }
 

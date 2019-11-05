@@ -23,17 +23,17 @@ import io.bdeploy.jersey.JerseyServer;
 
 @Path("/attach-events")
 @Singleton
-public class LocalServersAttachEventResourceImpl {
+public class ManagedServersAttachEventResourceImpl {
 
     private static final long KEEP_ALIVE_INTERVAL = 30; // seconds
 
-    private static final Logger log = LoggerFactory.getLogger(LocalServersAttachEventResourceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ManagedServersAttachEventResourceImpl.class);
 
     private final Sse sse;
     private final SseBroadcaster bc;
 
     @Inject
-    public LocalServersAttachEventResourceImpl(@Context Sse sse,
+    public ManagedServersAttachEventResourceImpl(@Context Sse sse,
             @Named(JerseyServer.BROADCAST_EXECUTOR) ScheduledExecutorService executor) {
         this.sse = sse;
         this.bc = sse.newBroadcaster();

@@ -14,11 +14,11 @@ import { DownloadService } from '../services/download.service';
 import { ErrorMessage } from '../services/logging.service';
 
 @Component({
-  selector: 'app-attach-local',
-  templateUrl: './attach-local.component.html',
-  styleUrls: ['./attach-local.component.css'],
+  selector: 'app-attach-managed',
+  templateUrl: './attach-managed.component.html',
+  styleUrls: ['./attach-managed.component.css'],
 })
-export class AttachLocalComponent implements OnInit {
+export class AttachManagedComponent implements OnInit {
   instanceGroupName: string = this.route.snapshot.paramMap.get('group');
   attachPayload: AttachIdentDto;
   infoGroup: FormGroup;
@@ -102,7 +102,7 @@ export class AttachLocalComponent implements OnInit {
       .tryAutoAttach(this.instanceGroupName, payload)
       .pipe(
         catchError(e => {
-          const error = new ErrorMessage('Cannot automatically attach to local server', e);
+          const error = new ErrorMessage('Cannot automatically attach to managed server', e);
           return of(error);
         }),
       )

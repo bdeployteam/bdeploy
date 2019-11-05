@@ -13,11 +13,11 @@ interface NodeRecord {
 }
 
 @Component({
-  selector: 'app-local-server-detail',
-  templateUrl: './local-server-detail.component.html',
-  styleUrls: ['./local-server-detail.component.css']
+  selector: 'app-managed-server-detail',
+  templateUrl: './managed-server-detail.component.html',
+  styleUrls: ['./managed-server-detail.component.css']
 })
-export class LocalServerDetailComponent implements OnInit {
+export class ManagedServerDetailComponent implements OnInit {
 
 
   @Input()
@@ -38,11 +38,11 @@ export class LocalServerDetailComponent implements OnInit {
   constructor(private config: ConfigService, private mbService: MessageboxService) { }
 
   ngOnInit() {
-    this.config.getInstancesForServer(this.instanceGroupName, this.server.name).subscribe(r => {
+    this.config.getInstancesForManagedServer(this.instanceGroupName, this.server.name).subscribe(r => {
       this.instances = r;
     });
 
-    this.config.minionsOfLocalServer(this.instanceGroupName, this.server.name).pipe(finalize(() => this.loading = false)).subscribe(r => {
+    this.config.minionsOfManagedServer(this.instanceGroupName, this.server.name).pipe(finalize(() => this.loading = false)).subscribe(r => {
       const arr: NodeRecord[] = [];
       for (const key of Object.keys(r)) {
         arr.push({key: key, status: r[key]});
@@ -55,12 +55,12 @@ export class LocalServerDetailComponent implements OnInit {
   async doDelete() {
     let doIt = false;
     if (this.instances.length > 0) {
-      doIt = await this.mbService.openAsync({title: 'Delete attached Local Server', message: `Are you sure you want to delete the selected local server from the central server? This will delete <b>${this.instances.length}</b> instances from the central server as well (but not from the local server).`, mode: MessageBoxMode.CONFIRM_WARNING});
+      doIt = await this.mbService.openAsync({title: 'Delete attached Managed Server', message: `Are you sure you want to delete the selected managed server from the central server? This will delete <b>${this.instances.length}</b> instances from the central server as well (but not from the managed server).`, mode: MessageBoxMode.CONFIRM_WARNING});
     } else {
-      doIt = await this.mbService.openAsync({title: 'Delete attached Local Server', message: 'Are you sure you want to delete the selected local server from the central server?', mode: MessageBoxMode.CONFIRM});
+      doIt = await this.mbService.openAsync({title: 'Delete attached Managed Server', message: 'Are you sure you want to delete the selected managed server from the central server?', mode: MessageBoxMode.CONFIRM});
     }
     if (doIt) {
-      await this.config.deleteLocalServer(this.instanceGroupName, this.server.name).toPromise();
+      await this.config.deleteManagedServer(this.instanceGroupName, this.server.name).toPromise();
       this.delete.emit(this.server);
     }
   }

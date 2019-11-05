@@ -11,10 +11,10 @@ public enum MinionMode {
     STANDALONE,
 
     /**
-     * In local mode, a minion requires to be connected to a central minion. All operations are regarded 'local', same as
+     * In managed mode, a minion requires to be connected to a central minion. All operations are regarded 'local', same as
      * standalone, but certain operations are not allowed.
      */
-    LOCAL,
+    MANAGED,
 
     /**
      * In central mode, a minion will not host master/slave services, but can only remotely control 'local' minions.

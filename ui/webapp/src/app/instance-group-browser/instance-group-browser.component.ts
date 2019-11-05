@@ -113,7 +113,7 @@ export class InstanceGroupBrowserComponent implements OnInit, OnDestroy {
     return !this.isAddAllowed();
   }
 
-  isAttachLocalAllowed(): boolean {
+  isAttachManagedAllowed(): boolean {
     return this.config.config.mode === MinionMode.CENTRAL;
   }
 }

@@ -45,17 +45,17 @@ import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
-import io.bdeploy.ui.LocalMasterAssociationMetaManifest;
-import io.bdeploy.ui.LocalMasterAttachmentsMetaManifest;
+import io.bdeploy.ui.ManagedMasterAssociationMetaManifest;
+import io.bdeploy.ui.ManagedMasterAttachmentsMetaManifest;
 import io.bdeploy.ui.api.InstanceGroupResource;
-import io.bdeploy.ui.api.LocalServersResource;
+import io.bdeploy.ui.api.ManagedServersResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.dto.AttachIdentDto;
 import io.bdeploy.ui.dto.CentralIdentDto;
 
-public class LocalServersResourceImpl implements LocalServersResource {
+public class ManagedServersResourceImpl implements ManagedServersResource {
 
-    private static final Logger log = LoggerFactory.getLogger(LocalServersResourceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ManagedServersResourceImpl.class);
 
     @Context
     private SecurityContext context;
@@ -72,14 +72,14 @@ public class LocalServersResourceImpl implements LocalServersResource {
         MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class, context);
         for (InstanceGroupConfiguration cfg : root.getInstanceGroups()) {
             if (cfg.name.equals(groupName)) {
-                throw new WebApplicationException("Instance Group with name " + groupName + " already exists on the local server",
-                        Status.CONFLICT);
+                throw new WebApplicationException(
+                        "Instance Group with name " + groupName + " already exists on the managed server", Status.CONFLICT);
             }
         }
 
         BHive hive = getInstanceGroupHive(groupName);
 
-        if (LocalMasterAttachmentsMetaManifest.read(hive).getAttachedLocalServers().containsKey(target.name)) {
+        if (ManagedMasterAttachmentsMetaManifest.read(hive).getAttachedManagedServers().containsKey(target.name)) {
             throw new WebApplicationException("Server with name " + target.name + " already exists!", Status.CONFLICT);
         }
 
@@ -95,7 +95,7 @@ public class LocalServersResourceImpl implements LocalServersResource {
             hive.execute(new PushOperation().setHiveName(groupName).addManifest(igm.getKey()).setRemote(svc));
 
             // store the attachment locally
-            LocalMasterAttachmentsMetaManifest.attach(hive, target, false);
+            ManagedMasterAttachmentsMetaManifest.attach(hive, target, false);
 
             WebTarget attachTarget = ResourceProvider.of(svc).getBaseTarget().path("/attach-events");
             StatusType status = attachTarget.request().buildPost(Entity.text(groupName)).invoke().getStatusInfo();
@@ -104,7 +104,7 @@ public class LocalServersResourceImpl implements LocalServersResource {
             }
         } catch (Exception e) {
             log.error("Auto-attach failed", e);
-            throw new WebApplicationException("Cannot automatically attach local server " + target.name, e);
+            throw new WebApplicationException("Cannot automatically attach managed server " + target.name, e);
         }
     }
 
@@ -112,12 +112,12 @@ public class LocalServersResourceImpl implements LocalServersResource {
     public void manualAttach(String groupName, AttachIdentDto target) {
         BHive hive = getInstanceGroupHive(groupName);
 
-        if (LocalMasterAttachmentsMetaManifest.read(hive).getAttachedLocalServers().containsKey(target.name)) {
+        if (ManagedMasterAttachmentsMetaManifest.read(hive).getAttachedManagedServers().containsKey(target.name)) {
             throw new WebApplicationException("Server with name " + target.name + " already exists!", Status.CONFLICT);
         }
 
         // store the attachment locally
-        LocalMasterAttachmentsMetaManifest.attach(hive, target, false);
+        ManagedMasterAttachmentsMetaManifest.attach(hive, target, false);
     }
 
     @Override
@@ -157,7 +157,7 @@ public class LocalServersResourceImpl implements LocalServersResource {
     public String getCentralIdent(String groupName, AttachIdentDto target) {
         BHive hive = getInstanceGroupHive(groupName);
 
-        if (LocalMasterAttachmentsMetaManifest.read(hive).getAttachedLocalServers().containsKey(target.name)) {
+        if (ManagedMasterAttachmentsMetaManifest.read(hive).getAttachedManagedServers().containsKey(target.name)) {
             throw new WebApplicationException("Server with name " + target.name + " already exists!", Status.CONFLICT);
         }
 
@@ -180,11 +180,11 @@ public class LocalServersResourceImpl implements LocalServersResource {
     }
 
     @Override
-    public List<AttachIdentDto> getLocalServers(String instanceGroup) {
+    public List<AttachIdentDto> getManagedServers(String instanceGroup) {
         BHive hive = getInstanceGroupHive(instanceGroup);
 
-        LocalMasterAttachmentsMetaManifest masters = LocalMasterAttachmentsMetaManifest.read(hive);
-        return masters.getAttachedLocalServers().values().stream().map(e -> {
+        ManagedMasterAttachmentsMetaManifest masters = ManagedMasterAttachmentsMetaManifest.read(hive);
+        return masters.getAttachedManagedServers().values().stream().map(e -> {
             e.auth = null;
             return e;
         }).collect(Collectors.toList());
@@ -194,15 +194,15 @@ public class LocalServersResourceImpl implements LocalServersResource {
     public AttachIdentDto getServerForInstance(String instanceGroup, String instanceId, String instanceTag) {
         BHive hive = getInstanceGroupHive(instanceGroup);
 
-        LocalMasterAttachmentsMetaManifest masters = LocalMasterAttachmentsMetaManifest.read(hive);
+        ManagedMasterAttachmentsMetaManifest masters = ManagedMasterAttachmentsMetaManifest.read(hive);
         InstanceManifest im = InstanceManifest.load(hive, instanceId, instanceTag);
 
-        String selected = LocalMasterAssociationMetaManifest.read(hive, im.getManifest());
+        String selected = ManagedMasterAssociationMetaManifest.read(hive, im.getManifest());
         if (selected == null) {
             return null;
         }
 
-        AttachIdentDto dto = masters.getAttachedLocalServers().get(selected);
+        AttachIdentDto dto = masters.getAttachedManagedServers().get(selected);
         dto.auth = null;
 
         return dto;
@@ -224,7 +224,7 @@ public class LocalServersResourceImpl implements LocalServersResource {
         SortedSet<Manifest.Key> latestKeys = InstanceManifest.scan(hive, true);
 
         for (Manifest.Key key : latestKeys) {
-            String associated = LocalMasterAssociationMetaManifest.read(hive, key);
+            String associated = ManagedMasterAssociationMetaManifest.read(hive, key);
             if (serverName.equals(associated)) {
                 instances.add(InstanceManifest.of(hive, key).getConfiguration());
             }
@@ -233,7 +233,7 @@ public class LocalServersResourceImpl implements LocalServersResource {
     }
 
     @Override
-    public void deleteLocalServer(String groupName, String serverName) {
+    public void deleteManagedServer(String groupName, String serverName) {
         BHive hive = getInstanceGroupHive(groupName);
         List<InstanceConfiguration> controlled = getInstancesControlledBy(groupName, serverName);
 
@@ -243,16 +243,16 @@ public class LocalServersResourceImpl implements LocalServersResource {
             allInstanceObjects.forEach(x -> hive.execute(new ManifestDeleteOperation().setToDelete(x)));
         }
 
-        LocalMasterAttachmentsMetaManifest.detach(hive, serverName);
+        ManagedMasterAttachmentsMetaManifest.detach(hive, serverName);
     }
 
     @Override
-    public Map<String, NodeStatus> getMinionsOfLocalServer(String groupName, String serverName) {
+    public Map<String, NodeStatus> getMinionsOfManagedServer(String groupName, String serverName) {
         BHive hive = getInstanceGroupHive(groupName);
 
-        AttachIdentDto attached = LocalMasterAttachmentsMetaManifest.read(hive).getAttachedLocalServers().get(serverName);
+        AttachIdentDto attached = ManagedMasterAttachmentsMetaManifest.read(hive).getAttachedManagedServers().get(serverName);
         if (attached == null) {
-            throw new WebApplicationException("Local server " + serverName + " not found for instance group " + groupName,
+            throw new WebApplicationException("Managed server " + serverName + " not found for instance group " + groupName,
                     Status.NOT_FOUND);
         }
 

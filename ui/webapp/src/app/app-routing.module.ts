@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AttachCentralComponent } from './attach-central/attach-central.component';
-import { AttachLocalComponent } from './attach-local/attach-local.component';
+import { AttachManagedComponent } from './attach-managed/attach-managed.component';
 import { ClientAppsComponent } from './client-apps/client-apps.component';
 import { ConfigFilesBrowserComponent } from './config-files-browser/config-files-browser.component';
 import { DataFilesBrowserComponent } from './data-files-browser/data-files-browser.component';
@@ -13,8 +13,8 @@ import { InstanceAddEditComponent } from './instance-add-edit/instance-add-edit.
 import { InstanceBrowserComponent } from './instance-browser/instance-browser.component';
 import { InstanceGroupAddEditComponent } from './instance-group-add-edit/instance-group-add-edit.component';
 import { InstanceGroupBrowserComponent } from './instance-group-browser/instance-group-browser.component';
-import { LocalServersComponent } from './local-servers/local-servers.component';
 import { LoginComponent } from './login/login.component';
+import { ManagedServersComponent } from './managed-servers/managed-servers.component';
 import { MasterCleanupComponent } from './master-cleanup/master-cleanup.component';
 import { ProcessConfigurationComponent } from './process-configuration/process-configuration.component';
 import { ProductsComponent } from './products/products.component';
@@ -163,18 +163,18 @@ const routes: Routes = [
     data: { title: 'Attach to Central Server', header: 'Attach to Central Server' }
   },
   {
-    path: 'attach/local/:group',
-    component: AttachLocalComponent,
+    path: 'attach/managed/:group',
+    component: AttachManagedComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Attach Local Server', header: 'Attach Local Server' }
+    data: { title: 'Attach Managed Server', header: 'Attach Managed Server' }
   },
   {
     path: 'servers/:group',
-    component: LocalServersComponent,
+    component: ManagedServersComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Manage Local Servers', header: 'Manage Local Servers' }
+    data: { title: 'Managed Servers', header: 'Managed Servers' }
   },
 ];
 

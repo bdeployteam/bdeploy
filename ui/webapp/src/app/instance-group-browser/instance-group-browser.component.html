@@ -11,7 +11,7 @@
     <p class="list-heading">Recently used:</p>
     <mat-grid-list cols="{{columns}}" rowHeight="200px" gutterSize="10px">
       <mat-grid-tile *ngFor="let recentGroup of filterRecent(recent) | slice:0:columns">
-        <app-instance-group-card [instanceGroup]='recentGroup' (removeEvent)=removeGroup(recentGroup) [isAttachAllowed]='isAttachLocalAllowed()'></app-instance-group-card>
+        <app-instance-group-card [instanceGroup]='recentGroup' (removeEvent)=removeGroup(recentGroup) [isAttachAllowed]='isAttachManagedAllowed()'></app-instance-group-card>
       </mat-grid-tile>
     </mat-grid-list>
     <mat-divider class="list-divider"></mat-divider>
@@ -20,7 +20,7 @@
 
 <mat-grid-list cols="{{columns}}" rowHeight="200px" gutterSize="10px">
   <mat-grid-tile *ngFor="let group of instanceGroupList.filtered">
-    <app-instance-group-card [instanceGroup]='group' (removeEvent)=removeGroup(group) [isAttachAllowed]='isAttachLocalAllowed()'></app-instance-group-card>
+    <app-instance-group-card [instanceGroup]='group' (removeEvent)=removeGroup(group) [isAttachAllowed]='isAttachManagedAllowed()'></app-instance-group-card>
   </mat-grid-tile>
 </mat-grid-list>
 

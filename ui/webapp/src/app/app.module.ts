@@ -21,7 +21,7 @@ import { ApplicationEditManualComponent } from './application-edit-manual/applic
 import { ApplicationEditOptionalComponent } from './application-edit-optional/application-edit-optional.component';
 import { ApplicationEditComponent } from './application-edit/application-edit.component';
 import { AttachCentralComponent } from './attach-central/attach-central.component';
-import { AttachLocalComponent } from './attach-local/attach-local.component';
+import { AttachManagedComponent } from './attach-managed/attach-managed.component';
 import { ClientAppsComponent } from './client-apps/client-apps.component';
 import { ClientInfoComponent } from './client-info/client-info.component';
 import { ConfigFilesBrowserComponent } from './config-files-browser/config-files-browser.component';
@@ -49,6 +49,8 @@ import { httpInterceptorProviders } from './interceptors';
 import { LoginComponent } from './login/login.component';
 import { LogoComponent } from './logo/logo.component';
 import { MainNavComponent } from './main-nav/main-nav.component';
+import { ManagedServerDetailComponent } from './managed-server-detail/managed-server-detail.component';
+import { ManagedServersComponent } from './managed-servers/managed-servers.component';
 import { MasterCleanupComponent } from './master-cleanup/master-cleanup.component';
 import { MessageboxComponent } from './messagebox/messagebox.component';
 import { ProcessConfigurationComponent } from './process-configuration/process-configuration.component';
@@ -75,8 +77,6 @@ import { ThemeChooserComponent } from './theme-chooser/theme-chooser.component';
 import { UpdateBrowserComponent } from './update-browser/update-browser.component';
 import { UpdateCardComponent } from './update-card/update-card.component';
 import { UpdateDialogComponent } from './update-dialog/update-dialog.component';
-import { LocalServersComponent } from './local-servers/local-servers.component';
-import { LocalServerDetailComponent } from './local-server-detail/local-server-detail.component';
 
 export function loadAppConfig(cfgService: ConfigService) {
   return () => cfgService.load();
@@ -144,9 +144,9 @@ export function loadAppConfig(cfgService: ConfigService) {
     InstanceVersionHistoryCardComponent,
     ConnectionLostComponent,
     AttachCentralComponent,
-    AttachLocalComponent,
-    LocalServersComponent,
-    LocalServerDetailComponent
+    AttachManagedComponent,
+    ManagedServersComponent,
+    ManagedServerDetailComponent
   ],
   imports: [
     BrowserModule,

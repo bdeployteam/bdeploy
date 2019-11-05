@@ -22,11 +22,11 @@ export class InstanceService {
     return this.http.get<InstanceDto[]>(url);
   }
 
-  public createInstance(instanceGroupName: string, instance: InstanceConfiguration, localServer: string) {
+  public createInstance(instanceGroupName: string, instance: InstanceConfiguration, managedServers: string) {
     const url: string = this.buildGroupUrl(instanceGroupName);
     this.log.debug('createInstance: ' + url);
     const options = {
-      params: new HttpParams().set('localServer', localServer),
+      params: new HttpParams().set('managedServers', managedServers),
     };
     return this.http.put(url, instance, options);
   }
@@ -42,7 +42,7 @@ export class InstanceService {
     instanceName: string,
     instance: InstanceConfiguration,
     nodeList: InstanceNodeConfigurationListDto,
-    localServer: string,
+    managedServers: string,
     expectedTag: string,
   ) {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceName);
@@ -52,7 +52,7 @@ export class InstanceService {
       nodeDtos: nodeList ? nodeList.nodeConfigDtos : null,
     };
     const options = {
-      params: new HttpParams().set('expect', expectedTag).set('localServer', localServer),
+      params: new HttpParams().set('expect', expectedTag).set('managedServers', managedServers),
     };
     return this.http.post(url, dto, options);
   }

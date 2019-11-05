@@ -12,7 +12,7 @@
   <mat-step label="Introduction" [completed]='attachPayload' #introStep>
     <p>
       This page can be used to attach this BDeploy server to a central, controlling server. You will need to open the counterpart on the central server
-      as well to be able to drag between the two pages. The page on the central server can be found by clicking <b>Attach Local Server...</b> in the
+      as well to be able to drag between the two pages. The page on the central server can be found by clicking <b>Attach Managed Server...</b> in the
       drop down context menu of an instance group.
     </p>
     <div class='button-container'>
@@ -20,7 +20,7 @@
       <mat-spinner *ngIf='!attachPayload' diameter='24'></mat-spinner>
     </div>
   </mat-step>
-  <mat-step label="Publish Local Server" #attachStep>
+  <mat-step label="Publish Managed Server" #attachStep>
     <p>
       Drag the below card to the drop zone on the central server.
     </p>
@@ -45,7 +45,7 @@
   </mat-step>
   <mat-step label="Manual Configuration of Central Server" optional="true" #manualStep>
     <p>
-      Note that this step is only necessary if the central server cannot contact this local server (temporariliy or permanently).
+      Note that this step is only necessary if the central server cannot contact this managed server (temporariliy or permanently).
       If not even drag and drop to the central server works, click <b>Download for manual setup</b> and drag the file to the central
       server instead.
     </p>
@@ -69,7 +69,7 @@
       <ng-container *ngIf='remoteAttached'>
         <mat-icon>check_circle_outline</mat-icon>
         <p>
-          This local server has been attached and the Instance Group <b>{{remoteAttached.name}}</b> has been added.
+          This managed server has been attached and the Instance Group <b>{{remoteAttached.name}}</b> has been added.
         </p>
         <div class='drag-container'>
           <app-instance-group-card [instanceGroup]='remoteAttached' [instanceGroupId]='remoteAttached.name'></app-instance-group-card>

@@ -61,23 +61,23 @@ export class ConfigService {
   }
 
   public tryAutoAttach(group: string, ident: AttachIdentDto): Observable<any> {
-    return this.http.put(environment.apiUrl + '/local-servers/auto-attach/' + group, ident, { headers: suppressGlobalErrorHandling(new HttpHeaders)});
+    return this.http.put(environment.apiUrl + '/managed-servers/auto-attach/' + group, ident, { headers: suppressGlobalErrorHandling(new HttpHeaders)});
   }
 
   public manualAttach(group: string, ident: AttachIdentDto): Observable<any> {
-    return this.http.put(environment.apiUrl + '/local-servers/manual-attach/' + group, ident);
+    return this.http.put(environment.apiUrl + '/managed-servers/manual-attach/' + group, ident);
   }
 
   public manualAttachCentral(ident: string): Observable<string> {
-    return this.http.put(environment.apiUrl + '/local-servers/manual-attach-central', ident, {responseType: 'text'});
+    return this.http.put(environment.apiUrl + '/managed-servers/manual-attach-central', ident, {responseType: 'text'});
   }
 
   public getCentralIdent(group: string, ident: AttachIdentDto): Observable<string> {
-    return this.http.post(environment.apiUrl + '/local-servers/central-ident/' + group, ident, { responseType: 'text' });
+    return this.http.post(environment.apiUrl + '/managed-servers/central-ident/' + group, ident, { responseType: 'text' });
   }
 
-  public getLocalServers(group: string): Observable<AttachIdentDto[]> {
-    return this.http.get<AttachIdentDto[]>(environment.apiUrl + '/local-servers/list/' + group);
+  public getManagedServers(group: string): Observable<AttachIdentDto[]> {
+    return this.http.get<AttachIdentDto[]>(environment.apiUrl + '/managed-servers/list/' + group);
   }
 
   public getServerForInstance(group: string, instance: string, tag: string): Observable<AttachIdentDto> {
@@ -85,18 +85,18 @@ export class ConfigService {
     if (tag) {
       p.set('instanceTag', tag);
     }
-    return this.http.get<AttachIdentDto>(environment.apiUrl + '/local-servers/controlling-server/' + group + '/' + instance, {params: p});
+    return this.http.get<AttachIdentDto>(environment.apiUrl + '/managed-servers/controlling-server/' + group + '/' + instance, {params: p});
   }
 
-  public getInstancesForServer(group: string, server: string): Observable<InstanceConfiguration[]> {
-    return this.http.get<InstanceConfiguration[]>(environment.apiUrl + '/local-servers/controlled-instances/' + group + '/' + server);
+  public getInstancesForManagedServer(group: string, server: string): Observable<InstanceConfiguration[]> {
+    return this.http.get<InstanceConfiguration[]>(environment.apiUrl + '/managed-servers/controlled-instances/' + group + '/' + server);
   }
 
-  public deleteLocalServer(group: string, server: string): Observable<any> {
-    return this.http.post(environment.apiUrl + '/local-servers/delete-server/' + group + '/' + server, server);
+  public deleteManagedServer(group: string, server: string): Observable<any> {
+    return this.http.post(environment.apiUrl + '/managed-servers/delete-server/' + group + '/' + server, server);
   }
 
-  public minionsOfLocalServer(group: string, server: string): Observable<{[key: string]: NodeStatus}> {
-    return this.http.get<{[key: string]: NodeStatus}>(environment.apiUrl + '/local-servers/minions/' + group + '/' + server);
+  public minionsOfManagedServer(group: string, server: string): Observable<{[key: string]: NodeStatus}> {
+    return this.http.get<{[key: string]: NodeStatus}>(environment.apiUrl + '/managed-servers/minions/' + group + '/' + server);
   }
 }

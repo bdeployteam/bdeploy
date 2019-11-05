@@ -54,7 +54,7 @@ export class InstanceAddEditComponent implements OnInit {
   });
 
   public formGroup = this.formBuilder.group({
-    localServer: this.formBuilder.group({
+    managedServer: this.formBuilder.group({
       name: ['']
     })
   });
@@ -104,7 +104,7 @@ export class InstanceAddEditComponent implements OnInit {
       });
       this.config.getServerForInstance(this.groupParam, this.uuidParam, null).subscribe(r => {
         if (r) {
-          this.localServerControl.setValue(r.name);
+          this.managedServerControl.setValue(r.name);
         }
       });
     }
@@ -127,12 +127,12 @@ export class InstanceAddEditComponent implements OnInit {
     if (!this.isCreate()) {
       this.productNameControl.disable();
       this.productTagControl.disable();
-      this.localServerControl.disable();
+      this.managedServerControl.disable();
     }
 
     if (this.isCentral()) {
-      this.localServerControl.setValidators([Validators.required]);
-      this.config.getLocalServers(this.groupParam).subscribe(r => {
+      this.managedServerControl.setValidators([Validators.required]);
+      this.config.getManagedServers(this.groupParam).subscribe(r => {
         this.serverNames = r.map(e => e.name).sort();
       });
     }
@@ -189,7 +189,7 @@ export class InstanceAddEditComponent implements OnInit {
 
     if (this.isCreate()) {
       this.instanceService
-        .createInstance(this.groupParam, instance, this.localServerControl.value)
+        .createInstance(this.groupParam, instance, this.managedServerControl.value)
         .pipe(finalize(() => (this.loading = false)))
         .subscribe(result => {
           this.clonedInstance = instance;
@@ -198,7 +198,7 @@ export class InstanceAddEditComponent implements OnInit {
         });
     } else {
       this.instanceService
-        .updateInstance(this.groupParam, this.uuidParam, instance, null, this.localServerControl.value, this.expectedVersion.key.tag)
+        .updateInstance(this.groupParam, this.uuidParam, instance, null, this.managedServerControl.value, this.expectedVersion.key.tag)
         .pipe(finalize(() => (this.loading = false)))
         .subscribe(result => {
           this.clonedInstance = instance;
@@ -228,8 +228,8 @@ export class InstanceAddEditComponent implements OnInit {
     return this.instanceFormGroup.get('product.tag');
   }
 
-  get localServerControl() {
-    return this.formGroup.get('localServer.name');
+  get managedServerControl() {
+    return this.formGroup.get('managedServer.name');
   }
 
   openOverlay(relative: MatButton, template: TemplateRef<any>) {
