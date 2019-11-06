@@ -169,6 +169,11 @@ public class InstanceImportExportHelper {
             inmBuilder.setInstanceNodeConfiguration(nodeCfg);
             inmBuilder.setMinionName(node.getKey());
 
+            // if there is already a version, we need to align the inm version to the target version
+            if (latest.isPresent()) {
+                inmBuilder.setKey(new Manifest.Key(nodeCfg.uuid + "/" + node.getKey(), Long.toString(latest.get() + 1)));
+            }
+
             imfb.addInstanceNodeManifest(node.getKey(), inmBuilder.insert(target));
         }
 
