@@ -4,7 +4,7 @@ Cypress.Commands.add('createInstance', function(group, name, version = '2.0.0') 
   cy.get('[data-cy=group-' + group + ']').first().click();
 
   // wait until the progress spinner disappears
-  cy.get('mat-progress-spinner').should('not.exist')
+  cy.waitUntilContentLoaded();
 
   // attention: the button contains 'add' not '+' (mat-icon('add') = '+')
   cy.contains('button', 'add').click();
@@ -48,8 +48,7 @@ Cypress.Commands.add('deleteInstance', function(group, instanceUuid) {
   cy.get('mat-dialog-container').contains('button', 'OK').click();
 
   // wait for the dialog to disappear and the page to reload
-  cy.wait('@reload')
-  cy.get('mat-progress-spinner').should('not.exist')
+  cy.waitUntilContentLoaded();
 
   // now NO trace of the UUID should be left.
   cy.get('body').contains(instanceUuid).should('not.exist');
@@ -58,7 +57,7 @@ Cypress.Commands.add('deleteInstance', function(group, instanceUuid) {
 Cypress.Commands.add('gotoInstance', function(groupName, instanceUuid) {
    cy.visit('/');
    cy.get('[data-cy=group-' + groupName + ']').first().click();
-   cy.get('mat-progress-spinner').should('not.exist')
+   cy.waitUntilContentLoaded();
    cy.get('[data-cy=instance-' + instanceUuid + ']').first().click();
 })
 
@@ -69,19 +68,25 @@ Cypress.Commands.add('installAndActivate', {prevSubject: true}, (subject) => {
   cy.wrap(subject).clickContextMenuItem('Install')
 
   // wait for progress and the icon to appear
-  cy.wrap(subject).find('mat-progress-spinner').should('not.exist')
+  cy.wrap(subject).waitUntilContentLoaded()
   cy.wrap(subject).contains('mat-icon', 'check_circle_outline').should('exist')
+
+  // activate the installed instance version
+  return cy.wrap(subject).activate();
+})
+
+Cypress.Commands.add('activate', {prevSubject: true}, (subject) => {
+  cy.get('mat-loading-spinner').should('not.exist');
 
   // activate the installed instance version
   cy.wrap(subject).clickContextMenuItem('Activate')
 
   // wait for progress and the icon to appear
-  cy.wrap(subject).find('mat-progress-spinner').should('not.exist')
+  cy.wrap(subject).waitUntilContentLoaded()
   cy.wrap(subject).contains('mat-icon', 'check_circle').should('exist')
 
   // no error should have popped up.
   cy.get('snack-bar-container').should('not.exist')
-
   return cy.wrap(subject);
 })
 

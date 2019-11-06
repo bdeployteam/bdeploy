@@ -5,9 +5,6 @@ describe('BHive Browser Tests', function() {
 
   it('Check user manifest in default hive', function() {
     cy.visit('/');
-    cy.get('input[hint=Filter]').type('Test');
-    cy.get('[data-cy=group-Test]').should('have.length', 1).click();
-
     cy.visit('/#/hive/browser')
 
     // wait for at least one row, meaning the pre-selected hive has been loaded.
@@ -16,12 +13,12 @@ describe('BHive Browser Tests', function() {
     // all in one chain to re-try the click on the drop down if it does not open.
     cy.get('mat-select[placeholder="Select a Hive"]').should('have.length', 1).click().get('body').contains('mat-option', 'default').should('exist').click();
 
-    cy.get('td:contains("users/admin")').should('be.visible').and('have.length.greaterThan', 1).contains('td', 'users/admin:1').click();
+    cy.get('td:contains("users/admin")').should('be.visible').and('have.length.gte', 1).contains('td', 'users/admin:1').click();
     cy.get('td:contains("user.json")').should('have.length', 1);
 
     cy.contains('mat-chip', 'home').click();
 
-    cy.get('td:contains("users/admin")').should('be.visible').and('have.length.greaterThan', 1)
+    cy.get('td:contains("users/admin")').should('be.visible').and('have.length.gte', 1)
   })
 
   it('Check download of manifest', function() {
@@ -33,7 +30,7 @@ describe('BHive Browser Tests', function() {
     })
   })
 
-  it('Check donwload of user json', function() {
+  it('Check download of user json', function() {
     cy.contains('td', 'users/admin').click();
     cy.contains('td', 'user.json').siblings().contains('mat-icon', 'cloud_download').downloadBlobFileShould(resp => {
       const json = JSON.parse(resp);

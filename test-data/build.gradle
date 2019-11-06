@@ -44,39 +44,8 @@ void createTasks(String prodNum) {
         inputs.dir file("${projectDir}/test-product-${prodNum}")
     }
 
-    task "product${prodNum}Hive" (type: JavaExec) {
-        doFirst {
-            delete "${buildDir}/prod${prodNum}hive"
-        }
-        args = ["product", "--hive=${buildDir}/prod${prodNum}hive", "--import=${projectDir}/test-product-${prodNum}"]
-        main = project(":minion").mainClassName
-        classpath = project(":minion").sourceSets.main.runtimeClasspath
-        inputs.dir file("${projectDir}/test-product-${prodNum}")
-        outputs.dir file("${buildDir}/prod${prodNum}hive")
-    }
-
-    task "product${prodNum}HiveZip" (type: Zip) {
-        from tasks["product${prodNum}Hive"]
-        archiveName "test-product-${prodNum}-hive.zip"
-        destinationDir file("${buildDir}/distribution/")
-    }
-
-    task "importProduct${prodNum}" (type: JavaExec, dependsOn: createInstanceGroup) {
-        doFirst {
-            delete "${buildDir}/pushTmp${prodNum}"
-        }
-        outputs.upToDateWhen { false }
-        args = ["product", "--hive=${buildDir}/pushTmp${prodNum}", "--import=${projectDir}/test-product-${prodNum}", "--push"]
-    }
-
-    jacoco {
-        applyTo tasks["importProduct${prodNum}"]
-        applyTo tasks["product${prodNum}Hive"]
-    }
-
     build {
         dependsOn "product${prodNum}Zip"
-        dependsOn "product${prodNum}HiveZip"
     }
 }
 
@@ -131,10 +100,6 @@ task addTestBDeployUser(type: JavaExec, dependsOn: startTestBDeploy) {
 
 task checkTestBDeploy(type: JavaExec, dependsOn: addTestBDeployUser) {
     args = [ "remote-master", "--minions" ]
-}
-
-task createInstanceGroup(type: JavaExec, dependsOn: checkTestBDeploy) {
-    args = [ "remote-group", "--create=Test", "--description=Automatic Test" ]
 }
 
 // now define the dynamic tasks for each product
@@ -365,14 +330,12 @@ jacoco {
     applyTo startTestBDeploy
     applyTo addTestBDeployUser
     applyTo checkTestBDeploy
-    applyTo createInstanceGroup
 }
 
 // now all tasks that depend on any of the generated tasks
 task setupDemoServer() {
     dependsOn(
-        importProduct1,
-        importProduct2
+        checkTestBDeploy
     )
 
     doFirst() {

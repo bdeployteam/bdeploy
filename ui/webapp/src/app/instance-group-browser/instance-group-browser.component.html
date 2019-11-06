@@ -6,8 +6,11 @@
     <mat-icon matSuffix>search</mat-icon>
   </mat-form-field>
 </mat-toolbar>
+<div *ngIf="groupsLoading || recentLoading" class="loading-container">
+  <mat-progress-spinner [mode]="'indeterminate'" class="loading-spinner" mode></mat-progress-spinner>
+</div>
 
-<div *ngIf="displayRecent$ | async">
+<div *ngIf="displayRecent | async">
     <p class="list-heading">Recently used:</p>
     <mat-grid-list cols="{{columns}}" rowHeight="200px" gutterSize="10px">
       <mat-grid-tile *ngFor="let recentGroup of filterRecent(recent) | slice:0:columns">

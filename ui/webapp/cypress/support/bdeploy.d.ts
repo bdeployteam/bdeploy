@@ -7,7 +7,35 @@ declare namespace Cypress {
     login();
 
     /**
-     * Create a new instance in the 'Test' instance group
+     * Creates a new instance group with the given name.
+     * @param group the name of the instance group to create
+     */
+    createInstanceGroup(group: string);
+
+    /**
+     * Uploads the given product into the given instance group
+     * @param group the name of the instance group
+     * @param product the name of the ZIP archive as stored in the fixtures folder
+     */
+    uploadProductIntoGroup(group: string, product: string);
+
+    /**
+     * Verify that the given product version exists
+     * @param group the name of the instance group
+     * @param productName the name of the product as displayed in the ui
+     * @param productId the internal ID of the product
+     * @param version the expected product version
+     */
+    verifyProductVersion(group:string, productName:string, productId: string, version: string);
+
+    /**
+     * Delete the instance group with the given name.
+     * @param group the name of the instance group to delete
+     */
+    deleteInstanceGroup(group: string);
+
+    /**
+     * Create a new instance in the given instance group
      * @param group the name of the instance group to create into.
      * @param name the name of the instance to create
      * @returns the UUID of the created instance as string
@@ -49,6 +77,11 @@ declare namespace Cypress {
      * Chained off an instance version card, will install and activate this instance version.
      */
     installAndActivate(): Chainable<Subject>;
+
+        /**
+     * Chained off an instance version card, will activate this instance version.
+     */
+    activate(): Chainable<Subject>;
 
     /**
      * Adds the named optional parameter in the given panel and sets its value.
@@ -97,5 +130,10 @@ declare namespace Cypress {
      * @param filename the name of the target file in the cypress/fixtures directory.
      */
     downloadFile(filename: string);
+
+    /**
+     * Waits until the content of the page is loaded.
+     */
+    waitUntilContentLoaded();
   }
 }

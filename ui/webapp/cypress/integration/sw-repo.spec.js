@@ -7,8 +7,8 @@ describe('Software Repository Tests', () => {
 
   it('Create Software Repository', () => {
     cy.visit('/#/softwarerepo/browser');
+    cy.waitUntilContentLoaded();
 
-    cy.get('mat-progress-spinner').should('not.exist');
     cy.contains('button', 'add').click();
 
     cy.get('input[placeholder^="Software Repository name"]').type(repoName);

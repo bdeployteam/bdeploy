@@ -18,3 +18,11 @@
 .fill-space {
   flex: 1 0 auto;
 }
+
+.loading-container {
+  flex: 1 0 auto;
+  flex-direction: row;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

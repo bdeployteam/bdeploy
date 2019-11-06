@@ -6,9 +6,18 @@ describe('Instance Tests', function () {
   })
 
   /**
-   * Creates a new instance and sets the instanceUuid variable to the resulting UUID
+   * Creates a new instance group and uploads a demo product
    */
-  it('Create a new instance', function () {
+  it('Create a new group', function () {
+    cy.createInstanceGroup('Test');
+    cy.uploadProductIntoGroup('Test', 'test-product-1-direct.zip');
+    cy.uploadProductIntoGroup('Test', 'test-product-2-direct.zip');
+  })
+
+  /**
+   * Creates a new instance within the previously created group.
+   */
+  it('Create a instance', function () {
     cy.createInstance('Test', 'CreateInstanceTest').then(uuid => {
       instanceUuid = uuid;
 
@@ -21,6 +30,8 @@ describe('Instance Tests', function () {
    */
   it('Configure server process', function () {
     cy.visit('/#/instance/browser/Test')
+    cy.waitUntilContentLoaded();
+
     cy.get('mat-card-subtitle').contains(instanceUuid).click();
 
     cy.get('app-instance-group-logo').parent().clickContextMenuItem('Configure Applications...');
@@ -163,10 +174,11 @@ describe('Instance Tests', function () {
   })
 
   /**
-   * Delete the instance with the well-known UUID
+   * Delete the instance and the group
    */
   it('Delete the instance', function () {
-    cy.deleteInstance('Test', instanceUuid)
+    cy.deleteInstance('Test', instanceUuid);
+    cy.deleteInstanceGroup('Test');
   })
 
   it('Cleanup instance group', function() {

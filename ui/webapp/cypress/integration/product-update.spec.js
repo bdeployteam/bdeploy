@@ -1,4 +1,5 @@
 describe('Product Tests', () => {
+  var instanceGroupName = 'Test-Group-' + new Date().getTime();
   var instanceUuid;
 
   beforeEach(() => {
@@ -6,10 +7,25 @@ describe('Product Tests', () => {
   });
 
   /**
+   * Create the Instance Group
+   */
+  it('Creates an instance group', function() {
+    cy.createInstanceGroup(instanceGroupName);
+  })
+
+  /**
+   * Upload a Product
+   */
+  it('Uploads products', function() {
+    cy.uploadProductIntoGroup(instanceGroupName, 'test-product-1-direct.zip');
+    cy.uploadProductIntoGroup(instanceGroupName, 'test-product-2-direct.zip');
+  })
+
+  /**
    * Creates a new instance and sets the instanceUuid variable to the resulting UUID
    */
   it('Create a new instance', function () {
-    cy.createInstance('Test', 'ProductUpdateTest', '1.0.0').then(uuid => {
+    cy.createInstance(instanceGroupName, 'ProductUpdateTest', '1.0.0').then(uuid => {
       instanceUuid = uuid;
 
       cy.get('body').contains(instanceUuid).should('exist');
@@ -21,7 +37,7 @@ describe('Product Tests', () => {
    * (copy from instance.spec.js)
    */
   it('Configure server process', function () {
-    cy.visit('/#/instance/browser/Test')
+    cy.visit('/#/instance/browser/' + instanceGroupName)
     cy.get('mat-card-subtitle').contains(instanceUuid).click();
 
     cy.get('app-instance-group-logo').parent().clickContextMenuItem('Configure Applications...');
@@ -111,6 +127,7 @@ describe('Product Tests', () => {
    * Delete the instance with the well-known UUID
    */
   it('Delete the instance', function () {
-    cy.deleteInstance('Test', instanceUuid)
+    cy.deleteInstance(instanceGroupName, instanceUuid)
+    cy.deleteInstanceGroup(instanceGroupName)
   })
 })
