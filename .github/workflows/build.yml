@@ -24,7 +24,7 @@ jobs:
 
     - name: Build and Test
       if: matrix.os != 'macos-latest'
-      run: ./gradlew --stacktrace clean build releaseTest -PrecordCypress -Dtestlogger.theme=plain-parallel
+      run: ./gradlew --stacktrace clean build releaseTest -PrecordCypress '-Dtestlogger.theme=plain-parallel'
 
     - name: Build and Test (Mac)
       if: matrix.os == 'macos-latest'
