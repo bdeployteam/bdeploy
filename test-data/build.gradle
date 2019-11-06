@@ -71,12 +71,22 @@ void setupBDeployJavaExec(JavaExec je) {
     setupBDeployRemoteEnv(je, testServerRoot)
 }
 
-task initTestBDeploy(type: JavaExec) {
+task initTestBDeploy(type: JavaExec ) {
+    def taskName = "";
+    if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+        taskName = "win64DistZip"
+    } else if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
+        taskName = "linux64DistZip"
+    } else if (org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
+        taskName = "mac64DistZip"
+    }
+    dependsOn ':minion:'+taskName
+
     doFirst() {
         delete "${testServerRoot}"
     }
 
-    args = [ "init", "--port=${testServerPort}", "--dist=ignore" ]
+    args = [ "init", "--port=${testServerPort}", "--dist="+project(':minion').tasks[taskName].outputs.files[0] ]
 }
 
 task triggerStopBDeploy() {

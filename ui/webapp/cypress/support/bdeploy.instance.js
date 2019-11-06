@@ -12,7 +12,6 @@ Cypress.Commands.add('createInstance', function(group, name, version = '2.0.0') 
   // do "something"/"a check" before typing, some times we got "st Instance..." or "est Instance..." instead of "Test Instance..."
   // looks as if typing starts before angular is ready and angular resets the input?
   cy.contains('button', 'SAVE').should('exist').and('be.disabled');
-
   cy.get('[placeholder=Name]').type(name)
   cy.get('[placeholder=Description]').type('Test Instance for automated test')
 
