@@ -8,7 +8,8 @@ Cypress.Commands.add('createInstanceGroup', function(name) {
   cy.contains('button', 'add').click();
 
   cy.contains('button', 'SAVE').should('exist').and('be.disabled');
-  cy.get('input[placeholder^="Instance group name"]').type(name);
+  cy.get('input[placeholder^="Instance group name"]').should('exist').click();
+  cy.get('input[placeholder^="Instance group name"]').should('exist').and('have.focus').type(name);
   cy.get('input[placeholder=Description]').type(name);
 
   cy.fixture('bdeploy.png').then(fileContent => {
