@@ -36,6 +36,8 @@ describe('Creates screenshots for the user documentation', () => {
 
     // Create instance group
     cy.contains('button', 'add').click();
+
+    cy.contains('button', 'SAVE').should('exist').and('be.disabled');
     cy.get('input[placeholder^="Instance group name"]').type('Demo');
     cy.get('input[placeholder=Description]').type('Demo Instance Group');
     cy.fixture('bdeploy.png').then(fileContent => {
@@ -44,10 +46,10 @@ describe('Creates screenshots for the user documentation', () => {
     cy.get('.logo-img').should('exist');
     cy.screenshot('BDeploy_Create_IG');
     cy.contains('button', 'SAVE').click();
-    cy.waitUntilContentLoaded();
 
     // Newly created instance group
     cy.get('[data-cy=group-Demo]').should('exist');
+    cy.waitUntilContentLoaded();
     cy.screenshot('BDeploy_Demo_IG');
 
     // Open instance page
@@ -104,6 +106,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.contains('a', 'Create Instance').click();
 
     // Create new instance
+    cy.contains('button', 'SAVE').should('exist').and('be.disabled');
     cy.get('[placeholder=Name]').type('Demo Instance');
     cy.get('[placeholder=Purpose]').click();
     cy.get('mat-option').contains('DEVELOPMENT').click();
@@ -367,12 +370,9 @@ describe('Creates screenshots for the user documentation', () => {
     cy.visit('/#/systemsoftware');
 
     // Available software
-    cy.waitUntilContentLoaded();
     cy.contains('System Software').should('exist');
-    cy.screenshot('BDeploy_System_No_Launcher');
-
-    // TODO: Upload BDeploy version
-    // TODO: Upload launcher
+    cy.get('mat-card-content').should('be.visible').should('have.length', 2)
+    cy.screenshot('BDeploy_System_With_Launcher');
   });
 
   // Capture Manual Cleanup
