@@ -30,11 +30,11 @@ You can use the *Manual Cleanup* page from the main menu to trigger a manual cle
 | Target
 | Description
 
-| *Instances* with _Auto Uninstall_ enabled
-| Uninstall *Instance Versions* that are older than the activated and the previously activated *Instance Version*.
+| *Instances* with _Auto Uninstallation_ enabled
+| If the option _Automatic Uninstallation_ is enabled on an *Instance*, *Instance Versions* that are older than the activated and the previously activated *Instance Version* are uninstalled automatically.
 
-| *Instance Groups* with _Auto Delete_ enabled
-| Delete *Product Versions* that are older than the oldest *Product Version* in use by an installed *Instance Version*
+| *Instance Groups* with _Automatic Cleanup_ enabled
+| If the option _Auto Cleanup_ is enabled on an *Instance Group*, old *Product Versions* that are no longer in use by *Instances* of this *Instance Group* are deleted automatically. To avoid that a *Product* vanishes completely, the very latest *Product Version* always remains.
 
 | Slave
 | Delete *Manifests* that are not known by the master

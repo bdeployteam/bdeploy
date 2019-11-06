@@ -20,16 +20,18 @@
         <mat-grid-tile>
           <ng-template #infoPopup>
             <mat-card class="info-card">
-              <div class="mat-title">Automatically delete unused products</div>
+              <div class="mat-title">Automatically cleanup unused product versions</div>
               <mat-card-content>
-                Enables automatic deletion of old product versions that<br>
-                are no longer used by instances of this instance group.
+                If this option is enabled, old product versions that are <br>
+                no longer in use by instances of this instance Group <br>
+                are deleted automatically. To avoid that a product vanishes<br>
+                completely, the very latest product version always remains.                
               </mat-card-content>
             </mat-card>
           </ng-template>
           <div class="boolean-param-field">
             <mat-slide-toggle class="boolean-param-widget" formControlName="autoDelete"></mat-slide-toggle>
-            <label class="boolean-param-label">Automatically delete unused products</label>
+            <label class="boolean-param-label">Automatic Cleanup</label>
           </div>
           <div class="icons">
             <button mat-icon-button type="button" #infoButton (click)="openOverlay(infoButton, infoPopup)">
