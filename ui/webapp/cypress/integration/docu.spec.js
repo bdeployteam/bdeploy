@@ -38,7 +38,8 @@ describe('Creates screenshots for the user documentation', () => {
     cy.contains('button', 'add').click();
 
     cy.contains('button', 'SAVE').should('exist').and('be.disabled');
-    cy.get('input[placeholder^="Instance group name"]').type('Demo');
+    cy.get('input[placeholder^="Instance group name"]').should('be.visible').click();
+    cy.get('input[placeholder^="Instance group name"]').should('be.visible').type('Demo');
     cy.get('input[placeholder=Description]').type('Demo Instance Group');
     cy.fixture('bdeploy.png').then(fileContent => {
       cy.get('input[type=file]').upload({ fileContent: fileContent, fileName: 'bdeploy.png', mimeType: 'image/png' });
@@ -107,7 +108,8 @@ describe('Creates screenshots for the user documentation', () => {
 
     // Create new instance
     cy.contains('button', 'SAVE').should('exist').and('be.disabled');
-    cy.get('[placeholder=Name]').type('Demo Instance');
+    cy.get('[placeholder=Name]').should('be.visible').click();
+    cy.get('[placeholder=Name]').should('be.visible').type('Demo Instance');
     cy.get('[placeholder=Purpose]').click();
     cy.get('mat-option').contains('DEVELOPMENT').click();
     cy.get('[placeholder=Description]').type('Demo Instance');
@@ -115,6 +117,8 @@ describe('Creates screenshots for the user documentation', () => {
     cy.get('mat-option').contains('Demo Product').click();
     cy.get('[placeholder=Version]').click();
     cy.get('mat-option').contains('2.0.0').click();
+    cy.get('mat-option').should('not.be.visible');
+    cy.wait(250);
     cy.screenshot('BDeploy_Instance_Create');
 
     // Save instance
@@ -133,6 +137,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.get('mat-card-subtitle').first().click();
     cy.waitUntilContentLoaded();
     cy.get('app-instance-group-logo').parent().find('button').contains('more_vert').click();
+    cy.wait(250);
     cy.screenshot('BDeploy_Instance_Menu');
 
     // Configure Applications
@@ -145,6 +150,7 @@ describe('Creates screenshots for the user documentation', () => {
     })
 
     cy.getApplicationConfigCard('master', 'Server Application').contains('more_vert').click();
+    cy.wait(250);
     cy.screenshot('BDeploy_DnD_Applications');
 
     // Process Configuration
@@ -156,6 +162,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.contains('mat-expansion-panel', "Sleep Configuration").as('panel');
     cy.get('@panel').click();
     cy.get('@panel').contains('button', 'Manage Optional').click();
+    cy.wait(250);
     cy.screenshot('BDeploy_Process_Optional_Parameters');
 
     cy.get('[placeholder=Filter').type("Sleep Timeout");
@@ -171,13 +178,15 @@ describe('Creates screenshots for the user documentation', () => {
     cy.get('button').contains('Create new parameter').click();
     cy.get('[placeholder=Predecessor]').click();
     cy.get('mat-option').contains('Sleep Timeout').click();
+    cy.get('mat-option').should('not.be.visible');
     cy.screenshot('BDeploy_Process_Custom_Create');
     cy.get('mat-dialog-container').contains('button', 'Apply').click();
     cy.get('[placeholder=custom-param-1]').type("--customValue=Demo");
     cy.screenshot('BDeploy_Process_Custom_Value');
 
-    //Command Line Preview
+    // Command Line Preview
     cy.contains('button', 'input').click();
+    cy.wait(250);
     cy.screenshot('BDeploy_Process_Custom_Preview');
     cy.get('.cdk-overlay-backdrop').click('top', {force:true});
 
@@ -195,7 +204,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.contains('button', 'add').click();
     cy.contains('New File').should('exist');
     cy.get('[placeholder="Enter path for file"]').type('test.json');
-    cy.get('textarea').type('{{}{enter}    "json": "is great"{enter}}', {force:true});
+    cy.get('textarea').type('{{}{enter}    "json": "is great"{enter}}', { force:true });
 
     cy.screenshot('BDeploy_CfgFile_New');
     cy.get('button').contains('APPLY').click();
@@ -220,6 +229,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.get('button').contains('SAVE').click();
     cy.waitUntilContentLoaded();
     cy.getLatestInstanceVersion().contains('more_vert').click();
+    cy.wait(250);
     cy.screenshot('BDeploy_Instance_Version_Menu');
 
     // Install instance version
@@ -260,7 +270,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.contains('mat-slide-toggle','Show all').click();
     cy.contains('mat-toolbar','Instance Versions').parent().as('versionSidebar');
     cy.get('@versionSidebar').contains('app-process-status','favorite').should('be.visible');
-    cy.get('@versionSidebar').screenshot('BDeploy_Tutorial_Process_Versions', { padding: 10, clip: { x: 0, y: 0, width: 370, height: 500  }})
+    cy.get('@versionSidebar').screenshot('BDeploy_Tutorial_Process_Versions', { padding: 10, clip: { x: 0, y: 0, width: 380, height: 500  }})
     cy.getApplicationConfigCard('master','Server Application').click();
 
     // Wait until the process crashes
@@ -305,17 +315,21 @@ describe('Creates screenshots for the user documentation', () => {
     cy.getApplicationConfigCard('master','Server Application').click();
     cy.contains('Process Control').should('exist');
     cy.contains('button','play_arrow').should('be.enabled').click();
+    cy.wait(250);
     cy.screenshot('BDeploy_Process_Manual_Confirm');
     cy.get('app-process-start-confirm').get('input').type('Server Application');
     cy.contains('button','Start').click();
 
     // Process Output
+    cy.wait(2000); // this is required here to give the process time to start. otherwise the out.txt does not yet exist
     cy.contains('button','message').click();
+    cy.contains('Got some text').should('be.visible');
     cy.screenshot('BDeploy_Process_Output');
     cy.get('.cdk-overlay-backdrop').click('top', {force:true});
 
     // Process Listing
     cy.get('button').contains('settings').click();
+    cy.wait(250);
     cy.screenshot('BDeploy_Process_List');
     cy.get('.cdk-overlay-backdrop').click('top', {force:true});
 
@@ -337,6 +351,7 @@ describe('Creates screenshots for the user documentation', () => {
 
     cy.contains('Instance Group: Demo').should('exist');
     cy.waitUntilContentLoaded();
+    cy.wait(250);
     cy.screenshot('BDeploy_Client_Download_Page');
   });
 
@@ -348,7 +363,9 @@ describe('Creates screenshots for the user documentation', () => {
     // Add new repository
     cy.contains('Software Repositories').should('exist');
     cy.contains('button', 'add').click();
-    cy.get('input[placeholder^="Software Repository name"]').type('External');
+    cy.contains('button', 'SAVE').should('exist').and('be.disabled');
+    cy.get('input[placeholder^="Software Repository name"]').should('be.visible').click();
+    cy.get('input[placeholder^="Software Repository name"]').should('be.visible').type('External');
     cy.get('input[placeholder=Description]').type('External Software Repository');
     cy.get('button').contains('SAVE').click();
     cy.waitUntilContentLoaded();
@@ -358,10 +375,30 @@ describe('Creates screenshots for the user documentation', () => {
     cy.contains('mat-card-title', 'External').click();
     cy.waitUntilContentLoaded();
 
-    // TODO: Upload external software
-    cy.screenshot('BDeploy_SWRepo_Ext_Softwares');
+    // Upload external software
+    cy.contains('button', 'cloud_upload').click();
+    cy.get('mat-dialog-container').within(() => {
+      cy.fixture('external-software-hive.zip').then(zip => {
+        cy.get('input[type=file]').upload({
+          fileName: 'external-software-hive.zip',
+          fileContent: zip,
+          mimeType: 'application/zip',
+        });
+        cy.contains('button', 'Upload').click();
+        cy.get('td:contains("Upload successful")').should('have.length', 1);
+        cy.contains('button', 'Close').click();
+      });
+    });
 
-    // TODO: Capture detail of external software
+    // Take screenshot of detail page
+    cy.waitUntilContentLoaded();
+    cy.get('mat-card-title').should('have.length.gte', 2);
+    cy.screenshot('BDeploy_SWRepo_Ext_Software');
+
+    // Capture detail of external software
+    cy.contains('mat-card-title','external/software/windows').click();
+    cy.get('mat-drawer').should('have.css', 'transform', 'none');
+    cy.screenshot('BDeploy_SWRepo_Ext_Software_Details');
   });
 
   // Capture System Software
@@ -372,6 +409,7 @@ describe('Creates screenshots for the user documentation', () => {
     // Available software
     cy.contains('System Software').should('exist');
     cy.get('mat-card-content').should('be.visible').should('have.length', 2)
+    cy.waitUntilContentLoaded();
     cy.screenshot('BDeploy_System_With_Launcher');
   });
 

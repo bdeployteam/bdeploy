@@ -32,8 +32,8 @@ Behind each parameter there is a small popup that can contain a short descriptio
 
 *Optional Parameters* can be selected for each group using the btn:[Manage Optional Parameters] dialog (available only if *Optional Parameters* are available) and then configured like other parameters.
 
-image::images/BDeploy_Process_Optional_parameters.png[Manage Optional Parameter(s),align=center, width=480, link="images/BDeploy_Process_Optional_parameters.png"]
-image::images/BDeploy_Process_Optional_configured.png[Configuring Optional Parameter(s), align=center, width=480, link="images/BDeploy_Process_Optional_configured.png"]
+image::images/BDeploy_Process_Optional_Parameters.png[Manage Optional Parameter(s),align=center, width=480, link="images/BDeploy_Process_Optional_Parameters.png"]
+image::images/BDeploy_Process_Optional_Configured.png[Configuring Optional Parameter(s), align=center, width=480, link="images/BDeploy_Process_Optional_Configured.png"]
 
 ===== Custom Parameters
 

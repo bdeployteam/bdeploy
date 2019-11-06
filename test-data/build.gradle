@@ -36,7 +36,7 @@ int randomServerPort() {
     }
 }
 
-void createTasks(String prodNum) {
+void createProductTasks(String prodNum) {
     task "product${prodNum}Zip" (type: Zip) {
         from fileTree(dir: "${projectDir}/test-product-${prodNum}")
         archiveName "test-product-${prodNum}-direct.zip"
@@ -112,9 +112,39 @@ task checkTestBDeploy(type: JavaExec, dependsOn: addTestBDeployUser) {
     args = [ "remote-master", "--minions" ]
 }
 
+// now define the dynamic tasks for each operating system
+createExternalSoftwareTasks("windows")
+createExternalSoftwareTasks("linux")
+// createExternalSoftwareTasks("mac")
+
+void createExternalSoftwareTasks(String os) {
+    def osUpper = os.substring(0,1).toUpperCase() + os.substring(1);
+    def hive = "${buildDir}/external-software-hive";
+    def source = "${projectDir}/external-software/${os}"
+    
+    task "externalSoftware${osUpper}" (type: JavaExec) {
+         args = [ "bhive", "import", "--hive=${hive}", "--source=${source}", "--manifest=external/software/${os}:v1.0.0" ]
+    }
+
+    build {
+        dependsOn "externalSoftware${osUpper}"
+    }
+}
+
+task cleanExternalSoftwareHive(type: Delete) {
+    delete "${buildDir}/external-software-hive"
+}
+
+task externalSoftwareZip(type: Zip, dependsOn: [cleanExternalSoftwareHive, externalSoftwareWindows, externalSoftwareLinux]) {
+    archiveFileName = "external-software-hive.zip"
+    destinationDir = file("${buildDir}/distribution/")
+    
+    from "${buildDir}/external-software-hive"
+}
+
 // now define the dynamic tasks for each product
-createTasks("1")
-createTasks("2")
+createProductTasks("1")
+createProductTasks("2")
 
 // now the tasks for binary (upgrade) tests
 task releaseTest() {

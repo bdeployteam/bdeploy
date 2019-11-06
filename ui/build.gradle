@@ -45,10 +45,12 @@ ext.sharedNpmLogic = { task, List<String> target ->
 }
 
 evaluationDependsOn(':test-data')
+
 task updateFixtureProducts(type: Copy) {
     def prj = project(':test-data')
     from prj.product1Zip.outputs
     from prj.product2Zip.outputs
+    from prj.externalSoftwareZip.outputs
 
     into "${webappDir}/cypress/fixtures"
 
