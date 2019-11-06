@@ -49,15 +49,15 @@ void createTasks(String prodNum) {
     }
 }
 
-void setupBDeployEnv(ProcessForkOptions options) {
+void setupBDeployEnv(ProcessForkOptions options, String testServerRoot) {
     options.environment += [
         HOSTNAME: testServerHost,
         BDEPLOY_ROOT: testServerRoot,
     ]
 }
 
-void setupBDeployRemoteEnv(ProcessForkOptions options) {
-    setupBDeployEnv(options)
+void setupBDeployRemoteEnv(ProcessForkOptions options, String testServerRoot) {
+    setupBDeployEnv(options, testServerRoot)
     options.environment += [
         BDEPLOY_REMOTE: "https://localhost:${testServerPort}/api",
         BDEPLOY_TOKENFILE: "${buildDir}/test-token.txt",
@@ -68,7 +68,7 @@ void setupBDeployRemoteEnv(ProcessForkOptions options) {
 void setupBDeployJavaExec(JavaExec je) {
     je.main = project(":minion").mainClassName
     je.classpath = project(":minion").sourceSets.main.runtimeClasspath
-    setupBDeployRemoteEnv(je)
+    setupBDeployRemoteEnv(je, testServerRoot)
 }
 
 task initTestBDeploy(type: JavaExec) {
@@ -86,7 +86,7 @@ task triggerStopBDeploy() {
 }
 
 task startTestBDeploy(type: com.github.psxpaul.task.JavaExecFork, dependsOn: initTestBDeploy) {
-    setupBDeployEnv(it)
+    setupBDeployEnv(it, testServerRoot)
     main = project(":minion").mainClassName
     classpath = project(":minion").sourceSets.main.runtimeClasspath
     args = [ "master" ]
@@ -129,14 +129,14 @@ void setupBinServerTasks(String version) {
         osName = "mac64";
     }
     def fileKey = "bdeploy-" + osName + "-" + version;
-    def binFile = new File(buildDir, "bin-dist/" + fileKey + "/bin/bdeploy")
+    def binFile = new File(buildDir, "bin-dist_${key}/" + fileKey + "/bin/bdeploy")
     if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
         binFile = file(binFile.toString() + ".bat")
     }
 
     def setupTask = { e ->
         e.executable binFile
-        setupBDeployRemoteEnv(e)
+        setupBDeployRemoteEnv(e, "${buildDir}/bin-root_${key}")
     }
 
     task "downloadBinaries_${key}" (type: Download) {
@@ -147,17 +147,17 @@ void setupBinServerTasks(String version) {
 
     task "unzipBinaries_${key}" (type: Copy, dependsOn: "downloadBinaries_${key}") {
         from zipTree(tasks["downloadBinaries_${key}"].dest)
-        into new File(buildDir, "bin-dist")
+        into new File(buildDir, "bin-dist_${key}")
 
         doFirst {
-            delete "${buildDir}/bin-dist"
+            delete "${buildDir}/bin-dist_${key}"
         }
     }
 
     task "binInitTestBDeploy_${key}" (type: Exec, dependsOn: "unzipBinaries_${key}") {
         setupTask(it)
         doFirst {
-            delete "${testServerRoot}"
+            delete "${buildDir}/bin-root_${key}"
         }
 
         args = [ "init", "--port=${testServerPort}", "--dist=ignore" ]
@@ -171,7 +171,7 @@ void setupBinServerTasks(String version) {
 
     task "binStartTestBDeploy_${key}" (type: com.github.psxpaul.task.ExecFork, dependsOn: "binInitTestBDeploy_${key}") {
         executable binFile
-        setupBDeployEnv(it)
+        setupBDeployEnv(it, "${buildDir}/bin-root_${key}")
         args = [ "master" ]
         waitForPort = testServerPort
         stopAfter = tasks["binTriggerStopBDeploy_${key}"]
@@ -221,7 +221,7 @@ void setupBinServerTasks(String version) {
 
     task "binImportTestData_${key}" (type: Exec, dependsOn: "binImportProd2_${key}") {
         setupTask(it)
-        args = [ "instance", "--importFrom=${projectDir}/bin-test-data/${version}.zip", "--hive=${testServerRoot}/storage/Test" ]
+        args = [ "instance", "--importFrom=${projectDir}/bin-test-data/${version}.zip", "--hive=${buildDir}/bin-root_${key}/storage/Test" ]
     }
 
     task "binSetupDemoServer_${key}"() {
