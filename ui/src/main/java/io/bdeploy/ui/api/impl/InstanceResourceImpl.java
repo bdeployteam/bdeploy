@@ -384,32 +384,27 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Override
     public InstanceNodeConfigurationListDto getNodeConfigurations(String instance, String versionTag) {
-        // List all manifest that are stored configured along with the target nodes
-        InstanceManifest thisIm = InstanceManifest.load(hive, instance, versionTag);
 
-        // Request a list of all nodes from the master
+        InstanceNodeConfigurationListDto result = new InstanceNodeConfigurationListDto();
+
+        // Collect node information
+        InstanceManifest thisIm = InstanceManifest.load(hive, instance, versionTag);
+        String thisMaster = ManagedMasterAssociationMetaManifest.read(hive, thisIm.getManifest());
         Map<String, InstanceNodeConfigurationDto> node2Dto = getExistingNodes(thisIm);
 
-        // Get all instance manifests in this hive
-        for (Manifest.Key instanceManifestKey : InstanceManifest.scan(hive, true)) {
-            // always only the latest is given... in case it's our own key we might be interested in another version,
-            // so explicitly reconstruct the manifest key with the correct tag in that case.
-            String rootName = InstanceManifest.getRootName(instance);
-            if (instanceManifestKey.getName().equals(rootName)) {
-                instanceManifestKey = new Manifest.Key(instanceManifestKey.getName(), thisIm.getManifest().getTag());
+        for (Key imKey : InstanceManifest.scan(hive, true)) {
+            boolean isForeign = !imKey.getName().equals(thisIm.getManifest().getName());
+            if (!isForeign) {
+                imKey = thisIm.getManifest(); // go on with requested tag (versionTag)
             }
+            String imMaster = ManagedMasterAssociationMetaManifest.read(hive, imKey);
 
-            InstanceManifest im = InstanceManifest.of(hive, instanceManifestKey);
-            boolean isForeign = !instanceManifestKey.getName().equals(thisIm.getManifest().getName());
-            if (!isForeign && !instanceManifestKey.getTag().equals(thisIm.getManifest().getTag())) {
-                // other version of myself, ignore.
+            if (thisMaster == null || thisMaster.equals(imMaster)) {
+                gatherNodeConfigurations(node2Dto, InstanceManifest.of(hive, imKey), isForeign);
             }
-
-            gatherNodeConfigurations(node2Dto, im, isForeign);
         }
 
-        InstanceNodeConfigurationListDto instanceDto = new InstanceNodeConfigurationListDto();
-        instanceDto.nodeConfigDtos.addAll(node2Dto.values());
+        result.nodeConfigDtos.addAll(node2Dto.values());
 
         // Load all available applications
         Key productKey = thisIm.getConfiguration().product;
@@ -418,12 +413,12 @@ public class InstanceResourceImpl implements InstanceResource {
             ProductManifest productManifest = ProductManifest.of(hive, productKey);
             for (Key applicationKey : productManifest.getApplications()) {
                 ApplicationManifest manifest = ApplicationManifest.of(hive, applicationKey);
-                instanceDto.applications.put(applicationKey.getName(), manifest.getDescriptor());
+                result.applications.put(applicationKey.getName(), manifest.getDescriptor());
             }
         } catch (Exception e) {
             log.warn("Cannot load product of instance version {}: {}", thisIm.getManifest(), productKey);
         }
-        return instanceDto;
+        return result;
     }
 
     private void gatherNodeConfigurations(Map<String, InstanceNodeConfigurationDto> node2Dto, InstanceManifest im,
