@@ -273,9 +273,9 @@ public class CleanupHelper {
         Comparator<String> intTagComparator = (a, b) -> Integer.compare(Integer.parseInt(a), Integer.parseInt(b));
 
         Map<String, String> oldestTag = new HashMap<>();
-        for (String iName : installedTagsMap.keySet()) {
-            Optional<String> min = installedTagsMap.get(iName).stream().min(intTagComparator);
-            oldestTag.put(iName, min.isPresent() ? min.get() : "0");
+        for (Map.Entry<String, List<String>> entry : installedTagsMap.entrySet()) {
+            Optional<String> min = entry.getValue().stream().min(intTagComparator);
+            oldestTag.put(entry.getKey(), min.isPresent() ? min.get() : "0");
         }
 
         Map<String, TreeSet<Key>> usedProductsMap = InstanceManifest.scan(hive, false).stream()

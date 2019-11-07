@@ -103,7 +103,6 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 throw new IllegalStateException("Cannot notify server of successful attachment: " + status);
             }
         } catch (Exception e) {
-            log.error("Auto-attach failed", e);
             throw new WebApplicationException("Cannot automatically attach managed server " + target.name, e);
         }
     }
@@ -133,8 +132,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         dto.config.logo = null; // later.
         self.create(dto.config);
         if (dto.logo != null) {
-            try (ByteArrayInputStream bis = new ByteArrayInputStream(dto.logo)) {
-                MultiPart mp = new MultiPart();
+            try (ByteArrayInputStream bis = new ByteArrayInputStream(dto.logo); MultiPart mp = new MultiPart();) {
                 StreamDataBodyPart bp = new StreamDataBodyPart("image", bis);
                 bp.setFilename("logo.png");
                 bp.setMediaType(new MediaType("image", "png"));

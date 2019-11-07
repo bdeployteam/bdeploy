@@ -15,9 +15,6 @@ import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 @CliName("shell")
 public class InteractiveShell extends CliTool {
 
-    public InteractiveShell() {
-    }
-
     @Override
     public void run() {
         try {

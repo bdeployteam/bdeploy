@@ -544,7 +544,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
         if ((state.nodeDtos == null || state.nodeDtos.isEmpty()) && oldConfig != null) {
             // no new node config - re-apply existing one with new tag, align redundant fields.
-            state.nodeDtos = readExistingNodeConfigs(oldConfig, rootTag, state.config);
+            state.nodeDtos = readExistingNodeConfigs(oldConfig, state.config);
         }
 
         // does NOT validate that the product exists, as it might still reside on the central server, not this one.
@@ -617,8 +617,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         }
     }
 
-    private List<InstanceNodeConfigurationDto> readExistingNodeConfigs(InstanceManifest oldConfig, String rootTag,
-            InstanceConfiguration cfg) {
+    private List<InstanceNodeConfigurationDto> readExistingNodeConfigs(InstanceManifest oldConfig, InstanceConfiguration cfg) {
         List<InstanceNodeConfigurationDto> result = new ArrayList<>();
         for (Map.Entry<String, Manifest.Key> entry : oldConfig.getInstanceNodeManifests().entrySet()) {
             InstanceNodeManifest oldInmf = InstanceNodeManifest.of(hive, entry.getValue());

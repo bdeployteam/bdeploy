@@ -143,11 +143,11 @@ public class UpdateHelper {
             tmpLaunchers = Files.createTempDirectory(tmpDir, "tmp-");
             try (DirectoryStream<Path> nestedLaunchers = Files.newDirectoryStream(launchers, "launcher-*.zip")) {
                 for (Path launcherZip : nestedLaunchers) {
-                    log.info("Importing nested update: " + launcherZip.getFileName());
+                    log.info("Importing nested update: {}", launcherZip.getFileName());
                     try {
                         result.addAll(importUpdate(launcherZip, tmpDir, hive));
                     } catch (Exception e) {
-                        log.error("Cannot import nested update package, see debug logs for more info: " + launcherZip);
+                        log.error("Cannot import nested update package, see debug logs for more info: {}", launcherZip);
                         if (log.isDebugEnabled()) {
                             log.debug("Underlying Exception: ", e);
                         }

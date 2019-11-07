@@ -4,6 +4,9 @@ import java.lang.reflect.InvocationTargetException;
 
 public class ExceptionHelper {
 
+    private ExceptionHelper() {
+    }
+
     public static String mapExceptionCausesToReason(Exception exception) {
         if (exception == null) {
             return "<unknown>";

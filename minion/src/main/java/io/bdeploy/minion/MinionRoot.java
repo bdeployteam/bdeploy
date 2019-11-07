@@ -148,21 +148,21 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     public void runPostUpdate(boolean isMaster) {
         String current = VersionHelper.readVersion();
         if (current == null || VersionHelper.UNKNOWN.equals(current)) {
-            log.debug("Skipping migration to " + current);
+            log.debug("Skipping migration to {}", current);
             return;
         }
 
         String lastMigrated = getState().fullyMigratedVersion;
         if (lastMigrated != null && lastMigrated.equals(current)) {
             // already performed migration, skip
-            log.debug("Already fully migrated to " + lastMigrated);
+            log.debug("Already fully migrated to {}", lastMigrated);
             return;
         }
 
         try {
             UpdatePackagingMigration.run(this, isMaster);
         } catch (Exception e) {
-            throw new RuntimeException("Minion update migration failed", e);
+            throw new IllegalStateException("Minion update migration failed", e);
         }
 
         // if all migrations succeeded (did not throw), record version

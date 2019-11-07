@@ -32,6 +32,9 @@ import io.bdeploy.minion.MinionRoot;
  */
 public class UpdatePackagingMigration {
 
+    private UpdatePackagingMigration() {
+    }
+
     private static final Logger log = LoggerFactory.getLogger(UpdatePackagingMigration.class);
 
     public static void run(MinionRoot root, boolean isMaster) throws IOException {
@@ -79,11 +82,11 @@ public class UpdatePackagingMigration {
                 for (Path zip : stream) {
                     try {
                         for (Manifest.Key k : UpdateHelper.importUpdate(zip, tmpDir, hive)) {
-                            log.info("Imported during migration: " + k);
+                            log.info("Imported during migration: {}", k);
                         }
                     } catch (Exception e) {
                         // happens if the hive already contains the manifest, e.g. if imported manually (or via CLI) beforehand.
-                        log.warn("Cannot migrate nested update package " + zip, e);
+                        log.warn("Cannot migrate nested update package {}", zip, e);
                     }
                 }
             }

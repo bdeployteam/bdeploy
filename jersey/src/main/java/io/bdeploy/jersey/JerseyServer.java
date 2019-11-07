@@ -229,7 +229,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             server.getHttpHandler().setAllowEncodedSlash(true);
             server.start();
 
-            log.info("Started Version " + VersionHelper.readVersion());
+            log.info("Started Version {}", VersionHelper.readVersion());
         } catch (GeneralSecurityException | IOException e) {
             throw new IllegalStateException("Cannot start server", e);
         }
