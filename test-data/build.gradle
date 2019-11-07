@@ -12,6 +12,11 @@ ext {
     testServerPort = randomServerPort()
     _testBinVersions = [ "1.2.1", "1.3.0" ]
 
+    if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+        // only test latest for now. Windows binaries are not stopped for some reason when killing the bat.
+        _testBinVersions = [ _testBinVersions[_testBinVersions.size() - 1] ];
+    }
+
     getTestBinVersions = {
         result = []
         _testBinVersions.each { 
