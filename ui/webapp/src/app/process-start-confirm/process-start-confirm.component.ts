@@ -16,4 +16,15 @@ export class ProcessStartConfirmComponent implements OnInit {
     // Do not close if the user clicks anywhere on the screen
     this.dialogRef.disableClose = true;
   }
+
+  okEnabled() {
+    return this.data.confirmation === this.data.application;
+  }
+
+  onEnter() {
+    if (!this.okEnabled()) {
+      return;
+    }
+    this.dialogRef.close('start');
+  }
 }
