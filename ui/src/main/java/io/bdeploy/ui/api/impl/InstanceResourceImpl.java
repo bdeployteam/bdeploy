@@ -751,7 +751,7 @@ public class InstanceResourceImpl implements InstanceResource {
         InstanceImportExportHelper.exportTo(zip, hive, InstanceManifest.of(hive, key));
 
         DownloadServiceImpl ds = rc.initResource(new DownloadServiceImpl());
-        return ds.serveFile(zip, "icon." + instanceId + "-" + tag + ".zip");
+        return ds.serveFile(zip, instanceId + "-" + tag + ".zip");
     }
 
     @WriteLock

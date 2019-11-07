@@ -221,7 +221,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     // for now this will result in a hardcore messagebox :)
     this.messageBoxService
       .open({
-        title: 'Change on Server detected',
+        title: 'Change on server detected',
         message: 'The instance has been modified by somebody else. Pressing OK will reload instance versions.',
         mode: MessageBoxMode.CONFIRM,
       })
