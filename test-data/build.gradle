@@ -60,7 +60,7 @@ void setupBDeployRemoteEnv(ProcessForkOptions options, String testServerRoot) {
     setupBDeployEnv(options, testServerRoot)
     options.environment += [
         BDEPLOY_REMOTE: "https://localhost:${testServerPort}/api",
-        BDEPLOY_TOKENFILE: "${buildDir}/test-token.txt",
+        BDEPLOY_TOKENFILE: "${testServerRoot}/test-token.txt",
         REMOTE_BHIVE: "Test"
     ]
 }
