@@ -59,7 +59,7 @@ task updateFixtureProducts(type: Copy) {
 
 task updateFixtures(dependsOn: [':test-data:setupDemoServer', 'updateFixtureProducts']) {
     File dir = project(":test-data").buildDir
-    File input = file("${dir}/test-token.txt")
+    File input = file("${dir}/test-root/test-token.txt")
     File output = file("${webappDir}/cypress/fixtures/token.json")
 
     inputs.file input
