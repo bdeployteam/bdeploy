@@ -80,7 +80,8 @@ public class TestFactory {
 
             /* STEP 4: push instance manifest to remote master */
             /* NOTE: instance manifest references all other required things */
-            local.execute(new PushOperation().setRemote(remote).setHiveName("demo").addManifest(instance));
+            local.execute(new PushOperation().setRemote(remote).setHiveName("demo").addManifest(instance).addManifest(prodKey)
+                    .addManifest(jdkKey));
         }
 
         return instance;

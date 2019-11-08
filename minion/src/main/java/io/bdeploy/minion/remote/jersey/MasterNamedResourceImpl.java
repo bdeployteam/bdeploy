@@ -198,6 +198,12 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         InstanceManifest imf = InstanceManifest.of(hive, key);
         SortedMap<String, Key> fragmentReferences = imf.getInstanceNodeManifests();
 
+        // assure that the product has been pushed to the master (e.g. by central).
+        Boolean productExists = hive.execute(new ManifestExistsOperation().setManifest(imf.getConfiguration().product));
+        if (!productExists) {
+            throw new WebApplicationException("Cannot find required product " + imf.getConfiguration().product, Status.NOT_FOUND);
+        }
+
         try (Activity deploying = reporter.start("Installing to minions...", fragmentReferences.size())) {
             for (Map.Entry<String, Manifest.Key> entry : fragmentReferences.entrySet()) {
                 String minionName = entry.getKey();
@@ -210,8 +216,25 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 assertNotNull(minion, "Cannot lookup minion on master: " + minionName);
                 assertNotNull(toDeploy, "Cannot lookup minion manifest on master: " + toDeploy);
 
+                // grab all required manifests from the applications
+                InstanceNodeManifest inm = InstanceNodeManifest.of(hive, toDeploy);
+                LocalDependencyFetcher localDeps = new LocalDependencyFetcher();
+                PushOperation pushOp = new PushOperation().setRemote(minion);
+                for (ApplicationConfiguration app : inm.getConfiguration().applications) {
+                    pushOp.addManifest(app.application);
+                    ApplicationManifest amf = ApplicationManifest.of(hive, app.application);
+
+                    // applications /must/ follow the ScopedManifestKey rules.
+                    ScopedManifestKey smk = ScopedManifestKey.parse(app.application);
+
+                    // the dependency must be here. it has been pushed here with the product,
+                    // since the product /must/ reference all direct dependencies.
+                    localDeps.fetch(hive, amf.getDescriptor().runtimeDependencies, smk.getOperatingSystem())
+                            .forEach(pushOp::addManifest);
+                }
+
                 // make sure the minion has the manifest.
-                hive.execute(new PushOperation().setRemote(minion).addManifest(toDeploy));
+                hive.execute(pushOp.addManifest(toDeploy));
 
                 SlaveDeploymentResource deployment = ResourceProvider.getResource(minion, SlaveDeploymentResource.class, context);
                 try {

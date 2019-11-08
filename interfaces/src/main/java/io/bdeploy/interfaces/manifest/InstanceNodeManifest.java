@@ -14,7 +14,6 @@ import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.op.ImportObjectOperation;
 import io.bdeploy.bhive.op.InsertArtificialTreeOperation;
 import io.bdeploy.bhive.op.InsertManifestOperation;
-import io.bdeploy.bhive.op.InsertManifestRefOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.ManifestNextIdOperation;
@@ -22,16 +21,12 @@ import io.bdeploy.bhive.op.ObjectLoadOperation;
 import io.bdeploy.bhive.op.TreeLoadOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.util.RuntimeAssert;
-import io.bdeploy.interfaces.ScopedManifestKey;
-import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
-import io.bdeploy.interfaces.manifest.dependencies.LocalDependencyFetcher;
 import io.bdeploy.interfaces.manifest.state.InstanceState;
 
 public class InstanceNodeManifest {
 
     public static final String INSTANCE_NODE_LABEL = "X-InstanceNode";
-    public static final String MANIFEST_TREE = "manifests";
 
     private InstanceNodeConfiguration config;
     private Manifest.Key key;
@@ -104,7 +99,6 @@ public class InstanceNodeManifest {
         private String name;
         private Manifest.Key key;
         private InstanceNodeConfiguration cfg;
-        private final SortedSet<Manifest.Key> applications = new TreeSet<>();
         private ObjectId configTree;
 
         public Builder setMinionName(String name) {
@@ -147,29 +141,6 @@ public class InstanceNodeManifest {
             if (configTree != null) {
                 tb.add(new Tree.Key("config", Tree.EntryType.TREE), configTree);
             }
-
-            // grab all required manifests from the applications
-            LocalDependencyFetcher localDeps = new LocalDependencyFetcher();
-            for (ApplicationConfiguration app : cfg.applications) {
-                applications.add(app.application);
-                ApplicationManifest amf = ApplicationManifest.of(hive, app.application);
-
-                // applications /must/ follow the ScopedManifestKey rules.
-                ScopedManifestKey smk = ScopedManifestKey.parse(app.application);
-
-                // the dependency must be here. it has been pushed here with the product,
-                // since the product /must/ reference all direct dependencies.
-                applications.addAll(localDeps.fetch(hive, amf.getDescriptor().runtimeDependencies, smk.getOperatingSystem()));
-            }
-
-            Tree.Builder mtb = new Tree.Builder();
-            for (Manifest.Key ref : applications) {
-                String refName = ref.directoryFriendlyName();
-                mtb.add(new Tree.Key(refName, Tree.EntryType.MANIFEST),
-                        hive.execute(new InsertManifestRefOperation().setManifest(ref)));
-            }
-            tb.add(new Tree.Key(MANIFEST_TREE, Tree.EntryType.TREE),
-                    hive.execute(new InsertArtificialTreeOperation().setTree(mtb)));
 
             Manifest.Builder mfb = new Manifest.Builder(key);
             mfb.setRoot(hive.execute(new InsertArtificialTreeOperation().setTree(tb)));

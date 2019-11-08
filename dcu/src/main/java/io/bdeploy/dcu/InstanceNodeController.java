@@ -9,7 +9,9 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
@@ -19,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.ExportOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.util.OsHelper;
@@ -26,8 +29,10 @@ import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.StreamHelper;
 import io.bdeploy.common.util.TemplateHelper;
+import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.cleanup.CleanupAction;
 import io.bdeploy.interfaces.cleanup.CleanupAction.CleanupType;
+import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
@@ -186,14 +191,14 @@ public class InstanceNodeController {
         Path targetDir = paths.get(SpecialDirectory.BIN);
         PathHelper.deleteRecursive(targetDir);
 
-        ApplicationPoolingReferenceHandler aprh = new ApplicationPoolingReferenceHandler(hive,
-                paths.getAndCreate(SpecialDirectory.MANIFEST_POOL), targetDir.resolve(InstanceNodeManifest.MANIFEST_TREE));
+        // write all required applications to the pool
+        SortedMap<Path, Manifest.Key> applications = installPooledApplicationsFor(dc);
 
         // write all the manifest content to the according target location, but specially handle applications
-        hive.execute(new ExportOperation().setManifest(manifest.getKey()).setTarget(targetDir).setReferenceHandler(aprh));
+        hive.execute(new ExportOperation().setManifest(manifest.getKey()).setTarget(targetDir));
 
         // create a variable resolver which can expand all supported variables.
-        VariableResolver resolver = new VariableResolver(paths, new ManifestRefPathProvider(paths, aprh.getExportedManifests()),
+        VariableResolver resolver = new VariableResolver(paths, new ManifestRefPathProvider(paths, applications),
                 new ApplicationParameterProvider(dc), additionalResolvers);
 
         // render configuration files.
@@ -211,6 +216,35 @@ public class InstanceNodeController {
 
         // make sure that the data directory always exists
         paths.getAndCreate(SpecialDirectory.DATA);
+    }
+
+    private SortedMap<Path, Key> installPooledApplicationsFor(InstanceNodeConfiguration dc) {
+        Path poolRoot = paths.getAndCreate(SpecialDirectory.MANIFEST_POOL);
+        SortedMap<Path, Key> result = new TreeMap<>();
+
+        LocalDependencyFetcher localDeps = new LocalDependencyFetcher();
+        List<Manifest.Key> applications = new ArrayList<>();
+        for (ApplicationConfiguration app : dc.applications) {
+            applications.add(app.application);
+            ApplicationManifest amf = ApplicationManifest.of(hive, app.application);
+
+            // applications /must/ follow the ScopedManifestKey rules.
+            ScopedManifestKey smk = ScopedManifestKey.parse(app.application);
+
+            // the dependency must be here. it has been pushed here with the configuration.
+            applications.addAll(localDeps.fetch(hive, amf.getDescriptor().runtimeDependencies, smk.getOperatingSystem()));
+        }
+
+        for (Manifest.Key key : applications) {
+            Path target = poolRoot.resolve(key.directoryFriendlyName());
+            result.put(target, key);
+
+            if (!Files.isDirectory(target)) {
+                hive.execute(new ExportOperation().setTarget(target).setManifest(key));
+            }
+        }
+
+        return result;
     }
 
     private void processConfigurationTemplates(Path path, VariableResolver resolver) {

@@ -250,6 +250,7 @@ public class InstanceResourceImpl implements InstanceResource {
                 .update(new InstanceUpdateDto(new InstanceConfigurationDto(instanceConfig, Collections.emptyList()),
                         getUpdatesFromTree("", new ArrayList<>(), product.getConfigTemplateTreeId())), null);
 
+        // FIXME: replace with actual full sync
         if (minion.getMode() == MinionMode.CENTRAL) {
             // immediately fetch back so we have it to create the association
             hive.execute(new FetchOperation().addManifest(key).setRemote(remote).setHiveName(group));
@@ -341,6 +342,7 @@ public class InstanceResourceImpl implements InstanceResource {
         MasterRootResource root = ResourceProvider.getResource(remote, MasterRootResource.class, context);
         Manifest.Key key = root.getNamedMaster(group).update(new InstanceUpdateDto(dto, Collections.emptyList()), expectedTag);
 
+        // FIXME: replace with actual full sync
         if (minion.getMode() == MinionMode.CENTRAL) {
             // immediately fetch back so we have it to create the association
             hive.execute(new FetchOperation().addManifest(key).setRemote(remote).setHiveName(group));
@@ -478,14 +480,17 @@ public class InstanceResourceImpl implements InstanceResource {
         RemoteService svc = mp.getControllingMaster(hive, instance.getManifest());
         try (Activity deploy = reporter.start("Deploying " + instance.getConfiguration().name + ":" + tag);
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
-            // 1. push manifest to remote
-            TransferStatistics stats = hive
-                    .execute(new PushOperation().setRemote(svc).addManifest(instance.getManifest()).setHiveName(group));
+            // 1. push config to remote (small'ish).
+            hive.execute(new PushOperation().setRemote(svc).addManifest(instance.getManifest()).setHiveName(group));
 
-            log.info("Pushed {} to {}; trees={}, objs={}, size={}", instance.getManifest(), svc.getUri(), stats.sumMissingTrees,
-                    stats.sumMissingObjects, UnitHelper.formatFileSize(stats.transferSize));
+            // 2. push product to remote in case it is not yet there.
+            TransferStatistics stats = hive.execute(
+                    new PushOperation().setRemote(svc).addManifest(instance.getConfiguration().product).setHiveName(group));
 
-            // 2: tell master to deploy
+            log.info("Pushed {} to {}; trees={}, objs={}, size={}", instance.getConfiguration().product, svc.getUri(),
+                    stats.sumMissingTrees, stats.sumMissingObjects, UnitHelper.formatFileSize(stats.transferSize));
+
+            // 3: tell master to deploy
             MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class, context);
             master.getNamedMaster(group).install(instance.getManifest());
         }

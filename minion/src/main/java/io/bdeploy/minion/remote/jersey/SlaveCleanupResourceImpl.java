@@ -18,13 +18,19 @@ import io.bdeploy.bhive.meta.MetaManifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
+import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.ManifestRefScanOperation;
 import io.bdeploy.bhive.op.PruneOperation;
 import io.bdeploy.common.Version;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.dcu.InstanceNodeController;
+import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.cleanup.CleanupAction;
 import io.bdeploy.interfaces.cleanup.CleanupAction.CleanupType;
+import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
+import io.bdeploy.interfaces.manifest.ApplicationManifest;
+import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
+import io.bdeploy.interfaces.manifest.dependencies.LocalDependencyFetcher;
 import io.bdeploy.interfaces.remote.SlaveCleanupResource;
 import io.bdeploy.minion.MinionRoot;
 
@@ -61,6 +67,24 @@ public class SlaveCleanupResourceImpl implements SlaveCleanupResource {
             SortedMap<String, Key> refs = hive.execute(new ManifestRefScanOperation().setManifest(keep));
             allRefs.add(keep);
             allRefs.addAll(refs.values());
+
+            // if the manifest is an InstanceNodeManifest, check all attached (indirectly referenced applications).
+            if (hive.execute(new ManifestLoadOperation().setManifest(keep)).getLabels()
+                    .containsKey(InstanceNodeManifest.INSTANCE_NODE_LABEL)) {
+                InstanceNodeManifest inm = InstanceNodeManifest.of(hive, keep);
+                LocalDependencyFetcher localDeps = new LocalDependencyFetcher();
+                for (ApplicationConfiguration app : inm.getConfiguration().applications) {
+                    allRefs.add(app.application);
+                    ApplicationManifest amf = ApplicationManifest.of(hive, app.application);
+
+                    // applications /must/ follow the ScopedManifestKey rules.
+                    ScopedManifestKey smk = ScopedManifestKey.parse(app.application);
+
+                    // the dependency must be here. it has been pushed here with the product,
+                    // since the product /must/ reference all direct dependencies.
+                    allRefs.addAll(localDeps.fetch(hive, amf.getDescriptor().runtimeDependencies, smk.getOperatingSystem()));
+                }
+            }
         }
 
         toClean.removeAll(allRefs);
