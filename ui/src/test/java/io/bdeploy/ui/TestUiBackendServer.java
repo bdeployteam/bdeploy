@@ -1,5 +1,6 @@
 package io.bdeploy.ui;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -206,6 +207,10 @@ public class TestUiBackendServer extends TestServer {
         @Override
         public <T> T getDecryptedPayload(String encrypted, Class<T> clazz) {
             return null;
+        }
+
+        @Override
+        public void signExecutable(File file, String applicationName, String string) {
         }
     }
 
