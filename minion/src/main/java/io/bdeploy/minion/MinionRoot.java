@@ -1,5 +1,6 @@
 package io.bdeploy.minion;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -51,6 +52,8 @@ import io.bdeploy.pcu.InstanceProcessController;
 import io.bdeploy.pcu.MinionProcessController;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
+import net.jsign.PESigner;
+import net.jsign.pe.PEFile;
 
 /**
  * Represents the root directory and configuration of a minion installation.
@@ -496,6 +499,19 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             return SecurityHelper.getInstance().getSelfVerifiedPayloadFromPack(encrypted, clazz);
         } catch (GeneralSecurityException | IOException e) {
             throw new WebApplicationException("Cannot decrypt payload", e);
+        }
+    }
+
+    @Override
+    public void signExecutable(File executable, String name, String host) {
+        MinionState state = getState();
+        try {
+            KeyStore keystore = SecurityHelper.getInstance().loadPrivateKeyStore(state.keystorePath, state.keystorePass);
+            PESigner signer = new PESigner(keystore, keystore.aliases().nextElement(), new String(state.keystorePass));
+            signer.withProgramName(name).withProgramURL(host).withTimestamping(false);
+            signer.sign(new PEFile(executable));
+        } catch (Exception e) {
+            throw new WebApplicationException("Cannot sign executable", e);
         }
     }
 

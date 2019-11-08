@@ -1,5 +1,6 @@
 package io.bdeploy.ui.api;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.SortedMap;
 
@@ -75,5 +76,17 @@ public interface Minion {
      * Descrypts a payload encrypted using {@link #getEncryptedPayload(Object)}.
      */
     public <T> T getDecryptedPayload(String encrypted, Class<T> clazz);
+
+    /**
+     * Signs the given windows executable with the certificate of the minion
+     *
+     * @param executable
+     *            the executable to sign.
+     * @param appName
+     *            the name that will be embedded in the signature.
+     * @param appUrl
+     *            the URL that will be embedded in the signature.
+     */
+    public void signExecutable(File executable, String appName, String appUrl);
 
 }

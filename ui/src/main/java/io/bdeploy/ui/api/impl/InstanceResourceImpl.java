@@ -685,16 +685,16 @@ public class InstanceResourceImpl implements InstanceResource {
         ProductManifest pm = ProductManifest.of(hive, im.getConfiguration().product);
 
         // Brand the executable and embed the required information
+        String appName = im.getConfiguration().name + " - " + appConfig.name;
+        ClickAndStartDescriptor clickAndStart = getClickAndStartDescriptor(im.getConfiguration().uuid, appConfig.uid);
         try {
-            ClickAndStartDescriptor clickAndStart = getClickAndStartDescriptor(im.getConfiguration().uuid, appConfig.uid);
-
             BrandingConfig config = new BrandingConfig();
             config.remoteService = clickAndStart.host;
             config.launcherUrl = launcherLocation.toString();
             config.iconUrl = iconLocation.toString();
             config.splashUrl = splashLocation.toString();
             config.applicationUid = appConfig.uid;
-            config.applicationName = im.getConfiguration().name + " - " + appConfig.name;
+            config.applicationName = appName;
             config.applicationJson = new String(StorageHelper.toRawBytes(clickAndStart), StandardCharsets.UTF_8);
             config.productVendor = pm.getProductDescriptor().vendor;
 
@@ -704,6 +704,9 @@ public class InstanceResourceImpl implements InstanceResource {
         } catch (Exception ioe) {
             throw new WebApplicationException("Cannot apply branding to windows installer.", ioe);
         }
+
+        // Now sign the executable with our certificate
+        minion.signExecutable(installer, appName, clickAndStart.host.getUri().toString());
     }
 
     @Override

@@ -250,10 +250,11 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
 
         String fileName = null;
         if (os == OperatingSystem.WINDOWS) {
-            fileName = "BDeploy Click & Start - Installer.exe";
-            createWindowsInstaller(installerPath, launcherKey, launcherLocation);
+            String installerName = "BDeploy Click & Start - Installer";
+            fileName = installerName + ".exe";
+            createWindowsInstaller(installerName, installerPath, launcherKey, launcherLocation);
         } else if (os == OperatingSystem.LINUX || os == OperatingSystem.MACOS) {
-            fileName = "BDeploy Click & Start-Installer.run";
+            fileName = "BDeploy-Click-and-Start-Installer.run";
             createLinuxInstaller(installerPath, launcherKey, launcherLocation);
         } else {
             throw new WebApplicationException("MAC OS Installer not yet supported");
@@ -296,7 +297,8 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
         }
     }
 
-    private void createWindowsInstaller(Path installerPath, ScopedManifestKey launcherKey, URI launcherLocation) {
+    private void createWindowsInstaller(String installerName, Path installerPath, ScopedManifestKey launcherKey,
+            URI launcherLocation) {
         File installer = installerPath.toFile();
 
         // Try to load the installer stored in the manifest tree
@@ -322,6 +324,9 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
         } catch (Exception ioe) {
             throw new WebApplicationException("Cannot apply branding to windows installer.", ioe);
         }
+
+        // Now sign the executable with our certificate
+        minion.signExecutable(installer, installerName, info.getBaseUri().toString());
     }
 
     /**
