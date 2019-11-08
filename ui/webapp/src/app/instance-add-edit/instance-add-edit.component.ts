@@ -15,6 +15,7 @@ import { ConfigService } from '../services/config.service';
 import { InstanceGroupService } from '../services/instance-group.service';
 import { InstanceService } from '../services/instance.service';
 import { Logger, LoggingService } from '../services/logging.service';
+import { ManagedServersService } from '../services/managed-servers.service';
 import { MessageboxService } from '../services/messagebox.service';
 import { ProductService } from '../services/product.service';
 import { sortByTags } from '../utils/manifest.utils';
@@ -73,6 +74,7 @@ export class InstanceAddEditComponent implements OnInit {
     private viewContainerRef: ViewContainerRef,
     private overlay: Overlay,
     private config: ConfigService,
+    private managedServers: ManagedServersService
   ) {}
 
   ngOnInit() {
@@ -102,7 +104,7 @@ export class InstanceAddEditComponent implements OnInit {
         });
         this.expectedVersion = vs[0];
       });
-      this.config.getServerForInstance(this.groupParam, this.uuidParam, null).subscribe(r => {
+      this.managedServers.getServerForInstance(this.groupParam, this.uuidParam, null).subscribe(r => {
         if (r) {
           this.managedServerControl.setValue(r.name);
         }
@@ -132,7 +134,7 @@ export class InstanceAddEditComponent implements OnInit {
 
     if (this.isCentral()) {
       this.managedServerControl.setValidators([Validators.required]);
-      this.config.getManagedServers(this.groupParam).subscribe(r => {
+      this.managedServers.getManagedServers(this.groupParam).subscribe(r => {
         this.serverNames = r.map(e => e.name).sort();
       });
     }

@@ -5,6 +5,8 @@ import java.util.TreeMap;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.meta.MetaManifest;
+import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.op.ManifestDeleteOldByIdOperation;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.ui.dto.AttachIdentDto;
 
@@ -29,7 +31,7 @@ public class ManagedMasterAttachmentsMetaManifest {
             throw new IllegalStateException("Managed server " + dto.name + " already exists!");
         }
         value.attachedManagedServers.put(dto.name, dto);
-        mm.write(hive, value);
+        writeAndClean(hive, mm, value);
     }
 
     public static ManagedMasterAttachmentsMetaManifest read(BHive hive) {
@@ -50,7 +52,14 @@ public class ManagedMasterAttachmentsMetaManifest {
 
         ManagedMasterAttachmentsMetaManifest value = read(hive);
         value.attachedManagedServers.remove(serverName);
-        mm.write(hive, value);
+        writeAndClean(hive, mm, value);
+    }
+
+    private static void writeAndClean(BHive hive, MetaManifest<ManagedMasterAttachmentsMetaManifest> mm,
+            ManagedMasterAttachmentsMetaManifest value) {
+        Manifest.Key key = mm.write(hive, value);
+
+        hive.execute(new ManifestDeleteOldByIdOperation().setAmountToKeep(10).setToDelete(key.getName()));
     }
 
 }

@@ -46,6 +46,13 @@ public class MetaManifest<T> {
     private final Class<T> metaClazz;
 
     /**
+     * @deprecated old deprecated name of meta manifests, which produced collisions. just there for migration of existing meta
+     *             manifest.
+     */
+    @Deprecated
+    private final String oldMetaName;
+
+    /**
      * Create a {@link MetaManifest} for the given {@link Key} which identifies the {@link Manifest} to "annotate" with metadata.
      *
      * @param parent the parent {@link Manifest}s {@link Key}.
@@ -57,7 +64,9 @@ public class MetaManifest<T> {
      */
     public MetaManifest(Manifest.Key parent, boolean useParentTag, Class<T> metaClazz) {
         this.parent = parent;
-        this.metaName = META_PREFIX + parent.getName() + (useParentTag ? ("/" + parent.getTag()) : META_DEFTAG);
+        this.oldMetaName = META_PREFIX + parent.getName() + (useParentTag ? ("/" + parent.getTag()) : META_DEFTAG);
+        this.metaName = META_PREFIX + parent.getName() + "/" + metaClazz.getSimpleName()
+                + (useParentTag ? ("/" + parent.getTag()) : META_DEFTAG);
         this.metaClazz = metaClazz;
     }
 
@@ -75,6 +84,9 @@ public class MetaManifest<T> {
         }
 
         String mfName = meta.getName().substring(META_PREFIX.length(), meta.getName().lastIndexOf('/'));
+
+        // now the last segment is the class name of what is persisted in there.
+        mfName = mfName.substring(0, mfName.lastIndexOf('/'));
 
         if (meta.getName().endsWith(META_DEFTAG)) {
             // last segment of name is the deftag, strip and find newest of manifest.
@@ -98,11 +110,20 @@ public class MetaManifest<T> {
      */
     public T read(BHiveExecution source) {
         Optional<Long> id = source.execute(new ManifestMaxIdOperation().setManifestName(metaName));
+        Manifest.Key key;
+
         if (!id.isPresent()) {
-            return null;
+            // legacy names for meta manifests.
+            id = source.execute(new ManifestMaxIdOperation().setManifestName(oldMetaName));
+            if (!id.isPresent()) {
+                return null;
+            }
+
+            key = new Manifest.Key(oldMetaName, id.get().toString());
+        } else {
+            key = new Manifest.Key(metaName, id.get().toString());
         }
 
-        Manifest.Key key = new Manifest.Key(metaName, id.get().toString());
         Manifest mf = source.execute(new ManifestLoadOperation().setManifest(key));
 
         try (InputStream is = source
@@ -163,6 +184,11 @@ public class MetaManifest<T> {
         ObjectId newTreeId = target.execute(new InsertArtificialTreeOperation().setTree(newTree));
         target.execute(new InsertManifestOperation().addManifest(newMf.setRoot(newTreeId).build(target)));
         target.execute(new ManifestDeleteOldByIdOperation().setAmountToKeep(META_HIST_SIZE).setToDelete(metaName));
+
+        // remove all manifests of the old name.
+        if (target.execute(new ManifestMaxIdOperation().setManifestName(oldMetaName)).isPresent()) {
+            target.execute(new ManifestDeleteOldByIdOperation().setAmountToKeep(0).setToDelete(oldMetaName));
+        }
 
         return targetKey;
     }

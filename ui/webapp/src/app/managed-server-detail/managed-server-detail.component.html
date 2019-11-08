@@ -44,5 +44,7 @@
 </div>
 
 <mat-action-row>
-  <button mat-button (click)='doDelete()'>Delete</button>
+  <span class='last-sync-label'>Last sync.: {{ getDate(server.lastSync)}}</span>
+  <button mat-button (click)='doSync()' [disabled]='loading'>Synchronize</button>
+  <button mat-button (click)='doDelete()' [disabled]='loading'>Delete</button>
 </mat-action-row>

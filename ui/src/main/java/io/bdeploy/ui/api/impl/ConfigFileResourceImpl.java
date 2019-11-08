@@ -9,6 +9,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
@@ -35,6 +36,7 @@ import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.ui.api.ConfigFileResource;
 import io.bdeploy.ui.api.MasterProvider;
+import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.dto.ConfigFileDto;
 
 public class ConfigFileResourceImpl implements ConfigFileResource {
@@ -46,8 +48,14 @@ public class ConfigFileResourceImpl implements ConfigFileResource {
     @Context
     private SecurityContext context;
 
+    @Context
+    private ResourceContext rc;
+
     @Inject
     private MasterProvider mp;
+
+    @Inject
+    private Minion minion;
 
     public ConfigFileResourceImpl(BHive hive, String groupId, String instanceId) {
         this.hive = hive;
@@ -112,6 +120,8 @@ public class ConfigFileResourceImpl implements ConfigFileResource {
 
         Manifest.Key rootKey = master.update(new InstanceUpdateDto(
                 new InstanceConfigurationDto(oldConfig.getConfiguration(), Collections.emptyList()), updates), expectedTag);
+
+        InstanceResourceImpl.syncInstance(minion, rc, groupId, instanceId);
 
         UiResources.getInstanceEventManager().create(instanceId, rootKey);
     }

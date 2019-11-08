@@ -22,7 +22,7 @@ public class UiMasterProvider implements MasterProvider {
         switch (minion.getMode()) {
             case CENTRAL:
                 ManagedMasterAttachmentsMetaManifest available = ManagedMasterAttachmentsMetaManifest.read(hive);
-                String associated = ManagedMasterAssociationMetaManifest.read(hive, imKey);
+                String associated = ManagedMasterAssociationMetaManifest.read(hive, imKey).getMasterName();
                 if (associated == null) {
                     throw new IllegalStateException("Cannot find associated master for instance " + imKey);
                 }

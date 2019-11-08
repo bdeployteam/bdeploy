@@ -47,7 +47,6 @@ import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.op.TreeLoadOperation;
-import io.bdeploy.bhive.op.remote.FetchOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
@@ -96,6 +95,7 @@ import io.bdeploy.ui.ManagedMasterAttachmentsMetaManifest;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.ConfigFileResource;
 import io.bdeploy.ui.api.InstanceResource;
+import io.bdeploy.ui.api.ManagedServersResource;
 import io.bdeploy.ui.api.MasterProvider;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
@@ -170,10 +170,7 @@ public class InstanceResourceImpl implements InstanceResource {
             Key activeProduct = null;
             ProductDto activeProductDto = null;
             try {
-                MasterRootResource root = ResourceProvider.getResource(mp.getControllingMaster(hive, imKey),
-                        MasterRootResource.class, context);
-                MasterNamedResource master = root.getNamedMaster(group);
-                InstanceStateRecord state = master.getInstanceState(config.uuid);
+                InstanceStateRecord state = getDeploymentStates(config.uuid);
 
                 if (state.activeTag != null) {
                     try {
@@ -246,16 +243,23 @@ public class InstanceResourceImpl implements InstanceResource {
 
         MasterRootResource root = ResourceProvider.getResource(remote, MasterRootResource.class, context);
 
-        Manifest.Key key = root.getNamedMaster(group)
+        root.getNamedMaster(group)
                 .update(new InstanceUpdateDto(new InstanceConfigurationDto(instanceConfig, Collections.emptyList()),
                         getUpdatesFromTree("", new ArrayList<>(), product.getConfigTemplateTreeId())), null);
 
-        // FIXME: replace with actual full sync
-        if (minion.getMode() == MinionMode.CENTRAL) {
-            // immediately fetch back so we have it to create the association
-            hive.execute(new FetchOperation().addManifest(key).setRemote(remote).setHiveName(group));
-            ManagedMasterAssociationMetaManifest.associate(hive, key, managedServer);
+        // immediately fetch back so we have it to create the association. don't use #syncInstance here,
+        // it requires the association to already exist.
+        rc.initResource(new ManagedServersResourceImpl()).synchronize(group, managedServer);
+    }
+
+    static void syncInstance(Minion minion, ResourceContext rc, String groupName, String instanceId) {
+        if (minion.getMode() != MinionMode.CENTRAL) {
+            return;
         }
+
+        ManagedServersResource rs = rc.initResource(new ManagedServersResourceImpl());
+        AttachIdentDto server = rs.getServerForInstance(groupName, instanceId, null);
+        rs.synchronize(groupName, server.name);
     }
 
     private List<FileStatusDto> getUpdatesFromTree(String path, List<FileStatusDto> target, ObjectId cfgTree) {
@@ -342,19 +346,14 @@ public class InstanceResourceImpl implements InstanceResource {
         MasterRootResource root = ResourceProvider.getResource(remote, MasterRootResource.class, context);
         Manifest.Key key = root.getNamedMaster(group).update(new InstanceUpdateDto(dto, Collections.emptyList()), expectedTag);
 
-        // FIXME: replace with actual full sync
-        if (minion.getMode() == MinionMode.CENTRAL) {
-            // immediately fetch back so we have it to create the association
-            hive.execute(new FetchOperation().addManifest(key).setRemote(remote).setHiveName(group));
-            ManagedMasterAssociationMetaManifest.associate(hive, key, managedServer);
-        }
+        // immediately fetch back so we have it to create the association
+        syncInstance(minion, rc, group, instance);
 
         UiResources.getInstanceEventManager().create(instance, key);
     }
 
     @Override
     public void delete(String instance) {
-        // TODO: delegate to master
         // prevent delete if processes are running.
         InstanceManifest im = readInstance(instance);
         RemoteService master = mp.getControllingMaster(hive, im.getManifest());
@@ -377,6 +376,8 @@ public class InstanceResourceImpl implements InstanceResource {
 
             root.getNamedMaster(group).delete(instance);
         }
+
+        syncInstance(minion, rc, group, instance);
     }
 
     @Override
@@ -391,7 +392,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
         // Collect node information
         InstanceManifest thisIm = InstanceManifest.load(hive, instance, versionTag);
-        String thisMaster = ManagedMasterAssociationMetaManifest.read(hive, thisIm.getManifest());
+        String thisMaster = ManagedMasterAssociationMetaManifest.read(hive, thisIm.getManifest()).getMasterName();
         Map<String, InstanceNodeConfigurationDto> node2Dto = getExistingNodes(thisIm);
 
         for (Key imKey : InstanceManifest.scan(hive, true)) {
@@ -399,7 +400,7 @@ public class InstanceResourceImpl implements InstanceResource {
             if (!isForeign) {
                 imKey = thisIm.getManifest(); // go on with requested tag (versionTag)
             }
-            String imMaster = ManagedMasterAssociationMetaManifest.read(hive, imKey);
+            String imMaster = ManagedMasterAssociationMetaManifest.read(hive, imKey).getMasterName();
 
             if (thisMaster == null || thisMaster.equals(imMaster)) {
                 gatherNodeConfigurations(node2Dto, InstanceManifest.of(hive, imKey), isForeign);
@@ -495,6 +496,7 @@ public class InstanceResourceImpl implements InstanceResource {
             master.getNamedMaster(group).install(instance.getManifest());
         }
 
+        syncInstance(minion, rc, group, instanceId);
         UiResources.getInstanceEventManager().stateChanged(instanceId, instance.getManifest());
     }
 
@@ -521,6 +523,7 @@ public class InstanceResourceImpl implements InstanceResource {
             master.getNamedMaster(group).uninstall(instance.getManifest());
         }
 
+        syncInstance(minion, rc, group, instanceId);
         UiResources.getInstanceEventManager().stateChanged(instanceId, instance.getManifest());
     }
 
@@ -534,6 +537,7 @@ public class InstanceResourceImpl implements InstanceResource {
             master.getNamedMaster(group).activate(instance.getManifest());
         }
 
+        syncInstance(minion, rc, group, instanceId);
         UiResources.getInstanceEventManager().stateChanged(instanceId, instance.getManifest());
     }
 
@@ -550,10 +554,8 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Override
     public InstanceStateRecord getDeploymentStates(String instanceId) {
-        InstanceManifest instance = InstanceManifest.load(hive, instanceId, null);
-        RemoteService svc = mp.getControllingMaster(hive, instance.getManifest());
-        MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class, context);
-        return master.getNamedMaster(group).getInstanceState(instanceId);
+        InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
+        return im.getState(hive).read();
     }
 
     @Override
@@ -776,6 +778,7 @@ public class InstanceResourceImpl implements InstanceResource {
         try {
             Files.copy(inputStream, zip);
             Key newKey = InstanceImportExportHelper.importFrom(zip, hive, instanceId, root);
+            syncInstance(minion, rc, group, instanceId);
             UiResources.getInstanceEventManager().create(instanceId, newKey);
             return Collections.singletonList(newKey);
         } catch (IOException e) {

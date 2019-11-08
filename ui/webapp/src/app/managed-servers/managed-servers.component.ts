@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { AttachIdentDto } from '../models/gen.dtos';
-import { ConfigService } from '../services/config.service';
+import { ManagedServersService } from '../services/managed-servers.service';
 
 @Component({
   selector: 'app-managed-servers',
@@ -16,27 +16,27 @@ export class ManagedServersComponent implements OnInit {
   managedServers: AttachIdentDto[];
   loading = true;
 
-  connected = new Map<AttachIdentDto, boolean>();
+  connected = new Map<string, boolean>();
 
-  constructor(private route: ActivatedRoute, private config: ConfigService, public location: Location) { }
+  constructor(private route: ActivatedRoute, public location: Location, private managedServersService: ManagedServersService) { }
 
   ngOnInit() {
     this.load();
   }
 
   load() {
-    this.config.getManagedServers(this.instanceGroupName).pipe(finalize(() => this.loading = false)).subscribe(r => {
-      r.forEach(a => {if (!this.connected.has(a)) {this.connected.set(a, false); }});
+    this.loading = true;
+    this.managedServersService.getManagedServers(this.instanceGroupName).pipe(finalize(() => this.loading = false)).subscribe(r => {
       this.managedServers = r.sort((a, b) => a.name.localeCompare(b.name));
     });
   }
 
   isConnected(server: AttachIdentDto) {
-    return this.connected.get(server);
+    return this.connected.get(server.name);
   }
 
   setConnected(server: AttachIdentDto, con: boolean) {
-    this.connected.set(server, con);
+    this.connected.set(server.name, con);
   }
 
 }

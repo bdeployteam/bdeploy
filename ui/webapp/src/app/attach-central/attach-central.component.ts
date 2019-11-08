@@ -3,10 +3,10 @@ import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatStep, MatStepper } from '@angular/material';
 import { EventSourcePolyfill } from 'ng-event-source';
 import { AttachIdentDto, InstanceGroupConfiguration } from '../models/gen.dtos';
-import { ConfigService } from '../services/config.service';
 import { DownloadService } from '../services/download.service';
 import { InstanceGroupService } from '../services/instance-group.service';
 import { ErrorMessage, LoggingService } from '../services/logging.service';
+import { ManagedServersService } from '../services/managed-servers.service';
 import { RemoteEventsService } from '../services/remote-events.service';
 
 @Component({
@@ -32,15 +32,15 @@ export class AttachCentralComponent implements OnInit, OnDestroy {
 
   constructor(
     public location: Location,
-    private config: ConfigService,
     private eventService: RemoteEventsService,
     private logging: LoggingService,
     private igService: InstanceGroupService,
     private dlService: DownloadService,
+    private managedServers: ManagedServersService,
   ) {}
 
   ngOnInit() {
-    this.config.getAttachIdent().subscribe(i => (this.attachPayload = i));
+    this.managedServers.getAttachIdent().subscribe(i => (this.attachPayload = i));
 
     this.updateEvents = this.eventService.getAttachEventSource();
     this.updateEvents.onerror = err => {
@@ -90,7 +90,7 @@ export class AttachCentralComponent implements OnInit, OnDestroy {
 
     this.manualLoading = true;
 
-    this.config.manualAttachCentral(data).subscribe(group => {
+    this.managedServers.manualAttachCentral(data).subscribe(group => {
       this.igService.getInstanceGroup(group).subscribe(r => {
         this.remoteAttached = r;
         this.stepper.selected = this.doneStep;

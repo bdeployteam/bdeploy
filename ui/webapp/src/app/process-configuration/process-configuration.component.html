@@ -40,12 +40,18 @@
         <div>
           Auto Start: <b *ngIf="!loading">{{ selectedConfig.instance.autoStart ? 'Enabled' : 'Disabled' }}</b>
         </div>
+        <div *ngIf='controllingServer'>
+            Last sync.: <b>{{ getDate(controllingServer.lastSync) }}</b>
+        </div>
       </div>
       <span class="fill-space"></span>
-      <button mat-flat-button class="app-process-out-of-sync-text" (click)="onNewerProductVersionAvailable()" *ngIf="isProductUpgradeAvailable() && !editMode">
+      <button mat-flat-button class="app-process-out-of-sync-text" (click)="onNewerProductVersionAvailable()" *ngIf="isProductUpgradeAvailable() && !editMode && !(isCentral() && !isCentralSyncd)">
         Newer product version available!
       </button>
       <span class="spacer"></span>
+      <ng-container *ngIf='isCentral()'>
+        <button mat-icon-button (click)='doSyncCentral()' matTooltip="Synchronize meta-data from the controlling server."><mat-icon>sync_alt</mat-icon></button>
+      </ng-container>
       <app-remote-progress [scope]='[groupParam, uuidParam]'></app-remote-progress>
       <ng-container *ngIf="isAutoRefreshVisible() && autoRefresh">
         <button mat-icon-button (click)="toggleAutoRefresh()"
@@ -55,31 +61,31 @@
         </button>
       </ng-container>
       <ng-container *ngIf="isAutoRefreshVisible() && !autoRefresh">
-        <button mat-icon-button (click)="toggleAutoRefresh()" matTooltip="Auto refresh of process status disabled. Click to enable.">
+        <button mat-icon-button (click)="toggleAutoRefresh()" [disabled]='isCentral() && !isCentralSyncd' matTooltip="Auto refresh of process status disabled. Click to enable.">
           <mat-icon>sync_disabled</mat-icon>
         </button>
       </ng-container>
       <mat-menu #appMenu="matMenu" xPosition="before">
-        <button mat-menu-item (click)="startInstance()" matTooltip="Starts all processes having the start type 'Instance' configured.">
+        <button mat-menu-item (click)="startInstance()" [disabled]='isReadonly()' matTooltip="Starts all processes having the start type 'Instance' configured.">
           Start Instance...
         </button>
-        <button mat-menu-item (click)="stopInstance()" matTooltip="Stops all processes.">
+        <button mat-menu-item (click)="stopInstance()" [disabled]='isReadonly()' matTooltip="Stops all processes.">
           Stop Instance...
         </button>
-        <button mat-menu-item (click)="restartInstance()" matTooltip="Stops all processes, then starts all having the start type 'Instance' configured.">
+        <button mat-menu-item (click)="restartInstance()" [disabled]='isReadonly()' matTooltip="Stops all processes, then starts all having the start type 'Instance' configured.">
           Restart Instance...
         </button>
         <mat-divider></mat-divider>
         <button mat-menu-item [routerLink]="['/instance/edit', groupParam, uuidParam]" [disabled]="!isEditable()">
           Edit Instance...
         </button>
-        <button mat-menu-item (click)="importInstanceVersion()">
+        <button mat-menu-item (click)="importInstanceVersion()" [disabled]='isReadonly()'>
           Import Instance Version...
         </button>
-        <button mat-menu-item [disabled]='loading' [routerLink]="['/configfiles', groupParam, uuidParam, selectedConfig?.version.key.tag]" [disabled]="!isEditable()">
+        <button mat-menu-item [disabled]='loading || isReadonly()' [routerLink]="['/configfiles', groupParam, uuidParam, selectedConfig?.version.key.tag]" [disabled]="!isEditable()">
           Configuration Files...
         </button>
-        <button mat-menu-item [disabled]='loading' [routerLink]="['/datafiles', groupParam, uuidParam, selectedConfig?.version.key.tag]">
+        <button mat-menu-item [disabled]='loading || isReadonly()' [routerLink]="['/datafiles', groupParam, uuidParam, selectedConfig?.version.key.tag]">
           Data Files...
         </button>
         <mat-divider></mat-divider>
@@ -103,6 +109,9 @@
         <div *ngIf="isRunningOutOfSync" class="app-process-out-of-sync-text">
           Out-of-sync: One or more applications are running in a version that is not activated.
         </div>
+        <div *ngIf="isCentral() && !isCentralSyncd" class="need-sync-text">
+          Press <button mat-icon-button (click)='doSyncCentral()' matTooltip="Synchronize meta-data from the controlling server."><mat-icon>sync_alt</mat-icon></button> to enable editing, process control and remote access.
+        </div>
         <ng-container *ngFor="let node of selectedConfig.nodeList.nodeConfigDtos">
           <app-instance-node-card
             class="node"
@@ -113,7 +122,7 @@
             [processConfig]="selectedConfig"
             [productMissing]="!isProductAvailable(selectedConfig)"
             [manageApplications]="isSidenavApplications()"
-            [isReadonly]="selectedConfig.readonly"
+            [isReadonly]="isReadonly()"
             [isInstanceDirty]="isDirtySelected()"
             (editAppConfigEvent)="onEditApp(node.nodeConfiguration, $event)"
             (editNodeAppsEvent)="onUpdateNodeApps()"
@@ -188,7 +197,8 @@
                 [selected]="isVersionSelected(config)"
                 [dirty]="config.dirty"
                 [productAvailable]="isProductAvailable(config)"
-                [disabled]="loading">
+                [disabled]="loading"
+                [readOnly]='isCentral() && !isCentralSyncd'>
               </app-instance-version-card>
             </ng-container>
           </div>

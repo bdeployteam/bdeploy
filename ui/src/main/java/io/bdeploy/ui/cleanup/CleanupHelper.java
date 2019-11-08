@@ -262,7 +262,7 @@ public class CleanupHelper {
 
         // find the oldest instance version per instance that is "under protection", i.e. the product it uses must not be uninstalled
         SortedSet<Key> latestInstanceManifests = InstanceManifest.scan(hive, true);
-        Map<String, List<String>> installedTagsMap = latestInstanceManifests.stream().collect(Collectors
+        Map<String, Set<String>> installedTagsMap = latestInstanceManifests.stream().collect(Collectors
                 .toMap(imKey -> imKey.getName(), imKey -> InstanceManifest.of(hive, imKey).getState(hive).read().installedTags));
         // remove all to-be-uninstalled tags from installedTagsMap
         latestInstanceManifests.stream().forEach(imKey -> {
@@ -273,7 +273,7 @@ public class CleanupHelper {
         Comparator<String> intTagComparator = (a, b) -> Integer.compare(Integer.parseInt(a), Integer.parseInt(b));
 
         Map<String, String> oldestTag = new HashMap<>();
-        for (Map.Entry<String, List<String>> entry : installedTagsMap.entrySet()) {
+        for (Map.Entry<String, Set<String>> entry : installedTagsMap.entrySet()) {
             Optional<String> min = entry.getValue().stream().min(intTagComparator);
             oldestTag.put(entry.getKey(), min.isPresent() ? min.get() : "0");
         }

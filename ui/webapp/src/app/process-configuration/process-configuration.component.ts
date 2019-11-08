@@ -2,7 +2,8 @@ import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
-import { ActivatedRoute, Params } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
+import { format } from 'date-fns';
 import { cloneDeep, isEqual } from 'lodash';
 import { EventSourcePolyfill } from 'ng-event-source';
 import { DragulaService } from 'ng2-dragula';
@@ -25,6 +26,7 @@ import { HeaderTitleService } from '../services/header-title.service';
 import { InstanceService } from '../services/instance.service';
 import { LauncherService } from '../services/launcher.service';
 import { Logger, LoggingService } from '../services/logging.service';
+import { ManagedServersService } from '../services/managed-servers.service';
 import { MessageboxService } from '../services/messagebox.service';
 import { ProcessService } from '../services/process.service';
 import { ProductService } from '../services/product.service';
@@ -96,6 +98,8 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   private updateEvents: EventSourcePolyfill;
   private lastStateReload = 0;
 
+  public isCentralSyncd = false;
+
   constructor(
     private route: ActivatedRoute,
     private loggingService: LoggingService,
@@ -112,7 +116,9 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     private eventService: RemoteEventsService,
     private systemService: SystemService,
     private dragulaService: DragulaService,
-    private config: ConfigService
+    private config: ConfigService,
+    private managedServers: ManagedServersService,
+    private router: Router,
   ) {}
 
   ngOnInit() {
@@ -122,6 +128,9 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
         this.groupParam = p['group'];
         this.uuidParam = p['uuid'];
         this.loadVersions(false);
+        if (!this.selectedConfig) {
+          return;
+        }
         this.enableAutoRefresh();
         this.doTriggerProcessStatusUpdate();
 
@@ -238,6 +247,15 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   private loadVersions(selectLatest: boolean): void {
     this.instanceService.listInstanceVersions(this.groupParam, this.uuidParam).subscribe(versions => {
       this.log.debug('got ' + versions.length + ' instance versions');
+
+      if (!versions.length) {
+        this.messageBoxService.open({title: 'Instance no longer available', message: 'The current instance is no longer available on the server', mode: MessageBoxMode.ERROR}).subscribe((r) => {
+          this.router.navigate(['instance', 'browser', this.groupParam]);
+        });
+
+        return;
+      }
+
       versions.sort((a, b) => {
         return +b.key.tag - +a.key.tag;
       });
@@ -304,7 +322,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     const call3 = this.productService.getProducts(this.groupParam); // => result[2];
     let call4 = of(null);
     if (this.isCentral()) {
-      call4 = this.config.getServerForInstance(this.groupParam, this.uuidParam, selectedVersion.key.tag); // results[3]
+      call4 = this.managedServers.getServerForInstance(this.groupParam, this.uuidParam, selectedVersion.key.tag); // results[3]
     }
 
     forkJoin([call1, call2, call3, call4]).subscribe(results => {
@@ -551,6 +569,11 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   public onSelectApp(node: InstanceNodeConfigurationDto, process: ApplicationConfiguration) {
+    // if we're central && !syncd prevent switching
+    if (this.isCentral() && !this.isCentralSyncd) {
+      return;
+    }
+
     // Prevent switching if we edit applications or products
     const disallowed = [SidenavMode.Applications, SidenavMode.Products];
     if (disallowed.includes(this.sidenavMode)) {
@@ -800,7 +823,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
    * Returns whether or not the currently selected configuration is editable.
    */
   isEditable() {
-    return this.selectedConfig && !this.selectedConfig.readonly;
+    return this.selectedConfig && !this.isReadonly();
   }
 
   async updateProduct(product: ProductDto): Promise<void> {
@@ -880,7 +903,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
   /** Enables auto-refresh mechanism */
   enableAutoRefresh() {
-    if (this.autoRefresh) {
+    if (this.autoRefresh || (this.isCentral() && !this.isCentralSyncd)) {
       return;
     }
 
@@ -943,6 +966,21 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     return this.sidenavMode === SidenavMode.ProcessStatus || this.sidenavMode === SidenavMode.Versions;
   }
 
+  isReadonly() {
+    return (this.selectedConfig && this.selectedConfig.readonly) || (this.isCentral() && !this.isCentralSyncd);
+  }
+
+  async doSyncCentral() {
+    if (!this.isCentral()) {
+      return;
+    }
+    await this.managedServers.synchronize(this.groupParam, this.controllingServer.name).toPromise();
+    this.isCentralSyncd = true;
+
+    // reload
+    this.loadVersions(true);
+  }
+
   importInstanceVersion() {
     const config = new MatDialogConfig();
     config.width = '80%';
@@ -980,5 +1018,9 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       classes.push('dragula-appOs-' + groupOs.toLowerCase());
     }
     return classes;
+  }
+
+  getDate(x: number) {
+    return format(new Date(x), 'dd.MM.yyyy HH:mm');
   }
 }

@@ -3,6 +3,7 @@
 @mixin process-configuration-theme($theme) {
   $dark: map-get($theme, is-dark);
   $warn: map-get($theme, 'warn');
+  $accent: map-get($theme, 'accent');
 
   .sticky-header {
     background-color: if($dark, #5a5a5a, #eeeeee);
@@ -19,5 +20,10 @@
   .app-process-out-of-sync-text {
     color: #fff;
     background-color: mat-color($warn);
+  }
+
+  .need-sync-text {
+    color: mat-color($accent, default-contrast);
+    background-color: mat-color($accent);
   }
 }

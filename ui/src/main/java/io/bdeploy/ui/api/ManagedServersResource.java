@@ -92,4 +92,10 @@ public interface ManagedServersResource {
     @Consumes(MediaType.TEXT_PLAIN)
     public Map<String, NodeStatus> getMinionsOfManagedServer(@PathParam("group") String groupName,
             @PathParam("server") String serverName);
+
+    @POST
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Path("/synchronize/{group}/{server}")
+    public void synchronize(@PathParam("group") String groupName, @PathParam("server") String serverName);
+
 }

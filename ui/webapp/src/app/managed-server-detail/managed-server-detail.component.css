@@ -13,3 +13,9 @@
 .node-table {
   flex: 1 0 auto;
 }
+
+.last-sync-label {
+  display: flex;
+  align-items: center;
+  font-size: smaller;
+}

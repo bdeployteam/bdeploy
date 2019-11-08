@@ -5,6 +5,7 @@ import { finalize } from 'rxjs/operators';
 import { MessageBoxMode } from '../messagebox/messagebox.component';
 import { AttachIdentDto, InstanceConfiguration, NodeStatus } from '../models/gen.dtos';
 import { ConfigService } from '../services/config.service';
+import { ManagedServersService } from '../services/managed-servers.service';
 import { MessageboxService } from '../services/messagebox.service';
 
 interface NodeRecord {
@@ -19,7 +20,6 @@ interface NodeRecord {
 })
 export class ManagedServerDetailComponent implements OnInit {
 
-
   @Input()
   public server: AttachIdentDto;
 
@@ -27,7 +27,7 @@ export class ManagedServerDetailComponent implements OnInit {
   public instanceGroupName: string;
 
   @Output()
-  public delete = new EventEmitter<AttachIdentDto>();
+  public reload = new EventEmitter<any>();
 
   loading = true;
   instances: InstanceConfiguration[];
@@ -35,19 +35,21 @@ export class ManagedServerDetailComponent implements OnInit {
 
   public dataSource: MatTableDataSource<NodeRecord>;
 
-  constructor(private config: ConfigService, private mbService: MessageboxService) { }
+  constructor(private config: ConfigService, private mbService: MessageboxService, private managedServers: ManagedServersService) { }
 
   ngOnInit() {
-    this.config.getInstancesForManagedServer(this.instanceGroupName, this.server.name).subscribe(r => {
+    this.load();
+  }
+
+  private load() {
+    this.managedServers.getInstancesForManagedServer(this.instanceGroupName, this.server.name).subscribe(r => {
       this.instances = r;
     });
-
-    this.config.minionsOfManagedServer(this.instanceGroupName, this.server.name).pipe(finalize(() => this.loading = false)).subscribe(r => {
+    this.managedServers.minionsOfManagedServer(this.instanceGroupName, this.server.name).pipe(finalize(() => this.loading = false)).subscribe(r => {
       const arr: NodeRecord[] = [];
       for (const key of Object.keys(r)) {
-        arr.push({key: key, status: r[key]});
+        arr.push({ key: key, status: r[key] });
       }
-
       this.dataSource = new MatTableDataSource<NodeRecord>(arr);
     });
   }
@@ -60,12 +62,22 @@ export class ManagedServerDetailComponent implements OnInit {
       doIt = await this.mbService.openAsync({title: 'Delete attached Managed Server', message: 'Are you sure you want to delete the selected managed server from the central server?', mode: MessageBoxMode.CONFIRM});
     }
     if (doIt) {
-      await this.config.deleteManagedServer(this.instanceGroupName, this.server.name).toPromise();
-      this.delete.emit(this.server);
+      await this.managedServers.deleteManagedServer(this.instanceGroupName, this.server.name).toPromise();
+      this.reload.emit();
     }
   }
 
   getDate(x: number) {
     return format(new Date(x), 'dd.MM.yyyy HH:mm');
+  }
+
+  async doSync() {
+    this.loading = true;
+
+    await this.managedServers.synchronize(this.instanceGroupName, this.server.name).toPromise();
+
+    this.load();
+
+    this.reload.emit();
   }
 }

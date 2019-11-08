@@ -132,7 +132,7 @@ public class ProductResourceImpl implements ProductResource {
         // read instance state once per instance and count installed instance versions
         long count = 0;
         for (Set<InstanceManifest> mfSet : uuid2imSet.values()) {
-            List<String> installedTags = mfSet.stream().findFirst().get().getState(hive).read().installedTags;
+            Set<String> installedTags = mfSet.stream().findFirst().get().getState(hive).read().installedTags;
             count += mfSet.stream().map(mf -> mf.getManifest().getTag()).filter(t -> installedTags.contains(t)).count();
         }
 

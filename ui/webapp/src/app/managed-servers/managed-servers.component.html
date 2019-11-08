@@ -31,7 +31,7 @@
           </mat-panel-description>
         </mat-expansion-panel-header>
         <ng-template matExpansionPanelContent>
-          <app-managed-server-detail [server]='server' [instanceGroupName]='instanceGroupName' (delete)='load()'></app-managed-server-detail>
+          <app-managed-server-detail [server]='server' [instanceGroupName]='instanceGroupName' (reload)='load()'></app-managed-server-detail>
         </ng-template>
       </mat-expansion-panel>
     </mat-accordion>

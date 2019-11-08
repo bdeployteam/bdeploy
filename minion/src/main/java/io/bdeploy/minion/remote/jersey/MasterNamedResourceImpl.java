@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -143,7 +144,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 .collect(Collectors.toCollection(TreeSet::new));
 
         // for each required minion, figure out available versions.
-        SortedMap<String, List<String>> available = new TreeMap<>();
+        SortedMap<String, Set<String>> available = new TreeMap<>();
         SortedSet<String> offline = new TreeSet<>();
         for (String minion : minions) {
             // don't check client node, it will never be online, and is not required (offline = OK).
@@ -156,7 +157,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             try {
                 SlaveDeploymentResource sdr = ResourceProvider.getResource(remote, SlaveDeploymentResource.class, context);
                 InstanceStateRecord instanceState = sdr.getInstanceState(instance);
-                available.put(minion, instanceState == null ? Collections.emptyList() : instanceState.installedTags);
+                available.put(minion, instanceState == null ? Collections.emptySet() : instanceState.installedTags);
             } catch (Exception e) {
                 log.warn("Problem contacting minion to fetch available deployments: {}", minion);
                 offline.add(minion);

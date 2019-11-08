@@ -12,10 +12,10 @@
     <span class="spacer"></span>
     <span *ngIf="!productAvailable" class="product-unavailable" matTooltip="Required product version is not available.">N/A</span>
     <mat-menu #appMenu="matMenu" xPosition="before">
-      <button mat-menu-item (click)="install.emit(instanceVersionDto.key)" [disabled]='dirty || !productAvailable || isDeployed || isActive'>Install</button>
-      <button mat-menu-item (click)="uninstall.emit(instanceVersionDto.key)" [disabled]='dirty || !isDeployed || isActive || isRunningOrScheduled'>Uninstall</button>
+      <button mat-menu-item (click)="install.emit(instanceVersionDto.key)" [disabled]='dirty || readOnly || !productAvailable || isDeployed || isActive'>Install</button>
+      <button mat-menu-item (click)="uninstall.emit(instanceVersionDto.key)" [disabled]='dirty || readOnly || !isDeployed || isActive || isRunningOrScheduled'>Uninstall</button>
       <mat-divider></mat-divider>
-      <button mat-menu-item (click)="activate.emit(instanceVersionDto.key)" [disabled]='dirty || !productAvailable || !isDeployed'>Activate</button>
+      <button mat-menu-item (click)="activate.emit(instanceVersionDto.key)" [disabled]='dirty || readOnly || !productAvailable || !isDeployed'>Activate</button>
       <mat-divider></mat-divider>
       <button mat-menu-item (click)="export.emit(instanceVersionDto.key)">Export...</button>
     </mat-menu>

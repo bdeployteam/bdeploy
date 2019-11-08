@@ -2,9 +2,6 @@ package io.bdeploy.interfaces.manifest.state;
 
 import java.util.function.Supplier;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.bdeploy.bhive.BHiveExecution;
 import io.bdeploy.bhive.meta.MetaManifest;
 import io.bdeploy.bhive.model.Manifest;
@@ -13,8 +10,6 @@ import io.bdeploy.bhive.model.Manifest;
  * Stores and retrieves instance state.
  */
 public class InstanceState {
-
-    private static final Logger log = LoggerFactory.getLogger(InstanceState.class);
 
     private final BHiveExecution hive;
     private final MetaManifest<InstanceStateRecord> meta;
@@ -68,7 +63,6 @@ public class InstanceState {
         if (stored == null) {
             // TODO: remove in 2.0.0. just return empty instance always.
             if (this.initSupplier == null) {
-                log.warn("No initializer for manifest state found, starting with empty state");
                 return new InstanceStateRecord();
             } else {
                 InstanceStateRecord supplied = initSupplier.get();
