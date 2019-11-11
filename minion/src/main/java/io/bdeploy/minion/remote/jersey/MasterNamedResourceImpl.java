@@ -71,6 +71,8 @@ import io.bdeploy.interfaces.manifest.dependencies.LocalDependencyFetcher;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
 import io.bdeploy.interfaces.manifest.state.InstanceState;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
+import io.bdeploy.interfaces.minion.MinionConfiguration;
+import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.interfaces.remote.SlaveDeploymentResource;
@@ -98,6 +100,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         this.reporter = reporter;
     }
 
+    @SuppressWarnings("deprecation")
     private InstanceState getState(InstanceManifest im, BHive hive) {
         return im.getState(hive).setMigrationProvider(() -> migrate(im.getConfiguration().uuid));
     }
@@ -153,7 +156,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 continue;
             }
 
-            RemoteService remote = root.getMinions().get(minion);
+            RemoteService remote = root.getMinions().getRemote(minion);
             try {
                 SlaveDeploymentResource sdr = ResourceProvider.getResource(remote, SlaveDeploymentResource.class, context);
                 InstanceStateRecord instanceState = sdr.getInstanceState(instance);
@@ -212,7 +215,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                     continue;
                 }
                 Manifest.Key toDeploy = entry.getValue();
-                RemoteService minion = root.getState().minions.get(minionName);
+                RemoteService minion = root.getMinions().getRemote(minionName);
 
                 assertNotNull(minion, "Cannot lookup minion on master: " + minionName);
                 assertNotNull(toDeploy, "Cannot lookup minion manifest on master: " + toDeploy);
@@ -277,11 +280,9 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                     continue;
                 }
                 Manifest.Key toDeploy = entry.getValue();
-                RemoteService minion = root.getState().minions.get(minionName);
-
-                assertNotNull(minion, "Cannot lookup minion on master: " + minionName);
                 assertNotNull(toDeploy, "Cannot lookup minion manifest on master: " + toDeploy);
 
+                RemoteService minion = root.getMinions().getRemote(minionName);
                 SlaveDeploymentResource deployment = ResourceProvider.getResource(minion, SlaveDeploymentResource.class, context);
                 try {
                     deployment.activate(toDeploy);
@@ -316,11 +317,9 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 continue;
             }
             Manifest.Key toDeploy = entry.getValue();
-            RemoteService minion = root.getState().minions.get(minionName);
-
-            assertNotNull(minion, "Cannot lookup minion on master: " + minionName);
             assertNotNull(toDeploy, "Cannot lookup minion manifest on master: " + toDeploy);
 
+            RemoteService minion = root.getMinions().getRemote(minionName);
             InstanceStateRecord deployments;
             try {
                 SlaveDeploymentResource slave = ResourceProvider.getResource(minion, SlaveDeploymentResource.class, context);
@@ -363,11 +362,9 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                     continue;
                 }
                 Manifest.Key toRemove = entry.getValue();
-                RemoteService minion = root.getState().minions.get(minionName);
-
-                assertNotNull(minion, "Cannot lookup minion on master: " + minionName);
                 assertNotNull(toRemove, "Cannot lookup minion manifest on master: " + toRemove);
 
+                RemoteService minion = root.getMinions().getRemote(minionName);
                 SlaveDeploymentResource deployment = ResourceProvider.getResource(minion, SlaveDeploymentResource.class, context);
                 try {
                     deployment.remove(toRemove);
@@ -647,7 +644,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             InstanceNodeManifest oldInmf = InstanceNodeManifest.of(hive, entry.getValue());
             InstanceNodeConfiguration nodeConfig = oldInmf.getConfiguration();
 
-            InstanceNodeConfigurationDto dto = new InstanceNodeConfigurationDto(entry.getKey(), null, null);
+            InstanceNodeConfigurationDto dto = new InstanceNodeConfigurationDto(entry.getKey());
             dto.nodeConfiguration = nodeConfig;
 
             result.add(dto);
@@ -671,7 +668,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             throw new WebApplicationException("Cannot find active version for instance " + instanceId, Status.NOT_FOUND);
         }
 
-        SortedMap<String, RemoteService> minions = root.getState().minions;
+        MinionConfiguration minions = root.getMinions();
         InstanceStatusDto status = getStatus(instanceId);
         for (String nodeName : status.getNodesWithApps()) {
             InstanceDirectory idd = new InstanceDirectory();
@@ -679,7 +676,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             idd.uuid = instanceId;
 
             try {
-                RemoteService service = minions.get(nodeName);
+                RemoteService service = minions.getRemote(nodeName);
 
                 SlaveDeploymentResource sdr = ResourceProvider.getResource(service, SlaveDeploymentResource.class, context);
                 List<InstanceDirectoryEntry> iddes = sdr.getDataDirectoryEntries(instanceId);
@@ -697,7 +694,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
     @Override
     public EntryChunk getEntryContent(String minion, InstanceDirectoryEntry entry, long offset, long limit) {
-        RemoteService svc = root.getMinions().get(minion);
+        RemoteService svc = root.getMinions().getRemote(minion);
         if (svc == null) {
             throw new WebApplicationException("Cannot find minion " + minion, Status.NOT_FOUND);
         }
@@ -745,10 +742,10 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
     @Override
     public void start(String instanceId) {
-        SortedMap<String, RemoteService> minions = root.getState().minions;
+        MinionConfiguration minions = root.getMinions();
         InstanceStatusDto status = getStatus(instanceId);
         for (String nodeName : status.getNodesWithApps()) {
-            RemoteService service = minions.get(nodeName);
+            RemoteService service = minions.getRemote(nodeName);
             SlaveProcessResource spc = ResourceProvider.getResource(service, SlaveProcessResource.class, context);
             spc.start(instanceId);
         }
@@ -772,8 +769,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
         // Now launch this application on the minion
         try (Activity activity = reporter.start("Starting application...", -1)) {
-            SortedMap<String, RemoteService> minions = root.getState().minions;
-            RemoteService service = minions.get(minion);
+            RemoteService service = root.getMinions().getRemote(minion);
             SlaveProcessResource spc = ResourceProvider.getResource(service, SlaveProcessResource.class, context);
             spc.start(instanceId, applicationId);
         }
@@ -782,14 +778,14 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     @Override
     public void stop(String instanceId) {
         InstanceStatusDto status = getStatus(instanceId);
-        SortedMap<String, RemoteService> minions = root.getState().minions;
+        MinionConfiguration minions = root.getMinions();
 
         // Find out all nodes where at least one application is running
         Collection<String> nodes = status.getNodesWhereAppsAreRunningOrScheduled();
 
         try (Activity activity = reporter.start("Stopping applications...", nodes.size())) {
             for (String node : nodes) {
-                RemoteService service = minions.get(node);
+                RemoteService service = minions.getRemote(node);
                 SlaveProcessResource spc = ResourceProvider.getResource(service, SlaveProcessResource.class, context);
                 spc.stop(instanceId);
                 activity.worked(1);
@@ -808,8 +804,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
         // Now stop this application on the minion
         try (Activity activity = reporter.start("Stopping application...", -1)) {
-            SortedMap<String, RemoteService> minions = root.getState().minions;
-            RemoteService service = minions.get(nodeName);
+            RemoteService service = root.getMinions().getRemote(nodeName);
             SlaveProcessResource spc = ResourceProvider.getResource(service, SlaveProcessResource.class, context);
             spc.stop(instanceId, applicationId);
         }
@@ -824,28 +819,30 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         for (Map.Entry<String, Manifest.Key> entry : imf.getInstanceNodeManifests().entrySet()) {
             InstanceNodeManifest inmf = InstanceNodeManifest.of(hive, entry.getValue());
             for (ApplicationConfiguration app : inmf.getConfiguration().applications) {
-                if (app.uid.equals(applicationId)) {
-                    // this is our app :)
-                    InstanceDirectory id = new InstanceDirectory();
-                    id.minion = entry.getKey();
-                    id.uuid = instanceId;
-
-                    try {
-                        RemoteService svc = root.getMinions().get(entry.getKey());
-                        SlaveProcessResource spr = ResourceProvider.getResource(svc, SlaveProcessResource.class, context);
-                        InstanceDirectoryEntry oe = spr.getOutputEntry(instanceId, tag, applicationId);
-
-                        if (oe != null) {
-                            id.entries.add(oe);
-                        }
-                    } catch (Exception e) {
-                        log.warn("Problem fetching output entry from {} for {}, {}, {}", entry.getKey(), instanceId, tag,
-                                applicationId, e);
-                        id.problem = e.toString();
-                    }
-
-                    return id;
+                if (!app.uid.equals(applicationId)) {
+                    continue;
                 }
+
+                // this is our app
+                InstanceDirectory id = new InstanceDirectory();
+                id.minion = entry.getKey();
+                id.uuid = instanceId;
+
+                try {
+                    RemoteService svc = root.getMinions().getRemote(entry.getKey());
+                    SlaveProcessResource spr = ResourceProvider.getResource(svc, SlaveProcessResource.class, context);
+                    InstanceDirectoryEntry oe = spr.getOutputEntry(instanceId, tag, applicationId);
+
+                    if (oe != null) {
+                        id.entries.add(oe);
+                    }
+                } catch (Exception e) {
+                    log.warn("Problem fetching output entry from {} for {}, {}, {}", entry.getKey(), instanceId, tag,
+                            applicationId, e);
+                    id.problem = e.toString();
+                }
+
+                return id;
             }
         }
 
@@ -857,11 +854,12 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     public InstanceStatusDto getStatus(String instanceId) {
         InstanceStatusDto instanceStatus = new InstanceStatusDto(instanceId);
 
-        SortedMap<String, RemoteService> minions = root.getState().minions;
+        MinionConfiguration minions = root.getMinions();
         try (Activity activity = reporter.start("Get node status...", minions.size())) {
-            for (Entry<String, RemoteService> entry : minions.entrySet()) {
+            for (Entry<String, MinionDto> entry : minions.entrySet()) {
                 String minion = entry.getKey();
-                SlaveProcessResource spc = ResourceProvider.getResource(entry.getValue(), SlaveProcessResource.class, context);
+                MinionDto dto = entry.getValue();
+                SlaveProcessResource spc = ResourceProvider.getResource(dto.remote, SlaveProcessResource.class, context);
                 try {
                     InstanceNodeStatusDto nodeStatus = spc.getStatus(instanceId);
                     instanceStatus.add(minion, nodeStatus);

@@ -1,7 +1,6 @@
 {
   "version": "0.2.0",
   "configurations": [
-
     {
       "type": "edge",
       "request": "launch",
@@ -13,7 +12,7 @@
     {
       "type": "firefox",
       "request": "launch",
-      "name": "Launch Firefox",
+      "name": "Launch Firefox (Standalone)",
       "keepProfileChanges": true,
       "profileDir": "${workspaceRoot}/.vscode/firefox-debug-profile/",
       "url": "http://localhost:4200/",
@@ -31,7 +30,7 @@
     {
       "type": "firefox",
       "request": "launch",
-      "name": "Launch Firefox (Local)",
+      "name": "Launch Firefox (Managed)",
       "keepProfileChanges": true,
       "profileDir": "${workspaceRoot}/.vscode/firefox-debug-profile/",
       "url": "http://localhost:4202/",
@@ -40,7 +39,7 @@
     {
       "type": "chrome",
       "request": "launch",
-      "name": "Launch Chrome",
+      "name": "Launch Chrome (Standalone)",
       "url": "http://localhost:4200",
       "webRoot": "${workspaceFolder}"
     },
@@ -54,7 +53,7 @@
     {
       "type": "chrome",
       "request": "launch",
-      "name": "Launch Chrome (Local)",
+      "name": "Launch Chrome (Managed)",
       "url": "http://localhost:4202",
       "webRoot": "${workspaceFolder}"
     }

@@ -20,8 +20,9 @@ import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.PathHelper;
-import io.bdeploy.interfaces.NodeStatus;
 import io.bdeploy.interfaces.UpdateHelper;
+import io.bdeploy.interfaces.minion.MinionDto;
+import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
@@ -77,13 +78,15 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
     }
 
     private void listMinions(MasterRootResource client) {
-        SortedMap<String, NodeStatus> minions = client.getMinions();
-        out().println(String.format("%1$-20s %2$-8s %3$25s %4$-10s %5$-15s", "NAME", "STATUS", "START", "OS", "VERSION"));
-        for (Map.Entry<String, NodeStatus> e : minions.entrySet()) {
-            NodeStatus s = e.getValue();
-            String startTime = (s == null ? "" : FORMATTER.format(s.startup));
-            out().println(String.format("%1$-20s %2$-8s %3$25s %4$-10s %5$-15s", e.getKey(), s == null ? "OFFLINE" : "ONLINE",
-                    startTime, s == null ? "" : s.os, s == null ? "" : s.version));
+        SortedMap<String, MinionStatusDto> minions = client.getMinions();
+        String formatString = "%1$-20s %2$-8s %3$25s %4$-10s %5$-15s";
+        out().println(String.format(formatString, "NAME", "STATUS", "START", "OS", "VERSION"));
+        for (Map.Entry<String, MinionStatusDto> e : minions.entrySet()) {
+            MinionStatusDto s = e.getValue();
+            String startTime = s.startup != null ? FORMATTER.format(s.startup) : "-";
+            String status = s.offline ? "OFFLINE" : "ONLINE";
+            MinionDto config = s.config;
+            out().println(String.format(formatString, e.getKey(), status, startTime, config.os, config.version));
         }
     }
 

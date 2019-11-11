@@ -11,14 +11,13 @@ import io.bdeploy.common.security.RemoteService;
 
 /**
  * Represents the persistent state of a minion
- * <p>
- * TODO: split to state, master and slave config. state = runtime data, master/slave config = static.
  */
 public class MinionState {
 
     /**
      * Known other minions. Currently only used on the master minion
      */
+    @Deprecated(forRemoval = true, since = "1.4.0")
     public SortedMap<String, RemoteService> minions = new TreeMap<>();
 
     /**

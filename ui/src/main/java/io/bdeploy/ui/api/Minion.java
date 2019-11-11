@@ -2,12 +2,9 @@ package io.bdeploy.ui.api;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.SortedMap;
-
-import javax.inject.Named;
 
 import io.bdeploy.common.security.RemoteService;
-import io.bdeploy.interfaces.NodeStatus;
+import io.bdeploy.interfaces.minion.MinionConfiguration;
 
 /**
  * Represents a master or a slave.
@@ -15,17 +12,10 @@ import io.bdeploy.interfaces.NodeStatus;
 public interface Minion {
 
     /**
-     * {@link Named} injection point for a {@link Boolean} determining whether the current minion hosts a master as well.
+     * The default name of each node. To determine whether a node is a master, use the provided {@link #isMaster() API} and never
+     * the name.
      */
-    public static final String MASTER = "MASTER";
-
-    /**
-     * The default name of the 'master' node. This node is a slave as any other node, but runs th master component as well.
-     * <p>
-     * The name is just used as a starting point. To determine whether a node is a master, query its {@link NodeStatus} instead of
-     * investigating its name.
-     */
-    public static final String DEFAULT_MASTER_NAME = "master";
+    public static final String DEFAULT_NAME = "master";
 
     /**
      * Returns the directory where the minion stores temporary files that are served to the client.
@@ -40,7 +30,7 @@ public interface Minion {
     /**
      * Retrieve registered slaves. This makes only sense if the current VM hosts a master, otherwise only 'self' is returned.
      */
-    public SortedMap<String, RemoteService> getMinions();
+    public MinionConfiguration getMinions();
 
     /**
      * Creates and returns a new weak token for the given principal. The weak token
@@ -65,6 +55,11 @@ public interface Minion {
      * @return the own "name", which is the hostname used to init the minion's root.
      */
     public String getSelfName();
+
+    /**
+     * Returns whether or not the minion represents the master.
+     */
+    public boolean isMaster();
 
     /**
      * Encrypts and signs the given payload using the minions private keys, embedding the public certificate used for encryption

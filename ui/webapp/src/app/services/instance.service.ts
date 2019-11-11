@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ClickAndStartDescriptor, ConfigFileDto, FileStatusDto, InstanceConfiguration, InstanceConfigurationDto, InstanceDirectory, InstanceDirectoryEntry, InstanceDto, InstanceManifestHistoryDto, InstanceNodeConfigurationListDto, InstancePurpose, InstanceStateRecord, InstanceVersionDto, ManifestKey, StringEntryChunkDto } from '../models/gen.dtos';
+import { ClickAndStartDescriptor, ConfigFileDto, FileStatusDto, InstanceConfiguration, InstanceConfigurationDto, InstanceDirectory, InstanceDirectoryEntry, InstanceDto, InstanceManifestHistoryDto, InstanceNodeConfigurationListDto, InstancePurpose, InstanceStateRecord, InstanceVersionDto, ManifestKey, MinionDto, MinionStatusDto, StringEntryChunkDto } from '../models/gen.dtos';
 import { ConfigService } from './config.service';
 import { DownloadService } from './download.service';
 import { InstanceGroupService } from './instance-group.service';
@@ -13,8 +13,12 @@ import { Logger, LoggingService } from './logging.service';
 export class InstanceService {
   private readonly log: Logger = this.loggingService.getLogger('InstanceService');
 
-  constructor(private cfg: ConfigService, private http: HttpClient, private loggingService: LoggingService,
-    private downloadService: DownloadService) {}
+  constructor(
+    private cfg: ConfigService,
+    private http: HttpClient,
+    private loggingService: LoggingService,
+    private downloadService: DownloadService,
+  ) {}
 
   public listInstances(instanceGroupName: string): Observable<InstanceDto[]> {
     const url: string = this.buildGroupUrl(instanceGroupName);
@@ -79,19 +83,33 @@ export class InstanceService {
     return this.http.get<InstanceConfiguration>(url);
   }
 
-  public listConfigurationFiles(instanceGroupName: string, instanceName: string, tag: string): Observable<ConfigFileDto[]> {
+  public listConfigurationFiles(
+    instanceGroupName: string,
+    instanceName: string,
+    tag: string,
+  ): Observable<ConfigFileDto[]> {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/cfgFiles/' + tag;
     this.log.debug('listConfigurationFiles: ' + url);
     return this.http.get<ConfigFileDto[]>(url);
   }
 
-  public getConfigurationFile(instanceGroupName: string, instanceName: string, tag: string, filename: string): Observable<string> {
+  public getConfigurationFile(
+    instanceGroupName: string,
+    instanceName: string,
+    tag: string,
+    filename: string,
+  ): Observable<string> {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/cfgFiles/' + tag + '/' + filename;
     this.log.debug('getConfigurationFile: ' + url);
     return this.http.get(url, { responseType: 'text' });
   }
 
-  public updateConfigurationFiles(instanceGroupName: string, instanceName: string, tag: string, configFiles: FileStatusDto[]) {
+  public updateConfigurationFiles(
+    instanceGroupName: string,
+    instanceName: string,
+    tag: string,
+    configFiles: FileStatusDto[],
+  ) {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/cfgFiles';
     this.log.debug('updateConfigurationFiles: ' + url);
     const options = {
@@ -121,6 +139,24 @@ export class InstanceService {
     return this.http.get<InstanceNodeConfigurationListDto>(url);
   }
 
+  public getMinionConfiguration(
+    instanceGroupName: string,
+    instanceId: string,
+    tag: string,
+  ): Observable<{ [key: string]: MinionDto }> {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceId) + '/' + tag + '/minionConfiguration';
+    return this.http.get<{ [minionName: string]: MinionDto }>(url);
+  }
+
+  public getMinionState(
+    instanceGroupName: string,
+    instanceId: string,
+    tag: string,
+  ): Observable<{ [key: string]: MinionStatusDto }> {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceId) + '/' + tag + '/minionState';
+    return this.http.get<{ [minionName: string]: MinionStatusDto }>(url);
+  }
+
   public install(instanceGroupName: string, instanceName: string, instance: ManifestKey) {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/' + instance.tag + '/install';
     this.log.debug('install: ' + url);
@@ -139,7 +175,11 @@ export class InstanceService {
     return this.http.get(url);
   }
 
-  public getHistory(instanceGroupName: string, instanceName: string, instance: ManifestKey): Observable<InstanceManifestHistoryDto> {
+  public getHistory(
+    instanceGroupName: string,
+    instanceName: string,
+    instance: ManifestKey,
+  ): Observable<InstanceManifestHistoryDto> {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/' + instance.tag + '/history';
     this.log.debug('history: ' + url);
     return this.http.get<InstanceManifestHistoryDto>(url);
@@ -151,16 +191,31 @@ export class InstanceService {
     return this.http.get<InstanceStateRecord>(url);
   }
 
-  public getApplicationOutputEntry(instanceGroupName: string, instanceName: string, instanceTag: string, appUid: string, silent: boolean): Observable<InstanceDirectory> {
-    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/output/' + instanceTag + '/' + appUid;
+  public getApplicationOutputEntry(
+    instanceGroupName: string,
+    instanceName: string,
+    instanceTag: string,
+    appUid: string,
+    silent: boolean,
+  ): Observable<InstanceDirectory> {
+    const url: string =
+      this.buildInstanceUrl(instanceGroupName, instanceName) + '/output/' + instanceTag + '/' + appUid;
     this.log.debug('getApplicationOutputEntry: ' + url);
     const options = {
-      headers: { 'ignoreLoadingBar': ''},
+      headers: { ignoreLoadingBar: '' },
     };
     return this.http.get<InstanceDirectory>(url, silent ? options : {});
   }
 
-  public getContentChunk(instanceGroupName: string, instanceName: string, id: InstanceDirectory, ide: InstanceDirectoryEntry, offset: number, limit: number, silent: boolean): Observable<StringEntryChunkDto> {
+  public getContentChunk(
+    instanceGroupName: string,
+    instanceName: string,
+    id: InstanceDirectory,
+    ide: InstanceDirectoryEntry,
+    offset: number,
+    limit: number,
+    silent: boolean,
+  ): Observable<StringEntryChunkDto> {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/content/' + id.minion;
     this.log.debug('getContentChunk: ' + url);
     const options = {
@@ -168,7 +223,7 @@ export class InstanceService {
       params: new HttpParams().set('offset', offset.toString()).set('limit', limit.toString()),
     };
     if (silent) {
-      options.headers = { 'ignoreLoadingBar': ''};
+      options.headers = { ignoreLoadingBar: '' };
     }
     return this.http.post<StringEntryChunkDto>(url, ide, options);
   }
@@ -190,7 +245,7 @@ export class InstanceService {
   }
 
   public downloadClientInstaller(token: string) {
-    const url =  this.downloadService.createDownloadUrl(token);
+    const url = this.downloadService.createDownloadUrl(token);
     this.downloadService.download(url);
   }
 

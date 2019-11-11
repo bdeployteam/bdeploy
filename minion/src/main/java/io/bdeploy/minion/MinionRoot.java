@@ -10,6 +10,7 @@ import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -41,11 +42,15 @@ import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.dcu.InstanceNodeController;
 import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
+import io.bdeploy.interfaces.manifest.MinionManifest;
+import io.bdeploy.interfaces.minion.MinionConfiguration;
+import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.jersey.audit.Auditor;
 import io.bdeploy.jersey.audit.RollingFileAuditor;
 import io.bdeploy.minion.job.CleanupDownloadDirJob;
 import io.bdeploy.minion.job.MasterCleanupJob;
+import io.bdeploy.minion.migration.MinionStateMigration;
 import io.bdeploy.minion.migration.UpdatePackagingMigration;
 import io.bdeploy.minion.user.UserDatabase;
 import io.bdeploy.pcu.InstanceProcessController;
@@ -76,6 +81,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
 
     private Path updates;
     private MinionUpdateManager updateManager = t -> log.error("No Update Manager, cannot update Minion!");
+
     private MinionMode mode = MinionMode.STANDALONE;
 
     private Scheduler scheduler;
@@ -101,6 +107,11 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         this.mode = mode;
     }
 
+    @Override
+    public boolean isMaster() {
+        return mode == MinionMode.CENTRAL || mode == MinionMode.MANAGED || mode == MinionMode.STANDALONE;
+    }
+
     /**
      * @return the mode the hosting minion is run in.
      */
@@ -115,11 +126,8 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     @Override
     public RemoteService getSelf() {
         MinionState state = getState();
-        if (state.self == null || state.self.isBlank()) {
-            return state.minions.get(DEFAULT_MASTER_NAME);
-        }
-
-        return state.minions.get(state.self);
+        String myName = (state.self == null || state.self.isBlank()) ? DEFAULT_NAME : state.self;
+        return getMinions().getRemote(myName);
     }
 
     @Override
@@ -148,7 +156,43 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         return updateManager;
     }
 
-    public void runPostUpdate(boolean isMaster) {
+    /**
+     * Called once when starting the minion root. Can be used for additional initialization
+     */
+    public void onStartup() {
+        doMigrate();
+        updateMasterFlag();
+    }
+
+    /** Ensures that the master flag is correctly set in the minion manifest */
+    private void updateMasterFlag() {
+        MinionManifest manifest = new MinionManifest(hive);
+        MinionConfiguration config = manifest.read();
+
+        // Check that the master flag is set on the correct entry
+        boolean writeManifest = false;
+        boolean isMaster = isMaster();
+        String myName = getState().self;
+        for (Map.Entry<String, MinionDto> entry : config.entrySet()) {
+            String minionName = entry.getKey();
+            MinionDto minionDto = entry.getValue();
+            if (minionName.equals(myName) && isMaster && !minionDto.master) {
+                minionDto.master = true;
+                writeManifest = true;
+            } else if (minionDto.master && !isMaster) {
+                minionDto.master = false;
+                writeManifest = true;
+            }
+        }
+
+        // Avoid writing new versions if nothing changed
+        if (writeManifest) {
+            manifest.update(config);
+        }
+    }
+
+    /** Does whatever is required to migrate an older version to the current version */
+    private void doMigrate() {
         String current = VersionHelper.readVersion();
         if (current == null || VersionHelper.UNKNOWN.equals(current)) {
             log.debug("Skipping migration to {}", current);
@@ -163,7 +207,8 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         }
 
         try {
-            UpdatePackagingMigration.run(this, isMaster);
+            UpdatePackagingMigration.run(this);
+            MinionStateMigration.run(this);
         } catch (Exception e) {
             throw new IllegalStateException("Minion update migration failed", e);
         }
@@ -182,8 +227,8 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     }
 
     @Override
-    public SortedMap<String, RemoteService> getMinions() {
-        return getState().minions;
+    public MinionConfiguration getMinions() {
+        return MinionManifest.getConfiguration(hive);
     }
 
     @Override

@@ -5,7 +5,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import io.bdeploy.interfaces.NodeStatus;
+import io.bdeploy.interfaces.minion.MinionStatusDto;
 
 /**
  * Query overall minion status.
@@ -18,6 +18,6 @@ public interface MinionStatusResource {
      * @return the status of the minion.
      */
     @GET
-    public NodeStatus getStatus();
+    public MinionStatusDto getStatus();
 
 }

@@ -16,8 +16,6 @@ export class ManagedServersComponent implements OnInit {
   managedServers: ManagedMasterDto[];
   loading = true;
 
-  connected = new Map<string, boolean>();
-
   constructor(private route: ActivatedRoute, public location: Location, private managedServersService: ManagedServersService) { }
 
   ngOnInit() {
@@ -29,14 +27,6 @@ export class ManagedServersComponent implements OnInit {
     this.managedServersService.getManagedServers(this.instanceGroupName).pipe(finalize(() => this.loading = false)).subscribe(r => {
       this.managedServers = r.sort((a, b) => a.name.localeCompare(b.name));
     });
-  }
-
-  isConnected(server: ManagedMasterDto) {
-    return this.connected.get(server.name);
-  }
-
-  setConnected(server: ManagedMasterDto, con: boolean) {
-    this.connected.set(server.name, con);
   }
 
 }

@@ -13,8 +13,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import io.bdeploy.interfaces.NodeStatus;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
+import io.bdeploy.interfaces.minion.MinionDto;
+import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.ui.dto.ManagedMasterDto;
 
 @Path("/managed-servers")
@@ -40,7 +41,8 @@ public interface ManagedServersResource {
      * Used on a managed server to manually (force) attach an instance group from a central server using it's encrypted
      * identification.
      * <p>
-     * The central identification must be a string obtained using {@link #getCentralIdent(String, ManagedMasterDto)} on the central
+     * The central identification must be a string obtained using {@link #getCentralIdent(String, ManagedMasterDto)} on the
+     * central
      * server.
      *
      * @return the name of the created (attached) instance group.
@@ -88,14 +90,20 @@ public interface ManagedServersResource {
     public void deleteManagedServer(@PathParam("group") String groupName, @PathParam("server") String serverName);
 
     @GET
-    @Path("/minions/{group}/{server}")
+    @Path("/minion-config/{group}/{server}")
     @Consumes(MediaType.TEXT_PLAIN)
-    public Map<String, NodeStatus> getMinionsOfManagedServer(@PathParam("group") String groupName,
+    public Map<String, MinionDto> getMinionsOfManagedServer(@PathParam("group") String groupName,
+            @PathParam("server") String serverName);
+
+    @GET
+    @Path("/minion-state/{group}/{server}")
+    @Consumes(MediaType.TEXT_PLAIN)
+    public Map<String, MinionStatusDto> getMinionStateOfManagedServer(@PathParam("group") String groupName,
             @PathParam("server") String serverName);
 
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
     @Path("/synchronize/{group}/{server}")
-    public void synchronize(@PathParam("group") String groupName, @PathParam("server") String serverName);
+    public ManagedMasterDto synchronize(@PathParam("group") String groupName, @PathParam("server") String serverName);
 
 }

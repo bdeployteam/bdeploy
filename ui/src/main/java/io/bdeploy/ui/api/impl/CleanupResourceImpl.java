@@ -3,13 +3,10 @@ package io.bdeploy.ui.api.impl;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
-
-import org.jvnet.hk2.annotations.Optional;
 
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.interfaces.cleanup.CleanupGroup;
@@ -19,11 +16,6 @@ import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.cleanup.CleanupHelper;
 
 public class CleanupResourceImpl implements CleanupResource {
-
-    @Inject
-    @Optional
-    @Named(Minion.MASTER)
-    private Boolean isMaster;
 
     @Inject
     private Minion minion;
@@ -50,7 +42,7 @@ public class CleanupResourceImpl implements CleanupResource {
     }
 
     private void checkMaster() {
-        if (isMaster == null || !isMaster) {
+        if (!minion.isMaster()) {
             throw new WebApplicationException("Cleanup is only supported on the master", Status.BAD_REQUEST);
         }
     }

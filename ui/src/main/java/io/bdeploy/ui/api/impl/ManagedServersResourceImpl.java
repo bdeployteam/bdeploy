@@ -44,17 +44,19 @@ import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.StreamHelper;
-import io.bdeploy.interfaces.NodeStatus;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
+import io.bdeploy.interfaces.minion.MinionDto;
+import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.ui.ControllingMaster;
 import io.bdeploy.ui.ManagedMasters;
 import io.bdeploy.ui.ManagedMastersConfiguration;
+import io.bdeploy.ui.api.BackendInfoResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.ManagedServersResource;
 import io.bdeploy.ui.api.Minion;
@@ -271,9 +273,19 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
     }
 
     @Override
-    public Map<String, NodeStatus> getMinionsOfManagedServer(String groupName, String serverName) {
+    public Map<String, MinionDto> getMinionsOfManagedServer(String groupName, String serverName) {
+        BHive hive = getInstanceGroupHive(groupName);
+
+        ManagedMasters mm = new ManagedMasters(hive);
+        ManagedMasterDto attached = mm.read().getManagedMaster(serverName);
+        return attached.minions.values();
+    }
+
+    @Override
+    public Map<String, MinionStatusDto> getMinionStateOfManagedServer(String groupName, String serverName) {
         RemoteService svc = getConfiguredRemote(groupName, serverName);
-        return ResourceProvider.getResource(svc, MasterRootResource.class, context).getMinions();
+        MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class, context);
+        return root.getMinions();
     }
 
     private RemoteService getConfiguredRemote(String groupName, String serverName) {
@@ -290,11 +302,10 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
     }
 
     @Override
-    public void synchronize(String groupName, String serverName) {
+    public ManagedMasterDto synchronize(String groupName, String serverName) {
         if (minion.getMode() != MinionMode.CENTRAL) {
-            return;
+            return null;
         }
-
         BHive hive = getInstanceGroupHive(groupName);
         RemoteService svc = getConfiguredRemote(groupName, serverName);
 
@@ -313,7 +324,6 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         List<String> instanceIds = instances.values().stream().map(ic -> ic.uuid).collect(Collectors.toList());
 
         FetchOperation fetchOp = new FetchOperation().setRemote(svc).setHiveName(groupName);
-
         try (RemoteBHive rbh = RemoteBHive.forService(svc, groupName, reporter)) {
             SortedSet<Manifest.Key> keysToFetch = new TreeSet<>();
 
@@ -323,8 +333,6 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             // we're also interested in all the related meta manifests.
             rbh.getManifestInventory(instanceIds.stream().map(s -> ".meta/" + s).toArray(String[]::new))
                     .forEach((k, v) -> keysToFetch.add(k));
-
-            // .. and also in the minion information. (FIXME)
         }
 
         hive.execute(fetchOp);
@@ -352,11 +360,18 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             new ControllingMaster(hive, instance).associate(serverName);
         }
 
-        // 5. update last sync timestamp on attachment of server.
+        // 5. Fetch minion information and store in the managed masters
+        // Note: We might not overwrite the entire DTO as the user can adopt the name and the service
         ManagedMasters mm = new ManagedMasters(hive);
         ManagedMasterDto attached = mm.read().getManagedMaster(serverName);
+        BackendInfoResource backendInfo = ResourceProvider.getResource(svc, BackendInfoResource.class, context);
+        ManagedMasterDto remoteInfo = backendInfo.getManagedMasterIdentification();
+        attached.minions = remoteInfo.minions;
+
+        // 5. update last sync timestamp on attachment of server.
         attached.lastSync = Instant.now();
         mm.attach(attached, true);
+        return attached;
     }
 
 }

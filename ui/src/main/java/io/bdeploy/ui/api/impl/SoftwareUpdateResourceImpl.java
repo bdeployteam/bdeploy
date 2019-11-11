@@ -51,7 +51,6 @@ import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.common.util.ZipHelper;
-import io.bdeploy.interfaces.NodeStatus;
 import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.interfaces.remote.MasterRootResource;
@@ -106,11 +105,6 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
     public List<Key> getBDeployVersions() {
         return getHive().execute(new ManifestListOperation().setManifestName(BDEPLOY_MF_NAME)).stream().sorted(BY_TAG_NEWEST_LAST)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public Map<String, NodeStatus> getMinionNodes() {
-        return master.getMinions();
     }
 
     @Override

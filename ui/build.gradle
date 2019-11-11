@@ -217,9 +217,11 @@ task genDtos() {
             'io.bdeploy.ui.dto.BackendInfoDto',
             'io.bdeploy.ui.dto.ManagedMasterDto',
             // Other, generic
+            'io.bdeploy.common.Version',
             'io.bdeploy.common.ActivitySnapshot',
             'io.bdeploy.interfaces.cleanup.CleanupGroup',
             'io.bdeploy.interfaces.directory.InstanceDirectory',
+            'io.bdeploy.interfaces.minion.MinionStatusDto',
             'io.bdeploy.interfaces.manifest.state.InstanceStateRecord',
             // Metrics
             'io.bdeploy.jersey.resources.JerseyMetricsResource$MetricBundle',

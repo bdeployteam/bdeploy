@@ -19,3 +19,17 @@
   align-items: center;
   font-size: smaller;
 }
+
+.mat-column-os {
+  width: 4em;
+  text-align: center;
+}
+
+.mat-column-status {
+  width: 4em;
+  text-align: center;
+}
+
+.mat-column-version {
+  width: 20%;
+}

@@ -1,12 +1,13 @@
 import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { format } from 'date-fns';
 import { cloneDeep } from 'lodash';
 import { DragulaService } from 'ng2-dragula';
 import { Subscription } from 'rxjs';
 import { ApplicationGroup } from '../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_APPLICATION_CONFIGURATION, EMPTY_INSTANCE_NODE_CONFIGURATION, EMPTY_PROCESS_CONTROL_CONFIG } from '../models/consts';
 import { EventWithCallback } from '../models/event';
-import { ApplicationConfiguration, ApplicationDto, InstanceNodeConfiguration, InstanceNodeConfigurationDto } from '../models/gen.dtos';
+import { ApplicationConfiguration, ApplicationDto, InstanceNodeConfiguration, InstanceNodeConfigurationDto, MinionDto, MinionStatusDto } from '../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../models/process.model';
 import { ApplicationService } from '../services/application.service';
 import { getAppOs } from '../utils/manifest.utils';
@@ -30,6 +31,8 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
   @Input() manageApplications: boolean;
   @Input() isReadonly: boolean;
   @Input() isInstanceDirty: boolean;
+  @Input() minionConfig: MinionDto;
+  @Input() minionState: MinionStatusDto;
 
   @Output() editAppConfigEvent = new EventEmitter<EditAppConfigContext>();
   @Output() editNodeAppsEvent = new EventEmitter<void>();
@@ -49,34 +52,44 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
 
   public nodeApps: ApplicationConfiguration[] = [];
 
-  constructor(private appService: ApplicationService, private dragulaService: DragulaService) { }
+  constructor(private appService: ApplicationService, private dragulaService: DragulaService) {}
 
   ngOnInit() {
     this.subscription = new Subscription();
     this.nodeApps = this.node.nodeConfiguration ? this.node.nodeConfiguration.applications : [];
 
     // Handle dropping of applications
-    this.subscription.add(this.dragulaService.dropModel().subscribe(({ target, source, item, sourceIndex, targetIndex }) => {
-      this.onDrop(target, source, item, sourceIndex, targetIndex);
-    }));
+    this.subscription.add(
+      this.dragulaService.dropModel().subscribe(({ target, source, item, sourceIndex, targetIndex }) => {
+        this.onDrop(target, source, item, sourceIndex, targetIndex);
+      }),
+    );
 
     // Visualize valid targets for dropping elements
-    this.subscription.add(this.dragulaService.drag().subscribe(( { el }) => {
-      this.onDrag(el);
-    }));
+    this.subscription.add(
+      this.dragulaService.drag().subscribe(({ el }) => {
+        this.onDrag(el);
+      }),
+    );
 
     // Remove visualization of valid targets for dropping elements
-    this.subscription.add(this.dragulaService.dragend().subscribe(( {} ) => {
-      this.onDragEnd();
-    }));
+    this.subscription.add(
+      this.dragulaService.dragend().subscribe(({}) => {
+        this.onDragEnd();
+      }),
+    );
 
-    this.subscription.add(this.dragulaService.over().subscribe(({ container }) => {
-      this.onDragOver(container);
-    }));
+    this.subscription.add(
+      this.dragulaService.over().subscribe(({ container }) => {
+        this.onDragOver(container);
+      }),
+    );
 
-    this.subscription.add(this.dragulaService.out().subscribe(({ container }) => {
-      this.onDragOut(container);
-    }));
+    this.subscription.add(
+      this.dragulaService.out().subscribe(({ container }) => {
+        this.onDragOut(container);
+      }),
+    );
   }
 
   ngOnDestroy(): void {
@@ -166,7 +179,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
           this.nodeApps.splice(targetIndex, 0, newCfg);
         }
       } else {
-        const nodeOs = this.node.status.os;
+        const nodeOs = this.minionConfig.os;
         const app = group.getAppFor(nodeOs);
         const newCfg = this.createNewAppConfig(app);
         this.nodeApps.splice(targetIndex, 0, newCfg);
@@ -309,9 +322,10 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
     }
 
     // Append node OS - only server nodes have a state
+    // NOTE: Config might contain entries where the node is not existing any more
     if (!this.isClientApplicationsNode()) {
-      if (this.node.status) {
-        classes.push('dragula-nodeOs-' + this.node.status.os.toLowerCase());
+      if (this.minionConfig) {
+        classes.push('dragula-nodeOs-' + this.minionConfig.os.toLowerCase());
       } else {
         classes.push('dragula-nodeOs-offline');
       }
@@ -341,4 +355,27 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
     classes.push('dragula-appOs-' + appOs.toLowerCase());
     return classes;
   }
+
+  isNodeExisting() {
+    return this.minionConfig != null;
+  }
+
+  isNodeOnline() {
+    if (!this.isNodeExisting()) {
+      return false;
+    }
+    return this.minionState && !this.minionState.offline;
+  }
+
+  getNodeStatusTooltip() {
+    if (!this.isNodeExisting()) {
+      return 'Node does not exist any more.';
+    }
+    if (!this.isNodeOnline()) {
+      return this.minionState.infoText;
+    }
+    const startDate = format(new Date(this.minionState.startup), 'dd.MM.yyyy HH:mm:ss');
+    return 'Start time: ' + startDate + ' | ' + ' Version:' + this.minionConfig.version;
+  }
+
 }

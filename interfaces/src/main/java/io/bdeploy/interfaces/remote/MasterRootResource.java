@@ -16,14 +16,12 @@ import javax.ws.rs.core.MediaType;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
-import io.bdeploy.common.util.OsHelper.OperatingSystem;
-import io.bdeploy.interfaces.NodeStatus;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
+import io.bdeploy.interfaces.minion.MinionStatusDto;
 
 /**
- * Master API. The master groups APIs available from minions and delegates tasks
- * to them.
+ * Master API. The master groups APIs available from minions and delegates tasks to them.
  */
 @Path("/master")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -31,13 +29,11 @@ import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfigurat
 public interface MasterRootResource {
 
     /**
-     * @return the list of registered minions along with their
-     *         {@link OperatingSystem}. A <code>null</code> {@link OperatingSystem}
-     *         indicates that the minion is offline.
+     * @return the list of registered minions indexed by their name
      */
     @GET
     @Path("/minions")
-    public SortedMap<String, NodeStatus> getMinions();
+    public SortedMap<String, MinionStatusDto> getMinions();
 
     /**
      * Update all minions one after another, and (last) the master minion.

@@ -38,7 +38,10 @@ import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfigurationDto
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest.Builder;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
+import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
+import io.bdeploy.interfaces.minion.MinionConfiguration;
+import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.ui.TestFactory;
@@ -54,17 +57,19 @@ public class InstanceResourceTest {
 
     @BeforeEach
     void addSlaves(MinionRoot mr) {
-        mr.modifyState(s -> {
-            RemoteService ms = s.minions.get("master");
+        BHive hive = mr.getHive();
+        MinionManifest mf = new MinionManifest(hive);
 
-            s.minions.put("Node1", ms);
-            s.minions.put("Node2", ms);
-            s.minions.put("Node3", ms);
-        });
+        MinionConfiguration config = mf.read();
+        config.addMinion("Node1", MinionDto.create(config.getRemote("master")));
+        config.addMinion("Node2", MinionDto.create(config.getRemote("master")));
+        config.addMinion("Node3", MinionDto.create(config.getRemote("master")));
+
+        mf.update(config);
     }
 
     @Test
-    void getConfiguration(InstanceGroupResource root, RemoteService remote, @TempDir Path tmpDir) throws Exception {
+    void getConfiguration(InstanceGroupResource root, @TempDir Path tmpDir, RemoteService remote) throws Exception {
         // Prepare and push group
         InstanceGroupConfiguration group = TestFactory.createInstanceGroup("Demo");
         root.create(group);
@@ -76,7 +81,7 @@ public class InstanceResourceTest {
         // Push instances and their configuration
         createInstance(remote, tmpDir, group.name, product, "Instance1", "Node1", "Node2");
         createInstance(remote, tmpDir, group.name, product, "Instance2", "Node2");
-        createInstance(remote, tmpDir, group.name, product, "Instance3", "Node3", Minion.DEFAULT_MASTER_NAME);
+        createInstance(remote, tmpDir, group.name, product, "Instance3", "Node3", Minion.DEFAULT_NAME);
 
         // Verify Instance1
         InstanceNodeConfigurationListDto instanceConfig = instanceResource.getNodeConfigurations("Instance1", "1");
@@ -86,7 +91,7 @@ public class InstanceResourceTest {
         verifyNodeDto(node2NodeDto.get("Node1"), true, 0);
         verifyNodeDto(node2NodeDto.get("Node2"), true, 1);
         verifyNodeDto(node2NodeDto.get("Node3"), false, 1);
-        verifyNodeDto(node2NodeDto.get(Minion.DEFAULT_MASTER_NAME), false, 1);
+        verifyNodeDto(node2NodeDto.get(Minion.DEFAULT_NAME), false, 1);
 
         // Verify Instance2
         instanceConfig = instanceResource.getNodeConfigurations("Instance2", "1");
@@ -96,7 +101,7 @@ public class InstanceResourceTest {
         verifyNodeDto(node2NodeDto.get("Node1"), false, 1);
         verifyNodeDto(node2NodeDto.get("Node2"), true, 1);
         verifyNodeDto(node2NodeDto.get("Node3"), false, 1);
-        verifyNodeDto(node2NodeDto.get(Minion.DEFAULT_MASTER_NAME), false, 1);
+        verifyNodeDto(node2NodeDto.get(Minion.DEFAULT_NAME), false, 1);
 
         // Verify Instance3
         instanceConfig = instanceResource.getNodeConfigurations("Instance3", "1");
@@ -106,7 +111,7 @@ public class InstanceResourceTest {
         verifyNodeDto(node2NodeDto.get("Node1"), false, 1);
         verifyNodeDto(node2NodeDto.get("Node2"), false, 2);
         verifyNodeDto(node2NodeDto.get("Node3"), true, 0);
-        verifyNodeDto(node2NodeDto.get(Minion.DEFAULT_MASTER_NAME), true, 0);
+        verifyNodeDto(node2NodeDto.get(Minion.DEFAULT_NAME), true, 0);
     }
 
     @Test
@@ -125,7 +130,7 @@ public class InstanceResourceTest {
         instanceResource.create(instanceConfig, null);
 
         // Create node configuration
-        InstanceNodeConfigurationDto nodeDto = new InstanceNodeConfigurationDto("Node1", null, null);
+        InstanceNodeConfigurationDto nodeDto = new InstanceNodeConfigurationDto("Node1");
         {
             InstanceNodeConfiguration nodeConfig = new InstanceNodeConfiguration();
             nodeConfig.applications.add(TestFactory.createAppConfig(product));
@@ -145,7 +150,7 @@ public class InstanceResourceTest {
         assertEquals(4, node2Config.size()); // one for each node available
 
         // Master should not have a configuration
-        verifyNodeDto(node2Config.get(Minion.DEFAULT_MASTER_NAME), false, 0);
+        verifyNodeDto(node2Config.get(Minion.DEFAULT_NAME), false, 0);
 
         // Node1 should have a configuration
         verifyNodeDto(node2Config.get("Node1"), true, 0);
@@ -167,7 +172,7 @@ public class InstanceResourceTest {
         node2Config = InstanceNodeConfigurationDto.groupByNode(availableNodeConfigs);
 
         // Master should not have a configuration
-        verifyNodeDto(node2Config.get(Minion.DEFAULT_MASTER_NAME), false, 0);
+        verifyNodeDto(node2Config.get(Minion.DEFAULT_NAME), false, 0);
     }
 
     /** Creates a new instance within the given group. A new node config is created for each passed node name */

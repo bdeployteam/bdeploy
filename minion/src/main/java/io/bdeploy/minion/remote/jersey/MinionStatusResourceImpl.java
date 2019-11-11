@@ -6,37 +6,27 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import org.jvnet.hk2.annotations.Optional;
-
-import io.bdeploy.common.util.OsHelper;
-import io.bdeploy.common.util.VersionHelper;
-import io.bdeploy.interfaces.NodeStatus;
+import io.bdeploy.interfaces.minion.MinionDto;
+import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.MinionStatusResource;
 import io.bdeploy.jersey.JerseyServer;
-import io.bdeploy.ui.api.Minion;
+import io.bdeploy.minion.MinionRoot;
 
 @Singleton
 public class MinionStatusResourceImpl implements MinionStatusResource {
 
     @Inject
+    private MinionRoot root;
+
+    @Inject
     @Named(JerseyServer.START_TIME)
     private Instant startTime;
 
-    @Inject
-    @Optional
-    @Named(Minion.MASTER)
-    private Boolean isMaster;
-
     @Override
-    public NodeStatus getStatus() {
-        NodeStatus s = new NodeStatus();
-
-        s.os = OsHelper.getRunningOs();
+    public MinionStatusDto getStatus() {
+        MinionStatusDto s = new MinionStatusDto();
         s.startup = startTime;
-
-        s.version = VersionHelper.readVersion();
-        s.master = isMaster == null ? false : isMaster;
-
+        s.config = MinionDto.create(root.getSelf());
         return s;
     }
 

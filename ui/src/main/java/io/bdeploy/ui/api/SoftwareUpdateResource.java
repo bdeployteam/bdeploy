@@ -2,7 +2,6 @@ package io.bdeploy.ui.api;
 
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -17,7 +16,6 @@ import javax.ws.rs.core.Response;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.interfaces.NodeStatus;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import io.bdeploy.ui.dto.LauncherDto;
 
@@ -36,13 +34,6 @@ public interface SoftwareUpdateResource {
     @GET
     @Path("/bdeploy")
     public List<Manifest.Key> getBDeployVersions();
-
-    /**
-     * @return {@link NodeStatus} per node, may contain <code>null</code> values for offline nodes!
-     */
-    @GET
-    @Path("/bdeploy/minions")
-    public Map<String, NodeStatus> getMinionNodes();
 
     @POST
     @Path("/selfUpdate")

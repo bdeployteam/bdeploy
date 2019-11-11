@@ -11,6 +11,13 @@ group configuration MasterSlave {
 	adopt member Slave;
 }
 
+/** Launches the central master with a managed master + slave*/
+group configuration CentralMasterSlave {
+	adopt member Central-Master regex ".*Started.*";
+	adopt member Managed-Master regex ".*Started.*";
+	adopt member Managed-Slave;
+}
+
 /**
  * Initialize a new master root.
  */
@@ -83,6 +90,15 @@ java configuration Slave-Register : minion-base {
 }
 
 /**
+ * Removes the slave from the master root.
+ */
+java configuration Slave-Remove : minion-base {
+	argument "slave";
+	argument "--root=${workspace_loc}/runtime/master";
+	argument "--remove=slave";
+}
+
+/**
  * Registers the managed slave with the managed root.
  */
 java configuration Managed-Slave-Register : minion-base {
@@ -91,6 +107,15 @@ java configuration Managed-Slave-Register : minion-base {
 	argument "--add=slave";
 	argument "--remote=https://localhost:7707/api";
 	argument "--tokenFile=${workspace_loc}/runtime/token-managed-slave.txt";
+}
+
+/**
+ * Removes the managed slave from the managed root.
+ */
+java configuration Managed-Slave-Remove : minion-base {
+	argument "slave";
+	argument "--root=${workspace_loc}/runtime/managed";
+	argument "--remove=slave";
 }
 
 /**

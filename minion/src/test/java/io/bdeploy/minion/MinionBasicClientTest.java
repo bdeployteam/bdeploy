@@ -9,7 +9,7 @@ import java.util.SortedMap;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import io.bdeploy.interfaces.NodeStatus;
+import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.ui.api.Minion;
 
@@ -18,9 +18,9 @@ public class MinionBasicClientTest {
 
     @Test
     public void listMinionsTest(MasterRootResource master) throws Exception {
-        SortedMap<String, NodeStatus> minions = master.getMinions();
+        SortedMap<String, MinionStatusDto> minions = master.getMinions();
         assertThat(minions.size(), is(1));
-        assertThat(minions.get(Minion.DEFAULT_MASTER_NAME), is(notNullValue()));
+        assertThat(minions.get(Minion.DEFAULT_NAME), is(notNullValue()));
     }
 
 }

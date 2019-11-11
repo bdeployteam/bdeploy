@@ -9,7 +9,6 @@ import { of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AttachCentralComponent } from '../attach-central/attach-central.component';
 import { ManagedMasterDto } from '../models/gen.dtos';
-import { ConfigService } from '../services/config.service';
 import { DownloadService } from '../services/download.service';
 import { ErrorMessage } from '../services/logging.service';
 import { ManagedServersService } from '../services/managed-servers.service';
@@ -40,7 +39,6 @@ export class AttachManagedComponent implements OnInit {
     public location: Location,
     private route: ActivatedRoute,
     private fb: FormBuilder,
-    private config: ConfigService,
     private dlService: DownloadService,
     private managedServers: ManagedServersService,
   ) {}
@@ -99,7 +97,7 @@ export class AttachManagedComponent implements OnInit {
   }
 
   autoAddServer() {
-    const payload = this.createIdent();
+    const payload = this.createDto();
     this.managedServers
       .tryAutoAttach(this.instanceGroupName, payload)
       .pipe(
@@ -119,19 +117,20 @@ export class AttachManagedComponent implements OnInit {
   }
 
   manualAddServer() {
-    const payload = this.createIdent();
+    const payload = this.createDto();
 
     this.managedServers.manualAttach(this.instanceGroupName, payload).subscribe(r => {
       this.stepper.selected = this.doneStep;
     });
   }
 
-  private createIdent(): ManagedMasterDto {
+  private createDto(): ManagedMasterDto {
     return {
       name: this.serverNameControl.value,
       description: this.serverDescControl.value,
       uri: this.serverUriControl.value,
       auth: this.attachPayload.auth,
+      minions : this.attachPayload.minions,
       lastSync: 0,
     };
   }
@@ -155,7 +154,7 @@ export class AttachManagedComponent implements OnInit {
   }
 
   loadCentralIdent() {
-    this.managedServers.getCentralIdent(this.instanceGroupName, this.createIdent()).subscribe(r => {
+    this.managedServers.getCentralIdent(this.instanceGroupName, this.createDto()).subscribe(r => {
       this.centralIdent = r;
     });
   }

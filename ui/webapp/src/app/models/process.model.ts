@@ -2,7 +2,7 @@ import { cloneDeep } from 'lodash';
 import { getAppKeyName } from '../utils/manifest.utils';
 import { ApplicationGroup } from './application.model';
 import { CLIENT_NODE_NAME, EMPTY_INSTANCE_NODE_CONFIGURATION, EMPTY_INSTANCE_NODE_CONFIGURATION_DTO } from './consts';
-import { ApplicationConfiguration, ApplicationDto, ApplicationType, InstanceConfiguration, InstanceNodeConfigurationDto, InstanceNodeConfigurationListDto, InstanceVersionDto } from './gen.dtos';
+import { ApplicationConfiguration, ApplicationDto, ApplicationType, InstanceConfiguration, InstanceNodeConfigurationDto, InstanceNodeConfigurationListDto, InstanceVersionDto, MinionDto } from './gen.dtos';
 
 /**
  * Context information for EventEmitter
@@ -87,10 +87,10 @@ export class ProcessConfigDto {
   /**
    * Sets the node configurations of this configuration.
    */
-  public setNodeList(nodeList: InstanceNodeConfigurationListDto) {
+  public setNodeList(nodeList: InstanceNodeConfigurationListDto, minions: {[minionName: string]: MinionDto}) {
     this.nodeList = nodeList;
     this.initClientApplicationNode();
-    this.nodeList.nodeConfigDtos = this.sortNodeConfigs(nodeList.nodeConfigDtos);
+    this.nodeList.nodeConfigDtos = this.sortNodeConfigs(nodeList.nodeConfigDtos, minions);
     this.clonedNodeList = cloneDeep(nodeList);
   }
 
@@ -98,17 +98,21 @@ export class ProcessConfigDto {
    * Returns a sorted list of node configurations.
    * Master is always the first entry. Client node is always the last one
    */
-  sortNodeConfigs(configs: InstanceNodeConfigurationDto[]): InstanceNodeConfigurationDto[] {
+  sortNodeConfigs(configs: InstanceNodeConfigurationDto[], minions: {[minionName: string]: MinionDto}): InstanceNodeConfigurationDto[] {
     configs.sort((a, b) => {
+      // Sort clients last
       if (a.nodeName === CLIENT_NODE_NAME) {
         return 1;
       } else if (b.nodeName === CLIENT_NODE_NAME) {
         return -1;
       }
-      if (!a.status || !b.status || a.status.master === b.status.master) {
+     // Sort by name
+      const minionA = minions[a.nodeName];
+      const minionB = minions[b.nodeName];
+      if (minionA && minionB && minionA.master === minionB.master) {
         return a.nodeName.toLocaleLowerCase().localeCompare(b.nodeName.toLocaleLowerCase());
       }
-      return a.status.master ? -1 : 1;
+      return minionA.master ? -1 : 1;
     });
     return configs;
   }

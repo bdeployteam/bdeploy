@@ -9,15 +9,10 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -63,7 +58,6 @@ import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.InstanceImportExportHelper;
-import io.bdeploy.interfaces.NodeStatus;
 import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
@@ -86,6 +80,9 @@ import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
+import io.bdeploy.interfaces.minion.MinionConfiguration;
+import io.bdeploy.interfaces.minion.MinionDto;
+import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
@@ -104,19 +101,17 @@ import io.bdeploy.ui.api.ProcessResource;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
 import io.bdeploy.ui.branding.Branding;
 import io.bdeploy.ui.branding.BrandingConfig;
-import io.bdeploy.ui.dto.ManagedMasterDto;
 import io.bdeploy.ui.dto.InstanceDto;
 import io.bdeploy.ui.dto.InstanceManifestHistoryDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
 import io.bdeploy.ui.dto.InstanceVersionDto;
+import io.bdeploy.ui.dto.ManagedMasterDto;
 import io.bdeploy.ui.dto.ProductDto;
 import io.bdeploy.ui.dto.StringEntryChunkDto;
 
 public class InstanceResourceImpl implements InstanceResource {
 
     private static final Logger log = LoggerFactory.getLogger(InstanceResourceImpl.class);
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
-            .withLocale(Locale.getDefault()).withZone(ZoneId.systemDefault());
 
     private final BHive hive;
     private final String group;
@@ -387,6 +382,28 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     @Override
+    public Map<String, MinionDto> getMinionConfiguration(String instance, String versionTag) {
+        if (minion.getMode() != MinionMode.CENTRAL) {
+            return minion.getMinions().values();
+        }
+        ManagedServersResource ms = rc.initResource(new ManagedServersResourceImpl());
+        ManagedMasterDto server = ms.getServerForInstance(group, instance, versionTag);
+        return server.minions.values();
+    }
+
+    @Override
+    public Map<String, MinionStatusDto> getMinionState(String instanceId, String versionTag) {
+        if (minion.getMode() != MinionMode.CENTRAL) {
+            RemoteService remote = minion.getSelf();
+            MasterRootResource root = ResourceProvider.getResource(remote, MasterRootResource.class, null);
+            return root.getMinions();
+        }
+        ManagedServersResource msr = rc.initResource(new ManagedServersResourceImpl());
+        ManagedMasterDto master = msr.getServerForInstance(group, instanceId, versionTag);
+        return msr.getMinionStateOfManagedServer(group, master.name);
+    }
+
+    @Override
     public InstanceNodeConfigurationListDto getNodeConfigurations(String instance, String versionTag) {
 
         InstanceNodeConfigurationListDto result = new InstanceNodeConfigurationListDto();
@@ -394,25 +411,30 @@ public class InstanceResourceImpl implements InstanceResource {
         // Collect node information
         InstanceManifest thisIm = InstanceManifest.load(hive, instance, versionTag);
         String thisMaster = new ControllingMaster(hive, thisIm.getManifest()).read().getName();
-        Map<String, InstanceNodeConfigurationDto> node2Dto = getExistingNodes(thisIm);
 
+        // Create a configuration entry for each configured minion
+        Map<String, MinionDto> minions = getMinionConfiguration(instance, versionTag);
+        for (Map.Entry<String, MinionDto> entry : minions.entrySet()) {
+            String minionName = entry.getKey();
+            result.nodeConfigDtos.add(new InstanceNodeConfigurationDto(minionName));
+        }
+
+        // Insert configuration and create nodes where we still have a configuration
         for (Key imKey : InstanceManifest.scan(hive, true)) {
             boolean isForeign = !imKey.getName().equals(thisIm.getManifest().getName());
             if (!isForeign) {
                 imKey = thisIm.getManifest(); // go on with requested tag (versionTag)
             }
             String imMaster = new ControllingMaster(hive, imKey).read().getName();
-
-            if (thisMaster == null || thisMaster.equals(imMaster)) {
-                gatherNodeConfigurations(node2Dto, InstanceManifest.of(hive, imKey), isForeign);
+            if (thisMaster != null && !thisMaster.equals(imMaster)) {
+                continue;
             }
+            InstanceManifest imf = InstanceManifest.of(hive, imKey);
+            gatherNodeConfigurations(result, imf, isForeign);
         }
-
-        result.nodeConfigDtos.addAll(node2Dto.values());
 
         // Load all available applications
         Key productKey = thisIm.getConfiguration().product;
-
         try {
             ProductManifest productManifest = ProductManifest.of(hive, productKey);
             for (Key applicationKey : productManifest.getApplications()) {
@@ -425,55 +447,34 @@ public class InstanceResourceImpl implements InstanceResource {
         return result;
     }
 
-    private void gatherNodeConfigurations(Map<String, InstanceNodeConfigurationDto> node2Dto, InstanceManifest im,
-            boolean isForeign) {
+    /** Create a new node configuration for each configured instance node configuration */
+    private void gatherNodeConfigurations(InstanceNodeConfigurationListDto result, InstanceManifest im, boolean isForeign) {
+        // Build a map of configurations indexed by the node name
+        Map<String, InstanceNodeConfigurationDto> node2Config = new TreeMap<>();
+        result.nodeConfigDtos.forEach(dto -> node2Config.put(dto.nodeName, dto));
+
+        // Update the node configuration. Create entries for nodes that are configured but missing
         for (Map.Entry<String, Manifest.Key> entry : im.getInstanceNodeManifests().entrySet()) {
             String nodeName = entry.getKey();
             Manifest.Key manifestKey = entry.getValue();
 
             InstanceNodeManifest manifest = InstanceNodeManifest.of(hive, manifestKey);
             InstanceNodeConfiguration configuration = manifest.getConfiguration();
+            InstanceNodeConfigurationDto nodeConfig = node2Config.get(nodeName);
 
-            InstanceNodeConfigurationDto descriptor = node2Dto.computeIfAbsent(nodeName, k -> new InstanceNodeConfigurationDto(k,
-                    null, "Node '" + k + "' not configured on master, or master offline."));
+            // Node is not known any more but has configured applications
+            if (nodeConfig == null) {
+                nodeConfig = new InstanceNodeConfigurationDto(nodeName);
+                result.nodeConfigDtos.add(nodeConfig);
+                node2Config.put(nodeName, nodeConfig);
+            }
+
             if (!isForeign) {
-                descriptor.nodeConfiguration = configuration;
+                nodeConfig.nodeConfiguration = configuration;
             } else {
-                descriptor.foreignNodeConfigurations.add(configuration);
+                nodeConfig.foreignNodeConfigurations.add(configuration);
             }
         }
-    }
-
-    private Map<String, InstanceNodeConfigurationDto> getExistingNodes(InstanceManifest thisIm) {
-        Map<String, InstanceNodeConfigurationDto> node2Dto = new HashMap<>();
-        RemoteService rsvc = mp.getControllingMaster(hive, thisIm.getManifest());
-        try (Activity fetchNodes = reporter.start("Fetching nodes from master");
-                AutoCloseable proxy = reporter.proxyActivities(rsvc)) {
-            MasterRootResource master = ResourceProvider.getResource(rsvc, MasterRootResource.class, context);
-            for (Map.Entry<String, NodeStatus> entry : master.getMinions().entrySet()) {
-                String nodeName = entry.getKey();
-                NodeStatus nodeStatus = entry.getValue();
-                if (node2Dto.containsKey(nodeName)) {
-                    continue;
-                }
-                node2Dto.put(nodeName,
-                        new InstanceNodeConfigurationDto(nodeName, nodeStatus,
-                                (nodeStatus != null
-                                        ? "Up since " + FORMATTER.format(nodeStatus.startup) + ", version: " + nodeStatus.version
-                                        : "Node not currently online")));
-            }
-        } catch (Exception e) {
-            log.warn("Master offline: {}", thisIm.getConfiguration().uuid);
-            if (log.isTraceEnabled()) {
-                log.trace("Exception", e);
-            }
-
-            // make sure there is at least a master... even if the master is not reachable.
-            node2Dto.put(Minion.DEFAULT_MASTER_NAME, new InstanceNodeConfigurationDto(Minion.DEFAULT_MASTER_NAME, null,
-                    "Error contacting master: " + e.getMessage()));
-        }
-
-        return node2Dto;
     }
 
     @Override
@@ -773,12 +774,15 @@ public class InstanceResourceImpl implements InstanceResource {
             throw new WebApplicationException("Cannot load " + instanceId, Status.NOT_FOUND);
         }
 
-        RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
-        MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class, context);
         Path zip = minion.getDownloadDir().resolve(UuidHelper.randomId() + ".zip");
         try {
             Files.copy(inputStream, zip);
-            Key newKey = InstanceImportExportHelper.importFrom(zip, hive, instanceId, root);
+
+            MinionConfiguration config = new MinionConfiguration();
+            Map<String, MinionDto> nodes = getMinionConfiguration(instanceId, null);
+            nodes.forEach((k, v) -> config.addMinion(k, v));
+
+            Key newKey = InstanceImportExportHelper.importFrom(zip, hive, instanceId, config);
             syncInstance(minion, rc, group, instanceId);
             UiResources.getInstanceEventManager().create(instanceId, newKey);
             return Collections.singletonList(newKey);

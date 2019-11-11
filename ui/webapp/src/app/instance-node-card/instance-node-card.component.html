@@ -1,16 +1,22 @@
 <mat-card #appNodeCard class="node-card instance-node-card-theme">
   <!-- server applications node header -->
   <mat-card-header *ngIf="!isClientApplicationsNode()" class='node-card-header instance-node-card-header-theme'>
-    <div mat-card-avatar class='instance-node-avatar-container'>
-      <mat-icon class='instance-node-avatar' *ngIf='node.status' [svgIcon]='node.status.os'></mat-icon>
-      <mat-icon class='instance-node-avatar' *ngIf='!node.status'>device_unknown</mat-icon>
+    <div mat-card-avatar class='instance-node-avatar-container' *ngIf='minionConfig'>
+      <mat-icon class='instance-node-avatar' [svgIcon]='minionConfig.os'></mat-icon>
+    </div>
+    <div mat-card-avatar class='instance-node-avatar-container' *ngIf='!minionConfig'>
+      <mat-icon class='instance-node-avatar'>device_unknown</mat-icon>
     </div>
     <mat-card-title>{{ node.nodeName }}</mat-card-title>
     <mat-card-subtitle class='node-card-subtitle'>Published server applications</mat-card-subtitle>
     <span class="fill-space"></span>
-
-    <mat-icon class='instance-node-online' *ngIf='node.status' [matTooltip]="node.statusHint">flight_takeoff</mat-icon>
-    <mat-icon class='instance-node-offline' *ngIf='!node.status' [matTooltip]="node.statusHint">warning</mat-icon>
+    <ng-container *ngIf="minionState">
+      <mat-icon class='instance-node-online' *ngIf='isNodeOnline()' [matTooltip]="getNodeStatusTooltip()">flight_takeoff</mat-icon>
+      <mat-icon class='instance-node-offline' *ngIf='!isNodeOnline()' [matTooltip]="getNodeStatusTooltip()">warning</mat-icon>
+    </ng-container>
+    <ng-container *ngIf="!minionConfig">
+        <mat-icon class='instance-node-offline' [matTooltip]="getNodeStatusTooltip()">error</mat-icon>
+    </ng-container>
   </mat-card-header>
 
   <!-- client applications node header -->

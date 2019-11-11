@@ -87,6 +87,7 @@ public class TestMinion extends TestServer {
                 root = Files.createTempDirectory("mr-");
                 mr = new MinionRoot(root, MinionMode.STANDALONE, new ActivityReporter.Null());
                 InitTool.initMinionRoot(root, mr, "localhost", port, null);
+                mr.onStartup();
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }

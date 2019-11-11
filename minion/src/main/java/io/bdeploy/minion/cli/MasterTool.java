@@ -24,7 +24,6 @@ import io.bdeploy.minion.MinionState;
 import io.bdeploy.minion.cli.MasterTool.MasterConfig;
 import io.bdeploy.minion.remote.jersey.JerseyAwareMinionUpdateManager;
 import io.bdeploy.minion.remote.jersey.MasterRootResourceImpl;
-import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.impl.UiResources;
 
@@ -94,7 +93,7 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
             try (JerseyServer srv = new JerseyServer(state.port, ks, state.keystorePass)) {
                 srv.setAuditor(new RollingFileAuditor(r.getAuditLogDir()));
                 r.setUpdateManager(new JerseyAwareMinionUpdateManager(srv));
-                r.runPostUpdate(true);
+                r.onStartup();
 
                 delegate.setDelegate(srv.getSseActivityReporter());
                 registerMasterResources(srv, config.publishWebapp(), config.allowCors(), r, srv.getSseActivityReporter());
@@ -120,8 +119,6 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
 
             @Override
             protected void configure() {
-                bind(Boolean.TRUE).named(Minion.MASTER).to(Boolean.class);
-
                 // required for SoftwareUpdateResourceImpl.
                 bind(MasterRootResourceImpl.class).to(MasterRootResource.class);
             }

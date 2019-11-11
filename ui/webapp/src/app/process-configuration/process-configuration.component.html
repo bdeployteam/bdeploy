@@ -45,7 +45,7 @@
         </div>
       </div>
       <span class="fill-space"></span>
-      <button mat-flat-button class="app-process-out-of-sync-text" (click)="onNewerProductVersionAvailable()" *ngIf="isProductUpgradeAvailable() && !editMode && !(isCentral() && !isCentralSyncd)">
+      <button mat-flat-button class="app-process-out-of-sync-text" (click)="onNewerProductVersionAvailable()" *ngIf="isProductUpgradeAvailable() && !editMode && !(isCentral() && !isCentralSynced)">
         Newer product version available!
       </button>
       <span class="spacer"></span>
@@ -61,7 +61,7 @@
         </button>
       </ng-container>
       <ng-container *ngIf="isAutoRefreshVisible() && !autoRefresh">
-        <button mat-icon-button (click)="toggleAutoRefresh()" [disabled]='isCentral() && !isCentralSyncd' matTooltip="Auto refresh of process status disabled. Click to enable.">
+        <button mat-icon-button (click)="toggleAutoRefresh()" [disabled]='isCentral() && !isCentralSynced' matTooltip="Auto refresh of process status disabled. Click to enable.">
           <mat-icon>sync_disabled</mat-icon>
         </button>
       </ng-container>
@@ -109,7 +109,7 @@
         <div *ngIf="isRunningOutOfSync" class="app-process-out-of-sync-text">
           Out-of-sync: One or more applications are running in a version that is not activated.
         </div>
-        <div *ngIf="isCentral() && !isCentralSyncd" class="need-sync-text">
+        <div *ngIf="isCentral() && !isCentralSynced" class="need-sync-text">
           Press <button mat-icon-button (click)='doSyncCentral()' matTooltip="Synchronize meta-data from the controlling server."><mat-icon>sync_alt</mat-icon></button> to enable editing, process control and remote access.
         </div>
         <ng-container *ngFor="let node of selectedConfig.nodeList.nodeConfigDtos">
@@ -123,6 +123,8 @@
             [productMissing]="!isProductAvailable(selectedConfig)"
             [manageApplications]="isSidenavApplications()"
             [isReadonly]="isReadonly()"
+            [minionConfig]="minionConfigs[node.nodeName]"
+            [minionState]="minionStates[node.nodeName]"
             [isInstanceDirty]="isDirtySelected()"
             (editAppConfigEvent)="onEditApp(node.nodeConfiguration, $event)"
             (editNodeAppsEvent)="onUpdateNodeApps()"
@@ -198,7 +200,7 @@
                 [dirty]="config.dirty"
                 [productAvailable]="isProductAvailable(config)"
                 [disabled]="loading"
-                [readOnly]='isCentral() && !isCentralSyncd'>
+                [readOnly]='isCentral() && !isCentralSynced'>
               </app-instance-version-card>
             </ng-container>
           </div>

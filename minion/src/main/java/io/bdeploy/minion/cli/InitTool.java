@@ -18,6 +18,9 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.VersionHelper;
+import io.bdeploy.interfaces.manifest.MinionManifest;
+import io.bdeploy.interfaces.minion.MinionConfiguration;
+import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.jersey.audit.AuditRecord;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.MinionState;
@@ -115,11 +118,15 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
                 .addCapability(ApiAccessToken.ADMIN_CAPABILITY).build();
 
         String pack = helper.createSignaturePack(aat, state.keystorePath, state.keystorePass);
+        RemoteService remote = new RemoteService(UriBuilder.fromUri("https://" + hostname + ":" + port + "/api").build(), pack);
 
-        RemoteService master = new RemoteService(UriBuilder.fromUri("https://" + hostname + ":" + port + "/api").build(), pack);
-        state.minions.put(Minion.DEFAULT_MASTER_NAME, master);
-        state.self = Minion.DEFAULT_MASTER_NAME;
+        MinionConfiguration minionConfiguration = new MinionConfiguration();
+        minionConfiguration.addMinion(Minion.DEFAULT_NAME, MinionDto.create(remote));
 
+        MinionManifest minionMf = new MinionManifest(mr.getHive());
+        minionMf.update(minionConfiguration);
+
+        state.self = Minion.DEFAULT_NAME;
         state.officialName = hostname;
         state.port = port;
         state.cleanupSchedule = MasterCleanupJob.DEFAULT_CLEANUP_SCHEDULE;

@@ -19,6 +19,12 @@ import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.SecurityHelper;
+import io.bdeploy.interfaces.manifest.MinionManifest;
+import io.bdeploy.interfaces.minion.MinionConfiguration;
+import io.bdeploy.interfaces.minion.MinionDto;
+import io.bdeploy.interfaces.minion.MinionStatusDto;
+import io.bdeploy.interfaces.remote.MinionStatusResource;
+import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyServer;
 import io.bdeploy.jersey.RegistrationTarget;
 import io.bdeploy.jersey.audit.RollingFileAuditor;
@@ -69,8 +75,6 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
     @Override
     protected void run(SlaveConfig config, @RemoteOptional RemoteService svc) {
         helpAndFailIfMissing(config.root(), "Missing --root");
-        out().println("Starting slave...");
-
         ActivityReporter.Delegating delegate = new ActivityReporter.Delegating();
         delegate.setDelegate(getActivityReporter());
         try (MinionRoot r = new MinionRoot(Paths.get(config.root()), MinionMode.SLAVE, delegate)) {
@@ -78,48 +82,77 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
                 Path upd = Paths.get(config.updateDir());
                 r.setUpdateDir(upd);
             }
-            MinionState state = r.getState();
-
             if (config.list()) {
-                for (Map.Entry<String, RemoteService> entry : state.minions.entrySet()) {
-                    out().println(String.format("%1$-30s %2$-40s", entry.getKey(), entry.getValue().getUri()));
-                }
-            } else if (config.add() != null || config.remove() != null) {
-                if (config.add() != null) {
-                    helpAndFailIfMissing(svc, "Missing --remote");
-                    try {
-                        assertTrue(svc.getUri().getScheme().equalsIgnoreCase("https"), "Only HTTPS slaves supported");
-                        state.minions.put(config.add(), svc);
-                    } catch (Exception e) {
-                        throw new IllegalStateException("Cannot add slave", e);
-                    }
-                } else if (config.remove() != null) {
-                    state.minions.remove(config.remove());
-                }
-
-                r.setState(state);
+                doListMinions(r);
+            } else if (config.add() != null) {
+                doAddMinion(r, config.add(), svc);
+            } else if (config.remove() != null) {
+                doRemoveMinion(r, config.remove());
             } else {
-                // run the slave :)
-                int port = state.port;
-                try {
-                    SecurityHelper sh = SecurityHelper.getInstance();
-                    KeyStore ks = sh.loadPrivateKeyStore(state.keystorePath, state.keystorePass);
-                    try (JerseyServer srv = new JerseyServer(port, ks, state.keystorePass)) {
-                        srv.setAuditor(new RollingFileAuditor(r.getAuditLogDir()));
-                        r.setUpdateManager(new JerseyAwareMinionUpdateManager(srv));
-                        r.runPostUpdate(false);
-
-                        delegate.setDelegate(srv.getSseActivityReporter());
-                        registerCommonResources(srv, r, srv.getSseActivityReporter());
-                        r.setupServerTasks(false, null);
-
-                        srv.start();
-                        srv.join();
-                    }
-                } catch (Exception e) {
-                    throw new IllegalStateException("Cannot run server on " + port, e);
-                }
+                doRunMinion(r, delegate);
             }
+        }
+    }
+
+    private void doRunMinion(MinionRoot root, ActivityReporter.Delegating delegate) {
+        MinionState state = root.getState();
+        int port = state.port;
+        try {
+            out().println("Starting slave...");
+
+            SecurityHelper sh = SecurityHelper.getInstance();
+            KeyStore ks = sh.loadPrivateKeyStore(state.keystorePath, state.keystorePass);
+            try (JerseyServer srv = new JerseyServer(port, ks, state.keystorePass)) {
+                srv.setAuditor(new RollingFileAuditor(root.getAuditLogDir()));
+                root.setUpdateManager(new JerseyAwareMinionUpdateManager(srv));
+                root.onStartup();
+
+                delegate.setDelegate(srv.getSseActivityReporter());
+                registerCommonResources(srv, root, srv.getSseActivityReporter());
+                root.setupServerTasks(false, null);
+
+                srv.start();
+                srv.join();
+            }
+        } catch (Exception e) {
+            throw new IllegalStateException("Cannot run server on " + port, e);
+        }
+    }
+
+    private void doAddMinion(MinionRoot root, String minionName, RemoteService slaveRemote) {
+        helpAndFailIfMissing(root, "Missing --remote");
+        assertTrue(slaveRemote.getUri().getScheme().equalsIgnoreCase("https"), "Only HTTPS slaves supported");
+        try {
+            // Try to contact the slave to get some information
+            MinionStatusResource statusResource = ResourceProvider.getResource(slaveRemote, MinionStatusResource.class, null);
+            MinionStatusDto status = statusResource.getStatus();
+
+            // Store information in our hive
+            MinionManifest mf = new MinionManifest(root.getHive());
+            MinionConfiguration minionConfig = mf.read();
+            minionConfig.addMinion(minionName, status.config);
+            mf.update(minionConfig);
+
+            out().println("Minion '" + minionName + "' successfully added.");
+        } catch (Exception e) {
+            throw new IllegalStateException("Cannot add slave. Check if the slave is online and try again.", e);
+        }
+    }
+
+    private void doRemoveMinion(MinionRoot root, String minionName) {
+        MinionManifest mf = new MinionManifest(root.getHive());
+        MinionConfiguration minionConfig = mf.read();
+        minionConfig.removeMinion(minionName);
+        mf.update(minionConfig);
+        out().println("Minion '" + minionName + "' successfully removed.");
+    }
+
+    private void doListMinions(MinionRoot r) {
+        String formatString = "%1$-30s %2$-8s %2$-40s";
+        for (Map.Entry<String, MinionDto> entry : r.getMinions().entrySet()) {
+            String name = entry.getKey();
+            MinionDto details = entry.getValue();
+            out().println(String.format(formatString, name, details.os, details.remote));
         }
     }
 

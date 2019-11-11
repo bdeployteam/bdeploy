@@ -5,7 +5,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AppConfig } from '../models/config.model';
-import { BackendInfoDto } from '../models/gen.dtos';
+import { BackendInfoDto, MinionStatusDto } from '../models/gen.dtos';
 import { suppressGlobalErrorHandling } from '../utils/server.utils';
 import { LoggingService } from './logging.service';
 
@@ -54,6 +54,10 @@ export class ConfigService {
 
   public tryGetBackendVersion(): Observable<BackendInfoDto> {
     return this.http.get<BackendInfoDto>(environment.apiUrl + '/backend-info/version', { headers: suppressGlobalErrorHandling(new HttpHeaders)});
+  }
+
+  public getNodeStates() {
+    return this.http.get<{ [minionName: string]: MinionStatusDto}[]>(environment.apiUrl + '/backend-info/minion-status');
   }
 
 }

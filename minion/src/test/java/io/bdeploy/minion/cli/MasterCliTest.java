@@ -54,7 +54,7 @@ public class MasterCliTest {
 
             ks = mr.getState().keystorePath;
             pp = mr.getState().keystorePass;
-            pack = AuthPackAccessor.getAuthPack(mr.getState().minions.get(Minion.DEFAULT_MASTER_NAME).getKeyStore());
+            pack = AuthPackAccessor.getAuthPack(mr.getMinions().getRemote(Minion.DEFAULT_NAME).getKeyStore());
         }
 
         Path tmpStore = tmp.resolve("pubstore");

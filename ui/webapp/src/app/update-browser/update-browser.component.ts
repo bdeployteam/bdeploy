@@ -115,17 +115,18 @@ export class UpdateBrowserComponent implements OnInit {
   }
 
   async updateSystemVersion(keys: GroupedKeys) {
-    const nodes = await this.updService.getNodeStates().toPromise();
     const requiredOs = [];
     let offline = false;
 
-    for (const state of nodes) {
-      if (!state) {
+    const nodes = await this.cfgService.getNodeStates().toPromise();
+    for (const nodeName of Object.keys(nodes)) {
+      const state = nodes[nodeName];
+      if (state.offline) {
         offline = true;
         continue;
       }
-      if (!requiredOs.includes(state.os)) {
-        requiredOs.push(state.os);
+      if (!requiredOs.includes(state.config.os)) {
+        requiredOs.push(state.config.os);
       }
     }
 

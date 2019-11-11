@@ -69,6 +69,11 @@ public class MinionDeployTest {
     @SlowTest
     void testRemoteDeploy(BHive local, MasterRootResource master, CleanupResource cr, RemoteService remote, @TempDir Path tmp,
             ActivityReporter reporter, MinionRoot mr) throws IOException, InterruptedException {
+        SortedMap<Key, ObjectId> inventoryStart = null;
+        try (RemoteBHive rbh = RemoteBHive.forService(remote, JerseyRemoteBHive.DEFAULT_NAME, reporter)) {
+            inventoryStart = rbh.getManifestInventory();
+        }
+
         Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, master, remote, tmp, true);
 
         String uuid = local.execute(new ManifestLoadOperation().setManifest(instance)).getLabels()
@@ -164,9 +169,10 @@ public class MinionDeployTest {
         // now actually do it.
         cr.perform(groups);
 
-        // no manifests should be left now
+        // All created manifests should be deleted
         try (RemoteBHive rbh = RemoteBHive.forService(remote, JerseyRemoteBHive.DEFAULT_NAME, reporter)) {
             SortedMap<Key, ObjectId> inventory = rbh.getManifestInventory();
+            inventory.keySet().removeAll(inventoryStart.keySet());
             assertTrue(inventory.isEmpty());
         }
 
@@ -187,28 +193,30 @@ public class MinionDeployTest {
         /* STEP 1: export and re-import instance */
         Path tmpZip = tmp.resolve("export.zip");
         InstanceImportExportHelper.exportTo(tmpZip, local, im1);
-        Manifest.Key importedInstance = InstanceImportExportHelper.importFrom(tmpZip, local, UuidHelper.randomId(), null);
+        Manifest.Key importedInstance = InstanceImportExportHelper.importFrom(tmpZip, local, UuidHelper.randomId(),
+                mr.getMinions());
 
         // check application UIDs
         InstanceManifest im2 = InstanceManifest.of(local, importedInstance);
 
         InstanceNodeManifest master1 = InstanceNodeManifest.of(local,
-                im1.getInstanceNodeManifests().get(Minion.DEFAULT_MASTER_NAME));
+                im1.getInstanceNodeManifests().get(Minion.DEFAULT_NAME));
         InstanceNodeManifest master2 = InstanceNodeManifest.of(local,
-                im2.getInstanceNodeManifests().get(Minion.DEFAULT_MASTER_NAME));
+                im2.getInstanceNodeManifests().get(Minion.DEFAULT_NAME));
 
         // IDs may NEVER match.
         assertEquals(master1.getConfiguration().applications.get(0).name, master2.getConfiguration().applications.get(0).name);
         assertNotEquals(master1.getConfiguration().applications.get(0).uid, master2.getConfiguration().applications.get(0).uid);
 
         // test re-import for same instance (new version) - applications UID must stay the same.
-        Manifest.Key importedVersion = InstanceImportExportHelper.importFrom(tmpZip, local, im1.getConfiguration().uuid, null);
+        Manifest.Key importedVersion = InstanceImportExportHelper.importFrom(tmpZip, local, im1.getConfiguration().uuid,
+                mr.getMinions());
         assertEquals("2", importedVersion.getTag()); // new version
         assertEquals(instance.getName(), importedVersion.getName());
 
         InstanceManifest im3 = InstanceManifest.of(local, importedVersion);
         InstanceNodeManifest master3 = InstanceNodeManifest.of(local,
-                im3.getInstanceNodeManifests().get(Minion.DEFAULT_MASTER_NAME));
+                im3.getInstanceNodeManifests().get(Minion.DEFAULT_NAME));
 
         // IDs MUST match.
         assertEquals(master1.getConfiguration().applications.get(0).name, master3.getConfiguration().applications.get(0).name);

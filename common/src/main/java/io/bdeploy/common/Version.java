@@ -3,11 +3,13 @@ package io.bdeploy.common;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
 
 /**
- * A Version in the format <major>.<minor>.<micro>[-qualifier]|[.qualifier]
+ * A Version in the format &ltmajor&gt.&ltminor&gt.&ltmicro&gt[-qualifier]|[.qualifier]
  */
 public class Version implements Comparable<Version> {
 
@@ -18,7 +20,9 @@ public class Version implements Comparable<Version> {
     private final int micro;
     private final String qualifier;
 
-    public Version(int major, int minor, int micro, String qualifier) {
+    @JsonCreator
+    public Version(@JsonProperty("major") int major, @JsonProperty("minor") int minor, @JsonProperty("micro") int micro,
+            @JsonProperty("qualifier") String qualifier) {
         this.major = major;
         this.minor = minor;
         this.micro = micro;
@@ -26,13 +30,24 @@ public class Version implements Comparable<Version> {
     }
 
     public static Version parse(String v) {
-        Matcher matcher = V_PATTERN.matcher(v);
-        if (!matcher.matches()) {
+        Version version = tryParse(v);
+        if (version == null) {
             throw new IllegalArgumentException("Given version does not match expected pattern");
         }
+        return version;
+    }
 
-        return new Version(Integer.parseInt(matcher.group(1)), Integer.parseInt(matcher.group(2)),
-                Integer.parseInt(matcher.group(3)), matcher.group(4));
+    public static Version tryParse(String v) {
+        Matcher matcher = V_PATTERN.matcher(v);
+        if (!matcher.matches()) {
+            return null;
+        }
+        try {
+            return new Version(Integer.parseInt(matcher.group(1)), Integer.parseInt(matcher.group(2)),
+                    Integer.parseInt(matcher.group(3)), matcher.group(4));
+        } catch (NumberFormatException nfe) {
+            return null;
+        }
     }
 
     public int getMajor() {
@@ -104,5 +119,4 @@ public class Version implements Comparable<Version> {
         }
         return true;
     }
-
 }

@@ -35,6 +35,7 @@ import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
+import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
@@ -106,10 +107,11 @@ public class CleanupHelper {
 
         // minions cleanup
         SortedSet<Key> allUniqueKeysToKeep = findAllUniqueKeys(registry);
-        for (Map.Entry<String, RemoteService> slave : minion.getMinions().entrySet()) {
+        for (Map.Entry<String, MinionDto> slave : minion.getMinions().entrySet()) {
             log.info("Cleaning on {}, using {} anchors.", slave.getKey(), allUniqueKeysToKeep.size());
 
-            SlaveCleanupResource scr = ResourceProvider.getResource(slave.getValue(), SlaveCleanupResource.class, null);
+            RemoteService remote = slave.getValue().remote;
+            SlaveCleanupResource scr = ResourceProvider.getResource(remote, SlaveCleanupResource.class, null);
             try {
                 List<CleanupAction> actions = scr.cleanup(allUniqueKeysToKeep, immediate);
                 if (!immediate) {
@@ -159,7 +161,7 @@ public class CleanupHelper {
                 continue;
             }
 
-            RemoteService svc = minion.getMinions().get(group.minion);
+            RemoteService svc = minion.getMinions().getRemote(group.minion);
             if (svc == null) {
                 log.warn("Minion {} associated with cleanup group {} not found", group.minion, group.name);
                 continue;

@@ -27,7 +27,7 @@ public class ManagedMastersConfiguration {
     }
 
     /**
-     * remove an existing attahced managed master
+     * remove an existing attached managed master
      */
     public void removeManagedMaster(String name) {
         attachedManagedMasters.remove(name);

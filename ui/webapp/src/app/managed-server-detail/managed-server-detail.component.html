@@ -13,33 +13,42 @@
       </th>
       <td mat-cell *matCellDef="let row">
         {{ row.key }}
+        <ng-container *ngIf="row.config.master">*</ng-container>
       </td>
     </ng-container>
 
     <ng-container matColumnDef="os">
       <th mat-header-cell *matHeaderCellDef>OS</th>
       <td mat-cell *matCellDef="let row">
-        {{ row.status.os }}
+        <mat-icon [svgIcon]='row.config.os' matTooltip='{{ row.config.os }}'></mat-icon>
       </td>
     </ng-container>
+
     <ng-container matColumnDef="version">
       <th mat-header-cell *matHeaderCellDef>System Version</th>
       <td mat-cell *matCellDef="let row">
-        {{ row.status.version }}
+        {{ getVersion(row.config.version) }}
       </td>
     </ng-container>
-    <ng-container matColumnDef="startup">
-        <th mat-header-cell *matHeaderCellDef>Up Since</th>
-        <td mat-cell *matCellDef="let row">
-          {{ getDate(row.status.startup) }}
-        </td>
-      </ng-container>
-      <ng-container matColumnDef="master">
-          <th mat-header-cell *matHeaderCellDef>Master</th>
-          <td mat-cell *matCellDef="let row">
-            {{ row.status.master ? '*' : '' }}
-          </td>
+
+    <ng-container matColumnDef="url">
+      <th mat-header-cell *matHeaderCellDef>URL</th>
+      <td mat-cell *matCellDef="let row">
+        {{ row.config.remote.uri }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef>Status</th>
+      <td mat-cell *matCellDef="let row">
+        <ng-container *ngIf="synchronized">
+          <mat-icon [ngClass]='getStatusClass(row.key)' matTooltip="{{getStatusTooltip(row.key)}}">{{ getStatusIcon(row.key) }}</mat-icon>
         </ng-container>
+        <ng-container *ngIf="!synchronized">
+          -
+        </ng-container>
+      </td>
+    </ng-container>
   </table>
 </div>
 

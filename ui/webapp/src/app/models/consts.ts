@@ -47,8 +47,8 @@ export const EMPTY_INSTANCE_GROUP: InstanceGroupConfiguration = {
 
 export const EMPTY_SOFTWARE_REPO: SoftwareRepositoryConfiguration = {
   name: null,
-  description: null
-}
+  description: null,
+};
 
 export const EMPTY_COMMAND_CONFIGURATION: CommandConfiguration = {
   executable: null,
@@ -103,8 +103,6 @@ export const EMPTY_INSTANCE_NODE_CONFIGURATION: InstanceNodeConfiguration = {
 
 export const EMPTY_INSTANCE_NODE_CONFIGURATION_DTO: InstanceNodeConfigurationDto = {
   nodeName: null,
-  status: null,
-  statusHint: null,
   nodeConfiguration: null,
   foreignNodeConfigurations: null,
 };

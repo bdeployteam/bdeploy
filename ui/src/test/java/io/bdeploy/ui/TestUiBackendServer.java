@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
 import java.util.TreeMap;
 
 import javax.annotation.Priority;
@@ -25,8 +24,13 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import io.bdeploy.bhive.remote.jersey.BHiveLocatorImpl;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.Version;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.common.util.VersionHelper;
+import io.bdeploy.interfaces.minion.MinionConfiguration;
+import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.jersey.TestServer;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.MasterProvider;
@@ -90,7 +94,7 @@ public class TestUiBackendServer extends TestServer {
 
             bind(reg).to(BHiveRegistry.class);
             bind(new EqualsAuthService()).to(AuthService.class);
-            bind(new DummyMinion(tmp.resolve("downloads"), self)).to(Minion.class);
+            bind(new TestUiMinion(tmp.resolve("downloads"), self)).to(Minion.class);
             bind(((MasterProvider) (h, i) -> self)).to(MasterProvider.class);
         }
     }
@@ -153,15 +157,22 @@ public class TestUiBackendServer extends TestServer {
 
     }
 
-    private static class DummyMinion implements Minion {
+    private static class TestUiMinion implements Minion {
 
         private final Path tmpDir;
         private final RemoteService self;
+        private final MinionConfiguration minions;
 
-        public DummyMinion(Path tmpDir, RemoteService self) {
+        public TestUiMinion(Path tmpDir, RemoteService self) {
             this.tmpDir = tmpDir;
             this.self = self;
+            this.minions = createMinion(self);
             PathHelper.mkdirs(tmpDir);
+        }
+
+        @Override
+        public boolean isMaster() {
+            return true;
         }
 
         @Override
@@ -175,8 +186,8 @@ public class TestUiBackendServer extends TestServer {
         }
 
         @Override
-        public SortedMap<String, RemoteService> getMinions() {
-            return new TreeMap<>();
+        public MinionConfiguration getMinions() {
+            return minions;
         }
 
         @Override
@@ -212,6 +223,17 @@ public class TestUiBackendServer extends TestServer {
         @Override
         public void signExecutable(File file, String applicationName, String string) {
         }
+    }
+
+    private static MinionConfiguration createMinion(RemoteService remote) {
+        MinionDto dto = new MinionDto();
+        dto.remote = remote;
+        dto.os = OsHelper.getRunningOs();
+        dto.version = Version.tryParse(VersionHelper.readVersion());
+
+        MinionConfiguration config = new MinionConfiguration();
+        config.addMinion("master", dto);
+        return config;
     }
 
 }

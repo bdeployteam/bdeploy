@@ -147,14 +147,14 @@ public class SpecialManifestsTest {
 
             Manifest.Key ifk = ifmb.setInstanceNodeConfiguration(cfg)
                     .setConfigTreeId(ProductManifest.of(hive, prodKey).getConfigTemplateTreeId())
-                    .setMinionName(Minion.DEFAULT_MASTER_NAME).insert(hive);
+                    .setMinionName(Minion.DEFAULT_NAME).insert(hive);
 
             InstanceConfiguration ic = new InstanceConfiguration();
             ic.name = "Test";
             ic.product = ProductManifest.of(hive, prodKey).getKey();
             ic.uuid = uuid;
 
-            new InstanceManifest.Builder().setInstanceConfiguration(ic).addInstanceNodeManifest(Minion.DEFAULT_MASTER_NAME, ifk)
+            new InstanceManifest.Builder().setInstanceConfiguration(ic).addInstanceNodeManifest(Minion.DEFAULT_NAME, ifk)
                     .insert(hive);
         }
 

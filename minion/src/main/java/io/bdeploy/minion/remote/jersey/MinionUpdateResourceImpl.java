@@ -8,11 +8,9 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
-import org.jvnet.hk2.annotations.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,18 +28,13 @@ import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.interfaces.remote.MinionUpdateResource;
 import io.bdeploy.minion.MinionRoot;
-import io.bdeploy.ui.api.Minion;
 
 public class MinionUpdateResourceImpl implements MinionUpdateResource {
 
     private static final Logger log = LoggerFactory.getLogger(MinionUpdateResourceImpl.class);
-    @Inject
-    private MinionRoot root;
 
     @Inject
-    @Optional
-    @Named(Minion.MASTER)
-    private Boolean isMaster;
+    private MinionRoot root;
 
     @Override
     public void update(Manifest.Key key) {
@@ -93,7 +86,7 @@ public class MinionUpdateResourceImpl implements MinionUpdateResource {
         h.execute(new ExportOperation().setManifest(key).setTarget(updateTarget));
 
         // slaves /always/ clean, master might need to keep things (e.g. for web-ui).
-        if (clean || isMaster == null || !isMaster) {
+        if (clean || !root.isMaster()) {
             // clean up any version from the hive which is not the currently running and not the new target version
             SortedSet<String> tagsToKeep = new TreeSet<>();
             tagsToKeep.add(key.getTag());

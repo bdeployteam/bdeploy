@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { LauncherDto, ManifestKey, NodeStatus, OperatingSystem } from '../models/gen.dtos';
+import { LauncherDto, ManifestKey, OperatingSystem } from '../models/gen.dtos';
 import { ConfigService } from './config.service';
 import { Logger, LoggingService } from './logging.service';
 
@@ -41,12 +41,6 @@ export class SoftwareUpdateService {
     const url: string = this.cfg.config.api + SoftwareUpdateService.BASEPATH;
     this.log.debug('deleteVersion: ' + url);
     return this.http.post(url, keys);
-  }
-
-  public getNodeStates() {
-    const url: string = this.cfg.config.api + SoftwareUpdateService.BASEPATH + '/bdeploy/minions';
-    this.log.debug('getNodeStates: ' + url);
-    return this.http.get<NodeStatus[]>(url);
   }
 
   public updateBdeploy(keys: ManifestKey[]) {

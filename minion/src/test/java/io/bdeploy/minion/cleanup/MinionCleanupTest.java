@@ -44,6 +44,13 @@ public class MinionCleanupTest {
 
     @Test
     void mfCleanup(BHive local, SlaveCleanupResource scr, RemoteService remote, ActivityReporter reporter, @TempDir Path tmp) {
+        // Collect all that is at the beginning of the test in the hive so that we can compare if we
+        // the cleanup removes everything that has been created
+        SortedMap<Key, ObjectId> inventoryStart = null;
+        try (RemoteBHive rbh = RemoteBHive.forService(remote, JerseyRemoteBHive.DEFAULT_NAME, reporter)) {
+            inventoryStart = rbh.getManifestInventory();
+        }
+
         Path app1 = TestAppFactory.createDummyApp("test1", tmp);
         Path app2 = TestAppFactory.createDummyApp("test2", tmp);
 
@@ -97,10 +104,10 @@ public class MinionCleanupTest {
         // now clean the other app immediately
         scr.cleanup(new TreeSet<>(), true);
 
-        // now all is gone
+        // Check that the hive has nothing in - except the stuff that was in at the beginning
         try (RemoteBHive rbh = RemoteBHive.forService(remote, JerseyRemoteBHive.DEFAULT_NAME, reporter)) {
             SortedMap<Key, ObjectId> mfs = rbh.getManifestInventory();
-
+            mfs.keySet().removeAll(inventoryStart.keySet());
             assertTrue(mfs.isEmpty());
         }
     }

@@ -24,7 +24,6 @@ import io.bdeploy.bhive.op.ImportTreeOperation;
 import io.bdeploy.bhive.op.ManifestExistsOperation;
 import io.bdeploy.bhive.op.ManifestMaxIdOperation;
 import io.bdeploy.bhive.util.StorageHelper;
-import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
@@ -32,7 +31,8 @@ import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
-import io.bdeploy.interfaces.remote.MasterRootResource;
+import io.bdeploy.interfaces.minion.MinionConfiguration;
+import io.bdeploy.interfaces.minion.MinionDto;
 
 /**
  * Helps with importing and exporting instance configurations
@@ -83,17 +83,22 @@ public class InstanceImportExportHelper {
     }
 
     /**
-     * @param zipFilePath the {@link Path} to the ZIP file to read from.
-     * @param target the target {@link BHive} to import to.
-     * @param uuid the target UUID for the instance. All existing UUIDs contained in the provided ZIP will be replaced by this
-     *            UUID. The target {@link BHive} may already contain an {@link InstanceManifest} with the given UUID, in which
-     *            case a new version will be created. If the UUID is not yet used, a new {@link InstanceManifest} will be created
-     *            instead.
-     * @param root an optional {@link MasterRootResource} which can be used to obtain OS information for minions. When given, this
-     *            will allow updating the application target operating system where required.
+     * Imports a single instance from the given ZIP file into the given target hive. All existing UUIDs contained in the provided
+     * ZIP will be replaced by this UUID. The target {@link BHive} may already contain an {@link InstanceManifest} with the given
+     * UUID, in which case a new version will be created. If the UUID is not yet used, a new {@link InstanceManifest} will be
+     * created instead.
+     *
+     * @param zipFilePath
+     *            {@link Path} to the ZIP file to read from.
+     * @param target
+     *            target {@link BHive} to import to.
+     * @param uuid
+     *            target UUID for the instance.
+     * @param minions
+     *            available minions and their OS
      * @return the resulting {@link Key} in the target {@link BHive}
      */
-    public static Manifest.Key importFrom(Path zipFilePath, BHive target, String uuid, MasterRootResource root) {
+    public static Manifest.Key importFrom(Path zipFilePath, BHive target, String uuid, MinionConfiguration minions) {
         try (FileSystem zfs = PathHelper.openZip(zipFilePath)) {
             Path zroot = zfs.getPath("/");
 
@@ -106,14 +111,14 @@ public class InstanceImportExportHelper {
                 cfgId = target.execute(new ImportTreeOperation().setSourcePath(cfgDir));
             }
 
-            return importFromData(target, cfg, cfgId, uuid, root);
+            return importFromData(target, cfg, cfgId, uuid, minions);
         } catch (IOException e) {
             throw new IllegalStateException("Cannot read ZIP: " + zipFilePath, e);
         }
     }
 
     private static Manifest.Key importFromData(BHive target, InstanceCompleteConfigDto dto, ObjectId cfgId, String uuid,
-            MasterRootResource root) {
+            MinionConfiguration minions) {
         if (!Objects.equals(dto.config.configTree, cfgId)) {
             log.warn("Configuration tree has unexpected ID: {} <-> {}", dto.config.configTree, cfgId);
         }
@@ -147,51 +152,39 @@ public class InstanceImportExportHelper {
         }
 
         InstanceManifest.Builder imfb = new InstanceManifest.Builder().setInstanceConfiguration(icfg);
-
-        // contact minions, fetch OS
-        Map<String, OperatingSystem> minionOss = new TreeMap<>();
-        if (root != null) {
-            SortedMap<String, NodeStatus> minions = root.getMinions();
-            minions.forEach((minion, status) -> minionOss.put(minion, status == null ? null : status.os));
-        }
-
         for (Map.Entry<String, InstanceNodeConfiguration> node : dto.minions.entrySet()) {
             InstanceNodeManifest.Builder inmBuilder = new InstanceNodeManifest.Builder();
             InstanceNodeConfiguration nodeCfg = node.getValue();
 
-            // align redundant copies of certain falgs
+            // align redundant copies of certain flags
             nodeCfg.copyRedundantFields(icfg);
-
             reAssignAppUuids(uuidPool, nodeCfg);
-            reAssignApplications(target, nodeCfg, minionOss.get(node.getKey()), node.getKey());
+
+            String minionName = node.getKey();
+            if (!minionName.equals(InstanceManifest.CLIENT_NODE_NAME)) {
+                MinionDto minionDto = minions.getMinion(minionName);
+                reAssignApplications(target, nodeCfg, minionName, minionDto);
+            }
 
             inmBuilder.setConfigTreeId(cfgId);
             inmBuilder.setInstanceNodeConfiguration(nodeCfg);
-            inmBuilder.setMinionName(node.getKey());
+            inmBuilder.setMinionName(minionName);
 
             // if there is already a version, we need to align the inm version to the target version
             if (latest.isPresent()) {
-                inmBuilder.setKey(new Manifest.Key(nodeCfg.uuid + "/" + node.getKey(), Long.toString(latest.get() + 1)));
+                inmBuilder.setKey(new Manifest.Key(nodeCfg.uuid + "/" + minionName, Long.toString(latest.get() + 1)));
             }
 
-            imfb.addInstanceNodeManifest(node.getKey(), inmBuilder.insert(target));
+            imfb.addInstanceNodeManifest(minionName, inmBuilder.insert(target));
         }
 
         return imfb.insert(target);
     }
 
-    private static void reAssignApplications(BHive hive, InstanceNodeConfiguration nodeCfg, OperatingSystem operatingSystem,
-            String minion) {
-        if (operatingSystem == null) {
-            // minion unknown or offline - cannot handle
-            log.warn("Cannot check/update target operating system for minion '{}'", minion);
+    private static void reAssignApplications(BHive hive, InstanceNodeConfiguration nodeCfg, String minionName, MinionDto minion) {
+        if (minionName.equals(InstanceManifest.CLIENT_NODE_NAME)) {
             return;
         }
-
-        if (minion.equals(InstanceManifest.CLIENT_NODE_NAME)) {
-            return;
-        }
-
         for (ApplicationConfiguration app : nodeCfg.applications) {
             Manifest.Key appKey = app.application;
             ScopedManifestKey smk = ScopedManifestKey.parse(appKey);
@@ -200,11 +193,11 @@ public class InstanceImportExportHelper {
                 continue; // not OS dependent
             }
 
-            if (smk.getOperatingSystem() == operatingSystem) {
+            if (smk.getOperatingSystem() == minion.os) {
                 continue; // this one is OK.
             }
 
-            ScopedManifestKey newKey = new ScopedManifestKey(smk.getName(), operatingSystem, smk.getTag());
+            ScopedManifestKey newKey = new ScopedManifestKey(smk.getName(), minion.os, smk.getTag());
             Boolean exists = hive.execute(new ManifestExistsOperation().setManifest(newKey.getKey()));
             if (Boolean.TRUE.equals(exists)) {
                 log.info("Updating application OS, setting {} to {}.", app.name, newKey);

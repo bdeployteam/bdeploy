@@ -143,7 +143,7 @@ public class TestFactory {
 
         /* STEP 2: create an node manifest per node which will participate (master & clients) */
         InstanceNodeManifest.Builder builder = new InstanceNodeManifest.Builder().setConfigTreeId(pmf.getConfigTemplateTreeId());
-        Manifest.Key inmKey = builder.setInstanceNodeConfiguration(inc).setMinionName(Minion.DEFAULT_MASTER_NAME).insert(local);
+        Manifest.Key inmKey = builder.setInstanceNodeConfiguration(inc).setMinionName(Minion.DEFAULT_NAME).insert(local);
 
         // minion name does not "technically" matter here, real code uses '__ClientApplications'
         InstanceNodeManifest.Builder clientBuilder = new InstanceNodeManifest.Builder();
@@ -158,7 +158,7 @@ public class TestFactory {
 
         /* STEP 3: create an InstanceManifest with all instance node configurations. */
         Manifest.Key imKey = new InstanceManifest.Builder().setInstanceConfiguration(ic)
-                .addInstanceNodeManifest(Minion.DEFAULT_MASTER_NAME, inmKey)
+                .addInstanceNodeManifest(Minion.DEFAULT_NAME, inmKey)
                 .addInstanceNodeManifest(InstanceManifest.CLIENT_NODE_NAME, cinmKey).insert(local);
 
         return imKey; // this is the "root" - all instance artifacts are now reachable from here.

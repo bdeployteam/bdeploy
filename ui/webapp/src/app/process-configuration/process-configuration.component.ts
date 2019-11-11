@@ -16,7 +16,7 @@ import { MessageBoxMode } from '../messagebox/messagebox.component';
 import { ApplicationGroup } from '../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_DEPLOYMENT_STATE } from '../models/consts';
 import { EventWithCallback } from '../models/event';
-import { ApplicationConfiguration, ApplicationDto, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstanceStateRecord, InstanceUpdateEventDto, InstanceUpdateEventType, ManagedMasterDto, ManifestKey, MinionMode, ProductDto } from '../models/gen.dtos';
+import { ApplicationConfiguration, ApplicationDto, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstanceStateRecord, InstanceUpdateEventDto, InstanceUpdateEventType, ManagedMasterDto, ManifestKey, MinionDto, MinionMode, MinionStatusDto, ProductDto } from '../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../models/process.model';
 import { ProcessDetailsComponent } from '../process-details/process-details.component';
 import { ApplicationService } from '../services/application.service';
@@ -71,6 +71,9 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
   public sidenavMode: SidenavMode = SidenavMode.Versions;
 
+  public minionConfigs: { [ minionName: string ]: MinionDto } = {};
+  public minionStates: { [ minionName: string ]: MinionStatusDto } = {};
+
   public deploymentState: InstanceStateRecord = EMPTY_DEPLOYMENT_STATE;
   public productTags: ProductDto[];
 
@@ -98,7 +101,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   private updateEvents: EventSourcePolyfill;
   private lastStateReload = 0;
 
-  public isCentralSyncd = false;
+  public isCentralSynced = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -116,7 +119,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     private eventService: RemoteEventsService,
     private systemService: SystemService,
     private dragulaService: DragulaService,
-    private config: ConfigService,
+    private configService: ConfigService,
     private managedServers: ManagedServersService,
     private router: Router,
   ) {}
@@ -129,7 +132,9 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
         this.uuidParam = p['uuid'];
         this.loadVersions(false);
         this.enableAutoRefresh();
-        this.doTriggerProcessStatusUpdate();
+        if (!this.isCentral()) {
+          this.doTriggerProcessStatusUpdate();
+        }
 
         this.updateEvents = this.eventService.getUpdateEventSource();
         this.updateEvents.onerror = err => {
@@ -322,8 +327,15 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       call4 = this.managedServers.getServerForInstance(this.groupParam, this.uuidParam, selectedVersion.key.tag); // results[3]
     }
 
-    forkJoin([call1, call2, call3, call4]).subscribe(results => {
-      newSelectedConfig.setNodeList(results[1]);
+    // Gather node state only in managed / standalone mode
+    let call5 = of({});
+    if (!this.isCentral() || this.isCentralSynced) {
+      call5 = this.instanceService.getMinionState(this.groupParam, this.uuidParam, selectedVersion.key.tag); // results[4]
+    }
+    const call6 = this.instanceService.getMinionConfiguration(this.groupParam, this.uuidParam, selectedVersion.key.tag); // results[5]
+
+    forkJoin([call1, call2, call3, call4, call5, call6]).subscribe(results => {
+      newSelectedConfig.setNodeList(results[1], results[5]);
       newSelectedConfig.setApplications(results[0]);
       this.selectedConfig = newSelectedConfig;
 
@@ -331,6 +343,8 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       this.productTags = sortByTags(filtered, p => p.key.tag, false);
 
       this.controllingServer = results[3];
+      this.minionStates = results[4];
+      this.minionConfigs = results[5];
 
       this.loading = false;
       this.updateDirtyStateAndValidate();
@@ -340,7 +354,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   isCentral() {
-    return this.config.config.mode === MinionMode.CENTRAL;
+    return this.configService.config.mode === MinionMode.CENTRAL;
   }
 
   getProductOfInstance(pcd: ProcessConfigDto): ProductDto {
@@ -566,8 +580,8 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   public onSelectApp(node: InstanceNodeConfigurationDto, process: ApplicationConfiguration) {
-    // if we're central && !syncd prevent switching
-    if (this.isCentral() && !this.isCentralSyncd) {
+    // if we're central && !synced prevent switching
+    if (this.isCentral() && !this.isCentralSynced) {
       return;
     }
 
@@ -900,7 +914,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
   /** Enables auto-refresh mechanism */
   enableAutoRefresh() {
-    if (this.autoRefresh || (this.isCentral() && !this.isCentralSyncd)) {
+    if (this.autoRefresh || (this.isCentral() && !this.isCentralSynced)) {
       return;
     }
 
@@ -964,15 +978,23 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   isReadonly() {
-    return (this.selectedConfig && this.selectedConfig.readonly) || (this.isCentral() && !this.isCentralSyncd);
+    return (this.selectedConfig && this.selectedConfig.readonly) || (this.isCentral() && !this.isCentralSynced);
   }
 
   async doSyncCentral() {
     if (!this.isCentral()) {
       return;
     }
-    await this.managedServers.synchronize(this.groupParam, this.controllingServer.name).toPromise();
-    this.isCentralSyncd = true;
+
+    try {
+      await this.managedServers.synchronize(this.groupParam, this.controllingServer.name).toPromise();
+      this.isCentralSynced = true;
+    } catch (e) {
+      this.messageBoxService.open({title: 'Synchronization Error', message: 'Synchronization failed. The remote master server might be offline.', mode: MessageBoxMode.ERROR});
+      this.minionStates = {};
+      this.isCentralSynced = false;
+      return;
+    }
 
     // reload
     this.loadVersions(true);

@@ -35,12 +35,15 @@ import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
-import io.bdeploy.interfaces.NodeStatus;
+import io.bdeploy.common.util.SortOneAsLastComparator;
 import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
+import io.bdeploy.interfaces.minion.MinionConfiguration;
+import io.bdeploy.interfaces.minion.MinionDto;
+import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.MinionStatusResource;
@@ -68,24 +71,26 @@ public class MasterRootResourceImpl implements MasterRootResource {
     private SecurityContext context;
 
     @Override
-    public SortedMap<String, NodeStatus> getMinions() {
-        SortedMap<String, RemoteService> minions = root.getState().minions;
-        SortedMap<String, NodeStatus> result = new TreeMap<>();
+    public SortedMap<String, MinionStatusDto> getMinions() {
+        SortedMap<String, MinionStatusDto> result = new TreeMap<>();
 
-        try (Activity contacting = reporter.start("Contacting Minions...", minions.size())) {
-            for (Map.Entry<String, RemoteService> entry : minions.entrySet()) {
+        MinionConfiguration minionConfig = root.getMinions();
+        try (Activity contacting = reporter.start("Contacting Minions...", minionConfig.size())) {
+            for (Map.Entry<String, MinionDto> entry : minionConfig.entrySet()) {
+                String name = entry.getKey();
+                MinionDto config = entry.getValue();
                 try {
-                    MinionStatusResource client = ResourceProvider.getResource(entry.getValue(), MinionStatusResource.class,
-                            context);
-                    result.put(entry.getKey(), client.getStatus());
+                    RemoteService service = config.remote;
+                    MinionStatusResource client = ResourceProvider.getResource(service, MinionStatusResource.class, context);
+                    result.put(name, client.getStatus());
                 } catch (Exception e) {
-                    log.warn("Problem while contacting minion: {}", entry.getKey());
+                    String message = e.getMessage();
+                    log.warn("Problem while contacting minion: {}", name);
                     if (log.isTraceEnabled()) {
                         log.trace("Exception", e);
                     }
-                    result.put(entry.getKey(), null);
+                    result.put(name, MinionStatusDto.createOffline(config, "Node not online: " + message));
                 }
-
                 contacting.worked(1);
             }
         }
@@ -104,24 +109,18 @@ public class MasterRootResourceImpl implements MasterRootResource {
         // find target OS for update package
         OperatingSystem updateOs = getTargetOsFromUpdate(version);
 
-        // check each minion's state and OS and push the update.
-        SortedMap<String, RemoteService> minions = root.getState().minions;
-        SortedMap<String, MinionUpdateResource> toUpdate = new TreeMap<>();
-        String masterName = pushUpdate(version, bhive, updateOs, minions, toUpdate);
-
-        if (masterName == null) {
-            log.warn("Cannot identify node running master from node registrations");
-            masterName = ""; // to make comparator for sorting nodes happy.
-        }
+        // Push the update to the removes. Ensure that master is the last one
+        MinionConfiguration minionConfig = root.getMinions();
+        String masterName = root.getState().self;
+        SortedMap<String, MinionUpdateResource> toUpdate = new TreeMap<>(new SortOneAsLastComparator(masterName));
+        pushUpdate(version, bhive, updateOs, minionConfig, toUpdate);
 
         // DON'T check for cancel from here on anymore to avoid inconsistent setups
         // (inconsistent setups can STILL occur in mixed-OS setups)
-
         prepareUpdate(version, clean, toUpdate);
 
-        // now schedule update on all but the master minions.
-        List<Throwable> problems = performUpdate(version, toUpdate, masterName);
-
+        // now perform the update on all
+        List<Throwable> problems = performUpdate(version, toUpdate);
         if (!problems.isEmpty()) {
             WebApplicationException ex = new WebApplicationException("Problem(s) updating minion(s)",
                     Status.INTERNAL_SERVER_ERROR);
@@ -130,20 +129,12 @@ public class MasterRootResourceImpl implements MasterRootResource {
         }
     }
 
-    private List<Throwable> performUpdate(Manifest.Key version, SortedMap<String, MinionUpdateResource> toUpdate,
-            String masterName) {
+    private List<Throwable> performUpdate(Manifest.Key version, SortedMap<String, MinionUpdateResource> toUpdate) {
         List<Throwable> problems = new ArrayList<>();
-        String finalMaster = masterName;
-        toUpdate.entrySet().stream().sorted((a, b) -> {
-            if (finalMaster.equals(a.getKey())) {
-                return 1;
-            } else if (finalMaster.equals(b.getKey())) {
-                return -1;
-            }
-            return a.getKey().compareTo(b.getKey());
-        }).forEach(entry -> {
+        toUpdate.entrySet().forEach(entry -> {
             try {
-                entry.getValue().update(version); // update schedules and delays, so we have a chance to return this call.
+                MinionUpdateResource updateResource = entry.getValue();
+                updateResource.update(version); // update schedules and delays, so we have a chance to return this call.
             } catch (Exception e) {
                 // don't immediately throw to update as many minions as possible.
                 // this Exception should actually never happen according to the contract.
@@ -170,28 +161,18 @@ public class MasterRootResourceImpl implements MasterRootResource {
         preparing.done();
     }
 
-    private String pushUpdate(Manifest.Key version, BHive h, OperatingSystem updateOs, SortedMap<String, RemoteService> minions,
+    private void pushUpdate(Manifest.Key version, BHive h, OperatingSystem updateOs, MinionConfiguration minionConfig,
             SortedMap<String, MinionUpdateResource> toUpdate) {
-        String masterName = null;
-        Activity pushing = reporter.start("Pushing update to Minions...", minions.size());
-        for (Entry<String, RemoteService> entry : minions.entrySet()) {
-            RemoteService service = entry.getValue();
+        Activity pushing = reporter.start("Pushing update to Minions...", minionConfig.size());
+        for (Entry<String, MinionDto> entry : minionConfig.entrySet()) {
+            MinionDto minionDto = entry.getValue();
+            RemoteService service = minionDto.remote;
             try {
-                MinionStatusResource sr = ResourceProvider.getResource(service, MinionStatusResource.class, context);
-                NodeStatus status = sr.getStatus();
-
-                if (status.master) {
-                    if (masterName != null) {
-                        throw new WebApplicationException("Multiple masters found in setup!");
-                    }
-                    masterName = entry.getKey();
-                }
-
-                if (status.os == updateOs) {
+                if (minionDto.os == updateOs) {
                     MinionUpdateResource resource = ResourceProvider.getResource(service, MinionUpdateResource.class, context);
                     toUpdate.put(entry.getKey(), resource);
                 } else {
-                    log.warn("Not updating {}, wrong os ({} != {})", entry.getKey(), status.os, updateOs);
+                    log.warn("Not updating {}, wrong os ({} != {})", entry.getKey(), minionDto.os, updateOs);
                     pushing.workAndCancelIfRequested(1);
                     continue;
                 }
@@ -210,7 +191,6 @@ public class MasterRootResourceImpl implements MasterRootResource {
             pushing.workAndCancelIfRequested(1);
         }
         pushing.done();
-        return masterName;
     }
 
     private OperatingSystem getTargetOsFromUpdate(Key version) {

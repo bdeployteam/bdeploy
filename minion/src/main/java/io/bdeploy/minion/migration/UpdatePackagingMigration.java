@@ -37,8 +37,8 @@ public class UpdatePackagingMigration {
 
     private static final Logger log = LoggerFactory.getLogger(UpdatePackagingMigration.class);
 
-    public static void run(MinionRoot root, boolean isMaster) throws IOException {
-        if (!isMaster) {
+    public static void run(MinionRoot root) throws IOException {
+        if (!root.isMaster()) {
             // the minion manifest will include the launcher also on the slave, as the update is pushed to them
             // but we don't need the launchers there.
             return;

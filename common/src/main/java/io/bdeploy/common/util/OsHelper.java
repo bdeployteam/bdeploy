@@ -9,7 +9,7 @@ public class OsHelper {
         WINDOWS,
         LINUX,
         AIX,
-	MACOS,
+        MACOS,
         UNKNOWN
     }
 
@@ -28,8 +28,8 @@ public class OsHelper {
         } else if (prop.contains("AIX")) {
             return OperatingSystem.AIX;
         } else if (prop.contains("MAC")) {
-	    return OperatingSystem.MACOS;
-	}
+            return OperatingSystem.MACOS;
+        }
 
         throw new IllegalStateException("Unsupported OS: " + prop);
     }

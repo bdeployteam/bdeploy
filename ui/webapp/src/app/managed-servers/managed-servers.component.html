@@ -19,15 +19,13 @@
   </div>
   <div *ngIf="managedServers && managedServers.length > 0" class="content-container">
     <mat-accordion multi='true'>
-      <mat-expansion-panel *ngFor='let server of managedServers' [disabled]='!isConnected(server)' #panel>
+      <mat-expansion-panel *ngFor='let server of managedServers' expanded='true'>
         <mat-expansion-panel-header>
           <mat-panel-title class='header-title'>
             {{server.name}} - {{server.description}}
           </mat-panel-title>
           <mat-panel-description class='header-description'>
             {{server.uri}}
-            <button mat-icon-button *ngIf='!isConnected(server)' matTooltip="Connect to Server" (click)='setConnected(server, true)'><mat-icon class='connect-button'>link</mat-icon></button>
-            <button mat-icon-button *ngIf='isConnected(server)' matTooltip="Disconnect from Server" (click)='setConnected(server, false); panel.close();'><mat-icon class='connect-button'>link_off</mat-icon></button>
           </mat-panel-description>
         </mat-expansion-panel-header>
         <ng-template matExpansionPanelContent>

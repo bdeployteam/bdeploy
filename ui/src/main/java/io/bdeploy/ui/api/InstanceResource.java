@@ -2,6 +2,7 @@ package io.bdeploy.ui.api;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -25,6 +26,8 @@ import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.directory.InstanceDirectory;
 import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
+import io.bdeploy.interfaces.minion.MinionDto;
+import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.jersey.ActivityScope;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import io.bdeploy.ui.dto.InstanceDto;
@@ -72,6 +75,16 @@ public interface InstanceResource {
     @GET
     @Path("/{instance}/{tag}/nodeConfiguration")
     public InstanceNodeConfigurationListDto getNodeConfigurations(@ActivityScope @PathParam("instance") String instanceId,
+            @PathParam("tag") String versionTag);
+
+    @GET
+    @Path("/{instance}/{tag}/minionConfiguration")
+    public Map<String, MinionDto> getMinionConfiguration(@ActivityScope @PathParam("instance") String instanceId,
+            @PathParam("tag") String versionTag);
+
+    @GET
+    @Path("/{instance}/{tag}/minionState")
+    public Map<String, MinionStatusDto> getMinionState(@ActivityScope @PathParam("instance") String instanceId,
             @PathParam("tag") String versionTag);
 
     @GET
@@ -150,4 +163,5 @@ public interface InstanceResource {
     public StringEntryChunkDto getContentChunk(@ActivityScope @PathParam("instance") String instanceId,
             @PathParam("minion") String minion, InstanceDirectoryEntry entry, @QueryParam("offset") long offset,
             @QueryParam("limit") long limit);
+
 }
