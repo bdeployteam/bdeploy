@@ -6,7 +6,9 @@
     <span class="spacer"></span>
     <mat-menu #appMenu="matMenu" xPosition="before">
       <button mat-menu-item [routerLink]="['/instance/browser', currentGroup.name]">Open</button>
-      <button mat-menu-item [routerLink]="['/instancegroup/edit', currentGroup.name]">Edit</button>
+      <div [matTooltip]='isManagedServer() ? "Editing of instance group information must be done on the controlling central server" : ""'>
+        <button mat-menu-item [routerLink]="['/instancegroup/edit', currentGroup.name]" [disabled]='isManagedServer()'>Edit</button>
+      </div>
       <button mat-menu-item (click)="delete()">Delete</button>
       <mat-divider></mat-divider>
       <button mat-menu-item [routerLink]="['/hive/browser', {hive: currentGroup.name}]">Hive</button>

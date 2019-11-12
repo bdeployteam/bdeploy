@@ -11,7 +11,8 @@ import { Observable, of } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { MessageBoxMode } from '../messagebox/messagebox.component';
 import { EMPTY_INSTANCE_GROUP } from '../models/consts';
-import { InstanceGroupConfiguration } from '../models/gen.dtos';
+import { InstanceGroupConfiguration, MinionMode } from '../models/gen.dtos';
+import { ConfigService } from '../services/config.service';
 import { InstanceGroupService } from '../services/instance-group.service';
 import { ErrorMessage, Logger, LoggingService } from '../services/logging.service';
 import { MessageboxService } from '../services/messagebox.service';
@@ -68,6 +69,7 @@ export class InstanceGroupAddEditComponent implements OnInit {
     public location: Location,
     private viewContainerRef: ViewContainerRef,
     private overlay: Overlay,
+    private config: ConfigService,
   ) {}
 
   ngOnInit() {
@@ -189,20 +191,33 @@ export class InstanceGroupAddEditComponent implements OnInit {
           this.clonedInstanceGroup = instanceGroup;
         });
     } else {
-      this.instanceGroupService
-        .updateInstanceGroup(this.nameParam, instanceGroup)
-        .pipe(
-          finalize(() => {
-            this.clearLogoUpload();
+      if (this.config.config.mode === MinionMode.CENTRAL) {
+        this.messageBoxService.open({title: 'Updating Managed Servers', message: 'This action will try to contact and syncrhonize with all managed servers for this instance group.', mode: MessageBoxMode.CONFIRM_WARNING}).subscribe(r => {
+          if (r) {
+            this.doUpdate(instanceGroup);
+          } else {
             this.loading = false;
-          }),
-        )
-        .subscribe(result => {
-          this.log.info('updated instance group ' + this.nameParam);
-          this.checkImage(this.nameParam);
-          this.clonedInstanceGroup = instanceGroup;
+          }
         });
+      } else {
+        this.doUpdate(instanceGroup);
+      }
+
     }
+  }
+
+  private doUpdate(instanceGroup: any) {
+    this.instanceGroupService
+      .updateInstanceGroup(this.nameParam, instanceGroup)
+      .pipe(finalize(() => {
+        this.clearLogoUpload();
+        this.loading = false;
+      }))
+      .subscribe(result => {
+        this.log.info('updated instance group ' + this.nameParam);
+        this.checkImage(this.nameParam);
+        this.clonedInstanceGroup = instanceGroup;
+      });
   }
 
   isModified(): boolean {

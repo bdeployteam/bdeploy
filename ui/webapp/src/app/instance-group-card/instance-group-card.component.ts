@@ -3,7 +3,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { cloneDeep } from 'lodash';
 import { InstanceGroupDeleteDialogComponent } from '../instance-group-delete-dialog/instance-group-delete-dialog.component';
 import { EMPTY_INSTANCE_GROUP } from '../models/consts';
-import { InstanceGroupConfiguration } from '../models/gen.dtos';
+import { InstanceGroupConfiguration, MinionMode } from '../models/gen.dtos';
+import { ConfigService } from '../services/config.service';
 import { InstanceGroupService } from '../services/instance-group.service';
 import { LoggingService } from '../services/logging.service';
 
@@ -26,7 +27,8 @@ export class InstanceGroupCardComponent implements OnInit {
   constructor(
     private loggingService: LoggingService,
     private instanceGroupService: InstanceGroupService,
-    private dialog: MatDialog) { }
+    private dialog: MatDialog,
+    private config: ConfigService) { }
 
   ngOnInit() {
     console.log(this.isAttachAllowed)
@@ -73,6 +75,10 @@ export class InstanceGroupCardComponent implements OnInit {
         this.log.warn('Instance group name does not match');
       }
     });
+  }
+
+  isManagedServer() {
+    return this.config.config.mode === MinionMode.MANAGED;
   }
 
 }

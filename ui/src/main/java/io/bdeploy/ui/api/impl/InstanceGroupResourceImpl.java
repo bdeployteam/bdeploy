@@ -18,6 +18,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.io.ByteStreams;
 
 import io.bdeploy.bhive.BHive;
@@ -40,12 +43,18 @@ import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
+import io.bdeploy.ui.api.ManagedServersResource;
+import io.bdeploy.ui.api.Minion;
+import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.ProductResource;
+import io.bdeploy.ui.dto.AttachIdentDto;
 import io.bdeploy.ui.dto.ClientApplicationDto;
 import io.bdeploy.ui.dto.InstanceClientAppsDto;
 import io.bdeploy.ui.dto.InstanceDto;
 
 public class InstanceGroupResourceImpl implements InstanceGroupResource {
+
+    private static final Logger log = LoggerFactory.getLogger(InstanceGroupResourceImpl.class);
 
     @Inject
     private BHiveRegistry registry;
@@ -61,6 +70,9 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
 
     @Context
     private SecurityContext context;
+
+    @Inject
+    private Minion minion;
 
     @Override
     public List<InstanceGroupConfiguration> list() {
@@ -114,6 +126,20 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
         auth.addRecentlyUsedInstanceGroup(context.getUserPrincipal().getName(), group);
         RuntimeAssert.assertEquals(group, config.name, "Group update changes group name");
         new InstanceGroupManifest(getGroupHive(group)).update(config);
+
+        if (minion.getMode() == MinionMode.CENTRAL) {
+            // update all managed servers, user had to confirm this in web UI.
+            ManagedServersResource ms = rc.initResource(new ManagedServersResourceImpl());
+            List<AttachIdentDto> servers = ms.getManagedServers(group);
+
+            for (AttachIdentDto dto : servers) {
+                try {
+                    ms.synchronize(group, dto.name);
+                } catch (Exception e) {
+                    log.warn("Cannot synchronize with " + dto.name + " on " + group, e);
+                }
+            }
+        }
     }
 
     @Override
