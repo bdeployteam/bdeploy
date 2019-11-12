@@ -128,9 +128,6 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
         this.groupParam = p['group'];
         this.uuidParam = p['uuid'];
         this.loadVersions(false);
-        if (!this.selectedConfig) {
-          return;
-        }
         this.enableAutoRefresh();
         this.doTriggerProcessStatusUpdate();
 

@@ -1,7 +1,9 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { EventEmitter, Injectable } from '@angular/core';
-import { finalize } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { catchError, finalize } from 'rxjs/operators';
 import { ProcessState, ProcessStatusDto } from '../models/gen.dtos';
+import { suppressGlobalErrorHandling } from '../utils/server.utils';
 import { InstanceService } from './instance.service';
 
 @Injectable({
@@ -29,8 +31,11 @@ export class ProcessService {
     }
     this.loading = true;
     const url = this.instanceService.buildInstanceUrl(instanceGroup, instanceId) + '/processes';
-    const promise = this.http.get<{ [key: string]: ProcessStatusDto }>(url);
-    promise.pipe(finalize(() => (this.loading = false))).subscribe(result => {
+    const promise = this.http.get<{ [key: string]: ProcessStatusDto }>(url, { headers: suppressGlobalErrorHandling(new HttpHeaders({'ignoreLoadingBar': ''})) });
+    promise.pipe(catchError(r => of(null)), finalize(() => (this.loading = false))).subscribe(result => {
+      if (!result) {
+        return; // error
+      }
       this.app2Status = result;
       this.tag2Status = this.groupByTag(Object.values(result));
       this.processStatusEmitter.next(result);
