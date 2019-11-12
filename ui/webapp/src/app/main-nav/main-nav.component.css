@@ -82,3 +82,10 @@ footer {
   height: 48px;
   width: 48px;
 }
+
+.server-type-hint {
+  font-size: 0.7em;
+  font-weight: bold;
+
+  margin-right: 20px;
+}

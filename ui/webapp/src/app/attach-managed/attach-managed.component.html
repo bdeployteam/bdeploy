@@ -23,16 +23,16 @@
       <p>
         Drag the managed server information from the managed server's <b>Attach to Central Server</b> page and drop it on the zone below.
       </p>
-      <div class='drag-container'>
+      <div class='drag-container' *ngIf='!attachPayload'>
         <mat-card class='drag-card drop-card' (drop)='onDrop($event)' (dragover)='onOver($event)'>
           Drop managed server information here!
         </mat-card>
       </div>
       <p *ngIf='attachPayload'>
-        Successfully read information for {{attachPayload.name}}.
+        Successfully read information for <b>{{attachPayload.name}}</b>.
       </p>
       <div class='button-container'>
-        <button mat-raised-button matStepperPrevious>Back</button>
+        <button mat-raised-button matStepperPrevious (click)='attachPayload = null'>Back</button>
         <button mat-raised-button matStepperNext [disabled]='!attachPayload' (click)='updateFormDefaults()'>Next</button>
       </div>
     </mat-step>

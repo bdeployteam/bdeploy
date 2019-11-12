@@ -1,7 +1,6 @@
 @import '~@angular/material/theming';
 
 @mixin main-nav-theme($theme) {
-  $dark: map-get($theme, 'is-dark');
   $palette: map-get($theme, 'main-toolbar');
 
   .main-toolbar {

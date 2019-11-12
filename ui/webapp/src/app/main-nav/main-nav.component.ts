@@ -44,6 +44,13 @@ export class MainNavComponent implements OnInit {
     });
   }
 
+  needServerTypeHint() {
+    if (this.backendVersion.value && this.backendVersion.value.mode !== MinionMode.STANDALONE) {
+      return true;
+    }
+    return false;
+  }
+
   logout(): void {
     this.router.navigate(['/login']).then(result => {
       if (result) {
