@@ -19,6 +19,6 @@ public class CentralIdentDto {
      * <b>must</b>
      * be a valid token on the target server for the identification to be accepted.
      */
-    public AttachIdentDto local;
+    public ManagedMasterDto local;
 
 }

@@ -16,7 +16,7 @@ import { MessageBoxMode } from '../messagebox/messagebox.component';
 import { ApplicationGroup } from '../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_DEPLOYMENT_STATE } from '../models/consts';
 import { EventWithCallback } from '../models/event';
-import { ApplicationConfiguration, ApplicationDto, AttachIdentDto, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstanceStateRecord, InstanceUpdateEventDto, InstanceUpdateEventType, ManifestKey, MinionMode, ProductDto } from '../models/gen.dtos';
+import { ApplicationConfiguration, ApplicationDto, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstanceStateRecord, InstanceUpdateEventDto, InstanceUpdateEventType, ManagedMasterDto, ManifestKey, MinionMode, ProductDto } from '../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../models/process.model';
 import { ProcessDetailsComponent } from '../process-details/process-details.component';
 import { ApplicationService } from '../services/application.service';
@@ -63,7 +63,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   public pageTitle: string;
 
   // the controlling managed server in central mode.
-  public controllingServer: AttachIdentDto;
+  public controllingServer: ManagedMasterDto;
 
   public selectedConfig: ProcessConfigDto;
   public processConfigs: ProcessConfigDto[] = [];

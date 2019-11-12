@@ -2,7 +2,7 @@ package io.bdeploy.ui.dto;
 
 import java.time.Instant;
 
-public class AttachIdentDto {
+public class ManagedMasterDto {
 
     public String name;
     public String description;

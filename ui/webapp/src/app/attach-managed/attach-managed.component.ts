@@ -8,7 +8,7 @@ import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AttachCentralComponent } from '../attach-central/attach-central.component';
-import { AttachIdentDto } from '../models/gen.dtos';
+import { ManagedMasterDto } from '../models/gen.dtos';
 import { ConfigService } from '../services/config.service';
 import { DownloadService } from '../services/download.service';
 import { ErrorMessage } from '../services/logging.service';
@@ -21,7 +21,7 @@ import { ManagedServersService } from '../services/managed-servers.service';
 })
 export class AttachManagedComponent implements OnInit {
   instanceGroupName: string = this.route.snapshot.paramMap.get('group');
-  attachPayload: AttachIdentDto;
+  attachPayload: ManagedMasterDto;
   infoGroup: FormGroup;
   attachSuccess = false;
   attachError: ErrorMessage;
@@ -126,7 +126,7 @@ export class AttachManagedComponent implements OnInit {
     });
   }
 
-  private createIdent(): AttachIdentDto {
+  private createIdent(): ManagedMasterDto {
     return {
       name: this.serverNameControl.value,
       description: this.serverDescControl.value,

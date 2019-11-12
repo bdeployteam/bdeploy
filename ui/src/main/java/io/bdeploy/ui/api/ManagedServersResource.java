@@ -15,7 +15,7 @@ import javax.ws.rs.core.MediaType;
 
 import io.bdeploy.interfaces.NodeStatus;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
-import io.bdeploy.ui.dto.AttachIdentDto;
+import io.bdeploy.ui.dto.ManagedMasterDto;
 
 @Path("/managed-servers")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -27,20 +27,20 @@ public interface ManagedServersResource {
      */
     @PUT
     @Path("/auto-attach/{group}")
-    public void tryAutoAttach(@PathParam("group") String groupName, AttachIdentDto target);
+    public void tryAutoAttach(@PathParam("group") String groupName, ManagedMasterDto target);
 
     /**
      * Used on a central server to manually (force) attach the given server without verification
      */
     @PUT
     @Path("/manual-attach/{group}")
-    public void manualAttach(@PathParam("group") String groupName, AttachIdentDto target);
+    public void manualAttach(@PathParam("group") String groupName, ManagedMasterDto target);
 
     /**
      * Used on a managed server to manually (force) attach an instance group from a central server using it's encrypted
      * identification.
      * <p>
-     * The central identification must be a string obtained using {@link #getCentralIdent(String, AttachIdentDto)} on the central
+     * The central identification must be a string obtained using {@link #getCentralIdent(String, ManagedMasterDto)} on the central
      * server.
      *
      * @return the name of the created (attached) instance group.
@@ -57,21 +57,21 @@ public interface ManagedServersResource {
      */
     @POST
     @Path("/central-ident/{group}")
-    public String getCentralIdent(@PathParam("group") String group, AttachIdentDto target);
+    public String getCentralIdent(@PathParam("group") String group, ManagedMasterDto target);
 
     /**
      * Retrieve all available managed servers for an instance group on the central server
      */
     @GET
     @Path("/list/{group}")
-    public List<AttachIdentDto> getManagedServers(@PathParam("group") String instanceGroup);
+    public List<ManagedMasterDto> getManagedServers(@PathParam("group") String instanceGroup);
 
     /**
      * Retrieve the controlling managed server on the central server.
      */
     @GET
     @Path("/controlling-server/{group}/{instanceId}")
-    public AttachIdentDto getServerForInstance(@PathParam("group") String instanceGroup,
+    public ManagedMasterDto getServerForInstance(@PathParam("group") String instanceGroup,
             @PathParam("instanceId") String instanceId, @QueryParam("instanceTag") String instanceTag);
 
     /**

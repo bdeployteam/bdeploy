@@ -3,7 +3,7 @@ import { MatTableDataSource } from '@angular/material';
 import { format } from 'date-fns';
 import { finalize } from 'rxjs/operators';
 import { MessageBoxMode } from '../messagebox/messagebox.component';
-import { AttachIdentDto, InstanceConfiguration, NodeStatus } from '../models/gen.dtos';
+import { InstanceConfiguration, ManagedMasterDto, NodeStatus } from '../models/gen.dtos';
 import { ConfigService } from '../services/config.service';
 import { ManagedServersService } from '../services/managed-servers.service';
 import { MessageboxService } from '../services/messagebox.service';
@@ -21,7 +21,7 @@ interface NodeRecord {
 export class ManagedServerDetailComponent implements OnInit {
 
   @Input()
-  public server: AttachIdentDto;
+  public server: ManagedMasterDto;
 
   @Input()
   public instanceGroupName: string;

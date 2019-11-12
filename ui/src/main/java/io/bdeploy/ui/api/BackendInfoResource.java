@@ -7,8 +7,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
-import io.bdeploy.ui.dto.AttachIdentDto;
 import io.bdeploy.ui.dto.BackendInfoDto;
+import io.bdeploy.ui.dto.ManagedMasterDto;
 
 @Path("/backend-info")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -24,7 +24,7 @@ public interface BackendInfoResource {
      * @return a DTO which can be used to attach this server to another server.
      */
     @GET
-    @Path("/attach-ident")
-    public AttachIdentDto getAttachIdentification();
+    @Path("/managed-master")
+    public ManagedMasterDto getManagedMasterIdentification();
 
 }

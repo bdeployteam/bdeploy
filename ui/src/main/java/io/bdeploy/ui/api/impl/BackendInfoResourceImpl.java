@@ -7,7 +7,7 @@ import javax.ws.rs.core.UriInfo;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.ui.api.BackendInfoResource;
 import io.bdeploy.ui.api.Minion;
-import io.bdeploy.ui.dto.AttachIdentDto;
+import io.bdeploy.ui.dto.ManagedMasterDto;
 import io.bdeploy.ui.dto.BackendInfoDto;
 
 public class BackendInfoResourceImpl implements BackendInfoResource {
@@ -24,8 +24,8 @@ public class BackendInfoResourceImpl implements BackendInfoResource {
     }
 
     @Override
-    public AttachIdentDto getAttachIdentification() {
-        AttachIdentDto dto = new AttachIdentDto();
+    public ManagedMasterDto getManagedMasterIdentification() {
+        ManagedMasterDto dto = new ManagedMasterDto();
 
         dto.name = minion.getSelfName();
         dto.auth = minion.getSelf().getAuthPack();

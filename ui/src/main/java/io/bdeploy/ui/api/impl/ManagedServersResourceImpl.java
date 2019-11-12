@@ -52,13 +52,14 @@ import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
-import io.bdeploy.ui.ManagedMasterAssociationMetaManifest;
-import io.bdeploy.ui.ManagedMasterAttachmentsMetaManifest;
+import io.bdeploy.ui.ControllingMaster;
+import io.bdeploy.ui.ManagedMasters;
+import io.bdeploy.ui.ManagedMastersConfiguration;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.ManagedServersResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
-import io.bdeploy.ui.dto.AttachIdentDto;
+import io.bdeploy.ui.dto.ManagedMasterDto;
 import io.bdeploy.ui.dto.CentralIdentDto;
 
 public class ManagedServersResourceImpl implements ManagedServersResource {
@@ -78,7 +79,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
     private ActivityReporter reporter;
 
     @Override
-    public void tryAutoAttach(String groupName, AttachIdentDto target) {
+    public void tryAutoAttach(String groupName, ManagedMasterDto target) {
         RemoteService svc = new RemoteService(UriBuilder.fromUri(target.uri).build(), target.auth);
         MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class, context);
         for (InstanceGroupConfiguration cfg : root.getInstanceGroups()) {
@@ -89,8 +90,9 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         }
 
         BHive hive = getInstanceGroupHive(groupName);
+        ManagedMasters mm = new ManagedMasters(hive);
 
-        if (ManagedMasterAttachmentsMetaManifest.read(hive).getAttachedManagedServers().containsKey(target.name)) {
+        if (mm.read().getManagedMasters().containsKey(target.name)) {
             throw new WebApplicationException("Server with name " + target.name + " already exists!", Status.CONFLICT);
         }
 
@@ -106,7 +108,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             hive.execute(new PushOperation().setHiveName(groupName).addManifest(igm.getKey()).setRemote(svc));
 
             // store the attachment locally
-            ManagedMasterAttachmentsMetaManifest.attach(hive, target, false);
+            mm.attach(target, false);
 
             WebTarget attachTarget = ResourceProvider.of(svc).getBaseTarget().path("/attach-events");
             StatusType status = attachTarget.request().buildPost(Entity.text(groupName)).invoke().getStatusInfo();
@@ -119,15 +121,16 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
     }
 
     @Override
-    public void manualAttach(String groupName, AttachIdentDto target) {
+    public void manualAttach(String groupName, ManagedMasterDto target) {
         BHive hive = getInstanceGroupHive(groupName);
+        ManagedMasters mm = new ManagedMasters(hive);
 
-        if (ManagedMasterAttachmentsMetaManifest.read(hive).getAttachedManagedServers().containsKey(target.name)) {
+        if (mm.read().getManagedMasters().containsKey(target.name)) {
             throw new WebApplicationException("Server with name " + target.name + " already exists!", Status.CONFLICT);
         }
 
         // store the attachment locally
-        ManagedMasterAttachmentsMetaManifest.attach(hive, target, false);
+        mm.attach(target, false);
     }
 
     @Override
@@ -163,10 +166,10 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
     }
 
     @Override
-    public String getCentralIdent(String groupName, AttachIdentDto target) {
+    public String getCentralIdent(String groupName, ManagedMasterDto target) {
         BHive hive = getInstanceGroupHive(groupName);
 
-        if (ManagedMasterAttachmentsMetaManifest.read(hive).getAttachedManagedServers().containsKey(target.name)) {
+        if (new ManagedMasters(hive).read().getManagedMasters().containsKey(target.name)) {
             throw new WebApplicationException("Server with name " + target.name + " already exists!", Status.CONFLICT);
         }
 
@@ -189,31 +192,38 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
     }
 
     @Override
-    public List<AttachIdentDto> getManagedServers(String instanceGroup) {
+    public List<ManagedMasterDto> getManagedServers(String instanceGroup) {
         BHive hive = getInstanceGroupHive(instanceGroup);
 
-        ManagedMasterAttachmentsMetaManifest masters = ManagedMasterAttachmentsMetaManifest.read(hive);
-        return masters.getAttachedManagedServers().values().stream().map(e -> {
+        ManagedMastersConfiguration masters = new ManagedMasters(hive).read();
+        return masters.getManagedMasters().values().stream().map(e -> {
             e.auth = null;
             return e;
         }).collect(Collectors.toList());
     }
 
     @Override
-    public AttachIdentDto getServerForInstance(String instanceGroup, String instanceId, String instanceTag) {
+    public ManagedMasterDto getServerForInstance(String instanceGroup, String instanceId, String instanceTag) {
         BHive hive = getInstanceGroupHive(instanceGroup);
 
-        ManagedMasterAttachmentsMetaManifest masters = ManagedMasterAttachmentsMetaManifest.read(hive);
+        ManagedMastersConfiguration masters = new ManagedMasters(hive).read();
         InstanceManifest im = InstanceManifest.load(hive, instanceId, instanceTag);
 
-        String selected = ManagedMasterAssociationMetaManifest.read(hive, im.getManifest()).getMasterName();
+        String selected = new ControllingMaster(hive, im.getManifest()).read().getName();
         if (selected == null) {
             return null;
         }
 
-        AttachIdentDto dto = masters.getAttachedManagedServers().get(selected);
-        dto.auth = null;
+        ManagedMasterDto dto = masters.getManagedMaster(selected);
 
+        if (dto == null) {
+            throw new WebApplicationException(
+                    "Recorded managed server for instance " + instanceId + " no longer available on instance group: " + selected,
+                    Status.NOT_FOUND);
+        }
+
+        // clear token - don't transfer over the wire if not required.
+        dto.auth = null;
         return dto;
     }
 
@@ -233,7 +243,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         SortedSet<Manifest.Key> latestKeys = InstanceManifest.scan(hive, true);
 
         for (Manifest.Key key : latestKeys) {
-            String associated = ManagedMasterAssociationMetaManifest.read(hive, key).getMasterName();
+            String associated = new ControllingMaster(hive, key).read().getName();
             if (serverName.equals(associated)) {
                 instances.add(InstanceManifest.of(hive, key).getConfiguration());
             }
@@ -252,7 +262,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             allInstanceObjects.forEach(x -> hive.execute(new ManifestDeleteOperation().setToDelete(x)));
         }
 
-        ManagedMasterAttachmentsMetaManifest.detach(hive, serverName);
+        new ManagedMasters(hive).detach(serverName);
     }
 
     @Override
@@ -264,10 +274,10 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
     private RemoteService getConfiguredRemote(String groupName, String serverName) {
         BHive hive = getInstanceGroupHive(groupName);
 
-        AttachIdentDto attached = ManagedMasterAttachmentsMetaManifest.read(hive).getAttachedManagedServers().get(serverName);
+        ManagedMasterDto attached = new ManagedMasters(hive).read().getManagedMaster(serverName);
         if (attached == null) {
             throw new WebApplicationException("Managed server " + serverName + " not found for instance group " + groupName,
-                    Status.NOT_FOUND);
+                    Status.EXPECTATION_FAILED);
         }
 
         RemoteService svc = new RemoteService(UriBuilder.fromUri(attached.uri).build(), attached.auth);
@@ -322,8 +332,8 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 continue; // OK. instance exists
             }
 
-            if (!serverName.equals(ManagedMasterAssociationMetaManifest.read(hive, key).getMasterName())) {
-                continue; // OK. other server
+            if (!serverName.equals(new ControllingMaster(hive, key).read().getName())) {
+                continue; // OK. other server or null (should not happen).
             }
 
             // Not OK: instance no longer on server.
@@ -334,13 +344,14 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
         // 4. for all the fetched manifests, if they are instances, associate the server with it
         for (Manifest.Key instance : instances.keySet()) {
-            ManagedMasterAssociationMetaManifest.associate(hive, instance, serverName);
+            new ControllingMaster(hive, instance).associate(serverName);
         }
 
         // 5. update last sync timestamp on attachment of server.
-        AttachIdentDto attached = ManagedMasterAttachmentsMetaManifest.read(hive).getAttachedManagedServers().get(serverName);
+        ManagedMasters mm = new ManagedMasters(hive);
+        ManagedMasterDto attached = mm.read().getManagedMaster(serverName);
         attached.lastSync = Instant.now();
-        ManagedMasterAttachmentsMetaManifest.attach(hive, attached, true);
+        mm.attach(attached, true);
     }
 
 }

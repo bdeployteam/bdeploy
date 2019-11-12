@@ -47,7 +47,7 @@ import io.bdeploy.ui.api.ManagedServersResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.ProductResource;
-import io.bdeploy.ui.dto.AttachIdentDto;
+import io.bdeploy.ui.dto.ManagedMasterDto;
 import io.bdeploy.ui.dto.ClientApplicationDto;
 import io.bdeploy.ui.dto.InstanceClientAppsDto;
 import io.bdeploy.ui.dto.InstanceDto;
@@ -130,9 +130,9 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
         if (minion.getMode() == MinionMode.CENTRAL) {
             // update all managed servers, user had to confirm this in web UI.
             ManagedServersResource ms = rc.initResource(new ManagedServersResourceImpl());
-            List<AttachIdentDto> servers = ms.getManagedServers(group);
+            List<ManagedMasterDto> servers = ms.getManagedServers(group);
 
-            for (AttachIdentDto dto : servers) {
+            for (ManagedMasterDto dto : servers) {
                 try {
                     ms.synchronize(group, dto.name);
                 } catch (Exception e) {

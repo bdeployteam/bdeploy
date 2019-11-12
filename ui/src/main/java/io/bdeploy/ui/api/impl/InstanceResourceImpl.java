@@ -90,8 +90,9 @@ import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
-import io.bdeploy.ui.ManagedMasterAssociationMetaManifest;
-import io.bdeploy.ui.ManagedMasterAttachmentsMetaManifest;
+import io.bdeploy.ui.ControllingMaster;
+import io.bdeploy.ui.ManagedMasters;
+import io.bdeploy.ui.ManagedMastersConfiguration;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.ConfigFileResource;
 import io.bdeploy.ui.api.InstanceResource;
@@ -103,7 +104,7 @@ import io.bdeploy.ui.api.ProcessResource;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
 import io.bdeploy.ui.branding.Branding;
 import io.bdeploy.ui.branding.BrandingConfig;
-import io.bdeploy.ui.dto.AttachIdentDto;
+import io.bdeploy.ui.dto.ManagedMasterDto;
 import io.bdeploy.ui.dto.InstanceDto;
 import io.bdeploy.ui.dto.InstanceManifestHistoryDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
@@ -230,12 +231,12 @@ public class InstanceResourceImpl implements InstanceResource {
         if (minion.getMode() == MinionMode.CENTRAL && managedServer == null) {
             throw new WebApplicationException("Managed server is not set on central", Status.EXPECTATION_FAILED);
         } else if (minion.getMode() == MinionMode.CENTRAL) {
-            ManagedMasterAttachmentsMetaManifest attached = ManagedMasterAttachmentsMetaManifest.read(hive);
-            if (!attached.getAttachedManagedServers().containsKey(managedServer)) {
+            ManagedMastersConfiguration masters = new ManagedMasters(hive).read();
+            ManagedMasterDto ident = masters.getManagedMaster(managedServer);
+            if (ident == null) {
                 throw new WebApplicationException("Managed server '" + managedServer + "' is not attached to this instance group",
                         Status.EXPECTATION_FAILED);
             }
-            AttachIdentDto ident = attached.getAttachedManagedServers().get(managedServer);
             remote = new RemoteService(UriBuilder.fromUri(ident.uri).build(), ident.auth);
         } else {
             remote = mp.getControllingMaster(hive, null);
@@ -258,7 +259,7 @@ public class InstanceResourceImpl implements InstanceResource {
         }
 
         ManagedServersResource rs = rc.initResource(new ManagedServersResourceImpl());
-        AttachIdentDto server = rs.getServerForInstance(groupName, instanceId, null);
+        ManagedMasterDto server = rs.getServerForInstance(groupName, instanceId, null);
         rs.synchronize(groupName, server.name);
     }
 
@@ -332,12 +333,12 @@ public class InstanceResourceImpl implements InstanceResource {
         if (minion.getMode() == MinionMode.CENTRAL && managedServer == null) {
             throw new WebApplicationException("Managed server is not set on central", Status.EXPECTATION_FAILED);
         } else if (minion.getMode() == MinionMode.CENTRAL) {
-            ManagedMasterAttachmentsMetaManifest attached = ManagedMasterAttachmentsMetaManifest.read(hive);
-            if (!attached.getAttachedManagedServers().containsKey(managedServer)) {
+            ManagedMastersConfiguration masters = new ManagedMasters(hive).read();
+            ManagedMasterDto ident = masters.getManagedMaster(managedServer);
+            if (ident == null) {
                 throw new WebApplicationException("Managed server '" + managedServer + "' is not attached to this instance group",
                         Status.EXPECTATION_FAILED);
             }
-            AttachIdentDto ident = attached.getAttachedManagedServers().get(managedServer);
             remote = new RemoteService(UriBuilder.fromUri(ident.uri).build(), ident.auth);
         } else {
             remote = mp.getControllingMaster(hive, null);
@@ -392,7 +393,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
         // Collect node information
         InstanceManifest thisIm = InstanceManifest.load(hive, instance, versionTag);
-        String thisMaster = ManagedMasterAssociationMetaManifest.read(hive, thisIm.getManifest()).getMasterName();
+        String thisMaster = new ControllingMaster(hive, thisIm.getManifest()).read().getName();
         Map<String, InstanceNodeConfigurationDto> node2Dto = getExistingNodes(thisIm);
 
         for (Key imKey : InstanceManifest.scan(hive, true)) {
@@ -400,7 +401,7 @@ public class InstanceResourceImpl implements InstanceResource {
             if (!isForeign) {
                 imKey = thisIm.getManifest(); // go on with requested tag (versionTag)
             }
-            String imMaster = ManagedMasterAssociationMetaManifest.read(hive, imKey).getMasterName();
+            String imMaster = new ControllingMaster(hive, imKey).read().getName();
 
             if (thisMaster == null || thisMaster.equals(imMaster)) {
                 gatherNodeConfigurations(node2Dto, InstanceManifest.of(hive, imKey), isForeign);

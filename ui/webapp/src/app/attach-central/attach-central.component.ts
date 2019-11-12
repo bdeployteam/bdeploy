@@ -2,7 +2,7 @@ import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatStep, MatStepper } from '@angular/material';
 import { EventSourcePolyfill } from 'ng-event-source';
-import { AttachIdentDto, InstanceGroupConfiguration } from '../models/gen.dtos';
+import { InstanceGroupConfiguration, ManagedMasterDto } from '../models/gen.dtos';
 import { DownloadService } from '../services/download.service';
 import { InstanceGroupService } from '../services/instance-group.service';
 import { ErrorMessage, LoggingService } from '../services/logging.service';
@@ -19,7 +19,7 @@ export class AttachCentralComponent implements OnInit, OnDestroy {
   static readonly ATTACH_MIME_TYPE = 'text/plain';
 
   private log = this.logging.getLogger('AttachCentralComponent');
-  attachPayload: AttachIdentDto;
+  attachPayload: ManagedMasterDto;
   updateEvents: EventSourcePolyfill;
   remoteAttached: InstanceGroupConfiguration;
   manualLoading = false;
@@ -40,7 +40,7 @@ export class AttachCentralComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.managedServers.getAttachIdent().subscribe(i => (this.attachPayload = i));
+    this.managedServers.getManagedMasterInfo().subscribe(i => (this.attachPayload = i));
 
     this.updateEvents = this.eventService.getAttachEventSource();
     this.updateEvents.onerror = err => {

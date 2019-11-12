@@ -192,7 +192,7 @@ export class InstanceGroupAddEditComponent implements OnInit {
         });
     } else {
       if (this.config.config.mode === MinionMode.CENTRAL) {
-        this.messageBoxService.open({title: 'Updating Managed Servers', message: 'This action will try to contact and syncrhonize with all managed servers for this instance group.', mode: MessageBoxMode.CONFIRM_WARNING}).subscribe(r => {
+        this.messageBoxService.open({title: 'Updating Managed Servers', message: 'This action will try to contact and synchronize with all managed servers for this instance group.', mode: MessageBoxMode.CONFIRM_WARNING}).subscribe(r => {
           if (r) {
             this.doUpdate(instanceGroup);
           } else {

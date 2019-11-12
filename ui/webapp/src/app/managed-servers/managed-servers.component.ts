@@ -2,7 +2,7 @@ import { Location } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { finalize } from 'rxjs/operators';
-import { AttachIdentDto } from '../models/gen.dtos';
+import { ManagedMasterDto } from '../models/gen.dtos';
 import { ManagedServersService } from '../services/managed-servers.service';
 
 @Component({
@@ -13,7 +13,7 @@ import { ManagedServersService } from '../services/managed-servers.service';
 export class ManagedServersComponent implements OnInit {
 
   instanceGroupName: string = this.route.snapshot.paramMap.get('group');
-  managedServers: AttachIdentDto[];
+  managedServers: ManagedMasterDto[];
   loading = true;
 
   connected = new Map<string, boolean>();
@@ -31,11 +31,11 @@ export class ManagedServersComponent implements OnInit {
     });
   }
 
-  isConnected(server: AttachIdentDto) {
+  isConnected(server: ManagedMasterDto) {
     return this.connected.get(server.name);
   }
 
-  setConnected(server: AttachIdentDto, con: boolean) {
+  setConnected(server: ManagedMasterDto, con: boolean) {
     this.connected.set(server.name, con);
   }
 
