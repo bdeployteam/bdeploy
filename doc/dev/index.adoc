@@ -34,6 +34,8 @@ include::launcher.adoc[]
 
 include::interfaces.adoc[]
 
+include::manifests.adoc[]
+
 include::ui.adoc[]
 
 include::devenv.adoc[]
