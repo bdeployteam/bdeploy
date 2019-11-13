@@ -59,8 +59,8 @@ import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.ManagedServersResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
-import io.bdeploy.ui.dto.ManagedMasterDto;
 import io.bdeploy.ui.dto.CentralIdentDto;
+import io.bdeploy.ui.dto.ManagedMasterDto;
 
 public class ManagedServersResourceImpl implements ManagedServersResource {
 
@@ -82,10 +82,11 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
     public void tryAutoAttach(String groupName, ManagedMasterDto target) {
         RemoteService svc = new RemoteService(UriBuilder.fromUri(target.uri).build(), target.auth);
         MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class, context);
+
+        boolean igExists = false;
         for (InstanceGroupConfiguration cfg : root.getInstanceGroups()) {
             if (cfg.name.equals(groupName)) {
-                throw new WebApplicationException(
-                        "Instance Group with name " + groupName + " already exists on the managed server", Status.CONFLICT);
+                igExists = true; // don't try to create, instead sync
             }
         }
 
@@ -101,14 +102,18 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         igc.logo = null;
 
         try {
-            // initial create without logo - required to create instance group hive.
-            root.addInstanceGroup(igc, null);
-
-            // push the latest instance group manifest to the target
-            hive.execute(new PushOperation().setHiveName(groupName).addManifest(igm.getKey()).setRemote(svc));
-
             // store the attachment locally
             mm.attach(target, false);
+
+            if (!igExists) {
+                // initial create without logo - required to create instance group hive.
+                root.addInstanceGroup(igc, null);
+
+                // push the latest instance group manifest to the target
+                hive.execute(new PushOperation().setHiveName(groupName).addManifest(igm.getKey()).setRemote(svc));
+            } else {
+                synchronize(groupName, target.name);
+            }
 
             WebTarget attachTarget = ResourceProvider.of(svc).getBaseTarget().path("/attach-events");
             StatusType status = attachTarget.request().buildPost(Entity.text(groupName)).invoke().getStatusInfo();
