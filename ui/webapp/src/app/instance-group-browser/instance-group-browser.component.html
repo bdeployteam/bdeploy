@@ -11,7 +11,7 @@
 </div>
 
 <ng-container *ngIf='!groupsLoading && instanceGroupList.isEmpty()'>
-  <div class="list-heading center">
+  <div class="center">
     <app-logo [size]='128'></app-logo>
     <p>
       <span class='welcomeText'>Welcome to BDeploy!</span>
@@ -35,7 +35,7 @@
       </p>
       <p>
         <span class="material-icons headerIcon">link</span>
-        <span class="headerText"><a [routerLink]="['/instancegroup/add']">Attach Instance Group</a></span>
+        <span class="headerText"><a [routerLink]="['/attach/central']">Attach Instance Group</a></span>
       </p>
     </ng-container>
   </div>
