@@ -9,7 +9,7 @@ Almost all of *BDeploy*'s storage is encapsulated in *Manifests* in a *BHive*. T
 
 There are a bunch of *Manifests* for several purposes.
 
-image::images/ManifestOverview.png[Merkle Hash Tree,align=center,width=480,link="images/ManifestOverview.png"]
+image::images/ManifestOverview.png[Special Manifest Types,align=center,width=480,link="images/ManifestOverview.png"]
 
 [%header,cols=2*]
 |===

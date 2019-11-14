@@ -159,8 +159,6 @@ export class InstanceAddEditComponent implements OnInit {
   public getErrorMessage(ctrl: FormControl): string {
     if (ctrl.hasError('required')) {
       return 'Required';
-    } else if (ctrl.hasError('urlPattern')) {
-      return 'Requires https://<host>:<port>/api';
     }
     return 'Unknown error';
   }
