@@ -8,6 +8,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LoadingBarHttpClientModule } from '@ngx-loading-bar/http-client';
 import { LoadingBarRouterModule } from '@ngx-loading-bar/router';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { AceEditorModule } from 'ng2-ace-editor';
 import { DragulaModule } from 'ng2-dragula';
 import { CookieService } from 'ngx-cookie-service';
@@ -53,6 +54,7 @@ import { ManagedServerDetailComponent } from './managed-server-detail/managed-se
 import { ManagedServersComponent } from './managed-servers/managed-servers.component';
 import { MasterCleanupComponent } from './master-cleanup/master-cleanup.component';
 import { MessageboxComponent } from './messagebox/messagebox.component';
+import { MetricsOverviewComponent } from './metrics-overview/metrics-overview.component';
 import { ProcessConfigurationComponent } from './process-configuration/process-configuration.component';
 import { ProcessDetailsComponent } from './process-details/process-details.component';
 import { ProcessListComponent } from './process-list/process-list.component';
@@ -146,7 +148,8 @@ export function loadAppConfig(cfgService: ConfigService) {
     AttachCentralComponent,
     AttachManagedComponent,
     ManagedServersComponent,
-    ManagedServerDetailComponent
+    ManagedServerDetailComponent,
+    MetricsOverviewComponent
   ],
   imports: [
     BrowserModule,
@@ -191,6 +194,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     AceEditorModule,
     MatTabsModule,
     MatStepperModule,
+    NgxChartsModule,
     DeviceDetectorModule.forRoot(),
     DragulaModule.forRoot()
   ],

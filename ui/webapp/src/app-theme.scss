@@ -5,6 +5,7 @@
 @import 'app/main-nav/main-nav-theme.scss';
 @import 'app/logo/logo-theme.scss';
 @import 'dragular.scss';
+@import 'app-ngx-charts-dark.scss';
 
 /* Custom component theme collection */
 @import 'app/instance-group-delete-dialog/instance-group-delete-dialog-theme.scss';
@@ -180,6 +181,7 @@ $app-dark-theme: add-toolbar-color(mat-dark-theme($app-dark-primary, $app-dark-a
 $app-dark-theme: override-theme-background($app-dark-theme, app-bar, #3d3c3e);
 .app-dark-theme {
   @include all-themes($app-dark-theme);
+  @include ngx-charts-dark();
 }
 .app-dark-theme-chooser {
   @include theme-chooser($app-dark-theme);
@@ -193,6 +195,7 @@ $app-dark-yellow-theme: add-toolbar-color(mat-dark-theme($app-dark-yellow-primar
 $app-dark-yellow-theme: override-theme-background($app-dark-yellow-theme, app-bar, #3d3c3e);
 .app-dark-yellow-theme {
   @include all-themes($app-dark-yellow-theme);
+  @include ngx-charts-dark();
 }
 .app-dark-yellow-theme-chooser {
   @include theme-chooser($app-dark-yellow-theme);

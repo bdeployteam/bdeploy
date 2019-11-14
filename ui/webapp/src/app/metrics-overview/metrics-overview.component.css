@@ -1,0 +1,44 @@
+.root-container {
+  display: flex;
+  flex-direction: column;
+
+  margin: 15px;
+
+  flex: 1 0 auto;
+}
+
+.charts-area {
+  flex: 1 0 auto;
+
+  display: flex;
+  flex-direction: row;
+}
+
+.details-group {
+  display: flex;
+  flex-direction: column;
+
+  flex: 50%;
+}
+
+.details-element-group {
+  display: flex;
+  flex-direction: column;
+
+  margin-left: 5px;
+}
+
+mat-divider {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.count-chart {
+  flex: 50%;
+  margin-right: 20px;
+}
+
+.timer-chart {
+  margin-top: 15px;
+  margin-bottom: 15px;
+}

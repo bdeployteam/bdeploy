@@ -16,6 +16,7 @@ import { InstanceGroupBrowserComponent } from './instance-group-browser/instance
 import { LoginComponent } from './login/login.component';
 import { ManagedServersComponent } from './managed-servers/managed-servers.component';
 import { MasterCleanupComponent } from './master-cleanup/master-cleanup.component';
+import { MetricsOverviewComponent } from './metrics-overview/metrics-overview.component';
 import { ProcessConfigurationComponent } from './process-configuration/process-configuration.component';
 import { ProductsComponent } from './products/products.component';
 import { SoftwareRepoAddEditComponent } from './software-repo-add-edit/software-repo-add-edit.component';
@@ -175,6 +176,13 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
     data: { title: 'Managed Servers', header: 'Managed Servers' }
+  },
+  {
+    path: 'metrics',
+    component: MetricsOverviewComponent,
+    canActivate: [AuthGuard],
+    canDeactivate: [CanDeactivateGuard],
+    data: { title: 'System Metrics', header: 'System Metrics' }
   },
 ];
 

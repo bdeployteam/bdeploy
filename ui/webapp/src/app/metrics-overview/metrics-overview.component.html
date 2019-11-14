@@ -1,0 +1,72 @@
+<div *ngIf="!loading" class="root-container">
+  <mat-form-field>
+    <mat-label>Metrics Group</mat-label>
+    <mat-select>
+      <mat-option *ngFor="let k of getKeys()" (onSelectionChange)="select($event)" [value]="k">{{ k }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <div *ngIf="selectedGroup" class="charts-area">
+    <div class="count-chart" [style.height.px]='countGraphHeight'>
+      <ngx-charts-bar-horizontal
+        [results]="groupCounts"
+        [xAxisLabel]="'Call Count'"
+        [yAxisLabel]="'Endpoint'"
+        [showXAxisLabel]="true"
+        [showYAxisLabel]="true"
+        [xAxis]="true"
+        [yAxis]="true"
+        (select)="selectTimer($event)"
+        #countChart
+      >
+      </ngx-charts-bar-horizontal>
+    </div>
+
+    <div class="details-group">
+      <ng-container  *ngIf='selectedTimer'>
+        Details of selected element:
+        <div class="details-element-group">
+          <span
+            >Count: <b>{{ selectedTimer.counter.value }}</b></span
+          >
+          <span
+            >Rate [mean]: <b>{{ selectedTimer.meter.meanRate }}</b></span
+          >
+          <span
+            >Rate [1min]: <b>{{ selectedTimer.meter.oneMinRate }}</b></span
+          >
+          <mat-divider></mat-divider>
+          <span
+            >Time [75th]: <b>{{ toMillis(selectedTimer.histogram.p75th) }} ms</b></span
+          >
+          <span
+            >Time [99th]: <b>{{ toMillis(selectedTimer.histogram.p99th) }} ms</b></span
+          >
+          <span
+            >Time [min]: <b>{{ toMillis(selectedTimer.histogram.min) }} ms</b></span
+          >
+          <span
+            >Time [max]: <b>{{ toMillis(selectedTimer.histogram.max) }} ms</b></span
+          >
+        </div>
+        <mat-divider></mat-divider>
+        Histogram weighted values:
+        <div *ngIf="timerSeries" [style.height.px]='300' class="timer-chart">
+          <ngx-charts-line-chart
+            [referenceLines]="referenceLines"
+            [showRefLines]="true"
+            [results]="timerSeries"
+            [xAxis]="false"
+            [yAxis]="true"
+            [xAxisLabel]="'Calls'"
+            [yAxisLabel]="'Timing [ms]'"
+            [legend]="false"
+            [showXAxisLabel]="false"
+            [showYAxisLabel]="true"
+          ></ngx-charts-line-chart>
+        </div>
+        Note: histogram values are sorted by value, not time.
+      </ng-container>
+    </div>
+  </div>
+</div>

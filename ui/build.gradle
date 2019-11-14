@@ -221,6 +221,9 @@ task genDtos() {
             'io.bdeploy.interfaces.cleanup.CleanupGroup',
             'io.bdeploy.interfaces.directory.InstanceDirectory',
             'io.bdeploy.interfaces.manifest.state.InstanceStateRecord',
+            // Metrics
+            'io.bdeploy.jersey.resources.JerseyMetricsResource$MetricBundle',
+            'io.bdeploy.common.metrics.Metrics$MetricGroup',
         ]
         settings.customTypeMappings.put('java.net.URI', 'string');
         settings.customTypeMappings.put('java.time.Instant', 'number');

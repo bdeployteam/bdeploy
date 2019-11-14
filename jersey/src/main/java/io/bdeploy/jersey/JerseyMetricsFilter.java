@@ -1,13 +1,19 @@
 package io.bdeploy.jersey;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
+import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
 
+import org.glassfish.jersey.server.ExtendedUriInfo;
+import org.glassfish.jersey.uri.UriTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +36,19 @@ public class JerseyMetricsFilter implements ContainerRequestFilter, ContainerRes
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
-        String endpoint = requestContext.getUriInfo().getPath();
+        UriInfo plainInfo = requestContext.getUriInfo();
+        String endpoint = plainInfo.getPath();
+        if (plainInfo instanceof ExtendedUriInfo) {
+            ExtendedUriInfo eui = (ExtendedUriInfo) plainInfo;
+
+            // use the matched templates to avoid separate entries per path parmeter value.
+            List<UriTemplate> x = new ArrayList<>(eui.getMatchedTemplates());
+            Collections.reverse(x);
+
+            StringBuilder builder = new StringBuilder();
+            x.forEach(t -> builder.append(t.getTemplate()));
+            endpoint = builder.toString();
+        }
         requestContext.setProperty(TIMER, Metrics.getMetric(MetricGroup.HTTP).timer(endpoint).time());
     }
 
