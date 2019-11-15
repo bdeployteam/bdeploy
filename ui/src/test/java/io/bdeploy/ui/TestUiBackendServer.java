@@ -206,7 +206,7 @@ public class TestUiBackendServer extends TestServer {
         }
 
         @Override
-        public String getSelfName() {
+        public String getOfficialName() {
             return "Unit_Test";
         }
 

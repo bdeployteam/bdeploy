@@ -5,14 +5,18 @@ import java.io.OutputStream;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.Security;
+import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.bouncycastle.asn1.x500.X500Name;
@@ -21,12 +25,18 @@ import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.KeyUsage;
+import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.operator.OperatorException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+
+import io.bdeploy.common.security.SecurityHelper;
 
 /**
  * Create X.509 certificates and private keys for Minion Servers.
@@ -78,10 +88,49 @@ public class BCX509Helper {
 
         KeyStore keyStore = KeyStore.getInstance("PKCS12");
         keyStore.load(null, null);
-        keyStore.setKeyEntry("1", kp.getPrivate(), passphrase, new java.security.cert.Certificate[] { cert });
+        keyStore.setKeyEntry(SecurityHelper.ROOT_ALIAS, kp.getPrivate(), passphrase,
+                new java.security.cert.Certificate[] { cert });
 
         try (OutputStream os = Files.newOutputStream(target)) {
             keyStore.store(os, passphrase);
+        }
+    }
+
+    public static void updatePrivateCertificate(Path ks, char[] pass, Path certifcate)
+            throws GeneralSecurityException, IOException {
+        Security.addProvider(new BouncyCastleProvider());
+
+        // backup before doing it...
+        Files.copy(ks, ks.getParent().resolve(ks.getFileName().toString() + ".bak"), StandardCopyOption.REPLACE_EXISTING);
+
+        KeyStore keyStore = SecurityHelper.getInstance().loadPrivateKeyStore(ks, pass);
+
+        List<Certificate> chain = new ArrayList<>();
+        KeyPair kp = null;
+
+        try (PEMParser parser = new PEMParser(Files.newBufferedReader(certifcate))) {
+            Object pemObject;
+
+            while ((pemObject = parser.readObject()) != null) {
+                if (pemObject instanceof X509CertificateHolder) {
+                    chain.add(new JcaX509CertificateConverter().getCertificate((X509CertificateHolder) pemObject));
+                }
+
+                if (pemObject instanceof PEMKeyPair) {
+                    if (kp != null) {
+                        throw new IllegalArgumentException("PEM contains multiple kay pairs");
+                    }
+
+                    kp = new JcaPEMKeyConverter().getKeyPair((PEMKeyPair) pemObject);
+                }
+            }
+        }
+
+        // replace the existing one...
+        keyStore.setKeyEntry(SecurityHelper.ROOT_ALIAS, kp.getPrivate(), pass, chain.toArray(Certificate[]::new));
+
+        try (OutputStream os = Files.newOutputStream(ks)) {
+            keyStore.store(os, pass);
         }
     }
 

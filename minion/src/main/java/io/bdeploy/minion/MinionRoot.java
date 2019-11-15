@@ -131,7 +131,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     }
 
     @Override
-    public String getSelfName() {
+    public String getOfficialName() {
         return getState().officialName;
     }
 

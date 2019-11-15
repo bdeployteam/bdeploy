@@ -35,7 +35,7 @@ public class BackendInfoResourceImpl implements BackendInfoResource {
     public ManagedMasterDto getManagedMasterIdentification() {
         ManagedMasterDto dto = new ManagedMasterDto();
 
-        dto.name = minion.getSelfName();
+        dto.name = minion.getOfficialName();
         dto.auth = minion.getSelf().getAuthPack();
         dto.uri = info.getBaseUri().toString();
         dto.minions = minion.getMinions();

@@ -256,6 +256,13 @@ java configuration NewToken : minion-base {
 	argument "--create";
 }
 
+java configuration UpdateCertificate : minion-base {
+	argument "certificate";
+	argument "--root=${workspace_loc}/runtime/master";
+	argument "--update=${file_prompt:Path to certificate PEM}";
+	argument "--tokenFile=${workspace_loc}/runtime/token.txt";
+}
+
 java configuration ProductImport : minion-base {
 	argument 'product' '--hive=/ssd/workspaces/deployment/git/deployment/test-data/build/prod2hive' '--imp=/ssd/workspaces/deployment/git/deployment/test-data/test-product-2';
 }

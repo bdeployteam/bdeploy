@@ -17,9 +17,6 @@ import java.security.PrivateKey;
 import java.security.Signature;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -40,8 +37,11 @@ import io.bdeploy.common.util.JacksonHelper;
 public class SecurityHelper {
 
     private static final Logger log = LoggerFactory.getLogger(SecurityHelper.class);
-
     private static final SecurityHelper INSTANCE = new SecurityHelper();
+
+    public static final String ROOT_ALIAS = "1";
+    private static final String TOKEN_ALIAS = "token";
+    private static final String CERT_ALIAS = "cert";
 
     private SecurityHelper() {
     }
@@ -217,8 +217,8 @@ public class SecurityHelper {
     public void importSignaturePack(String pack, KeyStore ks, char[] passphrase) throws GeneralSecurityException, IOException {
         SignaturePack sigs = SignaturePack.parse(pack);
 
-        String aliasCert = "cert";
-        String aliasToken = "token";
+        String aliasCert = CERT_ALIAS;
+        String aliasToken = TOKEN_ALIAS;
 
         ProtectionParameter pp = passphrase == null ? null : new KeyStore.PasswordProtection(passphrase);
 
@@ -259,7 +259,7 @@ public class SecurityHelper {
      * @return an encoded token which can be sent to the server.
      */
     public String getSignedToken(KeyStore ks, char[] passphrase) throws GeneralSecurityException {
-        String aliasToken = "token";
+        String aliasToken = TOKEN_ALIAS;
         if (!ks.containsAlias(aliasToken)) {
             throw new IllegalStateException("No access token found in keystore");
         }
@@ -288,12 +288,6 @@ public class SecurityHelper {
     public KeyStore loadPrivateKeyStore(InputStream is, char[] passphrase) throws GeneralSecurityException, IOException {
         KeyStore ks = KeyStore.getInstance("PKCS12");
         ks.load(is, passphrase);
-        ArrayList<String> aliases = Collections.list(ks.aliases());
-
-        // only one entry permitted in the keystore
-        if (aliases.size() != 1) {
-            throw new IllegalArgumentException("Private Keystore must contain exactly one key");
-        }
         return ks;
     }
 
@@ -324,18 +318,21 @@ public class SecurityHelper {
     }
 
     private PrivateKey getPrivateKey(KeyStore ks, char[] passphrase) throws GeneralSecurityException {
-        String alias = ks.aliases().nextElement();
-        return (PrivateKey) ks.getKey(alias, passphrase);
+        // find the "newest" alias, assume aliases are numbers
+        return (PrivateKey) ks.getKey(ROOT_ALIAS, passphrase);
     }
 
+    /**
+     * Load the public certificate from the given {@link KeyStore}.
+     */
     private Certificate getCertificate(KeyStore ks) throws KeyStoreException {
-        Enumeration<String> aliases = ks.aliases();
-        while (aliases.hasMoreElements()) {
-            String alias = aliases.nextElement();
-            Certificate cert = ks.getCertificate(alias);
-            if (cert != null) {
-                return cert;
-            }
+        String alias = ROOT_ALIAS;
+        if (!ks.containsAlias(ROOT_ALIAS)) {
+            alias = CERT_ALIAS;
+        }
+        Certificate cert = ks.getCertificate(alias);
+        if (cert != null) {
+            return cert;
         }
         throw new IllegalStateException("KeyStore does not contain a certificate");
     }

@@ -54,7 +54,7 @@ public interface Minion {
     /**
      * @return the own "name", which is the hostname used to init the minion's root.
      */
-    public String getSelfName();
+    public String getOfficialName();
 
     /**
      * Returns whether or not the minion represents the master.
