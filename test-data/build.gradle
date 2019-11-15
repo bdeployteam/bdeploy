@@ -117,6 +117,10 @@ task checkTestBDeploy(type: JavaExec, dependsOn: addTestBDeployUser) {
     args = [ "remote-master", "--minions" ]
 }
 
+task cleanExternalSoftwareHive(type: Delete) {
+    delete "${buildDir}/external-software-hive"
+}
+
 // now define the dynamic tasks for each operating system
 createExternalSoftwareTasks("windows")
 createExternalSoftwareTasks("linux")
@@ -127,7 +131,7 @@ void createExternalSoftwareTasks(String os) {
     def hive = "${buildDir}/external-software-hive";
     def source = "${projectDir}/external-software/${os}"
     
-    task "externalSoftware${osUpper}" (type: JavaExec) {
+    task "externalSoftware${osUpper}" (type: JavaExec, dependsOn: cleanExternalSoftwareHive) {
          args = [ "bhive", "import", "--hive=${hive}", "--source=${source}", "--manifest=external/software/${os}:v1.0.0" ]
     }
 
@@ -136,11 +140,7 @@ void createExternalSoftwareTasks(String os) {
     }
 }
 
-task cleanExternalSoftwareHive(type: Delete) {
-    delete "${buildDir}/external-software-hive"
-}
-
-task externalSoftwareZip(type: Zip, dependsOn: [cleanExternalSoftwareHive, externalSoftwareWindows, externalSoftwareLinux]) {
+task externalSoftwareZip(type: Zip, dependsOn: [externalSoftwareWindows, externalSoftwareLinux]) {
     archiveFileName = "external-software-hive.zip"
     destinationDir = file("${buildDir}/distribution/")
     
