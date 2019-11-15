@@ -25,6 +25,7 @@
 @import 'app/client-apps/client-apps-theme.scss';
 @import 'app/attach-central/attach-central.component.scss';
 @import 'app/managed-servers/managed-servers.component.scss';
+@import 'app/product-sync/product-sync-theme.scss';
 
 @mixin all-themes($theme) {
   // general angular material theme
@@ -52,6 +53,7 @@
   @include client-apps-theme($theme);
   @include attach-central-theme($theme);
   @include managed-servers-theme($theme);
+  @include product-sync-theme($theme);
 }
 
 @mixin theme-chooser($theme) {

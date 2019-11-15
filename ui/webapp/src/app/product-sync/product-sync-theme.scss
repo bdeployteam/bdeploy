@@ -1,0 +1,11 @@
+@import '~@angular/material/theming';
+
+@mixin product-sync-theme($theme) {
+  $dark: map-get($theme, 'is-dark');
+
+  $present-color: if($dark, mat-color($mat-grey, 500), mat-color($mat-grey, 500));
+
+  .prod-already-present {
+    color: $present-color;
+  }
+}

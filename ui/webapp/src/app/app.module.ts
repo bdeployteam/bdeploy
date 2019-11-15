@@ -3,7 +3,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { APP_INITIALIZER, ErrorHandler, NgModule } from '@angular/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatAutocompleteModule, MatBadgeModule, MatBottomSheetModule, MatButtonModule, MatCardModule, MatCheckboxModule, MatChipsModule, MatDialogModule, MatDividerModule, MatExpansionModule, MatFormFieldModule, MatGridListModule, MatIconModule, MatInputModule, MatListModule, MatMenuModule, MatPaginatorModule, MatProgressBarModule, MatProgressSpinnerModule, MatRippleModule, MatSelectModule, MatSidenavModule, MatSlideToggleModule, MatSnackBarModule, MatSortModule, MatStepperModule, MatTableModule, MatTabsModule, MatToolbarModule, MatTooltipModule, MatTreeModule } from '@angular/material';
+import { MatAutocompleteModule, MatBadgeModule, MatBottomSheetModule, MatButtonModule, MatCardModule, MatCheckboxModule, MatChipsModule, MatDialogModule, MatDividerModule, MatExpansionModule, MatFormFieldModule, MatGridListModule, MatIconModule, MatInputModule, MatListModule, MatMenuModule, MatPaginatorModule, MatProgressBarModule, MatProgressSpinnerModule, MatRadioModule, MatRippleModule, MatSelectModule, MatSidenavModule, MatSlideToggleModule, MatSnackBarModule, MatSortModule, MatStepperModule, MatTableModule, MatTabsModule, MatToolbarModule, MatTooltipModule, MatTreeModule } from '@angular/material';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LoadingBarHttpClientModule } from '@ngx-loading-bar/http-client';
@@ -63,6 +63,7 @@ import { ProcessStatusComponent } from './process-status/process-status.componen
 import { ProductCardComponent } from './product-card/product-card.component';
 import { ProductInfoCardComponent } from './product-info-card/product-info-card.component';
 import { ProductListComponent } from './product-list/product-list.component';
+import { ProductSyncComponent } from './product-sync/product-sync.component';
 import { ProductTagCardComponent } from './product-tag-card/product-tag-card.component';
 import { ProductsComponent } from './products/products.component';
 import { RemoteProgressElementComponent } from './remote-progress-element/remote-progress-element.component';
@@ -149,7 +150,8 @@ export function loadAppConfig(cfgService: ConfigService) {
     AttachManagedComponent,
     ManagedServersComponent,
     ManagedServerDetailComponent,
-    MetricsOverviewComponent
+    MetricsOverviewComponent,
+    ProductSyncComponent
   ],
   imports: [
     BrowserModule,
@@ -194,6 +196,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     AceEditorModule,
     MatTabsModule,
     MatStepperModule,
+    MatRadioModule,
     NgxChartsModule,
     DeviceDetectorModule.forRoot(),
     DragulaModule.forRoot()

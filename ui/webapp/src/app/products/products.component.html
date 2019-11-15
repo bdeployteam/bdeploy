@@ -3,6 +3,8 @@
     <mat-toolbar-row>
       <button mat-icon-button type="button" (click)='location.back()'><mat-icon>chevron_left</mat-icon></button>
       <span>Instance Group: {{instanceGroup}}</span>
+      <span class="spacer"></span>
+      <app-remote-progress [scope]='[instanceGroup, "transfer"]'></app-remote-progress>
     </mat-toolbar-row>
   </mat-toolbar>
 
@@ -32,6 +34,7 @@
         </mat-grid-list>
       </div>
       <button mat-fab class="add-button" (click)="openUploadDialog()"><mat-icon>cloud_upload</mat-icon></button>
+      <button mat-fab class="sync-button" *ngIf='isCentral()' [routerLink]='["/product-sync", instanceGroup]' color="primary"><mat-icon>sync_alt</mat-icon></button>
     </mat-drawer-content>
   </mat-drawer-container>
 </div>

@@ -18,6 +18,7 @@ import { ManagedServersComponent } from './managed-servers/managed-servers.compo
 import { MasterCleanupComponent } from './master-cleanup/master-cleanup.component';
 import { MetricsOverviewComponent } from './metrics-overview/metrics-overview.component';
 import { ProcessConfigurationComponent } from './process-configuration/process-configuration.component';
+import { ProductSyncComponent } from './product-sync/product-sync.component';
 import { ProductsComponent } from './products/products.component';
 import { SoftwareRepoAddEditComponent } from './software-repo-add-edit/software-repo-add-edit.component';
 import { SoftwareRepositoriesBrowserComponent } from './software-repositories-browser/software-repositories-browser.component';
@@ -176,6 +177,13 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
     data: { title: 'Managed Servers', header: 'Managed Servers' }
+  },
+  {
+    path: 'product-sync/:group',
+    component: ProductSyncComponent,
+    canActivate: [AuthGuard],
+    canDeactivate: [CanDeactivateGuard],
+    data: { title: 'Transfer Product Versions (${params["group"]})', header: 'Transfer Product Versions' }
   },
   {
     path: 'metrics',
