@@ -22,6 +22,7 @@ import io.bdeploy.jersey.audit.RollingFileAuditor;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.MinionState;
 import io.bdeploy.minion.cli.MasterTool.MasterConfig;
+import io.bdeploy.minion.remote.jersey.CentralUpdateResourceImpl;
 import io.bdeploy.minion.remote.jersey.JerseyAwareMinionUpdateManager;
 import io.bdeploy.minion.remote.jersey.MasterRootResourceImpl;
 import io.bdeploy.ui.api.MinionMode;
@@ -111,7 +112,9 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
         BHiveRegistry reg = SlaveTool.registerCommonResources(srv, minionRoot, reporter);
         minionRoot.setupServerTasks(true, minionRoot.getMode());
 
-        if (minionRoot.getMode() != MinionMode.CENTRAL) {
+        if (minionRoot.getMode() == MinionMode.CENTRAL) {
+            srv.register(CentralUpdateResourceImpl.class);
+        } else {
             srv.register(MasterRootResourceImpl.class);
         }
 
