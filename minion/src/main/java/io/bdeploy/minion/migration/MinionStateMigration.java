@@ -31,10 +31,16 @@ public class MinionStateMigration {
         if (minionConfiguration != null) {
             return;
         }
+        log.info("Migrating minion state entries to manifest entries.");
+
+        // Ensure that the self name is set
         MinionState state = root.getState();
+        if (state.self == null) {
+            state.self = MinionRoot.DEFAULT_NAME;
+            log.info("Setting self name to '{}'", MinionRoot.DEFAULT_NAME);
+        }
 
         // Create an entry for each slave
-        log.info("Migrating minion state entries to manifest entries.");
         minionConfiguration = new MinionConfiguration();
         for (Map.Entry<String, RemoteService> entry : state.minions.entrySet()) {
             String name = entry.getKey();
@@ -49,6 +55,7 @@ public class MinionStateMigration {
                 MinionDto dto = doMigrate(name, remote);
                 minionConfiguration.addMinion(name, dto);
             }
+            log.info("Created manifest entry for '{}'", name);
         }
 
         // Persist the manifest

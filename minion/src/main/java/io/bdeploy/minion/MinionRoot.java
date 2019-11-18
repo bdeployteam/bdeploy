@@ -126,8 +126,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     @Override
     public RemoteService getSelf() {
         MinionState state = getState();
-        String myName = (state.self == null || state.self.isBlank()) ? DEFAULT_NAME : state.self;
-        return getMinions().getRemote(myName);
+        return getMinions().getRemote(state.self);
     }
 
     @Override
