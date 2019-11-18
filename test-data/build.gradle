@@ -10,6 +10,12 @@ ext {
     testServerRoot = "${buildDir}/test-root"
     testServerHost = InetAddress.getLocalHost().getCanonicalHostName()
     testServerPort = randomServerPort()
+
+    testServerRootCentral = "${buildDir}/test-root-central"
+    testServerRootManaged = "${buildDir}/test-root-managed"
+    testServerPortCentral = randomServerPort()
+    testServerPortManaged = randomServerPort()
+
     _testBinVersions = [ "1.2.1", "1.3.0", "1.3.1" ]
 
     if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
@@ -54,44 +60,26 @@ void createProductTasks(String prodNum) {
     }
 }
 
-void setupBDeployEnv(ProcessForkOptions options, String testServerRoot) {
+void setupBDeployEnv(ProcessForkOptions options, String root) {
     options.environment += [
         HOSTNAME: testServerHost,
-        BDEPLOY_ROOT: testServerRoot,
+        BDEPLOY_ROOT: root,
     ]
 }
 
-void setupBDeployRemoteEnv(ProcessForkOptions options, String testServerRoot) {
-    setupBDeployEnv(options, testServerRoot)
+void setupBDeployRemoteEnv(ProcessForkOptions options, String root, int port) {
+    setupBDeployEnv(options, root)
     options.environment += [
-        BDEPLOY_REMOTE: "https://localhost:${testServerPort}/api",
-        BDEPLOY_TOKENFILE: "${testServerRoot}/test-token.txt",
+        BDEPLOY_REMOTE: "https://localhost:${port}/api",
+        BDEPLOY_TOKENFILE: "${root}/test-token.txt",
         REMOTE_BHIVE: "Test"
     ]
 }
 
-void setupBDeployJavaExec(JavaExec je) {
+void setupBDeployJavaExec(JavaExec je, String root, int port) {
     je.main = project(":minion").mainClassName
     je.classpath = project(":minion").sourceSets.main.runtimeClasspath
-    setupBDeployRemoteEnv(je, testServerRoot)
-}
-
-task initTestBDeploy(type: JavaExec ) {
-    def taskName = "";
-    if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
-        taskName = "win64DistZip"
-    } else if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
-        taskName = "linux64DistZip"
-    } else if (org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
-        taskName = "mac64DistZip"
-    }
-    dependsOn ':minion:'+taskName
-
-    doFirst() {
-        delete "${testServerRoot}"
-    }
-
-    args = [ "init", "--port=${testServerPort}", "--dist="+project(':minion').tasks[taskName].outputs.files[0] ]
+    setupBDeployRemoteEnv(je, root, port)
 }
 
 task triggerStopBDeploy() {
@@ -100,20 +88,59 @@ task triggerStopBDeploy() {
     }
 }
 
-task startTestBDeploy(type: com.github.psxpaul.task.JavaExecFork, dependsOn: initTestBDeploy) {
-    setupBDeployEnv(it, testServerRoot)
-    main = project(":minion").mainClassName
-    classpath = project(":minion").sourceSets.main.runtimeClasspath
-    args = [ "master" ]
-    waitForPort = testServerPort
-    stopAfter = triggerStopBDeploy
+void createServerTasks(String name, String root, int port) {
+    task "initTestBDeploy${name}"(type: JavaExec ) {
+        setupBDeployJavaExec(it, root, port);
+
+        def taskName = "";
+        if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+            taskName = "win64DistZip"
+        } else if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
+            taskName = "linux64DistZip"
+        } else if (org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
+            taskName = "mac64DistZip"
+        }
+        dependsOn ':minion:'+taskName
+
+        doFirst() {
+            delete "${root}"
+        }
+
+        if(name.equals("Central") || name.equals("Managed")) {
+            // save some time on startup...
+            args = [ "init", "--port=${port}", "--dist=ignore" ]
+        } else {
+            args = [ "init", "--port=${port}", "--dist="+project(':minion').tasks[taskName].outputs.files[0] ]
+        }
+    }
+
+    task "startTestBDeploy${name}"(type: com.github.psxpaul.task.JavaExecFork, dependsOn: "initTestBDeploy${name}") {
+        setupBDeployEnv(it, root)
+        main = project(":minion").mainClassName
+        classpath = project(":minion").sourceSets.main.runtimeClasspath
+        if(name.equals("Central")) {
+            args = [ "master", "--central" ]
+        } else if(name.equals("Managed")) {
+            args = [ "master", "--managed" ]
+        } else {
+            args = [ "master" ]
+        }
+        waitForPort = port
+        stopAfter = triggerStopBDeploy
+    }
+
+    task "addTestBDeployUser${name}"(type: JavaExec, dependsOn: "startTestBDeploy${name}") {
+        setupBDeployJavaExec(it, root, port);
+        args = [ "user", "--add=admin", "--password=admin", "--description=Automated Test User" ]
+    }
 }
 
-task addTestBDeployUser(type: JavaExec, dependsOn: startTestBDeploy) {
-    args = [ "user", "--add=admin", "--password=admin", "--description=Automated Test User" ]
-}
+createServerTasks("", testServerRoot, testServerPort);
+createServerTasks("Central", testServerRootCentral, testServerPortCentral);
+createServerTasks("Managed", testServerRootManaged, testServerPortManaged);
 
 task checkTestBDeploy(type: JavaExec, dependsOn: addTestBDeployUser) {
+    setupBDeployJavaExec(it, testServerRoot, testServerPort);
     args = [ "remote-master", "--minions" ]
 }
 
@@ -132,7 +159,8 @@ void createExternalSoftwareTasks(String os) {
     def source = "${projectDir}/external-software/${os}"
     
     task "externalSoftware${osUpper}" (type: JavaExec, dependsOn: cleanExternalSoftwareHive) {
-         args = [ "bhive", "import", "--hive=${hive}", "--source=${source}", "--manifest=external/software/${os}:v1.0.0" ]
+        setupBDeployJavaExec(it, testServerRoot, testServerPort);
+        args = [ "bhive", "import", "--hive=${hive}", "--source=${source}", "--manifest=external/software/${os}:v1.0.0" ]
     }
 
     build {
@@ -181,7 +209,7 @@ void setupBinServerTasks(String version) {
 
     def setupTask = { e ->
         e.executable binFile
-        setupBDeployRemoteEnv(e, "${buildDir}/bin-root_${key}")
+        setupBDeployRemoteEnv(e, "${buildDir}/bin-root_${key}", testServerPort)
     }
 
     task "downloadBinaries_${key}" (type: Download) {
@@ -372,21 +400,30 @@ getTestBinVersions().each { setupBinServerTasks(it) }
 // coverage for the rest of the tasks
 jacoco {
     applyTo initTestBDeploy
-    applyTo startTestBDeploy
     applyTo addTestBDeployUser
     applyTo checkTestBDeploy
+    applyTo startTestBDeploy
+    applyTo startTestBDeployCentral
+    applyTo startTestBDeployManaged
 }
 
 // now all tasks that depend on any of the generated tasks
 task setupDemoServer() {
     dependsOn(
-        checkTestBDeploy
+        checkTestBDeploy,
+        addTestBDeployUserCentral,
+        addTestBDeployUserManaged
     )
 
     doFirst() {
         println("----------------------------------------------------------------------------------------")
-        println("Successfully started demo server. Point your browser to https://localhost:${testServerPort}.")
-        println("User and password for the demo server are 'admin' and 'admin'.")
+        println("Successfully started demo server. Point your browser to:")
+        println("  https://localhost:${testServerPort} - STANDALONE Demo Server")
+        println("  https://localhost:${testServerPortCentral} - CENTRAL Demo Server")
+        println("  https://localhost:${testServerPortManaged} - MANAGED Demo Server")
+        println("User and password for the demo server(s) are 'admin' and 'admin'.")
+        println("NOTE: that cookies are hostname based, so logging in to one will log out on any other");
+        println("      server running on the same hostname.");
         println("----------------------------------------------------------------------------------------")
     }
 }
@@ -398,7 +435,4 @@ task runDemoServer(dependsOn: setupDemoServer) {
         def answer = userInput.askQuestion("Enter any value (or press enter) to stop the server", "Stop");
     }
 }
-
-// and fix all the common meta-data for all BDeploy JavaExec's.
-tasks.findAll { it instanceof JavaExec && !it.name.startsWith("product") }.each { setupBDeployJavaExec(it) }
 
