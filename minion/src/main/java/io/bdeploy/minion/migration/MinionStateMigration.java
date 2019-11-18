@@ -1,7 +1,6 @@
 package io.bdeploy.minion.migration;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,8 +9,8 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
-import io.bdeploy.interfaces.remote.MinionStatusResource;
-import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.interfaces.minion.MinionStatusDto;
+import io.bdeploy.minion.MinionHelper;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.MinionState;
 
@@ -51,12 +50,18 @@ public class MinionStateMigration {
 
             // Minions contains an entry for ourself
             if (state.self.equals(name)) {
-                MinionDto dto = MinionDto.create(remote);
-                dto.master = root.isMaster();
+                MinionDto dto = MinionDto.create(root.isMaster(), remote);
                 minionConfiguration.addMinion(name, dto);
             } else {
-                MinionDto dto = doMigrate(name, remote);
-                minionConfiguration.addMinion(name, dto);
+                log.info("Try to contact '{}' using {}", name, remote.getUri());
+                MinionStatusDto status = MinionHelper.tryContactMinion(remote, 3, 15);
+                if (status == null) {
+                    throw new IllegalStateException("Migration failed because not all minions are reachable. " //
+                            + "Ensure that they are running and try again.");
+                }
+                MinionDto config = status.config;
+                log.info("Minion successfully contacted. Version={} OS={}", config.version, config.os);
+                minionConfiguration.addMinion(name, config);
             }
             log.info("Created manifest entry for '{}'", name);
         }
@@ -69,31 +74,4 @@ public class MinionStateMigration {
         log.info("Migration successfully done.");
     }
 
-    private static MinionDto doMigrate(String name, RemoteService remote) {
-        // Try to contact the remote slave
-        int waitTime = 15;
-        int retryCount = 3;
-        for (int i = 0; i < retryCount; i++) {
-            try {
-                log.info("Contacting '{}' using {}", name, remote.getUri());
-                MinionStatusResource status = ResourceProvider.getResource(remote, MinionStatusResource.class, null);
-                MinionDto config = status.getStatus().config;
-                log.info("Minion successfully contacted. Version={} OS={}", config.version, config.os);
-                return config;
-            } catch (Exception ex) {
-                try {
-                    log.info("Failed to contact minion: {}", ex.getMessage());
-                    if (i < retryCount - 1) {
-                        log.info("Waiting {} seconds until next attempt ({}/{})", waitTime, i + 1, retryCount);
-                        TimeUnit.SECONDS.sleep(waitTime);
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw new IllegalStateException("Interrupted while waiting for next retry.");
-                }
-            }
-        }
-        throw new IllegalStateException("Migration failed because not all minions are reachable. " //
-                + "Ensure that they are running and try again.");
-    }
 }

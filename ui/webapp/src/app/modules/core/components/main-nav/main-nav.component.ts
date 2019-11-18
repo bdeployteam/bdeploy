@@ -4,7 +4,8 @@ import { MatToolbar } from '@angular/material/toolbar';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { BackendInfoDto, MinionMode } from '../../../../models/gen.dtos';
+import { convert2String } from 'src/app/modules/shared/utils/version.utils';
+import { BackendInfoDto, MinionMode, Version } from '../../../../models/gen.dtos';
 import { AuthenticationService } from '../../services/authentication.service';
 import { ConfigService } from '../../services/config.service';
 import { HeaderTitleService } from '../../services/header-title.service';
@@ -23,7 +24,7 @@ export class MainNavComponent implements OnInit {
 
   isAuth$: Observable<boolean> = this.authService.getTokenSubject().pipe(map(s => s !== null));
 
-  backendVersion: BehaviorSubject<BackendInfoDto> = new BehaviorSubject({ version: 'No connection', mode: MinionMode.STANDALONE });
+  backendInfo: BehaviorSubject<BackendInfoDto> = new BehaviorSubject({ version: null, mode: MinionMode.STANDALONE });
 
   constructor(
     private authService: AuthenticationService,
@@ -37,15 +38,15 @@ export class MainNavComponent implements OnInit {
   ngOnInit(): void {
     this.authService.getTokenSubject().subscribe(v => {
       if (this.authService.isAuthenticated()) {
-        this.cfgService.getBackendVersion().subscribe(ver => {
-          this.backendVersion.next(ver);
+        this.cfgService.getBackendInfo().subscribe(ver => {
+          this.backendInfo.next(ver);
         });
       }
     });
   }
 
   needServerTypeHint() {
-    if (this.backendVersion.value && this.backendVersion.value.mode !== MinionMode.STANDALONE) {
+    if (this.backendInfo.value && this.backendInfo.value.mode !== MinionMode.STANDALONE) {
       return true;
     }
     return false;
@@ -66,6 +67,13 @@ export class MainNavComponent implements OnInit {
   setLogLevel(event: MatSelectChange) {
     const lvl = +event.value as LogLevel;
     this.logging.getLogger(null).setLogLevel(lvl);
+  }
+
+  formatVersion(version: Version) {
+    if (version == null) {
+      return 'Unknown';
+    }
+    return convert2String(version);
   }
 
 }

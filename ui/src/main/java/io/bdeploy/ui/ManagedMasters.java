@@ -31,8 +31,8 @@ public class ManagedMasters {
      */
     public void attach(ManagedMasterDto dto, boolean replace) {
         ManagedMastersConfiguration value = read();
-        if (value.getManagedMasters().containsKey(dto.name) && !replace) {
-            throw new IllegalStateException("Managed server " + dto.name + " already exists!");
+        if (value.getManagedMasters().containsKey(dto.hostName) && !replace) {
+            throw new IllegalStateException("Managed server " + dto.hostName + " already exists!");
         }
         value.addManagedMaster(dto);
         writeAndClean(value);

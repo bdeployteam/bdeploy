@@ -13,6 +13,7 @@ import { ConnectionLostComponent } from './components/connection-lost/connection
 import { LoginComponent } from './components/login/login.component';
 import { LogoComponent } from './components/logo/logo.component';
 import { MainNavComponent } from './components/main-nav/main-nav.component';
+import { ManagedServerUpdateComponent } from './components/managed-server-update/managed-server-update.component';
 import { ThemeChooserComponent } from './components/theme-chooser/theme-chooser.component';
 import { ClickStopPropagationDirective } from './directives/click-stop-propagation.directive';
 import { FileDropDirective } from './directives/file-drop.directive';
@@ -32,6 +33,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     ClickStopPropagationDirective,
     ConnectionLostComponent,
     LoginComponent,
+    ManagedServerUpdateComponent,
   ],
   entryComponents: [
     ConnectionLostComponent,
@@ -132,6 +134,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     FileDropDirective,
     ClickStopPropagationDirective,
     LoginComponent,
+    ManagedServerUpdateComponent,
   ]
 })
 export class CoreModule { }

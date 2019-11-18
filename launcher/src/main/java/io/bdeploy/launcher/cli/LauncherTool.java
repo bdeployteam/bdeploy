@@ -244,7 +244,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             return;
         }
 
-        Version currentVersion = Version.parse(running);
+        Version currentVersion = VersionHelper.parse(running);
         try (RemoteBHive rbh = RemoteBHive.forService(cd.host, null, reporter)) {
             Version mostCurrent = null;
             Map<String, Key> byTagForCurrentOs = new TreeMap<>();
@@ -257,7 +257,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 // map to ScopedManifestKey, filter by OS, memorize key, map to tag, map to Version, reverse sorted
                 List<Version> available = launchers.keySet().stream().map(ScopedManifestKey::parse)
                         .filter(s -> s.getOperatingSystem() == runningOs).peek(s -> byTagForCurrentOs.put(s.getTag(), s.getKey()))
-                        .map(ScopedManifestKey::getTag).map(Version::parse).sorted(Collections.reverseOrder())
+                        .map(ScopedManifestKey::getTag).map(VersionHelper::parse).sorted(Collections.reverseOrder())
                         .collect(Collectors.toList());
 
                 // the first element in the collection is the one with the highest version number.

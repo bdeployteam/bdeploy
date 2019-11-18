@@ -134,9 +134,9 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
 
             for (ManagedMasterDto dto : servers) {
                 try {
-                    ms.synchronize(group, dto.name);
+                    ms.synchronize(group, dto.hostName);
                 } catch (Exception e) {
-                    log.warn("Cannot synchronize with " + dto.name + " on " + group, e);
+                    log.warn("Cannot synchronize with " + dto.hostName + " on " + group, e);
                 }
             }
         }

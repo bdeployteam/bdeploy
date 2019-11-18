@@ -242,6 +242,7 @@ task genDtos() {
             'io.bdeploy.ui.dto.BackendInfoDto',
             'io.bdeploy.ui.dto.ManagedMasterDto',
             'io.bdeploy.ui.dto.ProductTransferDto',
+            'io.bdeploy.ui.dto.MinionUpdateDto',
             // Other, generic
             'io.bdeploy.common.Version',
             'io.bdeploy.common.ActivitySnapshot',

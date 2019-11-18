@@ -32,7 +32,7 @@
               <mat-form-field *ngIf='!centralSourceRadio.checked' class='managed-server-field'>
                 <mat-label>Managed Server</mat-label>
                 <mat-select [(value)]='sourceManagedServer'>
-                  <mat-option *ngFor='let server of managedServers' [value]='server'>{{server.name}}</mat-option>
+                  <mat-option *ngFor='let server of managedServers' [value]='server'>{{server.hostName}}</mat-option>
                 </mat-select>
               </mat-form-field>
             </div>
@@ -52,7 +52,7 @@
                 <mat-form-field *ngIf='!centralTargetRadio.checked' class='managed-server-field'>
                   <mat-label>Managed Server</mat-label>
                   <mat-select [(value)]='targetManagedServer'>
-                    <mat-option *ngFor='let server of managedServers' [value]='server' [disabled]='server.name === sourceManagedServer?.name'>{{server.name}}</mat-option>
+                    <mat-option *ngFor='let server of managedServers' [value]='server' [disabled]='server.hostName === sourceManagedServer?.hostName'>{{server.hostName}}</mat-option>
                   </mat-select>
                 </mat-form-field>
               </div>

@@ -6,7 +6,7 @@ import io.bdeploy.interfaces.minion.MinionConfiguration;
 
 public class ManagedMasterDto {
 
-    public String name;
+    public String hostName;
     public String description;
     public String uri;
     public String auth;

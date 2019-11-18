@@ -8,7 +8,7 @@ The *System Software* page offers a mechanism to upload new *BDeploy* software v
 
 image::images/BDeploy_System_With_Launcher.png[BDeploy System Software,align=center,width=480,link="images/BDeploy_System_With_Launcher.png"]
 
-It also offers a way to _upload_ and also to _download_ *BDeploy Launcher* binaries. These binaries are required when <<_app_info_yaml,`CLIENT` *Applications*>> are configured. Use the btn:[+] button to upload either new *BDeploy* or *BDeploy Launcher* versions from their respective binary distributions (_ZIP_). 
+It also offers a way to _upload_ and also to _download_ *BDeploy Launcher* binaries. These binaries are required when <<_app_info_yaml,`CLIENT` *Applications*>> are configured. Use the btn:[Upload] button to upload either new *BDeploy* or *BDeploy Launcher* versions from their respective binary distributions (_ZIP_). 
 
 The page can also be used to download the binaries of *BDeploy* (e.g. to setup additional _slaves_) and the *BDeploy Launcher* binaries (e.g. for manual setup of the *BDeploy Launcher* on client PCs, see <<_client_applications,Client Applications>>).
 

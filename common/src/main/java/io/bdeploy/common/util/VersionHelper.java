@@ -3,10 +3,15 @@ package io.bdeploy.common.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import io.bdeploy.common.Version;
 
 public class VersionHelper {
 
     public static final String UNKNOWN = "Unknown";
+    private static final Pattern V_PATTERN = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)([-\\.].*)*");
 
     private VersionHelper() {
     }
@@ -26,6 +31,73 @@ public class VersionHelper {
 
             return p;
         } catch (IOException | RuntimeException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Parses and compares the two version object. An exception is thrown if one of the strings does not represent a valid
+     * version.
+     *
+     * @param a
+     *            first version to compare
+     * @param b
+     *            second version to compare
+     * @return a negative integer, zero, or a positive integer as this version is less than, equal to, or greater than the
+     *         specified version.
+     */
+    public static int compare(String a, String b) {
+        return compare(VersionHelper.parse(a), VersionHelper.parse(b));
+    }
+
+    /**
+     * Compares the two versions taking {@code null} into account. If both versions are {@code null} then they are assumed
+     * to be equal. Otherwise {@code null} is treated as lower than any other version.
+     *
+     * @param a
+     *            first version to compare
+     * @param b
+     *            second version to compare
+     * @return a negative integer, zero, or a positive integer as this version is less than, equal to, or greater than the
+     *         specified version.
+     */
+    public static int compare(Version a, Version b) {
+        if (a == null && b == null) {
+            return 0;
+        }
+        if (a == null) {
+            return -1;
+        }
+        if (b == null) {
+            return 1;
+        }
+        return a.compareTo(b);
+    }
+
+    /**
+     * Compares whether or not the two versions are equal.
+     */
+    public static boolean equals(Version a, Version b) {
+        return compare(a, b) == 0;
+    }
+
+    public static Version parse(String v) {
+        Version version = tryParse(v);
+        if (version == null) {
+            throw new IllegalArgumentException("Given version does not match expected pattern");
+        }
+        return version;
+    }
+
+    public static Version tryParse(String v) {
+        Matcher matcher = V_PATTERN.matcher(v);
+        if (!matcher.matches()) {
+            return null;
+        }
+        try {
+            return new Version(Integer.parseInt(matcher.group(1)), Integer.parseInt(matcher.group(2)),
+                    Integer.parseInt(matcher.group(3)), matcher.group(4));
+        } catch (NumberFormatException nfe) {
             return null;
         }
     }

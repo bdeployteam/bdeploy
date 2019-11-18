@@ -14,10 +14,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import io.bdeploy.common.Version;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.ui.dto.ManagedMasterDto;
+import io.bdeploy.ui.dto.MinionUpdateDto;
 import io.bdeploy.ui.dto.ProductDto;
 import io.bdeploy.ui.dto.ProductTransferDto;
 
@@ -120,5 +122,22 @@ public interface ManagedServersResource {
     @GET
     @Path("/active-transfers/{group}")
     public SortedSet<ProductDto> getActiveTransfers(@PathParam("group") String groupName);
+
+    @GET
+    @Path("/minion-updates/{group}/{server}")
+    public MinionUpdateDto getUpdates(@PathParam("group") String groupName, @PathParam("server") String serverName);
+
+    @POST
+    @Path("/minion-transfer-updates/{group}/{server}")
+    public void transferUpdate(@PathParam("group") String groupName, @PathParam("server") String serverName, MinionUpdateDto dto);
+
+    @POST
+    @Path("/minion-install-updates/{group}/{server}")
+    public void installUpdate(@PathParam("group") String groupName, @PathParam("server") String serverName, MinionUpdateDto dto);
+
+    @GET
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Path("/minion-ping/{group}/{server}")
+    public Version pingServer(@PathParam("group") String groupName, @PathParam("server") String serverName);
 
 }

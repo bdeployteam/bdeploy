@@ -70,7 +70,7 @@ export class AttachCentralComponent implements OnInit, OnDestroy {
   }
 
   downloadManualJson() {
-    this.dlService.downloadJson('server-' + this.attachPayload.name + '.json', this.attachPayload);
+    this.dlService.downloadJson('server-' + this.attachPayload.hostName + '.json', this.attachPayload);
   }
 
   async onDrop($event: DragEvent) {

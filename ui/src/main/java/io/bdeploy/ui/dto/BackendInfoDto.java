@@ -3,6 +3,7 @@ package io.bdeploy.ui.dto;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import io.bdeploy.common.Version;
 import io.bdeploy.ui.api.MinionMode;
 
 /**
@@ -10,11 +11,11 @@ import io.bdeploy.ui.api.MinionMode;
  */
 public class BackendInfoDto {
 
-    public String version;
+    public Version version;
     public MinionMode mode;
 
     @JsonCreator
-    public BackendInfoDto(@JsonProperty("version") String version, @JsonProperty("mode") MinionMode mode) {
+    public BackendInfoDto(@JsonProperty("version") Version version, @JsonProperty("mode") MinionMode mode) {
         this.version = version;
         this.mode = mode;
     }

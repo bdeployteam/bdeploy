@@ -106,7 +106,7 @@ export class InstanceAddEditComponent implements OnInit {
       });
       this.managedServers.getServerForInstance(this.groupParam, this.uuidParam, null).subscribe(r => {
         if (r) {
-          this.managedServerControl.setValue(r.name);
+          this.managedServerControl.setValue(r.hostName);
         }
       });
     }
@@ -135,7 +135,7 @@ export class InstanceAddEditComponent implements OnInit {
     if (this.isCentral()) {
       this.managedServerControl.setValidators([Validators.required]);
       this.managedServers.getManagedServers(this.groupParam).subscribe(r => {
-        this.serverNames = r.map(e => e.name).sort();
+        this.serverNames = r.map(e => e.hostName).sort();
       });
     }
   }

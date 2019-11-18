@@ -11,8 +11,8 @@
     <mat-card-subtitle class='node-card-subtitle'>Published server applications</mat-card-subtitle>
     <span class="fill-space"></span>
     <ng-container *ngIf="minionState">
-      <mat-icon class='instance-node-online' *ngIf='isNodeOnline()' [matTooltip]="getNodeStatusTooltip()">flight_takeoff</mat-icon>
-      <mat-icon class='instance-node-offline' *ngIf='!isNodeOnline()' [matTooltip]="getNodeStatusTooltip()">warning</mat-icon>
+      <mat-icon class='instance-node-online' *ngIf='isNodeOnline()' [matTooltip]="getNodeStatusTooltip()">favorite</mat-icon>
+      <mat-icon class='instance-node-offline' *ngIf='!isNodeOnline()' [matTooltip]="getNodeStatusTooltip()">error</mat-icon>
     </ng-container>
     <ng-container *ngIf="!minionConfig">
         <mat-icon class='instance-node-offline' [matTooltip]="getNodeStatusTooltip()">error</mat-icon>

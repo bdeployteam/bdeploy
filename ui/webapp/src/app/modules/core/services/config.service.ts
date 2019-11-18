@@ -4,11 +4,12 @@ import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { BackendInfoDto, MinionMode, MinionStatusDto } from '../../../models/gen.dtos';
+import { BackendInfoDto, MinionMode, MinionStatusDto, Version } from '../../../models/gen.dtos';
 import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
 import { LoggingService, LogLevel } from './logging.service';
 
 export interface AppConfig {
+  version: Version;
   api: string;
   logLevel: LogLevel;
   mode: MinionMode;
@@ -38,8 +39,9 @@ export class ConfigService {
 
   load(): Promise<AppConfig> {
     return new Promise(resolve => {
-      this.getBackendVersion().subscribe((bv) => {
+      this.getBackendInfo().subscribe((bv) => {
         this.config = {
+          version: bv.version,
           api: environment.apiUrl,
           logLevel: environment.logLevel,
           mode: bv.mode
@@ -52,12 +54,11 @@ export class ConfigService {
     });
   }
 
-  public getBackendVersion(): Observable<BackendInfoDto> {
-    // use environment instead of config here...
+  public getBackendInfo(): Observable<BackendInfoDto> {
     return this.http.get<BackendInfoDto>(environment.apiUrl + '/backend-info/version');
   }
 
-  public tryGetBackendVersion(): Observable<BackendInfoDto> {
+  public tryGetBackendInfo(): Observable<BackendInfoDto> {
     return this.http.get<BackendInfoDto>(environment.apiUrl + '/backend-info/version', { headers: suppressGlobalErrorHandling(new HttpHeaders)});
   }
 

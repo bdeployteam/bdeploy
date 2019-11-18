@@ -61,9 +61,9 @@ public class InstanceResourceTest {
         MinionManifest mf = new MinionManifest(hive);
 
         MinionConfiguration config = mf.read();
-        config.addMinion("Node1", MinionDto.create(config.getRemote("master")));
-        config.addMinion("Node2", MinionDto.create(config.getRemote("master")));
-        config.addMinion("Node3", MinionDto.create(config.getRemote("master")));
+        config.addMinion("Node1", MinionDto.create(false, config.getRemote("master")));
+        config.addMinion("Node2", MinionDto.create(false, config.getRemote("master")));
+        config.addMinion("Node3", MinionDto.create(false, config.getRemote("master")));
 
         mf.update(config);
     }

@@ -40,7 +40,7 @@ export class ProductSyncComponent implements OnInit {
     this.instanceGroup = this.route.snapshot.paramMap.get('group');
 
     this.servers.getManagedServers(this.instanceGroup).pipe(finalize(() => this.loading = false)).subscribe(r => {
-      this.managedServers = r.sort((a, b) => a.name.localeCompare(b.name));
+      this.managedServers = r.sort((a, b) => a.hostName.localeCompare(b.hostName));
     });
   }
 
@@ -73,13 +73,13 @@ export class ProductSyncComponent implements OnInit {
     // load products from source server.
     let call0 = this.productService.getProducts(this.instanceGroup);
     if (this.sourceType !== MinionMode.CENTRAL) {
-      call0 = this.servers.productsOfManagedServer(this.instanceGroup, this.sourceManagedServer.name);
+      call0 = this.servers.productsOfManagedServer(this.instanceGroup, this.sourceManagedServer.hostName);
     }
 
     // load products from the target server and check/disable entries of products already there.
     let call1 = this.productService.getProducts(this.instanceGroup);
     if (this.targetType !== MinionMode.CENTRAL) {
-      call1 = this.servers.productsOfManagedServer(this.instanceGroup, this.targetManagedServer.name);
+      call1 = this.servers.productsOfManagedServer(this.instanceGroup, this.targetManagedServer.hostName);
     }
 
     const call2 = this.servers.productsInTransfer(this.instanceGroup);
@@ -132,9 +132,9 @@ export class ProductSyncComponent implements OnInit {
   startTransfer() {
     const data: ProductTransferDto = {
       sourceMode: this.sourceType,
-      sourceServer: this.sourceType === MinionMode.MANAGED ? this.sourceManagedServer.name : null,
+      sourceServer: this.sourceType === MinionMode.MANAGED ? this.sourceManagedServer.hostName : null,
       targetMode: this.targetType,
-      targetServer: this.targetType === MinionMode.MANAGED ? this.targetManagedServer.name : null,
+      targetServer: this.targetType === MinionMode.MANAGED ? this.targetManagedServer.hostName : null,
       versionsToTransfer: this.selectedProducts
     };
 

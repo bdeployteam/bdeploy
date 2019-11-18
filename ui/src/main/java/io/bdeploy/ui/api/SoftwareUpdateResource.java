@@ -27,6 +27,26 @@ import io.bdeploy.ui.dto.LauncherDto;
 @Produces(MediaType.APPLICATION_JSON)
 public interface SoftwareUpdateResource {
 
+    /**
+     * Name and path of the native Windows installer stored in the launcher ZIP
+     */
+    public static final String INSTALLER_EXE = "bin/Installer.bin";
+
+    /**
+     * Name and path of the native Linux (shell script) installer template stored in the launcher ZIP
+     */
+    public static final String INSTALLER_SH = "bin/installer.tpl";
+
+    /**
+     * The name of the manifest used to store bdeploy versions.
+     */
+    public static final String BDEPLOY_MF_NAME = "meta/bdeploy";
+
+    /**
+     * The name of the manifest used to store launcher versions.
+     */
+    public static final String LAUNCHER_MF_NAME = "meta/launcher";
+
     public static final String ROOT_PATH = "/swup";
     public static final String DOWNLOAD_PATH = "/download/{name : .+}/{tag}";
     public static final String DOWNLOAD_LATEST_PATH = "/download/latest/{os}";

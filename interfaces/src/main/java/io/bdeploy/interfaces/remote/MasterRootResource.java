@@ -38,7 +38,7 @@ public interface MasterRootResource {
     /**
      * Update all minions one after another, and (last) the master minion.
      *
-     * @param version update to the given {@link Key}. The {@link Key} must have been pushed to the default hive before.
+     * @param version update to the given {@link Key}. The {@link Key}s must have been pushed to the default hive before.
      * @param clean whether to clean up old versions.
      */
     @PUT

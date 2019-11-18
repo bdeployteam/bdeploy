@@ -31,7 +31,7 @@ public interface BackendInfoResource {
     public ManagedMasterDto getManagedMasterIdentification();
 
     /**
-     * Requests the runtime state of all nodes. Might only be called in managed / standalone mode.
+     * Requests the runtime state of all nodes.
      */
     @GET
     @Path("/minion-status")

@@ -121,7 +121,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         RemoteService remote = new RemoteService(UriBuilder.fromUri("https://" + hostname + ":" + port + "/api").build(), pack);
 
         MinionConfiguration minionConfiguration = new MinionConfiguration();
-        minionConfiguration.addMinion(Minion.DEFAULT_NAME, MinionDto.create(remote));
+        minionConfiguration.addMinion(Minion.DEFAULT_NAME, MinionDto.create(mr.isMaster(), remote));
 
         MinionManifest minionMf = new MinionManifest(mr.getHive());
         minionMf.update(minionConfiguration);

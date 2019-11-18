@@ -259,7 +259,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
         ManagedServersResource rs = rc.initResource(new ManagedServersResourceImpl());
         ManagedMasterDto server = rs.getServerForInstance(groupName, instanceId, null);
-        rs.synchronize(groupName, server.name);
+        rs.synchronize(groupName, server.hostName);
     }
 
     private List<FileStatusDto> getUpdatesFromTree(String path, List<FileStatusDto> target, ObjectId cfgTree) {
@@ -389,7 +389,7 @@ public class InstanceResourceImpl implements InstanceResource {
         }
         ManagedServersResource msr = rc.initResource(new ManagedServersResourceImpl());
         ManagedMasterDto master = msr.getServerForInstance(group, instanceId, versionTag);
-        return msr.getMinionStateOfManagedServer(group, master.name);
+        return msr.getMinionStateOfManagedServer(group, master.hostName);
     }
 
     @Override
@@ -634,7 +634,7 @@ public class InstanceResourceImpl implements InstanceResource {
         BHive rootHive = reg.get(JerseyRemoteBHive.DEFAULT_NAME);
         Manifest mf = rootHive.execute(new ManifestLoadOperation().setManifest(launcherKey.getKey()));
         TreeEntryLoadOperation findInstallerOp = new TreeEntryLoadOperation().setRootTree(mf.getRoot())
-                .setRelativePath(SoftwareUpdateResourceImpl.INSTALLER_SH);
+                .setRelativePath(SoftwareUpdateResource.INSTALLER_SH);
         String template;
         try (InputStream in = rootHive.execute(findInstallerOp); ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             in.transferTo(os);

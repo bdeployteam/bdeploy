@@ -1,0 +1,54 @@
+.mat-card {
+  padding: 0 !important;
+}
+
+.mat-card-header {
+  border-radius: 5px 5px 0px 0px;
+}
+
+.fill-space {
+  flex: 1 1 auto;
+}
+
+.mat-card-title {
+  margin-top: 8px;
+}
+
+.mat-card-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mat-card-header-text {
+  margin: 0px;
+}
+
+.mat-card-content {
+  padding: 1em;
+}
+
+.mat-card-actions {
+  padding: 1em;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.mat-card-actions:last-child {
+  padding: 10px !important;
+  margin: 0px;
+}
+
+.update-spinner {
+  float: left;
+  position: relative;
+  margin-right: 1em;
+  bottom: 2px;
+}
+
+.content-text-icon {
+  margin-right: 0.5em;
+  margin-right: 0.5em;
+  vertical-align: middle;
+  margin-top: -5px;
+}

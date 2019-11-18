@@ -29,7 +29,7 @@
         </mat-card>
       </div>
       <p *ngIf='attachPayload'>
-        Successfully read information for <b>{{attachPayload.name}}</b>.
+        Successfully read information for <b>{{attachPayload.hostName}}</b>.
       </p>
       <div class='button-container'>
         <button mat-raised-button matStepperPrevious (click)='attachPayload = null'>Back</button>
@@ -80,7 +80,7 @@
     </mat-step>
     <mat-step label="Manual Configuration of Managed Server" optional="true" #manualStep>
       <p>
-        Note that this step is only necessary if this server cannot contact the configured managed server (temporariliy or permanently).
+        Note that this step is only necessary if this server cannot contact the configured managed server (temporarily or permanently).
       </p>
       <div class='drag-container' *ngIf='!centralIdent'>
         <mat-spinner diameter="24"></mat-spinner>

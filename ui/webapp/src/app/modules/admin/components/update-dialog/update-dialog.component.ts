@@ -1,7 +1,8 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { of } from 'rxjs';
-import { catchError, delay, retryWhen, scan, takeWhile } from 'rxjs/operators';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Version } from 'src/app/models/gen.dtos';
+import { retryWithDelay } from 'src/app/modules/shared/utils/server.utils';
+import { convert2String } from 'src/app/modules/shared/utils/version.utils';
 import { ConfigService } from '../../../core/services/config.service';
 
 export class UpdateDialogData {
@@ -11,39 +12,35 @@ export class UpdateDialogData {
 @Component({
   selector: 'app-update-dialog',
   templateUrl: './update-dialog.component.html',
-  styleUrls: ['./update-dialog.component.css']
+  styleUrls: ['./update-dialog.component.css'],
 })
 export class UpdateDialogComponent implements OnInit {
-
   finished = false;
   waiting = false;
   error = false;
-  versionAfterUpdate: string;
 
-  constructor(private dialogRef: MatDialogRef<UpdateDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: UpdateDialogData, private cfgSvc: ConfigService) { }
+  versionAfterUpdate: Version;
+
+  constructor(@Inject(MAT_DIALOG_DATA) public data: UpdateDialogData, private cfgSvc: ConfigService) {}
 
   ngOnInit() {
     this.data.waitFor.then(() => this.waitForServer());
   }
 
-  private waitForServer(): Promise<any> {
+  async waitForServer(): Promise<any> {
     this.waiting = true;
-    return this.cfgSvc.tryGetBackendVersion().pipe(
-      retryWhen(errors => errors.pipe(
-        scan(acc => acc + 1, 0),
-        takeWhile(acc => acc < 60),
-        delay(1000),
-        catchError(e => { console.log('eeek'); return of(null); })
-      )
-    )).toPromise().then(r => {
-      this.waiting = false;
-      this.finished = true;
-      if (!r) {
-        this.error = true;
-      }
-      this.versionAfterUpdate = r.version;
-    });
+    const observable = this.cfgSvc.tryGetBackendInfo();
+    const dto = await observable.pipe(retryWithDelay()).toPromise();
+    this.waiting = false;
+    this.finished = true;
+    if (!dto) {
+      this.error = true;
+    }
+    this.versionAfterUpdate = dto.version;
+  }
+
+  getVersionAfterUpdate() {
+    return convert2String(this.versionAfterUpdate);
   }
 
 }

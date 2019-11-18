@@ -5,6 +5,7 @@ import java.nio.file.Path;
 
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
+import io.bdeploy.interfaces.minion.MinionDto;
 
 /**
  * Represents a master or a slave.
@@ -26,6 +27,11 @@ public interface Minion {
      * Returns a directory which is suitable to place temporary directories/files within.
      */
     public Path getTempDir();
+
+    /**
+     * Returns the configuration of this minion
+     */
+    public MinionDto getMinionConfig();
 
     /**
      * Retrieve registered slaves. This makes only sense if the current VM hosts a master, otherwise only 'self' is returned.
@@ -52,9 +58,9 @@ public interface Minion {
     public RemoteService getSelf();
 
     /**
-     * @return the own "name", which is the hostname used to init the minion's root.
+     * @return the hostname used to init the minion's root.
      */
-    public String getOfficialName();
+    public String getHostName();
 
     /**
      * Returns whether or not the minion represents the master.

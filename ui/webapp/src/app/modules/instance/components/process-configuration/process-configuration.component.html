@@ -41,7 +41,7 @@
           Auto Start: <b *ngIf="!loading">{{ selectedConfig.instance.autoStart ? 'Enabled' : 'Disabled' }}</b>
         </div>
         <div *ngIf='controllingServer'>
-            Last sync.: <b>{{ getDate(controllingServer.lastSync) }}</b>
+            Last sync.: <b *ngIf="!loading">{{ getDate(controllingServer.lastSync) }}</b>
         </div>
       </div>
       <span class="fill-space"></span>
@@ -50,7 +50,7 @@
       </button>
       <span class="spacer"></span>
       <ng-container *ngIf='isCentral()'>
-        <button mat-icon-button (click)='doSyncCentral()' matTooltip="Synchronize meta-data from the controlling server."><mat-icon>sync_alt</mat-icon></button>
+        <button mat-icon-button (click)='syncCentral()' matTooltip="Synchronize meta-data from the controlling server."><mat-icon>sync_alt</mat-icon></button>
       </ng-container>
       <app-remote-progress [scope]='[groupParam, uuidParam]'></app-remote-progress>
       <ng-container *ngIf="isAutoRefreshVisible() && autoRefresh">
@@ -110,8 +110,18 @@
           Out-of-sync: One or more applications are running in a version that is not activated.
         </div>
         <div *ngIf="isCentral() && !isCentralSynced" class="need-sync-text">
-          Press <button mat-icon-button (click)='doSyncCentral()' matTooltip="Synchronize meta-data from the controlling server."><mat-icon>sync_alt</mat-icon></button> to enable editing, process control and remote access.
+          The last synchronized state of the instance is shown, so both editing and process control are not available.<br />
+          Press
+            <button mat-icon-button (click)='syncCentral()' matTooltip="Synchronize meta-data from the controlling server.">
+              <mat-icon>sync_alt</mat-icon>
+            </button>
+          to get the latest version from the managed master.
         </div>
+        <div class="update-container" *ngIf="showUpdateComponent()">
+          <app-managed-server-update [serverName]="controllingServer.name" [instanceGroupName]="groupParam" [updateDto]="updateDto" (updateEvent)="onUpdateEvent($event)">
+          </app-managed-server-update>
+        </div>
+
         <ng-container *ngFor="let node of selectedConfig.nodeList.nodeConfigDtos">
           <app-instance-node-card
             class="node"

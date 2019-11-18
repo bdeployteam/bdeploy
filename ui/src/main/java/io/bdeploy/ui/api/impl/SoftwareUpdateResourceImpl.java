@@ -9,7 +9,6 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -43,7 +42,7 @@ import io.bdeploy.bhive.op.PruneOperation;
 import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
-import io.bdeploy.common.Version;
+import io.bdeploy.bhive.util.VersionComparator;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
@@ -53,7 +52,6 @@ import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.common.util.ZipHelper;
 import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.UpdateHelper;
-import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
 import io.bdeploy.ui.branding.Branding;
@@ -64,26 +62,8 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
 
     private static final Logger log = LoggerFactory.getLogger(SoftwareUpdateResourceImpl.class);
 
-    /**
-     * Name and path of the native Windows installer stored in the launcher ZIP
-     */
-    public static final String INSTALLER_EXE = "bin/Installer.bin";
-
-    /**
-     * Name and path of the native Linux (shell script) installer template stored in the launcher ZIP
-     */
-    public static final String INSTALLER_SH = "bin/installer.tpl";
-
-    private static final String BDEPLOY_MF_NAME = "meta/bdeploy";
-    private static final String LAUNCHER_MF_NAME = "meta/launcher";
-    private static final Comparator<Key> BY_TAG_NEWEST_LAST = (a, b) -> Version.parse(a.getTag())
-            .compareTo(Version.parse(b.getTag()));
-
     @Inject
     private SecurityContext context;
-
-    @Inject
-    private MasterRootResource master;
 
     @Inject
     private BHiveRegistry reg;
@@ -103,26 +83,19 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
 
     @Override
     public List<Key> getBDeployVersions() {
-        return getHive().execute(new ManifestListOperation().setManifestName(BDEPLOY_MF_NAME)).stream().sorted(BY_TAG_NEWEST_LAST)
-                .collect(Collectors.toList());
+        return getHive().execute(new ManifestListOperation().setManifestName(BDEPLOY_MF_NAME)).stream()
+                .sorted(VersionComparator.BY_TAG_NEWEST_LAST).collect(Collectors.toList());
     }
 
     @Override
     public void updateSelf(List<Key> target) {
-        // delegate to the actual master resource
-        target.stream().map(ScopedManifestKey::parse).sorted((a, b) -> {
-            if (a.getOperatingSystem() != b.getOperatingSystem()) {
-                // put own OS last.
-                return a.getOperatingSystem() == OsHelper.getRunningOs() ? 1 : -1;
-            }
-            return a.getKey().toString().compareTo(b.getKey().toString());
-        }).forEach(k -> master.update(k.getKey(), false));
+        UpdateHelper.update(minion.getSelf(), context, OsHelper.getRunningOs(), target, false);
     }
 
     @Override
     public List<Key> getLauncherVersions() {
         return getHive().execute(new ManifestListOperation().setManifestName(LAUNCHER_MF_NAME)).stream()
-                .sorted(BY_TAG_NEWEST_LAST).collect(Collectors.toList());
+                .sorted(VersionComparator.BY_TAG_NEWEST_LAST).collect(Collectors.toList());
     }
 
     @Override

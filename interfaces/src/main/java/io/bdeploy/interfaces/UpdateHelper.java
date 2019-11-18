@@ -6,10 +6,13 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import javax.ws.rs.core.SecurityContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,12 +21,15 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.ImportOperation;
+import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.common.util.ZipHelper;
+import io.bdeploy.interfaces.remote.MasterRootResource;
+import io.bdeploy.interfaces.remote.ResourceProvider;
 
 /**
  * Provides shared functionality for dealing with updates.
@@ -236,6 +242,34 @@ public class UpdateHelper {
      */
     public static Key getCurrentKey() {
         return calculateKeyFromProperties(VersionHelper.readProperties(), OsHelper.getRunningOs());
+    }
+
+    /**
+     * Requests the master to install the given update packages.
+     *
+     * @param svc
+     *            the remote service to install the updates
+     * @param context
+     *            context of the caller
+     * @param osOfMaster
+     *            the OS of the master
+     * @param keys
+     *            the update packages
+     * @param cleanup
+     *            whether or not to clean old versions
+     */
+    public static void update(RemoteService svc, SecurityContext context, OperatingSystem osOfMaster, Collection<Key> keys,
+            boolean cleanup) {
+        MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class, null);
+
+        // We need to sort the updates so that the running OS is the last one
+        keys.stream().map(ScopedManifestKey::parse).sorted((a, b) -> {
+            // put own OS last.
+            if (a.getOperatingSystem() != b.getOperatingSystem()) {
+                return a.getOperatingSystem() == OsHelper.getRunningOs() ? 1 : -1;
+            }
+            return a.getKey().toString().compareTo(b.getKey().toString());
+        }).forEach(k -> root.update(k.getKey(), cleanup));
     }
 
 }

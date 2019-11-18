@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -28,6 +29,7 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.minion.MinionRoot;
@@ -53,21 +55,20 @@ public class MinionUpdateTest {
         root.onStartup();
 
         Path updateSource = TestAppFactory.createDummyApp("minion", tmp);
-        Manifest.Key updateKey = new Manifest.Key("bdeploy/snapshot/windows", "2.0.0");
+        Manifest.Key winUpdateKey = new Manifest.Key("bdeploy/snapshot/windows", "2.0.0");
+        Manifest.Key linuxUpdateKey = new Manifest.Key("bdeploy/snapshot/linux", "2.0.0");
 
-        local.execute(new ImportOperation().setManifest(updateKey).setSourcePath(updateSource));
-        local.execute(new PushOperation().addManifest(updateKey).setRemote(remote));
+        local.execute(new ImportOperation().setManifest(winUpdateKey).setSourcePath(updateSource));
+        local.execute(new ImportOperation().setManifest(linuxUpdateKey).setSourcePath(updateSource));
 
-        resource.update(updateKey, true);
+        local.execute(new PushOperation().addManifest(winUpdateKey).setRemote(remote));
+        local.execute(new PushOperation().addManifest(linuxUpdateKey).setRemote(remote));
+        UpdateHelper.update(remote, null, OsHelper.getRunningOs(), Arrays.asList(winUpdateKey, linuxUpdateKey), true);
 
-        // update triggered only on windows, not on linux
-        if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
-            assertTrue(updateTriggered.get());
-            assertTrue(Files.isDirectory(root.getUpdateDir().resolve("next")));
-            assertTrue(Files.isRegularFile(root.getUpdateDir().resolve("next").resolve(ApplicationDescriptor.FILE_NAME)));
-        } else {
-            assertFalse(updateTriggered.get());
-        }
+        // check that an update was triggered
+        assertTrue(updateTriggered.get());
+        assertTrue(Files.isDirectory(root.getUpdateDir().resolve("next")));
+        assertTrue(Files.isRegularFile(root.getUpdateDir().resolve("next").resolve(ApplicationDescriptor.FILE_NAME)));
     }
 
     @Test

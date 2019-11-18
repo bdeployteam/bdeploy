@@ -9,10 +9,11 @@ import { EventSourcePolyfill } from 'ng-event-source';
 import { DragulaService } from 'ng2-dragula';
 import { forkJoin, Observable, of, Subscription } from 'rxjs';
 import { catchError, finalize, mergeMap } from 'rxjs/operators';
+import { isUpdateFailed, isUpdateInProgress, isUpdateSuccess, UpdateStatus } from 'src/app/models/update.model';
 import { ApplicationGroup } from '../../../../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_DEPLOYMENT_STATE } from '../../../../models/consts';
 import { EventWithCallback } from '../../../../models/event';
-import { ApplicationConfiguration, ApplicationDto, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstanceStateRecord, InstanceUpdateEventDto, InstanceUpdateEventType, ManagedMasterDto, ManifestKey, MinionDto, MinionMode, MinionStatusDto, ProductDto } from '../../../../models/gen.dtos';
+import { ApplicationConfiguration, ApplicationDto, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstanceStateRecord, InstanceUpdateEventDto, InstanceUpdateEventType, ManagedMasterDto, ManifestKey, MinionDto, MinionMode, MinionStatusDto, MinionUpdateDto, ProductDto } from '../../../../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../../../../models/process.model';
 import { ConfigService } from '../../../core/services/config.service';
 import { HeaderTitleService } from '../../../core/services/header-title.service';
@@ -102,6 +103,8 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   private lastStateReload = 0;
 
   public isCentralSynced = false;
+  public updateDto: MinionUpdateDto;
+  public updateStatus: UpdateStatus;
 
   constructor(
     private route: ActivatedRoute,
@@ -536,7 +539,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
     let server = null;
     if (this.isCentral()) {
-      server = this.controllingServer.name;
+      server = this.controllingServer.hostName;
     }
 
     const nodePromise = this.instanceService.updateInstance(
@@ -978,26 +981,43 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   isReadonly() {
-    return (this.selectedConfig && this.selectedConfig.readonly) || (this.isCentral() && !this.isCentralSynced);
+    if (this.isCentral() && !this.isCentralSynced) {
+      return true;
+    }
+    if (this.isUpdateInProgress() || this.isUpdateFailed()) {
+      return true;
+    }
+    if (this.selectedConfig && this.selectedConfig.readonly) {
+      return true;
+    }
+    return false;
   }
 
-  async doSyncCentral() {
+  async syncCentral() {
     if (!this.isCentral()) {
       return;
     }
+    this.updateDto = null;
+    this.updateStatus = null;
+    await this.doSyncCentral();
+    if (this.isCentralSynced) {
+      this.loadVersions(true);
+    }
+  }
 
+  async doSyncCentral() {
     try {
-      await this.managedServers.synchronize(this.groupParam, this.controllingServer.name).toPromise();
+      await this.managedServers.synchronize(this.groupParam, this.controllingServer.hostName).toPromise();
+      this.updateDto = await this.managedServers.getUpdatesFor(this.groupParam, this.controllingServer.hostName).toPromise();
       this.isCentralSynced = true;
     } catch (e) {
-      this.messageBoxService.open({title: 'Synchronization Error', message: 'Synchronization failed. The remote master server might be offline.', mode: MessageBoxMode.ERROR});
+      this.messageBoxService.open({
+        title: 'Synchronization Error',
+        message: 'Synchronization failed. The remote master server might be offline.',
+        mode: MessageBoxMode.ERROR});
       this.minionStates = {};
       this.isCentralSynced = false;
-      return;
     }
-
-    // reload
-    this.loadVersions(true);
   }
 
   importInstanceVersion() {
@@ -1042,4 +1062,43 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   getDate(x: number) {
     return format(new Date(x), 'dd.MM.yyyy HH:mm');
   }
+
+  showUpdateComponent() {
+    if (this.updateDto && this.updateDto.updateAvailable) {
+      return true;
+    }
+    if (this.updateStatus) {
+      return true;
+    }
+    return false;
+  }
+
+  onUpdateEvent(updateState: UpdateStatus) {
+    this.updateStatus = updateState;
+    if (this.isUpdateSuccess()) {
+      this.doSyncCentral();
+    }
+    if (this.isUpdateFailed()) {
+      this.isCentralSynced = false;
+      this.messageBoxService.open({
+        title: 'Update Error',
+        message: 'Failed to await server to come back online. Please check server logs.',
+        mode: MessageBoxMode.ERROR,
+      });
+    }
+  }
+
+  isUpdateInProgress() {
+    return this.updateStatus && isUpdateInProgress(this.updateStatus);
+  }
+
+  isUpdateSuccess() {
+    return this.updateStatus && isUpdateSuccess(this.updateStatus);
+  }
+
+  isUpdateFailed() {
+    return this.updateStatus && isUpdateFailed(this.updateStatus);
+  }
+
+
 }

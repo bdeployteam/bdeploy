@@ -25,7 +25,7 @@ export class ManagedServersComponent implements OnInit {
   load() {
     this.loading = true;
     this.managedServersService.getManagedServers(this.instanceGroupName).pipe(finalize(() => this.loading = false)).subscribe(r => {
-      this.managedServers = r.sort((a, b) => a.name.localeCompare(b.name));
+      this.managedServers = r.sort((a, b) => a.hostName.localeCompare(b.hostName));
     });
   }
 

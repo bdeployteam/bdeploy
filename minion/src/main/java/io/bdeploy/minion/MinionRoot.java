@@ -34,6 +34,7 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.objects.LockableDatabase;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.Version;
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.SecurityHelper;
@@ -45,6 +46,7 @@ import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
+import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.jersey.audit.Auditor;
 import io.bdeploy.jersey.audit.RollingFileAuditor;
@@ -112,17 +114,11 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         return mode == MinionMode.CENTRAL || mode == MinionMode.MANAGED || mode == MinionMode.STANDALONE;
     }
 
-    /**
-     * @return the mode the hosting minion is run in.
-     */
     @Override
     public MinionMode getMode() {
         return mode;
     }
 
-    /**
-     * @return the own {@link RemoteService} for loop-back communication
-     */
     @Override
     public RemoteService getSelf() {
         MinionState state = getState();
@@ -130,7 +126,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     }
 
     @Override
-    public String getOfficialName() {
+    public String getHostName() {
         return getState().officialName;
     }
 
@@ -160,26 +156,18 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
      */
     public void onStartup() {
         doMigrate();
-        updateMasterFlag();
+        updateMinionConfiguration();
     }
 
-    /** Ensures that the master flag is correctly set in the minion manifest */
-    private void updateMasterFlag() {
+    /** Ensures that the master flag and the version is correctly set in the minion manifest */
+    private void updateMinionConfiguration() {
         MinionManifest manifest = new MinionManifest(hive);
         MinionConfiguration minionConfig = manifest.read();
 
         // Check that the master flag is set on the correct entry
         boolean writeManifest = false;
-        boolean isMaster = isMaster();
-        String myName = getState().self;
         for (Map.Entry<String, MinionDto> entry : minionConfig.entrySet()) {
-            String minionName = entry.getKey();
-            MinionDto minionDto = entry.getValue();
-            if (minionName.equals(myName) && isMaster && !minionDto.master) {
-                minionDto.master = true;
-                writeManifest = true;
-            } else if (minionDto.master && !isMaster) {
-                minionDto.master = false;
+            if (doUpdateMinionConfiguration(entry.getKey(), entry.getValue())) {
                 writeManifest = true;
             }
         }
@@ -188,6 +176,56 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         if (writeManifest) {
             manifest.update(minionConfig);
         }
+    }
+
+    /**
+     * Synchronizes the given configuration with the real values provided by the minion.
+     *
+     * @param minionName
+     *            name of the minion
+     * @param config
+     *            current minion configuration
+     * @return {@code true} if the configuration changed
+     */
+    private boolean doUpdateMinionConfiguration(String minionName, MinionDto config) {
+        boolean isMaster = isMaster();
+        String myName = getState().self;
+
+        // Ensure that the master flag is set correctly
+        boolean changed = false;
+        if (minionName.equals(myName) && isMaster && !config.master) {
+            config.master = true;
+            changed = true;
+        } else if (config.master && !isMaster) {
+            config.master = false;
+            changed = true;
+        }
+
+        // Update our own version
+        if (myName.equals(minionName)) {
+            Version running = VersionHelper.tryParse(VersionHelper.readVersion());
+            if (!VersionHelper.equals(running, config.version)) {
+                config.version = running;
+                changed = true;
+            }
+            return changed;
+        }
+
+        // Contact minion to get the current version
+        MinionStatusDto remoteStatus = MinionHelper.tryContactMinion(config.remote, 1, 0);
+        if (remoteStatus == null) {
+            log.warn("Configured minion '{}' is currently offline.", minionName);
+            return changed;
+        }
+        MinionDto remoteConfig = remoteStatus.config;
+        log.info("Minion successfully contacted. Version={} OS={}", remoteConfig.version, remoteConfig.os);
+
+        // Check if an update is required
+        if (!VersionHelper.equals(config.version, remoteConfig.version)) {
+            config.version = remoteConfig.version;
+            changed = true;
+        }
+        return changed;
     }
 
     /** Does whatever is required to migrate an older version to the current version */
@@ -221,6 +259,12 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
      */
     public Scheduler getScheduler() {
         return scheduler;
+    }
+
+    @Override
+    public MinionDto getMinionConfig() {
+        String myName = getState().self;
+        return getMinions().getMinion(myName);
     }
 
     @Override

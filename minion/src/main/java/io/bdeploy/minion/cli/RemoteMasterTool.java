@@ -7,10 +7,12 @@ import java.nio.file.Paths;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.SortedMap;
+import java.util.stream.Collectors;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
@@ -19,6 +21,8 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.OsHelper;
+import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.interfaces.minion.MinionDto;
@@ -43,6 +47,9 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
         @Help("Path to a launcher distribution (ZIP) which will be pushed to the master")
         String launcher();
 
+        @Help("OS of the remote master. If not specified it is assumed that the local and the remote OS are the same. ")
+        String masterOs();
+
         @Help(value = "Don't ask for confirmation before initiating the update process on the remote", arg = false)
         boolean yes() default false;
     }
@@ -66,7 +73,7 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
                 out().println(zip + " does not seem to be an update package");
             }
 
-            performUpdate(config, svc, client, zip);
+            performUpdate(config, svc, zip);
         } else if (config.launcher() != null) {
             Path zip = Paths.get(config.launcher());
             if (!Files.isReadable(zip)) {
@@ -90,16 +97,21 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
         }
     }
 
-    private void performUpdate(RemoteMasterConfig config, RemoteService svc, MasterRootResource client, Path zip) {
+    private void performUpdate(RemoteMasterConfig config, RemoteService svc, Path zip) {
         try {
-            Manifest.Key key = importAndPushUpdate(svc, zip, getActivityReporter());
+            Collection<Manifest.Key> keys = importAndPushUpdate(svc, zip, getActivityReporter());
 
             if (!config.yes()) {
                 System.out.println("Pushing of update package successful, press any key to continue updating or CTRL+C to abort");
                 System.in.read();
             }
 
-            client.update(key, true);
+            OperatingSystem masterOs = OsHelper.getRunningOs();
+            if (config.masterOs() != null) {
+                masterOs = OperatingSystem.valueOf(config.masterOs());
+            }
+
+            UpdateHelper.update(svc, null, masterOs, keys, true);
         } catch (IOException e) {
             throw new IllegalStateException("Failed to process update", e);
         }
@@ -119,8 +131,8 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
      * <p>
      * The key of the BDeploy update is returned for further update purposes.
      */
-    public static Manifest.Key importAndPushUpdate(RemoteService remote, Path updateZipFile, ActivityReporter reporter)
-            throws IOException {
+    public static Collection<Manifest.Key> importAndPushUpdate(RemoteService remote, Path updateZipFile,
+            ActivityReporter reporter) throws IOException {
         Path tmpDir = Files.createTempDirectory("update-");
         try {
             Path hive = tmpDir.resolve("hive");
@@ -130,7 +142,7 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
                 keys.forEach(pushOp::addManifest);
                 tmpHive.execute(pushOp);
 
-                return keys.stream().filter(UpdateHelper::isBDeployServerKey).findFirst().orElse(null);
+                return keys.stream().filter(UpdateHelper::isBDeployServerKey).collect(Collectors.toList());
             }
         } finally {
             PathHelper.deleteRecursive(tmpDir);

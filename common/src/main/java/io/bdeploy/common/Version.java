@@ -1,8 +1,5 @@
 package io.bdeploy.common;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ComparisonChain;
@@ -12,8 +9,6 @@ import com.google.common.collect.Ordering;
  * A Version in the format &ltmajor&gt.&ltminor&gt.&ltmicro&gt[-qualifier]|[.qualifier]
  */
 public class Version implements Comparable<Version> {
-
-    public static final Pattern V_PATTERN = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)([-\\.].*)*");
 
     private final int major;
     private final int minor;
@@ -27,27 +22,6 @@ public class Version implements Comparable<Version> {
         this.minor = minor;
         this.micro = micro;
         this.qualifier = qualifier;
-    }
-
-    public static Version parse(String v) {
-        Version version = tryParse(v);
-        if (version == null) {
-            throw new IllegalArgumentException("Given version does not match expected pattern");
-        }
-        return version;
-    }
-
-    public static Version tryParse(String v) {
-        Matcher matcher = V_PATTERN.matcher(v);
-        if (!matcher.matches()) {
-            return null;
-        }
-        try {
-            return new Version(Integer.parseInt(matcher.group(1)), Integer.parseInt(matcher.group(2)),
-                    Integer.parseInt(matcher.group(3)), matcher.group(4));
-        } catch (NumberFormatException nfe) {
-            return null;
-        }
     }
 
     public int getMajor() {
@@ -119,4 +93,5 @@ public class Version implements Comparable<Version> {
         }
         return true;
     }
+
 }

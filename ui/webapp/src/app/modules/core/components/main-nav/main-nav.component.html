@@ -22,10 +22,10 @@
       <mat-divider ></mat-divider>
       <div class="footer-content">
         <span>Version:</span>
-        <span>{{ (backendVersion | async).version }}</span>
+        <span>{{ formatVersion((backendInfo | async).version) }}</span>
 
         <span>Mode:</span>
-        <span>{{ (backendVersion | async).mode }}</span>
+        <span>{{ (backendInfo | async).mode }}</span>
 
         <span>Log Level:</span>
         <mat-select [value]="getLogLevel()" (selectionChange)="setLogLevel($event)">
@@ -50,7 +50,7 @@
       </button>
       <app-logo class='logo' [size]='48'></app-logo>{{title.getHeaderTitle()}}
       <span class="spacer"></span>
-      <span *ngIf='needServerTypeHint()' class='server-type-hint'>{{ (backendVersion | async).mode }}</span>
+      <span *ngIf='needServerTypeHint()' class='server-type-hint'>{{ (backendInfo | async).mode }}</span>
       <app-theme-chooser></app-theme-chooser>
       <ng-container *ngIf="isAuth$ | async">
         <button mat-icon-button aria-label="Logout icon" (click)="logout()"><mat-icon>exit_to_app</mat-icon></button>

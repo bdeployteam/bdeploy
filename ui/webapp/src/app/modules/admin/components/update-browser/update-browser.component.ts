@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { finalize } from 'rxjs/operators';
-import { ManifestKey, OperatingSystem } from '../../../../models/gen.dtos';
-import { ConfigService } from '../../../core/services/config.service';
-import { FileUploadComponent } from '../../../shared/components/file-upload/file-upload.component';
-import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
-import { MessageboxService } from '../../../shared/services/messagebox.service';
+import { ManifestKey, OperatingSystem, Version } from 'src/app/models/gen.dtos';
+import { ConfigService } from 'src/app/modules/core/services/config.service';
+import { FileUploadComponent } from 'src/app/modules/shared/components/file-upload/file-upload.component';
+import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
+import { MessageboxService } from 'src/app/modules/shared/services/messagebox.service';
+import { convert2String } from 'src/app/modules/shared/utils/version.utils';
 import { SoftwareUpdateService } from '../../services/software-update.service';
 import { UpdateDialogComponent } from '../update-dialog/update-dialog.component';
 
@@ -35,12 +36,11 @@ export class UpdateBrowserComponent implements OnInit {
   ngOnInit() {
     this.systemLoading = true;
     this.launcherLoading = true;
-
     this.reload();
   }
 
   private async reload() {
-    const currentVersion = await this.cfgService.getBackendVersion().toPromise();
+    const currentVersion = await this.cfgService.getBackendInfo().toPromise();
     this.updService
       .listBDeployVersions()
       .pipe(finalize(() => (this.systemLoading = false)))
@@ -51,7 +51,7 @@ export class UpdateBrowserComponent implements OnInit {
       .subscribe(r => (this.launcherVersions = this.groupKeysByTag(r, null)));
   }
 
-  private groupKeysByTag(keys: ManifestKey[], currentVersion: string) {
+  private groupKeysByTag(keys: ManifestKey[], currentVersion: Version) {
     const tags: { [key: string]: GroupedKeys } = {};
 
     // keys are already sorted by the backend. reverse the order to have the newest version on top.
@@ -63,7 +63,7 @@ export class UpdateBrowserComponent implements OnInit {
       group.tag = k.tag;
       group.snapshot = k.name.includes('snapshot');
 
-      if (currentVersion && currentVersion === group.tag) {
+      if (currentVersion && convert2String(currentVersion) === group.tag) {
         group.current = true;
       }
 

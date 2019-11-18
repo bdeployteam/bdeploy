@@ -4,7 +4,7 @@
   <div *ngIf='waiting'>Waiting for the master to come back online...</div>
   <ng-container  *ngIf='finished'>
     <div *ngIf='!error'>A reload is required to update the web application. Press OK to reload now.</div>
-    <div *ngIf='!error'>The server version after update is: {{versionAfterUpdate}}.</div>
+    <div *ngIf='!error'>The server version after update is: {{getVersionAfterUpdate()}}.</div>
     <div *ngIf='error'>Failed to await server to come back online. Please check server logs. Press OK to reload the application.</div>
   </ng-container>
 </div>

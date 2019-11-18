@@ -21,8 +21,8 @@ import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.ManifestRefScanOperation;
 import io.bdeploy.bhive.op.PruneOperation;
-import io.bdeploy.common.Version;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.dcu.InstanceNodeController;
 import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.cleanup.CleanupAction;
@@ -47,7 +47,7 @@ public class SlaveCleanupResourceImpl implements SlaveCleanupResource {
 
         Set<String> newestLauncherTags = hive.execute(new ManifestListOperation().setManifestName("meta/launcher")).stream() //
                 .map(Key::getTag) //
-                .collect(Collectors.toCollection(() -> new TreeSet<>((a, b) -> Version.parse(b).compareTo(Version.parse(a))))) // reverse order
+                .collect(Collectors.toCollection(() -> new TreeSet<>((a, b) -> VersionHelper.compare(b, a)))) // reverse order
                 .stream().limit(2).collect(Collectors.toSet());
 
         SortedSet<Key> allMfs = hive.execute(new ManifestListOperation()); // list ALL

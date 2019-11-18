@@ -9,25 +9,27 @@ import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
 
+import io.bdeploy.common.util.VersionHelper;
+
 public class VersionTest {
 
     @Test
     void version() {
-        Version v = Version.parse("1.2.3");
+        Version v = VersionHelper.parse("1.2.3");
 
         assertEquals(1, v.getMajor());
         assertEquals(2, v.getMinor());
         assertEquals(3, v.getMicro());
         assertNull(v.getQualifier());
 
-        v = Version.parse("1.2.3-qualifier");
+        v = VersionHelper.parse("1.2.3-qualifier");
 
         assertEquals(1, v.getMajor());
         assertEquals(2, v.getMinor());
         assertEquals(3, v.getMicro());
         assertEquals("-qualifier", v.getQualifier());
 
-        v = Version.parse("1.2.3.qualifier");
+        v = VersionHelper.parse("1.2.3.qualifier");
 
         assertEquals(1, v.getMajor());
         assertEquals(2, v.getMinor());
@@ -39,15 +41,15 @@ public class VersionTest {
     void sorting() {
         SortedSet<Version> vs = new TreeSet<>();
 
-        assertTrue(Version.parse("1.2.3").compareTo(Version.parse("1.0.0")) > 0);
-        assertTrue(Version.parse("1.2.3").compareTo(Version.parse("1.3.0")) < 0);
-        assertTrue(Version.parse("1.2.3").compareTo(Version.parse("1.2.3")) == 0);
+        assertTrue(VersionHelper.compare("1.2.3", "1.0.0") > 0);
+        assertTrue(VersionHelper.compare("1.2.3", "1.3.0") < 0);
+        assertTrue(VersionHelper.compare("1.2.3", "1.2.3") == 0);
 
-        vs.add(Version.parse("1.2.3"));
-        vs.add(Version.parse("1.0.1"));
-        vs.add(Version.parse("1.0.1-qualifier2"));
-        vs.add(Version.parse("1.0.1-qualifier1"));
-        vs.add(Version.parse("1.2.1"));
+        vs.add(VersionHelper.parse("1.2.3"));
+        vs.add(VersionHelper.parse("1.0.1"));
+        vs.add(VersionHelper.parse("1.0.1-qualifier2"));
+        vs.add(VersionHelper.parse("1.0.1-qualifier1"));
+        vs.add(VersionHelper.parse("1.2.1"));
 
         Version[] array = vs.stream().toArray(Version[]::new);
 

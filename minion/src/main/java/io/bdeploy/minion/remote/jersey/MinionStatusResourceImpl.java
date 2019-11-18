@@ -6,7 +6,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.MinionStatusResource;
 import io.bdeploy.jersey.JerseyServer;
@@ -26,7 +25,7 @@ public class MinionStatusResourceImpl implements MinionStatusResource {
     public MinionStatusDto getStatus() {
         MinionStatusDto s = new MinionStatusDto();
         s.startup = startTime;
-        s.config = MinionDto.create(root.getSelf());
+        s.config = root.getMinionConfig();
         return s;
     }
 

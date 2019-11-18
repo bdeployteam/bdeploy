@@ -24,7 +24,6 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import io.bdeploy.bhive.remote.jersey.BHiveLocatorImpl;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.Version;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.PathHelper;
@@ -206,8 +205,13 @@ public class TestUiBackendServer extends TestServer {
         }
 
         @Override
-        public String getOfficialName() {
+        public String getHostName() {
             return "Unit_Test";
+        }
+
+        @Override
+        public MinionDto getMinionConfig() {
+            return minions.getMinion("master");
         }
 
         @Override
@@ -229,7 +233,7 @@ public class TestUiBackendServer extends TestServer {
         MinionDto dto = new MinionDto();
         dto.remote = remote;
         dto.os = OsHelper.getRunningOs();
-        dto.version = Version.tryParse(VersionHelper.readVersion());
+        dto.version = VersionHelper.tryParse(VersionHelper.readVersion());
 
         MinionConfiguration config = new MinionConfiguration();
         config.addMinion("master", dto);

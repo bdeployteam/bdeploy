@@ -23,7 +23,7 @@ public class ManagedMastersConfiguration {
      * attach a new, or replace an existing attached managed master by name.
      */
     public void addManagedMaster(ManagedMasterDto dto) {
-        attachedManagedMasters.put(dto.name, dto);
+        attachedManagedMasters.put(dto.hostName, dto);
     }
 
     /**

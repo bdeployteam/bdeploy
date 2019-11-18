@@ -1,6 +1,6 @@
 <mat-toolbar class="mat-elevation-z1 header-toolbar">
   <button mat-icon-button type="button" (click)='location.back()'><mat-icon>chevron_left</mat-icon></button>
-  <span>Managed Servers for Instance Group: {{instanceGroupName}}</span>
+  <span>Instance Group: {{instanceGroupName}}</span>
 </mat-toolbar>
 
 <div *ngIf="loading" class="loading-container">
@@ -22,7 +22,7 @@
       <mat-expansion-panel *ngFor='let server of managedServers' expanded='true'>
         <mat-expansion-panel-header>
           <mat-panel-title class='header-title'>
-            {{server.name}} - {{server.description}}
+            {{server.hostName}} - {{server.description}}
           </mat-panel-title>
           <mat-panel-description class='header-description'>
             {{server.uri}}

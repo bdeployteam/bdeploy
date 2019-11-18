@@ -1,0 +1,11 @@
+@import '~@angular/material/theming';
+
+@mixin managed-server-update-theme($theme) {
+  $accent: map-get($theme, 'accent');
+
+  .update-card-header-theme {
+    color: mat-color($accent, default-contrast);
+    background-color: mat-color($accent);
+  }
+
+}

@@ -89,7 +89,7 @@ export class AttachManagedComponent implements OnInit {
       return;
     }
     if (!this.serverNameControl.value) {
-      this.serverNameControl.setValue(this.attachPayload.name);
+      this.serverNameControl.setValue(this.attachPayload.hostName);
     }
     if (!this.serverUriControl.value) {
       this.serverUriControl.setValue(this.attachPayload.uri);
@@ -126,7 +126,7 @@ export class AttachManagedComponent implements OnInit {
 
   private createDto(): ManagedMasterDto {
     return {
-      name: this.serverNameControl.value,
+      hostName: this.serverNameControl.value,
       description: this.serverDescControl.value,
       uri: this.serverUriControl.value,
       auth: this.attachPayload.auth,

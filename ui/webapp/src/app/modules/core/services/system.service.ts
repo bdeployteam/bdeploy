@@ -27,7 +27,7 @@ export class SystemService {
 
       const dialogRef = this.dialog.open(ConnectionLostComponent, config);
 
-      this.configService.tryGetBackendVersion().pipe(
+      this.configService.tryGetBackendInfo().pipe(
         retryWhen(errors => errors.pipe(delay(2000)))
       ).subscribe(
         r => {
