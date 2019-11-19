@@ -2,6 +2,7 @@ package io.bdeploy.ui.api;
 
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -17,6 +18,8 @@ import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.ui.dto.ManagedMasterDto;
+import io.bdeploy.ui.dto.ProductDto;
+import io.bdeploy.ui.dto.ProductTransferDto;
 
 @Path("/managed-servers")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -105,5 +108,17 @@ public interface ManagedServersResource {
     @Consumes(MediaType.TEXT_PLAIN)
     @Path("/synchronize/{group}/{server}")
     public ManagedMasterDto synchronize(@PathParam("group") String groupName, @PathParam("server") String serverName);
+
+    @GET
+    @Path("/list-products/{group}/{server}")
+    public List<ProductDto> listProducts(@PathParam("group") String groupName, @PathParam("server") String serverName);
+
+    @POST
+    @Path("/transfer-products/{group}")
+    public void transferProducts(@PathParam("group") String groupName, ProductTransferDto transfer);
+
+    @GET
+    @Path("/active-transfers/{group}")
+    public SortedSet<ProductDto> getActiveTransfers(@PathParam("group") String groupName);
 
 }

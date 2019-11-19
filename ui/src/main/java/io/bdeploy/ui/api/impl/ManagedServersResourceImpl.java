@@ -56,6 +56,7 @@ import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.ui.ControllingMaster;
 import io.bdeploy.ui.ManagedMasters;
 import io.bdeploy.ui.ManagedMastersConfiguration;
+import io.bdeploy.ui.ProductTransferService;
 import io.bdeploy.ui.api.BackendInfoResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.ManagedServersResource;
@@ -63,6 +64,8 @@ import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.dto.CentralIdentDto;
 import io.bdeploy.ui.dto.ManagedMasterDto;
+import io.bdeploy.ui.dto.ProductDto;
+import io.bdeploy.ui.dto.ProductTransferDto;
 
 public class ManagedServersResourceImpl implements ManagedServersResource {
 
@@ -79,6 +82,9 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
     @Inject
     private ActivityReporter reporter;
+
+    @Inject
+    private ProductTransferService transfers;
 
     @Override
     public void tryAutoAttach(String groupName, ManagedMasterDto target) {
@@ -372,6 +378,22 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         attached.lastSync = Instant.now();
         mm.attach(attached, true);
         return attached;
+    }
+
+    @Override
+    public List<ProductDto> listProducts(String groupName, String serverName) {
+        RemoteService svc = getConfiguredRemote(groupName, serverName);
+        return ResourceProvider.getResource(svc, InstanceGroupResource.class, context).getProductResource(groupName).list();
+    }
+
+    @Override
+    public void transferProducts(String groupName, ProductTransferDto transfer) {
+        transfers.initTransfer(getInstanceGroupHive(groupName), groupName, transfer);
+    }
+
+    @Override
+    public SortedSet<ProductDto> getActiveTransfers(String groupName) {
+        return transfers.getActiveTransfers(groupName);
     }
 
 }

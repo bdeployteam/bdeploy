@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
 
@@ -18,13 +19,16 @@ import org.glassfish.jersey.server.internal.inject.MultivaluedParameterExtractor
 import org.glassfish.jersey.server.model.Parameter;
 import org.glassfish.jersey.server.model.ResourceMethod;
 
+import com.google.common.base.Splitter;
+
 @Provider
 public class JerseySseActivityScopeFilter implements ContainerRequestFilter {
 
-    private static final String SCOPE_PROPERTY = "ActivityScopeProperty";
-
     @Inject
     private javax.inject.Provider<MultivaluedParameterExtractorProvider> mpep;
+
+    @Inject
+    private JerseyScopeService scopeService;
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
@@ -34,7 +38,11 @@ public class JerseySseActivityScopeFilter implements ContainerRequestFilter {
 
             String proxyScope = requestContext.getHeaderString(JerseySseActivityProxyClientFilter.PROXY_SCOPE_HEADER);
             if (proxyScope != null) {
-                scope.add(proxyScope);
+                if (proxyScope.contains(",")) {
+                    scope.addAll(Splitter.on(',').splitToList(proxyScope));
+                } else {
+                    scope.add(proxyScope);
+                }
             }
 
             ExtendedUriInfo info = (ExtendedUriInfo) plainInfo;
@@ -48,7 +56,12 @@ public class JerseySseActivityScopeFilter implements ContainerRequestFilter {
                 scope.addAll(getMethodScope(info, m));
             }
 
-            requestContext.setProperty(SCOPE_PROPERTY, scope);
+            String user = "<unknown>";
+            SecurityContext securityContext = requestContext.getSecurityContext();
+            if (securityContext != null && securityContext.getUserPrincipal() != null) {
+                user = securityContext.getUserPrincipal().getName();
+            }
+            scopeService.setScope(scope, user);
         }
     }
 
@@ -74,13 +87,12 @@ public class JerseySseActivityScopeFilter implements ContainerRequestFilter {
         return scopesInOrder;
     }
 
-    @SuppressWarnings("unchecked")
-    public static List<String> getRequestActivityScope(ContainerRequestContext context) {
-        if (context == null) {
+    public static List<String> getRequestActivityScope(JerseyScopeService jss) {
+        if (jss == null) {
             return Collections.emptyList();
         }
 
-        List<String> result = (List<String>) context.getProperty(SCOPE_PROPERTY);
+        List<String> result = jss.getScope();
         if (result == null) {
             return Collections.emptyList();
         }

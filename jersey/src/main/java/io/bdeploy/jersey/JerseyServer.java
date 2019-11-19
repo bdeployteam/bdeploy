@@ -288,6 +288,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             bind(broadcastScheduler).named(BROADCAST_EXECUTOR).to(ScheduledExecutorService.class);
             bind(signer).named(TOKEN_SIGNER).to(new TypeLiteral<Function<ApiAccessToken, String>>() {
             });
+            bind(JerseyScopeService.class).in(Singleton.class).to(JerseyScopeService.class);
 
             // need to lazily access the auditor in case it is changed later.
             bindFactory(new JerseyAuditorBridgeFactory()).to(Auditor.class);

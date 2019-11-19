@@ -7,7 +7,8 @@ import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { FileUploadComponent } from '../file-upload/file-upload.component';
-import { ProductDto } from '../models/gen.dtos';
+import { MinionMode, ProductDto } from '../models/gen.dtos';
+import { ConfigService } from '../services/config.service';
 import { ProductService } from '../services/product.service';
 import { sortByTags } from '../utils/manifest.utils';
 
@@ -37,6 +38,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     public dialog: MatDialog,
     public location: Location,
+    private config: ConfigService,
   ) {}
 
   ngOnInit() {
@@ -46,6 +48,10 @@ export class ProductsComponent implements OnInit, OnDestroy {
     this.subscription = this.mediaObserver.media$.subscribe((change: MediaChange) => {
       this.columns = this.grid.get(change.mqAlias);
     });
+  }
+
+  isCentral() {
+    return this.config.config.mode === MinionMode.CENTRAL;
   }
 
   public get selectedProductVersions() {

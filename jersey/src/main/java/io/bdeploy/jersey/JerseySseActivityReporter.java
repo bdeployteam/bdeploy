@@ -6,10 +6,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.LongSupplier;
 
-import javax.inject.Provider;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.SecurityContext;
+import javax.inject.Inject;
 
 import org.jvnet.hk2.annotations.Service;
 import org.slf4j.Logger;
@@ -30,8 +27,8 @@ public class JerseySseActivityReporter implements ActivityReporter {
 
     Consumer<JerseySseActivity> onDone = this::done;
 
-    @Context
-    private Provider<ContainerRequestContext> requestContext;
+    @Inject
+    private JerseyScopeService jss;
 
     /**
      * All running activities.
@@ -50,15 +47,8 @@ public class JerseySseActivityReporter implements ActivityReporter {
 
     @Override
     public synchronized Activity start(String activity, LongSupplier maxValue, LongSupplier currentValue) {
-        ContainerRequestContext rqc = requestContext.get();
-        List<String> scope = JerseySseActivityScopeFilter.getRequestActivityScope(rqc);
-        String user = "<Unknown>";
-        if (rqc != null) {
-            SecurityContext sec = rqc.getSecurityContext();
-            if (sec != null && sec.getUserPrincipal() != null) {
-                user = sec.getUserPrincipal().getName();
-            }
-        }
+        List<String> scope = JerseySseActivityScopeFilter.getRequestActivityScope(jss);
+        String user = jss.getUser();
 
         JerseySseActivity act = new JerseySseActivity(onDone, activity, maxValue, currentValue, scope, user);
         globalActivities.add(act);

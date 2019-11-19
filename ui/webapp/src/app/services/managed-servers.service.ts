@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { InstanceConfiguration, ManagedMasterDto, MinionDto, MinionStatusDto } from '../models/gen.dtos';
+import { InstanceConfiguration, ManagedMasterDto, MinionDto, MinionStatusDto, ProductDto, ProductTransferDto } from '../models/gen.dtos';
 import { suppressGlobalErrorHandling } from '../utils/server.utils';
 import { ConfigService } from './config.service';
 
@@ -78,5 +78,21 @@ export class ManagedServersService {
     return this.http.post<ManagedMasterDto>(this.config.config.api + '/managed-servers/synchronize/' + group + '/' + server, server, {
       headers: suppressGlobalErrorHandling(new HttpHeaders()),
     });
+  }
+
+  public productsOfManagedServer(group: string, server: string): Observable<ProductDto[]> {
+    return this.http.get<ProductDto[]>(
+      this.config.config.api + '/managed-servers/list-products/' + group + '/' + server,
+    );
+  }
+
+  public productsInTransfer(group: string): Observable<ProductDto[]> {
+    return this.http.get<ProductDto[]>(
+      this.config.config.api + '/managed-servers/active-transfers/' + group
+    );
+  }
+
+  public startTransfer(group: string, data: ProductTransferDto): Observable<any> {
+    return this.http.post(this.config.config.api + '/managed-servers/transfer-products/' + group, data, {headers: new HttpHeaders({ 'X-Proxy-Activity-Scope': group + ',' + 'transfer' })});
   }
 }
