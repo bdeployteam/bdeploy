@@ -75,6 +75,22 @@ task updateFixtures(dependsOn: [':test-data:setupDemoServer', 'updateFixtureProd
     }
 }
 
+List<String> getCypressConfig() {
+    def standalonePort = project(":test-data").testServerPort
+    def centralPort = project(":test-data").testServerPortCentral
+    def managedPort = project(":test-data").testServerPortManaged
+
+    return [
+        "--config", "baseUrl=https://localhost:${standalonePort}",
+        "--env", "backendBaseUrl=https://localhost:${standalonePort}/api"
+        + ",baseUrlCentral=https://localhost:${centralPort}"
+        + ",backendBaseUrlCentral=https://localhost:${centralPort}/api"
+        + ",baseUrlManaged=https://localhost:${managedPort}"
+        + ",backendBaseUrlManaged=https://localhost:${managedPort}/api"
+    ]
+
+}
+
 String cypressCmd() {
     if (!org.gradle.internal.os.OperatingSystem.current().isWindows()) {
         return "cypress";
@@ -93,9 +109,9 @@ task runCypressHeadless(type: Exec, dependsOn: updateFixtures) {
 
     def port = project(":test-data").testServerPort
     if(project.hasProperty('recordCypress')) {
-        commandLine (["${webappDir}/node_modules/.bin/" + cypressCmd(), "run", "--record", "--key", "a32f4a49-c18e-4942-8fb3-38928b39318e", "--config", "baseUrl=https://localhost:${port}", "--env", "backendBaseUrl=https://localhost:${port}/api"])
+        commandLine (["${webappDir}/node_modules/.bin/" + cypressCmd(), "run", "--record", "--key", "a32f4a49-c18e-4942-8fb3-38928b39318e"] + getCypressConfig())
     } else {
-        commandLine (["${webappDir}/node_modules/.bin/" + cypressCmd(), "run", "--config", "baseUrl=https://localhost:${port}", "--env", "backendBaseUrl=https://localhost:${port}/api"])
+        commandLine (["${webappDir}/node_modules/.bin/" + cypressCmd(), "run"] + getCypressConfig())
     }
 }
 
@@ -111,7 +127,7 @@ task updateDocuScreenshots(type: Copy, dependsOn: runCypressHeadless) {
 task runCypress(type: Exec, dependsOn: updateFixtures) {
     workingDir "$webappDir"
     def port = project(":test-data").testServerPort
-    commandLine (["${webappDir}/node_modules/.bin/" + cypressCmd(), "open", "--config", "baseUrl=https://localhost:${port}", "--env", "backendBaseUrl=https://localhost:${port}/api"])
+    commandLine (["${webappDir}/node_modules/.bin/" + cypressCmd(), "open"] + getCypressConfig())
 }
 
 task runDevCypress(type: Exec) {
@@ -122,7 +138,14 @@ task runDevCypress(type: Exec) {
         println("-----------------------------------------------------------------------------")
     }
     workingDir "$webappDir"
-    commandLine (["${webappDir}/node_modules/.bin/" + cypressCmd(), "open", "--config", "baseUrl=http://localhost:4200", "--env", "backendBaseUrl=https://localhost:7701/api"])
+    commandLine (["${webappDir}/node_modules/.bin/" + cypressCmd(), "open", 
+        "--config", "baseUrl=http://localhost:4200", 
+        "--env", "backendBaseUrl=https://localhost:7701/api",
+        "--env", "baseUrlCentral=https://localhost:4201",
+        "--env", "backendBaseUrlCentral=https://localhost:7705/api",
+        "--env", "baseUrlManaged=https://localhost:4202",
+        "--env", "backendBaseUrlManaged=https://localhost:7706/api"
+    ])
 }
 
 // this one is required to stop the server and accumulate coverage data

@@ -5,6 +5,8 @@ declare namespace Cypress {
      * @example cy.login()
      */
     login();
+    loginCentral();
+    loginManaged();
 
     /**
      * Creates a new instance group with the given name.
@@ -135,5 +137,8 @@ declare namespace Cypress {
      * Waits until the content of the page is loaded.
      */
     waitUntilContentLoaded();
+
+    visitCentral(url: string);
+    visitManaged(url: string);
   }
 }
