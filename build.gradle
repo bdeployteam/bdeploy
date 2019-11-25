@@ -55,7 +55,7 @@ ext {
     buildDate = new Date().format('yyyyMMddHHmm')
 
     // all java projects. these projects are pre-configured by the root project with a ton of helpers.
-    actualSubprojects = subprojects - project(':test-data');
+    actualSubprojects = subprojects - [ project(':test-data'), project(':doc') ];
 }
 
 allprojects {
@@ -370,43 +370,6 @@ task testReport(type: TestReport) {
     reportOn actualSubprojects*.test
 }
 
-task jacocoFullReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
-    dependsOn actualSubprojects*.test
-
-    getAdditionalSourceDirs().from(files(actualSubprojects.sourceSets.main.allSource.srcDirs))
-    getSourceDirectories().from(files(actualSubprojects.sourceSets.main.allSource.srcDirs))
-    getClassDirectories().from(files(actualSubprojects.sourceSets.main.output))
-
-    getExecutionData().from(fileTree(dir: projectDir).matching { include '**/*.exec' }.getFiles())
-
-    reports {
-        xml.enabled = true
-        xml.destination file("$buildDir/reports/jacoco/jacocoFullReport/jacocoFullReport.xml")
-    }
-
-    onlyIf = {
-        true
-    }
-}
-
-task test {
-    dependsOn actualSubprojects*.test
-    finalizedBy testReport
-    finalizedBy jacocoFullReport
-}
-
-sonarqube {
-    properties {
-        property "sonar.projectKey", "bdeployteam_bdeploy"
-        property "sonar.coverage.jacoco.xmlReportPaths", "$buildDir/reports/jacoco/jacocoFullReport/jacocoFullReport.xml"
-    }
-}
-
-project.tasks["sonarqube"].dependsOn build
-project.tasks["sonarqube"].dependsOn jacocoFullReport
-
-build.dependsOn test
-
 task genJavaDoc(type: Javadoc) {
     source = actualSubprojects*.sourceSets.main.allJava
     destinationDir = reporting.file("javadoc")
@@ -547,6 +510,60 @@ task release() {
         }
     }
 }
+
+evaluationDependsOnChildren()
+task jacocoFullReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
+    dependsOn actualSubprojects*.test
+
+    getAdditionalSourceDirs().from(files(actualSubprojects.sourceSets.main.allSource.srcDirs))
+    getSourceDirectories().from(files(actualSubprojects.sourceSets.main.allSource.srcDirs))
+    getClassDirectories().from(files(actualSubprojects.sourceSets.main.output))
+
+    rootProject.getAllTasks(true).each { p, tasks ->
+        if(p.name == 'interfaces' || p.name == 'launcher') {
+            return; // no tests run in there right now.
+        }
+
+        tasks.each {
+            if(!it.enabled) {
+                return;
+            }
+            def x = it.getExtensions().findByType(org.gradle.testing.jacoco.plugins.JacocoTaskExtension);
+            if(x != null) {
+                getExecutionData().from(x.destinationFile);
+            }
+        }
+    }
+
+    println(getExecutionData().getFiles());
+
+    reports {
+        xml.enabled = true
+        xml.destination file("$buildDir/reports/jacoco/jacocoFullReport/jacocoFullReport.xml")
+    }
+
+    onlyIf = {
+        true
+    }
+}
+
+task test {
+    dependsOn actualSubprojects*.test
+    finalizedBy testReport
+    finalizedBy jacocoFullReport
+}
+
+sonarqube {
+    properties {
+        property "sonar.projectKey", "bdeployteam_bdeploy"
+        property "sonar.coverage.jacoco.xmlReportPaths", "$buildDir/reports/jacoco/jacocoFullReport/jacocoFullReport.xml"
+    }
+}
+
+project.tasks["sonarqube"].dependsOn build
+project.tasks["sonarqube"].dependsOn jacocoFullReport
+
+build.dependsOn test
 
 if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
     // need special JDK for win64 as module input dir
