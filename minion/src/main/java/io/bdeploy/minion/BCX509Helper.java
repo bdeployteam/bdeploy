@@ -126,6 +126,10 @@ public class BCX509Helper {
             }
         }
 
+        if (kp == null || chain.isEmpty()) {
+            throw new IllegalArgumentException("Given certificate has either no key or empty certificate chain");
+        }
+
         // replace the existing one...
         keyStore.setKeyEntry(SecurityHelper.ROOT_ALIAS, kp.getPrivate(), pass, chain.toArray(Certificate[]::new));
 
