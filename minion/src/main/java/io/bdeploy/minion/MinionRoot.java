@@ -166,13 +166,13 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     /** Ensures that the master flag is correctly set in the minion manifest */
     private void updateMasterFlag() {
         MinionManifest manifest = new MinionManifest(hive);
-        MinionConfiguration config = manifest.read();
+        MinionConfiguration minionConfig = manifest.read();
 
         // Check that the master flag is set on the correct entry
         boolean writeManifest = false;
         boolean isMaster = isMaster();
         String myName = getState().self;
-        for (Map.Entry<String, MinionDto> entry : config.entrySet()) {
+        for (Map.Entry<String, MinionDto> entry : minionConfig.entrySet()) {
             String minionName = entry.getKey();
             MinionDto minionDto = entry.getValue();
             if (minionName.equals(myName) && isMaster && !minionDto.master) {
@@ -186,7 +186,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
 
         // Avoid writing new versions if nothing changed
         if (writeManifest) {
-            manifest.update(config);
+            manifest.update(minionConfig);
         }
     }
 
@@ -213,9 +213,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         }
 
         // if all migrations succeeded (did not throw), record version
-        modifyState(s -> {
-            s.fullyMigratedVersion = current;
-        });
+        modifyState(s -> s.fullyMigratedVersion = current);
     }
 
     /**
@@ -373,9 +371,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             PathHelper.mkdirs(defPath);
             List<Path> p = new ArrayList<>();
             p.add(defPath);
-            modifyState(s -> {
-                s.storageLocations = p;
-            });
+            modifyState(s -> s.storageLocations = p);
             return p;
         }
         return paths;
@@ -449,38 +445,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         }
         SortedMap<String, Manifest.Key> activeVersions = new TreeMap<>();
         for (Key key : keys) {
-            Path deploymentDir = getDeploymentDir();
-
-            try {
-                InstanceNodeManifest inm = InstanceNodeManifest.of(hive, key);
-                InstanceNodeController inc = new InstanceNodeController(hive, deploymentDir, inm);
-                if (!inc.isInstalled()) {
-                    continue;
-                }
-
-                // Get the deployment configuration and the target directory
-                ProcessGroupConfiguration pgc = inc.getProcessGroupConfiguration();
-                if (pgc == null) {
-                    String instanceId = inm.getConfiguration().uuid;
-                    log.warn("{} / {} - Cannot read persisted process configuration.", instanceId, inm.getKey().getTag());
-                    continue;
-                }
-                DeploymentPathProvider paths = inc.getDeploymentPathProvider();
-
-                // Create controller and add to the affected instance
-                InstanceProcessController instanceController = processController.getOrCreate(inm.getUUID());
-                instanceController.addProcessGroup(paths, inm.getKey().getTag(), pgc);
-
-                // fetch and remember the active version for this uuid.
-                if (!activeVersions.containsKey(inm.getUUID())) {
-                    String active = inm.getState(hive).read().activeTag;
-                    if (active != null) {
-                        activeVersions.put(inm.getUUID(), new Manifest.Key(inm.getKey().getName(), active));
-                    }
-                }
-            } catch (Exception e) {
-                log.error("Cannot setup process control for {}", key, e);
-            }
+            initProcessControllerForInstance(activeVersions, key);
         }
 
         // Check what is running and launch applications
@@ -489,6 +454,39 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         // Startup processes according to their configuration
         processController.setActiveVersions(activeVersions);
         processController.autoStart();
+    }
+
+    private void initProcessControllerForInstance(SortedMap<String, Manifest.Key> activeVersions, Key key) {
+        try {
+            InstanceNodeManifest inm = InstanceNodeManifest.of(hive, key);
+            InstanceNodeController inc = new InstanceNodeController(hive, getDeploymentDir(), inm);
+            if (!inc.isInstalled()) {
+                return;
+            }
+
+            // Get the deployment configuration and the target directory
+            ProcessGroupConfiguration pgc = inc.getProcessGroupConfiguration();
+            if (pgc == null) {
+                String instanceId = inm.getConfiguration().uuid;
+                log.warn("{} / {} - Cannot read persisted process configuration.", instanceId, inm.getKey().getTag());
+                return;
+            }
+            DeploymentPathProvider paths = inc.getDeploymentPathProvider();
+
+            // Create controller and add to the affected instance
+            InstanceProcessController instanceController = processController.getOrCreate(inm.getUUID());
+            instanceController.addProcessGroup(paths, inm.getKey().getTag(), pgc);
+
+            // fetch and remember the active version for this uuid.
+            if (!activeVersions.containsKey(inm.getUUID())) {
+                String active = inm.getState(hive).read().activeTag;
+                if (active != null) {
+                    activeVersions.put(inm.getUUID(), new Manifest.Key(inm.getKey().getName(), active));
+                }
+            }
+        } catch (Exception e) {
+            log.error("Cannot setup process control for {}", key, e);
+        }
     }
 
     /**

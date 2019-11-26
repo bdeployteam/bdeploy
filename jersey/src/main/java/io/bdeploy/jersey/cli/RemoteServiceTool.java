@@ -1,7 +1,5 @@
 package io.bdeploy.jersey.cli;
 
-import static io.bdeploy.common.util.RuntimeAssert.assertNotNull;
-
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
@@ -103,6 +101,19 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
                     "WARNING: both tokenFile and token are given, preferring tokenFile (Hint: check arguments and environment)");
         }
 
+        RemoteService svc = createRemoteService(rc, optional, r);
+
+        if (getActivityReporter() instanceof ActivityReporter.Stream) {
+            ((ActivityReporter.Stream) getActivityReporter())
+                    .setProxyConnector((s, c) -> JerseyClientFactory.get(s).getEventSource("/activities").register(c));
+        }
+
+        try (NoThrowAutoCloseable proxy = getActivityReporter().proxyActivities(svc)) {
+            run(config, svc);
+        }
+    }
+
+    private RemoteService createRemoteService(RemoteConfig rc, boolean optional, URI r) {
         RemoteService svc = null;
         if (rc.tokenFile() != null) {
             try {
@@ -128,19 +139,7 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
                 helpAndFail("Need either --tokenFile, --token or --keystore arguments to access remote service");
             }
         }
-
-        if (!optional) {
-            assertNotNull(svc, "Cannot determine remote service");
-        }
-
-        if (getActivityReporter() instanceof ActivityReporter.Stream) {
-            ((ActivityReporter.Stream) getActivityReporter())
-                    .setProxyConnector((s, c) -> JerseyClientFactory.get(s).getEventSource("/activities").register(c));
-        }
-
-        try (NoThrowAutoCloseable proxy = getActivityReporter().proxyActivities(svc)) {
-            run(config, svc);
-        }
+        return svc;
     }
 
     protected abstract void run(T config, RemoteService remote);

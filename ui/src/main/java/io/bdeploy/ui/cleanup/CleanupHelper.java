@@ -77,31 +77,7 @@ public class CleanupHelper {
 
             InstanceGroupConfiguration cfg = new InstanceGroupManifest(hive).read();
             if (cfg != null) {
-                List<CleanupAction> instanceGroupActions = new ArrayList<>();
-                Map<String, TreeSet<Key>> instanceVersions4Uninstall = new HashMap<>();
-
-                // auto uninstall of old instance version
-                SortedSet<Key> latestImKeys = InstanceManifest.scan(hive, true);
-                for (Key key : latestImKeys) {
-                    InstanceManifest im = InstanceManifest.of(hive, key);
-                    if (im.getConfiguration().autoUninstall) {
-                        instanceVersions4Uninstall.put(im.getManifest().getName(),
-                                findInstanceVersions4Uninstall(context, group, hive, im, provider));
-                        instanceGroupActions.addAll(uninstallInstanceVersions(context, hive,
-                                instanceVersions4Uninstall.get(im.getManifest().getName()), immediate, provider));
-                    }
-                }
-
-                // cleanup of unused products
-                if (cfg.autoDelete) {
-                    instanceGroupActions
-                            .addAll(deleteUnusedProducts(context, hive, instanceVersions4Uninstall, immediate, provider));
-                }
-
-                if (!immediate) {
-                    groups.add(new CleanupGroup("Perform Cleanup on Instance Group " + cfg.name, null, cfg.name,
-                            instanceGroupActions));
-                }
+                cleanInstanceGroup(context, immediate, provider, groups, group, hive, cfg);
             }
         }
 
@@ -131,6 +107,33 @@ public class CleanupHelper {
         }
 
         return groups;
+    }
+
+    private static void cleanInstanceGroup(SecurityContext context, boolean immediate, MasterProvider provider,
+            List<CleanupGroup> groups, String group, BHive hive, InstanceGroupConfiguration cfg) {
+        List<CleanupAction> instanceGroupActions = new ArrayList<>();
+        Map<String, SortedSet<Key>> instanceVersions4Uninstall = new HashMap<>();
+
+        // auto uninstall of old instance version
+        SortedSet<Key> latestImKeys = InstanceManifest.scan(hive, true);
+        for (Key key : latestImKeys) {
+            InstanceManifest im = InstanceManifest.of(hive, key);
+            if (im.getConfiguration().autoUninstall) {
+                instanceVersions4Uninstall.put(im.getManifest().getName(),
+                        findInstanceVersions4Uninstall(context, group, hive, im, provider));
+                instanceGroupActions.addAll(uninstallInstanceVersions(context, hive,
+                        instanceVersions4Uninstall.get(im.getManifest().getName()), immediate, provider));
+            }
+        }
+
+        // cleanup of unused products
+        if (cfg.autoDelete) {
+            instanceGroupActions.addAll(deleteUnusedProducts(context, hive, instanceVersions4Uninstall, immediate, provider));
+        }
+
+        if (!immediate) {
+            groups.add(new CleanupGroup("Perform Cleanup on Instance Group " + cfg.name, null, cfg.name, instanceGroupActions));
+        }
     }
 
     /**
@@ -215,7 +218,7 @@ public class CleanupHelper {
         return allUniqueKeysToKeep;
     }
 
-    public static TreeSet<Key> findInstanceVersions4Uninstall(SecurityContext context, String group, BHive hive,
+    public static SortedSet<Key> findInstanceVersions4Uninstall(SecurityContext context, String group, BHive hive,
             InstanceManifest instanceManifest, MasterProvider provider) {
         InstanceStateRecord state = instanceManifest.getState(hive).read();
 
@@ -255,22 +258,20 @@ public class CleanupHelper {
     }
 
     public static List<CleanupAction> deleteUnusedProducts(SecurityContext context, BHive hive,
-            Map<String, TreeSet<Key>> instanceVersions4Uninstall, boolean immediate, MasterProvider provider) {
+            Map<String, SortedSet<Key>> instanceVersions4Uninstall, boolean immediate, MasterProvider provider) {
         List<CleanupAction> actions = new ArrayList<>();
 
         // map of available products grouped by product name
-        Map<String, TreeSet<Key>> allProductsMap = ProductManifest.scan(hive).stream()
+        Map<String, SortedSet<Key>> allProductsMap = ProductManifest.scan(hive).stream()
                 .collect(Collectors.groupingBy(Key::getName, Collectors.toCollection(TreeSet::new)));
 
         // find the oldest instance version per instance that is "under protection", i.e. the product it uses must not be uninstalled
         SortedSet<Key> latestInstanceManifests = InstanceManifest.scan(hive, true);
-        Map<String, Set<String>> installedTagsMap = latestInstanceManifests.stream().collect(Collectors
-                .toMap(imKey -> imKey.getName(), imKey -> InstanceManifest.of(hive, imKey).getState(hive).read().installedTags));
+        Map<String, Set<String>> installedTagsMap = latestInstanceManifests.stream().collect(
+                Collectors.toMap(Key::getName, imKey -> InstanceManifest.of(hive, imKey).getState(hive).read().installedTags));
         // remove all to-be-uninstalled tags from installedTagsMap
-        latestInstanceManifests.stream().forEach(imKey -> {
-            instanceVersions4Uninstall.get(imKey.getName()).stream()
-                    .forEach(k -> installedTagsMap.get(imKey.getName()).remove(k.getTag()));
-        });
+        latestInstanceManifests.stream().forEach(imKey -> instanceVersions4Uninstall.get(imKey.getName()).stream()
+                .forEach(k -> installedTagsMap.get(imKey.getName()).remove(k.getTag())));
 
         Comparator<String> intTagComparator = (a, b) -> Integer.compare(Integer.parseInt(a), Integer.parseInt(b));
 
@@ -280,14 +281,26 @@ public class CleanupHelper {
             oldestTag.put(entry.getKey(), min.isPresent() ? min.get() : "0");
         }
 
-        Map<String, TreeSet<Key>> usedProductsMap = InstanceManifest.scan(hive, false).stream()
+        Map<String, SortedSet<Key>> usedProductsMap = InstanceManifest.scan(hive, false).stream()
                 .filter(imKey -> intTagComparator.compare(imKey.getTag(), oldestTag.get(imKey.getName())) >= 0)
                 .map(imKey -> InstanceManifest.of(hive, imKey).getConfiguration().product).collect(Collectors.toSet()).stream()
                 .collect(Collectors.groupingBy(Key::getName, Collectors.toCollection(TreeSet::new)));
 
         // create actions for unused products (older than the oldest product in use)
-        for (TreeSet<Key> pVersionKeys : allProductsMap.values()) {
-            TreeSet<Key> usedProducts = usedProductsMap.get(pVersionKeys.first().getName());
+        createDeleteProductsActions(hive, actions, allProductsMap, usedProductsMap);
+
+        if (immediate) {
+            perform(context, hive, actions, provider);
+            return Collections.emptyList();
+        }
+
+        return actions;
+    }
+
+    private static void createDeleteProductsActions(BHive hive, List<CleanupAction> actions,
+            Map<String, SortedSet<Key>> allProductsMap, Map<String, SortedSet<Key>> usedProductsMap) {
+        for (SortedSet<Key> pVersionKeys : allProductsMap.values()) {
+            SortedSet<Key> usedProducts = usedProductsMap.get(pVersionKeys.first().getName());
             // if the product is not used at all, take the newest product version to protect it
             Key oldestInUse = usedProducts != null && !usedProducts.isEmpty() ? usedProducts.first() : pVersionKeys.last();
             for (Key versionKey : pVersionKeys) {
@@ -311,13 +324,6 @@ public class CleanupHelper {
                 }
             }
         }
-
-        if (immediate) {
-            perform(context, hive, actions, provider);
-            return Collections.emptyList();
-        }
-
-        return actions;
     }
 
     public static void perform(SecurityContext context, BHive hive, List<CleanupAction> actions, MasterProvider provider) {

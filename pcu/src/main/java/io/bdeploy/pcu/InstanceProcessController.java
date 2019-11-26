@@ -322,10 +322,9 @@ public class InstanceProcessController {
             for (ProcessList list : processMap.values()) {
                 Map<String, ProcessController> running = list.getWithState(SET_RUNNING_SCHEDULED);
                 process = running.get(applicationId);
-                if (process == null) {
-                    continue;
+                if (process != null) {
+                    break;
                 }
-                break;
             }
         } finally {
             readLock.unlock();

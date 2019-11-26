@@ -77,7 +77,7 @@ public class JerseySseActivityResourceImpl {
             lastBroadcastWasEmpty = list.isEmpty();
             lastBroadcastTime = now;
 
-            // TODO: currently all activities are broadcasted to all receivers and the client filters.
+            // Currently all activities are broadcasted to all receivers and the client filters.
             // This allows for more complex filter logic on the client, but on the other hand produces potentially
             // a lot of traffic to all connected web-apps. If this ever becomes a problem, we need to rethink this.
             OutboundSseEvent event = sse.newEventBuilder().name("activities").data(ActivitySnapshot.LIST_TYPE, list)

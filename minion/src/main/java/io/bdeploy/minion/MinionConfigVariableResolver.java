@@ -18,11 +18,8 @@ public class MinionConfigVariableResolver implements UnaryOperator<String> {
     public String apply(String t) {
         if (t.startsWith("H:")) {
             String var = t.substring(2);
-            switch (var) {
-                case "HOSTNAME":
-                    return root.getState().officialName;
-                default:
-                    return null;
+            if ("HOSTNAME".equals(var)) {
+                return root.getState().officialName;
             }
         }
         return null;

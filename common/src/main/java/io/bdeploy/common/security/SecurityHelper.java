@@ -143,25 +143,9 @@ public class SecurityHelper {
      */
     public <T> T getVerifiedPayload(String token, Class<T> clazz, KeyStore ks) throws GeneralSecurityException {
         Certificate cert = getCertificate(ks);
-
         SignedPayload t = SignedPayload.parse(token);
-        byte[] payloadBytes = decode(t.p);
-        T payload;
-        try {
-            payload = getMapper().readValue(payloadBytes, clazz);
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot read JSON", e);
-        }
 
-        Signature sig = getSignatureAlgorithm();
-        sig.initVerify(cert.getPublicKey());
-        sig.update(payloadBytes);
-
-        if (!sig.verify(decode(t.s))) {
-            return null;
-        }
-
-        return payload;
+        return doVerifyPayload(clazz, t, cert);
     }
 
     /**
@@ -186,6 +170,16 @@ public class SecurityHelper {
             cert = cf.generateCertificate(bais);
         }
 
+        return doVerifyPayload(clazz, t, cert);
+    }
+
+    /**
+     * @param clazz the type of the payload to deserialize
+     * @param t the raw encrypted and signed payload
+     * @param cert the certificate to use to check the signature against.
+     * @return the verified payload if checks are OK, <code>null</code> otherwise.
+     */
+    private <T> T doVerifyPayload(Class<T> clazz, SignedPayload t, Certificate cert) throws GeneralSecurityException {
         byte[] payloadBytes = decode(t.p);
         T payload;
         try {

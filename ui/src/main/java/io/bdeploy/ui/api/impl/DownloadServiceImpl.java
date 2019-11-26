@@ -64,12 +64,12 @@ public class DownloadServiceImpl implements DownloadService {
         Path targetFile = minion.getDownloadDir().resolve(token);
         File file = targetFile.toFile();
         if (!file.isFile()) {
-            throw new WebApplicationException("Token to download client installer is not valid any more.", Status.BAD_REQUEST);
+            throw new WebApplicationException("Requested file no longer exists.", Status.BAD_REQUEST);
         }
         long lastModified = file.lastModified();
         long validUntil = lastModified + TimeUnit.MINUTES.toMillis(5);
         if (System.currentTimeMillis() > validUntil) {
-            throw new WebApplicationException("Token to download client installer is not valid any more.", Status.BAD_REQUEST);
+            throw new WebApplicationException("Requested file expired.", Status.BAD_REQUEST);
         }
 
         // Build a response with the stream

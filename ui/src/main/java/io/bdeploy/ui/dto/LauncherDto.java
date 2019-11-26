@@ -1,6 +1,6 @@
 package io.bdeploy.ui.dto;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 import io.bdeploy.bhive.model.Manifest;
@@ -11,6 +11,6 @@ import io.bdeploy.common.util.OsHelper.OperatingSystem;
  */
 public class LauncherDto {
 
-    public Map<OperatingSystem, Manifest.Key> launchers = new HashMap<>();
+    public Map<OperatingSystem, Manifest.Key> launchers = new EnumMap<>(OperatingSystem.class);
 
 }

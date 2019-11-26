@@ -63,24 +63,7 @@ public class ObjectConsistencyCheckOperation extends BHive.Operation<Set<Element
                 state.visit(new TreeVisitor.Builder().onBlob(existingElements::add).onTree(existingElements::add)
                         .onManifestRef(existingElements::add).build());
 
-                for (ElementView obj : existingElements) {
-                    if (markerDb.hasObject(obj.getElementId())) {
-                        continue;
-                    } else {
-                        // write the marker ourselves, the content never matches the checksum (intentionally).
-                        markerDb.addMarker(obj.getElementId());
-                    }
-
-                    if (!getObjectManager().checkObject(obj.getElementId(), !dryRun)) {
-                        broken.add(obj);
-                    }
-                    if (obj instanceof ManifestRefView) {
-                        ObjectId ref = ((ManifestRefView) obj).getReferenceId();
-                        if (!getObjectManager().checkObject(ref, !dryRun)) {
-                            broken.add(obj);
-                        }
-                    }
-                }
+                broken.addAll(checkElements(markerDb, existingElements));
 
                 scanning.workAndCancelIfRequested(1);
             }
@@ -89,6 +72,29 @@ public class ObjectConsistencyCheckOperation extends BHive.Operation<Set<Element
             PathHelper.deleteRecursive(markerPath);
         }
 
+        return broken;
+    }
+
+    private Set<ElementView> checkElements(MarkerDatabase markerDb, List<ElementView> existingElements) {
+        Set<ElementView> broken = new TreeSet<>();
+        for (ElementView obj : existingElements) {
+            if (markerDb.hasObject(obj.getElementId())) {
+                continue;
+            } else {
+                // write the marker ourselves, the content never matches the checksum (intentionally).
+                markerDb.addMarker(obj.getElementId());
+            }
+
+            if (!getObjectManager().checkObject(obj.getElementId(), !dryRun)) {
+                broken.add(obj);
+            }
+            if (obj instanceof ManifestRefView) {
+                ObjectId ref = ((ManifestRefView) obj).getReferenceId();
+                if (!getObjectManager().checkObject(ref, !dryRun)) {
+                    broken.add(obj);
+                }
+            }
+        }
         return broken;
     }
 

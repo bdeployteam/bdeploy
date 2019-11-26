@@ -303,8 +303,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                     Status.EXPECTATION_FAILED);
         }
 
-        RemoteService svc = new RemoteService(UriBuilder.fromUri(attached.uri).build(), attached.auth);
-        return svc;
+        return new RemoteService(UriBuilder.fromUri(attached.uri).build(), attached.auth);
     }
 
     @Override
@@ -317,7 +316,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
         // 1. Sync instance group data with managed server.
         MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class, context);
-        if (!root.getInstanceGroups().stream().map(g -> g.name).filter(n -> n.equals(groupName)).findAny().isPresent()) {
+        if (root.getInstanceGroups().stream().map(g -> g.name).noneMatch(n -> n.equals(groupName))) {
             throw new WebApplicationException("Instance group (no longer?) found on the managed server", Status.NOT_FOUND);
         }
 

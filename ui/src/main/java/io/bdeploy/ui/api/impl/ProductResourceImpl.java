@@ -133,7 +133,7 @@ public class ProductResourceImpl implements ProductResource {
         long count = 0;
         for (Set<InstanceManifest> mfSet : uuid2imSet.values()) {
             Set<String> installedTags = mfSet.stream().findFirst().get().getState(hive).read().installedTags;
-            count += mfSet.stream().map(mf -> mf.getManifest().getTag()).filter(t -> installedTags.contains(t)).count();
+            count += mfSet.stream().map(mf -> mf.getManifest().getTag()).filter(installedTags::contains).count();
         }
 
         return count;

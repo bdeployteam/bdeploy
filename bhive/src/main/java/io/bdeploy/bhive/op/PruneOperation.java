@@ -23,12 +23,6 @@ import io.bdeploy.common.ActivityReporter.Activity;
  */
 public class PruneOperation extends BHive.Operation<SortedMap<ObjectId, Long>> {
 
-    /**
-     *
-     */
-    /**
-     *
-     */
     @Override
     public SortedMap<ObjectId, Long> call() throws Exception {
         SortedMap<ObjectId, Long> result = new TreeMap<>();
@@ -52,7 +46,6 @@ public class PruneOperation extends BHive.Operation<SortedMap<ObjectId, Long>> {
             //  3) Upon completion, existing trasactions will block removal of the markers until the root is unlocked.
             MarkerDatabase.lockRoot(getMarkerRoot());
 
-            // TODO: this might be /very/ memory intensive.
             SortedSet<ObjectId> orig = getObjectManager().db(ObjectDatabase::getAllObjects);
             SortedSet<ObjectId> all = new TreeSet<>(orig);
             all.removeAll(referenced);

@@ -240,8 +240,31 @@ public class ProductManifest {
     private static void importApplications(BHive hive, DependencyFetcher fetcher, ProductVersionDescriptor versions,
             Map<String, Map<OperatingSystem, String>> toImport, String baseName, Builder builder, Path impBasePath,
             boolean parallel) {
-        List<Callable<ApplicationDescriptor>> tasks = new ArrayList<>();
+        List<Callable<ApplicationDescriptor>> tasks = doGatherImportTasks(hive, fetcher, versions, toImport, baseName, builder,
+                impBasePath);
 
+        try {
+            if (parallel) {
+                for (Future<ApplicationDescriptor> f : ForkJoinPool.commonPool().invokeAll(tasks)) {
+                    f.get();
+                }
+            } else {
+                for (Callable<ApplicationDescriptor> c : tasks) {
+                    c.call();
+                }
+            }
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to import", e);
+        }
+    }
+
+    /**
+     * Find all required tasks for the import
+     */
+    private static List<Callable<ApplicationDescriptor>> doGatherImportTasks(BHive hive, DependencyFetcher fetcher,
+            ProductVersionDescriptor versions, Map<String, Map<OperatingSystem, String>> toImport, String baseName,
+            Builder builder, Path impBasePath) {
+        List<Callable<ApplicationDescriptor>> tasks = new ArrayList<>();
         for (Map.Entry<String, Map<OperatingSystem, String>> entry : toImport.entrySet()) {
             for (Map.Entry<OperatingSystem, String> relApp : entry.getValue().entrySet()) {
                 Path appPath = impBasePath.resolve(relApp.getValue());
@@ -259,20 +282,7 @@ public class ProductManifest {
                         relApp.getKey(), finalAppPath));
             }
         }
-
-        try {
-            if (parallel) {
-                for (Future<ApplicationDescriptor> f : ForkJoinPool.commonPool().invokeAll(tasks)) {
-                    f.get();
-                }
-            } else {
-                for (Callable<ApplicationDescriptor> c : tasks) {
-                    c.call();
-                }
-            }
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to import", e);
-        }
+        return tasks;
     }
 
     private static ApplicationDescriptor importDependenciesAndApplication(BHive hive, DependencyFetcher fetcher,

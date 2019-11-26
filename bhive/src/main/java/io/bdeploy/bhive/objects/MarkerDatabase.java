@@ -12,6 +12,8 @@ import io.bdeploy.common.util.PathHelper;
 
 public class MarkerDatabase extends ObjectDatabase {
 
+    private static final String LOCK_FILE = ".lock";
+
     public MarkerDatabase(Path root, ActivityReporter reporter) {
         super(root, root.resolve("tmp"), reporter);
     }
@@ -56,7 +58,7 @@ public class MarkerDatabase extends ObjectDatabase {
     public static void lockRoot(Path root) {
         for (int i = 0; i < 10_000; ++i) {
             try {
-                Files.createFile(root.resolve(".lock"));
+                Files.createFile(root.resolve(LOCK_FILE));
                 return;
             } catch (FileAlreadyExistsException e) {
                 try {
@@ -79,7 +81,7 @@ public class MarkerDatabase extends ObjectDatabase {
      * @param root the root to wait for
      */
     public static void waitRootLock(Path root) {
-        Path lockFile = root.resolve(".lock");
+        Path lockFile = root.resolve(LOCK_FILE);
         for (int i = 0; i < 10_000; ++i) {
             if (Files.exists(lockFile)) {
                 try {
@@ -100,7 +102,7 @@ public class MarkerDatabase extends ObjectDatabase {
      * @param root root to unlock
      */
     public static void unlockRoot(Path root) {
-        PathHelper.deleteRecursive(root.resolve(".lock"));
+        PathHelper.deleteRecursive(root.resolve(LOCK_FILE));
     }
 
 }

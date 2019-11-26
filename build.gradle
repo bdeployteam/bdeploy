@@ -535,8 +535,6 @@ task jacocoFullReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
         }
     }
 
-    println(getExecutionData().getFiles());
-
     reports {
         xml.enabled = true
         xml.destination file("$buildDir/reports/jacoco/jacocoFullReport/jacocoFullReport.xml")

@@ -105,7 +105,7 @@ public class RemoteDeploymentTool extends RemoteServiceTool<RemoteDeployConfig> 
             return Long.compare(Long.valueOf(b.getKey().getTag()), Long.valueOf(a.getKey().getTag()));
         }).forEachOrdered(e -> {
             String uuid = e.getValue().uuid;
-            InstanceStateRecord state = stateCache.computeIfAbsent(uuid, u -> master.getInstanceState(u));
+            InstanceStateRecord state = stateCache.computeIfAbsent(uuid, master::getInstanceState);
             InstanceConfiguration ic = e.getValue();
 
             boolean isActive = e.getKey().getTag().equals(state.activeTag); // activeTag may be null.

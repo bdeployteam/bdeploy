@@ -22,6 +22,9 @@ public class MinionStateMigration {
 
     private static final Logger log = LoggerFactory.getLogger(MinionStateMigration.class);
 
+    private MinionStateMigration() {
+    }
+
     @SuppressWarnings("removal")
     public static void run(MinionRoot root) {
         // Check if we already have a minion manifest
@@ -62,9 +65,7 @@ public class MinionStateMigration {
         manifest.update(minionConfiguration);
 
         // Clear out the minions property
-        root.modifyState(s -> {
-            s.minions.clear();
-        });
+        root.modifyState(s -> s.minions.clear());
         log.info("Migration successfully done.");
     }
 
@@ -88,11 +89,11 @@ public class MinionStateMigration {
                     }
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
-                    throw new RuntimeException("Interrupted while waiting for next retry.");
+                    throw new IllegalStateException("Interrupted while waiting for next retry.");
                 }
             }
         }
-        throw new RuntimeException("Migration failed because not all minions are reachable. " //
+        throw new IllegalStateException("Migration failed because not all minions are reachable. " //
                 + "Ensure that they are running and try again.");
     }
 }

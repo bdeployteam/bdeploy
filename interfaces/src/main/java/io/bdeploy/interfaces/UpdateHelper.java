@@ -136,6 +136,13 @@ public class UpdateHelper {
 
         RuntimeAssert.assertTrue(Files.isDirectory(updContent), "Cannot find update content directory: " + updContent);
 
+        doImportUpdates(tmpDir, hive, result, key, updContent);
+
+        return result;
+    }
+
+    private static void doImportUpdates(Path tmpDir, BHive hive, List<Manifest.Key> result, Manifest.Key key, Path updContent)
+            throws IOException {
         // check for included launcher update packages and import as well.
         Path tmpLaunchers = null;
         Path launchers = updContent.resolve(SW_LAUNCHER);
@@ -174,8 +181,6 @@ public class UpdateHelper {
                 }
             }
         }
-
-        return result;
     }
 
     /**
@@ -205,7 +210,7 @@ public class UpdateHelper {
 
         String project = props.getProperty("project");
         String version = props.getProperty("version");
-        boolean snapshot = Boolean.valueOf(props.getProperty("snapshot"));
+        boolean snapshot = Boolean.parseBoolean(props.getProperty("snapshot"));
 
         if (os == null) {
             os = OperatingSystem.valueOf(props.getProperty("os").toUpperCase());

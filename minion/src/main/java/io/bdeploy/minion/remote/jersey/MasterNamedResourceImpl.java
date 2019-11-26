@@ -143,7 +143,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         }
 
         // figure out which minions we need to contact in total.
-        SortedSet<String> minions = requirements.values().stream().flatMap(v -> v.entrySet().stream()).map(e -> e.getKey())
+        SortedSet<String> minions = requirements.values().stream().flatMap(v -> v.entrySet().stream()).map(Entry::getKey)
                 .collect(Collectors.toCollection(TreeSet::new));
 
         // for each required minion, figure out available versions.
@@ -565,7 +565,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
         if ((state.nodeDtos == null || state.nodeDtos.isEmpty()) && oldConfig != null) {
             // no new node config - re-apply existing one with new tag, align redundant fields.
-            state.nodeDtos = readExistingNodeConfigs(oldConfig, state.config);
+            state.nodeDtos = readExistingNodeConfigs(oldConfig);
         }
 
         // does NOT validate that the product exists, as it might still reside on the central server, not this one.
@@ -638,7 +638,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         }
     }
 
-    private List<InstanceNodeConfigurationDto> readExistingNodeConfigs(InstanceManifest oldConfig, InstanceConfiguration cfg) {
+    private List<InstanceNodeConfigurationDto> readExistingNodeConfigs(InstanceManifest oldConfig) {
         List<InstanceNodeConfigurationDto> result = new ArrayList<>();
         for (Map.Entry<String, Manifest.Key> entry : oldConfig.getInstanceNodeManifests().entrySet()) {
             InstanceNodeManifest oldInmf = InstanceNodeManifest.of(hive, entry.getValue());

@@ -46,7 +46,7 @@ public class SlaveCleanupResourceImpl implements SlaveCleanupResource {
         BHive hive = root.getHive();
 
         Set<String> newestLauncherTags = hive.execute(new ManifestListOperation().setManifestName("meta/launcher")).stream() //
-                .map(key -> key.getTag()) //
+                .map(Key::getTag) //
                 .collect(Collectors.toCollection(() -> new TreeSet<>((a, b) -> Version.parse(b).compareTo(Version.parse(a))))) // reverse order
                 .stream().limit(2).collect(Collectors.toSet());
 
@@ -107,7 +107,6 @@ public class SlaveCleanupResourceImpl implements SlaveCleanupResource {
     }
 
     private boolean isNotWellKnown(Key key) {
-        // TODO: unify...?
         return !((key.getName().startsWith("meta/") && !key.getName().startsWith("meta/launcher"))
                 || key.getName().startsWith("users/"));
     }

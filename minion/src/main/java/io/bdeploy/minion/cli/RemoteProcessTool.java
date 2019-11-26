@@ -91,22 +91,25 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
             }
 
             String nodeName = nodeEntry.getKey();
+            printNodeProcesses(df, node, nodeName);
+        }
+    }
 
-            Map<String, ProcessStatusDto> allProc = new TreeMap<>();
-            allProc.putAll(node.deployed.get(node.activeTag).deployed);
-            allProc.putAll(node.runningOrScheduled);
+    private void printNodeProcesses(SimpleDateFormat df, InstanceNodeStatusDto node, String nodeName) {
+        Map<String, ProcessStatusDto> allProc = new TreeMap<>();
+        allProc.putAll(node.deployed.get(node.activeTag).deployed);
+        allProc.putAll(node.runningOrScheduled);
 
-            for (Map.Entry<String, ProcessStatusDto> procEntry : allProc.entrySet()) {
-                ProcessStatusDto ps = procEntry.getValue();
-                ProcessDetailDto detail = ps.processDetails;
+        for (Map.Entry<String, ProcessStatusDto> procEntry : allProc.entrySet()) {
+            ProcessStatusDto ps = procEntry.getValue();
+            ProcessDetailDto detail = ps.processDetails;
 
-                out().println(String.format(PROCESS_STATUS_FORMAT, ps.appName, ps.appUid, ps.processState.name(), nodeName,
-                        node.activeTag, detail == null ? "-" : df.format(detail.startTime), detail == null ? "-" : detail.user,
-                        detail == null ? "-" : Long.toString(detail.pid)));
+            out().println(String.format(PROCESS_STATUS_FORMAT, ps.appName, ps.appUid, ps.processState.name(), nodeName,
+                    node.activeTag, detail == null ? "-" : df.format(detail.startTime), detail == null ? "-" : detail.user,
+                    detail == null ? "-" : Long.toString(detail.pid)));
 
-                if (isVerbose() && detail != null) {
-                    printProcessDetailsRec(detail, "  ");
-                }
+            if (isVerbose() && detail != null) {
+                printProcessDetailsRec(detail, "  ");
             }
         }
     }

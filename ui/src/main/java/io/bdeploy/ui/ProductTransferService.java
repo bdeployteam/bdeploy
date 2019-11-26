@@ -103,7 +103,7 @@ public class ProductTransferService {
     }
 
     private SortedSet<ProductDto> getInTransferFor(String groupName) {
-        return inTransfer.computeIfAbsent(groupName, (k) -> new TreeSet<>((a, b) -> a.key.compareTo(b.key)));
+        return inTransfer.computeIfAbsent(groupName, k -> new TreeSet<>((a, b) -> a.key.compareTo(b.key)));
     }
 
     public SortedSet<ProductDto> getActiveTransfers(String groupName) {

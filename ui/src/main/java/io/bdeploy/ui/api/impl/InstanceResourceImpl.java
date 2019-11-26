@@ -222,6 +222,18 @@ public class InstanceResourceImpl implements InstanceResource {
             throw new WebApplicationException("Product not found: " + instanceConfig.product, Status.NOT_FOUND);
         }
 
+        MasterRootResource root = getManagingRootResource(managedServer);
+
+        root.getNamedMaster(group)
+                .update(new InstanceUpdateDto(new InstanceConfigurationDto(instanceConfig, Collections.emptyList()),
+                        getUpdatesFromTree("", new ArrayList<>(), product.getConfigTemplateTreeId())), null);
+
+        // immediately fetch back so we have it to create the association. don't use #syncInstance here,
+        // it requires the association to already exist.
+        rc.initResource(new ManagedServersResourceImpl()).synchronize(group, managedServer);
+    }
+
+    private MasterRootResource getManagingRootResource(String managedServer) {
         RemoteService remote;
         if (minion.getMode() == MinionMode.CENTRAL && managedServer == null) {
             throw new WebApplicationException("Managed server is not set on central", Status.EXPECTATION_FAILED);
@@ -237,15 +249,7 @@ public class InstanceResourceImpl implements InstanceResource {
             remote = mp.getControllingMaster(hive, null);
         }
 
-        MasterRootResource root = ResourceProvider.getResource(remote, MasterRootResource.class, context);
-
-        root.getNamedMaster(group)
-                .update(new InstanceUpdateDto(new InstanceConfigurationDto(instanceConfig, Collections.emptyList()),
-                        getUpdatesFromTree("", new ArrayList<>(), product.getConfigTemplateTreeId())), null);
-
-        // immediately fetch back so we have it to create the association. don't use #syncInstance here,
-        // it requires the association to already exist.
-        rc.initResource(new ManagedServersResourceImpl()).synchronize(group, managedServer);
+        return ResourceProvider.getResource(remote, MasterRootResource.class, context);
     }
 
     static void syncInstance(Minion minion, ResourceContext rc, String groupName, String instanceId) {
@@ -324,22 +328,7 @@ public class InstanceResourceImpl implements InstanceResource {
             dto.config = oldConfig.getConfiguration();
         }
 
-        RemoteService remote;
-        if (minion.getMode() == MinionMode.CENTRAL && managedServer == null) {
-            throw new WebApplicationException("Managed server is not set on central", Status.EXPECTATION_FAILED);
-        } else if (minion.getMode() == MinionMode.CENTRAL) {
-            ManagedMastersConfiguration masters = new ManagedMasters(hive).read();
-            ManagedMasterDto ident = masters.getManagedMaster(managedServer);
-            if (ident == null) {
-                throw new WebApplicationException("Managed server '" + managedServer + "' is not attached to this instance group",
-                        Status.EXPECTATION_FAILED);
-            }
-            remote = new RemoteService(UriBuilder.fromUri(ident.uri).build(), ident.auth);
-        } else {
-            remote = mp.getControllingMaster(hive, null);
-        }
-
-        MasterRootResource root = ResourceProvider.getResource(remote, MasterRootResource.class, context);
+        MasterRootResource root = getManagingRootResource(managedServer);
         Manifest.Key key = root.getNamedMaster(group).update(new InstanceUpdateDto(dto, Collections.emptyList()), expectedTag);
 
         // immediately fetch back so we have it to create the association
@@ -460,14 +449,12 @@ public class InstanceResourceImpl implements InstanceResource {
 
             InstanceNodeManifest manifest = InstanceNodeManifest.of(hive, manifestKey);
             InstanceNodeConfiguration configuration = manifest.getConfiguration();
-            InstanceNodeConfigurationDto nodeConfig = node2Config.get(nodeName);
-
-            // Node is not known any more but has configured applications
-            if (nodeConfig == null) {
-                nodeConfig = new InstanceNodeConfigurationDto(nodeName);
-                result.nodeConfigDtos.add(nodeConfig);
-                node2Config.put(nodeName, nodeConfig);
-            }
+            InstanceNodeConfigurationDto nodeConfig = node2Config.computeIfAbsent(nodeName, (k) -> {
+                // Node is not known any more but has configured applications
+                InstanceNodeConfigurationDto inc = new InstanceNodeConfigurationDto(k);
+                result.nodeConfigDtos.add(inc);
+                return inc;
+            });
 
             if (!isForeign) {
                 nodeConfig.nodeConfiguration = configuration;
@@ -780,7 +767,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
             MinionConfiguration config = new MinionConfiguration();
             Map<String, MinionDto> nodes = getMinionConfiguration(instanceId, null);
-            nodes.forEach((k, v) -> config.addMinion(k, v));
+            nodes.forEach(config::addMinion);
 
             Key newKey = InstanceImportExportHelper.importFrom(zip, hive, instanceId, config);
             syncInstance(minion, rc, group, instanceId);

@@ -130,10 +130,7 @@ public class JerseyCachedEventSource implements JerseySseRegistrar {
             return false;
         }
 
-        if ((System.currentTimeMillis() - refLessSince) >= refLessTimeout) {
-            return true;
-        }
-        return false;
+        return (System.currentTimeMillis() - refLessSince) >= refLessTimeout;
     }
 
     void doExpire() {
