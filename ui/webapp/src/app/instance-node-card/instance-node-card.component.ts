@@ -9,8 +9,8 @@ import { CLIENT_NODE_NAME, EMPTY_APPLICATION_CONFIGURATION, EMPTY_INSTANCE_NODE_
 import { EventWithCallback } from '../models/event';
 import { ApplicationConfiguration, ApplicationDto, InstanceNodeConfiguration, InstanceNodeConfigurationDto, MinionDto, MinionStatusDto } from '../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../models/process.model';
+import { getAppOs } from '../modules/shared/utils/manifest.utils';
 import { ApplicationService } from '../services/application.service';
-import { getAppOs } from '../utils/manifest.utils';
 
 @Component({
   selector: 'app-instance-node-card',

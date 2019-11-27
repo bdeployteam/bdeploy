@@ -6,11 +6,11 @@ import { UnknownParameter } from '../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_COMMAND_CONFIGURATION, EMPTY_PARAMETER_CONFIGURATION } from '../models/consts';
 import { ApplicationConfiguration, ApplicationDescriptor, ApplicationDto, ApplicationType, InstanceNodeConfigurationDto, ManifestKey, ParameterConfiguration, ParameterDescriptor, ParameterType } from '../models/gen.dtos';
 import { ProcessConfigDto } from '../models/process.model';
-import { findEntry } from '../utils/object.utils';
-import { suppressGlobalErrorHandling } from '../utils/server.utils';
-import { ConfigService } from './config.service';
+import { ConfigService } from '../modules/core/services/config.service';
+import { Logger, LoggingService } from '../modules/core/services/logging.service';
+import { findEntry } from '../modules/shared/utils/object.utils';
+import { suppressGlobalErrorHandling } from '../modules/shared/utils/server.utils';
 import { InstanceGroupService } from './instance-group.service';
-import { Logger, LoggingService } from './logging.service';
 
 @Injectable({
   providedIn: 'root',

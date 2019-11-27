@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ManifestKey, ProductDto } from '../models/gen.dtos';
-import { compareTags } from '../utils/manifest.utils';
+import { compareTags } from '../modules/shared/utils/manifest.utils';
 
 @Component({
   selector: 'app-product-tag-card',

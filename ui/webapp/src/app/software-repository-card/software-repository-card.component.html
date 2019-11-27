@@ -11,7 +11,7 @@
       <button mat-menu-item [routerLink]="['/softwarerepo/edit', repository.name]">Edit</button>
       <button mat-menu-item (click)="delete()">Delete</button>
       <mat-divider></mat-divider>
-      <button mat-menu-item [routerLink]="['/hive/browser', {hive: repository.name}]">Hive</button>
+      <button mat-menu-item [routerLink]="['/admin/hive/browser', {hive: repository.name}]">Hive</button>
     </mat-menu>
     <button class="option-button" mat-icon-button [matMenuTriggerFor]="appMenu" appClickStopPropagation>
       <mat-icon>more_vert</mat-icon>

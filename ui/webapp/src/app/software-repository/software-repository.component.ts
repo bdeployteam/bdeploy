@@ -5,9 +5,9 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatDrawer } from '@angular/material/sidenav';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { FileUploadComponent } from '../file-upload/file-upload.component';
 import { ManifestKey } from '../models/gen.dtos';
-import { Logger, LoggingService } from '../services/logging.service';
+import { Logger, LoggingService } from '../modules/core/services/logging.service';
+import { FileUploadComponent } from '../modules/shared/components/file-upload/file-upload.component';
 import { SoftwareService } from '../services/software.service';
 
 @Component({

@@ -10,14 +10,14 @@ import { Observable, of } from 'rxjs';
 import { ApplicationEditCommandPreviewComponent } from '../application-edit-command-preview/application-edit-command-preview.component';
 import { ApplicationEditManualComponent, Context } from '../application-edit-manual/application-edit-manual.component';
 import { ApplicationEditOptionalComponent } from '../application-edit-optional/application-edit-optional.component';
-import { MessageBoxMode } from '../messagebox/messagebox.component';
 import { CustomParameter, findFirstParameter, findLastParameter, GroupNames, LinkedParameter, NamedParameter, UnknownParameter } from '../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_PARAMETER_CONFIGURATION, EMPTY_PARAMETER_DESCRIPTOR } from '../models/consts';
 import { ApplicationConfiguration, ApplicationDescriptor, ApplicationStartType, ParameterDescriptor, ParameterType } from '../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../models/process.model';
+import { MessageBoxMode } from '../modules/shared/components/messagebox/messagebox.component';
+import { MessageboxService } from '../modules/shared/services/messagebox.service';
+import { ParameterValidators } from '../modules/shared/validators/parameter.validators';
 import { ApplicationService } from '../services/application.service';
-import { MessageboxService } from '../services/messagebox.service';
-import { ParameterValidators } from '../validators/parameter.validators';
 
 @Component({
   selector: 'app-application-edit',

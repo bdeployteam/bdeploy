@@ -11,7 +11,7 @@
       </div>
       <button mat-menu-item (click)="delete()">Delete</button>
       <mat-divider></mat-divider>
-      <button mat-menu-item [routerLink]="['/hive/browser', {hive: currentGroup.name}]">Hive</button>
+      <button mat-menu-item [routerLink]="['/admin/hive/browser', {hive: currentGroup.name}]">Hive</button>
       <button mat-menu-item [routerLink]="['/products', currentGroup.name]">Products</button>
       <ng-container *ngIf='isAttachAllowed'>
           <mat-divider></mat-divider>

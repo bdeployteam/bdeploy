@@ -6,11 +6,11 @@ import { MatDrawer } from '@angular/material/sidenav';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { FileUploadComponent } from '../file-upload/file-upload.component';
 import { MinionMode, ProductDto } from '../models/gen.dtos';
-import { ConfigService } from '../services/config.service';
+import { ConfigService } from '../modules/core/services/config.service';
+import { FileUploadComponent } from '../modules/shared/components/file-upload/file-upload.component';
+import { sortByTags } from '../modules/shared/utils/manifest.utils';
 import { ProductService } from '../services/product.service';
-import { sortByTags } from '../utils/manifest.utils';
 
 @Component({
   selector: 'app-products',

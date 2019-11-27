@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ConfigService } from './config.service';
+import { ConfigService } from '../modules/core/services/config.service';
 
 // defined in index.html directly to be as global as possible.
 declare var downloadLocation: { assign: (url: string) => {}, click: (link: HTMLAnchorElement) => {} };

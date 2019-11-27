@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { DeviceDetectorService } from 'ngx-device-detector';
 import { finalize } from 'rxjs/operators';
 import { LauncherDto, ManifestKey, OperatingSystem } from '../models/gen.dtos';
-import { getAppOs } from '../utils/manifest.utils';
-import { SoftwareUpdateService } from './software-update.service';
+import { SoftwareUpdateService } from '../modules/admin/services/software-update.service';
+import { getAppOs } from '../modules/shared/utils/manifest.utils';
 
 @Injectable()
 export class LauncherService {

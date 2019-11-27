@@ -2,8 +2,8 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { InstanceConfiguration, ManagedMasterDto, MinionDto, MinionStatusDto, ProductDto, ProductTransferDto } from '../models/gen.dtos';
-import { suppressGlobalErrorHandling } from '../utils/server.utils';
-import { ConfigService } from './config.service';
+import { ConfigService } from '../modules/core/services/config.service';
+import { suppressGlobalErrorHandling } from '../modules/shared/utils/server.utils';
 
 @Injectable({
   providedIn: 'root',

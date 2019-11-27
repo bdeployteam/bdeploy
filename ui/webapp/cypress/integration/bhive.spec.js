@@ -5,7 +5,7 @@ describe('BHive Browser Tests', function() {
 
   it('Check user manifest in default hive', function() {
     cy.visit('/');
-    cy.visit('/#/hive/browser')
+    cy.visit('/#/admin/hive/browser')
 
     // wait for at least one row, meaning the pre-selected hive has been loaded.
     cy.get('tbody>tr').should('exist');

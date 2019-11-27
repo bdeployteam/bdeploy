@@ -80,7 +80,7 @@ describe('Product Cleanup Test', function() {
    * calculate Manual Cleanup -> assert: no instance versions or products to uninstall
    */
   it('Calculates a manual cleanup with empty result', function() {
-    cy.visit('/#/manualcleanup');
+    cy.visit('/#/admin/manualcleanup');
     // calculate stuff
     cy.contains('button', 'Calculate Cleanup Actions').should('be.visible').and('be.enabled').click();
     // wait for the calculation to complete
@@ -111,7 +111,7 @@ describe('Product Cleanup Test', function() {
    * calculate Manual Cleanup -> assert: uninstall (v2)
    */
   it('Calculates a manual cleanup for uninstalling instance version v2', function() {
-    cy.visit('/#/manualcleanup');
+    cy.visit('/#/admin/manualcleanup');
     // calculate stuff
     cy.contains('button', 'Calculate Cleanup Actions').should('be.visible').and('be.enabled').click();
     // wait for the calculation to complete
@@ -154,7 +154,7 @@ describe('Product Cleanup Test', function() {
    * calculate Manual Cleanup -> assert: uninstall (v2) + (v3)
    */
   it('Calculates a manual cleanup for uninstalling instance version v2 + v3', function() {
-    cy.visit('/#/manualcleanup');
+    cy.visit('/#/admin/manualcleanup');
     // calculate stuff
     cy.contains('button', 'Calculate Cleanup Actions').should('be.visible').and('be.enabled').click();
     // wait for the calculation to complete
@@ -188,7 +188,7 @@ describe('Product Cleanup Test', function() {
    * calculate Manual Cleanup -> assert: uninstall (v2)...(v4), delete product version 1.0.0
    */
   it('Calculates a manual cleanup for uninstalling instance version v2..v4 and product version 1.0.0', function() {
-    cy.visit('/#/manualcleanup');
+    cy.visit('/#/admin/manualcleanup');
     // calculate stuff
     cy.contains('button', 'Calculate Cleanup Actions').should('be.visible').and('be.enabled').click();
     // wait for the calculation to complete

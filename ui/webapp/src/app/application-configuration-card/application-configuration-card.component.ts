@@ -1,11 +1,11 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { MessageBoxMode } from '../messagebox/messagebox.component';
 import { EventWithCallback } from '../models/event';
 import { ApplicationConfiguration, InstanceVersionDto, OperatingSystem } from '../models/gen.dtos';
+import { MessageBoxMode } from '../modules/shared/components/messagebox/messagebox.component';
+import { MessageboxService } from '../modules/shared/services/messagebox.service';
+import { getAppOs } from '../modules/shared/utils/manifest.utils';
 import { ApplicationService } from '../services/application.service';
 import { LauncherService } from '../services/launcher.service';
-import { MessageboxService } from '../services/messagebox.service';
-import { getAppOs } from '../utils/manifest.utils';
 
 @Component({
   selector: 'app-application-configuration-card',

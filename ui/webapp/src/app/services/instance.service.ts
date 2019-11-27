@@ -2,10 +2,10 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ClickAndStartDescriptor, ConfigFileDto, FileStatusDto, InstanceConfiguration, InstanceConfigurationDto, InstanceDirectory, InstanceDirectoryEntry, InstanceDto, InstanceManifestHistoryDto, InstanceNodeConfigurationListDto, InstancePurpose, InstanceStateRecord, InstanceVersionDto, ManifestKey, MinionDto, MinionStatusDto, StringEntryChunkDto } from '../models/gen.dtos';
-import { ConfigService } from './config.service';
+import { ConfigService } from '../modules/core/services/config.service';
+import { Logger, LoggingService } from '../modules/core/services/logging.service';
 import { DownloadService } from './download.service';
 import { InstanceGroupService } from './instance-group.service';
-import { Logger, LoggingService } from './logging.service';
 
 @Injectable({
   providedIn: 'root',

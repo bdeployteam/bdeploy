@@ -4,7 +4,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { cloneDeep, isEqual } from 'lodash';
 import { CustomParameter, GroupNames, NamedParameter } from '../models/application.model';
-import { ParameterValidators } from '../validators/parameter.validators';
+import { ParameterValidators } from '../modules/shared/validators/parameter.validators';
 
 /** Data to be passed to this dialog */
 export class Context {

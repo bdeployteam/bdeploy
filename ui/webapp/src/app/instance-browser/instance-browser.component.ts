@@ -5,8 +5,8 @@ import { forkJoin } from 'rxjs';
 import { SORT_PURPOSE } from '../models/consts';
 import { DataList } from '../models/dataList';
 import { InstanceConfiguration, InstanceDto, InstancePurpose, ProductDto } from '../models/gen.dtos';
+import { Logger, LoggingService } from '../modules/core/services/logging.service';
 import { InstanceService } from '../services/instance.service';
-import { Logger, LoggingService } from '../services/logging.service';
 import { ProductService } from '../services/product.service';
 
 @Component({

@@ -15,13 +15,13 @@ import 'brace/theme/twilight';
 import { Base64 } from 'js-base64';
 import { cloneDeep } from 'lodash';
 import { Observable, of, Subscription } from 'rxjs';
-import { CanComponentDeactivate } from '../guards/can-deactivate.guard';
-import { MessageBoxMode } from '../messagebox/messagebox.component';
 import { FileStatusDto, FileStatusType, InstanceConfiguration } from '../models/gen.dtos';
+import { Logger, LoggingService } from '../modules/core/services/logging.service';
+import { ThemeService } from '../modules/core/services/theme.service';
+import { MessageBoxMode } from '../modules/shared/components/messagebox/messagebox.component';
+import { CanComponentDeactivate } from '../modules/shared/guards/can-deactivate.guard';
+import { MessageboxService } from '../modules/shared/services/messagebox.service';
 import { InstanceService } from '../services/instance.service';
-import { Logger, LoggingService } from '../services/logging.service';
-import { MessageboxService } from '../services/messagebox.service';
-import { ThemeService } from '../services/theme.service';
 
 export class ConfigFileStatus {
   type: FileStatusType;

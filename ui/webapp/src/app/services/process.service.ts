@@ -3,7 +3,7 @@ import { EventEmitter, Injectable } from '@angular/core';
 import { of } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { ProcessState, ProcessStatusDto } from '../models/gen.dtos';
-import { suppressGlobalErrorHandling } from '../utils/server.utils';
+import { suppressGlobalErrorHandling } from '../modules/shared/utils/server.utils';
 import { InstanceService } from './instance.service';
 
 @Injectable({

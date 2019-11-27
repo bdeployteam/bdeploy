@@ -9,8 +9,8 @@ import { of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AttachCentralComponent } from '../attach-central/attach-central.component';
 import { ManagedMasterDto } from '../models/gen.dtos';
+import { ErrorMessage } from '../modules/core/services/logging.service';
 import { DownloadService } from '../services/download.service';
-import { ErrorMessage } from '../services/logging.service';
 import { ManagedServersService } from '../services/managed-servers.service';
 
 @Component({

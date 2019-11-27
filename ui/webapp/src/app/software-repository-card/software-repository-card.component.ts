@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { MessageBoxMode } from '../messagebox/messagebox.component';
 import { SoftwareRepositoryConfiguration } from '../models/gen.dtos';
-import { MessageboxService } from '../services/messagebox.service';
+import { MessageBoxMode } from '../modules/shared/components/messagebox/messagebox.component';
+import { MessageboxService } from '../modules/shared/services/messagebox.service';
 import { SoftwareRepositoryService } from '../services/software-repository.service';
 
 @Component({

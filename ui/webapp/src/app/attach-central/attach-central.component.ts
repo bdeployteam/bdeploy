@@ -3,11 +3,11 @@ import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatStep, MatStepper } from '@angular/material';
 import { EventSourcePolyfill } from 'ng-event-source';
 import { InstanceGroupConfiguration, ManagedMasterDto } from '../models/gen.dtos';
+import { ErrorMessage, LoggingService } from '../modules/core/services/logging.service';
+import { RemoteEventsService } from '../modules/shared/services/remote-events.service';
 import { DownloadService } from '../services/download.service';
 import { InstanceGroupService } from '../services/instance-group.service';
-import { ErrorMessage, LoggingService } from '../services/logging.service';
 import { ManagedServersService } from '../services/managed-servers.service';
-import { RemoteEventsService } from '../services/remote-events.service';
 
 @Component({
   selector: 'app-attach-central',

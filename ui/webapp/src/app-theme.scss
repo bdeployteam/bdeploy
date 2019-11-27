@@ -2,21 +2,21 @@
 @include mat-core();
 
 @import 'app-externals.scss';
-@import 'app/main-nav/main-nav-theme.scss';
-@import 'app/logo/logo-theme.scss';
+@import 'app/modules/core/components/main-nav/main-nav-theme.scss';
+@import 'app/modules/core/components/logo/logo-theme.scss';
 @import 'dragular.scss';
 @import 'app-ngx-charts-dark.scss';
 
 /* Custom component theme collection */
+@import 'app/modules/shared/components/file-upload/file-upload-theme.scss';
+@import 'app/modules/admin/components/hive/hive-theme.scss';
 @import 'app/instance-group-delete-dialog/instance-group-delete-dialog-theme.scss';
-@import 'app/hive/hive-theme.scss';
 @import 'app/instance-card/instance-card-theme.scss';
 @import 'app/instance-node-card/instance-node-card-theme.scss';
 @import 'app/instance-version-card/instance-version-card-theme.scss';
 @import 'app/application-edit/application-edit-theme.scss';
 @import 'app/product-tag-card/product-tag-card-theme.scss';
 @import 'app/application-configuration-card/application-configuration-card-theme.scss';
-@import 'app/file-upload/file-upload-theme.scss';
 @import 'app/instance-group-logo/instance-group-logo-theme.scss';
 @import 'app/process-configuration/process-configuration-theme.scss';
 @import 'app/process-details/process-details-theme.scss';

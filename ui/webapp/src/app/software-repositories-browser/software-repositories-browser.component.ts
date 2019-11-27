@@ -3,8 +3,8 @@ import { MediaChange, MediaObserver } from '@angular/flex-layout';
 import { Subscription } from 'rxjs';
 import { DataList } from '../models/dataList';
 import { SoftwareRepositoryConfiguration } from '../models/gen.dtos';
-import { AuthenticationService } from '../services/authentication.service';
-import { Logger, LoggingService } from '../services/logging.service';
+import { AuthenticationService } from '../modules/core/services/authentication.service';
+import { Logger, LoggingService } from '../modules/core/services/logging.service';
 import { SoftwareRepositoryService } from '../services/software-repository.service';
 
 @Component({

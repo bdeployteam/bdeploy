@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
-import { HeaderTitleService } from './services/header-title.service';
-import { Logger, LoggingService } from './services/logging.service';
+import { HeaderTitleService } from './modules/core/services/header-title.service';
+import { Logger, LoggingService } from './modules/core/services/logging.service';
 
 @Component({
   selector: 'app-root',

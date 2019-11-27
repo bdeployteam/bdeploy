@@ -1,5 +1,5 @@
+import { getAppKeyName, getAppOs } from '../modules/shared/utils/manifest.utils';
 import { ApplicationService } from '../services/application.service';
-import { getAppKeyName, getAppOs } from '../utils/manifest.utils';
 import { ApplicationDto, ApplicationType, OperatingSystem, ParameterConfiguration, ParameterDescriptor, ParameterType } from './gen.dtos';
 
 /**

@@ -1,7 +1,7 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { LoggingService, Logger, ErrorMessage } from '../services/logging.service';
-import { InstanceGroupService } from '../services/instance-group.service';
+import { Component, Input, OnInit } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
+import { ErrorMessage, Logger, LoggingService } from '../modules/core/services/logging.service';
+import { InstanceGroupService } from '../services/instance-group.service';
 
 @Component({
   selector: 'app-instance-group-logo',

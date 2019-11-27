@@ -7,11 +7,11 @@ import { format } from 'date-fns';
 import { Observable, Subscription } from 'rxjs';
 import { finalize, map, mergeMap } from 'rxjs/operators';
 import { ApplicationConfiguration, ApplicationStartType, InstanceDirectoryEntry, ProcessDetailDto, ProcessState, ProcessStatusDto, StringEntryChunkDto } from '../models/gen.dtos';
+import { unsubscribe } from '../modules/shared/utils/object.utils';
 import { ProcessListComponent } from '../process-list/process-list.component';
 import { ProcessStartConfirmComponent } from '../process-start-confirm/process-start-confirm.component';
 import { InstanceService } from '../services/instance.service';
 import { ProcessService } from '../services/process.service';
-import { unsubscribe } from '../utils/object.utils';
 
 @Component({
   selector: 'app-process-details',

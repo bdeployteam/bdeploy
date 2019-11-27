@@ -1,8 +1,8 @@
 import { Component, Input, OnChanges, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ProcessState, ProcessStatusDto } from '../models/gen.dtos';
+import { unsubscribe } from '../modules/shared/utils/object.utils';
 import { ProcessService } from '../services/process.service';
-import { unsubscribe } from '../utils/object.utils';
 
 @Component({
   selector: 'app-process-status',

@@ -3,10 +3,10 @@ import { MediaChange, MediaObserver } from '@angular/flex-layout';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { DataList } from '../models/dataList';
 import { InstanceGroupConfiguration, MinionMode } from '../models/gen.dtos';
-import { AuthenticationService } from '../services/authentication.service';
-import { ConfigService } from '../services/config.service';
+import { AuthenticationService } from '../modules/core/services/authentication.service';
+import { ConfigService } from '../modules/core/services/config.service';
+import { Logger, LoggingService } from '../modules/core/services/logging.service';
 import { InstanceGroupService } from '../services/instance-group.service';
-import { Logger, LoggingService } from '../services/logging.service';
 
 @Component({
   selector: 'app-instance-group-browser',

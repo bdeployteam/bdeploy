@@ -4,11 +4,11 @@ import { ActivatedRoute } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { SORT_PURPOSE } from '../models/consts';
 import { ClientApplicationDto, InstanceClientAppsDto, InstanceConfiguration, InstancePurpose, OperatingSystem } from '../models/gen.dtos';
+import { SoftwareUpdateService } from '../modules/admin/services/software-update.service';
 import { DownloadService } from '../services/download.service';
 import { InstanceGroupService } from '../services/instance-group.service';
 import { InstanceService } from '../services/instance.service';
 import { LauncherService } from '../services/launcher.service';
-import { SoftwareUpdateService } from '../services/software-update.service';
 
 @Component({
   selector: 'app-client-apps',

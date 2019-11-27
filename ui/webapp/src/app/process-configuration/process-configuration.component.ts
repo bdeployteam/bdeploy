@@ -10,29 +10,29 @@ import { DragulaService } from 'ng2-dragula';
 import { forkJoin, Observable, of, Subscription } from 'rxjs';
 import { catchError, finalize, mergeMap } from 'rxjs/operators';
 import { ApplicationEditComponent } from '../application-edit/application-edit.component';
-import { FileUploadComponent } from '../file-upload/file-upload.component';
 import { InstanceVersionCardComponent } from '../instance-version-card/instance-version-card.component';
-import { MessageBoxMode } from '../messagebox/messagebox.component';
 import { ApplicationGroup } from '../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_DEPLOYMENT_STATE } from '../models/consts';
 import { EventWithCallback } from '../models/event';
 import { ApplicationConfiguration, ApplicationDto, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstanceStateRecord, InstanceUpdateEventDto, InstanceUpdateEventType, ManagedMasterDto, ManifestKey, MinionDto, MinionMode, MinionStatusDto, ProductDto } from '../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../models/process.model';
+import { ConfigService } from '../modules/core/services/config.service';
+import { HeaderTitleService } from '../modules/core/services/header-title.service';
+import { Logger, LoggingService } from '../modules/core/services/logging.service';
+import { SystemService } from '../modules/core/services/system.service';
+import { FileUploadComponent } from '../modules/shared/components/file-upload/file-upload.component';
+import { MessageBoxMode } from '../modules/shared/components/messagebox/messagebox.component';
+import { MessageboxService } from '../modules/shared/services/messagebox.service';
+import { RemoteEventsService } from '../modules/shared/services/remote-events.service';
+import { compareTags, sortByTags } from '../modules/shared/utils/manifest.utils';
 import { ProcessDetailsComponent } from '../process-details/process-details.component';
 import { ApplicationService } from '../services/application.service';
-import { ConfigService } from '../services/config.service';
 import { DownloadService } from '../services/download.service';
-import { HeaderTitleService } from '../services/header-title.service';
 import { InstanceService } from '../services/instance.service';
 import { LauncherService } from '../services/launcher.service';
-import { Logger, LoggingService } from '../services/logging.service';
 import { ManagedServersService } from '../services/managed-servers.service';
-import { MessageboxService } from '../services/messagebox.service';
 import { ProcessService } from '../services/process.service';
 import { ProductService } from '../services/product.service';
-import { RemoteEventsService } from '../services/remote-events.service';
-import { SystemService } from '../services/system.service';
-import { compareTags, sortByTags } from '../utils/manifest.utils';
 
 export enum SidenavMode {
   Applications,

@@ -3,10 +3,10 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ManifestKey, ProductDto } from '../models/gen.dtos';
 import { ProcessConfigDto } from '../models/process.model';
-import { ConfigService } from './config.service';
+import { ConfigService } from '../modules/core/services/config.service';
+import { Logger, LoggingService } from '../modules/core/services/logging.service';
 import { DownloadService } from './download.service';
 import { InstanceGroupService } from './instance-group.service';
-import { Logger, LoggingService } from './logging.service';
 
 @Injectable({
   providedIn: 'root',

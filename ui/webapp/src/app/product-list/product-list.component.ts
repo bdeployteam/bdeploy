@@ -2,8 +2,8 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { from } from 'rxjs';
 import { finalize, flatMap, tap } from 'rxjs/operators';
 import { ManifestKey, ProductDto } from '../models/gen.dtos';
+import { LoggingService } from '../modules/core/services/logging.service';
 import { DownloadService } from '../services/download.service';
-import { LoggingService } from '../services/logging.service';
 import { ProductService } from '../services/product.service';
 
 @Component({

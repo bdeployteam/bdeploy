@@ -1,10 +1,10 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MatTableDataSource } from '@angular/material';
 import { format } from 'date-fns';
-import { MessageBoxMode } from '../messagebox/messagebox.component';
 import { InstanceConfiguration, ManagedMasterDto, MinionDto, MinionStatusDto, Version } from '../models/gen.dtos';
+import { MessageBoxMode } from '../modules/shared/components/messagebox/messagebox.component';
+import { MessageboxService } from '../modules/shared/services/messagebox.service';
 import { ManagedServersService } from '../services/managed-servers.service';
-import { MessageboxService } from '../services/messagebox.service';
 
 interface MinionTableRow {
   key: string;

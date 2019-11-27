@@ -5,25 +5,20 @@ import { AttachManagedComponent } from './attach-managed/attach-managed.componen
 import { ClientAppsComponent } from './client-apps/client-apps.component';
 import { ConfigFilesBrowserComponent } from './config-files-browser/config-files-browser.component';
 import { DataFilesBrowserComponent } from './data-files-browser/data-files-browser.component';
-import { AuthGuard } from './guards/authentication.guard';
-import { CanDeactivateGuard } from './guards/can-deactivate.guard';
-import { BackButtonGuard } from './hive-browser/back-button.guard';
-import { HiveBrowserComponent } from './hive-browser/hive-browser.component';
 import { InstanceAddEditComponent } from './instance-add-edit/instance-add-edit.component';
 import { InstanceBrowserComponent } from './instance-browser/instance-browser.component';
 import { InstanceGroupAddEditComponent } from './instance-group-add-edit/instance-group-add-edit.component';
 import { InstanceGroupBrowserComponent } from './instance-group-browser/instance-group-browser.component';
-import { LoginComponent } from './login/login.component';
 import { ManagedServersComponent } from './managed-servers/managed-servers.component';
-import { MasterCleanupComponent } from './master-cleanup/master-cleanup.component';
-import { MetricsOverviewComponent } from './metrics-overview/metrics-overview.component';
+import { LoginComponent } from './modules/core/components/login/login.component';
+import { AuthGuard } from './modules/shared/guards/authentication.guard';
+import { CanDeactivateGuard } from './modules/shared/guards/can-deactivate.guard';
 import { ProcessConfigurationComponent } from './process-configuration/process-configuration.component';
 import { ProductSyncComponent } from './product-sync/product-sync.component';
 import { ProductsComponent } from './products/products.component';
 import { SoftwareRepoAddEditComponent } from './software-repo-add-edit/software-repo-add-edit.component';
 import { SoftwareRepositoriesBrowserComponent } from './software-repositories-browser/software-repositories-browser.component';
 import { SoftwareRepositoryComponent } from './software-repository/software-repository.component';
-import { UpdateBrowserComponent } from './update-browser/update-browser.component';
 
 const routes: Routes = [
   {
@@ -55,13 +50,6 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
     data: { title: 'Edit Instance Group (${params["name"]})', header: 'Edit Instance Group' }
-  },
-  {
-    path: 'hive/browser',
-    component: HiveBrowserComponent,
-    canActivate: [AuthGuard],
-    canDeactivate: [BackButtonGuard],
-    data: { title: 'Hive Browser', header: 'Hive Browser' }
   },
   {
     path: 'instance/browser/:name',
@@ -137,20 +125,6 @@ const routes: Routes = [
     data: { title: 'Software Packages (${params["name"]})', header: 'Software Packages' }
   },
   {
-    path: 'systemsoftware',
-    component: UpdateBrowserComponent,
-    canActivate: [AuthGuard],
-    canDeactivate: [CanDeactivateGuard],
-    data: { title: 'System Software', header: 'System Software' }
-  },
-  {
-    path: 'manualcleanup',
-    component: MasterCleanupComponent,
-    canActivate: [AuthGuard],
-    canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Manual Cleanup', header: 'Manual Cleanup' }
-  },
-  {
     path: 'clientapps/:group',
     component: ClientAppsComponent,
     canActivate: [AuthGuard],
@@ -186,12 +160,9 @@ const routes: Routes = [
     data: { title: 'Transfer Product Versions (${params["group"]})', header: 'Transfer Product Versions' }
   },
   {
-    path: 'metrics',
-    component: MetricsOverviewComponent,
-    canActivate: [AuthGuard],
-    canDeactivate: [CanDeactivateGuard],
-    data: { title: 'System Metrics', header: 'System Metrics' }
-  },
+    path: 'admin',
+    loadChildren: () => import('./modules/admin/admin.module').then(x => x.AdminModule)
+  }
 ];
 
 @NgModule({
