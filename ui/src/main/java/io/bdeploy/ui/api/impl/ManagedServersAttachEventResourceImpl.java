@@ -41,7 +41,7 @@ public class ManagedServersAttachEventResourceImpl {
         executor.scheduleAtFixedRate(this::keepAlive, KEEP_ALIVE_INTERVAL, KEEP_ALIVE_INTERVAL, TimeUnit.SECONDS);
     }
 
-    public void keepAlive() {
+    private void keepAlive() {
         try {
             OutboundSseEvent event = sse.newEventBuilder().comment("keep-alive").build();
             bc.broadcast(event);

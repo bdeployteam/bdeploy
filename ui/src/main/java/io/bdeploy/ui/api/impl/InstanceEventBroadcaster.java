@@ -49,7 +49,7 @@ public class InstanceEventBroadcaster {
         bc.register(sink);
     }
 
-    public void keepAlive() {
+    private void keepAlive() {
         try {
             OutboundSseEvent event = sse.newEventBuilder().comment("keep-alive").build();
             bc.broadcast(event);

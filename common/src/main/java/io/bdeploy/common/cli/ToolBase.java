@@ -268,10 +268,6 @@ public abstract class ToolBase {
         tools.put(nameOf(tool), tool);
     }
 
-    protected boolean has(String tool) {
-        return tools.containsKey(tool);
-    }
-
     /**
      * Base class for all CLI tools.
      */

@@ -45,12 +45,6 @@ import io.bdeploy.common.cli.ToolBase;
  * target type and returned. Otherwise the default value of the {@link Method}
  * is returned.
  * <p>
- * It is possible to put arbitrary {@link Object}s into the {@link Map} using
- * {@link #add(Map)}. There is no validation on the types passed, but they are
- * in reality restricted to types that are valid return types for
- * {@link Annotation} {@link Method}s. Using any other types will result in an
- * {@link Exception}.
- * <p>
  * There is (limited) type conversion capabilities. Mainly this functionality
  * exists to be able to map {@link String}s (e.g. when mapping a command line
  * using {@link #add(String...)}) to the target types of the {@link Annotation}
@@ -106,16 +100,6 @@ public class Configuration {
 
     public Map<String, Object> getAllRawObjects() {
         return objects;
-    }
-
-    /**
-     * Adds arbitrary entries to the mapping. See the class documentation for more
-     * information on supported types and implicit conversions.
-     *
-     * @param arguments the entries to add to the mapping.
-     */
-    public void add(Map<String, ?> arguments) {
-        objects.putAll(arguments);
     }
 
     /**

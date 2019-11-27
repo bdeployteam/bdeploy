@@ -16,6 +16,7 @@ import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 public class VariableResolver implements UnaryOperator<String> {
 
     public enum SpecialVariablePrefix {
+
         /**
          * Variable has a manifest reference. The value is expected to be a
          * {@link Manifest} name and optionally a tag separated by ':'
@@ -106,7 +107,7 @@ public class VariableResolver implements UnaryOperator<String> {
         throw new IllegalArgumentException("Unresolved variable: " + varName);
     }
 
-    public String getVariableValue(SpecialVariablePrefix which, String raw) {
+    private String getVariableValue(SpecialVariablePrefix which, String raw) {
         if (raw.startsWith(which.prefix)) {
             return raw.substring(which.prefix.length());
         }

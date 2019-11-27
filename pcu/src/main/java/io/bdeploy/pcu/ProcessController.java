@@ -866,26 +866,6 @@ public class ProcessController {
         return recoverTask;
     }
 
-    /** Returns the future that is scheduled to monitor the up-time */
-    Future<?> getUptimeTask() {
-        return uptimeTask;
-    }
-
-    /** Returns the the "runtime" directory */
-    Path getProcessDir() {
-        return processDir;
-    }
-
-    /** Returns the version of the configuration */
-    String getInstanceTag() {
-        return instanceTag;
-    }
-
-    /** Returns unique ID of the instance */
-    String getInstanceUid() {
-        return instanceUid;
-    }
-
     /** Sleeps the given number of seconds */
     private static boolean doSleep(long value, TimeUnit unit) {
         try {

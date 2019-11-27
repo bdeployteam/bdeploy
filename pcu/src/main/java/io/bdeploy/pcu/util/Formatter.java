@@ -1,9 +1,6 @@
 package io.bdeploy.pcu.util;
 
 import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,25 +9,7 @@ import java.util.List;
  */
 public class Formatter {
 
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
-            .withZone(ZoneId.systemDefault());
-
     private Formatter() {
-    }
-
-    /**
-     * Formats the given instant into a human readable string.
-     *
-     * <pre>
-     *      28.03.2019 15:36:45
-     * </pre>
-     *
-     * @param value
-     *            the value to format
-     * @return the formatted value
-     */
-    public static String formatInstant(Instant value) {
-        return DATE_TIME_FORMATTER.format(value);
     }
 
     /**

@@ -1,4 +1,4 @@
-package io.bdeploy.pcu.util;
+package io.bdeploy.pcu;
 
 /**
  * Helper class working with process handles

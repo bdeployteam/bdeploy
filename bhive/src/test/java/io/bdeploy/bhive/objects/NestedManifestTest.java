@@ -85,7 +85,7 @@ public class NestedManifestTest extends DbTestBase {
             ContentHelper.checkDirsEqual(target.resolve("nested-b"), tmp);
 
             SortedMap<String, Manifest.Key> refKeys = new TreeMap<>();
-            TreeView scan = om.scan(m.getRoot());
+            TreeView scan = om.scan(m.getRoot(), Integer.MAX_VALUE, true);
             scan.visit(new TreeVisitor.Builder().onManifestRef(mfr -> refKeys.put(mfr.getPathString(), mfr.getReferenced()))
                     .build());
 

@@ -256,15 +256,6 @@ public class ObjectManager {
     }
 
     /**
-     * Create a traversable snapshot of the given {@link Tree} state down to the leafs..
-     *
-     * @param tree the root tree to scan
-     */
-    public TreeView scan(ObjectId tree) {
-        return scan(tree, Integer.MAX_VALUE, true);
-    }
-
-    /**
      * Create a traversable snapshot of the given {@link Tree} state up to a given maximum depth.
      * <p>
      * In case the root tree is damaged, it is wrapped in a dummy {@link TreeView} with a <code>null</code> {@link ObjectId}.
@@ -372,7 +363,7 @@ public class ObjectManager {
         }
     }
 
-    public ObjectId getSubTreeForName(Tree t, String name) {
+    private ObjectId getSubTreeForName(Tree t, String name) {
         return t.getChildren().entrySet().stream().filter(e -> e.getKey().getName().equals(name)).map(e -> {
             switch (e.getKey().getType()) {
                 case MANIFEST:

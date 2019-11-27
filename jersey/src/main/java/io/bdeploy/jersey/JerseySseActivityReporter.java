@@ -3,7 +3,6 @@ package io.bdeploy.jersey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.function.LongSupplier;
 
 import javax.inject.Inject;
@@ -24,8 +23,6 @@ public class JerseySseActivityReporter implements ActivityReporter {
 
     private static final Logger log = LoggerFactory.getLogger(JerseySseActivityReporter.class);
     static final ThreadLocal<JerseySseActivity> currentActivity = new ThreadLocal<>();
-
-    Consumer<JerseySseActivity> onDone = this::done;
 
     @Inject
     private JerseyScopeService jss;
@@ -50,7 +47,7 @@ public class JerseySseActivityReporter implements ActivityReporter {
         List<String> scope = JerseySseActivityScopeFilter.getRequestActivityScope(jss);
         String user = jss.getUser();
 
-        JerseySseActivity act = new JerseySseActivity(onDone, activity, maxValue, currentValue, scope, user);
+        JerseySseActivity act = new JerseySseActivity(this::done, activity, maxValue, currentValue, scope, user);
         globalActivities.add(act);
         return act;
     }

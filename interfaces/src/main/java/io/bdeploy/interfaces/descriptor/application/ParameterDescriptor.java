@@ -1,8 +1,5 @@
 package io.bdeploy.interfaces.descriptor.application;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 
 /**
@@ -108,45 +105,6 @@ public class ParameterDescriptor implements Comparable<ParameterDescriptor> {
      * The type of the parameter. Used for validation purposes.
      */
     public ParameterType type = ParameterType.STRING;
-
-    /**
-     * Renders the parameter according to the definition and the current value.
-     * <p>
-     * <b>Implementation note:</b> Changing the logic in here also requires adoptions
-     * to the TypeScript code located in <i>application.service.ts</i>.
-     * </p>
-     *
-     * @param actualValue the parameter value to use for rendering. The value is not
-     *            processed during preRender in any way. It is just placed
-     *            at the correct position. If the given value is
-     *            <code>null</code> or empty, the default value is used if
-     *            required.
-     * @return one or more arguments for the final command line which represent this
-     *         parameter. No variable substitution will be performed on the parameter.
-     *         A final rendering step is required to perform variable substitution.
-     */
-    public List<String> preRender(String actualValue) {
-        List<String> result = new ArrayList<>();
-
-        if (hasValue) {
-            String realValue = (actualValue == null || actualValue.isEmpty()) ? defaultValue : actualValue;
-
-            if (mandatory && realValue == null) {
-                throw new IllegalStateException("Don't have a value for parameter " + uid + " (" + name + ")");
-            }
-
-            if (valueAsSeparateArg) {
-                result.add(parameter);
-                result.add(realValue);
-            } else {
-                result.add(parameter + valueSeparator + realValue);
-            }
-        } else {
-            result.add(parameter);
-        }
-
-        return result;
-    }
 
     @Override
     public int compareTo(ParameterDescriptor o) {

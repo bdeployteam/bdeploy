@@ -37,16 +37,6 @@ public class PathHelper {
     }
 
     /**
-     * Replace all problematic characters in a String with '_'.
-     * <p>
-     * ATTENTION: {@link String}s which are different may become the same (thus
-     * {@link Path}s can collide) after processing.
-     */
-    public static String getPathFriendly(String str) {
-        return str.replaceAll("\\W+", "_");
-    }
-
-    /**
      * Create directories, wrapping {@link IOException} to {@link IllegalStateException}
      *
      * @param p {@link Path} to create.
@@ -56,18 +46,6 @@ public class PathHelper {
             Files.createDirectories(p);
         } catch (IOException e) {
             throw new IllegalStateException("Cannot create " + p, e);
-        }
-    }
-
-    /**
-     * @param p the {@link Path} to measure size of
-     * @return the size of the underlying file in bytes.
-     */
-    public static long sizeOf(Path p) {
-        try {
-            return Files.size(p);
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot read size of " + p, e);
         }
     }
 

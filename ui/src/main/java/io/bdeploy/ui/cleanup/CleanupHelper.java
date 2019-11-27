@@ -191,7 +191,7 @@ public class CleanupHelper {
      * @param registry the {@link BHiveRegistry} containing all relevant {@link BHive}s for the current setup.
      * @return the {@link SortedSet} of {@link Key}s which are required to be kept alive on each slave.
      */
-    public static SortedSet<Key> findAllUniqueKeys(BHiveRegistry registry) {
+    private static SortedSet<Key> findAllUniqueKeys(BHiveRegistry registry) {
         SortedSet<Key> allUniqueKeysToKeep = new TreeSet<>();
         for (Map.Entry<String, BHive> entry : registry.getAll().entrySet()) {
             BHive toCheck = entry.getValue();
@@ -218,7 +218,7 @@ public class CleanupHelper {
         return allUniqueKeysToKeep;
     }
 
-    public static SortedSet<Key> findInstanceVersions4Uninstall(SecurityContext context, String group, BHive hive,
+    private static SortedSet<Key> findInstanceVersions4Uninstall(SecurityContext context, String group, BHive hive,
             InstanceManifest instanceManifest, MasterProvider provider) {
         InstanceStateRecord state = instanceManifest.getState(hive).read();
 
@@ -239,7 +239,7 @@ public class CleanupHelper {
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    public static List<CleanupAction> uninstallInstanceVersions(SecurityContext context, BHive hive, Set<Key> imVersionKeys,
+    private static List<CleanupAction> uninstallInstanceVersions(SecurityContext context, BHive hive, Set<Key> imVersionKeys,
             boolean immediate, MasterProvider provider) {
         List<CleanupAction> actions = new ArrayList<>();
 
@@ -257,7 +257,7 @@ public class CleanupHelper {
         return actions;
     }
 
-    public static List<CleanupAction> deleteUnusedProducts(SecurityContext context, BHive hive,
+    private static List<CleanupAction> deleteUnusedProducts(SecurityContext context, BHive hive,
             Map<String, SortedSet<Key>> instanceVersions4Uninstall, boolean immediate, MasterProvider provider) {
         List<CleanupAction> actions = new ArrayList<>();
 
@@ -326,7 +326,7 @@ public class CleanupHelper {
         }
     }
 
-    public static void perform(SecurityContext context, BHive hive, List<CleanupAction> actions, MasterProvider provider) {
+    private static void perform(SecurityContext context, BHive hive, List<CleanupAction> actions, MasterProvider provider) {
         for (CleanupAction action : actions) {
             switch (action.type) {
                 case UNINSTALL_INSTANCE_VERSION:

@@ -124,7 +124,7 @@ public class ObjectManagerTest extends DbTestBase {
                             .add(new Tree.Key("missing", EntryType.BLOB), randomId())
                             .add(new Tree.Key("apptree", EntryType.TREE), tree).build());
 
-            TreeView snapshot = mgr.scan(testTree);
+            TreeView snapshot = mgr.scan(testTree, Integer.MAX_VALUE, true);
 
             Map<String, ElementView> l1 = snapshot.getChildren();
             assertTrue(l1.get("app") instanceof ManifestRefView);

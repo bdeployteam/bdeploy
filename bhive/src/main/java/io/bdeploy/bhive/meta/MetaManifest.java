@@ -70,10 +70,6 @@ public class MetaManifest<T> {
         this.metaClazz = metaClazz;
     }
 
-    public static SortedSet<Manifest.Key> listAllMetaManifests(BHiveExecution bhive) {
-        return bhive.execute(new ManifestListOperation().setManifestName(META_PREFIX));
-    }
-
     public static boolean isMetaManifest(Manifest.Key meta) {
         return meta.getName().startsWith(META_PREFIX);
     }

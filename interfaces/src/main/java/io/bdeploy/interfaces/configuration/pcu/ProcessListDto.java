@@ -15,13 +15,6 @@ public class ProcessListDto {
     public final Map<String, ProcessStatusDto> deployed = new TreeMap<>();
 
     /**
-     * Adds the given status DTO to the list of deployed applications
-     */
-    public void addDeployed(ProcessStatusDto data) {
-        deployed.put(data.appUid, data);
-    }
-
-    /**
      * Adds the given process status.
      */
     public void add(ProcessStatusDto data) {

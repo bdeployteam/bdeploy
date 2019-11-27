@@ -38,14 +38,6 @@ public class ScopedManifestKey {
     }
 
     /**
-     * @param key a string representation of a {@link Key}, including tag.
-     * @return a {@link ScopedManifestKey}
-     */
-    public static ScopedManifestKey parse(String key) {
-        return parse(Manifest.Key.parse(key));
-    }
-
-    /**
      * @param key a string representation of a {@link Key} <b>without</b> the operating system part of the key.
      * @param os the {@link OperatingSystem} to set for the {@link ScopedManifestKey}.
      * @return a {@link ScopedManifestKey}.
@@ -78,10 +70,6 @@ public class ScopedManifestKey {
 
     public String getTag() {
         return tag;
-    }
-
-    public boolean isSameBase(ScopedManifestKey other) {
-        return name.equals(other.name) && tag.equals(other.tag);
     }
 
     @Override

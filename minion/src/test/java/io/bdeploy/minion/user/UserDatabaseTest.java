@@ -19,7 +19,6 @@ import io.bdeploy.common.security.ApiAccessToken.Capability;
 import io.bdeploy.common.security.ApiAccessToken.ScopedCapability;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestMinion;
-import io.bdeploy.minion.user.UserDatabase;
 import io.bdeploy.ui.api.AuthService.UserInfo;
 
 @ExtendWith(TestMinion.class)
@@ -50,15 +49,13 @@ public class UserDatabaseTest {
         UserDatabase db = root.getUsers();
 
         List<String> recently1 = Arrays.asList(new String[] { "a", "b", "c" });
-        List<String> recently2 = Arrays.asList(new String[] { "d", "e", "f" });
 
         db.updateUser("test", "test", null);
 
-        db.updateRecentlyUsed("test", recently1);
+        db.addRecentlyUsedInstanceGroup("test", "a");
+        db.addRecentlyUsedInstanceGroup("test", "b");
+        db.addRecentlyUsedInstanceGroup("test", "c");
         assertIterableEquals(recently1, db.getRecentlyUsedInstanceGroups("test"));
-
-        db.updateRecentlyUsed("test", recently2);
-        assertIterableEquals(recently2, db.getRecentlyUsedInstanceGroups("test"));
     }
 
     @Test

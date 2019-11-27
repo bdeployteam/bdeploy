@@ -73,20 +73,6 @@ public class UserDatabase implements AuthService {
         internalUpdate(user, info);
     }
 
-    /**
-     * @param user the user to update
-     * @param recently the list of recently used items (instance groups)
-     */
-    public void updateRecentlyUsed(String user, List<String> recently) {
-        UserInfo info = findUser(user);
-        if (info == null) {
-            throw new IllegalStateException("Cannot find user " + user);
-        }
-
-        info.recentlyUsedInstanceGroups = recently;
-        internalUpdate(user, info);
-    }
-
     @Override
     public List<String> getRecentlyUsedInstanceGroups(String user) {
         UserInfo info = findUser(user);

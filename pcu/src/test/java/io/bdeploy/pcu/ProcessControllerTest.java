@@ -16,7 +16,6 @@ import io.bdeploy.common.TempDirectory;
 import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
-import io.bdeploy.pcu.util.ProcessHandles;
 
 @ExtendWith(TempDirectory.class)
 public class ProcessControllerTest {

@@ -38,8 +38,8 @@ public class MasterCleanupJob implements Job {
     /** Default schedule for cleanup job - once a day at 2:00am. */
     public static final String DEFAULT_CLEANUP_SCHEDULE = "0 0 2 * * ?";
 
-    public static final String DATA_ROOT = MinionRoot.class.getSimpleName();
-    public static final String SCHEDULE = "CronSchedule";
+    private static final String DATA_ROOT = MinionRoot.class.getSimpleName();
+    private static final String SCHEDULE = "CronSchedule";
 
     /**
      * Initializes (or updates) the cleanup job to the given schedule.
@@ -111,7 +111,7 @@ public class MasterCleanupJob implements Job {
      *
      * @param mr the {@link MinionRoot} of the master minion
      */
-    public void performCleanup(MinionRoot mr) {
+    private void performCleanup(MinionRoot mr) {
         log.info("Performing cleanup on all slaves");
 
         // no activity reporting on local hives right now (outside request scope, could only use Stream instead).

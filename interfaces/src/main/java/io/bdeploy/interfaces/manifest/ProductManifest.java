@@ -45,8 +45,8 @@ import io.bdeploy.interfaces.manifest.dependencies.DependencyFetcher;
  */
 public class ProductManifest {
 
-    public static final String PRODUCT_LABEL = "X-Product";
-    public static final String PRODUCT_DESC = "product.json";
+    private static final String PRODUCT_LABEL = "X-Product";
+    private static final String PRODUCT_DESC = "product.json";
     private static final String CONFIG_ENTRY = "config";
 
     private final SortedSet<Manifest.Key> applications;

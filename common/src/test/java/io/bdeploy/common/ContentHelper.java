@@ -97,10 +97,10 @@ public class ContentHelper {
 
     public static void checkDirsEqual(Path p1, Path p2) throws IOException {
         SortedMap<String, Long> p1_content = Files.walk(p1).filter(Files::isRegularFile).collect(Collectors
-                .toMap(p -> p1.relativize(p).toString(), p -> PathHelper.sizeOf(p), ContentHelper::mapMerge, TreeMap::new));
+                .toMap(p -> p1.relativize(p).toString(), p -> p.toFile().length(), ContentHelper::mapMerge, TreeMap::new));
 
         SortedMap<String, Long> p2_content = Files.walk(p2).filter(Files::isRegularFile).collect(Collectors
-                .toMap(p -> p2.relativize(p).toString(), p -> PathHelper.sizeOf(p), ContentHelper::mapMerge, TreeMap::new));
+                .toMap(p -> p2.relativize(p).toString(), p -> p.toFile().length(), ContentHelper::mapMerge, TreeMap::new));
 
         assertThat(p1_content, is(p2_content));
     }

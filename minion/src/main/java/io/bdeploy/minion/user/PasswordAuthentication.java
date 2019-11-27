@@ -15,7 +15,7 @@ import javax.crypto.spec.PBEKeySpec;
 /**
  * Hash passwords for storage, and test passwords against password tokens.
  * Instances of this class can be used concurrently by multiple threads.
- * 
+ *
  * @author erickson
  * @see <a href="http://stackoverflow.com/a/2861125/3474">StackOverflow</a>
  */
@@ -24,7 +24,7 @@ final class PasswordAuthentication {
     /**
      * Each token produced by this class uses this identifier as a prefix.
      */
-    public static final String ID = "$31$";
+    private static final String ID = "$31$";
 
     /**
      * The minimum recommended cost, used by default
@@ -36,14 +36,15 @@ final class PasswordAuthentication {
     private final SecureRandom random = new SecureRandom();
 
     private static int iterations(int cost) {
-        if ((cost < 0) || (cost > 30))
+        if ((cost < 0) || (cost > 30)) {
             throw new IllegalArgumentException("cost: " + cost);
+        }
         return 1 << cost;
     }
 
     /**
      * Hash a password for storage.
-     * 
+     *
      * @return a secure authentication token to be stored for later authentication
      */
     public String hash(char[] password) {
@@ -59,20 +60,22 @@ final class PasswordAuthentication {
 
     /**
      * Authenticate with a password and a stored password token.
-     * 
+     *
      * @return true if the password and token match
      */
     public boolean authenticate(char[] password, String token) {
         Matcher m = layout.matcher(token);
-        if (!m.matches())
+        if (!m.matches()) {
             throw new IllegalArgumentException("Invalid token format");
+        }
         int iterations = iterations(Integer.parseInt(m.group(1)));
         byte[] hash = Base64.getUrlDecoder().decode(m.group(2));
         byte[] salt = Arrays.copyOfRange(hash, 0, SIZE / 8);
         byte[] check = pbkdf2(password, salt, iterations);
         int zero = 0;
-        for (int idx = 0; idx < check.length; ++idx)
+        for (int idx = 0; idx < check.length; ++idx) {
             zero |= hash[salt.length + idx] ^ check[idx];
+        }
         return zero == 0;
     }
 

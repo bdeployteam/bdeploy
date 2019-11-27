@@ -8,7 +8,6 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
-import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
 import io.bdeploy.interfaces.variables.VariableResolver.SpecialVariablePrefix;
 
 /**
@@ -40,15 +39,11 @@ public class ApplicationConfiguration {
 
     /**
      * Pre-rendered start command.
-     *
-     * @see ParameterDescriptor#preRender(String)
      */
     public CommandConfiguration start;
 
     /**
      * Pre-rendered stop command.
-     *
-     * @see ParameterDescriptor#preRender(String)
      */
     public CommandConfiguration stop;
 

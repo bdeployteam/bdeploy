@@ -377,7 +377,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         return paths;
     }
 
-    public <T> T readConfig(String name, Class<T> clazz) {
+    private <T> T readConfig(String name, Class<T> clazz) {
         Path cfg = config.resolve(name);
 
         if (!Files.exists(cfg)) {
@@ -395,7 +395,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         }
     }
 
-    public void storeConfig(String name, Object cfg) {
+    private void storeConfig(String name, Object cfg) {
         Path cfgPath = config.resolve(name);
 
         try {

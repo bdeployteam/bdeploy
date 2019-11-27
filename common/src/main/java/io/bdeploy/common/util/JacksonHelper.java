@@ -13,8 +13,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class JacksonHelper {
 
-    public static final ObjectMapper JSON_MAPPER = createObjectMapper((JsonFactory) null);
-    public static final ObjectMapper YAML_MAPPER = createObjectMapper(new YAMLFactory());
+    private static final ObjectMapper JSON_MAPPER = createObjectMapper((JsonFactory) null);
+    private static final ObjectMapper YAML_MAPPER = createObjectMapper(new YAMLFactory());
 
     public enum MapperType {
         JSON,

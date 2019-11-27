@@ -67,7 +67,7 @@ import io.bdeploy.jersey.resources.JerseyMetricsResourceImpl;
  */
 public class JerseyServer implements AutoCloseable, RegistrationTarget {
 
-    public static final Logger log = LoggerFactory.getLogger(JerseyServer.class);
+    private static final Logger log = LoggerFactory.getLogger(JerseyServer.class);
 
     public static final String START_TIME = "StartTime";
     public static final String TOKEN_SIGNER = "TokenSigner";

@@ -28,10 +28,6 @@ public class MarkerDatabase extends ObjectDatabase {
         }
     }
 
-    public void removeMarker(ObjectId id) {
-        super.removeObject(id);
-    }
-
     @Override
     public InputStream getStream(ObjectId id) throws IOException {
         throw new UnsupportedOperationException("Marker-only Database");

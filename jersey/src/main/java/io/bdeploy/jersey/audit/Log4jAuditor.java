@@ -9,7 +9,7 @@ import org.slf4j.MDC;
  */
 public class Log4jAuditor implements Auditor {
 
-    public static final Logger log = LoggerFactory.getLogger(Log4jAuditor.class);
+    private static final Logger log = LoggerFactory.getLogger(Log4jAuditor.class);
 
     @Override
     public void close() {

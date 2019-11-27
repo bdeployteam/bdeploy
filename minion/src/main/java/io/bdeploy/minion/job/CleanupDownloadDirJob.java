@@ -34,9 +34,9 @@ public class CleanupDownloadDirJob implements Job {
     private static final Logger log = LoggerFactory.getLogger(CleanupDownloadDirJob.class);
 
     /** Default schedule for cleanup job */
-    public static final String DEFAULT_CLEANUP_SCHEDULE = "0 */10 * * * ?";
+    private static final String DEFAULT_CLEANUP_SCHEDULE = "0 */10 * * * ?";
 
-    public static final String DOWNLOAD_DIR = "downloadDir";
+    private static final String DOWNLOAD_DIR = "downloadDir";
 
     /**
      * Initializes the job that cleans the download directory

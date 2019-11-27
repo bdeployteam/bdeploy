@@ -21,7 +21,7 @@ public class InMemoryKeyStore implements KeyStoreProvider {
         this(authPack, Long.toString(System.currentTimeMillis()).toCharArray());
     }
 
-    public InMemoryKeyStore(String authPack, char[] pp) {
+    private InMemoryKeyStore(String authPack, char[] pp) {
         this.authPack = authPack;
         this.pp = Arrays.copyOf(pp, pp.length);
     }
