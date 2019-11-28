@@ -5,10 +5,10 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatDrawer } from '@angular/material/sidenav';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { ManifestKey } from '../models/gen.dtos';
-import { Logger, LoggingService } from '../modules/core/services/logging.service';
-import { FileUploadComponent } from '../modules/shared/components/file-upload/file-upload.component';
-import { SoftwareService } from '../services/software.service';
+import { ManifestKey } from '../../../../models/gen.dtos';
+import { Logger, LoggingService } from '../../../core/services/logging.service';
+import { FileUploadComponent } from '../../../shared/components/file-upload/file-upload.component';
+import { SoftwareService } from '../../services/software.service';
 
 @Component({
   selector: 'app-software-repository',

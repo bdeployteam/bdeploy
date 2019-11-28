@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { SoftwareRepositoryConfiguration } from '../models/gen.dtos';
-import { MessageBoxMode } from '../modules/shared/components/messagebox/messagebox.component';
-import { MessageboxService } from '../modules/shared/services/messagebox.service';
-import { SoftwareRepositoryService } from '../services/software-repository.service';
+import { SoftwareRepositoryConfiguration } from '../../../../models/gen.dtos';
+import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
+import { MessageboxService } from '../../../shared/services/messagebox.service';
+import { SoftwareRepositoryService } from '../../services/software-repository.service';
 
 @Component({
   selector: 'app-software-repository-card',

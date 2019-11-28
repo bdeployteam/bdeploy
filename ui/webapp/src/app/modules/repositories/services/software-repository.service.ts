@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { SoftwareRepositoryConfiguration } from '../models/gen.dtos';
-import { ConfigService } from '../modules/core/services/config.service';
-import { Logger, LoggingService } from '../modules/core/services/logging.service';
+import { SoftwareRepositoryConfiguration } from '../../../models/gen.dtos';
+import { ConfigService } from '../../core/services/config.service';
+import { Logger, LoggingService } from '../../core/services/logging.service';
 
 @Injectable({
   providedIn: 'root',

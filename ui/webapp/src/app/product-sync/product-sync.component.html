@@ -126,7 +126,7 @@
         </div>
         <div class='centered-container' *ngIf='!startingTransfer'>
           <span>Product transfer has been initiated. Use the remote progress monitor on this page or on the <b>Manage Products</b> to monitor progress</span>
-          <button mat-raised-button [routerLink]='["/products", instanceGroup]' replaceUrl>Done</button>
+          <button mat-raised-button [routerLink]='["/instancegroup/products", instanceGroup]' replaceUrl>Done</button>
         </div>
       </mat-step>
     </mat-vertical-stepper>

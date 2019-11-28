@@ -5,13 +5,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { cloneDeep, isEqual } from 'lodash';
 import { Observable, of } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { EMPTY_SOFTWARE_REPO } from '../models/consts';
-import { SoftwareRepositoryConfiguration } from '../models/gen.dtos';
-import { ErrorMessage, Logger, LoggingService } from '../modules/core/services/logging.service';
-import { MessageBoxMode } from '../modules/shared/components/messagebox/messagebox.component';
-import { MessageboxService } from '../modules/shared/services/messagebox.service';
-import { InstanceGroupValidators } from '../modules/shared/validators/instance-group.validator';
-import { SoftwareRepositoryService } from '../services/software-repository.service';
+import { EMPTY_SOFTWARE_REPO } from '../../../../models/consts';
+import { SoftwareRepositoryConfiguration } from '../../../../models/gen.dtos';
+import { ErrorMessage, Logger, LoggingService } from '../../../core/services/logging.service';
+import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
+import { MessageboxService } from '../../../shared/services/messagebox.service';
+import { InstanceGroupValidators } from '../../../shared/validators/instance-group.validator';
+import { SoftwareRepositoryService } from '../../services/software-repository.service';
 
 @Component({
   selector: 'app-software-repo-add-edit',

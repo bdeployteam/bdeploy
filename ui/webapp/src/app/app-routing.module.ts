@@ -16,9 +16,6 @@ import { CanDeactivateGuard } from './modules/shared/guards/can-deactivate.guard
 import { ProcessConfigurationComponent } from './process-configuration/process-configuration.component';
 import { ProductSyncComponent } from './product-sync/product-sync.component';
 import { ProductsComponent } from './products/products.component';
-import { SoftwareRepoAddEditComponent } from './software-repo-add-edit/software-repo-add-edit.component';
-import { SoftwareRepositoriesBrowserComponent } from './software-repositories-browser/software-repositories-browser.component';
-import { SoftwareRepositoryComponent } from './software-repository/software-repository.component';
 
 const routes: Routes = [
   {
@@ -52,6 +49,12 @@ const routes: Routes = [
     data: { title: 'Edit Instance Group (${params["name"]})', header: 'Edit Instance Group' }
   },
   {
+    path: 'instancegroup/products/:group',
+    component: ProductsComponent,
+    canActivate: [AuthGuard],
+    data: { title: 'Manage Products (${params["group"]})', header: 'Manage Products' }
+  },
+  {
     path: 'instance/browser/:name',
     component: InstanceBrowserComponent,
     canActivate: [AuthGuard],
@@ -79,50 +82,18 @@ const routes: Routes = [
     data: { title: 'Instance Overview (${params["group"]} - ${params["uuid"]})', header: 'Instance Overview' }
   },
   {
-    path: 'configfiles/:group/:uuid/:version',
+    path: 'instance/configfiles/:group/:uuid/:version',
     component: ConfigFilesBrowserComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
     data: { title: 'Configuration Files (${params["group"]} - ${params["uuid"]})', header: 'Configuration Files' }
   },
   {
-    path: 'datafiles/:group/:uuid/:version',
+    path: 'instance/datafiles/:group/:uuid/:version',
     component: DataFilesBrowserComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
     data: { title: 'Data Files (${params["group"]} - ${params["uuid"]})', header: 'Data Files' }
-  },
-  {
-    path: 'products/:group',
-    component: ProductsComponent,
-    canActivate: [AuthGuard],
-    data: { title: 'Manage Products (${params["group"]})', header: 'Manage Products' }
-  },
-  {
-    path: 'softwarerepo/browser',
-    component: SoftwareRepositoriesBrowserComponent,
-    canActivate: [AuthGuard],
-    data: { title: 'Software Repositories', header: 'Software Repositories' }
-  },
-  {
-    path: 'softwarerepo/add',
-    component: SoftwareRepoAddEditComponent,
-    canActivate: [AuthGuard],
-    canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Add Software Repository', header: 'Add Software Repository' }
-  },
-  {
-    path: 'softwarerepo/edit/:name',
-    component: SoftwareRepoAddEditComponent,
-    canActivate: [AuthGuard],
-    canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Edit Software Repository (${params["name"]})', header: 'Edit Software Repository' }
-  },
-  {
-    path: 'softwarerepo/packages/:name',
-    component: SoftwareRepositoryComponent,
-    canActivate: [AuthGuard],
-    data: { title: 'Software Packages (${params["name"]})', header: 'Software Packages' }
   },
   {
     path: 'clientapps/:group',
@@ -132,14 +103,14 @@ const routes: Routes = [
     data: { title: 'Client Applications (${params["group"]})', header: 'Client Applications' }
   },
   {
-    path: 'attach/central',
+    path: 'servers/attach/central',
     component: AttachCentralComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
     data: { title: 'Attach to Central Server', header: 'Attach to Central Server' }
   },
   {
-    path: 'attach/managed/:group',
+    path: 'servers/attach/managed/:group',
     component: AttachManagedComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
@@ -153,7 +124,7 @@ const routes: Routes = [
     data: { title: 'Managed Servers', header: 'Managed Servers' }
   },
   {
-    path: 'product-sync/:group',
+    path: 'servers/product-sync/:group',
     component: ProductSyncComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
@@ -162,6 +133,10 @@ const routes: Routes = [
   {
     path: 'admin',
     loadChildren: () => import('./modules/admin/admin.module').then(x => x.AdminModule)
+  },
+  {
+    path: 'softwarerepo',
+    loadChildren: () => import('./modules/repositories/repositories.module').then(x => x.RepositoriesModule)
   }
 ];
 

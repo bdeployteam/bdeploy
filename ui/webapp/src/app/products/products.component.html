@@ -34,7 +34,7 @@
         </mat-grid-list>
       </div>
       <button mat-fab class="add-button" (click)="openUploadDialog()"><mat-icon>cloud_upload</mat-icon></button>
-      <button mat-fab class="sync-button" *ngIf='isCentral()' [routerLink]='["/product-sync", instanceGroup]' color="primary"><mat-icon>sync_alt</mat-icon></button>
+      <button mat-fab class="sync-button" *ngIf='isCentral()' [routerLink]='["/servers/product-sync", instanceGroup]' color="primary"><mat-icon>sync_alt</mat-icon></button>
     </mat-drawer-content>
   </mat-drawer-container>
 </div>

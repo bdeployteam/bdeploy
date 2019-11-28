@@ -14,7 +14,7 @@
     </p>
     <p>
       <span class="material-icons headerIcon">link</span>
-      <span class="headerText"><a [routerLink]="['/attach/managed', instanceGroupName]">Attach Managed Server</a></span>
+      <span class="headerText"><a [routerLink]="['/servers/attach/managed', instanceGroupName]">Attach Managed Server</a></span>
     </p>
   </div>
   <div *ngIf="managedServers && managedServers.length > 0" class="content-container">
@@ -36,4 +36,4 @@
   </div>
 </ng-container>
 
-<button mat-fab class="add-button" [routerLink]="['/attach/managed', instanceGroupName]"><mat-icon>add</mat-icon></button>
+<button mat-fab class="add-button" [routerLink]="['/servers/attach/managed', instanceGroupName]"><mat-icon>add</mat-icon></button>

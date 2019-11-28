@@ -46,12 +46,6 @@ import { ProductListComponent } from './product-list/product-list.component';
 import { ProductSyncComponent } from './product-sync/product-sync.component';
 import { ProductTagCardComponent } from './product-tag-card/product-tag-card.component';
 import { ProductsComponent } from './products/products.component';
-import { SoftwareCardComponent } from './software-card/software-card.component';
-import { SoftwareListComponent } from './software-list/software-list.component';
-import { SoftwareRepoAddEditComponent } from './software-repo-add-edit/software-repo-add-edit.component';
-import { SoftwareRepositoriesBrowserComponent } from './software-repositories-browser/software-repositories-browser.component';
-import { SoftwareRepositoryCardComponent } from './software-repository-card/software-repository-card.component';
-import { SoftwareRepositoryComponent } from './software-repository/software-repository.component';
 
 @NgModule({
   declarations: [
@@ -79,12 +73,6 @@ import { SoftwareRepositoryComponent } from './software-repository/software-repo
     ApplicationEditOptionalComponent,
     ProductTagCardComponent,
     ProcessDetailsComponent,
-    SoftwareRepositoriesBrowserComponent,
-    SoftwareRepositoryComponent,
-    SoftwareRepositoryCardComponent,
-    SoftwareRepoAddEditComponent,
-    SoftwareCardComponent,
-    SoftwareListComponent,
     ProcessStatusComponent,
     ProcessListComponent,
     ApplicationEditCommandPreviewComponent,

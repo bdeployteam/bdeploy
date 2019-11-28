@@ -20,7 +20,7 @@
     </p>
     <p>
       <span class="material-icons headerIcon">apps</span>
-      <span class="headerText"><a [routerLink]="['/products', instanceGroupName]">Manage Products</a></span>
+      <span class="headerText"><a [routerLink]="['/instancegroup/products', instanceGroupName]">Manage Products</a></span>
     </p>
   </div>
   <div *ngIf="hasProducts && instanceDtoList.isEmpty()" class="list-heading center">
@@ -44,7 +44,7 @@
 <button mat-fab class="add-button" [routerLink]="['/instance/add', instanceGroupName]" [disabled]="!hasProducts">
   <mat-icon>add</mat-icon>
 </button>
-<button mat-fab class="products-button" matTooltip="Manage Products..." [routerLink]="['/products', instanceGroupName]" color="primary">
+<button mat-fab class="products-button" matTooltip="Manage Products..." [routerLink]="['/instancegroup/products', instanceGroupName]" color="primary">
   <mat-icon>apps</mat-icon>
 </button>
 <button mat-fab class="clientApps-button" matTooltip="Client Applications..." [routerLink]="['/clientapps', instanceGroupName]" color="primary">
