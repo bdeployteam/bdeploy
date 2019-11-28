@@ -11,12 +11,12 @@ import { Observable, of } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { EMPTY_INSTANCE_GROUP } from '../../../../models/consts';
 import { InstanceGroupConfiguration, MinionMode } from '../../../../models/gen.dtos';
-import { InstanceGroupService } from '../../../../services/instance-group.service';
 import { ConfigService } from '../../../core/services/config.service';
 import { ErrorMessage, Logger, LoggingService } from '../../../core/services/logging.service';
 import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
 import { MessageboxService } from '../../../shared/services/messagebox.service';
 import { InstanceGroupValidators } from '../../../shared/validators/instance-group.validator';
+import { InstanceGroupService } from '../../services/instance-group.service';
 
 @Component({
   selector: 'app-instance-group-add-edit',

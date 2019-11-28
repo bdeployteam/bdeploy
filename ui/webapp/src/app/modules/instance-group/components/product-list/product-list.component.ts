@@ -2,9 +2,9 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { from } from 'rxjs';
 import { finalize, flatMap, tap } from 'rxjs/operators';
 import { ManifestKey, ProductDto } from '../../../../models/gen.dtos';
-import { DownloadService } from '../../../../services/download.service';
-import { ProductService } from '../../../../services/product.service';
 import { LoggingService } from '../../../core/services/logging.service';
+import { DownloadService } from '../../../shared/services/download.service';
+import { ProductService } from '../../services/product.service';
 
 @Component({
   selector: 'app-product-list',

@@ -347,7 +347,7 @@ describe('Creates screenshots for the user documentation', () => {
   // Capture Client Applications
   it('Captures Client Applications', () => {
     cy.login();
-    cy.visit('/#/clientapps/Demo');
+    cy.visit('/#/instancegroup/clientapps/Demo');
 
     cy.contains('Instance Group: Demo').should('exist');
     cy.waitUntilContentLoaded();

@@ -2,9 +2,9 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ManifestKey } from '../../../models/gen.dtos';
-import { DownloadService } from '../../../services/download.service';
 import { ConfigService } from '../../core/services/config.service';
 import { Logger, LoggingService } from '../../core/services/logging.service';
+import { DownloadService } from '../../shared/services/download.service';
 import { SoftwareRepositoryService } from './software-repository.service';
 
 @Injectable({

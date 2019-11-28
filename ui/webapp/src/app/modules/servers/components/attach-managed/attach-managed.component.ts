@@ -8,8 +8,8 @@ import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ManagedMasterDto } from '../../../../models/gen.dtos';
-import { DownloadService } from '../../../../services/download.service';
 import { ErrorMessage } from '../../../core/services/logging.service';
+import { DownloadService } from '../../../shared/services/download.service';
 import { ManagedServersService } from '../../services/managed-servers.service';
 import { AttachCentralComponent } from '../attach-central/attach-central.component';
 

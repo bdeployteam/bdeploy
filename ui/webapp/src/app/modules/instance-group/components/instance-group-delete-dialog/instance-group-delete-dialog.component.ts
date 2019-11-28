@@ -1,7 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { InstanceService } from '../../../../services/instance.service';
 import { LoggingService } from '../../../core/services/logging.service';
+import { InstanceService } from '../../../instance/services/instance.service';
 
 
 export interface InstanceGroupDeleteDialogData {

@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { CoreModule } from '../core/core.module';
 import { SharedModule } from '../shared/shared.module';
+import { ClientAppsComponent } from './components/client-apps/client-apps.component';
 import { InstanceGroupAddEditComponent } from './components/instance-group-add-edit/instance-group-add-edit.component';
 import { InstanceGroupBrowserComponent } from './components/instance-group-browser/instance-group-browser.component';
 import { InstanceGroupCardComponent } from './components/instance-group-card/instance-group-card.component';
@@ -27,6 +28,7 @@ import { InstanceGroupRoutingModule } from './instance-group-routing.module';
     ProductListComponent,
     ProductTagCardComponent,
     ProductInfoCardComponent,
+    ClientAppsComponent,
   ],
   entryComponents: [
     InstanceGroupDeleteDialogComponent,

@@ -1,7 +1,7 @@
 import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { Observable } from 'rxjs';
 import { InstanceDirectoryEntry, StringEntryChunkDto } from '../../../../models/gen.dtos';
-import { InstanceService } from '../../../../services/instance.service';
+import { InstanceService } from '../../../instance/services/instance.service';
 
 const MAX_TAIL = 512 * 1024; // 512KB max initial fetch.
 

@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ProductDto } from '../../../../models/gen.dtos';
-import { ProductService } from '../../../../services/product.service';
+import { ProductService } from '../../services/product.service';
 
 @Component({
   selector: 'app-product-card',

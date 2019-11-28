@@ -1,0 +1,43 @@
+<mat-toolbar>
+    <mat-toolbar-row>
+      <span>{{appConfig.name}}</span>
+      <div class='spacer'></div>
+      <mat-icon class="icon" [svgIcon]='getAppOs()' title="Operating System: {{getAppOs()}}"></mat-icon>
+    </mat-toolbar-row>
+    <mat-toolbar-row class="subHeader process-uid">
+        <span> ID: {{appConfig.uid}}</span>
+    </mat-toolbar-row>
+  </mat-toolbar>
+<div class='flex-column'>
+  <ng-container *ngIf="!hasLauncher()">
+    <div class="launcher-warn launcher-warn-theme">
+      <mat-icon>warning</mat-icon>
+      <span>Launcher for the operating system of this application is not available.</span>
+      </div>
+    <mat-divider></mat-divider>
+  </ng-container>
+  <ng-container *ngIf='isActiveVersion()'>
+    <button class="align-left" mat-button (click)="downloadClickAndStart()" matTooltip="Download Click & Start">
+      <mat-icon>play_arrow</mat-icon>
+      <span class="button-text">Click & Start</span>
+    </button>
+
+    <button class="align-left" mat-button (click)="downloadInstaller()" [disabled]="!hasLauncher() || downloading" matTooltip="Download Installer">
+      <mat-icon *ngIf="!downloading">cloud_download</mat-icon>
+      <mat-progress-spinner *ngIf="downloading" [mode]="'indeterminate'" diameter='24' class="progress-spinner"> </mat-progress-spinner>
+      <span class="button-text">Installer</span>
+    </button>
+    <mat-divider></mat-divider>
+    <p><b>Click & Start:</b></p>
+    <p>With Click & Start, you launch the application simply by clicking on the provided link.</p>
+    <p>
+      The launcher application needs to be installed and the browser needs to be configured to
+      open the provided file.
+    </p>
+  </ng-container>
+  <ng-container *ngIf='!isActiveVersion()'>
+    <p><b>Downloads are only available for active instance versions.</b></p>
+    <p>For a better overview of available/active versions, visit the <a [routerLink]="['/instancegroup/clientapps', instanceGroup]">Client Applications</a> page.</p>
+  </ng-container>
+  <mat-divider></mat-divider>
+</div>

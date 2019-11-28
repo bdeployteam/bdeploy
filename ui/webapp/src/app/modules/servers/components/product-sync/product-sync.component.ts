@@ -5,7 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { ManagedMasterDto, MinionMode, ProductDto, ProductTransferDto } from '../../../../models/gen.dtos';
-import { ProductService } from '../../../../services/product.service';
+import { ProductService } from '../../../instance-group/services/product.service';
 import { ManagedServersService } from '../../services/managed-servers.service';
 
 @Component({

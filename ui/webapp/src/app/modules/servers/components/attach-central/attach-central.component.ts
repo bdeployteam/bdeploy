@@ -3,9 +3,9 @@ import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatStep, MatStepper } from '@angular/material';
 import { EventSourcePolyfill } from 'ng-event-source';
 import { InstanceGroupConfiguration, ManagedMasterDto } from '../../../../models/gen.dtos';
-import { DownloadService } from '../../../../services/download.service';
-import { InstanceGroupService } from '../../../../services/instance-group.service';
 import { ErrorMessage, LoggingService } from '../../../core/services/logging.service';
+import { InstanceGroupService } from '../../../instance-group/services/instance-group.service';
+import { DownloadService } from '../../../shared/services/download.service';
 import { RemoteEventsService } from '../../../shared/services/remote-events.service';
 import { ManagedServersService } from '../../services/managed-servers.service';
 

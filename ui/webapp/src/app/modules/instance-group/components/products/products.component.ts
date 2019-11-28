@@ -7,10 +7,10 @@ import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { MinionMode, ProductDto } from '../../../../models/gen.dtos';
-import { ProductService } from '../../../../services/product.service';
 import { ConfigService } from '../../../core/services/config.service';
 import { FileUploadComponent } from '../../../shared/components/file-upload/file-upload.component';
 import { sortByTags } from '../../../shared/utils/manifest.utils';
+import { ProductService } from '../../services/product.service';
 
 @Component({
   selector: 'app-products',

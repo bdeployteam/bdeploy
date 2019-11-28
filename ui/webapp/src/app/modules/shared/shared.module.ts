@@ -11,9 +11,9 @@ import { RemoteProgressComponent } from './components/remote-progress/remote-pro
   declarations: [
     RemoteProgressComponent,
     RemoteProgressElementComponent,
+    FileViewerComponent,
     MessageboxComponent,
     FileUploadComponent,
-    FileViewerComponent,
   ],
   entryComponents: [
     MessageboxComponent,
@@ -25,9 +25,9 @@ import { RemoteProgressComponent } from './components/remote-progress/remote-pro
   ],
   exports: [
     RemoteProgressComponent,
+    FileViewerComponent,
     MessageboxComponent,
     FileUploadComponent,
-    FileViewerComponent,
   ]
 })
 export class SharedModule { }

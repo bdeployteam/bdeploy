@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { finalize } from 'rxjs/operators';
 import { ManifestKey } from '../../../../models/gen.dtos';
-import { DownloadService } from '../../../../services/download.service';
 import { LoggingService } from '../../../core/services/logging.service';
+import { DownloadService } from '../../../shared/services/download.service';
 import { compareTags } from '../../../shared/utils/manifest.utils';
 import { SoftwareService } from '../../services/software.service';
 
