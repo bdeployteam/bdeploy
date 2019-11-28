@@ -1,21 +1,14 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AttachCentralComponent } from './attach-central/attach-central.component';
-import { AttachManagedComponent } from './attach-managed/attach-managed.component';
 import { ClientAppsComponent } from './client-apps/client-apps.component';
 import { ConfigFilesBrowserComponent } from './config-files-browser/config-files-browser.component';
 import { DataFilesBrowserComponent } from './data-files-browser/data-files-browser.component';
 import { InstanceAddEditComponent } from './instance-add-edit/instance-add-edit.component';
 import { InstanceBrowserComponent } from './instance-browser/instance-browser.component';
-import { InstanceGroupAddEditComponent } from './instance-group-add-edit/instance-group-add-edit.component';
-import { InstanceGroupBrowserComponent } from './instance-group-browser/instance-group-browser.component';
-import { ManagedServersComponent } from './managed-servers/managed-servers.component';
 import { LoginComponent } from './modules/core/components/login/login.component';
 import { AuthGuard } from './modules/shared/guards/authentication.guard';
 import { CanDeactivateGuard } from './modules/shared/guards/can-deactivate.guard';
 import { ProcessConfigurationComponent } from './process-configuration/process-configuration.component';
-import { ProductSyncComponent } from './product-sync/product-sync.component';
-import { ProductsComponent } from './products/products.component';
 
 const routes: Routes = [
   {
@@ -27,32 +20,6 @@ const routes: Routes = [
     path: 'login',
     component: LoginComponent,
     data: { title: 'Login', header: 'Login' }
-  },
-  {
-    path: 'instancegroup/browser',
-    component: InstanceGroupBrowserComponent,
-    canActivate: [AuthGuard],
-    data: { title: 'Instance Groups', header: 'Instance Groups' }
-  },
-  {
-    path: 'instancegroup/add',
-    component: InstanceGroupAddEditComponent,
-    canActivate: [AuthGuard],
-    canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Add Instance Group', header: 'Add Instance Group' }
-  },
-  {
-    path: 'instancegroup/edit/:name',
-    component: InstanceGroupAddEditComponent,
-    canActivate: [AuthGuard],
-    canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Edit Instance Group (${params["name"]})', header: 'Edit Instance Group' }
-  },
-  {
-    path: 'instancegroup/products/:group',
-    component: ProductsComponent,
-    canActivate: [AuthGuard],
-    data: { title: 'Manage Products (${params["group"]})', header: 'Manage Products' }
   },
   {
     path: 'instance/browser/:name',
@@ -103,32 +70,8 @@ const routes: Routes = [
     data: { title: 'Client Applications (${params["group"]})', header: 'Client Applications' }
   },
   {
-    path: 'servers/attach/central',
-    component: AttachCentralComponent,
-    canActivate: [AuthGuard],
-    canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Attach to Central Server', header: 'Attach to Central Server' }
-  },
-  {
-    path: 'servers/attach/managed/:group',
-    component: AttachManagedComponent,
-    canActivate: [AuthGuard],
-    canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Attach Managed Server', header: 'Attach Managed Server' }
-  },
-  {
-    path: 'servers/:group',
-    component: ManagedServersComponent,
-    canActivate: [AuthGuard],
-    canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Managed Servers', header: 'Managed Servers' }
-  },
-  {
-    path: 'servers/product-sync/:group',
-    component: ProductSyncComponent,
-    canActivate: [AuthGuard],
-    canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Transfer Product Versions (${params["group"]})', header: 'Transfer Product Versions' }
+    path: 'instancegroup',
+    loadChildren: () => import('./modules/instance-group/instance-group.module').then(x => x.InstanceGroupModule)
   },
   {
     path: 'admin',
@@ -137,6 +80,10 @@ const routes: Routes = [
   {
     path: 'softwarerepo',
     loadChildren: () => import('./modules/repositories/repositories.module').then(x => x.RepositoriesModule)
+  },
+  {
+    path: 'servers',
+    loadChildren: () => import('./modules/servers/servers.module').then(x => x.ServersModule)
   }
 ];
 

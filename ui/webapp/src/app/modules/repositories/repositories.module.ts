@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { CoreModule } from '../core/core.module';
+import { InstanceGroupModule } from '../instance-group/instance-group.module';
 import { SharedModule } from '../shared/shared.module';
 import { SoftwareCardComponent } from './components/software-card/software-card.component';
 import { SoftwareListComponent } from './components/software-list/software-list.component';
@@ -25,7 +26,8 @@ import { RepositoriesRoutingModule } from './repositories-routing.module';
     CommonModule,
     SharedModule,
     CoreModule,
-    RepositoriesRoutingModule
+    RepositoriesRoutingModule,
+    InstanceGroupModule
   ]
 })
 export class RepositoriesModule { }

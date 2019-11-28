@@ -10,22 +10,23 @@
 /* Custom component theme collection */
 @import 'app/modules/shared/components/file-upload/file-upload-theme.scss';
 @import 'app/modules/admin/components/hive/hive-theme.scss';
-@import 'app/instance-group-delete-dialog/instance-group-delete-dialog-theme.scss';
+@import 'app/modules/servers/components/attach-central/attach-central.component.scss';
+@import 'app/modules/servers/components/managed-servers/managed-servers.component.scss';
+@import 'app/modules/servers/components/product-sync/product-sync-theme.scss';
+@import 'app/modules/instance-group/components/instance-group-delete-dialog/instance-group-delete-dialog-theme.scss';
+@import 'app/modules/instance-group/components/product-tag-card/product-tag-card-theme.scss';
+@import 'app/modules/instance-group/components/instance-group-logo/instance-group-logo-theme.scss';
+
 @import 'app/instance-card/instance-card-theme.scss';
 @import 'app/instance-node-card/instance-node-card-theme.scss';
 @import 'app/instance-version-card/instance-version-card-theme.scss';
 @import 'app/application-edit/application-edit-theme.scss';
-@import 'app/product-tag-card/product-tag-card-theme.scss';
 @import 'app/application-configuration-card/application-configuration-card-theme.scss';
-@import 'app/instance-group-logo/instance-group-logo-theme.scss';
 @import 'app/process-configuration/process-configuration-theme.scss';
 @import 'app/process-details/process-details-theme.scss';
 @import 'app/process-status/process-status-theme.scss';
 @import 'app/client-info/client-info-theme.scss';
 @import 'app/client-apps/client-apps-theme.scss';
-@import 'app/attach-central/attach-central.component.scss';
-@import 'app/managed-servers/managed-servers.component.scss';
-@import 'app/product-sync/product-sync-theme.scss';
 
 @mixin all-themes($theme) {
   // general angular material theme

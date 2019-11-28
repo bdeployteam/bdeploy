@@ -12,12 +12,12 @@ import { EMPTY_INSTANCE } from '../models/consts';
 import { InstanceConfiguration, InstancePurpose, InstanceVersionDto, MinionMode, ProductDto } from '../models/gen.dtos';
 import { ConfigService } from '../modules/core/services/config.service';
 import { Logger, LoggingService } from '../modules/core/services/logging.service';
+import { ManagedServersService } from '../modules/servers/services/managed-servers.service';
 import { MessageBoxMode } from '../modules/shared/components/messagebox/messagebox.component';
 import { MessageboxService } from '../modules/shared/services/messagebox.service';
 import { sortByTags } from '../modules/shared/utils/manifest.utils';
 import { InstanceGroupService } from '../services/instance-group.service';
 import { InstanceService } from '../services/instance.service';
-import { ManagedServersService } from '../services/managed-servers.service';
 import { ProductService } from '../services/product.service';
 
 @Component({

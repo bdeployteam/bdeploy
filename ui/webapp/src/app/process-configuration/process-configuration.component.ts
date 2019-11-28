@@ -20,6 +20,7 @@ import { ConfigService } from '../modules/core/services/config.service';
 import { HeaderTitleService } from '../modules/core/services/header-title.service';
 import { Logger, LoggingService } from '../modules/core/services/logging.service';
 import { SystemService } from '../modules/core/services/system.service';
+import { ManagedServersService } from '../modules/servers/services/managed-servers.service';
 import { FileUploadComponent } from '../modules/shared/components/file-upload/file-upload.component';
 import { MessageBoxMode } from '../modules/shared/components/messagebox/messagebox.component';
 import { MessageboxService } from '../modules/shared/services/messagebox.service';
@@ -30,7 +31,6 @@ import { ApplicationService } from '../services/application.service';
 import { DownloadService } from '../services/download.service';
 import { InstanceService } from '../services/instance.service';
 import { LauncherService } from '../services/launcher.service';
-import { ManagedServersService } from '../services/managed-servers.service';
 import { ProcessService } from '../services/process.service';
 import { ProductService } from '../services/product.service';
 
