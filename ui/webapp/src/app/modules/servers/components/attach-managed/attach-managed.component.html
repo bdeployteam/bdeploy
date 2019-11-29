@@ -27,6 +27,7 @@
         <mat-card class='drag-card drop-card' (drop)='onDrop($event)' (dragover)='onOver($event)'>
           Drop managed server information here!
         </mat-card>
+        <input type="file" hidden (change)="onUpload($event)" data-cy="managed-ident">
       </div>
       <p *ngIf='attachPayload'>
         Successfully read information for <b>{{attachPayload.hostName}}</b>.

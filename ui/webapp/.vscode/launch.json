@@ -57,5 +57,14 @@
       "url": "http://localhost:4202",
       "webRoot": "${workspaceFolder}"
     }
+  ],
+  "compounds": [
+    {
+      "name": "Central Chrom & Managed Firefox",
+      "configurations": [
+        "Launch Chrome (Central)",
+        "Launch Firefox (Managed)"
+      ]
+    }
   ]
 }

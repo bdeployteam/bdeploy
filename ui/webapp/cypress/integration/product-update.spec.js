@@ -25,7 +25,7 @@ describe('Product Tests', () => {
    * Creates a new instance and sets the instanceUuid variable to the resulting UUID
    */
   it('Create a new instance', function () {
-    cy.createInstance(instanceGroupName, 'ProductUpdateTest', '1.0.0').then(uuid => {
+    cy.createInstance(instanceGroupName, 'ProductUpdateTest', 'STANDALONE', '1.0.0').then(uuid => {
       instanceUuid = uuid;
 
       cy.get('body').contains(instanceUuid).should('exist');

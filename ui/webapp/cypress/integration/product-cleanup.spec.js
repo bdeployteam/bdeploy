@@ -27,7 +27,7 @@ describe('Product Cleanup Test', function() {
    * Create the Instance
    */
   it('Creates an instance', function() {
-    cy.createInstance(instanceGroupName, instanceName, '1.0.0').then(uuid => {
+    cy.createInstance(instanceGroupName, instanceName, 'STANDALONE', '1.0.0').then(uuid => {
       instanceUuid = uuid;
 
       cy.get('body').contains(instanceUuid).should('exist');

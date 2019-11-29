@@ -11,15 +11,17 @@ declare namespace Cypress {
     /**
      * Creates a new instance group with the given name.
      * @param group the name of the instance group to create
+     * @param mode the BDeploy mode to use when navigating
      */
-    createInstanceGroup(group: string);
+    createInstanceGroup(group: string, mode?: 'STANDALONE' | 'CENTRAL');
 
     /**
      * Uploads the given product into the given instance group
      * @param group the name of the instance group
      * @param product the name of the ZIP archive as stored in the fixtures folder
+     * @param mode the BDeploy mode to use when navigating
      */
-    uploadProductIntoGroup(group: string, product: string);
+    uploadProductIntoGroup(group: string, product: string, mode?: 'STANDALONE' | 'CENTRAL' | 'MANAGED');
 
     /**
      * Verify that the given product version exists
@@ -27,30 +29,53 @@ declare namespace Cypress {
      * @param productName the name of the product as displayed in the ui
      * @param productId the internal ID of the product
      * @param version the expected product version
+     * @param mode the BDeploy mode to use when navigating
      */
-    verifyProductVersion(group:string, productName:string, productId: string, version: string);
+    verifyProductVersion(group: string, productName: string, productId: string, version: string, mode?: 'STANDALONE' | 'CENTRAL' | 'MANAGED');
 
     /**
      * Delete the instance group with the given name.
      * @param group the name of the instance group to delete
+     * @param mode the BDeploy mode to use when navigating
      */
-    deleteInstanceGroup(group: string);
+    deleteInstanceGroup(group: string, mode?: 'STANDALONE' | 'CENTRAL' | 'MANAGED');
 
     /**
      * Create a new instance in the given instance group
      * @param group the name of the instance group to create into.
      * @param name the name of the instance to create
+     * @param mode the BDeploy mode to use when navigating
+     * @param version the product version to use
      * @returns the UUID of the created instance as string
      * @example cy.createInstance('Test')
      */
-    createInstance(group: string, name: string, version?: '1.0.0' | '2.0.0'): Chainable<string>;
+    createInstance(group: string, name: string, mode?: 'STANDALONE' | 'CENTRAL' | 'MANAGED', version?: '1.0.0' | '2.0.0'): Chainable<string>;
 
     /**
      * Delete a previously created instance and verify it is gone.
      * @param group the name of the instance group the instance is found in.
      * @param instanceUuid the UUID of the instance to delete.
+     * @param mode the BDeploy mode to use when navigating
      */
-    deleteInstance(group: string, instanceUuid: string);
+    deleteInstance(group: string, instanceUuid: string, mode?: 'STANDALONE' | 'CENTRAL' | 'MANAGED');
+
+    /**
+     * Navigate to the given instance
+     * @param groupName the name of the instance group the instance is found in.
+     * @param instanceUuid  the UUID of the instance to go to.
+     * @param mode the BDeploy mode to use when navigating
+     */
+    gotoInstance(groupName: string, instanceUuid: string, mode?: 'STANDALONE' | 'CENTRAL' | 'MANAGED');
+
+    /**
+     * Perform a dummy change on the given instance to create a new instance version.
+     * @param instanceGroupName the name of the instance group the instance lives within
+     * @param instanceUuid the instance UUID.
+     * @param nodeName name of the node the application is configured on
+     * @param applicationName the name of the application to modify (toggle keep-alive)
+     * @param mode the BDeploy mode to use when navigating
+     */
+    createNewInstanceVersionByDummyChange(instanceGroupName: string, instanceUuid: string, nodeName: string, applicationName: string, mode?: 'STANDALONE' | 'CENTRAL' | 'MANAGED');
 
     /**
      * Finds the 'app-instance-node-card' for the given name.
@@ -128,6 +153,12 @@ declare namespace Cypress {
     downloadBlobFileShould(callback: (any) => void);
 
     /**
+     * Chain off a clickable element which will trigger downloadLocation.click in the application.
+     * @param filename the filename to store the file as - in the cypress/fixtures directory
+     */
+    downloadBlobFile(filename: string);
+
+    /**
      * Chain off a clickable element which will trigger downloadLocation.assign in the application.
      * @param filename the name of the target file in the cypress/fixtures directory.
      */
@@ -135,10 +166,14 @@ declare namespace Cypress {
 
     /**
      * Waits until the content of the page is loaded.
+     * <p>
+     * NOTE: Don't use with 'within', as elements would not be found in narrowed scope.
      */
     waitUntilContentLoaded();
 
     visitCentral(url: string);
     visitManaged(url: string);
+
+    visitBDeploy(url: String, mode: 'STANDALONE' | 'CENTRAL' | 'MANAGED');
   }
 }

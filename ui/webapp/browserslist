@@ -1,11 +1,21 @@
-# This file is currently used by autoprefixer to adjust CSS to support the below specified browsers
 # For additional information regarding the format and rule options, please see:
 # https://github.com/browserslist/browserslist#queries
 #
-# For IE 9-11 support, please remove 'not' from the last line of the file and adjust as needed
+# This file is used for CSS processing and the Angular compiler to control generation
+# of ES5 bundles - we try to avoid ES5, and stick with browsers that support ES6 (ES2015).
+# This reduces build times for the webapp drastically.
 
-> 0.5%
-last 2 versions
-Firefox ESR
-not dead
-not IE 9-11
+
+# Desktop
+Edge >76
+Firefox >67
+Chrome >63
+#Safari >12.1 # seems broken...
+Opera >63
+
+# Mobile
+iOS > 11
+Android >76
+ChromeAndroid >78
+FirefoxAndroid >68
+Samsung >9.2

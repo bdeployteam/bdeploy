@@ -1,5 +1,5 @@
-Cypress.Commands.add('createInstance', function(group, name, version = '2.0.0') {
-  cy.visit('/');
+Cypress.Commands.add('createInstance', function(group, name, mode = 'STANDALONE', version = '2.0.0') {
+  cy.visitBDeploy('/', mode);
   cy.get('input[hint=Filter]').type(group);
   cy.get('[data-cy=group-' + group + ']').first().click();
 
@@ -33,9 +33,9 @@ Cypress.Commands.add('createInstance', function(group, name, version = '2.0.0') 
 
 })
 
-Cypress.Commands.add('deleteInstance', function(group, instanceUuid) {
+Cypress.Commands.add('deleteInstance', function(group, instanceUuid, mode = 'STANDALONE') {
   // make sure we're on the correct page :) this allows delete to work if previous tests failed.
-  cy.visit('/#/instance/browser/' + group)
+  cy.visitBDeploy('/#/instance/browser/' + group, mode);
 
   // open the menu on the card
   cy.contains('mat-card', instanceUuid).clickContextMenuItem('Delete')
@@ -54,8 +54,8 @@ Cypress.Commands.add('deleteInstance', function(group, instanceUuid) {
   cy.get('body').contains(instanceUuid).should('not.exist');
 })
 
-Cypress.Commands.add('gotoInstance', function(groupName, instanceUuid) {
-   cy.visit('/');
+Cypress.Commands.add('gotoInstance', function(groupName, instanceUuid, mode = 'STANDALONE') {
+   cy.visitBDeploy('/', mode);
    cy.get('[data-cy=group-' + groupName + ']').first().click();
    cy.waitUntilContentLoaded();
    cy.get('[data-cy=instance-' + instanceUuid + ']').first().click();
@@ -144,8 +144,8 @@ Cypress.Commands.add('deleteMissingParameter', function(name) {
   cy.get('@panel').contains('mat-grid-tile', name).contains('button','delete').click();
 })
 
-Cypress.Commands.add('createNewInstanceVersionByDummyChange', function(instanceGroupName, instanceUuid, nodeName, applicationName) {
-  cy.gotoInstance(instanceGroupName, instanceUuid);
+Cypress.Commands.add('createNewInstanceVersionByDummyChange', function(instanceGroupName, instanceUuid, nodeName, applicationName, mode = 'STANDALONE') {
+  cy.gotoInstance(instanceGroupName, instanceUuid, mode);
   cy.getApplicationConfigCard(nodeName, applicationName).clickContextMenuItem('Configure...')
 
   // toggle 'Keep Alive' slider

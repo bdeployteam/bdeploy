@@ -60,19 +60,7 @@ task updateFixtureProducts(type: Copy) {
 }
 
 task updateFixtures(dependsOn: [':test-data:setupDemoServer', 'updateFixtureProducts']) {
-    File dir = project(":test-data").buildDir
-    File input = file("${dir}/test-root/test-token.txt")
-    File output = file("${webappDir}/cypress/fixtures/token.json")
-
-    inputs.file input
-    outputs.file output
-
-    doLast {
-        String token = input.text
-        output.text = """{
-    "token": "${token}"
-}"""
-    }
+    // currently nothing...
 }
 
 List<String> getCypressConfig() {
@@ -131,20 +119,14 @@ task runCypress(type: Exec, dependsOn: updateFixtures) {
 }
 
 task runDevCypress(type: Exec) {
-    doFirst {
-        println("-----------------------------------------------------------------------------")
-        println("Put the token for the backend server in the cypress/fixtures/token.json file!")
-        println("Otherwise the test cannot create an instance on the running backend.")
-        println("-----------------------------------------------------------------------------")
-    }
     workingDir "$webappDir"
     commandLine (["${webappDir}/node_modules/.bin/" + cypressCmd(), "open", 
         "--config", "baseUrl=http://localhost:4200", 
-        "--env", "backendBaseUrl=https://localhost:7701/api",
-        "--env", "baseUrlCentral=https://localhost:4201",
-        "--env", "backendBaseUrlCentral=https://localhost:7705/api",
-        "--env", "baseUrlManaged=https://localhost:4202",
-        "--env", "backendBaseUrlManaged=https://localhost:7706/api"
+        "--env", "backendBaseUrl=https://localhost:7701/api"
+        + ",baseUrlCentral=http://localhost:4201"
+        + ",backendBaseUrlCentral=https://localhost:7705/api"
+        + ",baseUrlManaged=http://localhost:4202"
+        + ",backendBaseUrlManaged=https://localhost:7706/api"
     ])
 }
 

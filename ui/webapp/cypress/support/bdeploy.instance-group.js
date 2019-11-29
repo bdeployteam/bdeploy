@@ -1,8 +1,8 @@
 /**
  * Command: createInstanceGroup
  */
-Cypress.Commands.add('createInstanceGroup', function(name) {
-  cy.visit('/');
+Cypress.Commands.add('createInstanceGroup', function(name, mode = 'STANDALONE') {
+  cy.visitBDeploy('/', mode);
   cy.waitUntilContentLoaded();
 
   cy.contains('button', 'add').click();
@@ -26,8 +26,8 @@ Cypress.Commands.add('createInstanceGroup', function(name) {
 /**
  * Command: deleteInstanceGroup
  */
-Cypress.Commands.add('deleteInstanceGroup', function(name) {
-  cy.visit('/');
+Cypress.Commands.add('deleteInstanceGroup', function(name, mode = 'STANDALONE') {
+  cy.visitBDeploy('/', mode);
 
   cy.get('[data-cy=group-' + name + ']')
     .should('exist')
@@ -51,8 +51,8 @@ Cypress.Commands.add('deleteInstanceGroup', function(name) {
 /**
  * Command: uploadProductIntoGroup
  */
-Cypress.Commands.add('uploadProductIntoGroup', function(groupName,fileName) {
-  cy.visit('/');
+Cypress.Commands.add('uploadProductIntoGroup', function(groupName,fileName, mode = 'STANDALONE') {
+  cy.visitBDeploy('/', mode);
   cy.waitUntilContentLoaded();
 
   cy.get('[data-cy=group-' + groupName + ']').first().should('exist').click();
@@ -80,8 +80,8 @@ Cypress.Commands.add('uploadProductIntoGroup', function(groupName,fileName) {
  /**
  * Command: verifyProductVersion
  */
-Cypress.Commands.add('verifyProductVersion', function(groupName, productName, productId, productVersion) {
-  cy.visit('/');
+Cypress.Commands.add('verifyProductVersion', function(groupName, productName, productId, productVersion, mode = 'STANDALONE') {
+  cy.visitBDeploy('/', mode);
   cy.waitUntilContentLoaded();
 
   cy.get('[data-cy=group-' + groupName + ']').first().should('exist').click();

@@ -31,7 +31,6 @@ export class InstanceGroupCardComponent implements OnInit {
     private config: ConfigService) { }
 
   ngOnInit() {
-    console.log(this.isAttachAllowed)
     if (this.instanceGroup === undefined) {
       // either of the two inputs must be set.
       if (this.instanceGroupId === undefined) {

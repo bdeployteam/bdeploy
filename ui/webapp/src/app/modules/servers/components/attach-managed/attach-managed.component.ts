@@ -55,11 +55,23 @@ export class AttachManagedComponent implements OnInit {
     $event.preventDefault();
 
     if ($event.dataTransfer.files.length > 0) {
-      const reader = new FileReader();
-      reader.onload = e => (this.attachPayload = JSON.parse(reader.result.toString()));
-      reader.readAsText($event.dataTransfer.files[0]);
+      this.readFile($event.dataTransfer.files[0]);
     } else if ($event.dataTransfer.types.includes(AttachCentralComponent.ATTACH_MIME_TYPE)) {
       this.attachPayload = JSON.parse($event.dataTransfer.getData(AttachCentralComponent.ATTACH_MIME_TYPE));
+    }
+  }
+
+  private readFile(file: File) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      this.attachPayload = JSON.parse(reader.result.toString());
+    };
+    reader.readAsText(file);
+  }
+
+  onUpload($event) {
+    if ($event.target.files && $event.target.files.length > 0) {
+      this.readFile($event.target.files[0]);
     }
   }
 

@@ -21,7 +21,6 @@ const fs = require('fs-extra');
 module.exports = (on, config) => {
   on('task', {
     downloadFileFromUrl(args) {
-      console.log(args)
       const fileName = args.fileName;
       return new Promise((resolve, reject) => {
           request({ url: args.url, encoding: null, headers: { } }, function (err, res, body) {

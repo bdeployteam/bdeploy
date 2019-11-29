@@ -66,6 +66,23 @@ Cypress.Commands.add('downloadBlobFileShould', { prevSubject: true },  function(
   });
 });
 
+Cypress.Commands.add('downloadBlobFile', { prevSubject: true },  function(subject, filename) {
+  cy.window().then(win => {
+    const stubbed = cy.stub(win.downloadLocation, 'click', (link) => {});
+
+    cy.wrap(subject).click().should(() => {
+      expect(stubbed).to.be.calledOnce;
+
+      const link = stubbed.args[0][0];
+      cy.downloadObjectUrl(link).then(rq => {
+        expect(rq.status).to.equal(200);
+
+        cy.writeFile('cypress/fixtures/' + filename, rq.response);
+      });
+    });
+  });
+});
+
 Cypress.Commands.add('downloadFile', { prevSubject: true }, (subject, fileName) => {
   cy.window().then(win => {
     const stubbed = cy.stub(win.downloadLocation, 'assign', (link) => {});
