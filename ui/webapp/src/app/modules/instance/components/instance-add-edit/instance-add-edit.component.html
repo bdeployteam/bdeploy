@@ -48,7 +48,7 @@
               <mat-card-content>
                 If this option is enabled, instance versions that are older than<br>
                 the activated and the previously activated instance version<br>
-                are uninstalled automatically.                
+                are uninstalled automatically.
               </mat-card-content>
             </mat-card>
           </ng-template>
@@ -91,7 +91,7 @@
     <div formGroupName="managedServer" class="container" *ngIf='isCentral()'>
         <h3 class="header"> Managed Server </h3>
         <mat-grid-list cols="1" rowHeight="5em">
-          <mat-grid-tile *ngIf='serverNames.length === 0'>
+          <mat-grid-tile *ngIf='servers.length === 0'>
             <div class='warning-tile'>
               <mat-icon class='warning-icon' color='warn'>warning</mat-icon>It seems that there are no managed servers attached to this instance group. Attach a managed server from the instance group's drop down context menu.
             </div>
@@ -99,7 +99,7 @@
           <mat-grid-tile>
             <mat-form-field>
               <mat-select formControlName="name" placeholder="Managed Server">
-                <mat-option *ngFor="let server of serverNames" value="{{server}}">{{server}}</mat-option>
+                <mat-option *ngFor="let server of servers" value="{{server.name}}">{{server.name}} - {{server.description}}</mat-option>
               </mat-select>
               <mat-error *ngIf="managedServerControl.invalid">{{getErrorMessage(managedServerControl)}}</mat-error>
             </mat-form-field>

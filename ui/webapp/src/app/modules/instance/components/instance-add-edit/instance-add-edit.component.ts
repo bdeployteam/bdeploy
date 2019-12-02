@@ -9,7 +9,7 @@ import { cloneDeep, isEqual } from 'lodash';
 import { Observable, of } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { EMPTY_INSTANCE } from '../../../../models/consts';
-import { InstanceConfiguration, InstancePurpose, InstanceVersionDto, MinionMode, ProductDto } from '../../../../models/gen.dtos';
+import { InstanceConfiguration, InstancePurpose, InstanceVersionDto, ManagedMasterDto, MinionMode, ProductDto } from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
 import { Logger, LoggingService } from '../../../core/services/logging.service';
 import { InstanceGroupService } from '../../../instance-group/services/instance-group.service';
@@ -33,7 +33,7 @@ export class InstanceAddEditComponent implements OnInit {
 
   public purposes: InstancePurpose[];
   public products: ProductDto[] = [];
-  public serverNames: string[] = [];
+  public servers: ManagedMasterDto[] = [];
 
   public loading = false;
 
@@ -135,7 +135,7 @@ export class InstanceAddEditComponent implements OnInit {
     if (this.isCentral()) {
       this.managedServerControl.setValidators([Validators.required]);
       this.managedServers.getManagedServers(this.groupParam).subscribe(r => {
-        this.serverNames = r.map(e => e.hostName).sort();
+        this.servers = r.sort((a, b) => a.hostName.localeCompare(b.hostName));
       });
     }
   }
