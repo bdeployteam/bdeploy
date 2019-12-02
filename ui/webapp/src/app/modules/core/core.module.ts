@@ -6,14 +6,17 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule, MatBadgeModule, MatBottomSheetModule, MatButtonModule, MatCardModule, MatCheckboxModule, MatChipsModule, MatDialogModule, MatDividerModule, MatExpansionModule, MatFormFieldModule, MatGridListModule, MatIconModule, MatInputModule, MatListModule, MatMenuModule, MatPaginatorModule, MatProgressBarModule, MatProgressSpinnerModule, MatRadioModule, MatRippleModule, MatSelectModule, MatSidenavModule, MatSlideToggleModule, MatSnackBarModule, MatSortModule, MatStepperModule, MatTableModule, MatTabsModule, MatToolbarModule, MatTooltipModule, MatTreeModule } from '@angular/material';
 import { RouterModule } from '@angular/router';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { CookieService } from 'ngx-cookie-service';
 import { GlobalErrorHandler } from 'src/app/modules/core/global-error-handler';
 import { ConnectionLostComponent } from './components/connection-lost/connection-lost.component';
+import { InstanceGroupCardComponent } from './components/instance-group-card/instance-group-card.component';
+import { InstanceGroupLogoComponent } from './components/instance-group-logo/instance-group-logo.component';
 import { LoginComponent } from './components/login/login.component';
 import { LogoComponent } from './components/logo/logo.component';
 import { MainNavComponent } from './components/main-nav/main-nav.component';
 import { ManagedServerUpdateComponent } from './components/managed-server-update/managed-server-update.component';
+import { ProductInfoCardComponent } from './components/product-info-card/product-info-card.component';
+import { ProductTagCardComponent } from './components/product-tag-card/product-tag-card.component';
 import { ThemeChooserComponent } from './components/theme-chooser/theme-chooser.component';
 import { ClickStopPropagationDirective } from './directives/click-stop-propagation.directive';
 import { FileDropDirective } from './directives/file-drop.directive';
@@ -34,6 +37,10 @@ export function loadAppConfig(cfgService: ConfigService) {
     ConnectionLostComponent,
     LoginComponent,
     ManagedServerUpdateComponent,
+    InstanceGroupLogoComponent,
+    InstanceGroupCardComponent,
+    ProductTagCardComponent,
+    ProductInfoCardComponent,
   ],
   entryComponents: [
     ConnectionLostComponent,
@@ -85,7 +92,6 @@ export function loadAppConfig(cfgService: ConfigService) {
     FlexLayoutModule,
     RouterModule,
     LayoutModule,
-    NgxChartsModule,
   ],
   exports: [
     MatButtonModule,
@@ -125,7 +131,6 @@ export function loadAppConfig(cfgService: ConfigService) {
     ReactiveFormsModule,
     FlexLayoutModule,
     LayoutModule,
-    NgxChartsModule,
 
     // our own core components
     MainNavComponent,
@@ -135,6 +140,10 @@ export function loadAppConfig(cfgService: ConfigService) {
     ClickStopPropagationDirective,
     LoginComponent,
     ManagedServerUpdateComponent,
+    InstanceGroupLogoComponent,
+    InstanceGroupCardComponent,
+    ProductTagCardComponent,
+    ProductInfoCardComponent,
   ]
 })
 export class CoreModule { }

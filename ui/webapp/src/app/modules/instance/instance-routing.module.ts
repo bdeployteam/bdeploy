@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { Route, RouterModule } from '@angular/router';
 import { AuthGuard } from '../shared/guards/authentication.guard';
 import { CanDeactivateGuard } from '../shared/guards/can-deactivate.guard';
-import { ConfigFilesBrowserComponent } from './components/config-files-browser/config-files-browser.component';
 import { DataFilesBrowserComponent } from './components/data-files-browser/data-files-browser.component';
 import { InstanceAddEditComponent } from './components/instance-add-edit/instance-add-edit.component';
 import { InstanceBrowserComponent } from './components/instance-browser/instance-browser.component';
@@ -35,13 +34,6 @@ const INSTANCE_ROUTES: Route[] = [
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
     data: { title: 'Instance Overview (${params["group"]} - ${params["uuid"]})', header: 'Instance Overview' }
-  },
-  {
-    path: 'configfiles/:group/:uuid/:version',
-    component: ConfigFilesBrowserComponent,
-    canActivate: [AuthGuard],
-    canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Configuration Files (${params["group"]} - ${params["uuid"]})', header: 'Configuration Files' }
   },
   {
     path: 'datafiles/:group/:uuid/:version',

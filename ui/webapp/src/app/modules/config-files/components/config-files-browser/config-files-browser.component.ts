@@ -18,10 +18,10 @@ import { Observable, of, Subscription } from 'rxjs';
 import { FileStatusDto, FileStatusType, InstanceConfiguration } from '../../../../models/gen.dtos';
 import { Logger, LoggingService } from '../../../core/services/logging.service';
 import { ThemeService } from '../../../core/services/theme.service';
+import { InstanceService } from '../../../instance/services/instance.service';
 import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
 import { CanComponentDeactivate } from '../../../shared/guards/can-deactivate.guard';
 import { MessageboxService } from '../../../shared/services/messagebox.service';
-import { InstanceService } from '../../services/instance.service';
 
 export class ConfigFileStatus {
   type: FileStatusType;

@@ -3,10 +3,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { cloneDeep } from 'lodash';
 import { EMPTY_INSTANCE_GROUP } from '../../../../models/consts';
 import { InstanceGroupConfiguration, MinionMode } from '../../../../models/gen.dtos';
-import { ConfigService } from '../../../core/services/config.service';
-import { LoggingService } from '../../../core/services/logging.service';
-import { InstanceGroupService } from '../../services/instance-group.service';
-import { InstanceGroupDeleteDialogComponent } from '../instance-group-delete-dialog/instance-group-delete-dialog.component';
+import { InstanceGroupDeleteDialogComponent } from '../../../instance-group/components/instance-group-delete-dialog/instance-group-delete-dialog.component';
+import { InstanceGroupService } from '../../../instance-group/services/instance-group.service';
+import { ConfigService } from '../../services/config.service';
+import { LoggingService } from '../../services/logging.service';
 
 @Component({
   selector: 'app-instance-group-card',

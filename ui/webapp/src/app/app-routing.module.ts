@@ -32,6 +32,10 @@ const routes: Routes = [
   {
     path: 'servers',
     loadChildren: () => import('./modules/servers/servers.module').then(x => x.ServersModule)
+  },
+  {
+    path: 'configfiles',
+    loadChildren: () => import('./modules/config-files/config-files.module').then(x => x.ConfigFilesModule)
   }
 ];
 

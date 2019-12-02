@@ -1,9 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { AceEditorModule } from 'ng2-ace-editor';
 import { DragulaModule } from 'ng2-dragula';
 import { CoreModule } from '../core/core.module';
-import { InstanceGroupModule } from '../instance-group/instance-group.module';
 import { SharedModule } from '../shared/shared.module';
 import { ApplicationConfigurationCardComponent } from './components/application-configuration-card/application-configuration-card.component';
 import { ApplicationDescriptorCardComponent } from './components/application-descriptor-card/application-descriptor-card.component';
@@ -12,7 +10,6 @@ import { ApplicationEditManualComponent } from './components/application-edit-ma
 import { ApplicationEditOptionalComponent } from './components/application-edit-optional/application-edit-optional.component';
 import { ApplicationEditComponent } from './components/application-edit/application-edit.component';
 import { ClientInfoComponent } from './components/client-info/client-info.component';
-import { ConfigFilesBrowserComponent } from './components/config-files-browser/config-files-browser.component';
 import { DataFilesBrowserComponent } from './components/data-files-browser/data-files-browser.component';
 import { InstanceAddEditComponent } from './components/instance-add-edit/instance-add-edit.component';
 import { InstanceBrowserComponent } from './components/instance-browser/instance-browser.component';
@@ -26,8 +23,6 @@ import { ProcessListComponent } from './components/process-list/process-list.com
 import { ProcessStartConfirmComponent } from './components/process-start-confirm/process-start-confirm.component';
 import { ProcessStatusComponent } from './components/process-status/process-status.component';
 import { InstanceRoutingModule } from './instance-routing.module';
-
-
 
 @NgModule({
   declarations: [
@@ -49,7 +44,6 @@ import { InstanceRoutingModule } from './instance-routing.module';
     ApplicationEditCommandPreviewComponent,
     ProcessStartConfirmComponent,
     ClientInfoComponent,
-    ConfigFilesBrowserComponent,
     DataFilesBrowserComponent,
     InstanceVersionHistoryCardComponent,
   ],
@@ -64,10 +58,8 @@ import { InstanceRoutingModule } from './instance-routing.module';
     CommonModule,
     SharedModule,
     CoreModule,
-    InstanceGroupModule,
     InstanceRoutingModule,
 
-    AceEditorModule,
     DragulaModule.forRoot(),
   ]
 })

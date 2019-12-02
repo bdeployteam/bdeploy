@@ -82,7 +82,7 @@
         <button mat-menu-item (click)="importInstanceVersion()" [disabled]='isReadonly()'>
           Import Instance Version...
         </button>
-        <button mat-menu-item [disabled]='loading || isReadonly()' [routerLink]="['/instance/configfiles', groupParam, uuidParam, selectedConfig?.version.key.tag]" [disabled]="!isEditable()">
+        <button mat-menu-item [disabled]='loading || isReadonly()' [routerLink]="['/configfiles/browser', groupParam, uuidParam, selectedConfig?.version.key.tag]" [disabled]="!isEditable()">
           Configuration Files...
         </button>
         <button mat-menu-item [disabled]='loading || isReadonly()' [routerLink]="['/instance/datafiles', groupParam, uuidParam, selectedConfig?.version.key.tag]">

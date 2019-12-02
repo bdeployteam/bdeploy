@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { CoreModule } from '../core/core.module';
-import { InstanceGroupModule } from '../instance-group/instance-group.module';
 import { SharedModule } from '../shared/shared.module';
 import { AttachCentralComponent } from './components/attach-central/attach-central.component';
 import { AttachManagedComponent } from './components/attach-managed/attach-managed.component';
@@ -25,7 +24,6 @@ import { ServersRoutingModule } from './servers-routing.module';
     SharedModule,
     CoreModule,
     ServersRoutingModule,
-    InstanceGroupModule
   ]
 })
 export class ServersModule { }
