@@ -12,6 +12,8 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ImportOperation;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
+import io.bdeploy.common.cfg.Configuration.Validator;
+import io.bdeploy.common.cfg.ExistingPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 
@@ -26,6 +28,7 @@ public class ImportTool extends ConfiguredCliTool<ImportConfig> {
     public @interface ImportConfig {
 
         @Help("The path to the directory to import")
+        @Validator(ExistingPathValidator.class)
         String source();
 
         @Help("The target BHive to import into")

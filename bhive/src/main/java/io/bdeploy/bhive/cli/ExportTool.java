@@ -1,6 +1,5 @@
 package io.bdeploy.bhive.cli;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -10,6 +9,8 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ExportOperation;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
+import io.bdeploy.common.cfg.Configuration.Validator;
+import io.bdeploy.common.cfg.NonExistingPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 
@@ -27,6 +28,7 @@ public class ExportTool extends ConfiguredCliTool<ExportConfig> {
         String hive();
 
         @Help("The target path to export to")
+        @Validator(NonExistingPathValidator.class)
         String target();
 
         @Help("Manifest(s) to export. Format is 'name:tag'")
@@ -46,9 +48,6 @@ public class ExportTool extends ConfiguredCliTool<ExportConfig> {
         helpAndFailIfMissing(config.manifest(), "Missing --manifest");
 
         Path targetPath = Paths.get(config.target());
-        if (Files.exists(targetPath)) {
-            helpAndFail("Target path already exists: " + targetPath);
-        }
 
         try (BHive hive = new BHive(Paths.get(config.hive()).toUri(), getActivityReporter())) {
             hive.setParallelism(config.jobs());

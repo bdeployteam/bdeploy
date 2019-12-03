@@ -124,7 +124,27 @@ public class Configuration {
      */
     @SuppressWarnings("unchecked")
     public <T extends Annotation> T get(Class<? extends Annotation> target) {
-        return (T) Proxy.newProxyInstance(target.getClassLoader(), new Class<?>[] { target }, this::doMap);
+        T proxy = (T) Proxy.newProxyInstance(target.getClassLoader(), new Class<?>[] { target }, this::doMap);
+
+        // access each method once to initialize cache, run conversions and especially validations.
+        List<Exception> validationProblems = new ArrayList<>();
+        for (Method m : target.getDeclaredMethods()) {
+            try {
+                doMap(proxy, m, null);
+            } catch (Exception e) {
+                validationProblems.add(e);
+            }
+        }
+
+        if (!validationProblems.isEmpty()) {
+            ConfigValidationException collector = new ConfigValidationException();
+            for (Exception problem : validationProblems) {
+                collector.addSuppressed(problem);
+            }
+            throw collector;
+        }
+
+        return proxy;
     }
 
     private Object doMap(Object proxy, Method method, Object[] arguments) {
@@ -150,20 +170,34 @@ public class Configuration {
     }
 
     private Object doConvert(Method method, Object object) {
-        Class<?> returnType = method.getReturnType();
-        if (object != null && returnType.isAssignableFrom(object.getClass())) {
-            return object;
-        }
-
         // lookup existing conversion
         Object conversion = conversions.get(method);
         if (conversion != null) {
             return conversion;
         }
 
+        Validator validator = method.getAnnotation(Validator.class);
+        ValidationMessage vmsg = null;
+        Class<? extends ConfigValidator<?>> cv = null;
+        if (validator != null) {
+            cv = validator.value();
+            vmsg = cv.getAnnotation(ValidationMessage.class);
+
+            if (vmsg == null) {
+                throw new IllegalStateException("No validation message set on validator class: " + cv);
+            }
+        }
+
+        Class<?> returnType = method.getReturnType();
+        if (object != null && returnType.isAssignableFrom(object.getClass())) {
+            validateOrThrow(object, method, cv, vmsg);
+            return object;
+        }
+
         if (returnType.isPrimitive() && !(object instanceof String)) {
             // implicit conversion through boxing/unboxing. let's just hope the types match
             // ;)
+            validateOrThrow(object, method, cv, vmsg);
             return object;
         }
 
@@ -174,6 +208,7 @@ public class Configuration {
             for (int i = 0; i < list.size(); ++i) {
                 Array.set(targetArray, i, convertType(returnType.getComponentType(), (String) list.get(i)));
             }
+            validateOrThrow(targetArray, method, cv, vmsg);
             conversions.put(method, targetArray);
             return targetArray;
         }
@@ -187,11 +222,33 @@ public class Configuration {
         // do actual conversion
         conversion = convertType(returnType, (String) object);
 
+        validateOrThrow(conversion, method, cv, vmsg);
+
         // remember the result in the mapping, so we don't need to convert back and
         // forth all the time.
         conversions.put(method, conversion);
 
         return conversion;
+    }
+
+    private void validateOrThrow(Object value, Method m, Class<? extends ConfigValidator<?>> validator, ValidationMessage msg) {
+        if (validator == null) {
+            return;
+        }
+
+        try {
+            ConfigValidator<?> v = validator.getDeclaredConstructor().newInstance();
+            if (!v.validate(cast(value))) {
+                throw new IllegalArgumentException("--" + m.getName() + ": " + String.format(msg.value(), value));
+            }
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+            throw new IllegalStateException("Cannot validate value: " + value + " using validator: " + validator, e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T cast(Object object) {
+        return (T) object;
     }
 
     @SuppressWarnings("unchecked")
@@ -299,11 +356,39 @@ public class Configuration {
     @Documented
     @Retention(RetentionPolicy.RUNTIME)
     @Target(value = { ElementType.METHOD })
+    public @interface Validator {
+
+        Class<? extends ConfigValidator<?>> value();
+    }
+
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(value = ElementType.TYPE)
+    public @interface ValidationMessage {
+
+        String value() default "Validation failed for $1%s";
+    }
+
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(value = { ElementType.METHOD })
     public @interface EnvironmentFallback {
 
         /**
          * @return the name of the environment variable to query in case the parameter is not explicitly set.
          */
         String value();
+    }
+
+    @FunctionalInterface
+    public interface ConfigValidator<T> {
+
+        /**
+         * Validates a single value.
+         *
+         * @param value the parameter value.
+         * @return whether the value is valid.
+         */
+        public boolean validate(T value);
     }
 }

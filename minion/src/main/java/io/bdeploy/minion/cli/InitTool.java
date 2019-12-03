@@ -11,6 +11,9 @@ import javax.ws.rs.core.UriBuilder;
 
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
+import io.bdeploy.common.cfg.Configuration.Validator;
+import io.bdeploy.common.cfg.HostnameValidator;
+import io.bdeploy.common.cfg.NonExistingPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.security.ApiAccessToken;
@@ -37,6 +40,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
 
         @Help("Root directory to initialize, must not exist.")
         @EnvironmentFallback("BDEPLOY_ROOT")
+        @Validator(NonExistingPathValidator.class)
         String root();
 
         @Help("Optional directory where to deploy applications to, defaults to root/deploy")
@@ -44,6 +48,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
 
         @Help("The official hostname that the minion will think of for itself")
         @EnvironmentFallback("HOSTNAME")
+        @Validator(HostnameValidator.class)
         String hostname();
 
         @Help("Path to the ZIP file you extracted this program from. Set to 'ignore' to skip. Be aware that this will cause an immediate update once connected to a remote master.")
@@ -51,6 +56,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
 
         @Help("Write the access token to a token file instead of printing it on the console")
         @EnvironmentFallback("BDEPLOY_TOKENFILE")
+        @Validator(NonExistingPathValidator.class)
         String tokenFile();
 
         @Help("Internal update directory.")
@@ -70,9 +76,6 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         helpAndFailIfMissing(config.hostname(), "Missing --hostname");
 
         Path root = Paths.get(config.root());
-        if (Files.isDirectory(root)) {
-            helpAndFail("Root " + root + " already exists!");
-        }
 
         try (MinionRoot mr = new MinionRoot(root, MinionMode.TOOL, getActivityReporter())) {
             mr.getAuditor().audit(AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("init").build());

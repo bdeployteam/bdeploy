@@ -10,6 +10,8 @@ import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
+import io.bdeploy.common.cfg.Configuration.Validator;
+import io.bdeploy.common.cfg.ExistingPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.security.SecurityHelper;
@@ -40,6 +42,7 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
 
         @Help("Root directory for the master minion. Must be initialized using the init command.")
         @EnvironmentFallback("BDEPLOY_ROOT")
+        @Validator(ExistingPathValidator.class)
         String root();
 
         @Help("Specify the directory where any incoming updates should be placed in.")

@@ -1,6 +1,5 @@
 package io.bdeploy.bhive.cli;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyStore;
@@ -13,6 +12,8 @@ import io.bdeploy.bhive.remote.jersey.BHiveJacksonModule;
 import io.bdeploy.bhive.remote.jersey.BHiveLocatorImpl;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.cfg.Configuration.Help;
+import io.bdeploy.common.cfg.Configuration.Validator;
+import io.bdeploy.common.cfg.ExistingPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.security.SecurityHelper;
@@ -31,6 +32,7 @@ public class ServeTool extends ConfiguredCliTool<ServeConfig> {
         String[] serve();
 
         @Help("Private KeyStore containing the server certificate and private key")
+        @Validator(ExistingPathValidator.class)
         String keystore();
 
         @Help("Passphrase for the private KeyStore")
@@ -61,9 +63,6 @@ public class ServeTool extends ConfiguredCliTool<ServeConfig> {
                 hives.put(path, new BHive(hPath.toUri(), getActivityReporter()));
             }
             Path storePath = Paths.get(config.keystore());
-            if (!Files.exists(storePath)) {
-                helpAndFail("KeyStore does not exist: " + storePath);
-            }
 
             char[] passphrase = config.passphrase() == null ? null : config.passphrase().toCharArray();
             KeyStore ks = SecurityHelper.getInstance().loadPrivateKeyStore(storePath, passphrase);

@@ -22,6 +22,7 @@ import com.codahale.metrics.Timer;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.cfg.ConfigValidationException;
 import io.bdeploy.common.cfg.Configuration;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.metrics.Metrics;
@@ -398,7 +399,15 @@ public abstract class ToolBase {
          * the given annotation.
          */
         protected <X extends Annotation> X getConfig(Class<X> clazz) {
-            return config.get(clazz);
+            try {
+                return config.get(clazz);
+            } catch (ConfigValidationException e) {
+                out().println("Validation Issues Exist:");
+                for (Throwable t : e.getSuppressed()) {
+                    out().println("  " + t.getMessage());
+                }
+                throw e;
+            }
         }
 
         /**
@@ -410,7 +419,7 @@ public abstract class ToolBase {
 
         @Override
         public final void run() {
-            run(config.get(configClass));
+            run(getConfig(configClass));
         }
 
         /**

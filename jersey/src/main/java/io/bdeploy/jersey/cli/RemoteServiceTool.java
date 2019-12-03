@@ -21,6 +21,9 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
+import io.bdeploy.common.cfg.Configuration.Validator;
+import io.bdeploy.common.cfg.ExistingPathValidator;
+import io.bdeploy.common.cfg.RemoteValidator;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.security.OnDiscKeyStore;
 import io.bdeploy.common.security.RemoteService;
@@ -36,11 +39,13 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
     @Help("Configuration for remote access")
     private @interface RemoteConfig {
 
-        @Help("URI of remote BHive. Supports file:, jar:file:, bhive:")
+        @Help("URI of remote BHive. Supports file:, jar:file:")
         @EnvironmentFallback("BDEPLOY_REMOTE")
+        @Validator(RemoteValidator.class)
         String remote();
 
         @Help("Path to keystore containing access token.")
+        @Validator(ExistingPathValidator.class)
         String keystore();
 
         @Help("Passphrase for the keystore.")
@@ -52,6 +57,7 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
 
         @Help("Path to a file containing the access token. Can be given alternatively to a keystore.")
         @EnvironmentFallback("BDEPLOY_TOKENFILE")
+        @Validator(ExistingPathValidator.class)
         String tokenFile();
     }
 

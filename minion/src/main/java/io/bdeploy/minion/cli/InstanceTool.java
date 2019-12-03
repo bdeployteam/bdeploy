@@ -10,6 +10,9 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ManifestMaxIdOperation;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
+import io.bdeploy.common.cfg.Configuration.Validator;
+import io.bdeploy.common.cfg.ExistingPathValidator;
+import io.bdeploy.common.cfg.NonExistingPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.util.UuidHelper;
@@ -28,9 +31,11 @@ public class InstanceTool extends ConfiguredCliTool<InstanceConfig> {
         String hive();
 
         @Help("Path to a ZIP file containing an export produced with this command")
+        @Validator(ExistingPathValidator.class)
         String importFrom();
 
         @Help("Path to a non-existing ZIP file where to export a given instance configuration")
+        @Validator(NonExistingPathValidator.class)
         String exportTo();
 
         @Help(value = "UUID of the instance. When exporting must exist. When importing may exist (a new version is created). If not given, a random new UUID is generated.")

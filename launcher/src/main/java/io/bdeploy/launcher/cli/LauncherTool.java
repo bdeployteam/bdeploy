@@ -34,6 +34,8 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.Version;
 import io.bdeploy.common.cfg.Configuration.Help;
+import io.bdeploy.common.cfg.Configuration.Validator;
+import io.bdeploy.common.cfg.ExistingPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.security.RemoteService;
@@ -68,6 +70,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     public @interface LauncherConfig {
 
         @Help("Launch file (*.bdeploy). This can be given directly to the executable as single argument as well.")
+        @Validator(ExistingPathValidator.class)
         String launch();
 
         @Help("Local working directory for the launcher, defaults to the user's home/.bdeploy.")
