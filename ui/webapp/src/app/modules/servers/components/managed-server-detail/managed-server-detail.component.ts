@@ -160,7 +160,7 @@ export class ManagedServerDetailComponent implements OnInit {
       this.synchronized = false;
       this.messageBoxService.open({
         title: 'Synchronization Error',
-        message: 'Synchronization failed. The remote master server might be offline.',
+        message: 'Synchronization failed. The remote master server might be offline, or the instance group may no longer exist on the server.',
         mode: MessageBoxMode.ERROR,
       });
     }

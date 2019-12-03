@@ -41,6 +41,12 @@ declare namespace Cypress {
     deleteInstanceGroup(group: string, mode?: 'STANDALONE' | 'CENTRAL' | 'MANAGED');
 
     /**
+     * Attaches the managed server to the central server.
+     * @param group the name of the instance group to attach
+     */
+    attachManaged(group: string);
+
+    /**
      * Create a new instance in the given instance group
      * @param group the name of the instance group to create into.
      * @param name the name of the instance to create

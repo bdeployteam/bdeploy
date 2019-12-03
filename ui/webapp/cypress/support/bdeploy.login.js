@@ -58,5 +58,7 @@ Cypress.Commands.add('visitBDeploy', function(url, mode) {
     return cy.visitCentral(url)
   } else if(mode === 'MANAGED') {
     return cy.visitManaged(url);
+  } else {
+    throw new Error('Unuspported mode: ' + mode);
   }
 })
