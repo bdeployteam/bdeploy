@@ -9,126 +9,117 @@
   </mat-toolbar>
 
   <div class="stepper-container">
-    <mat-vertical-stepper #stepper class="stepper" linear>
-      <ng-template matStepperIcon="edit">
-        <mat-icon>done</mat-icon>
-      </ng-template>
 
-      <mat-step label="Introduction" #introStep>
-        <p>
-          This page can be used to transfer product version from and to managed servers. Click <b>Next</b> to begin.
+    <mat-horizontal-stepper labelPosition="end" class="stepper" linear #stepper [@.disabled]="true">
+
+      <mat-step label="Choose Source and Target">
+
+        <p class="intro">
+          This page lets you transfer product versions from and to managed servers. Transfering products between managed servers
+          will first pull the product to the central server and then push it to the target. This means that afterwards, the product
+          is available at the central server as well.
         </p>
+
+        <div class="hflex">
+          <mat-form-field class='column'>
+            <mat-label>Source</mat-label>
+            <mat-select [(value)]='sourceSelection'>
+                <mat-option [value]=""></mat-option>
+                <mat-option [value]="OPTION_CENTRAL" [disabled]="targetSelection === OPTION_CENTRAL">Central Server</mat-option>
+                <mat-option *ngFor='let server of managedServers' [value]='server.hostName' [disabled]="targetSelection === server.hostName">Managed: {{server.hostName}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field class='column'>
+            <mat-label>Target</mat-label>
+            <mat-select [(value)]='targetSelection'>
+              <mat-option [value]=""></mat-option>
+              <mat-option [value]="OPTION_CENTRAL" [disabled]="sourceSelection === OPTION_CENTRAL">Central Server</mat-option>
+              <mat-option *ngFor='let server of managedServers' [value]='server.hostName' [disabled]="sourceSelection === server.hostName">Managed: {{server.hostName}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+        </div>
         <div class="button-container">
-          <button mat-raised-button matStepperNext [disabled]='loading'>Next</button>
-          <mat-spinner [diameter]='24' *ngIf='loading'></mat-spinner>
+          <button mat-raised-button matStepperNext [disabled]='!isSourceAndTargetOK()' (click)='loadProducts()'>Next</button>
         </div>
       </mat-step>
-      <mat-step label="Choose Source">
-        Choose the source for the transfer.
-        <mat-radio-group (change)='updateSource($event)'>
-          <div class='server-grid'>
-            <mat-radio-button value="CENTRAL" #centralSourceRadio checked='true'>Central Server</mat-radio-button>
-            <div class='managed-server-cell'>
-              <mat-form-field *ngIf='!centralSourceRadio.checked' class='managed-server-field'>
-                <mat-label>Managed Server</mat-label>
-                <mat-select [(value)]='sourceManagedServer'>
-                  <mat-option *ngFor='let server of managedServers' [value]='server'>{{server.hostName}}</mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
-            <mat-radio-button value="MANAGED">Managed Server</mat-radio-button>
-          </div>
-        </mat-radio-group>
-        <div class="button-container">
-          <button mat-raised-button matStepperNext [disabled]='!isSourceOK()'>Next</button>
+
+      <mat-step label="Choose Products">
+
+        <p class="intro">
+          First select the product you want to transfer. Then take the product version and drag it to the right. You can transfer as many
+          product versions (also of different products) in one step.
+        </p>
+
+        <div class="hflex">
+          <mat-form-field class='column'>
+            <input matInput placeholder="Source" [value]='getSelectionLabel(sourceSelection)' disabled="true"/>
+          </mat-form-field>
+          <mat-form-field class='column'>
+            <input matInput placeholder="Target" [value]='getSelectionLabel(targetSelection)' disabled="true"/>
+          </mat-form-field>
         </div>
-      </mat-step>
-      <mat-step label="Choose Target">
-          Choose the target for the transfer.
-          <mat-radio-group (change)='updateTarget($event)'>
-            <div class='server-grid'>
-              <mat-radio-button value="CENTRAL" #centralTargetRadio [disabled]='sourceType === "CENTRAL"'>Central Server</mat-radio-button>
-              <div class='managed-server-cell'>
-                <mat-form-field *ngIf='!centralTargetRadio.checked' class='managed-server-field'>
-                  <mat-label>Managed Server</mat-label>
-                  <mat-select [(value)]='targetManagedServer'>
-                    <mat-option *ngFor='let server of managedServers' [value]='server' [disabled]='server.hostName === sourceManagedServer?.hostName'>{{server.hostName}}</mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </div>
-              <mat-radio-button value="MANAGED" checked='true'>Managed Server</mat-radio-button>
-            </div>
-          </mat-radio-group>
-        <div class="button-container">
-          <button mat-raised-button matStepperPrevious>Back</button>
-          <button mat-raised-button matStepperNext [disabled]='!isTargetOK()' (click)='loadProducts()'>Next</button>
-        </div>
-      </mat-step>
-      <mat-step label="Choose Product">
         <div *ngIf='loadingProducts'>
           <mat-spinner [diameter]='24'></mat-spinner>
         </div>
-        <div *ngIf='!loadingProducts && !dataSource.data.length'>
+        <div *ngIf='!loadingProducts && sourceProducts.size === 0'>
           No Products available on the source server.
         </div>
-        <div *ngIf='!loadingProducts && dataSource.data.length' class='table-container'>
-            <table mat-table [dataSource]="dataSource" class="mat-elevation-z2 products-table">
-              <tr mat-header-row *matHeaderRowDef="columnsToDisplay; sticky: true"></tr>
-              <tr mat-row *matRowDef="let row; columns: columnsToDisplay"></tr>
 
-              <ng-container matColumnDef="status">
-                <th mat-header-cell *matHeaderCellDef>
-                  Sel.
-                </th>
-                <td mat-cell *matCellDef="let row" [ngClass]='isAlreadyPresent(row) ? "prod-already-present" : ""' [matTooltip]='isAlreadyPresent(row) ? "Product version already exists on the target" : ""'>
-                  <mat-checkbox (click)="$event.stopPropagation()" (change)="toggleRowSelection($event, row)" [disabled]='isProcessing(row) || isAlreadyPresent(row)'>
-                  </mat-checkbox>
-                </td>
-              </ng-container>
-
-              <ng-container matColumnDef="name">
-                <th mat-header-cell *matHeaderCellDef>
-                  Name
-                </th>
-                <td mat-cell *matCellDef="let row" [ngClass]='isAlreadyPresent(row) ? "prod-already-present" : ""' [matTooltip]='isAlreadyPresent(row) ? "Product version already exists on the target" : ""'>
-                  {{ row.name }}
-                </td>
-              </ng-container>
-
-              <ng-container matColumnDef="version">
-                <th mat-header-cell *matHeaderCellDef>
-                  Version
-                </th>
-                <td mat-cell *matCellDef="let row" [ngClass]='isAlreadyPresent(row) ? "prod-already-present" : ""' [matTooltip]='isAlreadyPresent(row) ? "Product version already exists on the target" : ""'>
-                  {{ row.key.tag }}
-                </td>
-              </ng-container>
-
-              <ng-container matColumnDef="info">
-                <th mat-header-cell *matHeaderCellDef class='cell-right-align'>
-                  Info
-                </th>
-                <td mat-cell *matCellDef="let row"  class='cell-right-align'>
-                  <app-product-info-card [productDto]='row' *ngIf='!isProcessing(row)'></app-product-info-card>
-                  <mat-spinner [diameter]='24' *ngIf='isProcessing(row)'></mat-spinner>
-                </td>
-              </ng-container>
-            </table>
+        <div *ngIf='!loadingProducts && sourceProducts.size > 0' class="hflex">
+          <mat-form-field class='column'>
+            <mat-label>Product</mat-label>
+            <mat-select [(value)]='selectedSourceProductKey'>
+              <mat-option *ngFor='let p of sourceProductsKeys' [value]='p'>{{sourceProducts.get(p)[0].name}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+           <div class='column sel-caption'><mat-icon class="icon">work</mat-icon><span class="sel-caption-text">Selected Products for Transfer:</span></div>
         </div>
+        <div *ngIf='!loadingProducts && sourceProducts.size > 0' class="hflex">
+          <mat-nav-list class='column product-list' dragula="PROD_VERSIONS" [(dragulaModel)]="selectableProducts">
+            <mat-list-item *ngFor='let prod of selectableProducts'>
+              <div class='product-row'>
+                <div>{{prod.key.tag}}</div>
+                <div class='spacer'></div>
+                <app-product-info-card [productDto]="prod"></app-product-info-card>
+                <mat-icon (click)="selectProductVersion(prod)">arrow_forward</mat-icon>
+              </div>
+            </mat-list-item>
+          </mat-nav-list>
+          <mat-nav-list class='column product-list' dragula="PROD_VERSIONS" [(dragulaModel)]="selectedProducts">
+            <mat-list-item *ngFor='let prod of selectedProducts'>
+              <div class='product-row'>
+                <div>{{prod.name}}:{{prod.key.tag}}</div>
+                <div class='spacer'></div>
+                <app-product-info-card [productDto]="prod"></app-product-info-card>
+              </div>
+              <mat-icon  (click)="deselectProductVersion(prod)">close</mat-icon>
+            </mat-list-item>
+          </mat-nav-list>
+        </div>
+
         <div class="button-container">
           <button mat-raised-button matStepperPrevious (click)='clearProducts()'>Back</button>
           <button mat-raised-button matStepperNext [disabled]='!selectedProducts.length' (click)='startTransfer()'>Next</button>
         </div>
       </mat-step>
+
       <mat-step label="Transfer">
-        <div class='centered-container' *ngIf='startingTransfer'>
+        <div class='intro' *ngIf='startingTransfer'>
           <mat-spinner diameter="24"></mat-spinner>
         </div>
-        <div class='centered-container' *ngIf='!startingTransfer'>
-          <span>Product transfer has been initiated. Use the remote progress monitor on this page or on the <b>Manage Products</b> to monitor progress</span>
+
+        <p class="intro" *ngIf='!startingTransfer'>
+          Product transfer has been initiated. Use the remote progress monitor on this page or on the <b>Manage Products</b> to monitor progress
+        </p>
+
+        <div class="button-container">
           <button mat-raised-button [routerLink]='["/instancegroup/products", instanceGroup]' replaceUrl>Done</button>
         </div>
       </mat-step>
-    </mat-vertical-stepper>
+
+    </mat-horizontal-stepper>
+
   </div>
 </div>
+

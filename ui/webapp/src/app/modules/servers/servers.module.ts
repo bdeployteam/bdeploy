@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { DragulaModule } from 'ng2-dragula';
 import { CoreModule } from '../core/core.module';
 import { SharedModule } from '../shared/shared.module';
 import { AttachCentralComponent } from './components/attach-central/attach-central.component';
@@ -24,6 +25,7 @@ import { ServersRoutingModule } from './servers-routing.module';
     SharedModule,
     CoreModule,
     ServersRoutingModule,
+    DragulaModule.forRoot(),
   ]
 })
 export class ServersModule { }

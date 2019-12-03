@@ -1,11 +1,14 @@
 import { Location } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-import { MatCheckboxChange, MatRadioChange, MatTableDataSource } from '@angular/material';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormBuilder } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { isEqual } from 'lodash';
+import { DragulaService } from 'ng2-dragula';
+import { forkJoin, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { ManagedMasterDto, MinionMode, ProductDto, ProductTransferDto } from '../../../../models/gen.dtos';
-import { ProductService } from '../../../instance-group/services/product.service';
+import { ManagedMasterDto, MinionMode, ProductDto, ProductTransferDto } from 'src/app/models/gen.dtos';
+import { ProductService } from 'src/app/modules/instance-group/services/product.service';
+import { sortByTags } from 'src/app/modules/shared/utils/manifest.utils';
 import { ManagedServersService } from '../../services/managed-servers.service';
 
 @Component({
@@ -13,83 +16,105 @@ import { ManagedServersService } from '../../services/managed-servers.service';
   templateUrl: './product-sync.component.html',
   styleUrls: ['./product-sync.component.css']
 })
-export class ProductSyncComponent implements OnInit {
+export class ProductSyncComponent implements OnInit, OnDestroy {
+
+  public OPTION_CENTRAL = '$$CENTRAL$$';
 
   public instanceGroup: string;
-  public sourceType = MinionMode.CENTRAL;
-  public sourceManagedServer: ManagedMasterDto;
 
-  public targetType = MinionMode.MANAGED;
-  public targetManagedServer: ManagedMasterDto;
+  public managedServers: ManagedMasterDto[];
+
+  public sourceSelection = null;
+  public targetSelection = null;
+
+  public sourceProducts: Map<string, ProductDto[]> = new Map();
+  public sourceProductsKeys: string[];
+  private _selectedSourceProductKey: string;
+  set selectedSourceProductKey(key) {
+    this._selectedSourceProductKey = key;
+    this.selectableProducts = this.sourceProducts.get(key).filter(p => !this.isAlreadyPresent(p) && !this.isProcessing(p) && !this.isSelected(p));
+  };
+
+  targetProducts: ProductDto[];
+  processingProducts: ProductDto[];
+
+  public selectableProducts: ProductDto[] = []; // copy of sourceProducts[selection]
+  public selectedProducts: ProductDto[] = [];
 
   loading = true;
   loadingProducts = true;
   startingTransfer = true;
-  managedServers: ManagedMasterDto[];
 
-  columnsToDisplay = ['status', 'name', 'version', 'info'];
-  dataSource: MatTableDataSource<ProductDto>;
-  targetProducts: ProductDto[];
-  processingProducts: ProductDto[];
+  private subscription: Subscription = new Subscription();
 
-  selectedProducts: ProductDto[] = [];
+  constructor(
+    private fb: FormBuilder,
+    private route: ActivatedRoute,
+    public location: Location,
+    private servers: ManagedServersService,
+    private productService: ProductService,
+    private dragulaService: DragulaService
+  ) {}
 
-  constructor(private route: ActivatedRoute, public location: Location, private servers: ManagedServersService, private productService: ProductService) { }
-
-  ngOnInit() {
+  public ngOnInit(): void {
     this.instanceGroup = this.route.snapshot.paramMap.get('group');
 
     this.servers.getManagedServers(this.instanceGroup).pipe(finalize(() => this.loading = false)).subscribe(r => {
       this.managedServers = r.sort((a, b) => a.hostName.localeCompare(b.hostName));
     });
+
+    this.subscription.add(this.dragulaService.drop('PROD_VERSIONS').subscribe(({name, el, source}) => {
+      this.selectedSourceProductKey = this._selectedSourceProductKey; // update selectable product versions
+    }));
   }
 
-  updateSource($event: MatRadioChange) {
-    this.sourceType = $event.value;
-    this.sourceManagedServer = null;
-    this.targetManagedServer = null;
-  }
-
-  updateTarget($event: MatRadioChange) {
-    this.targetType = $event.value;
-    this.targetManagedServer = null;
-  }
-
-  isSourceOK(): boolean {
-    if (this.sourceType === MinionMode.MANAGED && !this.sourceManagedServer) {
-      return false;
-    }
-    return true;
-  }
-
-  isTargetOK(): boolean {
-    if (this.targetType === MinionMode.MANAGED && !this.targetManagedServer) {
-      return false;
-    }
-    return true;
+  public ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 
   loadProducts() {
-    // load products from source server.
+    // load products from source server
     let call0 = this.productService.getProducts(this.instanceGroup);
-    if (this.sourceType !== MinionMode.CENTRAL) {
-      call0 = this.servers.productsOfManagedServer(this.instanceGroup, this.sourceManagedServer.hostName);
+    if (this.getMinionMode(this.sourceSelection) !== MinionMode.CENTRAL) {
+      call0 = this.servers.productsOfManagedServer(this.instanceGroup, this.sourceSelection);
     }
 
-    // load products from the target server and check/disable entries of products already there.
+    // load products from the target server
     let call1 = this.productService.getProducts(this.instanceGroup);
-    if (this.targetType !== MinionMode.CENTRAL) {
-      call1 = this.servers.productsOfManagedServer(this.instanceGroup, this.targetManagedServer.hostName);
+    if (this.getMinionMode(this.targetSelection) !== MinionMode.CENTRAL) {
+      call1 = this.servers.productsOfManagedServer(this.instanceGroup, this.targetSelection);
     }
 
     const call2 = this.servers.productsInTransfer(this.instanceGroup);
 
     // execute and wait for all of the calls.
     forkJoin([call0, call1, call2]).pipe(finalize(() => this.loadingProducts = false)).subscribe(results => {
-      this.dataSource = new MatTableDataSource(results[0]);
+      this.sourceProducts = new Map();
+      results[0].forEach(prod => {
+        this.sourceProducts.set(prod.name, this.sourceProducts.get(prod.name) || []);
+        this.sourceProducts.get(prod.name).push(prod);
+      });
+      this.sourceProductsKeys = Array.from(this.sourceProducts.keys());
+      this.sourceProductsKeys.forEach(key => {
+        const versions: ProductDto[] = this.sourceProducts.get(key);
+          this.sourceProducts.set(key, sortByTags(versions, v => v.key.tag, false));
+      });
+
+
       this.targetProducts = results[1];
       this.processingProducts = results[2];
     });
+  }
+
+  public isSourceAndTargetOK(): boolean {
+    return this.sourceSelection != null && this.targetSelection != null;
+  }
+
+  public getSelectionLabel(value: string) {
+    if (value === this.OPTION_CENTRAL) {
+      return 'Central Server';
+    }
+    return 'Managed: ' + value;
   }
 
   isProcessing(prod: ProductDto): boolean {
@@ -106,6 +131,31 @@ export class ProductSyncComponent implements OnInit {
     return false;
   }
 
+  isSelected(prod: ProductDto): boolean {
+    if (this.selectedProducts && this.containsProd(this.selectedProducts, prod)) {
+      return true;
+    }
+    return false;
+  }
+
+  public selectProductVersion(productVersion: ProductDto) {
+    if (this.selectedProducts.indexOf(productVersion) === -1) {
+      this.selectedProducts.push(productVersion);
+      this.selectedSourceProductKey = this._selectedSourceProductKey; // update selectable product versions
+    }
+  }
+
+  public deselectProductVersion(productVersion: ProductDto) {
+    this.selectedProducts = this.selectedProducts.filter(p => !isEqual(p.key, productVersion.key));
+    this.selectedSourceProductKey = this._selectedSourceProductKey; // update selectable product versions
+  }
+
+  clearProducts() {
+    this.sourceProducts = new Map();
+    this.selectedProducts.length = 0;
+    this.loadingProducts = true;
+  }
+
   private containsProd(arr: ProductDto[], prod: ProductDto): boolean {
     if (arr.find(x => x.key.name === prod.key.name && x.key.tag === prod.key.tag)) {
       return true;
@@ -113,28 +163,20 @@ export class ProductSyncComponent implements OnInit {
     return false;
   }
 
-  clearProducts() {
-    this.dataSource = null;
-    this.loadingProducts = true;
+  private getMinionMode(selection: string) {
+    return selection === this.OPTION_CENTRAL ? MinionMode.CENTRAL : MinionMode.MANAGED;
   }
 
-  toggleRowSelection($event: MatCheckboxChange, row: ProductDto) {
-    if ($event.checked) {
-      if (this.containsProd(this.selectedProducts, row)) {
-        return;
-      }
-      this.selectedProducts.push(row);
-    } else {
-      this.selectedProducts.splice(this.selectedProducts.indexOf(row), 1);
-    }
+  private isCentralOption(selection: string): boolean {
+    return selection === this.OPTION_CENTRAL;
   }
 
   startTransfer() {
     const data: ProductTransferDto = {
-      sourceMode: this.sourceType,
-      sourceServer: this.sourceType === MinionMode.MANAGED ? this.sourceManagedServer.hostName : null,
-      targetMode: this.targetType,
-      targetServer: this.targetType === MinionMode.MANAGED ? this.targetManagedServer.hostName : null,
+      sourceMode: this.getMinionMode(this.sourceSelection),
+      sourceServer: this.isCentralOption(this.sourceSelection) ? null : this.sourceSelection,
+      targetMode: this.getMinionMode(this.targetSelection),
+      targetServer: this.isCentralOption(this.targetSelection) ? null : this.targetSelection,
       versionsToTransfer: this.selectedProducts
     };
 
