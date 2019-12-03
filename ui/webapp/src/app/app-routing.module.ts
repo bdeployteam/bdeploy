@@ -1,6 +1,8 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { LoginComponent } from './modules/core/components/login/login.component';
+import { MessageboxComponent } from './modules/shared/components/messagebox/messagebox.component';
+import { NotFoundGuard } from './modules/shared/guards/not-found.guard';
 
 const routes: Routes = [
   {
@@ -36,6 +38,11 @@ const routes: Routes = [
   {
     path: 'configfiles',
     loadChildren: () => import('./modules/config-files/config-files.module').then(x => x.ConfigFilesModule)
+  },
+  {
+    path: '**',
+    component: MessageboxComponent, // This is a DUMMY! the NotFoundGuard will /always/ redirect
+    canActivate: [NotFoundGuard]
   }
 ];
 
