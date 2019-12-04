@@ -9,6 +9,7 @@ import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.ExistingPathValidator;
+import io.bdeploy.common.cfg.MinionRootValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.security.ApiAccessToken;
@@ -35,7 +36,7 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
 
         @Help("Root directory to update.")
         @EnvironmentFallback("BDEPLOY_ROOT")
-        @Validator(ExistingPathValidator.class)
+        @Validator(MinionRootValidator.class)
         String root();
 
         @Help("Write the new access token to a token file instead of printing it on the console")
