@@ -35,7 +35,7 @@
   <div *ngFor="let purpose of purposes">
     <p class="list-heading">{{purpose}}</p>
     <div  class="card" *ngFor="let instanceDto of getInstanceDtosByPurpose(purpose)">
-      <app-instance-card [instanceDto]='instanceDto' [instanceGroupName]='instanceGroupName' (removeEvent)='remove(instance)'></app-instance-card>
+      <app-instance-card [instanceDto]='instanceDto' [instanceGroupName]='instanceGroupName' (removeEvent)='remove()'></app-instance-card>
     </div>
     <mat-divider class="list-divider"></mat-divider>
   </div>

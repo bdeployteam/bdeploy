@@ -95,7 +95,7 @@ export class InstanceBrowserComponent implements OnInit {
     return sorted;
   }
 
-  remove(instance: InstanceConfiguration) {
+  remove() {
     this.loadInstances();
   }
 }

@@ -29,7 +29,7 @@
           Version: <b *ngIf="!loading">{{ selectedConfig.instance.product.tag }}</b>&nbsp;<span *ngIf="!loading && !isProductAvailable(selectedConfig)" class="product-unavailable" matTooltip="Required product version is not available.">N/A</span>
         </div>
         <div *ngIf='controllingServer'>
-          Controlling Server: <b *ngIf="!loading">{{controllingServer.name}}</b>
+          Controlling Server: <b *ngIf="!loading">{{controllingServer.hostName}}</b>
         </div>
         <div *ngIf='!controllingServer'>
           &nbsp;
@@ -118,7 +118,7 @@
           to get the latest version from the managed master.
         </div>
         <div class="update-container" *ngIf="showUpdateComponent()">
-          <app-managed-server-update [serverName]="controllingServer.name" [instanceGroupName]="groupParam" [updateDto]="updateDto" (updateEvent)="onUpdateEvent($event)">
+          <app-managed-server-update [serverName]="controllingServer.hostName" [instanceGroupName]="groupParam" [updateDto]="updateDto" (updateEvent)="onUpdateEvent($event)">
           </app-managed-server-update>
         </div>
 
