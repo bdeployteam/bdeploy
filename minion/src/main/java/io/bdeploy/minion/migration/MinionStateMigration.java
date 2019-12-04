@@ -38,7 +38,8 @@ public class MinionStateMigration {
         // Ensure that the self name is set
         MinionState state = root.getState();
         if (state.self == null) {
-            state.self = MinionRoot.DEFAULT_NAME;
+            root.modifyState(s -> s.self = MinionRoot.DEFAULT_NAME);
+            state = root.getState();
             log.info("Setting self name to '{}'", MinionRoot.DEFAULT_NAME);
         }
 
