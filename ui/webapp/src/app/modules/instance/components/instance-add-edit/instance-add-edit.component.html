@@ -99,7 +99,7 @@
           <mat-grid-tile>
             <mat-form-field>
               <mat-select formControlName="name" placeholder="Managed Server">
-                <mat-option *ngFor="let server of servers" value="{{server.name}}">{{server.name}} - {{server.description}}</mat-option>
+                <mat-option *ngFor="let server of servers" value="{{server.hostName}}">{{server.hostName}} - {{server.description}}</mat-option>
               </mat-select>
               <mat-error *ngIf="managedServerControl.invalid">{{getErrorMessage(managedServerControl)}}</mat-error>
             </mat-form-field>

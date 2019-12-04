@@ -1,6 +1,6 @@
 package io.bdeploy.ui.api.impl;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -54,10 +54,7 @@ public class BackendInfoResourceImpl implements BackendInfoResource {
         if (minion.getMode() == MinionMode.CENTRAL) {
             String name = minion.getMinions().values().keySet().iterator().next();
             MinionStatusResource status = ResourceProvider.getResource(remote, MinionStatusResource.class, null);
-
-            Map<String, MinionStatusDto> result = new HashMap<>();
-            result.put(name, status.getStatus());
-            return result;
+            return Collections.singletonMap(name, status.getStatus());
         }
 
         // Delegate to the master to find out all nodes and their state

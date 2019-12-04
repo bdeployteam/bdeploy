@@ -176,10 +176,11 @@ export class ManagedServerDetailComponent implements OnInit {
     return false;
   }
 
-  onUpdateEvent(updateState: UpdateStatus) {
+  async onUpdateEvent(updateState: UpdateStatus) {
     this.updateStatus = updateState;
     if (this.isUpdateSuccess()) {
-      this.doSynchronize();
+      await this.doSynchronize();
+      await this.load();
     }
     if (this.isUpdateFailed()) {
       this.synchronized = false;
