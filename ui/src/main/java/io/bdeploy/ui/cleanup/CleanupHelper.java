@@ -270,8 +270,8 @@ public class CleanupHelper {
         Map<String, Set<String>> installedTagsMap = latestInstanceManifests.stream().collect(
                 Collectors.toMap(Key::getName, imKey -> InstanceManifest.of(hive, imKey).getState(hive).read().installedTags));
         // remove all to-be-uninstalled tags from installedTagsMap
-        latestInstanceManifests.stream().forEach(imKey -> instanceVersions4Uninstall.get(imKey.getName()).stream()
-                .forEach(k -> installedTagsMap.get(imKey.getName()).remove(k.getTag())));
+        latestInstanceManifests.stream().forEach(imKey -> Optional.ofNullable(instanceVersions4Uninstall.get(imKey.getName()))
+                .ifPresent(keys -> keys.stream().forEach(k -> installedTagsMap.get(imKey.getName()).remove(k.getTag()))));
 
         Comparator<String> intTagComparator = (a, b) -> Integer.compare(Integer.parseInt(a), Integer.parseInt(b));
 
