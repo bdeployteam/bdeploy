@@ -57,13 +57,17 @@ public class MinionUpdateTest {
         Path updateSource = TestAppFactory.createDummyApp("minion", tmp);
         Manifest.Key winUpdateKey = new Manifest.Key("bdeploy/snapshot/windows", "2.0.0");
         Manifest.Key linuxUpdateKey = new Manifest.Key("bdeploy/snapshot/linux", "2.0.0");
+        Manifest.Key macUpdateKey = new Manifest.Key("bdeploy/snapshot/macos", "2.0.0");
 
         local.execute(new ImportOperation().setManifest(winUpdateKey).setSourcePath(updateSource));
         local.execute(new ImportOperation().setManifest(linuxUpdateKey).setSourcePath(updateSource));
+        local.execute(new ImportOperation().setManifest(macUpdateKey).setSourcePath(updateSource));
 
         local.execute(new PushOperation().addManifest(winUpdateKey).setRemote(remote));
         local.execute(new PushOperation().addManifest(linuxUpdateKey).setRemote(remote));
-        UpdateHelper.update(remote, null, OsHelper.getRunningOs(), Arrays.asList(winUpdateKey, linuxUpdateKey), true);
+        local.execute(new PushOperation().addManifest(macUpdateKey).setRemote(remote));
+        UpdateHelper.update(remote, null, OsHelper.getRunningOs(), Arrays.asList(winUpdateKey, linuxUpdateKey, macUpdateKey),
+                true);
 
         // check that an update was triggered
         assertTrue(updateTriggered.get());
