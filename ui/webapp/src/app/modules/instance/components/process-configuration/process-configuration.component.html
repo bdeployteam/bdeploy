@@ -261,7 +261,7 @@
       [processConfig]="selectedConfig"
       [appConfigContext]="editAppConfigContext"
       [appDesc]="selectedConfig.nodeList.applications[editAppConfigContext.applicationConfiguration.application.name]"
-      [readonly]="selectedConfig.readonly"
+      [readonly]="isReadonly()"
       (validationStateChanged)="updateDirtyStateAndValidate()">
     </app-application-edit>
   </div>
