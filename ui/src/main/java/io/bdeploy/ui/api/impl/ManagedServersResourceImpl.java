@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.meta.MetaManifest;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
@@ -349,8 +350,11 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             rbh.getManifestInventory(instanceIds.toArray(String[]::new)).forEach((k, v) -> keysToFetch.add(k));
 
             // we're also interested in all the related meta manifests.
-            rbh.getManifestInventory(instanceIds.stream().map(s -> ".meta/" + s).toArray(String[]::new))
+            rbh.getManifestInventory(instanceIds.stream().map(s -> MetaManifest.META_PREFIX + s).toArray(String[]::new))
                     .forEach((k, v) -> keysToFetch.add(k));
+
+            // set calculated keys to fetch operation.
+            keysToFetch.forEach(fetchOp::addManifest);
         }
 
         hive.execute(fetchOp);
