@@ -26,7 +26,7 @@
             <mat-select [(value)]='sourceSelection'>
                 <mat-option [value]=""></mat-option>
                 <mat-option [value]="OPTION_CENTRAL" [disabled]="targetSelection === OPTION_CENTRAL">Central Server</mat-option>
-                <mat-option *ngFor='let server of managedServers' [value]='server.hostName' [disabled]="targetSelection === server.hostName">Managed: {{server.hostName}}</mat-option>
+                <mat-option *ngFor='let server of managedServers' [value]='server.hostName' [disabled]="targetSelection === server.hostName">Managed: {{server.hostName}} - {{server.description}}</mat-option>
             </mat-select>
           </mat-form-field>
           <mat-form-field class='column'>
@@ -34,7 +34,7 @@
             <mat-select [(value)]='targetSelection'>
               <mat-option [value]=""></mat-option>
               <mat-option [value]="OPTION_CENTRAL" [disabled]="sourceSelection === OPTION_CENTRAL">Central Server</mat-option>
-              <mat-option *ngFor='let server of managedServers' [value]='server.hostName' [disabled]="sourceSelection === server.hostName">Managed: {{server.hostName}}</mat-option>
+              <mat-option *ngFor='let server of managedServers' [value]='server.hostName' [disabled]="sourceSelection === server.hostName">Managed: {{server.hostName}} - {{server.description}}</mat-option>
             </mat-select>
           </mat-form-field>
 
@@ -76,7 +76,7 @@
            <div class='column sel-caption'><mat-icon class="icon">work</mat-icon><span class="sel-caption-text">Selected Products for Transfer:</span></div>
         </div>
         <div *ngIf='!loadingProducts && sourceProducts.size > 0' class="hflex">
-          <mat-nav-list class='column product-list' dragula="PROD_VERSIONS" [(dragulaModel)]="selectableProducts">
+          <mat-nav-list class='column product-list' dragula="PROD_VERSIONS" [(dragulaModel)]="selectableProducts" data-cy='prod-source'>
             <mat-list-item *ngFor='let prod of selectableProducts'>
               <div class='product-row'>
                 <div>{{prod.key.tag}}</div>
@@ -86,7 +86,7 @@
               </div>
             </mat-list-item>
           </mat-nav-list>
-          <mat-nav-list class='column product-list' dragula="PROD_VERSIONS" [(dragulaModel)]="selectedProducts">
+          <mat-nav-list class='column product-list' dragula="PROD_VERSIONS" [(dragulaModel)]="selectedProducts" data-cy='prod-target'>
             <mat-list-item *ngFor='let prod of selectedProducts'>
               <div class='product-row'>
                 <div>{{prod.name}}:{{prod.key.tag}}</div>

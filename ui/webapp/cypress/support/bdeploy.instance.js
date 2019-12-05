@@ -1,4 +1,4 @@
-Cypress.Commands.add('createInstance', function(group, name, mode = 'STANDALONE', version = '2.0.0') {
+Cypress.Commands.add('createInstance', function(group, name, mode = 'STANDALONE', version = '2.0.0', server = null) {
   cy.visitBDeploy('/', mode);
   cy.get('input[hint=Filter]').type(group);
   cy.get('[data-cy=group-' + group + ']').first().click();
@@ -25,6 +25,11 @@ Cypress.Commands.add('createInstance', function(group, name, mode = 'STANDALONE'
 
   cy.get('[placeholder=Version]').click();
   cy.get('mat-option').contains(version).click();
+
+  if(mode === 'CENTRAL' && server) {
+    cy.get('[placeholder="Managed Server"]').click();
+    cy.get('mat-option').contains(server).click();
+  }
 
   return cy.get('mat-toolbar-row').contains('UUID').get('b').then(el => {
     cy.get('button').contains('SAVE').click();
@@ -59,6 +64,30 @@ Cypress.Commands.add('gotoInstance', function(groupName, instanceUuid, mode = 'S
    cy.get('[data-cy=group-' + groupName + ']').first().click();
    cy.waitUntilContentLoaded();
    cy.get('[data-cy=instance-' + instanceUuid + ']').first().click();
+})
+
+Cypress.Commands.add('startProcess', function(node, app) {
+  cy.getActiveInstanceVersion().contains('Version').click();
+  cy.getApplicationConfigCard(node, app).click();
+
+  cy.contains('mat-toolbar', 'Process Control').should('exist');
+  cy.contains('mat-toolbar', app).should('exist');
+
+  // start the process, show process list
+  cy.contains('app-process-details', app).within(() => {
+    cy.contains('button', 'play_arrow').should('be.enabled').click();
+    cy.get('app-process-status').find('.app-process-running').should('exist')
+
+    cy.contains('button', 'settings').should('be.enabled').click();
+  })
+
+  // check that at least one process entry exists
+  cy.get('app-process-list').within(() => {
+    cy.get('tbody>tr').should('exist');
+  })
+
+  // close process list
+  cy.get('.cdk-overlay-backdrop').click('top', {force:true}); // click even if obstructed.
 })
 
 Cypress.Commands.add('installAndActivate', {prevSubject: true}, (subject) => {

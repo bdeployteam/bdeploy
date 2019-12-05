@@ -52,10 +52,11 @@ declare namespace Cypress {
      * @param name the name of the instance to create
      * @param mode the BDeploy mode to use when navigating
      * @param version the product version to use
+     * @param server the server to configure if mode is CENTRAL
      * @returns the UUID of the created instance as string
      * @example cy.createInstance('Test')
      */
-    createInstance(group: string, name: string, mode?: 'STANDALONE' | 'CENTRAL' | 'MANAGED', version?: '1.0.0' | '2.0.0'): Chainable<string>;
+    createInstance(group: string, name: string, mode?: 'STANDALONE' | 'CENTRAL' | 'MANAGED', version?: '1.0.0' | '2.0.0', server?: string): Chainable<string>;
 
     /**
      * Delete a previously created instance and verify it is gone.
@@ -110,6 +111,11 @@ declare namespace Cypress {
      * Chained off an instance version card, will install and activate this instance version.
      */
     installAndActivate(): Chainable<Subject>;
+
+    /**
+     * Starts the Server Application on master
+     */
+    startProcess(node: string, application: string);
 
         /**
      * Chained off an instance version card, will activate this instance version.

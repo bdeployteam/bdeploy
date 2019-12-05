@@ -103,27 +103,7 @@ describe('Instance Tests', function () {
     cy.visit('/#/instance/overview/Test/' + instanceUuid);
     // don't click 'somewhere' on the card, as there are buttons preventing events or doing something else.
     // pick some label to click...
-    cy.getActiveInstanceVersion().contains('Version').click();
-    cy.getApplicationConfigCard('master', 'Server Application').click();
-
-    cy.contains('mat-toolbar', 'Process Control').should('exist');
-    cy.contains('mat-toolbar', 'Server Application').should('exist');
-
-    // start the process, show process list
-    cy.contains('app-process-details', 'Server Application').within(() => {
-      cy.contains('button', 'play_arrow').should('be.enabled').click();
-      cy.get('app-process-status').find('.app-process-running').should('exist')
-
-      cy.contains('button', 'settings').should('be.enabled').click();
-    })
-
-    // check that at least one process entry exists
-    cy.get('app-process-list').within(() => {
-      cy.get('tbody>tr').should('exist');
-    })
-
-    // close process list
-    cy.get('.cdk-overlay-backdrop').click('top', {force:true}); // click even if obstructed.
+    cy.startProcess('master', 'Server Application');
 
     // click process output button
     cy.contains('app-process-details', 'Server Application').within(() => {
