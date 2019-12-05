@@ -124,8 +124,9 @@ public class InstanceManifest {
         for (Entry<Key, ObjectId> entry : root.getChildren().entrySet()) {
             // only manifest refs to minion config is allowed here.
             if (entry.getKey().getType() != Tree.EntryType.MANIFEST) {
-                if (!entry.getKey().getName().equals(InstanceConfiguration.FILE_NAME)) {
-                    log.warn("Unsupported file in instance manifest: {}", entry.getKey());
+                if (!entry.getKey().getName().equals(InstanceConfiguration.FILE_NAME)
+                        && !entry.getKey().getName().contentEquals("config")) {
+                    log.warn("Unsupported entry in instance manifest: {}", entry.getKey());
                 }
                 continue;
             }
@@ -269,6 +270,11 @@ public class InstanceManifest {
             // insert instance config
             root.add(new Tree.Key(InstanceConfiguration.FILE_NAME, Tree.EntryType.BLOB),
                     hive.execute(new ImportObjectOperation().setData(StorageHelper.toRawBytes(config))));
+
+            // reference config tree
+            if (config.configTree != null) {
+                root.add(new Tree.Key("config", Tree.EntryType.TREE), config.configTree);
+            }
 
             // insert and record manifest reference
             instanceNodeManifests.forEach((k, v) -> root.add(new Tree.Key(k, Tree.EntryType.MANIFEST),
