@@ -50,6 +50,8 @@ public class CleanupHelper {
 
     private static final Logger log = LoggerFactory.getLogger(CleanupHelper.class);
 
+    private static Comparator<String> intTagComparator = (a, b) -> Integer.compare(Integer.parseInt(a), Integer.parseInt(b));
+
     private CleanupHelper() {
     }
 
@@ -232,7 +234,7 @@ public class CleanupHelper {
 
         return InstanceManifest.scan(hive, false).stream()
                 .filter(im -> im.getName().equals(instanceManifest.getManifest().getName())) //
-                .filter(im -> (state.activeTag != null && im.getTag().compareTo(state.activeTag) < 0)
+                .filter(im -> (state.activeTag != null && intTagComparator.compare(im.getTag(), state.activeTag) < 0)
                         && !im.getTag().equals(state.lastActiveTag)) //
                 .filter(im -> state.installedTags.contains(im.getTag())) //
                 .filter(im -> !activeTags.contains(im.getTag())) //
@@ -272,8 +274,6 @@ public class CleanupHelper {
         // remove all to-be-uninstalled tags from installedTagsMap
         latestInstanceManifests.stream().forEach(imKey -> Optional.ofNullable(instanceVersions4Uninstall.get(imKey.getName()))
                 .ifPresent(keys -> keys.stream().forEach(k -> installedTagsMap.get(imKey.getName()).remove(k.getTag()))));
-
-        Comparator<String> intTagComparator = (a, b) -> Integer.compare(Integer.parseInt(a), Integer.parseInt(b));
 
         Map<String, String> oldestTag = new HashMap<>();
         for (Map.Entry<String, Set<String>> entry : installedTagsMap.entrySet()) {
