@@ -18,8 +18,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.meta.MetaManifest;
+import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
+import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.PruneOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.security.RemoteService;
@@ -113,25 +116,31 @@ public class CleanupHelper {
 
     private static void cleanInstanceGroup(SecurityContext context, boolean immediate, MasterProvider provider,
             List<CleanupGroup> groups, String group, BHive hive, InstanceGroupConfiguration cfg) {
+
         List<CleanupAction> instanceGroupActions = new ArrayList<>();
         Map<String, SortedSet<Key>> instanceVersions4Uninstall = new HashMap<>();
+
+        SortedSet<Manifest.Key> allManifests4deletion = new TreeSet<>(); // collect all keys for meta cleanup
 
         // auto uninstall of old instance version
         SortedSet<Key> latestImKeys = InstanceManifest.scan(hive, true);
         for (Key key : latestImKeys) {
             InstanceManifest im = InstanceManifest.of(hive, key);
             if (im.getConfiguration().autoUninstall) {
-                instanceVersions4Uninstall.put(im.getManifest().getName(),
-                        findInstanceVersions4Uninstall(context, group, hive, im, provider));
-                instanceGroupActions.addAll(uninstallInstanceVersions(context, hive,
-                        instanceVersions4Uninstall.get(im.getManifest().getName()), immediate, provider));
+                SortedSet<Key> keys = findInstanceVersions4Uninstall(context, group, hive, im, provider);
+                instanceVersions4Uninstall.put(im.getManifest().getName(), keys);
+                allManifests4deletion.addAll(keys);
+                instanceGroupActions.addAll(uninstallInstanceVersions(context, hive, keys, immediate, provider));
             }
         }
 
         // cleanup of unused products
         if (cfg.autoDelete) {
-            instanceGroupActions.addAll(deleteUnusedProducts(context, hive, instanceVersions4Uninstall, immediate, provider));
+            instanceGroupActions.addAll(
+                    deleteUnusedProducts(context, hive, instanceVersions4Uninstall, allManifests4deletion, immediate, provider));
         }
+
+        instanceGroupActions.addAll(cleanupMetaManifests(context, hive, allManifests4deletion, immediate, provider));
 
         if (!immediate) {
             groups.add(new CleanupGroup("Perform Cleanup on Instance Group " + cfg.name, null, cfg.name, instanceGroupActions));
@@ -260,7 +269,8 @@ public class CleanupHelper {
     }
 
     private static List<CleanupAction> deleteUnusedProducts(SecurityContext context, BHive hive,
-            Map<String, SortedSet<Key>> instanceVersions4Uninstall, boolean immediate, MasterProvider provider) {
+            Map<String, SortedSet<Key>> instanceVersions4Uninstall, SortedSet<Manifest.Key> allManifests4deletion,
+            boolean immediate, MasterProvider provider) {
         List<CleanupAction> actions = new ArrayList<>();
 
         // map of available products grouped by product name
@@ -287,18 +297,21 @@ public class CleanupHelper {
                 .collect(Collectors.groupingBy(Key::getName, Collectors.toCollection(TreeSet::new)));
 
         // create actions for unused products (older than the oldest product in use)
-        createDeleteProductsActions(hive, actions, allProductsMap, usedProductsMap);
+        SortedSet<Manifest.Key> manifests4deletion = new TreeSet<>();
+        createDeleteProductsActions(hive, actions, manifests4deletion, allProductsMap, usedProductsMap);
 
         if (immediate) {
             perform(context, hive, actions, provider);
             return Collections.emptyList();
         }
 
+        allManifests4deletion.addAll(manifests4deletion);
         return actions;
     }
 
     private static void createDeleteProductsActions(BHive hive, List<CleanupAction> actions,
-            Map<String, SortedSet<Key>> allProductsMap, Map<String, SortedSet<Key>> usedProductsMap) {
+            SortedSet<Manifest.Key> manifests4deletion, Map<String, SortedSet<Key>> allProductsMap,
+            Map<String, SortedSet<Key>> usedProductsMap) {
         for (SortedSet<Key> pVersionKeys : allProductsMap.values()) {
             SortedSet<Key> usedProducts = usedProductsMap.get(pVersionKeys.first().getName());
             // if the product is not used at all, take the newest product version to protect it
@@ -312,11 +325,13 @@ public class CleanupHelper {
                 // protect all used products in use, but it's still being checked here again ;-)
                 if (usedProducts == null || !usedProducts.contains(versionKey)) {
                     ProductManifest pm = ProductManifest.of(hive, versionKey);
+                    manifests4deletion.add(versionKey);
                     actions.add(new CleanupAction(CleanupType.DELETE_MANIFEST, versionKey.toString(), "Delete product \""
                             + pm.getProductDescriptor().name + "\", version \"" + pm.getKey().getTag() + "\""));
 
                     // delete applications in product: this assumes that no single application version is used in multiple products.
                     for (Key appKey : pm.getApplications()) {
+                        manifests4deletion.add(appKey);
                         ApplicationManifest am = ApplicationManifest.of(hive, appKey);
                         actions.add(new CleanupAction(CleanupType.DELETE_MANIFEST, appKey.toString(), "Delete Application \""
                                 + am.getDescriptor().name + "\", version \"" + am.getKey().getTag() + "\""));
@@ -324,6 +339,27 @@ public class CleanupHelper {
                 }
             }
         }
+    }
+
+    private static List<CleanupAction> cleanupMetaManifests(SecurityContext context, BHive hive,
+            SortedSet<Manifest.Key> allManifests4deletion, boolean immediate, MasterProvider provider) {
+
+        List<CleanupAction> actions = new ArrayList<>();
+
+        SortedSet<Key> allImKeys = hive.execute(new ManifestListOperation());
+        for (Key key : allImKeys) {
+            if (MetaManifest.isMetaManifest(key) && !MetaManifest.isParentAlive(key, hive, allManifests4deletion)) {
+                actions.add(new CleanupAction(CleanupType.DELETE_MANIFEST, key.toString(), "Delete manifest " + key));
+            }
+        }
+
+        if (immediate) {
+            perform(context, hive, actions, provider);
+            return Collections.emptyList();
+        }
+
+        return actions;
+
     }
 
     private static void perform(SecurityContext context, BHive hive, List<CleanupAction> actions, MasterProvider provider) {
