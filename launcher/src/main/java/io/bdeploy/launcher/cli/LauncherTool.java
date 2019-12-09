@@ -42,6 +42,7 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.dcu.InstanceNodeController;
 import io.bdeploy.interfaces.ScopedManifestKey;
@@ -57,6 +58,7 @@ import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
+import io.bdeploy.interfaces.variables.LocalHostnameResolver;
 import io.bdeploy.launcher.cli.LauncherTool.LauncherConfig;
 import io.bdeploy.launcher.cli.branding.LauncherSplash;
 import io.bdeploy.launcher.cli.branding.LauncherSplashReporter;
@@ -374,15 +376,15 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
      * Launches the client process.
      */
     private static Process launchProcess(Manifest.Key targetClientKey, InstanceNodeController controller) {
-        log.info("launching {}", targetClientKey);
         ProcessGroupConfiguration pgc = controller.getProcessGroupConfiguration();
         ProcessConfiguration pc = pgc.applications.get(0);
+        List<String> command = TemplateHelper.process(pc.start, controller.getResolver());
+        log.info("launching {} using {}", targetClientKey, command);
 
         // INHERIT causes problems when debugging but is what we actually want in real life, attention.
-        ProcessBuilder b = new ProcessBuilder(pc.start).redirectError(Redirect.INHERIT).redirectInput(Redirect.INHERIT)
+        ProcessBuilder b = new ProcessBuilder(command).redirectError(Redirect.INHERIT).redirectInput(Redirect.INHERIT)
                 .redirectOutput(Redirect.INHERIT)
                 .directory(controller.getDeploymentPathProvider().get(SpecialDirectory.RUNTIME).toFile());
-
         try {
             Process p = b.start();
             log.info("started {}, PID={}", targetClientKey, p.pid());

@@ -22,6 +22,7 @@ import com.google.common.collect.Sets;
 
 import io.bdeploy.common.util.MdcLogger;
 import io.bdeploy.common.util.NamedDaemonThreadFactory;
+import io.bdeploy.common.util.VariableResolver;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
@@ -73,16 +74,19 @@ public class InstanceProcessController {
     }
 
     /**
-     * Adds the given process group to the list of processes.
+     * Creates new process controllers for all applications defined in the process group.
      *
      * @param pathProvider
      *            provides access to the special folders
+     * @param resolver
+     *            the resolver for variables
      * @param tag
      *            version of the configuration
      * @param groupConfig
      *            the process configuration
      */
-    public void addProcessGroup(DeploymentPathProvider pathProvider, String tag, ProcessGroupConfiguration groupConfig) {
+    public void createProcessControllers(DeploymentPathProvider pathProvider, VariableResolver resolver, String tag,
+            ProcessGroupConfiguration groupConfig) {
         try {
             writeLock.lock();
             // Create a new list if not yet existing for this tag
@@ -95,8 +99,10 @@ public class InstanceProcessController {
             // Add a new controller for each application
             for (ProcessConfiguration config : groupConfig.applications) {
                 Path processDir = pathProvider.get(SpecialDirectory.RUNTIME).resolve(config.uid);
-                processList.add(new ProcessController(groupConfig.uuid, tag, config, processDir));
-                logger.log(l -> l.info("Creating new process controller."), tag, config.uid);
+                ProcessController controller = new ProcessController(groupConfig.uuid, tag, config, processDir);
+                controller.setVariableResolver(resolver);
+                processList.add(controller);
+                logger.log(l -> l.debug("Creating new process controller."), tag, config.uid);
             }
         } finally {
             writeLock.unlock();

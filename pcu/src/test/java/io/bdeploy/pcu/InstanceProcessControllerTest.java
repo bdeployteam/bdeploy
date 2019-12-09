@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
+import java.util.Collections;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,7 +16,6 @@ import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
-import io.bdeploy.pcu.InstanceProcessController;
 
 @ExtendWith(TempDirectory.class)
 public class InstanceProcessControllerTest {
@@ -22,12 +23,13 @@ public class InstanceProcessControllerTest {
     @Test
     public void testStartStopApps(@TempDir Path tmp) throws Exception {
         ProcessConfiguration app1 = TestFactory.createConfig(tmp, "App1", true, "600");
-        ProcessConfiguration app2 = TestFactory.createConfig(tmp, "App2", false, "600");
+        ProcessConfiguration app2 = TestFactory.createConfig(tmp, "App2", false, "{{SLEEP_TIME}}");
         ProcessGroupConfiguration group = TestFactory.createGroupConfig("MyInstance", app1, app2);
 
         // Create controller with the two applications
+        Map<String, String> variables = Collections.singletonMap("SLEEP_TIME", "600");
         InstanceProcessController controller = new InstanceProcessController(group.uuid);
-        controller.addProcessGroup(new DeploymentPathProvider(tmp, group.uuid), "1", group);
+        controller.createProcessControllers(new DeploymentPathProvider(tmp, group.uuid), variables::get, "1", group);
         controller.setActiveTag("1");
 
         // Start all applications with auto-start flags
@@ -64,14 +66,14 @@ public class InstanceProcessControllerTest {
         ProcessConfiguration app1 = TestFactory.createConfig(path, "App1", true, "600");
         ProcessConfiguration app2 = TestFactory.createConfig(path, "App2", false, "600");
         ProcessGroupConfiguration group = TestFactory.createGroupConfig("MyInstance", app1, app2);
-        controller.addProcessGroup(new DeploymentPathProvider(path, group.uuid), "1", group);
+        controller.createProcessControllers(new DeploymentPathProvider(path, group.uuid), null, "1", group);
 
         // Create two applications in version 2 and add to the controller
         path = tmp.resolve("2");
         app1 = TestFactory.createConfig(path, "App1", true, "600");
         app2 = TestFactory.createConfig(path, "App2", false, "600");
         group = TestFactory.createGroupConfig("MyInstance", app1, app2);
-        controller.addProcessGroup(new DeploymentPathProvider(path, group.uuid), "2", group);
+        controller.createProcessControllers(new DeploymentPathProvider(path, group.uuid), null, "2", group);
 
         // Activate and start version 1
         controller.setActiveTag("1");
@@ -117,7 +119,7 @@ public class InstanceProcessControllerTest {
 
         // Create controller with the two applications
         InstanceProcessController controller = new InstanceProcessController(group.uuid);
-        controller.addProcessGroup(new DeploymentPathProvider(tmp, group.uuid), "1", group);
+        controller.createProcessControllers(new DeploymentPathProvider(tmp, group.uuid), null, "1", group);
         controller.setActiveTag("1");
 
         // Launch auto-start
@@ -131,7 +133,7 @@ public class InstanceProcessControllerTest {
         // Detach first and create new controller (simulate restart)
         controller.detach();
         controller = new InstanceProcessController(group.uuid);
-        controller.addProcessGroup(new DeploymentPathProvider(tmp, group.uuid), "1", group);
+        controller.createProcessControllers(new DeploymentPathProvider(tmp, group.uuid), null, "1", group);
         controller.setActiveTag("1");
 
         // Recover running applications

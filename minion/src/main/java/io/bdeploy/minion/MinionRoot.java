@@ -47,7 +47,6 @@ import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
-import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.jersey.audit.Auditor;
 import io.bdeploy.jersey.audit.RollingFileAuditor;
 import io.bdeploy.minion.job.CleanupDownloadDirJob;
@@ -515,11 +514,11 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
                 log.warn("{} / {} - Cannot read persisted process configuration.", instanceId, inm.getKey().getTag());
                 return;
             }
-            DeploymentPathProvider paths = inc.getDeploymentPathProvider();
 
             // Create controller and add to the affected instance
             InstanceProcessController instanceController = processController.getOrCreate(inm.getUUID());
-            instanceController.addProcessGroup(paths, inm.getKey().getTag(), pgc);
+            instanceController.createProcessControllers(inc.getDeploymentPathProvider(), inc.getResolver(), inm.getKey().getTag(),
+                    pgc);
 
             // fetch and remember the active version for this uuid.
             if (!activeVersions.containsKey(inm.getUUID())) {

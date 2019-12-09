@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -293,6 +295,28 @@ public class ProcessControllerTest {
         listener.expect(process, ProcessState.STOPPED);
         process.stop();
         listener.await(TIMEOUT);
+    }
+
+    @Test
+    public void testVariableReplacement(@TempDir Path tmp) throws Exception {
+        Map<String, String> vars = Collections.singletonMap("SLEEP_TIMEOUT", "100");
+
+        StateListener listener = new StateListener();
+        ProcessController process = TestFactory.create(tmp, "App9", false, "{{SLEEP_TIMEOUT}}");
+        process.setVariableResolver(vars::get);
+        process.addStatusListener(listener);
+
+        // Start and wait until the application is running
+        listener.expect(process, ProcessState.RUNNING);
+        process.start();
+        listener.await(TIMEOUT);
+        assertEquals(ProcessState.RUNNING, process.getState());
+
+        listener.expect(process, ProcessState.STOPPED);
+        process.stop();
+        listener.await(TIMEOUT);
+
+        assertEquals(ProcessState.STOPPED, process.getState());
     }
 
 }

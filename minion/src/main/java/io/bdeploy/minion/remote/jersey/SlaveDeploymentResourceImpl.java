@@ -94,7 +94,7 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
             // Notify that there is a new deployment
             MinionProcessController processController = root.getProcessController();
             InstanceProcessController controller = processController.getOrCreate(inm.getUUID());
-            controller.addProcessGroup(inc.getDeploymentPathProvider(), inm.getKey().getTag(),
+            controller.createProcessControllers(inc.getDeploymentPathProvider(), inc.getResolver(), inm.getKey().getTag(),
                     inc.getProcessGroupConfiguration());
         } finally {
             deploying.done();

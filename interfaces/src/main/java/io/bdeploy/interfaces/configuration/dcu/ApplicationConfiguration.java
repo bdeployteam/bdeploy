@@ -2,13 +2,15 @@ package io.bdeploy.interfaces.configuration.dcu;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.function.UnaryOperator;
 
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.common.util.TemplateHelper;
+import io.bdeploy.common.util.VariableResolver;
 import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
-import io.bdeploy.interfaces.variables.VariableResolver.SpecialVariablePrefix;
+import io.bdeploy.interfaces.variables.SkipDelayed;
+import io.bdeploy.interfaces.variables.Variables;
 
 /**
  * Holds the configuration for an application ({@link #application}) as created
@@ -54,29 +56,38 @@ public class ApplicationConfiguration {
      * This happens after deploying applications, when all paths for all deployed
      * artifacts are existing and fixed.
      */
-    public ProcessConfiguration renderDescriptor(UnaryOperator<String> valueResolver) {
-        ProcessConfiguration add = new ProcessConfiguration();
+    public ProcessConfiguration renderDescriptor(VariableResolver valueResolver) {
+        SkipDelayed skipDelayCallback = new SkipDelayed();
+        ProcessConfiguration processConfig = new ProcessConfiguration();
 
-        add.uid = uid;
-        add.name = name;
-        add.processControl = processControl;
+        processConfig.uid = uid;
+        processConfig.name = name;
+        processConfig.processControl = processControl;
 
-        Path manifestInstallPath = Paths
-                .get(valueResolver.apply(SpecialVariablePrefix.MANIFEST_REFERENCE.format(application.toString())));
+        String appManifestPath = Variables.MANIFEST_REFERENCE.format(application.toString());
+        String path = valueResolver.apply(appManifestPath);
+        if (path == null) {
+            throw new IllegalStateException("Unable to determine application installation path. Reference=" + appManifestPath);
+        }
+        Path manifestInstallPath = Paths.get(path);
 
         if (start.executable == null) {
             throw new IllegalStateException("No executable set for application '" + name + "' (" + uid + ")");
         }
 
-        add.start.add(manifestInstallPath.resolve(ParameterConfiguration.process(start.executable, valueResolver)).toString());
-        start.parameters.stream().map(pc -> pc.renderDescriptor(valueResolver)).forEach(add.start::addAll);
+        String startCmd = TemplateHelper.process(start.executable, valueResolver, skipDelayCallback);
+        processConfig.start.add(manifestInstallPath.resolve(startCmd).toString());
+        start.parameters.stream().map(pc -> TemplateHelper.process(pc.preRendered, valueResolver, skipDelayCallback))
+                .forEach(processConfig.start::addAll);
 
         if (hasStopCommand()) {
-            add.stop.add(manifestInstallPath.resolve(ParameterConfiguration.process(stop.executable, valueResolver)).toString());
-            stop.parameters.stream().map(pc -> pc.renderDescriptor(valueResolver)).forEach(add.stop::addAll);
+            String stopCmd = TemplateHelper.process(stop.executable, valueResolver, skipDelayCallback);
+            processConfig.stop.add(manifestInstallPath.resolve(stopCmd).toString());
+            stop.parameters.stream().map(pc -> TemplateHelper.process(pc.preRendered, valueResolver, skipDelayCallback))
+                    .forEach(processConfig.stop::addAll);
         }
 
-        return add;
+        return processConfig;
     }
 
     private boolean hasStopCommand() {

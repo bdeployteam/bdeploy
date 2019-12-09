@@ -92,7 +92,6 @@ public class TestFactory {
      */
     private static Manifest.Key createDemoInstance(BHive local, Manifest.Key product, Path tmp, Manifest.Key serverApp,
             Manifest.Key clientApp) throws IOException {
-        //        String uuid = UuidHelper.randomId();
         String uuid = "aaa-bbb-ccc";
 
         /* STEP 1a: read available applications from product manifest */

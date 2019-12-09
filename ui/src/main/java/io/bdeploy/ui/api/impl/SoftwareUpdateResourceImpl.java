@@ -256,7 +256,7 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
         values.put("APP_NAME", "");
         values.put("BDEPLOY_FILE", "");
 
-        String content = TemplateHelper.process(template, values::get, "{{", "}}");
+        String content = TemplateHelper.process(template, values::get);
         try {
             Files.write(installerPath, content.getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {

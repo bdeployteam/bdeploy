@@ -13,7 +13,6 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -29,6 +28,7 @@ import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.StreamHelper;
 import io.bdeploy.common.util.TemplateHelper;
+import io.bdeploy.common.util.VariableResolver;
 import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.cleanup.CleanupAction;
 import io.bdeploy.interfaces.cleanup.CleanupAction.CleanupType;
@@ -39,11 +39,17 @@ import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.dependencies.LocalDependencyFetcher;
 import io.bdeploy.interfaces.variables.ApplicationParameterProvider;
+import io.bdeploy.interfaces.variables.DelayedVariableResolver;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
+import io.bdeploy.interfaces.variables.DeploymentPathResolver;
+import io.bdeploy.interfaces.variables.EnvironmentVariableResolver;
 import io.bdeploy.interfaces.variables.InstanceVariableResolver;
 import io.bdeploy.interfaces.variables.ManifestRefPathProvider;
-import io.bdeploy.interfaces.variables.VariableResolver;
+import io.bdeploy.interfaces.variables.ManifestVariableResolver;
+import io.bdeploy.interfaces.variables.OsVariableResolver;
+import io.bdeploy.interfaces.variables.ParameterValueResolver;
+import io.bdeploy.interfaces.variables.CompositeResolver;
 
 /**
  * A {@link InstanceNodeController} is a unit which can be locally deployed.
@@ -60,7 +66,7 @@ public class InstanceNodeController {
 
     private final BHive hive;
     private final InstanceNodeManifest manifest;
-    private final List<UnaryOperator<String>> additionalResolvers = new ArrayList<>();
+    private final CompositeResolver resolvers = new CompositeResolver();
     private final Path root;
     private final DeploymentPathProvider paths;
 
@@ -74,7 +80,7 @@ public class InstanceNodeController {
         this.root = root;
         this.manifest = manifest;
         this.paths = new DeploymentPathProvider(root.resolve(manifest.getUUID()), manifest.getKey().getTag());
-        addAdditionalVariableResolver(new InstanceVariableResolver(manifest.getConfiguration()));
+        resolvers.add(new InstanceVariableResolver(manifest.getConfiguration()));
     }
 
     public InstanceNodeManifest getManifest() {
@@ -86,8 +92,8 @@ public class InstanceNodeController {
      *            variable and expected to return a value if known, or
      *            <code>null</code> if not able to resolve the variable.
      */
-    public void addAdditionalVariableResolver(UnaryOperator<String> external) {
-        additionalResolvers.add(external);
+    public void addAdditionalVariableResolver(VariableResolver external) {
+        resolvers.add(external);
     }
 
     /**
@@ -174,6 +180,13 @@ public class InstanceNodeController {
     }
 
     /**
+     * Returns the resolver that is capable to resolve variables for the given instance.
+     */
+    public VariableResolver getResolver() {
+        return resolvers;
+    }
+
+    /**
      * Reads the persisted process group configuration from the file-system. Can only be done if the node is fully deployed.
      */
     public ProcessGroupConfiguration getProcessGroupConfiguration() {
@@ -198,14 +211,18 @@ public class InstanceNodeController {
         hive.execute(new ExportOperation().setManifest(manifest.getKey()).setTarget(targetDir));
 
         // create a variable resolver which can expand all supported variables.
-        VariableResolver resolver = new VariableResolver(paths, new ManifestRefPathProvider(paths, applications),
-                new ApplicationParameterProvider(dc), additionalResolvers);
+        resolvers.add(new DelayedVariableResolver(resolvers));
+        resolvers.add(new OsVariableResolver());
+        resolvers.add(new EnvironmentVariableResolver());
+        resolvers.add(new DeploymentPathResolver(paths));
+        resolvers.add(new ManifestVariableResolver(new ManifestRefPathProvider(paths, applications)));
+        resolvers.add(new ParameterValueResolver(new ApplicationParameterProvider(dc)));
 
         // render configuration files.
-        processConfigurationTemplates(paths.get(SpecialDirectory.CONFIG), resolver);
+        processConfigurationTemplates(paths.get(SpecialDirectory.CONFIG), resolvers);
 
         // render the PCU information.
-        ProcessGroupConfiguration processGroupConfig = dc.renderDescriptor(resolver);
+        ProcessGroupConfiguration processGroupConfig = dc.renderDescriptor(resolvers);
 
         try {
             Files.write(paths.getAndCreate(SpecialDirectory.RUNTIME).resolve(PCU_JSON),
@@ -270,7 +287,7 @@ public class InstanceNodeController {
 
         try {
             String content = new String(Files.readAllBytes(file), StandardCharsets.UTF_8);
-            String processed = TemplateHelper.process(content, resolver, "{{", "}}");
+            String processed = TemplateHelper.process(content, resolver);
             Files.write(file, processed.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             // might have missing variable references, since we only 'see' what is on our node. Applications from other nodes are not available.

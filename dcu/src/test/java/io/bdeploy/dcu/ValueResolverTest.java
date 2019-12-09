@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -21,6 +20,7 @@ import io.bdeploy.common.TempDirectory;
 import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
+import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
@@ -29,9 +29,13 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
 import io.bdeploy.interfaces.variables.ApplicationParameterProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
+import io.bdeploy.interfaces.variables.DeploymentPathResolver;
 import io.bdeploy.interfaces.variables.ManifestRefPathProvider;
-import io.bdeploy.interfaces.variables.VariableResolver;
-import io.bdeploy.interfaces.variables.VariableResolver.SpecialVariablePrefix;
+import io.bdeploy.interfaces.variables.ManifestVariableResolver;
+import io.bdeploy.interfaces.variables.OsVariableResolver;
+import io.bdeploy.interfaces.variables.ParameterValueResolver;
+import io.bdeploy.interfaces.variables.Variables;
+import io.bdeploy.interfaces.variables.CompositeResolver;
 
 @ExtendWith(TempDirectory.class)
 public class ValueResolverTest {
@@ -67,20 +71,21 @@ public class ValueResolverTest {
 
         dc.applications.add(a1c);
 
-        VariableResolver resolver = new VariableResolver(dpp, new ManifestRefPathProvider(dpp, mfs),
-                new ApplicationParameterProvider(dc), Collections.emptyList());
+        CompositeResolver list = new CompositeResolver();
+        list.add(new DeploymentPathResolver(dpp));
+        list.add(new ManifestVariableResolver(new ManifestRefPathProvider(dpp, mfs)));
+        list.add(new ParameterValueResolver(new ApplicationParameterProvider(dc)));
 
         // tests whether the use cases in the a1c start command work.
-        ProcessGroupConfiguration dd = dc.renderDescriptor(resolver);
+        ProcessGroupConfiguration dd = dc.renderDescriptor(list);
 
         // unqualified reference when more than one manifest with the name exists
-        assertThrows(RuntimeException.class, () -> resolver.apply(SpecialVariablePrefix.MANIFEST_REFERENCE.format("a")));
+        assertThrows(RuntimeException.class, () -> list.apply(Variables.MANIFEST_REFERENCE.format("a")));
 
-        assertThat(resolver.apply(SpecialVariablePrefix.DEPLOYMENT_PATH.format("CONFIG")),
-                is(dpp.get(SpecialDirectory.CONFIG).toString()));
+        assertThat(list.apply(Variables.DEPLOYMENT_PATH.format("CONFIG")), is(dpp.get(SpecialDirectory.CONFIG).toString()));
 
         // resolver does not expand recursively - ParameterConfiguration does.
-        assertThat(resolver.apply(SpecialVariablePrefix.PARAMETER_VALUE.format("Application Number One:a1p2")), is("{{V:a1p1}}"));
+        assertThat(list.apply(Variables.PARAMETER_VALUE.format("Application Number One:a1p2")), is("{{V:a1p1}}"));
 
         // but the descriptor expand recursively.
         boolean found = false;
@@ -104,13 +109,13 @@ public class ValueResolverTest {
 
     @Test
     void osConditional() {
-        VariableResolver resolver = new VariableResolver(null, null, null, Collections.emptyList());
+        OsVariableResolver resolver = new OsVariableResolver();
 
         OperatingSystem current = OsHelper.getRunningOs();
         OperatingSystem notCurrent = current == OperatingSystem.LINUX ? OperatingSystem.WINDOWS : OperatingSystem.LINUX;
 
-        assertEquals("xx", ParameterConfiguration.process("x{{" + notCurrent.name() + ":value}}x", resolver));
-        assertEquals("xvaluex", ParameterConfiguration.process("x{{" + current.name() + ":value}}x", resolver));
+        assertEquals("xx", TemplateHelper.process("x{{" + notCurrent.name() + ":value}}x", resolver));
+        assertEquals("xvaluex", TemplateHelper.process("x{{" + current.name() + ":value}}x", resolver));
     }
 
 }

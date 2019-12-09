@@ -2,10 +2,7 @@ package io.bdeploy.interfaces.configuration.dcu;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 
-import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
 
 /**
@@ -46,24 +43,6 @@ public class ParameterConfiguration {
         } else {
             preRendered.add(desc.parameter);
         }
-    }
-
-    public List<String> renderDescriptor(UnaryOperator<String> valueResolver) {
-        return preRendered.stream().map(a -> process(a, valueResolver)).collect(Collectors.toList());
-    }
-
-    /**
-     * Resolves all variable references in the given String, using the given
-     * provider.
-     *
-     * @param value the raw value, potentially containing variable
-     *            references.
-     * @param valueProvider the value provider knowing how to resolve variable
-     *            references.
-     * @return a resolved {@link String}.
-     */
-    public static String process(String value, UnaryOperator<String> valueProvider) {
-        return TemplateHelper.process(value, valueProvider, "{{", "}}");
     }
 
 }

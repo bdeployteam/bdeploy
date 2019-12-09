@@ -655,7 +655,7 @@ public class InstanceResourceImpl implements InstanceResource {
         values.put("REMOTE_SERVICE_URL", ""); // not used, only in standalone
         values.put("REMOTE_SERVICE_TOKEN", ""); // not used, only in standalone
 
-        String content = TemplateHelper.process(template, values::get, "{{", "}}");
+        String content = TemplateHelper.process(template, values::get);
         try {
             Files.write(installerPath, content.getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {

@@ -28,6 +28,8 @@ import io.bdeploy.common.util.MdcLogger;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.common.util.TemplateHelper;
+import io.bdeploy.common.util.VariableResolver;
 import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
@@ -118,6 +120,9 @@ public class ProcessController {
 
     /** Listener that is notified when the state changes */
     private final List<Consumer<ProcessState>> statusListeners = new ArrayList<>();
+
+    /** Replace variables used in the start/stop command and it's arguments */
+    private VariableResolver variableResolver;
 
     /**
      * Creates a new process controller for the given configuration.
@@ -218,6 +223,15 @@ public class ProcessController {
      */
     public void setStableThreshold(Duration stableThreshold) {
         this.stableThreshold = stableThreshold;
+    }
+
+    /**
+     * Sets the resolver that will be used to replace variables in the start and stop command as well as its arguments.
+     *
+     * @param variableResolver the resolver to be used
+     */
+    public void setVariableResolver(VariableResolver variableResolver) {
+        this.variableResolver = variableResolver;
     }
 
     /**
@@ -425,7 +439,7 @@ public class ProcessController {
         logger.log(l -> l.info("Stopping application. PID = {}", pid));
 
         // try to gracefully stop the process using it's stop command
-        doInvokeStopCommand();
+        doInvokeStopCommand(processConfig.stop);
         if (processExit == null || processExit.isDone()) {
             afterTerminated();
             return;
@@ -730,12 +744,21 @@ public class ProcessController {
      * @throws IOException in case of an error starting the {@link Process}.
      */
     private Process launch(List<String> cmd) throws IOException {
-        ProcessBuilder b = new ProcessBuilder(cmd).directory(processDir.toFile());
+        List<String> command = replaceVariables(cmd);
+        logger.log(l -> l.debug("Launching new process {}", command));
 
+        ProcessBuilder b = new ProcessBuilder(command).directory(processDir.toFile());
         b.redirectErrorStream(true);
         b.redirectOutput(processDir.resolve(OUT_TXT).toFile());
-
         return b.start();
+    }
+
+    /** Replaces all variables defined in the given list */
+    private List<String> replaceVariables(List<String> input) {
+        if (variableResolver == null) {
+            return input;
+        }
+        return TemplateHelper.process(input, variableResolver);
     }
 
     /** Destroys this process and all its descendants */
@@ -765,14 +788,13 @@ public class ProcessController {
     }
 
     /** Executes the configured stop command and waits for the termination */
-    private void doInvokeStopCommand() {
-        List<String> stopCommand = processConfig.stop;
+    private void doInvokeStopCommand(List<String> stopCommand) {
         if (stopCommand == null || stopCommand.isEmpty()) {
             logger.log(l -> l.debug("No stop command configured."));
             return;
         }
         try {
-            logger.log(l -> l.info("Invoking configured stop command."));
+            logger.log(l -> l.info("Invoking configured stop command.", stopCommand));
             Process p = launch(stopCommand);
             boolean exited = p.waitFor(processConfig.processControl.gracePeriod, TimeUnit.MILLISECONDS);
             if (!exited) {

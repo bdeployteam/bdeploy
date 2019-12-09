@@ -4,11 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.common.util.VariableResolver;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
+import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
-import io.bdeploy.interfaces.variables.VariableResolver;
+import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
+import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
+import io.bdeploy.interfaces.variables.CompositeResolver;
+import io.bdeploy.interfaces.variables.ManifestSelfResolver;
 
 /**
  * A {@link InstanceNodeConfiguration} marries each {@link ApplicationDescriptor}
@@ -67,17 +72,24 @@ public class InstanceNodeConfiguration {
      * @return the rendered {@link ProcessGroupConfiguration}, which is machine specific.
      */
     public ProcessGroupConfiguration renderDescriptor(VariableResolver valueResolver) {
-        ProcessGroupConfiguration dd = new ProcessGroupConfiguration();
-        dd.name = name;
-        dd.uuid = uuid;
-        dd.autoStart = autoStart;
+        ProcessGroupConfiguration pgc = new ProcessGroupConfiguration();
+        pgc.name = name;
+        pgc.uuid = uuid;
+        pgc.autoStart = autoStart;
 
         // each downstream application has a scoped provider allowing to directly
         // reference parameter values of parameters in the same scope.
-        applications.stream().map(a -> a.renderDescriptor(valueResolver.scopedTo(a.name, a.application)))
-                .forEach(dd.applications::add);
+        for (ApplicationConfiguration app : applications) {
+            CompositeResolver list = new CompositeResolver();
+            list.add(new ApplicationVariableResolver(app));
+            list.add(new ApplicationParameterValueResolver(app.name, valueResolver));
+            list.add(new ManifestSelfResolver(app.application, valueResolver));
+            list.add(valueResolver);
+            ProcessConfiguration pc = app.renderDescriptor(list);
+            pgc.applications.add(pc);
+        }
 
-        return dd;
+        return pgc;
     }
 
     /**

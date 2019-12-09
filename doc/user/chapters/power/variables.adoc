@@ -101,6 +101,24 @@ a| Name of the 'MANIFEST' keys name of the configured product
 
 |===
 
+==== A: Application Value
+Used to expand to values related to the application containing the parameter's. 
+
+ {{A:<VAR>}}
+
+[%header,cols="1,6"]
+|===
+| Variable
+| Description
+
+| {{A:UUID}}
+| UUID of the application
+
+| {{A:NAME}}
+| Name of the application
+
+|===
+
 ==== H: Minion Properties
 
 Used to expand to properties of the minion where the application is deployed.
@@ -142,3 +160,28 @@ this variable allows the usage of different arguments for different operating sy
 |Expands to _java_ on Linux and _java.exe_ _Windows_ 
 
 |===
+
+==== Environmental Values
+
+Enables access to environmental variables defined in the operating system. The name of the variable refers to the name of the environmental variable.
+
+ {{ENV:NAME}}
+ {{DELAYED:ENV:NAME}}
+
+[%header,cols="1,6"]
+|===
+|Variable
+|Description
+
+|{{ENV:MY_VARIABLE}}
+|Expands to the value of the environmental variable when the application is *installed* on the node or client.
+
+|{{DELAYED:ENV:MY_VARIABLE}}
+|Expands to the value of the environmental variable when the application is *launched* on the node or client.
+
+|===
+
+Variables are replaced with their actual values when the process is installed on the target minion node. This might not always be desired.
+Especially for client applications it can be useful to do the actual replacing when the process is launched. This is can be achieved by prefixing 
+the actual variable with the *DELAYED* prefix. This enables that different users of the client application are getting different parameter values 
+depending on the value of the environmental variable.

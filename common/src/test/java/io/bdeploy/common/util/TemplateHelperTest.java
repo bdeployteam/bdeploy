@@ -2,9 +2,9 @@ package io.bdeploy.common.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.function.UnaryOperator;
 
 import org.junit.jupiter.api.Test;
 
@@ -14,26 +14,48 @@ public class TemplateHelperTest {
 
     private static Map<String, String> VARS = new TreeMap<>();
     static {
-        VARS.put("x", "RESOLVED");
-        VARS.put("y-pattern1", "{{x}}");
-        VARS.put("y-pattern2", "${x}");
+        VARS.put("a", "RESOLVED");
+        VARS.put("b", "{{a}}");
+        VARS.put("c", "{{b}}");
+        VARS.put("d", "{{c}}");
     }
 
-    private static UnaryOperator<String> RESOLVER = s -> VARS.get(s);
+    private static VariableResolver RESOLVER = VARS::get;
+    private static ShouldResolve DELAY_RESOLVING_B = s -> {
+        return !s.startsWith("b");
+    };
 
     @Test
-    void patterns() {
+    void resolveAllPatterns() {
+        // Recursive replacement of patterns
+        assertEquals(R, TemplateHelper.process("{{a}}", RESOLVER));
+        assertEquals(R, TemplateHelper.process("{{b}}", RESOLVER));
+        assertEquals(R, TemplateHelper.process("{{c}}", RESOLVER));
 
-        assertEquals(R, TemplateHelper.process("{{x}}", RESOLVER, "{{", "}}"));
-        assertEquals(R, TemplateHelper.process("${x}", RESOLVER, "${", "}"));
+        // Resolve multiple patterns in one string
+        assertEquals(R + "-" + R, TemplateHelper.process("{{a}}-{{c}}", RESOLVER));
+        assertEquals("Text-with-patterns-" + R + "-" + R + "-and-some-more-text",
+                TemplateHelper.process("Text-with-patterns-{{a}}-{{c}}-and-some-more-text", RESOLVER));
 
-        assertEquals("|x|", TemplateHelper.process("|x|", RESOLVER, "${", "}"));
-        assertEquals(R, TemplateHelper.process("|x|", RESOLVER, "|", "|"));
+        // Resolve using a list of values
+        assertEquals(Collections.singletonList(R), TemplateHelper.process(Collections.singletonList("{{a}}"), RESOLVER));
+    }
 
-        assertEquals(R, TemplateHelper.process("{{y-pattern1}}", RESOLVER, "{{", "}}"));
-        assertEquals(R, TemplateHelper.process("${y-pattern2}", RESOLVER, "${", "}"));
+    @Test
+    void resolveDelayedPatterns() {
+        // Variable should be resolved as it is not delayed
+        assertEquals(R, TemplateHelper.process("{{a}}", RESOLVER, DELAY_RESOLVING_B));
 
-        assertEquals(R + R, TemplateHelper.process("${x}${y-pattern2}", RESOLVER, "${", "}"));
+        // Variable should not be resolved as it is delayed
+        assertEquals("{{b}}", TemplateHelper.process("{{b}}", RESOLVER, DELAY_RESOLVING_B));
+
+        // Variable should be partly resolved until it is delayed
+        assertEquals("{{b}}", TemplateHelper.process("{{c}}", RESOLVER, DELAY_RESOLVING_B));
+    }
+
+    @Test
+    void notMatchingPattern() {
+        assertEquals("|a|", TemplateHelper.process("|a|", RESOLVER));
     }
 
 }
