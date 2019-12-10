@@ -18,7 +18,6 @@ import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.security.RemoteService;
-import io.bdeploy.common.util.StringHelper;
 
 public class BDeployProductPushTask {
 
@@ -37,7 +36,7 @@ public class BDeployProductPushTask {
         RemoteService svc = cfg.bdeployServer == null ? null
                 : new RemoteService(UriBuilder.fromUri(cfg.bdeployServer).build(), cfg.bdeployServerToken);
 
-        if (svc == null || StringHelper.isNullOrEmpty(cfg.bdeployTargetInstanceGroup)) {
+        if (svc == null || cfg.bdeployTargetInstanceGroup == null || cfg.bdeployTargetInstanceGroup.isEmpty()) {
             throw new IllegalStateException("Server or instance group not configured, see preferences.");
         }
 

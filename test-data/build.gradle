@@ -7,7 +7,7 @@ plugins {
 
 ext {
     testServerRoot = "${buildDir}/test-root"
-    testServerHost = InetAddress.getLocalHost().getCanonicalHostName()
+    testServerHost = "localhost"
     testServerPort = randomServerPort()
 
     testServerRootCentral = "${buildDir}/test-root-central"
