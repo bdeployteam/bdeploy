@@ -188,7 +188,7 @@ public class BDeployBuildProductTask {
             q += "%D";
         }
 
-        return bvs.getBuildVersion().replace("qualifier", q.replace("%D", format.format(date)));
+        return bvs.getDisplayVersion().replace("qualifier", q.replace("%D", format.format(date)));
     }
 
     static class ProductDesc {
