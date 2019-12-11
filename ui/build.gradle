@@ -8,7 +8,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'cz.habarta.typescript-generator:typescript-generator-gradle-plugin:2.13+'
+        classpath 'cz.habarta.typescript-generator:typescript-generator-gradle-plugin:2.18+'
     }
 }
 
@@ -178,96 +178,82 @@ task copyUserDoc(type:Copy, dependsOn:':doc:userDoc') {
     into "$webappDir/dist/webapp/assets/doc"
 }
 
-task genDtos() {
-    dependsOn 'compileJava'
+task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask) {
+    jsonLibrary = 'jackson2'
+    classes = [
+        // Descriptors
+        'io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor',
+        'io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor',
+        // Configurations and their DTOs
+        'io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration',
+        'io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto',
+        'io.bdeploy.interfaces.configuration.instance.InstanceConfiguration',
+        'io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration',
+        'io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration',
+        'io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration',
+        'io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto',
+        'io.bdeploy.interfaces.configuration.instance.FileStatusDto',
+        // UI only DTOs
+        'io.bdeploy.ui.dto.ApplicationDto',
+        'io.bdeploy.ui.dto.CredentialsDto',
+        'io.bdeploy.ui.dto.ClientApplicationDto',
+        'io.bdeploy.ui.dto.InstanceDto',
+        'io.bdeploy.ui.dto.InstanceClientAppsDto',
+        'io.bdeploy.ui.dto.InstanceNodeConfigurationListDto',
+        'io.bdeploy.ui.dto.ProductDto',
+        'io.bdeploy.ui.dto.HiveEntryDto',
+        'io.bdeploy.ui.dto.InstanceVersionDto',
+        'io.bdeploy.ui.dto.StringEntryChunkDto',
+        'io.bdeploy.ui.dto.LauncherDto',
+        'io.bdeploy.ui.dto.InstanceManifestHistoryDto',
+        'io.bdeploy.ui.dto.InstanceUpdateEventDto',
+        'io.bdeploy.ui.dto.ConfigFileDto',
+        'io.bdeploy.ui.dto.BackendInfoDto',
+        'io.bdeploy.ui.dto.ManagedMasterDto',
+        'io.bdeploy.ui.dto.ProductTransferDto',
+        'io.bdeploy.ui.dto.MinionUpdateDto',
+        // Other, generic
+        'io.bdeploy.common.Version',
+        'io.bdeploy.common.ActivitySnapshot',
+        'io.bdeploy.interfaces.cleanup.CleanupGroup',
+        'io.bdeploy.interfaces.directory.InstanceDirectory',
+        'io.bdeploy.interfaces.minion.MinionStatusDto',
+        'io.bdeploy.interfaces.manifest.state.InstanceStateRecord',
+        // Metrics
+        'io.bdeploy.jersey.resources.JerseyMetricsResource$MetricBundle',
+        'io.bdeploy.common.metrics.Metrics$MetricGroup',
+    ]
+    customTypeMappings = [
+        'java.net.URI:string',
+        'java.time.Instant:number'
+    ]
+    customTypeNaming = [
+        'io.bdeploy.bhive.model.Manifest$Key:ManifestKey',
+        'io.bdeploy.bhive.model.Tree$EntryType:TreeEntryType'
+    ]
+    excludeClasses = [
+        'java.lang.Comparable',
+        'java.io.Serializable',
+    ]
+    outputFileType = 'implementationFile'
+    outputKind = 'module'
+    mapEnum = 'asEnum'
+    nonConstEnums = true
+    jsonLibrary = 'jackson2'
+    noFileComment = true
 
-    inputs.files compileJava.destinationDir
-    inputs.files project(":interfaces").sourceSets.main.output.classesDirs
-    inputs.files project(":jersey").sourceSets.main.output.classesDirs
-    outputs.file "${webappDir}/src/app/models/gen.dtos.ts"
+    def cfg = new cz.habarta.typescript.generator.Jackson2Configuration();
+    cfg.fieldVisibility = com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
+    cfg.getterVisibility = com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
+    cfg.setterVisibility = com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
+
+    jackson2Configuration = cfg
+
+    outputFile = "${buildDir}/gen.dtos.tmp.ts"
 
     doLast {
-        def cfg = new cz.habarta.typescript.generator.Jackson2Configuration();
-        cfg.fieldVisibility = com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
-        cfg.getterVisibility = com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
-        cfg.setterVisibility = com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
-
-        def settings = new cz.habarta.typescript.generator.Settings();
-        def classes = [
-            // Descriptors
-            'io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor',
-            'io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor',
-            // Configurations and their DTOs
-            'io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration',
-            'io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto',
-            'io.bdeploy.interfaces.configuration.instance.InstanceConfiguration',
-            'io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration',
-            'io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration',
-            'io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration',
-            'io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto',
-            'io.bdeploy.interfaces.configuration.instance.FileStatusDto',
-            // UI only DTOs
-            'io.bdeploy.ui.dto.ApplicationDto',
-            'io.bdeploy.ui.dto.CredentialsDto',
-            'io.bdeploy.ui.dto.ClientApplicationDto',
-            'io.bdeploy.ui.dto.InstanceDto',
-            'io.bdeploy.ui.dto.InstanceClientAppsDto',
-            'io.bdeploy.ui.dto.InstanceNodeConfigurationListDto',
-            'io.bdeploy.ui.dto.ProductDto',
-            'io.bdeploy.ui.dto.HiveEntryDto',
-            'io.bdeploy.ui.dto.InstanceVersionDto',
-            'io.bdeploy.ui.dto.StringEntryChunkDto',
-            'io.bdeploy.ui.dto.LauncherDto',
-            'io.bdeploy.ui.dto.InstanceManifestHistoryDto',
-            'io.bdeploy.ui.dto.InstanceUpdateEventDto',
-            'io.bdeploy.ui.dto.ConfigFileDto',
-            'io.bdeploy.ui.dto.BackendInfoDto',
-            'io.bdeploy.ui.dto.ManagedMasterDto',
-            'io.bdeploy.ui.dto.ProductTransferDto',
-            'io.bdeploy.ui.dto.MinionUpdateDto',
-            // Other, generic
-            'io.bdeploy.common.Version',
-            'io.bdeploy.common.ActivitySnapshot',
-            'io.bdeploy.interfaces.cleanup.CleanupGroup',
-            'io.bdeploy.interfaces.directory.InstanceDirectory',
-            'io.bdeploy.interfaces.minion.MinionStatusDto',
-            'io.bdeploy.interfaces.manifest.state.InstanceStateRecord',
-            // Metrics
-            'io.bdeploy.jersey.resources.JerseyMetricsResource$MetricBundle',
-            'io.bdeploy.common.metrics.Metrics$MetricGroup',
-        ]
-        settings.customTypeMappings.put('java.net.URI', 'string');
-        settings.customTypeMappings.put('java.time.Instant', 'number');
-        settings.customTypeNaming.put('io.bdeploy.bhive.model.Manifest$Key', 'ManifestKey');
-        settings.customTypeNaming.put('io.bdeploy.bhive.model.Tree$EntryType', 'TreeEntryType');
-        def excludeClasses = [
-            'java.lang.Comparable',
-            'java.io.Serializable',
-        ]
-        settings.setExcludeFilter(excludeClasses, null);
-        settings.outputFileType = 'implementationFile'
-        settings.outputKind = 'module'
-        settings.mapEnum = 'asEnum'
-        settings.nonConstEnums = true
-        settings.jsonLibrary = 'jackson2'
-        settings.noFileComment = true
-
         def outputFile = "${webappDir}/src/app/models/gen.dtos.ts"
         def tmpOutputFile = "${buildDir}/gen.dtos.tmp.ts"
-
-        // add the compile classpath to see the classes dirs of other projects as JAR files are not yet built.
-        def uris = configurations.compileClasspath.files.asType(List).collect { it.toURI().toURL() };
-        // and add the runtime classpath as well to get our OWN classes.
-        uris.addAll(sourceSets.main.runtimeClasspath.collect { it.toURI().toURL() });
-        uris.unique();
-        def cl = settings.createClassLoader("dummy", uris as URL[], Thread.currentThread().getContextClassLoader());
-
-        settings.classLoader = cl;
-        settings.setJackson2Configuration(cl, cfg);
-
-        new cz.habarta.typescript.generator.TypeScriptGenerator(settings).generateTypeScript(
-            cz.habarta.typescript.generator.Input.fromClassNamesAndJaxrsApplication(classes, [], [], [], null, false, settings.getExcludeFilter(), cl, false),
-            cz.habarta.typescript.generator.Output.to(file(tmpOutputFile)));
 
         if(!file(outputFile).exists() || !file(outputFile).text.equals(file(tmpOutputFile).text)) {
             delete file(outputFile)

@@ -1,6 +1,6 @@
 plugins {
-    id 'org.asciidoctor.jvm.convert' version '2.3.0'
-    id 'org.asciidoctor.jvm.pdf' version '2.3.0'
+    id 'org.asciidoctor.jvm.convert' version '2.4.0'
+    id 'org.asciidoctor.jvm.pdf' version '2.4.0'
 }
 
 task developerDoc(type: org.asciidoctor.gradle.jvm.AsciidoctorTask) {
