@@ -20,6 +20,7 @@ import io.bdeploy.interfaces.remote.SlaveDeploymentResource;
 import io.bdeploy.jersey.JerseyCorsFilter;
 import io.bdeploy.jersey.JerseyServer;
 import io.bdeploy.jersey.RegistrationTarget;
+import io.bdeploy.jersey.audit.AuditRecord;
 import io.bdeploy.jersey.audit.RollingFileAuditor;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.MinionState;
@@ -85,6 +86,8 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
 
         ActivityReporter.Delegating delegate = new ActivityReporter.Delegating();
         try (MinionRoot r = new MinionRoot(Paths.get(config.root()), mode, delegate)) {
+            r.getAuditor().audit(AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("master").build());
+
             if (config.updateDir() != null) {
                 Path upd = Paths.get(config.updateDir());
                 r.setUpdateDir(upd);

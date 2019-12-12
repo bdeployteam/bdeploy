@@ -29,6 +29,7 @@ import io.bdeploy.interfaces.remote.MinionStatusResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyServer;
 import io.bdeploy.jersey.RegistrationTarget;
+import io.bdeploy.jersey.audit.AuditRecord;
 import io.bdeploy.jersey.audit.RollingFileAuditor;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.minion.MinionRoot;
@@ -81,6 +82,7 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
         ActivityReporter.Delegating delegate = new ActivityReporter.Delegating();
         delegate.setDelegate(getActivityReporter());
         try (MinionRoot r = new MinionRoot(Paths.get(config.root()), MinionMode.SLAVE, delegate)) {
+            r.getAuditor().audit(AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("slave").build());
             if (config.updateDir() != null) {
                 Path upd = Paths.get(config.updateDir());
                 r.setUpdateDir(upd);
