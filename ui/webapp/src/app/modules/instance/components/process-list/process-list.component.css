@@ -2,6 +2,9 @@
   max-height: 400px;
   max-width: 1024px;
   overflow-y: auto;
+
+  display: flex;
+  flex-direction: column;
 }
 
 td.mat-cell,

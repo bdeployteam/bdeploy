@@ -53,6 +53,12 @@ startCommand:
       mandatory: true
       fixed: true
       type: STRING
+    - uid: "param.subprocesses"
+      name: "Subprocess Count"
+      longDescription: "How many subprocesses should be started. Each sub-process stays alive for 60 seconds."
+      groupName: "Test Parameters"
+      parameter: "--subprocesses"
+      type: NUMERIC
     - uid: "param.out"
       name: "Output"
       longDescription: "A data file parameter"

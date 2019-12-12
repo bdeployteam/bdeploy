@@ -353,6 +353,7 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
 
   showProcessList() {
     this.processSheet = this.bottomSheet.open(ProcessListComponent, {
+      panelClass: 'process-sheet',
       data: {
         statusDto: this.status,
         appConfig: this.appConfig,

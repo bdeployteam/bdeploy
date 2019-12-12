@@ -15,7 +15,7 @@ export class ProcessListComponent implements OnInit {
   @ViewChild(MatTable, { static: true })
   public table: MatTable<any>;
 
-  @ViewChild(MatPaginator, { static: false })
+  @ViewChild(MatPaginator, { static: true })
   paginator: MatPaginator;
 
   @ViewChild(MatSort, { static: true })
@@ -50,6 +50,7 @@ export class ProcessListComponent implements OnInit {
       this.sort.sortChange.emit();
       this.table.renderRows();
     }
+    this.dataSource.paginator = this.paginator;
   }
 
   initDataSource(parent: ProcessDetailDto) {

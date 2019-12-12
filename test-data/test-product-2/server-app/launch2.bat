@@ -4,6 +4,14 @@
 @rem # TEST APPLICATION                              #
 @rem #################################################
 
+goto loop
+
+:subprocess
+    start /b powershell -command "sleep 60"
+    set /a lc=lc-1
+    if %lc%==0 goto loop
+    goto subprocess
+
 :loop
 IF NOT "%1" == "" (
 
@@ -29,6 +37,12 @@ IF NOT "%1" == "" (
         echo "Writing to file: %2"
         echo TEST > "%2"
         SHIFT
+    )
+    IF "%1" == "--subprocesses" (
+        echo "Starting %2 Sub-Processes..."
+        set lc=%2
+        SHIFT
+        goto subprocess
     )
 
     SHIFT

@@ -25,6 +25,14 @@ while [[ $# -gt 0 ]]; do
             echo "Writing to file: ${OUTFILE}"
             echo "TEST" > "${OUTFILE}"
             ;;
+        --subprocesses=*)
+            PROCCNT=${1##--subprocesses=}
+            echo "Starting ${PROCCNT} Sub-Processes..."
+            while [[ ${PROCCNT} -gt 0 ]]; do
+                sleep 60 &
+                ((PROCCNT = PROCCNT - 1))
+            done
+            ;;
         *)
             echo "Unsupported argument: $1"
             exit 2
