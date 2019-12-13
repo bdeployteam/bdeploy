@@ -10,6 +10,7 @@ import io.bdeploy.common.cfg.MinionRootValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.security.ApiAccessToken;
+import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.jersey.audit.AuditRecord;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.cli.UserTool.UserConfig;
@@ -57,12 +58,22 @@ public class UserTool extends ConfiguredCliTool<UserConfig> {
         helpAndFailIfMissing(config.root(), "Missing --root");
 
         try (MinionRoot r = new MinionRoot(Paths.get(config.root()), MinionMode.TOOL, getActivityReporter())) {
-            if (config.add() != null || config.update() != null) {
-                String user = config.add() != null ? config.add() : config.update();
+            if (config.add() != null) {
+                String user = config.add();
                 r.getAuditor().audit(AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration())
-                        .clobberParameter("password").setWhat(config.add() != null ? "add-user" : "update-user").build());
-                r.getUsers().updateUser(user, config.password(),
+                        .clobberParameter("password").setWhat("add-user").build());
+                r.getUsers().createLocalUser(user, config.password(),
                         config.admin() ? Collections.singletonList(ApiAccessToken.ADMIN_CAPABILITY) : null);
+            } else if (config.update() != null) {
+                String user = config.update();
+                r.getAuditor().audit(AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration())
+                        .clobberParameter("password").setWhat("update-user").build());
+                r.getUsers().updateLocalPassword(user, config.password());
+                if (config.admin()) {
+                    UserInfo info = r.getUsers().findUser(user);
+                    info.capabilities.add(ApiAccessToken.ADMIN_CAPABILITY);
+                    r.getUsers().updateUserInfo(info);
+                }
             } else if (config.remove() != null) {
                 r.getAuditor().audit(
                         AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("remove-user").build());

@@ -7,6 +7,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule, MatBadgeModule, MatBottomSheetModule, MatButtonModule, MatCardModule, MatCheckboxModule, MatChipsModule, MatDialogModule, MatDividerModule, MatExpansionModule, MatFormFieldModule, MatGridListModule, MatIconModule, MatInputModule, MatListModule, MatMenuModule, MatPaginatorModule, MatProgressBarModule, MatProgressSpinnerModule, MatRadioModule, MatRippleModule, MatSelectModule, MatSidenavModule, MatSlideToggleModule, MatSnackBarModule, MatSortModule, MatStepperModule, MatTableModule, MatTabsModule, MatToolbarModule, MatTooltipModule, MatTreeModule } from '@angular/material';
 import { RouterModule } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
+import { GravatarModule } from 'ngx-gravatar';
 import { GlobalErrorHandler } from 'src/app/modules/core/global-error-handler';
 import { ConnectionLostComponent } from './components/connection-lost/connection-lost.component';
 import { InstanceGroupCardComponent } from './components/instance-group-card/instance-group-card.component';
@@ -18,6 +19,9 @@ import { ManagedServerUpdateComponent } from './components/managed-server-update
 import { ProductInfoCardComponent } from './components/product-info-card/product-info-card.component';
 import { ProductTagCardComponent } from './components/product-tag-card/product-tag-card.component';
 import { ThemeChooserComponent } from './components/theme-chooser/theme-chooser.component';
+import { UserAvatarComponent } from './components/user-avatar/user-avatar.component';
+import { UserEditComponent } from './components/user-edit/user-edit.component';
+import { UserInfoComponent } from './components/user-info/user-info.component';
 import { ClickStopPropagationDirective } from './directives/click-stop-propagation.directive';
 import { FileDropDirective } from './directives/file-drop.directive';
 import { httpInterceptorProviders } from './interceptors';
@@ -41,9 +45,13 @@ export function loadAppConfig(cfgService: ConfigService) {
     InstanceGroupCardComponent,
     ProductTagCardComponent,
     ProductInfoCardComponent,
+    UserInfoComponent,
+    UserAvatarComponent,
+    UserEditComponent,
   ],
   entryComponents: [
     ConnectionLostComponent,
+    UserEditComponent,
   ],
   providers: [
     httpInterceptorProviders,
@@ -92,6 +100,8 @@ export function loadAppConfig(cfgService: ConfigService) {
     FlexLayoutModule,
     RouterModule,
     LayoutModule,
+
+    GravatarModule,
   ],
   exports: [
     MatButtonModule,

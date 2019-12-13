@@ -1,7 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatSelectChange } from '@angular/material/select';
 import { MatToolbar } from '@angular/material/toolbar';
-import { Router } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { convert2String } from 'src/app/modules/shared/utils/version.utils';
@@ -29,7 +28,6 @@ export class MainNavComponent implements OnInit {
   constructor(
     private authService: AuthenticationService,
     private cfgService: ConfigService,
-    private router: Router,
     public theme: ThemeService,
     public title: HeaderTitleService,
     public logging: LoggingService
@@ -50,14 +48,6 @@ export class MainNavComponent implements OnInit {
       return true;
     }
     return false;
-  }
-
-  logout(): void {
-    this.router.navigate(['/login']).then(result => {
-      if (result) {
-        this.authService.logout();
-      }
-    });
   }
 
   getLogLevel() {

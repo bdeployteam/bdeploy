@@ -162,7 +162,7 @@ describe('Instance Tests', function () {
   })
 
   it('Cleanup instance group', function() {
-    cy.visit('/#/admin/manualcleanup');
+    cy.visit('/#/admin/all/(panel:manualcleanup)');
 
     // calculate stuff
     cy.contains('button', 'Calculate Cleanup Actions').should('be.visible').and('be.enabled').click();

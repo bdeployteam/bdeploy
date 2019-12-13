@@ -1,0 +1,20 @@
+<mat-toolbar class='mat-elevation-z1'>
+  <div class="spacer"></div>
+  <button mat-raised-button [disabled]='settings.isLoading() || !settings.isDirty()' (click)='settings.revert()'>DISCARD</button>
+  <button mat-raised-button color="primary" [disabled]='settings.isLoading() || !settings.isDirty()' (click)='settings.save()'>SAVE</button>
+</mat-toolbar>
+<div class="content">
+  <mat-tab-group class='tab-container' dynamicHeight='true'>
+    <mat-tab label='Look & Feel'>
+      <div class="content" *ngIf='settings.isLoading()'>
+        <mat-spinner></mat-spinner>
+      </div>
+      <div class='tab-content' *ngIf='!settings.isLoading()'>
+        <p>
+          Control the appearence of the Web Application with the following settings.
+        </p>
+        <mat-slide-toggle [(ngModel)]='settings.getSettings().general.enableGravatar'>Enable Gravatar User Avatars</mat-slide-toggle>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

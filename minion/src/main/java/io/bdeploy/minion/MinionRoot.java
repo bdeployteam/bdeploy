@@ -17,6 +17,7 @@ import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+import javax.crypto.spec.SecretKeySpec;
 import javax.ws.rs.WebApplicationException;
 
 import org.apache.commons.codec.binary.Base64;
@@ -97,7 +98,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         this.updates = root.resolve("update");
         this.hiveDir = root.resolve("hive");
         this.hive = new BHive(hiveDir.toUri(), reporter);
-        this.users = new UserDatabase(this.hive);
+        this.users = new UserDatabase(this);
         this.tmpDir = root.resolve("tmp");
 
         this.logDir = create(root.resolve("log"));
@@ -357,6 +358,14 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         }
 
         return state;
+    }
+
+    public SecretKeySpec getEncryptionKey() {
+        try {
+            return SecurityHelper.createSecretKey(getState().keystorePass);
+        } catch (GeneralSecurityException e) {
+            throw new IllegalStateException("Cannot create encryption key", e);
+        }
     }
 
     public MinionState getState() {

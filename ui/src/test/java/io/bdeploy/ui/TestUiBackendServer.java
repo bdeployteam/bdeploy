@@ -28,6 +28,7 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.VersionHelper;
+import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.jersey.TestServer;
@@ -120,6 +121,19 @@ public class TestUiBackendServer extends TestServer {
             // force order of entries
             recently.computeIfAbsent(user, x -> new ArrayList<>()).remove(group);
             recently.get(user).add(group);
+        }
+
+        @Override
+        public UserInfo findUser(String name) {
+            return new UserInfo(name);
+        }
+
+        @Override
+        public void updateUserInfo(UserInfo info) {
+        }
+
+        @Override
+        public void updateLocalPassword(String user, String pw) {
         }
 
     }

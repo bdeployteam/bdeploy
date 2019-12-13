@@ -111,4 +111,10 @@ public interface MasterRootResource {
     @Path("{name}")
     public MasterNamedResource getNamedMaster(@PathParam("name") String name);
 
+    /**
+     * @return the {@link MasterSettingsResource} managing the settings of this master.
+     */
+    @Path("/settings")
+    public MasterSettingsResource getSettings();
+
 }

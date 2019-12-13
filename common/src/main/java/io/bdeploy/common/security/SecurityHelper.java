@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.KeyStore.ProtectionParameter;
@@ -18,9 +19,12 @@ import java.security.Signature;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 
+import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
@@ -40,6 +44,7 @@ public class SecurityHelper {
     private static final SecurityHelper INSTANCE = new SecurityHelper();
 
     public static final String ROOT_ALIAS = "1";
+    private static final byte[] DEF_SLT = "@%$&".getBytes(StandardCharsets.UTF_8);
     private static final String TOKEN_ALIAS = "token";
     private static final String CERT_ALIAS = "cert";
 
@@ -48,6 +53,45 @@ public class SecurityHelper {
 
     public static SecurityHelper getInstance() {
         return INSTANCE;
+    }
+
+    /**
+     * @param password the password for the key
+     * @return a secret key which can be used for encryption and decryption of passwords
+     */
+    public static SecretKeySpec createSecretKey(char[] password) throws GeneralSecurityException {
+        SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
+        PBEKeySpec keySpec = new PBEKeySpec(password, DEF_SLT, 1024, 256);
+        SecretKey keyTmp = keyFactory.generateSecret(keySpec);
+        return new SecretKeySpec(keyTmp.getEncoded(), "AES");
+    }
+
+    /**
+     * @param data the data to encrypt
+     * @param key the key to use to encrypt
+     * @return the encrypted data
+     */
+    public static String encrypt(String data, SecretKeySpec key) throws GeneralSecurityException, IOException {
+        Cipher pbeCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        pbeCipher.init(Cipher.ENCRYPT_MODE, key);
+        AlgorithmParameters parameters = pbeCipher.getParameters();
+        IvParameterSpec ivParameterSpec = parameters.getParameterSpec(IvParameterSpec.class);
+        byte[] cryptoText = pbeCipher.doFinal(data.getBytes("UTF-8"));
+        byte[] iv = ivParameterSpec.getIV();
+        return encode(iv) + ":" + encode(cryptoText);
+    }
+
+    /**
+     * @param data the encrypted data
+     * @param key the key to use to decrypt the data
+     * @return the decrypted data
+     */
+    public static String decrypt(String data, SecretKeySpec key) throws GeneralSecurityException, IOException {
+        String iv = data.split(":")[0];
+        String property = data.split(":")[1];
+        Cipher pbeCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        pbeCipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(decode(iv)));
+        return new String(pbeCipher.doFinal(decode(property)), "UTF-8");
     }
 
     /**

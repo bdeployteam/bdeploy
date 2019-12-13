@@ -126,8 +126,8 @@ describe("Central/Managed Basic Test", function() {
     })
 
     // this is to wait a little for the sync in the background to happen...
-    cy.waitUntilContentLoaded();
-    cy.contains('button', 'Done').should('be.enabled').click();
+    cy.wait(1000); // not nice. currently no other way to wait, product sync wizard needs to display progress.
+    cy.contains('button', 'Done').should('be.enabled').scrollIntoView().click();
 
     cy.contains('mat-card', 'Demo Product').should('exist').click();
     cy.get('app-product-list').within(pl => {

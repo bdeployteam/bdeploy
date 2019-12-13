@@ -13,6 +13,7 @@
 
 @import 'app/modules/shared/components/file-upload/file-upload-theme.scss';
 @import 'app/modules/admin/components/hive/hive-theme.scss';
+@import 'app/modules/admin/components/admin-shell/admin-shell.theme.scss';
 
 @import 'app/modules/servers/components/attach-central/attach-central-theme.scss';
 @import 'app/modules/servers/components/product-sync/product-sync-theme.scss';
@@ -57,6 +58,7 @@
   @include attach-central-theme($theme);
   @include managed-server-update-theme($theme);
   @include product-sync-theme($theme);
+  @include settings-shell-theme($theme);
 }
 
 @mixin theme-chooser($theme) {

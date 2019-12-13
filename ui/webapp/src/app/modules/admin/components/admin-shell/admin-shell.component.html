@@ -1,0 +1,23 @@
+<mat-toolbar class='mat-elevation-z2 admin-toolbar'>Administration</mat-toolbar>
+<mat-sidenav-container class='admin-shell-container'>
+  <mat-sidenav mode='side' opened class='admin-shell-nav mat-elevation-z2'>
+    <mat-nav-list>
+      <a mat-list-item [routerLink]='[{outlets: { panel: ["general"] } }]' routerLinkActive='active-setting'><mat-icon class="nav-icon">settings</mat-icon>General Settings</a>
+
+      <div class='menu-group'>User Management</div>
+      <a mat-list-item [routerLink]='[{outlets: { panel: ["authentication"] } }]' routerLinkActive='active-setting'><mat-icon class="nav-icon">security</mat-icon>Authentication</a>
+
+      <div class='menu-group'>Housekeeping</div>
+      <a mat-list-item [routerLink]='[{outlets: { panel: ["manualcleanup"] } }]'><mat-icon class="nav-icon">delete_sweep</mat-icon>Manual Cleanup</a>
+      <a mat-list-item [routerLink]='[{outlets: { panel: ["hive"] } }]'><mat-icon class="nav-icon">sd_storage</mat-icon>Hive Browser</a>
+
+      <div class='menu-group'>System</div>
+      <a mat-list-item [routerLink]='[{outlets: { panel: ["metrics"] } }]'><mat-icon class="nav-icon">timeline</mat-icon>System Metrics</a>
+      <a mat-list-item [routerLink]='[{outlets: { panel: ["systemsoftware"] } }]'><mat-icon class="nav-icon">system_update</mat-icon>System Software</a>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content class='admin-shell-content'>
+    <router-outlet name='panel'></router-outlet>
+  </mat-sidenav-content>
+</mat-sidenav-container>

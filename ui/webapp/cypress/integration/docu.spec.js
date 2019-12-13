@@ -404,7 +404,7 @@ describe('Creates screenshots for the user documentation', () => {
   // Capture System Software
   it('Captures System Software', () => {
     cy.login();
-    cy.visit('/#/admin/systemsoftware');
+    cy.visit('/#/admin/all/(panel:systemsoftware)');
 
     // Available software
     cy.contains('System Software').should('exist');
@@ -416,7 +416,7 @@ describe('Creates screenshots for the user documentation', () => {
   // Capture Manual Cleanup
   it('Captures Manual Cleanup', () => {
     cy.login();
-    cy.visit('/#/admin/manualcleanup');
+    cy.visit('/#/admin/all/(panel:manualcleanup)');
 
     // Introduction
     cy.contains('button', 'Calculate Cleanup Action').should('be.visible')

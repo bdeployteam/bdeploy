@@ -10,6 +10,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import io.bdeploy.ui.dto.CredentialsDto;
 
@@ -39,4 +40,23 @@ public interface AuthResource {
     @Path("/recent-groups")
     public List<String> getRecentlyUsedInstanceGroups();
 
+    /**
+     * Retrieve the current user.
+     * <p>
+     * The password field is cleared out.
+     *
+     * @return the currently logged in user's information.
+     */
+    @GET
+    @Path("/user")
+    public UserInfo getCurrentUser();
+
+    /**
+     * Updates the current user with the given information.
+     *
+     * @param info the info for the current user.
+     */
+    @POST
+    @Path("/user")
+    public void updateCurrentUser(UserInfo info);
 }
