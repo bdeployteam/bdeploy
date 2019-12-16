@@ -993,6 +993,10 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     return false;
   }
 
+  public isInstanceActivated(): boolean {
+    return (this.deploymentState != null && this.deploymentState.activeTag != null);
+  }
+
   async syncCentral() {
     if (!this.isCentral()) {
       return;
