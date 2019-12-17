@@ -1,0 +1,65 @@
+@keyframes router-load-backdrop-animation {
+  from {
+      opacity: 0.0 ;
+  }
+
+  to {
+      opacity: 0.5 ;
+  }
+}
+
+@keyframes router-load-indicator-animation {
+  from {
+      opacity: 0.0 ;
+  }
+
+  to {
+      opacity: 1.0 ;
+  }
+}
+
+.router-load-backdrop {
+  animation-delay: 200ms ;
+  animation-duration: 200ms ;
+  animation-fill-mode: both ;
+  animation-name: router-load-backdrop-animation ;
+
+  width: 100%;
+  height: 100%;
+
+  position: absolute;
+
+  background-color: #000000;
+
+  z-index: 1;
+
+  top: 0px;
+  left: 0px;
+}
+
+.router-load-indicator {
+  animation-delay: 200ms ;
+  animation-duration: 200ms ;
+  animation-fill-mode: both ;
+  animation-name: router-load-indicator-animation ;
+
+  display: flex;
+  flex-direction: column;
+
+  color: white;
+  background: #333333;
+
+  padding: 10px;
+  border-radius: 5px;
+
+  z-index: 2;
+
+  left: 50%;
+  top: 50%;
+
+  width: 200px;
+
+  position: fixed ;
+
+  transform: translateX( -50% ) translateY( -50% );
+}

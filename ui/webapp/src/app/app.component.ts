@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, RouteConfigLoadEnd, RouteConfigLoadStart, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { HeaderTitleService } from './modules/core/services/header-title.service';
 import { Logger, LoggingService } from './modules/core/services/logging.service';
@@ -15,6 +16,9 @@ export class AppComponent implements OnInit {
 
   title = 'webapp';
 
+  subscription: Subscription;
+  loadCount = 0;
+
   constructor(
     private loggingService: LoggingService,
     private router: Router,
@@ -28,7 +32,7 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.router.events
+    this.subscription = this.router.events
       .pipe(
         filter(e => e instanceof NavigationEnd),
         map(() => this.activatedRoute),
@@ -58,5 +62,22 @@ export class AppComponent implements OnInit {
         }
         this.titleService.setTitle(title);
       });
+
+    this.subscription.add(this.router.events.pipe(
+      filter(e => e instanceof RouteConfigLoadStart)
+    ).subscribe(e => {
+      this.loadCount++;
+    }));
+
+    this.subscription.add(this.router.events.pipe(
+      filter(e => e instanceof RouteConfigLoadEnd)
+    ).subscribe(e => {
+      this.loadCount--;
+    }));
+  }
+
+  showLoadIndicator(): boolean {
+    // at least one pending lazy load operation...
+    return !!this.loadCount;
   }
 }
