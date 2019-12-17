@@ -66,13 +66,13 @@
         </button>
       </ng-container>
       <mat-menu #appMenu="matMenu" xPosition="before">
-        <button mat-menu-item (click)="startInstance()" [disabled]='isReadonly()' matTooltip="Starts all processes having the start type 'Instance' configured.">
+        <button mat-menu-item (click)="startInstance()" [disabled]='!isInstanceActivated()' matTooltip="Starts all processes having the start type 'Instance' configured.">
           Start Instance...
         </button>
-        <button mat-menu-item (click)="stopInstance()" [disabled]='isReadonly()' matTooltip="Stops all processes.">
+        <button mat-menu-item (click)="stopInstance()" [disabled]='!isInstanceActivated()' matTooltip="Stops all processes.">
           Stop Instance...
         </button>
-        <button mat-menu-item (click)="restartInstance()" [disabled]='isReadonly()' matTooltip="Stops all processes, then starts all having the start type 'Instance' configured.">
+        <button mat-menu-item (click)="restartInstance()" [disabled]='!isInstanceActivated()' matTooltip="Stops all processes, then starts all having the start type 'Instance' configured.">
           Restart Instance...
         </button>
         <mat-divider></mat-divider>
