@@ -157,7 +157,7 @@ public class MinionDeployTest {
         List<CleanupGroup> groups = cr.calculate();
         assertEquals(2, groups.size());
         assertEquals("demo", groups.get(0).instanceGroup);
-        assertEquals(0, groups.get(0).actions.size());
+        assertEquals(4, groups.get(0).actions.size());
 
         assertEquals("master", groups.get(1).minion);
         // 1 instance node manifest, 1 application manifest, 1 dependent manifest
@@ -199,10 +199,8 @@ public class MinionDeployTest {
         // check application UIDs
         InstanceManifest im2 = InstanceManifest.of(local, importedInstance);
 
-        InstanceNodeManifest master1 = InstanceNodeManifest.of(local,
-                im1.getInstanceNodeManifests().get(Minion.DEFAULT_NAME));
-        InstanceNodeManifest master2 = InstanceNodeManifest.of(local,
-                im2.getInstanceNodeManifests().get(Minion.DEFAULT_NAME));
+        InstanceNodeManifest master1 = InstanceNodeManifest.of(local, im1.getInstanceNodeManifests().get(Minion.DEFAULT_NAME));
+        InstanceNodeManifest master2 = InstanceNodeManifest.of(local, im2.getInstanceNodeManifests().get(Minion.DEFAULT_NAME));
 
         // IDs may NEVER match.
         assertEquals(master1.getConfiguration().applications.get(0).name, master2.getConfiguration().applications.get(0).name);
@@ -215,8 +213,7 @@ public class MinionDeployTest {
         assertEquals(instance.getName(), importedVersion.getName());
 
         InstanceManifest im3 = InstanceManifest.of(local, importedVersion);
-        InstanceNodeManifest master3 = InstanceNodeManifest.of(local,
-                im3.getInstanceNodeManifests().get(Minion.DEFAULT_NAME));
+        InstanceNodeManifest master3 = InstanceNodeManifest.of(local, im3.getInstanceNodeManifests().get(Minion.DEFAULT_NAME));
 
         // IDs MUST match.
         assertEquals(master1.getConfiguration().applications.get(0).name, master3.getConfiguration().applications.get(0).name);
