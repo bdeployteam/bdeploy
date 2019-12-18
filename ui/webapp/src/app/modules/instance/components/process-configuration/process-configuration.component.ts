@@ -106,6 +106,8 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   public updateDto: MinionUpdateDto;
   public updateStatus: UpdateStatus;
 
+  private reloadPending = false;
+
   constructor(
     private route: ActivatedRoute,
     private loggingService: LoggingService,
@@ -233,20 +235,24 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
     // if we reach here, we received an event about a new instance version which we do not yet have.
     // for now this will result in a hardcore messagebox :)
-    this.messageBoxService
-      .open({
-        title: 'Change on server detected',
-        message: 'The instance has been modified by somebody else. Pressing OK will reload instance versions.',
-        mode: MessageBoxMode.CONFIRM,
-      })
-      .subscribe(r => {
-        if (r) {
-          this.loadVersions(true);
-          if (this.editMode) {
-            this.setEditMode(false);
-          }
-        }
-      });
+    if (!this.reloadPending) {
+      this.reloadPending = true;
+      this.messageBoxService
+        .open({
+          title: 'Change on server detected',
+          message: 'The instance has been modified by somebody else. Pressing OK will reload instance versions.',
+          mode: MessageBoxMode.CONFIRM,
+        })
+        .subscribe(r => {
+            if (r) {
+              this.loadVersions(true);
+              if (this.editMode) {
+                this.setEditMode(false);
+              }
+            }
+            this.reloadPending = false;
+        });
+    }
   }
 
   private loadVersions(selectLatest: boolean): void {
