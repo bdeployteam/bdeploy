@@ -7,6 +7,9 @@ import java.util.Optional;
 
 import javax.crypto.spec.SecretKeySpec;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Tree;
@@ -24,6 +27,8 @@ import io.bdeploy.interfaces.configuration.SettingsConfiguration;
 import io.bdeploy.interfaces.settings.LDAPSettingsDto;
 
 public class SettingsManifest {
+
+    private static final Logger log = LoggerFactory.getLogger(SettingsManifest.class);
 
     private static final String SETTINGS_MANIFEST = "meta/settings";
     private static final String CONFIG_FILE = "settings.json";
@@ -62,12 +67,14 @@ public class SettingsManifest {
         for (LDAPSettingsDto lds : config.auth.ldapSettings) {
             if (clearPasswords) {
                 lds.pass = null;
-            } else {
+            } else if (lds.pass != null && !lds.pass.isEmpty()) {
                 try {
                     lds.pass = SecurityHelper.decrypt(lds.pass, key);
                 } catch (GeneralSecurityException | IOException e) {
-                    throw new IllegalStateException("Cannot decrypt password", e);
+                    log.error("Cannot decrypt password for " + lds.server, e);
                 }
+            } else {
+                log.warn("No password for " + lds.server);
             }
         }
         return config;
@@ -81,7 +88,11 @@ public class SettingsManifest {
                 LDAPSettingsDto oldLds = oldConfig.auth.ldapSettings.stream().filter(l -> l.server.equals(server)).findAny()
                         .orElse(null);
                 if (oldLds != null) {
-                    lds.pass = oldLds.pass;
+                    try {
+                        lds.pass = SecurityHelper.encrypt(oldLds.pass, key);
+                    } catch (GeneralSecurityException | IOException e) {
+                        throw new IllegalStateException("Cannot encrypt password for server: " + lds.server, e);
+                    }
                 } else {
                     throw new IllegalStateException(
                             "No existing password found, and no password supplied for LDAP server " + lds.server);
@@ -90,7 +101,7 @@ public class SettingsManifest {
                 try {
                     lds.pass = SecurityHelper.encrypt(lds.pass, key);
                 } catch (GeneralSecurityException | IOException e) {
-                    throw new IllegalStateException("Cannot encrypt password", e);
+                    throw new IllegalStateException("Cannot encrypt password for server: " + lds.server, e);
                 }
             }
         }
