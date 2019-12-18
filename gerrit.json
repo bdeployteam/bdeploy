@@ -8,7 +8,7 @@
 		]
 	},
     {
-        "regex":"doc/.*,
+        "regex":"doc/.*",
         "reviewers": [
             "michael.heinrich@ssi-schaefer.com"
         ]

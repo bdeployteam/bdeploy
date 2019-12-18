@@ -1,0 +1,27 @@
+@import '~@angular/material/theming';
+
+@mixin settings-shell-theme($theme) {
+  $background: map-get($theme, background);
+  $dark: map-get($theme, is-dark);
+
+  $groupTextColor: if($dark, mat-color($mat-grey, 600), mat-color($mat-grey, 400));
+  $groupLineColor: if($dark, mat-color($mat-grey, 700), mat-color($mat-grey, 300));
+
+  .active-setting {
+    background-color: mat-color($background, selected-button);
+  }
+
+  .menu-group {
+    color: $groupTextColor;
+    font-size: smaller;
+
+    flex: 1 0 auto;
+
+    border-bottom: solid 1px $groupLineColor;
+
+    margin-top: 20px;
+    margin-bottom: 5px;
+
+    padding-left: 10px;
+  }
+}

@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { CookieService } from 'ngx-cookie-service';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { CredentialsDto } from '../../../models/gen.dtos';
+import { CredentialsDto, UserInfo } from '../../../models/gen.dtos';
 import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
 import { ConfigService } from './config.service';
 import { Logger, LoggingService } from './logging.service';
@@ -76,6 +76,16 @@ export class AuthenticationService {
   isAdmin(): boolean {
     // TODO: implement :)
     return false; // for testing
+  }
+
+  getUserInfo(): Observable<UserInfo> {
+    this.log.debug('Fetching current user info...');
+    return this.http.get<UserInfo>(this.cfg.config.api + '/auth/user');
+  }
+
+  updateUserInfo(info: UserInfo): Observable<any> {
+    this.log.debug('Updating current user info...');
+    return this.http.post<UserInfo>(this.cfg.config.api + '/auth/user', info);
   }
 
 }

@@ -2,6 +2,7 @@ package io.bdeploy.minion.user;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +31,11 @@ import io.bdeploy.bhive.op.ObjectConsistencyCheckOperation;
 import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.security.ApiAccessToken.ScopedCapability;
+import io.bdeploy.interfaces.UserInfo;
+import io.bdeploy.interfaces.manifest.SettingsManifest;
+import io.bdeploy.interfaces.settings.AuthenticationSettingsDto;
+import io.bdeploy.minion.MinionRoot;
+import io.bdeploy.minion.user.ldap.LdapAuthenticator;
 import io.bdeploy.ui.api.AuthService;
 
 /**
@@ -43,11 +49,17 @@ public class UserDatabase implements AuthService {
     private static final String NAMESPACE = "users/";
     private static final String FILE_NAME = "user.json";
 
-    private final PasswordAuthentication auth = new PasswordAuthentication();
+    private final MinionRoot root;
     private final BHive target;
 
-    public UserDatabase(BHive target) {
-        this.target = target;
+    private final List<Authenticator> authenticators = new ArrayList<>();
+
+    public UserDatabase(MinionRoot root) {
+        this.root = root;
+        this.target = root.getHive();
+
+        this.authenticators.add(new PasswordAuthentication());
+        this.authenticators.add(new LdapAuthenticator());
     }
 
     /**
@@ -55,17 +67,41 @@ public class UserDatabase implements AuthService {
      *
      * @param user the user name
      * @param pw the password to set or <code>null</code> to keep the current password
-     * @param capabilities the capabilities to set or <code>null</code> to keep the current ones
      */
-    public void updateUser(String user, String pw, List<ScopedCapability> capabilities) {
+    @Override
+    public void updateLocalPassword(String user, String pw) {
         UserInfo info = findUser(user);
         if (info == null) {
-            info = new UserInfo(user);
+            throw new IllegalStateException("Cannot find user " + user);
         }
 
         if (pw != null) {
-            info.password = auth.hash(pw.toCharArray());
+            if (info.external) {
+                throw new IllegalStateException("Cannot set password of externally-managed user");
+            }
+            info.password = PasswordAuthentication.hash(pw.toCharArray());
         }
+
+        internalUpdate(user, info);
+    }
+
+    @Override
+    public void updateUserInfo(UserInfo info) {
+        UserInfo old = findUser(info.name);
+
+        if (old.external) {
+            throw new UnsupportedOperationException("Update on external user not supported");
+        }
+
+        info.password = old.password; // don't update this.
+
+        internalUpdate(info.name, info);
+    }
+
+    public void createLocalUser(String user, String pw, List<ScopedCapability> capabilities) {
+        UserInfo info = new UserInfo(user);
+
+        info.password = PasswordAuthentication.hash(pw.toCharArray());
         if (capabilities != null) {
             info.capabilities = capabilities;
         }
@@ -134,17 +170,37 @@ public class UserDatabase implements AuthService {
 
     @Override
     public UserInfo authenticate(String user, String pw) {
+        AuthenticationSettingsDto settings = SettingsManifest.read(target, root.getEncryptionKey(), false).auth;
+
         UserInfo u = findUser(user);
         if (u == null) {
+            for (Authenticator auth : authenticators) {
+                u = auth.getInitialInfo(user, pw.toCharArray(), settings);
+                if (u != null) {
+                    u.lastActiveLogin = System.currentTimeMillis();
+                    internalUpdate(user, u);
+                    return u; // already successfully authenticated using the given password.
+                }
+            }
             return null;
         }
-        if (auth.authenticate(pw.toCharArray(), u.password)) {
-            return u;
+
+        for (Authenticator auth : authenticators) {
+            if (auth.isResponsible(u, settings)) {
+                UserInfo authenticated = auth.authenticate(u, pw.toCharArray(), settings);
+                if (authenticated != null) {
+                    authenticated.lastActiveLogin = System.currentTimeMillis();
+                    internalUpdate(user, authenticated);
+                    return authenticated;
+                }
+            }
         }
+
         return null;
     }
 
-    private UserInfo findUser(String name) {
+    @Override
+    public UserInfo findUser(String name) {
         Optional<Long> current = target.execute(new ManifestMaxIdOperation().setManifestName(NAMESPACE + name));
         if (!current.isPresent()) {
             return null;

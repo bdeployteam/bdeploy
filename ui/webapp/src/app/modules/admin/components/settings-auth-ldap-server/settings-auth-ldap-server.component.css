@@ -1,0 +1,17 @@
+.flex-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-horiz {
+  display: flex;
+  flex-direction: row;
+}
+
+.flex-horiz * {
+  flex: 1 0 auto;
+}
+
+.flex-horiz *:not(:first-child) {
+  margin-left: 10px;
+}

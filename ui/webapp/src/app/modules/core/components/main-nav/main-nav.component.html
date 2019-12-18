@@ -13,10 +13,7 @@
       <a mat-list-item (click)='drawer.close()' [routerLink]="['/softwarerepo/browser']"><mat-icon class="nav-icon">storage</mat-icon>Software Repositories</a>
     </mat-nav-list>
     <mat-nav-list class='at-bottom'>
-      <a mat-list-item (click)='drawer.close()' [routerLink]="['/admin/systemsoftware']"><mat-icon class="nav-icon">system_update</mat-icon>System Software</a>
-      <a mat-list-item (click)='drawer.close()' [routerLink]="['/admin/manualcleanup']"><mat-icon class="nav-icon">delete_sweep</mat-icon>Manual Cleanup</a>
-      <a mat-list-item (click)='drawer.close()' [routerLink]="['/admin/hive/browser']"><mat-icon class="nav-icon">sd_storage</mat-icon>Hive Browser</a>
-      <a mat-list-item (click)='drawer.close()' [routerLink]="['/admin/metrics']"><mat-icon class="nav-icon">timeline</mat-icon>System Metrics</a>
+      <a mat-list-item (click)='drawer.close()' [routerLink]="['/admin/']"><mat-icon class="nav-icon">settings</mat-icon>Administration</a>
     </mat-nav-list>
     <footer class="footer-container">
       <mat-divider ></mat-divider>
@@ -53,7 +50,7 @@
       <span *ngIf='needServerTypeHint()' class='server-type-hint'>{{ (backendInfo | async).mode }}</span>
       <app-theme-chooser></app-theme-chooser>
       <ng-container *ngIf="isAuth$ | async">
-        <button mat-icon-button aria-label="Logout icon" (click)="logout()"><mat-icon>exit_to_app</mat-icon></button>
+        <app-user-info></app-user-info>
       </ng-container>
     </mat-toolbar>
     <div id="app-content" class="sidenav-margin">

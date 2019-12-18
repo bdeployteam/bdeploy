@@ -135,13 +135,13 @@ Cypress.Commands.add('attachManaged', function(groupName) {
 
   cy.contains('mat-step-header', 'Additional Information').parent().within(e => {
     cy.get('input[placeholder=Description]').should('exist').and('be.visible').and('be.empty').type('Test Local Server');
-    cy.contains('button', 'Next').should('exist').and('be.visible').and('be.enabled').click();
+    cy.contains('button', 'Next').should('exist').and('be.enabled').scrollIntoView().click();
   });
 
   // magic happens here :)
 
   cy.contains('mat-step-header', 'Done').parent().within(e => {
-    cy.contains('button', 'Done').should('exist').and('be.visible').and('be.enabled').click();
+    cy.contains('button', 'Done').should('exist').and('be.enabled').scrollIntoView().click();
   });
 
   // we're on the managed servers page again now. verify server exists and can be sync'd.

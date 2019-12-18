@@ -14,10 +14,10 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 
 import io.bdeploy.common.security.ApiAccessToken;
+import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.jersey.JerseyServer;
 import io.bdeploy.ui.api.AuthResource;
 import io.bdeploy.ui.api.AuthService;
-import io.bdeploy.ui.api.AuthService.UserInfo;
 import io.bdeploy.ui.dto.CredentialsDto;
 
 public class AuthResourceImpl implements AuthResource {
@@ -53,6 +53,21 @@ public class AuthResourceImpl implements AuthResource {
         List<String> reversed = new ArrayList<>(auth.getRecentlyUsedInstanceGroups(user));
         Collections.reverse(reversed);
         return reversed;
+    }
+
+    @Override
+    public UserInfo getCurrentUser() {
+        UserInfo info = auth.findUser(context.getUserPrincipal().getName());
+        info.password = null;
+        return info;
+    }
+
+    @Override
+    public void updateCurrentUser(UserInfo info) {
+        if (info.password != null && !info.password.isBlank()) {
+            auth.updateLocalPassword(info.name, info.password);
+        }
+        auth.updateUserInfo(info);
     }
 
 }

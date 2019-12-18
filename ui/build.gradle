@@ -178,13 +178,14 @@ task copyUserDoc(type:Copy, dependsOn:':doc:userDoc') {
     into "$webappDir/dist/webapp/assets/doc"
 }
 
-task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask) {
+task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsOn: compileJava) {
     jsonLibrary = 'jackson2'
     classes = [
         // Descriptors
         'io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor',
         'io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor',
         // Configurations and their DTOs
+        'io.bdeploy.interfaces.configuration.SettingsConfiguration',
         'io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration',
         'io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto',
         'io.bdeploy.interfaces.configuration.instance.InstanceConfiguration',
@@ -219,6 +220,7 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask) {
         'io.bdeploy.interfaces.directory.InstanceDirectory',
         'io.bdeploy.interfaces.minion.MinionStatusDto',
         'io.bdeploy.interfaces.manifest.state.InstanceStateRecord',
+        'io.bdeploy.interfaces.UserInfo',
         // Metrics
         'io.bdeploy.jersey.resources.JerseyMetricsResource$MetricBundle',
         'io.bdeploy.common.metrics.Metrics$MetricGroup',

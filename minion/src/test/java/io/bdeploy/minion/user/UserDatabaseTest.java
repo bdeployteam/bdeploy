@@ -17,9 +17,9 @@ import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.ApiAccessToken.Capability;
 import io.bdeploy.common.security.ApiAccessToken.ScopedCapability;
+import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestMinion;
-import io.bdeploy.ui.api.AuthService.UserInfo;
 
 @ExtendWith(TestMinion.class)
 public class UserDatabaseTest {
@@ -28,7 +28,7 @@ public class UserDatabaseTest {
     void userRoles(MinionRoot root) {
         UserDatabase db = root.getUsers();
 
-        db.updateUser("test", "test", Collections.singletonList(ApiAccessToken.ADMIN_CAPABILITY));
+        db.createLocalUser("test", "test", Collections.singletonList(ApiAccessToken.ADMIN_CAPABILITY));
 
         UserInfo info = db.authenticate("test", "test");
         assertNotNull(info);
@@ -36,12 +36,18 @@ public class UserDatabaseTest {
         assertEquals(1, info.capabilities.size());
         assertEquals(ApiAccessToken.ADMIN_CAPABILITY.capability, info.capabilities.get(0).capability);
 
-        db.updateUser("test", null, Collections.emptyList());
+        info.capabilities.clear();
+        info.fullName = "Test User";
+        info.email = "test.user@example.com";
+        db.updateUserInfo(info);
 
         UserInfo updated = db.authenticate("test", "test");
         assertNotNull(updated);
         assertNotNull(updated.capabilities);
         assertTrue(updated.capabilities.isEmpty());
+
+        assertEquals("Test User", updated.fullName);
+        assertEquals("test.user@example.com", updated.email);
     }
 
     @Test
@@ -50,7 +56,7 @@ public class UserDatabaseTest {
 
         List<String> recently1 = Arrays.asList(new String[] { "a", "b", "c" });
 
-        db.updateUser("test", "test", null);
+        db.createLocalUser("test", "test", null);
 
         db.addRecentlyUsedInstanceGroup("test", "a");
         db.addRecentlyUsedInstanceGroup("test", "b");
@@ -62,9 +68,11 @@ public class UserDatabaseTest {
     void userCleanup(MinionRoot root) {
         UserDatabase db = root.getUsers();
 
-        db.updateUser("test", "test", null);
+        db.createLocalUser("test", "test", null);
         for (int i = 0; i < 20; ++i) {
-            db.updateUser("test", null, Collections.singletonList(new ScopedCapability("Scope" + i, Capability.ADMIN)));
+            UserInfo u = db.findUser("test");
+            u.capabilities.add(new ScopedCapability("Scope" + i, Capability.ADMIN));
+            db.updateUserInfo(u);
         }
 
         BHive hive = root.getHive();

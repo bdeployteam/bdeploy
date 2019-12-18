@@ -9,11 +9,13 @@ Cypress.Commands.add('createInstance', function(group, name, mode = 'STANDALONE'
   // attention: the button contains 'add' not '+' (mat-icon('add') = '+')
   cy.contains('button', 'add').click();
 
-  // do "something"/"a check" before typing, some times we got "st Instance..." or "est Instance..." instead of "Test Instance..."
-  // looks as if typing starts before angular is ready and angular resets the input?
+  // the application requests a UUID from the server, and then clears all values. we need to wait for the
+  // UUID to appear before typing to avoid races where the input would end up halv way (e.g. 'tance-123'
+  // instead of 'Instance-123').
   cy.contains('button', 'SAVE').should('exist').and('be.disabled');
-  cy.get('[placeholder=Name]').should('exist').click();
-  cy.get('[placeholder=Name]').should('exist').and('have.focus').type(name)
+  cy.get('mat-toolbar-row').contains('UUID').should('exist').and('be.visible');
+
+  cy.get('[placeholder=Name]').should('exist').and('be.enabled').type(name)
   cy.get('[placeholder=Description]').type('Test Instance for automated test')
 
   // angular drop down is something very different from a native HTML select/option

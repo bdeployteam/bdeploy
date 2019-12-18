@@ -1,0 +1,22 @@
+.admin-shell-container {
+  height: 100%;
+  padding-top: 64px;
+}
+
+.admin-shell-nav {
+  width: 250px;
+  padding-top: 64px;
+}
+
+.nav-icon {
+  margin-right: 10px;
+}
+
+.admin-toolbar {
+  z-index: 10;
+  position: fixed;
+
+  height: 64px;
+  min-height: 64px;
+  max-height: 64px;
+}

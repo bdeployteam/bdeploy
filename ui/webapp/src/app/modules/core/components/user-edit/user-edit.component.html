@@ -1,0 +1,16 @@
+<h1 mat-dialog-title>Edit User</h1>
+<form #f="ngForm">
+  <div mat-dialog-content class='flex-content'>
+    <mat-form-field><input matInput type='text' name='user' disabled required [value]='user.name' placeholder="Username"></mat-form-field>
+    <mat-form-field><input matInput type='text' name='name' [disabled]='user.external' [(ngModel)]='user.fullName' placeholder="Full Name" [matTooltip]='user.external ? "Cannot be edited as the user is externally managed" : ""'></mat-form-field>
+    <mat-form-field><input matInput type='text' name='mail' [disabled]='user.external' [(ngModel)]='user.email' placeholder="E-Mail Address" [matTooltip]='user.external ? "Cannot be edited as the user is externally managed" : ""'></mat-form-field>
+    <div class='flex-horiz'>
+      <mat-form-field><input matInput type='password' #pass1 name='pass1' [disabled]='user.external' [(ngModel)]='user.password' placeholder="New Password" [matTooltip]='user.external ? "Cannot be edited as the user is externally managed" : ""'></mat-form-field>
+      <mat-form-field><input matInput type='password' #pass2 name='pass2' [disabled]='user.external' placeholder="Repeat New Password" [matTooltip]='user.external ? "Cannot be edited as the user is externally managed" : ""'></mat-form-field>
+    </div>
+  </div>
+</form>
+<div mat-dialog-actions align="end">
+  <button mat-raised-button [mat-dialog-close]="null">Cancel</button>
+  <button mat-raised-button color="primary" [mat-dialog-close]="user" [disabled]='!f.dirty || f.invalid || !passwordsSame()'>Apply</button>
+</div>

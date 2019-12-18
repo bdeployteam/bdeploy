@@ -28,6 +28,7 @@ import io.bdeploy.minion.cli.MasterTool.MasterConfig;
 import io.bdeploy.minion.remote.jersey.CentralUpdateResourceImpl;
 import io.bdeploy.minion.remote.jersey.JerseyAwareMinionUpdateManager;
 import io.bdeploy.minion.remote.jersey.MasterRootResourceImpl;
+import io.bdeploy.minion.remote.jersey.MasterSettingsResourceImpl;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.impl.UiResources;
 
@@ -120,6 +121,7 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
 
         if (minionRoot.getMode() == MinionMode.CENTRAL) {
             srv.register(CentralUpdateResourceImpl.class);
+            srv.register(MasterSettingsResourceImpl.class);
         } else {
             srv.register(MasterRootResourceImpl.class);
         }

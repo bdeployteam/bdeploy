@@ -12,6 +12,9 @@ import java.util.regex.Pattern;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
+import io.bdeploy.interfaces.UserInfo;
+import io.bdeploy.interfaces.settings.AuthenticationSettingsDto;
+
 /**
  * Hash passwords for storage, and test passwords against password tokens.
  * Instances of this class can be used concurrently by multiple threads.
@@ -19,7 +22,7 @@ import javax.crypto.spec.PBEKeySpec;
  * @author erickson
  * @see <a href="http://stackoverflow.com/a/2861125/3474">StackOverflow</a>
  */
-final class PasswordAuthentication {
+final class PasswordAuthentication implements Authenticator {
 
     /**
      * Each token produced by this class uses this identifier as a prefix.
@@ -33,7 +36,7 @@ final class PasswordAuthentication {
     private static final String ALGORITHM = "PBKDF2WithHmacSHA1";
     private static final int SIZE = 128;
     private static final Pattern layout = Pattern.compile("\\$31\\$(\\d\\d?)\\$(.{43})");
-    private final SecureRandom random = new SecureRandom();
+    private static final SecureRandom random = new SecureRandom();
 
     private static int iterations(int cost) {
         if ((cost < 0) || (cost > 30)) {
@@ -47,7 +50,7 @@ final class PasswordAuthentication {
      *
      * @return a secure authentication token to be stored for later authentication
      */
-    public String hash(char[] password) {
+    public static String hash(char[] password) {
         byte[] salt = new byte[SIZE / 8];
         random.nextBytes(salt);
         byte[] dk = pbkdf2(password, salt, 1 << DEFAULT_COST);
@@ -63,7 +66,7 @@ final class PasswordAuthentication {
      *
      * @return true if the password and token match
      */
-    public boolean authenticate(char[] password, String token) {
+    private boolean verify(char[] password, String token) {
         Matcher m = layout.matcher(token);
         if (!m.matches()) {
             throw new IllegalArgumentException("Invalid token format");
@@ -89,6 +92,27 @@ final class PasswordAuthentication {
         } catch (InvalidKeySpecException ex) {
             throw new IllegalStateException("Invalid SecretKeyFactory", ex);
         }
+    }
+
+    @Override
+    public UserInfo authenticate(UserInfo user, char[] password, AuthenticationSettingsDto settings) {
+        if (verify(password, user.password)) {
+            return user;
+        }
+        return null;
+    }
+
+    @Override
+    public UserInfo getInitialInfo(String username, char[] password, AuthenticationSettingsDto settings) {
+        return null; // not supported
+    }
+
+    @Override
+    public boolean isResponsible(UserInfo user, AuthenticationSettingsDto settings) {
+        if (settings.disableBasic) {
+            return false;
+        }
+        return !user.external;
     }
 
 }

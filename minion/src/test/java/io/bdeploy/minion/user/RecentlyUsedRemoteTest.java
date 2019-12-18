@@ -24,7 +24,7 @@ public class RecentlyUsedRemoteTest {
     @Test
     void recentGroups(InstanceGroupResource root, AuthResource auth, MinionRoot mr) {
         // user must exist in the database
-        mr.getUsers().updateUser(System.getProperty("user.name"), "test",
+        mr.getUsers().createLocalUser(System.getProperty("user.name"), "test",
                 Collections.singletonList(ApiAccessToken.ADMIN_CAPABILITY));
 
         assertTrue(auth.getRecentlyUsedInstanceGroups().isEmpty());

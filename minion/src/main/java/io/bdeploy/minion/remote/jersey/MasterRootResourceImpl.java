@@ -46,6 +46,7 @@ import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
+import io.bdeploy.interfaces.remote.MasterSettingsResource;
 import io.bdeploy.interfaces.remote.MinionStatusResource;
 import io.bdeploy.interfaces.remote.MinionUpdateResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
@@ -291,6 +292,11 @@ public class MasterRootResourceImpl implements MasterRootResource {
         }
 
         return rc.initResource(new MasterNamedResourceImpl(root, h, reporter));
+    }
+
+    @Override
+    public MasterSettingsResource getSettings() {
+        return rc.initResource(new MasterSettingsResourceImpl());
     }
 
 }

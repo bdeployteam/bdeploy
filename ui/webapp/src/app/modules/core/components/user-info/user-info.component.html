@@ -1,0 +1,6 @@
+<mat-menu #appMenu="matMenu" xPosition="before">
+  <button mat-menu-item (click)="edit()">Edit...</button>
+  <button mat-menu-item (click)="logout()">Logout</button>
+</mat-menu>
+
+<button mat-icon-button [matMenuTriggerFor]="appMenu"><app-user-avatar [gravatar]='!settings.isLoading() && settings.getSettings().general.enableGravatar' [mail]='user?.email'></app-user-avatar></button>
