@@ -4,7 +4,7 @@ There are several components in the Web UI which allow maintenance of *BDeploy*.
 
 ==== System Software
 
-The *System Software* page offers a mechanism to upload new *BDeploy* software versions, deploy these versions (_upgrade_ and _downgrade_ possible) to the running *BDeploy* _master_ and attached _slaves_.
+The *System Software* page from the *Administration* menu offers a mechanism to upload new *BDeploy* software versions, deploy these versions (_upgrade_ and _downgrade_ possible) to the running *BDeploy* _master_ and attached _slaves_.
 
 image::images/BDeploy_System_With_Launcher.png[BDeploy System Software,align=center,width=480,link="images/BDeploy_System_With_Launcher.png"]
 
@@ -14,7 +14,7 @@ The page can also be used to download the binaries of *BDeploy* (e.g. to setup a
 
 ==== Manual Cleanup
 
-You can use the *Manual Cleanup* page from the main menu to trigger a manual cleanup of stuff that is not needed any more. There is no need to trigger this manually as a job is scheduled that performs the exact same operation every night: 
+You can use the *Manual Cleanup* page from the *Administration* menu to trigger a manual cleanup of stuff that is not needed any more. There is no need to trigger this manually as a job is scheduled that performs the exact same operation every night: 
 
 [%header,cols="2,3"]
 |===
@@ -52,7 +52,7 @@ Press the btn:[Execute all Actions] button to actually perform the calculated ac
 The dialog automatically resets itself after a certain timeout. This is to prevent execution of too old actions which might no longer be valid.
 
 ==== BHive Browser
-The BHive Browser is an internal tool for administrative purposes. It allows viewing and browsing the internals of the *BDeploy* storage. The drop-down at the top of the dialog is used to switch between the available hives. The _default_ hive is the internal storage where metadata about users and outer hives are stored. The actual data is stored in the individual hives itself.
+The *BHive Browser* from the *Administration* menu is an internal tool for administrative purposes. It allows viewing and browsing the internals of the *BDeploy* storage. The drop-down at the top of the dialog is used to switch between the available hives. The _default_ hive is the internal storage where metadata about users and outer hives are stored. The actual data is stored in the individual hives itself.
 
 [CAUTION]
 It has the power to destroy _everything_ - use with extreme caution.
