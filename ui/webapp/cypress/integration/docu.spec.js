@@ -2,7 +2,7 @@ describe('Creates screenshots for the user documentation', () => {
 
   // Ensure the correct resolution is set
   beforeEach('Screen resolution', () => {
-    cy.viewport(1920, 1080);
+    cy.viewport(1280, 720);
   });
 
   // Capture Login and Main menu

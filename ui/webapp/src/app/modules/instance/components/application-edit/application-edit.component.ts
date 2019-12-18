@@ -497,6 +497,8 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
       .open(ApplicationEditManualComponent, {
         width: '50%',
         height: '60%',
+        minWidth: '470px',
+        minHeight: '550px',
         data: cloneDeep(this.getCustomParameters()),
       })
       .afterClosed()
@@ -512,6 +514,8 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     const config = new MatDialogConfig();
     config.width = '50%';
     config.height = '60%';
+    config.minWidth = '470px';
+    config.minHeight = '550px';
     config.data = cloneDeep(this.getOptionalParameters(groupName));
     this.matDialog
       .open(ApplicationEditOptionalComponent, config)
