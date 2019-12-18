@@ -59,9 +59,13 @@ import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 import io.bdeploy.interfaces.variables.LocalHostnameResolver;
+import io.bdeploy.jersey.audit.Auditor;
+import io.bdeploy.jersey.audit.RollingFileAuditor;
 import io.bdeploy.launcher.cli.LauncherTool.LauncherConfig;
 import io.bdeploy.launcher.cli.branding.LauncherSplash;
 import io.bdeploy.launcher.cli.branding.LauncherSplashReporter;
+import io.bdeploy.launcher.cli.ui.LauncherErrorDialog;
+import io.bdeploy.launcher.cli.ui.LauncherUpdateDialog;
 
 @CliName("launcher")
 @Help("A tool which launches an application described by a '.bdeploy' file")
@@ -75,8 +79,11 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         @Validator(ExistingPathValidator.class)
         String launch();
 
-        @Help("Local working directory for the launcher, defaults to the user's home/.bdeploy.")
-        String cacheDir();
+        @Help("Directory where the launcher stores the hive as well as all applications. Defaults to home/.bdeploy.")
+        String homeDir();
+
+        @Help("Directory where the launcher stores essential runtime data.")
+        String userArea();
 
         @Help("Set by the launcher script to determine the directory where to put updates for automatic application.")
         String updateDir();
@@ -84,7 +91,33 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         @Help(value = "Makes the launcher quit immediately after updating and launching the application.", arg = false)
         boolean dontWait() default false;
 
+        @Help(value = "Terminate the application when an error occurs instead of opening an error dialog.", arg = false)
+        boolean exitOnError() default false;
     }
+
+    /** The home-directory for the hive */
+    private Path rootDir;
+
+    /** The path where to store updates */
+    private Path updateDir;
+
+    /** Path where the hive is stored */
+    private Path bhiveDir;
+
+    /** Path where all apps are stored */
+    private Path appsDir;
+
+    /** Path where the launched app is stored */
+    private Path appDir;
+
+    /** The user-directory for the hive */
+    private Path userArea;
+
+    /** The launch descriptor */
+    private ClickAndStartDescriptor descriptor;
+
+    /** Indicates whether or not the root is read-only */
+    private boolean readOnlyRootDir;
 
     public LauncherTool() {
         super(LauncherConfig.class);
@@ -92,21 +125,49 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
     @Override
     protected void run(LauncherConfig config) {
-        helpAndFailIfMissing(config.launch(), "Missing --launch");
+        try {
+            doInit(config);
 
-        Path cfg = Paths.get(config.launch());
-        if (!Files.exists(cfg)) {
-            helpAndFail("Given bdeploy file does not exist: " + cfg);
+            // Show splash and progress of operations
+            LauncherSplash splash = new LauncherSplash(appDir);
+            splash.show();
+
+            // Write audit logs to the user area if set
+            Auditor auditor = null;
+            if (userArea != null) {
+                auditor = new RollingFileAuditor(userArea.resolve("logs"));
+            }
+            LauncherSplashReporter reporter = new LauncherSplashReporter(splash);
+            try (BHive hive = new BHive(bhiveDir.toUri(), auditor, reporter)) {
+                doLaunch(hive, reporter, splash, !config.dontWait());
+            }
+        } catch (SoftwareUpdateException ex) {
+            log.error("Software update cannot be installed.", ex);
+            if (config.exitOnError()) {
+                helpAndFail(ex.getMessage());
+            }
+            LauncherUpdateDialog dialog = new LauncherUpdateDialog();
+            dialog.showUpdateRequired(ex);
+        } catch (Exception ex) {
+            log.error("Failed to launch application.", ex);
+            if (config.exitOnError()) {
+                helpAndFail(ex.getMessage());
+            }
+            LauncherErrorDialog dialog = new LauncherErrorDialog();
+            dialog.showError(ex);
+        }
+    }
+
+    /** Initializes all parameters based on the given configuration */
+    private void doInit(LauncherConfig config) {
+        if (config.launch() == null) {
+            throw new IllegalStateException("Missing --launch argument");
         }
 
-        // 0: check where to put local temporary data.
-        Path rootDir = Paths.get(System.getProperty("user.home")).resolve(".bdeploy");
-        if (config.cacheDir() != null && !config.cacheDir().isEmpty()) {
-            Path check = Paths.get(config.cacheDir());
-            if (!Files.isDirectory(check)) {
-                PathHelper.mkdirs(check);
-            }
-            rootDir = check;
+        // Check where to put local data.
+        rootDir = Paths.get(System.getProperty("user.home")).resolve(".bdeploy");
+        if (config.homeDir() != null && !config.homeDir().isEmpty()) {
+            rootDir = Paths.get(config.homeDir());
         } else {
             String override = System.getenv("BDEPLOY_HOME");
             if (override != null && !override.isEmpty()) {
@@ -118,131 +179,148 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 }
             }
         }
+        rootDir = rootDir.toAbsolutePath();
+        updateDir = PathHelper.ofNullableStrig(config.updateDir());
 
-        // 1: Launch application. Show dialog if launching fails
-        log.info("Using cache directory {}", rootDir);
-        try {
-            doLaunchFromConfig(cfg, rootDir.toAbsolutePath(), config.updateDir(), !config.dontWait());
-        } catch (Exception ex) {
-            log.error("Failed to launch application.", ex);
-            LauncherErrorDialog dialog = new LauncherErrorDialog();
-            dialog.showError(ex);
+        // Check if a user-specific directory should be used
+        userArea = PathHelper.ofNullableStrig(System.getenv("BDEPLOY_USER_AREA"));
+        if (userArea != null) {
+            userArea = userArea.toAbsolutePath();
+        }
+
+        // User-Area must be provided when the root is read-only
+        if (PathHelper.isReadOnly(rootDir) && (userArea == null || PathHelper.isReadOnly(userArea))) {
+            throw new IllegalStateException("A user area must be provided when the home directory is read-only");
+        }
+
+        Path descriptorFile = Paths.get(config.launch());
+        try (InputStream is = Files.newInputStream(descriptorFile)) {
+            descriptor = StorageHelper.fromStream(is, ClickAndStartDescriptor.class);
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to read " + config.launch(), e);
+        }
+        bhiveDir = rootDir.resolve("bhive");
+        appsDir = rootDir.resolve("apps");
+        appDir = appsDir.resolve(descriptor.applicationId);
+        if (!Files.isDirectory(appDir)) {
+            PathHelper.mkdirs(appDir);
+        }
+        readOnlyRootDir = PathHelper.isReadOnly(rootDir);
+
+        log.info("Using home directory {}{}", rootDir, readOnlyRootDir ? " (readonly)" : "");
+        if (userArea != null) {
+            log.info("Using user-area {}", userArea);
+            if (PathHelper.isReadOnly(userArea)) {
+                throw new IllegalStateException("The user area '" + userArea + "' must be writable. Check permissions.");
+            }
         }
     }
 
-    private static void doLaunchFromConfig(Path cfg, Path rootDir, String updateDir, boolean wait) {
-        ClickAndStartDescriptor cd;
-        try (InputStream is = Files.newInputStream(cfg)) {
-            cd = StorageHelper.fromStream(is, ClickAndStartDescriptor.class);
-        } catch (IOException e) {
-            throw new IllegalStateException("Failed to read " + cfg, e);
+    private void doLaunch(BHive hive, LauncherSplashReporter reporter, LauncherSplash splash, boolean waitForExit) {
+        // Check for launcher updates.
+        doCheckForUpdate(hive, reporter);
+        log.info("Launching {} / {} / {} from {}", descriptor.groupId, descriptor.instanceId, descriptor.applicationId,
+                descriptor.host.getUri());
+
+        MasterRootResource master = ResourceProvider.getResource(descriptor.host, MasterRootResource.class, null);
+        MasterNamedResource namedMaster = master.getNamedMaster(descriptor.groupId);
+
+        // Fetch more information from the remote server.
+        ClientApplicationConfiguration appCfg;
+        try (Activity info = reporter.start("Loading meta-data...")) {
+            // fails with 404 or other error, but never null.
+            log.info("fetching information from {}", descriptor.host.getUri());
+            appCfg = namedMaster.getClientConfiguration(descriptor.instanceId, descriptor.applicationId);
         }
 
-        Path bhiveDir = rootDir.resolve("bhive");
-        Path appsDir = rootDir.resolve("apps");
-        Path appDir = appsDir.resolve(cd.applicationId);
+        // Update splash with the fetched branding information
+        ApplicationBrandingDescriptor branding = appCfg.clientDesc.branding;
+        if (branding != null) {
+            if (appCfg.clientImageIcon != null) {
+                splash.updateIconImage(appCfg.clientImageIcon);
+            }
+            if (appCfg.clientSplashData != null) {
+                splash.updateSplashImage(appCfg.clientSplashData);
+            }
+            splash.updateSplashData(branding.splash);
+        } else {
+            log.warn("Client configuration does not contain any branding information.");
+        }
 
-        // Show splash and progress of operations
-        LauncherSplash splash = new LauncherSplash(appDir);
-        splash.show();
+        // this /might/ lead to too much re-installs if unrelated things change, but there is not
+        // other/easy way (currently) to detect this...
+        Manifest.Key targetClientKey = new Manifest.Key(descriptor.applicationId, appCfg.instanceKey.getTag());
 
-        LauncherSplashReporter reporter = new LauncherSplashReporter(splash);
-        try (BHive hive = new BHive(bhiveDir.toUri(), reporter)) {
-            // 0: check for launcher updates.
-            doCheckForUpdate(cd, hive, reporter, updateDir);
-            log.info("Launching {} / {} / {} from {}", cd.groupId, cd.instanceId, cd.applicationId, cd.host.getUri());
-
-            MasterRootResource master = ResourceProvider.getResource(cd.host, MasterRootResource.class, null);
-            MasterNamedResource namedMaster = master.getNamedMaster(cd.groupId);
-
-            // 1: fetch more information from the remote server.
-            ClientApplicationConfiguration appCfg;
-            try (Activity info = reporter.start("Loading meta-data...")) {
-                // fails with 404 or other error, but never null.
-                log.info("fetching information from {}", cd.host.getUri());
-                appCfg = namedMaster.getClientConfiguration(cd.instanceId, cd.applicationId);
+        if (hive.execute(new ManifestListOperation().setManifestName(targetClientKey.toString())).contains(targetClientKey)) {
+            // we have it already, no need to re-create.
+            log.info("re-using existing manifest: {}", targetClientKey);
+        } else {
+            // Throw an exception if we do not have write permissions in the root directory
+            if (readOnlyRootDir) {
+                String installed = getAppVersions(hive);
+                String available = appCfg.instanceKey.getTag();
+                String name = appCfg.clientDesc.name + "( " + descriptor.applicationId + " )";
+                throw new SoftwareUpdateException(name, installed, available);
             }
 
-            // Update splash and store data
-            ApplicationBrandingDescriptor branding = appCfg.clientDesc.branding;
-            if (branding != null) {
-                if (appCfg.clientImageIcon != null) {
-                    splash.updateIconImage(branding.icon, appCfg.clientImageIcon);
-                }
-                if (appCfg.clientSplashData != null) {
-                    splash.updateSplashImage(branding.splash.image, appCfg.clientSplashData);
-                }
-                splash.updateSplashData(branding.splash);
-            } else {
-                log.warn("Client configuration does not contain any branding information.");
+            log.info("fetching updated applications/configurations for {}", targetClientKey);
+            try (Activity info = reporter.start("Loading requirements...")) {
+                // fetch the underlying application and it's requirements into local cache (BHive)
+                fetchApplicationAndRequirements(hive, appCfg);
             }
 
-            // this /might/ lead to too much re-installs if unrelated things change, but there is not
-            // other/easy way (currently) to detect this...
-            Manifest.Key targetClientKey = new Manifest.Key(cd.applicationId, appCfg.instanceKey.getTag());
-
-            if (hive.execute(new ManifestListOperation().setManifestName(targetClientKey.toString())).contains(targetClientKey)) {
-                // we have it already, no need to re-create.
-                log.info("re-using existing manifest: {}", targetClientKey);
-            } else {
-                log.info("fetching updated applications/configurations for {}", targetClientKey);
-                try (Activity info = reporter.start("Loading requirements...")) {
-                    // 2: fetch the underlying application and it's requirements into local cache (BHive)
-                    fetchApplicationAndRequirements(hive, cd, appCfg);
-                }
-
-                try (Activity info = reporter.start("Preparing configuration...")) {
-                    // FIXME: DCS-396: client config shall not contain server config files.
-                    // download configuration data.
-                    //if (appCfg.configTreeId != null) {
-                    //    Path tmpCfg = namedMaster.getClientInstanceConfiguration(appCfg.instanceKey);
-                    //    try (BHive tmpHive = new BHive(UriBuilder.fromUri("jar:" + tmpCfg.toUri()).build(), reporter)) {
-                    //        CopyOperation copyAll = new CopyOperation().setDestinationHive(hive);
-                    //        tmpHive.execute(copyAll);
-                    //    }
-                    //}
-
-                    // 3: generate a 'fake' instanceNodeManifest from the existing configuration for local caching.
-                    createInstanceNodeManifest(appCfg, targetClientKey, hive);
-                }
+            try (Activity info = reporter.start("Preparing configuration...")) {
+                // generate a 'fake' instanceNodeManifest from the existing configuration for local caching.
+                createInstanceNodeManifest(appCfg, targetClientKey, hive);
             }
 
-            InstanceNodeController controller;
-            try (Activity info = reporter.start("Updating application...")) {
-                // 4: install using DCU to the target directory
-                controller = installApplication(appsDir, targetClientKey, hive);
+            // Store branding information on file-system
+            if (appCfg.clientImageIcon != null) {
+                splash.storeIconImage(branding.icon, appCfg.clientImageIcon);
             }
-
-            Process p;
-            try (Activity info = reporter.start("Launching...")) {
-                // 5: launch.
-                p = launchProcess(targetClientKey, controller);
+            if (appCfg.clientSplashData != null) {
+                splash.storeSplashImage(branding.splash.image, appCfg.clientSplashData);
             }
+            splash.storeSplashData(branding.splash);
+        }
 
-            reporter.stop();
-            splash.dismiss();
+        InstanceNodeController controller;
+        try (Activity info = reporter.start("Updating application...")) {
+            // 4: install using DCU to the target directory
+            controller = installApplication(appsDir, targetClientKey, hive);
+        }
 
-            // 6. Cleanup the installation directory and the hive.
-            // Keeps a max. of 2 existing installations per client around.
+        Process p;
+        try (Activity info = reporter.start("Launching...")) {
+            // 5: launch.
+            p = launchProcess(targetClientKey, controller);
+        }
+
+        reporter.stop();
+        splash.dismiss();
+
+        // 6. Cleanup the installation directory and the hive.
+        // Keeps a max. of 2 existing installations per client around.
+        if (!readOnlyRootDir) {
             hive.execute(new ManifestDeleteOldByIdOperation().setAmountToKeep(2).setRunGarbageCollector(true)
-                    .setToDelete(cd.applicationId).setPreDeleteHook(k -> deleteVersion(rootDir, hive, k)));
+                    .setToDelete(descriptor.applicationId).setPreDeleteHook(k -> deleteVersion(hive, k)));
+        }
 
-            // 7. wait for the process to exit
-            if (wait) {
-                try {
-                    p.waitFor();
-                } catch (InterruptedException e) {
-                    log.warn("waiting for application exit interrupted");
-                    Thread.currentThread().interrupt();
-                }
-            } else {
-                log.info("Detaching...");
+        // 7. wait for the process to exit
+        if (waitForExit) {
+            try {
+                p.waitFor();
+            } catch (InterruptedException e) {
+                log.warn("waiting for application exit interrupted");
+                Thread.currentThread().interrupt();
             }
+        } else {
+            log.info("Detaching...");
         }
     }
 
     @SuppressFBWarnings("DM_EXIT")
-    private static void doCheckForUpdate(ClickAndStartDescriptor cd, BHive hive, ActivityReporter reporter, String updateDir) {
+    private void doCheckForUpdate(BHive hive, ActivityReporter reporter) {
         String running = VersionHelper.readVersion();
         if (VersionHelper.UNKNOWN.equals(running)) {
             log.info("Skipping update, as running version cannot be determined");
@@ -250,7 +328,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
 
         Version currentVersion = VersionHelper.parse(running);
-        try (RemoteBHive rbh = RemoteBHive.forService(cd.host, null, reporter)) {
+        try (RemoteBHive rbh = RemoteBHive.forService(descriptor.host, null, reporter)) {
             Version mostCurrent = null;
             Map<String, Key> byTagForCurrentOs = new TreeMap<>();
             try (Activity check = reporter.start("Checking for launcher updates...")) {
@@ -276,24 +354,31 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 return;
             }
 
-            if (mostCurrent.compareTo(currentVersion) > 0) {
-                log.info("New launcher found, updating from {} to {}", currentVersion, mostCurrent);
-                doInstallUpdate(cd.host, hive, reporter, updateDir, currentVersion, mostCurrent,
-                        byTagForCurrentOs.get(mostCurrent.toString()));
-            } else {
+            if (mostCurrent.compareTo(currentVersion) <= 0) {
                 log.info("No updates found (running={}, newest={}), continue...", currentVersion, mostCurrent);
+                return;
             }
+
+            doInstallUpdate(descriptor.host, hive, reporter, currentVersion, mostCurrent,
+                    byTagForCurrentOs.get(mostCurrent.toString()));
         }
     }
 
-    private static void doInstallUpdate(RemoteService remote, BHive hive, ActivityReporter reporter, String updateDir,
-            Version currentVersion, Version mostCurrent, Key key) {
+    private void doInstallUpdate(RemoteService remote, BHive hive, ActivityReporter reporter, Version currentVersion,
+            Version mostCurrent, Key key) {
+
+        // Check if we have write permissions to install the update
+        if (PathHelper.isReadOnly(rootDir)) {
+            throw new SoftwareUpdateException("launcher", currentVersion.toString(), mostCurrent.toString());
+        }
+
+        log.info("New launcher found, updating from {} to {}", currentVersion, mostCurrent);
         try (Activity updating = reporter.start("Updating launcher to " + mostCurrent)) {
             // found a newer version to install.
             hive.execute(new FetchOperation().addManifest(key).setRemote(remote));
 
             // write to target directory
-            Path next = UpdateHelper.prepareUpdateDirectory(Paths.get(updateDir));
+            Path next = UpdateHelper.prepareUpdateDirectory(updateDir);
             hive.execute(new ExportOperation().setManifest(key).setTarget(next));
 
             try {
@@ -314,9 +399,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /**
      * Fetch the application and all its requirements from the remote hive.
      */
-    private static void fetchApplicationAndRequirements(BHive hive, ClickAndStartDescriptor cd,
-            ClientApplicationConfiguration appCfg) {
-        FetchOperation fetchOp = new FetchOperation().setHiveName(cd.groupId).setRemote(cd.host)
+    private void fetchApplicationAndRequirements(BHive hive, ClientApplicationConfiguration appCfg) {
+        FetchOperation fetchOp = new FetchOperation().setHiveName(descriptor.groupId).setRemote(descriptor.host)
                 .addManifest(appCfg.clientConfig.application);
         appCfg.resolvedRequires.forEach(fetchOp::addManifest);
         hive.execute(fetchOp);
@@ -326,8 +410,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
      * Creates a new InstanceNodeManifest which is used to "fake" a node (this client). The manifest will have the same tag as the
      * instance, so we can determine whether we have the client for a certain instance tag already.
      */
-    private static void createInstanceNodeManifest(ClientApplicationConfiguration appCfg, Manifest.Key targetClientKey,
-            BHive hive) {
+    private void createInstanceNodeManifest(ClientApplicationConfiguration appCfg, Manifest.Key targetClientKey, BHive hive) {
         InstanceNodeConfiguration fakeInc = new InstanceNodeConfiguration();
         fakeInc.applications.add(appCfg.clientConfig);
         fakeInc.name = appCfg.clientConfig.name;
@@ -343,7 +426,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /**
      * Installs the client application using (and returning) the DCU.
      */
-    private static InstanceNodeController installApplication(Path rootDir, Manifest.Key targetClientKey, BHive hive) {
+    private InstanceNodeController installApplication(Path rootDir, Manifest.Key targetClientKey, BHive hive) {
         InstanceNodeManifest fakeInmf = InstanceNodeManifest.of(hive, targetClientKey);
         InstanceNodeController controller = new InstanceNodeController(hive, rootDir, fakeInmf);
         controller.addAdditionalVariableResolver(new LocalHostnameResolver());
@@ -359,7 +442,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /**
      * Removes the given version if installed
      */
-    private static void deleteVersion(Path rootDir, BHive hive, Manifest.Key key) {
+    private void deleteVersion(BHive hive, Manifest.Key key) {
         try {
             log.info("Uninstall and delete old version {}", key);
             InstanceNodeManifest mf = InstanceNodeManifest.of(hive, key);
@@ -392,6 +475,17 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         } catch (IOException e) {
             throw new IllegalStateException("Cannot start " + targetClientKey, e);
         }
+    }
+
+    /**
+     * Returns the latest version that is installed for the given client
+     */
+    private String getAppVersions(BHive hive) {
+        SortedSet<Manifest.Key> installed = hive.execute(new ManifestListOperation().setManifestName(descriptor.applicationId));
+        if (installed.isEmpty()) {
+            return "-";
+        }
+        return installed.stream().map(k -> k.getTag()).collect(Collectors.joining(","));
     }
 
 }

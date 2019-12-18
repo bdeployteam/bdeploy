@@ -147,10 +147,37 @@ namespace Bdeploy.Shared
         {
             try
             {
-                using (FileStream stream = new FileStream(file,FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
                     return false;
             }
-            catch (IOException)
+            catch (Exception)
+            {
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Tests if the given location can be modified.
+        /// </summary>
+        /// <param name="path">the path to the directory to test</param>
+        /// <returns></returns>
+        public static bool IsReadOnly(string path)
+        {
+            try
+            {
+                // Ensure that the parent directory is existing
+                Directory.CreateDirectory(path);
+
+                // Create a random new file
+                var file = Path.Combine(path, Guid.NewGuid().ToString());
+                FileStream stream = new FileStream(file, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 100);
+
+                // Dipose and remove is success -> write permissions
+                stream.Dispose();
+                File.Delete(file);
+                return false;
+            }
+            catch (Exception)
             {
                 return true;
             }

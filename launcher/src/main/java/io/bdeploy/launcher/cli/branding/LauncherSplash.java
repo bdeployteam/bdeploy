@@ -28,7 +28,7 @@ import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.descriptor.application.ApplicationBrandingDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ApplicationSplashAreaDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ApplicationSplashDescriptor;
-import io.bdeploy.launcher.cli.WindowHelper;
+import io.bdeploy.launcher.cli.ui.WindowHelper;
 
 /**
  * Represents the splash screen which paints an image along with a progress text and progress bar.
@@ -43,9 +43,6 @@ public class LauncherSplash implements LauncherSplashDisplay {
 
     public LauncherSplash(Path appDir) {
         this.appDir = appDir;
-        if (!Files.isDirectory(appDir)) {
-            PathHelper.mkdirs(appDir);
-        }
     }
 
     public void show() {
@@ -146,16 +143,20 @@ public class LauncherSplash implements LauncherSplashDisplay {
     }
 
     /**
-     * Updates the tray icon of the splash and stores the icon on the file system.
+     * Updates the tray icon of the splash screen.
      */
-    public void updateIconImage(String name, byte[] imageData) {
+    public void updateIconImage(byte[] imageData) {
         BufferedImage image = load(imageData);
         if (image == null || splash == null) {
             return;
         }
         splash.setIconImage(image);
+    }
 
-        // Store image using a fixed name
+    /**
+     * Writes the icon image to the file-system.
+     */
+    public void storeIconImage(String name, byte[] imageData) {
         String splashType = PathHelper.getExtension(name);
         Path path = appDir.resolve("icon." + splashType);
         try (OutputStream os = Files.newOutputStream(path)) {
@@ -166,16 +167,20 @@ public class LauncherSplash implements LauncherSplashDisplay {
     }
 
     /**
-     * Updates the image of the splash and stores it on the file system.
+     * Updates the image of the splash.
      */
-    public void updateSplashImage(String name, byte[] imageData) {
+    public void updateSplashImage(byte[] imageData) {
         BufferedImage image = load(imageData);
         if (image == null || splash == null) {
             return;
         }
         splashComp.setImage(image);
+    }
 
-        // Store image using a fixed name
+    /**
+     * Writes the splash image to the file-system.
+     */
+    public void storeSplashImage(String name, byte[] imageData) {
         String splashType = PathHelper.getExtension(name);
         Path path = appDir.resolve("splash." + splashType);
         try (OutputStream os = Files.newOutputStream(path)) {
@@ -217,8 +222,12 @@ public class LauncherSplash implements LauncherSplashDisplay {
         splash.setSize(splashComp.getWidth(), splashComp.getHeight());
         WindowHelper.center(splash);
         EventQueue.invokeLater(() -> splash.repaint());
+    }
 
-        // Store branding info
+    /**
+     * Writes the splash configuration to the file-system
+     */
+    public void storeSplashData(ApplicationSplashDescriptor splashCfg) {
         Path path = appDir.resolve("splash.json");
         try (OutputStream os = Files.newOutputStream(path)) {
             os.write(StorageHelper.toRawBytes(splashCfg));

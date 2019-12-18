@@ -217,7 +217,6 @@ namespace Bdeploy.Launcher
         /// <summary>
         /// Creates a backup of the current version and copies the new files back to the working directory.
         /// </summary>
-        /// <param name="backupDir"></param>
         private bool BackupAndUpdate()
         {
             try

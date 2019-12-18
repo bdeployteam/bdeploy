@@ -1,4 +1,4 @@
-package io.bdeploy.launcher.cli;
+package io.bdeploy.launcher.cli.ui;
 
 import java.awt.Dimension;
 import java.awt.GraphicsEnvironment;
