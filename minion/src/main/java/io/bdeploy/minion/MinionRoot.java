@@ -563,8 +563,8 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     }
 
     @Override
-    public String createWeakToken(String principal) {
-        ApiAccessToken token = new ApiAccessToken.Builder().setIssuedTo(principal).setWeak(true).build();
+    public String createToken(String principal, boolean weak) {
+        ApiAccessToken token = new ApiAccessToken.Builder().setIssuedTo(principal).setWeak(weak).build();
         MinionState state = getState();
         try {
             KeyStore ks = SecurityHelper.getInstance().loadPrivateKeyStore(state.keystorePath, state.keystorePass);

@@ -88,4 +88,9 @@ export class AuthenticationService {
     return this.http.post<UserInfo>(this.cfg.config.api + '/auth/user', info);
   }
 
+  getAuthPackForUser(): Observable<String> {
+    this.log.debug('Retrieve auth pack for user');
+    return this.http.get(this.cfg.config.api + '/auth/auth-pack', { responseType: 'text'});
+  }
+
 }

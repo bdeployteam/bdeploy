@@ -59,4 +59,12 @@ public interface AuthResource {
     @POST
     @Path("/user")
     public void updateCurrentUser(UserInfo info);
+
+    /**
+     * @return an authentication pack which can be used for build integrations and command line token authentication.
+     */
+    @GET
+    @Path("/auth-pack")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String getAuthPack();
 }

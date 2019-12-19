@@ -301,7 +301,7 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
      */
     private RemoteService createRemoteService() {
         String userName = context.getUserPrincipal().getName();
-        return new RemoteService(info.getBaseUri(), minion.createWeakToken(userName));
+        return new RemoteService(info.getBaseUri(), minion.createToken(userName, true));
     }
 
     /**

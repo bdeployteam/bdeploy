@@ -18,6 +18,7 @@ import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.jersey.JerseyServer;
 import io.bdeploy.ui.api.AuthResource;
 import io.bdeploy.ui.api.AuthService;
+import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.dto.CredentialsDto;
 
 public class AuthResourceImpl implements AuthResource {
@@ -31,6 +32,9 @@ public class AuthResourceImpl implements AuthResource {
 
     @Inject
     private SecurityContext context;
+
+    @Inject
+    private Minion minion;
 
     @Override
     public Response authenticate(CredentialsDto cred) {
@@ -68,6 +72,11 @@ public class AuthResourceImpl implements AuthResource {
             auth.updateLocalPassword(info.name, info.password);
         }
         auth.updateUserInfo(info);
+    }
+
+    @Override
+    public String getAuthPack() {
+        return minion.createToken(context.getUserPrincipal().getName(), false);
     }
 
 }
