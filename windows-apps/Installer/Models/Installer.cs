@@ -109,10 +109,20 @@ namespace Bdeploy.Installer
                 {
                     StringBuilder builder = new StringBuilder();
                     builder.Append("Configuration is invalid or corrupt.").AppendLine().AppendLine();
-                    builder.AppendFormat("Configuration:").AppendLine();
+                    builder.Append("Configuration:").AppendLine();
                     builder.Append(config == null ? "<null>" : config.ToString()).AppendLine();
-                    builder.AppendFormat("Embedded:").AppendLine();
+                    builder.Append("Embedded:").AppendLine();
                     builder.Append(ConfigStorage.ReadEmbeddedConfigFile()).AppendLine();
+                    OnError(builder.ToString());
+                    return -1;
+                }
+
+                // Show error message if we do not have write permissions in our home directory
+                if(FileHelper.IsReadOnly(PathProvider.GetBdeployHome()))
+                {
+                    StringBuilder builder = new StringBuilder();
+                    builder.Append("Installation directory is read-only. Please check permissions.").AppendLine().AppendLine();
+                    builder.AppendFormat("BDEPLOY_HOME={0}",PathProvider.GetBdeployHome()).AppendLine();
                     OnError(builder.ToString());
                     return -1;
                 }

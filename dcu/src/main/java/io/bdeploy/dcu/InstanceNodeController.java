@@ -39,6 +39,7 @@ import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.dependencies.LocalDependencyFetcher;
 import io.bdeploy.interfaces.variables.ApplicationParameterProvider;
+import io.bdeploy.interfaces.variables.CompositeResolver;
 import io.bdeploy.interfaces.variables.DelayedVariableResolver;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
@@ -49,7 +50,6 @@ import io.bdeploy.interfaces.variables.ManifestRefPathProvider;
 import io.bdeploy.interfaces.variables.ManifestVariableResolver;
 import io.bdeploy.interfaces.variables.OsVariableResolver;
 import io.bdeploy.interfaces.variables.ParameterValueResolver;
-import io.bdeploy.interfaces.variables.CompositeResolver;
 
 /**
  * A {@link InstanceNodeController} is a unit which can be locally deployed.
@@ -80,7 +80,15 @@ public class InstanceNodeController {
         this.root = root;
         this.manifest = manifest;
         this.paths = new DeploymentPathProvider(root.resolve(manifest.getUUID()), manifest.getKey().getTag());
-        resolvers.add(new InstanceVariableResolver(manifest.getConfiguration()));
+
+        // Setup default resolvers for this node
+        InstanceNodeConfiguration config = manifest.getConfiguration();
+        this.resolvers.add(new InstanceVariableResolver(config));
+        this.resolvers.add(new DelayedVariableResolver(resolvers));
+        this.resolvers.add(new OsVariableResolver());
+        this.resolvers.add(new EnvironmentVariableResolver());
+        this.resolvers.add(new DeploymentPathResolver(paths));
+        this.resolvers.add(new ParameterValueResolver(new ApplicationParameterProvider(config)));
     }
 
     public InstanceNodeManifest getManifest() {
@@ -211,12 +219,7 @@ public class InstanceNodeController {
         hive.execute(new ExportOperation().setManifest(manifest.getKey()).setTarget(targetDir));
 
         // create a variable resolver which can expand all supported variables.
-        resolvers.add(new DelayedVariableResolver(resolvers));
-        resolvers.add(new OsVariableResolver());
-        resolvers.add(new EnvironmentVariableResolver());
-        resolvers.add(new DeploymentPathResolver(paths));
         resolvers.add(new ManifestVariableResolver(new ManifestRefPathProvider(paths, applications)));
-        resolvers.add(new ParameterValueResolver(new ApplicationParameterProvider(dc)));
 
         // render configuration files.
         processConfigurationTemplates(paths.get(SpecialDirectory.CONFIG), resolvers);
@@ -300,8 +303,7 @@ public class InstanceNodeController {
 
     /**
      * Scans the given {@link BHive} and the given deployment root {@link Path} and deletes any deployment from the deployment
-     * root
-     * {@link Path} which are no longer available in the {@link BHive}.
+     * root {@link Path} which are no longer available in the {@link BHive}.
      *
      * @param source the source {@link BHive} to scan for available {@link InstanceNodeController}s.
      * @param root the {@link Path} where all deployments reside.

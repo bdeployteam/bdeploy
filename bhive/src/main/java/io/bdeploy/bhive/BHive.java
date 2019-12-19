@@ -66,8 +66,17 @@ public class BHive implements AutoCloseable, BHiveExecution {
      * {@link RemoteBHive#forService(io.bdeploy.common.security.RemoteService, String, ActivityReporter)}
      */
     public BHive(URI uri, ActivityReporter reporter) {
-        this.uri = uri;
+        this(uri, null, reporter);
+    }
 
+    /**
+     * Creates a new hive instance. Supports ZIP and directory hives.
+     * <p>
+     * To connect to a remote hive instead, use
+     * {@link RemoteBHive#forService(io.bdeploy.common.security.RemoteService, String, ActivityReporter)}
+     */
+    public BHive(URI uri, Auditor auditor, ActivityReporter reporter) {
+        this.uri = uri;
         Path relRoot;
         if (uri.getScheme().equals("jar") || (uri.getScheme().equals("file") && uri.toString().toLowerCase().endsWith(".zip"))) {
             try {
@@ -83,11 +92,11 @@ public class BHive implements AutoCloseable, BHiveExecution {
                 throw new IllegalStateException("cannot open or create ZIP BHive " + uri, e);
             }
             relRoot = zipFs.getPath("/");
-            this.auditor = new NullAuditor();
+            this.auditor = auditor == null ? new NullAuditor() : auditor;
         } else {
             relRoot = Paths.get(uri);
             this.zipFs = null;
-            this.auditor = new RollingFileAuditor(relRoot.resolve("log"));
+            this.auditor = auditor == null ? new RollingFileAuditor(relRoot.resolve("logs")) : auditor;
         }
 
         Path objRoot = relRoot.resolve("objects");

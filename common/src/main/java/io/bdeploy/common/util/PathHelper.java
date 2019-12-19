@@ -9,6 +9,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -34,6 +35,35 @@ public class PathHelper {
     }
 
     private PathHelper() {
+    }
+
+    /**
+     * Converts the given string into a path object.
+     *
+     * @param path
+     *            the path to convert.
+     * @return the path or {@code null} if the input was null or empty
+     */
+    public static Path ofNullableStrig(String path) {
+        if (path == null || path.trim().isEmpty()) {
+            return null;
+        }
+        return Paths.get(path);
+    }
+
+    /**
+     * Tests if the given location can be modified. Testing is done by trying to create a new file.
+     */
+    public static boolean isReadOnly(Path path) {
+        try {
+            PathHelper.mkdirs(path);
+            Path testFile = path.resolve(UuidHelper.randomId());
+            Files.newOutputStream(testFile).close();
+            Files.delete(testFile);
+            return false;
+        } catch (Exception ioe) {
+            return true;
+        }
     }
 
     /**

@@ -148,7 +148,7 @@ public class BasicToolTest {
 
         // remaining objects of the simple manifest. 2 files, 2 trees, 1 manifest
         // plus remaining hive management objects. 1 .dblock, 1 manifest.db, audit.log
-        SkipSubTreeVisitor visitor = new SkipSubTreeVisitor(hiveDir.resolve("log"));
+        SkipSubTreeVisitor visitor = new SkipSubTreeVisitor(hiveDir.resolve("logs"));
         Files.walkFileTree(hiveDir, visitor);
         assertThat(visitor.getFileCount(), is(7L));
     }

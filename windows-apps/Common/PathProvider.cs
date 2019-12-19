@@ -9,7 +9,7 @@ namespace Bdeploy.Shared
     public class PathProvider
     {
         /// <summary>
-        /// Root directory of BDeploy.
+        /// Root directory of BDeploy. This location might be read-only for the current user.
         /// </summary>
         /// <returns></returns>
         public static string GetBdeployHome()
@@ -24,6 +24,23 @@ namespace Bdeploy.Shared
             // Otherwise store in local app-data folder of current user
             string appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             return Path.Combine(appData, "BDeploy");
+        }
+
+        /// <summary>
+        /// Returns a directory that can be used to store files required to run the application. This location
+        /// must always be writable for the current user. The BDeploy home directory is returned in case that the 
+        /// location is not specified. 
+        /// </summary>
+        /// <returns></returns>
+        public static string GetUserArea()
+        {
+            // Check if BDEPLOY_USER_AREA is set
+            string home = Environment.GetEnvironmentVariable("BDEPLOY_USER_AREA");
+            if (home != null)
+            {
+                return home;
+            }
+            return GetBdeployHome();
         }
 
         /// <summary>
@@ -45,12 +62,12 @@ namespace Bdeploy.Shared
         }
 
         /// <summary>
-        /// Directory where the logs are stored. (HOME_DIR\logs) 
+        /// Directory where the logs are stored. (HOME_DIR\logs or USER_AREA\logs) 
         /// </summary>
         /// <returns></returns>
         public static string GetLogsDir()
         {
-            return Path.Combine(GetBdeployHome(), "logs");
+            return Path.Combine(GetUserArea(), "logs");
         }
 
         /// <summary>

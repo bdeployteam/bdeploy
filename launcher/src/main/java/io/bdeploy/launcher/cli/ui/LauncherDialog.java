@@ -1,8 +1,9 @@
-package io.bdeploy.launcher.cli;
+package io.bdeploy.launcher.cli.ui;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -40,15 +41,17 @@ import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.ProcessHelper;
 
 /**
- * Display a plain dialog showing what went wrong.
+ * Base class providing a header, content and footer area.
  */
-public class LauncherErrorDialog extends JFrame {
+public abstract class LauncherDialog extends JFrame {
 
     private static final Logger log = LoggerFactory.getLogger(LauncherErrorDialog.class);
     private static final long serialVersionUID = 1L;
 
     private static final String SHOW_DETAILS_LABEL = "Show Details";
     private static final String HIDE_MESSAGE_LABEL = "Hide Details";
+    private static final Dimension DEFAULT_DIMENSION = new Dimension(650, 300);
+    private static final Dimension DETAIL_DIMENSION = new Dimension(650, 450);
 
     static {
         try {
@@ -64,25 +67,22 @@ public class LauncherErrorDialog extends JFrame {
     private boolean messagePage = true;
 
     /** Contains the detailed error message */
-    private JTextArea errorDetails;
+    protected JTextArea errorDetails;
 
     /** Label containing a nice human readable error message */
-    private JLabel errorSummary;
+    protected JLabel errorSummary;
+
+    /** Label containing the header icon */
+    protected JLabel headerIcon;
+
+    /** Label containing the header text */
+    protected JLabel headerText;
 
     /**
-     * Shows the error dialog with a dummy stack-trace. Only useful for testing.
+     * Creates a new dialog with a header, content and footer area
      */
-    public static void main(String[] args) {
-        LauncherErrorDialog dialog = new LauncherErrorDialog();
-        dialog.showError(new RuntimeException());
-    }
-
-    /**
-     * Creates a new dialog to show an error message to the user
-     */
-    public LauncherErrorDialog() {
-        super("Launcher");
-        setSize(600, 300);
+    public LauncherDialog() {
+        setSize(DEFAULT_DIMENSION);
         WindowHelper.center(this);
         setIconImage(loadImage("/logo128.png"));
         addWindowListener(new WindowAdapter() {
@@ -117,16 +117,16 @@ public class LauncherErrorDialog extends JFrame {
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.anchor = GridBagConstraints.WEST;
 
-        JLabel icon = new JLabel(loadIcon("/error.png", 32, 32));
-        header.add(icon);
+        headerIcon = new JLabel();
+        header.add(headerIcon);
 
         constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.HORIZONTAL;
 
-        JLabel text = new JLabel("Application could not be launched");
-        text.setFont(text.getFont().deriveFont(Font.BOLD, 16f));
-        text.setForeground(new Color(255, 79, 73));
-        header.add(text);
+        headerText = new JLabel();
+        headerText.setFont(headerText.getFont().deriveFont(Font.BOLD, 16f));
+        headerText.setForeground(new Color(255, 79, 73));
+        header.add(headerText);
 
         return header;
     }
@@ -180,28 +180,9 @@ public class LauncherErrorDialog extends JFrame {
     }
 
     /**
-     * Opens the dialog to show the error message to the user. Blocks until the user closes the dialog.
-     *
-     * @param ex the exception that occurred
-     */
-    public void showError(Throwable ex) {
-        setVisible(true);
-
-        // Default error summary
-        errorSummary.setText("<html>Unexpected error occurred while launching the application. " + //
-                "If the problem persists, contact the system administrator.</html>");
-
-        // Detailed error message
-        errorDetails.setText(getDetailedErrorMessage(ex));
-
-        // Block until dialog is closed
-        waitForExit();
-    }
-
-    /**
      * Blocks the current thread until the main window is closed.
      */
-    private void waitForExit() {
+    protected void waitForExit() {
         synchronized (lock) {
             try {
                 lock.wait();
@@ -213,7 +194,7 @@ public class LauncherErrorDialog extends JFrame {
     }
 
     /** Reads and returns the embedded image with the given name */
-    private static BufferedImage loadImage(String iconName) {
+    protected static BufferedImage loadImage(String iconName) {
         try (InputStream in = LauncherErrorDialog.class.getResourceAsStream(iconName)) {
             return ImageIO.read(in);
         } catch (IOException ex) {
@@ -222,13 +203,13 @@ public class LauncherErrorDialog extends JFrame {
     }
 
     /** Reads and returns the embedded icon and scales it to the given resolution */
-    private static ImageIcon loadIcon(String iconName, int width, int height) {
+    protected static ImageIcon loadIcon(String iconName, int width, int height) {
         BufferedImage image = loadImage(iconName);
         return new ImageIcon(image.getScaledInstance(width, height, BufferedImage.SCALE_SMOOTH));
     }
 
     /** Returns the detailed error message to be displayed */
-    private static String getDetailedErrorMessage(Throwable ex) {
+    protected static String getDetailedErrorMessage(Throwable ex) {
         StringBuilder builder = new StringBuilder();
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
@@ -295,10 +276,10 @@ public class LauncherErrorDialog extends JFrame {
 
         // Update button text for the user
         if (messagePage) {
-            setSize(600, 300);
+            setSize(DEFAULT_DIMENSION);
             button.setText(SHOW_DETAILS_LABEL);
         } else {
-            setSize(600, 450);
+            setSize(DETAIL_DIMENSION);
             button.setText(HIDE_MESSAGE_LABEL);
         }
 
