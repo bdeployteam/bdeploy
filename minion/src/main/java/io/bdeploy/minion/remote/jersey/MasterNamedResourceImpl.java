@@ -877,7 +877,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
     @Override
     public String generateWeakToken(String principal) {
-        return root.createWeakToken(principal);
+        return root.createToken(principal, true);
     }
 
     @Override

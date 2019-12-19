@@ -1,6 +1,24 @@
 <mat-menu #appMenu="matMenu" xPosition="before">
   <button mat-menu-item (click)="edit()">Edit...</button>
+  <button mat-menu-item (click)="openDialog(tokenDialog)">Create Token...</button>
   <button mat-menu-item (click)="logout()">Logout</button>
 </mat-menu>
 
 <button mat-icon-button [matMenuTriggerFor]="appMenu"><app-user-avatar [gravatar]='!settings.isLoading() && settings.getSettings().general.enableGravatar' [mail]='user?.email'></app-user-avatar></button>
+
+<ng-template #tokenDialog>
+  <h1 mat-dialog-title>Token for {{user.name}}</h1>
+  <p>
+    Use the following token to remotely access this server in your name, e.g. for pushing products.
+    To do so, copy the complete contents to the according tool.
+  </p>
+  <p>
+    <b>Attention:</b> This token is sensitive information as it allows remote access under your name. Do not pass this token on to others.
+  </p>
+  <div class='flex-content'>
+    <textarea readonly class='large-text'>{{pack}}</textarea>
+  </div>
+  <div mat-dialog-actions align="end">
+    <button mat-raised-button [mat-dialog-close]="true" color="primary">Close</button>
+  </div>
+</ng-template>

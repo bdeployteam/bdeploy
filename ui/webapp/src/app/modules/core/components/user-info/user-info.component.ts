@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Router } from '@angular/router';
 import { cloneDeep } from 'lodash';
@@ -16,6 +16,7 @@ import { UserEditComponent } from '../user-edit/user-edit.component';
 export class UserInfoComponent implements OnInit {
 
   public user: UserInfo;
+  public pack: String;
 
   constructor(private router: Router, private authService: AuthenticationService, public settings: SettingsService, private dialog: MatDialog) { }
 
@@ -44,6 +45,13 @@ export class UserInfoComponent implements OnInit {
           this.user.password = null;
         });
       }
+    });
+  }
+
+  async openDialog(ref: TemplateRef<unknown>) {
+    this.pack = await this.authService.getAuthPackForUser().toPromise();
+    this.dialog.open(ref, {
+      width: '600px'
     });
   }
 

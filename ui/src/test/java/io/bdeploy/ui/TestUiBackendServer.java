@@ -204,7 +204,7 @@ public class TestUiBackendServer extends TestServer {
         }
 
         @Override
-        public String createWeakToken(String principal) {
+        public String createToken(String principal, boolean weak) {
             return "token-" + principal;
         }
 

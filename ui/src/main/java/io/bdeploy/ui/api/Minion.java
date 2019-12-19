@@ -43,9 +43,9 @@ public interface Minion {
      * is only suitable for fetching fetching by launcher-like applications.
      *
      * @param principal the principal name to issue the token to.
-     * @return a "weak" token.
+     * @return a token (authentication pack including certificate).
      */
-    public String createWeakToken(String principal);
+    public String createToken(String principal, boolean weak);
 
     /**
      * @return the mode the hosting minion is run in.
