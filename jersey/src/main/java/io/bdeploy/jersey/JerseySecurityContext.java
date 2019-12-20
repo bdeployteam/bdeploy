@@ -5,7 +5,7 @@ import java.security.Principal;
 import javax.ws.rs.core.SecurityContext;
 
 import io.bdeploy.common.security.ApiAccessToken;
-import io.bdeploy.common.security.ApiAccessToken.Capability;
+import io.bdeploy.common.security.ScopedCapability;
 
 /**
  * A simple {@link SecurityContext} which provides information based on the
@@ -21,7 +21,7 @@ public class JerseySecurityContext implements SecurityContext {
         this.onBehalfOf = onBehalfOf;
     }
 
-    public boolean hasCapability(String scope, Capability cap) {
+    public boolean hasCapability(String scope, ScopedCapability.Capability cap) {
         return token.hasCapability(scope, cap);
     }
 

@@ -67,4 +67,10 @@ public interface AuthResource {
     @Path("/auth-pack")
     @Produces(MediaType.TEXT_PLAIN)
     public String getAuthPack();
+
+    /**
+     * @return the administrative interface for user managements.
+     */
+    @Path("/admin")
+    public AuthAdminResource getAdmin();
 }

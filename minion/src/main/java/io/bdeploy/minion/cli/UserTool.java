@@ -70,14 +70,14 @@ public class UserTool extends ConfiguredCliTool<UserConfig> {
                         .clobberParameter("password").setWhat("update-user").build());
                 r.getUsers().updateLocalPassword(user, config.password());
                 if (config.admin()) {
-                    UserInfo info = r.getUsers().findUser(user);
+                    UserInfo info = r.getUsers().getUser(user);
                     info.capabilities.add(ApiAccessToken.ADMIN_CAPABILITY);
                     r.getUsers().updateUserInfo(info);
                 }
             } else if (config.remove() != null) {
                 r.getAuditor().audit(
                         AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("remove-user").build());
-                r.getUsers().removeUser(config.remove());
+                r.getUsers().deleteUser(config.remove());
             } else if (config.list()) {
                 for (String u : r.getUsers().getAllNames()) {
                     out().println(u);

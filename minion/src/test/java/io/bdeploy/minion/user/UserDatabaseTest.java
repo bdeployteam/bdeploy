@@ -3,6 +3,7 @@ package io.bdeploy.minion.user;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
@@ -15,8 +16,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.common.security.ApiAccessToken;
-import io.bdeploy.common.security.ApiAccessToken.Capability;
-import io.bdeploy.common.security.ApiAccessToken.ScopedCapability;
+import io.bdeploy.common.security.ScopedCapability;
+import io.bdeploy.common.security.ScopedCapability.Capability;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestMinion;
@@ -34,7 +35,7 @@ public class UserDatabaseTest {
         assertNotNull(info);
         assertNotNull(info.capabilities);
         assertEquals(1, info.capabilities.size());
-        assertEquals(ApiAccessToken.ADMIN_CAPABILITY.capability, info.capabilities.get(0).capability);
+        assertEquals(ApiAccessToken.ADMIN_CAPABILITY.capability, info.capabilities.iterator().next().capability);
 
         info.capabilities.clear();
         info.fullName = "Test User";
@@ -70,13 +71,41 @@ public class UserDatabaseTest {
 
         db.createLocalUser("test", "test", null);
         for (int i = 0; i < 20; ++i) {
-            UserInfo u = db.findUser("test");
-            u.capabilities.add(new ScopedCapability("Scope" + i, Capability.ADMIN));
+            UserInfo u = db.getUser("test");
+            u.capabilities.add(new ScopedCapability("Scope" + i, ScopedCapability.Capability.ADMIN));
             db.updateUserInfo(u);
         }
 
         BHive hive = root.getHive();
         assertEquals(10, hive.execute(new ManifestListOperation().setManifestName("users/test")).size());
+    }
+
+    @Test
+    void crud(MinionRoot root) {
+        UserDatabase db = root.getUsers();
+
+        db.createLocalUser("test", "test", Collections.singleton(new ScopedCapability("test", Capability.WRITE)));
+        db.updateLocalPassword("test", "newpw");
+
+        UserInfo user = db.authenticate("test", "newpw");
+        assertNotNull(user);
+
+        user.fullName = "Test User";
+        user.email = "test@example.com";
+
+        db.updateUserInfo(user);
+
+        assertNotNull(db.authenticate("test", "newpw"));
+
+        user = db.getUser(user.name);
+
+        assertEquals("Test User", user.fullName);
+        assertEquals("test@example.com", user.email);
+
+        db.deleteUser("test");
+
+        assertNull(db.getUser("test"));
+        assertNull(db.authenticate("test", "newpw"));
     }
 
 }

@@ -5,9 +5,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * Represents a secure access token. Whoever has a correctly signed token of
  * this type has access to the remote API.
@@ -25,17 +22,17 @@ public class ApiAccessToken {
     long ia; // issuedAt
     long vu; // validUntil
     boolean wt; // weakToken
-    public static final ScopedCapability ADMIN_CAPABILITY = new ScopedCapability(null, Capability.ADMIN);
+    public static final ScopedCapability ADMIN_CAPABILITY = new ScopedCapability(null, ScopedCapability.Capability.ADMIN);
 
     public String getIssuedTo() {
         return it;
     }
 
     public boolean isGlobalAdmin() {
-        return hasCapability(null, Capability.ADMIN);
+        return hasCapability(null, ScopedCapability.Capability.ADMIN);
     }
 
-    public boolean hasCapability(String scope, Capability required) {
+    public boolean hasCapability(String scope, ScopedCapability.Capability required) {
         for (ScopedCapability cap : c) {
             // null and empty string are equal for this calculation...
             if (Objects.equals((cap.scope == null ? "" : cap.scope), (scope == null ? "" : scope))
@@ -54,26 +51,6 @@ public class ApiAccessToken {
         return wt;
     }
 
-    public enum Capability {
-        CREATE,
-        READ,
-        UPDATE,
-        DELETE,
-        ADMIN
-    }
-
-    public static final class ScopedCapability {
-
-        public final String scope;
-        public final Capability capability;
-
-        @JsonCreator
-        public ScopedCapability(@JsonProperty("scope") String scope, @JsonProperty("capability") Capability cap) {
-            this.scope = scope;
-            this.capability = cap;
-        }
-    }
-
     public static final class Builder {
 
         ApiAccessToken token = new ApiAccessToken();
@@ -85,6 +62,11 @@ public class ApiAccessToken {
 
         public Builder setIssuedTo(String name) {
             token.it = name;
+            return this;
+        }
+
+        public Builder forSystem() {
+            token.it = "BDeploy System";
             return this;
         }
 

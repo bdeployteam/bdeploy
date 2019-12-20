@@ -58,9 +58,7 @@ public class TokenTool extends ConfiguredCliTool<TokenConfig> {
         char[] pass = config.passphrase() == null ? null : config.passphrase().toCharArray();
 
         if (config.create()) {
-            String issuedTo = System.getProperty("user.name");
-
-            createNewToken(ksPath, pass, issuedTo);
+            createNewToken(ksPath, pass);
         } else if (config.load()) {
             helpAndFailIfMissing(config.pack(), "Missing --pack");
 
@@ -86,10 +84,9 @@ public class TokenTool extends ConfiguredCliTool<TokenConfig> {
         }
     }
 
-    private void createNewToken(Path keystore, char[] passphrase, String issuedTo) {
+    private void createNewToken(Path keystore, char[] passphrase) {
         SecurityHelper helper = SecurityHelper.getInstance();
-        ApiAccessToken aat = new ApiAccessToken.Builder().setIssuedTo(issuedTo).addCapability(ApiAccessToken.ADMIN_CAPABILITY)
-                .build();
+        ApiAccessToken aat = new ApiAccessToken.Builder().forSystem().addCapability(ApiAccessToken.ADMIN_CAPABILITY).build();
 
         out().println("Generating token with 50 years validity");
 

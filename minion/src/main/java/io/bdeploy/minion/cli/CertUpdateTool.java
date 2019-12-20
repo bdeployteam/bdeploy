@@ -84,8 +84,8 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
 
                 // now update the own access token.
                 SecurityHelper helper = SecurityHelper.getInstance();
-                ApiAccessToken aat = new ApiAccessToken.Builder().setIssuedTo(System.getProperty("user.name"))
-                        .addCapability(ApiAccessToken.ADMIN_CAPABILITY).build();
+                ApiAccessToken aat = new ApiAccessToken.Builder().forSystem().addCapability(ApiAccessToken.ADMIN_CAPABILITY)
+                        .build();
 
                 String pack = helper.createSignaturePack(aat, ks, ksp);
 

@@ -1,17 +1,23 @@
 package io.bdeploy.minion.user;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
@@ -30,7 +36,7 @@ import io.bdeploy.bhive.op.ManifestNextIdOperation;
 import io.bdeploy.bhive.op.ObjectConsistencyCheckOperation;
 import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.util.StorageHelper;
-import io.bdeploy.common.security.ApiAccessToken.ScopedCapability;
+import io.bdeploy.common.security.ScopedCapability;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.manifest.SettingsManifest;
 import io.bdeploy.interfaces.settings.AuthenticationSettingsDto;
@@ -49,6 +55,9 @@ public class UserDatabase implements AuthService {
     private static final String NAMESPACE = "users/";
     private static final String FILE_NAME = "user.json";
 
+    private final Cache<String, UserInfo> userCache = CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES)
+            .maximumSize(1_000).build();
+
     private final MinionRoot root;
     private final BHive target;
 
@@ -62,15 +71,46 @@ public class UserDatabase implements AuthService {
         this.authenticators.add(new LdapAuthenticator());
     }
 
+    @Override
+    public void updateUserInfo(UserInfo info) {
+        UserInfo old = getUser(info.name);
+
+        if (old.external != info.external) {
+            throw new UnsupportedOperationException("Update on external user not supported");
+        }
+
+        if (old.external) {
+            // managed by external system.
+            info.fullName = old.fullName;
+            info.email = old.email;
+        }
+
+        info.password = old.password; // don't update this.
+
+        internalUpdate(info.name, info);
+    }
+
+    @Override
+    public void createLocalUser(String user, String pw, Collection<ScopedCapability> capabilities) {
+        UserInfo info = new UserInfo(user);
+
+        info.password = PasswordAuthentication.hash(pw.toCharArray());
+        if (capabilities != null) {
+            info.capabilities.addAll(capabilities);
+        }
+
+        internalUpdate(user, info);
+    }
+
     /**
-     * Add or update an existing user
+     * Update the password of a local user.
      *
      * @param user the user name
      * @param pw the password to set or <code>null</code> to keep the current password
      */
     @Override
     public void updateLocalPassword(String user, String pw) {
-        UserInfo info = findUser(user);
+        UserInfo info = getUser(user);
         if (info == null) {
             throw new IllegalStateException("Cannot find user " + user);
         }
@@ -86,32 +126,8 @@ public class UserDatabase implements AuthService {
     }
 
     @Override
-    public void updateUserInfo(UserInfo info) {
-        UserInfo old = findUser(info.name);
-
-        if (old.external) {
-            throw new UnsupportedOperationException("Update on external user not supported");
-        }
-
-        info.password = old.password; // don't update this.
-
-        internalUpdate(info.name, info);
-    }
-
-    public void createLocalUser(String user, String pw, List<ScopedCapability> capabilities) {
-        UserInfo info = new UserInfo(user);
-
-        info.password = PasswordAuthentication.hash(pw.toCharArray());
-        if (capabilities != null) {
-            info.capabilities = capabilities;
-        }
-
-        internalUpdate(user, info);
-    }
-
-    @Override
     public List<String> getRecentlyUsedInstanceGroups(String user) {
-        UserInfo info = findUser(user);
+        UserInfo info = getUser(user);
         if (info == null) {
             return Collections.emptyList();
         }
@@ -121,7 +137,7 @@ public class UserDatabase implements AuthService {
 
     @Override
     public void addRecentlyUsedInstanceGroup(String user, String group) {
-        UserInfo info = findUser(user);
+        UserInfo info = getUser(user);
         if (info == null) {
             return;
         }
@@ -140,7 +156,7 @@ public class UserDatabase implements AuthService {
         }
 
         recentlyUsed.add(group);
-        internalUpdate(user, info);
+        updateUserInfo(info);
     }
 
     private synchronized void internalUpdate(String user, UserInfo info) {
@@ -155,24 +171,29 @@ public class UserDatabase implements AuthService {
                 .setRoot(target.execute(new InsertArtificialTreeOperation().setTree(root))).build(null)));
 
         target.execute(new ManifestDeleteOldByIdOperation().setAmountToKeep(10).setToDelete(NAMESPACE + user));
+
+        // update the cache.
+        userCache.put(user, info);
     }
 
-    public void removeUser(String user) {
+    @Override
+    public void deleteUser(String user) {
         SortedSet<Key> mfs = target.execute(new ManifestListOperation().setManifestName(NAMESPACE + user));
         log.info("Deleting {} manifests for user {}", mfs.size(), user);
         mfs.forEach(k -> target.execute(new ManifestDeleteOperation().setToDelete(k)));
     }
 
-    public Set<String> getAllNames() {
+    @Override
+    public SortedSet<String> getAllNames() {
         SortedSet<Key> keys = target.execute(new ManifestListOperation().setManifestName(NAMESPACE));
-        return keys.stream().map(k -> k.getName().substring(NAMESPACE.length())).collect(Collectors.toSet());
+        return keys.stream().map(k -> k.getName().substring(NAMESPACE.length())).collect(Collectors.toCollection(TreeSet::new));
     }
 
     @Override
     public UserInfo authenticate(String user, String pw) {
         AuthenticationSettingsDto settings = SettingsManifest.read(target, root.getEncryptionKey(), false).auth;
 
-        UserInfo u = findUser(user);
+        UserInfo u = getUser(user);
         if (u == null) {
             for (Authenticator auth : authenticators) {
                 u = auth.getInitialInfo(user, pw.toCharArray(), settings);
@@ -200,28 +221,45 @@ public class UserDatabase implements AuthService {
     }
 
     @Override
-    public UserInfo findUser(String name) {
+    public UserInfo getUser(String name) {
         Optional<Long> current = target.execute(new ManifestMaxIdOperation().setManifestName(NAMESPACE + name));
         if (!current.isPresent()) {
             return null;
         }
 
-        Manifest.Key key = new Manifest.Key(NAMESPACE + name, String.valueOf(current.get()));
-        Manifest mf = target.execute(new ManifestLoadOperation().setManifest(key));
+        try {
+            return userCache.get(name, () -> {
+                Manifest.Key key = new Manifest.Key(NAMESPACE + name, String.valueOf(current.get()));
+                Manifest mf = target.execute(new ManifestLoadOperation().setManifest(key));
 
-        // check the manifest for manipulation to prevent from manually making somebody admin, etc.
-        Set<ElementView> result = target.execute(new ObjectConsistencyCheckOperation().addRoot(key));
-        if (!result.isEmpty()) {
-            log.error("User corruption detected for {}", name);
-            return null;
-        }
+                // check the manifest for manipulation to prevent from manually making somebody admin, etc.
+                Set<ElementView> result = target.execute(new ObjectConsistencyCheckOperation().addRoot(key));
+                if (!result.isEmpty()) {
+                    log.error("User corruption detected for {}", name);
+                    return null;
+                }
 
-        try (InputStream is = target.execute(new TreeEntryLoadOperation().setRelativePath(FILE_NAME).setRootTree(mf.getRoot()))) {
-            return StorageHelper.fromStream(is, UserInfo.class);
-        } catch (IOException e) {
+                try (InputStream is = target
+                        .execute(new TreeEntryLoadOperation().setRelativePath(FILE_NAME).setRootTree(mf.getRoot()))) {
+                    return StorageHelper.fromStream(is, UserInfo.class);
+                }
+            });
+        } catch (ExecutionException e) {
             log.error("Cannot load user: {}", name, e);
             return null;
         }
+    }
+
+    @Override
+    public boolean isAuthorized(String user, ScopedCapability required) {
+        UserInfo info = getUser(user);
+
+        if (info.capabilities.contains(new ScopedCapability(null, required.capability))) {
+            // user has global entry for the required capability, thus it's ok :)
+            return true;
+        }
+
+        return info.capabilities.contains(required);
     }
 
 }

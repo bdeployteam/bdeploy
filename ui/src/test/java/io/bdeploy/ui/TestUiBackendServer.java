@@ -6,10 +6,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
@@ -25,6 +28,7 @@ import io.bdeploy.bhive.remote.jersey.BHiveLocatorImpl;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.security.ScopedCapability;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.VersionHelper;
@@ -124,7 +128,7 @@ public class TestUiBackendServer extends TestServer {
         }
 
         @Override
-        public UserInfo findUser(String name) {
+        public UserInfo getUser(String name) {
             return new UserInfo(name);
         }
 
@@ -134,6 +138,24 @@ public class TestUiBackendServer extends TestServer {
 
         @Override
         public void updateLocalPassword(String user, String pw) {
+        }
+
+        @Override
+        public void createLocalUser(String user, String pw, Collection<ScopedCapability> capabilities) {
+        }
+
+        @Override
+        public void deleteUser(String name) {
+        }
+
+        @Override
+        public SortedSet<String> getAllNames() {
+            return new TreeSet<>();
+        }
+
+        @Override
+        public boolean isAuthorized(String user, ScopedCapability required) {
+            return true;
         }
 
     }

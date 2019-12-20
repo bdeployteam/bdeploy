@@ -117,8 +117,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         MinionState state = mr.initKeys();
 
         SecurityHelper helper = SecurityHelper.getInstance();
-        ApiAccessToken aat = new ApiAccessToken.Builder().setIssuedTo(System.getProperty("user.name"))
-                .addCapability(ApiAccessToken.ADMIN_CAPABILITY).build();
+        ApiAccessToken aat = new ApiAccessToken.Builder().forSystem().addCapability(ApiAccessToken.ADMIN_CAPABILITY).build();
 
         String pack = helper.createSignaturePack(aat, state.keystorePath, state.keystorePass);
         RemoteService remote = new RemoteService(UriBuilder.fromUri("https://" + hostname + ":" + port + "/api").build(), pack);
