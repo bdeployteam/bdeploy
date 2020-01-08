@@ -1,5 +1,5 @@
 import { Component, OnInit, TemplateRef } from '@angular/core';
-import { MatDialog } from '@angular/material';
+import { MatDialog, MatSnackBar } from '@angular/material';
 import { Router } from '@angular/router';
 import { cloneDeep } from 'lodash';
 import { UserInfo } from 'src/app/models/gen.dtos';
@@ -18,7 +18,8 @@ export class UserInfoComponent implements OnInit {
   public user: UserInfo;
   public pack: String;
 
-  constructor(private router: Router, private authService: AuthenticationService, public settings: SettingsService, private dialog: MatDialog) { }
+  constructor(private router: Router, private authService: AuthenticationService, public settings: SettingsService, private dialog: MatDialog,
+    private snackbarService: MatSnackBar) { }
 
   ngOnInit() {
     this.authService.getUserInfo().subscribe(r => {
@@ -46,6 +47,10 @@ export class UserInfoComponent implements OnInit {
         });
       }
     });
+  }
+
+  copied() {
+    this.snackbarService.open('Token copied to clipboard.', null, { duration: 2000 });
   }
 
   async openDialog(ref: TemplateRef<unknown>) {

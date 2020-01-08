@@ -613,16 +613,17 @@ public class InstanceResourceImpl implements InstanceResource {
         URI iconLocation = iconUri.build(group, im.getConfiguration().uuid, appConfig.uid);
         URI splashLocation = splashUrl.build(group, im.getConfiguration().uuid, appConfig.uid);
 
-        String fileName;
+        String fileName = "%1$s (%2$s - %3$s) - Installer";
         if (applicationOs == OperatingSystem.WINDOWS) {
-            fileName = im.getConfiguration().name + " - " + appConfig.name + " - Installer.exe";
+            fileName = fileName + ".exe";
             createWindowsInstaller(im, appConfig, installerPath, launcherKey, launcherLocation, iconLocation, splashLocation);
         } else if (applicationOs == OperatingSystem.LINUX || applicationOs == OperatingSystem.MACOS) {
-            fileName = im.getConfiguration().name + "-" + appConfig.name + "-Installer.run";
+            fileName = fileName + ".run";
             createLinuxInstaller(im, appConfig, installerPath, launcherKey, launcherLocation, iconLocation);
         } else {
             throw new WebApplicationException("Unsupported OS for installer: " + applicationOs);
         }
+        fileName = String.format(fileName, appConfig.name, group, im.getConfiguration().name);
 
         // Return the name of the token for downloading
         ds.registerForDownload(token, fileName);
@@ -650,7 +651,7 @@ public class InstanceResourceImpl implements InstanceResource {
         values.put("LAUNCHER_URL", launcherLocation.toString());
         values.put("ICON_URL", iconLocation.toString());
         values.put("APP_UID", appConfig.uid);
-        values.put("APP_NAME", im.getConfiguration().name + " - " + appConfig.name);
+        values.put("APP_NAME", appConfig.name + " (" + group + " - " + im.getConfiguration().name + ")");
         values.put("BDEPLOY_FILE", new String(StorageHelper.toRawBytes(clickAndStart), StandardCharsets.UTF_8));
         values.put("REMOTE_SERVICE_URL", ""); // not used, only in standalone
         values.put("REMOTE_SERVICE_TOKEN", ""); // not used, only in standalone
@@ -681,7 +682,6 @@ public class InstanceResourceImpl implements InstanceResource {
         ProductManifest pm = ProductManifest.of(hive, im.getConfiguration().product);
 
         // Brand the executable and embed the required information
-        String appName = im.getConfiguration().name + " - " + appConfig.name;
         ClickAndStartDescriptor clickAndStart = getClickAndStartDescriptor(im.getConfiguration().uuid, appConfig.uid);
         try {
             BrandingConfig config = new BrandingConfig();
@@ -689,8 +689,10 @@ public class InstanceResourceImpl implements InstanceResource {
             config.launcherUrl = launcherLocation.toString();
             config.iconUrl = iconLocation.toString();
             config.splashUrl = splashLocation.toString();
+            config.instanceGroupName = group;
+            config.instanceName = im.getConfiguration().name;
             config.applicationUid = appConfig.uid;
-            config.applicationName = appName;
+            config.applicationName = appConfig.name;
             config.applicationJson = new String(StorageHelper.toRawBytes(clickAndStart), StandardCharsets.UTF_8);
             config.productVendor = pm.getProductDescriptor().vendor;
 
@@ -702,7 +704,7 @@ public class InstanceResourceImpl implements InstanceResource {
         }
 
         // Now sign the executable with our certificate
-        minion.signExecutable(installer, appName, clickAndStart.host.getUri().toString());
+        minion.signExecutable(installer, appConfig.name, clickAndStart.host.getUri().toString());
     }
 
     @Override

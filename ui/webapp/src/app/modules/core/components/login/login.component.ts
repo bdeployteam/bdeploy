@@ -1,11 +1,8 @@
-import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthenticationService } from '../../services/authentication.service';
-import { ConfigService } from '../../services/config.service';
 import { ErrorMessage, Logger, LoggingService } from '../../services/logging.service';
 
 @Component({
@@ -27,10 +24,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   public password = new FormControl('', [Validators.required]);
 
   constructor(
-    private cfg: ConfigService,
     private loggingService: LoggingService,
-    private http: HttpClient,
-    private snackBar: MatSnackBar,
     private route: ActivatedRoute,
     private router: Router,
     public auth: AuthenticationService

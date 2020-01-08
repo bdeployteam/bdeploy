@@ -38,6 +38,16 @@ public class BrandingConfig {
     public String applicationJson;
 
     /**
+     * Instance group name
+     */
+    public String instanceGroupName;
+
+    /**
+     * Instance name
+     */
+    public String instanceName;
+
+    /**
      * Human readable name of the application
      */
     public String applicationName;

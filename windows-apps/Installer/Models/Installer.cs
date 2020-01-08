@@ -118,11 +118,11 @@ namespace Bdeploy.Installer
                 }
 
                 // Show error message if we do not have write permissions in our home directory
-                if(FileHelper.IsReadOnly(PathProvider.GetBdeployHome()))
+                if (FileHelper.IsReadOnly(PathProvider.GetBdeployHome()))
                 {
                     StringBuilder builder = new StringBuilder();
                     builder.Append("Installation directory is read-only. Please check permissions.").AppendLine().AppendLine();
-                    builder.AppendFormat("BDEPLOY_HOME={0}",PathProvider.GetBdeployHome()).AppendLine();
+                    builder.AppendFormat("BDEPLOY_HOME={0}", PathProvider.GetBdeployHome()).AppendLine();
                     OnError(builder.ToString());
                     return -1;
                 }
@@ -131,10 +131,10 @@ namespace Bdeploy.Installer
                 // Prepare directories
                 Directory.CreateDirectory(bdeployHome);
                 Directory.CreateDirectory(launcherHome);
-                Directory.CreateDirectory(appsHome);      
-                
+                Directory.CreateDirectory(appsHome);
+
                 // Prepare home directory of the application if required
-                if(config.CanInstallApp())
+                if (config.CanInstallApp())
                 {
                     Directory.CreateDirectory(Path.Combine(appsHome, config.ApplicationUid));
                 }
@@ -211,9 +211,12 @@ namespace Bdeploy.Installer
         /// </summary>
         private void ExtractApplication()
         {
-            string appUid = config.ApplicationUid;
+            string instanceGroup = config.InstanceGroupName;
+            string instance = config.InstanceName;
             string appName = config.ApplicationName;
-            string productVendor = config.ProductVendor;
+            string appUid = config.ApplicationUid;
+            string productVendor = config.ProductVendor ?? "BDeploy";
+
             string appDescriptor = Path.Combine(appsHome, appUid, "launch.bdeploy");
             string icon = Path.Combine(appsHome, appUid, "icon.ico");
 
@@ -224,8 +227,8 @@ namespace Bdeploy.Installer
             // Only create shortcut if we just have written the descriptor
             if (createShortcut)
             {
-                Shortcut.CreateDesktopLink(appName, appDescriptor, launcherHome, icon);
-                Shortcut.CreateStartMenuLink(productVendor, appName, appDescriptor, launcherHome, icon);
+                Shortcut.CreateDesktopLink(instanceGroup, instance, appName, appDescriptor, launcherHome, icon);
+                Shortcut.CreateStartMenuLink(instanceGroup, instance, appName, productVendor, appDescriptor, launcherHome, icon);
             }
         }
 

@@ -45,10 +45,16 @@ namespace Bdeploy.Shared
         public string ClickAndStartDescriptor;
 
         /// <summary>
-        /// The human readable application name. Used to name the desktop shortcut
+        /// The human readable instance group name. Used to name shortcuts.
         /// </summary>
-        [DataMember(Name = "applicationName")]
-        public string ApplicationName;
+        [DataMember(Name = "instanceGroupName")]
+        public string InstanceGroupName;
+
+        /// <summary>
+        /// The human readable instance name. Used to name shortcuts.
+        /// </summary>
+        [DataMember(Name = "instanceName")]
+        public string InstanceName;
 
         /// <summary>
         /// The human readable product vendor. Used to group apps of the same vendor in the start menu.
@@ -56,6 +62,12 @@ namespace Bdeploy.Shared
         /// </summary>
         [DataMember(Name = "productVendor")]
         public string ProductVendor;
+
+        /// <summary>
+        /// The human readable application name. Used to name shortcuts
+        /// </summary>
+        [DataMember(Name = "applicationName")]
+        public string ApplicationName;
 
         /// <summary>
         /// The unique name of the application. Used to store the .bdeploy file

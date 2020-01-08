@@ -10,15 +10,16 @@
   <h1 mat-dialog-title>Token for {{user.name}}</h1>
   <p>
     Use the following token to remotely access this server in your name, e.g. for pushing products.
-    To do so, copy the complete contents to the according tool.
+    To do so, copy the complete content to the according tool.
   </p>
   <p>
     <b>Attention:</b> This token is sensitive information as it allows remote access under your name. Do not pass this token on to others.
   </p>
   <div class='flex-content'>
-    <textarea readonly class='large-text'>{{pack}}</textarea>
+    <textarea #inputTarget readonly class='large-text'>{{pack}}</textarea>
   </div>
   <div mat-dialog-actions align="end">
-    <button mat-raised-button [mat-dialog-close]="true" color="primary">Close</button>
+    <button mat-raised-button [ngxClipboard]="inputTarget" (cbOnSuccess)="copied()" color="primary">Copy To Clipboard</button>
+    <button mat-raised-button [mat-dialog-close]="true">Close</button>
   </div>
 </ng-template>

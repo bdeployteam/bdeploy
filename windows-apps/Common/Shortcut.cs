@@ -9,10 +9,16 @@ namespace Bdeploy.Shared
         /// <summary>
         /// Creates a shortcut for the given application on the desktop using the given name and icon
         /// </summary>
-        public static void CreateDesktopLink(string appName, string targetPath, string workingDir, string iconFile)
+        public static void CreateDesktopLink(string group, string instance, string appName, string targetPath, string workingDir, string iconFile)
         {
-            string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            string linkPath = Path.Combine(path, appName + ".lnk");
+            group = FileHelper.GetSafeFilename(group);
+            instance = FileHelper.GetSafeFilename(instance);
+            appName = FileHelper.GetSafeFilename(appName);
+
+            string desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            string linkName = appName + " (" + group + " - " + instance + ").lnk";
+            string linkPath = Path.Combine(desktop, linkName);
+
             WshShell shell = new WshShell();
             IWshShortcut linkFile = (IWshShortcut)shell.CreateShortcut(linkPath);
             linkFile.TargetPath = targetPath;
@@ -25,17 +31,19 @@ namespace Bdeploy.Shared
         /// <summary>
         /// Creates a shortcut for the given application in the start menu of the user.
         /// </summary>
-        public static void CreateStartMenuLink(string productVendor, string appName, string targetPath, string workingDir, string iconFile)
+        public static void CreateStartMenuLink(string group, string instance, string appName, string productVendor, string targetPath, string workingDir, string iconFile)
         {
-            // Use the name of the vendor for the directory
-            string path = Environment.GetFolderPath(Environment.SpecialFolder.Programs);
-            if (productVendor != null)
-            {
-                path = Path.Combine(path, productVendor);
-                Directory.CreateDirectory(path);
-            }
+            group = FileHelper.GetSafeFilename(group);
+            instance = FileHelper.GetSafeFilename(instance);
+            appName = FileHelper.GetSafeFilename(appName);
 
-            string linkPath = Path.Combine(path, appName + ".lnk");
+            string startMenu = Environment.GetFolderPath(Environment.SpecialFolder.Programs);
+            string linkDir = Path.Combine(startMenu, productVendor, group, instance);
+            Directory.CreateDirectory(linkDir);
+
+            string linkName = appName + " (" + group + " - " + instance + ").lnk";
+            string linkPath = Path.Combine(linkDir, linkName);
+
             WshShell shell = new WshShell();
             IWshShortcut linkFile = (IWshShortcut)shell.CreateShortcut(linkPath);
             linkFile.TargetPath = targetPath;

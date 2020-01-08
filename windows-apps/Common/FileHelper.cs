@@ -182,5 +182,15 @@ namespace Bdeploy.Shared
                 return true;
             }
         }
+
+        /// <summary>
+        /// Replaces all characters that cannot be used in a filename/directoryname with an underscore.
+        /// See https://stackoverflow.com/a/12800424
+        /// </summary>
+        /// <returns></returns>
+        public static string GetSafeFilename(string filename)
+        {
+            return string.Join("_", filename.Split(Path.GetInvalidFileNameChars()));
+        }
     }
 }
