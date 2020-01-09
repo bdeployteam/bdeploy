@@ -131,7 +131,7 @@ public class LauncherSplash implements LauncherSplashDisplay {
         });
 
         // Take first applicable file
-        if (files.length == 0) {
+        if (files == null || files.length == 0) {
             return null;
         }
         try {

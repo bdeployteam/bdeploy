@@ -39,6 +39,7 @@ import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
+import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory;
 import io.bdeploy.interfaces.manifest.state.InstanceState;
 
@@ -154,6 +155,25 @@ public class InstanceManifest {
             for (ApplicationConfiguration app : inmf.getConfiguration().applications) {
                 if (app.uid.equals(applicationId)) {
                     return app;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Find the instance node with the given ID in this configuration.
+     *
+     * @param hive the hive where the manifest is stored
+     * @param applicationId unique name of the application
+     */
+    public InstanceNodeConfiguration getInstanceNodeConfiguration(BHive hive, String applicationId) {
+        for (Map.Entry<String, Manifest.Key> entry : getInstanceNodeManifests().entrySet()) {
+            InstanceNodeManifest inmf = InstanceNodeManifest.of(hive, entry.getValue());
+            InstanceNodeConfiguration inc = inmf.getConfiguration();
+            for (ApplicationConfiguration app : inc.applications) {
+                if (app.uid.equals(applicationId)) {
+                    return inc;
                 }
             }
         }

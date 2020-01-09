@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.interfaces.ScopedManifestKey;
@@ -19,9 +18,9 @@ import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 public class ManifestRefPathProvider {
 
     private final Path exportDir;
-    private final SortedMap<Path, Manifest.Key> paths;
+    private final Map<Manifest.Key, Path> paths;
 
-    public ManifestRefPathProvider(DeploymentPathProvider provider, SortedMap<Path, Manifest.Key> paths) {
+    public ManifestRefPathProvider(DeploymentPathProvider provider, Map<Manifest.Key, Path> paths) {
         this.exportDir = provider.get(SpecialDirectory.BIN);
         this.paths = paths;
 
@@ -40,25 +39,24 @@ public class ManifestRefPathProvider {
     public Path getManifestPath(String name) {
         if (name.contains(":")) {
             Manifest.Key fullKey = Manifest.Key.parse(name);
-            return paths.entrySet().stream().filter(e -> e.getValue().equals(fullKey)).map(Map.Entry::getKey).findFirst()
-                    .orElse(null);
+            return paths.get(fullKey);
         }
 
         List<Path> candidates = new ArrayList<>();
 
         // check OS specific
-        for (Map.Entry<Path, Manifest.Key> entry : paths.entrySet()) {
-            ScopedManifestKey smk = ScopedManifestKey.parse(entry.getValue());
+        for (Map.Entry<Manifest.Key, Path> entry : paths.entrySet()) {
+            ScopedManifestKey smk = ScopedManifestKey.parse(entry.getKey());
             if (smk != null && smk.getName().equals(name)) {
-                candidates.add(entry.getKey());
+                candidates.add(entry.getValue());
             }
         }
 
         // only resolve non-OS specific if no OS specific match has been found.
         if (candidates.isEmpty()) {
-            for (Map.Entry<Path, Manifest.Key> entry : paths.entrySet()) {
-                if (entry.getValue().getName().equals(name)) {
-                    candidates.add(entry.getKey());
+            for (Map.Entry<Manifest.Key, Path> entry : paths.entrySet()) {
+                if (entry.getKey().getName().equals(name)) {
+                    candidates.add(entry.getValue());
                 }
             }
         }

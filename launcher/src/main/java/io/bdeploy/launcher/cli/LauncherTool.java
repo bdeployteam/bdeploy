@@ -6,9 +6,13 @@ import java.lang.ProcessBuilder.Redirect;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -23,11 +27,11 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.ExportOperation;
-import io.bdeploy.bhive.op.ManifestDeleteOldByIdOperation;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.PruneOperation;
 import io.bdeploy.bhive.op.remote.FetchOperation;
+import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.bhive.remote.RemoteBHive;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
@@ -43,22 +47,32 @@ import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.TemplateHelper;
+import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.common.util.VersionHelper;
-import io.bdeploy.dcu.InstanceNodeController;
 import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.UpdateHelper;
+import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
-import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
-import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationBrandingDescriptor;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
-import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
-import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
-import io.bdeploy.interfaces.variables.LocalHostnameResolver;
+import io.bdeploy.interfaces.variables.ApplicationParameterProvider;
+import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
+import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
+import io.bdeploy.interfaces.variables.CompositeResolver;
+import io.bdeploy.interfaces.variables.DelayedVariableResolver;
+import io.bdeploy.interfaces.variables.DeploymentPathProvider;
+import io.bdeploy.interfaces.variables.DeploymentPathResolver;
+import io.bdeploy.interfaces.variables.EnvironmentVariableResolver;
+import io.bdeploy.interfaces.variables.InstanceVariableResolver;
+import io.bdeploy.interfaces.variables.ManifestRefPathProvider;
+import io.bdeploy.interfaces.variables.ManifestSelfResolver;
+import io.bdeploy.interfaces.variables.ManifestVariableResolver;
+import io.bdeploy.interfaces.variables.OsVariableResolver;
+import io.bdeploy.interfaces.variables.ParameterValueResolver;
 import io.bdeploy.jersey.audit.Auditor;
 import io.bdeploy.jersey.audit.RollingFileAuditor;
 import io.bdeploy.launcher.cli.LauncherTool.LauncherConfig;
@@ -110,6 +124,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /** Path where the launched app is stored */
     private Path appDir;
 
+    /** Path where the pooled products and artifacts are stored */
+    private Path poolDir;
+
     /** The user-directory for the hive */
     private Path userArea;
 
@@ -139,6 +156,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             }
             LauncherSplashReporter reporter = new LauncherSplashReporter(splash);
             try (BHive hive = new BHive(bhiveDir.toUri(), auditor, reporter)) {
+                doCheckForLauncherUpdate(hive, reporter);
                 doLaunch(hive, reporter, splash, !config.dontWait());
             }
         } catch (SoftwareUpdateException ex) {
@@ -201,10 +219,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
         bhiveDir = rootDir.resolve("bhive");
         appsDir = rootDir.resolve("apps");
+        poolDir = appsDir.resolve("pool");
         appDir = appsDir.resolve(descriptor.applicationId);
-        if (!Files.isDirectory(appDir)) {
-            PathHelper.mkdirs(appDir);
-        }
         readOnlyRootDir = PathHelper.isReadOnly(rootDir);
 
         log.info("Using home directory {}{}", rootDir, readOnlyRootDir ? " (readonly)" : "");
@@ -217,101 +233,55 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     }
 
     private void doLaunch(BHive hive, LauncherSplashReporter reporter, LauncherSplash splash, boolean waitForExit) {
-        // Check for launcher updates.
-        doCheckForUpdate(hive, reporter);
         log.info("Launching {} / {} / {} from {}", descriptor.groupId, descriptor.instanceId, descriptor.applicationId,
                 descriptor.host.getUri());
-
         MasterRootResource master = ResourceProvider.getResource(descriptor.host, MasterRootResource.class, null);
         MasterNamedResource namedMaster = master.getNamedMaster(descriptor.groupId);
 
         // Fetch more information from the remote server.
-        ClientApplicationConfiguration appCfg;
+        ClientApplicationConfiguration clientAppCfg;
         try (Activity info = reporter.start("Loading meta-data...")) {
-            // fails with 404 or other error, but never null.
-            log.info("fetching information from {}", descriptor.host.getUri());
-            appCfg = namedMaster.getClientConfiguration(descriptor.instanceId, descriptor.applicationId);
+            log.info("Fetching client configuration from server...");
+            clientAppCfg = namedMaster.getClientConfiguration(descriptor.instanceId, descriptor.applicationId);
         }
 
         // Update splash with the fetched branding information
-        ApplicationBrandingDescriptor branding = appCfg.clientDesc.branding;
-        if (branding != null) {
-            if (appCfg.clientImageIcon != null) {
-                splash.updateIconImage(appCfg.clientImageIcon);
+        ApplicationBrandingDescriptor branding = clientAppCfg.appDesc.branding;
+        if (branding == null) {
+            log.info("Client configuration does not contain any branding information.");
+        } else {
+            if (clientAppCfg.clientImageIcon != null) {
+                splash.updateIconImage(clientAppCfg.clientImageIcon);
             }
-            if (appCfg.clientSplashData != null) {
-                splash.updateSplashImage(appCfg.clientSplashData);
+            if (clientAppCfg.clientSplashData != null) {
+                splash.updateSplashImage(clientAppCfg.clientSplashData);
             }
             splash.updateSplashData(branding.splash);
-        } else {
-            log.warn("Client configuration does not contain any branding information.");
         }
 
-        // this /might/ lead to too much re-installs if unrelated things change, but there is not
-        // other/easy way (currently) to detect this...
-        Manifest.Key targetClientKey = new Manifest.Key(descriptor.applicationId, appCfg.instanceKey.getTag());
+        // Install the application into the pool if missing
+        boolean updateInstalled = installApplication(hive, splash, reporter, clientAppCfg);
 
-        if (hive.execute(new ManifestListOperation().setManifestName(targetClientKey.toString())).contains(targetClientKey)) {
-            // we have it already, no need to re-create.
-            log.info("re-using existing manifest: {}", targetClientKey);
-        } else {
-            // Throw an exception if we do not have write permissions in the root directory
-            if (readOnlyRootDir) {
-                String installed = getAppVersions(hive);
-                String available = appCfg.instanceKey.getTag();
-                String name = appCfg.clientDesc.name + "( " + descriptor.applicationId + " )";
-                throw new SoftwareUpdateException(name, installed, available);
-            }
-
-            log.info("fetching updated applications/configurations for {}", targetClientKey);
-            try (Activity info = reporter.start("Loading requirements...")) {
-                // fetch the underlying application and it's requirements into local cache (BHive)
-                fetchApplicationAndRequirements(hive, appCfg);
-            }
-
-            try (Activity info = reporter.start("Preparing configuration...")) {
-                // generate a 'fake' instanceNodeManifest from the existing configuration for local caching.
-                createInstanceNodeManifest(appCfg, targetClientKey, hive);
-            }
-
-            // Store branding information on file-system
-            if (appCfg.clientImageIcon != null) {
-                splash.storeIconImage(branding.icon, appCfg.clientImageIcon);
-            }
-            if (appCfg.clientSplashData != null) {
-                splash.storeSplashImage(branding.splash.image, appCfg.clientSplashData);
-            }
-            splash.storeSplashData(branding.splash);
-        }
-
-        InstanceNodeController controller;
-        try (Activity info = reporter.start("Updating application...")) {
-            // 4: install using DCU to the target directory
-            controller = installApplication(appsDir, targetClientKey, hive);
-        }
-
+        // Launch the application
         Process p;
         try (Activity info = reporter.start("Launching...")) {
-            // 5: launch.
-            p = launchProcess(targetClientKey, controller);
+            p = launchApplication(hive, clientAppCfg);
         }
-
         reporter.stop();
         splash.dismiss();
 
-        // 6. Cleanup the installation directory and the hive.
-        // Keeps a max. of 2 existing installations per client around.
-        if (!readOnlyRootDir) {
-            hive.execute(new ManifestDeleteOldByIdOperation().setAmountToKeep(2).setRunGarbageCollector(true)
-                    .setToDelete(descriptor.applicationId).setPreDeleteHook(k -> deleteVersion(hive, k)));
+        // Cleanup the installation directory and the hive.
+        if (updateInstalled) {
+            cleanupApplications(hive);
         }
 
-        // 7. wait for the process to exit
+        // Wait for the process to exit
         if (waitForExit) {
             try {
-                p.waitFor();
+                int exitCode = p.waitFor();
+                log.info("Application terminated with exit code {}.", exitCode);
             } catch (InterruptedException e) {
-                log.warn("waiting for application exit interrupted");
+                log.warn("Waiting for application exit interrupted.");
                 Thread.currentThread().interrupt();
             }
         } else {
@@ -319,8 +289,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
     }
 
-    @SuppressFBWarnings("DM_EXIT")
-    private void doCheckForUpdate(BHive hive, ActivityReporter reporter) {
+    private void doCheckForLauncherUpdate(BHive hive, ActivityReporter reporter) {
         String running = VersionHelper.readVersion();
         if (VersionHelper.UNKNOWN.equals(running)) {
             log.info("Skipping update, as running version cannot be determined");
@@ -359,17 +328,19 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 return;
             }
 
-            doInstallUpdate(descriptor.host, hive, reporter, currentVersion, mostCurrent,
+            doInstallLauncherUpdate(descriptor.host, hive, reporter, currentVersion, mostCurrent,
                     byTagForCurrentOs.get(mostCurrent.toString()));
         }
     }
 
-    private void doInstallUpdate(RemoteService remote, BHive hive, ActivityReporter reporter, Version currentVersion,
+    @SuppressFBWarnings("DM_EXIT")
+    private void doInstallLauncherUpdate(RemoteService remote, BHive hive, ActivityReporter reporter, Version currentVersion,
             Version mostCurrent, Key key) {
 
         // Check if we have write permissions to install the update
         if (PathHelper.isReadOnly(rootDir)) {
-            throw new SoftwareUpdateException("launcher", currentVersion.toString(), mostCurrent.toString());
+            throw new SoftwareUpdateException("launcher",
+                    "Installed=" + currentVersion.toString() + " Available=" + mostCurrent.toString());
         }
 
         log.info("New launcher found, updating from {} to {}", currentVersion, mostCurrent);
@@ -397,95 +368,228 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     }
 
     /**
-     * Fetch the application and all its requirements from the remote hive.
+     * Installs the application with all requirements in case it is not already installed
      */
-    private void fetchApplicationAndRequirements(BHive hive, ClientApplicationConfiguration appCfg) {
-        FetchOperation fetchOp = new FetchOperation().setHiveName(descriptor.groupId).setRemote(descriptor.host)
-                .addManifest(appCfg.clientConfig.application);
-        appCfg.resolvedRequires.forEach(fetchOp::addManifest);
-        hive.execute(fetchOp);
-    }
+    private boolean installApplication(BHive hive, LauncherSplash splash, ActivityReporter reporter,
+            ClientApplicationConfiguration clientAppCfg) {
+        ApplicationConfiguration appCfg = clientAppCfg.appConfig;
 
-    /**
-     * Creates a new InstanceNodeManifest which is used to "fake" a node (this client). The manifest will have the same tag as the
-     * instance, so we can determine whether we have the client for a certain instance tag already.
-     */
-    private void createInstanceNodeManifest(ClientApplicationConfiguration appCfg, Manifest.Key targetClientKey, BHive hive) {
-        InstanceNodeConfiguration fakeInc = new InstanceNodeConfiguration();
-        fakeInc.applications.add(appCfg.clientConfig);
-        fakeInc.name = appCfg.clientConfig.name;
-        fakeInc.uuid = appCfg.clientConfig.uid;
-        // FIXME: DCS-396: client config shall not contain server config files.
-        //        ObjectId cfg = appCfg.configTreeId;
-        ObjectId cfg = null;
-
-        new InstanceNodeManifest.Builder().setInstanceNodeConfiguration(fakeInc).setMinionName("client").setKey(targetClientKey)
-                .setConfigTreeId(cfg).insert(hive);
-    }
-
-    /**
-     * Installs the client application using (and returning) the DCU.
-     */
-    private InstanceNodeController installApplication(Path rootDir, Manifest.Key targetClientKey, BHive hive) {
-        InstanceNodeManifest fakeInmf = InstanceNodeManifest.of(hive, targetClientKey);
-        InstanceNodeController controller = new InstanceNodeController(hive, rootDir, fakeInmf);
-        controller.addAdditionalVariableResolver(new LocalHostnameResolver());
-        if (!controller.isInstalled()) {
-            log.info("installing {} to {}", targetClientKey, rootDir);
-            controller.install();
-        } else {
-            log.info("re-using previous installation of {}", targetClientKey);
+        // Check if the application directory is already present
+        Collection<String> missing = getMissingArtifacts(hive, clientAppCfg);
+        if (missing.isEmpty()) {
+            log.info("Application is already installed. Nothing to install/update.");
+            return false;
         }
-        return controller;
-    }
+        Key appKey = appCfg.application;
+        log.info("Starting installation of application {}", appKey);
+        log.info("Missing artifacts {}", missing);
 
-    /**
-     * Removes the given version if installed
-     */
-    private void deleteVersion(BHive hive, Manifest.Key key) {
-        try {
-            log.info("Uninstall and delete old version {}", key);
-            InstanceNodeManifest mf = InstanceNodeManifest.of(hive, key);
-            InstanceNodeController c = new InstanceNodeController(hive, rootDir, mf);
-            if (c.isInstalled()) {
-                c.uninstall();
+        // Throw an exception if we do not have write permissions in the directory
+        String appName = appCfg.name;
+        if (readOnlyRootDir) {
+            throw new SoftwareUpdateException(appName, "Missing artifacts: " + missing.stream().collect(Collectors.joining(",")));
+        }
+
+        // Fetch the application and all the requirements
+        try (Activity info = reporter.start("Downloading...")) {
+            log.info("Fetching manifests from server...");
+            FetchOperation fetchOp = new FetchOperation().setHiveName(descriptor.groupId).setRemote(descriptor.host);
+            fetchOp.addManifest(appKey);
+            clientAppCfg.resolvedRequires.forEach(fetchOp::addManifest);
+
+            TransferStatistics stats = hive.execute(fetchOp);
+            if (stats.sumManifests == 0) {
+                log.info("Local hive already contains all required arfifacts. No manifests where fetched.");
+            } else {
+                log.info("Fetched {} manifests from server. Total size {}", stats.sumManifests,
+                        UnitHelper.formatFileSize(stats.transferSize));
             }
-        } catch (Exception ex) {
-            log.error("Failed to uninstall version", ex);
         }
+
+        // Export the application into the pool
+        List<Manifest.Key> applications = new ArrayList<>();
+        applications.add(appCfg.application);
+        applications.addAll(clientAppCfg.resolvedRequires);
+
+        log.info("Installing application and dependencies into the pool...", appKey);
+        try (Activity info = reporter.start("Installing...", applications.size())) {
+            for (Manifest.Key key : applications) {
+                Path target = poolDir.resolve(key.directoryFriendlyName());
+                if (Files.isDirectory(target)) {
+                    info.worked(1);
+                    log.info("{} is already installed.", key);
+                    continue;
+                }
+                log.info("Installing {}", key);
+                hive.execute(new ExportOperation().setTarget(target).setManifest(key));
+                info.worked(1);
+            }
+        }
+
+        // Application specific data will be stored in a separate directory
+        PathHelper.mkdirs(appDir);
+
+        // Store branding information on file-system
+        ApplicationBrandingDescriptor branding = clientAppCfg.appDesc.branding;
+        if (branding != null) {
+            if (clientAppCfg.clientImageIcon != null) {
+                splash.storeIconImage(branding.icon, clientAppCfg.clientImageIcon);
+            }
+            if (clientAppCfg.clientSplashData != null) {
+                splash.storeSplashImage(branding.splash.image, clientAppCfg.clientSplashData);
+            }
+            splash.storeSplashData(branding.splash);
+        }
+
+        // Protocol the installation
+        ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
+
+        ClientSoftwareConfiguration newConfig = new ClientSoftwareConfiguration();
+        newConfig.requiredSoftware.addAll(applications);
+        manifest.update(appCfg.uid, newConfig);
+
+        // Calculate the difference which software is not required anymore
+        log.info("Application successfully installed.");
+        return true;
     }
 
     /**
-     * Launches the client process.
+     * Checks if the application and ALL the required dependencies are already installed. The check is done
+     * by verifying that the target directories are existing. No deep verification is done. The returned list
+     * indicates which artifacts are missing.
      */
-    private static Process launchProcess(Manifest.Key targetClientKey, InstanceNodeController controller) {
-        ProcessGroupConfiguration pgc = controller.getProcessGroupConfiguration();
-        ProcessConfiguration pc = pgc.applications.get(0);
-        List<String> command = TemplateHelper.process(pc.start, controller.getResolver());
-        log.info("launching {} using {}", targetClientKey, command);
+    private Collection<String> getMissingArtifacts(BHive hive, ClientApplicationConfiguration clientAppCfg) {
+        // Application directory must be there
+        // NOTE: Directory is create before by the native installer
+        Collection<String> missing = new ArrayList<>();
+        if (!appDir.toFile().exists()) {
+            missing.add("Directory: " + clientAppCfg.appConfig.uid);
+        }
 
-        // INHERIT causes problems when debugging but is what we actually want in real life, attention.
-        ProcessBuilder b = new ProcessBuilder(command).redirectError(Redirect.INHERIT).redirectInput(Redirect.INHERIT)
-                .redirectOutput(Redirect.INHERIT)
-                .directory(controller.getDeploymentPathProvider().get(SpecialDirectory.RUNTIME).toFile());
+        // The software that we need must be in the pool
+        List<Manifest.Key> applications = new ArrayList<>();
+        applications.add(clientAppCfg.appConfig.application);
+        applications.addAll(clientAppCfg.resolvedRequires);
+        for (Manifest.Key app : applications) {
+            Path expectedPath = poolDir.resolve(app.directoryFriendlyName());
+            if (!expectedPath.toFile().exists()) {
+                missing.add("Pooled-App: " + app);
+            }
+        }
+
+        // Meta-Manifest about the installation must be there
+        // and must refer to what the application actually requires
+        ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
+        ClientSoftwareConfiguration config = manifest.readNewest(clientAppCfg.appConfig.uid);
+        if (config == null) {
+            missing.add("Meta-Manifest:" + clientAppCfg.appConfig.uid);
+        } else {
+            // Check that all required apps are listed
+            applications.removeAll(config.requiredSoftware);
+            if (!applications.isEmpty()) {
+                missing.add("Meta-Manifest-Entry: " + applications);
+            }
+        }
+        return missing;
+    }
+
+    /**
+     * Launches the client process using the given configuration.
+     */
+    private Process launchApplication(BHive hive, ClientApplicationConfiguration clientCfg) {
+        log.info("Attempting to launch application.");
+        ApplicationConfiguration appCfg = clientCfg.appConfig;
+
+        // General resolvers
+        CompositeResolver resolvers = new CompositeResolver();
+        resolvers.add(new ApplicationVariableResolver(appCfg));
+        resolvers.add(new DelayedVariableResolver(resolvers));
+        resolvers.add(new InstanceVariableResolver(clientCfg.instanceConfig));
+        resolvers.add(new OsVariableResolver());
+        resolvers.add(new EnvironmentVariableResolver());
+        resolvers.add(new ParameterValueResolver(new ApplicationParameterProvider(clientCfg.instanceConfig)));
+
+        // Enable resolving of path variables
+        DeploymentPathProvider pathProvider = new DeploymentPathProvider(appsDir, "1");
+        resolvers.add(new DeploymentPathResolver(pathProvider));
+
+        // Enable resolving of manifest variables
+        Map<Key, Path> pooledSoftware = new HashMap<>();
+        pooledSoftware.put(appCfg.application, poolDir.resolve(appCfg.application.directoryFriendlyName()));
+        for (Manifest.Key key : clientCfg.resolvedRequires) {
+            pooledSoftware.put(key, poolDir.resolve(key.directoryFriendlyName()));
+        }
+        resolvers.add(new ManifestVariableResolver(new ManifestRefPathProvider(pathProvider, pooledSoftware)));
+
+        // Resolvers that are using the general ones to actually do the work
+        CompositeResolver appSpecificResolvers = new CompositeResolver();
+        appSpecificResolvers.add(new ApplicationParameterValueResolver(appCfg.name, resolvers));
+        appSpecificResolvers.add(new ManifestSelfResolver(appCfg.application, resolvers));
+        appSpecificResolvers.add(resolvers);
+
+        // Create the actual start command and replace all defined variables
+        ProcessConfiguration pc = appCfg.renderDescriptor(appSpecificResolvers);
+        List<String> command = TemplateHelper.process(pc.start, appSpecificResolvers);
+        log.info("Executing {}", command.stream().collect(Collectors.joining(" ")));
         try {
+            ProcessBuilder b = new ProcessBuilder(command).redirectError(Redirect.INHERIT).redirectInput(Redirect.INHERIT)
+                    .redirectOutput(Redirect.INHERIT).directory(appDir.toFile());
             Process p = b.start();
-            log.info("started {}, PID={}", targetClientKey, p.pid());
+            log.info("Application successfully launched. PID={}", p.pid());
             return p;
         } catch (IOException e) {
-            throw new IllegalStateException("Cannot start " + targetClientKey, e);
+            throw new IllegalStateException("Cannot start " + appCfg.uid, e);
         }
     }
 
     /**
-     * Returns the latest version that is installed for the given client
+     * Removes software that is not used anymore after the installation of the update.
      */
-    private String getAppVersions(BHive hive) {
-        SortedSet<Manifest.Key> installed = hive.execute(new ManifestListOperation().setManifestName(descriptor.applicationId));
-        if (installed.isEmpty()) {
-            return "-";
+    private void cleanupApplications(BHive hive) {
+        // Collect all required software
+        ClientSoftwareManifest mf = new ClientSoftwareManifest(hive);
+        Set<Key> requiredApps = mf.getRequiredKeys();
+
+        // Collect all available software in the hive
+        Set<Key> availableApps = getAvailableApps(hive);
+
+        // Remove all the software that is still required
+        availableApps.removeAll(requiredApps);
+        if (availableApps.isEmpty()) {
+            log.info("Cleanup not required. All pooled software is still in-use");
+            return;
         }
-        return installed.stream().map(k -> k.getTag()).collect(Collectors.joining(","));
+
+        // Cleanup hive and pool
+        log.info("Removing stale pooled applications that are not used any more.");
+        for (Manifest.Key key : availableApps) {
+            log.info("Deleting {}", key);
+
+            hive.execute(new ManifestDeleteOperation().setToDelete(key));
+
+            Path pooledPath = poolDir.resolve(key.directoryFriendlyName());
+            if (pooledPath.toFile().exists()) {
+                PathHelper.deleteRecursive(pooledPath);
+            }
+        }
+
+        // Cleanup stale elements from the hive
+        SortedMap<ObjectId, Long> result = hive.execute(new PruneOperation());
+        long sum = result.values().stream().collect(Collectors.summarizingLong(x -> x)).getSum();
+        log.info("Cleanup successfully done. Removed {} objects ({}).", result.size(), UnitHelper.formatFileSize(sum));
+    }
+
+    /**
+     * Returns a list of all applications available in the hive
+     */
+    private Set<Key> getAvailableApps(BHive hive) {
+        SortedSet<Key> allKeys = hive.execute(new ManifestListOperation());
+        return allKeys.stream().filter(LauncherTool::isApp).collect(Collectors.toSet());
+    }
+
+    /** Returns whether or not the given manifest refers to an app */
+    private static boolean isApp(Key key) {
+        return !key.getName().startsWith("meta/");
     }
 
 }

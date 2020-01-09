@@ -711,19 +711,18 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
         InstanceManifest imf = InstanceManifest.load(hive, uuid, activeTag);
         ClientApplicationConfiguration cfg = new ClientApplicationConfiguration();
-        cfg.clientConfig = imf.getApplicationConfiguration(hive, application);
-        if (cfg.clientConfig == null) {
+        cfg.appConfig = imf.getApplicationConfiguration(hive, application);
+        if (cfg.appConfig == null) {
             throw new WebApplicationException("Cannot find application " + application + " in instance " + uuid,
                     Status.NOT_FOUND);
         }
+        cfg.instanceConfig = imf.getInstanceNodeConfiguration(hive, application);
 
-        ApplicationManifest amf = ApplicationManifest.of(hive, cfg.clientConfig.application);
-        cfg.clientDesc = amf.getDescriptor();
-        cfg.instanceKey = imf.getManifest();
-        cfg.configTreeId = imf.getConfiguration().configTree;
+        ApplicationManifest amf = ApplicationManifest.of(hive, cfg.appConfig.application);
+        cfg.appDesc = amf.getDescriptor();
 
         // application key MUST be a ScopedManifestKey. dependencies /must/ be present
-        ScopedManifestKey smk = ScopedManifestKey.parse(cfg.clientConfig.application);
+        ScopedManifestKey smk = ScopedManifestKey.parse(cfg.appConfig.application);
         cfg.resolvedRequires.addAll(
                 new LocalDependencyFetcher().fetch(hive, amf.getDescriptor().runtimeDependencies, smk.getOperatingSystem()));
 

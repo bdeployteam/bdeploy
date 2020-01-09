@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.SortedMap;
+import java.util.Map;
 import java.util.TreeMap;
 
 import org.junit.jupiter.api.Test;
@@ -27,6 +27,7 @@ import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
 import io.bdeploy.interfaces.variables.ApplicationParameterProvider;
+import io.bdeploy.interfaces.variables.CompositeResolver;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 import io.bdeploy.interfaces.variables.DeploymentPathResolver;
@@ -35,21 +36,20 @@ import io.bdeploy.interfaces.variables.ManifestVariableResolver;
 import io.bdeploy.interfaces.variables.OsVariableResolver;
 import io.bdeploy.interfaces.variables.ParameterValueResolver;
 import io.bdeploy.interfaces.variables.Variables;
-import io.bdeploy.interfaces.variables.CompositeResolver;
 
 @ExtendWith(TempDirectory.class)
 public class ValueResolverTest {
 
     @Test
     public void testValueProvider(@TempDir Path tmp) throws Exception {
-        SortedMap<Path, Manifest.Key> mfs = new TreeMap<>();
         Manifest.Key keyA1 = new Manifest.Key("a", "v1");
         Manifest.Key keyA2 = new Manifest.Key("a", "v2");
         Manifest.Key keyB1 = new Manifest.Key("b", "v1");
 
-        mfs.put(Paths.get("path/to/a"), keyA1);
-        mfs.put(Paths.get("path/to/a-v2"), keyA2);
-        mfs.put(Paths.get("path/to/b"), keyB1);
+        Map<Manifest.Key, Path> mfs = new TreeMap<>();
+        mfs.put(keyA1, Paths.get("path/to/a"));
+        mfs.put(keyA2, Paths.get("path/to/a-v2"));
+        mfs.put(keyB1, Paths.get("path/to/b"));
 
         Path fakeDeploy = tmp.resolve("fake");
         DeploymentPathProvider dpp = new DeploymentPathProvider(fakeDeploy, "fakeId");

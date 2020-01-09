@@ -11,7 +11,7 @@ public class LauncherUpdateDialog extends LauncherDialog {
 
     public static void main(String[] args) {
         LauncherUpdateDialog dialog = new LauncherUpdateDialog();
-        dialog.showUpdateRequired(new SoftwareUpdateException("myApp", "1.2.0", "1.3.0"));
+        dialog.showUpdateRequired(new SoftwareUpdateException("myApp", "Installed=1.2.0 Available=1.3.0"));
     }
 
     /**

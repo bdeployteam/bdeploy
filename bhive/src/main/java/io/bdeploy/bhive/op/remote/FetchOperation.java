@@ -113,4 +113,8 @@ public class FetchOperation extends RemoteOperation<TransferStatistics, FetchOpe
         return this;
     }
 
+    public SortedSet<Manifest.Key> getManifests() {
+        return manifests;
+    }
+
 }

@@ -33,7 +33,6 @@ public class ManifestDeleteOldByIdOperation extends BHive.Operation<Void> {
 
     @Override
     public Void call() throws Exception {
-        // clean old user infos, always keep only the latest 10 around.
         SortedSet<Key> execute = execute(new ManifestListOperation().setManifestName(manifestName));
         SortedMap<Long, List<Key>> mfsByKey = execute.stream()
                 .collect(Collectors.groupingBy(k -> Long.valueOf(k.getTag()), TreeMap::new, Collectors.toList()));

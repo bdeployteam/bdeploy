@@ -213,7 +213,7 @@ public class InstanceNodeController {
         PathHelper.deleteRecursive(targetDir);
 
         // write all required applications to the pool
-        SortedMap<Path, Manifest.Key> applications = installPooledApplicationsFor(dc);
+        SortedMap<Manifest.Key, Path> applications = installPooledApplicationsFor(dc);
 
         // write all the manifest content to the according target location, but specially handle applications
         hive.execute(new ExportOperation().setManifest(manifest.getKey()).setTarget(targetDir));
@@ -238,9 +238,9 @@ public class InstanceNodeController {
         paths.getAndCreate(SpecialDirectory.DATA);
     }
 
-    private SortedMap<Path, Key> installPooledApplicationsFor(InstanceNodeConfiguration dc) {
+    private SortedMap<Key, Path> installPooledApplicationsFor(InstanceNodeConfiguration dc) {
         Path poolRoot = paths.getAndCreate(SpecialDirectory.MANIFEST_POOL);
-        SortedMap<Path, Key> result = new TreeMap<>();
+        SortedMap<Key, Path> result = new TreeMap<>();
 
         LocalDependencyFetcher localDeps = new LocalDependencyFetcher();
         List<Manifest.Key> applications = new ArrayList<>();
@@ -257,7 +257,7 @@ public class InstanceNodeController {
 
         for (Manifest.Key key : applications) {
             Path target = poolRoot.resolve(key.directoryFriendlyName());
-            result.put(target, key);
+            result.put(key, target);
 
             if (!Files.isDirectory(target)) {
                 hive.execute(new ExportOperation().setTarget(target).setManifest(key));
