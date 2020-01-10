@@ -10,6 +10,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import io.bdeploy.interfaces.UserChangePasswordDto;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import io.bdeploy.ui.dto.CredentialsDto;
@@ -59,6 +60,15 @@ public interface AuthResource {
     @POST
     @Path("/user")
     public void updateCurrentUser(UserInfo info);
+
+    /**
+     * Updates the current user's password.
+     *
+     * @param dto password data
+     */
+    @POST
+    @Path("/change-password")
+    public Response changePassword(UserChangePasswordDto dto);
 
     /**
      * @return an authentication pack which can be used for build integrations and command line token authentication.

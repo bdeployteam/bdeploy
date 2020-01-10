@@ -36,8 +36,8 @@ public class AuthAdminResourceImpl implements AuthAdminResource {
     }
 
     @Override
-    public void deleteUser(String userName) {
-        auth.deleteUser(userName);
+    public void deleteUser(String name) {
+        auth.deleteUser(name);
     }
 
     @Override
@@ -48,6 +48,11 @@ public class AuthAdminResourceImpl implements AuthAdminResource {
     @Override
     public SortedSet<String> getAllUserNames() {
         return auth.getAllNames();
+    }
+
+    @Override
+    public SortedSet<UserInfo> getAllUser() {
+        return auth.getAll();
     }
 
 }

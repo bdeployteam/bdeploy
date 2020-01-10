@@ -154,6 +154,11 @@ public class TestUiBackendServer extends TestServer {
         }
 
         @Override
+        public SortedSet<UserInfo> getAll() {
+            return new TreeSet<>();
+        }
+
+        @Override
         public boolean isAuthorized(String user, ScopedCapability required) {
             return true;
         }

@@ -15,6 +15,8 @@ import { SettingsGeneralComponent } from './components/settings-general/settings
 import { UpdateBrowserComponent } from './components/update-browser/update-browser.component';
 import { UpdateCardComponent } from './components/update-card/update-card.component';
 import { UpdateDialogComponent } from './components/update-dialog/update-dialog.component';
+import { UserGlobalPermissionsComponent } from './components/user-global-permissions/user-global-permissions.component';
+import { UsersBrowserComponent } from './components/users-browser/users-browser.component';
 
 @NgModule({
   declarations: [
@@ -29,10 +31,13 @@ import { UpdateDialogComponent } from './components/update-dialog/update-dialog.
     SettingsAuthComponent,
     SettingsAuthLdapServerComponent,
     SettingsGeneralComponent,
+    UsersBrowserComponent,
+    UserGlobalPermissionsComponent,
   ],
   entryComponents: [
     UpdateDialogComponent,
     SettingsAuthLdapServerComponent,
+    UserGlobalPermissionsComponent
   ],
   imports: [
     CommonModule,

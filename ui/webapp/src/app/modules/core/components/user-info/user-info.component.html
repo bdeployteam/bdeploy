@@ -1,5 +1,6 @@
 <mat-menu #appMenu="matMenu" xPosition="before">
-  <button mat-menu-item (click)="edit()">Edit...</button>
+  <button mat-menu-item (click)="edit()" [disabled]="user?.external">Edit...</button>
+  <button mat-menu-item (click)="changePassword()" [disabled]="user?.external">Change Password...</button>
   <button mat-menu-item (click)="openDialog(tokenDialog)">Create Token...</button>
   <button mat-menu-item (click)="logout()">Logout</button>
 </mat-menu>

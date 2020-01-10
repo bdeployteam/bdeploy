@@ -1,0 +1,17 @@
+<h1 mat-dialog-title>Global Permissions for {{ userInfo.name }}</h1>
+<div mat-dialog-content>
+  <form class='grid-content'>
+      <mat-chip color="primary" [selected]="true" class="capability">ADMIN</mat-chip>
+      <mat-slide-toggle name="admin" [(ngModel)]='admin'>System administator</mat-slide-toggle>
+
+      <mat-chip color="primary" [selected]="false" class="capability">READ</mat-chip>
+      <mat-slide-toggle name="read" [(ngModel)]='read'>Global read permission</mat-slide-toggle>
+
+      <mat-chip color="primary" [selected]="false" class="capability">WRITE</mat-chip>
+      <mat-slide-toggle name="write" [(ngModel)]='write'>Global write permission</mat-slide-toggle>
+</form>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-raised-button [mat-dialog-close]="null">Cancel</button>
+  <button mat-raised-button color="primary" [mat-dialog-close]="getResult()">Ok</button>
+</div>

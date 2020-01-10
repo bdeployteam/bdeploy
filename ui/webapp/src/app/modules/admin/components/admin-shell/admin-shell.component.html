@@ -5,6 +5,7 @@
 
       <div class='menu-group'>User Management</div>
       <a mat-list-item [routerLink]='[{outlets: { panel: ["authentication"] } }]' routerLinkActive='active-setting'><mat-icon class="nav-icon">security</mat-icon>Authentication</a>
+      <a mat-list-item [routerLink]='[{outlets: { panel: ["users"] } }]' routerLinkActive='active-setting'><mat-icon class="nav-icon">account_circle</mat-icon>User Accounts</a>
 
       <div class='menu-group'>Housekeeping</div>
       <a mat-list-item [routerLink]='[{outlets: { panel: ["manualcleanup"] } }]'><mat-icon class="nav-icon">delete_sweep</mat-icon>Manual Cleanup</a>
