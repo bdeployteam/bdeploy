@@ -18,6 +18,7 @@ import io.bdeploy.bhive.op.ImportObjectOperation;
 import io.bdeploy.bhive.op.InsertArtificialTreeOperation;
 import io.bdeploy.bhive.op.InsertManifestOperation;
 import io.bdeploy.bhive.op.ManifestDeleteOldByIdOperation;
+import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.ManifestMaxIdOperation;
@@ -113,6 +114,21 @@ public class ClientSoftwareManifest {
 
         hive.execute(new InsertManifestOperation().addManifest(mfb.build(hive)));
         hive.execute(new ManifestDeleteOldByIdOperation().setToDelete(manifestName).setAmountToKeep(1));
+    }
+
+    /**
+     * Removes all manifest entries of the given application
+     */
+    public boolean remove(String appUid) {
+        String manifestName = MANIFEST_PREFIX + appUid;
+        SortedSet<Key> keys = hive.execute(new ManifestListOperation().setManifestName(manifestName));
+        if (keys.isEmpty()) {
+            return false;
+        }
+        for (Manifest.Key key : keys) {
+            hive.execute(new ManifestDeleteOperation().setToDelete(key));
+        }
+        return true;
     }
 
 }

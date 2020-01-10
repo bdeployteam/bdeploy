@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -35,6 +36,20 @@ public class PathHelper {
     }
 
     private PathHelper() {
+    }
+
+    /**
+     * Returns whether or not the given directory is empty. A non-existing directory is assumed to be empty.
+     */
+    public static boolean isDirEmpty(Path path) {
+        if (!path.toFile().exists()) {
+            return true;
+        }
+        try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(path)) {
+            return !dirStream.iterator().hasNext();
+        } catch (IOException ioe) {
+            return false;
+        }
     }
 
     /**

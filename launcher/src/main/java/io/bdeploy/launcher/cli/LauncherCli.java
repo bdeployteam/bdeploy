@@ -11,22 +11,17 @@ public class LauncherCli extends ToolBase {
 
     public LauncherCli() {
         register(LauncherTool.class);
-        register(ConfigurationTool.class);
+        register(UninstallerTool.class);
     }
 
     @Override
     public void toolMain(String... args) throws Exception {
         // filter out extra options given by the command line scripts.
         List<String> noOptArgs = Arrays.stream(args).filter(a -> !a.startsWith("-")).collect(Collectors.toList());
-
-        if (noOptArgs.isEmpty()) {
-            // want to launch config UI.
-            args = new String[] { "config" };
-        } else if (noOptArgs.size() == 1 && noOptArgs.get(0).toLowerCase().endsWith(".bdeploy")) {
+        if (noOptArgs.size() == 1 && noOptArgs.get(0).toLowerCase().endsWith(".bdeploy")) {
             // want to directly launch a single .bdeploy file
             List<String> argumentList = new ArrayList<>();
             argumentList.add("launcher");
-
             for (String arg : args) {
                 if (arg.toLowerCase().endsWith(".bdeploy")) {
                     argumentList.add("--launch=" + arg);
@@ -35,7 +30,6 @@ public class LauncherCli extends ToolBase {
                     argumentList.add(arg);
                 }
             }
-
             args = argumentList.toArray(new String[argumentList.size()]);
         }
 

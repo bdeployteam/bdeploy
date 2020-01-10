@@ -12,7 +12,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -183,19 +182,10 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
 
         // Check where to put local data.
-        rootDir = Paths.get(System.getProperty("user.home")).resolve(".bdeploy");
         if (config.homeDir() != null && !config.homeDir().isEmpty()) {
             rootDir = Paths.get(config.homeDir());
         } else {
-            String override = System.getenv("BDEPLOY_HOME");
-            if (override != null && !override.isEmpty()) {
-                rootDir = Paths.get(override);
-            } else {
-                override = System.getenv("LOCALAPPDATA");
-                if (override != null && !override.isEmpty()) {
-                    rootDir = Paths.get(override).resolve("BDeploy");
-                }
-            }
+            rootDir = ClientPathHelper.getBDeployHome();
         }
         rootDir = rootDir.toAbsolutePath();
         updateDir = PathHelper.ofNullableStrig(config.updateDir());
@@ -272,7 +262,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Cleanup the installation directory and the hive.
         if (updateInstalled) {
-            cleanupApplications(hive);
+            ClientAppCleanup cleanup = new ClientAppCleanup(hive, poolDir);
+            cleanup.run();
         }
 
         // Wait for the process to exit
@@ -540,56 +531,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         } catch (IOException e) {
             throw new IllegalStateException("Cannot start " + appCfg.uid, e);
         }
-    }
-
-    /**
-     * Removes software that is not used anymore after the installation of the update.
-     */
-    private void cleanupApplications(BHive hive) {
-        // Collect all required software
-        ClientSoftwareManifest mf = new ClientSoftwareManifest(hive);
-        Set<Key> requiredApps = mf.getRequiredKeys();
-
-        // Collect all available software in the hive
-        Set<Key> availableApps = getAvailableApps(hive);
-
-        // Remove all the software that is still required
-        availableApps.removeAll(requiredApps);
-        if (availableApps.isEmpty()) {
-            log.info("Cleanup not required. All pooled software is still in-use");
-            return;
-        }
-
-        // Cleanup hive and pool
-        log.info("Removing stale pooled applications that are not used any more.");
-        for (Manifest.Key key : availableApps) {
-            log.info("Deleting {}", key);
-
-            hive.execute(new ManifestDeleteOperation().setToDelete(key));
-
-            Path pooledPath = poolDir.resolve(key.directoryFriendlyName());
-            if (pooledPath.toFile().exists()) {
-                PathHelper.deleteRecursive(pooledPath);
-            }
-        }
-
-        // Cleanup stale elements from the hive
-        SortedMap<ObjectId, Long> result = hive.execute(new PruneOperation());
-        long sum = result.values().stream().collect(Collectors.summarizingLong(x -> x)).getSum();
-        log.info("Cleanup successfully done. Removed {} objects ({}).", result.size(), UnitHelper.formatFileSize(sum));
-    }
-
-    /**
-     * Returns a list of all applications available in the hive
-     */
-    private Set<Key> getAvailableApps(BHive hive) {
-        SortedSet<Key> allKeys = hive.execute(new ManifestListOperation());
-        return allKeys.stream().filter(LauncherTool::isApp).collect(Collectors.toSet());
-    }
-
-    /** Returns whether or not the given manifest refers to an app */
-    private static boolean isApp(Key key) {
-        return !key.getName().startsWith("meta/");
     }
 
 }

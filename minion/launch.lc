@@ -195,6 +195,17 @@ java configuration Launcher {
 //	vm-argument "-Dsun.awt.fontconfig=/tmp/markus.properties";
 }
 
+java configuration Uninstaller {
+	project launcher;
+	main-class io.bdeploy.launcher.cli.LauncherCli;
+	
+	working-dir "${workspace_loc}/runtime";
+	
+	argument "-v";
+	argument "uninstaller";
+	argument "--app=${string_prompt:Enter application UID}";
+}
+
 /**
  * Add a new user to the master's user database
  */
