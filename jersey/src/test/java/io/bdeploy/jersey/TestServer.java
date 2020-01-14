@@ -37,9 +37,6 @@ import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.UuidHelper;
-import io.bdeploy.jersey.JerseyClientFactory;
-import io.bdeploy.jersey.JerseyServer;
-import io.bdeploy.jersey.RegistrationTarget;
 import io.bdeploy.jersey.audit.Auditor;
 
 /**

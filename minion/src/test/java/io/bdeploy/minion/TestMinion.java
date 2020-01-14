@@ -6,6 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
@@ -13,12 +14,15 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.security.ApiAccessToken;
+import io.bdeploy.common.security.ApiAccessToken.Builder;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.jersey.TestServer;
 import io.bdeploy.jersey.audit.RollingFileAuditor;
 import io.bdeploy.minion.cli.InitTool;
 import io.bdeploy.minion.cli.MasterTool;
+import io.bdeploy.minion.user.UserDatabase;
 import io.bdeploy.ui.api.MinionMode;
 
 public class TestMinion extends TestServer {
@@ -36,11 +40,18 @@ public class TestMinion extends TestServer {
         CloseableMinionRoot cmr = getExtensionStore(context).getOrComputeIfAbsent(CloseableMinionRoot.class,
                 (k) -> new CloseableMinionRoot(getServerPort(context)), CloseableMinionRoot.class);
 
-        authPack = InitTool.initMinionRoot(cmr.root, cmr.mr, "localhost", getServerPort(context), null, MinionMode.STANDALONE);
+        InitTool.initMinionRoot(cmr.root, cmr.mr, "localhost", getServerPort(context), null, MinionMode.STANDALONE);
         MinionState state = cmr.mr.getState();
+
+        String userName = "Test";
+        UserDatabase userDb = cmr.mr.getUsers();
+        userDb.createLocalUser(userName, userName, Collections.singletonList(ApiAccessToken.ADMIN_CAPABILITY));
 
         serverStore = SecurityHelper.getInstance().loadPrivateKeyStore(state.keystorePath, state.keystorePass);
         storePass = state.keystorePass;
+
+        Builder builder = new ApiAccessToken.Builder().setIssuedTo(userName).addCapability(ApiAccessToken.ADMIN_CAPABILITY);
+        authPack = SecurityHelper.getInstance().createSignaturePack(builder.build(), serverStore, state.keystorePass);
 
         setAuditor(new RollingFileAuditor(cmr.mr.getAuditLogDir()));
 

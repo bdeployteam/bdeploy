@@ -15,6 +15,8 @@ import javax.ws.rs.core.MediaType;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.common.security.RequiredCapability;
+import io.bdeploy.common.security.ScopedCapability.Capability;
 
 @Path("/softwarerepository")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -30,6 +32,7 @@ public interface SoftwareResource {
 
     @DELETE
     @Path("/{name : .+}/{tag}")
+    @RequiredCapability(capability = Capability.ADMIN)
     public void delete(@PathParam("name") String name, @PathParam("tag") String tag);
 
     @GET
@@ -39,6 +42,7 @@ public interface SoftwareResource {
     @POST
     @Path("/upload")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @RequiredCapability(capability = Capability.ADMIN)
     public List<Manifest.Key> upload(@FormDataParam("file") InputStream inputStream);
 
 }

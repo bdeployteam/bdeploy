@@ -15,6 +15,8 @@ import javax.ws.rs.core.MediaType;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.common.security.RequiredCapability;
+import io.bdeploy.common.security.ScopedCapability.Capability;
 import io.bdeploy.ui.dto.ProductDto;
 
 @Path("/product")
@@ -28,6 +30,7 @@ public interface ProductResource {
 
     @DELETE
     @Path("/{name : .+}/{tag}")
+    @RequiredCapability(capability = Capability.ADMIN)
     public void delete(@PathParam("name") String name, @PathParam("tag") String tag);
 
     @Path("/{name : .+}/{tag}/application")
@@ -48,6 +51,7 @@ public interface ProductResource {
     @POST
     @Path("/upload")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @RequiredCapability(capability = Capability.WRITE)
     public List<Manifest.Key> upload(@FormDataParam("file") InputStream inputStream);
 
 }

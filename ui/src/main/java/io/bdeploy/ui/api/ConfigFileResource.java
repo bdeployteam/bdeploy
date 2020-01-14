@@ -11,6 +11,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import io.bdeploy.common.security.RequiredCapability;
+import io.bdeploy.common.security.ScopedCapability.Capability;
 import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
 import io.bdeploy.ui.dto.ConfigFileDto;
 
@@ -31,6 +33,7 @@ public interface ConfigFileResource {
     public String loadConfigFile(@PathParam("tag") String tag, @PathParam("file") String file);
 
     @POST
+    @RequiredCapability(capability = Capability.WRITE)
     public void updateConfigFiles(List<FileStatusDto> updates, @QueryParam("expect") String expectedTag);
 
 }

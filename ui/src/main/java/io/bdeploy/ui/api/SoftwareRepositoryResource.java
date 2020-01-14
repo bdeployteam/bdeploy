@@ -12,6 +12,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import io.bdeploy.common.security.RequiredCapability;
+import io.bdeploy.common.security.ScopedCapability.Capability;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
 import io.bdeploy.jersey.ActivityScope;
 
@@ -24,6 +26,7 @@ public interface SoftwareRepositoryResource {
     public List<SoftwareRepositoryConfiguration> list();
 
     @PUT
+    @RequiredCapability(capability = Capability.ADMIN)
     public void create(SoftwareRepositoryConfiguration config);
 
     @GET
@@ -32,10 +35,12 @@ public interface SoftwareRepositoryResource {
 
     @POST
     @Path("/{repo}")
+    @RequiredCapability(capability = Capability.ADMIN)
     public void update(@ActivityScope @PathParam("repo") String repo, SoftwareRepositoryConfiguration config);
 
     @DELETE
     @Path("/{repo}")
+    @RequiredCapability(capability = Capability.ADMIN)
     public void delete(@ActivityScope @PathParam("repo") String repo);
 
     @Path("/{softwareRepository}/content")

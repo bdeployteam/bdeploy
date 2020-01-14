@@ -97,7 +97,9 @@ public class AuthResourceImpl implements AuthResource {
 
     @Override
     public String getAuthPack() {
-        return minion.createToken(context.getUserPrincipal().getName(), false);
+        String user = context.getUserPrincipal().getName();
+        UserInfo userInfo = auth.getUser(user);
+        return minion.createToken(user, userInfo.getGlobalCapabilities());
     }
 
     @Override

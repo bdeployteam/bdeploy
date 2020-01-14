@@ -119,7 +119,7 @@ void createServerTasks(String name, String root, int port) {
 
     task "addTestBDeployUser${name}"(type: JavaExec, dependsOn: "startTestBDeploy${name}") {
         setupBDeployJavaExec(it, root, port);
-        args = [ "user", "--add=admin", "--password=admin", "--description=Automated Test User" ]
+        args = [ "user", "--add=admin", "--password=admin", "--admin", "--description=Automated Test User" ]
     }
 }
 
@@ -242,7 +242,7 @@ void setupBinServerTasks(String version) {
 
     task "binAddTestBDeployUser_${key}"(type: Exec, dependsOn: "binStartTestBDeploy_${key}") {
         setupTask(it)
-        args = [ "user", "--add=admin", "--password=admin", "--description=Automated Test User" ]
+        args = [ "user", "--add=admin", "--password=admin", "--admin", "--description=Automated Test User" ]
     }
 
     task "binCheckTestBDeploy_${key}"(type: Exec, dependsOn: "binAddTestBDeployUser_${key}") {

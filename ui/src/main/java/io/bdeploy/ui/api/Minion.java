@@ -2,8 +2,10 @@ package io.bdeploy.ui.api;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Collection;
 
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.security.ScopedCapability;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 
@@ -45,7 +47,16 @@ public interface Minion {
      * @param principal the principal name to issue the token to.
      * @return a token (authentication pack including certificate).
      */
-    public String createToken(String principal, boolean weak);
+    public String createWeakToken(String principal);
+
+    /**
+     * Creates and returns a new token for the given principal having the given global capabilities.
+     *
+     * @param principal the principal name to issue the token to.
+     * @param capabilities the global capabilities
+     * @return a token (authentication pack including certificate).
+     */
+    public String createToken(String principal, Collection<ScopedCapability> capabilities);
 
     /**
      * @return the mode the hosting minion is run in.

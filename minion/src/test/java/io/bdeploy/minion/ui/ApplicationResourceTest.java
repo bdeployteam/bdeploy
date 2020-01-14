@@ -1,4 +1,4 @@
-package io.bdeploy.ui.api.impl;
+package io.bdeploy.minion.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -14,15 +14,15 @@ import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.manifest.ProductManifest;
-import io.bdeploy.ui.TestFactory;
-import io.bdeploy.ui.TestUiBackendServer;
+import io.bdeploy.minion.TestFactory;
+import io.bdeploy.minion.TestMinion;
 import io.bdeploy.ui.api.ApplicationResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.ProductResource;
 import io.bdeploy.ui.dto.ApplicationDto;
 
+@ExtendWith(TestMinion.class)
 @ExtendWith(TempDirectory.class)
-@ExtendWith(TestUiBackendServer.class)
 public class ApplicationResourceTest {
 
     @Test

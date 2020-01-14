@@ -9,10 +9,13 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
+import io.bdeploy.common.security.RequiredCapability;
+import io.bdeploy.common.security.ScopedCapability.Capability;
 import io.bdeploy.jersey.ActivityScope;
 import io.bdeploy.ui.dto.HiveEntryDto;
 
 @Path("/hive")
+@RequiredCapability(capability = Capability.ADMIN)
 public interface HiveResource {
 
     @GET

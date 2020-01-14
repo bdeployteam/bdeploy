@@ -38,6 +38,8 @@ public class UiResources {
         server.register(ManagedServersResourceImpl.class);
         server.register(ManagedServersAttachEventResourceImpl.class);
 
+        server.register(CapabilityRequestFilter.class);
+
         server.register(new AbstractBinder() {
 
             @Override

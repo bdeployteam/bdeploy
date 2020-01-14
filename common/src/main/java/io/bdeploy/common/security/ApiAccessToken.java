@@ -1,8 +1,9 @@
 package io.bdeploy.common.security;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -22,25 +23,10 @@ public class ApiAccessToken {
     long ia; // issuedAt
     long vu; // validUntil
     boolean wt; // weakToken
-    public static final ScopedCapability ADMIN_CAPABILITY = new ScopedCapability(null, ScopedCapability.Capability.ADMIN);
+    public static final ScopedCapability ADMIN_CAPABILITY = new ScopedCapability(ScopedCapability.Capability.ADMIN);
 
     public String getIssuedTo() {
         return it;
-    }
-
-    public boolean isGlobalAdmin() {
-        return hasCapability(null, ScopedCapability.Capability.ADMIN);
-    }
-
-    public boolean hasCapability(String scope, ScopedCapability.Capability required) {
-        for (ScopedCapability cap : c) {
-            // null and empty string are equal for this calculation...
-            if (Objects.equals((cap.scope == null ? "" : cap.scope), (scope == null ? "" : scope))
-                    && cap.capability == required) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public boolean isValid() {
@@ -49,6 +35,10 @@ public class ApiAccessToken {
 
     public boolean isWeak() {
         return wt;
+    }
+
+    public Collection<ScopedCapability> getCapabilities() {
+        return Collections.unmodifiableCollection(c);
     }
 
     public static final class Builder {
@@ -82,6 +72,11 @@ public class ApiAccessToken {
 
         public Builder addCapability(ScopedCapability cap) {
             token.c.add(cap);
+            return this;
+        }
+
+        public Builder addCapability(Collection<ScopedCapability> caps) {
+            token.c.addAll(caps);
             return this;
         }
 

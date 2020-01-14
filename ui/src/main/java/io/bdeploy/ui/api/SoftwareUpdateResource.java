@@ -16,6 +16,8 @@ import javax.ws.rs.core.Response;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.common.security.RequiredCapability;
+import io.bdeploy.common.security.ScopedCapability.Capability;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import io.bdeploy.ui.dto.LauncherDto;
 
@@ -57,6 +59,7 @@ public interface SoftwareUpdateResource {
 
     @POST
     @Path("/selfUpdate")
+    @RequiredCapability(capability = Capability.ADMIN)
     public void updateSelf(List<Manifest.Key> target);
 
     @GET
@@ -72,6 +75,7 @@ public interface SoftwareUpdateResource {
     public List<Manifest.Key> uploadSoftware(@FormDataParam("file") InputStream inputStream);
 
     @POST // DELETE does not accept body for batch delete.
+    @RequiredCapability(capability = Capability.ADMIN)
     public void deleteVersions(List<Manifest.Key> keys);
 
     @GET

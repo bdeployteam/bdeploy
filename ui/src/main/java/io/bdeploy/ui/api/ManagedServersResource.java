@@ -15,6 +15,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import io.bdeploy.common.Version;
+import io.bdeploy.common.security.RequiredCapability;
+import io.bdeploy.common.security.ScopedCapability.Capability;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
@@ -33,6 +35,7 @@ public interface ManagedServersResource {
      */
     @PUT
     @Path("/auto-attach/{group}")
+    @RequiredCapability(scope = "group", capability = Capability.ADMIN)
     public void tryAutoAttach(@PathParam("group") String groupName, ManagedMasterDto target);
 
     /**
@@ -40,6 +43,7 @@ public interface ManagedServersResource {
      */
     @PUT
     @Path("/manual-attach/{group}")
+    @RequiredCapability(scope = "group", capability = Capability.ADMIN)
     public void manualAttach(@PathParam("group") String groupName, ManagedMasterDto target);
 
     /**
@@ -47,8 +51,7 @@ public interface ManagedServersResource {
      * identification.
      * <p>
      * The central identification must be a string obtained using {@link #getCentralIdent(String, ManagedMasterDto)} on the
-     * central
-     * server.
+     * central server.
      *
      * @return the name of the created (attached) instance group.
      */
@@ -64,6 +67,7 @@ public interface ManagedServersResource {
      */
     @POST
     @Path("/central-ident/{group}")
+    @RequiredCapability(scope = "group", capability = Capability.ADMIN)
     public String getCentralIdent(@PathParam("group") String group, ManagedMasterDto target);
 
     /**
@@ -71,6 +75,7 @@ public interface ManagedServersResource {
      */
     @GET
     @Path("/list/{group}")
+    @RequiredCapability(scope = "group", capability = Capability.ADMIN)
     public List<ManagedMasterDto> getManagedServers(@PathParam("group") String instanceGroup);
 
     /**
@@ -78,6 +83,7 @@ public interface ManagedServersResource {
      */
     @GET
     @Path("/controlling-server/{group}/{instanceId}")
+    @RequiredCapability(scope = "group", capability = Capability.ADMIN)
     public ManagedMasterDto getServerForInstance(@PathParam("group") String instanceGroup,
             @PathParam("instanceId") String instanceId, @QueryParam("instanceTag") String instanceTag);
 
@@ -86,58 +92,70 @@ public interface ManagedServersResource {
      */
     @GET
     @Path("/controlled-instances/{group}/{server}")
+    @RequiredCapability(scope = "group", capability = Capability.ADMIN)
     public List<InstanceConfiguration> getInstancesControlledBy(@PathParam("group") String groupName,
             @PathParam("server") String serverName);
 
     @POST
     @Path("/delete-server/{group}/{server}")
     @Consumes(MediaType.TEXT_PLAIN)
+    @RequiredCapability(scope = "group", capability = Capability.ADMIN)
     public void deleteManagedServer(@PathParam("group") String groupName, @PathParam("server") String serverName);
 
     @GET
     @Path("/minion-config/{group}/{server}")
     @Consumes(MediaType.TEXT_PLAIN)
+    @RequiredCapability(scope = "group", capability = Capability.ADMIN)
     public Map<String, MinionDto> getMinionsOfManagedServer(@PathParam("group") String groupName,
             @PathParam("server") String serverName);
 
     @GET
     @Path("/minion-state/{group}/{server}")
     @Consumes(MediaType.TEXT_PLAIN)
+    @RequiredCapability(scope = "group", capability = Capability.ADMIN)
     public Map<String, MinionStatusDto> getMinionStateOfManagedServer(@PathParam("group") String groupName,
             @PathParam("server") String serverName);
 
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
     @Path("/synchronize/{group}/{server}")
+    @RequiredCapability(scope = "group", capability = Capability.ADMIN)
     public ManagedMasterDto synchronize(@PathParam("group") String groupName, @PathParam("server") String serverName);
 
     @GET
     @Path("/list-products/{group}/{server}")
+    @RequiredCapability(scope = "group", capability = Capability.ADMIN)
     public List<ProductDto> listProducts(@PathParam("group") String groupName, @PathParam("server") String serverName);
 
     @POST
     @Path("/transfer-products/{group}")
+    @RequiredCapability(scope = "group", capability = Capability.ADMIN)
     public void transferProducts(@PathParam("group") String groupName, ProductTransferDto transfer);
 
     @GET
     @Path("/active-transfers/{group}")
+    @RequiredCapability(scope = "group", capability = Capability.ADMIN)
     public SortedSet<ProductDto> getActiveTransfers(@PathParam("group") String groupName);
 
     @GET
     @Path("/minion-updates/{group}/{server}")
+    @RequiredCapability(scope = "group", capability = Capability.ADMIN)
     public MinionUpdateDto getUpdates(@PathParam("group") String groupName, @PathParam("server") String serverName);
 
     @POST
     @Path("/minion-transfer-updates/{group}/{server}")
+    @RequiredCapability(scope = "group", capability = Capability.ADMIN)
     public void transferUpdate(@PathParam("group") String groupName, @PathParam("server") String serverName, MinionUpdateDto dto);
 
     @POST
     @Path("/minion-install-updates/{group}/{server}")
+    @RequiredCapability(scope = "group", capability = Capability.ADMIN)
     public void installUpdate(@PathParam("group") String groupName, @PathParam("server") String serverName, MinionUpdateDto dto);
 
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Path("/minion-ping/{group}/{server}")
+    @RequiredCapability(scope = "group", capability = Capability.ADMIN)
     public Version pingServer(@PathParam("group") String groupName, @PathParam("server") String serverName);
 
 }

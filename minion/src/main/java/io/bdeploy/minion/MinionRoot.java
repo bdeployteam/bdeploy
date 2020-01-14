@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
@@ -38,6 +39,7 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.Version;
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.security.ScopedCapability;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.VersionHelper;
@@ -561,14 +563,27 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     }
 
     @Override
-    public String createToken(String principal, boolean weak) {
-        ApiAccessToken token = new ApiAccessToken.Builder().setIssuedTo(principal).setWeak(weak).build();
+    public String createWeakToken(String principal) {
+        ApiAccessToken token = new ApiAccessToken.Builder().setIssuedTo(principal).setWeak(true).build();
         MinionState state = getState();
         try {
             KeyStore ks = SecurityHelper.getInstance().loadPrivateKeyStore(state.keystorePath, state.keystorePass);
             return SecurityHelper.getInstance().createSignaturePack(token, ks, state.keystorePass);
         } catch (GeneralSecurityException | IOException e) {
             throw new WebApplicationException("Cannot generate weak token", e);
+        }
+    }
+
+    @Override
+    public String createToken(String principal, Collection<ScopedCapability> capabilities) {
+        ApiAccessToken token = new ApiAccessToken.Builder().setIssuedTo(principal).setWeak(false).addCapability(capabilities)
+                .build();
+        MinionState state = getState();
+        try {
+            KeyStore ks = SecurityHelper.getInstance().loadPrivateKeyStore(state.keystorePath, state.keystorePass);
+            return SecurityHelper.getInstance().createSignaturePack(token, ks, state.keystorePass);
+        } catch (GeneralSecurityException | IOException e) {
+            throw new WebApplicationException("Cannot generate user token", e);
         }
     }
 

@@ -11,7 +11,6 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestMinion;
@@ -23,9 +22,6 @@ public class RecentlyUsedRemoteTest {
 
     @Test
     void recentGroups(InstanceGroupResource root, AuthResource auth, MinionRoot mr) {
-        // user must exist in the database. To avoid having to fake more, use the system username.
-        mr.getUsers().createLocalUser("BDeploy System", "test", Collections.singletonList(ApiAccessToken.ADMIN_CAPABILITY));
-
         assertTrue(auth.getRecentlyUsedInstanceGroups().isEmpty());
 
         InstanceGroupConfiguration group = new InstanceGroupConfiguration();

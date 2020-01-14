@@ -1,9 +1,11 @@
 package io.bdeploy.interfaces;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -32,7 +34,7 @@ public class UserInfo implements Comparable<UserInfo> {
 
     public long lastActiveLogin;
 
-    public SortedSet<ScopedCapability> capabilities = new TreeSet<>();
+    public Set<ScopedCapability> capabilities = new HashSet<>();
     public List<String> recentlyUsedInstanceGroups = new ArrayList<>();
 
     @JsonCreator
@@ -43,5 +45,14 @@ public class UserInfo implements Comparable<UserInfo> {
     @Override
     public int compareTo(UserInfo o) {
         return name.compareTo(o.name);
+    }
+
+    /**
+     * Returns a list of global capabilities assigned to this user
+     *
+     * @return the global capabilities
+     */
+    public Collection<ScopedCapability> getGlobalCapabilities() {
+        return capabilities.stream().filter(ScopedCapability::isGlobal).collect(Collectors.toList());
     }
 }

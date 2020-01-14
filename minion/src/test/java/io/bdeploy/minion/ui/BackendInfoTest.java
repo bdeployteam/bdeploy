@@ -1,4 +1,4 @@
-package io.bdeploy.ui.api.impl;
+package io.bdeploy.minion.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -6,10 +6,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.bdeploy.common.util.VersionHelper;
-import io.bdeploy.ui.TestUiBackendServer;
+import io.bdeploy.minion.TestMinion;
 import io.bdeploy.ui.api.BackendInfoResource;
 
-@ExtendWith(TestUiBackendServer.class)
+@ExtendWith(TestMinion.class)
 public class BackendInfoTest {
 
     @Test

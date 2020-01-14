@@ -14,6 +14,7 @@ import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.jersey.audit.AuditRecord;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.cli.UserTool.UserConfig;
+import io.bdeploy.minion.user.UserDatabase;
 
 /**
  * Manages users.
@@ -46,6 +47,9 @@ public class UserTool extends ConfiguredCliTool<UserConfig> {
 
         @Help(value = "When given, list all known users.", arg = false)
         boolean list() default false;
+
+        @Help("Creates a token with the privileges of the given user.")
+        String createToken();
     }
 
     public UserTool() {
@@ -57,30 +61,48 @@ public class UserTool extends ConfiguredCliTool<UserConfig> {
         helpAndFailIfMissing(config.root(), "Missing --root");
 
         try (MinionRoot r = new MinionRoot(Paths.get(config.root()), getActivityReporter())) {
+            UserDatabase userDb = r.getUsers();
             if (config.add() != null) {
                 String user = config.add();
                 r.getAuditor().audit(AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration())
                         .clobberParameter("password").setWhat("add-user").build());
-                r.getUsers().createLocalUser(user, config.password(),
+                userDb.createLocalUser(user, config.password(),
                         config.admin() ? Collections.singletonList(ApiAccessToken.ADMIN_CAPABILITY) : null);
             } else if (config.update() != null) {
                 String user = config.update();
                 r.getAuditor().audit(AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration())
                         .clobberParameter("password").setWhat("update-user").build());
-                r.getUsers().updateLocalPassword(user, config.password());
+                userDb.updateLocalPassword(user, config.password());
                 if (config.admin()) {
-                    UserInfo info = r.getUsers().getUser(user);
+                    UserInfo info = userDb.getUser(user);
                     info.capabilities.add(ApiAccessToken.ADMIN_CAPABILITY);
-                    r.getUsers().updateUserInfo(info);
+                    userDb.updateUserInfo(info);
                 }
             } else if (config.remove() != null) {
                 r.getAuditor().audit(
                         AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("remove-user").build());
-                r.getUsers().deleteUser(config.remove());
+                userDb.deleteUser(config.remove());
             } else if (config.list()) {
-                for (String u : r.getUsers().getAllNames()) {
-                    out().println(u);
+                String formatString = "%1$-30s %2$-8s %3$-8s %4$-30s";
+                out().println(String.format(formatString, "Username", "External", "Inactive", "Capabilities"));
+                for (UserInfo info : userDb.getAll()) {
+                    out().println(String.format(formatString, info.name, info.external, info.inactive, info.capabilities));
                 }
+            } else if (config.createToken() != null) {
+                helpAndFailIfMissing(config.password(), "Missing --password");
+                UserInfo info = userDb.authenticate(config.createToken(), config.password());
+                if (info == null) {
+                    helpAndFail("Invalid username / password");
+                }
+                String token = r.createToken(info.name, info.capabilities);
+
+                out().println("Generating token with 50 years validity for " + info.name);
+                out().println("Use the following token to remotely access this server in your name");
+                out().println("Attention: This token is sensitive information as it allows remote access under your name. "
+                        + "Do not pass this token on to others.");
+                out().println("");
+                out().println(token);
+                out().println("");
             } else {
                 out().println("Nothing to do, please give more arguments");
             }

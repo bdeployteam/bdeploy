@@ -9,11 +9,14 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import io.bdeploy.common.security.RequiredCapability;
+import io.bdeploy.common.security.ScopedCapability.Capability;
 import io.bdeploy.interfaces.cleanup.CleanupGroup;
 
 @Path("/cleanUi")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+@RequiredCapability(capability = Capability.ADMIN)
 public interface CleanupResource {
 
     @GET

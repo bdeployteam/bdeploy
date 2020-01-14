@@ -9,7 +9,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -231,30 +230,31 @@ public class UserDatabase implements AuthService {
 
     @Override
     public UserInfo getUser(String name) {
+        // Note: We are using getIfPresent and put instead of get(name, Callable) as we need to handle null values
+        UserInfo info = userCache.getIfPresent(name);
+        if (info != null) {
+            return info;
+        }
         Optional<Long> current = target.execute(new ManifestMaxIdOperation().setManifestName(NAMESPACE + name));
         if (!current.isPresent()) {
             return null;
         }
 
-        try {
-            return userCache.get(name, () -> {
-                Manifest.Key key = new Manifest.Key(NAMESPACE + name, String.valueOf(current.get()));
-                Manifest mf = target.execute(new ManifestLoadOperation().setManifest(key));
+        Manifest.Key key = new Manifest.Key(NAMESPACE + name, String.valueOf(current.get()));
+        Manifest mf = target.execute(new ManifestLoadOperation().setManifest(key));
 
-                // check the manifest for manipulation to prevent from manually making somebody admin, etc.
-                Set<ElementView> result = target.execute(new ObjectConsistencyCheckOperation().addRoot(key));
-                if (!result.isEmpty()) {
-                    log.error("User corruption detected for {}", name);
-                    return null;
-                }
-
-                try (InputStream is = target
-                        .execute(new TreeEntryLoadOperation().setRelativePath(FILE_NAME).setRootTree(mf.getRoot()))) {
-                    return StorageHelper.fromStream(is, UserInfo.class);
-                }
-            });
-        } catch (ExecutionException e) {
-            log.error("Cannot load user: {}", name, e);
+        // check the manifest for manipulation to prevent from manually making somebody admin, etc.
+        Set<ElementView> result = target.execute(new ObjectConsistencyCheckOperation().addRoot(key));
+        if (!result.isEmpty()) {
+            log.error("User corruption detected for {}", name);
+            return null;
+        }
+        try (InputStream is = target.execute(new TreeEntryLoadOperation().setRelativePath(FILE_NAME).setRootTree(mf.getRoot()))) {
+            info = StorageHelper.fromStream(is, UserInfo.class);
+            userCache.put(name, info);
+            return info;
+        } catch (Exception ex) {
+            log.error("Failed to persist user: {}", name, ex);
             return null;
         }
     }
@@ -262,13 +262,15 @@ public class UserDatabase implements AuthService {
     @Override
     public boolean isAuthorized(String user, ScopedCapability required) {
         UserInfo info = getUser(user);
-
-        if (info.capabilities.contains(new ScopedCapability(null, required.capability))) {
-            // user has global entry for the required capability, thus it's ok :)
-            return true;
+        if (info == null) {
+            return false;
         }
-
-        return info.capabilities.contains(required);
+        for (ScopedCapability capability : info.capabilities) {
+            if (capability.satisfies(required)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

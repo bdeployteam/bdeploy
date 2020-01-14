@@ -1,4 +1,4 @@
-package io.bdeploy.ui.api.impl;
+package io.bdeploy.minion.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -36,12 +36,12 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
 import io.bdeploy.interfaces.remote.ResourceProvider;
-import io.bdeploy.ui.TestUiBackendServer;
+import io.bdeploy.minion.TestMinion;
 import io.bdeploy.ui.api.DownloadService;
 import io.bdeploy.ui.api.SoftwareRepositoryResource;
 import io.bdeploy.ui.api.SoftwareResource;
 
-@ExtendWith(TestUiBackendServer.class)
+@ExtendWith(TestMinion.class)
 @ExtendWith(TempDirectory.class)
 @ExtendWith(TestActivityReporter.class)
 public class RepoResourceTest {

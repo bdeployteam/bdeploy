@@ -1,4 +1,4 @@
-package io.bdeploy.ui.api.impl;
+package io.bdeploy.minion.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -21,10 +21,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.jersey.JerseyClientFactory;
-import io.bdeploy.ui.TestUiBackendServer;
+import io.bdeploy.minion.TestMinion;
 import io.bdeploy.ui.api.InstanceGroupResource;
 
-@ExtendWith(TestUiBackendServer.class)
+@ExtendWith(TestMinion.class)
 public class InstanceGroupResourceTest {
 
     @Test

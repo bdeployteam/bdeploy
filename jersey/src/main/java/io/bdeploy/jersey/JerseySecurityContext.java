@@ -21,10 +21,6 @@ public class JerseySecurityContext implements SecurityContext {
         this.onBehalfOf = onBehalfOf;
     }
 
-    public boolean hasCapability(String scope, ScopedCapability.Capability cap) {
-        return token.hasCapability(scope, cap);
-    }
-
     @Override
     public Principal getUserPrincipal() {
         if (onBehalfOf != null) {
@@ -36,7 +32,6 @@ public class JerseySecurityContext implements SecurityContext {
 
     @Override
     public boolean isUserInRole(String role) {
-        // this is not used. it is required for @RolesAllowed, which is too static for DCS.
         return false;
     }
 
@@ -48,6 +43,23 @@ public class JerseySecurityContext implements SecurityContext {
     @Override
     public String getAuthenticationScheme() {
         return JerseyAuthenticationProvider.AUTHENTICATION_SCHEME;
+    }
+
+    /**
+     * Returns a boolean indicating whether the security token grants the requested capability. Please note that
+     * the token only contains the GLOBAL permissions. When {@code false} is returned then the LOCAL capabilities must also
+     * be evaluated before denying access to a given resource.
+     *
+     * @param scopedCapability the required capability
+     * @return {@code true} if authorized or {@code false} otherwise
+     */
+    public boolean isAuthorized(ScopedCapability scopedCapability) {
+        for (ScopedCapability sc : token.getCapabilities()) {
+            if (sc.satisfies(scopedCapability)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

@@ -10,6 +10,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import io.bdeploy.common.security.RequiredCapability;
+import io.bdeploy.common.security.ScopedCapability.Capability;
 import io.bdeploy.interfaces.UserChangePasswordDto;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
@@ -82,5 +84,6 @@ public interface AuthResource {
      * @return the administrative interface for user managements.
      */
     @Path("/admin")
+    @RequiredCapability(capability = Capability.ADMIN)
     public AuthAdminResource getAdmin();
 }
