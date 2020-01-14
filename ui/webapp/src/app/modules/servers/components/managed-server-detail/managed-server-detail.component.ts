@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MatTableDataSource } from '@angular/material';
 import { format } from 'date-fns';
+import { catchError } from 'rxjs/operators';
 import { isUpdateFailed, isUpdateInProgress, isUpdateSuccess, UpdateStatus } from 'src/app/models/update.model';
 import { convert2String } from 'src/app/modules/shared/utils/version.utils';
 import { InstanceConfiguration, ManagedMasterDto, MinionDto, MinionStatusDto, MinionUpdateDto, Version } from '../../../../models/gen.dtos';
@@ -149,8 +150,12 @@ export class ManagedServerDetailComponent implements OnInit {
   }
 
   async doSynchronize() {
+    let error = null;
     try {
-      this.server = await this.managedServers.synchronize(this.instanceGroupName, this.server.hostName).toPromise();
+      this.server = await this.managedServers.synchronize(this.instanceGroupName, this.server.hostName).pipe(catchError(e => {
+        error = e;
+        throw e;
+      })).toPromise();
       this.minionState = await this.managedServers.minionsStateOfManagedServer(this.instanceGroupName, this.server.hostName).toPromise();
       this.updateDto = await this.managedServers.getUpdatesFor(this.instanceGroupName, this.server.hostName).toPromise();
       this.synchronized = true;
@@ -160,7 +165,7 @@ export class ManagedServerDetailComponent implements OnInit {
       this.synchronized = false;
       this.messageBoxService.open({
         title: 'Synchronization Error',
-        message: 'Synchronization failed. The remote master server might be offline, or the instance group may no longer exist on the server.',
+        message: `Synchronization failed. The remote master server might be offline or misconfigured, or the instance group may no longer exist on the server.<br>Error message: ${error.statusText}`,
         mode: MessageBoxMode.ERROR,
       });
     }

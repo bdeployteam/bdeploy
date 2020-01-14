@@ -328,6 +328,11 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         BHive hive = getInstanceGroupHive(groupName);
         RemoteService svc = getConfiguredRemote(groupName, serverName);
 
+        BackendInfoResource backendInfo = ResourceProvider.getResource(svc, BackendInfoResource.class, context);
+        if (backendInfo.getVersion().mode != MinionMode.MANAGED) {
+            throw new WebApplicationException("Server is no longer in managed mode: " + serverName, Status.EXPECTATION_FAILED);
+        }
+
         // 1. Sync instance group data with managed server.
         MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class, context);
         if (root.getInstanceGroups().stream().map(g -> g.name).noneMatch(n -> n.equals(groupName))) {
@@ -335,6 +340,13 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         }
 
         Manifest.Key igKey = new InstanceGroupManifest(hive).getKey();
+        try (RemoteBHive rbh = RemoteBHive.forService(svc, groupName, reporter)) {
+            // ALWAYS delete all instance group information on the target - we win!
+            // otherwise the target may have a manifest with a higher tag number and win.
+            SortedMap<Key, ObjectId> keys = rbh.getManifestInventory(igKey.getName());
+            // maybe not optimal to do a call per manifest...
+            keys.keySet().forEach(rbh::removeManifest);
+        }
         hive.execute(new PushOperation().addManifest(igKey).setRemote(svc).setHiveName(groupName));
 
         // 2. Fetch all instance and meta manifests, no products.
@@ -385,7 +397,6 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         // 5. Fetch minion information and store in the managed masters
         ManagedMasters mm = new ManagedMasters(hive);
         ManagedMasterDto attached = mm.read().getManagedMaster(serverName);
-        BackendInfoResource backendInfo = ResourceProvider.getResource(svc, BackendInfoResource.class, context);
         Map<String, MinionStatusDto> status = backendInfo.getNodeStatus();
         Map<String, MinionDto> config = status.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().config));

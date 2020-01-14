@@ -47,10 +47,10 @@ import io.bdeploy.ui.api.ManagedServersResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.ProductResource;
-import io.bdeploy.ui.dto.ManagedMasterDto;
 import io.bdeploy.ui.dto.ClientApplicationDto;
 import io.bdeploy.ui.dto.InstanceClientAppsDto;
 import io.bdeploy.ui.dto.InstanceDto;
+import io.bdeploy.ui.dto.ManagedMasterDto;
 
 public class InstanceGroupResourceImpl implements InstanceGroupResource {
 
@@ -94,6 +94,13 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
 
         if (Files.isDirectory(hive)) {
             throw new WebApplicationException("Hive path already exists: ", Status.NOT_ACCEPTABLE);
+        }
+
+        // update the managed flag - indicator required when switching modes
+        if (minion.getMode() == MinionMode.STANDALONE) {
+            config.managed = false;
+        } else {
+            config.managed = true;
         }
 
         try {

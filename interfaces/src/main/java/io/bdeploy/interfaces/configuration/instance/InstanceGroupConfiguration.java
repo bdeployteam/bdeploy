@@ -28,4 +28,9 @@ public class InstanceGroupConfiguration {
      * Schedule background deletion of old and unused product versions
      */
     public boolean autoDelete;
+
+    /**
+     * Whether this instance group has been attached to a central server
+     */
+    public boolean managed;
 }

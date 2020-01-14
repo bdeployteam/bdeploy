@@ -162,6 +162,12 @@ java configuration Master : minion-base {
 	memory max=256 MB;
 }
 
+java configuration Master-MigrateMode : minion-base {
+	argument "set-mode";
+	argument "--root=${workspace_loc}/runtime/master";
+	argument "--mode=${string_prompt:Target Mode}";
+}
+
 /**
  * Runs the master in central mode on the previously initialized root.
  */

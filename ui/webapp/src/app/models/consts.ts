@@ -63,7 +63,8 @@ export const EMPTY_INSTANCE_GROUP: InstanceGroupConfiguration = {
   name: null,
   description: null,
   logo: null,
-  autoDelete: null
+  autoDelete: null,
+  managed: false
 };
 
 export const EMPTY_SOFTWARE_REPO: SoftwareRepositoryConfiguration = {

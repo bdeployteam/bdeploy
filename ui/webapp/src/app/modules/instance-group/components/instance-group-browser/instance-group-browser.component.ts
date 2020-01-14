@@ -26,6 +26,7 @@ export class InstanceGroupBrowserComponent implements OnInit, OnDestroy {
   instanceGroupList: DataList<InstanceGroupConfiguration>;
   recent: String[] = [];
   displayRecent: BehaviorSubject<boolean> = new BehaviorSubject(true);
+  mode: MinionMode;
 
   constructor(
     private mediaObserver: MediaObserver,
@@ -59,6 +60,10 @@ export class InstanceGroupBrowserComponent implements OnInit, OnDestroy {
         }
       }),
     );
+
+    this.config.getBackendInfo().subscribe(r => {
+      this.mode = r.mode;
+    });
 
     this.loadInstanceGroups();
   }
