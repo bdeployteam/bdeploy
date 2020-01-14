@@ -36,7 +36,7 @@ public class TestMinion extends TestServer {
         CloseableMinionRoot cmr = getExtensionStore(context).getOrComputeIfAbsent(CloseableMinionRoot.class,
                 (k) -> new CloseableMinionRoot(getServerPort(context)), CloseableMinionRoot.class);
 
-        authPack = InitTool.initMinionRoot(cmr.root, cmr.mr, "localhost", getServerPort(context), null);
+        authPack = InitTool.initMinionRoot(cmr.root, cmr.mr, "localhost", getServerPort(context), null, MinionMode.STANDALONE);
         MinionState state = cmr.mr.getState();
 
         serverStore = SecurityHelper.getInstance().loadPrivateKeyStore(state.keystorePath, state.keystorePass);
@@ -85,8 +85,8 @@ public class TestMinion extends TestServer {
         public CloseableMinionRoot(int port) {
             try {
                 root = Files.createTempDirectory("mr-");
-                mr = new MinionRoot(root, MinionMode.STANDALONE, new ActivityReporter.Null());
-                InitTool.initMinionRoot(root, mr, "localhost", port, null);
+                mr = new MinionRoot(root, new ActivityReporter.Null());
+                InitTool.initMinionRoot(root, mr, "localhost", port, null, MinionMode.STANDALONE);
                 mr.onStartup();
             } catch (Exception e) {
                 throw new IllegalStateException(e);

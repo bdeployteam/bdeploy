@@ -8,6 +8,7 @@ import java.util.TreeMap;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.ui.api.MinionMode;
 
 /**
  * Represents the persistent state of a minion
@@ -24,6 +25,13 @@ public class MinionState {
      * The own minion's name.
      */
     public String self;
+
+    /**
+     * The minions mode.
+     * <p>
+     * Defaults to {@link MinionMode#STANDALONE} for compatibility.
+     */
+    public MinionMode mode = MinionMode.STANDALONE;
 
     /**
      * Used only on the master; active versions, i.e. what has been activated

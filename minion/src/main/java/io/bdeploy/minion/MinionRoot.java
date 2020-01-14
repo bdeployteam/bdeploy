@@ -84,11 +84,9 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     private Path updates;
     private MinionUpdateManager updateManager = t -> log.error("No Update Manager, cannot update Minion!");
 
-    private MinionMode mode = MinionMode.STANDALONE;
-
     private Scheduler scheduler;
 
-    public MinionRoot(Path root, MinionMode mode, ActivityReporter reporter) {
+    public MinionRoot(Path root, ActivityReporter reporter) {
         super(root.resolve("etc"));
 
         root = root.toAbsolutePath();
@@ -106,17 +104,17 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         this.downloadDir = create(root.resolve("downloads"));
 
         this.processController = new MinionProcessController();
-        this.mode = mode;
     }
 
     @Override
     public boolean isMaster() {
-        return mode == MinionMode.CENTRAL || mode == MinionMode.MANAGED || mode == MinionMode.STANDALONE;
+        MinionMode m = getMode();
+        return m == MinionMode.CENTRAL || m == MinionMode.MANAGED || m == MinionMode.STANDALONE;
     }
 
     @Override
     public MinionMode getMode() {
-        return mode;
+        return getState().mode;
     }
 
     @Override

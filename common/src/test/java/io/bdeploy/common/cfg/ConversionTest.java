@@ -14,6 +14,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
+import io.bdeploy.common.cfg.Configuration.ConfigurationValueMapping;
+import io.bdeploy.common.cfg.Configuration.ValueMapping;
+
 public class ConversionTest {
 
     @Test
@@ -21,8 +24,8 @@ public class ConversionTest {
         Configuration c = new Configuration();
 
         c.add("--testByte=3", "--testChar=a", "--testInt=9", "--testShort=8", "--testLong=7", "--testFloat=0.9",
-                "--testDouble=0.9", "--testEnum=TEST1", "--testString=abc", "--testStringArray=abc,def,ghi",
-                "--testLongArray=1,2,3,4,5", "--testBoolean");
+                "--testDouble=0.9", "--testEnum=Test1", "--testString=abc", "--testStringArray=abc,def,ghi",
+                "--testLongArray=1,2,3,4,5", "--testBoolean", "--toLower=TEST", "--toUpper=test");
 
         TestConfig tc = c.get(TestConfig.class);
         assertEquals(3, tc.testByte());
@@ -44,6 +47,8 @@ public class ConversionTest {
         assertEquals(3, tc.testLongArray()[2]);
         assertEquals(4, tc.testLongArray()[3]);
         assertEquals(5, tc.testLongArray()[4]);
+        assertEquals("test", tc.toLower());
+        assertEquals("TEST", tc.toUpper());
     }
 
     @Test
@@ -94,6 +99,7 @@ public class ConversionTest {
 
         boolean testBoolean() default false;
 
+        @ConfigurationValueMapping(ValueMapping.TO_UPPERCASE)
         TestEnum testEnum() default TestEnum.TEST2;
 
         String testString() default "Test";
@@ -101,6 +107,12 @@ public class ConversionTest {
         String[] testStringArray() default {};
 
         long[] testLongArray() default {};
+
+        @ConfigurationValueMapping(ValueMapping.TO_LOWERCASE)
+        String toLower();
+
+        @ConfigurationValueMapping(ValueMapping.TO_UPPERCASE)
+        String toUpper();
     }
 
     public enum TestEnum {

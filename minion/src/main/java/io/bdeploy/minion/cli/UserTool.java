@@ -14,7 +14,6 @@ import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.jersey.audit.AuditRecord;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.cli.UserTool.UserConfig;
-import io.bdeploy.ui.api.MinionMode;
 
 /**
  * Manages users.
@@ -57,7 +56,7 @@ public class UserTool extends ConfiguredCliTool<UserConfig> {
     protected void run(UserConfig config) {
         helpAndFailIfMissing(config.root(), "Missing --root");
 
-        try (MinionRoot r = new MinionRoot(Paths.get(config.root()), MinionMode.TOOL, getActivityReporter())) {
+        try (MinionRoot r = new MinionRoot(Paths.get(config.root()), getActivityReporter())) {
             if (config.add() != null) {
                 String user = config.add();
                 r.getAuditor().audit(AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration())

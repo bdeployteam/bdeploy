@@ -14,7 +14,6 @@ import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.jersey.audit.AuditRecord;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.cli.StorageTool.StorageConfig;
-import io.bdeploy.ui.api.MinionMode;
 
 /**
  * Manages storage locations.
@@ -48,7 +47,7 @@ public class StorageTool extends ConfiguredCliTool<StorageConfig> {
     protected void run(StorageConfig config) {
         helpAndFailIfMissing(config.root(), "Missing --root");
 
-        try (MinionRoot r = new MinionRoot(Paths.get(config.root()), MinionMode.TOOL, getActivityReporter())) {
+        try (MinionRoot r = new MinionRoot(Paths.get(config.root()), getActivityReporter())) {
             List<Path> original = r.getStorageLocations();
             if (config.add() != null) {
                 Path p = Paths.get(config.add());

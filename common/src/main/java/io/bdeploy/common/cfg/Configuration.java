@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
+import java.util.function.Function;
 
 import com.google.common.base.Splitter;
 
@@ -188,9 +189,26 @@ public class Configuration {
             }
         }
 
+        ConfigurationValueMapping mapping = method.getAnnotation(ConfigurationValueMapping.class);
+        Function<Object, Object> mapper = s -> s;
+
+        if (mapping != null) {
+            switch (mapping.value()) {
+                case TO_LOWERCASE:
+                    mapper = s -> s.toString().toLowerCase();
+                    break;
+                case TO_UPPERCASE:
+                    mapper = s -> s.toString().toUpperCase();
+                    break;
+            }
+        }
+
         Class<?> returnType = method.getReturnType();
         if (object != null && returnType.isAssignableFrom(object.getClass())) {
             validateOrThrow(object, method, cv, vmsg);
+            if (returnType.isAssignableFrom(String.class)) {
+                return mapper.apply(object);
+            }
             return object;
         }
 
@@ -206,7 +224,7 @@ public class Configuration {
             // perform conversion for each of the elements.
             Object targetArray = Array.newInstance(returnType.getComponentType(), list.size());
             for (int i = 0; i < list.size(); ++i) {
-                Array.set(targetArray, i, convertType(returnType.getComponentType(), (String) list.get(i)));
+                Array.set(targetArray, i, convertType(returnType.getComponentType(), (String) list.get(i), mapper));
             }
             validateOrThrow(targetArray, method, cv, vmsg);
             conversions.put(method, targetArray);
@@ -220,7 +238,7 @@ public class Configuration {
         }
 
         // do actual conversion
-        conversion = convertType(returnType, (String) object);
+        conversion = convertType(returnType, (String) object, mapper);
 
         validateOrThrow(conversion, method, cv, vmsg);
 
@@ -252,9 +270,9 @@ public class Configuration {
     }
 
     @SuppressWarnings("unchecked")
-    private Object convertType(Class<?> target, String source) {
+    private Object convertType(Class<?> target, String source, Function<Object, Object> mapper) {
         if (target.equals(String.class)) {
-            return source;
+            return mapper.apply(source);
         } else if (target.equals(long.class)) {
             return Long.parseLong(source);
         } else if (target.equals(int.class)) {
@@ -279,7 +297,7 @@ public class Configuration {
             return source.charAt(0);
         } else if (target.isEnum()) {
             try {
-                return target.getMethod("valueOf", String.class).invoke(null, source);
+                return target.getMethod("valueOf", String.class).invoke(null, mapper.apply(source));
             } catch (NoSuchMethodException | IllegalAccessException e) {
                 throw new IllegalStateException(
                         "internal error resolving enumeration literal for " + target + " '" + source + "'", e);
@@ -290,7 +308,7 @@ public class Configuration {
             List<String> split = Splitter.on(',').trimResults().omitEmptyStrings().splitToList(source);
             Object targetArray = Array.newInstance(target.getComponentType(), split.size());
             for (int i = 0; i < split.size(); ++i) {
-                Array.set(targetArray, i, convertType(target.getComponentType(), split.get(i)));
+                Array.set(targetArray, i, convertType(target.getComponentType(), split.get(i), mapper));
             }
             return targetArray;
         } else if (target.isAnnotation()) {
@@ -334,6 +352,22 @@ public class Configuration {
     public @interface ConfigurationNameMapping {
 
         String value();
+    }
+
+    public enum ValueMapping {
+        TO_UPPERCASE,
+        TO_LOWERCASE
+    }
+
+    /**
+     * Annotated field's value will be mapped on injection using the given {@link ValueMapping} policy.
+     */
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    public @interface ConfigurationValueMapping {
+
+        ValueMapping value();
     }
 
     @Documented

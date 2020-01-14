@@ -24,7 +24,6 @@ import io.bdeploy.common.TestCliTool;
 import io.bdeploy.common.security.AuthPackAccessor;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.ui.api.Minion;
-import io.bdeploy.ui.api.MinionMode;
 
 @ExtendWith(TempDirectory.class)
 @ExtendWith(TestActivityReporter.class)
@@ -37,7 +36,7 @@ public class MasterCliTest {
     void testMasterCli(@TempDir Path tmp, ActivityReporter reporter) throws IOException {
         Path root = tmp.resolve("root");
         Path storage = tmp.resolve("storage");
-        tools.getTool(InitTool.class, "--root=" + root, "--hostname=localhost", "--dist=ignore").run();
+        tools.getTool(InitTool.class, "--root=" + root, "--hostname=localhost", "--dist=ignore", "--mode=standalone").run();
         tools.getTool(UserTool.class, "--root=" + root, "--add=test", "--password=test").run();
         tools.getTool(StorageTool.class, "--root=" + root, "--add=" + storage.toString()).run();
 
@@ -45,7 +44,7 @@ public class MasterCliTest {
         char[] pp;
         String pack;
 
-        try (MinionRoot mr = new MinionRoot(root, MinionMode.STANDALONE, reporter)) {
+        try (MinionRoot mr = new MinionRoot(root, reporter)) {
             assertEquals(2, mr.getStorageLocations().size());
             assertTrue(mr.getStorageLocations().contains(storage));
             assertTrue(mr.getUsers().getAllNames().contains("test"));
@@ -78,7 +77,7 @@ public class MasterCliTest {
         tools.getTool(UserTool.class, "--root=" + root, "--remove=test").run();
         tools.getTool(StorageTool.class, "--root=" + root, "--remove=" + storage.toString()).run();
 
-        try (MinionRoot mr = new MinionRoot(root, MinionMode.STANDALONE, reporter)) {
+        try (MinionRoot mr = new MinionRoot(root, reporter)) {
             assertEquals(1, mr.getStorageLocations().size());
             assertFalse(mr.getStorageLocations().contains(storage));
             assertFalse(mr.getUsers().getAllNames().contains("test"));

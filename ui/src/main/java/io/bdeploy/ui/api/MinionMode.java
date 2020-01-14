@@ -26,9 +26,4 @@ public enum MinionMode {
      */
     SLAVE,
 
-    /**
-     * A command line/short lived tool.
-     */
-    TOOL
-
 }

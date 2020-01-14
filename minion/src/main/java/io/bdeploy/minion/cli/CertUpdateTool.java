@@ -22,7 +22,6 @@ import io.bdeploy.jersey.audit.AuditRecord;
 import io.bdeploy.minion.BCX509Helper;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.cli.CertUpdateTool.CertUpdateConfig;
-import io.bdeploy.ui.api.MinionMode;
 
 @Help("Manage minion certificate")
 @CliName("certificate")
@@ -58,7 +57,7 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
             helpAndFail("Root " + root + " does not exists!");
         }
 
-        try (MinionRoot mr = new MinionRoot(root, MinionMode.TOOL, getActivityReporter())) {
+        try (MinionRoot mr = new MinionRoot(root, getActivityReporter())) {
             Path ks = mr.getState().keystorePath;
             char[] ksp = mr.getState().keystorePass;
 

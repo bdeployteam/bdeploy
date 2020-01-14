@@ -9,9 +9,11 @@ import java.security.GeneralSecurityException;
 
 import javax.ws.rs.core.UriBuilder;
 
+import io.bdeploy.common.cfg.Configuration.ConfigurationValueMapping;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
+import io.bdeploy.common.cfg.Configuration.ValueMapping;
 import io.bdeploy.common.cfg.HostnameValidator;
 import io.bdeploy.common.cfg.NonExistingPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
@@ -64,6 +66,10 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
 
         @Help("Port that the master will run on.")
         int port() default 7701;
+
+        @Help("The target mode for the server [CENTRAL,MANAGED,STANDALONE,SLAVE]. A MANAGED server can only work with a central counterpart.")
+        @ConfigurationValueMapping(ValueMapping.TO_UPPERCASE)
+        MinionMode mode();
     }
 
     public InitTool() {
@@ -74,13 +80,14 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
     protected void run(InitConfig config) {
         helpAndFailIfMissing(config.root(), "Missing --root");
         helpAndFailIfMissing(config.hostname(), "Missing --hostname");
+        helpAndFailIfMissing(config.mode(), "Missing --mode");
 
         Path root = Paths.get(config.root());
 
-        try (MinionRoot mr = new MinionRoot(root, MinionMode.TOOL, getActivityReporter())) {
+        try (MinionRoot mr = new MinionRoot(root, getActivityReporter())) {
             mr.getAuditor().audit(AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("init").build());
             out().println("Initializing minion keys...");
-            String pack = initMinionRoot(root, mr, config.hostname(), config.port(), config.deployments());
+            String pack = initMinionRoot(root, mr, config.hostname(), config.port(), config.deployments(), config.mode());
 
             if (config.tokenFile() != null) {
                 Files.write(Paths.get(config.tokenFile()), pack.getBytes(StandardCharsets.UTF_8));
@@ -112,7 +119,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         }
     }
 
-    public static String initMinionRoot(Path root, MinionRoot mr, String hostname, int port, String deployments)
+    public static String initMinionRoot(Path root, MinionRoot mr, String hostname, int port, String deployments, MinionMode mode)
             throws GeneralSecurityException, IOException {
         MinionState state = mr.initKeys();
 
@@ -123,7 +130,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         RemoteService remote = new RemoteService(UriBuilder.fromUri("https://" + hostname + ":" + port + "/api").build(), pack);
 
         MinionConfiguration minionConfiguration = new MinionConfiguration();
-        minionConfiguration.addMinion(Minion.DEFAULT_NAME, MinionDto.create(mr.isMaster(), remote));
+        minionConfiguration.addMinion(Minion.DEFAULT_NAME, MinionDto.create(mode != MinionMode.SLAVE, remote));
 
         MinionManifest minionMf = new MinionManifest(mr.getHive());
         minionMf.update(minionConfiguration);
@@ -133,6 +140,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         state.port = port;
         state.cleanupSchedule = MasterCleanupJob.DEFAULT_CLEANUP_SCHEDULE;
         state.fullyMigratedVersion = VersionHelper.readVersion();
+        state.mode = mode;
 
         state.deploymentDir = root.resolve("deploy");
         if (deployments != null) {

@@ -21,7 +21,6 @@ import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.cli.CleanupTool.CleanupConfig;
 import io.bdeploy.minion.job.MasterCleanupJob;
-import io.bdeploy.ui.api.MinionMode;
 
 @Help("Manage cleanup settings")
 @CliName("cleanup")
@@ -54,7 +53,7 @@ public class CleanupTool extends ConfiguredCliTool<CleanupConfig> {
             helpAndFail("Root " + root + " does not exists!");
         }
 
-        try (MinionRoot mr = new MinionRoot(root, MinionMode.TOOL, getActivityReporter())) {
+        try (MinionRoot mr = new MinionRoot(root, getActivityReporter())) {
             if (config.setSchedule() != null) {
                 try {
                     CronScheduleBuilder.cronScheduleNonvalidatedExpression(config.setSchedule());

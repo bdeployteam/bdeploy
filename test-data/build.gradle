@@ -102,9 +102,9 @@ void createServerTasks(String name, String root, int port) {
 
         if(name.equals("Central") || name.equals("Managed")) {
             // save some time on startup...
-            args = [ "init", "--port=${port}", "--dist=ignore" ]
+            args = [ "init", "--port=${port}", "--dist=ignore", "--mode=" + name ]
         } else {
-            args = [ "init", "--port=${port}", "--dist="+project(':minion').tasks[taskName].outputs.files[0] ]
+            args = [ "init", "--port=${port}", "--dist="+project(':minion').tasks[taskName].outputs.files[0], "--mode=standalone" ]
         }
     }
 
@@ -112,13 +112,7 @@ void createServerTasks(String name, String root, int port) {
         setupBDeployEnv(it, root)
         main = project(":minion").mainClassName
         classpath = project(":minion").sourceSets.main.runtimeClasspath
-        if(name.equals("Central")) {
-            args = [ "master", "--central" ]
-        } else if(name.equals("Managed")) {
-            args = [ "master", "--managed" ]
-        } else {
-            args = [ "master" ]
-        }
+        args = [ "master" ]
         waitForPort = port
         stopAfter = triggerStopBDeploy
     }
@@ -228,7 +222,7 @@ void setupBinServerTasks(String version) {
             delete "${buildDir}/bin-root_${key}"
         }
 
-        args = [ "init", "--port=${port}", "--dist=ignore" ]
+        args = [ "init", "--port=${port}", "--dist=ignore", "--mode=standalone" ]
     }
 
     task "binTriggerStopBDeploy_${key}"() {

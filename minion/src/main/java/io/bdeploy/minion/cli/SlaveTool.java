@@ -81,7 +81,10 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
         helpAndFailIfMissing(config.root(), "Missing --root");
         ActivityReporter.Delegating delegate = new ActivityReporter.Delegating();
         delegate.setDelegate(getActivityReporter());
-        try (MinionRoot r = new MinionRoot(Paths.get(config.root()), MinionMode.SLAVE, delegate)) {
+        try (MinionRoot r = new MinionRoot(Paths.get(config.root()), delegate)) {
+            if (r.getMode() != MinionMode.SLAVE) {
+                throw new IllegalStateException("Not a SLAVE root: " + config.root());
+            }
             r.getAuditor().audit(AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("slave").build());
             if (config.updateDir() != null) {
                 Path upd = Paths.get(config.updateDir());
