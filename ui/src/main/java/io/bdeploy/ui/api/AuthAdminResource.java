@@ -10,6 +10,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import io.bdeploy.interfaces.UserInfo;
@@ -31,7 +32,7 @@ public interface AuthAdminResource {
      */
     @POST
     @Path("/local/pw")
-    public void updateLocalUserPassword(String user, String password);
+    public void updateLocalUserPassword(@QueryParam("user") String user, String password);
 
     /**
      * @param info the new user information, password is ignored
@@ -47,10 +48,10 @@ public interface AuthAdminResource {
     public void updateUsers(List<UserInfo> infos);
 
     /**
-     * @param userName the user to delete
+     * @param name the name of the user to delete
      */
     @DELETE
-    public void deleteUser(String userName);
+    public void deleteUser(@QueryParam("name") String name);
 
     /**
      * @param name the user to load
@@ -65,5 +66,12 @@ public interface AuthAdminResource {
     @GET
     @Path("/names")
     public SortedSet<String> getAllUserNames();
+
+    /**
+     * @return a list of all known user.
+     */
+    @GET
+    @Path("/users")
+    public SortedSet<UserInfo> getAllUser();
 
 }

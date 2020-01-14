@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { CookieService } from 'ngx-cookie-service';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { CredentialsDto, UserInfo } from '../../../models/gen.dtos';
+import { CredentialsDto, UserChangePasswordDto, UserInfo } from '../../../models/gen.dtos';
 import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
 import { ConfigService } from './config.service';
 import { Logger, LoggingService } from './logging.service';
@@ -86,6 +86,12 @@ export class AuthenticationService {
   updateUserInfo(info: UserInfo): Observable<any> {
     this.log.debug('Updating current user info...');
     return this.http.post<UserInfo>(this.cfg.config.api + '/auth/user', info);
+  }
+
+  changePassword(dto: UserChangePasswordDto): Observable<any> {
+    this.log.debug('Changing password for current user...');
+    return this.http.post(this.cfg.config.api + '/auth/change-password', dto,
+    { responseType: 'text', headers: suppressGlobalErrorHandling(new HttpHeaders()) });
   }
 
   getAuthPackForUser(): Observable<String> {

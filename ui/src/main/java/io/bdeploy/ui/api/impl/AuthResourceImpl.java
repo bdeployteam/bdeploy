@@ -17,6 +17,7 @@ import javax.ws.rs.core.SecurityContext;
 
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.security.ApiAccessToken;
+import io.bdeploy.interfaces.UserChangePasswordDto;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.jersey.JerseyServer;
 import io.bdeploy.ui.api.AuthAdminResource;
@@ -81,10 +82,17 @@ public class AuthResourceImpl implements AuthResource {
 
     @Override
     public void updateCurrentUser(UserInfo info) {
-        if (info.password != null && !info.password.isBlank()) {
-            auth.updateLocalPassword(info.name, info.password);
-        }
         auth.updateUserInfo(info);
+    }
+
+    @Override
+    public Response changePassword(UserChangePasswordDto dto) {
+        if (auth.authenticate(dto.user, dto.currentPassword) != null) {
+            auth.updateLocalPassword(dto.user, dto.newPassword);
+            return Response.ok().build();
+        } else {
+            throw new WebApplicationException("Invalid credentials", Status.UNAUTHORIZED);
+        }
     }
 
     @Override

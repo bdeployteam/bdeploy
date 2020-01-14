@@ -4,8 +4,10 @@ import { Router } from '@angular/router';
 import { cloneDeep } from 'lodash';
 import { UserInfo } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from '../../services/authentication.service';
+import { Logger, LoggingService } from '../../services/logging.service';
 import { SettingsService } from '../../services/settings.service';
 import { UserEditComponent } from '../user-edit/user-edit.component';
+import { UserPasswordComponent } from '../user-password/user-password.component';
 
 @Component({
   selector: 'app-user-info',
@@ -15,10 +17,16 @@ import { UserEditComponent } from '../user-edit/user-edit.component';
 })
 export class UserInfoComponent implements OnInit {
 
+  private log: Logger = this.loggingService.getLogger('UserInfoComponent');
+
   public user: UserInfo;
   public pack: String;
 
-  constructor(private router: Router, private authService: AuthenticationService, public settings: SettingsService, private dialog: MatDialog,
+  constructor(private loggingService: LoggingService,
+    private router: Router,
+    private authService: AuthenticationService,
+    public settings: SettingsService,
+    private dialog: MatDialog,
     private snackbarService: MatSnackBar) { }
 
   ngOnInit() {
@@ -45,6 +53,32 @@ export class UserInfoComponent implements OnInit {
           this.user = r;
           this.user.password = null;
         });
+      }
+    });
+  }
+
+  changePassword() {
+    this.dialog.open(UserPasswordComponent, {
+      width: '500px',
+      data: {
+        isAdmin: false,
+        user: this.user.name
+      },
+    }).afterClosed().subscribe(r => {
+      if (r) {
+        this.authService.changePassword(r).subscribe(
+          result => {
+            this.log.info('user ' + this.user.name + 'successfully changed password');
+          },
+          error => {
+            if (error.status === 401) {
+              this.log.warn('user ' + this.user.name + ': wrong password!');
+              this.changePassword();
+            } else {
+              throw(error);
+            }
+          }
+        );
       }
     });
   }

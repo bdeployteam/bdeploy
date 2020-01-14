@@ -1,4 +1,4 @@
-import { ApplicationConfiguration, ApplicationStartType, CommandConfiguration, InstanceConfiguration, InstanceGroupConfiguration, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstancePurpose, InstanceStateRecord, InstanceVersionDto, ManifestKey, ParameterConfiguration, ParameterDescriptor, ParameterType, ProcessControlConfiguration, SoftwareRepositoryConfiguration } from './gen.dtos';
+import { ApplicationConfiguration, ApplicationStartType, CommandConfiguration, InstanceConfiguration, InstanceGroupConfiguration, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstancePurpose, InstanceStateRecord, InstanceVersionDto, ManifestKey, ParameterConfiguration, ParameterDescriptor, ParameterType, ProcessControlConfiguration, SoftwareRepositoryConfiguration, UserChangePasswordDto, UserInfo } from './gen.dtos';
 
 // HTTP header constant used to suppress global error handling
 export const NO_ERROR_HANDLING_HDR = 'X-No-Global-Error-Handling';
@@ -26,6 +26,27 @@ export const EMPTY_MANIFEST_KEY: ManifestKey = {
   name: null,
   tag: null,
 };
+
+export const EMPTY_USER_INFO: UserInfo = {
+  name: null,
+  password: null,
+  fullName: null,
+  email: null,
+  external: false,
+  externalSystem: null,
+  externalTag: null,
+  inactive: false,
+  lastActiveLogin: null,
+  capabilities: [],
+  recentlyUsedInstanceGroups: []
+};
+
+export const EMPTY_USER_CHANGE_PASSWORD_DTO: UserChangePasswordDto  = {
+  user: null,
+  currentPassword: null,
+  newPassword: null
+}
+
 
 export const EMPTY_INSTANCE: InstanceConfiguration = {
   uuid: null,

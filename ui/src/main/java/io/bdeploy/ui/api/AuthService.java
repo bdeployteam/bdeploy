@@ -55,6 +55,11 @@ public interface AuthService {
     public SortedSet<String> getAllNames();
 
     /**
+     * @return all users known to the system wit full user information
+     */
+    public SortedSet<UserInfo> getAll();
+
+    /**
      * @param user the user to get recently used for
      * @return the list of recently used items (instance groups). The latest one added is the last in the list.
      */
