@@ -156,6 +156,9 @@ public class UserDatabase implements AuthService {
         }
 
         recentlyUsed.add(group);
+
+        // rebuild the list, evict duplicates (even though they SHOULD not exist, they do).
+        info.recentlyUsedInstanceGroups = recentlyUsed.stream().distinct().collect(Collectors.toList());
         updateUserInfo(info);
     }
 
