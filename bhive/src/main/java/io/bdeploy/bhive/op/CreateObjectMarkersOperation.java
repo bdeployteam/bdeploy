@@ -3,6 +3,8 @@ package io.bdeploy.bhive.op;
 import java.util.SortedSet;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditStrategy;
+import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditWith;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.objects.MarkerDatabase;
 import io.bdeploy.common.util.RuntimeAssert;
@@ -13,6 +15,7 @@ import io.bdeploy.common.util.UuidHelper;
  */
 public class CreateObjectMarkersOperation extends BHive.Operation<String> {
 
+    @AuditWith(AuditStrategy.COLLECTION_PEEK)
     private SortedSet<ObjectId> ids;
 
     @Override

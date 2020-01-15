@@ -3,6 +3,7 @@ package io.bdeploy.bhive.op;
 import java.util.Optional;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.ReadOnlyOperation;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.util.RuntimeAssert;
@@ -10,6 +11,7 @@ import io.bdeploy.common.util.RuntimeAssert;
 /**
  * Returns the lexically "newest" tag for a given manifest.
  */
+@ReadOnlyOperation
 public class ManifestLexicalMaxTagOperation extends BHive.Operation<Optional<String>> {
 
     private String key;
@@ -19,8 +21,8 @@ public class ManifestLexicalMaxTagOperation extends BHive.Operation<Optional<Str
         RuntimeAssert.assertNotNull(key, "No Manifest to inspect");
 
         try (Activity activity = getActivityReporter().start("Evaluating latest manifest version...", -1)) {
-            return getManifestDatabase().getAllForName(key).stream().map(Manifest.Key::getTag)
-                    .sorted((a, b) -> b.compareTo(a)).findFirst();
+            return getManifestDatabase().getAllForName(key).stream().map(Manifest.Key::getTag).sorted((a, b) -> b.compareTo(a))
+                    .findFirst();
         }
     }
 

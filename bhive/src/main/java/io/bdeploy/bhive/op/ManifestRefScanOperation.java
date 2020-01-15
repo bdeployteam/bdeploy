@@ -4,6 +4,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.ReadOnlyOperation;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.objects.view.MissingObjectView;
@@ -15,6 +16,7 @@ import io.bdeploy.common.util.RuntimeAssert;
 /**
  * Scans for nested {@link Manifest}s referenced in the given {@link Manifest}.
  */
+@ReadOnlyOperation
 public class ManifestRefScanOperation extends BHive.Operation<SortedMap<String, Manifest.Key>> {
 
     private Manifest.Key manifest;

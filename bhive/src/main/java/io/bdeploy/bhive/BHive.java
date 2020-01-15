@@ -138,8 +138,10 @@ public class BHive implements AutoCloseable, BHiveExecution {
     public <T> T execute(Operation<T> op) {
         try (Timer.Context timer = Metrics.getMetric(MetricGroup.HIVE).timer(op.getClass().getSimpleName()).time()) {
             op.initOperation(this);
-            auditor.audit(AuditRecord.Builder.fromSystem().setWhat(op.getClass().getSimpleName())
-                    .addParameters(new AuditParameterExtractor().extract(op)).build());
+            if (op.getClass().getAnnotation(ReadOnlyOperation.class) == null) {
+                auditor.audit(AuditRecord.Builder.fromSystem().setWhat(op.getClass().getSimpleName())
+                        .addParameters(new AuditParameterExtractor().extract(op)).build());
+            }
             return op.call();
         } catch (Exception e) {
             auditor.audit(AuditRecord.Builder.fromSystem().setWhat(op.getClass().getSimpleName()).setSeverity(Severity.ERROR)

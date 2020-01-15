@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.SortedSet;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.ReadOnlyOperation;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.objects.ReferenceHandler;
@@ -14,6 +15,7 @@ import io.bdeploy.common.ActivityReporter.Activity;
 /**
  * Export a {@link Manifest}s root {@link Tree} to a target directory.
  */
+@ReadOnlyOperation
 public class ExportOperation extends BHive.Operation<Manifest.Key> {
 
     private Manifest.Key manifest;

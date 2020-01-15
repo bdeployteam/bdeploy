@@ -9,6 +9,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.ReadOnlyOperation;
 import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditStrategy;
 import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditWith;
 import io.bdeploy.bhive.model.Manifest;
@@ -22,6 +23,7 @@ import io.bdeploy.common.ActivityReporter.Activity;
  * Resolve {@link Manifest}s referenced in a {@link Tree} by the given
  * {@link ObjectId}s.
  */
+@ReadOnlyOperation
 public class ManifestRefLoadOperation extends BHive.Operation<SortedMap<ObjectId, Manifest.Key>> {
 
     @AuditWith(AuditStrategy.COLLECTION_PEEK)

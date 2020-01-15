@@ -4,6 +4,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.ReadOnlyOperation;
 import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditStrategy;
 import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditWith;
 import io.bdeploy.bhive.model.ObjectId;
@@ -12,6 +13,7 @@ import io.bdeploy.common.ActivityReporter.Activity;
 /**
  * Checks whether the given {@link ObjectId}s exist in the {@link BHive}.
  */
+@ReadOnlyOperation
 public class ObjectExistsOperation extends BHive.Operation<SortedSet<ObjectId>> {
 
     @AuditWith(AuditStrategy.COLLECTION_SIZE)

@@ -55,9 +55,9 @@ public class HiveAuditTest {
 
         RollingFileAuditor auditor = (RollingFileAuditor) hive.getAuditor();
         List<String> lines = Files.readAllLines(auditor.getLogFile());
-        assertEquals(7, lines.size());
-        assertTrue(lines.get(6).contains("ERROR"));
-        assertTrue(lines.get(6).contains("BLOB corruption"));
+        assertEquals(4, lines.size());
+        assertTrue(lines.get(3).contains("ERROR"));
+        assertTrue(lines.get(3).contains("BLOB corruption"));
     }
 
 }

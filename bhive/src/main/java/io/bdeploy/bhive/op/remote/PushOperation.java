@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.ws.rs.core.UriBuilder;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.ReadOnlyOperation;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.objects.view.ManifestRefView;
@@ -27,6 +28,7 @@ import io.bdeploy.common.ActivityReporter.Activity;
  * Pushes manifests from the local {@link BHive} to a remote {@link BHive}. If no
  * manifests are given, all locally available manifests are pushed.
  */
+@ReadOnlyOperation
 public class PushOperation extends RemoteOperation<TransferStatistics, PushOperation> {
 
     private final SortedSet<Manifest.Key> manifests = new TreeSet<>();

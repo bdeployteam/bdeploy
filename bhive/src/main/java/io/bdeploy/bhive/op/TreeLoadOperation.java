@@ -5,6 +5,7 @@ import static io.bdeploy.common.util.RuntimeAssert.assertNotNull;
 import java.io.InputStream;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.ReadOnlyOperation;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.objects.ObjectDatabase;
@@ -16,6 +17,7 @@ import io.bdeploy.common.ActivityReporter.Activity;
  * {@link ObjectDatabase} of the {@link BHive}. The {@link ObjectId} must refer
  * to a {@link Tree}.
  */
+@ReadOnlyOperation
 public class TreeLoadOperation extends BHive.Operation<Tree> {
 
     private ObjectId treeId;

@@ -3,12 +3,14 @@ package io.bdeploy.bhive.op;
 import java.util.Optional;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.ReadOnlyOperation;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.util.RuntimeAssert;
 
 /**
  * Returns the next available version number for Manifests which use a simple counter versioning scheme.
  */
+@ReadOnlyOperation
 public class ManifestNextIdOperation extends BHive.Operation<Long> {
 
     private String key;

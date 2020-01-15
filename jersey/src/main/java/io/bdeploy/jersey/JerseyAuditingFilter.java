@@ -3,14 +3,16 @@ package io.bdeploy.jersey;
 import java.io.IOException;
 
 import javax.inject.Inject;
+import javax.ws.rs.HttpMethod;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
+import javax.ws.rs.core.Response.Status.Family;
 import javax.ws.rs.core.Response.StatusType;
 
 import io.bdeploy.jersey.audit.AuditRecord;
-import io.bdeploy.jersey.audit.Auditor;
 import io.bdeploy.jersey.audit.AuditRecord.Severity;
+import io.bdeploy.jersey.audit.Auditor;
 
 /**
  * A {@link ContainerResponseFilter} which audit's requests and their results.
@@ -30,6 +32,12 @@ public class JerseyAuditingFilter implements ContainerResponseFilter {
         }
 
         StatusType status = responseContext.getStatusInfo();
+
+        // skip GET reqeusts which are successful
+        if (status.getFamily() == Family.SUCCESSFUL && requestContext.getMethod().equals(HttpMethod.GET)) {
+            return;
+        }
+
         auditor.audit(AuditRecord.Builder.fromRequest(requestContext)
                 .setSeverity(responseContext.getStatus() > 400 ? Severity.WARNING : Severity.NORMAL)
                 .setMessage(status.getStatusCode() + ": " + status.getReasonPhrase()).build());

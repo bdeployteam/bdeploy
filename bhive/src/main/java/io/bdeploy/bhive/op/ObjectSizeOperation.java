@@ -4,6 +4,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.ReadOnlyOperation;
 import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditStrategy;
 import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditWith;
 import io.bdeploy.bhive.model.ObjectId;
@@ -13,6 +14,7 @@ import io.bdeploy.common.util.RuntimeAssert;
 /**
  * Measures the disc usage of all {@link ObjectId}s given and returns the sum.
  */
+@ReadOnlyOperation
 public class ObjectSizeOperation extends BHive.Operation<Long> {
 
     @AuditWith(AuditStrategy.COLLECTION_SIZE)

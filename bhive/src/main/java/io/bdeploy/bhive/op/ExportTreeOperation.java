@@ -5,6 +5,7 @@ import static io.bdeploy.common.util.RuntimeAssert.assertNotNull;
 import java.nio.file.Path;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.ReadOnlyOperation;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.objects.ReferenceHandler;
@@ -13,6 +14,7 @@ import io.bdeploy.common.ActivityReporter.Activity;
 /**
  * Export a {@link Tree} recursively into a directory and return the
  */
+@ReadOnlyOperation
 public class ExportTreeOperation extends BHive.Operation<Void> {
 
     private Path target;

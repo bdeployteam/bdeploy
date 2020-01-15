@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.ReadOnlyOperation;
 import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditStrategy;
 import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditWith;
 import io.bdeploy.bhive.model.Manifest;
@@ -30,6 +31,7 @@ import io.bdeploy.common.ActivityReporter.Activity;
  * If no {@link Manifest} is set, returns ALL {@link ObjectId}s known in the
  * {@link ObjectDatabase}.
  */
+@ReadOnlyOperation
 public class ObjectListOperation extends BHive.Operation<SortedSet<ObjectId>> {
 
     private static final Logger log = LoggerFactory.getLogger(ObjectListOperation.class);

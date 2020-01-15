@@ -3,12 +3,14 @@ package io.bdeploy.bhive.op;
 import java.util.SortedSet;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.ReadOnlyOperation;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.ActivityReporter.Activity;
 
 /**
  * Lists all {@link Manifest}s available in the {@link BHive}.
  */
+@ReadOnlyOperation
 public class ManifestListOperation extends BHive.Operation<SortedSet<Manifest.Key>> {
 
     private String key;

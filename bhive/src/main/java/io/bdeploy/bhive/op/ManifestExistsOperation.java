@@ -3,12 +3,14 @@ package io.bdeploy.bhive.op;
 import static io.bdeploy.common.util.RuntimeAssert.assertNotNull;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.ReadOnlyOperation;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.ActivityReporter.Activity;
 
 /**
  * Checks whether the given manifest exists in the underlying {@link BHive}
  */
+@ReadOnlyOperation
 public class ManifestExistsOperation extends BHive.Operation<Boolean> {
 
     private Manifest.Key manifest;

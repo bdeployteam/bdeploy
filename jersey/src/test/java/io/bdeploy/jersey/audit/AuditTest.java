@@ -91,11 +91,9 @@ public class AuditTest {
 
         RollingFileAuditor auditor = (RollingFileAuditor) srv.getAuditor();
         List<String> lines = Files.readAllLines(auditor.getLogFile());
-        assertEquals(4, lines.size());
-        assertTrue(lines.get(0).contains("q:x=[Test]"));
-        assertTrue(lines.get(2).contains("Not Found"));
-        assertTrue(lines.get(3).contains("Something happened"));
-        assertTrue(lines.get(3).contains("With a cause"));
+        assertEquals(2, lines.size());
+        assertTrue(lines.get(1).contains("Something happened"));
+        assertTrue(lines.get(1).contains("With a cause"));
     }
 
 }

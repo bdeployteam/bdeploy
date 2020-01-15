@@ -7,6 +7,7 @@ import java.io.InputStream;
 import com.google.common.base.Splitter;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.ReadOnlyOperation;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.objects.ObjectDatabase;
@@ -16,6 +17,7 @@ import io.bdeploy.common.ActivityReporter.Activity;
  * Loads the specified file by relative path from a {@link Tree} and its
  * underlying storage in the {@link ObjectDatabase} of the {@link BHive}.
  */
+@ReadOnlyOperation
 public class TreeEntryLoadOperation extends BHive.Operation<InputStream> {
 
     private String relPath;

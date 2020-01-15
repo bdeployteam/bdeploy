@@ -1,6 +1,7 @@
 package io.bdeploy.bhive.op;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.ReadOnlyOperation;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
@@ -11,6 +12,7 @@ import io.bdeploy.common.util.RuntimeAssert;
 /**
  * Scan a given {@link Manifest} and return a {@link TreeView} of it's content.
  */
+@ReadOnlyOperation
 public class ScanOperation extends BHive.Operation<TreeView> {
 
     private ObjectId treeId;
@@ -21,15 +23,15 @@ public class ScanOperation extends BHive.Operation<TreeView> {
     @Override
     public TreeView call() throws Exception {
         try (Activity activity = getActivityReporter().start("Scanning manifest...", -1)) {
-    		if (manifest != null) {
-            	Manifest mf = execute(new ManifestLoadOperation().setManifest(manifest));
-            	RuntimeAssert.assertNotNull(mf, "Given manifest not found");
-            	treeId = mf.getRoot();
-        	}
+            if (manifest != null) {
+                Manifest mf = execute(new ManifestLoadOperation().setManifest(manifest));
+                RuntimeAssert.assertNotNull(mf, "Given manifest not found");
+                treeId = mf.getRoot();
+            }
 
             RuntimeAssert.assertNotNull(treeId, "No tree to scan");
 
-        	return getObjectManager().scan(treeId, maxDepth, followReferences);
+            return getObjectManager().scan(treeId, maxDepth, followReferences);
         }
     }
 
