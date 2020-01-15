@@ -97,11 +97,16 @@
       <div class="mat-title">Upload from existing file</div>
       <mat-card-content class='uploadDialogContent'>
         <div>Note that uploaded files will be regarded as binary files until the file is saved to the server.</div>
-        <input #filePath placeholder="Enter path for file"/>
-        <div class="dropZone" appFileDrop (filesDropped)="handleDrop($event, filePath, file)" (filesHovered)="dropZoneState($event)" [ngClass]="{'dropZoneActive': dropZoneActive}">
+        <mat-form-field class='margin-top'>
+          <input matInput #filePath placeholder="Enter path for file"/>
+        </mat-form-field>
+        <div *ngIf='!fileUploadChosen' class="dropZone" appFileDrop (filesDropped)="handleDrop($event, filePath, file)" (filesHovered)="dropZoneState($event)" [ngClass]="{'dropZoneActive': dropZoneActive}">
             <mat-icon class="dropZoneIcon">cloud_upload</mat-icon>
             <span class="dropZoneText">Drop file to upload, or&nbsp;</span>
             <button (click)="file.click()" class="browseButton">browse.</button>
+        </div>
+        <div *ngIf='fileUploadChosen' class='uploadDialogContent'>
+          <mat-icon class='upload-dropped'>check</mat-icon>
         </div>
         <input #file type='file' (change)='handleChange(filePath, file)' style="display: none" placeholder="File to upload"/>
       </mat-card-content>

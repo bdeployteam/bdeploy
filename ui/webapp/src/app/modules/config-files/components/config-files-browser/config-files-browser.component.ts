@@ -79,6 +79,7 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
   public originalContentCache = new Map<string, string>();
   private overlayRef: OverlayRef;
   public dropZoneActive = false;
+  public fileUploadChosen = false;
 
   constructor(
     private fb: FormBuilder,
@@ -378,6 +379,7 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
 
   /** Opens a modal overlay popup showing the given template */
   openOverlay(template: TemplateRef<any>) {
+    this.fileUploadChosen = false;
     this.closeOverlay();
 
     this.overlayRef = this.overlay.create({
@@ -408,6 +410,7 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
 
   handleChange(fileName: HTMLInputElement, input: HTMLInputElement) {
     fileName.value = input.files.item(0).name;
+    this.fileUploadChosen = true;
   }
 
   handleDrop(fileList: FileList, fileName: HTMLInputElement, input: HTMLInputElement) {
