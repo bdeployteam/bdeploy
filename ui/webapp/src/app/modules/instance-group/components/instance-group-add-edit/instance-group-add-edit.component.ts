@@ -46,6 +46,7 @@ export class InstanceGroupAddEditComponent implements OnInit {
     description: ['', Validators.required],
     logo: [''],
     autoDelete: [''],
+    managed: [''],
   });
 
   get nameControl() {
