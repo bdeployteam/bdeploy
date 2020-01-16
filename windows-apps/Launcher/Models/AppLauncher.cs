@@ -259,11 +259,12 @@ namespace Bdeploy.Launcher
         public bool Restart()
         {
             string executable = Process.GetCurrentProcess().MainModule.FileName;
-            Log.Information("Restarting launcher: {0} {1}", executable, application);
+            string argument = string.Format("\"{0}\"", application);
+            Log.Information("Restarting launcher: {0} {1}", executable, argument);
 
             try
             {
-                int pid = Utils.RunProcess(executable, application);
+                int pid = Utils.RunProcess(executable, argument);
                 Log.Information("Updated launcher running with PID: {0}", pid);
                 return true;
             }

@@ -1,27 +1,28 @@
 package io.bdeploy.interfaces.variables;
 
-import java.util.function.UnaryOperator;
+import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 
 /**
  * Scopes resolving of parameter values to the given application. The actual resolving is done by another resolver.
  */
 public class ApplicationParameterValueResolver extends PrefixResolver {
 
-    private final String application;
-    private final UnaryOperator<String> parentResolver;
+    private final String appUid;
+    private final ApplicationParameterProvider provider;
 
-    public ApplicationParameterValueResolver(String application, UnaryOperator<String> parentResolver) {
+    public ApplicationParameterValueResolver(String appUid, InstanceNodeConfiguration nodeConfig) {
         super(Variables.PARAMETER_VALUE);
-        this.application = application;
-        this.parentResolver = parentResolver;
+        this.provider = new ApplicationParameterProvider(nodeConfig);
+        this.appUid = appUid;
     }
 
     @Override
     protected String doResolve(String variable) {
-        if (!variable.contains(":")) {
-            return parentResolver.apply(prefix.format(application + ":" + variable));
+        // Variable contains a reference to another application. Delegate resolving
+        if (variable.contains(":")) {
+            return null;
         }
-        return parentResolver.apply(prefix.format(variable));
+        return provider.getValueById(appUid, variable);
     }
 
 }

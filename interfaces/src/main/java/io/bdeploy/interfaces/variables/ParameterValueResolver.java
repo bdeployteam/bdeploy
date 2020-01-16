@@ -13,8 +13,14 @@ public class ParameterValueResolver extends PrefixResolver {
     }
 
     @Override
-    protected String doResolve(String variable) {
-        return provider.getParameterValue(variable);
+    protected String doResolve(String nameAndParam) {
+        int idx = nameAndParam.lastIndexOf(":");
+        if (idx == -1) {
+            throw new IllegalArgumentException("Illegal parameter reference. Expecting appName:paramId but got " + nameAndParam);
+        }
+        String app = nameAndParam.substring(0, idx);
+        String parameter = nameAndParam.substring(idx + 1, nameAndParam.length());
+        return provider.getValueByDisplayName(app, parameter);
     }
 
 }

@@ -60,6 +60,7 @@ public class ValueResolverTest {
         ApplicationConfiguration a1c = new ApplicationConfiguration();
         a1c.application = keyA1;
         a1c.name = "Application Number One";
+        a1c.uid = "fakeId";
         a1c.start = new CommandConfiguration();
         a1c.start.executable = "rel/to/launcher.sh";
         a1c.start.parameters.add(fakeParam("a1p1", "a1p1-value", "--param=a1p1-value"));
@@ -77,7 +78,7 @@ public class ValueResolverTest {
         list.add(new ParameterValueResolver(new ApplicationParameterProvider(dc)));
 
         // tests whether the use cases in the a1c start command work.
-        ProcessGroupConfiguration dd = dc.renderDescriptor(list);
+        ProcessGroupConfiguration dd = dc.renderDescriptor(list, dc);
 
         // unqualified reference when more than one manifest with the name exists
         assertThrows(RuntimeException.class, () -> list.apply(Variables.MANIFEST_REFERENCE.format("a")));
