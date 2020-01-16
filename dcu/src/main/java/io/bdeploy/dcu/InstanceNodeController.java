@@ -225,8 +225,7 @@ public class InstanceNodeController {
         processConfigurationTemplates(paths.get(SpecialDirectory.CONFIG), resolvers);
 
         // render the PCU information.
-        ProcessGroupConfiguration processGroupConfig = dc.renderDescriptor(resolvers);
-
+        ProcessGroupConfiguration processGroupConfig = dc.renderDescriptor(resolvers, dc);
         try {
             Files.write(paths.getAndCreate(SpecialDirectory.RUNTIME).resolve(PCU_JSON),
                     StorageHelper.toRawBytes(processGroupConfig));

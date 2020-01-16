@@ -514,7 +514,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Resolvers that are using the general ones to actually do the work
         CompositeResolver appSpecificResolvers = new CompositeResolver();
-        appSpecificResolvers.add(new ApplicationParameterValueResolver(appCfg.name, resolvers));
+        appSpecificResolvers.add(new ApplicationParameterValueResolver(appCfg.uid, clientCfg.instanceConfig));
         appSpecificResolvers.add(new ManifestSelfResolver(appCfg.application, resolvers));
         appSpecificResolvers.add(resolvers);
 

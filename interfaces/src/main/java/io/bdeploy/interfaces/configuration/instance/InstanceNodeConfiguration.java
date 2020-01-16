@@ -71,7 +71,7 @@ public class InstanceNodeConfiguration {
      * @param valueResolver a resolver queried for all variables to expand.
      * @return the rendered {@link ProcessGroupConfiguration}, which is machine specific.
      */
-    public ProcessGroupConfiguration renderDescriptor(VariableResolver valueResolver) {
+    public ProcessGroupConfiguration renderDescriptor(VariableResolver valueResolver, InstanceNodeConfiguration dc) {
         ProcessGroupConfiguration pgc = new ProcessGroupConfiguration();
         pgc.name = name;
         pgc.uuid = uuid;
@@ -82,7 +82,7 @@ public class InstanceNodeConfiguration {
         for (ApplicationConfiguration app : applications) {
             CompositeResolver list = new CompositeResolver();
             list.add(new ApplicationVariableResolver(app));
-            list.add(new ApplicationParameterValueResolver(app.name, valueResolver));
+            list.add(new ApplicationParameterValueResolver(app.uid, dc));
             list.add(new ManifestSelfResolver(app.application, valueResolver));
             list.add(valueResolver);
             ProcessConfiguration pc = app.renderDescriptor(list);
