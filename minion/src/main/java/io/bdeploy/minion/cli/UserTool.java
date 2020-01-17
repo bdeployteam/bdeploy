@@ -93,6 +93,7 @@ public class UserTool extends ConfiguredCliTool<UserConfig> {
                 UserInfo info = userDb.authenticate(config.createToken(), config.password());
                 if (info == null) {
                     helpAndFail("Invalid username / password");
+                    return; // make code analysis happy :)
                 }
                 String token = r.createToken(info.name, info.capabilities);
 

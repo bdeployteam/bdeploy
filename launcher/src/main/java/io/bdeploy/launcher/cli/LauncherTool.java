@@ -150,13 +150,19 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
             // Write audit logs to the user area if set
             Auditor auditor = null;
-            if (userArea != null) {
-                auditor = new RollingFileAuditor(userArea.resolve("logs"));
-            }
-            LauncherSplashReporter reporter = new LauncherSplashReporter(splash);
-            try (BHive hive = new BHive(bhiveDir.toUri(), auditor, reporter)) {
-                doCheckForLauncherUpdate(hive, reporter);
-                doLaunch(hive, reporter, splash, !config.dontWait());
+            try {
+                if (userArea != null) {
+                    auditor = new RollingFileAuditor(userArea.resolve("logs"));
+                }
+                LauncherSplashReporter reporter = new LauncherSplashReporter(splash);
+                try (BHive hive = new BHive(bhiveDir.toUri(), auditor, reporter)) {
+                    doCheckForLauncherUpdate(hive, reporter);
+                    doLaunch(hive, reporter, splash, !config.dontWait());
+                }
+            } finally {
+                if (auditor != null) {
+                    auditor.close();
+                }
             }
         } catch (SoftwareUpdateException ex) {
             log.error("Software update cannot be installed.", ex);
