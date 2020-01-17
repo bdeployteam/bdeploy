@@ -91,7 +91,7 @@ task runCypressHeadless(type: Exec, dependsOn: updateFixtures) {
     workingDir "$webappDir"
     group = BasePlugin.BUILD_GROUP
 
-    if(org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
+    if(!org.gradle.internal.os.OperatingSystem.current().isLinux()) {
         ignoreExitValue = true // for now, as jenkins fails very often due to the tests.
     }
 
