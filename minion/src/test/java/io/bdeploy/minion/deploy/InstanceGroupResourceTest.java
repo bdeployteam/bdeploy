@@ -19,6 +19,7 @@ import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
+import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.minion.TestFactory;
@@ -36,12 +37,12 @@ public class InstanceGroupResourceTest {
     private static final String GROUP_NAME = "demo";
 
     @Test
-    public void testListClientApps(InstanceGroupResource resource, BHive local, MasterRootResource root, RemoteService remote,
-            @TempDir Path tmp) throws IOException, InterruptedException {
+    public void testListClientApps(InstanceGroupResource resource, BHive local, MasterRootResource root,
+            CommonRootResource common, RemoteService remote, @TempDir Path tmp) throws IOException, InterruptedException {
         OperatingSystem runningOs = OsHelper.getRunningOs();
 
         // Create install a small demo instance
-        Key instance = TestFactory.createApplicationsAndInstance(local, root, remote, tmp, true);
+        Key instance = TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true);
         MasterNamedResource master = root.getNamedMaster(GROUP_NAME);
         master.install(instance);
 

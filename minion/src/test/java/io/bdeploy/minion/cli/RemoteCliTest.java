@@ -23,6 +23,7 @@ import io.bdeploy.common.TestCliTool;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
+import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestFactory;
@@ -44,9 +45,10 @@ public class RemoteCliTest {
     TestCliTool tools = new TestCliTool(new MinionServerCli());
 
     @Test
-    void testRemoteCli(BHive local, MasterRootResource master, CleanupResource cr, RemoteService remote, @TempDir Path tmp,
-            ActivityReporter reporter, MinionRoot mr, @AuthPack String auth) throws IOException, InterruptedException {
-        Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, master, remote, tmp, true);
+    void testRemoteCli(BHive local, MasterRootResource master, CommonRootResource common, CleanupResource cr,
+            RemoteService remote, @TempDir Path tmp, ActivityReporter reporter, MinionRoot mr, @AuthPack String auth)
+            throws IOException, InterruptedException {
+        Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true);
 
         String uuid = local.execute(new ManifestLoadOperation().setManifest(instance)).getLabels()
                 .get(InstanceManifest.INSTANCE_LABEL);

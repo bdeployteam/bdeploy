@@ -4,7 +4,7 @@ import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
-import io.bdeploy.interfaces.remote.MasterRootResource;
+import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.minion.cli.RemoteRepoTool.RepoConfig;
@@ -37,7 +37,7 @@ public class RemoteRepoTool extends RemoteServiceTool<RepoConfig> {
 
     @Override
     protected void run(RepoConfig config, RemoteService svc) {
-        MasterRootResource client = ResourceProvider.getResource(svc, MasterRootResource.class, null);
+        CommonRootResource client = ResourceProvider.getResource(svc, CommonRootResource.class, null);
         if (config.add() != null) {
             helpAndFailIfMissing(config.description(), "Missing --description");
 

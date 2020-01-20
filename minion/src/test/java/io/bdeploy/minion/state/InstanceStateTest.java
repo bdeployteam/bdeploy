@@ -18,7 +18,7 @@ import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.state.InstanceState;
-import io.bdeploy.interfaces.remote.MasterRootResource;
+import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestFactory;
 import io.bdeploy.minion.TestMinion;
@@ -29,7 +29,7 @@ import io.bdeploy.minion.TestMinion;
 public class InstanceStateTest {
 
     @Test
-    void writeRead(@TempDir Path tmp, MinionRoot root, MasterRootResource master, RemoteService remote, BHive local)
+    void writeRead(@TempDir Path tmp, MinionRoot root, CommonRootResource master, RemoteService remote, BHive local)
             throws IOException, InterruptedException {
         Key instanceKey = TestFactory.createApplicationsAndInstance(local, master, remote, tmp, false);
 

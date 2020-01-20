@@ -25,7 +25,7 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
 import io.bdeploy.interfaces.configuration.instance.FileStatusDto.FileStatusType;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
-import io.bdeploy.interfaces.remote.MasterRootResource;
+import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.minion.TestFactory;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.ui.api.ConfigFileResource;
@@ -39,7 +39,7 @@ import io.bdeploy.ui.dto.ConfigFileDto;
 public class ConfigFileResourceTest {
 
     @Test
-    void updates(BHive local, MasterRootResource master, InstanceGroupResource igr, RemoteService remote, @TempDir Path tmp)
+    void updates(BHive local, CommonRootResource master, InstanceGroupResource igr, RemoteService remote, @TempDir Path tmp)
             throws Exception {
         Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, master, remote, tmp, true);
         InstanceManifest im = InstanceManifest.of(local, instance);

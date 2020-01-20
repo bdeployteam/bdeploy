@@ -39,7 +39,7 @@ import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfigurat
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.product.ProductDescriptor;
 import io.bdeploy.interfaces.descriptor.product.ProductVersionDescriptor;
-import io.bdeploy.interfaces.remote.MasterRootResource;
+import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestMinion;
@@ -55,7 +55,7 @@ public class ProductCliTest {
     TestCliTool tools = new TestCliTool(new MinionServerCli());
 
     @Test
-    void testProductImportWithExtDep(MasterRootResource master, RemoteService svc, MinionRoot root, @TempDir Path temp,
+    void testProductImportWithExtDep(CommonRootResource master, RemoteService svc, MinionRoot root, @TempDir Path temp,
             ActivityReporter reporter, @AuthPack String auth) throws IOException {
         // add a repository
         SoftwareRepositoryConfiguration cfg = new SoftwareRepositoryConfiguration();

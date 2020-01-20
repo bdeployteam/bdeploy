@@ -15,7 +15,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import io.bdeploy.common.TestCliTool;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
-import io.bdeploy.interfaces.remote.MasterRootResource;
+import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.minion.TestMinion.AuthPack;
@@ -27,7 +27,7 @@ public class RepoCliTest {
     TestCliTool tools = new TestCliTool(new MinionServerCli());
 
     @Test
-    public void crud(MasterRootResource master, MinionRoot root) {
+    public void crud(CommonRootResource master, MinionRoot root) {
         assertTrue(master.getSoftwareRepositories().isEmpty());
 
         SoftwareRepositoryConfiguration cfg = new SoftwareRepositoryConfiguration();
@@ -46,7 +46,7 @@ public class RepoCliTest {
     }
 
     @Test
-    public void toolCreate(MasterRootResource master, RemoteService service, @AuthPack String auth, MinionRoot root) {
+    public void toolCreate(CommonRootResource master, RemoteService service, @AuthPack String auth, MinionRoot root) {
         tools.getTool(RemoteRepoTool.class, "--remote=" + service.getUri(), "--token=" + auth,
                 "--storage=" + root.getStorageLocations().get(0).toString(), "--add=test", "--description=desc").run();
 

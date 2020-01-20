@@ -44,6 +44,7 @@ import io.bdeploy.interfaces.directory.InstanceDirectory;
 import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
+import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.SlaveCleanupResource;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
@@ -67,14 +68,15 @@ public class MinionDeployTest {
 
     @Test
     @SlowTest
-    void testRemoteDeploy(BHive local, MasterRootResource master, CleanupResource cr, RemoteService remote, @TempDir Path tmp,
-            ActivityReporter reporter, MinionRoot mr) throws IOException, InterruptedException {
+    void testRemoteDeploy(BHive local, MasterRootResource master, CommonRootResource common, CleanupResource cr,
+            RemoteService remote, @TempDir Path tmp, ActivityReporter reporter, MinionRoot mr)
+            throws IOException, InterruptedException {
         SortedMap<Key, ObjectId> inventoryStart = null;
         try (RemoteBHive rbh = RemoteBHive.forService(remote, JerseyRemoteBHive.DEFAULT_NAME, reporter)) {
             inventoryStart = rbh.getManifestInventory();
         }
 
-        Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, master, remote, tmp, true);
+        Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true);
 
         String uuid = local.execute(new ManifestLoadOperation().setManifest(instance)).getLabels()
                 .get(InstanceManifest.INSTANCE_LABEL);
@@ -186,9 +188,10 @@ public class MinionDeployTest {
     }
 
     @Test
-    void testImportedDeploy(BHive local, MasterRootResource master, SlaveCleanupResource scr, RemoteService remote,
-            @TempDir Path tmp, ActivityReporter reporter, MinionRoot mr) throws IOException, InterruptedException {
-        Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, master, remote, tmp, true);
+    void testImportedDeploy(BHive local, MasterRootResource master, CommonRootResource common, SlaveCleanupResource scr,
+            RemoteService remote, @TempDir Path tmp, ActivityReporter reporter, MinionRoot mr)
+            throws IOException, InterruptedException {
+        Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true);
         InstanceManifest im1 = InstanceManifest.of(local, instance);
 
         /* STEP 1: export and re-import instance */

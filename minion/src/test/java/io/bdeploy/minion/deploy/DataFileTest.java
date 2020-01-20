@@ -29,6 +29,7 @@ import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.InstanceDirectory;
 import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
+import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestFactory;
@@ -40,9 +41,9 @@ import io.bdeploy.minion.TestMinion;
 public class DataFileTest {
 
     @Test
-    void testDataFile(BHive local, MasterRootResource master, RemoteService remote, @TempDir Path tmp, MinionRoot mr)
-            throws IOException, InterruptedException {
-        Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, master, remote, tmp, true);
+    void testDataFile(BHive local, MasterRootResource master, CommonRootResource common, RemoteService remote, @TempDir Path tmp,
+            MinionRoot mr) throws IOException, InterruptedException {
+        Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true);
 
         String uuid = local.execute(new ManifestLoadOperation().setManifest(instance)).getLabels()
                 .get(InstanceManifest.INSTANCE_LABEL);

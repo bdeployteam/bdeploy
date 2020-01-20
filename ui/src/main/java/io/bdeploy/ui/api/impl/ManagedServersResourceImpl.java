@@ -62,6 +62,7 @@ import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
+import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
@@ -103,7 +104,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
     @Override
     public void tryAutoAttach(String groupName, ManagedMasterDto target) {
         RemoteService svc = new RemoteService(UriBuilder.fromUri(target.uri).build(), target.auth);
-        MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class, context);
+        CommonRootResource root = ResourceProvider.getResource(svc, CommonRootResource.class, context);
 
         boolean igExists = false;
         for (InstanceGroupConfiguration cfg : root.getInstanceGroups()) {
@@ -334,7 +335,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         }
 
         // 1. Sync instance group data with managed server.
-        MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class, context);
+        CommonRootResource root = ResourceProvider.getResource(svc, CommonRootResource.class, context);
         if (root.getInstanceGroups().stream().map(g -> g.name).noneMatch(n -> n.equals(groupName))) {
             throw new WebApplicationException("Instance group (no longer?) found on the managed server", Status.NOT_FOUND);
         }
@@ -350,7 +351,8 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         hive.execute(new PushOperation().addManifest(igKey).setRemote(svc).setHiveName(groupName));
 
         // 2. Fetch all instance and meta manifests, no products.
-        MasterNamedResource master = root.getNamedMaster(groupName);
+        MasterRootResource masterRoot = ResourceProvider.getResource(svc, MasterRootResource.class, context);
+        MasterNamedResource master = masterRoot.getNamedMaster(groupName);
         SortedMap<Key, InstanceConfiguration> instances = master.listInstanceConfigurations(true);
         List<String> instanceIds = instances.values().stream().map(ic -> ic.uuid).collect(Collectors.toList());
 

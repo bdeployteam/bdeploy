@@ -29,7 +29,7 @@ import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
-import io.bdeploy.interfaces.remote.MasterRootResource;
+import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.pcu.TestAppFactory;
 import io.bdeploy.ui.api.Minion;
 
@@ -38,8 +38,8 @@ import io.bdeploy.ui.api.Minion;
  */
 public class TestFactory {
 
-    public static Manifest.Key createApplicationsAndInstance(BHive local, MasterRootResource master, RemoteService remote,
-            Path tmp, boolean push) throws IOException {
+    public static Manifest.Key createApplicationsAndInstance(BHive local, CommonRootResource root, RemoteService remote, Path tmp,
+            boolean push) throws IOException {
         /* STEP 1: Applications and external Application provided by development teams */
         Path app = TestAppFactory.createDummyApp("app", tmp);
         Path client = TestAppFactory.createDummyApp("client", tmp);
@@ -80,7 +80,7 @@ public class TestFactory {
         if (push) {
             /* STEP 3b: Establish sync with designated remote master */
             /* NOTE: alternative: sync via exported property file and master CLI in offline mode */
-            master.addInstanceGroup(desc, master.getStorageLocations().iterator().next());
+            root.addInstanceGroup(desc, root.getStorageLocations().iterator().next());
 
             /* STEP 4: push instance manifest to remote master */
             /* NOTE: instance manifest references all other required things */

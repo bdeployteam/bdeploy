@@ -18,7 +18,7 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
-import io.bdeploy.interfaces.remote.MasterRootResource;
+import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 
 public class RemoteDependencyFetcher implements DependencyFetcher {
@@ -63,7 +63,7 @@ public class RemoteDependencyFetcher implements DependencyFetcher {
 
         // 3. if not all dependencies have been found, fetch list of software repos from master
         if (!remaining.isEmpty()) {
-            MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class, null);
+            CommonRootResource root = ResourceProvider.getResource(svc, CommonRootResource.class, null);
 
             // 4. check every software repo for the required dependencies as long as something is missing.
             for (SoftwareRepositoryConfiguration repo : root.getSoftwareRepositories()) {
