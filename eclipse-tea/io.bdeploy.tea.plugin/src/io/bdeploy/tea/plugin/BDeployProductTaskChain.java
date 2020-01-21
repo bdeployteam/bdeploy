@@ -149,6 +149,15 @@ public class BDeployProductTaskChain implements TaskChain {
 
         BDeployBuildProductTask build = new BDeployBuildProductTask(pd, hive, target);
         c.addTask(build);
+
+        if (target == null && cfg.bdeployProductPushServer != null) {
+            target = new BDeployTargetSpec();
+            target.name = "Configured by headless build";
+            target.uri = cfg.bdeployProductPushServer;
+            target.token = cfg.bdeployProductPushToken;
+            target.instanceGroup = cfg.bdeployProductPushGroup;
+        }
+
         if (target != null) {
             c.addTask(new BDeployProductPushTask(hive, () -> build.getKey(), target));
         } else {

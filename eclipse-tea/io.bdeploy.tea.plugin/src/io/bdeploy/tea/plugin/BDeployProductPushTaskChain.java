@@ -51,6 +51,13 @@ public class BDeployProductPushTaskChain implements TaskChain {
         if (product == null) {
             product = Manifest.Key.parse(cfg.bdeployProductPushKey);
         }
+        if (target == null) {
+            target = new BDeployTargetSpec();
+            target.name = "Configured by headless build";
+            target.uri = cfg.bdeployProductPushServer;
+            target.token = cfg.bdeployProductPushToken;
+            target.instanceGroup = cfg.bdeployProductPushGroup;
+        }
 
         File hive = new File(dirs.getProductDirectory(), "bhive");
         c.addTask(new BDeployProductPushTask(hive, () -> product, target));

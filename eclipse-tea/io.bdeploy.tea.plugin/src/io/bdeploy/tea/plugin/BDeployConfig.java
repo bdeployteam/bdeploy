@@ -17,6 +17,15 @@ public class BDeployConfig implements TaskingConfigurationExtension {
     @TaskingConfigProperty(description = "Key of the product to push", headlessOnly = true)
     public String bdeployProductPushKey;
 
+    @TaskingConfigProperty(description = "URI of target server to push to", headlessOnly = true)
+    public String bdeployProductPushServer;
+
+    @TaskingConfigProperty(description = "Token of target server to push to", headlessOnly = true)
+    public String bdeployProductPushToken;
+
+    @TaskingConfigProperty(description = "Instance Group on target server to push to", headlessOnly = true)
+    public String bdeployProductPushGroup;
+
     @TaskingConfigProperty(description = "Path to the product list file, may contain string substitutions.")
     public String bdeployProductListFile;
 
