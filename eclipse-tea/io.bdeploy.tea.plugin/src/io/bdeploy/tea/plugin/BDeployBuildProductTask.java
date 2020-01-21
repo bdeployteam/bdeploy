@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
 
 import javax.ws.rs.core.UriBuilder;
 
@@ -33,6 +34,7 @@ import org.eclipse.tea.library.build.util.FileUtils;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.RemoteService;
@@ -43,6 +45,7 @@ import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.dependencies.DependencyFetcher;
 import io.bdeploy.interfaces.manifest.dependencies.LocalDependencyFetcher;
 import io.bdeploy.interfaces.manifest.dependencies.RemoteDependencyFetcher;
+import io.bdeploy.tea.plugin.server.BDeployTargetSpec;
 import io.bdeploy.tea.plugin.services.BDeployApplicationBuild;
 
 @SuppressWarnings("restriction")
@@ -53,10 +56,13 @@ public class BDeployBuildProductTask {
 
     private final ProductDesc desc;
     private Manifest.Key key;
-    private File target;
+    private final File target;
+    private final BDeployTargetSpec pushTarget;
 
-    public BDeployBuildProductTask(ProductDesc desc) {
+    public BDeployBuildProductTask(ProductDesc desc, File target, BDeployTargetSpec pushTarget) {
         this.desc = desc;
+        this.target = target;
+        this.pushTarget = pushTarget;
     }
 
     @Override
@@ -67,7 +73,6 @@ public class BDeployBuildProductTask {
     @Execute
     public void build(BuildDirectories dirs, TaskingLog log, BDeployConfig cfg, TeaBuildVersionService bvs) throws Exception {
         File prodInfoDir = new File(dirs.getProductDirectory(), "prod-info");
-        target = new File(dirs.getProductDirectory(), "bhive");
 
         if (cfg.clearBHive) {
             log.info("Clearing " + target);
@@ -135,7 +140,24 @@ public class BDeployBuildProductTask {
 
             DependencyFetcher fetcher;
             if (svc != null) {
-                fetcher = new RemoteDependencyFetcher(svc, cfg.bdeployTargetInstanceGroup, reporter);
+                fetcher = new RemoteDependencyFetcher(svc, null, reporter);
+                if (pushTarget != null) {
+                    DependencyFetcher origFetcher = fetcher;
+                    DependencyFetcher groupFetcher = new RemoteDependencyFetcher(
+                            new RemoteService(UriBuilder.fromUri(pushTarget.uri).build(), pushTarget.token),
+                            pushTarget.instanceGroup, reporter);
+                    fetcher = new DependencyFetcher() {
+
+                        @Override
+                        public SortedSet<Key> fetch(BHive hive, SortedSet<String> deps, OperatingSystem os) {
+                            SortedSet<Key> k = groupFetcher.fetch(hive, deps, os);
+                            if (k == null) {
+                                k = origFetcher.fetch(hive, deps, os);
+                            }
+                            return k;
+                        }
+                    };
+                }
             } else {
                 fetcher = new LocalDependencyFetcher();
             }

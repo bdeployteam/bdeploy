@@ -3,27 +3,35 @@
  */
 package io.bdeploy.tea.plugin;
 
+import java.util.Map;
+
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+import io.bdeploy.tea.plugin.server.BDeployServerPanel;
+import io.bdeploy.tea.plugin.server.BDeployTargetSpec;
+
 public class BDeployChooseProductFileDialog extends TitleAreaDialog {
 
     private String selected;
+    private BDeployTargetSpec target;
     private final BDeployProductListDescriptor products;
+    private Runnable buttonUpdate;
 
     public BDeployChooseProductFileDialog(Shell parentShell, BDeployProductListDescriptor products) {
         super(parentShell);
@@ -33,6 +41,10 @@ public class BDeployChooseProductFileDialog extends TitleAreaDialog {
 
     public String getChosenFile() {
         return selected;
+    }
+
+    public BDeployTargetSpec getChosenTarget() {
+        return target;
     }
 
     @Override
@@ -46,28 +58,80 @@ public class BDeployChooseProductFileDialog extends TitleAreaDialog {
 
         TableViewer tv;
         tv = new TableViewer(comp, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
-        GridDataFactory.fillDefaults().grab(true, true).hint(300, 300).applyTo(tv.getControl());
-
+        GridDataFactory.fillDefaults().grab(true, true).hint(300, 150).applyTo(tv.getControl());
         tv.setContentProvider(ArrayContentProvider.getInstance());
-        tv.setLabelProvider(new LabelProvider());
-        tv.addSelectionChangedListener(new ISelectionChangedListener() {
+        tv.getTable().setHeaderVisible(true);
 
+        TableViewerColumn nameCol = new TableViewerColumn(tv, SWT.NONE);
+        nameCol.getColumn().setWidth(200);
+        nameCol.getColumn().setText("Name");
+        nameCol.setLabelProvider(new ColumnLabelProvider() {
+
+            @SuppressWarnings("unchecked")
             @Override
-            public void selectionChanged(SelectionChangedEvent event) {
-                IStructuredSelection sel = (IStructuredSelection) event.getSelection();
-                if (sel == null || sel.isEmpty()) {
-                    selected = null;
-                } else {
-                    selected = products.products.get(sel.getFirstElement());
-                }
-                Button button = getButton(IDialogConstants.OK_ID);
-                if (button != null) {
-                    button.setEnabled(selected != null);
-                }
-            }
+            public String getText(Object element) {
+                return ((Map.Entry<String, String>) element).getKey();
+            };
         });
 
-        tv.setInput(products.products.keySet());
+        TableViewerColumn fileCol = new TableViewerColumn(tv, SWT.NONE);
+        fileCol.getColumn().setWidth(200);
+        fileCol.getColumn().setText("File");
+        fileCol.setLabelProvider(new ColumnLabelProvider() {
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public String getText(Object element) {
+                return ((Map.Entry<String, String>) element).getValue();
+            };
+        });
+
+        tv.setInput(products.products.entrySet());
+
+        Button radioZip = new Button(comp, SWT.RADIO);
+        GridDataFactory.fillDefaults().grab(true, false).applyTo(radioZip);
+        radioZip.setText("Compress result and archive in the Workspace");
+
+        Button radioPush = new Button(comp, SWT.RADIO);
+        GridDataFactory.fillDefaults().grab(true, false).applyTo(radioPush);
+        radioPush.setText("Push result to selected target:");
+
+        BDeployServerPanel panel = new BDeployServerPanel(comp);
+        GridDataFactory.fillDefaults().hint(300, 150).applyTo(panel);
+
+        buttonUpdate = () -> {
+            Button button = getButton(IDialogConstants.OK_ID);
+            if (button != null) {
+                button.setEnabled(selected != null && (target != null || radioZip.getSelection()));
+            }
+        };
+
+        tv.addSelectionChangedListener(event -> {
+            IStructuredSelection sel = (IStructuredSelection) event.getSelection();
+            if (sel == null || sel.isEmpty()) {
+                selected = null;
+            } else {
+                selected = products.products.get(sel.getFirstElement());
+            }
+            buttonUpdate.run();
+
+        });
+
+        panel.addSelectionListener(s -> {
+            target = s;
+            buttonUpdate.run();
+        });
+
+        radioPush.setSelection(true);
+
+        radioZip.addSelectionListener(new SelectionAdapter() {
+
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                panel.setEnabled(!radioZip.getSelection());
+                buttonUpdate.run();
+            }
+        });
 
         return comp;
     }
@@ -76,7 +140,7 @@ public class BDeployChooseProductFileDialog extends TitleAreaDialog {
     protected void createButtonsForButtonBar(Composite parent) {
         super.createButtonsForButtonBar(parent);
 
-        getButton(IDialogConstants.OK_ID).setEnabled(selected != null);
+        buttonUpdate.run();
     }
 
 }

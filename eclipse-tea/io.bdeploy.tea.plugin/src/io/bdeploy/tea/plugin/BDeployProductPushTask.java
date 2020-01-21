@@ -4,6 +4,7 @@
 package io.bdeploy.tea.plugin;
 
 import java.io.File;
+import java.util.function.Supplier;
 
 import javax.ws.rs.core.UriBuilder;
 
@@ -18,36 +19,36 @@ import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.tea.plugin.server.BDeployTargetSpec;
 
 public class BDeployProductPushTask {
 
     private final File hive;
-    private final Key product;
+    private final Supplier<Key> product;
+    private final BDeployTargetSpec target;
 
-    public BDeployProductPushTask(File hive, Manifest.Key product) {
+    public BDeployProductPushTask(File hive, Supplier<Manifest.Key> product, BDeployTargetSpec target) {
         this.hive = hive;
         this.product = product;
+        this.target = target;
     }
 
     @Execute
-    void push(BDeployConfig cfg, TaskingLog log, BuildDirectories dirs) {
+    void push(TaskingLog log, BuildDirectories dirs) {
         ActivityReporter.Stream reporter = new ActivityReporter.Stream(log.info());
 
-        RemoteService svc = cfg.bdeployServer == null ? null
-                : new RemoteService(UriBuilder.fromUri(cfg.bdeployServer).build(), cfg.bdeployServerToken);
+        RemoteService svc = target.uri == null ? null : new RemoteService(UriBuilder.fromUri(target.uri).build(), target.token);
 
-        if (svc == null || cfg.bdeployTargetInstanceGroup == null || cfg.bdeployTargetInstanceGroup.isEmpty()) {
+        if (svc == null || target.instanceGroup == null || target.instanceGroup.isEmpty()) {
             throw new IllegalStateException("Server or instance group not configured, see preferences.");
         }
 
         try (BHive bhive = new BHive(hive.toURI(), reporter)) {
             // 1: optionally push
-            if (svc != null && cfg.bdeployTargetInstanceGroup != null && !cfg.bdeployTargetInstanceGroup.isEmpty()) {
-                log.info("Pushing result to " + svc.getUri() + " | " + cfg.bdeployTargetInstanceGroup);
-                try (NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
-                    PushOperation pushOp = new PushOperation();
-                    bhive.execute(pushOp.addManifest(product).setHiveName(cfg.bdeployTargetInstanceGroup).setRemote(svc));
-                }
+            log.info("Pushing result to " + svc.getUri() + " | " + target.instanceGroup);
+            try (NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
+                PushOperation pushOp = new PushOperation();
+                bhive.execute(pushOp.addManifest(product.get()).setHiveName(target.instanceGroup).setRemote(svc));
             }
         }
     }

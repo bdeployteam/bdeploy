@@ -23,13 +23,10 @@ public class BDeployConfig implements TaskingConfigurationExtension {
     @TaskingConfigProperty(description = "Clear BHive on build")
     public boolean clearBHive = false;
 
-    @TaskingConfigProperty(description = "BDeploy Server")
+    @TaskingConfigProperty(description = "BDeploy Software Repositories")
     public String bdeployServer; // default none
 
-    @TaskingConfigProperty(description = "BDeploy Server Token")
+    @TaskingConfigProperty(description = "BDeploy Software Repositories Server Token")
     public String bdeployServerToken; // default none
-
-    @TaskingConfigProperty(description = "Instance Group to push result to")
-    public String bdeployTargetInstanceGroup; // default none
 
 }

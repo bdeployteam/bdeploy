@@ -3,6 +3,7 @@
  */
 package io.bdeploy.tea.plugin;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -38,6 +39,7 @@ import org.osgi.service.component.annotations.Component;
 
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.tea.plugin.BDeployBuildProductTask.ProductDesc;
+import io.bdeploy.tea.plugin.server.BDeployTargetSpec;
 import io.bdeploy.tea.plugin.services.BDeployApplicationBuild;
 import io.bdeploy.tea.plugin.services.BDeployApplicationDescriptor;
 import io.bdeploy.tea.plugin.services.BDeployApplicationService;
@@ -45,11 +47,12 @@ import io.bdeploy.tea.plugin.services.BDeployApplicationService.CreateApplicatio
 
 @SuppressWarnings("restriction")
 @Component
-@TaskChainId(description = "Build BDeploy Product", alias = "BDeployProduct")
+@TaskChainId(description = "Build BDeploy Product...", alias = "BDeployProduct")
 @TaskChainMenuEntry(path = BuildLibraryMenu.MENU_BUILD, groupingId = "BDeploy", icon = "icons/bdeploy.png")
 public class BDeployProductTaskChain implements TaskChain {
 
     private Path bdeployProductFile;
+    private BDeployTargetSpec target;
 
     @TaskChainUiInit
     public void uiInit(Shell parent, BDeployConfig cfg) throws IOException, CoreException {
@@ -72,17 +75,14 @@ public class BDeployProductTaskChain implements TaskChain {
 
         Path rootPath = listPath.getParent();
 
-        if (listDesc.products.size() == 1) {
-            bdeployProductFile = rootPath.resolve(listDesc.products.values().iterator().next());
-        } else {
-            BDeployChooseProductFileDialog dlg = new BDeployChooseProductFileDialog(parent, listDesc);
-            dlg.setBlockOnOpen(true);
-            if (dlg.open() != Dialog.OK) {
-                throw new OperationCanceledException();
-            }
-
-            bdeployProductFile = rootPath.resolve(dlg.getChosenFile());
+        BDeployChooseProductFileDialog dlg = new BDeployChooseProductFileDialog(parent, listDesc);
+        dlg.setBlockOnOpen(true);
+        if (dlg.open() != Dialog.OK) {
+            throw new OperationCanceledException();
         }
+
+        target = dlg.getChosenTarget();
+        bdeployProductFile = rootPath.resolve(dlg.getChosenFile());
     }
 
     @SuppressWarnings("unchecked")
@@ -90,6 +90,8 @@ public class BDeployProductTaskChain implements TaskChain {
     public void init(TaskExecutionContext c, TaskingLog log, BDeployConfig cfg, DynamicProductBuildRegistry registry,
             BuildDirectories dirs, @Service List<BDeployApplicationService> appServices, IEclipseContext ctx)
             throws CoreException {
+
+        File hive = new File(dirs.getProductDirectory(), "bhive");
 
         // to produce reproducible JAR files (timestamps).
         ZipExecFactory.setIgnoreExternalZipExe(true);
@@ -145,9 +147,13 @@ public class BDeployProductTaskChain implements TaskChain {
         c.addTask(BackgroundTask
                 .allBarrier(pd.apps.stream().map(a -> a.task).filter(Objects::nonNull).collect(Collectors.toList())));
 
-        BDeployBuildProductTask build = new BDeployBuildProductTask(pd);
+        BDeployBuildProductTask build = new BDeployBuildProductTask(pd, hive, target);
         c.addTask(build);
-        c.addTask(new BDeployPackageProductTask(build));
+        if (target != null) {
+            c.addTask(new BDeployProductPushTask(hive, () -> build.getKey(), target));
+        } else {
+            c.addTask(new BDeployPackageProductTask(build));
+        }
         c.addTask(cache.getCleanup());
     }
 

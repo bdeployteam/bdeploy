@@ -22,6 +22,7 @@ import org.eclipse.tea.library.build.menu.BuildLibraryMenu;
 import org.osgi.service.component.annotations.Component;
 
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.tea.plugin.server.BDeployTargetSpec;
 
 @Component
 @TaskChainId(description = "Push BDeploy Product...", alias = "BDeployProductPush")
@@ -29,6 +30,7 @@ import io.bdeploy.bhive.model.Manifest;
 public class BDeployProductPushTaskChain implements TaskChain {
 
     private Manifest.Key product;
+    private BDeployTargetSpec target;
 
     @TaskChainUiInit
     public void uiInit(Shell parent, BuildDirectories dirs) throws IOException, CoreException {
@@ -40,6 +42,7 @@ public class BDeployProductPushTaskChain implements TaskChain {
             throw new OperationCanceledException();
         }
 
+        target = dlg.getChosenTarget();
         product = dlg.getChosenProduct();
     }
 
@@ -50,7 +53,7 @@ public class BDeployProductPushTaskChain implements TaskChain {
         }
 
         File hive = new File(dirs.getProductDirectory(), "bhive");
-        c.addTask(new BDeployProductPushTask(hive, product));
+        c.addTask(new BDeployProductPushTask(hive, () -> product, target));
     }
 
 }
