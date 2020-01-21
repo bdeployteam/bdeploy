@@ -13,6 +13,7 @@
       <mat-divider></mat-divider>
       <button mat-menu-item [routerLink]="['/admin/all', {outlets: { panel: ['hive', {hive: currentGroup.name}] } }]">Hive</button>
       <button mat-menu-item [routerLink]="['/instancegroup/products', currentGroup.name]">Products</button>
+      <button mat-menu-item [routerLink]="['/instancegroup/permissions', currentGroup.name]">Permissions</button>
       <ng-container *ngIf='isAttachAllowed'>
           <mat-divider></mat-divider>
           <button mat-menu-item [routerLink]="['/servers/browser', currentGroup.name]">Managed Servers...</button>

@@ -5,6 +5,7 @@ import { CanDeactivateGuard } from '../shared/guards/can-deactivate.guard';
 import { ClientAppsComponent } from './components/client-apps/client-apps.component';
 import { InstanceGroupAddEditComponent } from './components/instance-group-add-edit/instance-group-add-edit.component';
 import { InstanceGroupBrowserComponent } from './components/instance-group-browser/instance-group-browser.component';
+import { InstanceGroupPermissionsComponent } from './components/instance-group-permissions/instance-group-permissions.component';
 import { ProductsComponent } from './components/products/products.component';
 
 const IG_ROUTES: Route[] = [
@@ -33,6 +34,13 @@ const IG_ROUTES: Route[] = [
     component: ProductsComponent,
     canActivate: [AuthGuard],
     data: { title: 'Manage Products (${params["group"]})', header: 'Manage Products' }
+  },
+  {
+    path: 'permissions/:name',
+    component: InstanceGroupPermissionsComponent,
+    canActivate: [AuthGuard],
+    canDeactivate: [CanDeactivateGuard],
+    data: { title: 'Manage Permissions of Instance Group (${params["name"]})', header: 'Instance Group Permissions' }
   },
   {
     path: 'clientapps/:group',

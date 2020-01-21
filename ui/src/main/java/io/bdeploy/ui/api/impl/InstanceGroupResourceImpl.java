@@ -39,6 +39,7 @@ import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
+import io.bdeploy.interfaces.configuration.instance.InstanceGroupPermissionDto;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
@@ -155,6 +156,11 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
                 }
             }
         }
+    }
+
+    @Override
+    public void updatePermissions(String group, InstanceGroupPermissionDto[] permissions) {
+        auth.updateInstanceGroupPermissions(group, permissions);
     }
 
     @Override

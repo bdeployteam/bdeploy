@@ -1,0 +1,27 @@
+<h1 mat-dialog-title>Add User</h1>
+<div mat-dialog-content>
+  <form>
+    <div mat-dialog-content class='flex-content'>
+        <mat-form-field>
+          <input matInput placeholder="User to add" [matAutocomplete]="auto" [formControl]="userControl">
+            <mat-autocomplete #auto="matAutocomplete">
+              <mat-option *ngFor="let u of filteredUsers | async" [value]="u.name">
+                <span class="option">
+                  <app-user-avatar [gravatar]='!settings.isLoading() && settings.getSettings().general.enableGravatar' [mail]='u.email'></app-user-avatar>
+                  <span><b>{{u.fullName}}</b> ({{u.name}})</span>
+                </span>
+              </mat-option>
+              <mat-option *ngIf="filteredUsersShortened | async" [value]="" disabled>
+                <span class="option">
+                  <span>...</span>
+                </span>
+              </mat-option>
+            </mat-autocomplete>
+        </mat-form-field>
+    </div>
+  </form>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-raised-button [mat-dialog-close]="null">Cancel</button>
+  <button mat-raised-button color="primary" [disabled]="!isValid()" [mat-dialog-close]="getResult()">Ok</button>
+</div>

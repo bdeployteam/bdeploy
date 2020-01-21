@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { InstanceClientAppsDto, InstanceGroupConfiguration, OperatingSystem } from '../../../models/gen.dtos';
+import { InstanceClientAppsDto, InstanceGroupConfiguration, InstanceGroupPermissionDto, OperatingSystem } from '../../../models/gen.dtos';
 import { ConfigService } from '../../core/services/config.service';
 import { Logger, LoggingService } from '../../core/services/logging.service';
 import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
@@ -56,6 +56,12 @@ export class InstanceGroupService {
     return this.http.post(url, group);
   }
 
+  public updateInstanceGroupPermissions(name: string, permissions: InstanceGroupPermissionDto[]) {
+    const url: string = this.cfg.config.api + InstanceGroupService.BASEPATH + '/' + name + '/permissions';
+    this.log.debug('updateInstanceGroupPermissions: ' + url);
+    return this.http.post(url, permissions);
+  }
+
   public deleteInstanceGroup(name: string) {
     const url: string = this.cfg.config.api + InstanceGroupService.BASEPATH + '/' + name;
     this.log.debug('deleteInstanceGroup: ' + url);
@@ -85,4 +91,5 @@ export class InstanceGroupService {
     formData.append('image', file, file.name);
     return this.http.post<Response>(url, formData);
   }
+
 }

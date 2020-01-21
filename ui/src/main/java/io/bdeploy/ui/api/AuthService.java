@@ -6,6 +6,7 @@ import java.util.SortedSet;
 
 import io.bdeploy.common.security.ScopedCapability;
 import io.bdeploy.interfaces.UserInfo;
+import io.bdeploy.interfaces.configuration.instance.InstanceGroupPermissionDto;
 
 public interface AuthService {
 
@@ -20,6 +21,14 @@ public interface AuthService {
      * @param info the updated user information.
      */
     public void updateUserInfo(UserInfo info);
+
+    /**
+     * Updates the ScopedCapabilities for a list of users on a single InstanceGroup.
+     *
+     * @param group the name of the InstanceGroup.
+     * @param permissions list of user with Capability.
+     */
+    public void updateInstanceGroupPermissions(String group, InstanceGroupPermissionDto[] permissions);
 
     /**
      * @param user the user to create

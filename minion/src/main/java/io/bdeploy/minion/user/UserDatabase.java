@@ -37,6 +37,7 @@ import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.security.ScopedCapability;
 import io.bdeploy.interfaces.UserInfo;
+import io.bdeploy.interfaces.configuration.instance.InstanceGroupPermissionDto;
 import io.bdeploy.interfaces.manifest.SettingsManifest;
 import io.bdeploy.interfaces.settings.AuthenticationSettingsDto;
 import io.bdeploy.minion.MinionRoot;
@@ -87,6 +88,26 @@ public class UserDatabase implements AuthService {
         info.password = old.password; // don't update this.
 
         internalUpdate(info.name, info);
+    }
+
+    @Override
+    public synchronized void updateInstanceGroupPermissions(String group, InstanceGroupPermissionDto[] permissions) {
+        for (InstanceGroupPermissionDto dto : permissions) {
+            UserInfo info = getUser(dto.user);
+            if (info == null) {
+                throw new IllegalStateException("Cannot find user " + dto.user);
+            }
+
+            // clear all scoped capabilities for 'group'
+            info.capabilities.removeIf(c -> group.equals(c.scope));
+
+            // add given scoped capability
+            if (dto.capability != null) {
+                info.capabilities.add(new ScopedCapability(group, dto.capability));
+            }
+
+            internalUpdate(info.name, info);
+        }
     }
 
     @Override

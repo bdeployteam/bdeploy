@@ -21,6 +21,7 @@ import io.bdeploy.common.security.RequiredCapability;
 import io.bdeploy.common.security.ScopedCapability.Capability;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
+import io.bdeploy.interfaces.configuration.instance.InstanceGroupPermissionDto;
 import io.bdeploy.jersey.ActivityScope;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import io.bdeploy.ui.dto.InstanceClientAppsDto;
@@ -46,6 +47,10 @@ public interface InstanceGroupResource {
     @Path("/{group}")
     @RequiredCapability(capability = Capability.WRITE, scope = "group")
     public void update(@ActivityScope @PathParam("group") String group, InstanceGroupConfiguration config);
+
+    @POST
+    @Path("/{group}/permissions")
+    public void updatePermissions(@ActivityScope @PathParam("group") String group, InstanceGroupPermissionDto permissions[]);
 
     @DELETE
     @Path("/{group}")
