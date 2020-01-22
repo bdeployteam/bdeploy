@@ -156,25 +156,25 @@ public class BDeployServerEditDialog extends TitleAreaDialog {
         boolean canVerify = true;
         boolean canLoad = true;
 
-        if (template.name.isBlank()) {
+        if (template.name.isEmpty()) {
             setMessage("Provide a display name", IMessageProvider.ERROR);
         }
-        if (template.instanceGroup.isBlank()) {
+        if (template.instanceGroup.isEmpty()) {
             canVerify = false;
             setMessage("Provide an instance group name", IMessageProvider.ERROR);
         }
-        if (template.uri.isBlank() || !template.uri.startsWith("https") || !template.uri.endsWith("/api")) {
+        if (template.uri.isEmpty() || !template.uri.startsWith("https") || !template.uri.endsWith("/api")) {
             canVerify = false;
             canLoad = false;
             setMessage("Provide an URI with the format 'https://host:port/api'", IMessageProvider.ERROR);
         }
-        if (template.token.isBlank()) {
+        if (template.token.isEmpty()) {
             canVerify = false;
             canLoad = false;
             setMessage("Provide a valid token", IMessageProvider.ERROR);
         }
 
-        if (canVerify && !template.name.isBlank()) {
+        if (canVerify && !template.name.isEmpty()) {
             setMessage("Provide connection details for the server.", IMessageProvider.INFORMATION);
             enable = true;
         }
