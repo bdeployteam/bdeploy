@@ -28,8 +28,12 @@
   width: 100%;
 }
 
-.wide {
-  width: 25%;
+.col-wide {
+  flex: 1 1 25%;
+}
+
+.col-icon {
+  width: 60px;
 }
 
 .capability {

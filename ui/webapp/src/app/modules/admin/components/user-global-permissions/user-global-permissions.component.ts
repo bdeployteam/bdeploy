@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material';
-import { Capability, ScopedCapability, UserInfo } from 'src/app/models/gen.dtos';
+import { Capability, UserInfo } from 'src/app/models/gen.dtos';
 
 @Component({
   selector: 'app-user-global-permissions',
@@ -9,37 +9,50 @@ import { Capability, ScopedCapability, UserInfo } from 'src/app/models/gen.dtos'
 })
 export class UserGlobalPermissionsComponent implements OnInit {
 
-  public admin: boolean;
-  public read: boolean;
-  public write: boolean;
+  public slider = 0;
 
   constructor(@Inject(MAT_DIALOG_DATA) public userInfo: UserInfo) { }
 
   public ngOnInit() {
     console.log('userInfo = ' + JSON.stringify(this.userInfo, null, '\t'));
-    this.admin = this.hasCapability(Capability.ADMIN);
-    this.read = this.hasCapability(Capability.READ);
-    this.write = this.hasCapability(Capability.WRITE);
-  }
 
-  public getResult(): UserInfo {
-    this.updateCapability(Capability.ADMIN, this.admin);
-    this.updateCapability(Capability.READ, this.read);
-    this.updateCapability(Capability.WRITE, this.write);
-    return this.userInfo;
+    if (this.hasCapability(Capability.ADMIN)) {
+      this.slider = 3;
+    } else if (this.hasCapability(Capability.WRITE)) {
+      this.slider = 2;
+    } else if (this.hasCapability(Capability.READ)) {
+      this.slider = 1;
+    } else {
+      this.slider = 0;
+    }
   }
 
   private hasCapability(capability: Capability): boolean {
     return this.userInfo.capabilities.find(c => !c.scope && c.capability === capability) != null;
   }
 
-  private updateCapability(capabiltiy: Capability, newValue: boolean) {
-    const curValue = this.hasCapability(capabiltiy);
-    if ( curValue && !newValue) {
-      this.userInfo.capabilities = this.userInfo.capabilities.filter(c => c.scope || c.capability !== capabiltiy);
-    } else if (!curValue && newValue) {
-      const sc: ScopedCapability = {scope: null, capability: capabiltiy};
-      this.userInfo.capabilities.push(sc);
-    }
+  public setSlider(val: number) {
+    this.slider = val;
   }
+
+  public getClass(val: number) {
+    return val === this.slider ? 'label-selected' : 'label-unselected';
+  }
+
+  public getResult(): UserInfo {
+    this.userInfo.capabilities = this.userInfo.capabilities.filter(c => c.scope);
+    switch (this.slider) {
+      case 1:
+        this.userInfo.capabilities.push({scope: null, capability: Capability.READ});
+        break;
+      case 2:
+        this.userInfo.capabilities.push({scope: null, capability: Capability.WRITE});
+        break;
+      case 3:
+        this.userInfo.capabilities.push({scope: null, capability: Capability.ADMIN});
+        break;
+    }
+    return this.userInfo;
+  }
+
 }

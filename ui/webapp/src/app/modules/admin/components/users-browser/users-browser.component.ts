@@ -28,7 +28,7 @@ export class UsersBrowserComponent implements OnInit, AfterViewInit {
   public dataSource: MatTableDataSource<UserInfo> = null;
   private filterPredicate: (d, f) => boolean;
 
-  public displayedColumns: string[] = ['gravatar', 'name', 'fullName', 'email', 'globalPermissions', 'inactive', 'authenticatedBy', 'actions'];
+  public displayedColumns: string[] = ['gravatar', 'name', 'fullName', 'email', 'globalPermissions', 'inactive', 'authenticatedBy', 'lastActiveLogin', 'actions'];
 
   @ViewChild(MatPaginator, { static: false })
   paginator: MatPaginator;
@@ -68,7 +68,8 @@ export class UsersBrowserComponent implements OnInit, AfterViewInit {
         this.dataSource.filterPredicate = (data, filter) => {
           return this.filterPredicate(data.name, filter)
             || this.filterPredicate(data.fullName, filter)
-            || this.filterPredicate(data.email, filter);
+            || this.filterPredicate(data.email, filter)
+            || this.filterPredicate(this.getGlobalPermission(data), filter);
         };
       } else {
         this.dataSource.data = users;
@@ -103,8 +104,11 @@ export class UsersBrowserComponent implements OnInit, AfterViewInit {
     }
   }
 
-  public getGlobalPermissions(userInfo: UserInfo): Capability[] {
-    return userInfo.capabilities.filter(sc => !sc.scope).map(sc => sc.capability).sort();
+  public getGlobalPermission(userInfo: UserInfo): Capability {
+    let p = userInfo.capabilities.find(sc => sc.scope === null && sc.capability === Capability.ADMIN);
+    p = p ? p : userInfo.capabilities.find(sc => sc.scope === null && sc.capability === Capability.WRITE);
+    p = p ? p : userInfo.capabilities.find(sc => sc.scope === null && sc.capability === Capability.READ);
+    return p ? p.capability : null;
   }
 
   public isCurrentUser(userInfo: UserInfo): boolean {
