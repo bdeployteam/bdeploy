@@ -88,6 +88,11 @@ public class ApplicationDescriptor implements Comparable<ApplicationDescriptor> 
      */
     public SortedSet<String> runtimeDependencies = new TreeSet<>();
 
+    /**
+     * All endpoints which are provided by the application.
+     */
+    public EndpointsDescriptor endpoints = new EndpointsDescriptor();
+
     @Override
     public int compareTo(ApplicationDescriptor o) {
         return name.compareTo(o.name);

@@ -5,7 +5,6 @@ package io.bdeploy.tea.plugin;
 
 import java.util.Map;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -47,6 +46,7 @@ public class BDeployChooseProductFileDialog extends TitleAreaDialog {
         return target;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected Control createDialogArea(Composite parent) {
         setTitle("Select product to build");
@@ -100,7 +100,7 @@ public class BDeployChooseProductFileDialog extends TitleAreaDialog {
         GridDataFactory.fillDefaults().hint(300, 150).applyTo(panel);
 
         buttonUpdate = () -> {
-            Button button = getButton(IDialogConstants.OK_ID);
+            Button button = getButton(OK);
             if (button != null) {
                 button.setEnabled(selected != null && (target != null || radioZip.getSelection()));
             }
@@ -111,7 +111,7 @@ public class BDeployChooseProductFileDialog extends TitleAreaDialog {
             if (sel == null || sel.isEmpty()) {
                 selected = null;
             } else {
-                selected = products.products.get(sel.getFirstElement());
+                selected = ((Map.Entry<String, String>) sel.getFirstElement()).getValue();
             }
             buttonUpdate.run();
 

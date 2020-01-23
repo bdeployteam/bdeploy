@@ -1,4 +1,4 @@
-package io.bdeploy.ui.api.impl;
+package io.bdeploy.minion;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
@@ -8,14 +8,14 @@ import javax.ws.rs.core.UriBuilder;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.security.RemoteService;
-import io.bdeploy.ui.ControllingMaster;
-import io.bdeploy.ui.ManagedMasters;
-import io.bdeploy.ui.ManagedMastersConfiguration;
-import io.bdeploy.ui.api.MasterProvider;
+import io.bdeploy.interfaces.manifest.managed.ControllingMaster;
+import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
+import io.bdeploy.interfaces.manifest.managed.ManagedMasters;
+import io.bdeploy.interfaces.manifest.managed.ManagedMastersConfiguration;
+import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.ui.api.Minion;
-import io.bdeploy.ui.dto.ManagedMasterDto;
 
-public class UiMasterProvider implements MasterProvider {
+public class ControllingMasterProvider implements MasterProvider {
 
     @Inject
     private Minion minion;

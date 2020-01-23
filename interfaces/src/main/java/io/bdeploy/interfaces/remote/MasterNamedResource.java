@@ -1,7 +1,6 @@
 package io.bdeploy.interfaces.remote;
 
 import java.util.List;
-import java.util.SortedMap;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -16,7 +15,6 @@ import javax.ws.rs.core.MediaType;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
-import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.directory.EntryChunk;
@@ -211,14 +209,5 @@ public interface MasterNamedResource {
     @POST
     @Path("/weak-token")
     public String generateWeakToken(String principal);
-
-    /**
-     * Returns a list of instance configurations available in this hive.
-     *
-     * @return the list of instance configurations.
-     */
-    @GET
-    @Path("/instances")
-    public SortedMap<Manifest.Key, InstanceConfiguration> listInstanceConfigurations(@QueryParam("l") boolean latestOnly);
 
 }

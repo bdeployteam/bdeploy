@@ -17,6 +17,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.core.UriBuilder;
 
@@ -35,6 +36,8 @@ import org.eclipse.tea.library.build.util.FileUtils;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.op.ManifestDeleteOperation;
+import io.bdeploy.bhive.op.PruneOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.RemoteService;
@@ -164,6 +167,20 @@ public class BDeployBuildProductTask {
 
             log.info("Importing product from " + prodInfoYaml);
             key = ProductManifest.importFromDescriptor(prodInfoYaml.toPath(), bhive, fetcher, true);
+
+            // clean up old versions in the hive.
+            SortedSet<Key> scan = ProductManifest.scan(bhive);
+            scan.removeAll(
+                    scan.stream().sorted((a, b) -> b.getTag().compareTo(a.getTag())).limit(10).collect(Collectors.toList()));
+
+            for (Key k : scan) {
+                log.info("Cleaning old product version: " + k);
+                bhive.execute(new ManifestDeleteOperation().setToDelete(k));
+            }
+
+            if (!scan.isEmpty()) {
+                bhive.execute(new PruneOperation());
+            }
         }
 
     }

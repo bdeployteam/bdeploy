@@ -41,6 +41,7 @@ import io.bdeploy.minion.remote.jersey.MinionUpdateResourceImpl;
 import io.bdeploy.minion.remote.jersey.SlaveCleanupResourceImpl;
 import io.bdeploy.minion.remote.jersey.SlaveDeploymentResourceImpl;
 import io.bdeploy.minion.remote.jersey.SlaveProcessResourceImpl;
+import io.bdeploy.minion.remote.jersey.SlaveProxyResourceImpl;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
@@ -180,6 +181,7 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
             srv.register(SlaveCleanupResourceImpl.class);
             srv.register(SlaveProcessResourceImpl.class);
             srv.register(SlaveDeploymentResourceImpl.class);
+            srv.register(SlaveProxyResourceImpl.class);
         }
 
         srv.register(new MinionCommonBinder(root));

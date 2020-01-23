@@ -11,6 +11,8 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
+import io.bdeploy.interfaces.remote.CommonInstanceResource;
+import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
@@ -60,10 +62,11 @@ public class RemoteDeploymentTool extends RemoteServiceTool<RemoteDeployConfig> 
         try {
             helpAndFailIfMissing(config.instanceGroup(), "Missing --instanceGroup");
 
+            CommonRootResource commonRoot = ResourceProvider.getResource(svc, CommonRootResource.class, null);
             MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class, null);
             MasterNamedResource master = root.getNamedMaster(config.instanceGroup());
             if (config.list()) {
-                list(master);
+                list(master, commonRoot.getInstanceResource(config.instanceGroup()));
                 return;
             } else if (config.updateTo() != null) {
                 helpAndFailIfMissing(config.uuid(), "Missing --uuid");
@@ -92,12 +95,12 @@ public class RemoteDeploymentTool extends RemoteServiceTool<RemoteDeployConfig> 
         }
     }
 
-    private void list(MasterNamedResource master) {
+    private void list(MasterNamedResource master, CommonInstanceResource common) {
         out().println(String.format(OUTPUT_FORMAT, "UUID", "Name", "Tag", "Installed", "Active", "Product", "Product Version",
                 "Description"));
 
         SortedMap<String, InstanceStateRecord> stateCache = new TreeMap<>();
-        master.listInstanceConfigurations(false).entrySet().stream().sorted((a, b) -> {
+        common.listInstanceConfigurations(false).entrySet().stream().sorted((a, b) -> {
             int x = a.getValue().uuid.compareTo(b.getValue().uuid);
             if (x != 0) {
                 return x;

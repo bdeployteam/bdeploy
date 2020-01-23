@@ -1,11 +1,10 @@
-package io.bdeploy.ui;
+package io.bdeploy.interfaces.manifest.managed;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.meta.MetaManifest;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ManifestDeleteOldByIdOperation;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
-import io.bdeploy.ui.dto.ManagedMasterDto;
 
 /**
  * Encapsulates a {@link MetaManifest} which keeps track of attached servers

@@ -1,9 +1,7 @@
-package io.bdeploy.ui;
+package io.bdeploy.interfaces.manifest.managed;
 
 import java.util.SortedMap;
 import java.util.TreeMap;
-
-import io.bdeploy.ui.dto.ManagedMasterDto;
 
 /**
  * A DTO keeping track of all the attached managed masters. This is used on the central master only

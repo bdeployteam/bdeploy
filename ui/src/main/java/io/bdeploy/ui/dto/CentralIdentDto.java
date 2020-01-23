@@ -1,6 +1,7 @@
 package io.bdeploy.ui.dto;
 
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
+import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 
 public class CentralIdentDto {
 

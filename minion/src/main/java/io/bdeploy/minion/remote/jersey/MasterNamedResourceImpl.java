@@ -879,13 +879,4 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         return root.createWeakToken(principal);
     }
 
-    @Override
-    public SortedMap<Manifest.Key, InstanceConfiguration> listInstanceConfigurations(boolean latest) {
-        SortedSet<Key> scan = InstanceManifest.scan(hive, latest);
-        SortedMap<Manifest.Key, InstanceConfiguration> result = new TreeMap<>();
-
-        scan.stream().forEach(k -> result.put(k, InstanceManifest.of(hive, k).getConfiguration()));
-        return result;
-    }
-
 }

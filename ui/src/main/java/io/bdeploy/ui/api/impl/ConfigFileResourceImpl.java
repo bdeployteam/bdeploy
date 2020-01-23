@@ -31,11 +31,11 @@ import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
+import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.ui.api.ConfigFileResource;
-import io.bdeploy.ui.api.MasterProvider;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.dto.ConfigFileDto;
 

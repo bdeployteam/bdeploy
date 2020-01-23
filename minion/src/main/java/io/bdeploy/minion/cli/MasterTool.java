@@ -4,6 +4,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyStore;
 
+import javax.inject.Singleton;
+
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
@@ -15,6 +17,7 @@ import io.bdeploy.common.cfg.MinionRootValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.security.SecurityHelper;
+import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.SlaveDeploymentResource;
 import io.bdeploy.jersey.JerseyCorsFilter;
@@ -22,6 +25,7 @@ import io.bdeploy.jersey.JerseyServer;
 import io.bdeploy.jersey.RegistrationTarget;
 import io.bdeploy.jersey.audit.AuditRecord;
 import io.bdeploy.jersey.audit.RollingFileAuditor;
+import io.bdeploy.minion.ControllingMasterProvider;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.MinionState;
 import io.bdeploy.minion.cli.MasterTool.MasterConfig;
@@ -115,6 +119,7 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
             protected void configure() {
                 // required for SoftwareUpdateResourceImpl.
                 bind(MasterRootResourceImpl.class).to(MasterRootResource.class);
+                bind(ControllingMasterProvider.class).in(Singleton.class).to(MasterProvider.class);
             }
         });
 
