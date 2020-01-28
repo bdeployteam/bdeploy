@@ -1,3 +1,4 @@
+import { PortalModule } from '@angular/cdk/portal';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { DragulaModule } from 'ng2-dragula';
@@ -15,6 +16,8 @@ import { InstanceAddEditComponent } from './components/instance-add-edit/instanc
 import { InstanceBrowserComponent } from './components/instance-browser/instance-browser.component';
 import { InstanceCardComponent } from './components/instance-card/instance-card.component';
 import { InstanceNodeCardComponent } from './components/instance-node-card/instance-node-card.component';
+import { InstanceNotificationsItemComponent } from './components/instance-notifications-item/instance-notifications-item.component';
+import { InstanceNotificationsComponent } from './components/instance-notifications/instance-notifications.component';
 import { InstanceVersionCardComponent } from './components/instance-version-card/instance-version-card.component';
 import { InstanceVersionHistoryCardComponent } from './components/instance-version-history-card/instance-version-history-card.component';
 import { ProcessConfigurationComponent } from './components/process-configuration/process-configuration.component';
@@ -46,6 +49,8 @@ import { InstanceRoutingModule } from './instance-routing.module';
     ClientInfoComponent,
     DataFilesBrowserComponent,
     InstanceVersionHistoryCardComponent,
+    InstanceNotificationsComponent,
+    InstanceNotificationsItemComponent,
   ],
   entryComponents: [
     ApplicationEditManualComponent,
@@ -59,6 +64,7 @@ import { InstanceRoutingModule } from './instance-routing.module';
     SharedModule,
     CoreModule,
     InstanceRoutingModule,
+    PortalModule,
 
     DragulaModule.forRoot(),
   ]

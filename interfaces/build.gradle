@@ -9,7 +9,6 @@ dependencies {
         project(":common"),
         project(":jersey"),
         project(":bhive"),
-        'io.swagger.core.v3:swagger-annotations:2.1.1',
     )
 }
 

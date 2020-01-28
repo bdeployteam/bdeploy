@@ -1,0 +1,19 @@
+<ng-template #notificationPopup>
+  <mat-card class="info">
+      <div class="mat-title">Notifications</div>
+      <mat-card-content class='notification-content'>
+        <ng-container *ngFor='let item of notifications'>
+          <app-instance-notifications-item [notification]='item'></app-instance-notifications-item>
+        </ng-container>
+        <ng-container *ngIf='isEmpty()'>
+          <span>There are currently no notifications.</span>
+        </ng-container>
+      </mat-card-content>
+  </mat-card>
+</ng-template>
+
+<button *ngIf='!isEmpty()' class='notifications-button' mat-icon-button #notificationButton (click)="openOverlay(notificationButton, notificationPopup)">
+  <mat-icon [matBadge]='notifications.length' matBadgeSize='small' *ngIf='isError()' class='errorNotificationIconTheme'>error</mat-icon>
+  <mat-icon [matBadge]='notifications.length' matBadgeSize='small' *ngIf='isWarning()' class='warningNotificationIconTheme'>warning</mat-icon>
+  <mat-icon [matBadge]='notifications.length' matBadgeSize='small' matBadgeColor='primary' *ngIf='isInfo()' class='infoNotificationIconTheme'>info</mat-icon>
+</button>

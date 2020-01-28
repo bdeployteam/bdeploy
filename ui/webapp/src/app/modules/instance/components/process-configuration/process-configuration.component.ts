@@ -1,5 +1,5 @@
 import { Location } from '@angular/common';
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { ActivatedRoute, Params, Router } from '@angular/router';
@@ -33,6 +33,7 @@ import { ApplicationService } from '../../services/application.service';
 import { InstanceService } from '../../services/instance.service';
 import { ProcessService } from '../../services/process.service';
 import { ApplicationEditComponent } from '../application-edit/application-edit.component';
+import { InstanceNotification, Severity } from '../instance-notifications/instance-notifications.component';
 import { InstanceVersionCardComponent } from '../instance-version-card/instance-version-card.component';
 import { ProcessDetailsComponent } from '../process-details/process-details.component';
 
@@ -59,6 +60,24 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
   @ViewChild(ProcessDetailsComponent, { static: false })
   private processDetails: ProcessDetailsComponent;
+
+  @ViewChild('notificationOutOfSync', {static: false})
+  private notificationOutOfSync: TemplateRef<any>;
+
+  @ViewChild('notificationSyncCentral', {static: false})
+  private notificationSyncCentral: TemplateRef<any>;
+
+  @ViewChild('notificationUpdate', {static: false})
+  private notificationUpdate: TemplateRef<any>;
+
+  @ViewChild('notificationNewerProduct', {static: false})
+  private notificationNewerProduct: TemplateRef<any>;
+
+  @ViewChild('notificationValidationIssues', {static: false})
+  private notificationValidationIssues: TemplateRef<any>;
+  public issueCache: {context: EditAppConfigContext, issue: string}[];
+
+  notifications: InstanceNotification[] = [];
 
   public groupParam: string;
   public uuidParam: string;
@@ -608,8 +627,8 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     }
   }
 
-  public onEditApp(nodeConfig: InstanceNodeConfiguration, context: EditAppConfigContext) {
-    this.activeNodeConfig = nodeConfig;
+  public onEditApp(context: EditAppConfigContext) {
+    this.activeNodeConfig = context.instanceNodeConfigurationDto.nodeConfiguration;
     this.editAppConfigContext = cloneDeep(context);
     this.setEditMode(true);
   }
@@ -791,6 +810,8 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       this.discardEnabled = virtualConfig.dirty;
       this.saveEnabled = virtualConfig.dirty && virtualConfig.valid;
     }
+
+    this.updateNotifications();
   }
 
   doInstallVersion(manifest: ManifestKey, card: InstanceVersionCardComponent) {
@@ -955,6 +976,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     } else {
       this.isRunningOutOfSync = this.processService.isRunningOutOfSync(activatedTag);
     }
+    this.updateNotifications();
   }
 
   /** Triggers the refreshing of the process status */
@@ -1030,6 +1052,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       this.minionStates = {};
       this.isCentralSynced = false;
     }
+    this.updateNotifications();
   }
 
   importInstanceVersion() {
@@ -1098,6 +1121,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
         mode: MessageBoxMode.ERROR,
       });
     }
+    this.updateNotifications();
   }
 
   isUpdateInProgress() {
@@ -1112,5 +1136,82 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     return this.updateStatus && isUpdateFailed(this.updateStatus);
   }
 
+  private addNotification(template: TemplateRef<any>, severity: Severity, priority: number) {
+    const index = this.notifications.findIndex((v) => v.template === template);
+    if (index !== -1) {
+      return;
+    }
+    this.notifications.push({template, severity, priority});
+    this.notifications.sort((a, b) => a.priority - b.priority);
+  }
+
+  private removeNotification(template: TemplateRef<any>) {
+    const index = this.notifications.findIndex((v) => v.template === template);
+    if (index === -1) {
+      return;
+    }
+    this.notifications.splice(index, 1);
+  }
+
+  private updateNotifications() {
+    if (this.isCentral() && !this.isCentralSynced) {
+      this.addNotification(this.notificationSyncCentral, Severity.INFO, 1);
+    } else {
+      this.removeNotification(this.notificationSyncCentral);
+    }
+
+    if (this.isProductUpgradeAvailable() && !this.editMode && !(this.isCentral() && !this.isCentralSynced)) {
+      this.addNotification(this.notificationNewerProduct, Severity.INFO, 2);
+    } else {
+      this.removeNotification(this.notificationNewerProduct);
+    }
+
+    if (this.isRunningOutOfSync) {
+      this.addNotification(this.notificationOutOfSync, Severity.WARNING, 3);
+    } else {
+      this.removeNotification(this.notificationOutOfSync);
+    }
+
+    if (this.showUpdateComponent()) {
+      this.addNotification(this.notificationUpdate, Severity.WARNING, 4);
+    } else {
+      this.removeNotification(this.notificationUpdate);
+    }
+
+    if (!this.applicationService.isAllValid()) {
+      this.issueCache = this.getValidationIssues();
+      this.addNotification(this.notificationValidationIssues, Severity.ERROR, 5);
+    } else {
+      this.removeNotification(this.notificationValidationIssues);
+    }
+  }
+
+  private getAppAndNodeById(id: string): {app: ApplicationConfiguration, node: InstanceNodeConfigurationDto} {
+    for (const node of this.selectedConfig.nodeList.nodeConfigDtos) {
+      for (const app of node.nodeConfiguration.applications) {
+        if (app.uid === id) {
+          return {app, node};
+        }
+      }
+    }
+    return null;
+  }
+
+  getValidationIssues(): {context: EditAppConfigContext, issue: string}[] {
+    if (!this.selectedConfig || this.selectedConfig.readonly) {
+      return [];
+    }
+
+    const result = [];
+    const issues = this.applicationService.getValidationIssues();
+    for (const app of Array.from(issues.keys())) {
+      const appAndNode = this.getAppAndNodeById(app);
+      for (const issue of issues.get(app)) {
+        result.push({context: new EditAppConfigContext(appAndNode.node, appAndNode.app), issue});
+      }
+    }
+
+    return result;
+  }
 
 }

@@ -229,7 +229,9 @@ describe("Central/Managed Basic Test", function() {
     cy.contains('button', 'sync_alt').should('be.enabled').click();
     cy.waitUntilContentLoaded();
 
-    cy.contains('button', 'Newer product version available').should('be.visible').and('be.enabled').click();
+    cy.get('.notifications-button').should('exist').and('be.enabled').click();
+    cy.contains('button', 'Show Product Versions').should('be.visible').and('be.enabled').click();
+
     cy.contains('mat-toolbar', 'Change Product Version').should('exist');
     cy.contains('app-product-tag-card', '2.0.0').should('exist').contains('button', 'arrow_upward').should('be.enabled').and('be.visible').click();
 

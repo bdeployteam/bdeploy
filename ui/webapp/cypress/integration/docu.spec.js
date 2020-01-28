@@ -188,7 +188,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.contains('button', 'input').click();
     cy.wait(250);
     cy.screenshot('BDeploy_Process_Custom_Preview');
-    cy.get('.cdk-overlay-backdrop').click('top', {force:true});
+    cy.get('.cdk-overlay-backdrop').click('top', {force:true, multiple: true});
 
     // Save and apply changes to go back to the overview
     cy.get('button').contains('APPLY').click();
@@ -325,13 +325,13 @@ describe('Creates screenshots for the user documentation', () => {
     cy.contains('button','message').click();
     cy.contains('Got some text').should('be.visible');
     cy.screenshot('BDeploy_Process_Output');
-    cy.get('.cdk-overlay-backdrop').click('top', {force:true});
+    cy.get('.cdk-overlay-backdrop').click('top', {force:true, multiple: true});
 
     // Process Listing
     cy.get('button').contains('settings').click();
     cy.wait(250);
     cy.screenshot('BDeploy_Process_List');
-    cy.get('.cdk-overlay-backdrop').click('top', {force:true});
+    cy.get('.cdk-overlay-backdrop').click('top', {force:true, multiple: true});
 
     // Data Files
     cy.get('app-instance-group-logo').parent().clickContextMenuItem('Data Files...');
@@ -341,7 +341,7 @@ describe('Creates screenshots for the user documentation', () => {
     // Data File Content
     cy.contains('td', 'documentation.txt').click();
     cy.screenshot('BDeploy_DataFiles_Show');
-    cy.get('.cdk-overlay-backdrop').click('top', {force:true});
+    cy.get('.cdk-overlay-backdrop').click('top', {force:true, multiple: true});
   });
 
   // Capture Client Applications

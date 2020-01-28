@@ -30,6 +30,7 @@
 @import 'app/modules/instance/components/process-details/process-details-theme.scss';
 @import 'app/modules/instance/components/process-status/process-status-theme.scss';
 @import 'app/modules/instance/components/client-info/client-info-theme.scss';
+@import 'app/modules/instance/components/instance-notifications/instance-notifications-theme.scss';
 
 @mixin all-themes($theme) {
   // general angular material theme
@@ -59,6 +60,12 @@
   @include managed-server-update-theme($theme);
   @include product-sync-theme($theme);
   @include settings-shell-theme($theme);
+  @include instance-notifications-theme($theme);
+
+  .mat-badge-content {
+    background-color: rgb(194, 194, 194);
+    color: black;
+  }
 }
 
 @mixin theme-chooser($theme) {

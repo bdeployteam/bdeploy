@@ -5,7 +5,7 @@
     </div>
     <mat-card-title>Software Update</mat-card-title>
     <span class="fill-space"></span>
-    <button mat-icon-button (click)='closed=true' matTooltip="Close update hint.">
+    <button *ngIf='showClose' mat-icon-button (click)='closed=true' matTooltip="Close update hint.">
       <mat-icon>clear</mat-icon>
     </button>
   </mat-card-header>

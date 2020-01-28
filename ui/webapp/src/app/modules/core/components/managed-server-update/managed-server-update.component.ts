@@ -25,6 +25,9 @@ export class ManagedServerUpdateComponent implements OnInit {
   @Output()
   updateEvent = new EventEmitter<UpdateStatus>();
 
+  @Input()
+  showClose = true;
+
   closed = false;
   updateStatus = UpdateStatus.UPDATES_AVAILABLE;
   updateStatusText = '';

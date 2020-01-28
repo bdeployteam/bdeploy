@@ -1,0 +1,10 @@
+.notifications-button {
+  margin-right: 10px;
+}
+
+.notification-content {
+  overflow-y: auto;
+  max-height: 500px;
+  padding-right: 5px;
+  width: 750px;
+}

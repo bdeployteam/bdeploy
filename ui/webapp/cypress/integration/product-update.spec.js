@@ -60,7 +60,8 @@ describe('Product Tests', () => {
   })
 
   it('Upgrade to 2.0.0', () => {
-    cy.contains('button', 'Newer product version available').should('be.visible').and('be.enabled').click();
+    cy.get('.notifications-button').should('exist').and('be.enabled').click();
+    cy.contains('button', 'Show Product Versions').should('be.visible').and('be.enabled').click();
     cy.contains('mat-toolbar', 'Change Product Version').should('exist');
     cy.contains('app-product-tag-card', '2.0.0').should('exist').contains('button', 'arrow_upward').should('be.enabled').and('be.visible').click();
 
@@ -105,7 +106,10 @@ describe('Product Tests', () => {
     cy.contains('mat-slide-toggle','Show all').should('not.be.checked').click();
     cy.contains('app-product-tag-card', '1.0.0').should('exist').contains('button', 'arrow_downward').should('be.enabled').and('be.visible').click();
 
-    cy.contains('button', 'Newer product version available').should('be.visible').and('be.enabled');
+    cy.get('.notifications-button').should('exist').and('be.enabled').click();
+    cy.contains('button', 'Show Product Versions').should('be.visible').and('be.enabled');
+    cy.get('.cdk-overlay-backdrop').click('top', {force:true, multiple: true});
+
     cy.getApplicationConfigCard('master', 'Server Application').find('.app-config-invalid').should('exist');
     cy.contains('button', 'SAVE').should('be.disabled');
   })

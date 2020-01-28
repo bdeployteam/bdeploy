@@ -89,7 +89,7 @@ Cypress.Commands.add('startProcess', function(node, app) {
   })
 
   // close process list
-  cy.get('.cdk-overlay-backdrop').click('top', {force:true}); // click even if obstructed.
+  cy.get('.cdk-overlay-backdrop').click('top', {force:true, multiple: true}); // click even if obstructed.
 })
 
 Cypress.Commands.add('installAndActivate', {prevSubject: true}, (subject) => {

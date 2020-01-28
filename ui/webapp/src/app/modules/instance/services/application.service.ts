@@ -358,7 +358,7 @@ export class ApplicationService {
     if (!isClientApp) {
       const appName = cfg.name;
       this.serverAppNames.includes(appName)
-        ? errors.push(appName + ': Server process name already configured')
+        ? errors.push('Server process name already used by another application')
         : this.serverAppNames.push(appName);
     }
 
@@ -406,6 +406,13 @@ export class ApplicationService {
       return true;
     }
     return false;
+  }
+
+  /**
+   * Returns a mapping from application ID to validation problems.
+   */
+  public getValidationIssues() {
+    return this.validationStates;
   }
 
   /**

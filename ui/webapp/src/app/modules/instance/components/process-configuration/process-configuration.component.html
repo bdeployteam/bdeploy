@@ -1,3 +1,46 @@
+<ng-template #notificationOutOfSync>
+  <div>
+    Out-of-sync: One or more applications are running in a version that is not activated.
+  </div>
+</ng-template>
+
+<ng-template #notificationSyncCentral>
+  <div>
+    The last synchronized state of the instance is shown, so both editing and process control are not available.<br />
+    Press
+      <button mat-icon-button (click)='syncCentral()' matTooltip="Synchronize meta-data from the controlling server.">
+        <mat-icon>sync_alt</mat-icon>
+      </button>
+    to get the latest version from the managed master.
+  </div>
+</ng-template>
+
+<ng-template #notificationUpdate>
+  <div class="update-container">
+    <app-managed-server-update [showClose]='false' [serverName]="controllingServer.hostName" [instanceGroupName]="groupParam" [updateDto]="updateDto" (updateEvent)="onUpdateEvent($event)">
+    </app-managed-server-update>
+  </div>
+</ng-template>
+
+<ng-template #notificationNewerProduct>
+  <div class='prod-update-notification'>
+    A newer product version is available to update this instance to.
+    <button mat-raised-button *ngIf="authService.isScopedAdmin(groupParam)" (click)="instanceNotifications.closeOverlay(); onNewerProductVersionAvailable()">Show Product Versions</button>
+  </div>
+</ng-template>
+
+<ng-template #notificationValidationIssues>
+  <div class='validation-container'>
+    There are validation issues:
+    <div class='validation-item-list'>
+      <ng-container *ngFor='let item of issueCache'>
+        <div><b>{{item.context.applicationConfiguration.name}}:</b> {{item.issue}}</div>
+        <button mat-icon-button matTooltip="Edit affected application" (click)='instanceNotifications.closeOverlay(); onEditApp(item.context)'><mat-icon>arrow_forward</mat-icon></button>
+      </ng-container>
+    </div>
+  </div>
+</ng-template>
+
 <div class="box">
   <mat-toolbar class="mat-elevation-z1 header-toolbar process-config-header">
     <mat-toolbar-row id="page-header">
@@ -9,6 +52,7 @@
       </button>
       <span>Instance: {{ groupParam }} - {{ selectedConfig?.instance?.name }}</span>
       <span class="fill-space"></span>
+      <app-instance-notifications #instanceNotifications [notifications]='notifications'></app-instance-notifications>
       <ng-container *ngIf="!editMode">
         <button mat-button type="button" (click)="onDiscardChanges()" *ngIf="discardEnabled">DISCARD</button>
         <button mat-raised-button color="primary" type="submit" [disabled]="!saveEnabled" (click)="onSave()">SAVE</button>
@@ -45,10 +89,6 @@
         </div>
       </div>
       <span class="fill-space"></span>
-      <button mat-flat-button class="app-process-out-of-sync-text" (click)="onNewerProductVersionAvailable()" *ngIf="authService.isScopedAdmin(groupParam) && isProductUpgradeAvailable() && !editMode && !(isCentral() && !isCentralSynced)">
-        Newer product version available!
-      </button>
-      <span class="spacer"></span>
       <ng-container *ngIf='isCentral()'>
         <button mat-icon-button (click)='syncCentral()' matTooltip="Synchronize meta-data from the controlling server." [disabled]="!authService.isScopedWrite(groupParam)"><mat-icon>sync_alt</mat-icon></button>
       </ng-container>
@@ -106,22 +146,6 @@
   <div class="drawer-container" *ngIf="!editMode">
     <div class="nodes-container">
       <ng-container *ngIf="!loading">
-        <div *ngIf="isRunningOutOfSync" class="app-process-out-of-sync-text">
-          Out-of-sync: One or more applications are running in a version that is not activated.
-        </div>
-        <div *ngIf="isCentral() && !isCentralSynced" class="need-sync-text">
-          The last synchronized state of the instance is shown, so both editing and process control are not available.<br />
-          Press
-            <button mat-icon-button (click)='syncCentral()' matTooltip="Synchronize meta-data from the controlling server.">
-              <mat-icon>sync_alt</mat-icon>
-            </button>
-          to get the latest version from the managed master.
-        </div>
-        <div class="update-container" *ngIf="showUpdateComponent()">
-          <app-managed-server-update [serverName]="controllingServer.hostName" [instanceGroupName]="groupParam" [updateDto]="updateDto" (updateEvent)="onUpdateEvent($event)">
-          </app-managed-server-update>
-        </div>
-
         <ng-container *ngFor="let node of selectedConfig.nodeList.nodeConfigDtos">
           <app-instance-node-card
             class="node"
@@ -136,7 +160,7 @@
             [minionConfig]="minionConfigs[node.nodeName]"
             [minionState]="minionStates[node.nodeName]"
             [isInstanceDirty]="isDirtySelected()"
-            (editAppConfigEvent)="onEditApp(node.nodeConfiguration, $event)"
+            (editAppConfigEvent)="onEditApp($event)"
             (editNodeAppsEvent)="onUpdateNodeApps()"
             (removeNodeAppEvent)="onUpdateNodeApps()"
             (selectAppConfigEvent)="onSelectApp(node, $event)"

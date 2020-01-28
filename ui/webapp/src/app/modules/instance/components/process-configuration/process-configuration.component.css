@@ -191,3 +191,26 @@
   margin: 15px;
 }
 
+.prod-update-notification {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.validation-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.validation-item-list {
+  display: grid;
+  grid-template-columns: auto 40px;
+
+  align-items: center;
+  margin-left: 10px;
+}
+
+.validation-item-list > button {
+  justify-self: end;
+}

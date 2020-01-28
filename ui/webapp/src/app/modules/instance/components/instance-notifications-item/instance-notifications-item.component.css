@@ -1,0 +1,12 @@
+.notification-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.notificationItem {
+  border-radius: 5px;
+  margin: 5px 5px 5px 15px;
+  padding: 10px;
+  flex: 1 0 auto;
+}

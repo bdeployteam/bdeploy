@@ -14,9 +14,8 @@
 <button
   mat-icon-button
   (click)="showProgressSheet(progressDetails)"
-  [matBadge]="remoteProgressElements ? remoteProgressElements.length : '0'"
-  [matBadgeHidden]="!remoteProgressElements || remoteProgressElements.length === 0"
-  matBadgeSize="medium"
 >
-  <mat-icon svgIcon="progress"></mat-icon>
+  <mat-icon svgIcon="progress" [matBadge]="remoteProgressElements ? remoteProgressElements.length : '0'"
+  [matBadgeHidden]="!remoteProgressElements || remoteProgressElements.length === 0"
+  matBadgeSize="small"></mat-icon>
 </button>

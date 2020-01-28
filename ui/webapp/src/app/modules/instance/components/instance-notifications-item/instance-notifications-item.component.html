@@ -1,0 +1,10 @@
+<div class='notification-row'>
+  <div>
+    <mat-icon *ngIf='isError()' class='errorStaticNotificationIconTheme'>error</mat-icon>
+    <mat-icon *ngIf='isWarning()' class='warningNotificationIconTheme'>warning</mat-icon>
+    <mat-icon *ngIf='isInfo()' class='infoNotificationIconTheme'>info</mat-icon>
+  </div>
+  <div class='notificationItem mat-elevation-z1'>
+    <ng-template [cdkPortalOutlet]='templatePortal'></ng-template>
+  </div>
+</div>
