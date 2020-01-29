@@ -165,10 +165,17 @@ namespace Bdeploy.Shared
         /// </summary>
         public static ClickAndStartDescriptor FromString(string input)
         {
-            UTF8Encoding encoding = new UTF8Encoding(false);
-            DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ClickAndStartDescriptor));
-            MemoryStream stream = new MemoryStream(encoding.GetBytes(input));
-            return (ClickAndStartDescriptor)ser.ReadObject(stream);
+            try
+            {
+                UTF8Encoding encoding = new UTF8Encoding(false);
+                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ClickAndStartDescriptor));
+                MemoryStream stream = new MemoryStream(encoding.GetBytes(input));
+                return (ClickAndStartDescriptor)ser.ReadObject(stream);
+            }
+            catch (SerializationException)
+            {
+                return null;
+            }
         }
 
         /// <summary>
@@ -230,7 +237,7 @@ namespace Bdeploy.Shared
         public string Certificate;
 
         [DataMember(Name = "t")]
-        public string Token; 
+        public string Token;
 
     }
 
