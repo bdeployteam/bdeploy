@@ -152,6 +152,6 @@ Cypress.Commands.add('attachManaged', function(groupName) {
     cy.get('mat-spinner').should('not.exist');
 
     cy.contains('span', 'Last sync').should('contain.text', new Date().getFullYear());
-    cy.contains('td', 'favorite').should('exist'); // the green heart.
+    cy.contains('td', 'flight_takeoff').should('exist'); // the aeroplane
   });
 })

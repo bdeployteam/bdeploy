@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { cloneDeep } from 'lodash';
 import { DragulaService } from 'ng2-dragula';
 import { Subscription } from 'rxjs';
+import { convert2String } from 'src/app/modules/shared/utils/version.utils';
 import { ApplicationGroup } from '../../../../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_APPLICATION_CONFIGURATION, EMPTY_INSTANCE_NODE_CONFIGURATION, EMPTY_PROCESS_CONTROL_CONFIG } from '../../../../models/consts';
 import { EventWithCallback } from '../../../../models/event';
@@ -375,7 +376,8 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
       return this.minionState.infoText;
     }
     const startDate = format(new Date(this.minionState.startup), 'dd.MM.yyyy HH:mm:ss');
-    return 'Start time: ' + startDate + ' | ' + ' Version:' + this.minionConfig.version;
+    const versionStr = convert2String(this.minionConfig.version);
+    return 'Start time: ' + startDate + ' | ' + ' Version: ' + versionStr;
   }
 
 }

@@ -106,7 +106,7 @@ export class ManagedServerDetailComponent implements OnInit {
     if (status.offline) {
       return 'error';
     }
-    return 'favorite';
+    return 'flight_takeoff';
   }
 
   getStatusTooltip(minion: string) {
