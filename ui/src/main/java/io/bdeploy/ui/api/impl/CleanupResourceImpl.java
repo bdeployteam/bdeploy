@@ -10,8 +10,8 @@ import javax.ws.rs.core.SecurityContext;
 
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.interfaces.cleanup.CleanupGroup;
+import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.ui.api.CleanupResource;
-import io.bdeploy.ui.api.MasterProvider;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.cleanup.CleanupHelper;
 

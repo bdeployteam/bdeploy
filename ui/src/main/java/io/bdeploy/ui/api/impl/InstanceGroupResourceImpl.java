@@ -43,6 +43,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceGroupPermissionDto;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
+import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
@@ -53,7 +54,6 @@ import io.bdeploy.ui.api.ProductResource;
 import io.bdeploy.ui.dto.ClientApplicationDto;
 import io.bdeploy.ui.dto.InstanceClientAppsDto;
 import io.bdeploy.ui.dto.InstanceDto;
-import io.bdeploy.ui.dto.ManagedMasterDto;
 
 public class InstanceGroupResourceImpl implements InstanceGroupResource {
 

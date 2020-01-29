@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.container.ResourceContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
@@ -24,6 +26,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
+import io.bdeploy.interfaces.remote.CommonInstanceResource;
 import io.bdeploy.interfaces.remote.CommonRootResource;
 
 public class CommonRootResourceImpl implements CommonRootResource {
@@ -35,6 +38,9 @@ public class CommonRootResourceImpl implements CommonRootResource {
 
     @Inject
     private ActivityReporter reporter;
+
+    @Context
+    private ResourceContext rc;
 
     @Override
     public List<SoftwareRepositoryConfiguration> getSoftwareRepositories() {
@@ -115,6 +121,15 @@ public class CommonRootResourceImpl implements CommonRootResource {
         }
         registry.unregister(name);
         PathHelper.deleteRecursive(Paths.get(bHive.getUri()));
+    }
+
+    @Override
+    public CommonInstanceResource getInstanceResource(String name) {
+        BHive bHive = registry.get(name);
+        if (bHive == null) {
+            throw new WebApplicationException("Instance Group '" + name + "' does not exist", Status.NOT_FOUND);
+        }
+        return rc.initResource(new CommonInstanceResourceImpl(name, bHive));
     }
 
 }

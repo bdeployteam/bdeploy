@@ -70,6 +70,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfigurationDto
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
+import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.InstanceDirectory;
@@ -79,6 +80,11 @@ import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory;
+import io.bdeploy.interfaces.manifest.managed.ControllingMaster;
+import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
+import io.bdeploy.interfaces.manifest.managed.ManagedMasters;
+import io.bdeploy.interfaces.manifest.managed.ManagedMastersConfiguration;
+import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
@@ -87,14 +93,10 @@ import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
-import io.bdeploy.ui.ControllingMaster;
-import io.bdeploy.ui.ManagedMasters;
-import io.bdeploy.ui.ManagedMastersConfiguration;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.ConfigFileResource;
 import io.bdeploy.ui.api.InstanceResource;
 import io.bdeploy.ui.api.ManagedServersResource;
-import io.bdeploy.ui.api.MasterProvider;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.ProcessResource;
@@ -105,7 +107,6 @@ import io.bdeploy.ui.dto.InstanceDto;
 import io.bdeploy.ui.dto.InstanceManifestHistoryDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
 import io.bdeploy.ui.dto.InstanceVersionDto;
-import io.bdeploy.ui.dto.ManagedMasterDto;
 import io.bdeploy.ui.dto.ProductDto;
 import io.bdeploy.ui.dto.StringEntryChunkDto;
 
@@ -326,6 +327,17 @@ public class InstanceResourceImpl implements InstanceResource {
         if (dto.config == null) {
             // no new config - load existing one.
             dto.config = oldConfig.getConfiguration();
+        }
+
+        // copy endpoints from ApplicationDescriptor
+        if (dto.nodeDtos != null) {
+            // FIXME: needs configuration UI instead of dumb copy.
+            for (InstanceNodeConfigurationDto incd : dto.nodeDtos) {
+                for (ApplicationConfiguration cfg : incd.nodeConfiguration.applications) {
+                    ApplicationDescriptor desc = ApplicationManifest.of(hive, cfg.application).getDescriptor();
+                    cfg.endpoints.http.addAll(desc.endpoints.http);
+                }
+            }
         }
 
         MasterRootResource root = getManagingRootResource(managedServer);

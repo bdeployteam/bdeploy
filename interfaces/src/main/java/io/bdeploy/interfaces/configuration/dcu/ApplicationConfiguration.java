@@ -50,6 +50,11 @@ public class ApplicationConfiguration {
     public CommandConfiguration stop;
 
     /**
+     * Available/configured endpoints for this application.
+     */
+    public EndpointsConfiguration endpoints = new EndpointsConfiguration();
+
+    /**
      * Create a PCU-compliant {@link ProcessConfiguration}, resolving
      * values from the given resolver.
      * <p>

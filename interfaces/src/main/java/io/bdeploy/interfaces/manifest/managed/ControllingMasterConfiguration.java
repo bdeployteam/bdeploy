@@ -1,4 +1,4 @@
-package io.bdeploy.ui;
+package io.bdeploy.interfaces.manifest.managed;
 
 /**
  * Represents the information attached to an instance about the managed master controlling it

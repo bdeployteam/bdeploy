@@ -22,9 +22,10 @@ import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
+import io.bdeploy.interfaces.manifest.managed.ManagedMasters;
 import io.bdeploy.jersey.JerseyScopeService;
 import io.bdeploy.ui.api.MinionMode;
-import io.bdeploy.ui.dto.ManagedMasterDto;
 import io.bdeploy.ui.dto.ProductDto;
 import io.bdeploy.ui.dto.ProductTransferDto;
 

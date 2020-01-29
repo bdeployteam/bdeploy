@@ -59,16 +59,17 @@ import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
+import io.bdeploy.interfaces.manifest.managed.ControllingMaster;
+import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
+import io.bdeploy.interfaces.manifest.managed.ManagedMasters;
+import io.bdeploy.interfaces.manifest.managed.ManagedMastersConfiguration;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
+import io.bdeploy.interfaces.remote.CommonInstanceResource;
 import io.bdeploy.interfaces.remote.CommonRootResource;
-import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
-import io.bdeploy.ui.ControllingMaster;
-import io.bdeploy.ui.ManagedMasters;
-import io.bdeploy.ui.ManagedMastersConfiguration;
 import io.bdeploy.ui.ProductTransferService;
 import io.bdeploy.ui.api.BackendInfoResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
@@ -77,7 +78,6 @@ import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
 import io.bdeploy.ui.dto.CentralIdentDto;
-import io.bdeploy.ui.dto.ManagedMasterDto;
 import io.bdeploy.ui.dto.MinionUpdateDto;
 import io.bdeploy.ui.dto.ProductDto;
 import io.bdeploy.ui.dto.ProductTransferDto;
@@ -351,8 +351,8 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         hive.execute(new PushOperation().addManifest(igKey).setRemote(svc).setHiveName(groupName));
 
         // 2. Fetch all instance and meta manifests, no products.
-        MasterRootResource masterRoot = ResourceProvider.getResource(svc, MasterRootResource.class, context);
-        MasterNamedResource master = masterRoot.getNamedMaster(groupName);
+        CommonRootResource masterRoot = ResourceProvider.getResource(svc, CommonRootResource.class, context);
+        CommonInstanceResource master = masterRoot.getInstanceResource(groupName);
         SortedMap<Key, InstanceConfiguration> instances = master.listInstanceConfigurations(true);
         List<String> instanceIds = instances.values().stream().map(ic -> ic.uuid).collect(Collectors.toList());
 

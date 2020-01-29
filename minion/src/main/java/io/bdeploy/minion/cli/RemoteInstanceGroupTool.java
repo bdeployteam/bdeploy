@@ -9,7 +9,6 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.remote.CommonRootResource;
-import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.minion.cli.RemoteInstanceGroupTool.RemoteInstanceGroupConfig;
@@ -56,9 +55,8 @@ public class RemoteInstanceGroupTool extends RemoteServiceTool<RemoteInstanceGro
             client.addInstanceGroup(desc, config.storage());
         } else if (config.list()) {
             out().println(String.format(LIST_FORMAT, "Name", "Ins. Count", "Description"));
-            MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class, null);
             for (InstanceGroupConfiguration cfg : client.getInstanceGroups()) {
-                SortedMap<Manifest.Key, InstanceConfiguration> ics = master.getNamedMaster(cfg.name)
+                SortedMap<Manifest.Key, InstanceConfiguration> ics = client.getInstanceResource(cfg.name)
                         .listInstanceConfigurations(true);
                 out().println(String.format(LIST_FORMAT, cfg.name, ics.size(), cfg.description));
             }

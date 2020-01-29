@@ -70,12 +70,20 @@ public class TestServer
     private Auditor auditor;
 
     private RemoteService service;
+    private int port;
+
+    private final boolean resolver;
 
     public TestServer() {
         this(new Object[0]);
     }
 
     public TestServer(Object... registrations) {
+        this(true, registrations);
+    }
+
+    public TestServer(boolean resolver, Object... registrations) {
+        this.resolver = resolver;
         this.registrations.addAll(Arrays.asList(registrations));
         this.registrations.add(new ServiceLocatorFinder());
 
@@ -137,6 +145,10 @@ public class TestServer
     @Override
     public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
             throws ParameterResolutionException {
+        if (!resolver) {
+            return false;
+        }
+
         Class<?> type = parameterContext.getParameter().getType();
         if (type.isAssignableFrom(RemoteService.class) || type.isAssignableFrom(JerseyClientFactory.class)
                 || type.isAssignableFrom(ServiceLocator.class)) {
@@ -196,9 +208,16 @@ public class TestServer
         }
     }
 
+    public int getPort() {
+        return this.port;
+    }
+
     protected int getServerPort(ExtensionContext context) {
-        return getExtensionStore(context).getOrComputeIfAbsent("ServerPort", (k) -> Integer.valueOf(findFreePort()),
-                Integer.class);
+        return getExtensionStore(context).getOrComputeIfAbsent("ServerPort", (k) -> {
+            Integer port = Integer.valueOf(findFreePort());
+            this.port = port;
+            return port;
+        }, Integer.class);
     }
 
     @Override

@@ -7,7 +7,6 @@ import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 import io.bdeploy.jersey.RegistrationTarget;
 import io.bdeploy.ui.ProductTransferService;
-import io.bdeploy.ui.api.MasterProvider;
 
 public class UiResources {
 
@@ -45,7 +44,6 @@ public class UiResources {
             @Override
             protected void configure() {
                 bind(DownloadTokenCache.class).in(Singleton.class).to(DownloadTokenCache.class);
-                bind(UiMasterProvider.class).in(Singleton.class).to(MasterProvider.class);
                 bind(ProductTransferService.class).in(Singleton.class).to(ProductTransferService.class);
             }
         });

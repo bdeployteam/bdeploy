@@ -1,0 +1,111 @@
+package io.bdeploy.minion.endpoints;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.SortedMap;
+import java.util.stream.Collectors;
+
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.TestHive;
+import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.op.ManifestLoadOperation;
+import io.bdeploy.common.TempDirectory;
+import io.bdeploy.common.TempDirectory.TempDir;
+import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.interfaces.configuration.dcu.EndpointsConfiguration;
+import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
+import io.bdeploy.interfaces.manifest.InstanceManifest;
+import io.bdeploy.interfaces.remote.CommonRootResource;
+import io.bdeploy.interfaces.remote.MasterRootResource;
+import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.jersey.TestServer;
+import io.bdeploy.minion.MinionRoot;
+import io.bdeploy.minion.TestFactory;
+import io.bdeploy.minion.TestMinion;
+import io.bdeploy.minion.endpoints.HelloEndpoint.HelloResult;
+
+@ExtendWith(TestHive.class)
+@ExtendWith(TestMinion.class)
+@ExtendWith(TempDirectory.class)
+public class EndpointsTest {
+
+    private static final Logger log = LoggerFactory.getLogger(EndpointsTest.class);
+
+    @RegisterExtension
+    TestServer server = new TestServer(false, new Object[] { HelloEndpoint.class });
+
+    @Test
+    void testEndpoint(BHive local, MasterRootResource master, CommonRootResource common, RemoteService remote, @TempDir Path tmp,
+            MinionRoot mr) throws IOException, InterruptedException {
+        Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true, server.getPort());
+
+        String uuid = local.execute(new ManifestLoadOperation().setManifest(instance)).getLabels()
+                .get(InstanceManifest.INSTANCE_LABEL);
+
+        master.getNamedMaster("demo").install(instance);
+        assertFalse(master.getNamedMaster("demo").getInstanceState(uuid).installedTags.isEmpty());
+
+        assertThrows(ClientErrorException.class, () -> common.getInstanceResource("demo").getAllEndpoints(uuid).isEmpty());
+
+        master.getNamedMaster("demo").activate(instance);
+        assertEquals(instance.getTag(), master.getNamedMaster("demo").getInstanceState(uuid).activeTag);
+
+        master.getNamedMaster("demo").start(uuid, "app");
+
+        SortedMap<String, EndpointsConfiguration> allEndpoints = common.getInstanceResource("demo").getAllEndpoints(uuid);
+        List<HttpEndpoint> httpEndpoints = allEndpoints.entrySet().stream().flatMap(e -> e.getValue().http.stream())
+                .collect(Collectors.toList());
+        assertEquals(1, httpEndpoints.size());
+        assertEquals("test", httpEndpoints.get(0).id);
+
+        // start a server which actually provides the endpoint at the generated port
+        Response response = common.getInstanceResource("demo").getProxyResource(uuid, "app").get("test");
+        log.info("Result: {}", response.getStatusInfo());
+        assertEquals(200, response.getStatus());
+        assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
+
+        HelloResult result = response.readEntity(HelloResult.class);
+
+        assertNotNull(result);
+        assertEquals("world", result.hello);
+
+        // manually construct request to be able to pass additional parameters
+        WebTarget wt = ResourceProvider.of(remote).getBaseTarget().path("/master/common/proxy/test")
+                .queryParam("BDeploy_group", "demo").queryParam("BDeploy_instance", uuid)
+                .queryParam("BDeploy_application", "app");
+
+        HelloResult input = new HelloResult();
+        input.hello = "put";
+        input.time = 1;
+
+        response = wt.queryParam("value", "QUERY").request().header("TestHeader", "TestValue")
+                .buildPut(Entity.entity(input, MediaType.APPLICATION_JSON_TYPE)).invoke();
+
+        log.info("Result: {}", response.getStatusInfo());
+        assertEquals(200, response.getStatus());
+        assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
+
+        result = response.readEntity(HelloResult.class);
+
+        assertNotNull(result);
+        assertEquals("put - QUERY - TestValue", result.hello);
+    }
+}

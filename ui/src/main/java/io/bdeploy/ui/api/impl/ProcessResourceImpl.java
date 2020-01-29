@@ -12,10 +12,10 @@ import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 import io.bdeploy.interfaces.directory.InstanceDirectory;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
+import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
-import io.bdeploy.ui.api.MasterProvider;
 import io.bdeploy.ui.api.ProcessResource;
 
 public class ProcessResourceImpl implements ProcessResource {

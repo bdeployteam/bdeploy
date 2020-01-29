@@ -36,6 +36,7 @@ import io.bdeploy.common.security.SecurityHelper;
 @Priority(Priorities.AUTHENTICATION)
 public class JerseyAuthenticationProvider implements ContainerRequestFilter, ContainerResponseFilter {
 
+    private static final String BDEPLOY_ALT_AUTH_HEADER = "X-BDeploy-Authorization";
     private static final String THREAD_ORIG_NAME = "THREAD_ORIG_NAME";
     private static final Logger log = LoggerFactory.getLogger(JerseyAuthenticationProvider.class);
 
@@ -112,7 +113,10 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
         }
 
         // Get the Authorization header from the request
-        String authorizationHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
+        String authorizationHeader = requestContext.getHeaderString(BDEPLOY_ALT_AUTH_HEADER);
+        if (authorizationHeader == null) {
+            authorizationHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
+        }
 
         // Validate the Authorization header
         if (!isTokenBasedAuthentication(authorizationHeader)) {

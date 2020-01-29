@@ -112,6 +112,7 @@ export const EMPTY_APPLICATION_CONFIGURATION: ApplicationConfiguration = {
   processControl: null,
   start: EMPTY_COMMAND_CONFIGURATION,
   stop: EMPTY_COMMAND_CONFIGURATION,
+  endpoints: { http: [] }
 };
 
 export const EMPTY_INSTANCE_NODE_CONFIGURATION: InstanceNodeConfiguration = {

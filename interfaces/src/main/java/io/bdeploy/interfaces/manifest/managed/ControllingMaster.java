@@ -1,4 +1,4 @@
-package io.bdeploy.ui;
+package io.bdeploy.interfaces.manifest.managed;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.meta.MetaManifest;

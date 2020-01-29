@@ -40,9 +40,14 @@ public class TestFactory {
 
     public static Manifest.Key createApplicationsAndInstance(BHive local, CommonRootResource root, RemoteService remote, Path tmp,
             boolean push) throws IOException {
+        return createApplicationsAndInstance(local, root, remote, tmp, push, 0);
+    }
+
+    public static Manifest.Key createApplicationsAndInstance(BHive local, CommonRootResource root, RemoteService remote, Path tmp,
+            boolean push, int port) throws IOException {
         /* STEP 1: Applications and external Application provided by development teams */
-        Path app = TestAppFactory.createDummyApp("app", tmp);
-        Path client = TestAppFactory.createDummyApp("client", tmp);
+        Path app = TestAppFactory.createDummyApp("app", tmp, false, port);
+        Path client = TestAppFactory.createDummyApp("client", tmp, true, 0);
         Path jdk = TestAppFactory.createDummyAppNoDescriptor("jdk", tmp);
 
         Manifest.Key prodKey = new Manifest.Key("customer/product", "1.0.0.1234");
@@ -113,11 +118,12 @@ public class TestFactory {
         cfg.start.executable = amf.getDescriptor().startCommand.launcherPath;
         cfg.application = amf.getKey();
         cfg.processControl = ProcessControlConfiguration.createDefault();
+        cfg.endpoints.http.addAll(amf.getDescriptor().endpoints.http);
 
         /* STEP 1d: configure parameters, usually in the UI based on information from the application descriptor */
         ParameterConfiguration sleepParam = new ParameterConfiguration();
         sleepParam.uid = "sleepParam";
-        sleepParam.preRendered.add("3");
+        sleepParam.preRendered.add("10");
         cfg.start.parameters.add(sleepParam);
 
         /* STEP 1e: setup the node configuration, which basically only references all application configs */

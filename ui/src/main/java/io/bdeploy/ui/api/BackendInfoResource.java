@@ -8,10 +8,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import io.bdeploy.ui.dto.BackendInfoDto;
-import io.bdeploy.ui.dto.ManagedMasterDto;
 
 @Path("/backend-info")
 @Consumes(MediaType.APPLICATION_JSON)

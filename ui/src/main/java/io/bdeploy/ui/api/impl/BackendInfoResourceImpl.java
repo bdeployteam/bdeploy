@@ -10,6 +10,7 @@ import javax.ws.rs.core.UriInfo;
 import io.bdeploy.common.Version;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.VersionHelper;
+import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.MinionStatusResource;
@@ -18,7 +19,6 @@ import io.bdeploy.ui.api.BackendInfoResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.dto.BackendInfoDto;
-import io.bdeploy.ui.dto.ManagedMasterDto;
 
 public class BackendInfoResourceImpl implements BackendInfoResource {
 

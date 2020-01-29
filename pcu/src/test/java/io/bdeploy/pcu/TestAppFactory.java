@@ -19,6 +19,7 @@ import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor.ApplicationType;
 import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
+import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
 
 public class TestAppFactory {
@@ -85,13 +86,15 @@ public class TestAppFactory {
     }
 
     public static Path createDummyApp(String name, Path tmp) {
-        return createDummyApp(name, tmp, false);
+        return createDummyApp(name, tmp, false, 0);
     }
 
     /**
      * Creates a dummy application along with an {@link ApplicationDescriptor}.
+     *
+     * @param port
      */
-    public static Path createDummyApp(String name, Path tmp, boolean client) {
+    public static Path createDummyApp(String name, Path tmp, boolean client, int port) {
         Path target = tmp.resolve(name);
         PathHelper.mkdirs(target);
         ApplicationDescriptor cfg = new ApplicationDescriptor();
@@ -116,6 +119,17 @@ public class TestAppFactory {
         cfg.startCommand.parameters.add(getParam("--param1", "Parameter 1", "test"));
         cfg.startCommand.parameters.add(getParam("--param2", "Parameter 2", "more"));
         cfg.startCommand.parameters.add(getParam("--jdk", "Parameter 2", "{{M:jdk}}"));
+
+        if (port != 0) {
+            HttpEndpoint fakeEndpoint = new HttpEndpoint();
+            fakeEndpoint.id = "test";
+            fakeEndpoint.path = "/api/test/with/path"; // must match HelloEndpoint
+            fakeEndpoint.port = String.valueOf(port);
+            fakeEndpoint.secure = true;
+            fakeEndpoint.trustAll = true;
+
+            cfg.endpoints.http.add(fakeEndpoint);
+        }
 
         try {
             Files.write(target.resolve(ApplicationDescriptor.FILE_NAME),
