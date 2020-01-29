@@ -21,6 +21,7 @@ describe('Software Repository Tests', () => {
 
   it('Delete Instance Group', () => {
     cy.visit('/#/softwarerepo/browser');
+    cy.waitUntilContentLoaded();
 
     cy.contains('mat-card', repoName)
       .should('exist')

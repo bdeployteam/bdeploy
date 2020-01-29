@@ -2,6 +2,7 @@ import { Location } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
+import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { SORT_PURPOSE } from '../../../../models/consts';
 import { DataList } from '../../../../models/dataList';
 import { InstanceConfiguration, InstanceDto, InstancePurpose, ProductDto } from '../../../../models/gen.dtos';
@@ -26,6 +27,7 @@ export class InstanceBrowserComponent implements OnInit {
   purposes: InstancePurpose[] = [];
 
   constructor(
+    public authService: AuthenticationService,
     private route: ActivatedRoute,
     private instanceService: InstanceService,
     private productService: ProductService,

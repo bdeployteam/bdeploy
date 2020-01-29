@@ -9,6 +9,7 @@ import { EMPTY_INSTANCE_GROUP } from '../../../../models/consts';
 import { InstanceGroupConfiguration, MinionMode } from '../../../../models/gen.dtos';
 import { InstanceGroupDeleteDialogComponent } from '../../../instance-group/components/instance-group-delete-dialog/instance-group-delete-dialog.component';
 import { InstanceGroupService } from '../../../instance-group/services/instance-group.service';
+import { AuthenticationService } from '../../services/authentication.service';
 import { ConfigService } from '../../services/config.service';
 import { LoggingService } from '../../services/logging.service';
 
@@ -32,6 +33,7 @@ export class InstanceGroupCardComponent implements OnInit {
 
   constructor(
     private loggingService: LoggingService,
+    public authService: AuthenticationService,
     private instanceGroupService: InstanceGroupService,
     private dialog: MatDialog,
     private config: ConfigService,

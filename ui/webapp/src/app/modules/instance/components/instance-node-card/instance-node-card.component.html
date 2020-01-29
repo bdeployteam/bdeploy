@@ -39,6 +39,7 @@
         <span *ngIf="isClientApplicationsNode()">There are currently no client applications assigned to this node.</span>
       </div>
       <app-application-configuration-card *ngFor="let process of nodeApps"
+        [instanceGroupName]="instanceGroupName"
         class="process-card"
         [ngClass]="getDragulaAppClasses(process)"
         [appConfig]="process"
@@ -72,6 +73,7 @@
             <div *ngFor="let cfg of nodeCfg.applications">
               <app-application-configuration-card
                 class="process-card foreign-process-card"
+                [instanceGroupName]="instanceGroupName"
                 [isForeign]="'true'"
                 [appConfig]="cfg"
               ></app-application-configuration-card>

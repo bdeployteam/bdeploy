@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { EventWithCallback } from '../../../../models/event';
 import { ApplicationConfiguration, InstanceVersionDto, OperatingSystem } from '../../../../models/gen.dtos';
 import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
@@ -13,6 +14,7 @@ import { ApplicationService } from '../../services/application.service';
   styleUrls: ['./application-configuration-card.component.css'],
 })
 export class ApplicationConfigurationCardComponent implements OnInit {
+  @Input() instanceGroupName: string;
   @Input() public instanceVersion: InstanceVersionDto;
   @Input() public appConfig: ApplicationConfiguration;
   @Input() public activatedTag: string;
@@ -31,6 +33,7 @@ export class ApplicationConfigurationCardComponent implements OnInit {
   downloading = false;
 
   constructor(
+    public authService: AuthenticationService,
     private mbService: MessageboxService,
     private appService: ApplicationService,
     private launcherService: LauncherService,

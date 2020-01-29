@@ -10,6 +10,7 @@ import { DragulaService } from 'ng2-dragula';
 import { forkJoin, Observable, of, Subscription } from 'rxjs';
 import { catchError, finalize, mergeMap } from 'rxjs/operators';
 import { isUpdateFailed, isUpdateInProgress, isUpdateSuccess, UpdateStatus } from 'src/app/models/update.model';
+import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { ApplicationGroup } from '../../../../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_DEPLOYMENT_STATE } from '../../../../models/consts';
 import { EventWithCallback } from '../../../../models/event';
@@ -109,6 +110,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   private reloadPending = false;
 
   constructor(
+    public authService: AuthenticationService,
     private route: ActivatedRoute,
     private loggingService: LoggingService,
     private instanceService: InstanceService,
@@ -590,7 +592,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
   public onSelectApp(node: InstanceNodeConfigurationDto, process: ApplicationConfiguration) {
     // if we're central && !synced prevent switching
-    if (this.isCentral() && !this.isCentralSynced) {
+    if ((this.isCentral() && !this.isCentralSynced) || !this.authService.isScopedWrite(this.groupParam)) {
       return;
     }
 

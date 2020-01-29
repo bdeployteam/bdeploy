@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { InstanceDto } from '../../../../models/gen.dtos';
 import { LoggingService } from '../../../core/services/logging.service';
 import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
@@ -20,6 +21,7 @@ export class InstanceCardComponent implements OnInit {
   private log = this.loggingService.getLogger('InstanceCardComponent');
 
   constructor(
+    public authService: AuthenticationService,
     private loggingService: LoggingService,
     private instanceService: InstanceService,
     private mbService: MessageboxService,

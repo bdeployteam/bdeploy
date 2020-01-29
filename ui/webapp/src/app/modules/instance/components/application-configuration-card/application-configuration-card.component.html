@@ -3,10 +3,8 @@
     <span class="mat-title app-title">{{ appConfig.name }}</span>
     <span class="spacer"></span>
     <mat-menu #appMenu="matMenu" xPosition="before">
-      <button mat-menu-item (click)="onEdit()" [disabled]='isMissing()'>
-        <ng-container *ngIf="!isReadonly"> Configure... </ng-container>
-        <ng-container *ngIf="isReadonly"> View... </ng-container>
-      </button>
+      <button mat-menu-item *ngIf="!isReadonly" (click)="onEdit()" [disabled]="!authService.isScopedWrite(instanceGroupName) || isMissing()">Configure...</button>
+      <button mat-menu-item *ngIf="isReadonly" (click)="onEdit()" [disabled]="isMissing()">View...</button>
       <ng-container *ngIf='isClient'>
         <mat-divider></mat-divider>
         <button mat-menu-item [disabled]='!isActive()' (click)="downloadClickAndStart()">
@@ -18,7 +16,7 @@
         <mat-divider></mat-divider>
       </ng-container>
       <mat-divider></mat-divider>
-      <button mat-menu-item (click)="onDelete()" [disabled]="isReadonly">Delete...</button>
+      <button mat-menu-item (click)="onDelete()" [disabled]="!authService.isScopedAdmin(instanceGroupName) || isReadonly">Delete...</button>
     </mat-menu>
     <button class="option-button" mat-icon-button [matMenuTriggerFor]="appMenu" *ngIf="!isForeign" appClickStopPropagation>
       <mat-icon>more_vert</mat-icon>

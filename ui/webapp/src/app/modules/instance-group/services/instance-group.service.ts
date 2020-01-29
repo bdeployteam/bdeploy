@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { InstanceClientAppsDto, InstanceGroupConfiguration, InstanceGroupPermissionDto, OperatingSystem } from '../../../models/gen.dtos';
+import { InstanceClientAppsDto, InstanceGroupConfiguration, InstanceGroupPermissionDto, OperatingSystem, UserInfo } from '../../../models/gen.dtos';
 import { ConfigService } from '../../core/services/config.service';
 import { Logger, LoggingService } from '../../core/services/logging.service';
 import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
@@ -56,17 +56,24 @@ export class InstanceGroupService {
     return this.http.post(url, group);
   }
 
+  public deleteInstanceGroup(name: string) {
+    const url: string = this.cfg.config.api + InstanceGroupService.BASEPATH + '/' + name;
+    this.log.debug('deleteInstanceGroup: ' + url);
+    return this.http.delete(url);
+  }
+
+  public getAllUsers(name: string): Observable<UserInfo[]> {
+    const url: string = this.cfg.config.api + InstanceGroupService.BASEPATH + '/' + name + '/users';
+    this.log.debug('getAllUsers: ' + url);
+    return this.http.get<UserInfo[]>(url);
+  }
+
   public updateInstanceGroupPermissions(name: string, permissions: InstanceGroupPermissionDto[]) {
     const url: string = this.cfg.config.api + InstanceGroupService.BASEPATH + '/' + name + '/permissions';
     this.log.debug('updateInstanceGroupPermissions: ' + url);
     return this.http.post(url, permissions);
   }
 
-  public deleteInstanceGroup(name: string) {
-    const url: string = this.cfg.config.api + InstanceGroupService.BASEPATH + '/' + name;
-    this.log.debug('deleteInstanceGroup: ' + url);
-    return this.http.delete(url);
-  }
 
   public createUuid(name: string): Observable<string> {
     const url: string = this.cfg.config.api + InstanceGroupService.BASEPATH + '/' + name + '/new-uuid';

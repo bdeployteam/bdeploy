@@ -58,5 +58,5 @@
   </mat-grid-tile>
 </mat-grid-list>
 
-<button mat-fab class="add-button" *ngIf='isAddAllowed()' [routerLink]="['/instancegroup/add']"><mat-icon>add</mat-icon></button>
-<button mat-fab class="add-button" *ngIf='isAttachAllowed()' [routerLink]="['/servers/attach/central']" matTooltip="Attach Instance Group from Central Server"><mat-icon>link</mat-icon></button>
+<button mat-fab class="add-button" *ngIf='isAddAllowed()' [routerLink]="['/instancegroup/add']" [disabled]="!authService.isGlobalAdmin()"><mat-icon>add</mat-icon></button>
+<button mat-fab class="add-button" *ngIf='isAttachAllowed()' [routerLink]="['/servers/attach/central']" [disabled]="!authService.isGlobalAdmin()" matTooltip="Attach Instance Group from Central Server"><mat-icon>link</mat-icon></button>

@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { LoginComponent } from './modules/core/components/login/login.component';
 import { MessageboxComponent } from './modules/shared/components/messagebox/messagebox.component';
+import { AdminGuard } from './modules/shared/guards/admin.guard';
 import { NotFoundGuard } from './modules/shared/guards/not-found.guard';
 
 const routes: Routes = [
@@ -25,11 +26,13 @@ const routes: Routes = [
   },
   {
     path: 'admin',
-    loadChildren: () => import('./modules/admin/admin.module').then(x => x.AdminModule)
+    loadChildren: () => import('./modules/admin/admin.module').then(x => x.AdminModule),
+    canActivate: [AdminGuard]
   },
   {
     path: 'softwarerepo',
-    loadChildren: () => import('./modules/repositories/repositories.module').then(x => x.RepositoriesModule)
+    loadChildren: () => import('./modules/repositories/repositories.module').then(x => x.RepositoriesModule),
+    canActivate: [AdminGuard]
   },
   {
     path: 'servers',

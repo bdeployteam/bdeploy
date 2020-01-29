@@ -6,6 +6,7 @@ import { MatDrawer } from '@angular/material/sidenav';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
+import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { MinionMode, ProductDto } from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
 import { FileUploadComponent } from '../../../shared/components/file-upload/file-upload.component';
@@ -33,6 +34,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
   columns = 3; // calculated number of columns
 
   constructor(
+    public authService: AuthenticationService,
     private mediaObserver: MediaObserver,
     private productService: ProductService,
     private route: ActivatedRoute,

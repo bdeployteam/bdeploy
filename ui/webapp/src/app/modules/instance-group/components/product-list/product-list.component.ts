@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { from } from 'rxjs';
 import { finalize, flatMap, tap } from 'rxjs/operators';
+import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { ManifestKey, ProductDto } from '../../../../models/gen.dtos';
 import { LoggingService } from '../../../core/services/logging.service';
 import { DownloadService } from '../../../shared/services/download.service';
@@ -21,7 +22,11 @@ export class ProductListComponent implements OnInit {
   private usageCounts: Map<ManifestKey, number> = new Map();
   public exporting: ProductDto;
 
-  constructor(private productService: ProductService, private loggingService: LoggingService, private downloadService: DownloadService) {}
+  constructor(
+    private productService: ProductService,
+    private loggingService: LoggingService,
+    public authService: AuthenticationService,
+    private downloadService: DownloadService) {}
 
   public get products(): ProductDto[] {
     return this._products;

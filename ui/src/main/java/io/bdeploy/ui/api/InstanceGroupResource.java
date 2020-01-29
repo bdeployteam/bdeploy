@@ -3,6 +3,7 @@ package io.bdeploy.ui.api;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
+import java.util.SortedSet;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -20,6 +21,7 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import io.bdeploy.common.security.RequiredCapability;
 import io.bdeploy.common.security.ScopedCapability.Capability;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
+import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupPermissionDto;
 import io.bdeploy.jersey.ActivityScope;
@@ -50,12 +52,18 @@ public interface InstanceGroupResource {
 
     @POST
     @Path("/{group}/permissions")
+    @RequiredCapability(capability = Capability.ADMIN, scope = "group")
     public void updatePermissions(@ActivityScope @PathParam("group") String group, InstanceGroupPermissionDto permissions[]);
 
     @DELETE
     @Path("/{group}")
     @RequiredCapability(capability = Capability.ADMIN)
     public void delete(@ActivityScope @PathParam("group") String group);
+
+    @GET
+    @Path("/{group}/users")
+    @RequiredCapability(capability = Capability.ADMIN, scope = "group")
+    public SortedSet<UserInfo> getAllUser(@ActivityScope @PathParam("group") String group);
 
     @POST
     @Path("/{group}/image")

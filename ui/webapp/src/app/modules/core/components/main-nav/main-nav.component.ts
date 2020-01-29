@@ -26,7 +26,7 @@ export class MainNavComponent implements OnInit {
   backendInfo: BehaviorSubject<BackendInfoDto> = new BehaviorSubject({ version: null, mode: MinionMode.STANDALONE });
 
   constructor(
-    private authService: AuthenticationService,
+    public authService: AuthenticationService,
     private cfgService: ConfigService,
     public theme: ThemeService,
     public title: HeaderTitleService,

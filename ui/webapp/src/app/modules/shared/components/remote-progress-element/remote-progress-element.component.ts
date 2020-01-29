@@ -26,7 +26,7 @@ export class RemoteProgressElementComponent implements OnInit {
   }
 
   isCancelAllowed(element: ActivitySnapshot): boolean {
-    return this.authService.getUsername() === element.user || this.authService.isAdmin();
+    return this.authService.getUsername() === element.user || this.authService.isGlobalAdmin();
   }
 
 }

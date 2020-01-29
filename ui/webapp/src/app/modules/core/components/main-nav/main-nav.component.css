@@ -77,6 +77,11 @@ footer {
   width: 100%;
 }
 
+.disabled-nav {
+  opacity: 0.5;
+  user-select: none;
+}
+
 .logo {
   margin-right: 5px;
   height: 48px;

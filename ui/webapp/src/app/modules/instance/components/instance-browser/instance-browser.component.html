@@ -41,7 +41,7 @@
   </div>
 </ng-container>
 
-<button mat-fab class="add-button" [routerLink]="['/instance/add', instanceGroupName]" [disabled]="!hasProducts">
+<button mat-fab class="add-button" [routerLink]="['/instance/add', instanceGroupName]" [disabled]="!authService.isScopedAdmin(instanceGroupName) || !hasProducts">
   <mat-icon>add</mat-icon>
 </button>
 <button mat-fab class="products-button" matTooltip="Manage Products..." [routerLink]="['/instancegroup/products', instanceGroupName]" color="primary">

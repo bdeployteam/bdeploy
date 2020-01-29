@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.SortedMap;
+import java.util.SortedSet;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
@@ -37,6 +38,7 @@ import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.ScopedManifestKey;
+import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupPermissionDto;
@@ -171,6 +173,11 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
         }
         registry.unregister(group);
         PathHelper.deleteRecursive(Paths.get(bHive.getUri()));
+    }
+
+    @Override
+    public SortedSet<UserInfo> getAllUser(String group) {
+        return auth.getAll();
     }
 
     @Override

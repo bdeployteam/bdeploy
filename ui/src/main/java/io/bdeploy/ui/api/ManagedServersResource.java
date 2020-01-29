@@ -83,7 +83,7 @@ public interface ManagedServersResource {
      */
     @GET
     @Path("/controlling-server/{group}/{instanceId}")
-    @RequiredCapability(scope = "group", capability = Capability.ADMIN)
+    @RequiredCapability(scope = "group", capability = Capability.READ)
     public ManagedMasterDto getServerForInstance(@PathParam("group") String instanceGroup,
             @PathParam("instanceId") String instanceId, @QueryParam("instanceTag") String instanceTag);
 
@@ -92,7 +92,7 @@ public interface ManagedServersResource {
      */
     @GET
     @Path("/controlled-instances/{group}/{server}")
-    @RequiredCapability(scope = "group", capability = Capability.ADMIN)
+    @RequiredCapability(scope = "group", capability = Capability.READ)
     public List<InstanceConfiguration> getInstancesControlledBy(@PathParam("group") String groupName,
             @PathParam("server") String serverName);
 
@@ -119,7 +119,7 @@ public interface ManagedServersResource {
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
     @Path("/synchronize/{group}/{server}")
-    @RequiredCapability(scope = "group", capability = Capability.ADMIN)
+    @RequiredCapability(scope = "group", capability = Capability.WRITE)
     public ManagedMasterDto synchronize(@PathParam("group") String groupName, @PathParam("server") String serverName);
 
     @GET
@@ -139,7 +139,7 @@ public interface ManagedServersResource {
 
     @GET
     @Path("/minion-updates/{group}/{server}")
-    @RequiredCapability(scope = "group", capability = Capability.ADMIN)
+    @RequiredCapability(scope = "group", capability = Capability.WRITE)
     public MinionUpdateDto getUpdates(@PathParam("group") String groupName, @PathParam("server") String serverName);
 
     @POST

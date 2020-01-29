@@ -32,7 +32,7 @@ export class InstanceGroupBrowserComponent implements OnInit, OnDestroy {
     private mediaObserver: MediaObserver,
     private instanceGroupService: InstanceGroupService,
     private loggingService: LoggingService,
-    private authService: AuthenticationService,
+    public authService: AuthenticationService,
     private config: ConfigService) { }
 
   ngOnInit(): void {

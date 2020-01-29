@@ -6,7 +6,6 @@ import { cloneDeep } from 'lodash';
 import { Observable, of } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { Capability, ScopedCapability, UserInfo } from 'src/app/models/gen.dtos';
-import { AuthAdminService } from 'src/app/modules/admin/services/auth-admin.service';
 import { Logger, LoggingService } from 'src/app/modules/core/services/logging.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
@@ -49,7 +48,6 @@ export class InstanceGroupPermissionsComponent implements OnInit {
     private messageBoxService: MessageboxService,
     public settings: SettingsService,
     private loggingService: LoggingService,
-    private authAdminService: AuthAdminService,
     public location: Location,
     private route: ActivatedRoute
   ) { }
@@ -66,7 +64,7 @@ export class InstanceGroupPermissionsComponent implements OnInit {
       this.dataSource.data = [];
     }
 
-    this.authAdminService.getAll().subscribe(users => {
+    this.instanceGroupService.getAllUsers(this.nameParam).subscribe(users => {
       this.userAll = users;
 
       const userTable: UserInfo[] = [];
@@ -75,6 +73,18 @@ export class InstanceGroupPermissionsComponent implements OnInit {
         if (cap4instanceGroup && cap4instanceGroup.length > 0) {
           const clone = cloneDeep(u);
           clone.capabilities = cap4instanceGroup;
+          if (this.hasScoped(clone)) {
+            // add missing capabilities of lower prio (required for grant/revoke actions)
+            const hasScopedRead = clone.capabilities.find(c => c.scope !== null && c.capability === Capability.READ) != null;
+            const hasScopedWrite = clone.capabilities.find(c => c.scope !== null && c.capability === Capability.WRITE) != null;
+            const hasScopedAdmin = clone.capabilities.find(c => c.scope !== null && c.capability === Capability.ADMIN) != null;
+            if (hasScopedAdmin && !hasScopedWrite) {
+              clone.capabilities.push({scope: this.nameParam, capability: Capability.WRITE});
+            }
+            if ((hasScopedAdmin || hasScopedWrite) && !hasScopedRead) {
+              clone.capabilities.push({scope: this.nameParam, capability: Capability.READ});
+            }
+          }
           userTable.push(clone);
         }
       }
