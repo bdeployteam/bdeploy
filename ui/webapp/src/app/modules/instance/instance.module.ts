@@ -26,6 +26,7 @@ import { ProcessListComponent } from './components/process-list/process-list.com
 import { ProcessStartConfirmComponent } from './components/process-start-confirm/process-start-confirm.component';
 import { ProcessStatusComponent } from './components/process-status/process-status.component';
 import { InstanceRoutingModule } from './instance-routing.module';
+import { InstanceSyncComponent } from './components/instance-sync/instance-sync.component';
 
 @NgModule({
   declarations: [
@@ -51,6 +52,7 @@ import { InstanceRoutingModule } from './instance-routing.module';
     InstanceVersionHistoryCardComponent,
     InstanceNotificationsComponent,
     InstanceNotificationsItemComponent,
+    InstanceSyncComponent,
   ],
   entryComponents: [
     ApplicationEditManualComponent,

@@ -8,8 +8,8 @@
   <div>
     The last synchronized state of the instance is shown, so both editing and process control are not available.<br />
     Press
-      <button mat-icon-button (click)='syncCentral()' matTooltip="Synchronize meta-data from the controlling server.">
-        <mat-icon>sync_alt</mat-icon>
+      <button mat-icon-button (click)='instanceNotifications.closeOverlay(); syncComponent.doSyncCentral()' matTooltip="Synchronize meta-data from the controlling server.">
+        <mat-icon>settings_remote</mat-icon>
       </button>
     to get the latest version from the managed master.
   </div>
@@ -17,7 +17,7 @@
 
 <ng-template #notificationUpdate>
   <div class="update-container">
-    <app-managed-server-update [showClose]='false' [serverName]="controllingServer.hostName" [instanceGroupName]="groupParam" [updateDto]="updateDto" (updateEvent)="onUpdateEvent($event)">
+    <app-managed-server-update [showClose]='false' [serverName]="syncComponent.getServerName()" [instanceGroupName]="groupParam" [updateDto]="updateDto" (updateEvent)="onUpdateEvent($event)">
     </app-managed-server-update>
   </div>
 </ng-template>
@@ -72,26 +72,16 @@
         <div>
           Version: <b *ngIf="!loading">{{ selectedConfig.instance.product.tag }}</b>&nbsp;<span *ngIf="!loading && !isProductAvailable(selectedConfig)" class="product-unavailable" matTooltip="Required product version is not available.">N/A</span>
         </div>
-        <div *ngIf='controllingServer'>
-          Controlling Server: <b *ngIf="!loading">{{controllingServer.hostName}}</b>
-        </div>
-        <div *ngIf='!controllingServer'>
-          &nbsp;
-        </div>
         <div>
           Purpose: <b *ngIf="!loading">{{ selectedConfig.instance.purpose }}</b>
         </div>
         <div>
           Auto Start: <b *ngIf="!loading">{{ selectedConfig.instance.autoStart ? 'Enabled' : 'Disabled' }}</b>
         </div>
-        <div *ngIf='controllingServer'>
-            Last sync.: <b *ngIf="!loading">{{ getDate(controllingServer.lastSync) }}</b>
-        </div>
       </div>
+      <div class="spacer"></div>
+      <app-instance-sync #syncComponent [instanceGroup]='groupParam' [instance]='uuidParam' [tag]='selectedConfig?.version?.key?.tag' (syncEvent)='onSyncManaged()' (stateUpdateEvent)='onSyncStateUpdate()'></app-instance-sync>
       <span class="fill-space"></span>
-      <ng-container *ngIf='isCentral()'>
-        <button mat-icon-button (click)='syncCentral()' matTooltip="Synchronize meta-data from the controlling server." [disabled]="!authService.isScopedWrite(groupParam)"><mat-icon>sync_alt</mat-icon></button>
-      </ng-container>
       <app-remote-progress [scope]='[groupParam, uuidParam]'></app-remote-progress>
       <ng-container *ngIf="isAutoRefreshVisible() && autoRefresh">
         <button mat-icon-button (click)="toggleAutoRefresh()"
@@ -101,7 +91,7 @@
         </button>
       </ng-container>
       <ng-container *ngIf="isAutoRefreshVisible() && !autoRefresh">
-        <button mat-icon-button (click)="toggleAutoRefresh()" [disabled]='isCentral() && !isCentralSynced' matTooltip="Auto refresh of process status disabled. Click to enable.">
+        <button mat-icon-button (click)="toggleAutoRefresh()" [disabled]='isCentral() && !syncComponent.isInSync()' matTooltip="Auto refresh of process status disabled. Click to enable.">
           <mat-icon>sync_disabled</mat-icon>
         </button>
       </ng-container>
@@ -234,7 +224,7 @@
                 [dirty]="config.dirty"
                 [productAvailable]="isProductAvailable(config)"
                 [disabled]="loading"
-                [readOnly]='isCentral() && !isCentralSynced'>
+                [readOnly]='isCentral() && !syncComponent.isInSync()'>
               </app-instance-version-card>
             </ng-container>
           </div>

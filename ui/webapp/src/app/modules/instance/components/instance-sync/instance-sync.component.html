@@ -1,0 +1,8 @@
+<div *ngIf='server' class='sync-panel'>
+  <mat-icon *ngIf='isInSync()' class='sync-button' (click)='doSyncCentral()' matRipple [matRippleUnbounded]='true' [matRippleCentered]='true'>settings_remote</mat-icon>
+  <mat-icon *ngIf='!isInSync()' matTooltip='Synchronization required to unlock editing' class='sync-button sync-button-need-sync' (click)='doSyncCentral()' matRipple [matRippleUnbounded]='true' [matRippleCentered]='true'>settings_remote</mat-icon>
+  <div class='sync-text-panel'>
+    <div>Press to synchronize with <b>{{server.description}}</b></div>
+    <div>Last synchronization: <span [ngClass]='isInSync() ? "instance-in-sync" : "instance-not-in-sync"'>{{getDate(server.lastSync)}}</span></div>
+  </div>
+</div>

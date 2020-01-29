@@ -3,7 +3,6 @@ import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/c
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { format } from 'date-fns';
 import { cloneDeep, isEqual } from 'lodash';
 import { EventSourcePolyfill } from 'ng-event-source';
 import { DragulaService } from 'ng2-dragula';
@@ -14,7 +13,7 @@ import { AuthenticationService } from 'src/app/modules/core/services/authenticat
 import { ApplicationGroup } from '../../../../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_DEPLOYMENT_STATE } from '../../../../models/consts';
 import { EventWithCallback } from '../../../../models/event';
-import { ApplicationConfiguration, ApplicationDto, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstanceStateRecord, InstanceUpdateEventDto, InstanceUpdateEventType, ManagedMasterDto, ManifestKey, MinionDto, MinionMode, MinionStatusDto, MinionUpdateDto, ProductDto } from '../../../../models/gen.dtos';
+import { ApplicationConfiguration, ApplicationDto, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstanceStateRecord, InstanceUpdateEventDto, InstanceUpdateEventType, ManifestKey, MinionDto, MinionMode, MinionStatusDto, MinionUpdateDto, ProductDto } from '../../../../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../../../../models/process.model';
 import { ConfigService } from '../../../core/services/config.service';
 import { HeaderTitleService } from '../../../core/services/header-title.service';
@@ -34,6 +33,7 @@ import { InstanceService } from '../../services/instance.service';
 import { ProcessService } from '../../services/process.service';
 import { ApplicationEditComponent } from '../application-edit/application-edit.component';
 import { InstanceNotification, Severity } from '../instance-notifications/instance-notifications.component';
+import { InstanceSyncComponent } from '../instance-sync/instance-sync.component';
 import { InstanceVersionCardComponent } from '../instance-version-card/instance-version-card.component';
 import { ProcessDetailsComponent } from '../process-details/process-details.component';
 
@@ -79,12 +79,12 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
   notifications: InstanceNotification[] = [];
 
+  @ViewChild(InstanceSyncComponent, {static: true})
+  private syncComponent: InstanceSyncComponent;
+
   public groupParam: string;
   public uuidParam: string;
   public pageTitle: string;
-
-  // the controlling managed server in central mode.
-  public controllingServer: ManagedMasterDto;
 
   public selectedConfig: ProcessConfigDto;
   public processConfigs: ProcessConfigDto[] = [];
@@ -122,7 +122,6 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   private updateEvents: EventSourcePolyfill;
   private lastStateReload = 0;
 
-  public isCentralSynced = false;
   public updateDto: MinionUpdateDto;
   public updateStatus: UpdateStatus;
 
@@ -157,8 +156,8 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
         this.groupParam = p['group'];
         this.uuidParam = p['uuid'];
         this.loadVersions(false);
-        this.enableAutoRefresh();
         if (!this.isCentral()) {
+          this.enableAutoRefresh();
           this.doTriggerProcessStatusUpdate();
         }
 
@@ -352,29 +351,24 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       );
     const call2 = this.instanceService.getNodeConfiguration(this.groupParam, this.uuidParam, selectedVersion.key.tag); // => results[1]
     const call3 = this.productService.getProducts(this.groupParam); // => result[2];
-    let call4 = of(null);
-    if (this.isCentral()) {
-      call4 = this.managedServers.getServerForInstance(this.groupParam, this.uuidParam, selectedVersion.key.tag); // results[3]
-    }
 
     // Gather node state only in managed / standalone mode
-    let call5 = of({});
-    if (!this.isCentral() || this.isCentralSynced) {
-      call5 = this.instanceService.getMinionState(this.groupParam, this.uuidParam, selectedVersion.key.tag); // results[4]
+    let call4 = of({});
+    if (!this.isCentral() || this.syncComponent.isInSync()) {
+      call4 = this.instanceService.getMinionState(this.groupParam, this.uuidParam, selectedVersion.key.tag); // results[4]
     }
-    const call6 = this.instanceService.getMinionConfiguration(this.groupParam, this.uuidParam, selectedVersion.key.tag); // results[5]
+    const call5 = this.instanceService.getMinionConfiguration(this.groupParam, this.uuidParam, selectedVersion.key.tag); // results[5]
 
-    forkJoin([call1, call2, call3, call4, call5, call6]).subscribe(results => {
-      newSelectedConfig.setNodeList(results[1], results[5]);
+    forkJoin([call1, call2, call3, call4, call5]).subscribe(results => {
+      newSelectedConfig.setNodeList(results[1], results[4]);
       newSelectedConfig.setApplications(results[0]);
       this.selectedConfig = newSelectedConfig;
 
       const filtered = results[2].filter(x => x.key.name === this.selectedConfig.version.product.name);
       this.productTags = sortByTags(filtered, p => p.key.tag, false);
 
-      this.controllingServer = results[3];
-      this.minionStates = results[4];
-      this.minionConfigs = results[5];
+      this.minionStates = results[3];
+      this.minionConfigs = results[4];
 
       this.loading = false;
       this.updateDirtyStateAndValidate();
@@ -453,12 +447,10 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
   setSidenavVersions(): void {
     this.sidenavMode = SidenavMode.Versions;
-    this.enableAutoRefresh();
   }
 
   setSidenavApplications(): void {
     this.sidenavMode = SidenavMode.Applications;
-    this.disableAutoRefresh();
   }
 
   setSidenavProcessStatus(process: ApplicationConfiguration): void {
@@ -477,7 +469,6 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
   setSidenavProducts(): void {
     this.sidenavMode = SidenavMode.Products;
-    this.disableAutoRefresh();
   }
 
   public hasClientApplications(): boolean {
@@ -566,7 +557,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
     let server = null;
     if (this.isCentral()) {
-      server = this.controllingServer.hostName;
+      server = this.syncComponent.getServerName();
     }
 
     const nodePromise = this.instanceService.updateInstance(
@@ -611,7 +602,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
   public onSelectApp(node: InstanceNodeConfigurationDto, process: ApplicationConfiguration) {
     // if we're central && !synced prevent switching
-    if ((this.isCentral() && !this.isCentralSynced) || !this.authService.isScopedWrite(this.groupParam)) {
+    if ((this.isCentral() && !this.syncComponent.isInSync()) || !this.authService.isScopedWrite(this.groupParam)) {
       return;
     }
 
@@ -925,11 +916,9 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   setEditMode(editMode: boolean) {
     this.editMode = editMode;
     if (editMode) {
-      this.disableAutoRefresh();
       this.pageTitle = this.titleService.getHeaderTitle();
       this.titleService.setHeaderTitle('Process Settings');
     } else {
-      this.enableAutoRefresh();
       this.updateDirtyStateAndValidate();
       this.titleService.setHeaderTitle(this.pageTitle);
     }
@@ -946,7 +935,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
   /** Enables auto-refresh mechanism */
   enableAutoRefresh() {
-    if (this.autoRefresh || (this.isCentral() && !this.isCentralSynced)) {
+    if (this.autoRefresh || (this.isCentral() && !this.syncComponent.isInSync())) {
       return;
     }
 
@@ -1011,7 +1000,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   isReadonly() {
-    if (this.isCentral() && !this.isCentralSynced) {
+    if (this.isCentral() && !this.syncComponent.isInSync()) {
       return true;
     }
     if (this.isUpdateInProgress() || this.isUpdateFailed()) {
@@ -1027,30 +1016,23 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     return (this.deploymentState != null && this.deploymentState.activeTag != null);
   }
 
-  async syncCentral() {
+  async onSyncManaged() {
     if (!this.isCentral()) {
       return;
     }
     this.updateDto = null;
     this.updateStatus = null;
-    await this.doSyncCentral();
-    if (this.isCentralSynced) {
+    if (this.syncComponent.isInSync()) {
       this.loadVersions(true);
+      this.updateDto = await this.managedServers.getUpdatesFor(this.groupParam, this.syncComponent.getServerName()).toPromise();
     }
+    this.doTriggerProcessStatusUpdate();
+    this.updateNotifications();
   }
 
-  async doSyncCentral() {
-    try {
-      await this.managedServers.synchronize(this.groupParam, this.controllingServer.hostName).toPromise();
-      this.updateDto = await this.managedServers.getUpdatesFor(this.groupParam, this.controllingServer.hostName).toPromise();
-      this.isCentralSynced = true;
-    } catch (e) {
-      this.messageBoxService.open({
-        title: 'Synchronization Error',
-        message: 'Synchronization failed. The remote master server might be offline.',
-        mode: MessageBoxMode.ERROR});
+  async onSyncStateUpdate() {
+    if (!this.syncComponent.isInSync()) {
       this.minionStates = {};
-      this.isCentralSynced = false;
     }
     this.updateNotifications();
   }
@@ -1094,10 +1076,6 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     return classes;
   }
 
-  getDate(x: number) {
-    return format(new Date(x), 'dd.MM.yyyy HH:mm');
-  }
-
   showUpdateComponent() {
     if (this.updateDto && this.updateDto.updateAvailable) {
       return true;
@@ -1111,10 +1089,9 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   onUpdateEvent(updateState: UpdateStatus) {
     this.updateStatus = updateState;
     if (this.isUpdateSuccess()) {
-      this.doSyncCentral();
+      this.syncComponent.doSyncCentral();
     }
     if (this.isUpdateFailed()) {
-      this.isCentralSynced = false;
       this.messageBoxService.open({
         title: 'Update Error',
         message: 'Failed to await server to come back online. Please check server logs.',
@@ -1154,13 +1131,13 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   private updateNotifications() {
-    if (this.isCentral() && !this.isCentralSynced) {
+    if (this.isCentral() && !this.syncComponent.isInSync()) {
       this.addNotification(this.notificationSyncCentral, Severity.INFO, 1);
     } else {
       this.removeNotification(this.notificationSyncCentral);
     }
 
-    if (this.isProductUpgradeAvailable() && !this.editMode && !(this.isCentral() && !this.isCentralSynced)) {
+    if (this.isProductUpgradeAvailable() && !this.editMode && !(this.isCentral() && !this.syncComponent.isInSync())) {
       this.addNotification(this.notificationNewerProduct, Severity.INFO, 2);
     } else {
       this.removeNotification(this.notificationNewerProduct);

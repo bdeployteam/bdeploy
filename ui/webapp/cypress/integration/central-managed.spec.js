@@ -194,7 +194,7 @@ describe("Central/Managed Basic Test", function() {
     // cannot check configuration file here, as it would require a sync :)
 
     // now sync to central and make sure it appeared
-    cy.contains('button', 'sync_alt').should('be.enabled').click();
+    cy.contains('mat-icon', 'settings_remote').should('be.visible').click();
 
     // the next actions are not retryable, so sync must be completed before checking
     cy.waitUntilContentLoaded();
@@ -211,7 +211,7 @@ describe("Central/Managed Basic Test", function() {
     cy.gotoInstance(groupName, managedInstance, 'CENTRAL');
     cy.waitUntilContentLoaded();
 
-    cy.contains('button', 'sync_alt').should('be.enabled').click();
+    cy.contains('mat-icon', 'settings_remote').should('be.visible').click();
     cy.waitUntilContentLoaded();
 
     cy.getLatestInstanceVersion().installAndActivate();
@@ -226,7 +226,7 @@ describe("Central/Managed Basic Test", function() {
     cy.gotoInstance(groupName, managedInstance, 'CENTRAL');
     cy.waitUntilContentLoaded();
 
-    cy.contains('button', 'sync_alt').should('be.enabled').click();
+    cy.contains('mat-icon', 'settings_remote').should('be.visible').click();
     cy.waitUntilContentLoaded();
 
     cy.get('.notifications-button').should('exist').and('be.enabled').click();
@@ -258,7 +258,7 @@ describe("Central/Managed Basic Test", function() {
     cy.gotoInstance(groupName, managedInstance, 'CENTRAL');
     cy.waitUntilContentLoaded();
 
-    cy.contains('button', 'sync_alt').should('be.enabled').click();
+    cy.contains('mat-icon', 'settings_remote').should('be.visible').click();
     cy.waitUntilContentLoaded();
 
     cy.startProcess('master', 'Server Application');
@@ -309,7 +309,7 @@ describe("Central/Managed Basic Test", function() {
     cy.gotoInstance(groupName, managedInstance, 'CENTRAL');
     cy.waitUntilContentLoaded();
 
-    cy.contains('button', 'sync_alt').should('be.enabled').click();
+    cy.contains('mat-icon', 'settings_remote').should('be.visible').click();
     cy.waitUntilContentLoaded();
 
     cy.getApplicationConfigCard('master', 'Server Application').click();

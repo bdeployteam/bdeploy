@@ -1,0 +1,25 @@
+.sync-panel {
+  border: 1px dotted;
+  border-radius: 3px;
+
+  display: flex;
+  flex-direction: row;
+
+  align-items: center;
+  padding: 5px;
+}
+
+.sync-button {
+  font-size: 42px;
+  width: 42px;
+  height: 42px;
+
+  margin-right: 10px;
+
+  cursor: pointer;
+}
+
+.sync-button-disabled {
+  color: darkgray !important;
+  cursor: default !important;
+}
