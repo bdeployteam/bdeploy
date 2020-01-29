@@ -151,11 +151,9 @@ configure(actualSubprojects) {
     }
 
     test {
-        useJUnitPlatform {
-        //    excludeTags 'slow'
-        }
+        useJUnitPlatform()
         if(!project.hasProperty('verboseTest')) {
-            maxParallelForks = 8
+            maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
         }
         maxHeapSize = "2g"
         testLogging {
