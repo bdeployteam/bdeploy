@@ -6,7 +6,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.GridBagConstraints;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -36,6 +35,7 @@ import javax.swing.border.EmptyBorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.ProcessHelper;
@@ -114,14 +114,8 @@ public abstract class LauncherDialog extends JFrame {
         header.setBorder(new EmptyBorder(10, 10, 10, 10));
         header.setLayout(new FlowLayout());
 
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.anchor = GridBagConstraints.WEST;
-
         headerIcon = new JLabel();
         header.add(headerIcon);
-
-        constraints = new GridBagConstraints();
-        constraints.fill = GridBagConstraints.HORIZONTAL;
 
         headerText = new JLabel();
         headerText.setFont(headerText.getFont().deriveFont(Font.BOLD, 16f));
@@ -182,6 +176,7 @@ public abstract class LauncherDialog extends JFrame {
     /**
      * Blocks the current thread until the main window is closed.
      */
+    @SuppressFBWarnings(value = { "UW_UNCOND_WAIT", "WA_NOT_IN_LOOP" })
     protected void waitForExit() {
         synchronized (lock) {
             try {

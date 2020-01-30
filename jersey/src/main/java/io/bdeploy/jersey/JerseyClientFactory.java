@@ -126,7 +126,7 @@ public class JerseyClientFactory {
         }
     }
 
-    public void register(com.fasterxml.jackson.databind.Module o) {
+    public synchronized void register(com.fasterxml.jackson.databind.Module o) {
         if (additionalModules.contains(o)) {
             return;
         }
