@@ -1,7 +1,7 @@
 plugins {
     id 'base'
     id "com.github.psxpaul.execfork" version "0.1.13"
-    id "de.undercouch.download" version "4.0.2"
+    id "de.undercouch.download" version "4.0.4"
     id "jacoco"
 }
 
