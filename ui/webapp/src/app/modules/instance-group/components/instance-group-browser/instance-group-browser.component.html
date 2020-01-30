@@ -17,10 +17,10 @@
       <span class='welcomeText'>Welcome to BDeploy!</span>
     </p>
     <p>
-      <span class='headerText'>To get you started quickly, consider reading our <a href='https://bdeploy.io/user/index.html#_getting_started' target="_blank">documentation</a>!</span>
+      <span class='headerText' *ngIf="authService.isGlobalAdmin()">To get you started quickly, consider reading our <a href='https://bdeploy.io/user/index.html#_getting_started' target="_blank">documentation</a>!</span>
     </p>
     <mat-divider></mat-divider>
-    <ng-container *ngIf='isAddAllowed()'>
+    <ng-container *ngIf='authService.isGlobalAdmin() && isAddAllowed()'>
       <p>
         <span class="headerText">No instance groups have been created yet. Start by creating a new one.</span>
       </p>
@@ -29,13 +29,18 @@
         <span class="headerText"><a [routerLink]="['/instancegroup/add']">Create Instance Group</a></span>
       </p>
     </ng-container>
-    <ng-container *ngIf='isAttachAllowed()'>
+    <ng-container *ngIf='authService.isGlobalAdmin() && isAttachAllowed()'>
       <p>
         <span class="headerText">No instance groups have been attached yet. Start by attaching one from the central server.</span>
       </p>
       <p>
         <span class="material-icons headerIcon">link</span>
         <span class="headerText"><a [routerLink]="['/servers/attach/central']">Attach Instance Group</a></span>
+      </p>
+    </ng-container>
+    <ng-container *ngIf='!authService.isGlobalAdmin()'>
+      <p>
+        <span class="headerText">No instance groups found.</span>
       </p>
     </ng-container>
   </div>
