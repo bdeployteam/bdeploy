@@ -333,9 +333,11 @@ public class InstanceResourceImpl implements InstanceResource {
         if (dto.nodeDtos != null) {
             // FIXME: needs configuration UI instead of dumb copy.
             for (InstanceNodeConfigurationDto incd : dto.nodeDtos) {
-                for (ApplicationConfiguration cfg : incd.nodeConfiguration.applications) {
-                    ApplicationDescriptor desc = ApplicationManifest.of(hive, cfg.application).getDescriptor();
-                    cfg.endpoints.http.addAll(desc.endpoints.http);
+                if (incd.nodeConfiguration != null) {
+                    for (ApplicationConfiguration cfg : incd.nodeConfiguration.applications) {
+                        ApplicationDescriptor desc = ApplicationManifest.of(hive, cfg.application).getDescriptor();
+                        cfg.endpoints.http.addAll(desc.endpoints.http);
+                    }
                 }
             }
         }
