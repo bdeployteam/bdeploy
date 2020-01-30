@@ -48,7 +48,7 @@ export class ManagedServersService {
     }
     return this.http.get<ManagedMasterDto>(
       this.config.config.api + '/managed-servers/controlling-server/' + group + '/' + instance,
-      { params: p },
+      { params: p, headers: new HttpHeaders({'ignoreLoadingBar': ''}) },
     );
   }
 
