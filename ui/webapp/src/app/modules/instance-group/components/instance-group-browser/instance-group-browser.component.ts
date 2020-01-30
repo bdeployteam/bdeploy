@@ -108,7 +108,7 @@ export class InstanceGroupBrowserComponent implements OnInit, OnDestroy {
   }
 
   isAddAllowed(): boolean {
-    return this.config.config.mode === MinionMode.CENTRAL || this.config.config.mode === MinionMode.STANDALONE;
+    return (this.config.config.mode === MinionMode.CENTRAL || this.config.config.mode === MinionMode.STANDALONE);
   }
 
   isAttachAllowed(): boolean {
