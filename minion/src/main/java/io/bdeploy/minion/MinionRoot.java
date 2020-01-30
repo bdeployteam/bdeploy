@@ -61,7 +61,7 @@ import io.bdeploy.pcu.InstanceProcessController;
 import io.bdeploy.pcu.MinionProcessController;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
-import net.jsign.PESigner;
+import net.jsign.AuthenticodeSigner;
 import net.jsign.pe.PEFile;
 
 /**
@@ -614,7 +614,8 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         MinionState state = getState();
         try {
             KeyStore keystore = SecurityHelper.getInstance().loadPrivateKeyStore(state.keystorePath, state.keystorePass);
-            PESigner signer = new PESigner(keystore, keystore.aliases().nextElement(), new String(state.keystorePass));
+            AuthenticodeSigner signer = new AuthenticodeSigner(keystore, keystore.aliases().nextElement(),
+                    new String(state.keystorePass));
             signer.withProgramName(name).withProgramURL(host).withTimestamping(false);
             signer.sign(new PEFile(executable));
         } catch (Exception e) {
