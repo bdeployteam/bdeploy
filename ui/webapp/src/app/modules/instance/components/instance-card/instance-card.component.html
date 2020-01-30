@@ -14,20 +14,26 @@
     </button>
   </mat-card-header>
   <mat-card-content>
-    <p>{{instanceDto.instanceConfiguration.description}}</p>
-    <p>
-      <span *ngIf='instanceDto.productDto'>Product: <b [matTooltip]='instanceDto.productDto.name'>{{instanceDto.productDto.name}}</b></span>
-      <span *ngIf='!instanceDto.productDto'>Product: <b>{{instanceDto.instanceConfiguration.product.name}}</b></span>
+    <div class='intance-card-row'>
+    <div class='info-grid'>
+      {{instanceDto.instanceConfiguration.description}}
+      <div>
+        <span *ngIf='instanceDto.productDto'>Product: <b [matTooltip]='instanceDto.productDto.name'>{{instanceDto.productDto.name}}</b></span>
+        <span *ngIf='!instanceDto.productDto'>Product: <b>{{instanceDto.instanceConfiguration.product.name}}</b></span>
 
-      <span *ngIf='instanceDto.activeProduct'>&nbsp;
-        Active Product Version: <b>{{instanceDto.activeProduct.tag}}</b>&nbsp;
-        <span *ngIf='!instanceDto.activeProductDto' class="product-unavailable" matTooltip="Required product version is not available.">N/A</span>
-      </span>
+        <span *ngIf='instanceDto.activeProduct'>&nbsp;
+          Active Product Version: <b>{{instanceDto.activeProduct.tag}}</b>&nbsp;
+          <span *ngIf='!instanceDto.activeProductDto' class="product-unavailable" matTooltip="Required product version is not available.">N/A</span>
+        </span>
 
-      <span *ngIf='!instanceDto.activeProduct'>&nbsp;
-        Product Version: <b>{{instanceDto.instanceConfiguration.product.tag}}</b>&nbsp;
-        <span *ngIf='!instanceDto.productDto' class="product-unavailable" matTooltip="Required product version is not available.">N/A</span>
-      </span>
-    </p>
+        <span *ngIf='!instanceDto.activeProduct'>&nbsp;
+          Product Version: <b>{{instanceDto.instanceConfiguration.product.tag}}</b>&nbsp;
+          <span *ngIf='!instanceDto.productDto' class="product-unavailable" matTooltip="Required product version is not available.">N/A</span>
+        </span>
+      </div>
+    </div>
+    <div class='fill-space'></div>
+    <app-instance-sync [instanceGroup]='instanceGroupName' [instance]='instanceDto.instanceConfiguration.uuid'></app-instance-sync>
+  </div>
 </mat-card-content>
 </mat-card>

@@ -1,7 +1,7 @@
 <div *ngIf='server' class='sync-panel'>
   <ng-container *ngIf='authService.isScopedWrite(instanceGroup)'>
-    <mat-icon *ngIf='isInSync()' class='sync-button' (click)='doSyncCentral()' matRipple [matRippleUnbounded]='true' [matRippleCentered]='true'>settings_remote</mat-icon>
-    <mat-icon *ngIf='!isInSync()' matTooltip='Synchronization required to unlock editing' class='sync-button sync-button-need-sync' (click)='doSyncCentral()' matRipple [matRippleUnbounded]='true' [matRippleCentered]='true'>settings_remote</mat-icon>
+    <mat-icon appClickStopPropagation *ngIf='isInSync()' class='sync-button' (click)='doSyncCentral()' matRipple [matRippleUnbounded]='true' [matRippleCentered]='true'>settings_remote</mat-icon>
+    <mat-icon appClickStopPropagation *ngIf='!isInSync()' matTooltip='Synchronization required to unlock editing' class='sync-button sync-button-need-sync' (click)='doSyncCentral()' matRipple [matRippleUnbounded]='true' [matRippleCentered]='true'>settings_remote</mat-icon>
   </ng-container>
   <ng-container *ngIf='!authService.isScopedWrite(instanceGroup)'>
     <mat-icon class='sync-button sync-button-disabled' matTooltip='Insufficient permissions to synchronize.'>settings_remote</mat-icon>

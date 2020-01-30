@@ -26,8 +26,8 @@
   display: grid;
   grid-template-columns: auto auto 32px 32px 32px 32px;
 
-  grid-row-gap: 5px;
-  grid-column-gap: 5px;
+  row-gap: 5px;
+  column-gap: 5px;
 
   align-items: center;
 }

@@ -12,3 +12,16 @@
   background-size: cover;
   border-radius: 10%;
 }
+
+.intance-card-row {
+  display: flex;
+  flex-direction: row;
+
+  align-items: center;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: auto;
+  row-gap: 5px;
+}

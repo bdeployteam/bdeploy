@@ -24,8 +24,8 @@
   display: grid;
   justify-content: start;
   grid-template-columns: 24px auto auto;
-  grid-column-gap: 10px;
-  grid-row-gap: 10px;
+  column-gap: 10px;
+  row-gap: 10px;
   align-items: center;
 }
 

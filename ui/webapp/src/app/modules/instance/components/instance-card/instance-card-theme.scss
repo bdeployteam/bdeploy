@@ -17,4 +17,11 @@
     border-left: 10px solid $prod-border;
   }
 
+  .intance-card-row {
+    @include mat-typography-level-to-styles(mat-typography-config(), title);
+
+    font-weight: lighter;
+    font-size: medium;
+  }
+
 }

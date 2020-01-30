@@ -68,7 +68,7 @@ mat-form-field {
   margin-left: 1em;
   display: grid;
   grid-template-columns: 30px auto;
-  grid-column-gap: 10px;
+  column-gap: 10px;
   align-items: center;
 }
 
