@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -27,8 +28,8 @@ public class PathHelper {
     private static final ContentInfoUtil CIU = loadCIU();
 
     private static ContentInfoUtil loadCIU() {
-        try (InputStreamReader rdr = new InputStreamReader(
-                PathHelper.class.getClassLoader().getResourceAsStream("bdeploy-magic"))) {
+        try (InputStreamReader rdr = new InputStreamReader(PathHelper.class.getClassLoader().getResourceAsStream("bdeploy-magic"),
+                StandardCharsets.UTF_8)) {
             return new ContentInfoUtil(rdr);
         } catch (IOException e) {
             throw new IllegalStateException("ERROR: Cannot load magic resource", e);

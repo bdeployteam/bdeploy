@@ -1,11 +1,14 @@
 package io.bdeploy.common.util;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 /**
  * A comparator that ensures that a given string is put at the end. All others are sorted lexicographically.
  */
-public class SortOneAsLastComparator implements Comparator<String> {
+public class SortOneAsLastComparator implements Comparator<String>, Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final String name;
 

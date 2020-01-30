@@ -23,7 +23,7 @@ final class SplashGraphics extends PanelDoubleBuffered implements LauncherSplash
     private static final Logger log = LoggerFactory.getLogger(SplashGraphics.class);
     private static final long serialVersionUID = 1L;
 
-    private static Map<RenderingHints.Key, Object> hintsMap = null;
+    private static volatile Map<RenderingHints.Key, Object> hintsMap = null;
     private final AtomicBoolean fcWarn = new AtomicBoolean(false);
 
     private transient BufferedImage image;
@@ -147,10 +147,12 @@ final class SplashGraphics extends PanelDoubleBuffered implements LauncherSplash
 
     private static Map<RenderingHints.Key, Object> getHints() {
         if (hintsMap == null) {
-            hintsMap = new HashMap<>();
-            hintsMap.put(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-            hintsMap.put(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-            hintsMap.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            Map<RenderingHints.Key, Object> map = new HashMap<>();
+            map.put(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+            map.put(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            map.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            hintsMap = map;
         }
         return hintsMap;
     }

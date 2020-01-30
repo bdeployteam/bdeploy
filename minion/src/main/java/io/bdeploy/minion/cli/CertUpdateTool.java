@@ -1,9 +1,11 @@
 package io.bdeploy.minion.cli;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.GeneralSecurityException;
 
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
@@ -104,7 +106,7 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
             } else {
                 out().println("Nothing to do...");
             }
-        } catch (Exception e) {
+        } catch (GeneralSecurityException | IOException e) {
             throw new IllegalStateException("Cannot update certificate", e);
         }
     }

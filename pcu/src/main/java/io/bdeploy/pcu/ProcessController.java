@@ -410,7 +410,7 @@ public class ProcessController {
                 String line = new String(Files.readAllBytes(Paths.get("/proc", String.valueOf(pid), "stat")),
                         StandardCharsets.UTF_8);
                 String[] split = line.split(" ");
-                return Long.valueOf(split[21]);
+                return Long.parseLong(split[21]);
             } catch (Exception e) {
                 logger.log(l -> l.warn("Cannot read corrected start time of process, PID = {}.", pid, e));
             }
