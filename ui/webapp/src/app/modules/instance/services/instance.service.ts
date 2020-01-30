@@ -1,11 +1,16 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { ClickAndStartDescriptor, ConfigFileDto, FileStatusDto, InstanceConfiguration, InstanceConfigurationDto, InstanceDirectory, InstanceDirectoryEntry, InstanceDto, InstanceManifestHistoryDto, InstanceNodeConfigurationListDto, InstancePurpose, InstanceStateRecord, InstanceVersionDto, ManifestKey, MinionDto, MinionStatusDto, StringEntryChunkDto } from '../../../models/gen.dtos';
 import { ConfigService } from '../../core/services/config.service';
-import { Logger, LoggingService } from '../../core/services/logging.service';
+import { ErrorMessage, Logger, LoggingService } from '../../core/services/logging.service';
+import { SystemService } from '../../core/services/system.service';
 import { InstanceGroupService } from '../../instance-group/services/instance-group.service';
+import { MessageBoxMode } from '../../shared/components/messagebox/messagebox.component';
 import { DownloadService } from '../../shared/services/download.service';
+import { MessageboxService } from '../../shared/services/messagebox.service';
+import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
 
 @Injectable({
   providedIn: 'root',
@@ -18,6 +23,8 @@ export class InstanceService {
     private http: HttpClient,
     private loggingService: LoggingService,
     private downloadService: DownloadService,
+    private systemService: SystemService,
+    private messageBoxService: MessageboxService
   ) {}
 
   public listInstances(instanceGroupName: string): Observable<InstanceDto[]> {
@@ -57,8 +64,23 @@ export class InstanceService {
     };
     const options = {
       params: new HttpParams().set('expect', expectedTag).set('managedServer', managedServer),
+      headers: suppressGlobalErrorHandling(new HttpHeaders())
     };
-    return this.http.post(url, dto, options);
+    return this.http.post(url, dto, options).pipe(catchError(e => {
+      if (e instanceof HttpErrorResponse && e.status !== 401) {
+        if (e.status === 409) {
+          this.messageBoxService.open({title: 'Conflict', mode: MessageBoxMode.ERROR, message: 'There has been a conflict while saving. Another session has modified the instance, and your changes cannot be saved.'}).subscribe(_ => {});
+          return throwError(e);
+        } else if (e.status === 0) {
+          this.systemService.backendUnreachable();
+        } else {
+          const displayPath = new URL(url).pathname;
+          this.log.error(new ErrorMessage(e.status + ': ' + e.statusText + ': ' + displayPath, e));
+        }
+        return of(null);
+      }
+      return throwError(e);
+    }));
   }
 
   public deleteInstance(instanceGroupName: string, instanceName: string) {
