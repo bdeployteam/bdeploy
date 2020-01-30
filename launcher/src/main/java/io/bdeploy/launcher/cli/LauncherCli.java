@@ -1,9 +1,8 @@
 package io.bdeploy.launcher.cli;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import io.bdeploy.common.cli.ToolBase;
 
@@ -16,23 +15,35 @@ public class LauncherCli extends ToolBase {
 
     @Override
     public void toolMain(String... args) throws Exception {
-        // filter out extra options given by the command line scripts.
-        List<String> noOptArgs = Arrays.stream(args).filter(a -> !a.startsWith("-")).collect(Collectors.toList());
-        if (noOptArgs.size() == 1 && noOptArgs.get(0).toLowerCase().endsWith(".bdeploy")) {
-            // want to directly launch a single .bdeploy file
-            List<String> argumentList = new ArrayList<>();
-            argumentList.add("launcher");
-            for (String arg : args) {
-                if (arg.toLowerCase().endsWith(".bdeploy")) {
-                    argumentList.add("--launch=" + arg);
-                } else {
-                    // pass on all others (e.g. updateDir).
-                    argumentList.add(arg);
-                }
+        // Arguments starting with a single dash (-) are options for the tool
+        // Arguments starting with a double dash (--) are options for the application
+        List<String> noOpt = new ArrayList<>();
+        List<String> appArgs = new ArrayList<>();
+        List<String> toolArgs = new ArrayList<>();
+        for (String arg : args) {
+            if (arg.startsWith("--")) {
+                appArgs.add(arg);
+            } else if (arg.startsWith("-")) {
+                toolArgs.add(arg);
+            } else {
+                noOpt.add(arg);
             }
+        }
+
+        // Feature: A single argument without a single/double dash prefix might be specified
+        //          We expect that this is the descriptor of the file to launch
+        // Order is important: <tool arguments> <toolName> <appArguments>
+        // Sample: -v launcher --launch=MyFile.bdeploy
+        if (noOpt.size() == 1 && Paths.get(noOpt.get(0)).toFile().exists()) {
+            List<String> argumentList = new ArrayList<>();
+            argumentList.addAll(toolArgs);
+            argumentList.add("launcher");
+            argumentList.add("--launch=" + noOpt.get(0));
+            argumentList.addAll(appArgs);
             args = argumentList.toArray(new String[argumentList.size()]);
         }
 
+        // Pass arguments to the tools launcher
         super.toolMain(args);
     }
 

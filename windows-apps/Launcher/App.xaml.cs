@@ -30,16 +30,10 @@ namespace Bdeploy.Launcher
             string path = Path.Combine(PathProvider.GetLogsDir(), "launcher-log.txt");
             Log.Logger = LogFactory.CreateGlobalLogger(path);
 
-            // The application to launch must be passed
-            if (e.Args.Length != 1)
-            {
-                Log.Fatal("The descriptor of the application to launch is missing.");
-                Log.Fatal("Usage: BDeploy.exe myApp.bdeploy");
-                Log.Information("Exiting application.");
-                Current.Shutdown(-1);
-                return;
-            }
-            string application = e.Args[0];
+            // Bug in Firefox: When using Click & Start then Firefox does not quote the arguments correctly.
+            // Thus an application with a space in the name "My App.bdeploy" is passed as two individual arguments.
+            // instead of a single one. As a workaround we combine all arguments into a single one
+            string application = string.Join(" ", e.Args);
 
             // Launch and wait for termination
             AppLauncher launcher = new AppLauncher(application);
@@ -50,7 +44,7 @@ namespace Bdeploy.Launcher
             int exitCode = launcher.Start();
             if (exitCode != EX_UPDATE)
             {
-                Current.Shutdown(0);
+                Current.Shutdown(exitCode);
                 return;
             }
 

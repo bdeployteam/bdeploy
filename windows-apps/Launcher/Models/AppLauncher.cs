@@ -7,6 +7,7 @@ using Bdeploy.Shared;
 using System.Text;
 using Serilog.Events;
 using System;
+using System.Runtime.Serialization;
 
 namespace Bdeploy.Launcher
 {
