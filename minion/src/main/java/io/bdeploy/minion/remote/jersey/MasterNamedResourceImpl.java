@@ -364,6 +364,12 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 Manifest.Key toRemove = entry.getValue();
                 assertNotNull(toRemove, "Cannot lookup minion manifest on master: " + toRemove);
 
+                if (!root.getMinions().hasMinion(minionName)) {
+                    // minion no longer exists!?
+                    log.warn("Minion no longer existing: {}. Ignoring.", minionName);
+                    continue;
+                }
+
                 RemoteService minion = root.getMinions().getRemote(minionName);
                 SlaveDeploymentResource deployment = ResourceProvider.getResource(minion, SlaveDeploymentResource.class, context);
                 try {

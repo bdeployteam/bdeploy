@@ -79,6 +79,14 @@ public class MinionConfiguration {
     }
 
     /**
+     * @param minionName the name of the minion.
+     * @return whether the minion exists
+     */
+    public boolean hasMinion(String minionName) {
+        return minions.containsKey(minionName);
+    }
+
+    /**
      * Returns a view of the minion mappings.
      */
     public Set<Entry<String, MinionDto>> entrySet() {

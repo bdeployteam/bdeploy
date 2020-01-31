@@ -112,7 +112,7 @@ export class ProcessConfigDto {
       if (minionA && minionB && minionA.master === minionB.master) {
         return a.nodeName.toLocaleLowerCase().localeCompare(b.nodeName.toLocaleLowerCase());
       }
-      return minionA.master ? -1 : 1;
+      return (minionA && minionA.master) ? -1 : 1;
     });
     return configs;
   }
