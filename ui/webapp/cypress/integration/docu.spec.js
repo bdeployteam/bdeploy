@@ -401,13 +401,13 @@ describe('Creates screenshots for the user documentation', () => {
     cy.screenshot('BDeploy_SWRepo_Ext_Software_Details');
   });
 
-  // Capture System Software
-  it('Captures System Software', () => {
+  // Capture BDeploy Update
+  it('Captures BDeploy Update', () => {
     cy.login();
     cy.visit('/#/admin/all/(panel:systemsoftware)');
 
     // Available software
-    cy.contains('System Software').should('exist');
+    cy.contains('BDeploy Update').should('exist');
     cy.get('mat-card-content').should('be.visible').should('have.length', 2)
     cy.waitUntilContentLoaded();
     cy.screenshot('BDeploy_System_With_Launcher');
