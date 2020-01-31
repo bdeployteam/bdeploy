@@ -1,12 +1,10 @@
 .sync-panel {
-  border: 1px dotted;
-  border-radius: 3px;
-
   display: flex;
   flex-direction: row;
 
   align-items: center;
   padding: 5px;
+  padding-right: 10px;
 
   cursor: pointer;
 }

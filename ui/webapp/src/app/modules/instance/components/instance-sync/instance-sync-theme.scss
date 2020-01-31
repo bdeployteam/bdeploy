@@ -4,6 +4,11 @@
   $dark: map-get($theme, is-dark);
   $accent: map-get($theme, 'accent');
 
+  .sync-panel:hover {
+    border-radius: 5px;
+    background-color: if($dark, #333333, #efefef);
+  }
+
   .sync-button-need-sync {
     color: mat-color($accent, default);
   }
