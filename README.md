@@ -10,5 +10,13 @@
 
 Welcome to the BDeploy project!
 
+![BDeploy](https://bdeploy.io/user/images/BDeploy_DnD_Applications.png)
+
 BDeploy is a fast, reliable & configurable deployment solution for everyone and any type of application.
-Stay tuned for all the advantages, facts & documentation on https://bdeploy.io
+
+You can find more information here:
+
+* [Homepage](https://bdeploy.io)
+* [Documentation](https://bdeploy.io/user/index.html)
+* [Downloads](https://github.com/bdeployteam/bdeploy/releases)
+
