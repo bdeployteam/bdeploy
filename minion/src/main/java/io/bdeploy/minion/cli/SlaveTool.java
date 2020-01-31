@@ -83,9 +83,6 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
         ActivityReporter.Delegating delegate = new ActivityReporter.Delegating();
         delegate.setDelegate(getActivityReporter());
         try (MinionRoot r = new MinionRoot(Paths.get(config.root()), delegate)) {
-            if (r.getMode() != MinionMode.SLAVE) {
-                throw new IllegalStateException("Not a SLAVE root: " + config.root());
-            }
             r.getAuditor().audit(AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("slave").build());
             if (config.updateDir() != null) {
                 Path upd = Paths.get(config.updateDir());
@@ -98,6 +95,9 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
             } else if (config.remove() != null) {
                 doRemoveMinion(r, config.remove());
             } else {
+                if (r.getMode() != MinionMode.SLAVE) {
+                    throw new IllegalStateException("Not a SLAVE root: " + config.root());
+                }
                 doRunMinion(r, delegate);
             }
         }

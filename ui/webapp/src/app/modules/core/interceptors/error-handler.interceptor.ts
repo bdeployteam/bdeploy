@@ -18,7 +18,7 @@ export class HttpErrorHandlerInterceptor implements HttpInterceptor {
       // let 401 pass through for logout redirection in the other interceptor :)
       if (e instanceof HttpErrorResponse && e.status !== 401 && !request.headers.has(NO_ERROR_HANDLING_HDR)) {
 
-        if(e.status === 0) {
+        if (e.status === 0) {
           this.systemService.backendUnreachable();
         } else {
           let displayPath = request.url;

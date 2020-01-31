@@ -208,6 +208,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             throw new WebApplicationException("Cannot find required product " + imf.getConfiguration().product, Status.NOT_FOUND);
         }
 
+        // TODO: Check each minion whether it is online once we have unified version backend resources.
+
         try (Activity deploying = reporter.start("Installing to minions...", fragmentReferences.size())) {
             for (Map.Entry<String, Manifest.Key> entry : fragmentReferences.entrySet()) {
                 String minionName = entry.getKey();
@@ -237,8 +239,15 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                             .forEach(pushOp::addManifest);
                 }
 
-                // make sure the minion has the manifest.
-                hive.execute(pushOp.addManifest(toDeploy));
+                try {
+                    // make sure the minion has the manifest.
+                    hive.execute(pushOp.addManifest(toDeploy));
+                } catch (Exception e) {
+                    // in case this did not work, the minion is not available or has another problem
+                    // log but don't forward exception to the client
+                    log.warn("Problem communicating with slave " + minionName, e);
+                    throw new WebApplicationException("Minion " + minionName + " is not available", Status.BAD_GATEWAY);
+                }
 
                 SlaveDeploymentResource deployment = ResourceProvider.getResource(minion, SlaveDeploymentResource.class, context);
                 try {
@@ -287,7 +296,9 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 try {
                     deployment.activate(toDeploy);
                 } catch (Exception e) {
-                    throw new WebApplicationException("Cannot activate on " + minionName, e, Status.INTERNAL_SERVER_ERROR);
+                    // log but don't forward exception to the client
+                    log.warn("Problem communicating with slave " + minionName, e);
+                    throw new WebApplicationException("Cannot activate on " + minionName, Status.BAD_GATEWAY);
                 }
 
                 activating.worked(1);
@@ -347,10 +358,6 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     @Override
     public void uninstall(Key key) {
         InstanceManifest imf = InstanceManifest.of(hive, key);
-
-        if (!isFullyDeployed(imf)) {
-            return; // no need to.
-        }
 
         SortedMap<String, Key> fragments = imf.getInstanceNodeManifests();
         Activity removing = reporter.start("Removing on minions...", fragments.size());

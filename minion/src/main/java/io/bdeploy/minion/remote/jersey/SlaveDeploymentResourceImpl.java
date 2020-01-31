@@ -18,6 +18,7 @@ import javax.ws.rs.core.Response.Status;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.op.ManifestExistsOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.util.PathHelper;
@@ -121,6 +122,10 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
     @Override
     public void remove(Key key) {
         BHive hive = root.getHive();
+
+        if (!hive.execute(new ManifestExistsOperation().setManifest(key))) {
+            return;
+        }
 
         InstanceNodeManifest inm = InstanceNodeManifest.of(hive, key);
         InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentDir(), inm);
