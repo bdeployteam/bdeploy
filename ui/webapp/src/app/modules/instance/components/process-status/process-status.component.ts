@@ -143,7 +143,7 @@ export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
       styles.push('app-process-crash');
     }
     if (this.getShowOutOfSync() && !this.isMyVersion()) {
-      styles.push('app-process-out-of-sync');
+      styles.push('app-process-outdated');
     }
     return styles;
   }

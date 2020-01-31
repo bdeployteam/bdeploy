@@ -8,7 +8,7 @@
     color: if($dark, mat-color($mat-grey, 400), mat-color($mat-grey, 600));
   }
 
-  .out-of-sync {
+  .outdated {
     color: #fff;
     background-color: mat-color($warn);
   }

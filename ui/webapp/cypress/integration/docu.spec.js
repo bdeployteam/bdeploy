@@ -281,13 +281,13 @@ describe('Creates screenshots for the user documentation', () => {
     cy.contains('app-process-status','error', { timeout: 60000 });
     cy.screenshot('BDeploy_Process_Crashed_Repeatedly');
 
-    // Switch to another version to capture Out-Of-Sync
+    // Switch to another version to capture Outdated process
     cy.contains('button','play_arrow').should('be.enabled').click();
     cy.contains('mat-toolbar','Process Control').contains('button','close').click();
     cy.contains('mat-slide-toggle','Show all').click();
     cy.get('app-instance-version-card').children().eq(1).installAndActivate();
     cy.waitUntilContentLoaded();
-    cy.contains("Out-of-sync").should('be.visible');
+    cy.contains("Outdated").should('be.visible');
     cy.screenshot('BDeploy_Process_Out_Of_Sync', { clip: { x: 0, y: 175, width: 650, height: 380 }});
     cy.getApplicationConfigCard('master','Server Application').click();
     cy.contains('Process Control').should('exist');

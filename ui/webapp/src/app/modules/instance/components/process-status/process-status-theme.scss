@@ -16,11 +16,11 @@
     color: if($dark, #bbbbbb, #414141) !important;
   }
 
-  .app-process-out-of-sync {
+  .app-process-outdated {
     opacity: 0.6;
   }
 
-  .app-process-out-of-sync-text {
+  .app-process-outdated-text {
     color: #fff;
     background-color: mat-color($warn);
   }

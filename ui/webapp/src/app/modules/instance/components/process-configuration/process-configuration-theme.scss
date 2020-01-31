@@ -17,7 +17,7 @@
     background-color: if($dark, #5a5a5a, #eeeeee);
   }
 
-  .app-process-out-of-sync-text {
+  .app-process-outdated-text {
     color: #fff;
     background-color: mat-color($warn);
   }
