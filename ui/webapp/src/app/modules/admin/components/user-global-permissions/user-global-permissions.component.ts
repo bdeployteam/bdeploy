@@ -14,8 +14,6 @@ export class UserGlobalPermissionsComponent implements OnInit {
   constructor(@Inject(MAT_DIALOG_DATA) public userInfo: UserInfo) { }
 
   public ngOnInit() {
-    console.log('userInfo = ' + JSON.stringify(this.userInfo, null, '\t'));
-
     if (this.hasCapability(Capability.ADMIN)) {
       this.slider = 3;
     } else if (this.hasCapability(Capability.WRITE)) {
