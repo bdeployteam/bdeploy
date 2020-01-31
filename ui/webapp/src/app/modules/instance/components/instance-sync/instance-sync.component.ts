@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { format } from 'date-fns';
 import { ManagedMasterDto, MinionMode } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
@@ -12,7 +12,7 @@ import { MessageboxService } from 'src/app/modules/shared/services/messagebox.se
   templateUrl: './instance-sync.component.html',
   styleUrls: ['./instance-sync.component.css']
 })
-export class InstanceSyncComponent implements OnInit, OnChanges, OnDestroy {
+export class InstanceSyncComponent implements OnChanges {
 
   @Input()
   instanceGroup: string;
@@ -30,22 +30,8 @@ export class InstanceSyncComponent implements OnInit, OnChanges, OnDestroy {
   stateUpdateEvent = new EventEmitter<any>();
 
   server: ManagedMasterDto;
-  timer: any;
 
   constructor(private config: ConfigService, private managedServers: ManagedServersService, private messageBoxService: MessageboxService, public authService: AuthenticationService) { }
-
-  ngOnInit() {
-    if (this.config.config.mode === MinionMode.CENTRAL) {
-      // update every few seconds.
-      this.timer = setInterval(() => this.ngOnChanges(), 10_000);
-    }
-  }
-
-  ngOnDestroy() {
-    if (this.timer) {
-      clearInterval(this.timer);
-    }
-  }
 
   async ngOnChanges() {
     if (this.config.config.mode !== MinionMode.CENTRAL) {
