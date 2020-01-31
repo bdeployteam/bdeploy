@@ -126,7 +126,7 @@ public class SlaveProxyResourceImpl implements SlaveProxyResource {
                     wrapper.base64body = Base64.encodeBase64String(baos.toByteArray());
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                log.warn("Cannot wrap response", e);
             }
         }
 
