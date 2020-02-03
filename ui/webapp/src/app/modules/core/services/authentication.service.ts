@@ -30,7 +30,8 @@ export class AuthenticationService {
           result => {
             this.tokenSubject.next(result);
             // this is required if the backend runs on a different server than the frontend (dev)
-            this.cookies.set('st', result, 365, '/');
+            // - don't use secure, as this will fail in the development case (HTTP server only).
+            this.cookies.set('st', result, 365, '/', null, false, 'Strict');
           }, error => {
             this.tokenSubject.next(null);
             this.cookies.delete('st', '/');
