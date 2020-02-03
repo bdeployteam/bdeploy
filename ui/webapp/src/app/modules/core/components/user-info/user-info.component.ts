@@ -94,4 +94,11 @@ export class UserInfoComponent implements OnInit {
     });
   }
 
+  public getTitleUserName(): string {
+    if (this.user) {
+      return this.user.fullName ? this.user.fullName : this.user.name;
+    }
+    return '--';
+  }
+
 }

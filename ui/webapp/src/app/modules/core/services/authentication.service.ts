@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { CookieService } from 'ngx-cookie-service';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { Capability, CredentialsDto, UserChangePasswordDto, UserInfo } from '../../../models/gen.dtos';
 import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
@@ -16,7 +16,7 @@ export class AuthenticationService {
 
   private tokenSubject: BehaviorSubject<string> = new BehaviorSubject(this.cookies.check('st') ? this.cookies.get('st') : null);
 
-  public userInfo: UserInfo;
+  public userInfoSubject: BehaviorSubject<UserInfo> = new BehaviorSubject(null);
 
   constructor(private cfg: ConfigService, private http: HttpClient, private loggingService: LoggingService, private cookies: CookieService) { }
 
@@ -42,11 +42,11 @@ export class AuthenticationService {
             this.log.debug('Fetching current user info...');
             this.http.get<UserInfo>(this.cfg.config.api + '/auth/user').pipe(
               tap(
-                userInfo => this.userInfo = userInfo
+                userInfo => this.userInfoSubject.next(userInfo)
               )
             );
           }, error => {
-            this.userInfo = null;
+            this.userInfoSubject.next(null);
           }
         )
      );
@@ -70,8 +70,8 @@ export class AuthenticationService {
   }
 
   getUsername(): string {
-    if (this.userInfo) {
-      return this.userInfo.name;
+    if (this.userInfoSubject.value) {
+      return this.userInfoSubject.value.name;
     }
     const tokenPayload = this.getTokenPayload();
     return tokenPayload ? tokenPayload.it : null;
@@ -113,8 +113,8 @@ export class AuthenticationService {
   }
 
   isScopedAdmin(scope: string): boolean {
-    if (this.userInfo) {
-      return this.userInfo.capabilities.find(sc =>
+    if (this.userInfoSubject.value) {
+      return this.userInfoSubject.value.capabilities.find(sc =>
         (sc.scope === null || sc.scope === scope)
         && this.ge(sc.capability, Capability.ADMIN)) != null;
     }
@@ -122,8 +122,8 @@ export class AuthenticationService {
   }
 
   isScopedWrite(scope: string): boolean {
-    if (this.userInfo) {
-      return this.userInfo.capabilities.find(sc =>
+    if (this.userInfoSubject.value) {
+      return this.userInfoSubject.value.capabilities.find(sc =>
         (sc.scope === null || sc.scope === scope)
         && this.ge(sc.capability, Capability.WRITE)) != null;
     }
@@ -131,8 +131,8 @@ export class AuthenticationService {
   }
 
   isScopedRead(scope: string): boolean {
-    if (this.userInfo) {
-      return this.userInfo.capabilities.find(sc =>
+    if (this.userInfoSubject.value) {
+      return this.userInfoSubject.value.capabilities.find(sc =>
         (sc.scope === null || sc.scope === scope)
         && this.ge(sc.capability, Capability.READ)) != null;
     }
@@ -146,19 +146,16 @@ export class AuthenticationService {
   }
 
   getUserInfo(): Observable<UserInfo> {
-    if (this.userInfo) {
-      return of(this.userInfo);
-    } else {
-      this.log.debug('Fetching current user info...');
-      return this.http.get<UserInfo>(this.cfg.config.api + '/auth/user').pipe(
-        tap(userInfo => this.userInfo = userInfo)
-      );
-    }
+    this.log.debug('Fetching current user info...');
+    this.http.get<UserInfo>(this.cfg.config.api + '/auth/user').subscribe(
+      userInfo => this.userInfoSubject.next(userInfo)
+    );
+    return this.userInfoSubject.asObservable();
   }
 
   updateUserInfo(info: UserInfo): Observable<any> {
     this.log.debug('Updating current user info...');
-    this.userInfo = info;
+    this.userInfoSubject.next(info);
     return this.http.post<UserInfo>(this.cfg.config.api + '/auth/user', info);
   }
 
