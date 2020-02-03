@@ -8,14 +8,7 @@ Cypress.Commands.add('createInstance', function(group, name, mode = 'STANDALONE'
 
   // attention: the button contains 'add' not '+' (mat-icon('add') = '+')
   cy.contains('button', 'add').click();
-
-  // the application requests a UUID from the server, and then clears all values. we need to wait for the
-  // UUID to appear before typing to avoid races where the input would end up halv way (e.g. 'tance-123'
-  // instead of 'Instance-123').
-  cy.contains('button', 'SAVE').should('exist').and('be.disabled');
-  cy.get('mat-toolbar-row').contains('UUID').should('exist').and('be.visible');
-
-  cy.get('[placeholder=Name]').should('exist').and('be.enabled').type(name)
+  cy.get('[placeholder=Name]').type(name)
   cy.get('[placeholder=Description]').type('Test Instance for automated test')
 
   // angular drop down is something very different from a native HTML select/option
@@ -34,10 +27,10 @@ Cypress.Commands.add('createInstance', function(group, name, mode = 'STANDALONE'
   }
 
   return cy.get('mat-toolbar-row').contains('UUID').get('b').then(el => {
-    cy.get('button').contains('SAVE').click();
-    return cy.wrap(el.text())
+    const uuid = el.text();
+    cy.contains('button', 'SAVE').click();
+    return cy.wrap(uuid);
   });
-
 })
 
 Cypress.Commands.add('deleteInstance', function(group, instanceUuid, mode = 'STANDALONE') {

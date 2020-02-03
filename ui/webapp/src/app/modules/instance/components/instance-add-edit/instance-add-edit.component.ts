@@ -36,6 +36,7 @@ export class InstanceAddEditComponent implements OnInit {
   public servers: ManagedMasterDto[] = [];
 
   public loading = false;
+  public loadingText: string;
 
   public clonedInstance: InstanceConfiguration;
   private expectedVersion: InstanceVersionDto;
@@ -82,7 +83,18 @@ export class InstanceAddEditComponent implements OnInit {
     this.uuidParam = this.route.snapshot.paramMap.get('uuid');
     this.log.debug('groupParam = ' + this.groupParam + ', nameParam = ' + this.uuidParam);
 
+    // Disable the form as long as we do not have a UUID
+    this.loading = true;
+    this.instanceFormGroup.disable();
+    this.instanceFormGroup.valueChanges.subscribe(e => {
+      if (e.uuid && this.instanceFormGroup.disabled) {
+        this.loading = false;
+        this.instanceFormGroup.enable();
+      }
+    });
+
     if (this.isCreate()) {
+      this.loadingText = 'Generating UUID...';
       this.instanceGroupService.createUuid(this.groupParam).subscribe((uuid: string) => {
         this.log.debug('got uuid ' + uuid);
         const instance = cloneDeep(EMPTY_INSTANCE);
@@ -92,6 +104,7 @@ export class InstanceAddEditComponent implements OnInit {
         this.clonedInstance = cloneDeep(instance);
       });
     } else {
+      this.loadingText = 'Loading...';
       this.instanceService.getInstance(this.groupParam, this.uuidParam).subscribe(instance => {
         this.log.debug('got instance ' + this.uuidParam);
         this.instanceFormGroup.patchValue(instance);
@@ -185,10 +198,9 @@ export class InstanceAddEditComponent implements OnInit {
 
   public onSubmit(): void {
     this.loading = true;
+    this.loadingText = 'Saving...';
     const instance: InstanceConfiguration = this.instanceFormGroup.getRawValue();
-
     const managedServer = this.managedServerControl ? this.managedServerControl.value : null;
-
     if (this.isCreate()) {
       this.instanceService
         .createInstance(this.groupParam, instance, managedServer)

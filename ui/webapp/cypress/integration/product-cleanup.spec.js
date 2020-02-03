@@ -82,7 +82,7 @@ describe('Product Cleanup Test', function() {
   it('Calculates a manual cleanup with empty result', function() {
     cy.visit('/#/admin/all/(panel:manualcleanup)');
     // calculate stuff
-    cy.contains('button', 'Calculate Cleanup Actions').should('be.visible').and('be.enabled').click();
+    cy.contains('button', 'Calculate Cleanup Actions').click();
     // wait for the calculation to complete
     cy.get('mat-spinner', { timeout: 10000 }).should('not.exist');
     // the execute button should be there
@@ -113,7 +113,7 @@ describe('Product Cleanup Test', function() {
   it('Calculates a manual cleanup for uninstalling instance version v2', function() {
     cy.visit('/#/admin/all/(panel:manualcleanup)');
     // calculate stuff
-    cy.contains('button', 'Calculate Cleanup Actions').should('be.visible').and('be.enabled').click();
+    cy.contains('button', 'Calculate Cleanup Actions').click();
     // wait for the calculation to complete
     cy.get('mat-spinner', { timeout: 10000 }).should('not.exist');
     // the execute button should be there
@@ -129,10 +129,10 @@ describe('Product Cleanup Test', function() {
    */
   it('Upgrades the product to 2.0.0', function() {
     cy.gotoInstance(instanceGroupName, instanceUuid);
-    cy.get('.notifications-button').should('exist').and('be.enabled').click();
-    cy.contains('button', 'Show Product Versions').should('be.visible').and('be.enabled').click();
+    cy.get('.notifications-button').click();
+    cy.contains('button', 'Show Product Versions').click();
     cy.contains('mat-toolbar', 'Change Product Version').should('exist');
-    cy.contains('app-product-tag-card', '2.0.0').should('exist').contains('button', 'arrow_upward').should('be.enabled').and('be.visible').click();
+    cy.contains('app-product-tag-card', '2.0.0').should('exist').contains('button', 'arrow_upward').click();
 
     cy.getApplicationConfigCard('master', 'Server Application').find('.app-config-modified').should('exist');
     cy.get('app-instance-version-card').find('.instance-version-modified').should('exist')
@@ -157,7 +157,7 @@ describe('Product Cleanup Test', function() {
   it('Calculates a manual cleanup for uninstalling instance version v2 + v3', function() {
     cy.visit('/#/admin/all/(panel:manualcleanup)');
     // calculate stuff
-    cy.contains('button', 'Calculate Cleanup Actions').should('be.visible').and('be.enabled').click();
+    cy.contains('button', 'Calculate Cleanup Actions').click();
     // wait for the calculation to complete
     cy.get('mat-spinner', { timeout: 10000 }).should('not.exist');
     // the execute button should be there
@@ -191,7 +191,7 @@ describe('Product Cleanup Test', function() {
   it('Calculates a manual cleanup for uninstalling instance version v2..v4 and product version 1.0.0', function() {
     cy.visit('/#/admin/all/(panel:manualcleanup)');
     // calculate stuff
-    cy.contains('button', 'Calculate Cleanup Actions').should('be.visible').and('be.enabled').click();
+    cy.contains('button', 'Calculate Cleanup Actions').click();
     // wait for the calculation to complete
     cy.get('mat-spinner', { timeout: 10000 }).should('not.exist');
     // the execute button should be there
@@ -216,7 +216,7 @@ describe('Product Cleanup Test', function() {
 
     // the calculate button should be back. re-calculate
     cy.contains('button', 'Execute').should('not.exist'); // avoid finding the 'Re-Calculate ...' button.
-    cy.contains('button', 'Calculate Cleanup Actions').should('exist').and('be.visible').and('be.enabled').click();
+    cy.contains('button', 'Calculate Cleanup Actions').click();
 
     cy.get('mat-spinner', { timeout: 10000 }).should('not.exist');
     cy.contains('td', 'Uninstall instance version').should('not.exist');

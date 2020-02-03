@@ -105,14 +105,21 @@
       </mat-step>
 
       <mat-step label="Transfer">
-        <div class='intro' *ngIf='startingTransfer'>
-          <mat-spinner diameter="24"></mat-spinner>
+        <div class='intro' *ngIf='transferStarted && !transferDone'>
+          <div>
+            <mat-spinner diameter="24" class="transfer-spinner"></mat-spinner>
+            Product transfer has been initiated and is running in the background.
+          </div>
+          <br />
+          <div>
+            The transfer could take a while depending on the selected products and the available bandwidth.
+            Use the remote progress monitor on this page or on the <b>Manage Products</b> to monitor progress. <br/>
+            This page can be closed if desired.
+          </div>
         </div>
-
-        <p class="intro" *ngIf='!startingTransfer'>
-          Product transfer has been initiated. Use the remote progress monitor on this page or on the <b>Manage Products</b> to monitor progress
-        </p>
-
+        <div class='intro' *ngIf='transferDone'>
+          <mat-icon class="icon-and-text">done</mat-icon> Product transfer successfully done.
+        </div>
         <div class="button-container">
           <button mat-raised-button [routerLink]='["/instancegroup/products", instanceGroup]' replaceUrl>Done</button>
         </div>

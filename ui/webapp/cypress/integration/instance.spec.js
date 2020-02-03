@@ -50,12 +50,12 @@ describe('Instance Tests', function () {
   it('Create config file', () => {
     cy.visit('/#/instance/overview/Test/' + instanceUuid);
     cy.get('app-instance-group-logo').parent().clickContextMenuItem('Configuration Files...');
-    cy.contains('button', 'add').should('be.enabled').and('be.visible').click();
+    cy.contains('button', 'add').click();
     cy.get('input[placeholder="Enter path for file"]').clear().type('cypress.cfg')
     cy.get('textarea').type('CY-CFG', {force: true})
-    cy.contains('button', 'APPLY').should('be.enabled').and('be.visible').click();
+    cy.contains('button', 'APPLY').click();
     cy.contains('td', 'cypress.cfg').should('exist');
-    cy.contains('button', 'SAVE').should('be.enabled').and('be.visible').click();
+    cy.contains('button', 'SAVE').click();
   })
 
   /**
@@ -106,7 +106,7 @@ describe('Instance Tests', function () {
 
     // click process output button
     cy.contains('app-process-details', 'Server Application').within(() => {
-      cy.contains('button', 'message').should('be.enabled').click();
+      cy.contains('button', 'message').click();
     })
 
     // check process output and close overlay
@@ -132,7 +132,7 @@ describe('Instance Tests', function () {
     cy.visit('/#/instance/overview/Test/' + instanceUuid);
     cy.get('app-instance-group-logo').parent().clickContextMenuItem('Data Files...');
 
-    cy.contains('td', 'cypress.txt').should('exist').click();
+    cy.contains('td', 'cypress.txt').click();
 
     // check file content and close overlay
     cy.get('app-file-viewer').within(() => {
@@ -164,7 +164,7 @@ describe('Instance Tests', function () {
     cy.visit('/#/admin/all/(panel:manualcleanup)');
 
     // calculate stuff
-    cy.contains('button', 'Calculate Cleanup Actions').should('be.visible').and('be.enabled').click();
+    cy.contains('button', 'Calculate Cleanup Actions').click();
 
     // wait for the calculation to complete
     cy.get('mat-spinner', { timeout: 10000 }).should('not.exist');
@@ -187,7 +187,7 @@ describe('Instance Tests', function () {
 
     // the calculate button should be back. re-calculate
     cy.contains('button', 'Execute').should('not.exist'); // avoid finding the 'Re-Calculate ...' button.
-    cy.contains('button', 'Calculate Cleanup Actions').should('exist').and('be.visible').and('be.enabled').click();
+    cy.contains('button', 'Calculate Cleanup Actions').click();
 
     cy.get('mat-spinner', { timeout: 10000 }).should('not.exist');
     cy.contains('button', 'Execute all Actions').should('exist').and('be.disabled');

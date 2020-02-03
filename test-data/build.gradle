@@ -326,7 +326,7 @@ void setupBinServerTasks(String version) {
 
                 def exc = (check =~ /java\.lang\..*Exception/)
                 if(exc.size() > 0) {
-                    throw new RuntimeException("Upgrade log contains Exceptions!");
+                    throw new RuntimeException("Upgrade log contains exceptions. Output: " + check);
                 }
 
                 if(!rqFound) {
@@ -350,7 +350,8 @@ void setupBinServerTasks(String version) {
             }
 
             if(!ok) {
-                throw new RuntimeException("Upgrade to current version failed");
+                String check = file("${buildDir}/out_${key}.txt").text
+                throw new RuntimeException("Upgrade to current version failed. Output: " + check);
             }
         }
     }

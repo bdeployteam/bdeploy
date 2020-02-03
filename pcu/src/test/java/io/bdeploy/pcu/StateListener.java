@@ -3,12 +3,13 @@ package io.bdeploy.pcu;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-
-import com.google.common.collect.Lists;
 
 import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 
@@ -18,9 +19,25 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessState;
  */
 public class StateListener implements Consumer<ProcessState> {
 
-    private ProcessController pc;
+    private final ProcessController pc;
+
     private CountDownLatch latch;
     private List<ProcessState> expected;
+    private List<ProcessState> events;
+    private LinkedList<ProcessState> remaining;
+
+    /**
+     * Creates a new listener that gets notified whenever the state of the process is changed.
+     */
+    public static StateListener createFor(ProcessController pc) {
+        StateListener listener = new StateListener(pc);
+        pc.addStatusListener(listener);
+        return listener;
+    }
+
+    private StateListener(ProcessController pc) {
+        this.pc = pc;
+    }
 
     /**
      * Initializes a new synchronization object that can be used to wait until the expected states are reached.
@@ -28,24 +45,28 @@ public class StateListener implements Consumer<ProcessState> {
      * @param expected
      *            the expected target states.
      */
-    public void expect(ProcessController pc, ProcessState... expected) {
-        this.pc = pc;
-        this.expected = Lists.newArrayList(expected);
+    public void expect(ProcessState... expected) {
+        this.expected = Arrays.asList(expected);
+        this.remaining = new LinkedList<>(Arrays.asList(expected));
+        this.events = new ArrayList<>();
         this.latch = new CountDownLatch(1);
     }
 
     @Override
     public void accept(ProcessState current) {
-        if (expected.isEmpty()) {
-            throw new RuntimeException("No more state changes expected but got <[" + current + "]>");
+        events.add(current);
+        if (remaining.isEmpty()) {
+            throw new RuntimeException(
+                    "No more state changes expected but got <[" + current + "]>. All events <[" + events + "]>  ");
         }
         // Remove first element when matching
-        if (expected.get(0) == current) {
-            expected.remove(0);
+        ProcessState first = remaining.getFirst();
+        if (first == current) {
+            remaining.removeFirst();
         }
 
         // Notify if there are no more expected states
-        if (!expected.isEmpty()) {
+        if (!remaining.isEmpty()) {
             return;
         }
         latch.countDown();
@@ -60,8 +81,8 @@ public class StateListener implements Consumer<ProcessState> {
         if (done) {
             return;
         }
-        String message = "Expected states not achived within waiting time. Expected: <%1$s> but was: <[%2$s]>.\n%3$s";
-        fail(String.format(message, expected, pc.getState(), pc.toString()));
+        String message = "Expected states not achived within waiting time. Expected <%1$s> but got <%2$s>.\n%3$s";
+        fail(String.format(message, expected, events, pc.toString()));
     }
 
 }

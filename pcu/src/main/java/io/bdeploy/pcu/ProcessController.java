@@ -552,13 +552,19 @@ public class ProcessController {
         } catch (Exception ex) {
             throw new PcuRuntimeException("Failed to execute task '" + taskName + "'", ex);
         } finally {
+            // Remember current state. Releasing the lock could lead
+            // to another state change and result in wrong notifications
+            // send to the listeners
+            ProcessState currentState = processState;
+
             lockTask = null;
             lock.unlock();
 
             // Notify listeners when state changes
-            if (processState != oldState) {
-                notifyListeners();
+            if (currentState == oldState) {
+                return;
             }
+            notifyListeners(currentState);
         }
     }
 
@@ -870,9 +876,9 @@ public class ProcessController {
     }
 
     /** Notifies all listeners about the of the process */
-    private void notifyListeners() {
+    private void notifyListeners(ProcessState state) {
         try {
-            statusListeners.forEach(c -> c.accept(processState));
+            statusListeners.forEach(c -> c.accept(state));
         } catch (Exception ex) {
             logger.log(l -> l.error("Failed to notify listener about current process status.", ex));
         }

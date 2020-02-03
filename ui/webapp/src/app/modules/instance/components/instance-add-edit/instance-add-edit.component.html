@@ -9,7 +9,13 @@
         <button mat-raised-button color="primary" type="submit" [disabled]="loading || !isModified() || !instanceFormGroup.valid">SAVE</button>
       </mat-toolbar-row>
       <mat-toolbar-row class="subHeader">
-        <span> UUID: <b>{{uuidControl.value}}</b> </span>
+        <ng-container *ngIf="!loading">
+          <span> UUID: <b>{{uuidControl.value}}</b> </span>
+        </ng-container>
+        <ng-container *ngIf="loading">
+          <mat-progress-spinner [mode]="'indeterminate'" diameter="16"></mat-progress-spinner>
+          <span class="loading-text"> <b>{{loadingText}}</b> </span>
+        </ng-container>
       </mat-toolbar-row>
     </mat-toolbar>
 

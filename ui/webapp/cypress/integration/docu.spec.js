@@ -36,10 +36,7 @@ describe('Creates screenshots for the user documentation', () => {
 
     // Create instance group
     cy.contains('button', 'add').click();
-
-    cy.contains('button', 'SAVE').should('exist').and('be.disabled');
-    cy.get('input[placeholder^="Instance group name"]').should('be.visible').click();
-    cy.get('input[placeholder^="Instance group name"]').should('be.visible').type('Demo');
+    cy.get('input[placeholder^="Instance group name"]').type('Demo');
     cy.get('input[placeholder=Description]').type('Demo Instance Group');
     cy.fixture('bdeploy.png').then(fileContent => {
       cy.get('input[type=file]').upload({ fileContent: fileContent, fileName: 'bdeploy.png', mimeType: 'image/png' });
@@ -107,9 +104,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.contains('a', 'Create Instance').click();
 
     // Create new instance
-    cy.contains('button', 'SAVE').should('exist').and('be.disabled');
-    cy.get('[placeholder=Name]').should('be.visible').click();
-    cy.get('[placeholder=Name]').should('be.visible').type('Demo Instance');
+    cy.get('[placeholder=Name]').type('Demo Instance');
     cy.get('[placeholder=Purpose]').click();
     cy.get('mat-option').contains('DEVELOPMENT').click();
     cy.get('[placeholder=Description]').type('Demo Instance');
@@ -253,7 +248,7 @@ describe('Creates screenshots for the user documentation', () => {
     // Start process
     cy.getApplicationConfigCard('master','Server Application').click();
     cy.contains('Process Control').should('exist');
-    cy.contains('button','play_arrow').should('be.enabled').click();
+    cy.contains('button','play_arrow').click();
     cy.wait(2000);
     cy.contains('app-process-status','favorite').should('be.visible');
     cy.screenshot('BDeploy_Process_Started');
@@ -282,7 +277,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.screenshot('BDeploy_Process_Crashed_Repeatedly');
 
     // Switch to another version to capture Outdated process
-    cy.contains('button','play_arrow').should('be.enabled').click();
+    cy.contains('button','play_arrow').click();
     cy.contains('mat-toolbar','Process Control').contains('button','close').click();
     cy.contains('mat-slide-toggle','Show all').click();
     cy.get('app-instance-version-card').children().eq(1).installAndActivate();
@@ -314,7 +309,7 @@ describe('Creates screenshots for the user documentation', () => {
     // Start process with manual confirmation
     cy.getApplicationConfigCard('master','Server Application').click();
     cy.contains('Process Control').should('exist');
-    cy.contains('button','play_arrow').should('be.enabled').click();
+    cy.contains('button','play_arrow').click();
     cy.wait(250);
     cy.screenshot('BDeploy_Process_Manual_Confirm');
     cy.get('app-process-start-confirm').get('input').type('Server Application');
@@ -364,8 +359,8 @@ describe('Creates screenshots for the user documentation', () => {
     cy.contains('Software Repositories').should('exist');
     cy.contains('button', 'add').click();
     cy.contains('button', 'SAVE').should('exist').and('be.disabled');
-    cy.get('input[placeholder^="Software Repository name"]').should('be.visible').click();
-    cy.get('input[placeholder^="Software Repository name"]').should('be.visible').type('External');
+    cy.get('input[placeholder^="Software Repository name"]').click();
+    cy.get('input[placeholder^="Software Repository name"]').type('External');
     cy.get('input[placeholder=Description]').type('External Software Repository');
     cy.get('button').contains('SAVE').click();
     cy.waitUntilContentLoaded();

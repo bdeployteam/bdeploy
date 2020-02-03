@@ -33,7 +33,7 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  margin-top: 10px;
+  margin-top: 15px;
 }
 
 .button-container * {
@@ -73,4 +73,16 @@
 
 .sel-caption-text {
   padding-left: 4px;
+}
+
+.transfer-spinner {
+  float: left;
+  position: relative;
+  margin-right: 1em;
+}
+
+.icon-and-text {
+  margin-right: 0.2em;
+  position: relative;
+  top: 5px;
 }

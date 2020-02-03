@@ -26,12 +26,7 @@ describe("Central/Managed Basic Test", function() {
       .should("exist")
       .and("be.visible")
       .within(e => {
-        cy.contains("button", "Synchronize")
-          .should("exist")
-          .and("be.enabled")
-          .click();
-
-        // don't use waitUntilContentLoaded as it does not work in within blocks.
+        cy.contains("button", "Synchronize").click();
         cy.get("mat-spinner").should("not.exist");
       });
 
@@ -39,27 +34,20 @@ describe("Central/Managed Basic Test", function() {
       .should("exist")
       .within(dialog => {
         cy.contains("may no longer exist").should("exist");
-        cy.contains("button", "OK")
-          .should("be.enabled")
-          .click();
+        cy.contains("button", "OK").click();
       });
 
     cy.contains("mat-expansion-panel", "Test Local Server")
       .should("exist")
       .and("be.visible")
       .within(e => {
-        cy.contains("button", "Delete")
-          .should("exist")
-          .and("be.enabled")
-          .click();
+        cy.contains("button", "Delete").click();
       });
 
     cy.contains("mat-dialog-container", "Delete Managed Server")
       .should("exist")
       .within(dialog => {
-        cy.contains("button", "OK")
-          .should("be.enabled")
-          .click();
+        cy.contains("button", "OK").click();
       });
 
     cy.attachManaged(groupName); // re-attach
@@ -82,10 +70,8 @@ describe("Central/Managed Basic Test", function() {
       .should("exist")
       .and("be.visible")
       .within(e => {
-        cy.contains("button", "Synchronize")
-          .should("exist")
-          .and("be.enabled")
-          .click();
+        cy.contains("button", "Synchronize").click();
+        cy.get("mat-spinner").should("not.exist");
       });
 
     cy.visitBDeploy('/#/instance/browser/' + groupName, 'CENTRAL');
@@ -96,21 +82,21 @@ describe("Central/Managed Basic Test", function() {
 
   it("synchronizes product version 1.0.0 from managed to central", () => {
     cy.visitBDeploy('/#/instancegroup/products/' + groupName, 'CENTRAL');
-    cy.contains('button', 'sync_alt').should('exist').and('be.enabled').click();
+    cy.contains('button', 'sync_alt').click();
 
     cy.contains('mat-label', 'Source').should('be.visible').click({force: true});
-    cy.get('mat-option').contains('Test Local Server').should('be.visible').click();
+    cy.get('mat-option').contains('Test Local Server').click();
 
     // wait for the drop down to go away...
     cy.get('mat-option').should('not.exist');
 
     cy.contains('mat-label', 'Target').click({force: true});
-    cy.get('mat-option').contains('Central').should('be.visible').click();
+    cy.get('mat-option').contains('Central').click();
 
-    cy.contains('button', 'Next').should('exist').and('be.enabled').click();
+    cy.contains('button', 'Next').click();
 
     cy.contains('mat-label', 'Product').click({force: true});
-    cy.get('mat-option').contains('Demo').should('be.visible').click();
+    cy.get('mat-option').contains('Demo').click();
 
     cy.get('[data-cy="prod-source"]').within(s => {
       cy.contains('div', '1.0.0').siblings('mat-icon').contains('arrow_forward').click();
@@ -122,14 +108,14 @@ describe("Central/Managed Basic Test", function() {
 
     // need to make sure we hit the correct next button - the one from the first step is still in the DOM!
     cy.get('[data-cy="prod-target"]').parent().parent().within(p => {
-      cy.contains('button', 'Next').should('be.enabled').scrollIntoView().click();
+      cy.contains('button', 'Next').click();
     })
 
-    // this is to wait a little for the sync in the background to happen...
-    cy.wait(1000); // not nice. currently no other way to wait, product sync wizard needs to display progress.
-    cy.contains('button', 'Done').should('be.enabled').scrollIntoView().click();
+    // Wait until the transfer is done
+    cy.contains("Product transfer successfully done.");
+    cy.contains('button', 'Done').click();
 
-    cy.contains('mat-card', 'Demo Product').should('exist').click();
+    cy.contains('mat-card', 'Demo Product').click();
     cy.get('app-product-list').within(pl => {
       cy.contains('mat-list-item', '1.0.0').should('exist');
     });
@@ -177,12 +163,12 @@ describe("Central/Managed Basic Test", function() {
 
     // create a config file
     cy.get('app-instance-group-logo').parent().clickContextMenuItem('Configuration Files...');
-    cy.contains('button', 'add').should('be.enabled').and('be.visible').click();
+    cy.contains('button', 'add').click();
     cy.get('input[placeholder="Enter path for file"]').clear().type('cypress.cfg')
     cy.get('textarea').type('CY-CFG', {force: true})
-    cy.contains('button', 'APPLY').should('be.enabled').and('be.visible').click();
+    cy.contains('button', 'APPLY').click();
     cy.contains('td', 'cypress.cfg').should('exist');
-    cy.contains('button', 'SAVE').should('be.enabled').and('be.visible').click();
+    cy.contains('button', 'SAVE').click();
 
     // make sure that the instance version is NOT yet visible on the central
     cy.gotoInstance(groupName, managedInstance, 'CENTRAL');
@@ -193,7 +179,7 @@ describe("Central/Managed Basic Test", function() {
     // cannot check configuration file here, as it would require a sync :)
 
     // now sync to central and make sure it appeared
-    cy.contains('mat-icon', 'settings_remote').should('be.visible').click();
+    cy.contains('mat-icon', 'settings_remote').click();
 
     // the next actions are not retryable, so sync must be completed before checking
     cy.waitUntilContentLoaded();
@@ -210,7 +196,7 @@ describe("Central/Managed Basic Test", function() {
     cy.gotoInstance(groupName, managedInstance, 'CENTRAL');
     cy.waitUntilContentLoaded();
 
-    cy.contains('mat-icon', 'settings_remote').should('be.visible').click();
+    cy.contains('mat-icon', 'settings_remote').click();
     cy.waitUntilContentLoaded();
 
     cy.getLatestInstanceVersion().installAndActivate();
@@ -225,14 +211,14 @@ describe("Central/Managed Basic Test", function() {
     cy.gotoInstance(groupName, managedInstance, 'CENTRAL');
     cy.waitUntilContentLoaded();
 
-    cy.contains('mat-icon', 'settings_remote').should('be.visible').click();
+    cy.contains('mat-icon', 'settings_remote').click();
     cy.waitUntilContentLoaded();
 
-    cy.get('.notifications-button').should('exist').and('be.enabled').click();
-    cy.contains('button', 'Show Product Versions').should('be.visible').and('be.enabled').click();
+    cy.get('.notifications-button').click();
+    cy.contains('button', 'Show Product Versions').click();
 
     cy.contains('mat-toolbar', 'Change Product Version').should('exist');
-    cy.contains('app-product-tag-card', '2.0.0').should('exist').contains('button', 'arrow_upward').should('be.enabled').and('be.visible').click();
+    cy.contains('app-product-tag-card', '2.0.0').should('exist').contains('button', 'arrow_upward').click();
 
     cy.getApplicationConfigCard('master', 'Server Application').clickContextMenuItem('Configure...')
 
@@ -257,14 +243,14 @@ describe("Central/Managed Basic Test", function() {
     cy.gotoInstance(groupName, managedInstance, 'CENTRAL');
     cy.waitUntilContentLoaded();
 
-    cy.contains('mat-icon', 'settings_remote').should('be.visible').click();
+    cy.contains('mat-icon', 'settings_remote').click();
     cy.waitUntilContentLoaded();
 
     cy.startProcess('master', 'Server Application');
 
     // click process output button
     cy.contains('app-process-details', 'Server Application').within(() => {
-      cy.contains('button', 'message').should('be.enabled').click();
+      cy.contains('button', 'message').click();
     })
 
     // check process output and close overlay
@@ -289,7 +275,7 @@ describe("Central/Managed Basic Test", function() {
 
     // click process output button
     cy.contains('app-process-details', 'Server Application').within(() => {
-      cy.contains('button', 'message').should('be.enabled').click();
+      cy.contains('button', 'message').click();
     })
 
     // check process output and close overlay
@@ -308,7 +294,7 @@ describe("Central/Managed Basic Test", function() {
     cy.gotoInstance(groupName, managedInstance, 'CENTRAL');
     cy.waitUntilContentLoaded();
 
-    cy.contains('mat-icon', 'settings_remote').should('be.visible').click();
+    cy.contains('mat-icon', 'settings_remote').click();
     cy.waitUntilContentLoaded();
 
     cy.getApplicationConfigCard('master', 'Server Application').click();

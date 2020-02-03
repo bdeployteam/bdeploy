@@ -11,7 +11,7 @@ describe('BHive Browser Tests', function() {
     cy.get('tbody>tr').should('exist');
 
     // all in one chain to re-try the click on the drop down if it does not open.
-    cy.get('mat-select[placeholder="Select a Hive"]').should('have.length', 1).click().get('body').contains('mat-option', 'default').should('exist').click();
+    cy.get('mat-select[placeholder="Select a Hive"]').should('have.length', 1).click().get('body').contains('mat-option', 'default').click();
 
     cy.get('td:contains("users/admin")').should('be.visible').and('have.length.gte', 1).contains('td', 'users/admin:1').click();
     cy.get('td:contains("user.json")').should('have.length', 1);

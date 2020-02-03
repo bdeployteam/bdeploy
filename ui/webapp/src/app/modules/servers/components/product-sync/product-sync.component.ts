@@ -1,6 +1,5 @@
 import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { isEqual } from 'lodash';
 import { DragulaService } from 'ng2-dragula';
@@ -33,7 +32,7 @@ export class ProductSyncComponent implements OnInit, OnDestroy {
   set selectedSourceProductKey(key) {
     this._selectedSourceProductKey = key;
     this.selectableProducts = this.sourceProducts.get(key).filter(p => !this.isAlreadyPresent(p) && !this.isProcessing(p) && !this.isSelected(p));
-  };
+  }
 
   targetProducts: ProductDto[];
   processingProducts: ProductDto[];
@@ -43,12 +42,14 @@ export class ProductSyncComponent implements OnInit, OnDestroy {
 
   loading = true;
   loadingProducts = true;
-  startingTransfer = true;
+
+  transferStarted = false;
+  transferDone = false;
+  transferHandle: any;
 
   private subscription: Subscription = new Subscription();
 
   constructor(
-    private fb: FormBuilder,
     private route: ActivatedRoute,
     public location: Location,
     private servers: ManagedServersService,
@@ -70,9 +71,12 @@ export class ProductSyncComponent implements OnInit, OnDestroy {
 
   public ngOnDestroy(): void {
     this.subscription.unsubscribe();
+    this.resetProgress();
   }
 
   loadProducts() {
+    this.resetProgress();
+
     // load products from source server
     let call0 = this.productService.getProducts(this.instanceGroup);
     if (this.getMinionMode(this.sourceSelection) !== MinionMode.CENTRAL) {
@@ -172,6 +176,8 @@ export class ProductSyncComponent implements OnInit, OnDestroy {
   }
 
   startTransfer() {
+    this.resetProgress();
+
     const data: ProductTransferDto = {
       sourceMode: this.getMinionMode(this.sourceSelection),
       sourceServer: this.isCentralOption(this.sourceSelection) ? null : this.sourceSelection,
@@ -180,9 +186,24 @@ export class ProductSyncComponent implements OnInit, OnDestroy {
       versionsToTransfer: this.selectedProducts
     };
 
-    this.servers.startTransfer(this.instanceGroup, data).subscribe(r => {
-      this.startingTransfer = false;
-    });
+    this.transferStarted = true;
+    this.servers.startTransfer(this.instanceGroup, data).subscribe();
+
+    // Enable timer to execute regular updates
+    this.transferHandle = setInterval(() => this.updateTransferState(), 1000);
+  }
+
+  async updateTransferState() {
+    const inTransfer = await this.servers.productsInTransfer(this.instanceGroup).toPromise();
+    this.transferDone = inTransfer.length === 0;
+  }
+
+  resetProgress() {
+    this.transferDone = false;
+    this.transferStarted = false;
+    if (this.transferHandle) {
+      clearInterval(this.transferHandle);
+    }
   }
 
 }
