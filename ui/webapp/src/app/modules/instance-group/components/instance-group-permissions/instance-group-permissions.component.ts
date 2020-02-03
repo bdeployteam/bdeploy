@@ -119,6 +119,10 @@ export class InstanceGroupPermissionsComponent implements OnInit {
 
   public onGrantWrite(user: UserInfo): void {
     user.capabilities.push({scope: this.nameParam, capability: Capability.WRITE});
+    const hasScopedRead = user.capabilities.find(c => c.scope !== null && c.capability === Capability.READ) != null;
+    if (!hasScopedRead) {
+      user.capabilities.push({scope: this.nameParam, capability: Capability.READ});
+    }
   }
 
   public onRevokeWrite(user: UserInfo): void {
@@ -127,6 +131,10 @@ export class InstanceGroupPermissionsComponent implements OnInit {
 
   public onGrantAdmin(user: UserInfo): void {
     user.capabilities.push({scope: this.nameParam, capability: Capability.ADMIN});
+    const hasScopedWrite = user.capabilities.find(c => c.scope !== null && c.capability === Capability.WRITE) != null;
+    if (!hasScopedWrite) {
+      this.onGrantWrite(user);
+    }
   }
 
   public onRevokeAdmin(user: UserInfo): void {
