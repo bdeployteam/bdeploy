@@ -79,7 +79,10 @@ public class LdapAuthenticator implements Authenticator {
                     closeServerContext(ctx);
                 }
             } catch (NamingException e) {
-                log.error("Cannot authenticate {} on server {}", user.name, server.server, e);
+                log.debug("Cannot authenticate {} on server {}", user.name, server.server);
+                if (log.isTraceEnabled()) {
+                    log.trace("Exception", e);
+                }
             }
         }
         return null;
@@ -121,8 +124,8 @@ public class LdapAuthenticator implements Authenticator {
         return result.toArray(String[]::new);
     }
 
-    private UserInfo verifyAndUpdateSearchResult(UserInfo user, char[] password, LDAPSettingsDto server, LdapContext ctx, SearchResult sr)
-            throws NamingException {
+    private UserInfo verifyAndUpdateSearchResult(UserInfo user, char[] password, LDAPSettingsDto server, LdapContext ctx,
+            SearchResult sr) throws NamingException {
         String userDn = String.valueOf(sr.getAttributes().get(LDAP_DN).get(0));
 
         ctx.addToEnvironment(Context.SECURITY_PRINCIPAL, userDn);
