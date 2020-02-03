@@ -10,7 +10,6 @@ import javax.inject.Named;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
@@ -56,7 +55,9 @@ public class AuthResourceImpl implements AuthResource {
             String st = signer.apply(token.build());
 
             // cookie not set to 'secure' to allow sending during development.
-            return Response.ok().cookie(new NewCookie("st", st, "/", null, null, 365, false)).entity(st).build();
+            // cookie header set manually, as the NewCookie API does not support SameSite policies.
+            return Response.ok().header("Set-Cookie", "st=" + st + ";Version=1;Path=/;Max-Age=365;SameSite=Strict").entity(st)
+                    .build();
         } else {
             throw new WebApplicationException("Invalid credentials", Status.UNAUTHORIZED);
         }
