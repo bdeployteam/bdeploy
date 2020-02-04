@@ -36,6 +36,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
   @Input() minionState: MinionStatusDto;
 
   @Output() editAppConfigEvent = new EventEmitter<EditAppConfigContext>();
+  @Output() editAppEndpointsEvent = new EventEmitter<EditAppConfigContext>();
   @Output() editNodeAppsEvent = new EventEmitter<void>();
   @Output() removeNodeAppEvent = new EventEmitter<ApplicationConfiguration>();
   @Output() selectAppConfigEvent = new EventEmitter<ApplicationConfiguration>();
@@ -222,6 +223,10 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
 
   fireEditAppConfigEvent(appConfig: ApplicationConfiguration) {
     this.editAppConfigEvent.emit(new EditAppConfigContext(this.node, appConfig));
+  }
+
+  fireEditEndpointsAppConfigEvent(appConfig: ApplicationConfiguration) {
+    this.editAppEndpointsEvent.emit(new EditAppConfigContext(this.node, appConfig));
   }
 
   /** Returns whether or not at least one app has been added to the node */

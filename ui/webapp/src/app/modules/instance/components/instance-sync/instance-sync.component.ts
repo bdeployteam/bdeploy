@@ -39,6 +39,8 @@ export class InstanceSyncComponent implements OnChanges {
     }
     if (this.instanceGroup && this.instance) {
       this.server = await this.managedServers.getServerForInstance(this.instanceGroup, this.instance, this.tag).toPromise();
+    } else {
+      this.server = null;
     }
     if (this.server) {
       this.stateUpdateEvent.emit(null);

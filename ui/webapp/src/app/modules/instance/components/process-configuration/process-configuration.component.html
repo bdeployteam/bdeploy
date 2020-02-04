@@ -151,6 +151,7 @@
             [minionState]="minionStates[node.nodeName]"
             [isInstanceDirty]="isDirtySelected()"
             (editAppConfigEvent)="onEditApp($event)"
+            (editAppEndpointsEvent)="onEditAppEndpoints($event)"
             (editNodeAppsEvent)="onUpdateNodeApps()"
             (removeNodeAppEvent)="onUpdateNodeApps()"
             (selectAppConfigEvent)="onSelectApp(node, $event)"
@@ -269,7 +270,7 @@
   </div>
   <!-- Edit component. Replaces nodes and sidebar -->
   <div class="drawer-container" *ngIf="editMode">
-    <app-application-edit
+    <app-application-edit *ngIf='!editEndpointsMode' #editComponent
       class="nodes-container"
       [instanceGroup]="groupParam"
       [processConfig]="selectedConfig"
@@ -278,5 +279,14 @@
       [readonly]="isReadonly()"
       (validationStateChanged)="updateDirtyStateAndValidate()">
     </app-application-edit>
+    <app-application-edit-endpoints *ngIf='editEndpointsMode' #editComponent
+      class="nodes-container"
+      [instanceGroup]="groupParam"
+      [processConfig]="selectedConfig"
+      [appConfigContext]="editAppConfigContext"
+      [appDesc]="selectedConfig.nodeList.applications[editAppConfigContext.applicationConfiguration.application.name]"
+      [readonly]="isReadonly()"
+      (validationStateChanged)="updateDirtyStateAndValidate()">
+    </app-application-edit-endpoints>
   </div>
 </div>

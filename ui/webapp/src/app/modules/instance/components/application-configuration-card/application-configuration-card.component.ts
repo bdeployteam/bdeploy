@@ -28,6 +28,7 @@ export class ApplicationConfigurationCardComponent implements OnInit {
   @Output() removeEvent = new EventEmitter<boolean>();
   @Output() downloadClickAndStartEvent = new EventEmitter<ApplicationConfiguration>();
   @Output() downloadInstallerEvent = new EventEmitter<EventWithCallback<ApplicationConfiguration>>();
+  @Output() editEndpointsEvent = new EventEmitter<ApplicationConfiguration>();
 
   appOs: OperatingSystem;
   downloading = false;
@@ -43,12 +44,20 @@ export class ApplicationConfigurationCardComponent implements OnInit {
     this.appOs = getAppOs(this.appConfig.application);
   }
 
+  hasEndpoints() {
+    return this.appConfig.endpoints && this.appConfig.endpoints.http && this.appConfig.endpoints.http.length;
+  }
+
   isActive() {
     return this.activatedTag === this.instanceVersion.key.tag;
   }
 
   onEdit() {
     this.editEvent.emit(this.appConfig);
+  }
+
+  onEndpointEdit() {
+    this.editEndpointsEvent.emit(this.appConfig);
   }
 
   onDelete(): void {

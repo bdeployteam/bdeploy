@@ -48,6 +48,7 @@
         [productMissing]="productMissing"
         (removeEvent)="removeProcess(process)"
         (editEvent)="fireEditAppConfigEvent(process)"
+        (editEndpointsEvent)="fireEditEndpointsAppConfigEvent(process)"
         (click)="onSelect(process)"
         (downloadClickAndStartEvent)="downloadClickAndStartEvent.next($event)"
         (downloadInstallerEvent)="downloadInstallerEvent.next($event)"

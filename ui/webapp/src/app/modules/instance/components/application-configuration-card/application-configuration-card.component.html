@@ -5,6 +5,7 @@
     <mat-menu #appMenu="matMenu" xPosition="before">
       <button mat-menu-item *ngIf="!isReadonly" (click)="onEdit()" [disabled]="!authService.isScopedWrite(instanceGroupName) || isMissing()">Configure...</button>
       <button mat-menu-item *ngIf="isReadonly" (click)="onEdit()" [disabled]="isMissing()">View...</button>
+      <button mat-menu-item *ngIf="hasEndpoints()" (click)='onEndpointEdit()' [disabled]='isMissing()'>Endpoints...</button>
       <ng-container *ngIf='isClient'>
         <mat-divider></mat-divider>
         <button mat-menu-item [disabled]='!isActive()' (click)="downloadClickAndStart()">

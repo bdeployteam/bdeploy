@@ -31,7 +31,6 @@ import { compareTags, sortByTags } from '../../../shared/utils/manifest.utils';
 import { ApplicationService } from '../../services/application.service';
 import { InstanceService } from '../../services/instance.service';
 import { ProcessService } from '../../services/process.service';
-import { ApplicationEditComponent } from '../application-edit/application-edit.component';
 import { InstanceNotification, Severity } from '../instance-notifications/instance-notifications.component';
 import { InstanceSyncComponent } from '../instance-sync/instance-sync.component';
 import { InstanceVersionCardComponent } from '../instance-version-card/instance-version-card.component';
@@ -55,8 +54,8 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   public static readonly DROPLIST_APPLICATIONS = 'APPLICATIONS';
   private readonly log: Logger = this.loggingService.getLogger('ProcessConfigurationComponent');
 
-  @ViewChild(ApplicationEditComponent, { static: false })
-  private editComponent: ApplicationEditComponent;
+  @ViewChild('editComponent', { static: false })
+  private editComponent: any;
 
   @ViewChild(ProcessDetailsComponent, { static: false })
   private processDetails: ProcessDetailsComponent;
@@ -99,6 +98,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   public productTags: ProductDto[];
 
   public editMode = false;
+  public editEndpointsMode = false;
   public editAppConfigContext: EditAppConfigContext;
   public activeNodeConfig: InstanceNodeConfiguration;
 
@@ -624,6 +624,12 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     this.setEditMode(true);
   }
 
+  public onEditAppEndpoints(context: EditAppConfigContext) {
+    this.activeNodeConfig = context.instanceNodeConfigurationDto.nodeConfiguration;
+    this.editAppConfigContext = cloneDeep(context);
+    this.setEditMode(true, true);
+  }
+
   public onApplyAppChanges() {
     const updated = this.editComponent.appConfigContext.applicationConfiguration;
     const appDesc = this.editComponent.appDesc;
@@ -913,8 +919,9 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   /** Switches the edit to the desired state */
-  setEditMode(editMode: boolean) {
+  setEditMode(editMode: boolean, endpoints: boolean = false) {
     this.editMode = editMode;
+    this.editEndpointsMode = endpoints;
     if (editMode) {
       this.pageTitle = this.titleService.getHeaderTitle();
       this.titleService.setHeaderTitle('Process Settings');

@@ -3,19 +3,22 @@ package io.bdeploy.minion.remote.jersey;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
+import java.security.KeyStore;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.function.Function;
 
 import javax.inject.Inject;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLException;
 import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
-import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -28,16 +31,19 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.codec.binary.Base64;
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.StreamHelper;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
+import io.bdeploy.interfaces.descriptor.application.HttpEndpoint.HttpAuthenticationType;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.remote.ProxiedRequestWrapper;
 import io.bdeploy.interfaces.remote.ProxiedResponseWrapper;
@@ -46,6 +52,8 @@ import io.bdeploy.interfaces.remote.SlaveProxyResource;
 import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
 import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
 import io.bdeploy.interfaces.variables.CompositeResolver;
+import io.bdeploy.interfaces.variables.DeploymentPathProvider;
+import io.bdeploy.interfaces.variables.DeploymentPathResolver;
 import io.bdeploy.minion.MinionRoot;
 
 public class SlaveProxyResourceImpl implements SlaveProxyResource {
@@ -60,11 +68,6 @@ public class SlaveProxyResourceImpl implements SlaveProxyResource {
 
     @Override
     public ProxiedResponseWrapper forward(ProxiedRequestWrapper wrapper) {
-        InstanceNodeManifest inm = findInstanceNodeManifest(wrapper.instanceId);
-        if (inm == null) {
-            throw new WebApplicationException("Cannot find instance " + wrapper.instanceId, Status.NOT_FOUND);
-        }
-
         SlaveProcessResource spr = rc.initResource(new SlaveProcessResourceImpl());
         InstanceNodeStatusDto ins = spr.getStatus(wrapper.instanceId);
         ProcessStatusDto ps = ins.getStatus(wrapper.applicationId);
@@ -75,9 +78,16 @@ public class SlaveProxyResourceImpl implements SlaveProxyResource {
                     Status.PRECONDITION_FAILED);
         }
 
+        InstanceNodeManifest inm = findInstanceNodeManifest(wrapper.instanceId, ps.instanceTag);
+        if (inm == null) {
+            throw new WebApplicationException("Cannot find instance " + wrapper.instanceId, Status.NOT_FOUND);
+        }
+
+        HttpEndpoint processedEndpoint = processEndpoint(wrapper, inm);
+
         try {
             byte[] body = wrapper.base64body == null ? null : Base64.decodeBase64(wrapper.base64body);
-            WebTarget target = initClient(wrapper.endpoint).target(initUri(wrapper, inm));
+            WebTarget target = initClient(processedEndpoint).target(initUri(processedEndpoint));
 
             for (Map.Entry<String, List<String>> entry : wrapper.queryParameters.entrySet()) {
                 target = target.queryParam(entry.getKey(), entry.getValue().toArray());
@@ -95,17 +105,6 @@ public class SlaveProxyResourceImpl implements SlaveProxyResource {
             } else {
                 return wrap(request.build(wrapper.method).invoke());
             }
-        } catch (ProcessingException pex) {
-            Throwable cause = pex.getCause();
-            if (cause instanceof SSLException) {
-                log.warn("SSL Exception: " + cause.getMessage());
-                log.info("Falling back to plain HTTP for endpoint " + wrapper.endpoint.id);
-
-                wrapper.endpoint.secure = false;
-                return forward(wrapper);
-            }
-
-            throw pex;
         } catch (Exception e) {
             throw new WebApplicationException("Failed to call endpoint " + wrapper.endpoint.id + " on target application "
                     + wrapper.applicationId + " for instance " + wrapper.instanceId, e);
@@ -133,19 +132,36 @@ public class SlaveProxyResourceImpl implements SlaveProxyResource {
         return wrapper;
     }
 
-    private String initUri(ProxiedRequestWrapper wrapper, InstanceNodeManifest inm) {
+    private HttpEndpoint processEndpoint(ProxiedRequestWrapper wrapper, InstanceNodeManifest inm) {
+        HttpEndpoint processed = new HttpEndpoint();
         ApplicationConfiguration app = inm.getConfiguration().applications.stream()
                 .filter(a -> a.uid.equals(wrapper.applicationId)).findFirst().orElseThrow();
 
         CompositeResolver list = new CompositeResolver();
+        list.add(new DeploymentPathResolver(
+                new DeploymentPathProvider(root.getDeploymentDir().resolve(inm.getUUID()), inm.getKey().getTag())));
         list.add(new ApplicationVariableResolver(app));
         list.add(new ApplicationParameterValueResolver(app.uid, inm.getConfiguration()));
 
-        String port = TemplateHelper.process(wrapper.endpoint.port, list);
-        String path = TemplateHelper.process(wrapper.endpoint.path, list);
+        Function<String, String> p = (s) -> TemplateHelper.process(s, list);
 
-        return (wrapper.endpoint.secure ? "https://" : "http://") + "localhost:" + port + (path.startsWith("/") ? "" : "/")
-                + path;
+        processed.id = wrapper.endpoint.id;
+        processed.path = wrapper.endpoint.path;
+        processed.port = p.apply(wrapper.endpoint.port);
+        processed.secure = wrapper.endpoint.secure;
+        processed.trustAll = wrapper.endpoint.trustAll;
+        processed.trustStore = p.apply(wrapper.endpoint.trustStore);
+        processed.trustStorePass = p.apply(wrapper.endpoint.trustStorePass);
+        processed.authType = wrapper.endpoint.authType;
+        processed.authUser = p.apply(wrapper.endpoint.authUser);
+        processed.authPass = p.apply(wrapper.endpoint.authPass);
+
+        return processed;
+    }
+
+    private String initUri(HttpEndpoint endpoint) {
+        return (endpoint.secure ? "https://" : "http://") + "localhost:" + endpoint.port
+                + (endpoint.path.startsWith("/") ? "" : "/") + endpoint.path;
     }
 
     private Client initClient(HttpEndpoint endpoint) throws GeneralSecurityException {
@@ -171,14 +187,43 @@ public class SlaveProxyResourceImpl implements SlaveProxyResource {
             } }, new java.security.SecureRandom());
 
             client.sslContext(sslcontext).hostnameVerifier((s1, s2) -> true);
+        } else if (endpoint.secure && endpoint.trustStore != null && !endpoint.trustStore.isEmpty()) {
+            Path ksPath = Paths.get(endpoint.trustStore);
+
+            char[] pp = null;
+            if (endpoint.trustStorePass != null && !endpoint.trustStorePass.isEmpty()) {
+                pp = endpoint.trustStorePass.toCharArray();
+            }
+
+            KeyStore ks;
+            try {
+                ks = SecurityHelper.getInstance().loadPublicKeyStore(ksPath, pp);
+                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                tmf.init(ks);
+
+                SSLContext sslContext = SSLContext.getInstance("TLS");
+                sslContext.init(null, tmf.getTrustManagers(), null);
+                client.sslContext(sslContext);
+            } catch (GeneralSecurityException | IOException e) {
+                log.error("Cannot load configures trust store from " + ksPath, e);
+            }
+        }
+
+        if (endpoint.authType == HttpAuthenticationType.BASIC) {
+            client.register(HttpAuthenticationFeature.basic(endpoint.authUser, endpoint.authPass));
+        } else if (endpoint.authType == HttpAuthenticationType.DIGEST) {
+            client.register(HttpAuthenticationFeature.digest(endpoint.authUser, endpoint.authPass));
         }
 
         return client.build();
     }
 
-    private InstanceNodeManifest findInstanceNodeManifest(String instanceId) {
+    private InstanceNodeManifest findInstanceNodeManifest(String instanceId, String tag) {
         SortedSet<Key> manifests = InstanceNodeManifest.scan(root.getHive());
         for (Key key : manifests) {
+            if (!key.getTag().equals(tag)) {
+                continue;
+            }
             InstanceNodeManifest mf = InstanceNodeManifest.of(root.getHive(), key);
             if (!mf.getUUID().equals(instanceId)) {
                 continue;

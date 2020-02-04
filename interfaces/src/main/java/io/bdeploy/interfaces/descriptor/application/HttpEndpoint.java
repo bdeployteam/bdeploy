@@ -2,10 +2,30 @@ package io.bdeploy.interfaces.descriptor.application;
 
 public class HttpEndpoint {
 
+    public enum HttpAuthenticationType {
+        NONE,
+        BASIC,
+        DIGEST
+    }
+
     /**
      * The unique ID of the endpoint.
      */
     public String id;
+
+    /**
+     * The path to the endpoint on the server.
+     * <p>
+     * Note that path parameters are currently not supported.
+     */
+    public String path;
+
+    /**
+     * The port running the service. This is usually a reference to a configuration parameter of the hosting application
+     * <p>
+     * This is a candidate for <b>actual</b> configuration on the application, right now this cannot be configured
+     */
+    public String port;
 
     /**
      * Use HTTPS to connect
@@ -18,17 +38,30 @@ public class HttpEndpoint {
     public boolean trustAll = false;
 
     /**
-     * The port running the service. This is usually a reference to a configuration parameter of the hosting application
+     * Path to a trust store which contains the certificate(s) to use when calling the endpoint.
      * <p>
-     * This is a candidate for <b>actual</b> configuration on the application, right now this cannot be configured
+     * The trust store must be in JKS format
      */
-    public String port;
+    public String trustStore;
 
     /**
-     * The path to the endpoint on the server.
-     * <p>
-     * Note that path parameters are currently not supported.
+     * Password for the trust store.
      */
-    public String path;
+    public String trustStorePass;
+
+    /**
+     * The authentication type to use when performing the request
+     */
+    public HttpAuthenticationType authType = HttpAuthenticationType.NONE;
+
+    /**
+     * The user to use to perform authentication of any request
+     */
+    public String authUser;
+
+    /**
+     * The password to use to perform authentication of any request
+     */
+    public String authPass;
 
 }

@@ -173,6 +173,9 @@ export class ApplicationService {
       appConfig.stop.executable = appDesc.stopCommand.launcherPath;
       appConfig.stop.parameters = this.createParameters(appDesc.stopCommand.parameters, templates);
     }
+
+    // Initialize endpoints
+    appConfig.endpoints.http = cloneDeep(appDesc.endpoints.http);
   }
 
   /** Creates and returns an array of parameters based on the given descriptors */
@@ -445,6 +448,9 @@ export class ApplicationService {
    * that the app has no unknown parameters.
    */
   public setUnknownParameters(appUid: string, params: UnknownParameter[]) {
+    if (!params) {
+      return;
+    }
     if (params.length === 0) {
       this.unknownParameters.delete(appUid);
     } else {
@@ -674,6 +680,30 @@ export class ApplicationService {
         oldDesc ? oldDesc.stopCommand.parameters : [],
         templates,
       );
+    }
+    if (desc.endpoints && desc.endpoints.http) {
+      if (!app.endpoints || ! app.endpoints.http) {
+        app.endpoints = { http: [] };
+      }
+      const finalEps = [];
+      for (const cep of app.endpoints.http) {
+        const existing = desc.endpoints.http.findIndex(p => p.id === cep.id);
+        if (existing !== -1) {
+          // still existing endpoint, keep it
+          finalEps.push(cep);
+        }
+        // otherwise the endpoint is dropped, no longer existing in the application descriptor.
+      }
+
+      for (const ep of desc.endpoints.http) {
+        const existing = app.endpoints.http.findIndex(p => p.id === ep.id);
+        if (existing === -1) {
+          // newly added endpoint
+          finalEps.push(ep);
+        }
+      }
+
+      app.endpoints.http = finalEps;
     }
   }
 

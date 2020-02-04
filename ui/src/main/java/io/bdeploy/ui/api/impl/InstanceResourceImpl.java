@@ -70,7 +70,6 @@ import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfigurationDto
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
-import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.InstanceDirectory;
@@ -327,19 +326,6 @@ public class InstanceResourceImpl implements InstanceResource {
         if (dto.config == null) {
             // no new config - load existing one.
             dto.config = oldConfig.getConfiguration();
-        }
-
-        // copy endpoints from ApplicationDescriptor
-        if (dto.nodeDtos != null) {
-            // FIXME: needs configuration UI instead of dumb copy.
-            for (InstanceNodeConfigurationDto incd : dto.nodeDtos) {
-                if (incd.nodeConfiguration != null) {
-                    for (ApplicationConfiguration cfg : incd.nodeConfiguration.applications) {
-                        ApplicationDescriptor desc = ApplicationManifest.of(hive, cfg.application).getDescriptor();
-                        cfg.endpoints.http.addAll(desc.endpoints.http);
-                    }
-                }
-            }
         }
 
         MasterRootResource root = getManagingRootResource(managedServer);
