@@ -1,17 +1,17 @@
-<ng-container *ngIf='server'>
+<ng-container *ngIf='server && !invisible'>
   <ng-container *ngIf='authService.isScopedWrite(instanceGroup)'>
-    <div appClickStopPropagation class='sync-panel' matRipple [matRippleUnbounded]='false' [matRippleCentered]='true' (click)='doSyncCentral()'>
+    <div appClickStopPropagation class='sync-panel' matRipple [matRippleUnbounded]='false' [matRippleCentered]='true' (click)='doSyncCentral()' [matTooltip]='"Synchronize with " + server.hostName + " (" + server.description + ") to unlock editing."'>
       <mat-icon *ngIf='isInSync()' class='sync-button'>settings_remote</mat-icon>
-      <mat-icon appClickStopPropagation *ngIf='!isInSync()' matTooltip='Synchronization required to unlock editing' class='sync-button sync-button-need-sync' (click)='doSyncCentral()' matRipple [matRippleUnbounded]='true' [matRippleCentered]='true'>settings_remote</mat-icon>
+      <mat-icon appClickStopPropagation *ngIf='!isInSync()' class='sync-button sync-button-need-sync' (click)='doSyncCentral()' matRipple [matRippleUnbounded]='true' [matRippleCentered]='true'>settings_remote</mat-icon>
       <div class='sync-text-panel'>
-        <div>Press to synchronize with <b>{{server.description}}</b></div>
+        <div>Press to synchronize with <b>{{server.hostName}}</b></div>
         <div>Last synchronization: <span [ngClass]='isInSync() ? "instance-in-sync" : "instance-not-in-sync"'>{{getDate(server.lastSync)}}</span></div>
       </div>
     </div>
   </ng-container>
   <ng-container *ngIf='!authService.isScopedWrite(instanceGroup)'>
-    <div appClickStopPropagation class='sync-panel'>
-      <mat-icon class='sync-button sync-button-disabled' matTooltip='Insufficient permissions to synchronize.'>settings_remote</mat-icon>
+    <div appClickStopPropagation class='sync-panel' [matTooltip]='"Insufficient permissions to synchronize with " + server.hostName + " (" + server.description + ")."'>
+      <mat-icon class='sync-button sync-button-disabled'>settings_remote</mat-icon>
       <div class='sync-text-panel'>
         <div>No permissions to synchronize with <b>{{server.description}}</b></div>
         <div>Last synchronization: <span [ngClass]='isInSync() ? "instance-in-sync" : "instance-not-in-sync"'>{{getDate(server.lastSync)}}</span></div>

@@ -46,6 +46,11 @@ export class AppComponent implements OnInit {
         map(route => route.snapshot)
       )
       .subscribe(url => {
+        // safety, reduce load count, route is loaded so it cannot be loading anymore :)
+        // this can happen if lazy loading is initiated but a guard redirects the router
+        // somewhere else.
+        this.decreaseLoadCount();
+
         let title = 'BDeploy';
         if (url.data && url.data.title) {
           const params = url.params;
@@ -72,8 +77,15 @@ export class AppComponent implements OnInit {
     this.subscription.add(this.router.events.pipe(
       filter(e => e instanceof RouteConfigLoadEnd)
     ).subscribe(e => {
-      this.loadCount--;
+      this.decreaseLoadCount();
     }));
+  }
+
+  private decreaseLoadCount() {
+    this.loadCount--;
+    if (this.loadCount < 0) {
+      this.loadCount = 0;
+    }
   }
 
   showLoadIndicator(): boolean {

@@ -35,7 +35,7 @@ Cypress.Commands.add('clickContextMenuItem', { prevSubject: true}, function(subj
   let wrapped = cy.wrap(subject);
 
   wrapped.find('button').contains('more_vert').click();
-  cy.get('[role=menuitem]').contains(item).should('be.enabled').click();
+  cy.get('[role=menuitem]').contains(item).should('be.enabled').click().should('not.exist');
 
   return wrapped;
 });

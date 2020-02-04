@@ -500,6 +500,11 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   public isProductUpgradeAvailable(): boolean {
+    if (this.selectedConfig && !this.isProductAvailable(this.selectedConfig)) {
+      // the following calculation is wrong if the /current/ product is not available.
+      // in this case we simply don't display the new product version available hint.
+      return false;
+    }
     if (this.processConfigs && this.processConfigs.length > 0 && this.productTags && this.productTags.length > 0) {
       return this.processConfigs[0].version.product.tag !== this.productTags[0].key.tag;
     }
@@ -554,6 +559,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
    */
   onSave(): void {
     this.loading = true;
+    this.setSidenavVersions();
 
     let server = null;
     if (this.isCentral()) {
@@ -999,7 +1005,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   /** Returns whether or not the auto-refresh UI is visible */
-  isAutoRefreshVisible() {
+  isActionsVisible() {
     if (this.editMode) {
       return false;
     }
@@ -1184,6 +1190,10 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   getValidationIssues(): {context: EditAppConfigContext, issue: string}[] {
     if (!this.selectedConfig || this.selectedConfig.readonly) {
       return [];
+    }
+
+    if (!this.isProductAvailable(this.selectedConfig)) {
+      return [{ context: null, issue: 'The required product version is not available' }];
     }
 
     const result = [];

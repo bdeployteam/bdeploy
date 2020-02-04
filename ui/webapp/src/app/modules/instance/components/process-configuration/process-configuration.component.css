@@ -206,6 +206,7 @@
 .validation-item-list {
   display: grid;
   grid-template-columns: auto 40px;
+  grid-template-rows: repeat(auto-fill, minmax(32px, min-content));
 
   align-items: center;
   margin-left: 10px;
@@ -214,3 +215,4 @@
 .validation-item-list > button {
   justify-self: end;
 }
+

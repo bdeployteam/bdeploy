@@ -23,6 +23,9 @@ export class InstanceSyncComponent implements OnChanges {
   @Input()
   tag: string;
 
+  @Input()
+  invisible = false;
+
   @Output()
   syncEvent = new EventEmitter<any>();
 

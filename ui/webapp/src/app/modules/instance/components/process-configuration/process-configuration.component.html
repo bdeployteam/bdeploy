@@ -11,7 +11,7 @@
       <button mat-icon-button [disabled]="!authService.isScopedWrite(groupParam)" (click)='instanceNotifications.closeOverlay(); syncComponent.doSyncCentral()' matTooltip="Synchronize meta-data from the controlling server.">
         <mat-icon>settings_remote</mat-icon>
       </button>
-    to get the latest version from the managed master.
+    to get the latest version from the managed master. This will unlock editing for 15 minutes.
   </div>
 </ng-template>
 
@@ -34,8 +34,14 @@
     There are validation issues:
     <div class='validation-item-list'>
       <ng-container *ngFor='let item of issueCache'>
-        <div><b>{{item.context.applicationConfiguration.name}}:</b> {{item.issue}}</div>
-        <button mat-icon-button matTooltip="Edit affected application" (click)='instanceNotifications.closeOverlay(); onEditApp(item.context)'><mat-icon>arrow_forward</mat-icon></button>
+        <ng-container *ngIf='item.context'>
+          <div><b>{{item.context.applicationConfiguration.name}}:</b> {{item.issue}}</div>
+          <button mat-icon-button matTooltip="Edit affected application" (click)='instanceNotifications.closeOverlay(); onEditApp(item.context)'><mat-icon>arrow_forward</mat-icon></button>
+        </ng-container>
+        <ng-container *ngIf='!item.context'>
+          <div><b>{{item.issue}}</b></div>
+          <div></div>
+        </ng-container>
       </ng-container>
     </div>
   </div>
@@ -80,17 +86,17 @@
         </div>
       </div>
       <div class="spacer"></div>
-      <app-instance-sync #syncComponent [instanceGroup]='groupParam' [instance]='uuidParam' [tag]='selectedConfig?.version?.key?.tag' (syncEvent)='onSyncManaged()' (stateUpdateEvent)='onSyncStateUpdate()'></app-instance-sync>
+      <app-instance-sync #syncComponent [invisible]='!isActionsVisible()' [instanceGroup]='groupParam' [instance]='uuidParam' [tag]='selectedConfig?.version?.key?.tag' (syncEvent)='onSyncManaged()' (stateUpdateEvent)='onSyncStateUpdate()'></app-instance-sync>
       <span class="fill-space"></span>
-      <app-remote-progress [scope]='[groupParam, uuidParam]'></app-remote-progress>
-      <ng-container *ngIf="isAutoRefreshVisible() && autoRefresh">
+      <app-remote-progress *ngIf='isActionsVisible()' [scope]='[groupParam, uuidParam]'></app-remote-progress>
+      <ng-container *ngIf="isActionsVisible() && autoRefresh">
         <button mat-icon-button (click)="toggleAutoRefresh()"
           matTooltip="Auto refresh of process status enabled. Next refresh in {{nextAutoRefreshSec}} seconds. Click to disable.">
           <div class="toolbar-progress">{{getAutoRefreshSecFormatted()}}</div>
           <mat-icon>sync</mat-icon>
         </button>
       </ng-container>
-      <ng-container *ngIf="isAutoRefreshVisible() && !autoRefresh">
+      <ng-container *ngIf="isActionsVisible() && !autoRefresh">
         <button mat-icon-button (click)="toggleAutoRefresh()" [disabled]='isCentral() && !syncComponent.isInSync()' matTooltip="Auto refresh of process status disabled. Click to enable.">
           <mat-icon>sync_disabled</mat-icon>
         </button>
@@ -126,7 +132,7 @@
           Change Product Version...
         </button>
       </mat-menu>
-      <button class="option-button" mat-icon-button [matMenuTriggerFor]="appMenu" appClickStopPropagation>
+      <button class="option-button" *ngIf='isActionsVisible()' mat-icon-button [matMenuTriggerFor]="appMenu" appClickStopPropagation>
         <mat-icon>more_vert</mat-icon>
       </button>
     </mat-toolbar-row>

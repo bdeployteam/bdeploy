@@ -157,7 +157,6 @@ describe("Central/Managed Basic Test", function() {
     cy.gotoInstance(groupName, managedInstance, 'MANAGED');
 
     cy.get('app-instance-group-logo').parent().clickContextMenuItem('Configure Applications...');
-    cy.get('[role=menuitem]').contains('Configure Applications...').should('not.exist');
 
     cy.getNodeCard('master').contains('Drop server application here').then(el => {
       cy.contains('app-application-descriptor-card', 'Server Application').dragTo(el);
