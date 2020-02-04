@@ -17,6 +17,7 @@ import { UpdateCardComponent } from './components/update-card/update-card.compon
 import { UpdateDialogComponent } from './components/update-dialog/update-dialog.component';
 import { UserGlobalPermissionsComponent } from './components/user-global-permissions/user-global-permissions.component';
 import { UsersBrowserComponent } from './components/users-browser/users-browser.component';
+import { MasterCleanupGroupComponent } from './components/master-cleanup-group/master-cleanup-group.component';
 
 @NgModule({
   declarations: [
@@ -33,6 +34,7 @@ import { UsersBrowserComponent } from './components/users-browser/users-browser.
     SettingsGeneralComponent,
     UsersBrowserComponent,
     UserGlobalPermissionsComponent,
+    MasterCleanupGroupComponent,
   ],
   entryComponents: [
     UpdateDialogComponent,

@@ -1,5 +1,4 @@
 .page-container {
-  width: calc(100% - 20px);
   margin: 20px;
 }
 
@@ -14,15 +13,6 @@
 
 .spinner-container > div {
   margin: 15px;
-}
-
-.action-table {
-  margin: 20px;
-  width: calc(100% - 60px);
-}
-
-.offline-minion {
-  color: red;
 }
 
 .margin-button {

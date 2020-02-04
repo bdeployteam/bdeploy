@@ -1,0 +1,24 @@
+.box {
+  display: flex;
+  flex-direction: column;
+  margin-top: 32px;
+  padding: 16px;
+}
+
+.action-table {
+  width: 100%;
+}
+
+.mat-header-cell {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.mat-cell {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.offline-minion {
+  color: red;
+}

@@ -9,7 +9,7 @@
   </ng-container>
 
   <ng-container *ngIf='cleanupModel'>
-    <button mat-raised-button color='warn' (click)='onPerform()' [disabled]='!hasAction()' class='margin-button'>Execute all Actions</button>
+    <button mat-raised-button color='warn' (click)='onPerform()' [disabled]='!hasAction() || performingCleanupModel' class='margin-button'>Execute all Actions</button>
     <button mat-raised-button color='primary' (click)='onClear()' class='margin-button'>Reset (Auto. in {{ clearCounter }} s)</button>
   </ng-container>
 
@@ -21,27 +21,8 @@
   </ng-container>
 
   <ng-container *ngIf='cleanupModel && hasAction()'>
-    <ng-container *ngFor='let group of getNonemptyGroups()'>
-      <h3 [ngClass]='(group.minion == null && group.instanceGroup == null) ? "offline-minion" : null'>{{group.name}}</h3>
-      <table mat-table [dataSource]='group.actions' class='mat-elevation-z3 action-table'>
-        <ng-container matColumnDef="description">
-          <th mat-header-cell *matHeaderCellDef>Description</th>
-          <td mat-cell *matCellDef="let element">{{ element.description }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="type">
-          <th mat-header-cell *matHeaderCellDef>Action Type</th>
-          <td mat-cell *matCellDef="let element">{{ element.type }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="what">
-          <th mat-header-cell *matHeaderCellDef>Target Object</th>
-          <td mat-cell *matCellDef="let element">{{ element.what }}</td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef='columns'></tr>
-        <tr mat-row *matRowDef="let row; columns: columns"></tr>
-      </table>
+    <ng-container *ngFor='let group of cleanupModel'>
+      <app-master-cleanup-group [group]="group"></app-master-cleanup-group>
     </ng-container>
   </ng-container>
 

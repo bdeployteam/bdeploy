@@ -176,6 +176,9 @@ describe('Instance Tests', function () {
     // manifests on the slave are still there - meta (2 versions), node, app
     cy.get('td:contains(DELETE_MANIFEST)').should('have.length.greaterThan', 3);
 
+    cy.get('.mat-paginator-navigation-last').should('exist').and('be.enabled');
+    cy.get('.mat-paginator-navigation-last').click();
+
     // stale application pool folder & instance data folder
     cy.get('td:contains(DELETE_FOLDER)').should('have.length.greaterThan', 1);
 

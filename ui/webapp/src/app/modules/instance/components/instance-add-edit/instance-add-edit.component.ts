@@ -187,9 +187,11 @@ export class InstanceAddEditComponent implements OnInit {
     this.loading = true;
     const instance: InstanceConfiguration = this.instanceFormGroup.getRawValue();
 
+    const managedServer = this.managedServerControl ? this.managedServerControl.value : null;
+
     if (this.isCreate()) {
       this.instanceService
-        .createInstance(this.groupParam, instance, this.managedServerControl.value)
+        .createInstance(this.groupParam, instance, managedServer)
         .pipe(finalize(() => (this.loading = false)))
         .subscribe(result => {
           this.clonedInstance = instance;
@@ -198,7 +200,7 @@ export class InstanceAddEditComponent implements OnInit {
         });
     } else {
       this.instanceService
-        .updateInstance(this.groupParam, this.uuidParam, instance, null, this.managedServerControl.value, this.expectedVersion.key.tag)
+        .updateInstance(this.groupParam, this.uuidParam, instance, null, managedServer, this.expectedVersion.key.tag)
         .pipe(finalize(() => (this.loading = false)))
         .subscribe(result => {
           this.clonedInstance = instance;

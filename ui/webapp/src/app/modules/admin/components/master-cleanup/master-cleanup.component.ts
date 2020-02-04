@@ -15,7 +15,6 @@ export class MasterCleanupComponent implements OnInit, OnDestroy {
   clearCountDownHandle: any;
 
   performingCleanupModel = false;
-  columns = ['description', 'type', 'what'];
 
   constructor(private cleanupService: CleanupService) {}
 
@@ -34,14 +33,14 @@ export class MasterCleanupComponent implements OnInit, OnDestroy {
       .calculateCleanup()
       .pipe(finalize(() => (this.loadingCleanupModel = false)))
       .subscribe(r => {
-        this.cleanupModel = r;
+        this.cleanupModel = r.filter(g => g.actions.length > 0);
         this.clearCounter = 600;
         this.clearCountDownHandle = setInterval(() => this.clearCountDown(), 1000);
       });
   }
 
   public getNonemptyGroups(): CleanupGroup[] {
-    return this.cleanupModel.filter(g => g.actions.length > 0);
+    return this.cleanupModel;
   }
 
   clearCountDown() {

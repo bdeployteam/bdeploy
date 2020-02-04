@@ -1,0 +1,26 @@
+<div class="box mat-elevation-z3 ">
+  <h3 [ngClass]='(group.minion == null && group.instanceGroup == null) ? "offline-minion" : null'>{{group.name}}</h3>
+  <table mat-table [dataSource]='dataSource' class='action-table'>
+    <ng-container matColumnDef="description">
+      <th mat-header-cell *matHeaderCellDef>Description</th>
+      <td mat-cell *matCellDef="let element">{{ element.description }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="type">
+      <th mat-header-cell *matHeaderCellDef>Action Type</th>
+      <td mat-cell *matCellDef="let element">{{ element.type }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="what">
+      <th mat-header-cell *matHeaderCellDef>Target Object</th>
+      <td mat-cell *matCellDef="let element">{{ element.what }}</td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef='columns'></tr>
+    <tr mat-row *matRowDef="let row; columns: columns"></tr>
+  </table>
+  <mat-paginator
+    [pageSizeOptions]="[10]"
+    showFirstLastButtons>
+  </mat-paginator>
+</div>
