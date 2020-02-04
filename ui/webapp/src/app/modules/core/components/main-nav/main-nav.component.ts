@@ -1,10 +1,10 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatSelectChange } from '@angular/material/select';
 import { MatToolbar } from '@angular/material/toolbar';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { convert2String } from 'src/app/modules/shared/utils/version.utils';
-import { BackendInfoDto, MinionMode, Version } from '../../../../models/gen.dtos';
+import { MinionMode, Version } from '../../../../models/gen.dtos';
 import { AuthenticationService } from '../../services/authentication.service';
 import { ConfigService } from '../../services/config.service';
 import { HeaderTitleService } from '../../services/header-title.service';
@@ -23,31 +23,19 @@ export class MainNavComponent implements OnInit {
 
   isAuth$: Observable<boolean> = this.authService.getTokenSubject().pipe(map(s => s !== null));
 
-  backendInfo: BehaviorSubject<BackendInfoDto> = new BehaviorSubject({ version: null, mode: MinionMode.STANDALONE });
-
   constructor(
     public authService: AuthenticationService,
-    private cfgService: ConfigService,
+    public cfgService: ConfigService,
     public theme: ThemeService,
     public title: HeaderTitleService,
     public logging: LoggingService
   ) {}
 
   ngOnInit(): void {
-    this.authService.getTokenSubject().subscribe(v => {
-      if (this.authService.isAuthenticated()) {
-        this.cfgService.getBackendInfo().subscribe(ver => {
-          this.backendInfo.next(ver);
-        });
-      }
-    });
   }
 
   needServerTypeHint() {
-    if (this.backendInfo.value && this.backendInfo.value.mode !== MinionMode.STANDALONE) {
-      return true;
-    }
-    return false;
+    return this.cfgService.config && this.cfgService.config.mode !== MinionMode.STANDALONE;
   }
 
   getLogLevel() {

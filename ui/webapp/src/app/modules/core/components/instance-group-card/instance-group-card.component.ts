@@ -25,7 +25,6 @@ export class InstanceGroupCardComponent implements OnInit {
   @Input() instanceGroup: InstanceGroupConfiguration;
   @Input() instanceGroupId: string;
   @Input() isAttachAllowed: boolean;
-  @Input() mode: MinionMode;
   @Output() removeEvent = new EventEmitter<boolean>();
 
   public currentGroup = cloneDeep(EMPTY_INSTANCE_GROUP);
@@ -68,9 +67,9 @@ export class InstanceGroupCardComponent implements OnInit {
   }
 
   isModeOk() {
-    if (this.currentGroup.managed && this.mode !== MinionMode.STANDALONE) {
+    if (this.currentGroup.managed && this.config.config.mode !== MinionMode.STANDALONE) {
       return true;
-    } else if (!this.currentGroup.managed && this.mode === MinionMode.STANDALONE) {
+    } else if (!this.currentGroup.managed && this.config.config.mode === MinionMode.STANDALONE) {
       return true;
     }
     return false;
