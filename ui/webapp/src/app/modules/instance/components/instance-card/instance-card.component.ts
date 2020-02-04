@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
-import { InstanceDto } from '../../../../models/gen.dtos';
+import { InstanceGroupService } from 'src/app/modules/instance-group/services/instance-group.service';
+import { InstanceDto, InstanceGroupConfiguration } from '../../../../models/gen.dtos';
 import { LoggingService } from '../../../core/services/logging.service';
 import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
 import { MessageboxService } from '../../../shared/services/messagebox.service';
@@ -18,6 +19,8 @@ export class InstanceCardComponent implements OnInit {
   @Input() instanceGroupName: string;
   @Output() removeEvent = new EventEmitter<boolean>();
 
+  instanceGroup: InstanceGroupConfiguration;
+
   private log = this.loggingService.getLogger('InstanceCardComponent');
 
   constructor(
@@ -25,9 +28,11 @@ export class InstanceCardComponent implements OnInit {
     private loggingService: LoggingService,
     private instanceService: InstanceService,
     private mbService: MessageboxService,
+    private instanceGroupService: InstanceGroupService,
   ) {}
 
   ngOnInit() {
+    this.instanceGroupService.getInstanceGroup(this.instanceGroupName).subscribe(r => this.instanceGroup = r);
   }
 
   delete(): void {

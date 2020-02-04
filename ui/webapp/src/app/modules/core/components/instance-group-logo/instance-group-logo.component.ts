@@ -1,14 +1,15 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnChanges } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
+import { InstanceGroupConfiguration } from 'src/app/models/gen.dtos';
 import { InstanceGroupService } from '../../../instance-group/services/instance-group.service';
-import { ErrorMessage, Logger, LoggingService } from '../../services/logging.service';
+import { Logger, LoggingService } from '../../services/logging.service';
 
 @Component({
   selector: 'app-instance-group-logo',
   templateUrl: './instance-group-logo.component.html',
   styleUrls: ['./instance-group-logo.component.css']
 })
-export class InstanceGroupLogoComponent implements OnInit {
+export class InstanceGroupLogoComponent implements OnChanges {
 
   log: Logger = this.loggingService.getLogger('InstanceGroupLogoComponent');
 
@@ -17,27 +18,19 @@ export class InstanceGroupLogoComponent implements OnInit {
   public imageUrl = this.LOADING_IMG;
 
   @Input()
-  instanceGroupName: string;
+  instanceGroup: InstanceGroupConfiguration;
 
   constructor(
     private loggingService: LoggingService,
     private instanceGroupService: InstanceGroupService,
     private sanitizer: DomSanitizer) { }
 
-  ngOnInit() {
-    if (this.instanceGroupName) {
-      this.instanceGroupService.getInstanceGroup(this.instanceGroupName).subscribe(
-        instanceGroup => {
-          if (instanceGroup.logo) {
-            this.setImageUrl(instanceGroup.name, instanceGroup.logo.id);
-          } else {
-            this.imageUrl = this.NO_IMG;
-          }
-        },
-        error => {
-          this.log.error(new ErrorMessage('reading instance group failed', error));
-        }
-      );
+  ngOnChanges() {
+    if (!this.instanceGroup) {
+      return;
+    }
+    if (this.instanceGroup.logo) {
+      this.setImageUrl(this.instanceGroup.name, this.instanceGroup.logo.id);
     } else {
       this.imageUrl = this.NO_IMG;
     }

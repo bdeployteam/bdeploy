@@ -1,7 +1,7 @@
 <mat-card [ngClass]="['instance-card', 'instance-card-' + instanceDto.instanceConfiguration.purpose]"
     [routerLink]="['/instance/overview', instanceGroupName, instanceDto.instanceConfiguration.uuid]" attr.data-cy='instance-{{instanceDto.instanceConfiguration.uuid}}'>
   <mat-card-header>
-    <app-instance-group-logo mat-card-avatar [instanceGroupName]='instanceGroupName'></app-instance-group-logo>
+    <app-instance-group-logo mat-card-avatar [instanceGroup]='instanceGroup'></app-instance-group-logo>
     <mat-card-title>{{instanceDto.instanceConfiguration.name}}</mat-card-title>
     <mat-card-subtitle>Instance ({{instanceDto.instanceConfiguration.uuid}})</mat-card-subtitle>
     <span class="fill-space"></span>

@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { SORT_PURPOSE } from '../../../../models/consts';
-import { ClientApplicationDto, InstanceClientAppsDto, InstanceConfiguration, InstancePurpose, OperatingSystem } from '../../../../models/gen.dtos';
+import { ClientApplicationDto, InstanceClientAppsDto, InstanceConfiguration, InstanceGroupConfiguration, InstancePurpose, OperatingSystem } from '../../../../models/gen.dtos';
 import { SoftwareUpdateService } from '../../../admin/services/software-update.service';
 import { InstanceService } from '../../../instance/services/instance.service';
 import { DownloadService } from '../../../shared/services/download.service';
@@ -20,6 +20,7 @@ export class ClientAppsComponent implements OnInit {
 
   instanceGroupName: string = this.route.snapshot.paramMap.get('group');
   instanceApps: InstanceClientAppsDto[];
+  instanceGroup: InstanceGroupConfiguration;
 
   loading = true;
   hasApps = false;
@@ -36,6 +37,7 @@ export class ClientAppsComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.instanceGroupService.getInstanceGroup(this.instanceGroupName).subscribe(r => this.instanceGroup = r);
     this.activeOs = this.launcherService.getRunningOs();
     this.loadApps();
   }

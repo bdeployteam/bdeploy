@@ -42,7 +42,7 @@
       <div class="card" *ngFor="let instance of getInstances(purpose)">
         <mat-card [ngClass]="['instance-card','instance-card-theme', 'instance-card-' + instance.purpose]">
           <mat-card-header>
-            <app-instance-group-logo mat-card-avatar [instanceGroupName]='instanceGroupName'></app-instance-group-logo>
+            <app-instance-group-logo mat-card-avatar [instanceGroup]='instanceGroup'></app-instance-group-logo>
             <mat-card-title class="instance-card-title">{{instance.name}}</mat-card-title>
             <mat-card-subtitle *ngIf="instance.description" class="instance-card-subtitle">{{instance.description}}</mat-card-subtitle>
             <span class="fill-space"></span>

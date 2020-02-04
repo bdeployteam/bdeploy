@@ -10,10 +10,11 @@ import { forkJoin, Observable, of, Subscription } from 'rxjs';
 import { catchError, finalize, mergeMap } from 'rxjs/operators';
 import { isUpdateFailed, isUpdateInProgress, isUpdateSuccess, UpdateStatus } from 'src/app/models/update.model';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
+import { InstanceGroupService } from 'src/app/modules/instance-group/services/instance-group.service';
 import { ApplicationGroup } from '../../../../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_DEPLOYMENT_STATE } from '../../../../models/consts';
 import { EventWithCallback } from '../../../../models/event';
-import { ApplicationConfiguration, ApplicationDto, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstanceStateRecord, InstanceUpdateEventDto, InstanceUpdateEventType, ManifestKey, MinionDto, MinionMode, MinionStatusDto, MinionUpdateDto, ProductDto } from '../../../../models/gen.dtos';
+import { ApplicationConfiguration, ApplicationDto, InstanceGroupConfiguration, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstanceStateRecord, InstanceUpdateEventDto, InstanceUpdateEventType, ManifestKey, MinionDto, MinionMode, MinionStatusDto, MinionUpdateDto, ProductDto } from '../../../../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../../../../models/process.model';
 import { ConfigService } from '../../../core/services/config.service';
 import { HeaderTitleService } from '../../../core/services/header-title.service';
@@ -101,6 +102,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   public editEndpointsMode = false;
   public editAppConfigContext: EditAppConfigContext;
   public activeNodeConfig: InstanceNodeConfiguration;
+  public instanceGroup: InstanceGroupConfiguration;
 
   public cancelEnabled = true;
   public saveEnabled = false;
@@ -132,6 +134,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private loggingService: LoggingService,
     private instanceService: InstanceService,
+    private instanceGroupService: InstanceGroupService,
     private applicationService: ApplicationService,
     private messageBoxService: MessageboxService,
     private productService: ProductService,
@@ -155,6 +158,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       this.route.params.subscribe((p: Params) => {
         this.groupParam = p['group'];
         this.uuidParam = p['uuid'];
+        this.instanceGroupService.getInstanceGroup(this.groupParam).subscribe(r => this.instanceGroup = r);
         this.loadVersions(false);
         if (!this.isCentral()) {
           this.enableAutoRefresh();
