@@ -8,3 +8,10 @@
   display: flex;
   flex-direction: column;
 }
+
+.title-box {
+  border-bottom: 1px solid;
+  display: flex;
+  flex-direction: row;
+  padding-bottom: 8px;
+}

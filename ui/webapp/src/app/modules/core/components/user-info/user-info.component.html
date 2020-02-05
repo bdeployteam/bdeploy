@@ -1,4 +1,8 @@
 <mat-menu #appMenu="matMenu" xPosition="before">
+  <div mat-menu-item disabled="true" class="title-box">
+    <app-user-avatar [gravatar]='!settings.isLoading() && settings.getSettings().general.enableGravatar' [mail]='user?.email' hostSize='40' avatarSize='32'></app-user-avatar>
+    <div class="title-name">{{ getTitleUserName() }}</div>
+  </div>
   <button mat-menu-item (click)="edit()" [disabled]="user?.external">Edit...</button>
   <button mat-menu-item (click)="changePassword()" [disabled]="user?.external">Change Password...</button>
   <button mat-menu-item (click)="openDialog(tokenDialog)">Create Token...</button>
