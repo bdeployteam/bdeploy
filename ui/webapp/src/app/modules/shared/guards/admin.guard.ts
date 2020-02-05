@@ -12,7 +12,7 @@ export class AdminGuard implements CanActivate {
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
     if (!this.authService.isGlobalAdmin()) {
-      this.snackbar.open(`Because of missing privileges for /${route.url.join('/')}, we redirected you to the homepage.`, 'DISMISS', { panelClass: 'error-snackbar' });
+      this.snackbar.open(`Unfortunately, /${route.url.join('/')} was not found (wrong URL or insufficient rights), we returned you to the safe-zone.`, 'DISMISS', { panelClass: 'error-snackbar' });
       this.router.navigate(['/instancegroup/browser']);
       return false;
     }
