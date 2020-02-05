@@ -7,18 +7,14 @@ The *root directory* contains all the runtime data. Best to select an empty dire
 (e.g. /var/bdeploy on Unix) that is intended exclusively for this purpose. Keep the root directory separate from the BDeploy
 binary installation. Make sure that there is enough space available. 
 
- bdeploy init --root=/path/to/storage --hostname=<hostname> # --tokenFile=token.txt
+ bdeploy init --root=/path/to/storage --hostname=<hostname> --mode=STANDALONE --tokenFile=token.txt
 
-The `init` command will print a token (you can capture the token in a file by giving `--tokenFile=token.txt` instead).
-You need to copy this token - you will need this to be able to access this master from a remote server, e.g. a central
-remote *BDeploy master*.
+The `init` command will print a token. The token is written to a file when providing the `--tokenFile=token.txt` parameter.
+This token can be used to access this server remotely through the command line, so make sure to store it in a safe place.
+
+The `--mode` parameter of the `init` command is used to determine the future purpose of the *BDeploy* root. The mode must for now be set to *STANDALONE*, all other modes are reserved for a future release.
 
 The result of the `init` command is a *root directory* which can be used by the *master* or *slave* commands.
-
-[NOTE]
-Before *BDeploy 1.2.0* it was necessary to specify a `--dist` argument. This is no longer required, but still supported. Also,
-the *BDeploy Launcher* used to be a separate binary distribution. It is now included in the main *BDeploy* distribution, and
-will be set up for you by the `init` command
 
 ==== Launch
 After the initialization - which needs to be done only once - the *master* can be started with the following command:
@@ -28,12 +24,14 @@ After the initialization - which needs to be done only once - the *master* can b
 This will start the *master* server which also hosts the web UI: https://localhost:7701
 
 [NOTE]
-The server is using a self-signed certificate by default. Thus you need to instruct your browser to accept it.
+The server is using a self-signed certificate by default. Thus you need to instruct your browser to accept it. See <<Custom Certificate>> for instructions on how to provide a better certificate.
 
 ==== User
 Only authenticated users have access to the web UI. Thus a new user must be created in order to be able to use the web UI
 
- bdeploy user --root=/path/to/storage --add=admin --password=admin
+ bdeploy user --root=/path/to/storage --add=admin --password=admin --admin
 
-All created users are administrators that have full access to the system. Permissions to restrict what a certain user can
-do will be added in a future release.
+The created user will be a global administrator, meaning that the user has permission to fully control the server. With the `--admin` flag, the user will have no permissions per default. You have to create at least one administrator user to be able to set up the server (e.g. to configure LDAP authentication) and grant rights to other users.
+
+[WARNING]
+Don't use the depicted user and password, these are just samples.

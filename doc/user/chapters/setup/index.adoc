@@ -8,7 +8,11 @@ The source distribution of BDeploy contains a demo server that can be started wi
 
 include::download.adoc[]
 
+include::update.adoc[]
+
 include::master.adoc[]
+
+include::certificate.adoc[]
 
 include::slave.adoc[]
 

@@ -21,12 +21,52 @@ describe('Creates screenshots for the user documentation', () => {
     cy.waitUntilContentLoaded();
     cy.screenshot('BDeploy_Empty_IG');
 
+    // Capture user menu
+    cy.get('app-user-info').click();
+    cy.contains('[role=menuitem]', 'admin').should('exist');
+    cy.screenshot('BDeploy_User_Menu');
+    cy.get('.cdk-overlay-backdrop').click('top', {force:true, multiple: true});
+
     // Open sidebar and wait for animation to be done
     cy.contains('button', 'menu').click();
     cy.get('mat-sidenav').should('have.css', 'transform', 'none');
     cy.screenshot('BDeploy_Main_Menu');
     cy.contains('a', 'Instance Groups').click();
     cy.get('mat-sidenav').should('have.css', 'visibility', 'hidden');
+  });
+
+  it('Captures Settings', () => {
+    cy.login();
+
+    cy.visit('/#/admin');
+    cy.contains('.mat-tab-label', 'Look & Feel').should('be.visible');
+    cy.waitUntilContentLoaded();
+
+    cy.screenshot('BDeploy_General_Look_And_Feel');
+
+    cy.visit('/#/admin/all/(panel:authentication)');
+
+    cy.contains('.mat-tab-label', 'Local Users').should('be.visible');
+    cy.waitUntilContentLoaded();
+
+    cy.screenshot('BDeploy_Authentication_Local');
+
+    cy.contains('.mat-tab-label', 'LDAP').click();
+    cy.contains('button', 'add').click();
+
+    cy.get('mat-dialog-container').within(() => {
+      cy.get('[placeholder="Server URL"]').clear().type('ldaps://my-server');
+      cy.get('[placeholder=Description]').type('My LDAP Server');
+      cy.get('[placeholder="Server User"]').type('ldap.user@my-domain.com');
+      cy.get('[placeholder="Account Base"]').type('dc=my-domain,dc=com').blur();
+      cy.get('[placeholder="Server Password"]').type('xxx');
+
+      cy.screenshot('BDeploy_LDAP_Server_Config', { padding: 20 });
+
+      cy.contains('button', 'Apply').click();
+    });
+
+    cy.screenshot('BDeploy_LDAP_Servers');
   });
 
   // Captures Instance Group handling and Product upload
@@ -199,7 +239,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.contains('button', 'add').click();
     cy.contains('New File').should('exist');
     cy.get('[placeholder="Enter path for file"]').type('test.json');
-    cy.typeInAceEditor('{{}{enter}    "json": "is great"{enter}}');
+    cy.typeInAceEditor('{{}{enter}    "json": "is great"');
 
     cy.screenshot('BDeploy_CfgFile_New');
     cy.get('button').contains('APPLY').click();
@@ -214,9 +254,17 @@ describe('Creates screenshots for the user documentation', () => {
     cy.get('app-instance-group-logo').parent().clickContextMenuItem('Change Product Version...');
     cy.contains('mat-slide-toggle','Show all').click();
     cy.contains('app-product-tag-card', '1.0.0').contains('button', 'arrow_downward').click();
-    cy.get('button').contains('SAVE').click();
+    cy.contains('button', 'SAVE').should('be.enabled').click();
     cy.waitUntilContentLoaded();
+
+    // Notification about newer product version
+    cy.get('app-instance-notifications').click();
+    cy.contains('button', 'Show Product Versions').should('exist');
+    cy.screenshot('BDeploy_Product_Notification')
+    cy.get('.cdk-overlay-backdrop').click('top', {force:true, multiple: true});
+
     cy.get('app-instance-group-logo').parent().clickContextMenuItem('Change Product Version...');
+    cy.screenshot('BDeploy_Product_Change')
     cy.contains('app-product-tag-card', '2.0.0').contains('button', 'arrow_upward').click();
     cy.screenshot('BDeploy_Product_Upgrade_Local_Changes');
 
@@ -305,6 +353,24 @@ describe('Creates screenshots for the user documentation', () => {
     cy.contains('button','SAVE').click();
     cy.waitUntilContentLoaded();
     cy.getLatestInstanceVersion().installAndActivate();
+
+    // try to downgrade, capture validation problems, discard
+    cy.get('app-instance-group-logo').parent().clickContextMenuItem('Change Product Version...');
+    cy.contains('mat-slide-toggle','Show all').click();
+    cy.contains('app-product-tag-card', '1.0.0').contains('button', 'arrow_downward').click();
+    cy.contains('app-instance-notifications', 'error').click();
+    cy.screenshot('BDeploy_Product_Downgrade_Validation')
+    cy.get('.cdk-overlay-backdrop').click('top', {force:true, multiple: true});
+    cy.contains('button', 'DISCARD').should('be.enabled').click();
+    cy.get('mat-dialog-container').within(_ => {
+      cy.contains('button', 'Yes').should('be.enabled').click();
+    });
+
+    cy.get('body').then($body => {
+      if($body.find('button:contains("DISCARD")').length > 0) {
+        cy.contains('button', 'DISCARD').should('not.exist');
+      }
+    })
 
     // Start process with manual confirmation
     cy.getApplicationConfigCard('master','Server Application').click();

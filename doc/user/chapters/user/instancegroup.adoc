@@ -24,7 +24,7 @@ Click on an *Instance Group* to open the *Instance Browser* of this group. Here 
 
 image::images/BDeploy_Empty_Instances.png[Empty Instance Browser, align=center, width=480, link="images/BDeploy_Empty_Instances.png"]
 
-Since an *Instance* requires a *Product*, an empty *Instance Group* will display a shortcut to the <<_product_management,Product Management>> dialog. If there is at least one *Instance* already, the shortcut disappears. The btn:[Manage Products...] button in the lower right corner opens the <<_product_management,Product Management>> dialog, too.
+Since an *Instance* requires a *Product*, an empty *Instance Group* will display a shortcut to the <<Manage Products>> dialog. If there is at least one *Instance* already, the shortcut disappears. The btn:[Manage Products...] button in the lower right corner opens the <<Manage Products>> dialog, too.
 
 ==== Manage Products
 
@@ -52,7 +52,7 @@ The *Instance* determines whether it is included in the automatic cleanup job. I
 
 image::images/BDeploy_Instance_Create.png[Create a new Instance, align=center, width=480, link="images/BDeploy_Instance_Create.png"]
 
-Click an *Instance* to proceed to the <<_instance_configuration,Instance Configuration>>.
+Click an *Instance* to proceed to the <<Instance Overview>>.
 
 image::images/BDeploy_Instance_List.png[Instance Browser, align=center, width=480,link="images/BDeploy_Instance_List.png"]
 

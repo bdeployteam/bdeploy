@@ -36,8 +36,8 @@ The life cycle of a process is visualized in the following state graph:
 
 image::images/BDeploy_Process_State_Graph.png[Process State Graph,align=center,width=480,link="images/BDeploy_Process_State_Graph.png"]
 
-==== Process Out-Of-Sync
-An warning message - *Out-Of-Sync* - is displayed whenever one or more *Processes* are running in a version that is currently not *Activated*. This happens when *Deploying* a new version while *Processes* are still running. 
+==== Process Outdated
+An warning message - *Outdated* - is displayed whenever one or more *Processes* are running in a version that is currently not *Activated*. This happens when *Deploying* a new version while *Processes* are still running. 
 
 image::images/BDeploy_Process_Out_Of_Sync.png[align=center, width=480, link="images/BDeploy_Process_Out_Of_Sync.png"]
 
@@ -52,13 +52,13 @@ The *Start Type* of a *Process* can be configured in the *Process Configuration*
 | Name
 | Description
 
-| MANUAL
+| `MANUAL`
 | Process must be started manually. No automatic startup will be done.
 
-| MANUAL_CONFIRM
+| `MANUAL_CONFIRM`
 | Process must be started manually and an additional confirmation is required. 
 
-| INSTANCE
+| `INSTANCE`
 | Process will be started automatically *if* the _Automatic Startup_ flag of the *Instance* is set. 
 
 |===
@@ -66,7 +66,7 @@ The *Start Type* of a *Process* can be configured in the *Process Configuration*
 It is a common requirement that certain *Processes* of an *Instance* should be automatically started whenever the *BDeploy* server itself is started. To accomplish that, the _Automatic Startup_ flag of the *Instance* must be set. This can be done in the *Instance Configuration* dialog. Additionally the *Start Type* of the *Process* must set to *Instance*. This can be done in the *Process Configuration* dialog.
 
 
-*Processes* that are executing actions that cannot be reverted or that are potentially dangerous in productive environments (dropping a database, deleting files) should be configured with the start type *MANUAL CONFIRM*. Doing that results in an additional popup dialog that enforces the user to enter the name of the *Process* before it is started. The idea is, that the user takes an additional moment to ensure that he is really starting the desired *Process*.
+*Processes* that are executing actions that cannot be reverted or that are potentially dangerous in productive environments (dropping a database, deleting files) should be configured with the start type `MANUAL_CONFIRM`. Doing that results in an additional popup dialog that enforces the user to enter the name of the *Process* before it is started. The idea is, that the user takes an additional moment to ensure that he is really starting the desired *Process*.
 
 image::images/BDeploy_Process_Manual_Confirm.png[Manual Confirmation On Startup,align=center,width=480,link="images/BDeploy_Process_Manual_Confirm.png"]
 

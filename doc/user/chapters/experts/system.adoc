@@ -1,14 +1,79 @@
-=== System Maintenance
+=== Administration
 
 There are several components in the Web UI which allow maintenance of *BDeploy*. These are not to be used during _normal_ operation by users. They _are_ required during setup and to maintain current software versions of *BDeploy* itself if not done using the `<<_bdeploy_cli,bdeploy remote-master>>` CLI.
 
-==== System Software
+==== General Settings
 
-The *System Software* page from the *Administration* menu offers a mechanism to upload new *BDeploy* software versions, deploy these versions (_upgrade_ and _downgrade_ possible) to the running *BDeploy* _master_ and attached _slaves_.
+_Gravatar_ support can be enabled in the general _Look & Feel_ settings.
+
+image::images/BDeploy_General_Look_And_Feel.png[BDeploy Look & Feel Settings,align=center,width=480,link="images/BDeploy_General_Look_And_Feel.png"]
+
+==== Authentication
+
+*BDeploy* supports both built-in and external authentication mechanims. The built-in user authentication can be disabled completely in the settings.
+
+image::images/BDeploy_Authentication_Local.png[BDeploy Authentication Settings,align=center,width=480,link="images/BDeploy_Authentication_Local.png"]
+
+On the *LDAP* tab, you can configure a list of LDAP servers which should also be queried when authenticating a user.
+
+image::images/BDeploy_LDAP_Servers.png[BDeploy LDAP Servers,align=center,width=480,link="images/BDeploy_LDAP_Servers.png"]
+
+You can use the up and down arrows to control the order in which LDAP servers are queried for users that log on.
+
+*BDeploy* uses simple bind to authenticate users. First, a simple bind is made with a configured _Server User_. This user must have permissions to list other users that should be able to log into *BDeploy*. This bind is used to query for a user where the `Result User Field` matches the given (at login) user name. This can be any field like `user`, `sAMAccountName`, or even `mail` if you want users to log on using their E-Mail Address. Once the user to log on is found, it's distinguished name is used to perform another simple bind using the login-provided password. Once this succeeds the user is authenticated and an according record is created in *BDeploy*. From that point on, permissions can be granted to this user.
+
+image::images/BDeploy_LDAP_Server_Config.png[BDeploy LDAP Server Configuration,align=center,width=480,link="images/BDeploy_LDAP_Server_Config.png"]
+
+===== LDAP Server Properties
+
+The following properties can be configured for each LDAP Server:
+
+[%header,cols="2,3"]
+|===
+| Property
+| Description
+
+| Server URL
+| The URL of the LDAP server. Both `ldaps://` (with a proper certificate on the server) and `ldap://` are supported. `ldaps://` should be preferred where possible. Self-signed certificates are currently not configurable inside *BDeploy* (although they can be configure on the operating system).
+
+| Server User
+| The user which is used to query other users on the LDAP server
+
+| Server Password
+| The password for the _Server User_ which is used to query other users on the LDAP server.
+
+| Account Base
+| Root of the LDAP tree containing all user accounts to query. Typically in the form of `dc=domain,dc=com`.
+
+| Account Pattern
+| A partial LDAP query expression. Multiple filters can be written one after another. The final LDAP query is built by prepending `(&`, and appending a filter which queries the configures _Result User Field_ for the given user. Thie means that a pattern `(field1=value1)(field2=value2)` will result in a query like `(&(field1=value1)(field2=value2)(sAMAccountName=<GIVEN USER>))`.
+
+| Result User Field
+| Specifies the field which must match the given username when querying for the user.
+
+| Result Full Name Field
+| The field which should be used as source for the _Full Name_ of the user, which is used as a display name in <<User Accounts>> management.
+
+| Result E-Mail Field
+| The field which should be used as source for the users _E-Mail Address_. This is used for instance to query _Gravatar_ if _Gravatar_ support has been enabled in the <<General Settings>>.
+
+|===
+
+==== User Accounts
+
+TODO
+
+===== Instance Group Permissions
+
+TODO
+
+==== BDeploy Update
+
+The *BDeploy Update* page from the *Administration* menu offers a mechanism to upload new *BDeploy* software versions, deploy these versions (_upgrade_ and _downgrade_ possible) to the running *BDeploy* _master_ and attached _slaves_.
 
 image::images/BDeploy_System_With_Launcher.png[BDeploy System Software,align=center,width=480,link="images/BDeploy_System_With_Launcher.png"]
 
-It also offers a way to _upload_ and also to _download_ *BDeploy Launcher* binaries. These binaries are required when <<_app_info_yaml,`CLIENT` *Applications*>> are configured. Use the btn:[Upload] button to upload either new *BDeploy* or *BDeploy Launcher* versions from their respective binary distributions (_ZIP_). 
+It also offers a way to _upload_ and also to _download_ *BDeploy Launcher* binaries. These binaries are required when <<_app_info_yaml,`CLIENT` *Applications*>> are configured. Use the btn:[Upload] button to upload new *BDeploy* versions from the binary distributions (_ZIP_). 
 
 The page can also be used to download the binaries of *BDeploy* (e.g. to setup additional _slaves_) and the *BDeploy Launcher* binaries (e.g. for manual setup of the *BDeploy Launcher* on client PCs, see <<_client_applications,Client Applications>>).
 
@@ -56,6 +121,10 @@ The *BHive Browser* from the *Administration* menu is an internal tool for admin
 
 [CAUTION]
 It has the power to destroy _everything_ - use with extreme caution.
+
+==== Metrics
+
+This dialog provides a quick way to investigate potential performance issues in the server itself by providing access to the in-memory metrics kept track by the server for all actions and requests performed.
 
 ==== Log Level
 

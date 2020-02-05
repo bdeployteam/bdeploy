@@ -16,6 +16,13 @@ Third party software *Manifests* can have basically any name. If you want to pro
 
 It can then be referenced by an `app-info.yaml` using the short-hand syntax `my/external/software:1.0.0` and *BDeploy* will choose the correct one depending on the target operating system.
 
+=== Runtime Dependency Packaging
+
+*BDeploy* will always make sure that your products are self contained. This means that <<Runtime Dependencies>> are packaged with the product data at build time. The result is a product which contains all dependencies. This also means that pushing a product to a target server does not require *any* prerequisites on that target server.
+
+[NOTE]
+Included runtime dependencies will not show up on the target server's Web UI anywhere. Especially there is no <<Software Repositories,Software Repository>> created automatically for any third-party software. It is simply included in the product.
+
 === Software Repositories
 
 The *Software Repositories* page allows maintenance of external software that a specific product requires. A *Software Repository* shares its namespace with *Instance Groups*, which means that the unique name of a *Software Repository* must not collide with any name of a *Software Repository* or *Instance Group*.

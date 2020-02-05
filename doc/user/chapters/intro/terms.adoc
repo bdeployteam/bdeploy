@@ -15,9 +15,6 @@ BDeploy has a some important terms and concepts which should be known before div
 | *Application*
 | A part of a *Product* that can be started and stopped separately. Applications either run as *Process* on a server machine or as *Client Application* on a desktop computer. 
 
-| *Process*
-| An server *Application* that is configured to be started on one of the server *Nodes* of an *Instance*.
-
 | *Client Application*
 | An *Application* that can be distributed on desktop computers.
 

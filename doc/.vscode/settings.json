@@ -1,0 +1,10 @@
+{
+    "asciidoc.preview.attributes": {
+        "imagesdir": "../../",
+        "stylesdir": "../../../build/docs/user",
+        "source-highlighter": "coderay",
+        "icons": "font",
+    },
+    "asciidoc.preview.useEditorStyle": false,
+    "asciidoc.preview.style": "plain.css"
+}

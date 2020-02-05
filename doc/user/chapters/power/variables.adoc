@@ -5,6 +5,7 @@
 * Launcher path specified in <<_app_info_yaml,`app-info.yaml`>>.
 * Any parameter value. Either user-set value or the `defaultValue` specified in <<_app_info_yaml,`app-info.yaml`>>.
 * Any configuration file content.
+* Most of the <<_supported_endpoints_http_attributes,HTTP Endpoints>> attributes.
 
 Any of the above will be processed _as late as possible_, i.e. on the target node, right before writing the final content to the target directories.
 
@@ -23,6 +24,9 @@ Used whenever it is required to get the absolute installation path to another ma
 
 | {{M:openjdk/jre8}}
 | Expands to the absolute path where the OpenJDK manifest is installed on the server.
+
+| {{M:SELF}}
+| Expands to the absolute path where the manifest is installed on the server which contains the `app-info.yaml` for this application. This substitution shortcut is only supported in `app-info.yaml` files.
 
 |===
 
@@ -51,7 +55,6 @@ Used to expand to one of the special directories that are defined.
 
 |===
 
-
 ==== V: Parameter Value
 Used to reference a parameter within the same application or withing any other application from the same instance. Typically used when one application publishes a service on a specific port (_server_) and other applications (_clients_) should then connect to this port. The configuration of the _client_ applications would then refer to the port of the _server_ application. Thus when changing the port only the configuration of the _server_ application must be adopted.
 
@@ -72,7 +75,7 @@ Used to reference a parameter within the same application or withing any other a
 |===
 
 [WARNING]
-Beware that changing the name of an application will break the parameter reference mechanism. There is no mechanism that automatically adopts the configuration of applications which refer to values of other applications. This must be done manually if required.
+Beware that changing the name of an application will break the parameter reference mechanism. There is no mechanism that automatically adapts the configuration of applications which refer to values of other applications. This must be done manually if required.
 
 ==== I: Instance Value
 Used to expand to values related to the instance containing the parameter's process. 

@@ -1,8 +1,8 @@
 === Service
 
 ==== Linux Service (SYSTEMD)
-The bdeploy-linux64-x.x.x.zip package contains a template file from which a systemd service can be created. It is
-located in the 'etc' directory and named 'bdeploy-minion.service'.
+The `bdeploy-linux64-x.x.x.zip` package contains a template file from which a systemd service can be created. It is
+located in the `etc` directory and named `bdeploy-minion.service`.
 
 The template itself contains instructions on how to create a valid service from it.
 
@@ -11,13 +11,13 @@ filename will later on be the service name. This allows to install multiple bdep
 machine.
 
 [NOTE] 
-To get systemd to recognize the service(s) after copying the .service file(s) use the 'systemctl daemon-reload' command (as root).
-Once installed, you can start the service using 'systemctl'.
+To get systemd to recognize the service(s) after copying the service file(s) use the `systemctl daemon-reload` command (as root).
+Once installed, you can control the service using `systemctl`.
 
 ==== Windows Service
 
-The bdeploy-win64-x.x.x.zip package contains a batch script to create a new Windows service. The script is located in 
-the etc directory and is named bdeploy-service-install.bat
+The `bdeploy-win64-x.x.x.zip` package contains a batch script to create a new Windows service. The script is located in 
+the `etc` directory and is named `bdeploy-service-install.bat`
 
 The script must be called with administrative privileges and it expects the following arguments:
 
@@ -25,20 +25,20 @@ The script must be called with administrative privileges and it expects the foll
  <Path-to-minion>       Absolute path of the bdeploy executable
  <Path-to-store-files>  Absolute path of the data directory
 
-By default the service runs as 'Local System' but you can and should change that afterwards by using the services.msc
-application. Simply configure the desired account in the 'Log On' tab of the services management console.
+By default the service runs as _Local System_ but you can and should change that afterwards by using the services.msc
+application. Simply configure the desired account in the _Log On_ tab of the services management console.
 
-Once installed, you can start the service using services.msc or by calling 'net start BDeployMaster | BDeploySlave'.
-
-[NOTE]
-Use the 'Event Viewer' (Windows Logs->System) to get more information when the service fails to start.
+Once installed, you can start the service using services.msc or by calling `net start BDeployMaster | BDeploySlave`.
 
 [NOTE]
-Application logs (stdout, stderror) are written to a log file that is stored in <path-to-store-files>\log\service.log
+Use the _Event Viewer_ (Windows Logs->System) to get more information when the service fails to start.
 
 [NOTE]
-The service parameters are stored in the Windows registry: HKLM\SYSTEM\CurrentControlSet\Services\BDeployMaster
+Application logs (stdout, stderror) are written to a log file that is stored in `<path-to-store-files>\log\service.log`
+
+[NOTE]
+The service parameters are stored in the Windows registry: `HKLM\SYSTEM\CurrentControlSet\Services\BDeployMaster`
 
 [NOTE]
 You need to adopt the batch script when you want to create multiple services on the same machine. Simply adopt the
-MINION_SERVICE_PREFIX to use another prefix for the service.
+`MINION_SERVICE_PREFIX` to use another prefix for the service.

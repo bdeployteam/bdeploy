@@ -107,9 +107,13 @@ Changes done in configuration files must be *Saved* and they result in a new *In
 *Instances* are based on a *Product Version*. While the *Product* of the *Instance* cannot be changed afterwards, the *Version* can be chosen from the available *Product Versions* (upgrade to a newer version / downgrade to an older version). 
 
 
-If there's a newer *Product Version* available (newer than the one that is configured for the latest *Instance Version*), a notification is shown. Clicking on the notification opens the *Product Version* sidebar. The same sidebar can also be opened opened by clicking on the btn:[Change Product Version] button in the pull-down menu of the *Instance*. If the menu entry is disabled verify that the latest *Instance Version* is selected.
+If there's a newer *Product Version* available (newer than the one that is configured for the latest *Instance Version*), a notification is shown in the notification area.
 
-image::images/BDeploy_Product_Change.png[Change Current Product Tag,align=center,width=480,link="images/BDeploy_Product_Change.png"]
+image::images/BDeploy_Product_Notification.png[Notification about new Product Version,align=center,width=480,link="images/BDeploy_Product_Notification.png"]
+
+Clicking on the notification opens the *Product Version* sidebar. The same sidebar can also be opened opened by clicking on the btn:[Change Product Version] button in the pull-down menu of the *Instance*. If the menu entry is disabled verify that the latest *Instance Version* is selected.
+
+image::images/BDeploy_Product_Change.png[Change Current Product Version,align=center,width=480,link="images/BDeploy_Product_Change.png"]
 
 The btn:[Info] Popup provides a list of all Labels on that *Product* version.
 
@@ -120,7 +124,6 @@ image::images/BDeploy_Product_Upgrade_Local_Changes.png[Successful Product Tag C
 [NOTE]
 All *Applications* are marked as modified as they are now based on a different *Product Version*.
 
-Changing the *Product Version* can result in validation issues and automated adjustment of parameters. *Product Versions* can contain different *Applications*, so that with the change of the *Product Version* e.g. a previously configured *Application* must be deleted because it has been removed from the product. If parameters definitions are changed, validation errors may occur which must be corrected before saving (e.g. new mandatory parameters).
+Changing the *Product Version* can result in validation issues and automated adjustment of parameters. *Product Versions* can contain different *Applications*, so that with the change of the *Product Version* e.g. a previously configured *Application* must be deleted because it has been removed from the product. If parameters definitions are changed, validation errors may occur which must be corrected before saving (e.g. new mandatory parameters, parameters no longer supported, etc.). These errors will cause a visual indicator on affected applications, as well as a textual description of the problem in the notifications area.
 
-image::images/BDeploy_Product_Downgrade_Missing_Apps.png[Validation Issues After Product Tag Change,align=center,width=480,link="images/BDeploy_Product_Downgrade_Missing_Apps.png"]
-
+image::images/BDeploy_Product_Downgrade_Validation.png[Validation Issues After Product Version Change,align=center,width=480,link="images/BDeploy_Product_Downgrade_Validation.png"]

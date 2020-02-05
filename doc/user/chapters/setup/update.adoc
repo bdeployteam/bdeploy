@@ -1,0 +1,14 @@
+=== Update of existing Installations
+
+In case you already have an existing installation of *BDeploy*, you can easily update this installation. An update can be performed in two different ways: through the command line (even remotely) or through the Web UI.
+
+For more information about the Web UI, please see <<BDeploy Update>>.
+
+To remotely update an existing server, use a command similar to the following:
+
+ bdeploy remote-master --update=<path-to-update.zip> --remote=https://host:port/api --tokenFile=<path-to-token.txt>
+
+Updating a local server is through the command line is done in the same way.
+
+[NOTE]
+Existing slaves don't need a separate update. They need to be online when applying the update to the master. The update is applied to all online slaves as well when applying it to the master.

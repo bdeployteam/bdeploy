@@ -78,6 +78,10 @@ Also used to register a _slave_ with the _master_. For this, the `slave` command
 | No
 | Allows generation of new _access tokens_, see <<_security,Security>>.
 
+| `certificate`
+| No
+| Allows to change the certificate used by the *BDeploy* server for token signing and HTTPS traffic encryption.
+
 | `user`
 | No
 | Manages local users for a _master_. These users can be used to authenticate through the Web UI login dialog.
