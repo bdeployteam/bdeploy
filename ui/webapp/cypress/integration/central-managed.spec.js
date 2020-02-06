@@ -165,7 +165,7 @@ describe("Central/Managed Basic Test", function() {
     cy.get('app-instance-group-logo').parent().clickContextMenuItem('Configuration Files...');
     cy.contains('button', 'add').click();
     cy.get('input[placeholder="Enter path for file"]').clear().type('cypress.cfg')
-    cy.get('textarea').type('CY-CFG', {force: true})
+    cy.typeInAceEditor('CY-CFG');
     cy.contains('button', 'APPLY').click();
     cy.contains('td', 'cypress.cfg').should('exist');
     cy.contains('button', 'SAVE').click();

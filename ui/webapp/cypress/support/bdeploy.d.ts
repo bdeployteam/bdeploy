@@ -186,6 +186,11 @@ declare namespace Cypress {
     visitCentral(url: string);
     visitManaged(url: string);
 
-    visitBDeploy(url: String, mode: 'STANDALONE' | 'CENTRAL' | 'MANAGED');
+    visitBDeploy(url: string, mode: 'STANDALONE' | 'CENTRAL' | 'MANAGED');
+
+    /**
+     * Types some text into the ACE editor component
+     */
+    typeInAceEditor(text: string);
   }
 }

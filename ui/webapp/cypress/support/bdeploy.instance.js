@@ -179,3 +179,8 @@ Cypress.Commands.add('createNewInstanceVersionByDummyChange', function(instanceG
   cy.getApplicationConfigCard(nodeName, applicationName).find('.app-config-modified').should('exist')
   cy.contains('button', 'SAVE').click();
 })
+
+Cypress.Commands.add('typeInAceEditor', function(text) {
+  //See https://github.com/cypress-io/cypress/issues/1818#issuecomment-523487038
+  cy.get(".ace_text-input").first().focus().type(text)
+})

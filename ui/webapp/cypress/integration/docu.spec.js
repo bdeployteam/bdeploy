@@ -199,7 +199,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.contains('button', 'add').click();
     cy.contains('New File').should('exist');
     cy.get('[placeholder="Enter path for file"]').type('test.json');
-    cy.get('textarea').type('{{}{enter}    "json": "is great"{enter}}', { force:true });
+    cy.typeInAceEditor('{{}{enter}    "json": "is great"{enter}}');
 
     cy.screenshot('BDeploy_CfgFile_New');
     cy.get('button').contains('APPLY').click();
