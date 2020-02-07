@@ -55,25 +55,25 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   public static readonly DROPLIST_APPLICATIONS = 'APPLICATIONS';
   private readonly log: Logger = this.loggingService.getLogger('ProcessConfigurationComponent');
 
-  @ViewChild('editComponent', { static: false })
+  @ViewChild('editComponent')
   private editComponent: any;
 
-  @ViewChild(ProcessDetailsComponent, { static: false })
+  @ViewChild(ProcessDetailsComponent)
   private processDetails: ProcessDetailsComponent;
 
-  @ViewChild('notificationOutOfSync', {static: false})
+  @ViewChild('notificationOutOfSync')
   private notificationOutOfSync: TemplateRef<any>;
 
-  @ViewChild('notificationSyncCentral', {static: false})
+  @ViewChild('notificationSyncCentral')
   private notificationSyncCentral: TemplateRef<any>;
 
-  @ViewChild('notificationUpdate', {static: false})
+  @ViewChild('notificationUpdate')
   private notificationUpdate: TemplateRef<any>;
 
-  @ViewChild('notificationNewerProduct', {static: false})
+  @ViewChild('notificationNewerProduct')
   private notificationNewerProduct: TemplateRef<any>;
 
-  @ViewChild('notificationValidationIssues', {static: false})
+  @ViewChild('notificationValidationIssues')
   private notificationValidationIssues: TemplateRef<any>;
   public issueCache: {context: EditAppConfigContext, issue: string}[];
 

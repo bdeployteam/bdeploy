@@ -43,10 +43,10 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
   @Output() downloadClickAndStartEvent = new EventEmitter<ApplicationConfiguration>();
   @Output() downloadInstallerEvent = new EventEmitter<EventWithCallback<ApplicationConfiguration>>();
 
-  @ViewChild('appNodeCard', { read: ElementRef, static: false })
+  @ViewChild('appNodeCard', { read: ElementRef })
   appNodeCard: ElementRef;
 
-  @ViewChild('dragulaContainer', { read: ElementRef, static: false })
+  @ViewChild('dragulaContainer', { read: ElementRef })
   dragulaContainer: ElementRef;
 
   private nodeConfigCreated = false;

@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { MatOptionSelectionChange } from '@angular/material';
+import { MatOptionSelectionChange } from '@angular/material/core';
 import { BarHorizontalComponent } from '@swimlane/ngx-charts';
 import { MetricBundle, MetricGroup, TimerMetric } from '../../../../models/gen.dtos';
 import { MetricsService } from '../../services/metrics.service';
@@ -28,7 +28,7 @@ export class MetricsOverviewComponent implements OnInit {
   timerSeries: { name: string, series: SeriesElement[] }[];
   referenceLines: SeriesElement[];
 
-  @ViewChild('countChart', {static: false})
+  @ViewChild('countChart')
   countChart: BarHorizontalComponent;
 
   countGraphHeight = 100;

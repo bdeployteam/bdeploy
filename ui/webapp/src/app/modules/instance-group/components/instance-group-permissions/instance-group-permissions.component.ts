@@ -1,6 +1,9 @@
 import { Location } from '@angular/common';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { MatDialog, MatPaginator, MatSort, MatTableDataSource } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
+import { MatTableDataSource } from '@angular/material/table';
 import { ActivatedRoute } from '@angular/router';
 import { cloneDeep } from 'lodash';
 import { Observable, of } from 'rxjs';
@@ -36,10 +39,10 @@ export class InstanceGroupPermissionsComponent implements OnInit {
 
   public displayedColumns: string[] = ['gravatar', 'name', 'fullName', 'email', 'read', 'write', 'admin', 'delete'];
 
-  @ViewChild(MatPaginator, { static: false })
+  @ViewChild(MatPaginator)
   paginator: MatPaginator;
 
-  @ViewChild(MatSort, { static: false })
+  @ViewChild(MatSort)
   sort: MatSort;
 
   constructor(

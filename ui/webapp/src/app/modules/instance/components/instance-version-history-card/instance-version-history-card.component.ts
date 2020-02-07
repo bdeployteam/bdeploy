@@ -14,7 +14,7 @@ import { InstanceService } from '../../services/instance.service';
   styleUrls: ['./instance-version-history-card.component.css']
 })
 export class InstanceVersionHistoryCardComponent implements OnInit {
-  @ViewChild(MatTable, { static: false })
+  @ViewChild(MatTable)
   public table: MatTable<any>;
 
   public displayedColumns = ['action', 'user', 'timestamp' /* FUTURE, 'comment' */];

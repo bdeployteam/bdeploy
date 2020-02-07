@@ -1,6 +1,7 @@
 import { NestedTreeControl } from '@angular/cdk/tree';
 import { Component, Input, OnDestroy, OnInit, TemplateRef } from '@angular/core';
-import { MatBottomSheet, MatTreeNestedDataSource } from '@angular/material';
+import { MatBottomSheet } from '@angular/material/bottom-sheet';
+import { MatTreeNestedDataSource } from '@angular/material/tree';
 import { EventSourcePolyfill } from 'ng-event-source';
 import { LoggingService } from '../../../core/services/logging.service';
 import { SystemService } from '../../../core/services/system.service';
