@@ -558,7 +558,7 @@ public class InstanceResourceImpl implements InstanceResource {
         desc.applicationId = applicationId;
         desc.groupId = group;
         desc.instanceId = instanceId;
-        desc.host = new RemoteService(info.getBaseUri(), master.generateWeakToken(context.getUserPrincipal().getName()));
+        desc.host = new RemoteService(svc.getUri(), master.generateWeakToken(context.getUserPrincipal().getName()));
 
         return desc;
     }

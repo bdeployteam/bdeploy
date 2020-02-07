@@ -58,7 +58,7 @@ public interface AuthAdminResource {
      * @return the user's full information
      */
     @GET
-    public UserInfo getUser(String name);
+    public UserInfo getUser(@QueryParam("name") String name);
 
     /**
      * @return a list of all known user names.
