@@ -72,13 +72,7 @@
 /***************************************************************************************************
  * Zone JS is required by default for Angular itself.
  */
-import 'zone.js/dist/zone';  // Included with Angular CLI.
-
-
-/***************************************************************************************************
- * APPLICATION IMPORTS
- */
-import 'hammerjs';	// Required by mat-slide-toggle
+import 'zone.js/dist/zone';	// Required by mat-slide-toggle
 
 /***************************************************************************************************
  * Drag & Drop:

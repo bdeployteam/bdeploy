@@ -3,7 +3,7 @@ import { Location } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatStep, MatStepper } from '@angular/material';
+import { MatStep, MatStepper } from '@angular/material/stepper';
 import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 import { catchError } from 'rxjs/operators';

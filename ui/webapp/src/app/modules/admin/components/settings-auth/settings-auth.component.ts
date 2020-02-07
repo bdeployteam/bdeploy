@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { cloneDeep } from 'lodash';
 import { Observable, of } from 'rxjs';
 import { LDAPSettingsDto } from 'src/app/models/gen.dtos';

@@ -1,5 +1,5 @@
 import { Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
-import { MAT_DIALOG_DATA } from '@angular/material';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { cloneDeep } from 'lodash';
 import { EMPTY_USER_INFO } from 'src/app/models/consts';
 import { UserInfo } from 'src/app/models/gen.dtos';
@@ -11,10 +11,10 @@ import { UserInfo } from 'src/app/models/gen.dtos';
 })
 export class UserEditComponent implements OnInit {
 
-  @ViewChild('pass1', { static: false })
+  @ViewChild('pass1')
   private pass1: ElementRef;
 
-  @ViewChild('pass2', { static: false })
+  @ViewChild('pass2')
   private pass2: ElementRef;
 
   public isCreate = false;

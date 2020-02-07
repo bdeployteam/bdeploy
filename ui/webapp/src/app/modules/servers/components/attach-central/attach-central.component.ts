@@ -1,6 +1,6 @@
 import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { MatStep, MatStepper } from '@angular/material';
+import { MatStep, MatStepper } from '@angular/material/stepper';
 import { EventSourcePolyfill } from 'ng-event-source';
 import { InstanceGroupConfiguration, ManagedMasterDto } from '../../../../models/gen.dtos';
 import { ErrorMessage, LoggingService } from '../../../core/services/logging.service';

@@ -1,7 +1,7 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, Input, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
-import { MatButton } from '@angular/material';
+import { MatButton } from '@angular/material/button';
 
 export enum Severity {
   INFO, WARNING, ERROR
