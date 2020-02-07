@@ -13,5 +13,5 @@
 </form>
 <div mat-dialog-actions align="end">
   <button mat-raised-button [mat-dialog-close]="null">Cancel</button>
-  <button mat-raised-button color="primary" [mat-dialog-close]="user" [disabled]='!f.dirty || f.invalid || !passwordsSame()'>Apply</button>
+  <button mat-raised-button color="primary" [mat-dialog-close]="user" [disabled]='!f.dirty || f.invalid || !isValid()'>Apply</button>
 </div>

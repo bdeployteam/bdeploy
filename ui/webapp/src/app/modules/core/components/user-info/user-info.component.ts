@@ -47,7 +47,10 @@ export class UserInfoComponent implements OnInit {
   edit() {
     this.dialog.open(UserEditComponent, {
       width: '500px',
-      data: cloneDeep(this.user),
+      data: {
+        isCreate: false,
+        user: cloneDeep(this.user)
+      }
     }).afterClosed().subscribe(r => {
       if (r) {
         this.authService.updateUserInfo(r).subscribe(_ => {

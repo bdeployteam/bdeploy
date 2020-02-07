@@ -121,7 +121,10 @@ export class UsersBrowserComponent implements OnInit, AfterViewInit {
   public onAdd(): void {
     this.dialog.open(UserEditComponent, {
       width: '500px',
-      data: null,
+      data: {
+        isCreate: true,
+        knownUser: this.dataSource.data.map(u => u.name)
+      },
     }).afterClosed().subscribe(r => {
       if (r) {
         this.authAdminService.createLocalUser(r).subscribe(result => {
@@ -134,7 +137,10 @@ export class UsersBrowserComponent implements OnInit, AfterViewInit {
   public onEdit(userInfo: UserInfo): void {
     this.dialog.open(UserEditComponent, {
       width: '500px',
-      data: cloneDeep(userInfo),
+      data: {
+        isCreate: false,
+        user: cloneDeep(userInfo)
+      }
     }).afterClosed().subscribe(r => {
       if (r) {
         this.authAdminService.updateUser(r).subscribe(result => {

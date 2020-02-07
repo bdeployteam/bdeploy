@@ -112,7 +112,12 @@ public class UserDatabase implements AuthService {
 
     @Override
     public void createLocalUser(String user, String pw, Collection<ScopedCapability> capabilities) {
-        UserInfo info = new UserInfo(user);
+        UserInfo info = getUser(user);
+        if (info != null) {
+            throw new IllegalStateException("User already exists: " + user);
+        }
+
+        info = new UserInfo(user);
 
         info.password = PasswordAuthentication.hash(pw.toCharArray());
         if (capabilities != null) {
