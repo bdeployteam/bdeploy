@@ -12,8 +12,6 @@ import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import javax.ws.rs.core.SecurityContext;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -249,17 +247,12 @@ public class UpdateHelper {
      *
      * @param svc
      *            the remote service to install the updates
-     * @param context
-     *            context of the caller
-     * @param osOfMaster
-     *            the OS of the master
      * @param keys
      *            the update packages
      * @param cleanup
      *            whether or not to clean old versions
      */
-    public static void update(RemoteService svc, SecurityContext context, OperatingSystem osOfMaster, Collection<Key> keys,
-            boolean cleanup) {
+    public static void update(RemoteService svc, Collection<Key> keys, boolean cleanup) {
         MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class, null);
 
         // We need to sort the updates so that the running OS is the last one

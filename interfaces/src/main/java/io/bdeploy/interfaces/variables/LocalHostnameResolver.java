@@ -3,9 +3,6 @@ package io.bdeploy.interfaces.variables;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import io.bdeploy.interfaces.variables.PrefixResolver;
-import io.bdeploy.interfaces.variables.Variables;
-
 /**
  * An additional variable resolver used by the DCU to resolve the local hostname.
  */

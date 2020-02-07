@@ -83,7 +83,7 @@ public class CapabilityRequestFilter implements ContainerRequestFilter {
             }
 
             // Try to find the parameter holding the actual scoped value
-            String methodScope = getScopedValue(uriInfo, resourceMethod, requiredCapability.scope());
+            String methodScope = getScopedValue(uriInfo, requiredCapability.scope());
             if (methodScope != null) {
                 activeScope = methodScope;
             }
@@ -116,11 +116,10 @@ public class CapabilityRequestFilter implements ContainerRequestFilter {
      * Tries to find the actual value for a parameter with the given name.
      *
      * @param uriInfo info about the invoked URI
-     * @param method info about the invoked method
      * @param scopeParam the name of the parameter to find
      * @return the actual value
      */
-    private String getScopedValue(ExtendedUriInfo uriInfo, ResourceMethod method, String scopeParam) {
+    private String getScopedValue(ExtendedUriInfo uriInfo, String scopeParam) {
         if (scopeParam == null || scopeParam.isEmpty()) {
             return null;
         }

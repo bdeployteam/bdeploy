@@ -450,9 +450,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         try (RemoteBHive rbh = RemoteBHive.forService(svc, null, reporter)) {
             SortedMap<Key, ObjectId> inventory = rbh.getManifestInventory(SoftwareUpdateResource.BDEPLOY_MF_NAME,
                     SoftwareUpdateResource.LAUNCHER_MF_NAME);
-            inventory.keySet().stream().forEach(key -> {
-                remoteVersions.add(ScopedManifestKey.parse(key));
-            });
+            inventory.keySet().stream().forEach(key -> remoteVersions.add(ScopedManifestKey.parse(key)));
         }
 
         // Determine what is available in our hive
@@ -461,9 +459,9 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         localVersion.addAll(getLocalPackage(SoftwareUpdateResource.LAUNCHER_MF_NAME));
 
         // Compute what is missing and what needs to be installed
-        updateDto.packagesToInstall = localVersion.stream().map(smk -> smk.getKey()).collect(Collectors.toList());
+        updateDto.packagesToInstall = localVersion.stream().map(ScopedManifestKey::getKey).collect(Collectors.toList());
         localVersion.removeAll(remoteVersions);
-        updateDto.packagesToTransfer = localVersion.stream().map(smk -> smk.getKey()).collect(Collectors.toList());
+        updateDto.packagesToTransfer = localVersion.stream().map(ScopedManifestKey::getKey).collect(Collectors.toList());
 
         return updateDto;
     }
@@ -501,7 +499,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
         // Trigger the update on the master node
         RemoteService svc = getConfiguredRemote(groupName, serverName);
-        UpdateHelper.update(svc, context, masterDto.get().os, server, true);
+        UpdateHelper.update(svc, server, true);
     }
 
     @Override

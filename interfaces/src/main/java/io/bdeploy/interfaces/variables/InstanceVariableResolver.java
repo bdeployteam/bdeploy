@@ -27,8 +27,9 @@ public class InstanceVariableResolver extends PrefixResolver {
                 return incf.product == null ? "" : incf.product.getName();
             case "PRODUCT_TAG":
                 return incf.product == null ? "" : incf.product.getTag();
+            default:
+                return null;
         }
-        return null;
     }
 
 }

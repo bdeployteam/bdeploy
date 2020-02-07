@@ -66,8 +66,7 @@ public class MinionUpdateTest {
         local.execute(new PushOperation().addManifest(winUpdateKey).setRemote(remote));
         local.execute(new PushOperation().addManifest(linuxUpdateKey).setRemote(remote));
         local.execute(new PushOperation().addManifest(macUpdateKey).setRemote(remote));
-        UpdateHelper.update(remote, null, OsHelper.getRunningOs(), Arrays.asList(winUpdateKey, linuxUpdateKey, macUpdateKey),
-                true);
+        UpdateHelper.update(remote, Arrays.asList(winUpdateKey, linuxUpdateKey, macUpdateKey), true);
 
         // check that an update was triggered
         assertTrue(updateTriggered.get());

@@ -261,7 +261,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         // Launch the application
         Process p;
         try (Activity info = reporter.start("Launching...")) {
-            p = launchApplication(hive, clientAppCfg);
+            p = launchApplication(clientAppCfg);
         }
         reporter.stop();
         splash.dismiss();
@@ -408,7 +408,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         applications.add(appCfg.application);
         applications.addAll(clientAppCfg.resolvedRequires);
 
-        log.info("Installing application and dependencies into the pool...", appKey);
+        log.info("Installing application and dependencies into the pool...");
         try (Activity info = reporter.start("Installing...", applications.size())) {
             for (Manifest.Key key : applications) {
                 Path target = poolDir.resolve(key.directoryFriendlyName());
@@ -493,7 +493,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /**
      * Launches the client process using the given configuration.
      */
-    private Process launchApplication(BHive hive, ClientApplicationConfiguration clientCfg) {
+    private Process launchApplication(ClientApplicationConfiguration clientCfg) {
         log.info("Attempting to launch application.");
         ApplicationConfiguration appCfg = clientCfg.appConfig;
 

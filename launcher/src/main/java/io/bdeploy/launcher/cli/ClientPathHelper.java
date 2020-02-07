@@ -8,6 +8,9 @@ import java.nio.file.Paths;
  */
 public class ClientPathHelper {
 
+    private ClientPathHelper() {
+    }
+
     /**
      * Returns the home directory where the hive, the launcher as well as all apps are stored.
      */

@@ -46,12 +46,13 @@ public class ApplicationParameterProvider {
         Collection<ApplicationConfiguration> apps = config.applications.stream().filter(a -> a.name.equals(appName))
                 .collect(Collectors.toList());
         if (apps.isEmpty()) {
-            throw new RuntimeException("Unable to resolve parameter value. Application with the " + "name '" + appName
+            throw new IllegalArgumentException("Unable to resolve parameter value. Application with the " + "name '" + appName
                     + "' is not existing in this instance.");
         }
         if (apps.size() != 1) {
-            throw new RuntimeException("Unable to resolve parameter value. Variable references an application with the name '"
-                    + appName + "' that is defined multiple times.");
+            throw new IllegalArgumentException(
+                    "Unable to resolve parameter value. Variable references an application with the name '" + appName
+                            + "' that is defined multiple times.");
         }
         return apps.iterator().next();
     }

@@ -44,7 +44,6 @@ import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
 import io.bdeploy.bhive.util.VersionComparator;
 import io.bdeploy.common.security.RemoteService;
-import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.TemplateHelper;
@@ -89,7 +88,7 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
 
     @Override
     public void updateSelf(List<Key> target) {
-        UpdateHelper.update(minion.getSelf(), context, OsHelper.getRunningOs(), target, false);
+        UpdateHelper.update(minion.getSelf(), target, false);
     }
 
     @Override

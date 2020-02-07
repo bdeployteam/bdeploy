@@ -14,7 +14,7 @@ public class ParameterValueResolver extends PrefixResolver {
 
     @Override
     protected String doResolve(String nameAndParam) {
-        int idx = nameAndParam.lastIndexOf(":");
+        int idx = nameAndParam.lastIndexOf(':');
         if (idx == -1) {
             throw new IllegalArgumentException("Illegal parameter reference. Expecting appName:paramId but got " + nameAndParam);
         }

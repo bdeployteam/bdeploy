@@ -13,7 +13,7 @@ public class EnvironmentVariableResolver extends PrefixResolver {
     protected String doResolve(String variable) {
         String value = System.getenv(variable);
         if (value == null) {
-            throw new RuntimeException("Environment variable " + variable + " not set.");
+            throw new IllegalStateException("Environment variable " + variable + " not set.");
         }
         return value;
     }

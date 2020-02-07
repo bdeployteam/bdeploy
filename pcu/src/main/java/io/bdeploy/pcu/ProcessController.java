@@ -561,10 +561,9 @@ public class ProcessController {
             lock.unlock();
 
             // Notify listeners when state changes
-            if (currentState == oldState) {
-                return;
+            if (currentState != oldState) {
+                notifyListeners(currentState);
             }
-            notifyListeners(currentState);
         }
     }
 
@@ -800,7 +799,7 @@ public class ProcessController {
             return;
         }
         try {
-            logger.log(l -> l.info("Invoking configured stop command.", stopCommand));
+            logger.log(l -> l.info("Invoking configured stop command {}.", stopCommand));
             Process p = launch(stopCommand);
             boolean exited = p.waitFor(processConfig.processControl.gracePeriod, TimeUnit.MILLISECONDS);
             if (!exited) {

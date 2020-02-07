@@ -18,8 +18,9 @@ public class ApplicationVariableResolver extends PrefixResolver {
                 return appConfig.uid;
             case "NAME":
                 return appConfig.name;
+            default:
+                return null;
         }
-        return null;
     }
 
 }

@@ -111,7 +111,7 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
                 masterOs = OperatingSystem.valueOf(config.masterOs());
             }
 
-            UpdateHelper.update(svc, null, masterOs, keys, true);
+            UpdateHelper.update(svc, keys, true);
         } catch (IOException e) {
             throw new IllegalStateException("Failed to process update", e);
         }
