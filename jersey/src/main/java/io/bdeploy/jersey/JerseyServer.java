@@ -17,10 +17,13 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 
+import org.glassfish.grizzly.http.CompressionConfig;
+import org.glassfish.grizzly.http.CompressionConfig.CompressionMode;
 import org.glassfish.grizzly.http.server.CLStaticHttpHandler;
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.HttpHandlerRegistration;
@@ -66,6 +69,20 @@ import io.bdeploy.jersey.resources.JerseyMetricsResourceImpl;
  * used to register a web application using e.g. {@link CLStaticHttpHandler}.
  */
 public class JerseyServer implements AutoCloseable, RegistrationTarget {
+
+    /**
+     * The "Content-Length"-Buffer is a buffer used to buffer a response and determine its length.
+     * <p>
+     * Once the buffer overflows, the server switches from settings a Content-Length header on a response to chunked transfer
+     * encoding.
+     * <p>
+     * The buffer is intentionally very small to support streaming responses (e.g. ZIP files, ...).
+     * <p>
+     * The buffer size is also the limit for response sizes to exclude from compression. If compression would be be there,
+     * we would set this to zero to completely disable buffering, but compression will /always/ happen for chunked encoding
+     * as content length cannot be determined up front.
+     */
+    private static final int CL_BUFFER_SIZE = 512;
 
     private static final Logger log = LoggerFactory.getLogger(JerseyServer.class);
 
@@ -205,8 +222,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             rc.register(new JerseyServerReporterContextResolver());
             rc.register(new JerseyWriteLockFilter());
 
-            // disable output content buffer to allow "real" streaming. jersey will always use chunked encoding.
-            rc.property(ServerProperties.OUTBOUND_CONTENT_LENGTH_BUFFER, 0);
+            rc.property(ServerProperties.OUTBOUND_CONTENT_LENGTH_BUFFER, CL_BUFFER_SIZE);
 
             server = GrizzlyHttpServerFactory.createHttpServer(jerseyUri, rc, true, sslEngine, false);
             if (root != null) {
@@ -224,6 +240,16 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
                         .setMemoryManager(listener.getTransport().getMemoryManager());
 
                 listener.getTransport().setWorkerThreadPoolConfig(cfg);
+
+                CompressionConfig cc = listener.getCompressionConfig();
+
+                cc.setCompressionMode(CompressionMode.ON);
+                cc.setCompressionMinSize(CL_BUFFER_SIZE);
+
+                // need to set an explicit list of media-types to compress, as text/event-stream *must* not be compressed.
+                cc.setCompressibleMimeTypes(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN,
+                        MediaType.TEXT_HTML, MediaType.TEXT_XML, "application/javascript", "text/javascript", "text/css",
+                        "image/svg+xml");
             }
 
             server.getHttpHandler().setAllowEncodedSlash(true);
