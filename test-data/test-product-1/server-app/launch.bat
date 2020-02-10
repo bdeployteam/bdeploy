@@ -3,6 +3,7 @@
 @rem #################################################
 @rem # TEST APPLICATION                              #
 @rem #################################################
+echo "Command line arguments %*"
 
 :loop
 IF NOT "%1" == "" (

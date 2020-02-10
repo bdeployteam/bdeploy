@@ -1,1 +1,1 @@
-Sample for an external software shared that can be shared between Instance Groups.
+Sample for an external software that can be shared between Instance Groups.

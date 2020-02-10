@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+echo "Command line arguments" $@
 
 while [[ $# -gt 0 ]]; do
     case $1 in
