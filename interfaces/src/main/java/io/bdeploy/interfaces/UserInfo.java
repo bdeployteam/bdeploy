@@ -39,7 +39,7 @@ public class UserInfo implements Comparable<UserInfo> {
 
     @JsonCreator
     public UserInfo(@JsonProperty("name") String name) {
-        this.name = name;
+        this.name = normalizeName(name);
     }
 
     @Override
@@ -54,5 +54,14 @@ public class UserInfo implements Comparable<UserInfo> {
      */
     public Collection<ScopedCapability> getGlobalCapabilities() {
         return capabilities.stream().filter(ScopedCapability::isGlobal).collect(Collectors.toList());
+    }
+
+    /**
+     * Removes leading as well as trailing spaces and converts the name into lower case.
+     */
+    public static String normalizeName(String name) {
+        name = name.trim();
+        name = name.toLowerCase();
+        return name;
     }
 }

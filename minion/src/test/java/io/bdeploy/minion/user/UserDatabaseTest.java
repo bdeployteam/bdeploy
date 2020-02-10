@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
@@ -14,10 +15,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.ScopedCapability;
 import io.bdeploy.common.security.ScopedCapability.Capability;
+import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestMinion;
@@ -29,26 +32,26 @@ public class UserDatabaseTest {
     void userRoles(MinionRoot root) {
         UserDatabase db = root.getUsers();
 
-        db.createLocalUser("test", "test", Collections.singletonList(ApiAccessToken.ADMIN_CAPABILITY));
+        db.createLocalUser("JunitTest", "JunitTest", Collections.singletonList(ApiAccessToken.ADMIN_CAPABILITY));
 
-        UserInfo info = db.authenticate("test", "test");
+        UserInfo info = db.authenticate("JunitTest", "JunitTest");
         assertNotNull(info);
         assertNotNull(info.capabilities);
         assertEquals(1, info.capabilities.size());
         assertEquals(ApiAccessToken.ADMIN_CAPABILITY.capability, info.capabilities.iterator().next().capability);
 
         info.capabilities.clear();
-        info.fullName = "Test User";
-        info.email = "test.user@example.com";
+        info.fullName = "JunitTest User";
+        info.email = "JunitTest.user@example.com";
         db.updateUserInfo(info);
 
-        UserInfo updated = db.authenticate("test", "test");
+        UserInfo updated = db.authenticate("JunitTest", "JunitTest");
         assertNotNull(updated);
         assertNotNull(updated.capabilities);
         assertTrue(updated.capabilities.isEmpty());
 
-        assertEquals("Test User", updated.fullName);
-        assertEquals("test.user@example.com", updated.email);
+        assertEquals("JunitTest User", updated.fullName);
+        assertEquals("JunitTest.user@example.com", updated.email);
     }
 
     @Test
@@ -57,55 +60,102 @@ public class UserDatabaseTest {
 
         List<String> recently1 = Arrays.asList(new String[] { "a", "b", "c" });
 
-        db.createLocalUser("test", "test", null);
+        db.createLocalUser("JunitTest", "JunitTest", null);
 
-        db.addRecentlyUsedInstanceGroup("test", "a");
-        db.addRecentlyUsedInstanceGroup("test", "b");
-        db.addRecentlyUsedInstanceGroup("test", "c");
-        assertIterableEquals(recently1, db.getRecentlyUsedInstanceGroups("test"));
+        db.addRecentlyUsedInstanceGroup("JunitTest", "a");
+        db.addRecentlyUsedInstanceGroup("JunitTest", "b");
+        db.addRecentlyUsedInstanceGroup("JunitTest", "c");
+        assertIterableEquals(recently1, db.getRecentlyUsedInstanceGroups("JunitTest"));
     }
 
     @Test
     void userCleanup(MinionRoot root) {
         UserDatabase db = root.getUsers();
 
-        db.createLocalUser("test", "test", null);
+        db.createLocalUser("JunitTest", "JunitTest", null);
         for (int i = 0; i < 20; ++i) {
-            UserInfo u = db.getUser("test");
+            UserInfo u = db.getUser("JunitTest");
             u.capabilities.add(new ScopedCapability("Scope" + i, ScopedCapability.Capability.ADMIN));
             db.updateUserInfo(u);
         }
 
         BHive hive = root.getHive();
-        assertEquals(10, hive.execute(new ManifestListOperation().setManifestName("users/test")).size());
+        assertEquals(10, hive.execute(new ManifestListOperation().setManifestName(UserDatabase.NAMESPACE + "junittest")).size());
     }
 
     @Test
     void crud(MinionRoot root) {
         UserDatabase db = root.getUsers();
 
-        db.createLocalUser("test", "test", Collections.singleton(new ScopedCapability("test", Capability.WRITE)));
-        db.updateLocalPassword("test", "newpw");
+        db.createLocalUser("JunitTest", "JunitTest", Collections.singleton(new ScopedCapability("JunitTest", Capability.WRITE)));
+        db.updateLocalPassword("JunitTest", "newpw");
 
-        UserInfo user = db.authenticate("test", "newpw");
+        UserInfo user = db.authenticate("JunitTest", "newpw");
         assertNotNull(user);
 
-        user.fullName = "Test User";
-        user.email = "test@example.com";
+        user.fullName = "JunitTest User";
+        user.email = "JunitTest@example.com";
 
         db.updateUserInfo(user);
 
-        assertNotNull(db.authenticate("test", "newpw"));
+        assertNotNull(db.authenticate("JunitTest", "newpw"));
 
         user = db.getUser(user.name);
 
-        assertEquals("Test User", user.fullName);
-        assertEquals("test@example.com", user.email);
+        assertEquals("JunitTest User", user.fullName);
+        assertEquals("JunitTest@example.com", user.email);
 
-        db.deleteUser("test");
+        db.deleteUser("JunitTest");
 
-        assertNull(db.getUser("test"));
-        assertNull(db.authenticate("test", "newpw"));
+        assertNull(db.getUser("JunitTest"));
+        assertNull(db.authenticate("JunitTest", "newpw"));
+    }
+
+    @Test
+    public void userNames(MinionRoot root) {
+        UserDatabase db = root.getUsers();
+        int originalSize = db.getAllNames().size();
+
+        ScopedCapability capability = new ScopedCapability("MyScope", Capability.ADMIN);
+        db.createLocalUser("jUNit", "junit", Collections.singleton(capability));
+
+        // Ensure it is stored in lower-case
+        BHive hive = root.getHive();
+        for (Key key : hive.execute(new ManifestListOperation().setManifestName(UserDatabase.NAMESPACE))) {
+            String name = key.getName().substring(UserDatabase.NAMESPACE.length());
+            assertTrue(StringHelper.isAllLowerCase(name));
+        }
+
+        // Attempt to create users with different case
+        assertThrows(IllegalStateException.class, () -> db.createLocalUser("JUNIT", "JUNIT", Collections.emptyList()));
+        assertThrows(IllegalStateException.class, () -> db.createLocalUser("Junit", "Junit", Collections.emptyList()));
+        assertThrows(IllegalStateException.class, () -> db.createLocalUser("juniT", "juniT", Collections.emptyList()));
+
+        // Attempt to authenticate with different case
+        assertNotNull(db.authenticate("JUNIT", "junit"));
+
+        // Try to get with different case
+        assertNotNull(db.getUser("Junit"));
+
+        // Query groups using different case
+        db.addRecentlyUsedInstanceGroup("JUNIT", "a");
+        assertEquals(Arrays.asList("a"), db.getRecentlyUsedInstanceGroups("juNIT"));
+
+        // Query permissions
+        assertTrue(db.isAuthorized("JUNit", capability));
+
+        // Query all users - check if lowercase
+        for (String name : db.getAllNames()) {
+            assertTrue(StringHelper.isAllLowerCase(name));
+        }
+        for (UserInfo user : db.getAll()) {
+            assertTrue(StringHelper.isAllLowerCase(user.name));
+        }
+
+        // Delete user
+        db.deleteUser("JUNIT");
+        assertNull(db.getUser("JUNIT"));
+        assertEquals(originalSize, db.getAllNames().size());
     }
 
 }

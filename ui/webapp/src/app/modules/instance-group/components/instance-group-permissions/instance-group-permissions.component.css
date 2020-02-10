@@ -32,6 +32,18 @@
   flex: 1 1 25%;
 }
 
-.col-icon {
+.gravatar {
+  position: relative;
+  top: 8px;
+}
+
+.mat-column-gravatar {
+  width: 45px;
+}
+
+.mat-column-read,
+.mat-column-write,
+.mat-column-admin,
+.mat-column-delete {
   width: 60px;
 }

@@ -35,7 +35,10 @@ export class UserEditComponent implements OnInit {
   }
 
   isValid() {
-    if (this.isCreate && this.user.password) {
+    if (this.isCreate) {
+      if (!this.user.name || !this.user.password) {
+        return false;
+      }
       const passwordsValid = this.pass1 && this.pass2 && this.pass1.nativeElement.value === this.pass2.nativeElement.value;
       const userExists = this.knownUser && this.knownUser.find(u => u === this.user.name);
       return passwordsValid && !userExists;

@@ -15,4 +15,19 @@ public class StringHelper {
         return s.replace("\n", "").replace("\r", "");
     }
 
+    /**
+     * Checks if the string contains only lowercase characters.
+     */
+    public static boolean isAllLowerCase(String s) {
+        if (s.isBlank()) {
+            return true;
+        }
+        for (int i = 0; i < s.length(); i++) {
+            if (!Character.isLowerCase(s.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

@@ -32,7 +32,25 @@
   flex: 1 1 25%;
 }
 
-.col-icon {
+.mat-column-gravatar {
+  width: 45px;
+}
+
+.mat-column-inactive {
+  width: 45px;
+}
+
+.mat-column-inactive mat-icon {
+  position: relative;
+  left: 10px;
+}
+
+.mat-column-globalPermissions mat-chip {
+  position: relative;
+  left: 25px;
+}
+
+.mat-column-actions {
   width: 60px;
 }
 

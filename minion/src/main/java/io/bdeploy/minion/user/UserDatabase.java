@@ -52,7 +52,7 @@ import io.bdeploy.ui.api.AuthService;
 public class UserDatabase implements AuthService {
 
     private static final Logger log = LoggerFactory.getLogger(UserDatabase.class);
-    private static final String NAMESPACE = "users/";
+    public static final String NAMESPACE = "users/";
     private static final String FILE_NAME = "user.json";
 
     private final Cache<String, UserInfo> userCache = CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES)
@@ -112,6 +112,7 @@ public class UserDatabase implements AuthService {
 
     @Override
     public void createLocalUser(String user, String pw, Collection<ScopedCapability> capabilities) {
+        user = UserInfo.normalizeName(user);
         UserInfo info = getUser(user);
         if (info != null) {
             throw new IllegalStateException("User already exists: " + user);
@@ -135,6 +136,7 @@ public class UserDatabase implements AuthService {
      */
     @Override
     public void updateLocalPassword(String user, String pw) {
+        user = UserInfo.normalizeName(user);
         UserInfo info = getUser(user);
         if (info == null) {
             throw new IllegalStateException("Cannot find user " + user);
@@ -152,6 +154,7 @@ public class UserDatabase implements AuthService {
 
     @Override
     public List<String> getRecentlyUsedInstanceGroups(String user) {
+        user = UserInfo.normalizeName(user);
         UserInfo info = getUser(user);
         if (info == null) {
             return Collections.emptyList();
@@ -162,6 +165,7 @@ public class UserDatabase implements AuthService {
 
     @Override
     public void addRecentlyUsedInstanceGroup(String user, String group) {
+        user = UserInfo.normalizeName(user);
         UserInfo info = getUser(user);
         if (info == null) {
             return;
@@ -188,6 +192,8 @@ public class UserDatabase implements AuthService {
     }
 
     private synchronized void internalUpdate(String user, UserInfo info) {
+        user = UserInfo.normalizeName(user);
+
         Long id = target.execute(new ManifestNextIdOperation().setManifestName(NAMESPACE + user));
         Manifest.Key key = new Manifest.Key(NAMESPACE + user, String.valueOf(id));
 
@@ -206,6 +212,7 @@ public class UserDatabase implements AuthService {
 
     @Override
     public void deleteUser(String user) {
+        user = UserInfo.normalizeName(user);
         SortedSet<Key> mfs = target.execute(new ManifestListOperation().setManifestName(NAMESPACE + user));
         log.info("Deleting {} manifests for user {}", mfs.size(), user);
         mfs.forEach(k -> target.execute(new ManifestDeleteOperation().setToDelete(k)));
@@ -225,6 +232,7 @@ public class UserDatabase implements AuthService {
 
     @Override
     public UserInfo authenticate(String user, String pw) {
+        user = UserInfo.normalizeName(user);
         AuthenticationSettingsDto settings = SettingsManifest.read(target, root.getEncryptionKey(), false).auth;
 
         UserInfo u = getUser(user);
@@ -256,6 +264,7 @@ public class UserDatabase implements AuthService {
 
     @Override
     public UserInfo getUser(String name) {
+        name = UserInfo.normalizeName(name);
         // Note: We are using getIfPresent and put instead of get(name, Callable) as we need to handle null values
         UserInfo info = userCache.getIfPresent(name);
         if (info != null) {
@@ -287,6 +296,7 @@ public class UserDatabase implements AuthService {
 
     @Override
     public boolean isAuthorized(String user, ScopedCapability required) {
+        user = UserInfo.normalizeName(user);
         UserInfo info = getUser(user);
         if (info == null) {
             return false;
