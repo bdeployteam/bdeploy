@@ -10,10 +10,7 @@
     <div class="count-chart" [style.height.px]='countGraphHeight'>
       <ngx-charts-bar-horizontal
         [results]="groupCounts"
-        [xAxisLabel]="'Call Count'"
-        [yAxisLabel]="'Endpoint'"
-        [showXAxisLabel]="true"
-        [showYAxisLabel]="true"
+        [maxYAxisTickLength]='40'
         [xAxis]="true"
         [yAxis]="true"
         (select)="selectTimer($event)"
