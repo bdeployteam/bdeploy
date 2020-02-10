@@ -5,14 +5,16 @@ describe('User Accounts Test', function() {
 
   this.beforeEach(function() {
     cy.login();
+    cy.viewport(1280, 720);
   })
 
   it('Enters the user accounts dialog and creates a test user', function() {
     cy.visit('/#/admin/all/(panel:users)');
     cy.waitUntilContentLoaded();
 
-    cy.createUser(demoUser, 'Test account', demoUser + mailDomain);
+    cy.screenshot('BDeploy_UserAccounts');
 
+    cy.createUser(demoUser, 'Test account', demoUser + mailDomain, 'demo', true);
     cy.searchUser(demoUser);
   })
 
@@ -24,6 +26,7 @@ describe('User Accounts Test', function() {
     cy.get('input[placeholder="Full Name"]').clear().type('John Doe');
     cy.get('input[placeholder="E-Mail Address"]').clear().type('john-doe' + mailDomain);
 
+    cy.screenshot('BDeploy_UserAccounts_Edit');
     cy.contains('button', 'Apply').click();
 
     cy.contains('td', 'John Doe').should('exist');
@@ -34,6 +37,7 @@ describe('User Accounts Test', function() {
     cy.waitUntilContentLoaded();
     cy.contains('tr', demoUser).clickContextMenuItem('Set Inactive');
     cy.contains('td', 'check_box').should('exist');
+    cy.screenshot('BDeploy_UserAccounts_Inactive');
   })
 
   it('Activates the user', function() {
@@ -46,6 +50,7 @@ describe('User Accounts Test', function() {
     cy.waitUntilContentLoaded();
     cy.setGlobalCapability(demoUser, 'WRITE');
     cy.contains('td', 'WRITE').should('exist');
+    cy.screenshot('BDeploy_UserAccounts_GlobalCapabilities');
   })
 
   it('Removes the global capability for the user', function() {
@@ -54,7 +59,7 @@ describe('User Accounts Test', function() {
     cy.contains('td', 'WRITE').should('not.exist');
   })
 
-  it('Deletesthe user and resets the dialog', function() {
+  it('Deletes the user and resets the dialog', function() {
     cy.deleteUser(demoUser);
     cy.searchUser();
   })
