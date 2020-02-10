@@ -21,8 +21,6 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.security.RemoteService;
-import io.bdeploy.common.util.OsHelper;
-import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.interfaces.minion.MinionDto;
@@ -104,11 +102,6 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
             if (!config.yes()) {
                 System.out.println("Pushing of update package successful, press any key to continue updating or CTRL+C to abort");
                 System.in.read();
-            }
-
-            OperatingSystem masterOs = OsHelper.getRunningOs();
-            if (config.masterOs() != null) {
-                masterOs = OperatingSystem.valueOf(config.masterOs());
             }
 
             UpdateHelper.update(svc, keys, true);
