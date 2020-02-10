@@ -156,6 +156,16 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     this.subscriptions = new Subscription();
     this.subscriptions.add(
       this.route.params.subscribe((p: Params) => {
+        // clean up.
+        if (this.updateEvents) {
+          this.updateEvents.close();
+          this.updateEvents = null;
+        }
+
+        this.loading = true;
+        this.selectedConfig = null;
+        this.selectedProcess = null;
+
         this.groupParam = p['group'];
         this.uuidParam = p['uuid'];
         this.instanceGroupService.getInstanceGroup(this.groupParam).subscribe(r => this.instanceGroup = r);
