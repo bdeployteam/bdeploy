@@ -231,7 +231,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     /** Does whatever is required to migrate an older version to the current version */
     private void doMigrate() {
         String current = VersionHelper.readVersion();
-        if (current == null || VersionHelper.UNKNOWN.equals(current)) {
+        if (VersionHelper.UNKNOWN.equals(current)) {
             log.debug("Skipping migration to {}", current);
             return;
         }

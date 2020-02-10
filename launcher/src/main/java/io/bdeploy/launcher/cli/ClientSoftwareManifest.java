@@ -100,6 +100,18 @@ public class ClientSoftwareManifest {
     }
 
     /**
+     * Returns a collection of all launchers that are referenced by the installed software. This keys
+     * represent the launchers that must be retained.
+     */
+    public Set<Manifest.Key> getRequiredLauncherKeys() {
+        Set<Manifest.Key> result = new HashSet<>();
+        for (ClientSoftwareConfiguration software : list()) {
+            result.add(software.launcher);
+        }
+        return result;
+    }
+
+    /**
      * Stores the given software configuration entry.
      */
     public void update(String appUid, ClientSoftwareConfiguration config) {
