@@ -10,15 +10,11 @@
 
 // This function is called when a project is opened or re-opened (e.g. due to
 // the project's config changing)
-
-module.exports = (on, config) => {
-  // `on` is used to hook into various events Cypress emits
-  // `config` is the resolved Cypress config
-}
-
 const request = require('request');
 const fs = require('fs-extra');
 module.exports = (on, config) => {
+  require('cypress-terminal-report').installPlugin(on);
+
   on('task', {
     downloadFileFromUrl(args) {
       const fileName = args.fileName;
