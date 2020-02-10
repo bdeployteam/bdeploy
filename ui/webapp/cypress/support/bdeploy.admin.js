@@ -11,7 +11,7 @@ Cypress.Commands.add('searchUser', function(username = null) {
 /**
  * Command: createUser
  */
-Cypress.Commands.add('createUser', function(username, fullname, email, password = 'demo') {
+Cypress.Commands.add('createUser', function(username, fullname, email, password, docuScreenshots = false) {
   cy.contains('button', 'add').click();
   cy.contains('button', 'Apply').should('exist').and('be.disabled');
 
@@ -22,11 +22,15 @@ Cypress.Commands.add('createUser', function(username, fullname, email, password 
   cy.get('input[placeholder="New Password"]').type(password);
   cy.get('input[placeholder="Repeat New Password"]').type(password);
   cy.contains('button', 'Apply').should('exist').and('enabled');
+
+  if (docuScreenshots) {
+    cy.screenshot('BDeploy_UserAccounts_Add');
+  }
   cy.contains('button', 'Apply').click();
 })
 
 /**
- * Command: createUser
+ * Command: deleteUser
  */
 Cypress.Commands.add('deleteUser', function(username) {
   cy.visit('/#/admin/all/(panel:users)');
@@ -43,7 +47,7 @@ Cypress.Commands.add('deleteUser', function(username) {
 /**
  * Command: setGlobalCapability
  */
-Cypress.Commands.add('setGlobalCapability', function(username, capability) {
+Cypress.Commands.add('setGlobalCapability', function(username, capability, docuScreenshots = false) {
   cy.contains('tr', username).should('exist');
   cy.contains('tr', username).clickContextMenuItem('Global Permissions...');
 
@@ -53,5 +57,8 @@ Cypress.Commands.add('setGlobalCapability', function(username, capability) {
     cy.get('app-user-global-permissions').contains('mat-chip', capability).click();
   }
 
+  if (docuScreenshots) {
+    cy.screenshot('BDeploy_UserAccounts_SetGlobalCapabilities');
+  }
   cy.contains('button', 'OK').click();
 })

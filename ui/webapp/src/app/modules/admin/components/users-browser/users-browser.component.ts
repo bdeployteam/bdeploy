@@ -4,6 +4,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { cloneDeep } from 'lodash';
+import { finalize } from 'rxjs/operators';
 import { Capability, LDAPSettingsDto, UserInfo } from 'src/app/models/gen.dtos';
 import { UserEditComponent } from 'src/app/modules/core/components/user-edit/user-edit.component';
 import { UserPasswordComponent } from 'src/app/modules/core/components/user-password/user-password.component';
@@ -41,6 +42,8 @@ export class UsersBrowserComponent implements OnInit, AfterViewInit {
 
   private currentUser: UserInfo;
 
+  loading = true;
+
   constructor(
     private dialog: MatDialog,
     private messageBoxService: MessageboxService,
@@ -62,22 +65,26 @@ export class UsersBrowserComponent implements OnInit, AfterViewInit {
   }
 
   loadUsers() {
-    this.authAdminService.getAll().subscribe(users => {
-      if (this.dataSource === null) {
-        this.dataSource = new MatTableDataSource(users);
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
+    this.loading = true;
+    this.authAdminService.getAll()
+      .pipe(finalize(() => (this.loading = false)))
+      .subscribe(users => {
+        if (this.dataSource === null) {
+          this.dataSource = new MatTableDataSource(users);
+          this.dataSource.paginator = this.paginator;
+          this.dataSource.sort = this.sort;
 
-        this.dataSource.filterPredicate = (data, filter) => {
-          return this.filterPredicate(data.name, filter)
-            || this.filterPredicate(data.fullName, filter)
-            || this.filterPredicate(data.email, filter)
-            || this.filterPredicate(this.getGlobalPermission(data), filter);
-        };
-      } else {
-        this.dataSource.data = users;
+          this.dataSource.filterPredicate = (data, filter) => {
+            return this.filterPredicate(data.name, filter)
+              || this.filterPredicate(data.fullName, filter)
+              || this.filterPredicate(data.email, filter)
+              || this.filterPredicate(this.getGlobalPermission(data), filter);
+          };
+        } else {
+          this.dataSource.data = users;
+        }
       }
-    });
+    );
   }
 
   public applyFilter(filterValue: string): void {
@@ -116,6 +123,10 @@ export class UsersBrowserComponent implements OnInit, AfterViewInit {
 
   public isCurrentUser(userInfo: UserInfo): boolean {
     return this.currentUser && userInfo.name === this.currentUser.name;
+  }
+
+  isLoading() {
+    return this.loading || this.settings.isLoading();
   }
 
   public onAdd(): void {

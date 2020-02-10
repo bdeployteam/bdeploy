@@ -10,6 +10,7 @@ describe('Instance Group Tests', () => {
 
   beforeEach(() => {
     cy.login();
+    cy.viewport(1280, 720);
   });
 
   it('Create instance group', () => {
@@ -33,17 +34,16 @@ describe('Instance Group Tests', () => {
     cy.visit('/#/admin/all/(panel:users)');
     cy.waitUntilContentLoaded();
 
-    cy.createUser(globalAdmin, 'Global admin account', globalAdmin + mailDomain);
+    cy.createUser(globalAdmin, 'Global admin account', globalAdmin + mailDomain, 'demo');
     cy.waitUntilContentLoaded();
     cy.setGlobalCapability(globalAdmin, 'ADMIN');
-    cy.createUser(globalWrite, 'Global write account', globalWrite + mailDomain);
+    cy.createUser(globalWrite, 'Global write account', globalWrite + mailDomain, 'demo');
     cy.waitUntilContentLoaded();
     cy.setGlobalCapability(globalWrite, 'WRITE');
-    cy.createUser(globalRead, 'Global read account', globalRead + mailDomain);
+    cy.createUser(globalRead, 'Global read account', globalRead + mailDomain, 'demo');
     cy.waitUntilContentLoaded();
     cy.setGlobalCapability(globalRead, 'READ');
-    cy.createUser(globalNone, 'Account without global capabilities', globalNone + mailDomain);
-
+    cy.createUser(globalNone, 'Account without global capabilities', globalNone + mailDomain, 'demo');
   })
 
   it('Checks permissions on the instance group', function() {
@@ -76,7 +76,11 @@ describe('Instance Group Tests', () => {
       // check admin + write
       cy.get('mat-icon[data-cy="revoke-write"]').should('exist');
       cy.get('mat-icon[data-cy="revoke-admin"]').should('exist');
+    });
 
+    cy.screenshot('BDeploy_Demo_IG_Permissions_Global');
+
+    cy.contains('tr', globalRead).within(() => {
       // revoke admin
       cy.get('mat-icon[data-cy="revoke-admin"]').click();
       // check write
@@ -88,7 +92,6 @@ describe('Instance Group Tests', () => {
       // check write
       cy.get('mat-icon[data-cy="grant-write"]').should('exist');
       cy.get('mat-icon[data-cy="grant-admin"]').should('exist');
-
     });
   })
 
@@ -99,6 +102,7 @@ describe('Instance Group Tests', () => {
     cy.get('input[placeholder="User to add"]').should('exist').click();
     cy.get('input[placeholder="User to add"]').should('exist').and('have.focus').type(globalNone);
 
+    cy.screenshot('BDeploy_Demo_Permissions_AddUser1');
     cy.contains('button', 'OK').click();
 
     cy.contains('tr', globalNone).within(() => {
@@ -106,6 +110,7 @@ describe('Instance Group Tests', () => {
       cy.get('mat-icon[data-cy="grant-write"]').should('exist');
       cy.get('mat-icon[data-cy="grant-admin"]').should('exist');
     });
+    cy.screenshot('BDeploy_Demo_Permissions_AddUser2');
   })
 
   it('Removes a user', function() {
