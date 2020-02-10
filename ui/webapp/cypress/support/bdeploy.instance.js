@@ -56,9 +56,9 @@ Cypress.Commands.add('deleteInstance', function(group, instanceUuid, mode = 'STA
 
 Cypress.Commands.add('gotoInstance', function(groupName, instanceUuid, mode = 'STANDALONE') {
    cy.visitBDeploy('/', mode);
-   cy.get('[data-cy=group-' + groupName + ']').first().click();
+   cy.get('[data-cy=group-' + groupName + ']').first().click('top');
    cy.waitUntilContentLoaded();
-   cy.get('[data-cy=instance-' + instanceUuid + ']').first().click();
+   cy.get('[data-cy=instance-' + instanceUuid + ']').first().click('top');
 })
 
 Cypress.Commands.add('startProcess', function(node, app) {
