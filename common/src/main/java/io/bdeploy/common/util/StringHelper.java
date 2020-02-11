@@ -19,7 +19,7 @@ public class StringHelper {
      * Checks if the string contains only lowercase characters.
      */
     public static boolean isAllLowerCase(String s) {
-        if (s.isBlank()) {
+        if (s.trim().isEmpty()) {
             return true;
         }
         for (int i = 0; i < s.length(); i++) {
