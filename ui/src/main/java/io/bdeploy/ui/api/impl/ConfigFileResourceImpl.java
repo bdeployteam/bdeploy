@@ -55,6 +55,9 @@ public class ConfigFileResourceImpl implements ConfigFileResource {
     private MasterProvider mp;
 
     @Inject
+    private InstanceEventManager iem;
+
+    @Inject
     private Minion minion;
 
     public ConfigFileResourceImpl(BHive hive, String groupId, String instanceId) {
@@ -123,7 +126,7 @@ public class ConfigFileResourceImpl implements ConfigFileResource {
 
         InstanceResourceImpl.syncInstance(minion, rc, groupId, instanceId);
 
-        UiResources.getInstanceEventManager().create(instanceId, rootKey);
+        iem.create(instanceId, rootKey);
     }
 
 }

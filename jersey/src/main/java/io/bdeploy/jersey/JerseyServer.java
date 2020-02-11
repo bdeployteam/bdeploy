@@ -7,6 +7,8 @@ import java.security.KeyStore;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
@@ -31,6 +33,9 @@ import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
+import org.glassfish.grizzly.websockets.WebSocketAddOn;
+import org.glassfish.grizzly.websockets.WebSocketApplication;
+import org.glassfish.grizzly.websockets.WebSocketEngine;
 import org.glassfish.hk2.api.Factory;
 import org.glassfish.hk2.api.TypeLiteral;
 import org.glassfish.hk2.utilities.Binder;
@@ -105,6 +110,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
     private HttpServer server;
     private HttpHandler root;
     private Auditor auditor = new Log4jAuditor();
+    private final Map<String, WebSocketApplication> wsApplications = new TreeMap<>();
 
     /**
      * @param port the port to listen on
@@ -135,6 +141,10 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             SLF4JBridgeHandler.removeHandlersForRootLogger();
             SLF4JBridgeHandler.install();
         }
+    }
+
+    public KeyStore getKeyStore() {
+        return store;
     }
 
     /**
@@ -185,6 +195,11 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
         root = handler;
     }
 
+    @Override
+    public void registerWebsocketApplication(String urlMapping, WebSocketApplication wsa) {
+        wsApplications.put(urlMapping, wsa);
+    }
+
     /**
      * Start the server as configured.
      */
@@ -229,6 +244,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
                 server.getServerConfiguration().addHttpHandler(root, HttpHandlerRegistration.ROOT);
             }
 
+            WebSocketAddOn wsao = new WebSocketAddOn();
             for (NetworkListener listener : server.getListeners()) {
                 // default pool size restricts to num CPUs * 2.
                 // we want to have unrestricted thread counts to allow ALL requests to be processed in parallel.
@@ -241,6 +257,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
 
                 listener.getTransport().setWorkerThreadPoolConfig(cfg);
 
+                // enable compression on the server for known mime types.
                 CompressionConfig cc = listener.getCompressionConfig();
 
                 cc.setCompressionMode(CompressionMode.ON);
@@ -250,7 +267,15 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
                 cc.setCompressibleMimeTypes(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN,
                         MediaType.TEXT_HTML, MediaType.TEXT_XML, "application/javascript", "text/javascript", "text/css",
                         "image/svg+xml");
+
+                // enable WebSockets on the listener
+                listener.registerAddOn(wsao);
             }
+
+            // register all WebSocketApplications on their path.
+            wsApplications.forEach((path, app) -> {
+                WebSocketEngine.getEngine().register("/ws", path, app);
+            });
 
             server.getHttpHandler().setAllowEncodedSlash(true);
             server.start();

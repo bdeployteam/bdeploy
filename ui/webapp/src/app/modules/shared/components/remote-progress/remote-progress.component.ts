@@ -2,7 +2,7 @@ import { NestedTreeControl } from '@angular/cdk/tree';
 import { Component, Input, OnDestroy, OnInit, TemplateRef } from '@angular/core';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
-import { EventSourcePolyfill } from 'ng-event-source';
+import ReconnectingWebSocket from 'reconnecting-websocket';
 import { LoggingService } from '../../../core/services/logging.service';
 import { SystemService } from '../../../core/services/system.service';
 import { ActivitySnapshotTreeNode, RemoteEventsService } from '../../services/remote-events.service';
@@ -16,7 +16,7 @@ export class RemoteProgressComponent implements OnInit, OnDestroy {
   private log = this.loggingService.getLogger('RemoteProgressComponent');
 
   public remoteProgressElements: ActivitySnapshotTreeNode[];
-  private eventSource: EventSourcePolyfill;
+  private ws: ReconnectingWebSocket;
   private _scope: string[];
 
   @Input() set scope(v: string[]) {
@@ -38,28 +38,35 @@ export class RemoteProgressComponent implements OnInit, OnDestroy {
   }
 
   private updateRemoteEvents(message: MessageEvent, scope: string[]) {
-    const list = this.events.parseEvent(message, scope);
-    if (list && list.length === 0) {
-      this.remoteProgressElements = null;
-    } else {
-      this.remoteProgressElements = list;
-    }
-    this.treeDataSource.data = this.remoteProgressElements;
+    const blob = message.data as Blob;
+    const r = new FileReader();
+    r.onload = () => {
+      const list = this.events.parseEvent(r.result, scope);
+      if (list && list.length === 0) {
+        this.remoteProgressElements = null;
+      } else {
+        this.remoteProgressElements = list;
+      }
+      this.treeDataSource.data = this.remoteProgressElements;
+    };
+    r.readAsText(blob);
   }
 
   private startEventListener() {
-    this.eventSource = this.events.getGlobalEventSource();
-    this.eventSource.onerror = err => {
+    this.ws = this.events.createActivitiesWebSocket();
+    this.ws.addEventListener('error', () => {
       this.systemService.backendUnreachable();
       this.remoteProgressElements = null;
-    };
-    this.eventSource.addEventListener('activities', e => this.updateRemoteEvents(e as MessageEvent, this._scope));
+    });
+    this.ws.addEventListener('message', (e) => {
+      this.updateRemoteEvents(e, this._scope);
+    });
   }
 
   private stopEventListener() {
-    if (this.eventSource) {
-      this.eventSource.close();
-      this.eventSource = null;
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
     }
   }
 

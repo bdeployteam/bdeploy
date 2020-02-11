@@ -140,6 +140,9 @@ public class InstanceResourceImpl implements InstanceResource {
     @Context
     private UriInfo info;
 
+    @Inject
+    private InstanceEventManager iem;
+
     public InstanceResourceImpl(String group, BHive hive) {
         this.group = group;
         this.hive = hive;
@@ -334,7 +337,7 @@ public class InstanceResourceImpl implements InstanceResource {
         // immediately fetch back so we have it to create the association
         syncInstance(minion, rc, group, instance);
 
-        UiResources.getInstanceEventManager().create(instance, key);
+        iem.create(instance, key);
     }
 
     @Override
@@ -486,7 +489,7 @@ public class InstanceResourceImpl implements InstanceResource {
         }
 
         syncInstance(minion, rc, group, instanceId);
-        UiResources.getInstanceEventManager().stateChanged(instanceId, instance.getManifest());
+        iem.stateChanged(instanceId, instance.getManifest());
     }
 
     @Override
@@ -513,7 +516,7 @@ public class InstanceResourceImpl implements InstanceResource {
         }
 
         syncInstance(minion, rc, group, instanceId);
-        UiResources.getInstanceEventManager().stateChanged(instanceId, instance.getManifest());
+        iem.stateChanged(instanceId, instance.getManifest());
     }
 
     @Override
@@ -527,7 +530,7 @@ public class InstanceResourceImpl implements InstanceResource {
         }
 
         syncInstance(minion, rc, group, instanceId);
-        UiResources.getInstanceEventManager().stateChanged(instanceId, instance.getManifest());
+        iem.stateChanged(instanceId, instance.getManifest());
     }
 
     @Override
@@ -773,7 +776,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
             Key newKey = InstanceImportExportHelper.importFrom(zip, hive, instanceId, config);
             syncInstance(minion, rc, group, instanceId);
-            UiResources.getInstanceEventManager().create(instanceId, newKey);
+            iem.create(instanceId, newKey);
             return Collections.singletonList(newKey);
         } catch (IOException e) {
             throw new WebApplicationException("Cannot import from uploaded ZIP", e);

@@ -13,6 +13,7 @@ import io.bdeploy.bhive.remote.jersey.BHiveJacksonModule;
 import io.bdeploy.bhive.remote.jersey.BHiveLocatorImpl;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
+import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
@@ -27,11 +28,14 @@ import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.MinionStatusResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.jersey.JerseyEventBroadcaster;
 import io.bdeploy.jersey.JerseyServer;
+import io.bdeploy.jersey.JerseySseActivityReporter;
 import io.bdeploy.jersey.RegistrationTarget;
 import io.bdeploy.jersey.audit.AuditRecord;
 import io.bdeploy.jersey.audit.RollingFileAuditor;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
+import io.bdeploy.jersey.ws.BroadcastingAuthenticatedWebSocket;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.MinionState;
 import io.bdeploy.minion.cli.SlaveTool.SlaveConfig;
@@ -184,7 +188,11 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
             srv.register(SlaveProxyResourceImpl.class);
         }
 
-        srv.register(new MinionCommonBinder(root));
+        BroadcastingAuthenticatedWebSocket activityBc = new BroadcastingAuthenticatedWebSocket(o -> StorageHelper.toRawBytes(o),
+                srv.getKeyStore());
+        srv.registerWebsocketApplication("/activities", activityBc);
+
+        srv.register(new MinionCommonBinder(root, activityBc));
         srv.registerResource(r);
 
         return r;
@@ -193,9 +201,11 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
     private static class MinionCommonBinder extends AbstractBinder {
 
         private final MinionRoot root;
+        private final BroadcastingAuthenticatedWebSocket activityBc;
 
-        public MinionCommonBinder(MinionRoot root) {
+        public MinionCommonBinder(MinionRoot root, BroadcastingAuthenticatedWebSocket activityBc) {
             this.root = root;
+            this.activityBc = activityBc;
         }
 
         @Override
@@ -203,6 +213,7 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
             bind(root).to(MinionRoot.class);
             bind(root).to(Minion.class);
             bind(root.getUsers()).to(AuthService.class);
+            bind(activityBc).named(JerseySseActivityReporter.ACTIVITY_BROADCASTER).to(JerseyEventBroadcaster.class);
         }
     }
 

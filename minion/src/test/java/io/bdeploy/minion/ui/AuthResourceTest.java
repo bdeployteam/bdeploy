@@ -27,7 +27,7 @@ public class AuthResourceTest {
         Response resp = auth.authenticate(new CredentialsDto("Test", "Test"));
         String token = resp.readEntity(String.class);
         ApiAccessToken decoded = SecurityHelper.getInstance().getVerifiedPayload(token, ApiAccessToken.class,
-                backend.getServerStore());
+                backend.getKeyStore());
 
         assertNotNull(decoded);
         assertEquals("Test", decoded.getIssuedTo());

@@ -54,6 +54,18 @@ export class ConfigService {
     });
   }
 
+  public getWsUrl(): string {
+    if (this.config.api.startsWith('https://')) {
+      return this.config.api.replace('https', 'wss').replace('/api', '/ws');
+    } else if (this.config.api.startsWith('/')) {
+      // relative, use browser information to figure out an absolute URL, since WebSockets require this.
+      const url = new URL(window.location.href);
+      return 'wss://' + url.host + '/ws';
+    } else {
+      throw new Error('Cannot figure out WebSocket URL');
+    }
+  }
+
   public getBackendInfo(): Observable<BackendInfoDto> {
     return this.http.get<BackendInfoDto>(environment.apiUrl + '/backend-info/version');
   }

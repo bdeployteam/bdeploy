@@ -11,6 +11,7 @@ import io.bdeploy.bhive.cli.ServeTool.ServeConfig;
 import io.bdeploy.bhive.remote.jersey.BHiveJacksonModule;
 import io.bdeploy.bhive.remote.jersey.BHiveLocatorImpl;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
+import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.ExistingPathValidator;
@@ -18,6 +19,7 @@ import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.jersey.JerseyServer;
+import io.bdeploy.jersey.ws.BroadcastingAuthenticatedWebSocket;
 
 /**
  * Starts a HTTP(S) server which serves given {@link BHive}s other the network.
@@ -84,6 +86,11 @@ public class ServeTool extends ConfiguredCliTool<ServeConfig> {
             for (Map.Entry<String, BHive> entry : hives.entrySet()) {
                 reg.register(entry.getKey(), entry.getValue());
             }
+
+            // WebSocket activity reporter bridge
+            BroadcastingAuthenticatedWebSocket activityBc = new BroadcastingAuthenticatedWebSocket(
+                    o -> StorageHelper.toRawBytes(o), server.getKeyStore());
+            server.registerWebsocketApplication("/activities", activityBc);
 
             // locator will create nested resources on demand.
             server.registerResource(reg);

@@ -4,8 +4,8 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { cloneDeep, isEqual } from 'lodash';
-import { EventSourcePolyfill } from 'ng-event-source';
 import { DragulaService } from 'ng2-dragula';
+import ReconnectingWebSocket from 'reconnecting-websocket';
 import { forkJoin, Observable, of, Subscription } from 'rxjs';
 import { catchError, finalize, mergeMap } from 'rxjs/operators';
 import { isUpdateFailed, isUpdateInProgress, isUpdateSuccess, UpdateStatus } from 'src/app/models/update.model';
@@ -121,7 +121,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   public nextAutoRefreshSec: number;
 
   private subscriptions = new Subscription();
-  private updateEvents: EventSourcePolyfill;
+  private ws: ReconnectingWebSocket;
   private lastStateReload = 0;
 
   public updateDto: MinionUpdateDto;
@@ -157,9 +157,9 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.route.params.subscribe((p: Params) => {
         // clean up.
-        if (this.updateEvents) {
-          this.updateEvents.close();
-          this.updateEvents = null;
+        if (this.ws) {
+          this.ws.close();
+          this.ws = null;
         }
 
         this.loading = true;
@@ -175,11 +175,11 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
           this.doTriggerProcessStatusUpdate();
         }
 
-        this.updateEvents = this.eventService.getUpdateEventSource();
-        this.updateEvents.onerror = err => {
+        this.ws = this.eventService.createInstanceUpdatesWebSocket();
+        this.ws.addEventListener('error', err => {
           this.systemService.backendUnreachable();
-        };
-        this.updateEvents.addEventListener(this.uuidParam, e => this.onRemoteInstanceUpdate(e as MessageEvent));
+        });
+        this.ws.addEventListener('message', e => this.onRemoteInstanceUpdate(e));
       }),
     );
     this.subscriptions.add(this.processService.subscribe(() => this.onProcessStatusChanged()));
@@ -221,29 +221,39 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       clearInterval(this.autoRefreshHandle);
     }
 
-    if (this.updateEvents) {
-      this.updateEvents.close();
-      this.updateEvents = null;
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
     }
   }
 
   private onRemoteInstanceUpdate(event: MessageEvent) {
-    const dto = JSON.parse(event.data) as InstanceUpdateEventDto;
+    const blob = event.data as Blob;
+    const r = new FileReader();
+    r.onload = () => {
+      const dto = JSON.parse(r.result as string) as InstanceUpdateEventDto;
 
-    // we need to wait a little here before checking as the event may be fired even before we
-    // finished our remote call in case /we/ are updating the instance, let along the loading
-    // of the new instance version after updating. So the timeout is generous.
-    if (dto.type === InstanceUpdateEventType.CREATE) {
-      setTimeout(() => this.onRemoteInstanceUpdateDirect(dto.key), 500);
-    } else if (dto.type === InstanceUpdateEventType.STATE_CHANGE) {
-      setTimeout(() => {
-        // avoid reload if we did it ourselves. still delay a little as the event may arrive
-        // before the actual call returned and a reload was initiated by the instance version card.
-        if (new Date().getTime() - this.lastStateReload >= 150) {
-          this.loadDeploymentStates(() => {});
-        }
-      }, 100);
-    }
+      // check if the instance ID is the correct one
+      if (!dto.key.name.startsWith(this.uuidParam)) {
+        return;
+      }
+
+      // we need to wait a little here before checking as the event may be fired even before we
+      // finished our remote call in case /we/ are updating the instance, let along the loading
+      // of the new instance version after updating. So the timeout is generous.
+      if (dto.type === InstanceUpdateEventType.CREATE) {
+        setTimeout(() => this.onRemoteInstanceUpdateDirect(dto.key), 500);
+      } else if (dto.type === InstanceUpdateEventType.STATE_CHANGE) {
+        setTimeout(() => {
+          // avoid reload if we did it ourselves. still delay a little as the event may arrive
+          // before the actual call returned and a reload was initiated by the instance version card.
+          if (new Date().getTime() - this.lastStateReload >= 150) {
+            this.loadDeploymentStates(() => {});
+          }
+        }, 100);
+      }
+    };
+    r.readAsText(blob);
   }
 
   private onRemoteInstanceUpdateDirect(newKey: ManifestKey) {
