@@ -13,7 +13,7 @@ describe('User Accounts Test', function() {
 
     cy.screenshot('BDeploy_UserAccounts');
 
-    cy.createUser(demoUser, 'Test account', demoUser + mailDomain, 'demo', true);
+    cy.createUser(demoUser, 'Demo account', demoUser + mailDomain, 'demo', true);
     cy.searchUser(demoUser);
   })
 
@@ -47,9 +47,8 @@ describe('User Accounts Test', function() {
 
   it('Sets a global capability for the user', function() {
     cy.waitUntilContentLoaded();
-    cy.setGlobalCapability(demoUser, 'WRITE');
+    cy.setGlobalCapability(demoUser, 'WRITE', true);
     cy.contains('td', 'WRITE').should('exist');
-    cy.screenshot('BDeploy_UserAccounts_GlobalCapabilities');
   })
 
   it('Removes the global capability for the user', function() {

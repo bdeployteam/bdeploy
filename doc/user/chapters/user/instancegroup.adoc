@@ -13,12 +13,32 @@ The name of an instance group cannot be changed. Be carful when choosing the nam
 
 The _Automatic Cleanup_ option helps to reduce the amount of consumed hard disk space. During the lifetime of an *Instance Group*, probably many new versions of a *Product* are deployed. To avoid that the hard disk is filled up with *Product Versions* that are not used anymore, there is an option to activate an automatic cleanup job. If the option _Automatic Cleanup_ is enabled, old *Product Versions* that are no longer in use by *Instances* of this *Instance Group* are deleted automatically. To avoid that a *Product* vanishes completely, the very latest *Product Version* always remains.
 
-All the configured *Instance Groups* are shown in the *Instance Groups* dialog. This page shows a list of _recently used_ *Instance Groups* in the first row. It will always contain the most recently used *Instance Groups* for the logged in user. This allows allows a quick return to previously/frequently visited *Instance Groups*.
+==== Instance Group Access
+
+A new *Instance Group* is initially only visible to users with global read permission (or higher).
+
+image::images/BDeploy_Demo_Permissions_Global.png[Global Instance Group Permissions, align=center, width=480, link="images/BDeploy_Demo_Permissions_Global.png"]
+
+Use the btn:[+] button to add a user to the list. The input field suggests matching users from the list of all users.
+
+image::images/BDeploy_Demo_Permissions_AddUser1.png[Grant Read Access to an Instance Group, align=center, width=480, link="images/BDeploy_Demo_Permissions_AddUser1.png"]
+
+Adding a user grants read access to the *Instance Group*. The bin icon in the last column removes the user from the list. Users with global read permission cannot be removed.
+
+image::images/BDeploy_Demo_Permissions_AddUser2.png[Grant Read Access to an Instance Group, align=center, width=480, link="images/BDeploy_Demo_Permissions_AddUser2.png"]
+
+Write access and administration permissions for an *Instance Group* can be granted and revoked using the checkbox in the respective column.
+
+==== Instance Group Dialog
+
+All *Instance Groups* that are visible to the user are shown in the *Instance Groups* dialog. This page shows a list of _recently used_ *Instance Groups* in the first row. It will always contain the most recently used *Instance Groups* for the logged in user. This allows allows a quick return to previously/frequently visited *Instance Groups*.
 
 image::images/BDeploy_Demo_IG.png[Demo Instance Group, align=center, width=480, link="images/BDeploy_Demo_IG.png"]
 
 [NOTE]
 Of course you can also bookmark the location of an *Instance Group* in your browser.
+
+==== Initial Steps
 
 Click on an *Instance Group* to open the *Instance Browser* of this group. Here you can see all *Instances* grouped by their _purpose_ (can be `DEVELOPMENT`, `TEST`, `PRODUCTIVE`)
 

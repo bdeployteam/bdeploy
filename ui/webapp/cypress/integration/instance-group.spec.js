@@ -75,17 +75,15 @@ describe('Instance Group Tests', () => {
   })
 
   it('Grants/revokes admin and write permissions to globalRead user', function() {
+    cy.screenshot('BDeploy_Demo_Permissions_Global');
+
     cy.contains('tr', globalRead).within(() => {
       // grant admin
       cy.get('mat-icon[data-cy="grant-admin"]').click();
       // check admin + write
       cy.get('mat-icon[data-cy="revoke-write"]').should('exist');
       cy.get('mat-icon[data-cy="revoke-admin"]').should('exist');
-    });
 
-    cy.screenshot('BDeploy_Demo_IG_Permissions_Global');
-
-    cy.contains('tr', globalRead).within(() => {
       // revoke admin
       cy.get('mat-icon[data-cy="revoke-admin"]').click();
       // check write

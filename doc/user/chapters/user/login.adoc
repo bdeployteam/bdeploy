@@ -4,7 +4,7 @@ Each user needs to authenticate with a username and password in order to get acc
 
 image::images/BDeploy_Login.png[BDeploy Login, align=center, width=480, link="images/BDeploy_Login.png"]
 
-After an successful login the main page is shown which lists all available *Instance Groups*.
+After a successful login the main page is shown with all *Instance Groups* that the user is permitted to see.
 
 Clicking on the hamburger menu in the top-left corner provides access to the various other parts of the system.
 

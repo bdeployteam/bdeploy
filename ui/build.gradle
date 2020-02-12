@@ -120,6 +120,8 @@ task runCypressHeadless(type: Exec, dependsOn: updateFixtures) {
 
 task updateDocuScreenshots(type: Copy, dependsOn: runCypressHeadless) {
     from fileTree(dir: "${webappDir}/cypress/screenshots/docu.spec.js").matching { include "*.png" }
+    from fileTree(dir: "${webappDir}/cypress/screenshots/instance-group.spec.js").matching { include "*.png" }
+    from fileTree(dir: "${webappDir}/cypress/screenshots/user.spec.js").matching { include "*.png" }
     into new File(project(":doc").projectDir, "user/images")
 
     doLast {  
