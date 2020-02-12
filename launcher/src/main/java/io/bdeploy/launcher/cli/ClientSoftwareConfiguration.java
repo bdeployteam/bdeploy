@@ -11,7 +11,18 @@ import io.bdeploy.bhive.model.Manifest;
 public class ClientSoftwareConfiguration {
 
     /**
+     * The key of the launcher required for this software.
+     * <p>
+     * This key is ONLY written in case that launching of the application is delegated to another launcher.
+     * </p>
+     */
+    public Manifest.Key launcher;
+
+    /**
      * The software that is required by the application.
+     * <p>
+     * This key is ONLY written in case that the application is directly launched.
+     * </p>
      */
     public Collection<Manifest.Key> requiredSoftware = new ArrayList<>();
 
