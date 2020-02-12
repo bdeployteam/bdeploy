@@ -4,7 +4,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.POST;
 
-import io.bdeploy.jersey.JerseyEventBroadcaster;
+import io.bdeploy.jersey.ws.JerseyEventBroadcaster;
 import io.bdeploy.ui.api.ManagedServersAttachEventResource;
 
 public class ManagedServersAttachEventResourceImpl implements ManagedServersAttachEventResource {

@@ -1,4 +1,4 @@
-package io.bdeploy.jersey;
+package io.bdeploy.jersey.activity;
 
 import java.io.IOException;
 import java.util.function.Supplier;
@@ -8,13 +8,13 @@ import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.ext.Provider;
 
 @Provider
-public class JerseySseActivityProxyClientFilter implements ClientRequestFilter {
+public class JerseyRemoteActivityScopeClientFilter implements ClientRequestFilter {
 
     public static final String PROXY_SCOPE_HEADER = "X-Proxy-Activity-Scope";
 
     private final Supplier<String> proxyScope;
 
-    public JerseySseActivityProxyClientFilter(Supplier<String> proxyScope) {
+    public JerseyRemoteActivityScopeClientFilter(Supplier<String> proxyScope) {
         this.proxyScope = proxyScope;
     }
 

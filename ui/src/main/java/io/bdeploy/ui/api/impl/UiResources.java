@@ -6,9 +6,9 @@ import org.glassfish.grizzly.http.server.CLStaticHttpHandler;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 import io.bdeploy.bhive.util.StorageHelper;
-import io.bdeploy.jersey.JerseyEventBroadcaster;
 import io.bdeploy.jersey.RegistrationTarget;
 import io.bdeploy.jersey.ws.BroadcastingAuthenticatedWebSocket;
+import io.bdeploy.jersey.ws.JerseyEventBroadcaster;
 import io.bdeploy.ui.ProductTransferService;
 import io.bdeploy.ui.api.ManagedServersAttachEventResource;
 

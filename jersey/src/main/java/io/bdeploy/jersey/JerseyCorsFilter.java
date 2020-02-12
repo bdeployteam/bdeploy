@@ -10,6 +10,8 @@ import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 
+import io.bdeploy.jersey.activity.JerseyRemoteActivityScopeClientFilter;
+
 /**
  * Allow CORS for testing.
  * <p>
@@ -64,7 +66,7 @@ public class JerseyCorsFilter implements ContainerResponseFilter, ContainerReque
                         // put it in this list. And remove the ones you don't want.
                         "X-Requested-With, Authorization, Accept-Version, Content-Type, Content-MD5, CSRF-Token, "
                                 + "X-No-Global-Error-Handling, " // dummy header to supress error handling in web-app.
-                                + JerseySseActivityProxyClientFilter.PROXY_SCOPE_HEADER + ", "
+                                + JerseyRemoteActivityScopeClientFilter.PROXY_SCOPE_HEADER + ", "
                                 + JerseyOnBehalfOfFilter.ON_BEHALF_OF_HEADER);
             }
 

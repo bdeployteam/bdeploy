@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.net.URI;
 import java.security.KeyStore;
 
+import javax.ws.rs.core.UriBuilder;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -82,6 +84,13 @@ public class RemoteService implements Serializable {
      */
     public String getAuthPack() {
         return authPack;
+    }
+
+    /**
+     * @return a URI which can be used to connect to WebSockets on the given remote, following the standard pattern
+     */
+    public URI getWebSocketUri(String path) {
+        return UriBuilder.fromUri(getUri()).scheme("wss").replacePath("/ws").path(path).build();
     }
 
     @Override

@@ -2,7 +2,6 @@ apply plugin: 'java-library'
 
 dependencies {
     implementation(
-        'org.glassfish.jersey.media:jersey-media-sse:2.29.1',
         'org.glassfish.jersey.ext:jersey-proxy-client:2.29.1',
         'javax.xml.bind:jaxb-api:2.3.1',
         'org.glassfish.jaxb:jaxb-runtime:2.3.2',
@@ -20,6 +19,7 @@ dependencies {
         'org.glassfish.jersey.containers:jersey-container-grizzly2-http:2.29.1',
         'org.glassfish.jersey.media:jersey-media-multipart:2.29.1',
         'org.glassfish.grizzly:grizzly-websockets:2.4.4',
+        'org.glassfish.grizzly:grizzly-http-client:1.16',
     )
 }
 

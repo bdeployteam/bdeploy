@@ -89,8 +89,8 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
                 r.setUpdateManager(new JerseyAwareMinionUpdateManager(srv));
                 r.onStartup();
 
-                delegate.setDelegate(srv.getSseActivityReporter());
-                registerMasterResources(srv, config.publishWebapp(), config.allowCors(), r, srv.getSseActivityReporter());
+                delegate.setDelegate(srv.getRemoteActivityReporter());
+                registerMasterResources(srv, config.publishWebapp(), config.allowCors(), r, srv.getRemoteActivityReporter());
 
                 srv.start();
                 srv.join();

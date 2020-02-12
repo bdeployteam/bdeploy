@@ -58,6 +58,9 @@ import io.bdeploy.common.util.NamedDaemonThreadFactory;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.JerseyAuthenticationUnprovider;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.JerseyAuthenticationWeakenerProvider;
+import io.bdeploy.jersey.activity.JerseyBroadcastingActivityReporter;
+import io.bdeploy.jersey.activity.JerseyRemoteActivityResourceImpl;
+import io.bdeploy.jersey.activity.JerseyRemoteActivityScopeServerFilter;
 import io.bdeploy.jersey.audit.Auditor;
 import io.bdeploy.jersey.audit.Log4jAuditor;
 import io.bdeploy.jersey.resources.JerseyMetricsResourceImpl;
@@ -150,7 +153,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
     /**
      * @return an {@link ActivityReporter} which can broadcast to remote.
      */
-    public ActivityReporter getSseActivityReporter() {
+    public ActivityReporter getRemoteActivityReporter() {
         return reporterDelegate;
     }
 
@@ -231,9 +234,9 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             rc.register(JerseyMetricsResourceImpl.class);
             rc.register(JerseyAuditingFilter.class);
             rc.register(JerseyExceptionMapper.class);
-            rc.register(JerseySseActivityResourceImpl.class);
-            rc.register(JerseySseActivityScopeFilter.class);
-            rc.register(new JerseyLazySseInitializer());
+            rc.register(JerseyRemoteActivityResourceImpl.class);
+            rc.register(JerseyRemoteActivityScopeServerFilter.class);
+            rc.register(new JerseyLazyReporterInitializer());
             rc.register(new JerseyServerReporterContextResolver());
             rc.register(new JerseyWriteLockFilter());
 
@@ -333,7 +336,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
         protected void configure() {
             Function<ApiAccessToken, String> signer = a -> SecurityHelper.getInstance().createToken(a, store, passphrase);
 
-            bind(JerseySseActivityReporter.class).in(Singleton.class).to(JerseySseActivityReporter.class);
+            bind(JerseyBroadcastingActivityReporter.class).in(Singleton.class).to(JerseyBroadcastingActivityReporter.class);
             bind(JerseyWriteLockService.class).in(Singleton.class).to(JerseyWriteLockService.class);
             bind(startTime).named(START_TIME).to(Instant.class);
             bind(broadcastScheduler).named(BROADCAST_EXECUTOR).to(ScheduledExecutorService.class);
@@ -345,7 +348,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             bindFactory(new JerseyAuditorBridgeFactory()).to(Auditor.class);
 
             // need to bridge over to the same instance as used for the singleton sse activity reporter.
-            bindFactory(JerseySseToActivityReporterBridgeFactory.class).to(ActivityReporter.class);
+            bindFactory(JerseyRemoteActivityReporterBridgeFactory.class).to(ActivityReporter.class);
         }
 
     }
@@ -368,12 +371,12 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
     }
 
     /**
-     * Provides the instance of {@link JerseySseActivityReporter} when an {@link ActivityReporter} is requested for injection.
+     * Provides the instance of {@link JerseyBroadcastingActivityReporter} when an {@link ActivityReporter} is requested for injection.
      */
-    private static class JerseySseToActivityReporterBridgeFactory implements Factory<ActivityReporter> {
+    private static class JerseyRemoteActivityReporterBridgeFactory implements Factory<ActivityReporter> {
 
         @Inject
-        private JerseySseActivityReporter reporter;
+        private JerseyBroadcastingActivityReporter reporter;
 
         @Override
         public ActivityReporter provide() {
@@ -388,15 +391,15 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
     }
 
     /**
-     * Updates the delegate {@link ActivityReporter} of the {@link JerseyServer} to the resolved {@link JerseySseActivityReporter}
+     * Updates the delegate {@link ActivityReporter} of the {@link JerseyServer} to the resolved {@link JerseyBroadcastingActivityReporter}
      * once it is available for injection.
      */
-    private class JerseyLazySseInitializer implements ContainerLifecycleListener {
+    private class JerseyLazyReporterInitializer implements ContainerLifecycleListener {
 
         @Override
         public void onStartup(Container container) {
             reporterDelegate.setDelegate(
-                    container.getApplicationHandler().getInjectionManager().getInstance(JerseySseActivityReporter.class));
+                    container.getApplicationHandler().getInjectionManager().getInstance(JerseyBroadcastingActivityReporter.class));
         }
 
         @Override

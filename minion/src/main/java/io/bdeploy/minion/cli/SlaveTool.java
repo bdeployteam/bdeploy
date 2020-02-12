@@ -28,14 +28,14 @@ import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.MinionStatusResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
-import io.bdeploy.jersey.JerseyEventBroadcaster;
 import io.bdeploy.jersey.JerseyServer;
-import io.bdeploy.jersey.JerseySseActivityReporter;
 import io.bdeploy.jersey.RegistrationTarget;
+import io.bdeploy.jersey.activity.JerseyBroadcastingActivityReporter;
 import io.bdeploy.jersey.audit.AuditRecord;
 import io.bdeploy.jersey.audit.RollingFileAuditor;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.jersey.ws.BroadcastingAuthenticatedWebSocket;
+import io.bdeploy.jersey.ws.JerseyEventBroadcaster;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.MinionState;
 import io.bdeploy.minion.cli.SlaveTool.SlaveConfig;
@@ -120,8 +120,8 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
                 root.setUpdateManager(new JerseyAwareMinionUpdateManager(srv));
                 root.onStartup();
 
-                delegate.setDelegate(srv.getSseActivityReporter());
-                registerCommonResources(srv, root, srv.getSseActivityReporter());
+                delegate.setDelegate(srv.getRemoteActivityReporter());
+                registerCommonResources(srv, root, srv.getRemoteActivityReporter());
                 root.setupServerTasks(false, null);
 
                 srv.start();
@@ -213,7 +213,7 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
             bind(root).to(MinionRoot.class);
             bind(root).to(Minion.class);
             bind(root.getUsers()).to(AuthService.class);
-            bind(activityBc).named(JerseySseActivityReporter.ACTIVITY_BROADCASTER).to(JerseyEventBroadcaster.class);
+            bind(activityBc).named(JerseyBroadcastingActivityReporter.ACTIVITY_BROADCASTER).to(JerseyEventBroadcaster.class);
         }
     }
 

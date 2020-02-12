@@ -1,4 +1,4 @@
-package io.bdeploy.jersey;
+package io.bdeploy.jersey.activity;
 
 import java.util.List;
 import java.util.concurrent.atomic.LongAdder;
@@ -12,13 +12,13 @@ import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.ActivitySnapshot;
 import io.bdeploy.common.util.UuidHelper;
 
-final class JerseySseActivity implements Activity {
+final class JerseyRemoteActivity implements Activity {
 
-    private static final Logger log = LoggerFactory.getLogger(JerseySseActivity.class);
+    private static final Logger log = LoggerFactory.getLogger(JerseyRemoteActivity.class);
 
     private final String name;
-    private final Consumer<JerseySseActivity> onDone;
-    private final Consumer<JerseySseActivity> onCancel;
+    private final Consumer<JerseyRemoteActivity> onDone;
+    private final Consumer<JerseyRemoteActivity> onCancel;
     private final LongSupplier maxWork;
     private final LongSupplier currentWork;
     private final long start;
@@ -32,7 +32,7 @@ final class JerseySseActivity implements Activity {
 
     private final String user;
 
-    public JerseySseActivity(Consumer<JerseySseActivity> onDone, String name, LongSupplier maxWork, LongSupplier currentWork,
+    public JerseyRemoteActivity(Consumer<JerseyRemoteActivity> onDone, String name, LongSupplier maxWork, LongSupplier currentWork,
             List<String> scope, String user) {
         this.onDone = onDone;
         this.name = name;
@@ -47,11 +47,11 @@ final class JerseySseActivity implements Activity {
         // wire activities by UUID. this is done so that serialization of activity "trees" stays
         // as flat as it is - otherwise too much traffic to clients would be produced. Clients
         // need to convert the flat list of activities to a tree representation when interested.
-        JerseySseActivity parent = JerseySseActivityReporter.currentActivity.get();
+        JerseyRemoteActivity parent = JerseyBroadcastingActivityReporter.currentActivity.get();
         if (parent != null) {
             this.parentUuid = parent.uuid;
         }
-        JerseySseActivityReporter.currentActivity.set(this);
+        JerseyBroadcastingActivityReporter.currentActivity.set(this);
 
         if (log.isTraceEnabled()) {
             log.trace("Begin: [{}] {}", uuid, name);
@@ -59,9 +59,9 @@ final class JerseySseActivity implements Activity {
     }
 
     /**
-     * Directly create an activity - used by {@link JerseySseActivityProxy}
+     * Directly create an activity - used by {@link JerseyRemoveActivityProxy}
      */
-    JerseySseActivity(Consumer<JerseySseActivity> onDone, Consumer<JerseySseActivity> onCancel, String name, LongSupplier maxWork,
+    JerseyRemoteActivity(Consumer<JerseyRemoteActivity> onDone, Consumer<JerseyRemoteActivity> onCancel, String name, LongSupplier maxWork,
             LongSupplier currentWork, List<String> scope, String user, long start, String uuid, String parentUuid) {
         this.onDone = onDone;
         this.onCancel = onCancel;

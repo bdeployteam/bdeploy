@@ -218,6 +218,13 @@ public class SecurityHelper {
     }
 
     /**
+     * Extract the pure token (required for HTTPS authentication) from a signature pack.
+     */
+    public String getTokenFromPack(String pack) {
+        return SignaturePack.parse(pack).t;
+    }
+
+    /**
      * @param clazz the type of the payload to deserialize
      * @param t the raw encrypted and signed payload
      * @param cert the certificate to use to check the signature against.

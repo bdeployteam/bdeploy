@@ -1,4 +1,4 @@
-package io.bdeploy.jersey;
+package io.bdeploy.jersey.activity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,8 +21,11 @@ import org.glassfish.jersey.server.model.ResourceMethod;
 
 import com.google.common.base.Splitter;
 
+import io.bdeploy.jersey.ActivityScope;
+import io.bdeploy.jersey.JerseyScopeService;
+
 @Provider
-public class JerseySseActivityScopeFilter implements ContainerRequestFilter {
+public class JerseyRemoteActivityScopeServerFilter implements ContainerRequestFilter {
 
     @Inject
     private javax.inject.Provider<MultivaluedParameterExtractorProvider> mpep;
@@ -36,7 +39,7 @@ public class JerseySseActivityScopeFilter implements ContainerRequestFilter {
         if (plainInfo instanceof ExtendedUriInfo) {
             List<String> scope = new ArrayList<>();
 
-            String proxyScope = requestContext.getHeaderString(JerseySseActivityProxyClientFilter.PROXY_SCOPE_HEADER);
+            String proxyScope = requestContext.getHeaderString(JerseyRemoteActivityScopeClientFilter.PROXY_SCOPE_HEADER);
             if (proxyScope != null) {
                 if (proxyScope.contains(",")) {
                     scope.addAll(Splitter.on(',').splitToList(proxyScope));

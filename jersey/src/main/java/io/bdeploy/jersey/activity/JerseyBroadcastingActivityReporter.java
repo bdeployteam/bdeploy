@@ -1,4 +1,4 @@
-package io.bdeploy.jersey;
+package io.bdeploy.jersey.activity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,17 +20,20 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivitySnapshot;
 import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.jersey.JerseyScopeService;
+import io.bdeploy.jersey.JerseyServer;
+import io.bdeploy.jersey.ws.JerseyEventBroadcaster;
 
 /**
  * An activity reporter which exposes currently running activities to be broadcasted via SSE
  */
 @Service
-public class JerseySseActivityReporter implements ActivityReporter {
+public class JerseyBroadcastingActivityReporter implements ActivityReporter {
 
     public static final String ACTIVITY_BROADCASTER = "JerseyActivityBroadcaster";
 
-    private static final Logger log = LoggerFactory.getLogger(JerseySseActivityReporter.class);
-    static final ThreadLocal<JerseySseActivity> currentActivity = new ThreadLocal<>();
+    private static final Logger log = LoggerFactory.getLogger(JerseyBroadcastingActivityReporter.class);
+    static final ThreadLocal<JerseyRemoteActivity> currentActivity = new ThreadLocal<>();
 
     @Inject
     private JerseyScopeService jss;
@@ -43,7 +46,7 @@ public class JerseySseActivityReporter implements ActivityReporter {
     private boolean lastBroadcastWasEmpty;
 
     @Inject
-    public JerseySseActivityReporter(@Named(JerseyServer.BROADCAST_EXECUTOR) ScheduledExecutorService scheduler) {
+    public JerseyBroadcastingActivityReporter(@Named(JerseyServer.BROADCAST_EXECUTOR) ScheduledExecutorService scheduler) {
         scheduler.scheduleAtFixedRate(this::sendUpdate, 1, 1, TimeUnit.SECONDS);
     }
 
@@ -52,7 +55,7 @@ public class JerseySseActivityReporter implements ActivityReporter {
             return;
         }
 
-        List<ActivitySnapshot> list = getGlobalActivities().stream().filter(Objects::nonNull).map(JerseySseActivity::snapshot)
+        List<ActivitySnapshot> list = getGlobalActivities().stream().filter(Objects::nonNull).map(JerseyRemoteActivity::snapshot)
                 .collect(Collectors.toList());
 
         if (list.isEmpty() && lastBroadcastWasEmpty) {
@@ -67,7 +70,7 @@ public class JerseySseActivityReporter implements ActivityReporter {
     /**
      * All running activities.
      */
-    private final List<JerseySseActivity> globalActivities = new ArrayList<>();
+    private final List<JerseyRemoteActivity> globalActivities = new ArrayList<>();
 
     @Override
     public Activity start(String activity) {
@@ -81,24 +84,24 @@ public class JerseySseActivityReporter implements ActivityReporter {
 
     @Override
     public synchronized Activity start(String activity, LongSupplier maxValue, LongSupplier currentValue) {
-        List<String> scope = JerseySseActivityScopeFilter.getRequestActivityScope(jss);
+        List<String> scope = JerseyRemoteActivityScopeServerFilter.getRequestActivityScope(jss);
         String user = jss.getUser();
 
-        JerseySseActivity act = new JerseySseActivity(this::done, activity, maxValue, currentValue, scope, user);
+        JerseyRemoteActivity act = new JerseyRemoteActivity(this::done, activity, maxValue, currentValue, scope, user);
         globalActivities.add(act);
         return act;
     }
 
-    private synchronized void done(JerseySseActivity act) {
+    private synchronized void done(JerseyRemoteActivity act) {
         if (!globalActivities.contains(act)) {
             return; // already done.
         }
 
-        JerseySseActivity current = currentActivity.get();
+        JerseyRemoteActivity current = currentActivity.get();
         if (current != null && current.getUuid().equals(act.getUuid())) {
             // current is the one we're finishing
             if (act.getParentUuid() != null) {
-                JerseySseActivity parent = globalActivities.stream().filter(Objects::nonNull)
+                JerseyRemoteActivity parent = globalActivities.stream().filter(Objects::nonNull)
                         .filter(a -> a.getUuid().equals(act.getParentUuid())).findFirst().orElse(null);
                 if (parent != null) {
                     currentActivity.set(parent);
@@ -121,32 +124,32 @@ public class JerseySseActivityReporter implements ActivityReporter {
 
     @Override
     public NoThrowAutoCloseable proxyActivities(RemoteService service) {
-        return new JerseySseActivityProxy(service, this);
+        return new JerseyRemoveActivityProxy(service, this);
     }
 
     /**
      * @return (a copy of) all currently known activities
      */
-    synchronized List<JerseySseActivity> getGlobalActivities() {
+    synchronized List<JerseyRemoteActivity> getGlobalActivities() {
         return new ArrayList<>(globalActivities);
     }
 
-    synchronized void addProxyActivity(JerseySseActivity act) {
+    synchronized void addProxyActivity(JerseyRemoteActivity act) {
         globalActivities.add(act);
     }
 
-    synchronized void removeProxyActivity(JerseySseActivity act) {
+    synchronized void removeProxyActivity(JerseyRemoteActivity act) {
         globalActivities.remove(act);
     }
 
     /**
      * @return the current activity on the calling thread.
      */
-    JerseySseActivity getCurrentActivity() {
+    JerseyRemoteActivity getCurrentActivity() {
         return currentActivity.get();
     }
 
-    JerseySseActivity getActivityById(String uuid) {
+    JerseyRemoteActivity getActivityById(String uuid) {
         return globalActivities.stream().filter(Objects::nonNull).filter(a -> a.getUuid().equals(uuid)).findAny().orElse(null);
     }
 
