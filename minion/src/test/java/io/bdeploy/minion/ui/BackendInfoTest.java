@@ -14,7 +14,7 @@ public class BackendInfoTest {
 
     @Test
     void testVersion(BackendInfoResource rsrc) {
-        assertEquals(VersionHelper.tryParse(VersionHelper.readVersion()), rsrc.getVersion().version);
+        assertEquals(VersionHelper.getVersion(), rsrc.getVersion().version);
     }
 
 }

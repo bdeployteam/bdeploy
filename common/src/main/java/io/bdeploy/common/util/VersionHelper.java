@@ -10,28 +10,39 @@ import io.bdeploy.common.Version;
 
 public class VersionHelper {
 
-    public static final String UNKNOWN = "Unknown";
     private static final Pattern V_PATTERN = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)([-\\.].*)*");
+    public static final Version UNDEFINED = VersionHelper.parse("0.0.0");
+
+    private static final Version version;
+    private static final Properties properties = readProperties();
+    static {
+        if (!properties.containsKey("version")) {
+            properties.put("version", "0.0.0");
+        }
+        version = parse(properties.getProperty("version"));
+    }
 
     private VersionHelper() {
     }
 
-    public static String readVersion() {
-        Properties props = readProperties();
-        if (props == null) {
-            return UNKNOWN;
-        }
-        return props.getProperty("version");
+    public static Version getVersion() {
+        return version;
     }
 
-    public static Properties readProperties() {
+    public static Properties getProperties() {
+        Properties copy = new Properties();
+        copy.putAll(properties);
+        return copy;
+    }
+
+    private static Properties readProperties() {
         try (InputStream is = VersionHelper.class.getResourceAsStream("/version.properties")) {
             Properties p = new Properties();
             p.load(is);
 
             return p;
         } catch (IOException | RuntimeException e) {
-            return null;
+            return new Properties();
         }
     }
 
@@ -81,6 +92,12 @@ public class VersionHelper {
         return compare(a, b) == 0;
     }
 
+    /**
+     * Parses the given string into a version. Throws an exception if parsing fails.
+     *
+     * @param v the string to parse
+     * @return the version object. Never {@code null}
+     */
     public static Version parse(String v) {
         Version version = tryParse(v);
         if (version == null) {
@@ -89,6 +106,12 @@ public class VersionHelper {
         return version;
     }
 
+    /**
+     * Tries to parse the given string into a version object.
+     *
+     * @param v the string to parse
+     * @return the version object or {@code null} in case that the string is not a version
+     */
     public static Version tryParse(String v) {
         Matcher matcher = V_PATTERN.matcher(v);
         if (!matcher.matches()) {
@@ -100,6 +123,21 @@ public class VersionHelper {
         } catch (NumberFormatException nfe) {
             return null;
         }
+    }
+
+    /**
+     * Returns whether or not the currently running version is undefined. Typically happens when starting the minion in the
+     * development environment.
+     */
+    public static boolean isRunningUndefined() {
+        return isUndefined(getVersion());
+    }
+
+    /**
+     * Returns whether or not the given version represents the undefined version.
+     */
+    public static boolean isUndefined(Version version) {
+        return equals(version, UNDEFINED);
     }
 
 }

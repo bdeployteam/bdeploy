@@ -181,7 +181,7 @@ namespace Bdeploy.Installer
             }
             catch (Exception ex)
             {
-                OnError(ex.Message);
+                OnError(ex.ToString());
                 return -1;
             }
             finally

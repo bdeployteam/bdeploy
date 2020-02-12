@@ -23,6 +23,7 @@ import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ObjectListOperation;
 import io.bdeploy.bhive.op.ObjectSizeOperation;
+import io.bdeploy.common.Version;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.UpdateHelper;
@@ -50,10 +51,10 @@ public class MinionUpdateResourceImpl implements MinionUpdateResource {
 
     @Override
     public void prepare(Key key, boolean clean) {
-        String currentVersion = VersionHelper.readVersion();
-        if (currentVersion.equals(VersionHelper.UNKNOWN)) {
-            // cannot prevent at LEAST for unit tests.
-            log.error("I don't know my own version, this might not work well");
+        // cannot prevent at LEAST for unit tests.
+        Version currentVersion = VersionHelper.getVersion();
+        if (VersionHelper.isRunningUndefined()) {
+            log.warn("Running version cannot be determined.");
         }
 
         BHive h = root.getHive();
@@ -90,7 +91,7 @@ public class MinionUpdateResourceImpl implements MinionUpdateResource {
             // clean up any version from the hive which is not the currently running and not the new target version
             SortedSet<String> tagsToKeep = new TreeSet<>();
             tagsToKeep.add(key.getTag());
-            tagsToKeep.add(currentVersion);
+            tagsToKeep.add(currentVersion.toString());
 
             // there is a tiny (acceptable) potential for left-over minion versions: if the 'name' of the
             // to-be installed update diverges from the name of the currently installed version, versions

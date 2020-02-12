@@ -7,7 +7,6 @@ import javax.inject.Inject;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 
-import io.bdeploy.common.Version;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
@@ -30,8 +29,7 @@ public class BackendInfoResourceImpl implements BackendInfoResource {
 
     @Override
     public BackendInfoDto getVersion() {
-        Version version = VersionHelper.tryParse(VersionHelper.readVersion());
-        return new BackendInfoDto(version, minion.getMode());
+        return new BackendInfoDto(VersionHelper.getVersion(), minion.getMode());
     }
 
     @Override

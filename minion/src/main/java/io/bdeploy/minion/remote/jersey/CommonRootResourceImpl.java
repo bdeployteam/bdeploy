@@ -21,7 +21,9 @@ import org.slf4j.LoggerFactory;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.Version;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
@@ -41,6 +43,11 @@ public class CommonRootResourceImpl implements CommonRootResource {
 
     @Context
     private ResourceContext rc;
+
+    @Override
+    public Version getVersion() {
+        return VersionHelper.getVersion();
+    }
 
     @Override
     public List<SoftwareRepositoryConfiguration> getSoftwareRepositories() {

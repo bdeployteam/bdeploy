@@ -27,7 +27,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
@@ -136,9 +135,6 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Context
     private ResourceContext rc;
-
-    @Context
-    private UriInfo info;
 
     @Inject
     private InstanceEventManager iem;
@@ -600,15 +596,21 @@ public class InstanceResourceImpl implements InstanceResource {
                     Status.NOT_FOUND);
         }
 
-        UriBuilder launcherUri = UriBuilder.fromUri(info.getBaseUri());
+        // The URI for the installer will use the URI from the target server
+        // We intentionally do not optimize the installer to use the URI from the central server
+        // so that installers can be shared and used regardless from where they have been downloaded from
+        ClickAndStartDescriptor clickAndStart = getClickAndStartDescriptor(im.getConfiguration().uuid, appConfig.uid);
+        URI baseUri = clickAndStart.host.getUri();
+
+        UriBuilder launcherUri = UriBuilder.fromUri(baseUri);
         launcherUri.path(SoftwareUpdateResource.ROOT_PATH);
         launcherUri.path(SoftwareUpdateResource.DOWNLOAD_LATEST_PATH);
 
-        UriBuilder iconUri = UriBuilder.fromUri(info.getBaseUri());
+        UriBuilder iconUri = UriBuilder.fromUri(baseUri);
         iconUri.path("/group/{group}/instance/");
         iconUri.path(InstanceResource.PATH_DOWNLOAD_APP_ICON);
 
-        UriBuilder splashUrl = UriBuilder.fromUri(info.getBaseUri());
+        UriBuilder splashUrl = UriBuilder.fromUri(baseUri);
         splashUrl.path("/group/{group}/instance/");
         splashUrl.path(InstanceResource.PATH_DOWNLOAD_APP_SPLASH);
 
@@ -619,10 +621,11 @@ public class InstanceResourceImpl implements InstanceResource {
         String fileName = "%1$s (%2$s - %3$s) - Installer";
         if (applicationOs == OperatingSystem.WINDOWS) {
             fileName = fileName + ".exe";
-            createWindowsInstaller(im, appConfig, installerPath, launcherKey, launcherLocation, iconLocation, splashLocation);
+            createWindowsInstaller(im, appConfig, clickAndStart, installerPath, launcherKey, launcherLocation, iconLocation,
+                    splashLocation);
         } else if (applicationOs == OperatingSystem.LINUX || applicationOs == OperatingSystem.MACOS) {
             fileName = fileName + ".run";
-            createLinuxInstaller(im, appConfig, installerPath, launcherKey, launcherLocation, iconLocation);
+            createLinuxInstaller(im, appConfig, clickAndStart, installerPath, launcherKey, launcherLocation, iconLocation);
         } else {
             throw new WebApplicationException("Unsupported OS for installer: " + applicationOs);
         }
@@ -633,8 +636,9 @@ public class InstanceResourceImpl implements InstanceResource {
         return token;
     }
 
-    private void createLinuxInstaller(InstanceManifest im, ApplicationConfiguration appConfig, Path installerPath,
-            ScopedManifestKey launcherKey, URI launcherLocation, URI iconLocation) {
+    private void createLinuxInstaller(InstanceManifest im, ApplicationConfiguration appConfig,
+            ClickAndStartDescriptor clickAndStart, Path installerPath, ScopedManifestKey launcherKey, URI launcherLocation,
+            URI iconLocation) {
         BHive rootHive = reg.get(JerseyRemoteBHive.DEFAULT_NAME);
         Manifest mf = rootHive.execute(new ManifestLoadOperation().setManifest(launcherKey.getKey()));
         TreeEntryLoadOperation findInstallerOp = new TreeEntryLoadOperation().setRootTree(mf.getRoot())
@@ -646,8 +650,6 @@ public class InstanceResourceImpl implements InstanceResource {
         } catch (IOException ioe) {
             throw new WebApplicationException("Cannot create linux installer.", ioe);
         }
-
-        ClickAndStartDescriptor clickAndStart = getClickAndStartDescriptor(im.getConfiguration().uuid, appConfig.uid);
 
         // must match the values required in the installer.tpl file
         Map<String, String> values = new TreeMap<>();
@@ -667,9 +669,9 @@ public class InstanceResourceImpl implements InstanceResource {
         }
     }
 
-    private void createWindowsInstaller(InstanceManifest im, ApplicationConfiguration appConfig, Path installerPath,
-            ScopedManifestKey launcherKey, URI launcherLocation, URI iconLocation, URI splashLocation) {
-        File installer = installerPath.toFile();
+    private void createWindowsInstaller(InstanceManifest im, ApplicationConfiguration appConfig,
+            ClickAndStartDescriptor clickAndStart, Path installerPath, ScopedManifestKey launcherKey, URI launcherLocation,
+            URI iconLocation, URI splashLocation) {
         // Try to load the installer stored in the manifest tree
         BHive rootHive = reg.get(JerseyRemoteBHive.DEFAULT_NAME);
         Manifest mf = rootHive.execute(new ManifestLoadOperation().setManifest(launcherKey.getKey()));
@@ -685,7 +687,7 @@ public class InstanceResourceImpl implements InstanceResource {
         ProductManifest pm = ProductManifest.of(hive, im.getConfiguration().product);
 
         // Brand the executable and embed the required information
-        ClickAndStartDescriptor clickAndStart = getClickAndStartDescriptor(im.getConfiguration().uuid, appConfig.uid);
+        File installer = installerPath.toFile();
         try {
             BrandingConfig config = new BrandingConfig();
             config.remoteService = clickAndStart.host;

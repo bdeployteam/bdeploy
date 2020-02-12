@@ -203,7 +203,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
 
         // Update our own version
         if (myName.equals(minionName)) {
-            Version running = VersionHelper.tryParse(VersionHelper.readVersion());
+            Version running = VersionHelper.getVersion();
             if (!VersionHelper.equals(running, config.version)) {
                 config.version = running;
                 changed = true;
@@ -230,14 +230,14 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
 
     /** Does whatever is required to migrate an older version to the current version */
     private void doMigrate() {
-        String current = VersionHelper.readVersion();
-        if (VersionHelper.UNKNOWN.equals(current)) {
-            log.debug("Skipping migration to {}", current);
+        if (VersionHelper.isRunningUndefined()) {
+            log.debug("Skipping migration as the running version is undefined.");
             return;
         }
 
+        Version current = VersionHelper.getVersion();
         String lastMigrated = getState().fullyMigratedVersion;
-        if (lastMigrated != null && lastMigrated.equals(current)) {
+        if (lastMigrated != null && lastMigrated.equals(current.toString())) {
             // already performed migration, skip
             log.debug("Already fully migrated to {}", lastMigrated);
             return;
@@ -251,7 +251,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         }
 
         // if all migrations succeeded (did not throw), record version
-        modifyState(s -> s.fullyMigratedVersion = current);
+        modifyState(s -> s.fullyMigratedVersion = current.toString());
     }
 
     /**

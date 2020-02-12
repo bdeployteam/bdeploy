@@ -102,7 +102,7 @@ public abstract class ToolBase {
                             streamReporter.setVerboseSummary(reporter == null);
                             break;
                         case "--version":
-                            String version = VersionHelper.readVersion();
+                            String version = VersionHelper.getVersion().toString();
                             System.out.println(version);
                             return;
                         default:

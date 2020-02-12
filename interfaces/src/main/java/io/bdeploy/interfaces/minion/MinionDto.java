@@ -43,7 +43,7 @@ public class MinionDto {
         MinionDto dto = new MinionDto();
         dto.master = isMaster;
         dto.remote = remote;
-        dto.version = VersionHelper.tryParse(VersionHelper.readVersion());
+        dto.version = VersionHelper.getVersion();
         dto.os = OsHelper.getRunningOs();
         return dto;
     }

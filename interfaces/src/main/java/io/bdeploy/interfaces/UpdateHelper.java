@@ -239,7 +239,7 @@ public class UpdateHelper {
      * @return the {@link Key} representing the currently running version of the BDeploy minion.
      */
     public static Key getCurrentKey() {
-        return calculateKeyFromProperties(VersionHelper.readProperties(), OsHelper.getRunningOs());
+        return calculateKeyFromProperties(VersionHelper.getProperties(), OsHelper.getRunningOs());
     }
 
     /**

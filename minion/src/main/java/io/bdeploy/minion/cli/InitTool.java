@@ -139,7 +139,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         state.officialName = hostname;
         state.port = port;
         state.cleanupSchedule = MasterCleanupJob.DEFAULT_CLEANUP_SCHEDULE;
-        state.fullyMigratedVersion = VersionHelper.readVersion();
+        state.fullyMigratedVersion = VersionHelper.getVersion().toString();
         state.mode = mode;
 
         state.deploymentDir = root.resolve("deploy");

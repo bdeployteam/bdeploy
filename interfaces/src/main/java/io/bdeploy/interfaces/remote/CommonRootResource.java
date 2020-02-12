@@ -12,9 +12,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import io.bdeploy.common.Version;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
 import io.bdeploy.jersey.ActivityScope;
+import io.bdeploy.jersey.JerseyAuthenticationProvider.WeakTokenAllowed;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -30,6 +32,11 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public interface CommonRootResource {
+
+    @GET
+    @WeakTokenAllowed
+    @Path("/version")
+    public Version getVersion();
 
     /**
      * Software repository hives contain additional software which can be referenced when building products.
