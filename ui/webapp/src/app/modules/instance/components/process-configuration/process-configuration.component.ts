@@ -1202,6 +1202,9 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
   private getAppAndNodeById(id: string): {app: ApplicationConfiguration, node: InstanceNodeConfigurationDto} {
     for (const node of this.selectedConfig.nodeList.nodeConfigDtos) {
+      if (!node.nodeConfiguration) {
+        continue;
+      }
       for (const app of node.nodeConfiguration.applications) {
         if (app.uid === id) {
           return {app, node};

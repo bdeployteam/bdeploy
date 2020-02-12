@@ -1,5 +1,6 @@
 .container {
   height: 100%;
+  padding: 10px 5px;
 }
 
 .mat-dialog-content {
@@ -34,8 +35,8 @@
 }
 
 .dropZone {
-  height: 50px;
   display: flex;
+  height: 100px;
   justify-content: center;
   align-items: center;
   border: 1px dashed #ccc;

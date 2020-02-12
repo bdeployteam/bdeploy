@@ -24,6 +24,9 @@ export interface UploadData {
   styleUrls: ['./file-upload.component.css']
 })
 export class FileUploadComponent implements OnInit, OnDestroy {
+
+  private readonly log = this.loggingService.getLogger('FileUploadComponent');
+
   @ViewChild('file', { static: true })
   public fileRef: ElementRef;
 
@@ -47,7 +50,6 @@ export class FileUploadComponent implements OnInit, OnDestroy {
   public uploadFinished = true;
 
   private ws: ReconnectingWebSocket;
-  private log = this.loggingService.getLogger('FileUploadComponent');
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public uploadData: UploadData,
@@ -158,6 +160,9 @@ export class FileUploadComponent implements OnInit, OnDestroy {
   }
 
   isInProgress(file: File) {
+    if (!this.getUploadStatus(file)) {
+      return false;
+    }
     if (this.isFinished(file) || this.isFailed(file)) {
       return false;
     }
@@ -283,8 +288,6 @@ export class FileUploadComponent implements OnInit, OnDestroy {
 
     // start the upload and save the progress map
     this.uploads = this.uploadService.upload(this.uploadData.url, this.files);
-
-    //    this.uploads = this.softwareService.uploadSoftware(this.uploadData.softwareRepositoryName, this.files);
     const allObservables = [];
     this.uploads.forEach(e => {
       allObservables.push(e.progressObservable);

@@ -8,8 +8,7 @@
   $warn: map-get($theme, 'warn');
 
   .dropZoneActive {
-    border: 1px dashed mat-color($primary) !important;
-    background-color: mat-color($accent);
+    border: 2px dashed mat-color($primary) !important;
   }
 
   .browseButton {

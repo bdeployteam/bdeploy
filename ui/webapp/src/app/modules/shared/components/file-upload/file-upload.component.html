@@ -1,7 +1,7 @@
-<div class="container" fxLayout="column" fxLayoutAlign="space-evenly stretch">
+<div class="container" fxLayout="column" fxLayoutAlign="space-evenly stretch" appFileDrop (filesDropped)="handleDrop($event)" (filesHovered)="dropZoneState($event)" [ngClass]="{'dropZoneActive': dropZoneActive}">
     <h1 mat-dialog-title>{{uploadData.title}}</h1>
     <p>{{uploadData.headerMessage}}</p>
-    <div class="dropZone" appFileDrop (filesDropped)="handleDrop($event)" (filesHovered)="dropZoneState($event)" [ngClass]="{'dropZoneActive': dropZoneActive}">
+    <div class="dropZone">
         <mat-icon class="dropZoneIcon">cloud_upload</mat-icon>
         <span class="dropZoneText">Drop files to upload, or&nbsp;</span>
         <button [disabled]="uploading" (click)="addFiles()" class="browseButton">browse.</button>
