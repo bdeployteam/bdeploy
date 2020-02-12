@@ -8,6 +8,8 @@ import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import javax.annotation.Priority;
@@ -18,6 +20,7 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.ext.Provider;
 
 import org.glassfish.grizzly.http.server.HttpHandler;
+import org.glassfish.grizzly.websockets.WebSocketApplication;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.jersey.server.spi.Container;
 import org.glassfish.jersey.server.spi.ContainerLifecycleListener;
@@ -64,6 +67,7 @@ public class TestServer
 
     private final List<Object> registrations = new ArrayList<>();
     private final List<AutoCloseable> resources = new ArrayList<>();
+    private final Map<String, WebSocketApplication> wsApplications = new TreeMap<>();
 
     private HttpHandler rootHandler;
     private ServiceLocator rootLocator;
@@ -105,7 +109,8 @@ public class TestServer
         resources.clear();
     }
 
-    public KeyStore getServerStore() {
+    @Override
+    public KeyStore getKeyStore() {
         return serverStore;
     }
 
@@ -135,6 +140,11 @@ public class TestServer
     @Override
     public void registerRoot(HttpHandler handler) {
         rootHandler = handler;
+    }
+
+    @Override
+    public void registerWebsocketApplication(String urlMapping, WebSocketApplication wsa) {
+        wsApplications.put(urlMapping, wsa);
     }
 
     private List<Class<?>> getRegisteredClasses() {
@@ -262,6 +272,7 @@ public class TestServer
         public void start() {
             resources.forEach(this.server::registerResource);
             registrations.forEach(this.server::register);
+            wsApplications.forEach(this.server::registerWebsocketApplication);
             if (auditor != null) {
                 this.server.setAuditor(auditor);
             }

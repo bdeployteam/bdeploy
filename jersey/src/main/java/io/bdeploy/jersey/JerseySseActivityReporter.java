@@ -3,15 +3,21 @@ package io.bdeploy.jersey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.LongSupplier;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
+import org.jvnet.hk2.annotations.Optional;
 import org.jvnet.hk2.annotations.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.ActivitySnapshot;
 import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.security.RemoteService;
 
@@ -21,11 +27,42 @@ import io.bdeploy.common.security.RemoteService;
 @Service
 public class JerseySseActivityReporter implements ActivityReporter {
 
+    public static final String ACTIVITY_BROADCASTER = "JerseyActivityBroadcaster";
+
     private static final Logger log = LoggerFactory.getLogger(JerseySseActivityReporter.class);
     static final ThreadLocal<JerseySseActivity> currentActivity = new ThreadLocal<>();
 
     @Inject
     private JerseyScopeService jss;
+
+    @Inject
+    @Named(ACTIVITY_BROADCASTER)
+    @Optional
+    private JerseyEventBroadcaster bc;
+
+    private boolean lastBroadcastWasEmpty;
+
+    @Inject
+    public JerseySseActivityReporter(@Named(JerseyServer.BROADCAST_EXECUTOR) ScheduledExecutorService scheduler) {
+        scheduler.scheduleAtFixedRate(this::sendUpdate, 1, 1, TimeUnit.SECONDS);
+    }
+
+    private void sendUpdate() {
+        if (bc == null) {
+            return;
+        }
+
+        List<ActivitySnapshot> list = getGlobalActivities().stream().filter(Objects::nonNull).map(JerseySseActivity::snapshot)
+                .collect(Collectors.toList());
+
+        if (list.isEmpty() && lastBroadcastWasEmpty) {
+            return;
+        }
+
+        lastBroadcastWasEmpty = list.isEmpty();
+
+        bc.send(list);
+    }
 
     /**
      * All running activities.

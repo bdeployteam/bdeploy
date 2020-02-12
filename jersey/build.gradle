@@ -7,7 +7,9 @@ dependencies {
         'javax.xml.bind:jaxb-api:2.3.1',
         'org.glassfish.jaxb:jaxb-runtime:2.3.2',
         'javax.activation:activation:1.1.1',
+        'jakarta.servlet:jakarta.servlet-api:4.0.3',
         'org.slf4j:jul-to-slf4j:1.7.30',
+        'org.glassfish.grizzly:grizzly-http-servlet:2.4.4',
         project(":common"),
     )
 
@@ -17,6 +19,7 @@ dependencies {
         'org.glassfish.jersey.inject:jersey-hk2:2.29.1',
         'org.glassfish.jersey.containers:jersey-container-grizzly2-http:2.29.1',
         'org.glassfish.jersey.media:jersey-media-multipart:2.29.1',
+        'org.glassfish.grizzly:grizzly-websockets:2.4.4',
     )
 }
 

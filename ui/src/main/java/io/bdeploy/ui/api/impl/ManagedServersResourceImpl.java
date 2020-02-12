@@ -26,7 +26,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Response.Status.Family;
-import javax.ws.rs.core.Response.StatusType;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriBuilder;
 
@@ -73,6 +72,7 @@ import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.ui.ProductTransferService;
 import io.bdeploy.ui.api.BackendInfoResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
+import io.bdeploy.ui.api.ManagedServersAttachEventResource;
 import io.bdeploy.ui.api.ManagedServersResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
@@ -138,11 +138,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 synchronize(groupName, target.hostName);
             }
 
-            WebTarget attachTarget = ResourceProvider.of(svc).getBaseTarget().path("/attach-events");
-            StatusType status = attachTarget.request().buildPost(Entity.text(groupName)).invoke().getStatusInfo();
-            if (status.getFamily() != Family.SUCCESSFUL) {
-                throw new IllegalStateException("Cannot notify server of successful attachment: " + status);
-            }
+            ResourceProvider.getResource(svc, ManagedServersAttachEventResource.class, context).setLocalAttached(groupName);
         } catch (Exception e) {
             throw new WebApplicationException("Cannot automatically attach managed server " + target.hostName, e);
         }

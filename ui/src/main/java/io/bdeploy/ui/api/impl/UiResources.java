@@ -5,18 +5,16 @@ import javax.inject.Singleton;
 import org.glassfish.grizzly.http.server.CLStaticHttpHandler;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
+import io.bdeploy.bhive.util.StorageHelper;
+import io.bdeploy.jersey.JerseyEventBroadcaster;
 import io.bdeploy.jersey.RegistrationTarget;
+import io.bdeploy.jersey.ws.BroadcastingAuthenticatedWebSocket;
 import io.bdeploy.ui.ProductTransferService;
+import io.bdeploy.ui.api.ManagedServersAttachEventResource;
 
 public class UiResources {
 
-    private static InstanceEventManager instanceEvents = new InstanceEventManager();
-
     private UiResources() {
-    }
-
-    public static InstanceEventManager getInstanceEventManager() {
-        return instanceEvents;
     }
 
     public static void register(RegistrationTarget server) {
@@ -32,12 +30,18 @@ public class UiResources {
         server.register(CleanupResourceImpl.class);
         server.register(DownloadServiceImpl.class);
 
-        server.register(InstanceEventBroadcaster.class);
-
         server.register(ManagedServersResourceImpl.class);
         server.register(ManagedServersAttachEventResourceImpl.class);
 
         server.register(CapabilityRequestFilter.class);
+
+        BroadcastingAuthenticatedWebSocket instanceUpdateBc = new BroadcastingAuthenticatedWebSocket(
+                o -> StorageHelper.toRawBytes(o), server.getKeyStore());
+        BroadcastingAuthenticatedWebSocket attachEventBc = new BroadcastingAuthenticatedWebSocket(o -> o.toString().getBytes(),
+                server.getKeyStore());
+
+        server.registerWebsocketApplication("/instance-updates", instanceUpdateBc);
+        server.registerWebsocketApplication("/attach-events", attachEventBc);
 
         server.register(new AbstractBinder() {
 
@@ -45,6 +49,10 @@ public class UiResources {
             protected void configure() {
                 bind(DownloadTokenCache.class).in(Singleton.class).to(DownloadTokenCache.class);
                 bind(ProductTransferService.class).in(Singleton.class).to(ProductTransferService.class);
+                bind(InstanceEventManager.class).in(Singleton.class).to(InstanceEventManager.class);
+
+                bind(instanceUpdateBc).named(InstanceEventManager.INSTANCE_BROADCASTER).to(JerseyEventBroadcaster.class);
+                bind(attachEventBc).named(ManagedServersAttachEventResource.ATTACH_BROADCASTER).to(JerseyEventBroadcaster.class);
             }
         });
     }

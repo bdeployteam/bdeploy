@@ -12,7 +12,6 @@ public class InstanceUpdateEventDto {
      */
     public enum InstanceUpdateEventType {
         CREATE,
-        REMOVE, // reserved for later
         STATE_CHANGE
     }
 

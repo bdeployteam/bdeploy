@@ -1,28 +1,33 @@
 package io.bdeploy.ui.api.impl;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.jvnet.hk2.annotations.Service;
+
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.jersey.JerseyEventBroadcaster;
+import io.bdeploy.ui.dto.InstanceUpdateEventDto;
+import io.bdeploy.ui.dto.InstanceUpdateEventDto.InstanceUpdateEventType;
 
 /**
- * Singleton wrapper around lazily (on request) initialized {@link InstanceEventBroadcaster}.
+ * Manager capable of broadcasting instance related events.
  */
+@Service
 public class InstanceEventManager {
 
-    private InstanceEventBroadcaster bc;
+    public static final String INSTANCE_BROADCASTER = "InstanceEventBroadcaster";
+
+    @Inject
+    @Named(INSTANCE_BROADCASTER)
+    private JerseyEventBroadcaster bc;
 
     public void create(String instanceId, Manifest.Key key) {
-        if (bc != null) {
-            bc.create(instanceId, key);
-        }
+        bc.send(new InstanceUpdateEventDto(key, InstanceUpdateEventType.CREATE));
     }
 
     public void stateChanged(String instanceId, Manifest.Key key) {
-        if (bc != null) {
-            bc.stateChanged(instanceId, key);
-        }
-    }
-
-    void register(InstanceEventBroadcaster bc) {
-        this.bc = bc;
+        bc.send(new InstanceUpdateEventDto(key, InstanceUpdateEventType.STATE_CHANGE));
     }
 
 }

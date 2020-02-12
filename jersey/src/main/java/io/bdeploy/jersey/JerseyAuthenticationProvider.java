@@ -90,7 +90,6 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
     private static final String REALM = "BDeploy";
     private static final String NO_AUTH = "unsecured";
     private static final String WEAK_AUTH = "weak";
-    private final SecurityHelper security = SecurityHelper.getInstance();
     private final KeyStore store;
 
     public JerseyAuthenticationProvider(KeyStore store) {
@@ -130,7 +129,7 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
         try {
 
             // Validate the token
-            ApiAccessToken api = validateToken(token);
+            ApiAccessToken api = validateToken(token, store);
 
             // check if weak is allowed
             if (api.isWeak() && requestContext.getProperty(WEAK_AUTH) == null) {
@@ -171,9 +170,9 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
                 .header(HttpHeaders.WWW_AUTHENTICATE, AUTHENTICATION_SCHEME + " realm=\"" + REALM + "\"").build());
     }
 
-    private ApiAccessToken validateToken(String tokenValue) {
+    public static ApiAccessToken validateToken(String tokenValue, KeyStore ks) {
         try {
-            ApiAccessToken token = security.getVerifiedPayload(tokenValue, ApiAccessToken.class, store);
+            ApiAccessToken token = SecurityHelper.getInstance().getVerifiedPayload(tokenValue, ApiAccessToken.class, ks);
 
             if (token != null && token.isValid()) {
                 return token;

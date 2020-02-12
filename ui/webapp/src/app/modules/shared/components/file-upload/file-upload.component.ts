@@ -1,7 +1,7 @@
 import { Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatTable } from '@angular/material/table';
-import { EventSourcePolyfill } from 'ng-event-source';
+import ReconnectingWebSocket from 'reconnecting-websocket';
 import { forkJoin } from 'rxjs';
 import { ManifestKey } from '../../../../models/gen.dtos';
 import { ErrorMessage, LoggingService } from '../../../core/services/logging.service';
@@ -46,7 +46,7 @@ export class FileUploadComponent implements OnInit, OnDestroy {
   public dropZoneActive = false;
   public uploadFinished = true;
 
-  private eventSource: EventSourcePolyfill;
+  private ws: ReconnectingWebSocket;
   private log = this.loggingService.getLogger('FileUploadComponent');
 
   constructor(
@@ -60,17 +60,17 @@ export class FileUploadComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // start event source
-    this.eventSource = this.eventService.getGlobalEventSource();
-    this.eventSource.onerror = err => {
+    this.ws = this.eventService.createActivitiesWebSocket();
+    this.ws.addEventListener('error', (err) => {
       this.log.error(new ErrorMessage('Error while processing events', err));
-    };
-    this.eventSource.addEventListener('activities', e => this.onEventReceived(e as MessageEvent));
+    });
+    this.ws.addEventListener('message', e => this.onEventReceived(e));
   }
 
   ngOnDestroy(): void {
-    if (this.eventSource) {
-      this.eventSource.close();
-      this.eventSource = null;
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
     }
   }
 
@@ -206,30 +206,35 @@ export class FileUploadComponent implements OnInit, OnDestroy {
   }
 
   onEventReceived(e: MessageEvent) {
-    // we accept all events as we don't know the scope we're looking for beforehand.
-    const rootEvents = this.eventService.parseEvent(e, []);
+    const blob = e.data as Blob;
+    const r = new FileReader();
+    r.onload = () => {
+      // we accept all events as we don't know the scope we're looking for beforehand.
+      const rootEvents = this.eventService.parseEvent(r.result, []);
 
-    // each received event's root scope must match a scope of an UploadStatus object.
-    // discard all events where this is not true.
-    let needUpdate = false;
-    for (const event of rootEvents) {
-      if (!event.snapshot || !event.snapshot.scope || event.snapshot.scope.length < 1) {
-        continue;
+      // each received event's root scope must match a scope of an UploadStatus object.
+      // discard all events where this is not true.
+      let needUpdate = false;
+      for (const event of rootEvents) {
+        if (!event.snapshot || !event.snapshot.scope || event.snapshot.scope.length < 1) {
+          continue;
+        }
+
+        const status = this.getUploadStatusByUUID(event.snapshot.scope[0]);
+        if (!status) {
+          continue; // discard, not ours.
+        }
+
+        // if we do have a match, extract the most relevant message, set it, and then flag a table repaint.
+        status.processingHint = this.extractMostRelevantMessage(event);
+        needUpdate = true;
       }
 
-      const status = this.getUploadStatusByUUID(event.snapshot.scope[0]);
-      if (!status) {
-        continue; // discard, not ours.
+      if (needUpdate) {
+        this.table.renderRows();
       }
-
-      // if we do have a match, extract the most relevant message, set it, and then flag a table repaint.
-      status.processingHint = this.extractMostRelevantMessage(event);
-      needUpdate = true;
-    }
-
-    if (needUpdate) {
-      this.table.renderRows();
-    }
+    };
+    r.readAsText(blob);
   }
 
   extractMostRelevantMessage(node: ActivitySnapshotTreeNode): string {

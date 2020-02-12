@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { isEqual } from 'lodash';
-import { EventSourcePolyfill } from 'ng-event-source';
+import ReconnectingWebSocket from 'reconnecting-websocket';
 import { ActivitySnapshot } from '../../../models/gen.dtos';
 import { AuthenticationService } from '../../core/services/authentication.service';
 import { ConfigService } from '../../core/services/config.service';
@@ -20,30 +20,32 @@ export class RemoteEventsService {
 
   constructor(private cfg: ConfigService, private auth: AuthenticationService, private http: HttpClient, private loggingService: LoggingService) {}
 
-  public getUpdateEventSource() {
-    return new EventSourcePolyfill(this.cfg.config.api + '/instance-updates', {
-      headers: { Authorization: 'Bearer ' + this.auth.getToken() },
-    });
-  }
-
-  public getAttachEventSource() {
-    return new EventSourcePolyfill(this.cfg.config.api + '/attach-events', {
-      headers: { Authorization: 'Bearer ' + this.auth.getToken() },
-    });
-  }
-
-  public getGlobalEventSource(): EventSourcePolyfill {
-    return new EventSourcePolyfill(this.cfg.config.api + '/activities', {
-      headers: { Authorization: 'Bearer ' + this.auth.getToken() },
-    });
-  }
-
   public cancelActivity(uuid: string) {
     return this.http.delete(this.cfg.config.api + '/activities/' + uuid);
   }
 
-  public parseEvent(e: MessageEvent, scope: string[]): ActivitySnapshotTreeNode[] {
-    const allActivities = JSON.parse(e.data) as ActivitySnapshot[];
+  public createActivitiesWebSocket() {
+    return this.createAuthenticatedWebSocket('/activities');
+  }
+
+  public createInstanceUpdatesWebSocket() {
+    return this.createAuthenticatedWebSocket('/instance-updates');
+  }
+
+  public createAttachEventsWebSocket() {
+    return this.createAuthenticatedWebSocket('/attach-events');
+  }
+
+  private createAuthenticatedWebSocket(path: string) {
+    const ws = new ReconnectingWebSocket(this.cfg.getWsUrl() + path);
+    ws.addEventListener('open', () => {
+      ws.send(this.auth.getToken());
+    });
+    return ws;
+  }
+
+  public parseEvent(data: any, scope: string[]): ActivitySnapshotTreeNode[] {
+    const allActivities = JSON.parse(data) as ActivitySnapshot[];
     const allTreeNodes = new Map<string, ActivitySnapshotTreeNode>();
     const rootNodes: ActivitySnapshotTreeNode[] = [];
 

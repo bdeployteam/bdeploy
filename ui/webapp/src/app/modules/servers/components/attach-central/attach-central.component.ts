@@ -1,7 +1,7 @@
 import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatStep, MatStepper } from '@angular/material/stepper';
-import { EventSourcePolyfill } from 'ng-event-source';
+import ReconnectingWebSocket from 'reconnecting-websocket';
 import { InstanceGroupConfiguration, ManagedMasterDto } from '../../../../models/gen.dtos';
 import { ErrorMessage, LoggingService } from '../../../core/services/logging.service';
 import { InstanceGroupService } from '../../../instance-group/services/instance-group.service';
@@ -20,7 +20,7 @@ export class AttachCentralComponent implements OnInit, OnDestroy {
 
   private log = this.logging.getLogger('AttachCentralComponent');
   attachPayload: ManagedMasterDto;
-  updateEvents: EventSourcePolyfill;
+  ws: ReconnectingWebSocket;
   remoteAttached: InstanceGroupConfiguration;
   manualLoading = false;
 
@@ -42,26 +42,31 @@ export class AttachCentralComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.managedServers.getManagedMasterInfo().subscribe(i => (this.attachPayload = i));
 
-    this.updateEvents = this.eventService.getAttachEventSource();
-    this.updateEvents.onerror = err => {
+    this.ws = this.eventService.createAttachEventsWebSocket();
+    this.ws.addEventListener('error', err => {
       this.log.error(new ErrorMessage('Error waiting for attach events', err));
-    };
-    this.updateEvents.addEventListener('attach', e => this.onRemoteAttach(e as MessageEvent));
+    });
+    this.ws.addEventListener('message', e => this.onRemoteAttach(e));
   }
 
   ngOnDestroy() {
-    if (this.updateEvents) {
-      this.updateEvents.close();
-      this.updateEvents = null;
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
     }
   }
 
   onRemoteAttach(e: MessageEvent) {
-    const groupName = e.data as string;
-    this.igService.getInstanceGroup(groupName).subscribe(r => {
-      this.remoteAttached = r;
-      this.stepper.selected = this.doneStep;
-    });
+    const blob = e.data as Blob;
+    const r = new FileReader();
+    r.onload = () => {
+      const groupName = r.result as string;
+      this.igService.getInstanceGroup(groupName).subscribe(res => {
+        this.remoteAttached = res;
+        this.stepper.selected = this.doneStep;
+      });
+    };
+    r.readAsText(blob);
   }
 
   onDragStart($event) {
