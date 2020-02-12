@@ -86,7 +86,7 @@ public class TestServer
         this(true, registrations);
     }
 
-    public TestServer(boolean resolver, Object... registrations) {
+    public TestServer(boolean resolver, Object[] registrations) {
         this.resolver = resolver;
         this.registrations.addAll(Arrays.asList(registrations));
         this.registrations.add(new ServiceLocatorFinder());

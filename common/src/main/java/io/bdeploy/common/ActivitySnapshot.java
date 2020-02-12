@@ -2,17 +2,16 @@ package io.bdeploy.common;
 
 import java.util.List;
 
-import javax.ws.rs.core.GenericType;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 /**
  * A serializable snapshot of an activity on the server.
  */
 public final class ActivitySnapshot {
 
-    public static final GenericType<List<ActivitySnapshot>> LIST_TYPE = new GenericType<List<ActivitySnapshot>>() {
+    public static final TypeReference<List<ActivitySnapshot>> LIST_TYPE = new TypeReference<List<ActivitySnapshot>>() {
     };
 
     public final String uuid;

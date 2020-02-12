@@ -6,7 +6,7 @@ import javax.inject.Named;
 import org.jvnet.hk2.annotations.Service;
 
 import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.jersey.JerseyEventBroadcaster;
+import io.bdeploy.jersey.ws.JerseyEventBroadcaster;
 import io.bdeploy.ui.dto.InstanceUpdateEventDto;
 import io.bdeploy.ui.dto.InstanceUpdateEventDto.InstanceUpdateEventType;
 

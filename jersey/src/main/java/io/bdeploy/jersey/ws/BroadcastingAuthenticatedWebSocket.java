@@ -14,12 +14,15 @@ import org.glassfish.grizzly.websockets.OptimizedBroadcaster;
 import org.glassfish.grizzly.websockets.WebSocket;
 import org.glassfish.grizzly.websockets.WebSocketAdapter;
 import org.glassfish.grizzly.websockets.WebSocketApplication;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.jersey.JerseyAuthenticationProvider;
-import io.bdeploy.jersey.JerseyEventBroadcaster;
 
 public class BroadcastingAuthenticatedWebSocket extends WebSocketApplication implements JerseyEventBroadcaster {
+
+    private static final Logger log = LoggerFactory.getLogger(BroadcastingAuthenticatedWebSocket.class);
 
     private final Broadcaster broadcaster;
 
@@ -48,12 +51,21 @@ public class BroadcastingAuthenticatedWebSocket extends WebSocketApplication imp
 
             @Override
             public void onMessage(WebSocket s, String text) {
-                ApiAccessToken token = JerseyAuthenticationProvider.validateToken(text, authStore);
-                if (token == null) {
-                    s.close(Status.UNAUTHORIZED.getStatusCode(), "Invalid Authentication Token");
+                ApiAccessToken token = null;
+                try {
+                    token = JerseyAuthenticationProvider.validateToken(text, authStore);
+                } catch (Exception e) {
+                    log.error("Cannot parse authentication token: ", e);
                 }
+
                 schedule.cancel(false);
-                BroadcastingAuthenticatedWebSocket.super.onConnect(socket);
+
+                if (token == null) {
+                    log.warn("Invalid authentication from client, closing");
+                    s.close(Status.UNAUTHORIZED.getStatusCode(), "Invalid Authentication Token");
+                } else {
+                    BroadcastingAuthenticatedWebSocket.super.onConnect(socket);
+                }
             }
         });
     }

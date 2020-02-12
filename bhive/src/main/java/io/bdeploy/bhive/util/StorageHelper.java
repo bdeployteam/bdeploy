@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.bdeploy.bhive.model.Tree;
@@ -89,6 +89,18 @@ public class StorageHelper {
     }
 
     /**
+     * De-serializes an Object of given type from a byte[].
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T fromRawBytes(byte[] bytes, TypeReference<T> ref) {
+        try {
+            return (T) getMapper().readValue(bytes, ref);
+        } catch (IOException e) {
+            throw new IllegalStateException(JSON_READ_ERROR, e);
+        }
+    }
+
+    /**
      * De-serializes an Object of given type from a given file
      */
     public static <T> T fromPath(Path path, Class<T> clazz) {
@@ -133,7 +145,6 @@ public class StorageHelper {
     private static ObjectMapper getMapper(MapperType type) {
         ObjectMapper dm = JacksonHelper.createObjectMapper(type);
 
-        dm.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         dm.registerModule(new BHiveJacksonModule());
 
         return dm;

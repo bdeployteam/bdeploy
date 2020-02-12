@@ -3,13 +3,10 @@ package io.bdeploy.jersey;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -21,7 +18,6 @@ import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
-import javax.ws.rs.sse.SseEventSource;
 
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.RequestEntityProcessing;
@@ -33,11 +29,17 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.AsyncHttpClientConfig;
+import com.ning.http.client.ListenableFuture;
+import com.ning.http.client.ws.WebSocket;
+import com.ning.http.client.ws.WebSocketUpgradeHandler;
 
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.SecurityHelper;
-import io.bdeploy.common.util.NamedDaemonThreadFactory;
+import io.bdeploy.jersey.activity.JerseyRemoteActivityScopeClientFilter;
+import io.bdeploy.jersey.ws.WebSocketAuthenticatingMessageListener;
 
 /**
  * A factory for Jersey based JAX-RS clients.
@@ -60,18 +62,7 @@ public class JerseyClientFactory {
 
     private static final ThreadLocal<String> proxyUuid = new ThreadLocal<>();
     private static final Cache<RemoteService, JerseyClientFactory> factoryCache = CacheBuilder.newBuilder().maximumSize(100)
-            .expireAfterAccess(5, TimeUnit.MINUTES).removalListener(i -> {
-                JerseyClientFactory jcf = (JerseyClientFactory) i.getValue();
-                jcf.close();
-            }).build();
-
-    private final Cache<String, JerseyCachedEventSource> sseCache = CacheBuilder.newBuilder().maximumSize(20)
-            .removalListener(i -> {
-                JerseyCachedEventSource ses = (JerseyCachedEventSource) i.getValue();
-                ses.doExpire();
-            }).build();
-
-    private final ScheduledExecutorService sseCacheReaper;
+            .expireAfterAccess(5, TimeUnit.MINUTES).build();
 
     /**
      * @param svc the {@link RemoteService} specification to create clients for.
@@ -90,32 +81,6 @@ public class JerseyClientFactory {
         } catch (GeneralSecurityException e) {
             throw new IllegalStateException("Cannot initialize security", e);
         }
-
-        this.sseCacheReaper = Executors
-                .newSingleThreadScheduledExecutor(new NamedDaemonThreadFactory("SSE Client Cache Reaper - " + svc.getUri()));
-        this.sseCacheReaper.scheduleAtFixedRate(this::cacheReaper, 30, 30, TimeUnit.SECONDS);
-    }
-
-    private synchronized void cacheReaper() {
-        Set<String> toEvict = new TreeSet<>();
-        for (Map.Entry<String, JerseyCachedEventSource> entry : sseCache.asMap().entrySet()) {
-            if (entry.getValue().isExpired()) {
-                toEvict.add(entry.getKey());
-            }
-        }
-        sseCache.invalidateAll(toEvict);
-    }
-
-    /**
-     * Perform maintenance cleanup tasks now, used for testing
-     */
-    public void cleanUp() {
-        cacheReaper();
-    }
-
-    private void close() {
-        sseCacheReaper.shutdownNow();
-        sseCache.invalidateAll();
     }
 
     public static JerseyClientFactory get(RemoteService svc) {
@@ -167,9 +132,6 @@ public class JerseyClientFactory {
     }
 
     /**
-     * Note: proxy based clients are not suitable for {@link SseEventSource}s. Use
-     * {@link #getEventSource(String)} instead.
-     *
      * @return a {@link WebTarget} with all required feature, filter and provider
      *         registrations for the {@link RemoteService} associated with this
      *         factory.
@@ -195,7 +157,7 @@ public class JerseyClientFactory {
         builder.register(JerseyPathReader.class);
         builder.register(JerseyPathWriter.class);
         builder.register(new JerseyClientReporterResolver());
-        builder.register(new JerseySseActivityProxyClientFilter(proxyUuid::get));
+        builder.register(new JerseyRemoteActivityScopeClientFilter(proxyUuid::get));
 
         for (Object reg : additionalRegistrations) {
             if (reg instanceof Class<?>) {
@@ -215,24 +177,32 @@ public class JerseyClientFactory {
         return target;
     }
 
-    static void setProxyUuid(String uuid) {
+    public static void setProxyUuid(String uuid) {
         proxyUuid.set(uuid);
     }
 
     /**
-     * @param path the path to the SSE endpoint relative to the
-     *            {@link RemoteService} URI.
-     * @return An {@link SseEventSource} which allows listening to server sent
-     *         events. The returned {@link SseEventSource} might already be open as it might have been cached. In this case
-     *         further {@link SseEventSource#open()} calls are ignored.
+     * @return a client that is capable of providing a WebSocket connection to the given service. The caller is responsible for
+     *         closing the client once done!
      */
-    public synchronized JerseySseRegistrar getEventSource(String path) {
-        try {
-            WebTarget target = getBaseTarget().path(path);
-            return sseCache.get(path, () -> new JerseyCachedEventSource(SseEventSource.target(target).build(), target));
-        } catch (ExecutionException e) {
-            throw new IllegalStateException("Cannot load event source from cache", e);
-        }
+    public AsyncHttpClient getWebSocketClient() {
+        // using custom hostname verifier is not possible when using sslContext, need to trust all for now.
+        return new AsyncHttpClient(new AsyncHttpClientConfig.Builder().setAcceptAnyCertificate(true).build());
+    }
+
+    /**
+     * @param path the path on the server under the '/ws' context
+     * @param onMessage callback for received messaged
+     * @param onError callback for received errors
+     * @return a {@link ListenableFuture} which can be used to retrieve the {@link WebSocket}.
+     */
+    public ListenableFuture<WebSocket> getAuthenticatedWebSocket(AsyncHttpClient client, String path, Consumer<byte[]> onMessage,
+            Consumer<Throwable> onError, Consumer<WebSocket> onClose) {
+        return client.prepareGet(svc.getWebSocketUri(path).toString())
+                .execute(new WebSocketUpgradeHandler.Builder()
+                        .addWebSocketListener(new WebSocketAuthenticatingMessageListener(
+                                SecurityHelper.getInstance().getTokenFromPack(svc.getAuthPack()), onMessage, onError, onClose))
+                        .build());
     }
 
     @Provider

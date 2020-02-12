@@ -1,33 +1,46 @@
-package io.bdeploy.jersey;
+package io.bdeploy.jersey.activity;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.sse.InboundSseEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.ws.WebSocket;
 
 import io.bdeploy.common.ActivitySnapshot;
 import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.JacksonHelper;
+import io.bdeploy.common.util.JacksonHelper.MapperType;
 import io.bdeploy.common.util.UuidHelper;
+import io.bdeploy.jersey.JerseyClientFactory;
 
-public class JerseySseActivityProxy implements NoThrowAutoCloseable {
+public class JerseyRemoveActivityProxy implements NoThrowAutoCloseable {
+
+    private static final Logger log = LoggerFactory.getLogger(JerseyRemoveActivityProxy.class);
 
     private final String proxyUuid = "proxy-" + UuidHelper.randomId();
 
-    private final JerseySseActivityReporter reporter;
+    private final JerseyBroadcastingActivityReporter reporter;
     private final RemoteService remote;
-    private final JerseyEventSubscription subscription;
-    private final JerseySseActivity parent;
+    private final JerseyRemoteActivity parent;
+    private WebSocket ws;
+    private AsyncHttpClient client;
 
     private final Map<String, ActivityNode> proxiedActivities = new TreeMap<>();
     private final Map<String, String> uuidMapping = new TreeMap<>();
 
-    public JerseySseActivityProxy(RemoteService service, JerseySseActivityReporter reporter) {
+    public JerseyRemoveActivityProxy(RemoteService service, JerseyBroadcastingActivityReporter reporter) {
         if (service.getKeyStore() == null) {
             throw new IllegalStateException("RemoteService references a local service: " + service.getUri());
         }
@@ -35,13 +48,38 @@ public class JerseySseActivityProxy implements NoThrowAutoCloseable {
         this.reporter = reporter;
         parent = reporter.getCurrentActivity();
         remote = service;
-        subscription = JerseyClientFactory.get(service).getEventSource("/activities").register(this::onMessage);
+
+        createWebSocket(service);
 
         JerseyClientFactory.setProxyUuid(proxyUuid);
     }
 
-    private void onMessage(InboundSseEvent event) {
-        List<ActivitySnapshot> activities = event.readData(ActivitySnapshot.LIST_TYPE);
+    private void createWebSocket(RemoteService service) {
+        client = JerseyClientFactory.get(service).getWebSocketClient();
+        try {
+            ws = JerseyClientFactory.get(service).getAuthenticatedWebSocket(client, "/activities", this::onMessage, e -> {
+                log.error("WebSocket Error", e);
+            }, ws -> {
+                log.warn("WebSocket closed");
+            }).get();
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("Cannot create WebSocket", e);
+        }
+    }
+
+    private void onMessage(byte[] message) {
+        // cannot use StorageHelper -> dependency not allowed.
+        ObjectMapper om = JacksonHelper.createObjectMapper(MapperType.JSON);
+        List<ActivitySnapshot> activities;
+        try {
+            activities = om.readValue(message, ActivitySnapshot.LIST_TYPE);
+        } catch (IOException e) {
+            log.error("Cannot read activities");
+            if (log.isDebugEnabled()) {
+                log.debug("Exception:", e);
+            }
+            return;
+        }
 
         for (ActivitySnapshot snap : activities) {
             // only allow acitivities which have the proxy scope set, i.e. created by a remote call with our scope set.
@@ -115,11 +153,11 @@ public class JerseySseActivityProxy implements NoThrowAutoCloseable {
         return reporter.getActivityById(uuid) != null;
     }
 
-    private void onDone(JerseySseActivity activity) {
+    private void onDone(JerseyRemoteActivity activity) {
         reporter.removeProxyActivity(activity);
     }
 
-    private void onCancel(JerseySseActivity activity) {
+    private void onCancel(JerseyRemoteActivity activity) {
         // cancel requested - delegate to remote
         String actualUuid = uuidMapping.entrySet().stream().filter(e -> e.getValue().equals(activity.getUuid())).findFirst()
                 .map(Map.Entry::getKey).orElse(null);
@@ -138,24 +176,29 @@ public class JerseySseActivityProxy implements NoThrowAutoCloseable {
             entry.getValue().activity.done();
         }
 
-        subscription.close();
+        if (ws != null) {
+            ws.close();
+        }
+        if (client != null) {
+            client.close();
+        }
     }
 
     private static class ActivityNode {
 
-        public JerseySseActivity activity;
+        public JerseyRemoteActivity activity;
         public long current = 0;
         public long max = -1;
 
-        public ActivityNode(ActivitySnapshot snapshot, JerseySseActivity root, Consumer<JerseySseActivity> onDone,
-                Consumer<JerseySseActivity> onCancel, String uuid, String parentUuid) {
+        public ActivityNode(ActivitySnapshot snapshot, JerseyRemoteActivity root, Consumer<JerseyRemoteActivity> onDone,
+                Consumer<JerseyRemoteActivity> onCancel, String uuid, String parentUuid) {
             this.current = snapshot.current;
             this.max = snapshot.max;
 
             // remove the proxy scope, which MUST be the first element in the scope list.
             List<String> scope = snapshot.scope.subList(1, snapshot.scope.size());
 
-            this.activity = new JerseySseActivity(onDone, onCancel, snapshot.name, () -> max, () -> current, scope,
+            this.activity = new JerseyRemoteActivity(onDone, onCancel, snapshot.name, () -> max, () -> current, scope,
                     root == null ? snapshot.user : root.getUser(), System.currentTimeMillis() - snapshot.duration, uuid,
                     parentUuid);
         }

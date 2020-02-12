@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -41,6 +42,7 @@ public class JacksonHelper {
         result.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
         result.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
         result.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        result.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         result.registerModule(new Jdk8Module());
         result.registerModule(new JavaTimeModule());
         return result;

@@ -14,8 +14,13 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 
 import javax.ws.rs.core.UriBuilder;
+
+import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.ws.WebSocket;
 
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.NoThrowAutoCloseable;
@@ -110,13 +115,45 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
         RemoteService svc = createRemoteService(rc, optional, r);
 
         if (getActivityReporter() instanceof ActivityReporter.Stream) {
-            ((ActivityReporter.Stream) getActivityReporter())
-                    .setProxyConnector((s, c) -> JerseyClientFactory.get(s).getEventSource("/activities").register(c));
+            ((ActivityReporter.Stream) getActivityReporter()).setProxyConnector(this::connectProxy);
         }
 
         try (NoThrowAutoCloseable proxy = getActivityReporter().proxyActivities(svc)) {
             run(config, svc);
         }
+    }
+
+    private NoThrowAutoCloseable connectProxy(RemoteService remote, Consumer<byte[]> onMessage) {
+        return new NoThrowAutoCloseable() {
+
+            private AsyncHttpClient client;
+            private WebSocket ws;
+
+            {
+                try {
+                    this.client = JerseyClientFactory.get(remote).getWebSocketClient();
+                    this.ws = JerseyClientFactory.get(remote).getAuthenticatedWebSocket(client, "/activities", onMessage, e -> {
+                        out().println("WebSocket error: ");
+                        e.printStackTrace(out());
+                    }, s -> {
+                        out().println("Activities WebSocket disconnected");
+                    }).get();
+                } catch (InterruptedException | ExecutionException e) {
+                    out().println("Cannot initialize Acitivities WebSocket");
+                    e.printStackTrace(out());
+                }
+            }
+
+            @Override
+            public void close() {
+                if (ws != null) {
+                    ws.close();
+                }
+                if (client != null) {
+                    client.close();
+                }
+            }
+        };
     }
 
     private RemoteService createRemoteService(RemoteConfig rc, boolean optional, URI r) {

@@ -18,12 +18,14 @@ import java.util.function.Consumer;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
-import javax.ws.rs.sse.InboundSseEvent;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.JacksonHelper;
+import io.bdeploy.common.util.JacksonHelper.MapperType;
 import io.bdeploy.common.util.NamedDaemonThreadFactory;
 
 /**
@@ -124,7 +126,7 @@ public interface ActivityReporter {
         private ScheduledExecutorService updater;
         private ScheduledFuture<?> scheduled;
         private boolean verbose;
-        private BiFunction<RemoteService, Consumer<InboundSseEvent>, NoThrowAutoCloseable> proxyConnector;
+        private BiFunction<RemoteService, Consumer<byte[]>, NoThrowAutoCloseable> proxyConnector;
 
         private final Deque<AsyncActivity> activities = new ArrayDeque<>();
         private final List<AsyncActivity> allActivities = new ArrayList<>();
@@ -334,7 +336,7 @@ public interface ActivityReporter {
 
         }
 
-        public void setProxyConnector(BiFunction<RemoteService, Consumer<InboundSseEvent>, NoThrowAutoCloseable> proxyConnector) {
+        public void setProxyConnector(BiFunction<RemoteService, Consumer<byte[]>, NoThrowAutoCloseable> proxyConnector) {
             this.proxyConnector = proxyConnector;
         }
 
@@ -354,10 +356,16 @@ public interface ActivityReporter {
                 }
             }
 
-            private void onMessage(InboundSseEvent event) {
-                List<ActivitySnapshot> activityList = event.readData(ActivitySnapshot.LIST_TYPE);
-                for (ActivitySnapshot act : activityList) {
-                    output.println("SRV: " + act);
+            private void onMessage(byte[] event) {
+                try {
+                    ObjectMapper mapper = JacksonHelper.createObjectMapper(MapperType.JSON);
+                    List<ActivitySnapshot> activityList = mapper.readValue(event, ActivitySnapshot.LIST_TYPE);
+                    for (ActivitySnapshot act : activityList) {
+                        output.println("SRV: " + act);
+                    }
+                } catch (Exception e) {
+                    output.println("Cannot read server activities:");
+                    e.printStackTrace(output);
                 }
             }
 

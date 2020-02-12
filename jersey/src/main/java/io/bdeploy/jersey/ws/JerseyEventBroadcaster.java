@@ -1,4 +1,4 @@
-package io.bdeploy.jersey;
+package io.bdeploy.jersey.ws;
 
 public interface JerseyEventBroadcaster {
 
