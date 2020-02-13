@@ -1078,6 +1078,8 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     const config = new MatDialogConfig();
     config.width = '80%';
     config.height = '60%';
+    config.minWidth = '650px';
+    config.minHeight = '550px';
     config.data = {
       title: 'Import Instance Version',
       headerMessage: `Import a new instance version from a previously exported instance version. The target server of the imported version is ignored.`,

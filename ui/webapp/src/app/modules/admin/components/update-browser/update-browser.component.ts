@@ -179,6 +179,8 @@ export class UpdateBrowserComponent implements OnInit {
     const config = new MatDialogConfig();
     config.width = '80%';
     config.height = '60%';
+    config.minWidth = '650px';
+    config.minHeight = '550px';
     config.data = {
       title: 'Upload Update Packages',
       headerMessage: `Upload update packages for BDeploy or the BDeploy Client Launcher. You can provide multiple packages at once.`,

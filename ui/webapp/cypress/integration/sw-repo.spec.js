@@ -15,6 +15,7 @@ describe('Software Repository Tests', () => {
     cy.get('input[placeholder=Description]').type('Automated Test Repo ' + repoName);
 
     cy.contains('button', 'SAVE').click();
+    cy.waitUntilContentLoaded();
 
     cy.contains('mat-card', repoName).should('exist');
   });

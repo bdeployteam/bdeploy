@@ -45,6 +45,7 @@ describe('Instance Tests', function () {
     cy.getApplicationConfigCard('master', 'Server Application').contains('Initializing...').should('not.exist')
 
     cy.contains('button', 'SAVE').click();
+    cy.waitUntilContentLoaded();
   })
 
   it('Create config file', () => {
@@ -56,6 +57,7 @@ describe('Instance Tests', function () {
     cy.contains('button', 'APPLY').click();
     cy.contains('td', 'cypress.cfg').should('exist');
     cy.contains('button', 'SAVE').click();
+    cy.waitUntilContentLoaded();
   })
 
   /**
