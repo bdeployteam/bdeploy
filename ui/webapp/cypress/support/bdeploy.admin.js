@@ -12,7 +12,7 @@ Cypress.Commands.add('searchUser', function(username = null) {
  * Command: createUser
  */
 Cypress.Commands.add('createUser', function(username, fullname, email, password, docuScreenshots = false) {
-  cy.contains('button', 'add').click();
+  cy.get('.add-button').click();
   cy.contains('button', 'Apply').should('exist').and('be.disabled');
 
   cy.get('input[placeholder="Username"]').should('exist').click();

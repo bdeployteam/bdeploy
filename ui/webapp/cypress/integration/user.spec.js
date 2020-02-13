@@ -5,7 +5,6 @@ describe('User Accounts Test', function() {
 
   this.beforeEach(function() {
     cy.login();
-    cy.viewport(1280, 720);
   })
 
   it('Enters the user accounts dialog and creates a test user', function() {

@@ -84,6 +84,7 @@ describe('Instance Tests', function () {
     cy.getApplicationConfigCard('master', 'Server Application').find('.app-config-modified').should('exist')
 
     cy.contains('button', 'SAVE').click();
+    cy.waitUntilContentLoaded();
   })
 
   /**

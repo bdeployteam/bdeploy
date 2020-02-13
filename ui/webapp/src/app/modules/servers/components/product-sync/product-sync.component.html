@@ -20,10 +20,14 @@
           is available at the central server as well.
         </p>
 
+        <div *ngIf='loading' class='loading-hint'>
+          <mat-spinner diameter='24'></mat-spinner>&nbsp;Loading...
+        </div>
+
         <div class="hflex">
           <mat-form-field class='column'>
             <mat-label>Source</mat-label>
-            <mat-select [(value)]='sourceSelection'>
+            <mat-select [(value)]='sourceSelection' [disabled]='loading'>
                 <mat-option [value]=""></mat-option>
                 <mat-option [value]="OPTION_CENTRAL" [disabled]="targetSelection === OPTION_CENTRAL">Central Server</mat-option>
                 <mat-option *ngFor='let server of managedServers' [value]='server.hostName' [disabled]="targetSelection === server.hostName">Managed: {{server.hostName}} - {{server.description}}</mat-option>
@@ -31,7 +35,7 @@
           </mat-form-field>
           <mat-form-field class='column'>
             <mat-label>Target</mat-label>
-            <mat-select [(value)]='targetSelection'>
+            <mat-select [(value)]='targetSelection' [disabled]='loading'>
               <mat-option [value]=""></mat-option>
               <mat-option [value]="OPTION_CENTRAL" [disabled]="sourceSelection === OPTION_CENTRAL">Central Server</mat-option>
               <mat-option *ngFor='let server of managedServers' [value]='server.hostName' [disabled]="sourceSelection === server.hostName">Managed: {{server.hostName}} - {{server.description}}</mat-option>

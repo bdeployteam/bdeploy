@@ -84,6 +84,7 @@ describe("Central/Managed Basic Test", function() {
     cy.visitBDeploy('/#/instancegroup/products/' + groupName, 'CENTRAL');
     cy.contains('button', 'sync_alt').click();
 
+    cy.waitUntilContentLoaded();
     cy.contains('mat-label', 'Source').should('be.visible').click({force: true});
     cy.get('mat-option').contains('Test Local Server').click();
 

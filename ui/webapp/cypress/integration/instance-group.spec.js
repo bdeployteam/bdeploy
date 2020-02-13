@@ -10,7 +10,6 @@ describe('Instance Group Tests', () => {
 
   beforeEach(() => {
     cy.login();
-    cy.viewport(1280, 720);
   });
 
   it('Create instance group', () => {
@@ -37,12 +36,18 @@ describe('Instance Group Tests', () => {
     cy.createUser(globalAdmin, 'Global admin account', globalAdmin + mailDomain, 'demo');
     cy.waitUntilContentLoaded();
     cy.setGlobalCapability(globalAdmin, 'ADMIN');
+    cy.waitUntilContentLoaded();
+
     cy.createUser(globalWrite, 'Global write account', globalWrite + mailDomain, 'demo');
     cy.waitUntilContentLoaded();
     cy.setGlobalCapability(globalWrite, 'WRITE');
+    cy.waitUntilContentLoaded();
+
     cy.createUser(globalRead, 'Global read account', globalRead + mailDomain, 'demo');
     cy.waitUntilContentLoaded();
     cy.setGlobalCapability(globalRead, 'READ');
+    cy.waitUntilContentLoaded();
+
     cy.createUser(globalNone, 'Account without global capabilities', globalNone + mailDomain, 'demo');
   })
 

@@ -86,3 +86,10 @@
   position: relative;
   top: 5px;
 }
+
+.loading-hint {
+  display: flex;
+  flex-direction: row;
+
+  align-items: center;
+}
