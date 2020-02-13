@@ -48,9 +48,6 @@ export class MainNavComponent implements OnInit {
   }
 
   formatVersion(version: Version) {
-    if (version == null) {
-      return 'Unknown';
-    }
     return convert2String(version);
   }
 

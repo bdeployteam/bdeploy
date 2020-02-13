@@ -432,7 +432,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             throw new WebApplicationException("Cannot determine master node");
         }
 
-        Version runningVersion = VersionHelper.tryParse(VersionHelper.readVersion());
+        Version runningVersion = VersionHelper.getVersion();
         Version managedVersion = masterDto.get().version;
 
         // Determine whether or not an update must be installed
@@ -506,7 +506,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
     }
 
     private Collection<ScopedManifestKey> getLocalPackage(String manifestName) {
-        final String runningVersion = VersionHelper.readVersion();
+        String runningVersion = VersionHelper.getVersion().toString();
 
         BHive defaultHive = registry.get(JerseyRemoteBHive.DEFAULT_NAME);
         ManifestListOperation operation = new ManifestListOperation().setManifestName(manifestName);

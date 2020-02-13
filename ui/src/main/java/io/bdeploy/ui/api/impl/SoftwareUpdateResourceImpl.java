@@ -43,11 +43,13 @@ import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
 import io.bdeploy.bhive.util.VersionComparator;
+import io.bdeploy.common.Version;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.UuidHelper;
+import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.common.util.ZipHelper;
 import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.UpdateHelper;
@@ -312,7 +314,19 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
     public ScopedManifestKey getNewestLauncher(OperatingSystem os) {
         List<Key> versions = getLauncherVersions();
         return versions.stream().map(ScopedManifestKey::parse).filter(smk -> smk.getOperatingSystem() == os)
-                .reduce((first, second) -> second).orElse(null);
+                .filter(smk -> matchesRunningVersion(smk)).reduce((first, second) -> second).orElse(null);
+    }
+
+    /** Returns whether or not this version matches the running version */
+    private static boolean matchesRunningVersion(ScopedManifestKey smk) {
+        // Development environment: Take latest available launcher
+        if (VersionHelper.isRunningUndefined()) {
+            return true;
+        }
+        // Otherwise take the manifest only if the version is matching
+        Version running = VersionHelper.getVersion();
+        Version launcherVersion = VersionHelper.tryParse(smk.getTag());
+        return VersionHelper.equals(launcherVersion, running);
     }
 
 }

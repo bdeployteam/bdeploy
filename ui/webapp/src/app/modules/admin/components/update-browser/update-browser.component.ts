@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { finalize } from 'rxjs/operators';
-import { ManifestKey, OperatingSystem, Version } from 'src/app/models/gen.dtos';
+import { BackendInfoDto, ManifestKey, OperatingSystem } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { FileUploadComponent } from 'src/app/modules/shared/components/file-upload/file-upload.component';
 import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
@@ -27,6 +27,7 @@ export class UpdateBrowserComponent implements OnInit {
 
   public systemVersions: GroupedKeys[];
   public launcherVersions: GroupedKeys[];
+  public backendInfo: BackendInfoDto;
 
   public systemLoading = false;
   public launcherLoading = false;
@@ -40,21 +41,22 @@ export class UpdateBrowserComponent implements OnInit {
   }
 
   private async reload() {
-    const currentVersion = await this.cfgService.getBackendInfo().toPromise();
+    this.backendInfo = await this.cfgService.getBackendInfo().toPromise();
     this.updService
       .listBDeployVersions()
       .pipe(finalize(() => (this.systemLoading = false)))
-      .subscribe(r => (this.systemVersions = this.groupKeysByTag(r, currentVersion.version)));
+      .subscribe(r => (this.systemVersions = this.groupKeysByTag(r)));
     this.updService
       .listLauncherVersions()
       .pipe(finalize(() => (this.launcherLoading = false)))
-      .subscribe(r => (this.launcherVersions = this.groupKeysByTag(r, null)));
+      .subscribe(r => (this.launcherVersions = this.groupKeysByTag(r)));
   }
 
-  private groupKeysByTag(keys: ManifestKey[], currentVersion: Version) {
+  private groupKeysByTag(keys: ManifestKey[]) {
     const tags: { [key: string]: GroupedKeys } = {};
 
     // keys are already sorted by the backend. reverse the order to have the newest version on top.
+    const currentVersion = this.backendInfo.version;
     keys.reverse().forEach(k => {
       if (!(k.tag in tags)) {
         tags[k.tag] = new GroupedKeys();
@@ -63,7 +65,7 @@ export class UpdateBrowserComponent implements OnInit {
       group.tag = k.tag;
       group.snapshot = k.name.includes('snapshot');
 
-      if (currentVersion && convert2String(currentVersion) === group.tag) {
+      if (convert2String(currentVersion) === group.tag) {
         group.current = true;
       }
 
@@ -144,6 +146,15 @@ export class UpdateBrowserComponent implements OnInit {
           return;
         }
       }
+    }
+
+    let text = `Confirm that the system should be updated to version <b>${keys.tag}</b>`;
+    if (keys.snapshot) {
+      text += '<br/><br/><b>WARNING:</b> You are about to install a snapshot version that is not yet released.';
+    }
+    const doUpdate = await this.mbService.openAsync({title: 'Confirm Update', message: text , mode: MessageBoxMode.QUESTION});
+    if (!doUpdate) {
+      return;
     }
 
     // perform update call and then wait some seconds for the master to go down.
