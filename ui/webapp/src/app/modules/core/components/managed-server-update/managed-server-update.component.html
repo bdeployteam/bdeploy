@@ -20,6 +20,15 @@
         The update can either be immediately installed or it can be prepared and installed at a later time.
         Preparing will only transfer the new version to the target system. It can then be installed at any time.
       </div>
+
+      <div class="version-grid">
+        <div>Current Version:</div>
+        <div>{{updateDto.runningVersion | formatVersion}}</div>
+        <div></div>
+        <div>New Version:</div>
+        <div><b>{{updateDto.updateVersion | formatVersion }}</b></div>
+        <div><a *ngIf="!isSnapshot()" href='https://github.com/bdeployteam/bdeploy/releases/tag/v{{updateDto.runningVersion | formatVersion}}' target="_blank">Release Notes (GitHub)</a> </div>
+      </div>
     </div>
 
     <div *ngIf="showInProgressHint()">

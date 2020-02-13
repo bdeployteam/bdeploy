@@ -59,6 +59,7 @@ import { UserPasswordComponent } from './components/user-password/user-password.
 import { ClickStopPropagationDirective } from './directives/click-stop-propagation.directive';
 import { FileDropDirective } from './directives/file-drop.directive';
 import { httpInterceptorProviders } from './interceptors';
+import { VersionPipe } from './pipes/version.pipe';
 import { ConfigService } from './services/config.service';
 
 export function loadAppConfig(cfgService: ConfigService) {
@@ -83,6 +84,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     UserAvatarComponent,
     UserEditComponent,
     UserPasswordComponent,
+    VersionPipe,
   ],
   entryComponents: [
     ConnectionLostComponent,
@@ -192,6 +194,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     ProductTagCardComponent,
     ProductInfoCardComponent,
     UserAvatarComponent,
+    VersionPipe,
   ]
 })
 export class CoreModule { }

@@ -108,4 +108,8 @@ export class ManagedServerUpdateComponent implements OnInit {
     return isUpdateFailed(this.updateStatus);
   }
 
+  isSnapshot() {
+    return this.updateDto.packagesToInstall.some(key => key.name.includes('snapshot'));
+  }
+
 }

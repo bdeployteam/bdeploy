@@ -52,3 +52,9 @@
   vertical-align: middle;
   margin-top: -5px;
 }
+
+.version-grid {
+  margin-top: 1em;
+  display: grid;
+  grid-template-columns: 120px 150px auto;
+}

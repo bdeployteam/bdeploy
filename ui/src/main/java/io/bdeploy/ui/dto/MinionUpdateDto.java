@@ -17,6 +17,11 @@ public class MinionUpdateDto {
     public Version updateVersion;
 
     /**
+     * The version that is currently running.
+     */
+    public Version runningVersion;
+
+    /**
      * Flag whether or not updates can be installed.
      */
     public boolean updateAvailable;

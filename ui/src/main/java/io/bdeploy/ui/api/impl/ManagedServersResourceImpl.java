@@ -438,6 +438,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         // Determine whether or not an update must be installed
         MinionUpdateDto updateDto = new MinionUpdateDto();
         updateDto.updateVersion = runningVersion;
+        updateDto.runningVersion = managedVersion;
         updateDto.updateAvailable = VersionHelper.compare(runningVersion, managedVersion) > 0;
 
         // Contact the remote service to find out all installed versions

@@ -104,8 +104,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
   openUploadDialog() {
     const config = new MatDialogConfig();
-    config.width = '80%';
-    config.height = '60%';
+    config.width = '70%';
+    config.height = '75%';
     config.minWidth = '650px';
     config.minHeight = '550px';
     config.data = {
