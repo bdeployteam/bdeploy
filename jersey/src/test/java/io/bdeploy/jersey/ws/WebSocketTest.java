@@ -74,12 +74,13 @@ public class WebSocketTest {
                         public void onMessage(String message) {
                             log.info("Client message: " + message);
 
-                            webSocket.close();
                             result.set(message);
+
+                            webSocket.close();
                         }
                     }).build()).get();
 
-            while (result.get() == null) {
+            while (result.get() == null || !closed.get()) {
                 Thread.sleep(10);
             }
 
