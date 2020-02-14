@@ -2,11 +2,11 @@
   <img src="https://bdeploy.io/user/images/logo.svg" width="150" />
 </p>
 <p align="center">
-  <a href="https://github.com/bdeployteam/bdeploy/actions?query=workflow%3A%22BDeployCI-Linux%22" title="GitHub CI - Linux">
-   <img src="https://github.com/bdeployteam/bdeploy/workflows/BDeploy%20CI%20-%20Linux/badge.svg" />
+  <a href="https://github.com/bdeployteam/bdeploy/actions?query=workflow%3A%22BDeploy+CI+-+Linux%22+branch%3Amaster" title="GitHub CI - Linux">
+   <img src="https://github.com/bdeployteam/bdeploy/workflows/BDeploy%20CI%20-%20Linux/badge.svg?branch=master" />
   </a>
-  <a href="https://github.com/bdeployteam/bdeploy/actions?query=workflow%3A%22BDeployCI-Windows%22" title="GitHub CI - Windows">
-   <img src="https://github.com/bdeployteam/bdeploy/workflows/BDeploy%20CI%20-%20Windows/badge.svg" />
+  <a href="https://github.com/bdeployteam/bdeploy/actions?query=workflow%3A%22BDeploy+CI+-+Windows%22+branch%3Amaster" title="GitHub CI - Windows">
+   <img src="https://github.com/bdeployteam/bdeploy/workflows/BDeploy%20CI%20-%20Windows/badge.svg?branch=master" />
   </a>
   <a href="https://travis-ci.com/bdeployteam/bdeploy" title="Travis CI - Linux">
    <img src="https://travis-ci.com/bdeployteam/bdeploy.svg?branch=master" />
