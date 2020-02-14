@@ -8,6 +8,7 @@ BDeploy uses the *Eclipse IDE* for backend- and *VSCode* for frontend-developmen
 * https://code.visualstudio.com/download[VSCode]
 ** You need to have the https://marketplace.visualstudio.com/items?itemName=johnpapa.angular-essentials[Angular Essentials] extension installed.
 * https://www.npmjs.com/get-npm[NPM]
+** Some people prefer to use https://github.com/nvm-sh/nvm[NVM]
 * https://git-scm.com/downloads[GIT]
 
 === Environment Setup
@@ -15,6 +16,9 @@ BDeploy uses the *Eclipse IDE* for backend- and *VSCode* for frontend-developmen
 * You will want to set the `JAVA_HOME` environment variable to point to the path where you extracted the *OpenJDK 11* package to assure that the build picks up the correct Java.
 * Make sure that the `npm` command works from the command line where you will run `gradle` builds (`cmd.exe` on Windows, `bash` on Linux).
 * Install the *Angular CLI* globally for easier working by running `npm install -g @angular/cli`.
+
+[NOTE]
+You need root permissions on Linux if you installed NodeJS (and NPM) through your distribution to be able to globally install the *Angular CLI*.
 
 === Repository and Gradle Build
 
@@ -44,7 +48,9 @@ To be able to build, start and debug BDeploy backend applications from the Eclip
 * Open the *Git Repositories* view.
 * Click *Add existing local repository*, browse to the repository location (e.g. `/work/bdeploy/bdeploy`) and add it.
 * Right click the repository in the *Git Repositories* view and select *Import Projects...*.
-** Select all projects with type *Eclipse project* (and only those) and proceed.
+** Select all projects with type *Eclipse project*
+** *Don't* select the projects in the _eclipse-tea_ folder.
+** *Don't* select projects of type *Maven*.
 
 This results in a complete BDeploy workspace setup which compiles automatically.
 
