@@ -7,7 +7,7 @@ The *root directory* contains all the runtime data. Best to select an empty dire
 (e.g. /var/bdeploy on Unix) that is intended exclusively for this purpose. Keep the root directory separate from the BDeploy
 binary installation. Make sure that there is enough space available. 
 
- bdeploy init --root=/path/to/storage --hostname=<hostname> --mode=STANDALONE --tokenFile=token.txt
+ bdeploy init --root=/path/to/storage --hostname=<hostname> --mode=STANDALONE --tokenFile=token.txt --port=7701
 
 The `init` command will print a token. The token is written to a file when providing the `--tokenFile=token.txt` parameter.
 This token can be used to access this server remotely through the command line, so make sure to store it in a safe place.
@@ -31,7 +31,7 @@ Only authenticated users have access to the web UI. Thus a new user must be crea
 
  bdeploy user --root=/path/to/storage --add=admin --password=admin --admin
 
-The created user will be a global administrator, meaning that the user has permission to fully control the server. With the `--admin` flag, the user will have no permissions per default. You have to create at least one administrator user to be able to set up the server (e.g. to configure LDAP authentication) and grant rights to other users.
+The created user will be a global administrator, meaning that the user has permission to fully control the server. Without the `--admin` flag, the user will have no permissions per default. You have to create at least one administrator user to be able to set up the server (e.g. to configure LDAP authentication) and grant rights to other users.
 
 [WARNING]
 Don't use the depicted user and password, these are just samples.

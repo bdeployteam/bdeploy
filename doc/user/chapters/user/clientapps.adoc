@@ -28,6 +28,32 @@ The *Launcher* can also be manually deployed using the provided ZIP file. After 
 Clicking on a _Click & Start_ link in the *Browser* will download a *.bdeploy* file that can be directly executed. A more elegant way is to configure the *Browser* to directly open the *.bdeploy* file type. Firefox as well as Chrome allows to configure this after the file has been downloaded.
 
 
+==== Multi-User Installations
 
+Larger organizations typically do not want to deploy client applications on each client computer. They prefer to install the client software on a central server and publish the software via Citrix or similar technologies so that all users have access to one shared instance. This has the advantage that the administrators are in control of the installation and can centralize the update handling. BDeploy supports such an installation szenario.
 
+There are two different locations that are important in the context of deploying applications in a multi-user setup:
 
+* *Installation Area* - The location where the launcher as well as all applications are installed. This location is typically protected by file system privileges so that an *Administrator* has full permissions and all other users have read permissions. This location is defined by the environment variable *BDEPLOY_HOME*.
+
+* *User Area* - The per-user are where the launcher as well as each launched application is permitted to write files. This location is mandatory in case that the *Installation Area* is read-only. This location is defined by the environment variable *BDEPLOY_USER_AREA*.
+
+===== Configuration
+
+When the *Installation Area* is read-only the environment variable *BDEPLOY_USER_AREA* must be set for each user and must point to a directory that is writable for the user that wants to launch an application.
+
+===== Installing new software
+
+New software is typically installed by the *Administrator* that has full permissions in the *Installation Area*. The administrator is either using the provided *Installer* or a *Click & Start* file in order to install the new application. After that step the application is available and can be launched by each new user by using the *CLick & Start* file.
+
+===== Updating software
+
+Whenever a new *Product version* is *Activated* on the server the administrator *needs* to launch the application *once* to deploy the new update. Not doing that will lead to an error that each user receives when trying to launch the application. The *Launcher* always checks for updates and tries to install them. Using an outdated application is not permitted and thus users will not be able to launch the application any more.
+
+image::images/BDeploy_Client_Launcher_Update_Required.png[Required Software Update,align=center,width=480,link="images/BDeploy_Client_Launcher_Update_Required.png"]
+
+[NOTE] 
+Configuration changes in a client application - like adding, removing or changing a parameter - *do not* require *Administrator* attention since the installation itself is not affected. The change is automatically applied on the next start of the application.
+
+[CAUTION]
+Changing the product version or changing the launcher version on the server require a manual interaction of the *Administrator* otherwise *NO* user can use the client application anymore.
