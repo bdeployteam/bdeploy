@@ -35,8 +35,8 @@ public class UiResources {
 
         server.register(CapabilityRequestFilter.class);
 
-        BroadcastingAuthenticatedWebSocket instanceUpdateBc = new BroadcastingAuthenticatedWebSocket(
-                o -> StorageHelper.toRawBytes(o), server.getKeyStore());
+        BroadcastingAuthenticatedWebSocket instanceUpdateBc = new BroadcastingAuthenticatedWebSocket(StorageHelper::toRawBytes,
+                server.getKeyStore());
         BroadcastingAuthenticatedWebSocket attachEventBc = new BroadcastingAuthenticatedWebSocket(o -> o.toString().getBytes(),
                 server.getKeyStore());
 

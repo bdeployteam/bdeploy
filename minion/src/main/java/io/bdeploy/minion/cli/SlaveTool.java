@@ -188,7 +188,7 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
             srv.register(SlaveProxyResourceImpl.class);
         }
 
-        BroadcastingAuthenticatedWebSocket activityBc = new BroadcastingAuthenticatedWebSocket(o -> StorageHelper.toRawBytes(o),
+        BroadcastingAuthenticatedWebSocket activityBc = new BroadcastingAuthenticatedWebSocket(StorageHelper::toRawBytes,
                 srv.getKeyStore());
         srv.registerWebsocketApplication("/activities", activityBc);
 
