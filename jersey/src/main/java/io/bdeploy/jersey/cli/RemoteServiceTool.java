@@ -141,6 +141,7 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
                 } catch (InterruptedException | ExecutionException e) {
                     out().println("Cannot initialize Acitivities WebSocket");
                     e.printStackTrace(out());
+                    Thread.currentThread().interrupt();
                 }
             }
 

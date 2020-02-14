@@ -124,7 +124,7 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
 
     @Override
     public NoThrowAutoCloseable proxyActivities(RemoteService service) {
-        return new JerseyRemoveActivityProxy(service, this);
+        return new JerseyRemoteActivityProxy(service, this);
     }
 
     /**

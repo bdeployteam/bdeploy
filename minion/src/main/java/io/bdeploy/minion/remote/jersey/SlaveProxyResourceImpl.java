@@ -143,7 +143,7 @@ public class SlaveProxyResourceImpl implements SlaveProxyResource {
         list.add(new ApplicationVariableResolver(app));
         list.add(new ApplicationParameterValueResolver(app.uid, inm.getConfiguration()));
 
-        Function<String, String> p = (s) -> TemplateHelper.process(s, list);
+        Function<String, String> p = s -> TemplateHelper.process(s, list);
 
         processed.id = wrapper.endpoint.id;
         processed.path = wrapper.endpoint.path;

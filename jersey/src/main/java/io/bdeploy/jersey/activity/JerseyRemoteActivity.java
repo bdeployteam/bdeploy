@@ -59,7 +59,7 @@ final class JerseyRemoteActivity implements Activity {
     }
 
     /**
-     * Directly create an activity - used by {@link JerseyRemoveActivityProxy}
+     * Directly create an activity - used by {@link JerseyRemoteActivityProxy}
      */
     JerseyRemoteActivity(Consumer<JerseyRemoteActivity> onDone, Consumer<JerseyRemoteActivity> onCancel, String name, LongSupplier maxWork,
             LongSupplier currentWork, List<String> scope, String user, long start, String uuid, String parentUuid) {

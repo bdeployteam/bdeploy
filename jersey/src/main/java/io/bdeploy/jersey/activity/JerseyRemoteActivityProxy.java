@@ -25,9 +25,9 @@ import io.bdeploy.common.util.JacksonHelper.MapperType;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.jersey.JerseyClientFactory;
 
-public class JerseyRemoveActivityProxy implements NoThrowAutoCloseable {
+public class JerseyRemoteActivityProxy implements NoThrowAutoCloseable {
 
-    private static final Logger log = LoggerFactory.getLogger(JerseyRemoveActivityProxy.class);
+    private static final Logger log = LoggerFactory.getLogger(JerseyRemoteActivityProxy.class);
 
     private final String proxyUuid = "proxy-" + UuidHelper.randomId();
 
@@ -40,7 +40,7 @@ public class JerseyRemoveActivityProxy implements NoThrowAutoCloseable {
     private final Map<String, ActivityNode> proxiedActivities = new TreeMap<>();
     private final Map<String, String> uuidMapping = new TreeMap<>();
 
-    public JerseyRemoveActivityProxy(RemoteService service, JerseyBroadcastingActivityReporter reporter) {
+    public JerseyRemoteActivityProxy(RemoteService service, JerseyBroadcastingActivityReporter reporter) {
         if (service.getKeyStore() == null) {
             throw new IllegalStateException("RemoteService references a local service: " + service.getUri());
         }
@@ -64,6 +64,7 @@ public class JerseyRemoveActivityProxy implements NoThrowAutoCloseable {
             }).get();
         } catch (InterruptedException | ExecutionException e) {
             log.error("Cannot create WebSocket", e);
+            Thread.currentThread().interrupt();
         }
     }
 

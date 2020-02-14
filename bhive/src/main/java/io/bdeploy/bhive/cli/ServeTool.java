@@ -88,8 +88,8 @@ public class ServeTool extends ConfiguredCliTool<ServeConfig> {
             }
 
             // WebSocket activity reporter bridge
-            BroadcastingAuthenticatedWebSocket activityBc = new BroadcastingAuthenticatedWebSocket(
-                    o -> StorageHelper.toRawBytes(o), server.getKeyStore());
+            BroadcastingAuthenticatedWebSocket activityBc = new BroadcastingAuthenticatedWebSocket(StorageHelper::toRawBytes,
+                    server.getKeyStore());
             server.registerWebsocketApplication("/activities", activityBc);
 
             // locator will create nested resources on demand.
