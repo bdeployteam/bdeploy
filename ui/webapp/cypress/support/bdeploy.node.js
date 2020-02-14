@@ -12,6 +12,16 @@ Cypress.Commands.add('waitUntilContentLoaded', function() {
   cy.wait(100);
 
   cy.get('ngx-loading-bar').children().should('not.exist'); // page not yet loaded fully (e.g. lazy loading large module)
-  cy.get('mat-progress-spinner').should('not.be.visible'); // determinate
-  cy.get('mat-spinner').should('not.be.visible'); // indeterminate
+
+  cy.get('body').then($body => {
+    if($body.find('mat-progress-spinner').length > 0) {
+      cy.get('mat-progress-spinner').should('not.be.visible');
+    }
+  });
+
+  cy.get('body').then($body => {
+    if($body.find('mat-spinner').length > 0) {
+      cy.get('mat-spinner').should('not.be.visible');
+    }
+  });
 })

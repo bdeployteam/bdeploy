@@ -106,6 +106,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
     const config = new MatDialogConfig();
     config.width = '80%';
     config.height = '60%';
+    config.minWidth = '650px';
+    config.minHeight = '550px';
     config.data = {
       title: 'Upload Products',
       headerMessage: 'Upload products into this instance group. The selected archive may either contain a new product or a new version of an existing product.',

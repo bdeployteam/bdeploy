@@ -19,6 +19,7 @@ Cypress.Commands.add('createInstanceGroup', function(name, mode = 'STANDALONE') 
   cy.get('.logo-img').should('exist');
 
   cy.contains('button', 'SAVE').click();
+  cy.waitUntilContentLoaded();
 
   cy.get('[data-cy=group-' + name + ']').should('exist');
 })

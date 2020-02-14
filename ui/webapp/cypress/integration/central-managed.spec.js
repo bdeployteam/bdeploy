@@ -161,6 +161,7 @@ describe("Central/Managed Basic Test", function() {
     cy.getApplicationConfigCard('Client Applications', 'Client Application').contains('Initializing...').should('not.exist')
 
     cy.contains('button', 'SAVE').click();
+    cy.waitUntilContentLoaded();
 
     // create a config file
     cy.get('app-instance-group-logo').parent().clickContextMenuItem('Configuration Files...');
@@ -170,6 +171,7 @@ describe("Central/Managed Basic Test", function() {
     cy.contains('button', 'APPLY').click();
     cy.contains('td', 'cypress.cfg').should('exist');
     cy.contains('button', 'SAVE').click();
+    cy.waitUntilContentLoaded();
 
     // make sure that the instance version is NOT yet visible on the central
     cy.gotoInstance(groupName, managedInstance, 'CENTRAL');
@@ -220,6 +222,7 @@ describe("Central/Managed Basic Test", function() {
 
     cy.contains('mat-toolbar', 'Change Product Version').should('exist');
     cy.contains('app-product-tag-card', '2.0.0').should('exist').contains('button', 'arrow_upward').click();
+    cy.waitUntilContentLoaded();
 
     cy.getApplicationConfigCard('master', 'Server Application').clickContextMenuItem('Configure...')
 

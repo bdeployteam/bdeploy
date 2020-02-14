@@ -51,6 +51,7 @@ describe('Product Cleanup Test', function() {
     cy.getApplicationConfigCard('master', 'Server Application').contains('Initializing...').should('not.exist')
 
     cy.contains('button', 'SAVE').click();
+    cy.waitUntilContentLoaded();
   })
 
   /**
@@ -138,6 +139,7 @@ describe('Product Cleanup Test', function() {
     cy.get('app-instance-version-card').find('.instance-version-modified').should('exist')
 
     cy.contains('button', 'SAVE').click();
+    cy.waitUntilContentLoaded();
 
     cy.get('app-instance-version-card').find('.instance-version-modified').should('not.exist')
     cy.contains('app-instance-version-card', '2.0.0').should('exist');

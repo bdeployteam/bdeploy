@@ -29,6 +29,7 @@ Cypress.Commands.add('createInstance', function(group, name, mode = 'STANDALONE'
   return cy.get('mat-toolbar-row').contains('UUID').get('b').then(el => {
     const uuid = el.text();
     cy.contains('button', 'SAVE').click();
+    cy.waitUntilContentLoaded();
     return cy.wrap(uuid);
   });
 })
@@ -178,6 +179,7 @@ Cypress.Commands.add('createNewInstanceVersionByDummyChange', function(instanceG
   cy.contains('button', 'APPLY').click();
   cy.getApplicationConfigCard(nodeName, applicationName).find('.app-config-modified').should('exist')
   cy.contains('button', 'SAVE').click();
+  cy.waitUntilContentLoaded();
 })
 
 Cypress.Commands.add('typeInAceEditor', function(text) {

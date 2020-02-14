@@ -87,6 +87,8 @@ export class SoftwareRepositoryComponent implements OnInit, OnDestroy {
     const config = new MatDialogConfig();
     config.width = '80%';
     config.height = '60%';
+    config.minWidth = '650px';
+    config.minHeight = '550px';
     config.data = {
       title: 'Upload Software Packages',
       headerMessage: 'Upload software packages into this software repository. The selected archive may contain any new software package or a new version of an existing software package.',
