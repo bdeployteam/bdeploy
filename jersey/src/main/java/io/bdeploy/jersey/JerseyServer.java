@@ -19,7 +19,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
@@ -267,11 +266,6 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
                 cc.setCompressionMode(CompressionMode.ON);
                 cc.setCompressionMinSize(CL_BUFFER_SIZE);
 
-                // need to set an explicit list of media-types to compress, as text/event-stream *must* not be compressed.
-                cc.setCompressibleMimeTypes(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN,
-                        MediaType.TEXT_HTML, MediaType.TEXT_XML, "application/javascript", "text/javascript", "text/css",
-                        "image/svg+xml");
-
                 // enable WebSockets on the listener
                 listener.registerAddOn(wsao);
             }
@@ -372,7 +366,8 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
     }
 
     /**
-     * Provides the instance of {@link JerseyBroadcastingActivityReporter} when an {@link ActivityReporter} is requested for injection.
+     * Provides the instance of {@link JerseyBroadcastingActivityReporter} when an {@link ActivityReporter} is requested for
+     * injection.
      */
     private static class JerseyRemoteActivityReporterBridgeFactory implements Factory<ActivityReporter> {
 
@@ -392,15 +387,16 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
     }
 
     /**
-     * Updates the delegate {@link ActivityReporter} of the {@link JerseyServer} to the resolved {@link JerseyBroadcastingActivityReporter}
+     * Updates the delegate {@link ActivityReporter} of the {@link JerseyServer} to the resolved
+     * {@link JerseyBroadcastingActivityReporter}
      * once it is available for injection.
      */
     private class JerseyLazyReporterInitializer implements ContainerLifecycleListener {
 
         @Override
         public void onStartup(Container container) {
-            reporterDelegate.setDelegate(
-                    container.getApplicationHandler().getInjectionManager().getInstance(JerseyBroadcastingActivityReporter.class));
+            reporterDelegate.setDelegate(container.getApplicationHandler().getInjectionManager()
+                    .getInstance(JerseyBroadcastingActivityReporter.class));
         }
 
         @Override
