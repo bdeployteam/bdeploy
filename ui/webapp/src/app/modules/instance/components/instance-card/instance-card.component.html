@@ -6,8 +6,8 @@
     <mat-card-subtitle>Instance ({{instanceDto.instanceConfiguration.uuid}})</mat-card-subtitle>
     <span class="fill-space"></span>
     <mat-menu #appMenu="matMenu" xPosition="before">
-      <button mat-menu-item [routerLink]="['/instance/edit', instanceGroupName, instanceDto.instanceConfiguration.uuid]" [disabled]="!authService.isScopedAdmin('instanceGroupName')">Edit</button>
-      <button mat-menu-item (click)="delete()" [disabled]="!authService.isScopedAdmin('instanceGroupName')">Delete</button>
+      <button mat-menu-item [routerLink]="['/instance/edit', instanceGroupName, instanceDto.instanceConfiguration.uuid]" [disabled]="!authService.isScopedAdmin(instanceGroupName)">Edit</button>
+      <button mat-menu-item (click)="delete()" [disabled]="!authService.isScopedAdmin(instanceGroupName)">Delete</button>
     </mat-menu>
     <button class="option-button" mat-icon-button [matMenuTriggerFor]="appMenu" appClickStopPropagation>
       <mat-icon>more_vert</mat-icon>
