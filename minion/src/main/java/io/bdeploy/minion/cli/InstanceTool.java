@@ -12,12 +12,14 @@ import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.ExistingPathValidator;
+import io.bdeploy.common.cfg.MinionRootValidator;
 import io.bdeploy.common.cfg.NonExistingPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.InstanceImportExportHelper;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
+import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.cli.InstanceTool.InstanceConfig;
 
 @Help("Import and Export existing instance configurations")
@@ -25,6 +27,11 @@ import io.bdeploy.minion.cli.InstanceTool.InstanceConfig;
 public class InstanceTool extends ConfiguredCliTool<InstanceConfig> {
 
     public @interface InstanceConfig {
+
+        @Help("Path to the minion root used for loading minion configurations")
+        @EnvironmentFallback("BDEPLOY_ROOT")
+        @Validator(MinionRootValidator.class)
+        String root();
 
         @Help("Path to the local hive used for loading application descriptors and storing the deployment manifests when loading")
         @EnvironmentFallback("BHIVE")
@@ -51,13 +58,17 @@ public class InstanceTool extends ConfiguredCliTool<InstanceConfig> {
 
     @Override
     protected void run(InstanceConfig config) {
+        helpAndFailIfMissing(config.root(), "--root missing");
         helpAndFailIfMissing(config.hive(), "--hive missing");
 
-        try (BHive hive = new BHive(Paths.get(config.hive()).toUri(), getActivityReporter())) {
+        Path rootDir = Paths.get(config.root());
+        Path hiveDir = Paths.get(config.hive());
+        try (MinionRoot root = new MinionRoot(rootDir, getActivityReporter());
+                BHive hive = new BHive(hiveDir.toUri(), getActivityReporter())) {
             if (config.exportTo() != null) {
                 doExport(Paths.get(config.exportTo()), hive, config.uuid(), config.tag());
             } else if (config.importFrom() != null) {
-                doImport(Paths.get(config.importFrom()), hive, config.uuid());
+                doImport(Paths.get(config.importFrom()), root, hive, config.uuid());
             } else {
                 helpAndFail("Nothing to do...");
             }
@@ -69,11 +80,12 @@ public class InstanceTool extends ConfiguredCliTool<InstanceConfig> {
      * @param hive the {@link BHive} to import to
      * @param uuid the target UUID of the instance.
      */
-    private void doImport(Path zip, BHive hive, String uuid) {
+    private void doImport(Path zip, MinionRoot root, BHive hive, String uuid) {
         if (uuid == null) {
             uuid = UuidHelper.randomId();
         }
-        Manifest.Key created = InstanceImportExportHelper.importFrom(zip, hive, uuid, null);
+
+        Manifest.Key created = InstanceImportExportHelper.importFrom(zip, hive, uuid, root.getMinions());
         InstanceManifest imf = InstanceManifest.of(hive, created);
         out().println("Created '" + imf.getConfiguration().uuid + "': " + imf.getConfiguration().name);
     }
