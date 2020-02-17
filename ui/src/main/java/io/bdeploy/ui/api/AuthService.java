@@ -31,6 +31,13 @@ public interface AuthService {
     public void updateInstanceGroupPermissions(String group, InstanceGroupPermissionDto[] permissions);
 
     /**
+     * Removes the ScopedCapabilities for all users on a single InstanceGroup.
+     *
+     * @param group the name of the InstanceGroup.
+     */
+    public void removeInstanceGroupPermissions(String group);
+
+    /**
      * @param user the user to create
      * @param pw the password to assign initially
      * @param capabilities the initial capabilities of the user.

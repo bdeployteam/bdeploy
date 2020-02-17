@@ -171,12 +171,17 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
         if (bHive == null) {
             throw new WebApplicationException("Hive '" + group + "' does not exist");
         }
+        auth.removeInstanceGroupPermissions(group);
         registry.unregister(group);
         PathHelper.deleteRecursive(Paths.get(bHive.getUri()));
     }
 
     @Override
     public SortedSet<UserInfo> getAllUser(String group) {
+        BHive bHive = registry.get(group);
+        if (bHive == null) {
+            throw new WebApplicationException("Hive '" + group + "' does not exist");
+        }
         return auth.getAll();
     }
 
