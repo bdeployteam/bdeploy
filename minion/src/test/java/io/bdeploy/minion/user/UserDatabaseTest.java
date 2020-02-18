@@ -18,8 +18,8 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.common.security.ApiAccessToken;
-import io.bdeploy.common.security.ScopedCapability;
-import io.bdeploy.common.security.ScopedCapability.Capability;
+import io.bdeploy.common.security.ScopedPermission;
+import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.minion.MinionRoot;
@@ -32,23 +32,23 @@ public class UserDatabaseTest {
     void userRoles(MinionRoot root) {
         UserDatabase db = root.getUsers();
 
-        db.createLocalUser("JunitTest", "JunitTest", Collections.singletonList(ApiAccessToken.ADMIN_CAPABILITY));
+        db.createLocalUser("JunitTest", "JunitTest", Collections.singletonList(ApiAccessToken.ADMIN_PERMISSION));
 
         UserInfo info = db.authenticate("JunitTest", "JunitTest");
         assertNotNull(info);
-        assertNotNull(info.capabilities);
-        assertEquals(1, info.capabilities.size());
-        assertEquals(ApiAccessToken.ADMIN_CAPABILITY.capability, info.capabilities.iterator().next().capability);
+        assertNotNull(info.permissions);
+        assertEquals(1, info.permissions.size());
+        assertEquals(ApiAccessToken.ADMIN_PERMISSION.permission, info.permissions.iterator().next().permission);
 
-        info.capabilities.clear();
+        info.permissions.clear();
         info.fullName = "JunitTest User";
         info.email = "JunitTest.user@example.com";
         db.updateUserInfo(info);
 
         UserInfo updated = db.authenticate("JunitTest", "JunitTest");
         assertNotNull(updated);
-        assertNotNull(updated.capabilities);
-        assertTrue(updated.capabilities.isEmpty());
+        assertNotNull(updated.permissions);
+        assertTrue(updated.permissions.isEmpty());
 
         assertEquals("JunitTest User", updated.fullName);
         assertEquals("JunitTest.user@example.com", updated.email);
@@ -75,7 +75,7 @@ public class UserDatabaseTest {
         db.createLocalUser("JunitTest", "JunitTest", null);
         for (int i = 0; i < 20; ++i) {
             UserInfo u = db.getUser("JunitTest");
-            u.capabilities.add(new ScopedCapability("Scope" + i, ScopedCapability.Capability.ADMIN));
+            u.permissions.add(new ScopedPermission("Scope" + i, ScopedPermission.Permission.ADMIN));
             db.updateUserInfo(u);
         }
 
@@ -87,7 +87,7 @@ public class UserDatabaseTest {
     void crud(MinionRoot root) {
         UserDatabase db = root.getUsers();
 
-        db.createLocalUser("JunitTest", "JunitTest", Collections.singleton(new ScopedCapability("JunitTest", Capability.WRITE)));
+        db.createLocalUser("JunitTest", "JunitTest", Collections.singleton(new ScopedPermission("JunitTest", Permission.WRITE)));
         db.updateLocalPassword("JunitTest", "newpw");
 
         UserInfo user = db.authenticate("JunitTest", "newpw");
@@ -116,8 +116,8 @@ public class UserDatabaseTest {
         UserDatabase db = root.getUsers();
         int originalSize = db.getAllNames().size();
 
-        ScopedCapability capability = new ScopedCapability("MyScope", Capability.ADMIN);
-        db.createLocalUser("jUNit", "junit", Collections.singleton(capability));
+        ScopedPermission permission = new ScopedPermission("MyScope", Permission.ADMIN);
+        db.createLocalUser("jUNit", "junit", Collections.singleton(permission));
 
         // Ensure it is stored in lower-case
         BHive hive = root.getHive();
@@ -142,7 +142,7 @@ public class UserDatabaseTest {
         assertEquals(Arrays.asList("a"), db.getRecentlyUsedInstanceGroups("juNIT"));
 
         // Query permissions
-        assertTrue(db.isAuthorized("JUNit", capability));
+        assertTrue(db.isAuthorized("JUNit", permission));
 
         // Query all users - check if lowercase
         for (String name : db.getAllNames()) {

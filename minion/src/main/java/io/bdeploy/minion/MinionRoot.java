@@ -39,7 +39,7 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.Version;
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
-import io.bdeploy.common.security.ScopedCapability;
+import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.VersionHelper;
@@ -575,8 +575,8 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     }
 
     @Override
-    public String createToken(String principal, Collection<ScopedCapability> capabilities) {
-        ApiAccessToken token = new ApiAccessToken.Builder().setIssuedTo(principal).setWeak(false).addCapability(capabilities)
+    public String createToken(String principal, Collection<ScopedPermission> permissions) {
+        ApiAccessToken token = new ApiAccessToken.Builder().setIssuedTo(principal).setWeak(false).addPermission(permissions)
                 .build();
         MinionState state = getState();
         try {

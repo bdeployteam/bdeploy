@@ -45,12 +45,12 @@ public class TestMinion extends TestServer {
 
         String userName = "Test";
         UserDatabase userDb = cmr.mr.getUsers();
-        userDb.createLocalUser(userName, userName, Collections.singletonList(ApiAccessToken.ADMIN_CAPABILITY));
+        userDb.createLocalUser(userName, userName, Collections.singletonList(ApiAccessToken.ADMIN_PERMISSION));
 
         serverStore = SecurityHelper.getInstance().loadPrivateKeyStore(state.keystorePath, state.keystorePass);
         storePass = state.keystorePass;
 
-        Builder builder = new ApiAccessToken.Builder().setIssuedTo(userName).addCapability(ApiAccessToken.ADMIN_CAPABILITY);
+        Builder builder = new ApiAccessToken.Builder().setIssuedTo(userName).addPermission(ApiAccessToken.ADMIN_PERMISSION);
         authPack = SecurityHelper.getInstance().createSignaturePack(builder.build(), serverStore, state.keystorePass);
 
         setAuditor(new RollingFileAuditor(cmr.mr.getAuditLogDir()));

@@ -5,7 +5,7 @@ import java.security.Principal;
 import javax.ws.rs.core.SecurityContext;
 
 import io.bdeploy.common.security.ApiAccessToken;
-import io.bdeploy.common.security.ScopedCapability;
+import io.bdeploy.common.security.ScopedPermission;
 
 /**
  * A simple {@link SecurityContext} which provides information based on the
@@ -46,16 +46,16 @@ public class JerseySecurityContext implements SecurityContext {
     }
 
     /**
-     * Returns a boolean indicating whether the security token grants the requested capability. Please note that
-     * the token only contains the GLOBAL permissions. When {@code false} is returned then the LOCAL capabilities must also
+     * Returns a boolean indicating whether the security token grants the requested permission. Please note that
+     * the token only contains the GLOBAL permissions. When {@code false} is returned then the LOCAL permissions must also
      * be evaluated before denying access to a given resource.
      *
-     * @param scopedCapability the required capability
+     * @param scopedPermission the required permission
      * @return {@code true} if authorized or {@code false} otherwise
      */
-    public boolean isAuthorized(ScopedCapability scopedCapability) {
-        for (ScopedCapability sc : token.getCapabilities()) {
-            if (sc.satisfies(scopedCapability)) {
+    public boolean isAuthorized(ScopedPermission scopedPermission) {
+        for (ScopedPermission sc : token.getPermissions()) {
+            if (sc.satisfies(scopedPermission)) {
                 return true;
             }
         }

@@ -3,7 +3,7 @@ package io.bdeploy.interfaces.configuration.instance;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.bdeploy.common.security.ScopedCapability.Capability;
+import io.bdeploy.common.security.ScopedPermission.Permission;
 
 /**
  * Allows updating of {@link InstanceConfiguration}
@@ -11,12 +11,12 @@ import io.bdeploy.common.security.ScopedCapability.Capability;
 public class InstanceGroupPermissionDto {
 
     public final String user;
-    public final Capability capability;
+    public final Permission permission;
 
     @JsonCreator
-    public InstanceGroupPermissionDto(@JsonProperty("user") String user, @JsonProperty("capability") Capability capability) {
+    public InstanceGroupPermissionDto(@JsonProperty("user") String user, @JsonProperty("permission") Permission permission) {
         this.user = user;
-        this.capability = capability;
+        this.permission = permission;
     }
 
 }

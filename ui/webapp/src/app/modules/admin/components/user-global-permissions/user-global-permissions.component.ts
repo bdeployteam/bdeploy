@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Capability, UserInfo } from 'src/app/models/gen.dtos';
+import { Permission, UserInfo } from 'src/app/models/gen.dtos';
 
 @Component({
   selector: 'app-user-global-permissions',
@@ -14,19 +14,19 @@ export class UserGlobalPermissionsComponent implements OnInit {
   constructor(@Inject(MAT_DIALOG_DATA) public userInfo: UserInfo) { }
 
   public ngOnInit() {
-    if (this.hasCapability(Capability.ADMIN)) {
+    if (this.hasPermission(Permission.ADMIN)) {
       this.slider = 3;
-    } else if (this.hasCapability(Capability.WRITE)) {
+    } else if (this.hasPermission(Permission.WRITE)) {
       this.slider = 2;
-    } else if (this.hasCapability(Capability.READ)) {
+    } else if (this.hasPermission(Permission.READ)) {
       this.slider = 1;
     } else {
       this.slider = 0;
     }
   }
 
-  private hasCapability(capability: Capability): boolean {
-    return this.userInfo.capabilities.find(c => !c.scope && c.capability === capability) != null;
+  private hasPermission(permission: Permission): boolean {
+    return this.userInfo.permissions.find(c => !c.scope && c.permission === permission) != null;
   }
 
   public setSlider(val: number) {
@@ -38,16 +38,16 @@ export class UserGlobalPermissionsComponent implements OnInit {
   }
 
   public getResult(): UserInfo {
-    this.userInfo.capabilities = this.userInfo.capabilities.filter(c => c.scope);
+    this.userInfo.permissions = this.userInfo.permissions.filter(c => c.scope);
     switch (this.slider) {
       case 1:
-        this.userInfo.capabilities.push({scope: null, capability: Capability.READ});
+        this.userInfo.permissions.push({scope: null, permission: Permission.READ});
         break;
       case 2:
-        this.userInfo.capabilities.push({scope: null, capability: Capability.WRITE});
+        this.userInfo.permissions.push({scope: null, permission: Permission.WRITE});
         break;
       case 3:
-        this.userInfo.capabilities.push({scope: null, capability: Capability.ADMIN});
+        this.userInfo.permissions.push({scope: null, permission: Permission.ADMIN});
         break;
     }
     return this.userInfo;

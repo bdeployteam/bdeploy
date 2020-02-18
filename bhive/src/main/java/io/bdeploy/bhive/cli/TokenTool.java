@@ -86,7 +86,7 @@ public class TokenTool extends ConfiguredCliTool<TokenConfig> {
 
     private void createNewToken(Path keystore, char[] passphrase) {
         SecurityHelper helper = SecurityHelper.getInstance();
-        ApiAccessToken aat = new ApiAccessToken.Builder().forSystem().addCapability(ApiAccessToken.ADMIN_CAPABILITY).build();
+        ApiAccessToken aat = new ApiAccessToken.Builder().forSystem().addPermission(ApiAccessToken.ADMIN_PERMISSION).build();
 
         out().println("Generating token with 50 years validity");
 

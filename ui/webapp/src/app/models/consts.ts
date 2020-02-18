@@ -37,7 +37,7 @@ export const EMPTY_USER_INFO: UserInfo = {
   externalTag: null,
   inactive: false,
   lastActiveLogin: null,
-  capabilities: [],
+  permissions: [],
   recentlyUsedInstanceGroups: []
 };
 

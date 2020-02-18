@@ -31,8 +31,8 @@ import io.bdeploy.bhive.op.ImportObjectOperation;
 import io.bdeploy.bhive.op.ObjectLoadOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.security.ScopedCapability;
-import io.bdeploy.common.security.ScopedCapability.Capability;
+import io.bdeploy.common.security.ScopedPermission;
+import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
@@ -88,8 +88,8 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
                 continue;
             }
             // The current user must have at least scoped read permissions
-            ScopedCapability requiredCapability = new ScopedCapability(cfg.name, Capability.READ);
-            if (!auth.isAuthorized(context.getUserPrincipal().getName(), requiredCapability)) {
+            ScopedPermission requiredPermission = new ScopedPermission(cfg.name, Permission.READ);
+            if (!auth.isAuthorized(context.getUserPrincipal().getName(), requiredPermission)) {
                 continue;
             }
             result.add(cfg);

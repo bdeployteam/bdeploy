@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.SortedSet;
 
-import io.bdeploy.common.security.ScopedCapability;
+import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupPermissionDto;
 
@@ -23,10 +23,10 @@ public interface AuthService {
     public void updateUserInfo(UserInfo info);
 
     /**
-     * Updates the ScopedCapabilities for a list of users on a single InstanceGroup.
+     * Updates the ScopedPermissions for a list of users on a single InstanceGroup.
      *
      * @param group the name of the InstanceGroup.
-     * @param permissions list of user with Capability.
+     * @param permissions list of user with granted Permission.
      */
     public void updateInstanceGroupPermissions(String group, InstanceGroupPermissionDto[] permissions);
 
@@ -40,9 +40,9 @@ public interface AuthService {
     /**
      * @param user the user to create
      * @param pw the password to assign initially
-     * @param capabilities the initial capabilities of the user.
+     * @param permissions the initial permissions of the user.
      */
-    public void createLocalUser(String user, String pw, Collection<ScopedCapability> capabilities);
+    public void createLocalUser(String user, String pw, Collection<ScopedPermission> permissions);
 
     /**
      * @param user the user to update
@@ -89,8 +89,8 @@ public interface AuthService {
 
     /**
      * @param user the user's name
-     * @param required the required capability
-     * @return whether the user with the given name has the given capability.
+     * @param required the required permission
+     * @return whether the user with the given name has the given permission.
      */
-    public boolean isAuthorized(String user, ScopedCapability required);
+    public boolean isAuthorized(String user, ScopedPermission required);
 }

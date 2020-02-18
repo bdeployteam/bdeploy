@@ -18,8 +18,8 @@ import javax.ws.rs.core.MediaType;
 
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
-import io.bdeploy.common.security.RequiredCapability;
-import io.bdeploy.common.security.ScopedCapability.Capability;
+import io.bdeploy.common.security.RequiredPermission;
+import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
@@ -37,38 +37,38 @@ public interface InstanceGroupResource {
     public List<InstanceGroupConfiguration> list();
 
     @PUT
-    @RequiredCapability(capability = Capability.ADMIN)
+    @RequiredPermission(permission = Permission.ADMIN)
     public void create(InstanceGroupConfiguration config);
 
     @GET
     @Path("/{group}")
-    @RequiredCapability(capability = Capability.READ, scope = "group")
+    @RequiredPermission(permission = Permission.READ, scope = "group")
     public InstanceGroupConfiguration read(@ActivityScope @PathParam("group") String group);
 
     @POST
     @Path("/{group}")
-    @RequiredCapability(capability = Capability.WRITE, scope = "group")
+    @RequiredPermission(permission = Permission.WRITE, scope = "group")
     public void update(@ActivityScope @PathParam("group") String group, InstanceGroupConfiguration config);
 
     @POST
     @Path("/{group}/permissions")
-    @RequiredCapability(capability = Capability.ADMIN, scope = "group")
+    @RequiredPermission(permission = Permission.ADMIN, scope = "group")
     public void updatePermissions(@ActivityScope @PathParam("group") String group, InstanceGroupPermissionDto permissions[]);
 
     @DELETE
     @Path("/{group}")
-    @RequiredCapability(capability = Capability.ADMIN)
+    @RequiredPermission(permission = Permission.ADMIN)
     public void delete(@ActivityScope @PathParam("group") String group);
 
     @GET
     @Path("/{group}/users")
-    @RequiredCapability(capability = Capability.ADMIN, scope = "group")
+    @RequiredPermission(permission = Permission.ADMIN, scope = "group")
     public SortedSet<UserInfo> getAllUser(@ActivityScope @PathParam("group") String group);
 
     @POST
     @Path("/{group}/image")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @RequiredCapability(capability = Capability.WRITE, scope = "group")
+    @RequiredPermission(permission = Permission.WRITE, scope = "group")
     public void updateImage(@ActivityScope @PathParam("group") String group, @FormDataParam("image") InputStream imageData);
 
     @GET
@@ -82,20 +82,20 @@ public interface InstanceGroupResource {
      */
     @GET
     @Path("/{group}/new-uuid")
-    @RequiredCapability(capability = Capability.READ, scope = "group")
+    @RequiredPermission(permission = Permission.READ, scope = "group")
     public String createUuid(@ActivityScope @PathParam("group") String group);
 
     @Path("/{group}/instance")
-    @RequiredCapability(capability = Capability.READ, scope = "group")
+    @RequiredPermission(permission = Permission.READ, scope = "group")
     public InstanceResource getInstanceResource(@ActivityScope @PathParam("group") String group);
 
     @Path("/{group}/product")
-    @RequiredCapability(capability = Capability.READ, scope = "group")
+    @RequiredPermission(permission = Permission.READ, scope = "group")
     public ProductResource getProductResource(@ActivityScope @PathParam("group") String group);
 
     @GET
     @Path("/{group}/client-apps")
-    @RequiredCapability(capability = Capability.READ, scope = "group")
+    @RequiredPermission(permission = Permission.READ, scope = "group")
     public Collection<InstanceClientAppsDto> listClientApps(@ActivityScope @PathParam("group") String group,
             @QueryParam("os") OperatingSystem os);
 

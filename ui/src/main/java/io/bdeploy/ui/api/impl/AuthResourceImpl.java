@@ -49,8 +49,8 @@ public class AuthResourceImpl implements AuthResource {
         if (info != null) {
             ApiAccessToken.Builder token = new ApiAccessToken.Builder().setIssuedTo(cred.user);
 
-            // apply global capabilities. scoped ones are not in the token.
-            info.capabilities.stream().filter(c -> c.scope == null).forEach(token::addCapability);
+            // apply global permissions. scoped ones are not in the token.
+            info.permissions.stream().filter(c -> c.scope == null).forEach(token::addPermission);
 
             String st = signer.apply(token.build());
 
@@ -100,7 +100,7 @@ public class AuthResourceImpl implements AuthResource {
     public String getAuthPack() {
         String user = context.getUserPrincipal().getName();
         UserInfo userInfo = auth.getUser(user);
-        return minion.createToken(user, userInfo.getGlobalCapabilities());
+        return minion.createToken(user, userInfo.getGlobalPermissions());
     }
 
     @Override

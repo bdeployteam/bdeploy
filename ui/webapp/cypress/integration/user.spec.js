@@ -45,15 +45,15 @@ describe('User Accounts Test', function() {
     cy.contains('td', 'check_box').should('not.exist');
   })
 
-  it('Sets a global capability for the user', function() {
+  it('Sets a global permission for the user', function() {
     cy.waitUntilContentLoaded();
-    cy.setGlobalCapability(demoUser, 'WRITE', true);
+    cy.setGlobalPermission(demoUser, 'WRITE', true);
     cy.contains('td', 'WRITE').should('exist');
   })
 
-  it('Removes the global capability for the user', function() {
+  it('Removes the global permission for the user', function() {
     cy.waitUntilContentLoaded();
-    cy.setGlobalCapability(demoUser, '(none)');
+    cy.setGlobalPermission(demoUser, '(none)');
     cy.contains('td', 'WRITE').should('not.exist');
   })
 

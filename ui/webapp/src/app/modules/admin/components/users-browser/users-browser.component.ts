@@ -5,7 +5,7 @@ import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { cloneDeep } from 'lodash';
 import { finalize } from 'rxjs/operators';
-import { Capability, LDAPSettingsDto, UserInfo } from 'src/app/models/gen.dtos';
+import { LDAPSettingsDto, Permission, UserInfo } from 'src/app/models/gen.dtos';
 import { UserEditComponent } from 'src/app/modules/core/components/user-edit/user-edit.component';
 import { UserPasswordComponent } from 'src/app/modules/core/components/user-password/user-password.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
@@ -114,11 +114,11 @@ export class UsersBrowserComponent implements OnInit, AfterViewInit {
     }
   }
 
-  public getGlobalPermission(userInfo: UserInfo): Capability {
-    let p = userInfo.capabilities.find(sc => sc.scope === null && sc.capability === Capability.ADMIN);
-    p = p ? p : userInfo.capabilities.find(sc => sc.scope === null && sc.capability === Capability.WRITE);
-    p = p ? p : userInfo.capabilities.find(sc => sc.scope === null && sc.capability === Capability.READ);
-    return p ? p.capability : null;
+  public getGlobalPermission(userInfo: UserInfo): Permission {
+    let p = userInfo.permissions.find(sc => sc.scope === null && sc.permission === Permission.ADMIN);
+    p = p ? p : userInfo.permissions.find(sc => sc.scope === null && sc.permission === Permission.WRITE);
+    p = p ? p : userInfo.permissions.find(sc => sc.scope === null && sc.permission === Permission.READ);
+    return p ? p.permission : null;
   }
 
   public isCurrentUser(userInfo: UserInfo): boolean {

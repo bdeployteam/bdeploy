@@ -1,5 +1,6 @@
 package io.bdeploy.common.security;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -9,14 +10,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * access any scoped resource with READ permissions. In contrast to that a user that has scoped READ permissions is not able to
  * access a resource requiring global read permissions.
  */
-public final class ScopedCapability {
+public final class ScopedPermission {
 
     /**
-     * Available capabilities. Capabilities are inclusive meaning that higher permissions
+     * Available permissions. Permissions are inclusive meaning that higher permissions
      * include the lower ones. Thus a given resource must only define the lowest required
-     * capability and not multiple ones.
+     * permission and not multiple ones.
      */
-    public enum Capability {
+    public enum Permission {
+
         /**
          * The resource can be viewed but not modified.
          */
@@ -36,50 +38,52 @@ public final class ScopedCapability {
         int level;
 
         /**
-         * Creates a new capability with the given level. Higher level means higher permissions.
+         * Creates a new permission with the given level. Higher level means higher permissions.
          */
-        Capability(int level) {
+        Permission(int level) {
             this.level = level;
         }
     }
 
     public final String scope;
-    public final ScopedCapability.Capability capability;
+    @JsonAlias("capability") // renamed to permission
+    public final ScopedPermission.Permission permission;
 
     /**
-     * Creates a new global capability.
+     * Creates a new global permission.
      *
-     * @param cap the capability
+     * @param permission the permission
      */
-    public ScopedCapability(ScopedCapability.Capability cap) {
-        this(null, cap);
+    public ScopedPermission(ScopedPermission.Permission permission) {
+        this(null, permission);
     }
 
     /**
-     * Creates a new scoped capability allowing access to a particular resource.
+     * Creates a new scoped permission allowing access to a particular resource.
      *
      * @param scope the scope of the resource
-     * @param cap the capability
+     * @param permission the permission
      */
     @JsonCreator
-    public ScopedCapability(@JsonProperty("scope") String scope, @JsonProperty("capability") ScopedCapability.Capability cap) {
+    public ScopedPermission(@JsonProperty("scope") String scope,
+            @JsonProperty("permission") ScopedPermission.Permission permission) {
         this.scope = scope;
-        this.capability = cap;
+        this.permission = permission;
     }
 
     @Override
     public String toString() {
         if (scope == null) {
-            return capability.name() + " (<<GLOBAL>>)";
+            return permission.name() + " (<<GLOBAL>>)";
         }
-        return capability.name() + " (" + scope + ")";
+        return permission.name() + " (" + scope + ")";
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((capability == null) ? 0 : capability.hashCode());
+        result = prime * result + ((permission == null) ? 0 : permission.hashCode());
         result = prime * result + ((scope == null) ? 0 : scope.hashCode());
         return result;
     }
@@ -95,8 +99,8 @@ public final class ScopedCapability {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        ScopedCapability other = (ScopedCapability) obj;
-        if (capability != other.capability) {
+        ScopedPermission other = (ScopedPermission) obj;
+        if (permission != other.permission) {
             return false;
         }
         if (scope == null) {
@@ -110,33 +114,33 @@ public final class ScopedCapability {
     }
 
     /**
-     * Returns whether or not this is a global scoped capability
+     * Returns whether or not this is a global scoped permission
      */
     public boolean isGlobal() {
         return scope == null;
     }
 
     /**
-     * Checks whether or not this capability satisfies the given one. Capabilities are inclusive and ADMIN is the highest one.
-     * The <tt>ADMIN</tt> capability implicitly grants <tt>WRITE</tt> and <tt>READ</tt> and the <tt>WRITE</tt> capability
-     * implicitly grants <tt>READ</tt> capability.
+     * Checks whether or not this permission satisfies the given one. Permissions are inclusive and ADMIN is the highest one.
+     * The <tt>ADMIN</tt> permission implicitly grants <tt>WRITE</tt> and <tt>READ</tt> and the <tt>WRITE</tt> permission
+     * implicitly grants <tt>READ</tt> permission.
      * <p>
      * <ul>
      * <li>If this token is a global one then the scoped of the other one is ignored.
-     * Just the capability without the scoped is checked.</li>
+     * Just the permission without the scoped is checked.</li>
      * <li>If this token is a scoped one and the other one is a global then always {@code false} will be returned.</li>
-     * <li>If both are scoped capabilities then the scope must match. If so the capability will be compared.
+     * <li>If both are scoped permissions then the scope must match. If so the permission will be compared.
      * </ul>
      *
      * @param other
-     *            the capability to check
-     * @return {@code true} if this capability satisfies the other one and {@code false} otherwise
+     *            the permission to check
+     * @return {@code true} if this permission satisfies the other one and {@code false} otherwise
      */
-    public boolean satisfies(ScopedCapability other) {
+    public boolean satisfies(ScopedPermission other) {
         // If this is a global token the scope can be ignored
-        // We just need to verify that we have the requested capability
+        // We just need to verify that we have the requested permission
         if (isGlobal()) {
-            return compareCapability(other.capability) >= 0;
+            return comparePermission(other.permission) >= 0;
         }
 
         // If the other one is a global token access is not possible
@@ -149,18 +153,19 @@ public final class ScopedCapability {
             return false;
         }
 
-        // Same scope, compare capabilities
-        return compareCapability(other.capability) >= 0;
+        // Same scope, compare permissions
+        return comparePermission(other.permission) >= 0;
     }
 
     /**
-     * Compares this capability with the other one.
+     * Compares this permission with the other one.
      *
-     * @param other the other capability
-     * @return -1 if the this capability provides lower permissions than the other one, 0 if the capabilities are equal and 1 if
-     *         this capability provides higher permissions
+     * @param other the other permission
+     * @return -1 if the this permission provides lower a permission level than the other one, 0 if the permissions are equal and
+     *         1 if
+     *         this permission provides a higher permission level
      */
-    private int compareCapability(Capability other) {
-        return Integer.compare(capability.level, other.level);
+    private int comparePermission(Permission other) {
+        return Integer.compare(permission.level, other.level);
     }
 }

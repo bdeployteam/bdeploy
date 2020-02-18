@@ -29,26 +29,26 @@ describe('Instance Group Tests', () => {
     })
   })
 
-  it('Creates user with global capabilities', function() {
+  it('Creates user with global permissions', function() {
     cy.visit('/#/admin/all/(panel:users)');
     cy.waitUntilContentLoaded();
 
     cy.createUser(globalAdmin, 'Global admin account', globalAdmin + mailDomain, 'demo');
     cy.waitUntilContentLoaded();
-    cy.setGlobalCapability(globalAdmin, 'ADMIN');
+    cy.setGlobalPermission(globalAdmin, 'ADMIN');
     cy.waitUntilContentLoaded();
 
     cy.createUser(globalWrite, 'Global write account', globalWrite + mailDomain, 'demo');
     cy.waitUntilContentLoaded();
-    cy.setGlobalCapability(globalWrite, 'WRITE');
+    cy.setGlobalPermission(globalWrite, 'WRITE');
     cy.waitUntilContentLoaded();
 
     cy.createUser(globalRead, 'Global read account', globalRead + mailDomain, 'demo');
     cy.waitUntilContentLoaded();
-    cy.setGlobalCapability(globalRead, 'READ');
+    cy.setGlobalPermission(globalRead, 'READ');
     cy.waitUntilContentLoaded();
 
-    cy.createUser(globalNone, 'Account without global capabilities', globalNone + mailDomain, 'demo');
+    cy.createUser(globalNone, 'Account without global permissions', globalNone + mailDomain, 'demo');
   })
 
   it('Checks permissions on the instance group', function() {

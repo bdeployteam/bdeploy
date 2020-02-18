@@ -39,7 +39,7 @@ public class UserTool extends ConfiguredCliTool<UserConfig> {
         @Help("The password for the user to add.")
         String password();
 
-        @Help("Add global admin capability to the user.")
+        @Help("Add global admin permission to the user.")
         boolean admin() default false;
 
         @Help("The name of the user to remove.")
@@ -67,7 +67,7 @@ public class UserTool extends ConfiguredCliTool<UserConfig> {
                 r.getAuditor().audit(AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration())
                         .clobberParameter("password").setWhat("add-user").build());
                 userDb.createLocalUser(user, config.password(),
-                        config.admin() ? Collections.singletonList(ApiAccessToken.ADMIN_CAPABILITY) : null);
+                        config.admin() ? Collections.singletonList(ApiAccessToken.ADMIN_PERMISSION) : null);
             } else if (config.update() != null) {
                 String user = config.update();
                 r.getAuditor().audit(AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration())
@@ -75,7 +75,7 @@ public class UserTool extends ConfiguredCliTool<UserConfig> {
                 userDb.updateLocalPassword(user, config.password());
                 if (config.admin()) {
                     UserInfo info = userDb.getUser(user);
-                    info.capabilities.add(ApiAccessToken.ADMIN_CAPABILITY);
+                    info.permissions.add(ApiAccessToken.ADMIN_PERMISSION);
                     userDb.updateUserInfo(info);
                 }
             } else if (config.remove() != null) {
@@ -84,9 +84,9 @@ public class UserTool extends ConfiguredCliTool<UserConfig> {
                 userDb.deleteUser(config.remove());
             } else if (config.list()) {
                 String formatString = "%1$-30s %2$-8s %3$-8s %4$-30s";
-                out().println(String.format(formatString, "Username", "External", "Inactive", "Capabilities"));
+                out().println(String.format(formatString, "Username", "External", "Inactive", "Permissions"));
                 for (UserInfo info : userDb.getAll()) {
-                    out().println(String.format(formatString, info.name, info.external, info.inactive, info.capabilities));
+                    out().println(String.format(formatString, info.name, info.external, info.inactive, info.permissions));
                 }
             } else if (config.createToken() != null) {
                 helpAndFailIfMissing(config.password(), "Missing --password");
@@ -95,7 +95,7 @@ public class UserTool extends ConfiguredCliTool<UserConfig> {
                     helpAndFail("Invalid username / password");
                     return; // make code analysis happy :)
                 }
-                String token = r.createToken(info.name, info.capabilities);
+                String token = r.createToken(info.name, info.permissions);
 
                 out().println("Generating token with 50 years validity for " + info.name);
                 out().println("Use the following token to remotely access this server in your name");

@@ -73,23 +73,23 @@ The pull-down menu at the end of each table entry contains actions for modifying
 
 image::images/BDeploy_UserAccounts_Edit.png[BDeploy User Accounts,align=center,width=480,link="images/BDeploy_UserAccounts_Edit.png"]
 
-The global capabilities can be changed using the btn:[Global Capabilities] button in the pull-down menu.
+The global permissions can be changed using the btn:[Global Permissions] button in the pull-down menu.
 
-image::images/BDeploy_UserAccounts_SetGlobalCapabilities.png[BDeploy User Accounts,align=center,width=480,link="images/BDeploy_UserAccounts_SetGlobalCapabilities.png"]
+image::images/BDeploy_UserAccounts_SetGlobalPermissions.png[BDeploy User Accounts,align=center,width=480,link="images/BDeploy_UserAccounts_SetGlobalPermissions.png"]
 
 [%header,cols="25,75"]
 |===
-|Capability
+|Permission
 |Meaning
 
 | *READ*
-| Only those *Instance Groups* for which a user has *READ* capability are displayed. Users with global *READ* capability can see all *Instance Groups*.
-*READ* capability allows the user to read the *Instance Group* without making any modifications.
+| Only those *Instance Groups* for which a user has *READ* permission are displayed. Users with global *READ* permission can see all *Instance Groups*.
+*READ* permission allows the user to read the *Instance Group* without making any modifications.
 
 | *WRITE*
-| The *WRITE* capability allows a user to maintain the contents of an *Instance Group* without modifying the *Instance Group* itself. The *WRITE* capability contains the *READ* capability. Users with global *WRITE* capability can maintain all *Instance Groups*.
+| The *WRITE* permission allows a user to maintain the contents of an *Instance Group* without modifying the *Instance Group* itself. The *WRITE* permission contains the *READ* permission. Users with global *WRITE* permission can maintain all *Instance Groups*.
 | *ADMIN*
-| The *ADMIN* capability contains the *WRITE* and *READ* capability and allows full access to an *Instance Group*. Users with global *ADMIN* capability have full access to all *Instance Groups* and additionally to the *BDeploy* system configuration.
+| The *ADMIN* permission contains the *WRITE* and *READ* permission and allows full access to an *Instance Group*. Users with global *ADMIN* permission have full access to all *Instance Groups* and additionally to the *BDeploy* system configuration.
 |===
 
 The btn:[Set Active] and btn:[Set Inactive] actions are used to disable an account without deleting it i.e. to activate it again.

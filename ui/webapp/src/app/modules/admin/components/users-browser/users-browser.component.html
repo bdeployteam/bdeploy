@@ -39,7 +39,7 @@
         <th mat-header-cell *matHeaderCellDef>Global permissions</th>
         <td mat-cell *matCellDef="let element" class="col-wide">
           <mat-chip-list *ngIf="getGlobalPermission(element) !== null">
-            <mat-chip color="primary" [selected]="getGlobalPermission(element) === 'ADMIN'" class="capability">{{ getGlobalPermission(element) }}</mat-chip>
+            <mat-chip color="primary" [selected]="getGlobalPermission(element) === 'ADMIN'" class="permission">{{ getGlobalPermission(element) }}</mat-chip>
           </mat-chip-list>
         </td>
     </ng-container>

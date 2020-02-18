@@ -7,10 +7,10 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import io.bdeploy.common.security.ScopedCapability.Capability;
+import io.bdeploy.common.security.ScopedPermission.Permission;
 
 /**
- * Specifies the capability required to access methods.
+ * Specifies the permission required to access methods.
  * <p>
  * This annotation can be specified on a class or on method(s). Specifying it
  * at a class level means that it applies to all the methods in the class.
@@ -22,12 +22,12 @@ import io.bdeploy.common.security.ScopedCapability.Capability;
 @Documented
 @Retention(RUNTIME)
 @Target({ ElementType.TYPE, ElementType.METHOD })
-public @interface RequiredCapability {
+public @interface RequiredPermission {
 
     /**
-     * The capability required to access the method
+     * The permission required to access the method
      */
-    public Capability capability();
+    public Permission permission();
 
     /**
      * The name of the query parameter / path parameter containing the actual value. The returned value

@@ -16,7 +16,7 @@ public class AuthAdminResourceImpl implements AuthAdminResource {
 
     @Override
     public void createLocalUser(UserInfo info) {
-        auth.createLocalUser(info.name, info.password, info.capabilities);
+        auth.createLocalUser(info.name, info.password, info.permissions);
         auth.updateUserInfo(info);
     }
 

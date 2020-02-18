@@ -7,10 +7,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.bdeploy.common.security.ScopedCapability;
+import io.bdeploy.common.security.ScopedPermission;
 
 /**
  * Information about a successfully authenticated user at the point in time where authentication happened.
@@ -34,7 +35,8 @@ public class UserInfo implements Comparable<UserInfo> {
 
     public long lastActiveLogin;
 
-    public Set<ScopedCapability> capabilities = new HashSet<>();
+    @JsonAlias("capabilities") // renamed to permissions
+    public Set<ScopedPermission> permissions = new HashSet<>();
     public List<String> recentlyUsedInstanceGroups = new ArrayList<>();
 
     @JsonCreator
@@ -48,12 +50,12 @@ public class UserInfo implements Comparable<UserInfo> {
     }
 
     /**
-     * Returns a list of global capabilities assigned to this user
+     * Returns a list of global permissions assigned to this user
      *
-     * @return the global capabilities
+     * @return the global permissions
      */
-    public Collection<ScopedCapability> getGlobalCapabilities() {
-        return capabilities.stream().filter(ScopedCapability::isGlobal).collect(Collectors.toList());
+    public Collection<ScopedPermission> getGlobalPermissions() {
+        return permissions.stream().filter(ScopedPermission::isGlobal).collect(Collectors.toList());
     }
 
     /**

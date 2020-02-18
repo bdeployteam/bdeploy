@@ -36,7 +36,7 @@ import io.bdeploy.bhive.op.ManifestNextIdOperation;
 import io.bdeploy.bhive.op.ObjectConsistencyCheckOperation;
 import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.util.StorageHelper;
-import io.bdeploy.common.security.ScopedCapability;
+import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupPermissionDto;
 import io.bdeploy.interfaces.manifest.SettingsManifest;
@@ -54,7 +54,7 @@ public class UserDatabase implements AuthService {
 
     private static final Logger log = LoggerFactory.getLogger(UserDatabase.class);
     public static final String NAMESPACE = "users/";
-    private static final String FILE_NAME = "user.json";
+    public static final String FILE_NAME = "user.json";
 
     private final Cache<String, UserInfo> userCache = CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES)
             .maximumSize(1_000).build();
@@ -99,12 +99,12 @@ public class UserDatabase implements AuthService {
                 throw new IllegalStateException("Cannot find user " + dto.user);
             }
 
-            // clear all scoped capabilities for 'group'
-            info.capabilities.removeIf(c -> group.equals(c.scope));
+            // clear all scoped permissions for 'group'
+            info.permissions.removeIf(c -> group.equals(c.scope));
 
-            // add given scoped capability
-            if (dto.capability != null) {
-                info.capabilities.add(new ScopedCapability(group, dto.capability));
+            // add given scoped permission
+            if (dto.permission != null) {
+                info.permissions.add(new ScopedPermission(group, dto.permission));
             }
 
             internalUpdate(info.name, info);
@@ -114,17 +114,17 @@ public class UserDatabase implements AuthService {
     @Override
     public void removeInstanceGroupPermissions(String group) {
         SortedSet<UserInfo> allUsers = getAll();
-        Set<InstanceGroupPermissionDto> changedCapabilities = new HashSet<>();
+        Set<InstanceGroupPermissionDto> changedPermissions = new HashSet<>();
         for (UserInfo userInfo : allUsers) {
-            if (userInfo.capabilities.removeIf(c -> group.equals(c.scope))) {
-                changedCapabilities.add(new InstanceGroupPermissionDto(userInfo.name, null));
+            if (userInfo.permissions.removeIf(c -> group.equals(c.scope))) {
+                changedPermissions.add(new InstanceGroupPermissionDto(userInfo.name, null));
             }
         }
-        updateInstanceGroupPermissions(group, changedCapabilities.toArray(InstanceGroupPermissionDto[]::new));
+        updateInstanceGroupPermissions(group, changedPermissions.toArray(InstanceGroupPermissionDto[]::new));
     }
 
     @Override
-    public void createLocalUser(String user, String pw, Collection<ScopedCapability> capabilities) {
+    public void createLocalUser(String user, String pw, Collection<ScopedPermission> permissions) {
         user = UserInfo.normalizeName(user);
         UserInfo info = getUser(user);
         if (info != null) {
@@ -134,8 +134,8 @@ public class UserDatabase implements AuthService {
         info = new UserInfo(user);
 
         info.password = PasswordAuthentication.hash(pw.toCharArray());
-        if (capabilities != null) {
-            info.capabilities.addAll(capabilities);
+        if (permissions != null) {
+            info.permissions.addAll(permissions);
         }
 
         internalUpdate(user, info);
@@ -308,14 +308,14 @@ public class UserDatabase implements AuthService {
     }
 
     @Override
-    public boolean isAuthorized(String user, ScopedCapability required) {
+    public boolean isAuthorized(String user, ScopedPermission required) {
         user = UserInfo.normalizeName(user);
         UserInfo info = getUser(user);
         if (info == null) {
             return false;
         }
-        for (ScopedCapability capability : info.capabilities) {
-            if (capability.satisfies(required)) {
+        for (ScopedPermission permission : info.permissions) {
+            if (permission.satisfies(required)) {
                 return true;
             }
         }

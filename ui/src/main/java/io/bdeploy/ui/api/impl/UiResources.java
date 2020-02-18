@@ -33,7 +33,7 @@ public class UiResources {
         server.register(ManagedServersResourceImpl.class);
         server.register(ManagedServersAttachEventResourceImpl.class);
 
-        server.register(CapabilityRequestFilter.class);
+        server.register(PermissionRequestFilter.class);
 
         BroadcastingAuthenticatedWebSocket instanceUpdateBc = new BroadcastingAuthenticatedWebSocket(StorageHelper::toRawBytes,
                 server.getKeyStore());

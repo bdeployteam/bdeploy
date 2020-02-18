@@ -97,7 +97,7 @@ public class TestServer
                 serverStore = helper.loadPrivateKeyStore(is, TEST_STORE_PASS);
             }
             ApiAccessToken aat = new ApiAccessToken.Builder().setIssuedTo(System.getProperty("user.name"))
-                    .addCapability(ApiAccessToken.ADMIN_CAPABILITY).build();
+                    .addPermission(ApiAccessToken.ADMIN_PERMISSION).build();
             authPack = helper.createSignaturePack(aat, serverStore, TEST_STORE_PASS);
         } catch (Exception e) {
             throw new RuntimeException("Failed to load keystores", e);

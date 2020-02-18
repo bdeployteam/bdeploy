@@ -36,7 +36,7 @@ describe('BHive Browser Tests', function() {
       const json = JSON.parse(resp);
       expect(json).to.have.property('name', 'admin')
       expect(json).to.have.property('password')
-      expect(json).to.have.property('capabilities')
+      expect(json).to.have.property('permissions')
     })
   })
 

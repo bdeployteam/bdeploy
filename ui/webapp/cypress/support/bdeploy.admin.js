@@ -45,20 +45,20 @@ Cypress.Commands.add('deleteUser', function(username) {
 })
 
 /**
- * Command: setGlobalCapability
+ * Command: setGlobalPermission
  */
-Cypress.Commands.add('setGlobalCapability', function(username, capability, docuScreenshots = false) {
+Cypress.Commands.add('setGlobalPermission', function(username, permission, docuScreenshots = false) {
   cy.contains('tr', username).should('exist');
   cy.contains('tr', username).clickContextMenuItem('Global Permissions...');
 
-  if (capability === '(none)') {
-    cy.get('app-user-global-permissions').contains('span', capability).click();
+  if (permission === '(none)') {
+    cy.get('app-user-global-permissions').contains('span', permission).click();
   } else {
-    cy.get('app-user-global-permissions').contains('mat-chip', capability).click();
+    cy.get('app-user-global-permissions').contains('mat-chip', permission).click();
   }
 
   if (docuScreenshots) {
-    cy.screenshot('BDeploy_UserAccounts_SetGlobalCapabilities');
+    cy.screenshot('BDeploy_UserAccounts_SetGlobalPermissions');
   }
   cy.contains('button', 'OK').click();
 })

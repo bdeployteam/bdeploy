@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { CookieService } from 'ngx-cookie-service';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
-import { Capability, CredentialsDto, UserChangePasswordDto, UserInfo } from '../../../models/gen.dtos';
+import { CredentialsDto, Permission, UserChangePasswordDto, UserInfo } from '../../../models/gen.dtos';
 import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
 import { ConfigService } from './config.service';
 import { Logger, LoggingService } from './logging.service';
@@ -91,7 +91,7 @@ export class AuthenticationService {
   isGlobalAdmin(): boolean {
     const tokenPayload = this.getTokenPayload();
     if (tokenPayload && tokenPayload.c) {
-      return tokenPayload.c.find(c => c.scope === null && c.capability === Capability.ADMIN) != null;
+      return tokenPayload.c.find(c => c.scope === null && c.permission === Permission.ADMIN) != null;
     }
     return false;
   }
@@ -99,7 +99,7 @@ export class AuthenticationService {
   isGlobalWrite(): boolean {
     const tokenPayload = this.getTokenPayload();
     if (tokenPayload && tokenPayload.c) {
-      return tokenPayload.c.find(c => c.scope === null && c.capability === Capability.WRITE) != null;
+      return tokenPayload.c.find(c => c.scope === null && c.permission === Permission.WRITE) != null;
     }
     return false;
   }
@@ -107,42 +107,42 @@ export class AuthenticationService {
   isGlobalRead(): boolean {
     const tokenPayload = this.getTokenPayload();
     if (tokenPayload && tokenPayload.c) {
-      return tokenPayload.c.find(c => c.scope === null && c.capability === Capability.READ) != null;
+      return tokenPayload.c.find(c => c.scope === null && c.permission === Permission.READ) != null;
     }
     return false;
   }
 
   isScopedAdmin(scope: string): boolean {
-    if (this.userInfoSubject.value) {
-      return this.userInfoSubject.value.capabilities.find(sc =>
+    if (this.userInfoSubject.value && this.userInfoSubject.value.permissions) {
+      return this.userInfoSubject.value.permissions.find(sc =>
         (sc.scope === null || sc.scope === scope)
-        && this.ge(sc.capability, Capability.ADMIN)) != null;
+        && this.ge(sc.permission, Permission.ADMIN)) != null;
     }
     return false;
   }
 
   isScopedWrite(scope: string): boolean {
-    if (this.userInfoSubject.value) {
-      return this.userInfoSubject.value.capabilities.find(sc =>
+    if (this.userInfoSubject.value && this.userInfoSubject.value.permissions) {
+      return this.userInfoSubject.value.permissions.find(sc =>
         (sc.scope === null || sc.scope === scope)
-        && this.ge(sc.capability, Capability.WRITE)) != null;
+        && this.ge(sc.permission, Permission.WRITE)) != null;
     }
     return false;
   }
 
   isScopedRead(scope: string): boolean {
-    if (this.userInfoSubject.value) {
-      return this.userInfoSubject.value.capabilities.find(sc =>
+    if (this.userInfoSubject.value && this.userInfoSubject.value.permissions) {
+      return this.userInfoSubject.value.permissions.find(sc =>
         (sc.scope === null || sc.scope === scope)
-        && this.ge(sc.capability, Capability.READ)) != null;
+        && this.ge(sc.permission, Permission.READ)) != null;
     }
     return false;
   }
 
-  private ge(c1: Capability, c2: Capability): boolean {
-    return (c2 === Capability.READ)
-      || (c1 !== Capability.READ && c2 === Capability.WRITE)
-      || (c1 === Capability.ADMIN && c2 === Capability.ADMIN);
+  private ge(c1: Permission, c2: Permission): boolean {
+    return (c2 === Permission.READ)
+      || (c1 !== Permission.READ && c2 === Permission.WRITE)
+      || (c1 === Permission.ADMIN && c2 === Permission.ADMIN);
   }
 
   getUserInfo(): Observable<UserInfo> {

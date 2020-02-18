@@ -19,11 +19,11 @@ import java.util.concurrent.TimeUnit;
 public class ApiAccessToken {
 
     String it; // issuedTo
-    List<ScopedCapability> c = new ArrayList<>(); // capabilities
+    List<ScopedPermission> c = new ArrayList<>(); // permissions
     long ia; // issuedAt
     long vu; // validUntil
     boolean wt; // weakToken
-    public static final ScopedCapability ADMIN_CAPABILITY = new ScopedCapability(ScopedCapability.Capability.ADMIN);
+    public static final ScopedPermission ADMIN_PERMISSION = new ScopedPermission(ScopedPermission.Permission.ADMIN);
 
     public String getIssuedTo() {
         return it;
@@ -37,7 +37,7 @@ public class ApiAccessToken {
         return wt;
     }
 
-    public Collection<ScopedCapability> getCapabilities() {
+    public Collection<ScopedPermission> getPermissions() {
         return Collections.unmodifiableCollection(c);
     }
 
@@ -70,13 +70,13 @@ public class ApiAccessToken {
             return this;
         }
 
-        public Builder addCapability(ScopedCapability cap) {
-            token.c.add(cap);
+        public Builder addPermission(ScopedPermission permission) {
+            token.c.add(permission);
             return this;
         }
 
-        public Builder addCapability(Collection<ScopedCapability> caps) {
-            token.c.addAll(caps);
+        public Builder addPermission(Collection<ScopedPermission> permissions) {
+            token.c.addAll(permissions);
             return this;
         }
 

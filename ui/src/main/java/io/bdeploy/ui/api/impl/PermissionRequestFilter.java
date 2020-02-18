@@ -20,23 +20,23 @@ import javax.ws.rs.core.UriInfo;
 import org.glassfish.jersey.server.ExtendedUriInfo;
 import org.glassfish.jersey.server.model.ResourceMethod;
 
-import io.bdeploy.common.security.RequiredCapability;
-import io.bdeploy.common.security.ScopedCapability;
+import io.bdeploy.common.security.RequiredPermission;
+import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.jersey.JerseySecurityContext;
 import io.bdeploy.ui.api.AuthService;
 
 /**
- * Ensures that the user has the required capabilities to access a certain method.
+ * Ensures that the user has the required permissions to access a certain method.
  * <p>
- * The URI is visited from left to right and the required capabilities and scopes are evaluated. All required capabilities
+ * The URI is visited from left to right and the required permissions and scopes are evaluated. All required permissions
  * must be fulfilled otherwise an {@linkplain ForbiddenException exception} is thrown. Scopes defined on resource locators are
- * inherited to all following resource methods that are called. Thus if a resource locator defines a required capability of READ
+ * inherited to all following resource methods that are called. Thus if a resource locator defines a required permission of READ
  * for scope 'A' all methods defined on that locator will automatically inherit READ for scope 'A'. However the method can
- * overwrite the scope and the capability and define a more restrictive value like WRITE or ADMIN.
+ * overwrite the scope and the permission and define a more restrictive value like WRITE or ADMIN.
  * </p>
  */
 @Priority(Priorities.AUTHORIZATION)
-public class CapabilityRequestFilter implements ContainerRequestFilter {
+public class PermissionRequestFilter implements ContainerRequestFilter {
 
     @Inject
     private AuthService authService;
@@ -61,12 +61,12 @@ public class CapabilityRequestFilter implements ContainerRequestFilter {
         }
         JerseySecurityContext securityContext = (JerseySecurityContext) plainSecurityContext;
 
-        // Check if one of the invoked locators require a special capability
+        // Check if one of the invoked locators require a special permission
         ExtendedUriInfo uriInfo = (ExtendedUriInfo) plainInfo;
         List<ResourceMethod> methods = new ArrayList<>(uriInfo.getMatchedResourceLocators());
         Collections.reverse(methods);
 
-        // Check if the final method requires a special capability
+        // Check if the final method requires a special permission
         ResourceMethod invokedMethod = uriInfo.getMatchedResourceMethod();
         if (invokedMethod != null) {
             methods.add(invokedMethod);
@@ -74,42 +74,42 @@ public class CapabilityRequestFilter implements ContainerRequestFilter {
 
         String activeScope = null;
 
-        // Check if the user has the capabilities declared on each involved method
+        // Check if the user has the permissions declared on each involved method
         for (ResourceMethod resourceMethod : methods) {
             Method method = resourceMethod.getInvocable().getDefinitionMethod();
-            RequiredCapability requiredCapability = getRequiredCapability(method);
-            if (requiredCapability == null) {
+            RequiredPermission requiredPermission = getRequiredPermission(method);
+            if (requiredPermission == null) {
                 continue;
             }
 
             // Try to find the parameter holding the actual scoped value
-            String methodScope = getScopedValue(uriInfo, requiredCapability.scope());
+            String methodScope = getScopedValue(uriInfo, requiredPermission.scope());
             if (methodScope != null) {
                 activeScope = methodScope;
             }
 
-            // Check if the user has global capabilities
-            ScopedCapability scopedCapability = new ScopedCapability(activeScope, requiredCapability.capability());
-            if (securityContext.isAuthorized(scopedCapability)) {
+            // Check if the user has global permissions
+            ScopedPermission scopedPermission = new ScopedPermission(activeScope, requiredPermission.permission());
+            if (securityContext.isAuthorized(scopedPermission)) {
                 continue;
             }
 
-            // Check if the user has scoped capabilities
-            if (!authService.isAuthorized(userName, scopedCapability)) {
+            // Check if the user has scoped permissions
+            if (!authService.isAuthorized(userName, scopedPermission)) {
                 throw new ForbiddenException("User '" + userName + "' is not authorized to access requested resource.");
             }
         }
     }
 
     /**
-     * Returns the defined capability or {@code null} if not defined on the method or on class level.
+     * Returns the defined permission or {@code null} if not defined on the method or on class level.
      */
-    private RequiredCapability getRequiredCapability(Method method) {
-        RequiredCapability capability = method.getAnnotation(RequiredCapability.class);
-        if (capability != null) {
-            return capability;
+    private RequiredPermission getRequiredPermission(Method method) {
+        RequiredPermission permission = method.getAnnotation(RequiredPermission.class);
+        if (permission != null) {
+            return permission;
         }
-        return method.getDeclaringClass().getAnnotation(RequiredCapability.class);
+        return method.getDeclaringClass().getAnnotation(RequiredPermission.class);
     }
 
     /**

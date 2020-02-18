@@ -19,8 +19,8 @@ import javax.ws.rs.core.Response;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import io.bdeploy.bhive.model.Manifest.Key;
-import io.bdeploy.common.security.RequiredCapability;
-import io.bdeploy.common.security.ScopedCapability.Capability;
+import io.bdeploy.common.security.RequiredPermission;
+import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
@@ -54,7 +54,7 @@ public interface InstanceResource {
     public List<InstanceVersionDto> listVersions(@ActivityScope @PathParam("instance") String instanceId);
 
     @PUT
-    @RequiredCapability(capability = Capability.ADMIN)
+    @RequiredPermission(permission = Permission.ADMIN)
     public void create(InstanceConfiguration config, @QueryParam("managedServer") String managedServer);
 
     @GET
@@ -68,13 +68,13 @@ public interface InstanceResource {
 
     @POST
     @Path("/{instance}")
-    @RequiredCapability(capability = Capability.WRITE)
+    @RequiredPermission(permission = Permission.WRITE)
     public void update(@ActivityScope @PathParam("instance") String instanceId, InstanceConfigurationDto config,
             @QueryParam("managedServer") String managedServer, @QueryParam("expect") String expectedTag);
 
     @DELETE
     @Path("/{instance}")
-    @RequiredCapability(capability = Capability.ADMIN)
+    @RequiredPermission(permission = Permission.ADMIN)
     public void delete(@ActivityScope @PathParam("instance") String instanceId);
 
     @GET
@@ -94,17 +94,17 @@ public interface InstanceResource {
 
     @GET
     @Path("/{instance}/{tag}/install")
-    @RequiredCapability(capability = Capability.WRITE)
+    @RequiredPermission(permission = Permission.WRITE)
     public void install(@ActivityScope @PathParam("instance") String instanceId, @ActivityScope @PathParam("tag") String tag);
 
     @GET
     @Path("/{instance}/{tag}/uninstall")
-    @RequiredCapability(capability = Capability.WRITE)
+    @RequiredPermission(permission = Permission.WRITE)
     public void uninstall(@ActivityScope @PathParam("instance") String instanceId, @ActivityScope @PathParam("tag") String tag);
 
     @GET
     @Path("/{instance}/{tag}/activate")
-    @RequiredCapability(capability = Capability.WRITE)
+    @RequiredPermission(permission = Permission.WRITE)
     public void activate(@ActivityScope @PathParam("instance") String instanceId, @ActivityScope @PathParam("tag") String tag);
 
     @GET
@@ -158,7 +158,7 @@ public interface InstanceResource {
     @POST
     @Path("/{instance}/import")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @RequiredCapability(capability = Capability.WRITE)
+    @RequiredPermission(permission = Permission.WRITE)
     public List<Key> importInstance(@FormDataParam("file") InputStream inputStream,
             @ActivityScope @PathParam("instance") String instanceId);
 
