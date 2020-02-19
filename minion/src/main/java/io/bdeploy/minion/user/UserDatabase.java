@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -108,6 +109,18 @@ public class UserDatabase implements AuthService {
 
             internalUpdate(info.name, info);
         }
+    }
+
+    @Override
+    public void removeInstanceGroupPermissions(String group) {
+        SortedSet<UserInfo> allUsers = getAll();
+        Set<InstanceGroupPermissionDto> changedCapabilities = new HashSet<>();
+        for (UserInfo userInfo : allUsers) {
+            if (userInfo.capabilities.removeIf(c -> group.equals(c.scope))) {
+                changedCapabilities.add(new InstanceGroupPermissionDto(userInfo.name, null));
+            }
+        }
+        updateInstanceGroupPermissions(group, changedCapabilities.toArray(InstanceGroupPermissionDto[]::new));
     }
 
     @Override
