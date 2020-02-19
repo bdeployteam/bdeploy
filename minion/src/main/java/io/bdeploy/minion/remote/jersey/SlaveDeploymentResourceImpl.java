@@ -120,6 +120,26 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
     }
 
     @Override
+    public void deactivate(Key key) {
+        BHive hive = root.getHive();
+
+        if (!hive.execute(new ManifestExistsOperation().setManifest(key))) {
+            return;
+        }
+
+        InstanceNodeManifest inm = InstanceNodeManifest.of(hive, key);
+
+        // tell the process controller that there is no active tag anymore...
+        MinionProcessController processController = root.getProcessController();
+        InstanceProcessController controller = processController.getOrCreate(inm.getUUID());
+        controller.setActiveTag(null);
+
+        // deactivate by marking as removed and re-installed (there is no actual de-activation).
+        getState(inm, hive).uninstall(key.getTag());
+        getState(inm, hive).install(key.getTag());
+    }
+
+    @Override
     public void remove(Key key) {
         BHive hive = root.getHive();
 

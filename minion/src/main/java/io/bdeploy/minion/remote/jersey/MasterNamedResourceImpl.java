@@ -277,8 +277,24 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         // record de-activation
         String activeTag = imf.getState(hive).read().activeTag;
         if (activeTag != null) {
-            InstanceManifest.load(hive, imf.getConfiguration().uuid, activeTag).getHistory(hive).record(Action.DEACTIVATE,
-                    context.getUserPrincipal().getName(), null);
+            InstanceManifest oldIm = InstanceManifest.load(hive, imf.getConfiguration().uuid, activeTag);
+            oldIm.getHistory(hive).record(Action.DEACTIVATE, context.getUserPrincipal().getName(), null);
+
+            // make sure all nodes which no longer participate are deactivated.
+            for (Map.Entry<String, Manifest.Key> oldNode : oldIm.getInstanceNodeManifests().entrySet()) {
+                // deactivation by activation later on.
+                if (imf.getInstanceNodeManifests().containsKey(oldNode.getKey())) {
+                    continue;
+                }
+
+                RemoteService rs = root.getMinions().getRemote(oldNode.getKey());
+                if (rs == null) {
+                    log.info("Minion " + oldNode.getKey() + " no longer available for de-activation");
+                    continue;
+                }
+
+                ResourceProvider.getResource(rs, SlaveDeploymentResource.class, context).deactivate(oldNode.getValue());
+            }
         }
 
         SortedMap<String, Key> fragments = imf.getInstanceNodeManifests();

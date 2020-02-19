@@ -1053,6 +1053,10 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     return (this.deploymentState != null && this.deploymentState.activeTag != null);
   }
 
+  public isActiveVersionSelected(): boolean {
+    return (this.isInstanceActivated() && this.selectedConfig != null && this.selectedConfig.version.key.tag === this.deploymentState.activeTag);
+  }
+
   async onSyncManaged() {
     if (!this.isCentral()) {
       return;
