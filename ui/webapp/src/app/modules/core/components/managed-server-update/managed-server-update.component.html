@@ -27,7 +27,7 @@
         <div></div>
         <div>New Version:</div>
         <div><b>{{updateDto.updateVersion | formatVersion }}</b></div>
-        <div><a *ngIf="!isSnapshot()" href='https://github.com/bdeployteam/bdeploy/releases/tag/v{{updateDto.runningVersion | formatVersion}}' target="_blank">Release Notes (GitHub)</a> </div>
+        <div><a *ngIf="!isSnapshot()" href='https://github.com/bdeployteam/bdeploy/releases/tag/v{{updateDto.updateVersion | formatVersion}}' target="_blank">Release Notes (GitHub)</a> </div>
       </div>
     </div>
 
