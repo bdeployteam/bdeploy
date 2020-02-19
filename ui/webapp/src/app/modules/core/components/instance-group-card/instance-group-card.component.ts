@@ -95,7 +95,7 @@ export class InstanceGroupCardComponent implements OnInit {
     const dialogRef = this.dialog.open(InstanceGroupDeleteDialogComponent, {
       minWidth: '300px',
       maxWidth: '90%',
-      data: { name: this.instanceGroup.name, confirmation: '' }
+      data: { name: this.instanceGroup.name, title: this.instanceGroup.title, confirmation: '' }
     });
 
     dialogRef.afterClosed().subscribe(result => {

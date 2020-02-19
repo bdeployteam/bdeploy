@@ -27,3 +27,13 @@
 .mat-card-actions {
   text-align: right;
 }
+
+.group-description {
+  word-break: break-word;
+  overflow: hidden;
+
+  /* This has been tested with chrome and firefox! */
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+}
