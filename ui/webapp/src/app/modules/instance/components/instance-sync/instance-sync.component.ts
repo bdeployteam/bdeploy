@@ -66,6 +66,9 @@ export class InstanceSyncComponent implements OnChanges {
   }
 
   async doSyncCentral() {
+    if (!this.isSyncAllowed()) {
+      return;
+    }
     try {
       await this.managedServers.synchronize(this.instanceGroup, this.server.hostName).toPromise();
       this.ngOnChanges();
@@ -76,6 +79,10 @@ export class InstanceSyncComponent implements OnChanges {
         message: 'Synchronization failed. The remote master server might be offline.',
         mode: MessageBoxMode.ERROR});
     }
+  }
+
+  isSyncAllowed() {
+    return this.authService.isScopedWrite(this.instanceGroup);
   }
 
   getDate(x: number) {

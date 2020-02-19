@@ -9,7 +9,7 @@
     The last synchronized state of the instance is shown, so both editing and process control are not available.<br />
     Press
       <button mat-icon-button [disabled]="!authService.isScopedWrite(groupParam)" (click)='instanceNotifications.closeOverlay(); syncComponent.doSyncCentral()' matTooltip="Synchronize meta-data from the controlling server.">
-        <mat-icon>settings_remote</mat-icon>
+        <mat-icon>dns</mat-icon>
       </button>
     to get the latest version from the managed master. This will unlock editing for 15 minutes.
   </div>

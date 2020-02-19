@@ -1,26 +1,23 @@
 .sync-panel {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+
+  grid-template-columns: 24px auto;
+  column-gap: 5px;
+  row-gap: 5px;
 
   align-items: center;
-  padding: 5px;
+
+  min-width: 250px;
+
+  padding-left: 10px;
   padding-right: 10px;
+}
 
+.sync-panel-active {
   cursor: pointer;
-
-  min-width: 410px;
 }
 
-.sync-button {
-  font-size: 42px;
-  width: 42px;
-  height: 42px;
-
-  margin-right: 10px;
-  margin-left: 10px;
-}
-
-.sync-button-disabled {
-  color: darkgray !important;
-  cursor: default !important;
+.press-to-sync {
+  padding-left: 5px;
+  font-size: x-small;
 }
