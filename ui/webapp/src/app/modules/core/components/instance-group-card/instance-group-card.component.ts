@@ -90,7 +90,7 @@ export class InstanceGroupCardComponent implements OnInit {
           this.removeEvent.emit(true);
         });
       } else {
-        this.log.warn('Instance group name does not match');
+        this.log.warn('Instance group ID does not match');
       }
     });
   }

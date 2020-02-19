@@ -40,7 +40,6 @@ mat-form-field {
 .boolean-param-field {
   flex: 1 1 auto;
   justify-content: left;
-  margin-left: 1em;
   border-bottom-width: 1px;
   border-bottom-style: solid;
 }

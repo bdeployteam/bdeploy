@@ -33,6 +33,7 @@ public class InstanceGroupResourceTest {
 
         InstanceGroupConfiguration cfg = new InstanceGroupConfiguration();
         cfg.name = "demo";
+        cfg.title = "Demo Title";
         cfg.description = "This is a Demo";
 
         res.create(cfg);
@@ -40,6 +41,7 @@ public class InstanceGroupResourceTest {
         List<InstanceGroupConfiguration> list = res.list();
         assertEquals(1, list.size());
         assertEquals("demo", list.get(0).name);
+        assertEquals("Demo Title", list.get(0).title);
         assertEquals("This is a Demo", list.get(0).description);
         assertNull(list.get(0).logo);
 

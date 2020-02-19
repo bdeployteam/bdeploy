@@ -8,11 +8,11 @@
     </mat-toolbar>
 
     <div class="field-container margin-container">
-      <mat-grid-list cols="2" rowHeight="5em">
+      <mat-grid-list cols="2" rowHeight="5em" gutterSize='10px'>
         <mat-grid-tile>
           <mat-form-field>
             <input class="input-field" matInput [readonly]="!isCreate()"
-              formControlName="name" placeholder="Instance group name (Cannot be changed after creation!)" />
+              formControlName="name" placeholder="Instance group ID (Cannot be changed after creation!)" />
             <mat-error *ngIf="nameControl.invalid">{{getErrorMessage(nameControl)}}</mat-error>
           </mat-form-field>
         </mat-grid-tile>
@@ -25,7 +25,7 @@
                 If this option is enabled, old product versions that are no<br>
                 longer in use by instances of this instance group are deleted<br>
                 automatically. To avoid that a product vanishes completely,<br>
-                the very latest product version always remains.                
+                the very latest product version always remains.
               </mat-card-content>
             </mat-card>
           </ng-template>
@@ -40,7 +40,14 @@
           </div>
         </mat-grid-tile>
 
-        <mat-grid-tile [colspan]="2">
+        <mat-grid-tile>
+          <mat-form-field>
+            <input class="input-field" matInput
+              formControlName="title" placeholder="Display Title" />
+            <mat-error *ngIf="titleControl.invalid">{{getErrorMessage(titleControl)}}</mat-error>
+          </mat-form-field>
+        </mat-grid-tile>
+        <mat-grid-tile>
           <mat-form-field>
             <input class="input-field" matInput
               formControlName="description" placeholder="Description" />

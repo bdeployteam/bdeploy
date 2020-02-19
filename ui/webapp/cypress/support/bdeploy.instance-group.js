@@ -8,8 +8,8 @@ Cypress.Commands.add('createInstanceGroup', function(name, mode = 'STANDALONE') 
   cy.contains('button', 'add').click();
 
   cy.contains('button', 'SAVE').should('exist').and('be.disabled');
-  cy.get('input[placeholder^="Instance group name"]').should('exist').click();
-  cy.get('input[placeholder^="Instance group name"]').should('exist').and('have.focus').type(name);
+  cy.get('input[placeholder^="Instance group ID"]').should('exist').click();
+  cy.get('input[placeholder^="Instance group ID"]').should('exist').and('have.focus').type(name);
   cy.get('input[placeholder=Description]').type(name);
 
   cy.fixture('bdeploy.png').then(fileContent => {
@@ -38,7 +38,7 @@ Cypress.Commands.add('deleteInstanceGroup', function(name, mode = 'STANDALONE') 
     .within(dialog => {
       cy.contains('Deleting an instance group cannot be undone').should('exist');
       cy.contains('button', 'Delete').should('be.disabled');
-      cy.get('input[placeholder="Instance Group Name"]')
+      cy.get('input[placeholder="Instance Group ID"]')
         .clear()
         .type(name);
       cy.contains('button', 'Delete')

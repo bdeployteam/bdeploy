@@ -9,7 +9,7 @@
     <div><b>WARNING:</b> Deleting this instance group will delete <b>{{instanceCount}}</b> contained<span *ngIf="instanceCount > 1"> instances</span><span *ngIf="instanceCount == 1"> instance</span> as well.</div>
   </div>
   <mat-form-field>
-    <input matInput required [(ngModel)]="data.confirmation" placeholder="Instance Group Name" cdkFocusInitial autocomplete="off">
+    <input matInput required [(ngModel)]="data.confirmation" placeholder="Instance Group ID" cdkFocusInitial autocomplete="off">
   </mat-form-field>
 </div>
 <div mat-dialog-actions align="end">
