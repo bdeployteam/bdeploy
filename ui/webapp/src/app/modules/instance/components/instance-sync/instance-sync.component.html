@@ -1,21 +1,20 @@
-<ng-container *ngIf='server && !invisible'>
-  <ng-container *ngIf='authService.isScopedWrite(instanceGroup)'>
-    <div appClickStopPropagation class='sync-panel' matRipple [matRippleUnbounded]='false' [matRippleCentered]='true' (click)='doSyncCentral()' [matTooltip]='"Synchronize with " + server.hostName + " (" + server.description + ") to unlock editing."'>
-      <mat-icon *ngIf='isInSync()' class='sync-button'>settings_remote</mat-icon>
-      <mat-icon appClickStopPropagation *ngIf='!isInSync()' class='sync-button sync-button-need-sync' (click)='doSyncCentral()' matRipple [matRippleUnbounded]='true' [matRippleCentered]='true'>settings_remote</mat-icon>
-      <div class='sync-text-panel'>
-        <div>Press to synchronize with <b>{{server.hostName}}</b></div>
-        <div>Last synchronization: <span [ngClass]='isInSync() ? "instance-in-sync" : "instance-not-in-sync"'>{{getDate(server.lastSync)}}</span></div>
-      </div>
-    </div>
-  </ng-container>
-  <ng-container *ngIf='!authService.isScopedWrite(instanceGroup)'>
-    <div appClickStopPropagation class='sync-panel' [matTooltip]='"Insufficient permissions to synchronize with " + server.hostName + " (" + server.description + ")."'>
-      <mat-icon class='sync-button sync-button-disabled'>settings_remote</mat-icon>
-      <div class='sync-text-panel'>
-        <div>No permissions to synchronize with <b>{{server.description}}</b></div>
-        <div>Last synchronization: <span [ngClass]='isInSync() ? "instance-in-sync" : "instance-not-in-sync"'>{{getDate(server.lastSync)}}</span></div>
-      </div>
+<ng-container *ngIf="server && !invisible">
+  <ng-container>
+    <div
+      appClickStopPropagation
+      class="sync-panel"
+      [ngClass]="isSyncAllowed() ? ['sync-panel-active'] : []"
+      matRipple
+      [matRippleUnbounded]="false"
+      [matRippleCentered]="true"
+      (click)="doSyncCentral()"
+      [matTooltip]="isSyncAllowed()
+          ? 'Synchronize with ' + server.description + ' (' + server.hostName + ') to unlock editing.'
+          : 'No permission to synchronize with ' + server.description + ' (' + server.hostName + ').'">
+      <mat-icon>dns</mat-icon>
+      <div><b>{{ server.description }}</b></div>
+      <mat-icon [ngClass]="isInSync() || !isSyncAllowed() ? [] : ['sync-button-need-sync']">access_time</mat-icon>
+      <div>{{ getDate(server.lastSync) }}<span class='press-to-sync' *ngIf='isSyncAllowed()'>(Press to sync)</span></div>
     </div>
   </ng-container>
 </ng-container>
