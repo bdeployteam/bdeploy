@@ -122,4 +122,12 @@ export class ManagedServersService {
       },
     );
   }
+
+  public isDataMigrationRequired(group: string): Observable<boolean> {
+    return this.http.get<boolean>(this.config.config.api + '/managed-servers/requires-data-migration/' + group);
+  }
+
+  public performDataMigration(group: string): Observable<any> {
+    return this.http.post(this.config.config.api + '/managed-servers/perform-data-migration/' + group, {});
+  }
 }

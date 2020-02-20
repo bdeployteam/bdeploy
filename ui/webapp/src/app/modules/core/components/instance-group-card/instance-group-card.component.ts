@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { ManagedServersService } from 'src/app/modules/servers/services/managed-servers.service';
 import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
 import { MessageboxService } from 'src/app/modules/shared/services/messagebox.service';
 import { InstanceGroupConfiguration, MinionMode } from '../../../../models/gen.dtos';
@@ -32,7 +33,8 @@ export class InstanceGroupCardComponent implements OnInit {
     private dialog: MatDialog,
     private config: ConfigService,
     private router: Router,
-    private mb: MessageboxService) { }
+    private mb: MessageboxService,
+    private managedServers: ManagedServersService) { }
 
   ngOnInit() {}
 
@@ -65,13 +67,28 @@ export class InstanceGroupCardComponent implements OnInit {
         // group is not managed but we're no longer a standalone server -> need to attach!
         this.mb.open({title: 'Migrate from Standalone Instance Group', message: `The Instance Group <b>${this.instanceGroup.name}</b> was created in standalone mode. This server has been migrated to a managed mode. You need to attach this Instance Group to an Instance Group <b>with the exact same name</b> on a Central Server to continue using it.`, mode: MessageBoxMode.CONFIRM}).subscribe(r => {
           if (r) {
-            this.router.navigate(['/servers/attach/central']);
+            this.initiateMigration();
           }
         });
       }
     } else {
       this.router.navigate(['/instance/browser', this.instanceGroup.name]);
     }
+  }
+
+  async initiateMigration() {
+    const needMigration = await this.managedServers.isDataMigrationRequired(this.instanceGroup.name).toPromise();
+
+    if (needMigration) {
+      const r = await this.mb.openAsync({title: 'Data Migration', message: `The Instance Group <b>${this.instanceGroup.name}</b> contains instance data which needs to be migrated. This migration will <b>discard</b> old instance versions and create a new, compatible configuration from the <b>latest</b> instance version.`, mode: MessageBoxMode.CONFIRM_WARNING});
+      if (r) {
+        await this.managedServers.performDataMigration(this.instanceGroup.name).toPromise();
+      } else {
+        return;
+      }
+    }
+
+    this.router.navigate(['/servers/attach/central']);
   }
 
   delete(): void {
