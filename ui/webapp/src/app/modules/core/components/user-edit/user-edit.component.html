@@ -1,17 +1,35 @@
 <h1 mat-dialog-title *ngIf="isCreate">Create User</h1>
 <h1 mat-dialog-title *ngIf="!isCreate">Edit User</h1>
-<form #f="ngForm">
+<form [formGroup]="userFormGroup">
   <div mat-dialog-content class='flex-content'>
-    <mat-form-field><input matInput type='text' name='user' [disabled]='!isCreate' required [(ngModel)]='user.name' placeholder="Username"></mat-form-field>
-    <mat-form-field><input matInput type='text' name='name' [disabled]='user.external' [(ngModel)]='user.fullName' placeholder="Full Name"></mat-form-field>
-    <mat-form-field><input matInput type='text' name='mail' [disabled]='user.external' [(ngModel)]='user.email' placeholder="E-Mail Address"></mat-form-field>
-    <div class='flex-horiz' *ngIf="isCreate">
-      <mat-form-field><input matInput type='password' #pass1 name='pass1' [disabled]='user.external' [(ngModel)]='user.password' placeholder="New Password"></mat-form-field>
-      <mat-form-field><input matInput type='password' #pass2 name='pass2' [disabled]='user.external' placeholder="Repeat New Password"></mat-form-field>
+    <mat-form-field>
+      <input matInput [readonly]="!isCreate" formControlName="name" placeholder="Username"/>
+      <mat-error *ngIf="nameControl.invalid">{{getErrorMessage(nameControl)}}</mat-error>
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput [readonly]="isExternal" formControlName="fullName" placeholder="Full Name"/>
+      <mat-error *ngIf="fullNameControl.invalid">{{getErrorMessage(fullNameControl)}}</mat-error>
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput [readonly]="isExternal" formControlName="email" placeholder="E-Mail Address"/>
+      <mat-error *ngIf="emailControl.invalid">{{getErrorMessage(emailControl)}}</mat-error>
+    </mat-form-field>
+    <div class='flex-horiz' *ngIf="isCreate" formGroupName="passwords">
+        <mat-form-field>
+          <input matInput type='password' formControlName="password" placeholder="New Password">
+          <mat-error>{{getErrorMessage(passwordControl)}}</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput type='password' formControlName="passwordRepeat" placeholder="Confirm New Password">
+          <mat-error>{{getErrorMessage(passwordRepeatControl)}}</mat-error>
+        </mat-form-field>
     </div>
   </div>
+  <div mat-dialog-actions align="end">
+    <mat-error *ngIf="passwordsGroup.invalid && passwordControl.valid" class="form-error">
+      Please confirm your password!
+    </mat-error>
+    <button mat-raised-button type="button" [mat-dialog-close]="null">Cancel</button>
+    <button mat-raised-button type="submit" color="primary" [mat-dialog-close]="getResult()" [disabled]='!userFormGroup.valid'>Apply</button>
+  </div>
 </form>
-<div mat-dialog-actions align="end">
-  <button mat-raised-button [mat-dialog-close]="null">Cancel</button>
-  <button mat-raised-button color="primary" [mat-dialog-close]="user" [disabled]='!f.dirty || f.invalid || !isValid()'>Apply</button>
-</div>

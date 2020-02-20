@@ -20,7 +20,7 @@ Cypress.Commands.add('createUser', function(username, fullname, email, password,
   cy.get('input[placeholder="Full Name"]').type(fullname);
   cy.get('input[placeholder="E-Mail Address"]').type(email);
   cy.get('input[placeholder="New Password"]').type(password);
-  cy.get('input[placeholder="Repeat New Password"]').type(password);
+  cy.get('input[placeholder="Confirm New Password"]').type(password);
   cy.contains('button', 'Apply').should('exist').and('enabled');
 
   if (docuScreenshots) {
