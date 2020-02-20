@@ -25,6 +25,11 @@ import javax.ws.rs.core.UriBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.bdeploy.api.product.v1.DependencyFetcher;
+import io.bdeploy.api.product.v1.ProductDescriptor;
+import io.bdeploy.api.product.v1.ProductManifestBuilder;
+import io.bdeploy.api.product.v1.ProductVersionDescriptor;
+import io.bdeploy.api.product.v1.impl.LocalDependencyFetcher;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -41,12 +46,8 @@ import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.common.util.UuidHelper;
-import io.bdeploy.interfaces.descriptor.product.ProductDescriptor;
-import io.bdeploy.interfaces.descriptor.product.ProductVersionDescriptor;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
-import io.bdeploy.interfaces.manifest.dependencies.DependencyFetcher;
-import io.bdeploy.interfaces.manifest.dependencies.LocalDependencyFetcher;
 import io.bdeploy.ui.api.ApplicationResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.ProductResource;
@@ -218,8 +219,8 @@ public class ProductResourceImpl implements ProductResource {
             DependencyFetcher fetcher = new LocalDependencyFetcher();
 
             // validate paths, etc. neither product-info.yaml, nor product-version.yaml are allowed to use '..' in paths.
-            Path desc = ProductManifest.getDescriptorPath(zfs.getPath("/"));
-            ProductDescriptor pd = ProductManifest.readProductDescriptor(desc);
+            Path desc = ProductManifestBuilder.getDescriptorPath(zfs.getPath("/"));
+            ProductDescriptor pd = ProductManifestBuilder.readProductDescriptor(desc);
 
             if (pd.configTemplates != null) {
                 RuntimeAssert.assertFalse(pd.configTemplates.contains("..") || pd.configTemplates.startsWith("/"),
@@ -231,7 +232,7 @@ public class ProductResourceImpl implements ProductResource {
             }
 
             Path vDesc = desc.getParent().resolve(pd.versionFile);
-            ProductVersionDescriptor pvd = ProductManifest.readProductVersionDescriptor(desc, vDesc);
+            ProductVersionDescriptor pvd = ProductManifestBuilder.readProductVersionDescriptor(desc, vDesc);
 
             for (Entry<String, Map<OperatingSystem, String>> entry : pvd.appInfo.entrySet()) {
                 for (Entry<OperatingSystem, String> loc : entry.getValue().entrySet()) {
@@ -240,7 +241,7 @@ public class ProductResourceImpl implements ProductResource {
                 }
             }
 
-            return Collections.singletonList(ProductManifest.importFromDescriptor(desc, hive, fetcher, false));
+            return Collections.singletonList(ProductManifestBuilder.importFromDescriptor(desc, hive, fetcher, false));
         }
     }
 

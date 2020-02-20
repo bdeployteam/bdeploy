@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 
 /**

@@ -3,6 +3,10 @@ package io.bdeploy.minion.cli;
 import java.nio.file.Paths;
 import java.util.SortedSet;
 
+import io.bdeploy.api.product.v1.DependencyFetcher;
+import io.bdeploy.api.product.v1.ProductManifestBuilder;
+import io.bdeploy.api.product.v1.impl.LocalDependencyFetcher;
+import io.bdeploy.api.product.v1.impl.RemoteDependencyFetcher;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -18,9 +22,6 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
-import io.bdeploy.interfaces.manifest.dependencies.DependencyFetcher;
-import io.bdeploy.interfaces.manifest.dependencies.LocalDependencyFetcher;
-import io.bdeploy.interfaces.manifest.dependencies.RemoteDependencyFetcher;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.minion.cli.ProductTool.ProductConfig;
 
@@ -81,7 +82,7 @@ public class ProductTool extends RemoteServiceTool<ProductConfig> {
             fetcher = new LocalDependencyFetcher();
         }
 
-        Manifest.Key key = ProductManifest.importFromDescriptor(Paths.get(config.imp()), hive, fetcher, true);
+        Manifest.Key key = ProductManifestBuilder.importFromDescriptor(Paths.get(config.imp()), hive, fetcher, true);
 
         if (config.push()) {
             helpAndFailIfMissing(svc, "missing --remote");

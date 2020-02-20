@@ -5,6 +5,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 
+import io.bdeploy.api.product.v1.ProductDescriptor;
+import io.bdeploy.api.product.v1.ProductManifestBuilder;
+import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ImportOperation;
@@ -15,7 +18,6 @@ import io.bdeploy.common.util.JacksonHelper;
 import io.bdeploy.common.util.JacksonHelper.MapperType;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.PathHelper;
-import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
@@ -25,7 +27,6 @@ import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
-import io.bdeploy.interfaces.descriptor.product.ProductDescriptor;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
@@ -70,7 +71,7 @@ public class TestFactory {
         pd.product = "customer";
         pd.applications.add("demo");
         pd.configTemplates = "config-templates";
-        new ProductManifest.Builder(pd).add(appKey).add(clientKey).setConfigTemplates(cfgs).insert(local, prodKey,
+        new ProductManifestBuilder(pd).add(appKey).add(clientKey).setConfigTemplates(cfgs).insert(local, prodKey,
                 "Demo Product for Unit Test");
 
         /* STEP 2: Create instance group (normally via Web UI) and associated hive on remote */
@@ -211,7 +212,7 @@ public class TestFactory {
             pd.product = "prod";
             pd.applications.add(appKey.getName());
             pd.configTemplates = "config-templates";
-            new ProductManifest.Builder(pd).add(appKey).setConfigTemplates(cfgs).insert(hive, prodKey, "Dummy Product");
+            new ProductManifestBuilder(pd).add(appKey).setConfigTemplates(cfgs).insert(hive, prodKey, "Dummy Product");
             hive.execute(new PushOperation().addManifest(prodKey).setHiveName(groupName).setRemote(remote));
 
             return ProductManifest.of(hive, prodKey);

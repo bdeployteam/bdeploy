@@ -1,4 +1,4 @@
-package io.bdeploy.interfaces.manifest.dependencies;
+package io.bdeploy.api.product.v1;
 
 import java.util.SortedSet;
 

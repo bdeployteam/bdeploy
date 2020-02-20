@@ -1,12 +1,6 @@
 package io.bdeploy.interfaces.descriptor.application;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
-import io.bdeploy.common.util.OsHelper.OperatingSystem;
-import io.bdeploy.interfaces.ScopedManifestKey;
+import io.bdeploy.api.product.v1.ApplicationDescriptorApi;
 
 /**
  * Top level element defining an application. The serialized form of this DTO
@@ -16,13 +10,7 @@ import io.bdeploy.interfaces.ScopedManifestKey;
  * The serialized form of this DTO must reside in the top-level or any
  * application imported into the system, and have the name {@value #FILE_NAME}.
  */
-public class ApplicationDescriptor implements Comparable<ApplicationDescriptor> {
-
-    /**
-     * The name under which the {@link ApplicationDescriptor} can be found in a
-     * conforming application folder.
-     */
-    public static final String FILE_NAME = "app-info.yaml";
+public class ApplicationDescriptor extends ApplicationDescriptorApi implements Comparable<ApplicationDescriptor> {
 
     public enum ApplicationType {
         SERVER,
@@ -47,14 +35,6 @@ public class ApplicationDescriptor implements Comparable<ApplicationDescriptor> 
     public ApplicationBrandingDescriptor branding = new ApplicationBrandingDescriptor();
 
     /**
-     * Operating systems which are supported by this app-info.yaml.
-     * <p>
-     * The purpose of this information is solely verification of product configuration
-     * during creation of products which include platform specific applications.
-     */
-    public List<OperatingSystem> supportedOperatingSystems = new ArrayList<>();
-
-    /**
      * Describes the process control specific properties of this application.
      */
     public ProcessControlDescriptor processControl = new ProcessControlDescriptor();
@@ -70,23 +50,6 @@ public class ApplicationDescriptor implements Comparable<ApplicationDescriptor> 
      * shut down properly).
      */
     public ExecutableDescriptor stopCommand;
-
-    /**
-     * Additional dependencies of the application.
-     * <p>
-     * Runtime dependencies are resolved at two points in time:
-     * <ul>
-     * <li>When creating a product which includes this application. The product always includes applications
-     * for a specific operating system, thus this operating system is used to resolve dependencies.</li>
-     * <li>When creating an InstanceNodeManifest which includes this application for a specific (the node's)
-     * operating system, in which case the dependency is resolved against the actual OS.</li>
-     * </ul>
-     * <p>
-     * The dependency <b>must</b> include a name and a tag. This name and tag are used to
-     * construct {@link ScopedManifestKey}s which are os specific, using the OS provided
-     * by the current context.
-     */
-    public SortedSet<String> runtimeDependencies = new TreeSet<>();
 
     /**
      * All endpoints which are provided by the application.

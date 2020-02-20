@@ -1,4 +1,4 @@
-package io.bdeploy.interfaces.descriptor.product;
+package io.bdeploy.api.product.v1;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -6,7 +6,6 @@ import java.util.TreeMap;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
-import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 
 /**
  * Contains potentially dynamic information relevant when creating a product
@@ -21,9 +20,9 @@ public class ProductVersionDescriptor {
 
     /**
      * A mapping of application names (defined in {@link ProductDescriptor#applications}) to {@link OperatingSystem} specific
-     * relative paths to app-info.yaml files (containing the relevant {@link ApplicationDescriptor}). It is assumed that the
-     * app-info.yaml file is located in the root directory of the actual application build, so that the app-info.yaml's parent
-     * directory is regarded as application directory to import into the product.
+     * relative paths to app-info.yaml files. It is assumed that the app-info.yaml file is located in the root directory of the
+     * actual application build, so that the app-info.yaml's parent directory is regarded as application directory to import into
+     * the product.
      */
     public Map<String, Map<OperatingSystem, String>> appInfo = new TreeMap<>();
 
