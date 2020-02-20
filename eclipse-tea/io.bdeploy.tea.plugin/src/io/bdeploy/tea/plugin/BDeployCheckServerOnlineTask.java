@@ -7,9 +7,9 @@ import javax.ws.rs.core.UriBuilder;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 
+import io.bdeploy.api.remote.v1.PublicRootResource;
 import io.bdeploy.common.security.RemoteService;
-import io.bdeploy.interfaces.remote.CommonRootResource;
-import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.jersey.JerseyClientFactory;
 
 public class BDeployCheckServerOnlineTask {
 
@@ -21,7 +21,7 @@ public class BDeployCheckServerOnlineTask {
             }
 
             RemoteService svc = new RemoteService(UriBuilder.fromUri(cfg.bdeployServer).build(), cfg.bdeployServerToken);
-            CommonRootResource master = ResourceProvider.getResource(svc, CommonRootResource.class, null);
+            PublicRootResource master = JerseyClientFactory.get(svc).getProxyClient(PublicRootResource.class);
 
             // any actual remote call to verify the connection.
             master.getSoftwareRepositories();

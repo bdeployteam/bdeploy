@@ -33,21 +33,22 @@ import org.eclipse.tea.library.build.config.BuildDirectories;
 import org.eclipse.tea.library.build.services.TeaBuildVersionService;
 import org.eclipse.tea.library.build.util.FileUtils;
 
+import io.bdeploy.api.product.v1.DependencyFetcher;
+import io.bdeploy.api.product.v1.ProductDescriptor;
+import io.bdeploy.api.product.v1.ProductManifestBuilder;
+import io.bdeploy.api.product.v1.ProductVersionDescriptor;
+import io.bdeploy.api.product.v1.impl.LocalDependencyFetcher;
+import io.bdeploy.api.product.v1.impl.RemoteDependencyFetcher;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
+import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.PruneOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
-import io.bdeploy.interfaces.descriptor.product.ProductDescriptor;
-import io.bdeploy.interfaces.descriptor.product.ProductVersionDescriptor;
-import io.bdeploy.interfaces.manifest.ProductManifest;
-import io.bdeploy.interfaces.manifest.dependencies.DependencyFetcher;
-import io.bdeploy.interfaces.manifest.dependencies.LocalDependencyFetcher;
-import io.bdeploy.interfaces.manifest.dependencies.RemoteDependencyFetcher;
 import io.bdeploy.tea.plugin.server.BDeployTargetSpec;
 import io.bdeploy.tea.plugin.services.BDeployApplicationBuild;
 
@@ -166,10 +167,10 @@ public class BDeployBuildProductTask {
             }
 
             log.info("Importing product from " + prodInfoYaml);
-            key = ProductManifest.importFromDescriptor(prodInfoYaml.toPath(), bhive, fetcher, true);
+            key = ProductManifestBuilder.importFromDescriptor(prodInfoYaml.toPath(), bhive, fetcher, true);
 
             // clean up old versions in the hive.
-            SortedSet<Key> scan = ProductManifest.scan(bhive);
+            SortedSet<Key> scan = bhive.execute(new ManifestListOperation().setManifestName(key.getName()));
             scan.removeAll(
                     scan.stream().sorted((a, b) -> b.getTag().compareTo(a.getTag())).limit(10).collect(Collectors.toList()));
 
