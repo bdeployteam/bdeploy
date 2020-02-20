@@ -20,6 +20,7 @@ import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
+import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlConfiguration;
@@ -75,6 +76,7 @@ public class TestFactory {
         /* STEP 2: Create instance group (normally via Web UI) and associated hive on remote */
         InstanceGroupConfiguration desc = new InstanceGroupConfiguration();
         desc.name = "demo";
+        desc.title = "title";
         desc.description = "For Unit Test";
         /* (note: usually this would be once locally (local HiveRegistry) as well as on the master). */
         /* (this test creates the named hive only on the target "remote" server - see below) */
@@ -161,6 +163,8 @@ public class TestFactory {
 
         InstanceConfiguration ic = new InstanceConfiguration();
         ic.name = "DemoInstance";
+        ic.description = "Demo Instance";
+        ic.purpose = InstancePurpose.TEST;
         ic.product = pmf.getKey();
         ic.uuid = uuid;
         ic.configTree = pmf.getConfigTemplateTreeId();

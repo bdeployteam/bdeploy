@@ -13,10 +13,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-
 /**
  * Proxy requests to a target process on an instance.
  * <p>
@@ -35,69 +31,31 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 @Produces("*/*")
 public interface CommonProxyResource {
 
-    @Operation(summary = "Proxy the request to the target process.", responses = {
-            @ApiResponse(description = "The response of the target process is mapped back, including headers (content type, etc.)."),
-            @ApiResponse(responseCode = "412",
-                         description = "In case the endpoint cannot be resolved/called (instance not found, application not found, application not running, ...). See status message for problem details.") })
     @HEAD
     @Path("{endpoint : .+}")
-    public Response head(
-            @Parameter(description = "ID of the endpoint exposed by the given application in the given instance.") @PathParam("endpoint") String endpointId);
+    public Response head(@PathParam("endpoint") String endpointId);
 
-    @Operation(summary = "Proxy the request to the target process.", responses = {
-            @ApiResponse(description = "The response of the target process is mapped back, including headers (content type, etc.)."),
-            @ApiResponse(responseCode = "412",
-                         description = "In case the endpoint cannot be resolved/called (instance not found, application not found, application not running, ...). See status message for problem details.") })
     @OPTIONS
     @Path("{endpoint : .+}")
-    public Response options(
-            @Parameter(description = "ID of the endpoint exposed by the given application in the given instance.") @PathParam("endpoint") String endpointId);
+    public Response options(@PathParam("endpoint") String endpointId);
 
-    @Operation(summary = "Proxy the request to the target process.", responses = {
-            @ApiResponse(description = "The response of the target process is mapped back, including headers (content type, etc.)."),
-            @ApiResponse(responseCode = "412",
-                         description = "In case the endpoint cannot be resolved/called (instance not found, application not found, application not running, ...). See status message for problem details.") })
     @GET
     @Path("{endpoint : .+}")
-    public Response get(
-            @Parameter(description = "ID of the endpoint exposed by the given application in the given instance.") @PathParam("endpoint") String endpointId);
+    public Response get(@PathParam("endpoint") String endpointId);
 
-    @Operation(summary = "Proxy the request to the target process.", responses = {
-            @ApiResponse(description = "The response of the target process is mapped back, including headers (content type, etc.)."),
-            @ApiResponse(responseCode = "412",
-                         description = "In case the endpoint cannot be resolved/called (instance not found, application not found, application not running, ...). See status message for problem details.") })
     @PUT
     @Path("{endpoint : .+}")
-    public Response put(
-            @Parameter(description = "ID of the endpoint exposed by the given application in the given instance.") @PathParam("endpoint") String endpointId,
-            byte[] body);
+    public Response put(@PathParam("endpoint") String endpointId, byte[] body);
 
-    @Operation(summary = "Proxy the request to the target process.", responses = {
-            @ApiResponse(description = "The response of the target process is mapped back, including headers (content type, etc.)."),
-            @ApiResponse(responseCode = "412",
-                         description = "In case the endpoint cannot be resolved/called (instance not found, application not found, application not running, ...). See status message for problem details.") })
     @POST
     @Path("{endpoint : .+}")
-    public Response post(
-            @Parameter(description = "ID of the endpoint exposed by the given application in the given instance.") @PathParam("endpoint") String endpointId,
-            byte[] body);
+    public Response post(@PathParam("endpoint") String endpointId, byte[] body);
 
-    @Operation(summary = "Proxy the request to the target process.", responses = {
-            @ApiResponse(description = "The response of the target process is mapped back, including headers (content type, etc.)."),
-            @ApiResponse(responseCode = "412",
-                         description = "In case the endpoint cannot be resolved/called (instance not found, application not found, application not running, ...). See status message for problem details.") })
     @DELETE
     @Path("{endpoint : .+}")
-    public Response delete(
-            @Parameter(description = "ID of the endpoint exposed by the given application in the given instance.") @PathParam("endpoint") String endpointId);
+    public Response delete(@PathParam("endpoint") String endpointId);
 
-    @Operation(summary = "Proxy the request to the target process.", responses = {
-            @ApiResponse(description = "The response of the target process is mapped back, including headers (content type, etc.)."),
-            @ApiResponse(responseCode = "412",
-                         description = "In case the endpoint cannot be resolved/called (instance not found, application not found, application not running, ...). See status message for problem details.") })
     @PATCH
     @Path("{endpoint : .+}")
-    public Response patch(
-            @Parameter(description = "ID of the endpoint exposed by the given application in the given instance.") @PathParam("endpoint") String endpointId,
-            byte[] body);
+    public Response patch(@PathParam("endpoint") String endpointId, byte[] body);
 }

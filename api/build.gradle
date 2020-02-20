@@ -1,0 +1,34 @@
+plugins {
+  id 'java-library'
+  id 'com.github.johnrengelman.shadow' version '5.2.0'
+  id "io.swagger.core.v3.swagger-gradle-plugin" version "2.1.1"
+}
+
+dependencies {
+    implementation(
+        project(":jersey"),
+        project(":bhive"),
+        'io.swagger.core.v3:swagger-annotations:2.1.1',
+    )
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+build.dependsOn shadowJar
+build.dependsOn resolve
+
+shadowJar {
+    baseName = 'bdeploy-api'
+}
+
+resolve {
+    outputFileName = 'BDeployAPI'
+    outputFormat = 'YAML'
+    classpath = sourceSets.main.runtimeClasspath
+    outputDir = file("${buildDir}/openapi")
+    readAllResources = false
+    resourceClasses = [
+        'io.bdeploy.interfaces.remote.CommonRootResource',
+    ]
+}

@@ -55,7 +55,7 @@ ext {
     buildDate = new Date().format('yyyyMMddHHmm')
 
     // all java projects. these projects are pre-configured by the root project with a ton of helpers.
-    actualSubprojects = subprojects - [ project(':test-data'), project(':doc') ];
+    actualSubprojects = subprojects - [ project(':test-data'), project(':doc'), project(':api') ];
 }
 
 allprojects {
