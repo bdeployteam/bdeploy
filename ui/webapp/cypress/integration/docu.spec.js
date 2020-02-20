@@ -71,7 +71,7 @@ describe('Creates screenshots for the user documentation', () => {
 
     // Create instance group
     cy.contains('button', 'add').click();
-    cy.get('input[placeholder^="Instance group name"]').type('Demo');
+    cy.get('input[placeholder^="Instance group ID"]').type('Demo');
     cy.get('input[placeholder=Description]').type('Demo Instance Group');
     cy.fixture('bdeploy.png').then(fileContent => {
       cy.get('input[type=file]').upload({ fileContent: fileContent, fileName: 'bdeploy.png', mimeType: 'image/png' });

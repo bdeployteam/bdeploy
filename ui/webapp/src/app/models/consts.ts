@@ -61,6 +61,7 @@ export const EMPTY_INSTANCE: InstanceConfiguration = {
 
 export const EMPTY_INSTANCE_GROUP: InstanceGroupConfiguration = {
   name: null,
+  title: null,
   description: null,
   logo: null,
   autoDelete: null,

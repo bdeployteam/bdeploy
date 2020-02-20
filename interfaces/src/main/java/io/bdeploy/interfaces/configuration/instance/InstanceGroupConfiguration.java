@@ -10,9 +10,14 @@ public class InstanceGroupConfiguration {
     public static final String FILE_NAME = "instance-group.json";
 
     /**
-     * The human readable name of the instance group
+     * The name of the instance group. Used as ID and path in the filesystem to the groups BHive.
      */
     public String name;
+
+    /**
+     * A human readable title for the instance group
+     */
+    public String title;
 
     /**
      * Additional descriptive text.

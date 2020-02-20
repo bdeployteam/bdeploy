@@ -43,6 +43,7 @@ export class InstanceGroupAddEditComponent implements OnInit {
 
   public instanceGroupFormGroup = this.fb.group({
     name: ['', [Validators.required, InstanceGroupValidators.namePattern]],
+    title: [''],
     description: ['', Validators.required],
     logo: [''],
     autoDelete: [''],
@@ -51,6 +52,9 @@ export class InstanceGroupAddEditComponent implements OnInit {
 
   get nameControl() {
     return this.instanceGroupFormGroup.get('name');
+  }
+  get titleControl() {
+    return this.instanceGroupFormGroup.get('title');
   }
   get descriptionControl() {
     return this.instanceGroupFormGroup.get('description');
