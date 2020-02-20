@@ -34,6 +34,16 @@ public interface SlaveDeploymentResource {
     public void activate(Manifest.Key key);
 
     /**
+     * Deactivates a certain instance node manifest. This is used *only* when a node no longer takes part
+     * in an instance, e.g. when the last application running on this node is removed.
+     *
+     * @param key the manifest to be deactivated.
+     */
+    @POST
+    @Path("/deactivate")
+    public void deactivate(Manifest.Key key);
+
+    /**
      * @param key the key to be erased from the slave.
      */
     @POST
