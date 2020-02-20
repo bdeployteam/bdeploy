@@ -6,6 +6,7 @@ import { InstanceService } from '../../../instance/services/instance.service';
 
 export interface InstanceGroupDeleteDialogData {
   name: string;
+  title: string;
   confirmation: string;
 }
 
