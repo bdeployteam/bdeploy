@@ -2,8 +2,6 @@ package io.bdeploy.minion.cli;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -37,7 +35,6 @@ public class MasterCliTest {
         Path root = tmp.resolve("root");
         Path storage = tmp.resolve("storage");
         tools.getTool(InitTool.class, "--root=" + root, "--hostname=localhost", "--dist=ignore", "--mode=standalone").run();
-        tools.getTool(UserTool.class, "--root=" + root, "--add=test", "--password=test").run();
         tools.getTool(StorageTool.class, "--root=" + root, "--add=" + storage.toString()).run();
 
         Path ks;
@@ -47,9 +44,6 @@ public class MasterCliTest {
         try (MinionRoot mr = new MinionRoot(root, reporter)) {
             assertEquals(2, mr.getStorageLocations().size());
             assertTrue(mr.getStorageLocations().contains(storage));
-            assertTrue(mr.getUsers().getAllNames().contains("test"));
-            assertNotNull(mr.getUsers().authenticate("test", "test"));
-            assertNull(mr.getUsers().authenticate("test", "wrong"));
 
             ks = mr.getState().keystorePath;
             pp = mr.getState().keystorePass;
@@ -74,14 +68,11 @@ public class MasterCliTest {
         tools.getTool(TokenTool.class, "--keystore=" + ks.toString(), "--passphrase=" + new String(pp), "--check",
                 "--token=" + token).run();
 
-        tools.getTool(UserTool.class, "--root=" + root, "--remove=test").run();
         tools.getTool(StorageTool.class, "--root=" + root, "--remove=" + storage.toString()).run();
 
         try (MinionRoot mr = new MinionRoot(root, reporter)) {
             assertEquals(1, mr.getStorageLocations().size());
             assertFalse(mr.getStorageLocations().contains(storage));
-            assertFalse(mr.getUsers().getAllNames().contains("test"));
-            assertNull(mr.getUsers().authenticate("test", "test"));
         }
     }
 

@@ -221,7 +221,8 @@ java configuration Uninstaller {
 java configuration Master-AddUser : minion-base {
 	argument "user";
 	argument "--admin"; // all users are global admin which are created using this config
-	argument "--root=${workspace_loc}/runtime/master";
+	argument "--remote=https://localhost:7701/api";
+	argument "--tokenFile=${workspace_loc}/runtime/token.txt";
 	argument "--add=${string_prompt:Enter Username}";
 	argument "--password=${password_prompt:Enter Password}";
 }
@@ -232,7 +233,8 @@ java configuration Master-AddUser : minion-base {
 java configuration Central-AddUser : minion-base {
 	argument "user";
 	argument "--admin"; // all users are global admin which are created using this config
-	argument "--root=${workspace_loc}/runtime/central";
+	argument "--remote=https://localhost:7705/api";
+	argument "--tokenFile=${workspace_loc}/runtime/token-central.txt";
 	argument "--add=${string_prompt:Enter Username}";
 	argument "--password=${password_prompt:Enter Password}";
 }
@@ -243,7 +245,8 @@ java configuration Central-AddUser : minion-base {
 java configuration Managed-AddUser : minion-base {
 	argument "user";
 	argument "--admin"; // all users are global admin which are created using this config
-	argument "--root=${workspace_loc}/runtime/managed";
+	argument "--remote=https://localhost:7706/api";
+	argument "--tokenFile=${workspace_loc}/runtime/token-managed.txt";
 	argument "--add=${string_prompt:Enter Username}";
 	argument "--password=${password_prompt:Enter Password}";
 }

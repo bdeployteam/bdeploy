@@ -75,6 +75,10 @@ public class AuthResourceImpl implements AuthResource {
     public UserInfo getCurrentUser() {
         UserInfo info = auth.getUser(context.getUserPrincipal().getName());
 
+        if (info == null) {
+            return null;
+        }
+
         // dumb deep clone by JSON round-trip here - otherwise we update the cached in memory object.
         UserInfo clone = StorageHelper.fromRawBytes(StorageHelper.toRawBytes(info), UserInfo.class);
         clone.password = null;
@@ -97,8 +101,10 @@ public class AuthResourceImpl implements AuthResource {
     }
 
     @Override
-    public String getAuthPack() {
-        String user = context.getUserPrincipal().getName();
+    public String getAuthPack(String user) {
+        if (user == null) {
+            user = context.getUserPrincipal().getName();
+        }
         UserInfo userInfo = auth.getUser(user);
         return minion.createToken(user, userInfo.getGlobalPermissions());
     }
