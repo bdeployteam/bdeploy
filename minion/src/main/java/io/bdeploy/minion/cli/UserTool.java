@@ -4,6 +4,8 @@ import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.security.ScopedPermission;
+import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
@@ -29,8 +31,14 @@ public class UserTool extends RemoteServiceTool<UserConfig> {
         @Help("The password for the user to add.")
         String password();
 
-        @Help("Add global admin permission to the user.")
+        @Help("Add global admin permission to the user. Shortcut for --permission=ADMIN")
         boolean admin() default false;
+
+        @Help("Add a specific permission to the user. Values can be READ, WRITE or ADMIN. Use in conjunction with --scope to, otherwise permission is global.")
+        String permission();
+
+        @Help("Scopes a specific permission specified with --permission to a certain instance group")
+        String scope();
 
         @Help("The name of the user to remove.")
         String remove();
@@ -56,6 +64,9 @@ public class UserTool extends RemoteServiceTool<UserConfig> {
             if (config.admin()) {
                 user.permissions.add(ApiAccessToken.ADMIN_PERMISSION);
             }
+            if (config.permission() != null) {
+                user.permissions.add(new ScopedPermission(config.scope(), Permission.valueOf(config.permission().toUpperCase())));
+            }
             user.password = config.password();
             admin.createLocalUser(user);
         } else if (config.update() != null) {
@@ -69,6 +80,10 @@ public class UserTool extends RemoteServiceTool<UserConfig> {
             }
             if (config.admin()) {
                 user.permissions.add(ApiAccessToken.ADMIN_PERMISSION);
+                admin.updateUser(user);
+            }
+            if (config.permission() != null) {
+                user.permissions.add(new ScopedPermission(config.scope(), Permission.valueOf(config.permission().toUpperCase())));
                 admin.updateUser(user);
             }
         } else if (config.remove() != null) {
