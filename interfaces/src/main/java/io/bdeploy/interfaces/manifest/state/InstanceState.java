@@ -1,7 +1,5 @@
 package io.bdeploy.interfaces.manifest.state;
 
-import java.util.function.Supplier;
-
 import io.bdeploy.bhive.BHiveExecution;
 import io.bdeploy.bhive.meta.MetaManifest;
 import io.bdeploy.bhive.model.Manifest;
@@ -13,21 +11,10 @@ public class InstanceState {
 
     private final BHiveExecution hive;
     private final MetaManifest<InstanceStateRecord> meta;
-    private Supplier<InstanceStateRecord> initSupplier;
 
     public InstanceState(Manifest.Key instanceManifest, BHiveExecution hive) {
         this.hive = hive;
         this.meta = new MetaManifest<>(instanceManifest, false, InstanceStateRecord.class);
-    }
-
-    /**
-     * @param initSupplier a {@link Supplier} capable of migrating from the old information scheme to the new one.
-     * @deprecated only used for migration from old (online) scheme to new (offline) scheme.
-     */
-    @Deprecated
-    public InstanceState setMigrationProvider(Supplier<InstanceStateRecord> initSupplier) {
-        this.initSupplier = initSupplier;
-        return this;
     }
 
     /**
@@ -61,14 +48,7 @@ public class InstanceState {
     private InstanceStateRecord readOrCreate() {
         InstanceStateRecord stored = meta.read(hive);
         if (stored == null) {
-            // TODO: remove in 2.0.0. just return empty instance always.
-            if (this.initSupplier == null) {
-                return new InstanceStateRecord();
-            } else {
-                InstanceStateRecord supplied = initSupplier.get();
-                store(supplied);
-                return supplied;
-            }
+            return new InstanceStateRecord();
         }
         return stored;
     }

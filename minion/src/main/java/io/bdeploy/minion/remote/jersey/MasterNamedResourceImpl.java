@@ -8,17 +8,13 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
@@ -100,95 +96,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         this.reporter = reporter;
     }
 
-    @SuppressWarnings("deprecation")
     private InstanceState getState(InstanceManifest im, BHive hive) {
-        return im.getState(hive).setMigrationProvider(() -> migrate(im.getConfiguration().uuid));
-    }
-
-    /**
-     * @deprecated only used to migrate state, see {@link #getState(InstanceManifest, BHive)}
-     */
-    @Deprecated(forRemoval = true, since = "1.2.0")
-    private InstanceStateRecord migrate(String instance) {
-        SortedSet<String> installed = new TreeSet<>();
-
-        // figure out which instance versions and which node manifests exist on which node (configuration wise).
-        SortedMap<Key, SortedMap<String, Manifest.Key>> requirements = new TreeMap<>();
-        SortedSet<Key> scan = InstanceManifest.scan(hive, false);
-        for (Manifest.Key k : scan) {
-            InstanceManifest imf = InstanceManifest.of(hive, k);
-            String instanceId = imf.getConfiguration().uuid;
-            if (!instanceId.equals(instance)) {
-                continue;
-            }
-
-            if (imf.getInstanceNodeManifests().isEmpty()) {
-                continue;
-            } else {
-                boolean hasApps = false;
-                for (Manifest.Key inmk : imf.getInstanceNodeManifests().values()) {
-                    InstanceNodeManifest inmf = InstanceNodeManifest.of(hive, inmk);
-                    if (!inmf.getConfiguration().applications.isEmpty()) {
-                        hasApps = true;
-                        break;
-                    }
-                }
-                if (!hasApps) {
-                    continue; // ignore this version, cannot be "installed".
-                }
-            }
-
-            // found one, calculate which minion needs which manifest installed
-            requirements.put(k, imf.getInstanceNodeManifests());
-        }
-
-        // figure out which minions we need to contact in total.
-        SortedSet<String> minions = requirements.values().stream().flatMap(v -> v.entrySet().stream()).map(Entry::getKey)
-                .collect(Collectors.toCollection(TreeSet::new));
-
-        // for each required minion, figure out available versions.
-        SortedMap<String, Set<String>> available = new TreeMap<>();
-        SortedSet<String> offline = new TreeSet<>();
-        for (String minion : minions) {
-            // don't check client node, it will never be online, and is not required (offline = OK).
-            if (minion.equals(InstanceManifest.CLIENT_NODE_NAME)) {
-                offline.add(minion);
-                continue;
-            }
-
-            RemoteService remote = root.getMinions().getRemote(minion);
-            try {
-                SlaveDeploymentResource sdr = ResourceProvider.getResource(remote, SlaveDeploymentResource.class, context);
-                InstanceStateRecord instanceState = sdr.getInstanceState(instance);
-                available.put(minion, instanceState == null ? Collections.emptySet() : instanceState.installedTags);
-            } catch (Exception e) {
-                log.warn("Problem contacting minion to fetch available deployments: {}", minion);
-                offline.add(minion);
-            }
-        }
-
-        // cross check which requirement is fulfilled, regarding offline minions as OK.
-        check: for (Entry<Key, SortedMap<String, Key>> entry : requirements.entrySet()) {
-            SortedMap<String, Key> rqs = entry.getValue();
-            for (Entry<String, Key> toFulfill : rqs.entrySet()) {
-                if (!offline.contains(toFulfill.getKey())
-                        && !available.get(toFulfill.getKey()).contains(toFulfill.getValue().getTag())) {
-                    // at least one requirement failed, continue with next version.
-                    continue check;
-                }
-            }
-            installed.add(entry.getKey().getTag());
-        }
-
-        InstanceStateRecord result = new InstanceStateRecord();
-        result.installedTags.addAll(installed);
-
-        Manifest.Key masterActive = root.getState().activeMasterVersions.get(instance);
-        if (masterActive != null) {
-            result.activeTag = masterActive.getTag();
-        }
-
-        return result;
+        return im.getState(hive);
     }
 
     @Override

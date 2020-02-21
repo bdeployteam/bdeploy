@@ -1,6 +1,8 @@
 package io.bdeploy.minion.migration;
 
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +17,7 @@ import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.MinionState;
 
 /**
- * Creates {@linkplain MinionManifest manifest} entries for all minions listed in the {@linkplain MinionState#minions} map.
+ * Creates {@linkplain MinionManifest manifest} entries for all minions listed in an old minion state map.
  */
 public class MinionStateMigration {
 
@@ -24,7 +26,6 @@ public class MinionStateMigration {
     private MinionStateMigration() {
     }
 
-    @SuppressWarnings("removal")
     public static void run(MinionRoot root) {
         // Check if we already have a minion manifest
         // In that case the migration is not required
@@ -34,6 +35,11 @@ public class MinionStateMigration {
             return;
         }
         log.info("Migrating minion state entries to manifest entries.");
+
+        // Find the state.json and read it with the old state class.
+        // This needs to happen before the first modification of the state
+        // as otherwise the file is written without the field.
+        OldMinionState migState = root.getPartialStateForMigration(OldMinionState.class);
 
         // Ensure that the self name is set
         MinionState state = root.getState();
@@ -45,7 +51,7 @@ public class MinionStateMigration {
 
         // Create an entry for each slave
         minionConfiguration = new MinionConfiguration();
-        for (Map.Entry<String, RemoteService> entry : state.minions.entrySet()) {
+        for (Map.Entry<String, RemoteService> entry : migState.minions.entrySet()) {
             String name = entry.getKey();
             RemoteService remote = entry.getValue();
 
@@ -70,9 +76,15 @@ public class MinionStateMigration {
         // Persist the manifest
         manifest.update(minionConfiguration);
 
-        // Clear out the minions property
-        root.modifyState(s -> s.minions.clear());
         log.info("Migration successfully done.");
+    }
+
+    private static class OldMinionState {
+
+        /**
+         * Known other minions. Currently only used on the master minion
+         */
+        public SortedMap<String, RemoteService> minions = new TreeMap<>();
     }
 
 }
