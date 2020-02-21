@@ -15,3 +15,8 @@
 .flex-horiz *:not(:first-child) {
   margin-left: 10px;
 }
+
+.form-error {
+  flex: 1 1 auto;
+  text-align: left;
+}
