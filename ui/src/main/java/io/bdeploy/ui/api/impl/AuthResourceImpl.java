@@ -44,20 +44,34 @@ public class AuthResourceImpl implements AuthResource {
     private ResourceContext rc;
 
     @Override
-    public Response authenticate(CredentialsDto cred) {
+    public Response authenticate(CredentialsDto credentials) {
+        String token = doAuthenticate(credentials, false);
+        // cookie not set to 'secure' to allow sending during development.
+        // cookie header set manually, as the NewCookie API does not support SameSite policies.
+        return Response.ok().header("Set-Cookie", "st=" + token + ";Version=1;Path=/;Max-Age=365;SameSite=Strict").entity(token)
+                .build();
+    }
+
+    @Override
+    public Response authenticatePacked(CredentialsDto credentials) {
+        String tokenPack = doAuthenticate(credentials, true);
+        return Response.ok().entity(tokenPack).build();
+    }
+
+    private String doAuthenticate(CredentialsDto cred, boolean pack) {
         UserInfo info = auth.authenticate(cred.user, cred.password);
         if (info != null) {
+            if (pack) {
+                return minion.createToken(cred.user, info.permissions);
+            }
+
             ApiAccessToken.Builder token = new ApiAccessToken.Builder().setIssuedTo(cred.user);
 
             // apply global permissions. scoped ones are not in the token.
             info.permissions.stream().filter(c -> c.scope == null).forEach(token::addPermission);
-
             String st = signer.apply(token.build());
 
-            // cookie not set to 'secure' to allow sending during development.
-            // cookie header set manually, as the NewCookie API does not support SameSite policies.
-            return Response.ok().header("Set-Cookie", "st=" + st + ";Version=1;Path=/;Max-Age=365;SameSite=Strict").entity(st)
-                    .build();
+            return st;
         } else {
             throw new WebApplicationException("Invalid credentials", Status.UNAUTHORIZED);
         }

@@ -98,21 +98,32 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
         RemoteConfig rc = getConfig(RemoteConfig.class);
         boolean optional = isOptional();
 
-        if (!optional) {
-            helpAndFailIfMissing(rc.remote(), "Missing --remote");
+        LocalLoginManager llm = new LocalLoginManager();
+
+        if (!optional && llm.getCurrent() == null) {
+            helpAndFailIfMissing(rc.remote(), "Missing --remote, or login using `bdeploy login`");
         }
 
-        URI r = null;
+        RemoteService svc;
         if (rc.remote() != null) {
-            r = UriBuilder.fromUri(rc.remote()).build();
-        }
+            URI r = null;
+            if (rc.remote() != null) {
+                r = UriBuilder.fromUri(rc.remote()).build();
+            }
 
-        if (rc.tokenFile() != null && rc.token() != null) {
-            out().println(
-                    "WARNING: both tokenFile and token are given, preferring tokenFile (Hint: check arguments and environment)");
-        }
+            if (rc.tokenFile() != null && rc.token() != null) {
+                out().println(
+                        "WARNING: both tokenFile and token are given, preferring tokenFile (Hint: check arguments and environment)");
+            }
 
-        RemoteService svc = createRemoteService(rc, optional, r);
+            svc = createRemoteService(rc, optional, r);
+        } else {
+            svc = llm.getCurrentService();
+            if (!optional && svc == null) {
+                helpAndFail(
+                        "Need either --tokenFile, --token or --keystore arguments or a current login session to access remote service");
+            }
+        }
 
         if (getActivityReporter() instanceof ActivityReporter.Stream) {
             ((ActivityReporter.Stream) getActivityReporter()).setProxyConnector(this::connectProxy);

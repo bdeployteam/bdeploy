@@ -2,6 +2,7 @@ package io.bdeploy.minion.cli;
 
 import io.bdeploy.bhive.cli.TokenTool;
 import io.bdeploy.common.cli.ToolBase;
+import io.bdeploy.jersey.cli.LocalLoginTool;
 
 public class MinionServerCli extends ToolBase {
 
@@ -21,6 +22,7 @@ public class MinionServerCli extends ToolBase {
         register(RemoteRepoTool.class);
 
         // tools for local use
+        register(LocalLoginTool.class);
         register(ProductTool.class);
         register(TokenTool.class);
         register(BHiveWrapperTool.class);

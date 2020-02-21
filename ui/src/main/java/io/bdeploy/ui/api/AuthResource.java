@@ -32,6 +32,14 @@ public interface AuthResource {
     public Response authenticate(CredentialsDto credentials);
 
     /**
+     * Same as {@link #authenticate(CredentialsDto)} but returns a authentication pack suitable for CLI and other tools.
+     */
+    @POST
+    @Path("/packed")
+    @Unsecured
+    public Response authenticatePacked(CredentialsDto credentials);
+
+    /**
      * Return a list of recently used instance groups.
      * <p>
      * NOTE: since the list is maintained per user, there is no way to remove recently used entries efficiently when deleting an
