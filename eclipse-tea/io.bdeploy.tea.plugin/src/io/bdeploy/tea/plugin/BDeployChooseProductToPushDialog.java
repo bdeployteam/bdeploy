@@ -26,11 +26,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+import io.bdeploy.api.product.v1.ProductManifestBuilder;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.op.ManifestListOperation;
+import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.tea.plugin.server.BDeployServerPanel;
 import io.bdeploy.tea.plugin.server.BDeployTargetSpec;
 
@@ -77,7 +79,7 @@ public class BDeployChooseProductToPushDialog extends TitleAreaDialog {
 
             @Override
             public int compare(Viewer viewer, Object e1, Object e2) {
-                return ((ProductManifest) e2).getKey().getTag().compareTo(((ProductManifest) e1).getKey().getTag());
+                return ((Manifest) e2).getKey().getTag().compareTo(((Manifest) e1).getKey().getTag());
             }
         });
         tv.getTable().setHeaderVisible(true);
@@ -89,7 +91,7 @@ public class BDeployChooseProductToPushDialog extends TitleAreaDialog {
 
             @Override
             public String getText(Object element) {
-                return ((ProductManifest) element).getKey().getName();
+                return ((Manifest) element).getKey().getName();
             };
         });
 
@@ -100,7 +102,7 @@ public class BDeployChooseProductToPushDialog extends TitleAreaDialog {
 
             @Override
             public String getText(Object element) {
-                return ((ProductManifest) element).getKey().getTag();
+                return ((Manifest) element).getKey().getTag();
             };
         });
 
@@ -111,18 +113,7 @@ public class BDeployChooseProductToPushDialog extends TitleAreaDialog {
 
             @Override
             public String getText(Object element) {
-                return ((ProductManifest) element).getProductDescriptor().name;
-            };
-        });
-
-        TableViewerColumn vendorCol = new TableViewerColumn(tv, SWT.NONE);
-        vendorCol.getColumn().setWidth(300);
-        vendorCol.getColumn().setText("Vendor");
-        vendorCol.setLabelProvider(new ColumnLabelProvider() {
-
-            @Override
-            public String getText(Object element) {
-                return ((ProductManifest) element).getProductDescriptor().vendor;
+                return ((Manifest) element).getLabels().get(ProductManifestBuilder.PRODUCT_LABEL);
             };
         });
 
@@ -138,7 +129,7 @@ public class BDeployChooseProductToPushDialog extends TitleAreaDialog {
             if (sel == null || sel.isEmpty()) {
                 selected = null;
             } else {
-                selected = ((ProductManifest) sel.getFirstElement()).getKey();
+                selected = ((Manifest) sel.getFirstElement()).getKey();
             }
             buttonUpdate.run();
         });
@@ -150,8 +141,9 @@ public class BDeployChooseProductToPushDialog extends TitleAreaDialog {
 
         ActivityReporter reporter = new ActivityReporter.Null();
         try (BHive bhive = new BHive(hive.toURI(), reporter)) {
-            SortedSet<Key> keys = ProductManifest.scan(bhive);
-            List<ProductManifest> pms = keys.stream().map(x -> ProductManifest.of(bhive, x)).collect(Collectors.toList());
+            SortedSet<Key> keys = bhive.execute(new ManifestListOperation());
+            List<Manifest> pms = keys.stream().map(x -> bhive.execute(new ManifestLoadOperation().setManifest(x)))
+                    .filter(x -> x.getLabels().containsKey(ProductManifestBuilder.PRODUCT_LABEL)).collect(Collectors.toList());
             tv.setInput(pms);
         }
 

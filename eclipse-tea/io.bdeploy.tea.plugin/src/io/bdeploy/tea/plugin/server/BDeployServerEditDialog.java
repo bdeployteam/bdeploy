@@ -26,10 +26,10 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import io.bdeploy.api.remote.v1.PublicRootResource;
+import io.bdeploy.api.remote.v1.dto.InstanceGroupConfigurationApi;
 import io.bdeploy.common.security.RemoteService;
-import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
-import io.bdeploy.interfaces.remote.CommonRootResource;
-import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.jersey.JerseyClientFactory;
 
 public class BDeployServerEditDialog extends TitleAreaDialog {
 
@@ -107,8 +107,8 @@ public class BDeployServerEditDialog extends TitleAreaDialog {
             public void widgetSelected(SelectionEvent e) {
                 RemoteService svc = new RemoteService(UriBuilder.fromUri(template.uri).build(), template.token);
                 try {
-                    CommonRootResource root = ResourceProvider.getResource(svc, CommonRootResource.class, null);
-                    List<InstanceGroupConfiguration> igs = root.getInstanceGroups();
+                    PublicRootResource root = JerseyClientFactory.get(svc).getProxyClient(PublicRootResource.class);
+                    List<InstanceGroupConfigurationApi> igs = root.getInstanceGroups();
 
                     String sel = comboIg.getCombo().getText();
                     comboIg.setInput(igs.stream().map(i -> i.name).toArray());
@@ -133,9 +133,9 @@ public class BDeployServerEditDialog extends TitleAreaDialog {
             public void widgetSelected(SelectionEvent e) {
                 RemoteService svc = new RemoteService(UriBuilder.fromUri(template.uri).build(), template.token);
                 try {
-                    CommonRootResource root = ResourceProvider.getResource(svc, CommonRootResource.class, null);
-                    List<InstanceGroupConfiguration> igs = root.getInstanceGroups();
-                    Optional<InstanceGroupConfiguration> ig = igs.stream().filter(i -> i.name.equals(template.instanceGroup))
+                    PublicRootResource root = JerseyClientFactory.get(svc).getProxyClient(PublicRootResource.class);
+                    List<InstanceGroupConfigurationApi> igs = root.getInstanceGroups();
+                    Optional<InstanceGroupConfigurationApi> ig = igs.stream().filter(i -> i.name.equals(template.instanceGroup))
                             .findAny();
                     if (!ig.isPresent()) {
                         throw new IllegalArgumentException(
