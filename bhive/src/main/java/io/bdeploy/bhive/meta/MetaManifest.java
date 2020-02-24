@@ -46,13 +46,6 @@ public class MetaManifest<T> {
     private final Class<T> metaClazz;
 
     /**
-     * @deprecated old deprecated name of meta manifests, which produced collisions. just there for migration of existing meta
-     *             manifest.
-     */
-    @Deprecated
-    private final String oldMetaName;
-
-    /**
      * Create a {@link MetaManifest} for the given {@link Key} which identifies the {@link Manifest} to "annotate" with metadata.
      *
      * @param parent the parent {@link Manifest}s {@link Key}.
@@ -64,7 +57,6 @@ public class MetaManifest<T> {
      */
     public MetaManifest(Manifest.Key parent, boolean useParentTag, Class<T> metaClazz) {
         this.parent = parent;
-        this.oldMetaName = META_PREFIX + parent.getName() + (useParentTag ? ("/" + parent.getTag()) : META_DEFTAG);
         this.metaName = META_PREFIX + parent.getName() + "/" + metaClazz.getSimpleName()
                 + (useParentTag ? ("/" + parent.getTag()) : META_DEFTAG);
         this.metaClazz = metaClazz;
@@ -109,13 +101,7 @@ public class MetaManifest<T> {
         Manifest.Key key;
 
         if (!id.isPresent()) {
-            // legacy names for meta manifests.
-            id = source.execute(new ManifestMaxIdOperation().setManifestName(oldMetaName));
-            if (!id.isPresent()) {
-                return null;
-            }
-
-            key = new Manifest.Key(oldMetaName, id.get().toString());
+            return null;
         } else {
             key = new Manifest.Key(metaName, id.get().toString());
         }
@@ -180,11 +166,6 @@ public class MetaManifest<T> {
         ObjectId newTreeId = target.execute(new InsertArtificialTreeOperation().setTree(newTree));
         target.execute(new InsertManifestOperation().addManifest(newMf.setRoot(newTreeId).build(target)));
         target.execute(new ManifestDeleteOldByIdOperation().setAmountToKeep(META_HIST_SIZE).setToDelete(metaName));
-
-        // remove all manifests of the old name.
-        if (target.execute(new ManifestMaxIdOperation().setManifestName(oldMetaName)).isPresent()) {
-            target.execute(new ManifestDeleteOldByIdOperation().setAmountToKeep(0).setToDelete(oldMetaName));
-        }
 
         return targetKey;
     }

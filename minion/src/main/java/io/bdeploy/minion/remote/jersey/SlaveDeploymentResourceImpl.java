@@ -51,33 +51,7 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
      * @return the {@link InstanceState}, potentially migrated from "old" information in {@link MinionState}.
      */
     private InstanceState getState(InstanceNodeManifest inm, BHive hive) {
-        return inm.getState(hive).setMigrationProvider(() -> migrateState(inm.getUUID()));
-    }
-
-    /**
-     * @deprecated only used to migrate state, see {@link #getState(InstanceNodeManifest, BHive)}
-     */
-    @Deprecated(forRemoval = true, since = "1.2.0")
-    private InstanceStateRecord migrateState(String uuid) {
-        InstanceStateRecord record = new InstanceStateRecord();
-        // find all versions of the given INM.
-        SortedSet<Key> manifests = InstanceNodeManifest.scan(root.getHive());
-        for (Key key : manifests) {
-            InstanceNodeManifest mf = InstanceNodeManifest.of(root.getHive(), key);
-            if (!mf.getUUID().equals(uuid)) {
-                continue;
-            }
-            InstanceNodeController controller = new InstanceNodeController(root.getHive(), root.getDeploymentDir(), mf);
-            if (!controller.isInstalled()) {
-                continue;
-            }
-            record.installedTags.add(mf.getKey().getTag());
-        }
-
-        Manifest.Key active = root.getState().activeVersions.get(uuid);
-        record.activeTag = active == null ? null : active.getTag();
-
-        return record;
+        return inm.getState(hive);
     }
 
     @Override

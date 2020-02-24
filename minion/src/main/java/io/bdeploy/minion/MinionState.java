@@ -3,23 +3,13 @@ package io.bdeploy.minion;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
-import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.ui.api.MinionMode;
 
 /**
  * Represents the persistent state of a minion
  */
 public class MinionState {
-
-    /**
-     * Known other minions. Currently only used on the master minion
-     */
-    @Deprecated(forRemoval = true, since = "1.4.0")
-    public SortedMap<String, RemoteService> minions = new TreeMap<>();
 
     /**
      * The own minion's name.
@@ -32,23 +22,6 @@ public class MinionState {
      * Defaults to {@link MinionMode#STANDALONE} for compatibility.
      */
     public MinionMode mode = MinionMode.STANDALONE;
-
-    /**
-     * Used only on the master; active versions, i.e. what has been activated
-     * already.
-     *
-     * @deprecated only used to migrate old scheme to new scheme.
-     */
-    @Deprecated(forRemoval = true, since = "1.2.0")
-    public SortedMap<String, Manifest.Key> activeMasterVersions = new TreeMap<>();
-
-    /**
-     * Used on all minions, tracking the currently active manifest for each UUID.
-     *
-     * @deprecated only used to migrate old scheme to new scheme.
-     */
-    @Deprecated(forRemoval = true, since = "1.2.0")
-    public SortedMap<String, Manifest.Key> activeVersions = new TreeMap<>();
 
     /**
      * Path to the keystore containing the private key and certificates for the

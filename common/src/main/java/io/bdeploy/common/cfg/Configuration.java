@@ -325,10 +325,15 @@ public class Configuration {
     public static void formatHelp(Class<? extends Annotation> cfg, PrintStream target, String indent) {
         for (Method m : cfg.getDeclaredMethods()) {
             Help h = m.getAnnotation(Help.class);
+            ConfigurationNameMapping mapping = m.getAnnotation(ConfigurationNameMapping.class);
+            String name = m.getName();
+            if (mapping != null) {
+                name = mapping.value();
+            }
             if (h != null) {
-                target.println(indent + String.format("%1$20s%2$4s: %3$s", "--" + m.getName(), h.arg() ? "=ARG" : "", h.value()));
+                target.println(indent + String.format("%1$20s%2$4s: %3$s", "--" + name, h.arg() ? "=ARG" : "", h.value()));
             } else {
-                target.println(indent + m.getName());
+                target.println(indent + name);
             }
 
             EnvironmentFallback env = m.getAnnotation(EnvironmentFallback.class);
