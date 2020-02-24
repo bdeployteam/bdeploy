@@ -7,6 +7,7 @@ include(
     'pcu',
     'minion',
     'interfaces',
+    'api',
     'ui',
     'jersey',
     'doc',

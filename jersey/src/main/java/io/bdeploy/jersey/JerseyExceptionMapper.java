@@ -23,6 +23,12 @@ public class JerseyExceptionMapper implements ExceptionMapper<RuntimeException> 
     public Response toResponse(RuntimeException exception) {
         if (exception instanceof WebApplicationException && (exception.getCause() == null || exception.getCause() == exception)) {
             WebApplicationException webEx = (WebApplicationException) exception;
+
+            if (webEx.getResponse().getStatus() == Status.TEMPORARY_REDIRECT.getStatusCode()) {
+                // response carries valuable headers.
+                return webEx.getResponse();
+            }
+
             return Response.status(webEx.getResponse().getStatus(), webEx.getMessage()).build();
         }
 

@@ -28,6 +28,7 @@ import io.bdeploy.jersey.audit.RollingFileAuditor;
 import io.bdeploy.minion.ControllingMasterProvider;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.MinionState;
+import io.bdeploy.minion.api.v1.PublicRootResourceImpl;
 import io.bdeploy.minion.cli.MasterTool.MasterConfig;
 import io.bdeploy.minion.remote.jersey.CentralUpdateResourceImpl;
 import io.bdeploy.minion.remote.jersey.CommonRootResourceImpl;
@@ -112,6 +113,7 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
         }
 
         srv.register(CommonRootResourceImpl.class);
+        srv.register(PublicRootResourceImpl.class);
         srv.register(MasterSettingsResourceImpl.class);
         srv.register(new AbstractBinder() {
 
