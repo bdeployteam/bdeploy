@@ -6,6 +6,7 @@ plugins {
 
 dependencies {
     implementation(
+        project(":common"),
         project(":jersey"),
         project(":bhive"),
         'io.swagger.core.v3:swagger-annotations:2.1.1',
@@ -29,6 +30,6 @@ resolve {
     outputDir = file("${buildDir}/openapi")
     readAllResources = false
     resourceClasses = [
-        'io.bdeploy.interfaces.remote.CommonRootResource',
+        'io.bdeploy.api.remote.v1.PublicRootResource',
     ]
 }

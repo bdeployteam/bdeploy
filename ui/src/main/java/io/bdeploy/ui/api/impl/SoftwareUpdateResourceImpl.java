@@ -31,6 +31,7 @@ import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -51,7 +52,6 @@ import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.common.util.ZipHelper;
-import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.SoftwareUpdateResource;

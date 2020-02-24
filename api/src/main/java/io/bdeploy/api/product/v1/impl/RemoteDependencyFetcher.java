@@ -1,4 +1,4 @@
-package io.bdeploy.interfaces.manifest.dependencies;
+package io.bdeploy.api.product.v1.impl;
 
 import java.util.List;
 import java.util.SortedMap;
@@ -6,6 +6,9 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import io.bdeploy.api.product.v1.DependencyFetcher;
+import io.bdeploy.api.remote.v1.PublicRootResource;
+import io.bdeploy.api.remote.v1.dto.SoftwareRepositoryConfigurationApi;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -16,10 +19,7 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
-import io.bdeploy.interfaces.ScopedManifestKey;
-import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
-import io.bdeploy.interfaces.remote.CommonRootResource;
-import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.jersey.JerseyClientFactory;
 
 public class RemoteDependencyFetcher implements DependencyFetcher {
 
@@ -63,10 +63,10 @@ public class RemoteDependencyFetcher implements DependencyFetcher {
 
         // 3. if not all dependencies have been found, fetch list of software repos from master
         if (!remaining.isEmpty()) {
-            CommonRootResource root = ResourceProvider.getResource(svc, CommonRootResource.class, null);
+            PublicRootResource root = JerseyClientFactory.get(svc).getProxyClient(PublicRootResource.class);
 
             // 4. check every software repo for the required dependencies as long as something is missing.
-            for (SoftwareRepositoryConfiguration repo : root.getSoftwareRepositories()) {
+            for (SoftwareRepositoryConfigurationApi repo : root.getSoftwareRepositories()) {
                 try (Activity resolving = reporter.start("Resolving " + remaining.size() + " dependencies from repository "
                         + repo.name + " (" + repo.description + ")")) {
                     remaining = fetchSingleRemote(hive, remaining, os, repo.name);

@@ -1,16 +1,16 @@
-package io.bdeploy.interfaces.manifest.dependencies;
+package io.bdeploy.api.product.v1.impl;
 
 import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import io.bdeploy.api.product.v1.DependencyFetcher;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.ManifestExistsOperation;
 import io.bdeploy.bhive.op.ManifestLexicalMaxTagOperation;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
-import io.bdeploy.interfaces.ScopedManifestKey;
 
 public class LocalDependencyFetcher implements DependencyFetcher {
 

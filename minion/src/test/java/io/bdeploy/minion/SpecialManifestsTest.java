@@ -12,6 +12,9 @@ import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import io.bdeploy.api.product.v1.ProductDescriptor;
+import io.bdeploy.api.product.v1.ProductManifestBuilder;
+import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
@@ -24,7 +27,6 @@ import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.dcu.InstanceNodeController;
-import io.bdeploy.interfaces.ScopedManifestKey;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
@@ -32,7 +34,6 @@ import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
-import io.bdeploy.interfaces.descriptor.product.ProductDescriptor;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
@@ -82,7 +83,7 @@ public class SpecialManifestsTest {
         pd.name = "Dummy Product";
         pd.product = "prod";
         pd.applications.add("app");
-        ProductManifest.Builder pmb = new ProductManifest.Builder(pd);
+        ProductManifestBuilder pmb = new ProductManifestBuilder(pd);
         pmb.add(appKey);
         pmb.insert(hive, prodKey, "Test Product");
 
@@ -121,7 +122,7 @@ public class SpecialManifestsTest {
             pd.product = "prod";
             pd.applications.add("app");
             pd.configTemplates = "config-templates";
-            new ProductManifest.Builder(pd).add(appKey).setConfigTemplates(cfgs).insert(hive, prodKey, "Dummy Product");
+            new ProductManifestBuilder(pd).add(appKey).setConfigTemplates(cfgs).insert(hive, prodKey, "Dummy Product");
 
             InstanceNodeManifest.Builder ifmb = new InstanceNodeManifest.Builder();
 

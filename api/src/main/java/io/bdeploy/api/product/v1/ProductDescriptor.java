@@ -1,4 +1,4 @@
-package io.bdeploy.interfaces.descriptor.product;
+package io.bdeploy.api.product.v1;
 
 import java.util.ArrayList;
 import java.util.List;

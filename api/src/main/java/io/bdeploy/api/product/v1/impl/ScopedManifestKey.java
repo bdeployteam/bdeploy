@@ -1,4 +1,4 @@
-package io.bdeploy.interfaces;
+package io.bdeploy.api.product.v1.impl;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
