@@ -7,3 +7,5 @@ include::system.adoc[]
 include::cli.adoc[]
 
 include::security.adoc[]
+
+include::proxy.adoc[]

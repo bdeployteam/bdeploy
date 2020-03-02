@@ -183,6 +183,14 @@ describe('Creates screenshots for the user documentation', () => {
     cy.wait(250);
     cy.screenshot('BDeploy_DnD_Applications');
 
+    cy.get('button').contains('Endpoints...').click();
+    cy.waitUntilContentLoaded();
+    cy.screenshot('BDeploy_Endpoints_Config');
+    cy.get('button').contains('CANCEL').click();
+    cy.waitUntilContentLoaded();
+
+    cy.getApplicationConfigCard('master', 'Server Application').contains('more_vert').click();
+
     // Process Configuration
     cy.get('button').contains('Configure...').click();
     cy.waitUntilContentLoaded();

@@ -79,3 +79,9 @@ startCommand:
       defaultValue: "10"
       type: NUMERIC
 
+endpoints:
+    http:
+        - id: 'myVersion'
+          path: 'public/version'
+          port: 1234
+
