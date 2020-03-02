@@ -44,7 +44,7 @@ declare namespace Cypress {
      * Attaches the managed server to the central server.
      * @param group the name of the instance group to attach
      */
-    attachManaged(group: string);
+    attachManaged(group: string, screenshots?: boolean);
 
     /**
      * Create a new instance in the given instance group

@@ -86,6 +86,10 @@ Also used to register a _slave_ with the _master_. For this, the `slave` command
 | No
 | Manages local users for a _master_. These users can be used to authenticate through the Web UI login dialog.
 
+| `set-mode`
+| No
+| Changes the intended purpose of a *BDeploy* root directory, see <<Migrating between Modes>>.
+
 |===
 
 ==== BHive CLI

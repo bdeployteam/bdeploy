@@ -1,5 +1,5 @@
 describe("Central/Managed Basic Test", function() {
-  var groupName = "CentralGroup-" + new Date().getTime();
+  var groupName = "Demo";
   var managedInstance;
   var centralInstance;
 
@@ -8,7 +8,7 @@ describe("Central/Managed Basic Test", function() {
   });
 
   it("attach managed server to central", () => {
-    cy.attachManaged(groupName);
+    cy.attachManaged(groupName, true);
   });
 
   it("deletes and re-attaches instance group on managed server", () => {
@@ -22,7 +22,7 @@ describe("Central/Managed Basic Test", function() {
       .should("exist");
 
     cy.visitBDeploy("/#/servers/browser/" + groupName, "CENTRAL");
-    cy.contains("mat-expansion-panel", "Test Local Server")
+    cy.contains("mat-expansion-panel", "Managed Server")
       .should("exist")
       .and("be.visible")
       .within(e => {
@@ -37,7 +37,7 @@ describe("Central/Managed Basic Test", function() {
         cy.contains("button", "OK").click();
       });
 
-    cy.contains("mat-expansion-panel", "Test Local Server")
+    cy.contains("mat-expansion-panel", "Managed Server")
       .should("exist")
       .and("be.visible")
       .within(e => {
@@ -66,7 +66,7 @@ describe("Central/Managed Basic Test", function() {
     cy.contains('app-instance-card', 'ManagedInstance').should('not.exist');
 
     cy.visitBDeploy('/#/servers/browser/' + groupName, 'CENTRAL');
-    cy.contains("mat-expansion-panel", "Test Local Server")
+    cy.contains("mat-expansion-panel", "Managed Server")
       .should("exist")
       .and("be.visible")
       .within(e => {
@@ -82,11 +82,13 @@ describe("Central/Managed Basic Test", function() {
 
   it("synchronizes product version 1.0.0 from managed to central", () => {
     cy.visitBDeploy('/#/instancegroup/products/' + groupName, 'CENTRAL');
+    cy.waitUntilContentLoaded();
+    cy.screenshot('BDeploy_Product_Sync_Button');
     cy.contains('button', 'sync_alt').click();
 
     cy.waitUntilContentLoaded();
     cy.contains('mat-label', 'Source').should('be.visible').click({force: true});
-    cy.get('mat-option').contains('Test Local Server').click();
+    cy.get('mat-option').contains('Managed Server').click();
 
     // wait for the drop down to go away...
     cy.get('mat-option').should('not.exist');
@@ -94,10 +96,16 @@ describe("Central/Managed Basic Test", function() {
     cy.contains('mat-label', 'Target').click({force: true});
     cy.get('mat-option').contains('Central').click();
 
+    cy.waitUntilContentLoaded();
+    cy.screenshot('BDeploy_Product_Sync_Wizard');
+
     cy.contains('button', 'Next').click();
 
     cy.contains('mat-label', 'Product').click({force: true});
     cy.get('mat-option').contains('Demo').click();
+
+    cy.waitUntilContentLoaded();
+    cy.screenshot('BDeploy_Product_Sync_Version');
 
     cy.get('[data-cy="prod-source"]').within(s => {
       cy.contains('div', '1.0.0').siblings('mat-icon').contains('arrow_forward').click();
@@ -114,6 +122,9 @@ describe("Central/Managed Basic Test", function() {
 
     // Wait until the transfer is done
     cy.contains("Product transfer successfully done.");
+
+    cy.screenshot('BDeploy_Product_Sync_Done');
+
     cy.contains('button', 'Done').click();
 
     cy.contains('mat-card', 'Demo Product').click();
@@ -129,7 +140,7 @@ describe("Central/Managed Basic Test", function() {
 
   it("creates instance on central", () => {
     cy.uploadProductIntoGroup(groupName, 'test-product-2-direct.zip', 'CENTRAL');
-    cy.createInstance(groupName, 'CentralInstance', 'CENTRAL', '2.0.0', 'Test Local Server').then(id => {
+    cy.createInstance(groupName, 'CentralInstance', 'CENTRAL', '2.0.0', 'Managed Server').then(id => {
       centralInstance = id;
     });
 
@@ -138,6 +149,9 @@ describe("Central/Managed Basic Test", function() {
 
     cy.visitBDeploy('/#/instance/browser/' + groupName, 'CENTRAL');
     cy.contains('app-instance-card', 'CentralInstance').should('exist');
+
+    cy.waitUntilContentLoaded();
+    cy.screenshot('BDeploy_Central_Instance_With_Sync');
   });
 
   it("configures instance on managed and sync to central", () => {

@@ -101,12 +101,24 @@ Cypress.Commands.add('verifyProductVersion', function(groupName, productName, pr
   });
 })
 
-Cypress.Commands.add('attachManaged', function(groupName) {
+Cypress.Commands.add('attachManaged', function(groupName, screenshot = false) {
   cy.visitBDeploy('/', 'MANAGED');
 
+  cy.waitUntilContentLoaded();
+  if(screenshot) {
+    cy.screenshot('BDeploy_Welcome_Managed');
+  }
   cy.contains('button', 'link').should('exist').and('be.enabled').click();
 
+  cy.waitUntilContentLoaded();
+  if(screenshot) {
+    cy.screenshot('BDeploy_Managed_Attach_Intro');
+  }
   cy.contains('button', 'Next').should('exist').and('be.enabled').click();
+  if(screenshot) {
+    cy.wait(100);
+    cy.screenshot('BDeploy_Managed_Attach_Waiting');
+  }
   cy.contains('button', 'Continue Manually').should('exist').and('be.enabled').click();
 
   cy.contains('button', 'Download').should('exist').and('be.enabled').downloadBlobFile('managed-ident.json');
@@ -117,9 +129,17 @@ Cypress.Commands.add('attachManaged', function(groupName) {
     .clickContextMenuItem('Managed Servers...');
 
   cy.waitUntilContentLoaded();
+  if(screenshot) {
+    cy.screenshot('BDeploy_Central_Managed_Servers');
+  }
 
   cy.contains('button', 'add').should('exist').and('be.enabled').click();
   cy.contains('button', 'Next').should('exist').and('be.enabled').click();
+
+  if(screenshot) {
+    cy.wait(100)
+    cy.screenshot('BDeploy_Central_Attach_Drop');
+  }
 
   cy.contains('mat-step-header', 'Attach Managed Server').parent().within(e => {
     cy.fixture('managed-ident.json').then(json => {
@@ -131,22 +151,37 @@ Cypress.Commands.add('attachManaged', function(groupName) {
     });
 
     cy.contains('Successfully read information for').should('exist').and('be.visible');
+    if(screenshot) {
+      cy.screenshot('BDeploy_Central_Attach_Read_Success')
+    }
     cy.contains('button', 'Next').should('exist').and('be.visible').and('be.enabled').click();
   })
 
   cy.contains('mat-step-header', 'Additional Information').parent().within(e => {
-    cy.get('input[placeholder=Description]').should('exist').and('be.visible').and('be.empty').type('Test Local Server');
+    cy.get('input[placeholder=Description]').should('exist').and('be.visible').and('be.empty').type('Managed Server');
+    if(screenshot) {
+      cy.screenshot('BDeploy_Central_Attach_Info')
+    }
     cy.contains('button', 'Next').should('exist').and('be.enabled').scrollIntoView().click();
   });
 
-  // magic happens here :)
+  // magic happens here in the background :)
+
+  if(screenshot) {
+    cy.waitUntilContentLoaded();
+    cy.contains('mat-step-header', 'Done').parent().within(e => {
+      cy.contains('button', 'Done').should('exist').and('be.enabled').scrollIntoView();
+    });
+    cy.wait(100); // animation
+    cy.screenshot('BDeploy_Central_Attach_Done')
+  }
 
   cy.contains('mat-step-header', 'Done').parent().within(e => {
     cy.contains('button', 'Done').should('exist').and('be.enabled').scrollIntoView().click();
   });
 
   // we're on the managed servers page again now. verify server exists and can be sync'd.
-  cy.contains('mat-expansion-panel', 'Test Local Server').should('exist').and('be.visible').within(e => {
+  cy.contains('mat-expansion-panel', 'Managed Server').should('exist').and('be.visible').within(e => {
     cy.contains('button', 'Synchronize').should('exist').and('be.enabled').click();
 
     // don't use waitUntilContentLoaded as it does not work in within blocks.
@@ -155,4 +190,8 @@ Cypress.Commands.add('attachManaged', function(groupName) {
     cy.contains('span', 'Last sync').should('contain.text', new Date().getFullYear());
     cy.contains('td', 'flight_takeoff').should('exist'); // the aeroplane
   });
+
+  if(screenshot) {
+    cy.screenshot('BDeploy_Central_Managed_Servers_Sync')
+  }
 })

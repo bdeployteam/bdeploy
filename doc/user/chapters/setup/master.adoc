@@ -1,5 +1,28 @@
 === Master
 
+==== Modes of Operation
+
+*BDeploy* may be set up in different modes, makeing a few different overal usage scenarios possible:
+
+* `STANDALONE` mode: A standalone *BDeploy* master which is responsible for itself, its slaves, and every application deployed theron.
+* `MANAGED` mode: A *BDeploy* master which is controlled by a `CENTRAL` *BDeploy* master. The `MANAGED` master can still be used nearly the same as the `STANDALONE` master, with very few restrictions. A `MANAGED` master can *additionally* be controlled indirectly through the attached `CENTRAL` master
+* `CENTRAL` mode: Allows a central *BDeploy* master to control/manage multiple `MANAGED` masters. The `CENTRAL` master itself has no local deployment capabilities, but _just_ the ability to control other masters. Other than that, from a users perspective, the server handles mostly like a `STANDALONE` or `MANAGED` master directly.
+* `SLAVE` mode: A slave which can be attached to either a `STANDALONE` or `MANAGED` server as additional node to run applications on.
+
+image::images/Scenario_Standalone.svg[STANDALONE Deployment Scenario,align=center,width=480,link="images/Scenario_Standalone.svg"]
+
+Compared to the rather straight forward standalone scenario above, a `CENTRAL` and `MANAGED` server setup, allows for more flixibility, manageable through a single Web UI:
+
+image::images/Scenario_Central_Managed.svg[CENTRAL/MANAGED Deployment Scenario,align=center,width=480,link="images/Scenario_Central_Managed.svg"]
+
+[NOTE]
+You can still manage every `MANAGED` server directly through its own Web UI. Creation of new *Instance Groups* is restricted to the `CENTRAL` Web UI though.
+
+*BDeploy*'s `CENTRAL` mode is built in a way that attached `MANAGED` servers can have an alternate URL, allowing it to manage servers which are known under a different name in the local network (e.g. VPN/NAT, alternate DNS, etc.).
+
+[NOTE]
+See <<Central/Managed Specific Configuration>> for more details.
+
 ==== Initialization
 To start using BDeploy you will at least need a single *master*. The *master* needs to be initialized before it can be started.
 
@@ -12,7 +35,10 @@ binary installation. Make sure that there is enough space available.
 The `init` command will print a token. The token is written to a file when providing the `--tokenFile=token.txt` parameter.
 This token can be used to access this server remotely through the command line, so make sure to store it in a safe place.
 
-The `--mode` parameter of the `init` command is used to determine the future purpose of the *BDeploy* root. The mode must for now be set to *STANDALONE*, all other modes are reserved for a future release.
+The `--mode` parameter of the `init` command is used to determine the future purpose of the *BDeploy* root. The mode can be `STANDALONE`, `MANAGED`, `CENTRAL` or `SLAVE`.
+
+[NOTE]
+It is not recommended (<<Migrating between Modes,but possible>>) to change the mode of an initialized root later, so take care to use the correct mode for the intended use.
 
 The result of the `init` command is a *root directory* which can be used by the *master* or *slave* commands.
 
