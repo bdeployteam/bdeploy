@@ -212,7 +212,7 @@ public class CleanupHelper {
                 // this is either the default hive (slave hive), or a software repository.
                 continue;
             }
-            log.info("Gathering information for instance group {} ({})", ig.name, ig.description);
+            log.info("Gathering information for instance group {} ({})", ig.name, ig.title);
 
             // instance manifests
             SortedSet<Key> imfs = InstanceManifest.scan(toCheck, false);
