@@ -18,6 +18,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class ApiAccessToken {
 
+    private static final String SYSTEM_USER = "BDeploy System";
+
     String it; // issuedTo
     List<ScopedPermission> c = new ArrayList<>(); // permissions
     long ia; // issuedAt
@@ -35,6 +37,10 @@ public class ApiAccessToken {
 
     public boolean isWeak() {
         return wt;
+    }
+
+    public boolean isSystem() {
+        return SYSTEM_USER.equals(it);
     }
 
     public Collection<ScopedPermission> getPermissions() {
@@ -56,7 +62,7 @@ public class ApiAccessToken {
         }
 
         public Builder forSystem() {
-            token.it = "BDeploy System";
+            token.it = SYSTEM_USER;
             return this;
         }
 

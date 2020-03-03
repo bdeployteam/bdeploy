@@ -91,9 +91,12 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
     private static final String NO_AUTH = "unsecured";
     private static final String WEAK_AUTH = "weak";
     private final KeyStore store;
+    private final UserValidator userValidator;
 
-    public JerseyAuthenticationProvider(KeyStore store) {
+    public JerseyAuthenticationProvider(KeyStore store, UserValidator userValidator) {
         this.store = store;
+        this.userValidator = userValidator;
+
     }
 
     @Override
@@ -133,6 +136,10 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
 
             // check if weak is allowed
             if (api.isWeak() && requestContext.getProperty(WEAK_AUTH) == null) {
+                abortWithUnauthorized(requestContext);
+            }
+
+            if (!api.isSystem() && userValidator != null && !userValidator.isValid(api.getIssuedTo())) {
                 abortWithUnauthorized(requestContext);
             }
 
@@ -182,6 +189,17 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
         } catch (GeneralSecurityException e) {
             throw new IllegalStateException("Cannot verify access token.", e);
         }
+    }
+
+    /**
+     * A {@link UserValidator} will verify that a successfully authenticated user is still valid.
+     * <p>
+     * The validator should make sure that the user is still available, active, etc.
+     */
+    @FunctionalInterface
+    public interface UserValidator {
+
+        public boolean isValid(String user);
     }
 
 }

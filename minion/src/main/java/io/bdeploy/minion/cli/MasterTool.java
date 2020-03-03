@@ -17,6 +17,7 @@ import io.bdeploy.common.cfg.MinionRootValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.security.SecurityHelper;
+import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.SlaveDeploymentResource;
@@ -87,6 +88,10 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
             KeyStore ks = sh.loadPrivateKeyStore(state.keystorePath, state.keystorePass);
             try (JerseyServer srv = new JerseyServer(state.port, ks, state.keystorePass)) {
                 srv.setAuditor(new RollingFileAuditor(r.getAuditLogDir()));
+                srv.setUserValidator(user -> {
+                    UserInfo info = r.getUsers().getUser(user);
+                    return info != null && !info.inactive;
+                });
                 r.setUpdateManager(new JerseyAwareMinionUpdateManager(srv));
                 r.onStartup();
 

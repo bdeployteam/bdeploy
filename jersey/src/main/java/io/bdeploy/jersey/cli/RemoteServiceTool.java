@@ -29,6 +29,7 @@ import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.ExistingPathValidator;
 import io.bdeploy.common.cfg.RemoteValidator;
+import io.bdeploy.common.cli.ToolBase;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.security.OnDiscKeyStore;
 import io.bdeploy.common.security.RemoteService;
@@ -98,9 +99,10 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
         RemoteConfig rc = getConfig(RemoteConfig.class);
         boolean optional = isOptional();
 
+        boolean isTestMode = ToolBase.isTestMode();
         LocalLoginManager llm = new LocalLoginManager();
 
-        if (!optional && llm.getCurrent() == null) {
+        if (!optional && (!isTestMode && llm.getCurrent() == null)) {
             helpAndFailIfMissing(rc.remote(), "Missing --remote, or login using `bdeploy login`");
         }
 
@@ -118,7 +120,7 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
 
             svc = createRemoteService(rc, optional, r);
         } else {
-            svc = llm.getCurrentService();
+            svc = isTestMode ? null : llm.getCurrentService();
             if (!optional && svc == null) {
                 helpAndFail(
                         "Need either --tokenFile, --token or --keystore arguments or a current login session to access remote service");

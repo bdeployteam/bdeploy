@@ -57,6 +57,7 @@ import io.bdeploy.common.util.NamedDaemonThreadFactory;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.JerseyAuthenticationUnprovider;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.JerseyAuthenticationWeakenerProvider;
+import io.bdeploy.jersey.JerseyAuthenticationProvider.UserValidator;
 import io.bdeploy.jersey.activity.JerseyBroadcastingActivityReporter;
 import io.bdeploy.jersey.activity.JerseyRemoteActivityResourceImpl;
 import io.bdeploy.jersey.activity.JerseyRemoteActivityScopeServerFilter;
@@ -114,6 +115,8 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
     private Auditor auditor = new Log4jAuditor();
     private final Map<String, WebSocketApplication> wsApplications = new TreeMap<>();
 
+    private UserValidator userValidator;
+
     /**
      * @param port the port to listen on
      * @param store the keystore carrying the private certificate/key material
@@ -167,6 +170,13 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
     public void setAuditor(Auditor auditor) {
         this.auditor = auditor;
         registerResource(auditor);
+    }
+
+    /**
+     * @param validator a validator which can verify a user exists and is allowed to proceed.
+     */
+    public void setUserValidator(UserValidator validator) {
+        this.userValidator = validator;
     }
 
     @Override
@@ -225,7 +235,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             rc.register(JerseyObjectMapper.class);
             rc.register(JacksonFeature.class);
             rc.register(MultiPartFeature.class);
-            rc.register(new JerseyAuthenticationProvider(store));
+            rc.register(new JerseyAuthenticationProvider(store, userValidator));
             rc.register(JerseyAuthenticationUnprovider.class);
             rc.register(JerseyAuthenticationWeakenerProvider.class);
             rc.register(JerseyPathReader.class);
