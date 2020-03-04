@@ -1,4 +1,6 @@
-apply plugin: 'application'
+plugins {
+  id 'application'
+}
 
 ext {
     scriptDefVmArgs = [ '-Xms64m', '-Xmx1g' ]
@@ -80,3 +82,5 @@ distributions {
         addLauncherDist(it)
     }
 }
+
+

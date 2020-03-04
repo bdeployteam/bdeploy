@@ -17,7 +17,7 @@ public class VersionHelper {
     private static final Properties properties = readProperties();
     static {
         if (!properties.containsKey("version")) {
-            properties.put("version", "0.0.0");
+            properties.put("version", System.getProperty("bdeploy.version.override", "0.0.0"));
         }
         version = parse(properties.getProperty("version"));
     }

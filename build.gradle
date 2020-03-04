@@ -439,6 +439,7 @@ private boolean hasMacJdk() {
 private String readJdk(String which) {
     def v = System.getProperty(which)
     if(v != null) {
+        println("Using " + which + " from " + v);
         return v;
     }
     return System.getProperty("java.home")
@@ -527,6 +528,13 @@ task release() {
     doFirst {
         if(version.contains('SNAPSHOT')) {
             throw new RuntimeException("Cannot release a SNAPSHOT: " + version);
+        }
+
+        if(!hasWinJdk()) {
+            throw new RuntimeException("Cannot release without a WINDOWS JDK");
+        }
+        if(!hasLinuxJdk()) {
+            throw new RuntimeException("Cannot release without a LINUX JDK");
         }
     }
 }

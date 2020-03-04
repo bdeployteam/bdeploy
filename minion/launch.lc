@@ -176,6 +176,7 @@ java configuration Central-Master : minion-base {
 	argument "--root=${workspace_loc}/runtime/central";
 	argument "--allowCors";
 	vm-argument "-XX:+HeapDumpOnOutOfMemoryError";
+//	vm-argument "-Dbdeploy.version.override=2.0.0"; // TESTING
 	memory max=256 MB;
 }
 

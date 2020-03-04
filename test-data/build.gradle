@@ -1,8 +1,12 @@
+import okhttp3.OkHttpClient
+import java.util.concurrent.TimeUnit
+
 plugins {
     id 'base'
     id "com.github.psxpaul.execfork" version "0.1.13"
     id "de.undercouch.download" version "4.0.4"
     id "jacoco"
+    id "com.github.breadmoirai.github-release" version "2.2.12"
 }
 
 ext {
@@ -201,6 +205,27 @@ task release(dependsOn: releaseTest) {
     doLast {
         println "Release seems to do well with upgrades..."
     }
+}
+
+evaluationDependsOn(':api')
+githubRelease {
+    if(project.hasProperty('githubToken')) {
+        token project.getProperty('githubToken')
+    }
+    owner 'bdeployteam'
+    repo 'bdeploy'
+    tagName "v${version}"
+    releaseName "Release ${version}"
+
+    releaseAssets.from(project(":minion").linux64DistZip)
+    releaseAssets.from(project(":minion").win64DistZip)
+    releaseAssets.from(project(":api").shadowJar)
+    releaseAssets.from(fileTree(project(":api").resolve.outputDir))
+    releaseAssets.from(project(":test-data").product1Zip)
+    releaseAssets.from(project(":test-data").product2Zip)
+
+    // increase read and write timeouts as the files are rather large :)
+    client new OkHttpClient.Builder().readTimeout(10, TimeUnit.MINUTES).writeTimeout(10, TimeUnit.MINUTES).build();
 }
 
 void setupBinServerTasks(String version) {
