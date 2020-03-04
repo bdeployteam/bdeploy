@@ -15,11 +15,14 @@ ext {
     testServerPortCentral = randomServerPort()
     testServerPortManaged = randomServerPort()
 
-    _testBinVersions = [ "1.2.1", "1.3.0", "1.3.1", "1.4.0" ]
+    _testBinVersions = new File(projectDir, "test.versions") as String[]
 
     getTestBinVersions = {
         result = []
         _testBinVersions.each { 
+            if(it.empty) {
+                return;
+            }
             def dataFile = file("${projectDir}/bin-test-data/${it}.zip")
             if(!dataFile.exists()) {
                 println "WARNING: Skipping test server for " + it + ", file does not exist: " + dataFile
@@ -31,6 +34,25 @@ ext {
     }
 
     bdeployBaseUrl = "https://github.com/bdeployteam/bdeploy/releases/download/"
+}
+
+task printTestVersions {
+    doLast {
+        getTestBinVersions().each {
+            println "Version: " + it;
+        }
+    }
+}
+
+task addTestVersion {
+    doFirst {
+        if(!project.hasProperty('addVersion')) {
+            throw new RuntimeException("Need to set property addVersion");
+        }
+    }
+    doLast {
+        new File(projectDir, "/test.versions").text += project.getProperty('addVersion') + '\n';
+    }
 }
 
 evaluationDependsOn(':minion')
