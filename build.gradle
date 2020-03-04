@@ -59,10 +59,27 @@ ext {
 }
 
 allprojects {
-    version = '2.0.0-SNAPSHOT'
+    version = new File(rootProject.projectDir, "/bdeploy.version").text
 
     repositories {
         mavenCentral()
+    }
+}
+
+task printVersion {
+    doLast {
+        println version
+    }
+}
+
+task setVersion {
+    doFirst {
+        if(!project.hasProperty('targetVersion')) {
+            throw new RuntimeException("Need to set property targetVersion");
+        }
+    }
+    doLast {
+        new File(projectDir, "/bdeploy.version").text = project.getProperty('targetVersion');
     }
 }
 
