@@ -7,6 +7,8 @@ import java.security.KeyStore;
 import javax.inject.Singleton;
 
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
@@ -46,6 +48,8 @@ import io.bdeploy.ui.api.impl.UiResources;
 @Help("Start a Master Minion.")
 @CliName("master")
 public class MasterTool extends ConfiguredCliTool<MasterConfig> {
+
+    private static final Logger log = LoggerFactory.getLogger(MasterTool.class);
 
     public @interface MasterConfig {
 
@@ -90,7 +94,12 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
                 srv.setAuditor(new RollingFileAuditor(r.getAuditLogDir()));
                 srv.setUserValidator(user -> {
                     UserInfo info = r.getUsers().getUser(user);
-                    return info != null && !info.inactive;
+                    if (info == null) {
+                        // FIXME: REMOVE this. Non-existent users should not be allowed!
+                        log.error("User not available: " + user + ". Allowing to support legacy tokens.");
+                        return true;
+                    }
+                    return !info.inactive;
                 });
                 r.setUpdateManager(new JerseyAwareMinionUpdateManager(srv));
                 r.onStartup();
