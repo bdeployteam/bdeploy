@@ -13,7 +13,7 @@
 #  GRADLE_ARGS (optional): additional gradle arguments
 
 ROOT=$(cd $(dirname $0); pwd)
-cd $ROOT
+cd "$ROOT"
 
 REL_VER="$1"
 NEXT_VER="$2"
@@ -33,14 +33,14 @@ if [[ -z "${NEXT_VER}" ]]; then
 fi
 
 if [[ -z "${GH_USER}" ]]; then
-    die "Third argument must be the GitHub user which is allowed to push and create a release"
+    die "GH_USER variable must contain the GitHub user which is allowed to push and create a release"
 fi
 
 if [[ -z "${GH_TOKEN}" ]]; then
-    die "Fourth argument must be the GitHub token which is allowed to create a release"
+    die "GH_TOKEN variable must contain the GitHub token which is allowed to create a release"
 fi
 
-CURRENT_VER="$(cat $ROOT/bdeploy.version)"
+CURRENT_VER="$(cat "$ROOT/bdeploy.version")"
 
 if [[ ${CURRENT_VER} != *"-SNAPSHOT" ]]; then
     die "Current version ($CURRENT_VER) is not a SNAPSHOT version!"
