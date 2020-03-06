@@ -91,7 +91,7 @@ fi
 
 ./gradlew setVersion -PtargetVersion=$REL_VER "${GRADLE_ARG_ARR[@]}"
 [[ -n "${NO_TESTS}" ]] && ./gradlew clean build release updateDocuScreenshots -x test -x releaseTest -x runCypressHeadless "${GRADLE_ARG_ARR[@]}"
-[[ -z "${NO_TESTS}" ]] && ./gradlew clean build release updateDocuScreenshots "${GRADLE_ARG_ARR[@]}"
+[[ -z "${NO_TESTS}" ]] && ./gradlew clean build release updateDocuScreenshots -x releaseTest "${GRADLE_ARG_ARR[@]}"
 
 git add bdeploy.version doc test-data
 git commit -m "Release $REL_VER"
@@ -100,7 +100,7 @@ git push https://$GH_USER:$GH_TOKEN@github.com/bdeployteam/bdeploy.git HEAD:mast
 ./gradlew githubRelease -PgithubToken=$GH_TOKEN "${GRADLE_ARG_ARR[@]}"
 ./gradlew setVersion -PtargetVersion=$NEXT_VER "${GRADLE_ARG_ARR[@]}"
 ./gradlew addTestVersion -PaddVersion=$REL_VER "${GRADLE_ARG_ARR[@]}"
-[[ -z "${NO_TESTS}" ]] && ./gradlew clean build releaseTest "${GRADLE_ARG_ARR[@]}"
+[[ -z "${NO_TESTS}" ]] && ./gradlew build releaseTest -x test -x runCypressHeadless "${GRADLE_ARG_ARR[@]}"
 
 git add bdeploy.version test-data
 git commit -m "Update to $NEXT_VER"
