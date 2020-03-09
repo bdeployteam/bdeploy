@@ -10,6 +10,7 @@ import java.util.Properties;
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
+import javax.naming.directory.Attribute;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
@@ -140,7 +141,10 @@ public class LdapAuthenticator implements Authenticator {
             user.fullName = String.valueOf(sr.getAttributes().get(server.accountFullName).get(0));
         }
         if (server.accountEmail != null && !server.accountEmail.isBlank()) {
-            user.email = String.valueOf(sr.getAttributes().get(server.accountEmail).get(0));
+            Attribute attribute = sr.getAttributes().get(server.accountEmail);
+            if (attribute != null) {
+                user.email = String.valueOf(sr.getAttributes().get(server.accountEmail).get(0));
+            }
         }
         return user;
     }
