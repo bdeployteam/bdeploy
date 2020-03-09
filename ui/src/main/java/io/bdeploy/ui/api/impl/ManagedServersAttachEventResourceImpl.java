@@ -4,10 +4,14 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.POST;
 
+import io.bdeploy.jersey.JerseyScopeService;
 import io.bdeploy.jersey.ws.JerseyEventBroadcaster;
 import io.bdeploy.ui.api.ManagedServersAttachEventResource;
 
 public class ManagedServersAttachEventResourceImpl implements ManagedServersAttachEventResource {
+
+    @Inject
+    private JerseyScopeService jss;
 
     @Inject
     @Named(ATTACH_BROADCASTER)
@@ -16,7 +20,7 @@ public class ManagedServersAttachEventResourceImpl implements ManagedServersAtta
     @Override
     @POST
     public void setLocalAttached(String groupName) {
-        bc.send(groupName);
+        bc.send(groupName, jss.getScope());
     }
 
 }

@@ -1,8 +1,13 @@
 package io.bdeploy.jersey.activity;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.LongSupplier;
@@ -43,7 +48,23 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
     @Optional
     private JerseyEventBroadcaster bc;
 
-    private boolean lastBroadcastWasEmpty;
+    private final Set<List<String>> activeScopes = new TreeSet<>(this::compareScopes);
+
+    private int compareScopes(List<String> a, List<String> b) {
+        if (a.size() > b.size()) {
+            return 1;
+        }
+        if (b.size() > a.size()) {
+            return -1;
+        }
+        for (int i = 0; i < a.size(); ++i) {
+            int r = a.get(i).compareTo(b.get(i));
+            if (r != 0) {
+                return r;
+            }
+        }
+        return 0;
+    }
 
     @Inject
     public JerseyBroadcastingActivityReporter(@Named(JerseyServer.BROADCAST_EXECUTOR) ScheduledExecutorService scheduler) {
@@ -58,13 +79,54 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
         List<ActivitySnapshot> list = getGlobalActivities().stream().filter(Objects::nonNull).map(JerseyRemoteActivity::snapshot)
                 .collect(Collectors.toList());
 
-        if (list.isEmpty() && lastBroadcastWasEmpty) {
-            return;
+        // split to distinct lists per scope name
+        Map<List<String>, List<ActivitySnapshot>> perScope = new TreeMap<>(this::compareScopes);
+        for (ActivitySnapshot snapshot : list) {
+            List<ActivitySnapshot> forScope = perScope.computeIfAbsent(snapshot.scope, (k) -> new ArrayList<>());
+
+            forScope.add(snapshot);
+
+            while (addChildren(forScope, list) != 0) {
+                // intentionally left blank :)
+            }
+        }
+        activeScopes.addAll(perScope.keySet());
+
+        for (Map.Entry<List<String>, List<ActivitySnapshot>> e : perScope.entrySet()) {
+            bc.send(e.getValue(), e.getKey());
         }
 
-        lastBroadcastWasEmpty = list.isEmpty();
+        List<List<String>> scopesToRemove = new ArrayList<>();
+        for (List<String> active : activeScopes) {
+            if (!perScope.containsKey(active)) {
+                scopesToRemove.add(active);
+            }
+        }
 
-        bc.send(list);
+        for (List<String> toRemove : scopesToRemove) {
+            activeScopes.remove(toRemove);
+            bc.send(Collections.emptyList(), toRemove);
+        }
+    }
+
+    private int addChildren(List<ActivitySnapshot> activities, List<ActivitySnapshot> pool) {
+        Set<String> haveUuids = activities.stream().map(s -> s.uuid).collect(Collectors.toCollection(TreeSet::new));
+
+        List<ActivitySnapshot> children = new ArrayList<>();
+        for (ActivitySnapshot root : activities) {
+            for (ActivitySnapshot potentialChild : pool) {
+                if (haveUuids.contains(potentialChild.uuid)) {
+                    // have it already.
+                    continue;
+                }
+
+                if (potentialChild.parentUuid != null && potentialChild.parentUuid.equals(root.uuid)) {
+                    children.add(potentialChild);
+                }
+            }
+        }
+        activities.addAll(children);
+        return children.size();
     }
 
     /**

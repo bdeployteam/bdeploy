@@ -2,6 +2,7 @@ package io.bdeploy.minion.ws;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.LongAdder;
@@ -44,17 +45,18 @@ public class WebSocketActivityTest {
     void testWebSocket(RemoteService service, Producer producer) throws InterruptedException, ExecutionException {
         LongAdder count = new LongAdder();
         try (AsyncHttpClient client = JerseyClientFactory.get(service).getWebSocketClient()) {
-            WebSocket ws = JerseyClientFactory.get(service).getAuthenticatedWebSocket(client, "/activities", m -> {
-                List<ActivitySnapshot> acts = StorageHelper.fromRawBytes(m, ActivitySnapshot.LIST_TYPE);
+            WebSocket ws = JerseyClientFactory.get(service)
+                    .getAuthenticatedWebSocket(client, Collections.emptyList(), "/activities", m -> {
+                        List<ActivitySnapshot> acts = StorageHelper.fromRawBytes(m, ActivitySnapshot.LIST_TYPE);
 
-                if (acts.get(0).name.equals("Test")) {
-                    count.increment();
-                }
-            }, t -> {
-                log.error("Error", t);
-            }, s -> {
-                log.info("Close!");
-            }).get();
+                        if (acts.get(0).name.equals("Test")) {
+                            count.increment();
+                        }
+                    }, t -> {
+                        log.error("Error", t);
+                    }, s -> {
+                        log.info("Close!");
+                    }).get();
 
             producer.produce();
 

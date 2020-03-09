@@ -53,7 +53,7 @@ export class RemoteProgressComponent implements OnInit, OnDestroy {
   }
 
   private startEventListener() {
-    this.ws = this.events.createActivitiesWebSocket();
+    this.ws = this.events.createActivitiesWebSocket(this._scope);
     this.ws.addEventListener('error', () => {
       this.systemService.backendUnreachable();
       this.remoteProgressElements = null;
