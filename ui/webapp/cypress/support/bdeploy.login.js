@@ -1,20 +1,20 @@
 Cypress.Commands.add('login', function() {
   cy.fixture('login.json').then(user => {
-    cy.request('POST', Cypress.env('backendBaseUrl') + '/auth', { user: user.user, password: user.pass })
+    cy.request({ method: 'POST', url: Cypress.env('backendBaseUrl') + '/auth', body: { user: user.user, password: user.pass }})
     cy.getCookie('st').should('exist')
   })
 })
 
 Cypress.Commands.add('loginCentral', function() {
   cy.fixture('login.json').then(user => {
-    cy.request('POST', Cypress.env('backendBaseUrlCentral') + '/auth', { user: user.user, password: user.pass })
+    cy.request({ method: 'POST', url: Cypress.env('backendBaseUrlCentral') + '/auth', body: { user: user.user, password: user.pass }})
     cy.getCookie('st').should('exist')
   })
 })
 
 Cypress.Commands.add('loginManaged', function() {
   cy.fixture('login.json').then(user => {
-    cy.request('POST', Cypress.env('backendBaseUrlManaged') + '/auth', { user: user.user, password: user.pass })
+    cy.request({ method: 'POST', url: Cypress.env('backendBaseUrlManaged') + '/auth', body: { user: user.user, password: user.pass }})
     cy.getCookie('st').should('exist')
   })
 })
