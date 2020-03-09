@@ -57,11 +57,12 @@ public class JerseyRemoteActivityProxy implements NoThrowAutoCloseable {
     private void createWebSocket(RemoteService service) {
         client = JerseyClientFactory.get(service).getWebSocketClient();
         try {
-            ws = JerseyClientFactory.get(service).getAuthenticatedWebSocket(client, "/activities", this::onMessage, e -> {
-                log.error("WebSocket Error", e);
-            }, ws -> {
-                log.warn("WebSocket closed");
-            }).get();
+            ws = JerseyClientFactory.get(service)
+                    .getAuthenticatedWebSocket(client, List.of(proxyUuid), "/activities", this::onMessage, e -> {
+                        log.error("WebSocket Error", e);
+                    }, ws -> {
+                        log.warn("WebSocket closed");
+                    }).get();
         } catch (InterruptedException | ExecutionException e) {
             log.error("Cannot create WebSocket", e);
             Thread.currentThread().interrupt();

@@ -2,6 +2,7 @@ package io.bdeploy.minion.ws;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.LongAdder;
@@ -46,17 +47,18 @@ public class WebSocketActivityProxyTest {
     void testWebSocket() throws InterruptedException, ExecutionException {
         LongAdder count = new LongAdder();
         try (AsyncHttpClient client = JerseyClientFactory.get(ext.getRemoteService()).getWebSocketClient()) {
-            WebSocket ws = JerseyClientFactory.get(ext.getRemoteService()).getAuthenticatedWebSocket(client, "/activities", m -> {
-                List<ActivitySnapshot> acts = StorageHelper.fromRawBytes(m, ActivitySnapshot.LIST_TYPE);
+            WebSocket ws = JerseyClientFactory.get(ext.getRemoteService())
+                    .getAuthenticatedWebSocket(client, Collections.emptyList(), "/activities", m -> {
+                        List<ActivitySnapshot> acts = StorageHelper.fromRawBytes(m, ActivitySnapshot.LIST_TYPE);
 
-                if (acts.stream().filter(a -> a.name.equals("Test")).findFirst().isPresent()) {
-                    count.increment();
-                }
-            }, t -> {
-                log.error("Error", t);
-            }, s -> {
-                log.info("Close!");
-            }).get();
+                        if (acts.stream().filter(a -> a.name.equals("Test")).findFirst().isPresent()) {
+                            count.increment();
+                        }
+                    }, t -> {
+                        log.error("Error", t);
+                    }, s -> {
+                        log.info("Close!");
+                    }).get();
 
             JerseyClientFactory.get(ext.getRemoteService()).getProxyClient(Proxy.class).produce();
 

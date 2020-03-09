@@ -175,7 +175,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
           this.doTriggerProcessStatusUpdate();
         }
 
-        this.ws = this.eventService.createInstanceUpdatesWebSocket();
+        this.ws = this.eventService.createInstanceUpdatesWebSocket([this.groupParam, this.uuidParam]);
         this.ws.addEventListener('error', err => {
           this.systemService.backendUnreachable();
         });

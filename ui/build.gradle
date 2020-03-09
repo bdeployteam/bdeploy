@@ -240,6 +240,7 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
         'io.bdeploy.interfaces.UserInfo',
         'io.bdeploy.interfaces.UserChangePasswordDto',
         'io.bdeploy.interfaces.manifest.managed.ManagedMasterDto',
+        'io.bdeploy.jersey.ws.WebSocketInitDto',
         // Metrics
         'io.bdeploy.jersey.resources.JerseyMetricsResource$MetricBundle',
         'io.bdeploy.common.metrics.Metrics$MetricGroup',

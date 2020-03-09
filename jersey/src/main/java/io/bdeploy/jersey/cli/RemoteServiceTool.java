@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
@@ -145,12 +146,14 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
             {
                 try {
                     this.client = JerseyClientFactory.get(remote).getWebSocketClient();
-                    this.ws = JerseyClientFactory.get(remote).getAuthenticatedWebSocket(client, "/activities", onMessage, e -> {
-                        out().println("WebSocket error: ");
-                        e.printStackTrace(out());
-                    }, s -> {
-                        out().println("Activities WebSocket disconnected");
-                    }).get();
+                    // cannot filter by proxy scope as the scope is set later in the process whenever a call is made.
+                    this.ws = JerseyClientFactory.get(remote)
+                            .getAuthenticatedWebSocket(client, Collections.emptyList(), "/activities", onMessage, e -> {
+                                out().println("WebSocket error: ");
+                                e.printStackTrace(out());
+                            }, s -> {
+                                out().println("Activities WebSocket disconnected");
+                            }).get();
                 } catch (InterruptedException | ExecutionException e) {
                     out().println("Cannot initialize Acitivities WebSocket");
                     e.printStackTrace(out());

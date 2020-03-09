@@ -3,6 +3,7 @@ package io.bdeploy.jersey;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -181,6 +182,10 @@ public class JerseyClientFactory {
         proxyUuid.set(uuid);
     }
 
+    public static String getProxyUuid() {
+        return proxyUuid.get();
+    }
+
     /**
      * @return a client that is capable of providing a WebSocket connection to the given service. The caller is responsible for
      *         closing the client once done!
@@ -191,17 +196,18 @@ public class JerseyClientFactory {
     }
 
     /**
+     * @param client the client to use, obtain from {@link #getWebSocketClient()}
+     * @param scope the scope to filter messages with on the server side.
      * @param path the path on the server under the '/ws' context
      * @param onMessage callback for received messaged
      * @param onError callback for received errors
      * @return a {@link ListenableFuture} which can be used to retrieve the {@link WebSocket}.
      */
-    public ListenableFuture<WebSocket> getAuthenticatedWebSocket(AsyncHttpClient client, String path, Consumer<byte[]> onMessage,
-            Consumer<Throwable> onError, Consumer<WebSocket> onClose) {
+    public ListenableFuture<WebSocket> getAuthenticatedWebSocket(AsyncHttpClient client, List<String> scope, String path,
+            Consumer<byte[]> onMessage, Consumer<Throwable> onError, Consumer<WebSocket> onClose) {
         return client.prepareGet(svc.getWebSocketUri(path).toString())
-                .execute(new WebSocketUpgradeHandler.Builder()
-                        .addWebSocketListener(new WebSocketAuthenticatingMessageListener(
-                                SecurityHelper.getInstance().getTokenFromPack(svc.getAuthPack()), onMessage, onError, onClose))
+                .execute(new WebSocketUpgradeHandler.Builder().addWebSocketListener(new WebSocketAuthenticatingMessageListener(
+                        SecurityHelper.getInstance().getTokenFromPack(svc.getAuthPack()), scope, onMessage, onError, onClose))
                         .build());
     }
 
