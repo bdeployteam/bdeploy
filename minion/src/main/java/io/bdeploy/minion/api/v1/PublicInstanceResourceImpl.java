@@ -9,6 +9,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import io.bdeploy.api.remote.v1.PublicInstanceResource;
@@ -91,8 +92,9 @@ public class PublicInstanceResourceImpl implements PublicInstanceResource {
         // this one is not explicitly implemented. the reason is that the proxy resource /must/ simply be a resource
         // implementation that forwards every request with every supported method. by /not/ implementing it in the public
         // API, we will be able to accept additional methods supported in future releases of BDeploy without adaption.
-        throw new WebApplicationException(
-                Response.temporaryRedirect(ui.getBaseUriBuilder().path("/master/common/proxy").build()).build());
+        throw new WebApplicationException(Response.temporaryRedirect(UriBuilder
+                .fromUri(ui.getRequestUri().toString().replace("/public/v1/common/proxy", "/master/common/proxy")).build())
+                .build());
     }
 
 }
