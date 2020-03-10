@@ -170,7 +170,7 @@ export class UpdateBrowserComponent implements OnInit {
         minWidth: '300px',
         maxWidth: '800px',
         disableClose: true,
-        data: {waitFor: waitFor},
+        data: {waitFor: waitFor, oldVersion: this.backendInfo.version },
       })
       .afterClosed().toPromise();
   }

@@ -3,8 +3,9 @@
   <mat-progress-bar mode='indeterminate' *ngIf='!finished'></mat-progress-bar>
   <div *ngIf='waiting'>Waiting for the master to come back online...</div>
   <ng-container  *ngIf='finished'>
+    <div *ngIf='!error && !isStillSameVersion()'>The server version after update is: {{getVersionAfterUpdate()}}.</div>
+    <div *ngIf='!error && isStillSameVersion()'>It seems that the server version did not change. Please check the server logs.</div>
     <div *ngIf='!error'>A reload is required to update the web application. Press OK to reload now.</div>
-    <div *ngIf='!error'>The server version after update is: {{getVersionAfterUpdate()}}.</div>
     <div *ngIf='error'>Failed to await server to come back online. Please check server logs. Press OK to reload the application.</div>
   </ng-container>
 </div>

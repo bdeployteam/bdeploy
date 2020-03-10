@@ -1,9 +1,11 @@
 package io.bdeploy.minion.remote.jersey;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.FileStore;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -22,8 +24,10 @@ import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.ExportOperation;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
+import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.ObjectListOperation;
 import io.bdeploy.bhive.op.ObjectSizeOperation;
+import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.common.Version;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.UpdateHelper;
@@ -62,6 +66,33 @@ public class MinionUpdateResourceImpl implements MinionUpdateResource {
         SortedSet<Key> mfs = h.execute(new ManifestListOperation().setManifestName(key.toString()));
         if (!mfs.contains(key)) {
             throw new WebApplicationException("Cannot find version to update to: " + key, Status.NOT_FOUND);
+        }
+
+        // We need to make sure here that the update is compatible with the running server version.
+        try (InputStream is = h.execute(
+                new TreeEntryLoadOperation().setRootTree(h.execute(new ManifestLoadOperation().setManifest(key)).getRoot())
+                        .setRelativePath("version.properties"))) {
+            Properties props = new Properties();
+            props.load(is);
+
+            if (props.containsKey("minSourceVersion")) {
+                Version version = VersionHelper.tryParse(props.getProperty("minSourceVersion"));
+                if (version == null) {
+                    log.error("Cannot parse minimum source server version from update package");
+                } else {
+                    if (VersionHelper.getVersion().compareTo(version) < 0) {
+                        throw new IllegalStateException(
+                                "Running version is not compatible with update package. Server must be at least version "
+                                        + version + " to be able to update.");
+                    }
+                    log.info("Version compatibility check OK: current=" + VersionHelper.getVersion() + ", required=" + version);
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Cannot read version.properties from update package.");
+            if (log.isTraceEnabled()) {
+                log.trace("Exception:", e);
+            }
         }
 
         Path updateDir = root.getUpdateDir();
