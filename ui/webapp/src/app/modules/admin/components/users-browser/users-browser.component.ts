@@ -29,7 +29,7 @@ export class UsersBrowserComponent implements OnInit, AfterViewInit {
   public INITIAL_SORT_COLUMN = 'name';
   public INITIAL_SORT_DIRECTION = 'asc';
 
-  public dataSource: MatTableDataSource<UserInfo> = null;
+  public dataSource: MatTableDataSource<UserInfo> = new MatTableDataSource<UserInfo>([]);
   private filterPredicate: (d, f) => boolean;
 
   public displayedColumns: string[] = ['gravatar', 'name', 'fullName', 'email', 'globalPermissions', 'inactive', 'authenticatedBy', 'lastActiveLogin', 'actions'];
@@ -54,6 +54,18 @@ export class UsersBrowserComponent implements OnInit, AfterViewInit {
   ) { }
 
   ngOnInit() {
+  }
+
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+    this.dataSource.filterPredicate = (data, filter) => {
+      return this.filterPredicate(data.name, filter)
+        || this.filterPredicate(data.fullName, filter)
+        || this.filterPredicate(data.email, filter)
+        || this.filterPredicate(this.getGlobalPermission(data), filter);
+    };
+
     this.authService.getUserInfo().subscribe(r => {
       this.currentUser = r;
     });
@@ -61,28 +73,12 @@ export class UsersBrowserComponent implements OnInit, AfterViewInit {
     this.loadUsers();
   }
 
-  ngAfterViewInit() {
-  }
-
   loadUsers() {
     this.loading = true;
     this.authAdminService.getAll()
       .pipe(finalize(() => (this.loading = false)))
       .subscribe(users => {
-        if (this.dataSource === null) {
-          this.dataSource = new MatTableDataSource(users);
-          this.dataSource.paginator = this.paginator;
-          this.dataSource.sort = this.sort;
-
-          this.dataSource.filterPredicate = (data, filter) => {
-            return this.filterPredicate(data.name, filter)
-              || this.filterPredicate(data.fullName, filter)
-              || this.filterPredicate(data.email, filter)
-              || this.filterPredicate(this.getGlobalPermission(data), filter);
-          };
-        } else {
           this.dataSource.data = users;
-        }
       }
     );
   }
