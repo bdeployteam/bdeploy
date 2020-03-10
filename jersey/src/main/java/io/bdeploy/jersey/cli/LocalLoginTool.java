@@ -74,6 +74,8 @@ public class LocalLoginTool extends ConfiguredCliTool<LoginConfig> {
                 out().println(String.format(LIST_FORMAT, entry.getKey(), entry.getValue().url,
                         (data.current != null && data.current.equals(entry.getKey())) ? "*" : ""));
             }
+        } else {
+            out().println("No action given...");
         }
     }
 

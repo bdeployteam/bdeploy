@@ -62,11 +62,13 @@ public class BDeployBuildProductTask {
     private Manifest.Key key;
     private final File target;
     private final BDeployTargetSpec pushTarget;
+    private final BDeployTargetSpec sourceServer;
 
-    public BDeployBuildProductTask(ProductDesc desc, File target, BDeployTargetSpec pushTarget) {
+    public BDeployBuildProductTask(ProductDesc desc, File target, BDeployTargetSpec pushTarget, BDeployTargetSpec sourceServer) {
         this.desc = desc;
         this.target = target;
         this.pushTarget = pushTarget;
+        this.sourceServer = sourceServer;
     }
 
     @Override
@@ -139,8 +141,13 @@ public class BDeployBuildProductTask {
             }
 
             // 2: create product and import into bhive
-            RemoteService svc = cfg.bdeployServer == null ? null
-                    : new RemoteService(UriBuilder.fromUri(cfg.bdeployServer).build(), cfg.bdeployServerToken);
+            RemoteService svc;
+            if (this.sourceServer != null) {
+                svc = new RemoteService(UriBuilder.fromUri(sourceServer.uri).build(), sourceServer.token);
+            } else {
+                svc = cfg.bdeployServer == null ? null
+                        : new RemoteService(UriBuilder.fromUri(cfg.bdeployServer).build(), cfg.bdeployServerToken);
+            }
 
             DependencyFetcher fetcher;
             if (svc != null) {

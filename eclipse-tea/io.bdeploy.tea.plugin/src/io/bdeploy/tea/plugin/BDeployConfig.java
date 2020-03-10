@@ -35,7 +35,7 @@ public class BDeployConfig implements TaskingConfigurationExtension {
     @TaskingConfigProperty(description = "BDeploy Software Repositories")
     public String bdeployServer; // default none
 
-    @TaskingConfigProperty(description = "BDeploy Software Repositories Server Token")
+    @TaskingConfigProperty(description = "BDeploy Software Repositories Server Token", headlessOnly = true)
     public String bdeployServerToken; // default none
 
 }

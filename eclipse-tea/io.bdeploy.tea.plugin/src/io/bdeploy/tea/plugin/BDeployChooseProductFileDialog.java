@@ -31,6 +31,7 @@ public class BDeployChooseProductFileDialog extends TitleAreaDialog {
     private BDeployTargetSpec target;
     private final BDeployProductListDescriptor products;
     private Runnable buttonUpdate;
+    private boolean clear;
 
     public BDeployChooseProductFileDialog(Shell parentShell, BDeployProductListDescriptor products) {
         super(parentShell);
@@ -44,6 +45,10 @@ public class BDeployChooseProductFileDialog extends TitleAreaDialog {
 
     public BDeployTargetSpec getChosenTarget() {
         return target;
+    }
+
+    public boolean isClearSourceToken() {
+        return clear;
     }
 
     @SuppressWarnings("unchecked")
@@ -98,6 +103,16 @@ public class BDeployChooseProductFileDialog extends TitleAreaDialog {
 
         BDeployServerPanel panel = new BDeployServerPanel(comp);
         GridDataFactory.fillDefaults().hint(300, 150).applyTo(panel);
+
+        Button chkClearSourceToken = new Button(comp, SWT.CHECK);
+        chkClearSourceToken.setText("Clear Software Repository Server login data");
+        chkClearSourceToken.addSelectionListener(new SelectionAdapter() {
+
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                clear = chkClearSourceToken.getSelection();
+            }
+        });
 
         buttonUpdate = () -> {
             Button button = getButton(OK);
