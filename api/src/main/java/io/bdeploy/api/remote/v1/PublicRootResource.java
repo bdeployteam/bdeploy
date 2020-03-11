@@ -8,10 +8,12 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import io.bdeploy.api.remote.v1.dto.InstanceGroupConfigurationApi;
 import io.bdeploy.api.remote.v1.dto.SoftwareRepositoryConfigurationApi;
 import io.bdeploy.jersey.ActivityScope;
+import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.WeakTokenAllowed;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,10 +31,27 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 @Produces(MediaType.APPLICATION_JSON)
 public interface PublicRootResource {
 
+    /**
+     * @return the currently running server version
+     */
+	@Operation(summary = "Get BDeploy Server Version", description = "Retrieve the version of the running BDeploy server.")
     @GET
     @WeakTokenAllowed
     @Path("/version")
     public String getVersion();
+	
+	
+	/**
+	 * @param user the user to log in
+	 * @param pass the password to use.
+	 * @param full whether a full authentication pack or only the token part is requested.
+	 * @return Either a full authentication pack or a token only.
+	 */
+	@Operation(summary = "Login to a BDeploy Server", description = "Uses given credentials to create a token for the BDeploy server. This token can be used by tooling to perform communication with the server on behalf of the given user. The 'full' parameter controls the type of token returned. Most tools require a full token.")
+	@GET
+	@Unsecured
+	@Path("/login")
+	public Response login(@QueryParam("user") String user, @QueryParam("pass") String pass, @QueryParam("full") boolean full);
 
     /**
      * Software repository hives contain additional software which can be referenced when building products.

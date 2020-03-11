@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import io.bdeploy.api.remote.v1.PublicInstanceResource;
@@ -14,6 +15,9 @@ import io.bdeploy.api.remote.v1.dto.SoftwareRepositoryConfigurationApi;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
 import io.bdeploy.minion.remote.jersey.CommonRootResourceImpl;
+import io.bdeploy.ui.api.AuthResource;
+import io.bdeploy.ui.api.impl.AuthResourceImpl;
+import io.bdeploy.ui.dto.CredentialsDto;
 
 /**
  * V1 implementation of the public API.
@@ -29,6 +33,16 @@ public class PublicRootResourceImpl implements PublicRootResource {
     @Override
     public String getVersion() {
         return rc.getResource(CommonRootResourceImpl.class).getVersion().toString();
+    }
+
+    @Override
+    public Response login(String user, String pass, boolean full) {
+        AuthResource auth = rc.getResource(AuthResourceImpl.class);
+        if (full) {
+            return auth.authenticatePacked(new CredentialsDto(user, pass));
+        } else {
+            return auth.authenticate(new CredentialsDto(user, pass));
+        }
     }
 
     @Override

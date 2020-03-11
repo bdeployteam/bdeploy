@@ -36,6 +36,7 @@ public class BDeployServerEditDialog extends TitleAreaDialog {
     private final BDeployTargetSpec template;
     private ComboViewer comboIg;
     private Button btnLoad;
+    private Button btnLogin;
 
     public BDeployServerEditDialog(Shell parentShell, BDeployTargetSpec template) {
         super(parentShell);
@@ -79,11 +80,27 @@ public class BDeployServerEditDialog extends TitleAreaDialog {
         lblToken.setText("BDeploy Server Token");
 
         Text txtToken = new Text(comp, SWT.BORDER);
+        txtToken.setEnabled(false);
         txtToken.setText(template.token);
-        GridDataFactory.fillDefaults().grab(true, false).span(2, 1).hint(150, -1).applyTo(txtToken);
+        GridDataFactory.fillDefaults().grab(true, false).hint(150, -1).applyTo(txtToken);
         txtToken.addModifyListener((e) -> {
             template.token = txtToken.getText();
             updateState();
+        });
+
+        btnLogin = new Button(comp, SWT.PUSH);
+        btnLogin.setText("Login");
+        btnLogin.setEnabled(false);
+        btnLogin.addSelectionListener(new SelectionAdapter() {
+
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                BDeployLoginDialog dlg = new BDeployLoginDialog(getShell(), txtName.getText(), txtUri.getText());
+                dlg.setBlockOnOpen(true);
+                if (dlg.open() == OK) {
+                    txtToken.setText(dlg.getServer().token);
+                }
+            }
         });
 
         Label lblIg = new Label(comp, SWT.NONE);
@@ -155,6 +172,7 @@ public class BDeployServerEditDialog extends TitleAreaDialog {
         boolean enable = false;
         boolean canVerify = true;
         boolean canLoad = true;
+        boolean canLogin = true;
 
         if (template.name.isEmpty()) {
             setMessage("Provide a display name", IMessageProvider.ERROR);
@@ -163,15 +181,16 @@ public class BDeployServerEditDialog extends TitleAreaDialog {
             canVerify = false;
             setMessage("Provide an instance group name", IMessageProvider.ERROR);
         }
-        if (template.uri.isEmpty() || !template.uri.startsWith("https") || !template.uri.endsWith("/api")) {
-            canVerify = false;
-            canLoad = false;
-            setMessage("Provide an URI with the format 'https://host:port/api'", IMessageProvider.ERROR);
-        }
         if (template.token.isEmpty()) {
             canVerify = false;
             canLoad = false;
-            setMessage("Provide a valid token", IMessageProvider.ERROR);
+            setMessage("Perform a Login", IMessageProvider.ERROR);
+        }
+        if (template.uri.isEmpty() || !template.uri.startsWith("https") || !template.uri.endsWith("/api")) {
+            canVerify = false;
+            canLoad = false;
+            canLogin = false;
+            setMessage("Provide an URI with the format 'https://host:port/api'", IMessageProvider.ERROR);
         }
 
         if (canVerify && !template.name.isEmpty()) {
@@ -180,6 +199,7 @@ public class BDeployServerEditDialog extends TitleAreaDialog {
         }
 
         getButton(100).setEnabled(canVerify);
+        btnLogin.setEnabled(canLogin);
         btnLoad.setEnabled(canLoad);
         getButton(OK).setEnabled(enable);
     }

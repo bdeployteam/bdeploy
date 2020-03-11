@@ -17,6 +17,8 @@ import java.util.stream.Collectors;
 import org.eclipse.core.internal.variables.StringVariableManager;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.extensions.Service;
@@ -36,9 +38,11 @@ import org.eclipse.tea.library.build.lcdsl.tasks.p2.DynamicProductBuildRegistry;
 import org.eclipse.tea.library.build.menu.BuildLibraryMenu;
 import org.eclipse.tea.library.build.tasks.jar.TaskInitJarCache;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.prefs.BackingStoreException;
 
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.tea.plugin.BDeployBuildProductTask.ProductDesc;
+import io.bdeploy.tea.plugin.server.BDeployLoginDialog;
 import io.bdeploy.tea.plugin.server.BDeployTargetSpec;
 import io.bdeploy.tea.plugin.services.BDeployApplicationBuild;
 import io.bdeploy.tea.plugin.services.BDeployApplicationDescriptor;
@@ -53,6 +57,7 @@ public class BDeployProductTaskChain implements TaskChain {
 
     private Path bdeployProductFile;
     private BDeployTargetSpec target;
+    private BDeployTargetSpec source;
 
     @TaskChainUiInit
     public void uiInit(Shell parent, BDeployConfig cfg) throws IOException, CoreException {
@@ -83,6 +88,36 @@ public class BDeployProductTaskChain implements TaskChain {
 
         target = dlg.getChosenTarget();
         bdeployProductFile = rootPath.resolve(dlg.getChosenFile());
+
+        // Need to make sure that the source server is available for us, otherwise prompt login.
+        IEclipsePreferences prefs = InstanceScope.INSTANCE.getNode("io.bdeploy.tea.plugin.source");
+        source = dlg.isClearSourceToken() ? null : loadSourceServer(prefs);
+
+        if (source == null) {
+            BDeployLoginDialog srcDlg = new BDeployLoginDialog(parent, "BDeploy Software Repositories", cfg.bdeployServer);
+            srcDlg.setBlockOnOpen(true);
+            if (srcDlg.open() != Dialog.OK) {
+                throw new OperationCanceledException();
+            }
+            source = srcDlg.getServer();
+            saveSourceServer(prefs, source);
+        }
+    }
+
+    private BDeployTargetSpec loadSourceServer(IEclipsePreferences prefs) {
+        byte[] serverBytes = prefs.getByteArray("sourceServer", null);
+        if (serverBytes == null) {
+            return null;
+        }
+        return StorageHelper.fromRawBytes(serverBytes, BDeployTargetSpec.class);
+    }
+
+    private void saveSourceServer(IEclipsePreferences preferences, BDeployTargetSpec source) {
+        preferences.putByteArray("sourceServer", StorageHelper.toRawBytes(source));
+        try {
+            preferences.flush();
+        } catch (BackingStoreException e) {
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -96,7 +131,7 @@ public class BDeployProductTaskChain implements TaskChain {
         // to produce reproducible JAR files (timestamps).
         ZipExecFactory.setIgnoreExternalZipExe(true);
 
-        c.addTask(BDeployCheckServerOnlineTask.class);
+        c.addTask(new BDeployCheckServerOnlineTask(target, source));
 
         TaskInitJarCache cache = new TaskInitJarCache(dirs.getNewCacheDirectory("jar"));
         c.addTask(cache);
@@ -147,7 +182,7 @@ public class BDeployProductTaskChain implements TaskChain {
         c.addTask(BackgroundTask
                 .allBarrier(pd.apps.stream().map(a -> a.task).filter(Objects::nonNull).collect(Collectors.toList())));
 
-        BDeployBuildProductTask build = new BDeployBuildProductTask(pd, hive, target);
+        BDeployBuildProductTask build = new BDeployBuildProductTask(pd, hive, target, source);
         c.addTask(build);
 
         if (target == null && cfg.bdeployProductPushServer != null) {
