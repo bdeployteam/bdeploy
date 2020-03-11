@@ -66,6 +66,10 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
         @EnvironmentFallback("BDEPLOY_TOKENFILE")
         @Validator(ExistingPathValidator.class)
         String tokenFile();
+
+        @Help("Override which named login session to use for this command.")
+        @EnvironmentFallback("BDEPLOY_LOGIN")
+        String useLogin();
     }
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -103,11 +107,11 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
         boolean isTestMode = ToolBase.isTestMode();
         LocalLoginManager llm = new LocalLoginManager();
 
-        if (!optional && (!isTestMode && llm.getCurrent() == null)) {
-            helpAndFailIfMissing(rc.remote(), "Missing --remote, or login using `bdeploy login`");
+        if (!optional && (!isTestMode && (llm.getCurrent() == null && rc.useLogin() == null))) {
+            helpAndFailIfMissing(rc.remote(), "Missing --remote, --useLogin, or current login using `bdeploy login`");
         }
 
-        RemoteService svc;
+        RemoteService svc = null;
         if (rc.remote() != null) {
             URI r = null;
             if (rc.remote() != null) {
@@ -120,8 +124,12 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
             }
 
             svc = createRemoteService(rc, optional, r);
-        } else {
-            svc = isTestMode ? null : llm.getCurrentService();
+        } else if (!isTestMode) {
+            if (rc.useLogin() != null) {
+                svc = llm.getNamedService(rc.useLogin());
+            } else {
+                svc = llm.getCurrentService();
+            }
             if (!optional && svc == null) {
                 helpAndFail(
                         "Need either --tokenFile, --token or --keystore arguments or a current login session to access remote service");

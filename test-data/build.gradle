@@ -128,9 +128,9 @@ void createServerTasks(String name, String root, int port) {
 
         if(name.equals("Central") || name.equals("Managed")) {
             // save some time on startup...
-            args = [ "init", "--port=${port}", "--dist=ignore", "--mode=" + name ]
+            args = [ "init", "--port=${port}", "--dist=ignore", "--mode=" + name, "--initUser=admin", "--initPassword=admin" ]
         } else {
-            args = [ "init", "--port=${port}", "--dist="+project(':minion').tasks[taskName].outputs.files[0], "--mode=standalone" ]
+            args = [ "init", "--port=${port}", "--dist="+project(':minion').tasks[taskName].outputs.files[0], "--mode=standalone", "--initUser=admin", "--initPassword=admin" ]
         }
     }
 
@@ -142,18 +142,13 @@ void createServerTasks(String name, String root, int port) {
         waitForPort = port
         stopAfter = triggerStopBDeploy
     }
-
-    task "addTestBDeployUser${name}"(type: JavaExec, dependsOn: "startTestBDeploy${name}") {
-        setupBDeployJavaExec(it, root, port);
-        args = [ "user", "--add=admin", "--password=admin", "--admin", "--description=Automated Test User" ]
-    }
 }
 
 createServerTasks("", testServerRoot, testServerPort);
 createServerTasks("Central", testServerRootCentral, testServerPortCentral);
 createServerTasks("Managed", testServerRootManaged, testServerPortManaged);
 
-task checkTestBDeploy(type: JavaExec, dependsOn: addTestBDeployUser) {
+task checkTestBDeploy(type: JavaExec, dependsOn: startTestBDeploy) {
     setupBDeployJavaExec(it, testServerRoot, testServerPort);
     args = [ "remote-master", "--minions" ]
 }
@@ -269,7 +264,11 @@ void setupBinServerTasks(String version) {
             delete "${buildDir}/bin-root_${key}"
         }
 
-        args = [ "init", "--port=${port}", "--dist=ignore", "--mode=standalone" ]
+        if(key.startsWith('2')) {
+            args = [ "init", "--port=${port}", "--dist=ignore", "--mode=standalone", "--initUser=admin", "--initPassword=admin" ]
+        } else {
+            args = [ "init", "--port=${port}", "--dist=ignore", "--mode=standalone" ]
+        }
     }
 
     task "binTriggerStopBDeploy_${key}"() {
@@ -287,12 +286,17 @@ void setupBinServerTasks(String version) {
         standardOutput = "${buildDir}/out_${key}.txt"
     }
 
-    task "binAddTestBDeployUser_${key}"(type: Exec, dependsOn: "binStartTestBDeploy_${key}") {
-        setupTask(it)
-        args = [ "user", "--add=admin", "--password=admin", "--admin", "--description=Automated Test User" ]
+    if(key.startsWith("1")) {
+        task "binAddTestBDeployUser_${key}"(type: Exec, dependsOn: "binStartTestBDeploy_${key}") {
+            setupTask(it)
+            args = [ "user", "--add=admin", "--password=admin", "--admin", "--description=Automated Test User" ]
+        }
     }
 
-    task "binCheckTestBDeploy_${key}"(type: Exec, dependsOn: "binAddTestBDeployUser_${key}") {
+    task "binCheckTestBDeploy_${key}"(type: Exec) {
+        if(key.startsWith("1")) {
+            dependsOn "binAddTestBDeployUser_${key}"
+        }
         setupTask(it)
         args = [ "remote-master", "--minions" ]
     }
@@ -408,8 +412,12 @@ void setupBinServerTasks(String version) {
     // dependencies are defined by the tasks. This does not guarantee an execution order. we need to manually define it
     // to be able to run multiple upgrade tests after each other.
     tasks["binStartTestBDeploy_${key}"].mustRunAfter("binInitTestBDeploy_${key}")
-    tasks["binAddTestBDeployUser_${key}"].mustRunAfter("binStartTestBDeploy_${key}")
-    tasks["binCheckTestBDeploy_${key}"].mustRunAfter("binAddTestBDeployUser_${key}")
+    if(key.startsWith("1")) {
+        tasks["binAddTestBDeployUser_${key}"].mustRunAfter("binStartTestBDeploy_${key}")
+        tasks["binCheckTestBDeploy_${key}"].mustRunAfter("binAddTestBDeployUser_${key}")
+    } else {
+        tasks["binCheckTestBDeploy_${key}"].mustRunAfter("binStartTestBDeploy_${key}")
+    }
     tasks["binCreateInstanceGroup_${key}"].mustRunAfter("binCheckTestBDeploy_${key}")
     tasks["binDownloadProd1_${key}"].mustRunAfter("binCreateInstanceGroup_${key}")
     tasks["binDownloadProd2_${key}"].mustRunAfter("binCreateInstanceGroup_${key}")
@@ -437,7 +445,6 @@ getTestBinVersions().each { setupBinServerTasks(it) }
 // coverage for the rest of the tasks
 jacoco {
     applyTo initTestBDeploy
-    applyTo addTestBDeployUser
     applyTo checkTestBDeploy
     applyTo startTestBDeploy
     applyTo startTestBDeployCentral
@@ -448,8 +455,8 @@ jacoco {
 task setupDemoServer() {
     dependsOn(
         checkTestBDeploy,
-        addTestBDeployUserCentral,
-        addTestBDeployUserManaged
+        startTestBDeployCentral,
+        startTestBDeployManaged
     )
 
     doFirst() {

@@ -2,6 +2,8 @@ package io.bdeploy.minion.cli;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -34,7 +36,8 @@ public class MasterCliTest {
     void testMasterCli(@TempDir Path tmp, ActivityReporter reporter) throws IOException {
         Path root = tmp.resolve("root");
         Path storage = tmp.resolve("storage");
-        tools.getTool(InitTool.class, "--root=" + root, "--hostname=localhost", "--dist=ignore", "--mode=standalone").run();
+        tools.getTool(InitTool.class, "--root=" + root, "--hostname=localhost", "--dist=ignore", "--mode=standalone",
+                "--initUser=test", "--initPassword=test").run();
         tools.getTool(StorageTool.class, "--root=" + root, "--add=" + storage.toString()).run();
 
         Path ks;
@@ -44,6 +47,9 @@ public class MasterCliTest {
         try (MinionRoot mr = new MinionRoot(root, reporter)) {
             assertEquals(2, mr.getStorageLocations().size());
             assertTrue(mr.getStorageLocations().contains(storage));
+            assertTrue(mr.getUsers().getAllNames().contains("test"));
+            assertNotNull(mr.getUsers().authenticate("test", "test"));
+            assertNull(mr.getUsers().authenticate("test", "wrong"));
 
             ks = mr.getState().keystorePath;
             pp = mr.getState().keystorePass;

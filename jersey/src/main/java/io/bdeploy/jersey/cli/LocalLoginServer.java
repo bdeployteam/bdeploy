@@ -7,5 +7,6 @@ public class LocalLoginServer {
 
     public String url;
     public String token;
+    public String user;
 
 }

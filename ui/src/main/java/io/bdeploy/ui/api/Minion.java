@@ -56,7 +56,7 @@ public interface Minion {
      * @param permissions the global permissions
      * @return a token (authentication pack including certificate).
      */
-    public String createToken(String principal, Collection<ScopedPermission> permissions);
+    public String createToken(String principal, Collection<ScopedPermission> permissions, boolean full);
 
     /**
      * @return the mode the hosting minion is run in.

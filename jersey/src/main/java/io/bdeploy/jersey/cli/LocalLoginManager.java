@@ -103,6 +103,7 @@ public class LocalLoginManager {
             LocalLoginServer s = new LocalLoginServer();
             s.url = url;
             s.token = result.readEntity(String.class);
+            s.user = user;
 
             data.servers.put(serverName, s);
             data.current = serverName;
@@ -137,13 +138,19 @@ public class LocalLoginManager {
 
     public RemoteService getCurrentService() {
         LocalLoginData data = read();
+        return getNamedService(data.current);
+    }
 
-        if (data.current == null || !data.servers.containsKey(data.current)) {
+    public RemoteService getNamedService(String name) {
+        LocalLoginData data = read();
+
+        if (!data.servers.containsKey(name)) {
             return null;
         }
 
-        LocalLoginServer server = data.servers.get(data.current);
+        LocalLoginServer server = data.servers.get(name);
         return new RemoteService(UriBuilder.fromUri(server.url).build(), server.token);
+
     }
 
     private SSLContext createTrustAllContext() {

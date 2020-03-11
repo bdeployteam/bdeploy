@@ -1,7 +1,6 @@
 package io.bdeploy.minion.cli;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -39,11 +38,6 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
         @EnvironmentFallback("BDEPLOY_ROOT")
         @Validator(MinionRootValidator.class)
         String root();
-
-        @Help("Write the new access token to a token file instead of printing it on the console")
-        @EnvironmentFallback("BDEPLOY_TOKENFILE")
-        @Validator(ExistingPathValidator.class)
-        String tokenFile();
     }
 
     public CertUpdateTool() {
@@ -70,7 +64,8 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
                 }
 
                 out().println("ATTENTION: This operation will render all existing tokens invalid. This means");
-                out().println("           that all clients need to re-run the installer to update tokens.");
+                out().println("           that all clients need to re-run the installer(s) to update tokens.");
+                out().println("           Also all existing logins (CLI, Web, ...) will have to be re-performed.");
                 out().println("           Press CTRL+C to abort, or enter to continue.");
                 System.in.read();
 
@@ -97,11 +92,6 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
                 minion.remote = newRemote;
                 mf.update(cfg);
 
-                if (config.tokenFile() != null) {
-                    Files.write(Paths.get(config.tokenFile()), pack.getBytes(StandardCharsets.UTF_8));
-                } else {
-                    out().println(pack);
-                }
                 out().println("Certificate updated.");
             } else {
                 out().println("Nothing to do...");

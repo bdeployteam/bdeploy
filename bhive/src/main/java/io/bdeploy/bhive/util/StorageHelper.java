@@ -91,10 +91,9 @@ public class StorageHelper {
     /**
      * De-serializes an Object of given type from a byte[].
      */
-    @SuppressWarnings("unchecked")
     public static <T> T fromRawBytes(byte[] bytes, TypeReference<T> ref) {
         try {
-            return (T) getMapper().readValue(bytes, ref);
+            return getMapper().readValue(bytes, ref);
         } catch (IOException e) {
             throw new IllegalStateException(JSON_READ_ERROR, e);
         }

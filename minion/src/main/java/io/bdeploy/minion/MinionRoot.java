@@ -585,13 +585,17 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     }
 
     @Override
-    public String createToken(String principal, Collection<ScopedPermission> permissions) {
+    public String createToken(String principal, Collection<ScopedPermission> permissions, boolean full) {
         ApiAccessToken token = new ApiAccessToken.Builder().setIssuedTo(principal).setWeak(false).addPermission(permissions)
                 .build();
         MinionState state = getState();
         try {
             KeyStore ks = SecurityHelper.getInstance().loadPrivateKeyStore(state.keystorePath, state.keystorePass);
-            return SecurityHelper.getInstance().createSignaturePack(token, ks, state.keystorePass);
+            if (full) {
+                return SecurityHelper.getInstance().createSignaturePack(token, ks, state.keystorePass);
+            } else {
+                return SecurityHelper.getInstance().createToken(token, ks, state.keystorePass);
+            }
         } catch (GeneralSecurityException | IOException e) {
             throw new WebApplicationException("Cannot generate user token", e);
         }

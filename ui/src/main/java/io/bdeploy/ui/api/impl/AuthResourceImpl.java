@@ -3,10 +3,8 @@ package io.bdeploy.ui.api.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.core.Context;
@@ -15,10 +13,8 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 
 import io.bdeploy.bhive.util.StorageHelper;
-import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.interfaces.UserChangePasswordDto;
 import io.bdeploy.interfaces.UserInfo;
-import io.bdeploy.jersey.JerseyServer;
 import io.bdeploy.ui.api.AuthAdminResource;
 import io.bdeploy.ui.api.AuthResource;
 import io.bdeploy.ui.api.AuthService;
@@ -26,10 +22,6 @@ import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.dto.CredentialsDto;
 
 public class AuthResourceImpl implements AuthResource {
-
-    @Inject
-    @Named(JerseyServer.TOKEN_SIGNER)
-    private Function<ApiAccessToken, String> signer;
 
     @Inject
     private AuthService auth;
@@ -61,17 +53,7 @@ public class AuthResourceImpl implements AuthResource {
     private String doAuthenticate(CredentialsDto cred, boolean pack) {
         UserInfo info = auth.authenticate(cred.user, cred.password);
         if (info != null) {
-            if (pack) {
-                return minion.createToken(cred.user, info.permissions);
-            }
-
-            ApiAccessToken.Builder token = new ApiAccessToken.Builder().setIssuedTo(cred.user);
-
-            // apply global permissions. scoped ones are not in the token.
-            info.permissions.stream().filter(c -> c.scope == null).forEach(token::addPermission);
-            String st = signer.apply(token.build());
-
-            return st;
+            return minion.createToken(cred.user, info.permissions, pack);
         } else {
             throw new WebApplicationException("Invalid credentials", Status.UNAUTHORIZED);
         }
@@ -115,12 +97,13 @@ public class AuthResourceImpl implements AuthResource {
     }
 
     @Override
-    public String getAuthPack(String user) {
+    public String getAuthPack(String user, Boolean full) {
         if (user == null) {
             user = context.getUserPrincipal().getName();
         }
+
         UserInfo userInfo = auth.getUser(user);
-        return minion.createToken(user, userInfo.getGlobalPermissions());
+        return minion.createToken(user, userInfo.getGlobalPermissions(), Boolean.TRUE.equals(full));
     }
 
     @Override
