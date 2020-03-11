@@ -444,6 +444,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         updateDto.updateVersion = runningVersion;
         updateDto.runningVersion = managedVersion;
         updateDto.updateAvailable = VersionHelper.compare(runningVersion, managedVersion) > 0;
+        updateDto.forceUpdate = runningVersion.getMajor() > managedVersion.getMajor();
 
         // Contact the remote service to find out all installed versions
         RemoteService svc = getConfiguredRemote(groupName, serverName);

@@ -11,12 +11,13 @@
   </mat-card-header>
   <mat-card-content class='node-card-content'>
     <div *ngIf="showUpdateHint()">
-      <div *ngIf="!arePackagesMissing()">
+      <div *ngIf="!updateDto?.forceUpdate">
         A new software update for this server is available and can be installed.
       </div>
-
+      <div *ngIf="updateDto?.forceUpdate">
+        A new major software update for this server is available and must be installed to proceed!
+      </div>
       <div *ngIf="arePackagesMissing()">
-        A new software update for this server is available and can be installed.
         The update can either be immediately installed or it can be prepared and installed at a later time.
         Preparing will only transfer the new version to the target system. It can then be installed at any time.
       </div>
