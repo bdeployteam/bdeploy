@@ -16,6 +16,10 @@ Each of the binaries provides a set of _commands_ along with available _options_
 | No
 | Wraps around to the <<_bhive_cli,BHive CLI>>. Can be used to access *BHive* CLI commands if ther *BHive* stand-alone binaries are not available. Usage: `bdeploy bhive <command>`
 
+| `login`
+| Yes
+| Manages login sessions on remote servers. This command eliminates the need to manage tokens yourself. Login sessions are managed per user, can be created, switched and removed. Validity of the login session is the same as for the Web UI. Subsequent commands will use the configured remote login session to perform remote communication.
+
 | `cleanup`
 | No
 |Manage the schedule at which the _master_ performs background cleanup operations on all _slaves_ (including himself).
@@ -187,6 +191,8 @@ Usage: PushTool <args...>
 |Variable
 |Description
 
+|`BDEPLOY_LOGIN`
+|Specifies the name of a stored login session (`bdeploy login`) to use. This overrides the currently active login session if there is one.
 |`BDEPLOY_REMOTE`
 |URL to the remote *BDeploy* server which commands should connect to, e.g. `https://hostname:7701/api`.
 |`BDEPLOY_ROOT`

@@ -6,7 +6,7 @@ The application hosting the endpoint to call can be hosted on any slave in the s
 
 You will need these to be able to call an Endpoint of a remote application through the *BDeploy* public API:
 
-* A *BDeploy* token to be supplied for an authorization header in the form of `X-BDeploy-Authorization: Bearer <TOKEN>`.
+* A *BDeploy* _slim_ token to be supplied for an authorization header in the form of `X-BDeploy-Authorization: Bearer <TOKEN>`. You can obtain this token from the Web UI for the logged in user.
 * The `id` of the instance group hosting the application you want to tunnel to.
 * The `uuid` of the instance hosting the application you want to tunnel to. You can see this id for instance from the browsers URL when on the instance overview page for the instance in question.
 * The `id` of the applications endpoint as defined in the <<_app_info_yaml,app-info.yaml>>.

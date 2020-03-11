@@ -1,6 +1,7 @@
 package io.bdeploy.jersey.activity;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -57,8 +58,8 @@ public class JerseyRemoteActivityProxy implements NoThrowAutoCloseable {
     private void createWebSocket(RemoteService service) {
         client = JerseyClientFactory.get(service).getWebSocketClient();
         try {
-            ws = JerseyClientFactory.get(service)
-                    .getAuthenticatedWebSocket(client, List.of(proxyUuid), "/activities", this::onMessage, e -> {
+            ws = JerseyClientFactory.get(service).getAuthenticatedWebSocket(client, Collections.singletonList(proxyUuid),
+                    "/activities", this::onMessage, e -> {
                         log.error("WebSocket Error", e);
                     }, ws -> {
                         log.warn("WebSocket closed");

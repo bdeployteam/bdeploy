@@ -3,7 +3,8 @@
 Make sure that all master and slave services are running on the according nodes by starting the created services or by starting them manually.
 To verify that the setup is OK, run on the master:
 
- bdeploy remote-master --minions --remote=https://localhost:7701/api --tokenFile=token.txt
+ bdeploy login --add=MyServer --remote=https://localhost:7701/api
+ bdeploy remote-master --minions
 
 This will provide output like this:
 
@@ -12,3 +13,6 @@ This will provide output like this:
  slave                OFFLINE
 
 If any of the nodes is marked offline, the according minion on the respective node is not reachable from the master node.
+
+[NOTE]
+`bdeploy login` will prompt for user and password, create a local session, and use that session on subsequent commands. This login session will keep validity until removed using e.g. `bdeploy login --remove=MyServer`.

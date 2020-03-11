@@ -7,4 +7,4 @@ By changing the certificate *BDeploy* uses, all existing tokens will lose their 
 
 You can use the `certificate` tool to switch to another ceritificate:
 
- bdeploy certificate --update=<path-to-pem> --root=<path-to-root> --tokenFile=<token.txt>
+ bdeploy certificate --update=<path-to-pem> --root=<path-to-root>

@@ -24,17 +24,14 @@ public class LocalLoginTool extends ConfiguredCliTool<LoginConfig> {
         @Validator(RemoteValidator.class)
         String remote();
 
-        @Help(value = "Perform a login to the given remote and store the session locally", arg = false)
-        boolean login() default false;
+        @Help("Perform a login to the given remote and store the session locally using the given name")
+        String add();
 
-        @Help(value = "Remove a stored login session", arg = false)
-        boolean remove() default false;
+        @Help("Remove the given stored login session")
+        String remove();
 
         @Help(value = "List all stored login sessions", arg = false)
         boolean list() default false;
-
-        @Help("The name of the stored login session when logging in or removing")
-        String name();
 
         @Help("The name of the stored login session to switch to")
         String use();
@@ -48,9 +45,8 @@ public class LocalLoginTool extends ConfiguredCliTool<LoginConfig> {
     protected void run(LoginConfig config) {
         LocalLoginManager llm = new LocalLoginManager();
 
-        if (config.login()) {
+        if (config.add() != null) {
             helpAndFailIfMissing(config.remote(), "Missing --remote");
-            helpAndFailIfMissing(config.name(), "Missing --name");
 
             out().println("Please specify user and password for " + config.remote());
 
@@ -60,10 +56,9 @@ public class LocalLoginTool extends ConfiguredCliTool<LoginConfig> {
             out().print("Password: ");
             char[] pass = System.console().readPassword();
 
-            llm.login(config.name(), config.remote(), user, new String(pass));
-        } else if (config.remove()) {
-            helpAndFailIfMissing(config.name(), "Missing --name");
-            llm.remove(config.name());
+            llm.login(config.add(), config.remote(), user, new String(pass));
+        } else if (config.remove() != null) {
+            llm.remove(config.remove());
         } else if (config.use() != null) {
             llm.setCurrent(config.use());
         } else if (config.list()) {

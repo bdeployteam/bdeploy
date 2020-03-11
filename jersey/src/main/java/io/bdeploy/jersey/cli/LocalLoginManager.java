@@ -115,7 +115,7 @@ public class LocalLoginManager {
     public void remove(String serverName) {
         LocalLoginData data = read();
         data.servers.remove(serverName);
-        if (data.current.equals(serverName)) {
+        if (serverName.equals(data.current)) {
             data.current = null;
         }
         write(data);
