@@ -7,6 +7,7 @@ import { ConfigService } from '../../../core/services/config.service';
 
 export class UpdateDialogData {
   public waitFor: Promise<any>;
+  public oldVersion: Version;
 }
 
 @Component({
@@ -37,6 +38,10 @@ export class UpdateDialogComponent implements OnInit {
       this.error = true;
     }
     this.versionAfterUpdate = dto.version;
+  }
+
+  isStillSameVersion() {
+    return convert2String(this.versionAfterUpdate) === convert2String(this.data.oldVersion);
   }
 
   getVersionAfterUpdate() {

@@ -28,9 +28,11 @@ import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
+import io.bdeploy.common.Version;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.SortOneAsLastComparator;
+import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
@@ -88,7 +90,12 @@ public class MasterRootResourceImpl implements MasterRootResource {
     }
 
     @Override
-    public void update(Manifest.Key version, boolean clean) {
+    public Version getUpdateApiVersion() {
+        return UpdateHelper.currentApiVersion();
+    }
+
+    @Override
+    public void updateV1(Manifest.Key version, boolean clean) {
         BHive bhive = registry.get(JerseyRemoteBHive.DEFAULT_NAME);
 
         SortedSet<Key> keys = bhive.execute(new ManifestListOperation().setManifestName(version.toString()));

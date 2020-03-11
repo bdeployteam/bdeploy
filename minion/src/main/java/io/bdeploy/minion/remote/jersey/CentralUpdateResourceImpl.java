@@ -17,11 +17,13 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
+import io.bdeploy.common.Version;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
-import io.bdeploy.interfaces.remote.CentralUpdateResource;
+import io.bdeploy.interfaces.UpdateHelper;
+import io.bdeploy.interfaces.remote.CommonUpdateResource;
 
-public class CentralUpdateResourceImpl implements CentralUpdateResource {
+public class CentralUpdateResourceImpl implements CommonUpdateResource {
 
     private static final Logger log = LoggerFactory.getLogger(CentralUpdateResourceImpl.class);
 
@@ -32,7 +34,12 @@ public class CentralUpdateResourceImpl implements CentralUpdateResource {
     private ResourceContext rc;
 
     @Override
-    public void update(Key version, boolean clean) {
+    public Version getUpdateApiVersion() {
+        return UpdateHelper.currentApiVersion();
+    }
+
+    @Override
+    public void updateV1(Key version, boolean clean) {
         BHive bhive = registry.get(JerseyRemoteBHive.DEFAULT_NAME);
 
         SortedSet<Key> keys = bhive.execute(new ManifestListOperation().setManifestName(version.toString()));

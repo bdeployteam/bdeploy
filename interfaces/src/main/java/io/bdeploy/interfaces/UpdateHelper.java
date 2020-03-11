@@ -12,6 +12,8 @@ import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import javax.ws.rs.ServerErrorException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +22,7 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.ImportOperation;
+import io.bdeploy.common.Version;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
@@ -27,13 +30,15 @@ import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.common.util.ZipHelper;
-import io.bdeploy.interfaces.remote.MasterRootResource;
+import io.bdeploy.interfaces.remote.CommonUpdateResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 
 /**
  * Provides shared functionality for dealing with updates.
  */
 public class UpdateHelper {
+
+    public static final Version UPDATE_API_V1 = new Version(1, 0, 0, null);
 
     /**
      * Prefix for all update package {@link Key}s.
@@ -254,16 +259,34 @@ public class UpdateHelper {
      *            whether or not to clean old versions
      */
     public static void update(RemoteService svc, Collection<Key> keys, boolean cleanup) {
-        MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class, null);
+        CommonUpdateResource root = ResourceProvider.getResource(svc, CommonUpdateResource.class, null);
 
-        // We need to sort the updates so that the running OS is the last one
-        keys.stream().map(ScopedManifestKey::parse).sorted((a, b) -> {
-            // put own OS last.
-            if (a.getOperatingSystem() != b.getOperatingSystem()) {
-                return a.getOperatingSystem() == OsHelper.getRunningOs() ? 1 : -1;
-            }
-            return a.getKey().toString().compareTo(b.getKey().toString());
-        }).forEach(k -> root.update(k.getKey(), cleanup));
+        Version apiVersion;
+        try {
+            apiVersion = root.getUpdateApiVersion();
+        } catch (ServerErrorException e) {
+            // API version not (yet) supported, must be old BDeploy.
+            apiVersion = UPDATE_API_V1;
+        }
+
+        switch (apiVersion.getMajor()) {
+            case 1:
+                // We need to sort the updates so that the running OS is the last one
+                keys.stream().map(ScopedManifestKey::parse).sorted((a, b) -> {
+                    // put own OS last.
+                    if (a.getOperatingSystem() != b.getOperatingSystem()) {
+                        return a.getOperatingSystem() == OsHelper.getRunningOs() ? 1 : -1;
+                    }
+                    return a.getKey().toString().compareTo(b.getKey().toString());
+                }).forEach(k -> root.updateV1(k.getKey(), cleanup));
+                break;
+            default:
+                throw new UnsupportedOperationException("Update API version not supported: " + apiVersion);
+        }
+    }
+
+    public static Version currentApiVersion() {
+        return UPDATE_API_V1;
     }
 
 }

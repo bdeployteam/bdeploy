@@ -44,6 +44,9 @@ if (hasProperty('buildScan')) {
 }
 
 ext {
+    // Defines the minimum BDeploy version when upgrading to "this" version. This is checked on servers which support this property prior to performing the update.
+    minSourceServerVersion = "1.2.1"
+
     // Defines the path to a WINDOWS JDK, to be able to build windows dist packages on linux
     win64jdk = readJdk("win64jdk")
     // Defines the path to a LINUX JDK, to be able to build linux dist packages on windows
@@ -236,6 +239,7 @@ configure([project(':minion'), project(':launcher')]) {
                 p['project'] = project.name
                 p['snapshot'] = version.contains('SNAPSHOT') ? 'true' : 'false'
                 p['version'] = version.replaceAll('SNAPSHOT', rootProject.ext.buildDate)
+                p['minSourceVersion'] = minSourceServerVersion
                 p.store w, null
             }
         }
