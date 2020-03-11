@@ -12,7 +12,6 @@ import java.util.TreeMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Function;
 import java.util.logging.Level;
 
 import javax.inject.Inject;
@@ -36,7 +35,6 @@ import org.glassfish.grizzly.websockets.WebSocketAddOn;
 import org.glassfish.grizzly.websockets.WebSocketApplication;
 import org.glassfish.grizzly.websockets.WebSocketEngine;
 import org.glassfish.hk2.api.Factory;
-import org.glassfish.hk2.api.TypeLiteral;
 import org.glassfish.hk2.utilities.Binder;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
@@ -51,8 +49,6 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.security.ApiAccessToken;
-import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.NamedDaemonThreadFactory;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.JerseyAuthenticationUnprovider;
@@ -95,7 +91,6 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
     private static final Logger log = LoggerFactory.getLogger(JerseyServer.class);
 
     public static final String START_TIME = "StartTime";
-    public static final String TOKEN_SIGNER = "TokenSigner";
     public static final String BROADCAST_EXECUTOR = "BcExecutor";
 
     private final int port;
@@ -339,14 +334,10 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
 
         @Override
         protected void configure() {
-            Function<ApiAccessToken, String> signer = a -> SecurityHelper.getInstance().createToken(a, store, passphrase);
-
             bind(JerseyBroadcastingActivityReporter.class).in(Singleton.class).to(JerseyBroadcastingActivityReporter.class);
             bind(JerseyWriteLockService.class).in(Singleton.class).to(JerseyWriteLockService.class);
             bind(startTime).named(START_TIME).to(Instant.class);
             bind(broadcastScheduler).named(BROADCAST_EXECUTOR).to(ScheduledExecutorService.class);
-            bind(signer).named(TOKEN_SIGNER).to(new TypeLiteral<Function<ApiAccessToken, String>>() {
-            });
             bind(JerseyScopeService.class).in(Singleton.class).to(JerseyScopeService.class);
 
             // need to lazily access the auditor in case it is changed later.

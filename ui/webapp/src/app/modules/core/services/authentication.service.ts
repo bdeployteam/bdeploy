@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { CookieService } from 'ngx-cookie-service';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -165,9 +165,9 @@ export class AuthenticationService {
     { responseType: 'text', headers: suppressGlobalErrorHandling(new HttpHeaders()) });
   }
 
-  getAuthPackForUser(): Observable<String> {
+  getAuthPackForUser(genFull: boolean): Observable<String> {
     this.log.debug('Retrieve auth pack for user');
-    return this.http.get(this.cfg.config.api + '/auth/auth-pack', { responseType: 'text'});
+    return this.http.get(this.cfg.config.api + '/auth/auth-pack', { responseType: 'text', params: new HttpParams().append('full', genFull ? 'true' : 'false')});
   }
 
 }

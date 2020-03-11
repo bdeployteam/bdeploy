@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
+import java.util.Collections;
 
 import javax.ws.rs.core.UriBuilder;
 
@@ -56,7 +57,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         @Help("Path to the ZIP file you extracted this program from. Set to 'ignore' to skip. Be aware that this will cause an immediate update once connected to a remote master.")
         String dist();
 
-        @Help("Write the access token to a token file instead of printing it on the console")
+        @Help("Write the access token to a token file instead of printing it on the console. Only required for slaves.")
         @EnvironmentFallback("BDEPLOY_TOKENFILE")
         @Validator(NonExistingPathValidator.class)
         String tokenFile();
@@ -70,6 +71,12 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         @Help("The target mode for the server [CENTRAL,MANAGED,STANDALONE,SLAVE]. A MANAGED server can only work with a central counterpart.")
         @ConfigurationValueMapping(ValueMapping.TO_UPPERCASE)
         MinionMode mode();
+
+        @Help("The initial user's name to create. The initial user is always system administrator. Not required for slaves.")
+        String initUser();
+
+        @Help("The password for the initial user to create.")
+        String initPassword();
     }
 
     public InitTool() {
@@ -82,6 +89,11 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         helpAndFailIfMissing(config.hostname(), "Missing --hostname");
         helpAndFailIfMissing(config.mode(), "Missing --mode");
 
+        if (config.mode() != MinionMode.SLAVE) {
+            helpAndFailIfMissing(config.initUser(), "Missing --initUser");
+            helpAndFailIfMissing(config.initPassword(), "Missing --initPassword");
+        }
+
         Path root = Paths.get(config.root());
 
         try (MinionRoot mr = new MinionRoot(root, getActivityReporter())) {
@@ -92,7 +104,14 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
             if (config.tokenFile() != null) {
                 Files.write(Paths.get(config.tokenFile()), pack.getBytes(StandardCharsets.UTF_8));
             } else {
-                out().println(pack);
+                if (config.mode() == MinionMode.SLAVE) {
+                    out().println(pack);
+                }
+            }
+
+            if (config.mode() != MinionMode.SLAVE) {
+                mr.getUsers().createLocalUser(config.initUser(), config.initPassword(),
+                        Collections.singletonList(ApiAccessToken.ADMIN_PERMISSION));
             }
 
             String dist = config.dist();

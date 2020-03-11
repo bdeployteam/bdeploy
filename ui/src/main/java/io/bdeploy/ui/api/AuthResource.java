@@ -87,7 +87,7 @@ public interface AuthResource {
     @GET
     @Path("/auth-pack")
     @Produces(MediaType.TEXT_PLAIN)
-    public String getAuthPack(@QueryParam("user") String user);
+    public String getAuthPack(@QueryParam("user") String user, @QueryParam("full") Boolean full);
 
     /**
      * @return the administrative interface for user managements.

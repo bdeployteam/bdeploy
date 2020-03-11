@@ -14,7 +14,7 @@ import io.bdeploy.jersey.cli.LocalLoginTool.LoginConfig;
 @CliName("login")
 public class LocalLoginTool extends ConfiguredCliTool<LoginConfig> {
 
-    private static final String LIST_FORMAT = "%1$-20s %2$-30s %3$s";
+    private static final String LIST_FORMAT = "%1$-20s %2$-30s %3$-15s %4$s";
 
     @Help("Configuration for remote access")
     public @interface LoginConfig {
@@ -65,13 +65,12 @@ public class LocalLoginTool extends ConfiguredCliTool<LoginConfig> {
             helpAndFailIfMissing(config.name(), "Missing --name");
             llm.remove(config.name());
         } else if (config.use() != null) {
-            helpAndFailIfMissing(config.name(), "Missing --name");
-            llm.setCurrent(config.name());
+            llm.setCurrent(config.use());
         } else if (config.list()) {
             LocalLoginData data = llm.read();
-            out().println(String.format(LIST_FORMAT, "Name", "URI", "Current"));
+            out().println(String.format(LIST_FORMAT, "Name", "URI", "User", "Current"));
             for (Map.Entry<String, LocalLoginServer> entry : data.servers.entrySet()) {
-                out().println(String.format(LIST_FORMAT, entry.getKey(), entry.getValue().url,
+                out().println(String.format(LIST_FORMAT, entry.getKey(), entry.getValue().url, entry.getValue().user,
                         (data.current != null && data.current.equals(entry.getKey())) ? "*" : ""));
             }
         } else {

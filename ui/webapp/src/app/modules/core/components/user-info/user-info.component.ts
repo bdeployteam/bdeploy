@@ -22,6 +22,7 @@ export class UserInfoComponent implements OnInit {
 
   public user: UserInfo;
   public pack: String;
+  public genFull = false;
 
   constructor(private loggingService: LoggingService,
     private router: Router,
@@ -92,10 +93,14 @@ export class UserInfoComponent implements OnInit {
   }
 
   async openDialog(ref: TemplateRef<unknown>) {
-    this.pack = await this.authService.getAuthPackForUser().toPromise();
+    this.regenPack();
     this.dialog.open(ref, {
       width: '600px'
     });
+  }
+
+  regenPack() {
+    this.authService.getAuthPackForUser(this.genFull).subscribe(r => this.pack = r);
   }
 
   public getTitleUserName(): string {

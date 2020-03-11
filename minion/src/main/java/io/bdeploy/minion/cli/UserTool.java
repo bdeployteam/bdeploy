@@ -95,7 +95,7 @@ public class UserTool extends RemoteServiceTool<UserConfig> {
                 out().println(String.format(formatString, info.name, info.external, info.inactive, info.permissions));
             }
         } else if (config.createToken() != null) {
-            String token = auth.getAuthPack(config.createToken());
+            String token = auth.getAuthPack(config.createToken(), true);
 
             out().println("Generating token with 50 years validity for " + config.createToken());
             out().println("Use the following token to remotely access this server in your name");
