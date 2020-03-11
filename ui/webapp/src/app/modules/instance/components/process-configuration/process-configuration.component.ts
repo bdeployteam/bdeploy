@@ -1037,7 +1037,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   isReadonly() {
-    if (this.isCentral() && !this.syncComponent.isInSync()) {
+    if (this.isCentral() && (!this.syncComponent.isInSync() || this.syncComponent.isInSync() && this.updateDto && this.updateDto.forceUpdate)) {
       return true;
     }
     if (this.isUpdateInProgress() || this.isUpdateFailed()) {
@@ -1193,7 +1193,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     }
 
     if (this.showUpdateComponent()) {
-      this.addNotification(this.notificationUpdate, Severity.WARNING, 4);
+      this.addNotification(this.notificationUpdate, this.updateDto && this.updateDto.forceUpdate ? Severity.ERROR : Severity.WARNING, 4);
     } else {
       this.removeNotification(this.notificationUpdate);
     }

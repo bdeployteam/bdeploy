@@ -27,6 +27,11 @@ public class MinionUpdateDto {
     public boolean updateAvailable;
 
     /**
+     * Flag whether an update must be installed.
+     */
+    public boolean forceUpdate;
+
+    /**
      * The packages to install
      */
     public Collection<Key> packagesToInstall = Collections.emptyList();
