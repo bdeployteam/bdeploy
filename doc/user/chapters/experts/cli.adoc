@@ -30,6 +30,9 @@ a| `init`
 
 The `init` command also generates the initial _security token_, see <<_security,Security>>. It is suggested to use the `--tokenFile` parameter if the token should be stored for later use.
 
+| `hostname`
+| Allows 'renaming' of the minion. The `init` command stores the given hostname, used later on for connections to self and also for variable expansion. If the hostname changed or is no longer valid, the `hostname` tool can update all relevant data.
+
 | `instance`
 | No
 | Tooling to *export* (to _ZIP_) and *import* (from _ZIP_) *Instances* locally.

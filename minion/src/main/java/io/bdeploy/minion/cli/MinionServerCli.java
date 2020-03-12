@@ -13,6 +13,7 @@ public class MinionServerCli extends ToolBase {
         register(SlaveTool.class);
         register(InteractiveShell.class);
         register(CertUpdateTool.class);
+        register(HostnameTool.class);
 
         // master only tools
         register(InstanceTool.class);
