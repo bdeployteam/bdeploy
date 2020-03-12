@@ -13,6 +13,11 @@ import io.bdeploy.common.util.OsHelper.OperatingSystem;
 public class ClientPathHelper {
 
     /**
+     * Name of the directory containing the launcher.
+     */
+    public static final String LAUNCHER_DIR = "launcher";
+
+    /**
      * Name of the environment variable defining the home-directory
      */
     public static final String BDEPLOY_HOME = "BDEPLOY_HOME";
@@ -51,12 +56,12 @@ public class ClientPathHelper {
      */
     public static Path getNativeLauncher(Version version) {
         // On Windows we are searching for a BDeploy.exe executable in the launcher directory
-        Path launcherHome = getHome(version).resolve("launcher");
+        Path launcherHome = getHome(version).resolve(LAUNCHER_DIR);
         if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
             return launcherHome.resolve("BDeploy.exe");
         }
         // On Linux and MAC the startup script is in the bin folder
-        return launcherHome.resolve("bin").resolve("launcher");
+        return launcherHome.resolve("bin").resolve(LAUNCHER_DIR);
     }
 
     /**
@@ -64,7 +69,7 @@ public class ClientPathHelper {
      */
     public static Path getNativeUninstaller(Version version) {
         // On Windows we are searching for a Uninstaller.exe executable in the launcher directory
-        Path launcherHome = getHome(version).resolve("launcher");
+        Path launcherHome = getHome(version).resolve(LAUNCHER_DIR);
         if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
             return launcherHome.resolve("Uninstaller.exe");
         }

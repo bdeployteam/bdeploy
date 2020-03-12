@@ -83,7 +83,7 @@ public class DownloadServiceImpl implements DownloadService {
                     if (log.isDebugEnabled()) {
                         log.debug("Could not fully write output", ioe);
                     } else {
-                        log.warn("Could not fully write output: {}", ioe);
+                        log.warn("Could not fully write output: {}", ioe.toString());
                     }
                 } finally {
                     // Cleanup token and file

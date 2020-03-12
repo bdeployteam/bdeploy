@@ -10,6 +10,8 @@ import io.bdeploy.ui.api.ManagedServersAttachEventResource;
 
 public class ManagedServersAttachEventResourceImpl implements ManagedServersAttachEventResource {
 
+    public static final String ATTACH_BROADCASTER = "AttachManagedBroadcast";
+
     @Inject
     private JerseyScopeService jss;
 

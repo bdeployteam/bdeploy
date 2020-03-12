@@ -174,10 +174,12 @@ public class SlaveProxyResourceImpl implements SlaveProxyResource {
 
                 @Override
                 public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+                    // we need to trust all certificates
                 }
 
                 @Override
                 public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+                    // we need to trust all certificates
                 }
 
                 @Override

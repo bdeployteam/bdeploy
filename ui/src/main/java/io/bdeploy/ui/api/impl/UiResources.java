@@ -10,7 +10,6 @@ import io.bdeploy.jersey.RegistrationTarget;
 import io.bdeploy.jersey.ws.BroadcastingAuthenticatedWebSocket;
 import io.bdeploy.jersey.ws.JerseyEventBroadcaster;
 import io.bdeploy.ui.ProductTransferService;
-import io.bdeploy.ui.api.ManagedServersAttachEventResource;
 
 public class UiResources {
 
@@ -52,7 +51,8 @@ public class UiResources {
                 bind(InstanceEventManager.class).in(Singleton.class).to(InstanceEventManager.class);
 
                 bind(instanceUpdateBc).named(InstanceEventManager.INSTANCE_BROADCASTER).to(JerseyEventBroadcaster.class);
-                bind(attachEventBc).named(ManagedServersAttachEventResource.ATTACH_BROADCASTER).to(JerseyEventBroadcaster.class);
+                bind(attachEventBc).named(ManagedServersAttachEventResourceImpl.ATTACH_BROADCASTER)
+                        .to(JerseyEventBroadcaster.class);
             }
         });
     }

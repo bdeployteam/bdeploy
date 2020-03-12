@@ -174,7 +174,7 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
                     if (log.isDebugEnabled()) {
                         log.debug("Could not fully write output", ioe);
                     } else {
-                        log.warn("Could not fully write output: {}", ioe);
+                        log.warn("Could not fully write output: {}", ioe.toString());
                     }
                 }
             }

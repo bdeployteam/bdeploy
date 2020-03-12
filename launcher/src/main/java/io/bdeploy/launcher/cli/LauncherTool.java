@@ -558,7 +558,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         hive.execute(new FetchOperation().addManifest(launcher).setRemote(descriptor.host));
 
         // write to target directory
-        Path launcherHome = ClientPathHelper.getHome(version).resolve("launcher");
+        Path launcherHome = ClientPathHelper.getHome(version).resolve(ClientPathHelper.LAUNCHER_DIR);
         hive.execute(new ExportOperation().setManifest(launcher).setTarget(launcherHome));
 
         // Write manifest entry that the launcher needs to be retained
@@ -585,7 +585,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         try {
             ProcessBuilder b = new ProcessBuilder(command);
             b.redirectError(Redirect.INHERIT).redirectInput(Redirect.INHERIT).redirectOutput(Redirect.INHERIT);
-            b.directory(homeDir.resolve("launcher").toFile());
+            b.directory(homeDir.resolve(ClientPathHelper.LAUNCHER_DIR).toFile());
 
             // We set explicitly overwrite the default environment variables so that the launcher is using
             // the home directory that we specify. Important as the other launcher should not use our

@@ -10,16 +10,17 @@ import io.bdeploy.common.Version;
 
 public class VersionHelper {
 
+    private static final String VERSION_PROP = "version";
     private static final Pattern V_PATTERN = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)([-\\.].*)*");
     public static final Version UNDEFINED = VersionHelper.parse("0.0.0");
 
     private static final Version version;
     private static final Properties properties = readProperties();
     static {
-        if (!properties.containsKey("version")) {
-            properties.put("version", System.getProperty("bdeploy.version.override", "0.0.0"));
+        if (!properties.containsKey(VERSION_PROP)) {
+            properties.put(VERSION_PROP, System.getProperty("bdeploy.version.override", "0.0.0"));
         }
-        version = parse(properties.getProperty("version"));
+        version = parse(properties.getProperty(VERSION_PROP));
     }
 
     private VersionHelper() {

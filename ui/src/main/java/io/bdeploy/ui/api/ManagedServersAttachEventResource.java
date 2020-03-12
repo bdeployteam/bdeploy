@@ -8,8 +8,6 @@ import io.bdeploy.jersey.ActivityScope;
 @Path("/attach-events")
 public interface ManagedServersAttachEventResource {
 
-    public static final String ATTACH_BROADCASTER = "AttachManagedBroadcast";
-
     @POST
     public void setLocalAttached(@ActivityScope String groupName);
 

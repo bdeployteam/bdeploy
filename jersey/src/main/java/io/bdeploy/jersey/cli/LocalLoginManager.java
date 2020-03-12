@@ -161,10 +161,12 @@ public class LocalLoginManager {
 
                 @Override
                 public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+                    // we must accept all certificates
                 }
 
                 @Override
                 public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+                    // we must accept all certificates
                 }
 
                 @Override

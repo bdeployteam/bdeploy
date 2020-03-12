@@ -70,6 +70,8 @@ import net.jsign.pe.PEFile;
  */
 public class MinionRoot extends LockableDatabase implements Minion, AutoCloseable {
 
+    private static final String STATE_FILE = "state.json";
+
     private static final Logger log = LoggerFactory.getLogger(MinionRoot.class);
 
     private final Path config;
@@ -375,13 +377,13 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
      * with a custom class for state migration, which contains fields that are no longer in state.json.
      */
     public <T> T getPartialStateForMigration(Class<T> clazz) {
-        return readConfig("state.json", clazz);
+        return readConfig(STATE_FILE, clazz);
     }
 
     public MinionState getState() {
         AtomicReference<MinionState> ref = new AtomicReference<>(null);
         locked(() -> {
-            MinionState s = readConfig("state.json", MinionState.class);
+            MinionState s = readConfig(STATE_FILE, MinionState.class);
             if (s.keystorePath == null) {
                 throw new IllegalStateException("Minion root not initialized!");
             }
@@ -391,7 +393,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     }
 
     public void setState(MinionState s) {
-        locked(() -> storeConfig("state.json", s));
+        locked(() -> storeConfig(STATE_FILE, s));
     }
 
     public void modifyState(Consumer<MinionState> modifier) {
