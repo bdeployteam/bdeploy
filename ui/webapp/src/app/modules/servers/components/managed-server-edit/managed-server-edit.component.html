@@ -1,0 +1,15 @@
+<h1 mat-dialog-title>Edit Managed Server</h1>
+<form #f="ngForm">
+  <div mat-dialog-content class='flex-content'>
+    <mat-form-field><input matInput type='text' name='desc' required [(ngModel)]='server.description' placeholder="Description"></mat-form-field>
+    <mat-form-field>
+      <input matInput type='text' appServerUrlValidator name='uri' required [(ngModel)]='server.uri' placeholder="Server URI" matTooltip="The full URI under which the server is reachable.">
+      <mat-error *ngIf='f.getError("uri", "uri")'>{{f.getError("uri", "uri")}}</mat-error>
+    </mat-form-field>
+    <mat-form-field><input matInput type='text' name='token' [(ngModel)]='server.auth' placeholder="Server Full Token (Experts)" matTooltip="The full token used for authentication. Update with care."></mat-form-field>
+  </div>
+</form>
+<div mat-dialog-actions align="end">
+  <button mat-raised-button [mat-dialog-close]="null">Cancel</button>
+  <button mat-raised-button color="primary" [mat-dialog-close]="server" [disabled]='f.invalid'>Apply</button>
+</div>

@@ -103,6 +103,12 @@ public interface ManagedServersResource {
     @RequiredPermission(scope = "group", permission = Permission.ADMIN)
     public void deleteManagedServer(@ActivityScope @PathParam("group") String groupName, @PathParam("server") String serverName);
 
+    @POST
+    @Path("/update-server/{group}/{server}")
+    @RequiredPermission(scope = "group", permission = Permission.ADMIN)
+    public void updateManagedServer(@ActivityScope @PathParam("group") String groupName, @PathParam("server") String serverName,
+            ManagedMasterDto update);
+
     @GET
     @Path("/minion-config/{group}/{server}")
     @Consumes(MediaType.TEXT_PLAIN)

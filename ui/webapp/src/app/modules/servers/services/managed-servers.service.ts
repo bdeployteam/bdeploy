@@ -62,6 +62,10 @@ export class ManagedServersService {
     return this.http.post(this.config.config.api + '/managed-servers/delete-server/' + group + '/' + server, server);
   }
 
+  public updateManagedServer(group: string, server: string, dto: ManagedMasterDto): Observable<any> {
+    return this.http.post(this.config.config.api + '/managed-servers/update-server/' + group + '/' + server, dto);
+  }
+
   public minionsConfigOfManagedServer(group: string, server: string): Observable<{ [minionName: string]: MinionDto }> {
     return this.http.get<{ [minionName: string]: MinionDto }>(
       this.config.config.api + '/managed-servers/minion-config/' + group + '/' + server,

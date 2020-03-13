@@ -294,6 +294,27 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
     }
 
     @Override
+    public void updateManagedServer(String groupName, String serverName, ManagedMasterDto update) {
+        if (!serverName.equals(update.hostName)) {
+            throw new WebApplicationException("Server name does not match configuration: " + serverName, Status.BAD_REQUEST);
+        }
+
+        ManagedMasters mm = new ManagedMasters(getInstanceGroupHive(groupName));
+
+        ManagedMasterDto old = mm.read().getManagedMaster(serverName);
+        if (old == null) {
+            throw new WebApplicationException("Server does not (yet) exist: " + serverName, Status.NOT_FOUND);
+        }
+
+        if (update.auth == null || update.auth.isBlank()) {
+            // token might have been cleared out.
+            update.auth = old.auth;
+        }
+
+        mm.attach(update, true);
+    }
+
+    @Override
     public Map<String, MinionDto> getMinionsOfManagedServer(String groupName, String serverName) {
         BHive hive = getInstanceGroupHive(groupName);
 

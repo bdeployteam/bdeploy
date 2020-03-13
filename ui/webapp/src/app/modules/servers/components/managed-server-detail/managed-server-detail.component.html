@@ -38,7 +38,7 @@
       </ng-container>
 
       <ng-container matColumnDef="url">
-        <th mat-header-cell *matHeaderCellDef>URL</th>
+        <th mat-header-cell *matHeaderCellDef>URL (as known by target server)</th>
         <td mat-cell *matCellDef="let row">
           {{ row.config.remote.uri }}
         </td>
@@ -61,5 +61,6 @@
 <mat-action-row>
   <span class='last-sync-label'>Last sync.: {{ getDate(server.lastSync)}}</span>
   <button mat-button (click)='synchronize()' [disabled]='loading || isUpdateInProgress()'>Synchronize</button>
+  <button mat-button (click)='edit()' [disabled]='loading || isUpdateInProgress()'>Edit...</button>
   <button mat-button (click)='delete()' [disabled]='loading || isUpdateInProgress()'>Delete</button>
 </mat-action-row>

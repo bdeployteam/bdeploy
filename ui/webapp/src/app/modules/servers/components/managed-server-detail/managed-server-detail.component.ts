@@ -1,6 +1,8 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { format } from 'date-fns';
+import { cloneDeep } from 'lodash';
 import { catchError } from 'rxjs/operators';
 import { isUpdateFailed, isUpdateInProgress, isUpdateSuccess, UpdateStatus } from 'src/app/models/update.model';
 import { convert2String } from 'src/app/modules/shared/utils/version.utils';
@@ -8,6 +10,7 @@ import { InstanceConfiguration, ManagedMasterDto, MinionDto, MinionStatusDto, Mi
 import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
 import { MessageboxService } from '../../../shared/services/messagebox.service';
 import { ManagedServersService } from '../../services/managed-servers.service';
+import { ManagedServerEditComponent } from '../managed-server-edit/managed-server-edit.component';
 
 interface MinionTableRow {
   key: string;
@@ -40,7 +43,7 @@ export class ManagedServerDetailComponent implements OnInit {
   columnsToDisplay = ['minion', 'url', 'version', 'os', 'status'];
   dataSource: MatTableDataSource<MinionTableRow>;
 
-  constructor(private messageBoxService: MessageboxService, private managedServers: ManagedServersService) {}
+  constructor(private messageBoxService: MessageboxService, private managedServers: ManagedServersService, private dialog: MatDialog) {}
 
   ngOnInit() {
     this.load();
@@ -207,6 +210,17 @@ export class ManagedServerDetailComponent implements OnInit {
 
   isUpdateFailed() {
     return this.updateStatus && isUpdateFailed(this.updateStatus);
+  }
+
+  edit() {
+    this.dialog.open(ManagedServerEditComponent, {
+      width: '500px',
+      data: cloneDeep(this.server),
+    }).afterClosed().subscribe(r => {
+      if (r) {
+        this.managedServers.updateManagedServer(this.instanceGroupName, this.server.hostName, r).subscribe(_ => { this.reload.emit(); });
+      }
+    });
   }
 
 }
