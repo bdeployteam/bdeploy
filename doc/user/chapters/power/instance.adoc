@@ -2,9 +2,9 @@
 
 The *Instance Overview* dialog allows exporting and importing of an *Instance Version*. With that feature a clone of an existing version can be created. This is quite handy in case that another server with the same - potentially complex - process configuration should be created. 
 
-For the export, select the desired *Instance Version* and start the export in the pull-down menu with the action btn:[Export...].
+For the export, select the desired *Instance Version* and start the export in the pull-down menu with the action btn:[Export].
 
-The action btn:[Import Instance Version...] in the *Instance Version* pulldown menu imports a new *Instance Version*. The import data is compared with the existing *Instance* data before a new *Instance Version* is created. The exported data does not contain the *Product* itself. This must be available in the target *Instance Group* as otherwise the importing will fail.
+The action btn:[Import Instance Version] in the *Instance Version* pulldown menu imports a new *Instance Version*. The import data is compared with the existing *Instance* data before a new *Instance Version* is created. The exported data does not contain the *Product* itself. This must be available in the target *Instance Group* as otherwise the importing will fail.
 
 [NOTE]
 Only process configuration is imported to existing instances, the instance configuration (target master URI, name, description, purpose) are left intact.

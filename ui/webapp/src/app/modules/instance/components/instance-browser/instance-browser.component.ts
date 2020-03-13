@@ -106,4 +106,8 @@ export class InstanceBrowserComponent implements OnInit {
   isCentral() {
     return this.config.config.mode === MinionMode.CENTRAL;
   }
+
+  isManaged() {
+    return this.config.config.mode === MinionMode.MANAGED;
+  }
 }

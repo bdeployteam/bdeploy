@@ -19,7 +19,7 @@ describe('User Accounts Test', function() {
 
   it('edits the user', function() {
     cy.contains('tr', demoUser).should('exist');
-    cy.contains('tr', demoUser).clickContextMenuItem('Edit...');
+    cy.contains('tr', demoUser).clickContextMenuItem('Edit');
 
     cy.get('input[placeholder="Full Name"]').should('exist').click();
     cy.get('input[placeholder="Full Name"]').clear().type('John Doe');

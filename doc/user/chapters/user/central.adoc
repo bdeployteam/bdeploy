@@ -36,7 +36,7 @@ To attach in *Instance Group*, you need both Web UIs of `CENTRAL` and `MANAGED` 
 [NOTE]
 You can easily distiguish `CENTRAL` and `MANAGED` servers by the according banner in the upper right corner of the Web UI.
 
-On the `CENTRAL` server, choose menu:Context Menu[Managed Servers...] on the *Instance Group* you want to attach. This will take you to the *Managed Servers* page for this *Instance Group*. Initially, this page will be empty.
+On the `CENTRAL` server, choose menu:Context Menu[Managed Servers] on the *Instance Group* you want to attach. This will take you to the *Managed Servers* page for this *Instance Group*. Initially, this page will be empty.
 
 image::images/BDeploy_Central_Managed_Servers.png[Managed Servers Page on Central, align=center, width=480, link="images/BDeploy_Central_Managed_Servers.png"]
 

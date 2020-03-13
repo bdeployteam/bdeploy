@@ -65,14 +65,14 @@
       <th mat-header-cell *matHeaderCellDef></th>
       <td mat-cell *matCellDef="let element" align="right">
         <mat-menu #appMenu="matMenu" xPosition="before">
-          <button mat-menu-item (click)="onEdit(element)" [disabled]="element.external">Edit...</button>
+          <button mat-menu-item (click)="onEdit(element)" [disabled]="element.external"><mat-icon>edit</mat-icon>Edit...</button>
           <mat-divider></mat-divider>
-          <button mat-menu-item (click)="onSetPassword(element)" [disabled]="element.external || isCurrentUser(element)">Set Password...</button>
-          <button mat-menu-item (click)="onGlobalPermissions(element)" [disabled]="isCurrentUser(element)">Global Permissions...</button>
+          <button mat-menu-item (click)="onSetPassword(element)" [disabled]="element.external || isCurrentUser(element)"><mat-icon>fingerprint</mat-icon>Set Password...</button>
+          <button mat-menu-item (click)="onGlobalPermissions(element)" [disabled]="isCurrentUser(element)"><mat-icon>security</mat-icon>Global Permissions...</button>
           <mat-divider></mat-divider>
-          <button mat-menu-item (click)="onSetInactive(element, true)" *ngIf="!element.inactive" [disabled]="element.external || isCurrentUser(element)">Set Inactive</button>
-          <button mat-menu-item (click)="onSetInactive(element, false)" *ngIf="element.inactive" [disabled]="element.external || isCurrentUser(element)">Set Active</button>
-          <button mat-menu-item (click)="onDelete(element)" [disabled]="isCurrentUser(element)">Delete</button>
+          <button mat-menu-item (click)="onSetInactive(element, true)" *ngIf="!element.inactive" [disabled]="element.external || isCurrentUser(element)"><mat-icon>check_box_outline_blank</mat-icon>Set Inactive</button>
+          <button mat-menu-item (click)="onSetInactive(element, false)" *ngIf="element.inactive" [disabled]="element.external || isCurrentUser(element)"><mat-icon>check_box_outline</mat-icon>Set Active</button>
+          <button mat-menu-item (click)="onDelete(element)" [disabled]="isCurrentUser(element)"><mat-icon>delete</mat-icon>Delete</button>
         </mat-menu>
         <button class="option-button" mat-icon-button [matMenuTriggerFor]="appMenu" appClickStopPropagation>
           <mat-icon>more_vert</mat-icon>

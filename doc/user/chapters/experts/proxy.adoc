@@ -38,7 +38,7 @@ http://my-server/#/instance/overview/MyGroup/xxxx-111-xxxx
 
 From the above URL, you can find the instance group `id` (*MyGroup*) as well as the instance `uuid` (*xxxx-111-xxxx*). When on the instance overview page, click the server application you want to tunnel to. The process control panel for that application opens up, and you will see the applications `id` displayed right beneath its name.
 
-Last thing to manually lookup is the endpoint `id`. Endpoints can be accessed in the process' context menu by choosing menu:Context Menu[Endpoints...]
+Last thing to manually lookup is the endpoint `id`. Endpoints can be accessed in the process' context menu by choosing menu:Context Menu[Endpoints]
 
 image::images/BDeploy_DnD_Applications.png[Process Context Menu,align=center,width=480,link="images/BDeploy_DnD_Applications.png"]
 

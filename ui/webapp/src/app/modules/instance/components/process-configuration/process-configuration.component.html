@@ -103,33 +103,33 @@
       </ng-container>
       <mat-menu #appMenu="matMenu" xPosition="before">
         <button mat-menu-item (click)="startInstance()" [disabled]='!authService.isScopedWrite(groupParam) || !isInstanceActivated() || (isReadonly() && !isActiveVersionSelected())' matTooltip="Starts all processes having the start type 'Instance' configured.">
-          Start Instance...
+          <mat-icon>play_arrow</mat-icon>Start Instance
         </button>
         <button mat-menu-item (click)="stopInstance()" [disabled]='!authService.isScopedWrite(groupParam) || !isInstanceActivated() || (isReadonly() && !isActiveVersionSelected())' matTooltip="Stops all processes.">
-          Stop Instance...
+          <mat-icon>stop</mat-icon>Stop Instance
         </button>
         <button mat-menu-item (click)="restartInstance()" [disabled]='!authService.isScopedWrite(groupParam) || !isInstanceActivated() || (isReadonly() && !isActiveVersionSelected())' matTooltip="Stops all processes, then starts all having the start type 'Instance' configured.">
-          Restart Instance...
+          <mat-icon>replay</mat-icon>Restart Instance
         </button>
         <mat-divider></mat-divider>
         <button mat-menu-item [routerLink]="['/instance/edit', groupParam, uuidParam]" [disabled]="!authService.isScopedAdmin(groupParam) || !isEditable()">
-          Edit Instance...
+          <mat-icon>edit</mat-icon>Edit Instance
         </button>
         <button mat-menu-item (click)="importInstanceVersion()" [disabled]='!authService.isScopedWrite(groupParam) || isReadonly()'>
-          Import Instance Version...
+          <mat-icon>import_export</mat-icon>Import Instance Version
         </button>
         <button mat-menu-item [disabled]='!authService.isScopedWrite(groupParam) || loading || isReadonly()' [routerLink]="['/configfiles/browser', groupParam, uuidParam, selectedConfig?.version.key.tag]" [disabled]="!isEditable()">
-          Configuration Files...
+          <mat-icon>attachment</mat-icon>Configuration Files
         </button>
         <button mat-menu-item [disabled]='!authService.isScopedWrite(groupParam) || loading || isReadonly()' [routerLink]="['/instance/datafiles', groupParam, uuidParam, selectedConfig?.version.key.tag]">
-          Data Files...
+          <mat-icon>folder</mat-icon>Data Files
         </button>
         <mat-divider></mat-divider>
         <button mat-menu-item (click)="setSidenavApplications()" [disabled]="!authService.isScopedWrite(groupParam) || isSidenavApplications() || !isEditable() || !isProductAvailable(selectedConfig)">
-          Configure Applications...
+          <mat-icon>layers</mat-icon>Configure Applications
         </button>
         <button mat-menu-item (click)="setSidenavProducts()" [disabled]="!authService.isScopedWrite(groupParam) || isSidenavProducts() || !isEditable()">
-          Change Product Version...
+          <mat-icon>apps</mat-icon>Change Product Version
         </button>
       </mat-menu>
       <button class="option-button" *ngIf='isActionsVisible()' mat-icon-button [matMenuTriggerFor]="appMenu" appClickStopPropagation>

@@ -44,7 +44,7 @@ Click on an *Instance Group* to open the *Instance Browser* of this group. Here 
 
 image::images/BDeploy_Empty_Instances.png[Empty Instance Browser, align=center, width=480, link="images/BDeploy_Empty_Instances.png"]
 
-Since an *Instance* requires a *Product*, an empty *Instance Group* will display a shortcut to the <<Manage Products>> dialog. If there is at least one *Instance* already, the shortcut disappears. The btn:[Manage Products...] button in the lower right corner opens the <<Manage Products>> dialog, too.
+Since an *Instance* requires a *Product*, an empty *Instance Group* will display a shortcut to the <<Manage Products>> dialog. If there is at least one *Instance* already, the shortcut disappears. The menu:Context Menu[Products] menu opens the <<Manage Products>> dialog, too.
 
 ==== Manage Products
 

@@ -49,7 +49,7 @@ Cypress.Commands.add('deleteUser', function(username) {
  */
 Cypress.Commands.add('setGlobalPermission', function(username, permission, docuScreenshots = false) {
   cy.contains('tr', username).should('exist');
-  cy.contains('tr', username).clickContextMenuItem('Global Permissions...');
+  cy.contains('tr', username).clickContextMenuItem('Global Permissions');
 
   if (permission === '(none)') {
     cy.get('app-user-global-permissions').contains('span', permission).click();

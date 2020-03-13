@@ -59,7 +59,7 @@ Cypress.Commands.add('uploadProductIntoGroup', function(groupName,fileName, mode
   cy.get('[data-cy=group-' + groupName + ']').first().should('exist').click();
   cy.waitUntilContentLoaded();
 
-  cy.get('button[mattooltip="Manage Products..."]').should('be.visible').and('be.enabled').click();
+  cy.get('mat-toolbar').clickContextMenuItem('Products');
   cy.contains('button', 'cloud_upload').should('be.visible').and('be.enabled').click();
 
   cy.get('mat-dialog-container').within(() => {
@@ -88,7 +88,7 @@ Cypress.Commands.add('verifyProductVersion', function(groupName, productName, pr
   cy.get('[data-cy=group-' + groupName + ']').first().should('exist').click();
   cy.waitUntilContentLoaded();
 
-  cy.get('button[mattooltip="Manage Products..."]').should('be.visible').and('be.enabled').click();
+  cy.get('mat-toolbar').clickContextMenuItem('Products');
   cy.contains('app-product-card', productName).should('exist').click();
 
   cy.get('app-product-list').contains(productVersion).should('exist');
@@ -126,7 +126,7 @@ Cypress.Commands.add('attachManaged', function(groupName, screenshot = false) {
   cy.visitBDeploy('/', 'CENTRAL');
   cy.get('[data-cy=group-' + groupName + ']')
     .should('exist')
-    .clickContextMenuItem('Managed Servers...');
+    .clickContextMenuItem('Managed Servers');
 
   cy.waitUntilContentLoaded();
   if(screenshot) {

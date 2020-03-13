@@ -29,8 +29,8 @@
     <div class="content-toolbar" *ngIf="launcherService.hasLauncherForOs(activeOs)">
       <span class="fill-space"></span>
       <mat-menu #appMenu="matMenu" xPosition="before">
-        <button mat-menu-item (click)="downloadLauncherInstaller()">Installer</button>
-        <button mat-menu-item (click)="downloadLauncherZip()">ZIP (Manual Installation)</button>
+        <button mat-menu-item (click)="downloadLauncherInstaller()"><mat-icon>cloud_download</mat-icon>Installer</button>
+        <button mat-menu-item (click)="downloadLauncherZip()"><mat-icon>archive</mat-icon>ZIP (Manual Installation)</button>
       </mat-menu>
       <button mat-stroked-button color="primary" [matMenuTriggerFor]="appMenu" appClickStopPropagation>
         <mat-icon>cloud_download</mat-icon>

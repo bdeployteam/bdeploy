@@ -40,7 +40,7 @@ describe('Product Tests', () => {
     cy.visit('/#/instance/browser/' + instanceGroupName)
     cy.get('mat-card-subtitle').contains(instanceUuid).click();
 
-    cy.get('app-instance-group-logo').parent().clickContextMenuItem('Configure Applications...');
+    cy.get('app-instance-group-logo').parent().clickContextMenuItem('Configure Applications');
 
     cy.getNodeCard('master').contains('Drop server application here').then(el => {
       cy.contains('app-application-descriptor-card', 'Server Application').dragTo(el);
@@ -77,7 +77,7 @@ describe('Product Tests', () => {
   })
 
   it('Configure new optional parameter', () => {
-    cy.getApplicationConfigCard('master', 'Server Application').clickContextMenuItem('Configure...')
+    cy.getApplicationConfigCard('master', 'Server Application').clickContextMenuItem('Configure')
 
     // set out parameter
     cy.addAndSetOptionalParameter('Test Parameters', 'Output', '{{P:DATA}}/cypress.txt');
@@ -101,7 +101,7 @@ describe('Product Tests', () => {
   })
 
   it('Downgrade to version 1.0.0', () => {
-    cy.get('app-instance-group-logo').parent().clickContextMenuItem('Change Product Version...');
+    cy.get('app-instance-group-logo').parent().clickContextMenuItem('Change Product Version');
     cy.contains('mat-toolbar', 'Change Product Version').should('exist');
 
     cy.contains('app-product-tag-card', '2.0.0').should('exist').contains('button', 'check').and('be.visible');
@@ -118,7 +118,7 @@ describe('Product Tests', () => {
   })
 
   it('Handle unknown parameters', () => {
-    cy.getApplicationConfigCard('master', 'Server Application').clickContextMenuItem('Configure...')
+    cy.getApplicationConfigCard('master', 'Server Application').clickContextMenuItem('Configure')
 
     cy.convertMissingToCustomParameter('param.out','Output');
     cy.deleteMissingParameter('Config File');
