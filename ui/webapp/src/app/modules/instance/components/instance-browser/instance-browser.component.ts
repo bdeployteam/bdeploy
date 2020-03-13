@@ -3,9 +3,10 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
+import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { SORT_PURPOSE } from '../../../../models/consts';
 import { DataList } from '../../../../models/dataList';
-import { InstanceConfiguration, InstanceDto, InstancePurpose, ProductDto } from '../../../../models/gen.dtos';
+import { InstanceConfiguration, InstanceDto, InstancePurpose, MinionMode, ProductDto } from '../../../../models/gen.dtos';
 import { Logger, LoggingService } from '../../../core/services/logging.service';
 import { ProductService } from '../../../instance-group/services/product.service';
 import { InstanceService } from '../../services/instance.service';
@@ -33,6 +34,7 @@ export class InstanceBrowserComponent implements OnInit {
     private productService: ProductService,
     private loggingService: LoggingService,
     public location: Location,
+    private config: ConfigService,
   ) {}
 
   ngOnInit(): void {
@@ -99,5 +101,9 @@ export class InstanceBrowserComponent implements OnInit {
 
   remove() {
     this.loadInstances();
+  }
+
+  isCentral() {
+    return this.config.config.mode === MinionMode.CENTRAL;
   }
 }

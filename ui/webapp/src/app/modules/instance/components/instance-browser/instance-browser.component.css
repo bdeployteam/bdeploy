@@ -22,6 +22,22 @@
   position: fixed !important;
 }
 
+.permissions-button {
+  top: auto !important;
+  right: 40px !important;
+  bottom: 250px !important;
+  left: auto !important;
+  position: fixed !important;
+}
+
+.servers-button {
+  top: auto !important;
+  right: 40px !important;
+  bottom: 320px !important;
+  left: auto !important;
+  position: fixed !important;
+}
+
 .card {
   margin-left: 40px;
   margin-right: 40px;

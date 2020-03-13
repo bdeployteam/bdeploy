@@ -50,3 +50,9 @@
 <button mat-fab class="clientApps-button" matTooltip="Client Applications..." [routerLink]="['/instancegroup/clientapps', instanceGroupName]" color="primary">
   <mat-icon>computer</mat-icon>
 </button>
+<button mat-fab class="permissions-button" matTooltip="Permissions..." [routerLink]="['/instancegroup/permissions', instanceGroupName]" [disabled]="!authService.isScopedAdmin(this.instanceGroupName)" color="primary">
+  <mat-icon>security</mat-icon>
+</button>
+<button *ngIf='isCentral()' mat-fab class="servers-button" matTooltip="Managed Servers..." [routerLink]="['/servers/browser', instanceGroupName]" [disabled]="!authService.isScopedAdmin(this.instanceGroupName)" color="primary">
+  <mat-icon>dns</mat-icon>
+</button>
