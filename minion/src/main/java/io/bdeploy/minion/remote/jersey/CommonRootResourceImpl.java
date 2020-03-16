@@ -132,6 +132,9 @@ public class CommonRootResourceImpl implements CommonRootResource {
 
     @Override
     public CommonInstanceResource getInstanceResource(String name) {
+        if (name == null) {
+            throw new WebApplicationException("No instance group parameter given", Status.BAD_REQUEST);
+        }
         BHive bHive = registry.get(name);
         if (bHive == null) {
             throw new WebApplicationException("Instance Group '" + name + "' does not exist", Status.NOT_FOUND);

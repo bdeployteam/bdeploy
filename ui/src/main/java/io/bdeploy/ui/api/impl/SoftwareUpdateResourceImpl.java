@@ -129,6 +129,10 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
         LauncherDto latestLaunchers = getLatestLaunchers();
         Manifest.Key key = latestLaunchers.launchers.get(os);
 
+        if (key == null) {
+            throw new WebApplicationException("Cannot find launcher for " + os, Status.NOT_FOUND);
+        }
+
         URI target = UriBuilder.fromUri(info.getBaseUri()).path(SoftwareUpdateResource.ROOT_PATH)
                 .path(SoftwareUpdateResource.DOWNLOAD_PATH).build(new Object[] { key.getName(), key.getTag() }, false);
 

@@ -3,9 +3,11 @@ package io.bdeploy.minion.api.v1;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import io.bdeploy.api.remote.v1.PublicInstanceResource;
@@ -78,6 +80,9 @@ public class PublicRootResourceImpl implements PublicRootResource {
 
     @Override
     public PublicInstanceResource getInstanceResource(String group) {
+        if (group == null) {
+            throw new WebApplicationException("No instance group parameter given", Status.BAD_REQUEST);
+        }
         return rc.initResource(new PublicInstanceResourceImpl(group));
     }
 
