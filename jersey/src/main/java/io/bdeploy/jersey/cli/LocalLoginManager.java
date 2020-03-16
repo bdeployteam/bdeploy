@@ -138,6 +138,9 @@ public class LocalLoginManager {
 
     public RemoteService getCurrentService() {
         LocalLoginData data = read();
+        if (data.current == null) {
+            return null;
+        }
         return getNamedService(data.current);
     }
 
