@@ -9,7 +9,7 @@ import javax.ws.rs.core.MediaType;
 
 import io.bdeploy.interfaces.configuration.SettingsConfiguration;
 
-@Path("/settings")
+@Path("/master/settings")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public interface MasterSettingsResource {
