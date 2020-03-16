@@ -91,7 +91,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.screenshot('BDeploy_Empty_Instances');
 
     // Open products page
-    cy.contains('button', 'apps').click();
+    cy.get('mat-toolbar').clickContextMenuItem('Products');
     cy.contains('Start by uploading');
     cy.screenshot('BDeploy_Empty_Products');
 
@@ -171,7 +171,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.screenshot('BDeploy_Instance_Menu');
 
     // Configure Applications
-    cy.get('button').contains('Configure Applications...').click();
+    cy.get('button').contains('Configure Applications').click();
     cy.getNodeCard('master').contains('Drop server application here').then(el => {
       cy.contains('app-application-descriptor-card', 'Server Application').dragTo(el);
     })
@@ -183,7 +183,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.wait(250);
     cy.screenshot('BDeploy_DnD_Applications');
 
-    cy.get('button').contains('Endpoints...').click();
+    cy.get('button').contains('Endpoints').click();
     cy.waitUntilContentLoaded();
     cy.screenshot('BDeploy_Endpoints_Config');
     cy.get('button').contains('CANCEL').click();
@@ -192,7 +192,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.getApplicationConfigCard('master', 'Server Application').contains('more_vert').click();
 
     // Process Configuration
-    cy.get('button').contains('Configure...').click();
+    cy.get('button').contains('Configure').click();
     cy.waitUntilContentLoaded();
     cy.screenshot('BDeploy_Process_Config');
 
@@ -234,7 +234,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.waitUntilContentLoaded();
 
     // Configuration files
-    cy.get('app-instance-group-logo').parent().clickContextMenuItem('Configuration Files...');
+    cy.get('app-instance-group-logo').parent().clickContextMenuItem('Configuration Files');
     cy.waitUntilContentLoaded();
     cy.screenshot('BDeploy_CfgFiles_Browser');
 
@@ -254,7 +254,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.waitUntilContentLoaded();
 
     // Change product version (We first need to downgrade and save to get the desired state)
-    cy.get('app-instance-group-logo').parent().clickContextMenuItem('Change Product Version...');
+    cy.get('app-instance-group-logo').parent().clickContextMenuItem('Change Product Version');
     cy.contains('mat-slide-toggle','Show all').click();
     cy.contains('app-product-tag-card', '1.0.0').contains('button', 'arrow_downward').click();
     cy.contains('button', 'SAVE').should('be.enabled').click();
@@ -266,7 +266,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.screenshot('BDeploy_Product_Notification')
     cy.get('.cdk-overlay-backdrop').click('top', {force:true, multiple: true});
 
-    cy.get('app-instance-group-logo').parent().clickContextMenuItem('Change Product Version...');
+    cy.get('app-instance-group-logo').parent().clickContextMenuItem('Change Product Version');
     cy.screenshot('BDeploy_Product_Change')
     cy.contains('app-product-tag-card', '2.0.0').contains('button', 'arrow_upward').click();
     cy.screenshot('BDeploy_Product_Upgrade_Local_Changes');
@@ -344,7 +344,7 @@ describe('Creates screenshots for the user documentation', () => {
 
     // Change to manual confirmation
     cy.contains('mat-toolbar','Process Control').contains('button','close').click();
-    cy.getApplicationConfigCard('master','Server Application').clickContextMenuItem("Configure...");
+    cy.getApplicationConfigCard('master','Server Application').clickContextMenuItem("Configure");
     cy.get('mat-select').contains("MANUAL").click();
     cy.get('mat-option').contains('MANUAL_CONFIRM').click();
 
@@ -358,7 +358,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.getLatestInstanceVersion().installAndActivate();
 
     // try to downgrade, capture validation problems, discard
-    cy.get('app-instance-group-logo').parent().clickContextMenuItem('Change Product Version...');
+    cy.get('app-instance-group-logo').parent().clickContextMenuItem('Change Product Version');
     cy.contains('mat-slide-toggle','Show all').click();
     cy.contains('app-product-tag-card', '1.0.0').contains('button', 'arrow_downward').click();
     cy.contains('app-instance-notifications', 'error').click();
@@ -398,7 +398,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.get('.cdk-overlay-backdrop').click('top', {force:true, multiple: true});
 
     // Data Files
-    cy.get('app-instance-group-logo').parent().clickContextMenuItem('Data Files...');
+    cy.get('app-instance-group-logo').parent().clickContextMenuItem('Data Files');
     cy.contains('td', 'documentation.txt').should('exist')
     cy.screenshot('BDeploy_DataFiles_Browser');
 

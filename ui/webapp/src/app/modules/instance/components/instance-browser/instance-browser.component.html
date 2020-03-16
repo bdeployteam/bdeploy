@@ -2,12 +2,33 @@
   <button mat-icon-button type="button" (click)='location.back()'><mat-icon>chevron_left</mat-icon></button>
   <span>Instance Group: {{instanceGroupName}}</span>
   <span class="fill-space"></span>
-  <app-remote-progress [scope]='[instanceGroupName]'></app-remote-progress>
   <mat-form-field class="search">
     <mat-label></mat-label>
     <input matInput type="text" hint="Filter" [(ngModel)]="instanceDtoList.searchString" (ngModelChange)="instanceDtoList.applyFilter()">
     <mat-icon matSuffix>search</mat-icon>
   </mat-form-field>
+  <!-- <span class='menu-separator'>|</span> -->
+  <div class='vert-speparator'></div>
+  <app-remote-progress [scope]='[instanceGroupName]'></app-remote-progress>
+  <mat-menu #appMenu="matMenu" xPosition="before">
+    <div [matTooltip]='isManaged() ? "Editing of instance group information must be done on the controlling central server" : ""'>
+      <button mat-menu-item [routerLink]="['/instancegroup/edit', instanceGroupName]" [disabled]='isManaged() || !authService.isScopedAdmin(this.instanceGroupName)'><mat-icon>edit</mat-icon>Edit</button>
+      <mat-divider></mat-divider>
+    </div>
+    <button mat-menu-item [routerLink]="['/admin/all', {outlets: { panel: ['hive', {hive: instanceGroupName}] } }]" [disabled]="!authService.isGlobalAdmin()"><mat-icon>sd_storage</mat-icon>Hive</button>
+    <button mat-menu-item [routerLink]="['/instancegroup/products', instanceGroupName]"><mat-icon>apps</mat-icon>Products</button>
+    <button mat-menu-item [routerLink]="['/instancegroup/clientapps', instanceGroupName]"><mat-icon>computer</mat-icon>Client Applications</button>
+    <button mat-menu-item [routerLink]="['/instancegroup/permissions', instanceGroupName]" [disabled]="!authService.isScopedAdmin(this.instanceGroupName)">
+      <mat-icon>security</mat-icon>Permissions
+    </button>
+    <ng-container *ngIf='isCentral()'>
+        <mat-divider></mat-divider>
+        <button mat-menu-item [routerLink]="['/servers/browser', instanceGroupName]" [disabled]="!authService.isScopedAdmin(this.instanceGroupName)"><mat-icon>dns</mat-icon>Managed Servers</button>
+    </ng-container>
+  </mat-menu>
+  <button class="option-button" mat-icon-button [matMenuTriggerFor]="appMenu" appClickStopPropagation>
+    <mat-icon>more_vert</mat-icon>
+  </button>
 </mat-toolbar>
 
 <div *ngIf="loading" class="loading-container">
@@ -43,16 +64,4 @@
 
 <button mat-fab class="add-button" [routerLink]="['/instance/add', instanceGroupName]" [disabled]="!authService.isScopedAdmin(instanceGroupName) || !hasProducts">
   <mat-icon>add</mat-icon>
-</button>
-<button mat-fab class="products-button" matTooltip="Manage Products..." [routerLink]="['/instancegroup/products', instanceGroupName]" color="primary">
-  <mat-icon>apps</mat-icon>
-</button>
-<button mat-fab class="clientApps-button" matTooltip="Client Applications..." [routerLink]="['/instancegroup/clientapps', instanceGroupName]" color="primary">
-  <mat-icon>computer</mat-icon>
-</button>
-<button mat-fab class="permissions-button" matTooltip="Permissions..." [routerLink]="['/instancegroup/permissions', instanceGroupName]" [disabled]="!authService.isScopedAdmin(this.instanceGroupName)" color="primary">
-  <mat-icon>security</mat-icon>
-</button>
-<button *ngIf='isCentral()' mat-fab class="servers-button" matTooltip="Managed Servers..." [routerLink]="['/servers/browser', instanceGroupName]" [disabled]="!authService.isScopedAdmin(this.instanceGroupName)" color="primary">
-  <mat-icon>dns</mat-icon>
 </button>

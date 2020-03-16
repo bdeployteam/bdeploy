@@ -10,7 +10,7 @@ Upgrading the *Product Version* that is used in an *Instance* requires two disti
 Uploading a new *Product Version* is done in the *Manage Products* page:
 
  . Click on the desired *Instance Group*
- . Click on btn:[Manage Products] in the bottom right corner of the *Instance Browser* dialog
+ . Click on menu:Context Menu[Products] menu of the *Instance Browser* dialog
  . A card for each *Product* is displayed. Clicking on the card shows all available versions
  . Click on the btn:[Upload] button in the bottom right corner
  . Select the ZIP archive containing the new *Product Version*. This archive is typically created by your *Build* tool

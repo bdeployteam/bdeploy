@@ -171,7 +171,7 @@ Cypress.Commands.add('deleteMissingParameter', function(name) {
 
 Cypress.Commands.add('createNewInstanceVersionByDummyChange', function(instanceGroupName, instanceUuid, nodeName, applicationName, mode = 'STANDALONE') {
   cy.gotoInstance(instanceGroupName, instanceUuid, mode);
-  cy.getApplicationConfigCard(nodeName, applicationName).clickContextMenuItem('Configure...')
+  cy.getApplicationConfigCard(nodeName, applicationName).clickContextMenuItem('Configure')
 
   // toggle 'Keep Alive' slider
   cy.contains('div', 'Keep Alive').find('.mat-slide-toggle-thumb').first().click();

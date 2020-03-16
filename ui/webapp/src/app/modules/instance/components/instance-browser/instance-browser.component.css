@@ -86,3 +86,10 @@
   justify-content: center;
   align-items: center;
 }
+
+.vert-speparator {
+  height: 50%;
+  border-left: 1px solid;
+
+  margin: 15px;
+}

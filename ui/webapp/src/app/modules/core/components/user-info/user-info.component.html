@@ -3,10 +3,10 @@
     <app-user-avatar [gravatar]='!settings.isLoading() && settings.getSettings().general.enableGravatar' [mail]='user?.email' hostSize='40' avatarSize='32'></app-user-avatar>
     <div class="title-name">{{ getTitleUserName() }}</div>
   </div>
-  <button mat-menu-item (click)="edit()" [disabled]="user?.external">Edit...</button>
-  <button mat-menu-item (click)="changePassword()" [disabled]="user?.external">Change Password...</button>
-  <button mat-menu-item (click)="openDialog(tokenDialog)">Create Token...</button>
-  <button mat-menu-item (click)="logout()">Logout</button>
+  <button mat-menu-item (click)="edit()" [disabled]="user?.external"><mat-icon>edit</mat-icon>Edit...</button>
+  <button mat-menu-item (click)="changePassword()" [disabled]="user?.external"><mat-icon>fingerprint</mat-icon>Change Password...</button>
+  <button mat-menu-item (click)="openDialog(tokenDialog)"><mat-icon>vpn_key</mat-icon>Create Token...</button>
+  <button mat-menu-item (click)="logout()"><mat-icon>exit_to_app</mat-icon>Logout</button>
 </mat-menu>
 
 <button mat-icon-button [matMenuTriggerFor]="appMenu"><app-user-avatar [gravatar]='!settings.isLoading() && settings.getSettings().general.enableGravatar' [mail]='user?.email'></app-user-avatar></button>

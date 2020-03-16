@@ -5,20 +5,21 @@
     <mat-card-subtitle>{{instanceGroup.name}}</mat-card-subtitle>
     <span class="spacer"></span>
     <mat-menu #appMenu="matMenu" xPosition="before">
-      <button mat-menu-item [routerLink]="['/instance/browser', instanceGroup.name]" [disabled]="!authService.isScopedRead(this.instanceGroup.name)">Open</button>
+      <button mat-menu-item [routerLink]="['/instance/browser', instanceGroup.name]" [disabled]="!authService.isScopedRead(this.instanceGroup.name)"><mat-icon>folder_open</mat-icon>Open</button>
       <div [matTooltip]='isManagedServer() ? "Editing of instance group information must be done on the controlling central server" : ""'>
-        <button mat-menu-item [routerLink]="['/instancegroup/edit', instanceGroup.name]" [disabled]='isManagedServer() || !authService.isScopedAdmin(this.instanceGroup.name)'>Edit</button>
+        <button mat-menu-item [routerLink]="['/instancegroup/edit', instanceGroup.name]" [disabled]='isManagedServer() || !authService.isScopedAdmin(this.instanceGroup.name)'><mat-icon>edit</mat-icon>Edit</button>
       </div>
-      <button mat-menu-item (click)="delete()" [disabled]="!authService.isGlobalAdmin()">Delete</button>
+      <button mat-menu-item (click)="delete()" [disabled]="!authService.isGlobalAdmin()"><mat-icon>delete</mat-icon>Delete</button>
       <mat-divider></mat-divider>
-      <button mat-menu-item [routerLink]="['/admin/all', {outlets: { panel: ['hive', {hive: instanceGroup.name}] } }]" [disabled]="!authService.isGlobalAdmin()">Hive</button>
-      <button mat-menu-item [routerLink]="['/instancegroup/products', instanceGroup.name]">Products</button>
+      <button mat-menu-item [routerLink]="['/admin/all', {outlets: { panel: ['hive', {hive: instanceGroup.name}] } }]" [disabled]="!authService.isGlobalAdmin()"><mat-icon>sd_storage</mat-icon>Hive</button>
+      <button mat-menu-item [routerLink]="['/instancegroup/products', instanceGroup.name]"><mat-icon>apps</mat-icon>Products</button>
+      <button mat-menu-item [routerLink]="['/instancegroup/clientapps', instanceGroup.name]"><mat-icon>computer</mat-icon>Client Applications</button>
       <button mat-menu-item [routerLink]="['/instancegroup/permissions', instanceGroup.name]" [disabled]="!authService.isScopedAdmin(this.instanceGroup.name)">
-        Permissions
+        <mat-icon>security</mat-icon>Permissions
       </button>
       <ng-container *ngIf='isAttachAllowed'>
           <mat-divider></mat-divider>
-          <button mat-menu-item [routerLink]="['/servers/browser', instanceGroup.name]" [disabled]="!authService.isScopedAdmin(this.instanceGroup.name)">Managed Servers...</button>
+          <button mat-menu-item [routerLink]="['/servers/browser', instanceGroup.name]" [disabled]="!authService.isScopedAdmin(this.instanceGroup.name)"><mat-icon>dns</mat-icon>Managed Servers</button>
       </ng-container>
     </mat-menu>
     <button class="option-button" mat-icon-button [matMenuTriggerFor]="appMenu" appClickStopPropagation>

@@ -34,7 +34,7 @@ describe('Instance Tests', function () {
 
     cy.get('mat-card-subtitle').contains(instanceUuid).click();
 
-    cy.get('app-instance-group-logo').parent().clickContextMenuItem('Configure Applications...');
+    cy.get('app-instance-group-logo').parent().clickContextMenuItem('Configure Applications');
 
     cy.getNodeCard('master').contains('Drop server application here').then(el => {
       cy.contains('app-application-descriptor-card', 'Server Application').dragTo(el);
@@ -50,7 +50,7 @@ describe('Instance Tests', function () {
 
   it('Create config file', () => {
     cy.visit('/#/instance/overview/Test/' + instanceUuid);
-    cy.get('app-instance-group-logo').parent().clickContextMenuItem('Configuration Files...');
+    cy.get('app-instance-group-logo').parent().clickContextMenuItem('Configuration Files');
     cy.contains('button', 'add').click();
     cy.get('input[placeholder="Enter path for file"]').clear().type('cypress.cfg')
     cy.typeInAceEditor('CY-CFG');
@@ -67,7 +67,7 @@ describe('Instance Tests', function () {
    */
   it('Set server parameters', function() {
     cy.visit('/#/instance/overview/Test/' + instanceUuid);
-    cy.getApplicationConfigCard('master', 'Server Application').clickContextMenuItem('Configure...')
+    cy.getApplicationConfigCard('master', 'Server Application').clickContextMenuItem('Configure')
 
     // set sleep parameter
     cy.addAndSetOptionalParameter('Sleep Configuration', 'Sleep Timeout', '120');
@@ -133,7 +133,7 @@ describe('Instance Tests', function () {
 
   it('Check data file browser', () => {
     cy.visit('/#/instance/overview/Test/' + instanceUuid);
-    cy.get('app-instance-group-logo').parent().clickContextMenuItem('Data Files...');
+    cy.get('app-instance-group-logo').parent().clickContextMenuItem('Data Files');
 
     cy.contains('td', 'cypress.txt').click();
 
@@ -152,7 +152,7 @@ describe('Instance Tests', function () {
     cy.visit('/#/instance/overview/Test/' + instanceUuid);
     cy.closeConfigureApplications();
     cy.getLatestInstanceVersion().find('button').contains('more_vert').click();
-    cy.get('[role=menuitem]').contains('Export...').should('be.enabled').downloadFile('export-test.zip');
+    cy.get('[role=menuitem]').contains('Export').should('be.enabled').downloadFile('export-test.zip');
   })
 
   /**

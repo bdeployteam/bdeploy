@@ -1,6 +1,6 @@
 === Client Applications
 
-A dedicated overview page shows all configured *Client Applications* of an entire *Instance Group*. This page can be opened by navigating to the *Instance Browser* of the desired *Instance Group*. Clicking on the btn:[Client Applications] icon in the bottom right corner opens the overview page.
+A dedicated overview page shows all configured *Client Applications* of an entire *Instance Group*. This page can be opened by navigating to the *Instance Browser* of the desired *Instance Group*. Clicking on the menu:Context Menu[Client Applications] menu opens the overview page.
 
 image::images/BDeploy_Client_Download_Page.png[Application Download Page,align=center,width=480,link="images/BDeploy_Client_Download_Page.png"]
 
