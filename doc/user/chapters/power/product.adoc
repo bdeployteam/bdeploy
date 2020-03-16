@@ -351,9 +351,21 @@ Once you have a `product-info.yaml` with it's `product-version.yaml` and all the
 
 *BDeploy* provides integration into https://www.eclipse.org/tea/[Eclipse TEA]. Using this integration, you can easily export *Eclipse RCP* based products as *Applications* and bundle them into a custom *Product*.
 
-Once you have required files, select menu:TEA[TEA Build Library > Create BDeploy Product...]. You will be prompted which *Product* to build and where to put the resulting product. You can choose to create a self-contained ZIP, or to push deltas to a selected server.
+Once you have required files, select menu:TEA[TEA Build Library > Build BDeploy Product...]. You will be prompted which *Product* to build and where to put the resulting product. You can choose to create a self-contained ZIP, or to push deltas to a selected server.
 
 image::images/TEA_build_product.png[TEA Integration Product Build,align=center,width=480,link="images/TEA_build_product.png"]
+
+You can configure multiple servers by using the btn:[Add], btn:[Delete] and btn:[Edit] buttons.
+
+image::images/TEA_edit_server.png[TEA BDeploy Server configuration,align=center,width=480,link="images/TEA_edit_server.png"]
+
+Enter a description and a URL. You will then be able to use the btn:[Login] button to create a token for the server.
+
+image::images/TEA_login.png[TEA BDeploy Login,align=center,width=480,link="images/TEA_login.png"]
+
+Now you can use the btn:[Load Groups] to fetch a list of existing instance groups from the server to choose from. Finally, use the verity button to check whether the entered information is correct.
+
+When confirming the build dialog, on first run you will be prompted to login to the Software Repositories *BDeploy* server configured in the TEA *BDeploy* preferences.
 
 Since product builds are stored in the workspace, you can choose to re-push a previous build of the product (to the same or another server). Select menu:TEA[TEA Build Library > Push BDeploy Product...] to do so. You will be presented a list of available local product versions and the configured *BDeploy* servers.
 
@@ -377,7 +389,7 @@ The path to the `products.yaml` has to be configured in the *Eclipse TEA* prefer
 
 image::images/TEA_preferences_products.png[TEA Integration Products Preference,align=center,width=480,link="images/TEA_preferences_products.png"]
 
-The preferences also allow to configure a *BDeploy* server whos <<Software Repositories>> are used during resolution of <<Runtime Dependencies>>.
+The preferences also allow to configure a *BDeploy* server whos <<Software Repositories>> are used during resolution of <<Runtime Dependencies>>. You will be asked to log into this server once when starting a product build.
 
 ===== `product-build.yaml`
 
