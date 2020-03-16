@@ -3,7 +3,26 @@
   <span class="fill-space"></span>
 </mat-toolbar>
 
-<mat-grid-list cols="{{columns}}" rowHeight="200px" gutterSize="10px">
+<ng-container *ngIf='!loading && softwareRepositoryList.isEmpty()'>
+  <div class="center">
+      <p>
+        <span class="headerText">No software repositories have been created yet. Start by creating a new one.</span>
+      </p>
+      <p>
+        <span class='headerTextSmall'>
+          Software repositories provide third-party software during product builds.<br/>
+          You don't need a software repository to consume existing products.
+        </span>
+      </p>
+      <p>
+        <span class="material-icons headerIcon">add</span>
+        <span class="headerText"><a [routerLink]="['/softwarerepo/add']">Create Software Repository</a></span>
+      </p>
+  </div>
+</ng-container>
+
+
+<mat-grid-list *ngIf='!loading' cols="{{columns}}" rowHeight="200px" gutterSize="10px">
   <mat-grid-tile *ngFor="let repository of softwareRepositoryList.data">
     <app-software-repository-card [repository]="repository" (removeEvent)="onRemoveRepo(repository)"></app-software-repository-card>
   </mat-grid-tile>

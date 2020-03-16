@@ -5,3 +5,24 @@
   left: auto !important;
   position: fixed !important;
 }
+
+.center {
+  text-align: center;
+}
+
+.headerText {
+  font-size: 1.5em;
+  margin-left: 15px;
+  vertical-align: middle;
+}
+
+.headerTextSmall {
+  font-size: 1.2em;
+  margin-left: 15px;
+  vertical-align: middle;
+}
+
+.headerIcon {
+  font-size: 2em;
+  vertical-align: middle;
+}

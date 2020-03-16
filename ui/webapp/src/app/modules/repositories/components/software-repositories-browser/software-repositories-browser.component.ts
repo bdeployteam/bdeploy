@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MediaChange, MediaObserver } from '@angular/flex-layout';
 import { Subscription } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 import { DataList } from '../../../../models/dataList';
 import { SoftwareRepositoryConfiguration } from '../../../../models/gen.dtos';
 import { AuthenticationService } from '../../../core/services/authentication.service';
@@ -17,6 +18,7 @@ export class SoftwareRepositoriesBrowserComponent implements OnInit, OnDestroy {
   log: Logger = this.loggingService.getLogger('SoftwareRepositoriesBrowserComponent');
 
   private subscription: Subscription;
+  loading = true;
 
   private grid = new Map([
     ['xs', 1],
@@ -57,7 +59,8 @@ export class SoftwareRepositoriesBrowserComponent implements OnInit, OnDestroy {
   }
 
   private loadSoftwareRepositories() {
-    this.softwareRepositoryService.listSoftwareRepositories().subscribe(repositories => {
+    this.loading = true;
+    this.softwareRepositoryService.listSoftwareRepositories().pipe(finalize(() => this.loading = false)).subscribe(repositories => {
       this.softwareRepositoryList.addAll(repositories);
       this.log.debug('got ' + repositories.length + ' repositories');
     });
