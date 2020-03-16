@@ -1,8 +1,11 @@
 <h1 mat-dialog-title>Delete Instance Group: {{data.title ? data.title : data.name}} ({{data.name}})</h1>
 <div mat-dialog-content>
   <div class="flex-row">
+    Please enter the ID of the instance group to confirm.
+  </div>
+  <div class="flex-row">
       <div class="warn-icon"><mat-icon>warning</mat-icon></div>
-      <div><b>WARNING:</b> Deleting an instance group <b>cannot be undone</b>. Please enter the name of the instance group to confirm.</div>
+      <div><b>WARNING:</b> Deleting an instance group <b>cannot be undone</b>. </div>
   </div>
   <div class="flex-row instance-group-delete-warn" *ngIf="instanceCount > 0">
     <div class="warn-icon"><mat-icon>warning</mat-icon></div>
