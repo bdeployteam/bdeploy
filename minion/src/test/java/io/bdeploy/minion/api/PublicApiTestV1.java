@@ -1,9 +1,11 @@
 package io.bdeploy.minion.api;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.SortedMap;
@@ -13,6 +15,10 @@ import javax.ws.rs.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import io.bdeploy.api.product.v1.ProductManifestBuilder;
+import io.bdeploy.api.product.v1.impl.LocalDependencyFetcher;
+import io.bdeploy.api.product.v1.impl.RemoteDependencyFetcher;
+import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.api.remote.v1.PublicInstanceResource;
 import io.bdeploy.api.remote.v1.PublicRootResource;
 import io.bdeploy.api.remote.v1.dto.EndpointsConfigurationApi;
@@ -24,19 +30,26 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.op.ImportOperation;
+import io.bdeploy.bhive.op.ManifestDeleteOperation;
+import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.TempDirectory;
 import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.OsHelper;
+import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
 import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
-import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestFactory;
 import io.bdeploy.minion.TestMinion;
-import io.bdeploy.ui.api.CleanupResource;
+import io.bdeploy.pcu.TestAppFactory;
+import io.bdeploy.ui.api.InstanceGroupResource;
+import io.bdeploy.ui.api.ProductResource;
+import io.bdeploy.ui.dto.ProductDto;
 
 /**
  * Tests V1 public API
@@ -48,8 +61,8 @@ import io.bdeploy.ui.api.CleanupResource;
 public class PublicApiTestV1 {
 
     @Test
-    void testV1(BHive local, MasterRootResource master, CommonRootResource common, CleanupResource cr, RemoteService remote,
-            @TempDir Path tmp, ActivityReporter reporter, MinionRoot mr) throws Exception {
+    void testV1(BHive local, MasterRootResource master, CommonRootResource common, RemoteService remote, @TempDir Path tmp)
+            throws Exception {
         Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true, 1111);
 
         PublicRootResource prr = ResourceProvider.getResource(remote, PublicRootResource.class, null);
@@ -96,6 +109,67 @@ public class PublicApiTestV1 {
         assertEquals("test", eca.http.get(0).id);
         assertEquals("/api/test/with/path", eca.http.get(0).path);
 
+    }
+
+    @Test
+    void testProductsV1(BHive local, CommonRootResource common, InstanceGroupResource igr, RemoteService remote,
+            ActivityReporter reporter, @TempDir Path tmp) throws Exception {
+        Path jdk = TestAppFactory.createDummyAppNoDescriptor("jdk", tmp.resolve("jdk"));
+
+        ScopedManifestKey jdkKey = new ScopedManifestKey("jdk", OsHelper.getRunningOs(), "1.8.0");
+
+        local.execute(new ImportOperation().setSourcePath(jdk).setManifest(jdkKey.getKey()));
+
+        SoftwareRepositoryConfiguration src = new SoftwareRepositoryConfiguration();
+        src.name = "SW";
+        src.description = "SW";
+
+        common.addSoftwareRepository(src, null);
+
+        local.execute(new PushOperation().addManifest(jdkKey.getKey()).setHiveName("SW").setRemote(remote));
+        local.execute(new ManifestDeleteOperation().setToDelete(jdkKey.getKey()));
+
+        Path prod = tmp.resolve("product");
+
+        Path pathToApp = TestAppFactory.createDummyApp("myApp", prod);
+        Path prodInfo = prod.resolve("product-info.yaml");
+        Path prodVer = prod.resolve("product-versions.yaml");
+
+        Files.write(prodInfo, List.of("name: Test Product", "product: com.example/product", "vendor: Unit Test", "applications:",
+                " - myApp", "versionFile: product-versions.yaml"));
+
+        String appPath = pathToApp.toString().replace('\\', '/');
+        Files.write(prodVer,
+                List.of("version: \"1.0.0\"", "appInfo:", " myApp:", "  " + OsHelper.getRunningOs() + ": \"" + appPath + "\""));
+
+        Key prodKey = ProductManifestBuilder.importFromDescriptor(prodInfo, local,
+                new RemoteDependencyFetcher(remote, "SW", reporter), false);
+        assertNotNull(prodKey);
+
+        Files.write(prodVer,
+                List.of("version: \"1.0.1\"", "appInfo:", " myApp:", "  " + OsHelper.getRunningOs() + ": \"" + appPath + "\""));
+
+        // try with parallel import as well, even though this does not have much impact with one application to cover the code path.
+        Key prod2Key = ProductManifestBuilder.importFromDescriptor(prodInfo, local, new LocalDependencyFetcher(), true);
+        assertNotNull(prod2Key);
+
+        InstanceGroupConfiguration cfg = new InstanceGroupConfiguration();
+        cfg.name = "IG";
+        cfg.description = "IG";
+
+        common.addInstanceGroup(cfg, null);
+
+        local.execute(new PushOperation().addManifest(prodKey).addManifest(prod2Key).setHiveName("IG").setRemote(remote));
+
+        ProductResource pr = igr.getProductResource("IG");
+        List<ProductDto> list = pr.list();
+
+        assertEquals(2, list.size());
+
+        assertEquals("Test Product", list.get(0).name);
+        assertEquals("Test Product", list.get(1).name);
+        assertEquals("Unit Test", list.get(0).vendor);
+        assertEquals("Unit Test", list.get(1).vendor);
     }
 
 }
