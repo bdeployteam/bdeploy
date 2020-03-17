@@ -198,7 +198,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
   /**
    * Called when the user drags the application from one node to another node.
    */
-  private removeProcess(application: ApplicationConfiguration, sourceIndex: number) {
+  removeProcess(application: ApplicationConfiguration, sourceIndex: number) {
     const index = this.nodeApps.indexOf(application);
     if (index === -1) {
       return;
