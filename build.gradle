@@ -58,7 +58,7 @@ ext {
     buildDate = new Date().format('yyyyMMddHHmm')
 
     // all java projects. these projects are pre-configured by the root project with a ton of helpers.
-    actualSubprojects = subprojects - [ project(':test-data'), project(':doc'), project(':api') ];
+    actualSubprojects = subprojects - [ project(':test-data'), project(':doc') ];
 }
 
 allprojects {
@@ -552,7 +552,7 @@ task jacocoFullReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
     getClassDirectories().from(files(actualSubprojects.sourceSets.main.output))
 
     rootProject.getAllTasks(true).each { p, tasks ->
-        if(p.name == 'interfaces' || p.name == 'launcher' || p.name == 'ui') {
+        if(p.name == 'interfaces' || p.name == 'launcher' || p.name == 'ui' || p.name == 'api') {
             return; // no tests run in there right now.
         }
 
