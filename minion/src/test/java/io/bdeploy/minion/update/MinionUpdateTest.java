@@ -32,7 +32,7 @@ import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
-import io.bdeploy.interfaces.remote.MasterRootResource;
+import io.bdeploy.interfaces.remote.CommonUpdateResource;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.minion.TestMinion.AuthPack;
@@ -49,26 +49,26 @@ public class MinionUpdateTest {
     TestCliTool cli = new TestCliTool(new MinionServerCli());
 
     @Test
-    void testUpdate(MinionRoot root, MasterRootResource resource, RemoteService remote, @TempDir Path tmp, BHive local)
+    void testUpdate(MinionRoot root, CommonUpdateResource resource, RemoteService remote, @TempDir Path tmp, BHive local)
             throws IOException {
         doTestUpdate(root, resource, remote, tmp, local);
     }
 
     @Tag("CENTRAL")
     @Test
-    void testUpdateCentral(MinionRoot root, MasterRootResource resource, RemoteService remote, @TempDir Path tmp, BHive local)
+    void testUpdateCentral(MinionRoot root, CommonUpdateResource resource, RemoteService remote, @TempDir Path tmp, BHive local)
             throws IOException {
         doTestUpdate(root, resource, remote, tmp, local);
     }
 
     @Tag("MANAGED")
     @Test
-    void testUpdateManaged(MinionRoot root, MasterRootResource resource, RemoteService remote, @TempDir Path tmp, BHive local)
+    void testUpdateManaged(MinionRoot root, CommonUpdateResource resource, RemoteService remote, @TempDir Path tmp, BHive local)
             throws IOException {
         doTestUpdate(root, resource, remote, tmp, local);
     }
 
-    void doTestUpdate(MinionRoot root, MasterRootResource resource, RemoteService remote, Path tmp, BHive local)
+    void doTestUpdate(MinionRoot root, CommonUpdateResource resource, RemoteService remote, Path tmp, BHive local)
             throws IOException {
         AtomicBoolean updateTriggered = new AtomicBoolean(false);
         root.setUpdateManager((t) -> updateTriggered.set(true));
@@ -95,26 +95,26 @@ public class MinionUpdateTest {
     }
 
     @Test
-    void testZippedUpdate(MinionRoot root, MasterRootResource resource, RemoteService svc, @TempDir Path tmp,
+    void testZippedUpdate(MinionRoot root, CommonUpdateResource resource, RemoteService svc, @TempDir Path tmp,
             @AuthPack String auth) throws IOException, GeneralSecurityException {
         doTestZippedUpdate(root, resource, svc, tmp, auth);
     }
 
     @Tag("CENTRAL")
     @Test
-    void testZippedUpdateCentral(MinionRoot root, MasterRootResource resource, RemoteService svc, @TempDir Path tmp,
+    void testZippedUpdateCentral(MinionRoot root, CommonUpdateResource resource, RemoteService svc, @TempDir Path tmp,
             @AuthPack String auth) throws IOException, GeneralSecurityException {
         doTestZippedUpdate(root, resource, svc, tmp, auth);
     }
 
     @Tag("MANAGED")
     @Test
-    void testZippedUpdateManaged(MinionRoot root, MasterRootResource resource, RemoteService svc, @TempDir Path tmp,
+    void testZippedUpdateManaged(MinionRoot root, CommonUpdateResource resource, RemoteService svc, @TempDir Path tmp,
             @AuthPack String auth) throws IOException, GeneralSecurityException {
         doTestZippedUpdate(root, resource, svc, tmp, auth);
     }
 
-    void doTestZippedUpdate(MinionRoot root, MasterRootResource resource, RemoteService svc, Path tmp, String auth)
+    void doTestZippedUpdate(MinionRoot root, CommonUpdateResource resource, RemoteService svc, Path tmp, String auth)
             throws IOException, GeneralSecurityException {
         AtomicBoolean updateTriggered = new AtomicBoolean(false);
         root.setUpdateManager((t) -> updateTriggered.set(true));

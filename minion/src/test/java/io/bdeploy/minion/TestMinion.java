@@ -62,7 +62,7 @@ public class TestMinion extends TestServer {
         CloseableMinionRoot cmr = getExtensionStore(context).getOrComputeIfAbsent(CloseableMinionRoot.class,
                 (k) -> new CloseableMinionRoot(getServerPort(context), finalMode), CloseableMinionRoot.class);
 
-        InitTool.initMinionRoot(cmr.root, cmr.mr, "localhost", getServerPort(context), null, MinionMode.STANDALONE);
+        InitTool.initMinionRoot(cmr.root, cmr.mr, "localhost", getServerPort(context), null, finalMode);
         MinionState state = cmr.mr.getState();
 
         String userName = "Test";
