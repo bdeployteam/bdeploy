@@ -27,9 +27,9 @@ public class LocalPushFetchToolTest {
         String hive1arg = "--hive=" + hive1.toString();
         String hive2arg = "--hive=" + hive2.toString();
 
-        tools.getTool(ImportTool.class, hive1arg, "--source=" + src, "--manifest=app:v1").run();
-        tools.getTool(PushTool.class, hive1arg, "--remote=" + hive2.toUri(), "--manifest=app:v1", "--target=default").run();
-        tools.getTool(ExportTool.class, hive2arg, "--target=" + target, "--manifest=app:v1").run();
+        tools.execute(ImportTool.class, hive1arg, "--source=" + src, "--manifest=app:v1");
+        tools.execute(PushTool.class, hive1arg, "--remote=" + hive2.toUri(), "--manifest=app:v1", "--target=default");
+        tools.execute(ExportTool.class, hive2arg, "--target=" + target, "--manifest=app:v1");
 
         ContentHelper.checkDirsEqual(src, target);
     }
@@ -44,9 +44,9 @@ public class LocalPushFetchToolTest {
         String hive1arg = "--hive=" + hive1.toString();
         String hive2arg = "--hive=" + hive2.toString();
 
-        tools.getTool(ImportTool.class, hive1arg, "--source=" + src, "--manifest=app:v1").run();
-        tools.getTool(FetchTool.class, hive2arg, "--remote=" + hive1.toUri(), "--manifest=app:v1").run();
-        tools.getTool(ExportTool.class, hive2arg, "--target=" + target, "--manifest=app:v1").run();
+        tools.execute(ImportTool.class, hive1arg, "--source=" + src, "--manifest=app:v1");
+        tools.execute(FetchTool.class, hive2arg, "--remote=" + hive1.toUri(), "--manifest=app:v1");
+        tools.execute(ExportTool.class, hive2arg, "--target=" + target, "--manifest=app:v1");
 
         ContentHelper.checkDirsEqual(src, target);
     }

@@ -142,8 +142,7 @@ public class MinionDeployTest {
         Files.write(bdeployFile, StorageHelper.toRawBytes(cdesc));
 
         /* STEP 8: launcher client, assert that the script does some sleeping... */
-        launcher.getTool(LauncherTool.class, "--homeDir=" + tmp.resolve("launcher"), "--launch=" + bdeployFile, "--exitOnError")
-                .run();
+        launcher.execute(LauncherTool.class, "--homeDir=" + tmp.resolve("launcher"), "--launch=" + bdeployFile, "--exitOnError");
 
         // if we reach here, launching succeeded. unfortunately no better way to check right now.
 

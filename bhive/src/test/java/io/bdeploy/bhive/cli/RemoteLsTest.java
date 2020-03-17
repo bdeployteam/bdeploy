@@ -3,8 +3,6 @@ package io.bdeploy.bhive.cli;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
@@ -27,15 +25,10 @@ public class RemoteLsTest {
         Path smallSrcDir = ContentHelper.genSimpleTestTree(tmp, "src");
         Path hive = tmp.resolve("hive");
 
-        tools.getTool(ImportTool.class, "--hive=" + hive, "--manifest=app:v1", "--source=" + smallSrcDir).run();
+        tools.execute(ImportTool.class, "--hive=" + hive, "--manifest=app:v1", "--source=" + smallSrcDir);
 
-        ManifestTool tool = tools.getTool(ManifestTool.class, "--remote=" + hive.toUri(), "--list");
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos)) {
-            tool.setOutput(ps);
-            tool.run();
-
-            assertThat(baos.toString(), startsWith("app:v1"));
-        }
+        String[] output = tools.execute(ManifestTool.class, "--remote=" + hive.toUri(), "--list");
+        assertThat(output[0], startsWith("app:v1"));
     }
 
 }

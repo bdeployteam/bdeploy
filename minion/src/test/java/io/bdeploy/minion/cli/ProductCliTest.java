@@ -115,8 +115,8 @@ public class ProductCliTest {
 
         // now import the product into a new hive, ext dependency should be fetched from remote
         Path impHive = temp.resolve("imp-hive");
-        tools.getTool(ProductTool.class, "--hive=" + impHive, "--import=" + pdFile, "--remote=" + svc.getUri(), "--token=" + auth)
-                .run();
+        tools.execute(ProductTool.class, "--hive=" + impHive, "--import=" + pdFile, "--remote=" + svc.getUri(),
+                "--token=" + auth);
 
         // this is the key we expect to be created.
         Manifest.Key prodKey = new Manifest.Key("prod/product", "1.0.0");

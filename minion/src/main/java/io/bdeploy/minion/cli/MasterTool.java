@@ -33,6 +33,7 @@ import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.MinionState;
 import io.bdeploy.minion.api.v1.PublicRootResourceImpl;
 import io.bdeploy.minion.cli.MasterTool.MasterConfig;
+import io.bdeploy.minion.cli.shutdown.RemoteShutdownImpl;
 import io.bdeploy.minion.remote.jersey.CentralUpdateResourceImpl;
 import io.bdeploy.minion.remote.jersey.CommonRootResourceImpl;
 import io.bdeploy.minion.remote.jersey.JerseyAwareMinionUpdateManager;
@@ -66,6 +67,9 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
 
         @Help(value = "Allow CORS, allows the web-app to run on a different port than the backend.", arg = false)
         boolean allowCors() default false;
+
+        @Help("A token which can be used to remotely shutdown the server on /shutdown")
+        String shutdownToken();
     }
 
     public MasterTool() {
@@ -106,6 +110,10 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
 
                 delegate.setDelegate(srv.getRemoteActivityReporter());
                 registerMasterResources(srv, config.publishWebapp(), config.allowCors(), r, srv.getRemoteActivityReporter());
+
+                if (config.shutdownToken() != null) {
+                    srv.register(new RemoteShutdownImpl(srv, config.shutdownToken()));
+                }
 
                 srv.start();
                 srv.join();

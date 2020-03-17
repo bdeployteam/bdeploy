@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.ws.rs.WebApplicationException;
@@ -46,11 +47,12 @@ public class RepoCliTest {
     }
 
     @Test
-    public void toolCreate(CommonRootResource master, RemoteService service, @AuthPack String auth, MinionRoot root) {
-        tools.getTool(RemoteRepoTool.class, "--remote=" + service.getUri(), "--token=" + auth,
-                "--storage=" + root.getStorageLocations().get(0).toString(), "--add=test", "--description=desc").run();
+    public void toolCreate(CommonRootResource master, RemoteService service, @AuthPack String auth, MinionRoot root)
+            throws IOException {
+        tools.execute(RemoteRepoTool.class, "--remote=" + service.getUri(), "--token=" + auth,
+                "--storage=" + root.getStorageLocations().get(0).toString(), "--add=test", "--description=desc");
 
-        tools.getTool(RemoteRepoTool.class, "--remote=" + service.getUri(), "--token=" + auth, "--list").run();
+        tools.execute(RemoteRepoTool.class, "--remote=" + service.getUri(), "--token=" + auth, "--list");
 
         List<SoftwareRepositoryConfiguration> repos = master.getSoftwareRepositories();
         assertEquals(1, repos.size());

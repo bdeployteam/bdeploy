@@ -27,6 +27,12 @@ public class LocalLoginTool extends ConfiguredCliTool<LoginConfig> {
         @Help("Perform a login to the given remote and store the session locally using the given name")
         String add();
 
+        @Help("User to login, read from console if not given")
+        String user();
+
+        @Help("Password to use when logging in, read from console if not given")
+        String password();
+
         @Help("Remove the given stored login session")
         String remove();
 
@@ -50,11 +56,21 @@ public class LocalLoginTool extends ConfiguredCliTool<LoginConfig> {
 
             out().println("Please specify user and password for " + config.remote());
 
-            out().print("User: ");
-            String user = System.console().readLine();
+            String user;
+            if (config.user() != null) {
+                user = config.user();
+            } else {
+                out().print("User: ");
+                user = System.console().readLine();
+            }
 
-            out().print("Password: ");
-            char[] pass = System.console().readPassword();
+            char[] pass;
+            if (config.password() != null) {
+                pass = config.password().toCharArray();
+            } else {
+                out().print("Password: ");
+                pass = System.console().readPassword();
+            }
 
             llm.login(config.add(), config.remote(), user, new String(pass));
         } else if (config.remove() != null) {

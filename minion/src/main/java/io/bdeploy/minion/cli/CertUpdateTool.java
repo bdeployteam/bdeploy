@@ -38,6 +38,9 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
         @EnvironmentFallback("BDEPLOY_ROOT")
         @Validator(MinionRootValidator.class)
         String root();
+
+        @Help(value = "Override user questions and assume consent", arg = false)
+        boolean yes();
     }
 
     public CertUpdateTool() {
@@ -63,11 +66,13 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
                     helpAndFail("New certificate " + cert + " does not exist!");
                 }
 
-                out().println("ATTENTION: This operation will render all existing tokens invalid. This means");
-                out().println("           that all clients need to re-run the installer(s) to update tokens.");
-                out().println("           Also all existing logins (CLI, Web, ...) will have to be re-performed.");
-                out().println("           Press CTRL+C to abort, or enter to continue.");
-                System.in.read();
+                if (!config.yes()) {
+                    out().println("ATTENTION: This operation will render all existing tokens invalid. This means");
+                    out().println("           that all clients need to re-run the installer(s) to update tokens.");
+                    out().println("           Also all existing logins (CLI, Web, ...) will have to be re-performed.");
+                    out().println("           Press CTRL+C to abort, or enter to continue.");
+                    System.in.read();
+                }
 
                 mr.getAuditor().audit(
                         AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("cert-update").build());

@@ -1,5 +1,8 @@
 package io.bdeploy.common;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -10,11 +13,15 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.cli.ToolBase;
 import io.bdeploy.common.cli.ToolBase.CliTool;
 
 public class TestCliTool implements ParameterResolver {
+
+    private static final Logger log = LoggerFactory.getLogger(TestCliTool.class);
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.PARAMETER)
@@ -48,15 +55,25 @@ public class TestCliTool implements ParameterResolver {
         if (args.isPresent()) {
             arr = args.get().value();
         }
-        return getTool((Class<? extends CliTool>) parameterContext.getParameter().getType(), arr);
+        return getTool(defaultReporter, (Class<? extends CliTool>) parameterContext.getParameter().getType(), arr);
     }
 
-    @SuppressWarnings("unchecked")
-    public <T extends CliTool> T getTool(Class<T> tool, String... args) {
-        return (T) getTool(defaultReporter, tool, args);
+    public <T extends CliTool> String[] execute(Class<T> tool, String... args) throws IOException {
+        return readOutput(getTool(defaultReporter, tool, args));
     }
 
-    private Object getTool(ActivityReporter reporter, Class<? extends CliTool> tool, String... args) {
+    private <T extends CliTool> String[] readOutput(T tool) throws IOException {
+        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+            tool.setOutput(new PrintStream(os));
+            tool.run();
+
+            log.info(tool.getClass().getSimpleName() + " output:\n" + os.toString());
+
+            return os.toString().split("\\r?\\n");
+        }
+    }
+
+    private CliTool getTool(ActivityReporter reporter, Class<? extends CliTool> tool, String... args) {
         String name = ToolBase.nameOf(tool);
         if (name == null) {
             throw new IllegalArgumentException("Unknown tool: " + tool);

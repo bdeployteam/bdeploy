@@ -131,8 +131,7 @@ public class MinionUpdateTest {
         }
 
         // this will unpack, import, push, and trigger the update
-        cli.getTool(RemoteMasterTool.class, "--update=" + zip.toString(), "--yes", "--remote=" + svc.getUri(), "--token=" + auth)
-                .run();
+        cli.execute(RemoteMasterTool.class, "--update=" + zip.toString(), "--yes", "--remote=" + svc.getUri(), "--token=" + auth);
 
         if (OsHelper.getRunningOs() == OperatingSystem.LINUX) {
             assertTrue(updateTriggered.get());

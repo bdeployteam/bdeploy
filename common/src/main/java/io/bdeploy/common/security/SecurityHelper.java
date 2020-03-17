@@ -46,7 +46,7 @@ public class SecurityHelper {
     public static final String ROOT_ALIAS = "1";
     private static final byte[] DEF_SLT = "@%$&".getBytes(StandardCharsets.UTF_8);
     private static final String TOKEN_ALIAS = "token";
-    private static final String CERT_ALIAS = "cert";
+    public static final String CERT_ALIAS = "cert";
 
     private SecurityHelper() {
     }

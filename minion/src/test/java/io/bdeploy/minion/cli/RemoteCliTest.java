@@ -55,41 +55,41 @@ public class RemoteCliTest {
 
         /* STEP 5: deploy, activate on remote master */
         assertTrue(master.getNamedMaster("demo").getInstanceState(uuid).installedTags.isEmpty());
-        tools.getTool(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                "--uuid=" + uuid, "--tag=" + instance.getTag(), "--install").run();
+        tools.execute(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
+                "--uuid=" + uuid, "--tag=" + instance.getTag(), "--install");
         assertFalse(master.getNamedMaster("demo").getInstanceState(uuid).installedTags.isEmpty());
 
-        tools.getTool(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                "--list").run();
+        tools.execute(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
+                "--list");
 
         // test uninstall, re-install once
-        tools.getTool(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                "--uuid=" + uuid, "--tag=" + instance.getTag(), "--uninstall").run();
+        tools.execute(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
+                "--uuid=" + uuid, "--tag=" + instance.getTag(), "--uninstall");
         assertTrue(master.getNamedMaster("demo").getInstanceState(uuid).installedTags.isEmpty());
-        tools.getTool(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                "--uuid=" + uuid, "--tag=" + instance.getTag(), "--install").run();
+        tools.execute(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
+                "--uuid=" + uuid, "--tag=" + instance.getTag(), "--install");
         assertFalse(master.getNamedMaster("demo").getInstanceState(uuid).installedTags.isEmpty());
 
-        tools.getTool(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                "--uuid=" + uuid, "--tag=" + instance.getTag(), "--activate").run();
+        tools.execute(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
+                "--uuid=" + uuid, "--tag=" + instance.getTag(), "--activate");
         assertEquals(instance.getTag(), master.getNamedMaster("demo").getInstanceState(uuid).activeTag);
 
         /* STEP 6: run/control processes on the remote */
-        tools.getTool(RemoteProcessTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                "--uuid=" + uuid, "--application=app", "--start").run();
+        tools.execute(RemoteProcessTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
+                "--uuid=" + uuid, "--application=app", "--start");
 
         InstanceStatusDto status = master.getNamedMaster("demo").getStatus(uuid);
         System.out.println(status);
         assertTrue(status.isAppRunningOrScheduled("app"));
 
-        tools.getTool(RemoteProcessTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                "--uuid=" + uuid, "--status").run();
+        tools.execute(RemoteProcessTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
+                "--uuid=" + uuid, "--status");
 
         // give the script a bit to write output
         Thread.sleep(200);
 
-        tools.getTool(RemoteProcessTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                "--uuid=" + uuid, "--application=app", "--stop").run();
+        tools.execute(RemoteProcessTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
+                "--uuid=" + uuid, "--application=app", "--stop");
 
         status = master.getNamedMaster("demo").getStatus(uuid);
         System.out.println(status);

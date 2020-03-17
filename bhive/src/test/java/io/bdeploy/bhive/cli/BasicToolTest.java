@@ -7,21 +7,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
-
-import com.google.common.base.Splitter;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
@@ -60,7 +54,7 @@ public class BasicToolTest {
         ContentHelper.genTestTree(srcDir, 1, 1, 1, 2, 0, 0);
 
         // import a test directory
-        tools.getTool(ImportTool.class, hiveArg, "--source=" + srcDir, "--manifest=test:v1", "--label=x:y").run();
+        tools.execute(ImportTool.class, hiveArg, "--source=" + srcDir, "--manifest=test:v1", "--label=x:y");
 
         // check programmatically whether this looks ok.
         try (BHive h = new BHive(hiveDir.toUri(), reporter)) {
@@ -75,63 +69,36 @@ public class BasicToolTest {
         }
 
         // check with tool whether the manifest is there
-        ManifestTool list = tools.getTool(ManifestTool.class, hiveArg, "--list", "--manifest=test:v1");
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            try (PrintStream ps = new PrintStream(baos)) {
-                list.setOutput(ps);
-                list.run();
-            }
-            String output = baos.toString(StandardCharsets.UTF_8.name());
-            assertThat(output, startsWith("test:v1"));
-        }
+        String[] output = tools.execute(ManifestTool.class, hiveArg, "--list", "--manifest=test:v1");
+        assertThat(output[0], startsWith("test:v1"));
 
         // perform FSCK to check for broken database
-        FsckTool check = tools.getTool(FsckTool.class, hiveArg, "--manifest=test:v1");
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            try (PrintStream ps = new PrintStream(baos)) {
-                check.setOutput(ps);
-                check.run();
-            }
-            String output = baos.toString(StandardCharsets.UTF_8.name());
-            assertThat(output.trim(), is("Check OK"));
-        }
+        output = tools.execute(FsckTool.class, hiveArg, "--manifest=test:v1");
+        assertThat(output[0].trim(), is("Check OK"));
 
         // export to other directory and compare with original source.
-        tools.getTool(ExportTool.class, hiveArg, "--manifest=test:v1", "--target=" + expDir.toString()).run();
+        tools.execute(ExportTool.class, hiveArg, "--manifest=test:v1", "--target=" + expDir.toString());
 
         ContentHelper.checkDirsEqual(srcDir, expDir);
 
         Manifest.Key anotherKey = new Manifest.Key("another", "v1");
-        tools.getTool(ImportTool.class, hiveArg, "--source=" + smallSrcDir, "--manifest=" + anotherKey).run();
+        tools.execute(ImportTool.class, hiveArg, "--source=" + smallSrcDir, "--manifest=" + anotherKey);
 
         Manifest.Key anotherKey2 = new Manifest.Key("another", "v2");
         Files.delete(smallSrc2Dir.resolve("test.txt"));
         Files.write(smallSrc2Dir.resolve("another.txt"), Arrays.asList("Test Content"));
-        tools.getTool(ImportTool.class, hiveArg, "--source=" + smallSrc2Dir, "--manifest=" + anotherKey2).run();
+        tools.execute(ImportTool.class, hiveArg, "--source=" + smallSrc2Dir, "--manifest=" + anotherKey2);
 
-        TreeTool treetool = tools.getTool(TreeTool.class, hiveArg, "--list=" + anotherKey);
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            treetool.setOutput(new PrintStream(baos));
-            treetool.run();
+        output = tools.execute(TreeTool.class, hiveArg, "--list=" + anotherKey);
+        assertEquals(4, output.length);
 
-            List<String> out = Splitter.on(System.getProperty("line.separator")).splitToList(baos.toString());
-            // 4 elements plus an empty final line
-            assertEquals(5, out.size());
-        }
+        output = tools.execute(TreeTool.class, hiveArg, "--diff=" + anotherKey, "--diff=" + anotherKey2);
+        // one content diff (root), one only left (test.txt), one only right
+        // (another.txt).
+        assertEquals(4, output.length);
 
-        TreeTool difftool = tools.getTool(TreeTool.class, hiveArg, "--diff=" + anotherKey, "--diff=" + anotherKey2);
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            difftool.setOutput(new PrintStream(baos));
-            difftool.run();
-
-            List<String> out = Splitter.on(System.getProperty("line.separator")).splitToList(baos.toString());
-            // one content diff (root), one only left (test.txt), one only right
-            // (another.txt), one final empty line.
-            assertEquals(5, out.size());
-        }
-
-        tools.getTool(ManifestTool.class, hiveArg, "--delete", "--manifest=test:v1").run();
-        tools.getTool(ManifestTool.class, hiveArg, "--delete", "--manifest=another:v2").run();
+        tools.execute(ManifestTool.class, hiveArg, "--delete", "--manifest=test:v1");
+        tools.execute(ManifestTool.class, hiveArg, "--delete", "--manifest=another:v2");
 
         // check programmatically whether this looks ok.
         try (BHive h = new BHive(hiveDir.toUri(), reporter)) {
@@ -144,7 +111,7 @@ public class BasicToolTest {
             assertThat(labels.size(), is(0));
         }
 
-        tools.getTool(PruneTool.class, hiveArg).run();
+        tools.execute(PruneTool.class, hiveArg);
 
         // remaining objects of the simple manifest. 2 files, 2 trees, 1 manifest
         // plus remaining hive management objects. 1 .dblock, 1 manifest.db, audit.log

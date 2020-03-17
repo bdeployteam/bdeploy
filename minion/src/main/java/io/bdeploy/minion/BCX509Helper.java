@@ -2,6 +2,7 @@ package io.bdeploy.minion;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,6 +11,7 @@ import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
+import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.cert.Certificate;
@@ -33,6 +35,8 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.OperatorException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
@@ -135,6 +139,31 @@ public class BCX509Helper {
 
         try (OutputStream os = Files.newOutputStream(ks)) {
             keyStore.store(os, pass);
+        }
+    }
+
+    public static void exportPrivateCertificateAsPem(Path ks, char[] pass, Path pem)
+            throws GeneralSecurityException, IOException, OperatorCreationException {
+        Security.addProvider(new BouncyCastleProvider());
+
+        if (Files.exists(pem)) {
+            throw new IllegalStateException("Will not overwrite existing PEM: " + pem);
+        }
+
+        KeyStore keyStore = SecurityHelper.getInstance().loadPrivateKeyStore(ks, pass);
+
+        PrivateKey pk = (PrivateKey) keyStore.getKey(SecurityHelper.ROOT_ALIAS, pass);
+        String alias = SecurityHelper.ROOT_ALIAS;
+        if (!keyStore.containsAlias(SecurityHelper.ROOT_ALIAS)) {
+            alias = SecurityHelper.CERT_ALIAS;
+        }
+        Certificate cert = keyStore.getCertificate(alias);
+
+        try (OutputStreamWriter osw = new OutputStreamWriter(Files.newOutputStream(pem))) {
+            try (JcaPEMWriter writer = new JcaPEMWriter(osw)) {
+                writer.writeObject(cert);
+                writer.writeObject(pk);
+            }
         }
     }
 
