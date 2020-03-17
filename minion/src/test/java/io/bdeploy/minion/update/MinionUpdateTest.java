@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -50,6 +51,25 @@ public class MinionUpdateTest {
     @Test
     void testUpdate(MinionRoot root, MasterRootResource resource, RemoteService remote, @TempDir Path tmp, BHive local)
             throws IOException {
+        doTestUpdate(root, resource, remote, tmp, local);
+    }
+
+    @Tag("CENTRAL")
+    @Test
+    void testUpdateCentral(MinionRoot root, MasterRootResource resource, RemoteService remote, @TempDir Path tmp, BHive local)
+            throws IOException {
+        doTestUpdate(root, resource, remote, tmp, local);
+    }
+
+    @Tag("MANAGED")
+    @Test
+    void testUpdateManaged(MinionRoot root, MasterRootResource resource, RemoteService remote, @TempDir Path tmp, BHive local)
+            throws IOException {
+        doTestUpdate(root, resource, remote, tmp, local);
+    }
+
+    void doTestUpdate(MinionRoot root, MasterRootResource resource, RemoteService remote, Path tmp, BHive local)
+            throws IOException {
         AtomicBoolean updateTriggered = new AtomicBoolean(false);
         root.setUpdateManager((t) -> updateTriggered.set(true));
         root.onStartup();
@@ -77,6 +97,25 @@ public class MinionUpdateTest {
     @Test
     void testZippedUpdate(MinionRoot root, MasterRootResource resource, RemoteService svc, @TempDir Path tmp,
             @AuthPack String auth) throws IOException, GeneralSecurityException {
+        doTestZippedUpdate(root, resource, svc, tmp, auth);
+    }
+
+    @Tag("CENTRAL")
+    @Test
+    void testZippedUpdateCentral(MinionRoot root, MasterRootResource resource, RemoteService svc, @TempDir Path tmp,
+            @AuthPack String auth) throws IOException, GeneralSecurityException {
+        doTestZippedUpdate(root, resource, svc, tmp, auth);
+    }
+
+    @Tag("MANAGED")
+    @Test
+    void testZippedUpdateManaged(MinionRoot root, MasterRootResource resource, RemoteService svc, @TempDir Path tmp,
+            @AuthPack String auth) throws IOException, GeneralSecurityException {
+        doTestZippedUpdate(root, resource, svc, tmp, auth);
+    }
+
+    void doTestZippedUpdate(MinionRoot root, MasterRootResource resource, RemoteService svc, Path tmp, String auth)
+            throws IOException, GeneralSecurityException {
         AtomicBoolean updateTriggered = new AtomicBoolean(false);
         root.setUpdateManager((t) -> updateTriggered.set(true));
 
