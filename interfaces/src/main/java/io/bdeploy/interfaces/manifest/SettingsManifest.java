@@ -83,9 +83,8 @@ public class SettingsManifest {
     private static SettingsConfiguration encryptPasswords(BHive hive, SettingsConfiguration config, SecretKeySpec key) {
         SettingsConfiguration oldConfig = read(hive, key, false);
         for (LDAPSettingsDto lds : config.auth.ldapSettings) {
-            String server = lds.server;
             if (lds.pass == null || lds.pass.isEmpty()) {
-                LDAPSettingsDto oldLds = oldConfig.auth.ldapSettings.stream().filter(l -> l.server.equals(server)).findAny()
+                LDAPSettingsDto oldLds = oldConfig.auth.ldapSettings.stream().filter(l -> l.id.equals(lds.id)).findAny()
                         .orElse(null);
                 if (oldLds != null) {
                     try {

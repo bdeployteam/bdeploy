@@ -100,7 +100,7 @@ export class UsersBrowserComponent implements OnInit, AfterViewInit {
   public getAuthenticatedBy(userInfo: UserInfo): string {
     if(userInfo.externalSystem) {
       if (userInfo.externalSystem === 'LDAP') {
-        const dto: LDAPSettingsDto = this.settings.getSettings().auth.ldapSettings.find(s => s.server === userInfo.externalTag);
+        const dto: LDAPSettingsDto = this.settings.getSettings().auth.ldapSettings.find(s => s.id === userInfo.externalTag);
         return dto ? dto.description : userInfo.externalTag + ' (not found)';
       } else {
         return userInfo.externalTag; // should not happen
