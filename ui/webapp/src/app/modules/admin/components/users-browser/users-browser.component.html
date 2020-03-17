@@ -89,4 +89,4 @@
     showFirstLastButtons>
   </mat-paginator>
 </div>
-<button mat-fab class="add-button" *ngIf='!isLoading() && !settings.getSettings().auth.disableBasic' (click)="onAdd()"><mat-icon>add</mat-icon></button>
+<button mat-fab class="add-button" *ngIf='!settings.getSettings().auth.disableBasic' [disabled]='isLoading()' (click)="onAdd()"><mat-icon>add</mat-icon></button>
