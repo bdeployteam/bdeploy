@@ -1,5 +1,7 @@
 package io.bdeploy.interfaces.descriptor.application;
 
+import javax.annotation.processing.Generated;
+
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 
 /**
@@ -111,6 +113,7 @@ public class ParameterDescriptor implements Comparable<ParameterDescriptor> {
         return uid.compareTo(o.uid);
     }
 
+    @Generated("Eclipse")
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -119,6 +122,7 @@ public class ParameterDescriptor implements Comparable<ParameterDescriptor> {
         return result;
     }
 
+    @Generated("Eclipse")
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

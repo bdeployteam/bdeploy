@@ -1,5 +1,7 @@
 package io.bdeploy.common.security;
 
+import javax.annotation.processing.Generated;
+
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -79,6 +81,7 @@ public final class ScopedPermission {
         return permission.name() + " (" + scope + ")";
     }
 
+    @Generated("Eclipse")
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -88,6 +91,7 @@ public final class ScopedPermission {
         return result;
     }
 
+    @Generated("Eclipse")
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.annotation.processing.Generated;
+
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
@@ -75,6 +77,7 @@ public class ApplicationManifest implements Comparable<ApplicationManifest> {
         return key.compareTo(o.key);
     }
 
+    @Generated("Eclipse")
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -83,6 +86,7 @@ public class ApplicationManifest implements Comparable<ApplicationManifest> {
         return result;
     }
 
+    @Generated("Eclipse")
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

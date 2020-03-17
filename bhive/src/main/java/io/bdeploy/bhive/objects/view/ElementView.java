@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.processing.Generated;
+
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.op.ScanOperation;
@@ -65,6 +67,7 @@ public abstract class ElementView implements Comparable<ElementView> {
         return id.compareTo(o.id);
     }
 
+    @Generated("Eclipse")
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -73,6 +76,7 @@ public abstract class ElementView implements Comparable<ElementView> {
         return result;
     }
 
+    @Generated("Eclipse")
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

@@ -3,6 +3,8 @@ package io.bdeploy.interfaces.configuration.pcu;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.processing.Generated;
+
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 
@@ -54,6 +56,7 @@ public class ProcessConfiguration implements Comparable<ProcessConfiguration> {
         return uid.compareTo(o.uid);
     }
 
+    @Generated("Eclipse")
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -62,6 +65,7 @@ public class ProcessConfiguration implements Comparable<ProcessConfiguration> {
         return result;
     }
 
+    @Generated("Eclipse")
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

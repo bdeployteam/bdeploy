@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.net.URI;
 import java.security.KeyStore;
 
+import javax.annotation.processing.Generated;
 import javax.ws.rs.core.UriBuilder;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -93,6 +94,7 @@ public class RemoteService implements Serializable {
         return UriBuilder.fromUri(getUri()).scheme("wss").replacePath("/ws").path(path).build();
     }
 
+    @Generated("Eclipse")
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -102,6 +104,7 @@ public class RemoteService implements Serializable {
         return result;
     }
 
+    @Generated("Eclipse")
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

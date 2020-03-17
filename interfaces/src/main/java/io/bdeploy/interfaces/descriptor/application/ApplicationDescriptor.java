@@ -1,5 +1,7 @@
 package io.bdeploy.interfaces.descriptor.application;
 
+import javax.annotation.processing.Generated;
+
 import io.bdeploy.api.product.v1.ApplicationDescriptorApi;
 
 /**
@@ -61,6 +63,7 @@ public class ApplicationDescriptor extends ApplicationDescriptorApi implements C
         return name.compareTo(o.name);
     }
 
+    @Generated("Eclipse")
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -69,6 +72,7 @@ public class ApplicationDescriptor extends ApplicationDescriptorApi implements C
         return result;
     }
 
+    @Generated("Eclipse")
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
