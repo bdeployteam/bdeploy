@@ -1,5 +1,8 @@
 package io.bdeploy.api.product.v1.impl;
 
+
+import javax.annotation.processing.Generated;
+
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
@@ -77,6 +80,7 @@ public class ScopedManifestKey {
         return getKey().toString();
     }
 
+    @Generated("Eclipse")
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -87,6 +91,7 @@ public class ScopedManifestKey {
         return result;
     }
 
+    @Generated("Eclipse")
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

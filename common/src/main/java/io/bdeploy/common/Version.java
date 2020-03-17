@@ -1,5 +1,7 @@
 package io.bdeploy.common;
 
+import javax.annotation.processing.Generated;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ComparisonChain;
@@ -52,6 +54,7 @@ public class Version implements Comparable<Version> {
         return major + "." + minor + "." + micro + (qualifier == null ? "" : qualifier);
     }
 
+    @Generated("Eclipse")
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -63,6 +66,7 @@ public class Version implements Comparable<Version> {
         return result;
     }
 
+    @Generated("Eclipse")
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

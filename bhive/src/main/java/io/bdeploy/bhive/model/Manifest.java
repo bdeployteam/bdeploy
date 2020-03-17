@@ -11,6 +11,8 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import javax.annotation.processing.Generated;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -118,6 +120,7 @@ public class Manifest implements Serializable, Comparable<Manifest> {
         return "Manifest(" + root + ")";
     }
 
+    @Generated("Eclipse")
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -127,6 +130,7 @@ public class Manifest implements Serializable, Comparable<Manifest> {
         return result;
     }
 
+    @Generated("Eclipse")
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -330,6 +334,7 @@ public class Manifest implements Serializable, Comparable<Manifest> {
             return new Key(key.substring(0, indexOf), key.substring(indexOf + 1));
         }
 
+        @Generated("Eclipse")
         @Override
         public int hashCode() {
             final int prime = 31;
@@ -339,6 +344,7 @@ public class Manifest implements Serializable, Comparable<Manifest> {
             return result;
         }
 
+        @Generated("Eclipse")
         @Override
         public boolean equals(Object obj) {
             if (this == obj) {
@@ -402,6 +408,7 @@ public class Manifest implements Serializable, Comparable<Manifest> {
             return path.compareTo(o.path);
         }
 
+        @Generated("Eclipse")
         @Override
         public int hashCode() {
             final int prime = 31;
@@ -410,6 +417,7 @@ public class Manifest implements Serializable, Comparable<Manifest> {
             return result;
         }
 
+        @Generated("Eclipse")
         @Override
         public boolean equals(Object obj) {
             if (this == obj) {
