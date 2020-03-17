@@ -4,7 +4,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { cloneDeep } from 'lodash';
-import { finalize } from 'rxjs/operators';
+import { catchError, finalize } from 'rxjs/operators';
 import { LDAPSettingsDto, Permission, UserInfo } from 'src/app/models/gen.dtos';
 import { UserEditComponent } from 'src/app/modules/core/components/user-edit/user-edit.component';
 import { UserPasswordComponent } from 'src/app/modules/core/components/user-password/user-password.component';
@@ -134,7 +134,8 @@ export class UsersBrowserComponent implements OnInit, AfterViewInit {
       },
     }).afterClosed().subscribe(r => {
       if (r) {
-        this.authAdminService.createLocalUser(r).subscribe(result => {
+        this.loading = true;
+        this.authAdminService.createLocalUser(r).pipe(catchError(e => { this.loading = false; throw e; })).subscribe(result => {
           this.loadUsers();
         });
       }
@@ -150,7 +151,8 @@ export class UsersBrowserComponent implements OnInit, AfterViewInit {
       }
     }).afterClosed().subscribe(r => {
       if (r) {
-        this.authAdminService.updateUser(r).subscribe(result => {
+        this.loading = true;
+        this.authAdminService.updateUser(r).pipe(catchError(e => { this.loading = false; throw e; })).subscribe(result => {
           this.loadUsers();
         });
       }
@@ -166,7 +168,8 @@ export class UsersBrowserComponent implements OnInit, AfterViewInit {
       },
     }).afterClosed().subscribe(r => {
       if (r) {
-        this.authAdminService.updateLocalUserPassword(r.user, r.newPassword).subscribe(result => {
+        this.loading = true;
+        this.authAdminService.updateLocalUserPassword(r.user, r.newPassword).pipe(catchError(e => { this.loading = false; throw e; })).subscribe(result => {
           this.loadUsers();
         });
       }
@@ -179,7 +182,8 @@ export class UsersBrowserComponent implements OnInit, AfterViewInit {
       data: cloneDeep(userInfo),
     }).afterClosed().subscribe(r => {
       if (r) {
-        this.authAdminService.updateUser(r).subscribe(result => {
+        this.loading = true;
+        this.authAdminService.updateUser(r).pipe(catchError(e => { this.loading = false; throw e; })).subscribe(result => {
           this.loadUsers();
         });
       }
@@ -193,7 +197,8 @@ export class UsersBrowserComponent implements OnInit, AfterViewInit {
       return;
     }
     userInfo.inactive = newValue;
-    this.authAdminService.updateUser(userInfo).subscribe(result => {
+    this.loading = true;
+    this.authAdminService.updateUser(userInfo).pipe(catchError(e => { this.loading = false; throw e; })).subscribe(result => {
       this.loadUsers();
     });
   }
@@ -205,7 +210,8 @@ export class UsersBrowserComponent implements OnInit, AfterViewInit {
       mode: MessageBoxMode.CONFIRM,
     }).subscribe(r => {
       if (r) {
-        this.authAdminService.deleteUser(userInfo.name).subscribe(result => {
+        this.loading = true;
+        this.authAdminService.deleteUser(userInfo.name).pipe(catchError(e => { this.loading = false; throw e; })).subscribe(result => {
           this.loadUsers();
         });
       }
