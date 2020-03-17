@@ -8,10 +8,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.ApiAccessToken;
@@ -25,7 +28,14 @@ import io.bdeploy.minion.cli.MasterTool;
 import io.bdeploy.minion.user.UserDatabase;
 import io.bdeploy.ui.api.MinionMode;
 
+/**
+ * A complete Minion for unit tests.
+ * <p>
+ * You can provide a {@link Tag} to set the minion's mode, e.g. <code>@Tag("CENTRAL")</code>.
+ */
 public class TestMinion extends TestServer {
+
+    private static final Logger log = LoggerFactory.getLogger(TestMinion.class);
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.PARAMETER)
@@ -37,8 +47,20 @@ public class TestMinion extends TestServer {
         // Make sure previous registered resources are gone.
         resetRegistrations();
 
+        MinionMode mode = MinionMode.STANDALONE;
+        for (String tag : context.getTags()) {
+            if (MinionMode.CENTRAL.name().equals(tag)) {
+                mode = MinionMode.CENTRAL;
+            } else if (MinionMode.MANAGED.name().equals(tag)) {
+                mode = MinionMode.MANAGED;
+            }
+        }
+
+        MinionMode finalMode = mode;
+        log.info("TestMinion mode = " + finalMode);
+
         CloseableMinionRoot cmr = getExtensionStore(context).getOrComputeIfAbsent(CloseableMinionRoot.class,
-                (k) -> new CloseableMinionRoot(getServerPort(context)), CloseableMinionRoot.class);
+                (k) -> new CloseableMinionRoot(getServerPort(context), finalMode), CloseableMinionRoot.class);
 
         InitTool.initMinionRoot(cmr.root, cmr.mr, "localhost", getServerPort(context), null, MinionMode.STANDALONE);
         MinionState state = cmr.mr.getState();
@@ -93,11 +115,11 @@ public class TestMinion extends TestServer {
 
         final MinionRoot mr;
 
-        public CloseableMinionRoot(int port) {
+        public CloseableMinionRoot(int port, MinionMode mode) {
             try {
                 root = Files.createTempDirectory("mr-");
                 mr = new MinionRoot(root, new ActivityReporter.Null());
-                InitTool.initMinionRoot(root, mr, "localhost", port, null, MinionMode.STANDALONE);
+                InitTool.initMinionRoot(root, mr, "localhost", port, null, mode);
                 mr.onStartup();
             } catch (Exception e) {
                 throw new IllegalStateException(e);
