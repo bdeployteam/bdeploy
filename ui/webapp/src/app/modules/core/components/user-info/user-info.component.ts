@@ -1,5 +1,5 @@
 import { Component, OnInit, TemplateRef } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { cloneDeep } from 'lodash';
@@ -18,11 +18,13 @@ import { UserPasswordComponent } from '../user-password/user-password.component'
 })
 export class UserInfoComponent implements OnInit {
 
-  private log: Logger = this.loggingService.getLogger('UserInfoComponent');
+  private readonly log: Logger = this.loggingService.getLogger('UserInfoComponent');
 
   public user: UserInfo;
   public pack: String;
   public genFull = false;
+
+  private dialogRef: MatDialogRef<any>;
 
   constructor(private loggingService: LoggingService,
     private router: Router,
@@ -90,11 +92,12 @@ export class UserInfoComponent implements OnInit {
 
   copied() {
     this.snackbarService.open('Token copied to clipboard.', null, { duration: 2000 });
+    this.dialogRef.close();
   }
 
   async openDialog(ref: TemplateRef<unknown>) {
     this.regenPack();
-    this.dialog.open(ref, {
+    this.dialogRef = this.dialog.open(ref, {
       width: '600px'
     });
   }
