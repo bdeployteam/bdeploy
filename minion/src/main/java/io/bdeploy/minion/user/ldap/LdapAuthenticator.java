@@ -49,8 +49,7 @@ public class LdapAuthenticator implements Authenticator {
             return null;
         }
 
-        Optional<LDAPSettingsDto> server = settings.ldapSettings.stream().filter(s -> s.server.equals(user.externalTag))
-                .findAny();
+        Optional<LDAPSettingsDto> server = settings.ldapSettings.stream().filter(s -> s.id.equals(user.externalTag)).findAny();
         if (!server.isPresent()) {
             log.warn("LDAP server {} associated with user {} no longer available, will try all servers.", user.externalTag,
                     user.name);
@@ -135,7 +134,7 @@ public class LdapAuthenticator implements Authenticator {
 
         user.external = true;
         user.externalSystem = LDAP_SYSTEM;
-        user.externalTag = server.server;
+        user.externalTag = server.id;
 
         if (server.accountFullName != null && !server.accountFullName.isBlank()) {
             user.fullName = String.valueOf(sr.getAttributes().get(server.accountFullName).get(0));

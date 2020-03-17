@@ -55,6 +55,7 @@ import io.bdeploy.jersey.audit.RollingFileAuditor;
 import io.bdeploy.minion.job.CleanupDownloadDirJob;
 import io.bdeploy.minion.job.MasterCleanupJob;
 import io.bdeploy.minion.migration.MinionStateMigration;
+import io.bdeploy.minion.migration.SettingsConfigurationMigration;
 import io.bdeploy.minion.migration.SystemUserMigration;
 import io.bdeploy.minion.migration.UpdatePackagingMigration;
 import io.bdeploy.minion.user.UserDatabase;
@@ -250,6 +251,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             UpdatePackagingMigration.run(this);
             MinionStateMigration.run(this);
             SystemUserMigration.run(this);
+            SettingsConfigurationMigration.run(this);
         } catch (Exception e) {
             throw new IllegalStateException("Minion update migration failed", e);
         }

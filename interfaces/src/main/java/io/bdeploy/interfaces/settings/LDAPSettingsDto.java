@@ -3,6 +3,11 @@ package io.bdeploy.interfaces.settings;
 public class LDAPSettingsDto {
 
     /**
+     * The Identifier of this record.
+     */
+    public String id;
+
+    /**
      * The URL of the LDAP server.
      */
     public String server;
