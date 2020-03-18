@@ -89,4 +89,6 @@
     showFirstLastButtons>
   </mat-paginator>
 </div>
-<button mat-fab class="add-button" *ngIf='!settings.getSettings().auth.disableBasic' [disabled]='isLoading()' (click)="onAdd()"><mat-icon>add</mat-icon></button>
+<button mat-fab class="add-button" [disabled]='settings.isLoading() || settings.getSettings()?.auth.disableBasic' (click)="onAdd()">
+  <mat-icon [matTooltip]='settings.getSettings()?.auth.disableBasic ? "Local user management is disabled" : "Create a local user account"'>add</mat-icon>
+</button>
