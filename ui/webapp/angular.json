@@ -10,22 +10,22 @@
       "prefix": "app",
       "schematics": {
         "@schematics/angular:component": {
-            "skipTests": true
+          "skipTests": true
         },
         "@schematics/angular:directive": {
-            "skipTests": true
+          "skipTests": true
         },
         "@schematics/angular:modules": {
-            "skipTests": true
+          "skipTests": true
         },
         "@schematics/angular:pipe": {
-            "skipTests": true
+          "skipTests": true
         },
         "@schematics/angular:service": {
-            "skipTests": true
+          "skipTests": true
         },
         "@schematics/angular:class": {
-            "skipTests": true
+          "skipTests": true
         }
       },
       "architect": {
@@ -151,5 +151,8 @@
       }
     }
   },
-  "defaultProject": "webapp"
+  "defaultProject": "webapp",
+  "cli": {
+    "analytics": false
+  }
 }
