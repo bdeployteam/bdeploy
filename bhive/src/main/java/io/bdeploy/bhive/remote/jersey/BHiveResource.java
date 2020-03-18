@@ -12,9 +12,9 @@ import javax.ws.rs.core.MediaType;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
-import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.WeakTokenAllowed;
 
 /**

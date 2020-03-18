@@ -13,8 +13,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.ImportOperation;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
@@ -24,8 +24,8 @@ import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ContentHelper;
 import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.TempDirectory.TempDir;
+import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.security.RemoteService;
 
 @ExtendWith(TestHive.class)

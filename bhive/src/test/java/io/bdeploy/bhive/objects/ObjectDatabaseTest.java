@@ -21,14 +21,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import io.bdeploy.bhive.model.ObjectId;
-import io.bdeploy.bhive.objects.ObjectDatabase;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.ContentHelper;
 import io.bdeploy.common.SlowTest;
 import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TestActivityReporter;
-import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.TempDirectory.TempDir;
+import io.bdeploy.common.TestActivityReporter;
 
 @ExtendWith(TempDirectory.class)
 @ExtendWith(TestActivityReporter.class)

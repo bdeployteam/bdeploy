@@ -10,7 +10,7 @@ import java.util.NoSuchElementException;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import javax.annotation.processing.Generated;
+import javax.annotation.Generated;
 
 import com.google.common.collect.MoreCollectors;
 

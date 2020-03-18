@@ -7,8 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
-import io.bdeploy.bhive.model.ObjectId;
-import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.objects.DbTestBase;
 
 public class ModelTests extends DbTestBase {

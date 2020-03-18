@@ -1,6 +1,6 @@
 package io.bdeploy.common.security;
 
-import javax.annotation.processing.Generated;
+import javax.annotation.Generated;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonCreator;

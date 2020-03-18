@@ -13,8 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import io.bdeploy.common.ContentHelper;
 import io.bdeploy.common.TempDirectory;
 import io.bdeploy.common.TempDirectory.TempDir;
-import io.bdeploy.jersey.audit.AuditRecord;
-import io.bdeploy.jersey.audit.RollingFileAuditor;
 
 @ExtendWith(TempDirectory.class)
 public class AuditorLoadTest {
