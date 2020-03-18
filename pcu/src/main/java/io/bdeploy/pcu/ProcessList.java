@@ -68,7 +68,7 @@ public class ProcessList {
     }
 
     /**
-     * Returns a collection of all applications with the given state.
+     * Returns an collection of all applications with the given state.
      *
      * @param states the states to filter
      * @return all applications with the given state

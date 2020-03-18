@@ -350,7 +350,7 @@ public class ProcessController {
         if (processState == ProcessState.RUNNING || processState == ProcessState.RUNNING_UNSTABLE) {
             throw new PcuRuntimeException("Application is already running.");
         }
-        logger.log(l -> l.info("Starting application."));
+        logger.log(l -> l.info("Starting {}", processConfig.name));
 
         // Reset counter if manually started
         if (resetRecoverCount) {
@@ -435,8 +435,7 @@ public class ProcessController {
             cleanup();
             return;
         }
-        long pid = process.pid();
-        logger.log(l -> l.info("Stopping application. PID = {}", pid));
+        logger.log(l -> l.info("Stopping {}", processConfig.name));
 
         // try to gracefully stop the process using it's stop command
         doInvokeStopCommand(processConfig.stop);
@@ -877,6 +876,7 @@ public class ProcessController {
     /** Notifies all listeners about the of the process */
     private void notifyListeners(ProcessState state) {
         try {
+            logger.log(l -> l.info("Notify listeners about new process state {}.", state));
             statusListeners.forEach(c -> c.accept(state));
         } catch (Exception ex) {
             logger.log(l -> l.error("Failed to notify listener about current process status.", ex));

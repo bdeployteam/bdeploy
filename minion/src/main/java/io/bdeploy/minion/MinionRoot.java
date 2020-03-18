@@ -531,17 +531,17 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             }
 
             // Get the deployment configuration and the target directory
+            String tag = inm.getKey().getTag();
             ProcessGroupConfiguration pgc = inc.getProcessGroupConfiguration();
             if (pgc == null) {
                 String instanceId = inm.getConfiguration().uuid;
-                log.warn("{} / {} - Cannot read persisted process configuration.", instanceId, inm.getKey().getTag());
+                log.warn("{} / {} - Cannot read persisted process configuration.", instanceId, tag);
                 return;
             }
 
             // Create controller and add to the affected instance
-            InstanceProcessController instanceController = processController.getOrCreate(inm.getUUID());
-            instanceController.createProcessControllers(inc.getDeploymentPathProvider(), inc.getResolver(), inm.getKey().getTag(),
-                    pgc);
+            InstanceProcessController instanceController = processController.getOrCreate(hive, inm);
+            instanceController.createProcessControllers(inc.getDeploymentPathProvider(), inc.getResolver(), tag, pgc);
 
             // fetch and remember the active version for this uuid.
             if (!activeVersions.containsKey(inm.getUUID())) {

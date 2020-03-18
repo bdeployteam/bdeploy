@@ -29,7 +29,7 @@ public class SlaveProcessResourceImpl implements SlaveProcessResource {
         if (instanceController == null) {
             throw new WebApplicationException("Instance with ID '" + instanceId + "' is unknown");
         }
-        instanceController.start();
+        instanceController.startAll();
     }
 
     @Override
@@ -49,7 +49,7 @@ public class SlaveProcessResourceImpl implements SlaveProcessResource {
         if (instanceController == null) {
             throw new WebApplicationException("Instance with ID '" + instanceId + "' is unknown");
         }
-        instanceController.stop();
+        instanceController.stopAll();
     }
 
     @Override
@@ -65,7 +65,10 @@ public class SlaveProcessResourceImpl implements SlaveProcessResource {
     @Override
     public InstanceNodeStatusDto getStatus(String instanceId) {
         MinionProcessController processController = root.getProcessController();
-        InstanceProcessController instanceController = processController.getOrCreate(instanceId);
+        InstanceProcessController instanceController = processController.get(instanceId);
+        if (instanceController == null) {
+            return new InstanceNodeStatusDto();
+        }
         return instanceController.getStatus();
     }
 
