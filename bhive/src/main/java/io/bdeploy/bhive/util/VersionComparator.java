@@ -10,7 +10,7 @@ public class VersionComparator {
 
     public static final Comparator<Key> BY_TAG_NEWEST_LAST = (a, b) -> VersionHelper.compare(a.getTag(), b.getTag());
 
-    public static final Comparator<Version> NEWEST_LAST = (a, b) -> VersionHelper.compare(a, b);
+    public static final Comparator<Version> NEWEST_LAST = VersionHelper::compare;
 
     private VersionComparator() {
     }

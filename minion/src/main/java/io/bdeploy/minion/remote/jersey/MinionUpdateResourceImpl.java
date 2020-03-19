@@ -69,51 +69,12 @@ public class MinionUpdateResourceImpl implements MinionUpdateResource {
         }
 
         // We need to make sure here that the update is compatible with the running server version.
-        try (InputStream is = h.execute(
-                new TreeEntryLoadOperation().setRootTree(h.execute(new ManifestLoadOperation().setManifest(key)).getRoot())
-                        .setRelativePath("version.properties"))) {
-            Properties props = new Properties();
-            props.load(is);
-
-            if (props.containsKey("minSourceVersion")) {
-                Version version = VersionHelper.tryParse(props.getProperty("minSourceVersion"));
-                if (version == null) {
-                    log.error("Cannot parse minimum source server version from update package");
-                } else {
-                    if (VersionHelper.getVersion().compareTo(version) < 0) {
-                        throw new IllegalStateException(
-                                "Running version is not compatible with update package. Server must be at least version "
-                                        + version + " to be able to update.");
-                    }
-                    log.info("Version compatibility check OK: current=" + VersionHelper.getVersion() + ", required=" + version);
-                }
-            }
-        } catch (Exception e) {
-            log.warn("Cannot read version.properties from update package.");
-            if (log.isTraceEnabled()) {
-                log.trace("Exception:", e);
-            }
-        }
+        checkCompatiblity(key, h);
 
         Path updateDir = root.getUpdateDir();
         Path updateTarget = UpdateHelper.prepareUpdateDirectory(updateDir);
 
-        try {
-            FileStore store = Files.getFileStore(root.getUpdateDir());
-            long space = store.getUsableSpace();
-
-            SortedSet<ObjectId> objects = h.execute(new ObjectListOperation().addManifest(key));
-            ObjectSizeOperation sop = new ObjectSizeOperation();
-            objects.forEach(sop::addObject);
-            long required = h.execute(sop);
-
-            if ((required * 2) >= space) {
-                throw new WebApplicationException("Not enough space available to savely perform update",
-                        Status.PRECONDITION_FAILED);
-            }
-        } catch (IOException e) {
-            log.warn("Cannot check space requirements for update", e);
-        }
+        checkDiscSpace(key, h);
 
         h.execute(new ExportOperation().setManifest(key).setTarget(updateTarget));
 
@@ -143,6 +104,53 @@ public class MinionUpdateResourceImpl implements MinionUpdateResource {
         }
 
         // update is now prepared in the update dir of the root.
+    }
+
+    private void checkDiscSpace(Key key, BHive h) {
+        try {
+            FileStore store = Files.getFileStore(root.getUpdateDir());
+            long space = store.getUsableSpace();
+
+            SortedSet<ObjectId> objects = h.execute(new ObjectListOperation().addManifest(key));
+            ObjectSizeOperation sop = new ObjectSizeOperation();
+            objects.forEach(sop::addObject);
+            long required = h.execute(sop);
+
+            if ((required * 2) >= space) {
+                throw new WebApplicationException("Not enough space available to savely perform update",
+                        Status.PRECONDITION_FAILED);
+            }
+        } catch (IOException e) {
+            log.warn("Cannot check space requirements for update", e);
+        }
+    }
+
+    private void checkCompatiblity(Key key, BHive h) {
+        try (InputStream is = h.execute(
+                new TreeEntryLoadOperation().setRootTree(h.execute(new ManifestLoadOperation().setManifest(key)).getRoot())
+                        .setRelativePath("version.properties"))) {
+            Properties props = new Properties();
+            props.load(is);
+
+            if (props.containsKey("minSourceVersion")) {
+                Version version = VersionHelper.tryParse(props.getProperty("minSourceVersion"));
+                if (version == null) {
+                    log.error("Cannot parse minimum source server version from update package");
+                } else {
+                    if (VersionHelper.getVersion().compareTo(version) < 0) {
+                        throw new IllegalStateException(
+                                "Running version is not compatible with update package. Server must be at least version "
+                                        + version + " to be able to update.");
+                    }
+                    log.info("Version compatibility check OK: current={}, required={}", VersionHelper.getVersion(), version);
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Cannot read version.properties from update package.");
+            if (log.isTraceEnabled()) {
+                log.trace("Exception:", e);
+            }
+        }
     }
 
 }

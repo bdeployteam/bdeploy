@@ -572,7 +572,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         SortedSet<Key> scan = InstanceManifest.scan(hive, true);
 
         for (Key k : scan) {
-            log.info("Migrating " + k.getName() + ", using tag " + k.getTag());
+            log.info("Migrating {}, using tag {}", k.getName(), k.getTag());
             InstanceManifest im = InstanceManifest.of(hive, k);
 
             // dummy update, re-use existing configuration. new manifests will be written without references

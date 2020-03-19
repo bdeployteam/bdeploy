@@ -84,9 +84,7 @@ public class CommonInstanceResourceImpl implements CommonInstanceResource {
 
         for (Manifest.Key imnk : im.getInstanceNodeManifests().values()) {
             InstanceNodeManifest inm = InstanceNodeManifest.of(hive, imnk);
-            inm.getConfiguration().applications.stream().forEach(a -> {
-                result.put(a.uid, a.endpoints);
-            });
+            inm.getConfiguration().applications.stream().forEach(a -> result.put(a.uid, a.endpoints));
         }
 
         return result;

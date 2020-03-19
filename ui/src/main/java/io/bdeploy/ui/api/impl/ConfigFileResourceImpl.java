@@ -126,7 +126,7 @@ public class ConfigFileResourceImpl implements ConfigFileResource {
 
         InstanceResourceImpl.syncInstance(minion, rc, groupId, instanceId);
 
-        iem.create(instanceId, rootKey);
+        iem.create(rootKey);
     }
 
 }

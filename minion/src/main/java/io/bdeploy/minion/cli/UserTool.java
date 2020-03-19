@@ -60,32 +60,9 @@ public class UserTool extends RemoteServiceTool<UserConfig> {
         AuthAdminResource admin = auth.getAdmin();
 
         if (config.add() != null) {
-            UserInfo user = new UserInfo(config.add());
-            if (config.admin()) {
-                user.permissions.add(ApiAccessToken.ADMIN_PERMISSION);
-            }
-            if (config.permission() != null) {
-                user.permissions.add(new ScopedPermission(config.scope(), Permission.valueOf(config.permission().toUpperCase())));
-            }
-            user.password = config.password();
-            admin.createLocalUser(user);
+            addUser(config, admin);
         } else if (config.update() != null) {
-            UserInfo user = admin.getUser(config.update());
-            if (user == null) {
-                out().println("Cannot find user " + config.update());
-                return;
-            }
-            if (config.password() != null) {
-                admin.updateLocalUserPassword(config.update(), config.password());
-            }
-            if (config.admin()) {
-                user.permissions.add(ApiAccessToken.ADMIN_PERMISSION);
-                admin.updateUser(user);
-            }
-            if (config.permission() != null) {
-                user.permissions.add(new ScopedPermission(config.scope(), Permission.valueOf(config.permission().toUpperCase())));
-                admin.updateUser(user);
-            }
+            updateUser(config, admin);
         } else if (config.remove() != null) {
             admin.deleteUser(config.remove());
         } else if (config.list()) {
@@ -95,18 +72,53 @@ public class UserTool extends RemoteServiceTool<UserConfig> {
                 out().println(String.format(formatString, info.name, info.external, info.inactive, info.permissions));
             }
         } else if (config.createToken() != null) {
-            String token = auth.getAuthPack(config.createToken(), true);
-
-            out().println("Generating token with 50 years validity for " + config.createToken());
-            out().println("Use the following token to remotely access this server in your name");
-            out().println("Attention: This token is sensitive information as it allows remote access under your name. "
-                    + "Do not pass this token on to others.");
-            out().println("");
-            out().println(token);
-            out().println("");
+            createToken(config, auth);
         } else {
             out().println("Nothing to do, please give more arguments");
         }
+    }
+
+    private void createToken(UserConfig config, AuthResource auth) {
+        String token = auth.getAuthPack(config.createToken(), true);
+
+        out().println("Generating token with 50 years validity for " + config.createToken());
+        out().println("Use the following token to remotely access this server in your name");
+        out().println("Attention: This token is sensitive information as it allows remote access under your name. "
+                + "Do not pass this token on to others.");
+        out().println("");
+        out().println(token);
+        out().println("");
+    }
+
+    private void updateUser(UserConfig config, AuthAdminResource admin) {
+        UserInfo user = admin.getUser(config.update());
+        if (user == null) {
+            out().println("Cannot find user " + config.update());
+            return;
+        }
+        if (config.password() != null) {
+            admin.updateLocalUserPassword(config.update(), config.password());
+        }
+        if (config.admin()) {
+            user.permissions.add(ApiAccessToken.ADMIN_PERMISSION);
+            admin.updateUser(user);
+        }
+        if (config.permission() != null) {
+            user.permissions.add(new ScopedPermission(config.scope(), Permission.valueOf(config.permission().toUpperCase())));
+            admin.updateUser(user);
+        }
+    }
+
+    private void addUser(UserConfig config, AuthAdminResource admin) {
+        UserInfo user = new UserInfo(config.add());
+        if (config.admin()) {
+            user.permissions.add(ApiAccessToken.ADMIN_PERMISSION);
+        }
+        if (config.permission() != null) {
+            user.permissions.add(new ScopedPermission(config.scope(), Permission.valueOf(config.permission().toUpperCase())));
+        }
+        user.password = config.password();
+        admin.createLocalUser(user);
     }
 
 }

@@ -17,11 +17,7 @@ public class MinionRootValidator implements ConfigValidator<String> {
             return false;
         }
 
-        if (!Files.isRegularFile(target.resolve("etc/state.json"))) {
-            return false;
-        }
-
-        return true;
+        return Files.isRegularFile(target.resolve("etc/state.json"));
     }
 
 }

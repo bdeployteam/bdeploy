@@ -1,5 +1,7 @@
 package io.bdeploy.interfaces;
 
+import javax.annotation.Generated;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -23,5 +25,37 @@ public class UserChangePasswordDto implements Comparable<UserChangePasswordDto> 
     @Override
     public int compareTo(UserChangePasswordDto o) {
         return user.compareTo(o.user);
+    }
+
+    @Generated("Eclipse")
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((user == null) ? 0 : user.hashCode());
+        return result;
+    }
+
+    @Generated("Eclipse")
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        UserChangePasswordDto other = (UserChangePasswordDto) obj;
+        if (user == null) {
+            if (other.user != null) {
+                return false;
+            }
+        } else if (!user.equals(other.user)) {
+            return false;
+        }
+        return true;
     }
 }
