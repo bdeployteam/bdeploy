@@ -3,6 +3,7 @@ package io.bdeploy.launcher.cli;
 import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,9 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
         @Help("The unique identifier of the application to uninstall.")
         String app();
 
+        @Help("Directory where the launcher stores the hive as well as all applications. Defaults to home/.bdeploy.")
+        String homeDir();
+
     }
 
     public UninstallerTool() {
@@ -43,7 +47,13 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
         if (config.app() == null) {
             throw new IllegalStateException("Missing --app argument");
         }
-        Path rootDir = ClientPathHelper.getBDeployHome();
+        // Check where to put local data.
+        Path rootDir;
+        if (config.homeDir() != null && !config.homeDir().isEmpty()) {
+            rootDir = Paths.get(config.homeDir());
+        } else {
+            rootDir = ClientPathHelper.getBDeployHome();
+        }
         Path bhiveDir = rootDir.resolve("bhive");
         try (BHive hive = new BHive(bhiveDir.toUri(), new ActivityReporter.Null())) {
             doUninstall(rootDir, hive, config.app());

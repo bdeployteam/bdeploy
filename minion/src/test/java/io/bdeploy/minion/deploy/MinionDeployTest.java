@@ -50,6 +50,7 @@ import io.bdeploy.interfaces.remote.SlaveCleanupResource;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 import io.bdeploy.launcher.cli.LauncherCli;
 import io.bdeploy.launcher.cli.LauncherTool;
+import io.bdeploy.launcher.cli.UninstallerTool;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestFactory;
 import io.bdeploy.minion.TestMinion;
@@ -143,6 +144,7 @@ public class MinionDeployTest {
 
         /* STEP 8: launcher client, assert that the script does some sleeping... */
         launcher.execute(LauncherTool.class, "--homeDir=" + tmp.resolve("launcher"), "--launch=" + bdeployFile, "--exitOnError");
+        launcher.execute(UninstallerTool.class, "--homeDir=" + tmp.resolve("launcher"), "--app=client");
 
         // if we reach here, launching succeeded. unfortunately no better way to check right now.
 
