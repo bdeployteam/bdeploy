@@ -4,11 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.nio.file.Path;
+import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +23,7 @@ import io.bdeploy.common.TempDirectory;
 import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.TestCliTool;
+import io.bdeploy.common.cli.ToolBase;
 import io.bdeploy.common.security.AuthPackAccessor;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.UuidHelper;
@@ -155,6 +158,15 @@ public class MasterCliTest {
             // change current
             tools.execute(LocalLoginTool.class, "--use=MyOtherServer");
 
+            // use the login, test the user tool
+            ToolBase.setTestModeForLLM(false); // disable to allow local login manager.
+            tools.execute(UserTool.class, "--add=user1", "--password=user1");
+            tools.execute(UserTool.class, "--update=user1", "--admin");
+            tools.execute(UserTool.class, "--update=user1", "--permission=WRITE", "--scope=IG");
+            output = tools.execute(UserTool.class, "--list");
+            assertTrue(Arrays.stream(output).anyMatch(s -> s.contains("user1")));
+            ToolBase.setTestModeForLLM(true);
+
             output = tools.execute(LocalLoginTool.class, "--list");
             assertEquals(2, output.length);
             assertTrue(output[1].contains("*"));
@@ -166,6 +178,11 @@ public class MasterCliTest {
             ResourceProvider.getResource(self, RemoteShutdown.class, null).shutdown(shutdown);
             master.join();
         }
+
+        tools.execute(ModeTool.class, "--root=" + root, "--mode=MANAGED");
+        assertThrows(UnsupportedOperationException.class, () -> {
+            tools.execute(ModeTool.class, "--root=" + root, "--mode=CENTRAL");
+        });
     }
 
 }
