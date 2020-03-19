@@ -240,7 +240,12 @@ public class UserDatabase implements AuthService {
 
     @Override
     public SortedSet<UserInfo> getAll() {
-        return getAllNames().stream().map(name -> getUser(name)).collect(Collectors.toCollection(TreeSet::new));
+        return getAllNames().stream().map(name -> {
+            UserInfo cached = getUser(name);
+            UserInfo clone = StorageHelper.fromRawBytes(StorageHelper.toRawBytes(cached), UserInfo.class);
+            clone.password = null;
+            return clone;
+        }).collect(Collectors.toCollection(TreeSet::new));
     }
 
     @Override
