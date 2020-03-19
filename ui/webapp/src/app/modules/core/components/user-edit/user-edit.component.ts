@@ -47,8 +47,6 @@ export class UserEditComponent implements OnInit {
     return this.userFormGroup.get('passwords.passwordRepeat');
   }
 
-
-
   public isCreate = false;
   public isExternal = false;
   public knownUser: string[] = null;
