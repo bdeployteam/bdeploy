@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.net.URI;
 import java.security.KeyStore;
 
-import javax.annotation.processing.Generated;
+import javax.annotation.Generated;
 import javax.ws.rs.core.UriBuilder;
 
 import com.fasterxml.jackson.annotation.JsonCreator;

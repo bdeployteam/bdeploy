@@ -5,8 +5,6 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 
-import io.bdeploy.common.ActivityReporter;
-
 public class TestActivityReporter implements ParameterResolver {
 
     private final ActivityReporter defaultReporter = new ActivityReporter.Stream(System.out);

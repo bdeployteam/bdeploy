@@ -3,9 +3,9 @@ package io.bdeploy.bhive.objects.view;
 import java.util.Collection;
 
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
-import io.bdeploy.bhive.model.Manifest.Key;
 
 /**
  * View of a {@link Manifest} reference in a {@link Tree}.

@@ -1,7 +1,7 @@
 package io.bdeploy.api.product.v1.impl;
 
 
-import javax.annotation.processing.Generated;
+import javax.annotation.Generated;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;

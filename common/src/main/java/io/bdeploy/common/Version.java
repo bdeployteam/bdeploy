@@ -1,6 +1,6 @@
 package io.bdeploy.common;
 
-import javax.annotation.processing.Generated;
+import javax.annotation.Generated;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

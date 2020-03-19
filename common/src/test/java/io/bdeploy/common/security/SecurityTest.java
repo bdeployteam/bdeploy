@@ -12,9 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.bdeploy.common.TempDirectory;
 import io.bdeploy.common.TempDirectory.TempDir;
-import io.bdeploy.common.security.ApiAccessToken;
-import io.bdeploy.common.security.OnDiscKeyStore;
-import io.bdeploy.common.security.SecurityHelper;
 
 @ExtendWith(TempDirectory.class)
 public class SecurityTest {
