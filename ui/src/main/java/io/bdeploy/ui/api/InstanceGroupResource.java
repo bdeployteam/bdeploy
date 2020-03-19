@@ -53,7 +53,7 @@ public interface InstanceGroupResource {
     @POST
     @Path("/{group}/permissions")
     @RequiredPermission(permission = Permission.ADMIN, scope = "group")
-    public void updatePermissions(@ActivityScope @PathParam("group") String group, InstanceGroupPermissionDto permissions[]);
+    public void updatePermissions(@ActivityScope @PathParam("group") String group, InstanceGroupPermissionDto[] permissions);
 
     @DELETE
     @Path("/{group}")

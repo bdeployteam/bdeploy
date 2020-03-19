@@ -154,7 +154,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
                 try {
                     ms.synchronize(group, dto.hostName);
                 } catch (Exception e) {
-                    log.warn("Cannot synchronize with " + dto.hostName + " on " + group, e);
+                    log.warn("Cannot synchronize with {} on {}", dto.hostName, group, e);
                 }
             }
         }
@@ -276,8 +276,8 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
         boolean isManagedGroup = read(group).managed;
         boolean requiresManagedGroup = minion.getMode() != MinionMode.STANDALONE;
         if (requiresManagedGroup != isManagedGroup) {
-            log.info("Rejecting request to access " + (isManagedGroup ? "managed" : "standalone") + " instance group on "
-                    + minion.getMode() + " server");
+            log.info("Rejecting request to access {} instance group on {} server", (isManagedGroup ? "managed" : "standalone"),
+                    minion.getMode());
             throw new WebApplicationException("Instance group mode does not match server mode.", Status.SERVICE_UNAVAILABLE);
         }
 

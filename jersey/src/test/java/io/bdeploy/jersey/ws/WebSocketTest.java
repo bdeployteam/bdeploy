@@ -3,9 +3,9 @@ package io.bdeploy.jersey.ws;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.glassfish.grizzly.websockets.DataFrame;
 import org.glassfish.grizzly.websockets.WebSocket;
@@ -36,7 +36,7 @@ public class WebSocketTest {
     private final AtomicBoolean connected = new AtomicBoolean();
     private final AtomicBoolean received = new AtomicBoolean();
     private final AtomicBoolean sent = new AtomicBoolean();
-    private final AtomicBoolean closed = new AtomicBoolean();
+    private final CompletableFuture<Boolean> closed = new CompletableFuture<>();
 
     public WebSocketTest() {
         wsa = new WebSocketTestApplication();
@@ -47,7 +47,7 @@ public class WebSocketTest {
     void testWebSocket(RemoteService service) throws InterruptedException, ExecutionException {
         String testPayload = "This is a Test " + System.currentTimeMillis();
         try (AsyncHttpClient c = JerseyClientFactory.get(service).getWebSocketClient()) {
-            AtomicReference<String> result = new AtomicReference<>();
+            CompletableFuture<String> result = new CompletableFuture<>();
             c.prepareGet(service.getWebSocketUri("/test").toString())
                     .execute(new WebSocketUpgradeHandler.Builder().addWebSocketListener(new DefaultWebSocketListener() {
 
@@ -74,17 +74,15 @@ public class WebSocketTest {
                         public void onMessage(String message) {
                             log.info("Client message: " + message);
 
-                            result.set(message);
+                            result.complete(message);
 
                             webSocket.close();
                         }
                     }).build()).get();
 
-            while (result.get() == null || !closed.get()) {
-                Thread.sleep(10);
-            }
+            String r = result.get();
 
-            assertEquals(testPayload, result.get());
+            assertEquals(testPayload, r);
             assertTrue(connected.get());
             assertTrue(received.get());
             assertTrue(sent.get());
@@ -110,7 +108,7 @@ public class WebSocketTest {
 
                 @Override
                 public void onClose(WebSocket socket, DataFrame frame) {
-                    closed.set(true);
+                    closed.complete(true);
                 }
             });
 

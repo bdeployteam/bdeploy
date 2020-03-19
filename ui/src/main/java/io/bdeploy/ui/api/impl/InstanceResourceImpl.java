@@ -333,7 +333,7 @@ public class InstanceResourceImpl implements InstanceResource {
         // immediately fetch back so we have it to create the association
         syncInstance(minion, rc, group, instance);
 
-        iem.create(instance, key);
+        iem.create(key);
     }
 
     @Override
@@ -448,7 +448,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
             InstanceNodeManifest manifest = InstanceNodeManifest.of(hive, manifestKey);
             InstanceNodeConfiguration configuration = manifest.getConfiguration();
-            InstanceNodeConfigurationDto nodeConfig = node2Config.computeIfAbsent(nodeName, (k) -> {
+            InstanceNodeConfigurationDto nodeConfig = node2Config.computeIfAbsent(nodeName, k -> {
                 // Node is not known any more but has configured applications
                 InstanceNodeConfigurationDto inc = new InstanceNodeConfigurationDto(k);
                 result.nodeConfigDtos.add(inc);
@@ -485,7 +485,7 @@ public class InstanceResourceImpl implements InstanceResource {
         }
 
         syncInstance(minion, rc, group, instanceId);
-        iem.stateChanged(instanceId, instance.getManifest());
+        iem.stateChanged(instance.getManifest());
     }
 
     @Override
@@ -512,7 +512,7 @@ public class InstanceResourceImpl implements InstanceResource {
         }
 
         syncInstance(minion, rc, group, instanceId);
-        iem.stateChanged(instanceId, instance.getManifest());
+        iem.stateChanged(instance.getManifest());
     }
 
     @Override
@@ -526,7 +526,7 @@ public class InstanceResourceImpl implements InstanceResource {
         }
 
         syncInstance(minion, rc, group, instanceId);
-        iem.stateChanged(instanceId, instance.getManifest());
+        iem.stateChanged(instance.getManifest());
     }
 
     @Override
@@ -778,7 +778,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
             Key newKey = InstanceImportExportHelper.importFrom(zip, hive, instanceId, config);
             syncInstance(minion, rc, group, instanceId);
-            iem.create(instanceId, newKey);
+            iem.create(newKey);
             return Collections.singletonList(newKey);
         } catch (IOException e) {
             throw new WebApplicationException("Cannot import from uploaded ZIP", e);

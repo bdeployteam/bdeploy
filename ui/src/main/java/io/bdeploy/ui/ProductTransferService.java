@@ -54,45 +54,7 @@ public class ProductTransferService {
             jss.setScope(parentScope, parentUser);
 
             try (Activity act = reporter.start("Transferring " + data.versionsToTransfer.size() + " products...")) {
-                ManagedMasters masters = new ManagedMasters(instanceGroupHive);
-                FetchOperation fetch = null;
-                PushOperation push = null;
-
-                if (data.sourceMode == MinionMode.CENTRAL) {
-                    // need push to managed server only
-                    ManagedMasterDto attached = masters.read().getManagedMaster(data.targetServer);
-                    RemoteService svc = new RemoteService(UriBuilder.fromUri(attached.uri).build(), attached.auth);
-                    push = new PushOperation().setRemote(svc).setHiveName(groupName);
-                } else {
-                    ManagedMasterDto srcAttached = masters.read().getManagedMaster(data.sourceServer);
-                    RemoteService srcSvc = new RemoteService(UriBuilder.fromUri(srcAttached.uri).build(), srcAttached.auth);
-                    fetch = new FetchOperation().setRemote(srcSvc).setHiveName(groupName);
-
-                    if (data.targetMode == MinionMode.MANAGED) {
-                        // need a push after the fetch.
-                        ManagedMasterDto targetAttached = masters.read().getManagedMaster(data.sourceServer);
-                        RemoteService targetSvc = new RemoteService(UriBuilder.fromUri(targetAttached.uri).build(),
-                                targetAttached.auth);
-                        push = new PushOperation().setRemote(targetSvc).setHiveName(groupName);
-                    }
-                }
-
-                for (ProductDto x : data.versionsToTransfer) {
-                    if (push != null) {
-                        push.addManifest(x.key);
-                    }
-                    if (fetch != null) {
-                        fetch.addManifest(x.key);
-                    }
-                }
-
-                // always first fetch, then push
-                if (fetch != null) {
-                    instanceGroupHive.execute(fetch);
-                }
-                if (push != null) {
-                    instanceGroupHive.execute(push);
-                }
+                doTransfer(instanceGroupHive, groupName, data);
             }
         }, transferExec).whenComplete((r, e) -> {
             getInTransferFor(groupName).removeAll(data.versionsToTransfer);
@@ -101,6 +63,47 @@ public class ProductTransferService {
                 log.error("Failed to transfer product versions", e);
             }
         });
+    }
+
+    private void doTransfer(BHive instanceGroupHive, String groupName, ProductTransferDto data) {
+        ManagedMasters masters = new ManagedMasters(instanceGroupHive);
+        FetchOperation fetch = null;
+        PushOperation push = null;
+
+        if (data.sourceMode == MinionMode.CENTRAL) {
+            // need push to managed server only
+            ManagedMasterDto attached = masters.read().getManagedMaster(data.targetServer);
+            RemoteService svc = new RemoteService(UriBuilder.fromUri(attached.uri).build(), attached.auth);
+            push = new PushOperation().setRemote(svc).setHiveName(groupName);
+        } else {
+            ManagedMasterDto srcAttached = masters.read().getManagedMaster(data.sourceServer);
+            RemoteService srcSvc = new RemoteService(UriBuilder.fromUri(srcAttached.uri).build(), srcAttached.auth);
+            fetch = new FetchOperation().setRemote(srcSvc).setHiveName(groupName);
+
+            if (data.targetMode == MinionMode.MANAGED) {
+                // need a push after the fetch.
+                ManagedMasterDto targetAttached = masters.read().getManagedMaster(data.sourceServer);
+                RemoteService targetSvc = new RemoteService(UriBuilder.fromUri(targetAttached.uri).build(), targetAttached.auth);
+                push = new PushOperation().setRemote(targetSvc).setHiveName(groupName);
+            }
+        }
+
+        for (ProductDto x : data.versionsToTransfer) {
+            if (push != null) {
+                push.addManifest(x.key);
+            }
+            if (fetch != null) {
+                fetch.addManifest(x.key);
+            }
+        }
+
+        // always first fetch, then push
+        if (fetch != null) {
+            instanceGroupHive.execute(fetch);
+        }
+        if (push != null) {
+            instanceGroupHive.execute(push);
+        }
     }
 
     private SortedSet<ProductDto> getInTransferFor(String groupName) {

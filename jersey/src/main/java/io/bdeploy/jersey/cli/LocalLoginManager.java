@@ -7,12 +7,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
@@ -26,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.JacksonHelper;
 import io.bdeploy.common.util.JacksonHelper.MapperType;
+import io.bdeploy.jersey.TrustAllServersTrustManager;
 
 /**
  * Manages stored local login sessions for CLI or build tools.
@@ -62,7 +60,7 @@ public class LocalLoginManager {
                 JacksonHelper.createObjectMapper(MapperType.JSON).writeValue(os, data);
             }
         } catch (IOException e) {
-            log.error("Cannot write local login data to " + getDataFile(), e);
+            log.error("Cannot write local login data to {}", getDataFile(), e);
         }
     }
 
@@ -76,7 +74,7 @@ public class LocalLoginManager {
                 return JacksonHelper.createObjectMapper(MapperType.JSON).readValue(is, LocalLoginData.class);
             }
         } catch (IOException e) {
-            log.error("Cannot read local login data from " + getDataFile(), e);
+            log.error("Cannot read local login data from {}", getDataFile(), e);
             return new LocalLoginData();
         }
     }
@@ -160,23 +158,7 @@ public class LocalLoginManager {
         try {
             SSLContext sslcontext = SSLContext.getInstance("TLS");
 
-            sslcontext.init(null, new TrustManager[] { new X509TrustManager() {
-
-                @Override
-                public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-                    // we must accept all certificates
-                }
-
-                @Override
-                public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-                    // we must accept all certificates
-                }
-
-                @Override
-                public X509Certificate[] getAcceptedIssuers() {
-                    return new X509Certificate[0];
-                }
-            } }, new java.security.SecureRandom());
+            sslcontext.init(null, new TrustManager[] { new TrustAllServersTrustManager() }, new java.security.SecureRandom());
             return sslcontext;
         } catch (GeneralSecurityException e) {
             log.warn("Cannot create SSL context", e);

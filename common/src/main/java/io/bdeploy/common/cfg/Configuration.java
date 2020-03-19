@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import com.google.common.base.Splitter;
 
@@ -189,19 +190,7 @@ public class Configuration {
             }
         }
 
-        ConfigurationValueMapping mapping = method.getAnnotation(ConfigurationValueMapping.class);
-        Function<Object, Object> mapper = s -> s;
-
-        if (mapping != null) {
-            switch (mapping.value()) {
-                case TO_LOWERCASE:
-                    mapper = s -> s.toString().toLowerCase();
-                    break;
-                case TO_UPPERCASE:
-                    mapper = s -> s.toString().toUpperCase();
-                    break;
-            }
-        }
+        UnaryOperator<Object> mapper = getMapper(method);
 
         Class<?> returnType = method.getReturnType();
         if (object != null && returnType.isAssignableFrom(object.getClass())) {
@@ -247,6 +236,20 @@ public class Configuration {
         conversions.put(method, conversion);
 
         return conversion;
+    }
+
+    private UnaryOperator<Object> getMapper(Method method) {
+        ConfigurationValueMapping mapping = method.getAnnotation(ConfigurationValueMapping.class);
+        UnaryOperator<Object> mapper = s -> s;
+
+        if (mapping != null) {
+            if (mapping.value() == ValueMapping.TO_LOWERCASE) {
+                mapper = s -> s.toString().toLowerCase();
+            } else if (mapping.value() == ValueMapping.TO_UPPERCASE) {
+                mapper = s -> s.toString().toUpperCase();
+            }
+        }
+        return mapper;
     }
 
     private void validateOrThrow(Object value, Method m, Class<? extends ConfigValidator<?>> validator, ValidationMessage msg) {

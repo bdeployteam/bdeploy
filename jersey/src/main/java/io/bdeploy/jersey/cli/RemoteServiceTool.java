@@ -113,27 +113,9 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
 
         RemoteService svc = null;
         if (rc.remote() != null) {
-            URI r = null;
-            if (rc.remote() != null) {
-                r = UriBuilder.fromUri(rc.remote()).build();
-            }
-
-            if (rc.tokenFile() != null && rc.token() != null) {
-                out().println(
-                        "WARNING: both tokenFile and token are given, preferring tokenFile (Hint: check arguments and environment)");
-            }
-
-            svc = createRemoteService(rc, optional, r);
+            svc = createServiceFromCli(rc, optional);
         } else if (!isTestMode) {
-            if (rc.useLogin() != null) {
-                svc = llm.getNamedService(rc.useLogin());
-            } else {
-                svc = llm.getCurrentService();
-            }
-            if (!optional && svc == null) {
-                helpAndFail(
-                        "Need either --tokenFile, --token or --keystore arguments or a current login session to access remote service");
-            }
+            svc = createServiceFromLLM(rc, optional, llm);
         }
 
         if (getActivityReporter() instanceof ActivityReporter.Stream) {
@@ -143,6 +125,36 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
         try (NoThrowAutoCloseable proxy = getActivityReporter().proxyActivities(svc)) {
             run(config, svc);
         }
+    }
+
+    private RemoteService createServiceFromLLM(RemoteConfig rc, boolean optional, LocalLoginManager llm) {
+        RemoteService svc;
+        if (rc.useLogin() != null) {
+            svc = llm.getNamedService(rc.useLogin());
+        } else {
+            svc = llm.getCurrentService();
+        }
+        if (!optional && svc == null) {
+            helpAndFail(
+                    "Need either --tokenFile, --token or --keystore arguments or a current login session to access remote service");
+        }
+        return svc;
+    }
+
+    private RemoteService createServiceFromCli(RemoteConfig rc, boolean optional) {
+        RemoteService svc;
+        URI r = null;
+        if (rc.remote() != null) {
+            r = UriBuilder.fromUri(rc.remote()).build();
+        }
+
+        if (rc.tokenFile() != null && rc.token() != null) {
+            out().println(
+                    "WARNING: both tokenFile and token are given, preferring tokenFile (Hint: check arguments and environment)");
+        }
+
+        svc = createRemoteService(rc, optional, r);
+        return svc;
     }
 
     private NoThrowAutoCloseable connectProxy(RemoteService remote, Consumer<byte[]> onMessage) {
@@ -159,9 +171,7 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
                             .getAuthenticatedWebSocket(client, Collections.emptyList(), "/activities", onMessage, e -> {
                                 out().println("WebSocket error: ");
                                 e.printStackTrace(out());
-                            }, s -> {
-                                out().println("Activities WebSocket disconnected");
-                            }).get();
+                            }, s -> out().println("Activities WebSocket disconnected")).get();
                 } catch (InterruptedException | ExecutionException e) {
                     out().println("Cannot initialize Acitivities WebSocket");
                     e.printStackTrace(out());

@@ -154,7 +154,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 } catch (Exception e) {
                     // in case this did not work, the minion is not available or has another problem
                     // log but don't forward exception to the client
-                    log.warn("Problem communicating with slave " + minionName, e);
+                    log.warn("Problem communicating with slave {}", minionName, e);
                     throw new WebApplicationException("Minion " + minionName + " is not available", Status.BAD_GATEWAY);
                 }
 
@@ -198,7 +198,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
                 RemoteService rs = root.getMinions().getRemote(oldNode.getKey());
                 if (rs == null) {
-                    log.info("Minion " + oldNode.getKey() + " no longer available for de-activation");
+                    log.info("Minion {} no longer available for de-activation", oldNode.getKey());
                     continue;
                 }
 
@@ -222,7 +222,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                     deployment.activate(toDeploy);
                 } catch (Exception e) {
                     // log but don't forward exception to the client
-                    log.warn("Problem communicating with slave " + minionName, e);
+                    log.warn("Problem communicating with slave {}", minionName, e);
                     throw new WebApplicationException("Cannot activate on " + minionName, Status.BAD_GATEWAY);
                 }
 

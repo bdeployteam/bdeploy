@@ -74,28 +74,7 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
                     System.in.read();
                 }
 
-                mr.getAuditor().audit(
-                        AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("cert-update").build());
-                try {
-                    BCX509Helper.updatePrivateCertificate(ks, ksp, cert);
-                } catch (Exception e) {
-                    out().println("ERROR: Cannot update certificate!");
-                    e.printStackTrace(out());
-                }
-
-                // now update the own access token.
-                SecurityHelper helper = SecurityHelper.getInstance();
-                ApiAccessToken aat = new ApiAccessToken.Builder().forSystem().addPermission(ApiAccessToken.ADMIN_PERMISSION)
-                        .build();
-
-                String pack = helper.createSignaturePack(aat, ks, ksp);
-
-                MinionManifest mf = new MinionManifest(mr.getHive());
-                MinionConfiguration cfg = mf.read();
-                MinionDto minion = cfg.getMinion(mr.getState().self);
-                RemoteService newRemote = new RemoteService(minion.remote.getUri(), pack);
-                minion.remote = newRemote;
-                mf.update(cfg);
+                doUpdateCertificate(mr, ks, ksp, cert);
 
                 out().println("Certificate updated.");
             } else {
@@ -104,6 +83,30 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
         } catch (GeneralSecurityException | IOException e) {
             throw new IllegalStateException("Cannot update certificate", e);
         }
+    }
+
+    private void doUpdateCertificate(MinionRoot mr, Path ks, char[] ksp, Path cert) throws GeneralSecurityException, IOException {
+        mr.getAuditor()
+                .audit(AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("cert-update").build());
+        try {
+            BCX509Helper.updatePrivateCertificate(ks, ksp, cert);
+        } catch (Exception e) {
+            out().println("ERROR: Cannot update certificate!");
+            e.printStackTrace(out());
+        }
+
+        // now update the own access token.
+        SecurityHelper helper = SecurityHelper.getInstance();
+        ApiAccessToken aat = new ApiAccessToken.Builder().forSystem().addPermission(ApiAccessToken.ADMIN_PERMISSION).build();
+
+        String pack = helper.createSignaturePack(aat, ks, ksp);
+
+        MinionManifest mf = new MinionManifest(mr.getHive());
+        MinionConfiguration cfg = mf.read();
+        MinionDto minion = cfg.getMinion(mr.getState().self);
+        RemoteService newRemote = new RemoteService(minion.remote.getUri(), pack);
+        minion.remote = newRemote;
+        mf.update(cfg);
     }
 
 }

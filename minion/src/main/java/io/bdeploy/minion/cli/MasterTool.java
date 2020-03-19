@@ -100,7 +100,7 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
                     UserInfo info = r.getUsers().getUser(user);
                     if (info == null) {
                         // FIXME: REMOVE this. Non-existent users should not be allowed!
-                        log.error("User not available: " + user + ". Allowing to support legacy tokens.");
+                        log.error("User not available: {}. Allowing to support legacy tokens.", user);
                         return true;
                     }
                     return !info.inactive;

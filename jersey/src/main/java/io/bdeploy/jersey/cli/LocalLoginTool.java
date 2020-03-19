@@ -52,27 +52,7 @@ public class LocalLoginTool extends ConfiguredCliTool<LoginConfig> {
         LocalLoginManager llm = new LocalLoginManager();
 
         if (config.add() != null) {
-            helpAndFailIfMissing(config.remote(), "Missing --remote");
-
-            out().println("Please specify user and password for " + config.remote());
-
-            String user;
-            if (config.user() != null) {
-                user = config.user();
-            } else {
-                out().print("User: ");
-                user = System.console().readLine();
-            }
-
-            char[] pass;
-            if (config.password() != null) {
-                pass = config.password().toCharArray();
-            } else {
-                out().print("Password: ");
-                pass = System.console().readPassword();
-            }
-
-            llm.login(config.add(), config.remote(), user, new String(pass));
+            addUser(config, llm);
         } else if (config.remove() != null) {
             llm.remove(config.remove());
         } else if (config.use() != null) {
@@ -87,6 +67,30 @@ public class LocalLoginTool extends ConfiguredCliTool<LoginConfig> {
         } else {
             out().println("No action given...");
         }
+    }
+
+    private void addUser(LoginConfig config, LocalLoginManager llm) {
+        helpAndFailIfMissing(config.remote(), "Missing --remote");
+
+        out().println("Please specify user and password for " + config.remote());
+
+        String user;
+        if (config.user() != null) {
+            user = config.user();
+        } else {
+            out().print("User: ");
+            user = System.console().readLine();
+        }
+
+        char[] pass;
+        if (config.password() != null) {
+            pass = config.password().toCharArray();
+        } else {
+            out().print("Password: ");
+            pass = System.console().readPassword();
+        }
+
+        llm.login(config.add(), config.remote(), user, new String(pass));
     }
 
 }

@@ -105,7 +105,7 @@ public class PublicApiTestV1 {
         assertTrue(eps.containsKey("app"));
 
         EndpointsConfigurationApi eca = eps.get("app");
-        assertEquals(eca.http.size(), 1);
+        assertEquals(1, eca.http.size());
         assertEquals("test", eca.http.get(0).id);
         assertEquals("/api/test/with/path", eca.http.get(0).path);
 

@@ -112,7 +112,7 @@ public class MetaManifest<T> {
                 .execute(new TreeEntryLoadOperation().setRootTree(mf.getRoot()).setRelativePath(metaFileName()))) {
             return StorageHelper.fromStream(is, metaClazz);
         } catch (Exception e) {
-            log.debug("Cannot read " + metaFileName() + " for " + parent, e);
+            log.debug("Cannot read {} for {}", metaFileName(), parent, e);
             return null; // this is "OK", since an exception is thrown if the object not yet exists.
         }
     }

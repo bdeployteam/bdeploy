@@ -26,11 +26,11 @@ public class InstanceEventManager {
     @Named(INSTANCE_BROADCASTER)
     private JerseyEventBroadcaster bc;
 
-    public void create(String instanceId, Manifest.Key key) {
+    public void create(Manifest.Key key) {
         bc.send(new InstanceUpdateEventDto(key, InstanceUpdateEventType.CREATE), scope.getScope());
     }
 
-    public void stateChanged(String instanceId, Manifest.Key key) {
+    public void stateChanged(Manifest.Key key) {
         bc.send(new InstanceUpdateEventDto(key, InstanceUpdateEventType.STATE_CHANGE), scope.getScope());
     }
 

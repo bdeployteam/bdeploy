@@ -73,7 +73,7 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
             Version version = VersionHelper.tryParse(config.launcher.getTag());
             doDelegateUninstall(version, appUid);
         } else {
-            doUninstallApp(rootDir, hive, appUid);
+            doUninstallApp(rootDir, appUid);
         }
 
         // Remove the manifest which software is used by this application
@@ -89,7 +89,7 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
     /**
      * Removes the given application from this hive and from the pool
      */
-    private void doUninstallApp(Path rootDir, BHive hive, String appUid) {
+    private void doUninstallApp(Path rootDir, String appUid) {
         // Delete the directory where application specific files are stored
         Path appsDir = rootDir.resolve("apps");
         Path appDir = appsDir.resolve(appUid);

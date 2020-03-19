@@ -276,14 +276,12 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             }
 
             // register all WebSocketApplications on their path.
-            wsApplications.forEach((path, app) -> {
-                WebSocketEngine.getEngine().register("/ws", path, app);
-            });
+            wsApplications.forEach((path, app) -> WebSocketEngine.getEngine().register("/ws", path, app));
 
             server.getHttpHandler().setAllowEncodedSlash(true);
             server.start();
 
-            log.info("Started Version {}", VersionHelper.getVersion().toString());
+            log.info("Started Version {}", VersionHelper.getVersion());
         } catch (GeneralSecurityException | IOException e) {
             throw new IllegalStateException("Cannot start server", e);
         }

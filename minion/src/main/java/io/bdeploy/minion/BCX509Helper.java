@@ -36,7 +36,6 @@ import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
-import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.OperatorException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
@@ -143,7 +142,7 @@ public class BCX509Helper {
     }
 
     public static void exportPrivateCertificateAsPem(Path ks, char[] pass, Path pem)
-            throws GeneralSecurityException, IOException, OperatorCreationException {
+            throws GeneralSecurityException, IOException {
         Security.addProvider(new BouncyCastleProvider());
 
         if (Files.exists(pem)) {

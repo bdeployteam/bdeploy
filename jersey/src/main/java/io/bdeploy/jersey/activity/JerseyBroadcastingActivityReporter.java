@@ -82,7 +82,7 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
         // split to distinct lists per scope name
         Map<List<String>, List<ActivitySnapshot>> perScope = new TreeMap<>(this::compareScopes);
         for (ActivitySnapshot snapshot : list) {
-            List<ActivitySnapshot> forScope = perScope.computeIfAbsent(snapshot.scope, (k) -> new ArrayList<>());
+            List<ActivitySnapshot> forScope = perScope.computeIfAbsent(snapshot.scope, k -> new ArrayList<>());
 
             forScope.add(snapshot);
 

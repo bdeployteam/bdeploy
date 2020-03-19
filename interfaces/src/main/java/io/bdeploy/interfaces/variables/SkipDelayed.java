@@ -9,10 +9,7 @@ public class SkipDelayed implements ShouldResolve {
 
     @Override
     public Boolean apply(String t) {
-        if (t.startsWith(Variables.DELAYED.name())) {
-            return false;
-        }
-        return true;
+        return !t.startsWith(Variables.DELAYED.name());
     }
 
 }

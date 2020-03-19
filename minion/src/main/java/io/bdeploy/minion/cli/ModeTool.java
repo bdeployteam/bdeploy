@@ -58,9 +58,7 @@ public class ModeTool extends ConfiguredCliTool<ModeConfig> {
                 throw new UnsupportedOperationException("Cannot convert root to " + oldMode + ".");
             }
 
-            mr.modifyState(s -> {
-                s.mode = config.mode();
-            });
+            mr.modifyState(s -> s.mode = config.mode());
 
             out().println("Root mode has been set to " + newMode);
         }

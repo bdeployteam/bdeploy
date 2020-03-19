@@ -7,18 +7,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import javax.inject.Inject;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -54,6 +51,7 @@ import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
 import io.bdeploy.interfaces.variables.CompositeResolver;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathResolver;
+import io.bdeploy.jersey.TrustAllServersTrustManager;
 import io.bdeploy.minion.MinionRoot;
 
 public class SlaveProxyResourceImpl implements SlaveProxyResource {
@@ -143,7 +141,7 @@ public class SlaveProxyResourceImpl implements SlaveProxyResource {
         list.add(new ApplicationVariableResolver(app));
         list.add(new ApplicationParameterValueResolver(app.uid, inm.getConfiguration()));
 
-        Function<String, String> p = s -> TemplateHelper.process(s, list);
+        UnaryOperator<String> p = s -> TemplateHelper.process(s, list);
 
         processed.id = wrapper.endpoint.id;
         processed.path = wrapper.endpoint.path;
@@ -170,23 +168,7 @@ public class SlaveProxyResourceImpl implements SlaveProxyResource {
         if (endpoint.secure && endpoint.trustAll) {
             SSLContext sslcontext = SSLContext.getInstance("TLS");
 
-            sslcontext.init(null, new TrustManager[] { new X509TrustManager() {
-
-                @Override
-                public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-                    // we need to trust all certificates
-                }
-
-                @Override
-                public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-                    // we need to trust all certificates
-                }
-
-                @Override
-                public X509Certificate[] getAcceptedIssuers() {
-                    return new X509Certificate[0];
-                }
-            } }, new java.security.SecureRandom());
+            sslcontext.init(null, new TrustManager[] { new TrustAllServersTrustManager() }, new java.security.SecureRandom());
 
             client.sslContext(sslcontext).hostnameVerifier((s1, s2) -> true);
         } else if (endpoint.secure && endpoint.trustStore != null && !endpoint.trustStore.isEmpty()) {
@@ -207,7 +189,7 @@ public class SlaveProxyResourceImpl implements SlaveProxyResource {
                 sslContext.init(null, tmf.getTrustManagers(), null);
                 client.sslContext(sslContext);
             } catch (GeneralSecurityException | IOException e) {
-                log.error("Cannot load configures trust store from " + ksPath, e);
+                log.error("Cannot load configures trust store from {}", ksPath, e);
             }
         }
 

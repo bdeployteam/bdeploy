@@ -1,8 +1,5 @@
 package io.bdeploy.minion.migration;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +16,7 @@ public class SettingsConfigurationMigration {
     private SettingsConfigurationMigration() {
     }
 
-    public static void run(MinionRoot root) throws GeneralSecurityException, IOException {
+    public static void run(MinionRoot root) {
         SettingsConfiguration settings = SettingsManifest.read(root.getHive(), root.getEncryptionKey(), false);
 
         boolean changes = false;

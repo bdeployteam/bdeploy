@@ -76,7 +76,7 @@ public class SecurityHelper {
         pbeCipher.init(Cipher.ENCRYPT_MODE, key);
         AlgorithmParameters parameters = pbeCipher.getParameters();
         IvParameterSpec ivParameterSpec = parameters.getParameterSpec(IvParameterSpec.class);
-        byte[] cryptoText = pbeCipher.doFinal(data.getBytes("UTF-8"));
+        byte[] cryptoText = pbeCipher.doFinal(data.getBytes(StandardCharsets.UTF_8));
         byte[] iv = ivParameterSpec.getIV();
         return encode(iv) + ":" + encode(cryptoText);
     }
@@ -91,7 +91,7 @@ public class SecurityHelper {
         String property = data.split(":")[1];
         Cipher pbeCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         pbeCipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(decode(iv)));
-        return new String(pbeCipher.doFinal(decode(property)), "UTF-8");
+        return new String(pbeCipher.doFinal(decode(property)), StandardCharsets.UTF_8);
     }
 
     /**
