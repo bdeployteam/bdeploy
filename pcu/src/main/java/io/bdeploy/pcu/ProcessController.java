@@ -311,6 +311,15 @@ public class ProcessController {
     }
 
     /**
+     * Sets the intend that stopping this process is planned in the near future. This does not have any effect on the process
+     * itself. It will still be running and stopping must be explicitly invoked to really terminate the process. Setting this
+     * intend is typically done when stopping multiple processes one after each other to visualize the desired target state.
+     */
+    public void prepareStop() {
+        executeLocked("PrepareStop", false, this::doPrepareStop);
+    }
+
+    /**
      * Stops the process and all its descendants.
      * <p>
      * <b>Procedure:</b> If a stop command is defined this command is executed. It is expected that the process
@@ -347,7 +356,7 @@ public class ProcessController {
 
     /** Starts the application */
     private void doStart(boolean resetRecoverCount) {
-        if (processState == ProcessState.RUNNING || processState == ProcessState.RUNNING_UNSTABLE) {
+        if (processState.isRunning()) {
             throw new PcuRuntimeException("Application is already running.");
         }
         logger.log(l -> l.info("Starting {}", processConfig.name));
@@ -398,31 +407,17 @@ public class ProcessController {
         }
     }
 
-    private long internalGetProcessStartTimestampCorrected(long pid, Instant reportedStartTime) {
-        if (OsHelper.getRunningOs() == OperatingSystem.LINUX) {
-            // see bug DCS-546 - the JVM on linux uses an invalid formula to calculate the absolute timestamp at which a process was started.
-            // There are various dynamically updated offsets and timestamps in play, thus the value may change over time. There /is/ a stable
-            // value we can use, and actually what we do here is the very same thing as the JVM does when reading the start time. The read value
-            // is not absolute though, but relative to the kernel boot time (which is sufficient for what we want). We just omit addition
-            // of real time and boot time offsets as done in the linux kernel when querying the boottime of the kernel.
-            try {
-                // read the single line from /proc/[pid]/stat, field no 22 is the start time.
-                String line = new String(Files.readAllBytes(Paths.get("/proc", String.valueOf(pid), "stat")),
-                        StandardCharsets.UTF_8);
-                String[] split = line.split(" ");
-                return Long.parseLong(split[21]);
-            } catch (Exception e) {
-                logger.log(l -> l.warn("Cannot read corrected start time of process, PID = {}.", pid, e));
-            }
+    /** Updates the state that stopping is planned */
+    private void doPrepareStop() {
+        if (!processState.isRunning()) {
+            throw new PcuRuntimeException("Application is already stopped.");
         }
-
-        // we (for now) trust the OS to deliver a stable absolute timestamp.
-        return reportedStartTime.toEpochMilli();
+        processState = ProcessState.RUNNING_STOP_PLANNED;
     }
 
     /** Stops the application */
     private void doStop() {
-        if (processState == ProcessState.STOPPED) {
+        if (processState.isStopped()) {
             throw new PcuRuntimeException("Application is already stopped.");
         }
 
@@ -435,7 +430,9 @@ public class ProcessController {
             cleanup();
             return;
         }
+        // Stopping could take a while thus we setting the intent
         logger.log(l -> l.info("Stopping {}", processConfig.name));
+        processState = ProcessState.RUNNING_STOP_PLANNED;
 
         // try to gracefully stop the process using it's stop command
         doInvokeStopCommand(processConfig.stop);
@@ -666,6 +663,16 @@ public class ProcessController {
             return;
         }
 
+        // Stop already planned. OK do not restart it anymore
+        if (processState == ProcessState.RUNNING_STOP_PLANNED) {
+            String message = "Application terminated. Remains stopped as stopping is already planned. Total uptime: {}";
+            logger.log(l -> l.info(message, uptimeString));
+            processState = ProcessState.STOPPED;
+            waitForLockRelease();
+            cleanup();
+            return;
+        }
+
         // Process terminated unexpectedly
         logger.log(l -> l.error("Application terminated unexpectedly. Total uptime: {}", uptimeString));
 
@@ -881,6 +888,28 @@ public class ProcessController {
         } catch (Exception ex) {
             logger.log(l -> l.error("Failed to notify listener about current process status.", ex));
         }
+    }
+
+    private long internalGetProcessStartTimestampCorrected(long pid, Instant reportedStartTime) {
+        if (OsHelper.getRunningOs() == OperatingSystem.LINUX) {
+            // see bug DCS-546 - the JVM on linux uses an invalid formula to calculate the absolute timestamp at which a process was started.
+            // There are various dynamically updated offsets and timestamps in play, thus the value may change over time. There /is/ a stable
+            // value we can use, and actually what we do here is the very same thing as the JVM does when reading the start time. The read value
+            // is not absolute though, but relative to the kernel boot time (which is sufficient for what we want). We just omit addition
+            // of real time and boot time offsets as done in the linux kernel when querying the boottime of the kernel.
+            try {
+                // read the single line from /proc/[pid]/stat, field no 22 is the start time.
+                String line = new String(Files.readAllBytes(Paths.get("/proc", String.valueOf(pid), "stat")),
+                        StandardCharsets.UTF_8);
+                String[] split = line.split(" ");
+                return Long.parseLong(split[21]);
+            } catch (Exception e) {
+                logger.log(l -> l.warn("Cannot read corrected start time of process, PID = {}.", pid, e));
+            }
+        }
+
+        // we (for now) trust the OS to deliver a stable absolute timestamp.
+        return reportedStartTime.toEpochMilli();
     }
 
     /** Returns a new-instance of this controller without any runtime data */

@@ -114,7 +114,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   public isRunningOutOfSync = false;
 
   // Refresh timer and configuration
-  public readonly AUTO_REFRESH_INTERVAL_SEC = 10;
+  public autoRefreshInterval = 10;
   public lastAutoRefresh = Date.now();
   public autoRefresh = false;
   public autoRefreshHandle: any;
@@ -922,8 +922,13 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   startInstance() {
+    // Reduce refresh interval so that the user directly gets feedback about the progress
+    this.autoRefreshInterval = 1;
+
+     // Reset interval back to default when stopping is finished
     this.processService.startAll(this.groupParam, this.uuidParam).subscribe(r => {
       this.doTriggerProcessStatusUpdate();
+      this.autoRefreshInterval = 10;
       if (this.processDetails) {
         this.processDetails.reLoadStatus();
       }
@@ -931,8 +936,13 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   stopInstance() {
+    // Reduce refresh interval so that the user directly gets feedback about the progress
+    this.autoRefreshInterval = 1;
+
+    // Reset interval back to default when stopping is finished
     this.processService.stopAll(this.groupParam, this.uuidParam).subscribe(r => {
       this.doTriggerProcessStatusUpdate();
+      this.autoRefreshInterval = 10;
       if (this.processDetails) {
         this.processDetails.reLoadStatus();
       }
@@ -1013,7 +1023,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
   /** Executes the status refresh operation or updates the remaining seconds */
   doUpdateAutoRefreshProgress() {
-    const nextRefreshMs = this.lastAutoRefresh + this.AUTO_REFRESH_INTERVAL_SEC * 1000;
+    const nextRefreshMs = this.lastAutoRefresh + this.autoRefreshInterval * 1000;
     const diff = nextRefreshMs - Date.now();
     this.nextAutoRefreshSec = Math.round(diff / 1000);
     if (this.nextAutoRefreshSec <= 0) {

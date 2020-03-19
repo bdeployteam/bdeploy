@@ -21,6 +21,9 @@ The process status is visualized with an icon in the bottom right corner of each
 a| image::images/BDeploy_Process_Status_Running.png[width=32,align=center]
 | Process is *running*.
 
+a| image::images/BDeploy_Process_Status_Running_Stop_Planned.png[width=32,align=center]
+| Process is *running* but *stopping* has been *requested* by the user.
+
 a| image::images/BDeploy_Process_Status_Running_Version.png[align=center,width=32]
 | Process is *running* in another version.
 
@@ -69,6 +72,10 @@ It is a common requirement that certain *Processes* of an *Instance* should be a
 *Processes* that are executing actions that cannot be reverted or that are potentially dangerous in productive environments (dropping a database, deleting files) should be configured with the start type `MANUAL_CONFIRM`. Doing that results in an additional popup dialog that enforces the user to enter the name of the *Process* before it is started. The idea is, that the user takes an additional moment to ensure that he is really starting the desired *Process*.
 
 image::images/BDeploy_Process_Manual_Confirm.png[Manual Confirmation On Startup,align=center,width=480,link="images/BDeploy_Process_Manual_Confirm.png"]
+
+==== Startup and Shutdown Order
+
+The *Process Control* starts the processes in the order as they are defined in the *Process Configuration* dialog. That means the order can be influenced by dragging applications around. When *Start Instance* is invoked then all processes with startup type *Instance* are started in the defined order. When *Stop Instance* is invoked then all running processes are stopped sequentially. The order is reversed during the stop operation. That means the last process is stopped first and the first process is stopped at last. The next process is stopped when the previous is terminated.
 
 ==== Keep Alive
 

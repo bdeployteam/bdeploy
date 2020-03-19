@@ -295,6 +295,18 @@ public class InstanceProcessController {
         // Unknown processes are stopped first
         running.values().forEach(toStop::addFirst);
 
+        // Set intend that all should be stopped
+        for (ProcessController process : toStop) {
+            try {
+                process.prepareStop();
+            } catch (Exception ex) {
+                String appId = process.getDescriptor().uid;
+                String tag = process.getStatus().instanceTag;
+                logger.log(l -> l.error("Failed to prepare stopping of application.", ex), tag, appId);
+            }
+        }
+
+        // Execute shutdown in new thread so that the caller is not blocked
         Instant start = Instant.now();
         Iterator<ProcessController> iter = toStop.iterator();
         logger.log(l -> l.info("Stopping all running applications."));

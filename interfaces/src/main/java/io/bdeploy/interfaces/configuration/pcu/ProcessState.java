@@ -23,6 +23,12 @@ public enum ProcessState {
     RUNNING_UNSTABLE,
 
     /**
+     * Process is running.
+     * Indicates that stopping is currently in progress or planned in near future.
+     */
+    RUNNING_STOP_PLANNED,
+
+    /**
      * Process is stopped.
      * Indicates that the process control failed to recover the process as it keeps crashing.
      */
@@ -40,7 +46,17 @@ public enum ProcessState {
      * @return {@code true} if it is running
      */
     public boolean isRunning() {
-        return this == RUNNING || this == RUNNING_UNSTABLE;
+        return this == RUNNING || this == RUNNING_UNSTABLE || this == RUNNING_STOP_PLANNED;
+    }
+
+    /**
+     * Returns whether or not the status indicates that the process is stopped and that it is not planned
+     * to automatically start it.
+     *
+     * @return {@code true} if it is stopped
+     */
+    public boolean isStopped() {
+        return this == STOPPED || this == CRASHED_PERMANENTLY;
     }
 
     /**
@@ -50,7 +66,7 @@ public enum ProcessState {
      * @return {@code true} if it is running
      */
     public boolean isRunningOrScheduled() {
-        return this == RUNNING || this == RUNNING_UNSTABLE || this == CRASHED_WAITING;
+        return this == RUNNING || this == RUNNING_UNSTABLE || this == CRASHED_WAITING || this == RUNNING_STOP_PLANNED;
     }
 
 }

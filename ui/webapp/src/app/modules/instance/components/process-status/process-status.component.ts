@@ -58,11 +58,13 @@ export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
     this.icons[ProcessState.RUNNING_UNSTABLE] = 'favorite';
     this.icons[ProcessState.CRASHED_WAITING] = 'report_problem';
     this.icons[ProcessState.CRASHED_PERMANENTLY] = 'error';
+    this.icons[ProcessState.RUNNING_STOP_PLANNED] = 'schedule';
     this.icons_outlined[ProcessState.STOPPED] = 'favorite_outline';
     this.icons_outlined[ProcessState.RUNNING] = 'favorite_outline';
     this.icons_outlined[ProcessState.RUNNING_UNSTABLE] = 'favorite_outline';
     this.icons_outlined[ProcessState.CRASHED_WAITING] = 'report_problem_outline';
     this.icons_outlined[ProcessState.CRASHED_PERMANENTLY] = 'error_outline';
+    this.icons_outlined[ProcessState.RUNNING_STOP_PLANNED] = 'schedule';
   }
 
   onStatusChanged() {
@@ -114,6 +116,12 @@ export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
 
+    // Display if at least one app is about to be stopped
+    if (status.find(app => ProcessState.RUNNING_STOP_PLANNED === app.processState)) {
+      this.processState = ProcessState.RUNNING_STOP_PLANNED;
+      return;
+    }
+
     // Display if at least one app is running
     if (status.find(app => runningStates.has(app.processState))) {
       this.processState = ProcessState.RUNNING;
@@ -131,6 +139,9 @@ export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
   getStatusClass() {
     const styles = ['icon'];
     if (this.isRunning()) {
+      styles.push('app-process-running');
+    }
+    if(this.isStopPlanned()) {
       styles.push('app-process-running');
     }
     if (this.isStopped()) {
@@ -166,6 +177,12 @@ export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
         return 'Application crashed permanently in a different version.';
       }
       return 'Application crashed permanently.';
+    }
+    if(this.isStopPlanned()) {
+      if (this.showStateOfAllApps()) {
+        return 'One ore more applications are going to be stopped.';
+      }
+      return 'Application is about to be stopped.';
     }
     if (this.isRunning()) {
       if (this.showStateOfAllApps()) {
@@ -233,6 +250,10 @@ export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
 
   isStopped() {
     return this.processState === ProcessState.STOPPED;
+  }
+
+  isStopPlanned() {
+    return this.processState === ProcessState.RUNNING_STOP_PLANNED;
   }
 
   isCrashedWaiting() {
