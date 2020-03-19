@@ -104,7 +104,7 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
         RemoteConfig rc = getConfig(RemoteConfig.class);
         boolean optional = isOptional();
 
-        boolean isTestMode = ToolBase.isTestMode();
+        boolean isTestMode = ToolBase.istTestModeLLM();
         LocalLoginManager llm = new LocalLoginManager();
 
         if (!optional && (!isTestMode && (llm.getCurrent() == null && rc.useLogin() == null))) {

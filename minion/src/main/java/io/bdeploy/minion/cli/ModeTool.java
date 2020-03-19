@@ -63,9 +63,6 @@ public class ModeTool extends ConfiguredCliTool<ModeConfig> {
             });
 
             out().println("Root mode has been set to " + newMode);
-        } catch (Exception e) {
-            out().println("Failed to change mode of minion root.");
-            e.printStackTrace(out());
         }
     }
 

@@ -36,6 +36,7 @@ import io.bdeploy.common.util.VersionHelper;
 public abstract class ToolBase {
 
     private static boolean testMode = false;
+    private static boolean testModeLLM = false;
     private static boolean failWithException = false;
     private final Map<String, Class<? extends CliTool>> tools = new TreeMap<>();
 
@@ -46,6 +47,11 @@ public abstract class ToolBase {
      */
     public static void setTestMode(boolean test) {
         testMode = test;
+        testModeLLM = test;
+    }
+
+    public static void setTestModeForLLM(boolean test) {
+        testModeLLM = test;
     }
 
     /**
@@ -60,6 +66,10 @@ public abstract class ToolBase {
      */
     public static boolean isTestMode() {
         return testMode;
+    }
+
+    public static boolean istTestModeLLM() {
+        return testModeLLM;
     }
 
     public void toolMain(String... args) throws Exception {
