@@ -11,6 +11,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 
 /**
@@ -18,6 +21,8 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessState;
  * Enables event-driven testing without hard-coded delays.
  */
 public class StateListener implements Consumer<ProcessState> {
+
+    private static final Logger log = LoggerFactory.getLogger(StateListener.class);
 
     private final ProcessController pc;
 
@@ -53,7 +58,8 @@ public class StateListener implements Consumer<ProcessState> {
     }
 
     @Override
-    public void accept(ProcessState current) {
+    public synchronized void accept(ProcessState current) {
+        log.info("Process state changed to {}", current);
         events.add(current);
         if (remaining.isEmpty()) {
             throw new RuntimeException(

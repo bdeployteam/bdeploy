@@ -1,10 +1,14 @@
 package io.bdeploy.pcu;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -33,7 +37,7 @@ public class InstanceProcessControllerTest {
         controller.setActiveTag("1");
 
         // Start all applications with auto-start flags
-        controller.start();
+        controller.startAll();
         InstanceNodeStatusDto status = controller.getStatus();
         assertTrue(status.areAppsRunningOrScheduled());
         assertTrue(status.areAppsRunningOrScheduledInVersion("1"));
@@ -50,7 +54,7 @@ public class InstanceProcessControllerTest {
         assertTrue(!status.isAppRunningOrScheduled("App1"));
 
         // Stop all remaining
-        controller.stop();
+        controller.stopAll();
         status = controller.getStatus();
         assertTrue(!status.areAppsRunningOrScheduledInVersion("1"));
         assertTrue(!status.areAppsRunningOrScheduled());
@@ -77,7 +81,7 @@ public class InstanceProcessControllerTest {
 
         // Activate and start version 1
         controller.setActiveTag("1");
-        controller.start();
+        controller.startAll();
 
         // Application 1 must be running in the expected version
         InstanceNodeStatusDto status = controller.getStatus();
@@ -107,7 +111,7 @@ public class InstanceProcessControllerTest {
         assertThrows(RuntimeException.class, () -> controller.start("App2"));
 
         // Stop all applications
-        controller.stop();
+        controller.stopAll();
     }
 
     @Test
@@ -144,7 +148,39 @@ public class InstanceProcessControllerTest {
         assertTrue(!status.isAppRunningOrScheduled("App2"));
 
         // Stop all applications
-        controller.stop();
+        controller.stopAll();
+    }
+
+    @Test
+    public void testStartStopOrder(@TempDir Path tmp) {
+        ProcessConfiguration app1 = TestFactory.createConfig(tmp, "App1", true, "600");
+        ProcessConfiguration app2 = TestFactory.createConfig(tmp, "App2", true, "600");
+        ProcessGroupConfiguration group = TestFactory.createGroupConfig("MyInstance", app1, app2);
+
+        // Create controller with the two applications
+        InstanceProcessController controller = new InstanceProcessController(group.uuid);
+        controller.createProcessControllers(new DeploymentPathProvider(tmp, group.uuid), null, "1", group);
+        controller.setActiveTag("1");
+        controller.setOrderProvider(t -> Arrays.asList("App2", "App1"));
+
+        // Add listeners to verify order
+        List<String> order = new ArrayList<>();
+        ProcessList processList = controller.getProcessList("1");
+        ProcessController pc1 = processList.get("App1");
+        ProcessController pc2 = processList.get("App2");
+        pc1.addStatusListener((s) -> order.add(pc1.getDescriptor().uid));
+        pc2.addStatusListener((s) -> order.add(pc2.getDescriptor().uid));
+
+        // Launch both applications and verify order
+        controller.startAll();
+        assertEquals("App2", order.get(0));
+        assertEquals("App1", order.get(1));
+
+        // Stop both applications and verify order. Must be reversed
+        order.clear();
+        controller.stopAll();
+        assertEquals("App1", order.get(0));
+        assertEquals("App2", order.get(1));
     }
 
 }

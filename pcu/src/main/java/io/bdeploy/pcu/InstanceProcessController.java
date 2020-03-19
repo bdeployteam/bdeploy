@@ -4,24 +4,24 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import javax.ws.rs.WebApplicationException;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.Sets;
 
 import io.bdeploy.common.util.MdcLogger;
-import io.bdeploy.common.util.NamedDaemonThreadFactory;
 import io.bdeploy.common.util.VariableResolver;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
@@ -54,23 +54,20 @@ public class InstanceProcessController {
     private final Lock readLock = rwLock.readLock();
     private final Lock writeLock = rwLock.writeLock();
 
-    /** The unique ID of the instance */
-    private final String instanceUid;
-
     /** Maps the tag of an instance to the list of processes */
     private final Map<String, ProcessList> processMap = new HashMap<>();
 
     /** The currently active tag */
     private String activeTag;
 
+    /** Provides the order of processes */
+    private Function<String, List<String>> orderSupplier;
+
     /**
      * Create a new instance controller.
-     *
-     * @param instanceUid the unique id of the instance
      */
     public InstanceProcessController(String instanceUid) {
-        this.instanceUid = instanceUid;
-        this.logger.setMdcValue(this.instanceUid);
+        this.logger.setMdcValue(instanceUid);
     }
 
     /**
@@ -116,6 +113,18 @@ public class InstanceProcessController {
     public void setActiveTag(String activeTag) {
         logger.log(l -> l.info("Setting active tag to {}.", activeTag));
         this.activeTag = activeTag;
+    }
+
+    /**
+     * Sets the supplier that is asked for the current order in which the processes are configured. This
+     * order is taken into account when starting and when stopping processes. Stopping is done by reversing
+     * the provided list and then stop one process after each other. If no provider is set then processes are started
+     * and stopped in an undefined order.
+     *
+     * @param orderSupplier takes the current active tag and returns the order of the processes
+     */
+    public void setOrderProvider(Function<String, List<String>> orderSupplier) {
+        this.orderSupplier = orderSupplier;
     }
 
     /**
@@ -171,19 +180,18 @@ public class InstanceProcessController {
         }
 
         // Proceed with normal startup of all processes
-        start();
+        startAll();
     }
 
     /**
      * Starts all applications of the currently active tag.
      */
-    public void start() {
+    public void startAll() {
         if (activeTag == null) {
             throw new PcuRuntimeException("No active tag has been set");
         }
         try {
             readLock.lock();
-            logger.log(l -> l.info("Starting all applications."), activeTag);
 
             // Compute runtime state across all versions
             Map<String, ProcessController> running = new HashMap<>();
@@ -191,14 +199,29 @@ public class InstanceProcessController {
                 running.putAll(list.getWithState(SET_RUNNING_SCHEDULED));
             }
 
-            // Start all missing applications
+            // Ensure that something is deployed
             ProcessList list = processMap.get(activeTag);
             if (list == null) {
                 throw new PcuRuntimeException("Activated version '" + activeTag + "' is not deployed");
             }
-            for (Map.Entry<String, ProcessController> entry : list.controllers.entrySet()) {
-                String appId = entry.getKey();
-                ProcessController controller = entry.getValue();
+
+            // Determine order in which processes should be started
+            List<String> startupOrder = new ArrayList<>();
+            if (orderSupplier != null) {
+                startupOrder.addAll(orderSupplier.apply(activeTag));
+            } else {
+                startupOrder.addAll(list.controllers.keySet());
+            }
+
+            // Start all missing applications
+            logger.log(l -> l.info("Starting all applications."), activeTag);
+            Instant start = Instant.now();
+            List<String> failed = new ArrayList<>();
+            for (String appId : startupOrder) {
+                ProcessController controller = list.get(appId);
+                if (controller == null) {
+                    continue;
+                }
 
                 // Write logs when the application is already running
                 if (running.containsKey(appId)) {
@@ -223,61 +246,78 @@ public class InstanceProcessController {
                 try {
                     controller.start();
                 } catch (Exception ex) {
+                    failed.add(appId);
                     logger.log(l -> l.info("Failed to start application.", ex), activeTag, appId);
                 }
             }
-            logger.log(l -> l.info("All applications have been started."), activeTag);
+            Duration duration = Duration.between(start, Instant.now());
+            if (failed.isEmpty()) {
+                logger.log(l -> l.info("Applications have been started in {}", Formatter.formatDuration(duration)), activeTag);
+                return;
+            }
+            logger.log(l -> l.warn("Not all applications could be started. Failed {}", failed));
         } finally {
             readLock.unlock();
         }
     }
 
     /**
-     * Stops all running processes.
+     * Stops all running processes of this instance. Processes are stopped in the order that is defined by the given list. If a
+     * process is running but it is not contained in this list then it is stopped before all other processes. If the order is
+     * undefined for multiple processes then the order is not guaranteed.
      */
-    public void stop() {
-        ExecutorService service = Executors.newFixedThreadPool(4, new NamedDaemonThreadFactory(instanceUid + "-stopProcess"));
-        Collection<ProcessController> toStop = new ArrayList<>();
-        try {
-            readLock.lock();
-            // Execute stopping in parallel as this could last for some time
-            for (ProcessList list : processMap.values()) {
-                for (ProcessController controller : list.getWithState(SET_RUNNING_SCHEDULED).values()) {
-                    toStop.add(controller);
-                }
+    public void stopAll() {
+        // Determine all running versions across all tags
+        Map<String, ProcessController> running = new HashMap<>();
+        for (ProcessList list : processMap.values()) {
+            running.putAll(list.getWithState(SET_RUNNING_SCHEDULED));
+        }
+
+        // Determine order in which processes should be stopped
+        List<String> shutdownOrder = new ArrayList<>();
+        if (orderSupplier != null) {
+            shutdownOrder.addAll(orderSupplier.apply(activeTag));
+            Collections.reverse(shutdownOrder);
+        } else {
+            List<String> unordered = running.values().stream().map(pc -> pc.getDescriptor().uid).collect(Collectors.toList());
+            shutdownOrder.addAll(unordered);
+        }
+
+        // Bring the controllers in the desired order
+        Deque<ProcessController> toStop = new LinkedList<>();
+        for (String appUid : shutdownOrder) {
+            ProcessController controller = running.remove(appUid);
+            if (controller == null) {
+                continue;
             }
-        } finally {
-            readLock.unlock();
+            toStop.add(controller);
         }
+        // Unknown processes are stopped first
+        running.values().forEach(toStop::addFirst);
 
-        logger.log(l -> l.info("Stopping {} running applications.", toStop.size()));
-        for (ProcessController process : toStop) {
-            service.execute(() -> {
-                try {
-                    process.stop();
-                } catch (Exception ex) {
-                    String appId = process.getDescriptor().uid;
-                    String tag = process.getStatus().instanceTag;
-                    logger.log(l -> l.error("Failed to stop application.", ex), tag, appId);
-                }
-            });
-        }
-
-        // Wait for all to terminate
         Instant start = Instant.now();
-        logger.log(l -> l.info("Waiting for applications to stop."));
-        try {
-            service.shutdown();
-            service.awaitTermination(5, TimeUnit.MINUTES);
-            Duration duration = Duration.between(start, Instant.now());
-            logger.log(l -> l.info("All applications stopped. Stopping took {}", Formatter.formatDuration(duration)));
-        } catch (InterruptedException e) {
-            Duration duration = Duration.between(start, Instant.now());
-            Thread.currentThread().interrupt();
-            throw new WebApplicationException(
-                    "Interruped while waiting for processes to stop. Waited for " + Formatter.formatDuration(duration), e);
+        Iterator<ProcessController> iter = toStop.iterator();
+        logger.log(l -> l.info("Stopping all running applications."));
+        while (iter.hasNext()) {
+            ProcessController process = iter.next();
+            try {
+                process.stop();
+                iter.remove();
+            } catch (Exception ex) {
+                String appId = process.getDescriptor().uid;
+                String tag = process.getStatus().instanceTag;
+                logger.log(l -> l.error("Failed to stop application.", ex), tag, appId);
+            }
         }
-
+        // Check if we could stop all applications
+        Duration duration = Duration.between(start, Instant.now());
+        if (toStop.isEmpty()) {
+            logger.log(l -> l.info("Applications have been stopped in {} ", Formatter.formatDuration(duration)));
+            return;
+        }
+        String stillRunning = toStop.stream().map(pc -> pc.getDescriptor().name).collect(Collectors.joining(","));
+        logger.log(l -> l.warn("Not all applications could be stopped."));
+        logger.log(l -> l.warn("Following applications are still running or in an undefined state: {}", stillRunning));
     }
 
     /**
@@ -383,6 +423,13 @@ public class InstanceProcessController {
         } finally {
             readLock.unlock();
         }
+    }
+
+    /**
+     * Returns all process controllers belonging to the given tag.
+     */
+    public ProcessList getProcessList(String tag) {
+        return processMap.get(tag);
     }
 
 }

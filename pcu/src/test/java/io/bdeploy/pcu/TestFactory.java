@@ -51,6 +51,7 @@ public class TestFactory {
 
         ProcessConfiguration config = new ProcessConfiguration();
         config.uid = name;
+        config.name = name;
         config.processControl = new ProcessControlConfiguration();
         config.processControl.keepAlive = keepAlive;
         config.processControl.gracePeriod = 250; // 250ms 

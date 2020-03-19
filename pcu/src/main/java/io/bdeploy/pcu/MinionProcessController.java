@@ -7,8 +7,10 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.util.MdcLogger;
+import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 
 /**
  * Represents the top-level process controller of a minion. The controller will instantiate a new
@@ -89,15 +91,17 @@ public class MinionProcessController {
     /**
      * Returns an existing instance controller or creates a new one if not existing
      *
-     * @param instanceId
-     *            the unique ID of the instance to manage
+     * @param hive the hive where the instance node manifest is stored
+     * @param inm the current instance node manifest
      */
-    public InstanceProcessController getOrCreate(String instanceId) {
+    public InstanceProcessController getOrCreate(BHive hive, InstanceNodeManifest inm) {
+        String instanceId = inm.getUUID();
         try {
             writeLock.lock();
             InstanceProcessController controller = instance2Controller.get(instanceId);
             if (controller == null) {
                 controller = new InstanceProcessController(instanceId);
+                controller.setOrderProvider(new InstanceNodeOrderProvider(hive, inm.getKey().getName()));
                 instance2Controller.put(instanceId, controller);
                 logger.log(l -> l.debug("Creating new instance controller."), instanceId);
             }
