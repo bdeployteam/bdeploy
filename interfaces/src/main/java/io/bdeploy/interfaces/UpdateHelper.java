@@ -12,8 +12,6 @@ import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import javax.ws.rs.ServerErrorException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -264,7 +262,7 @@ public class UpdateHelper {
         Version apiVersion;
         try {
             apiVersion = root.getUpdateApiVersion();
-        } catch (ServerErrorException e) {
+        } catch (Exception e) {
             // API version not (yet) supported, must be old BDeploy.
             apiVersion = UPDATE_API_V1;
         }
