@@ -296,6 +296,8 @@ void setupBinServerTasks(String version) {
     task "binCheckTestBDeploy_${key}"(type: Exec) {
         if(key.startsWith("1")) {
             dependsOn "binAddTestBDeployUser_${key}"
+        } else {
+            dependsOn "binStartTestBDeploy_${key}"
         }
         setupTask(it)
         args = [ "remote-master", "--minions" ]
