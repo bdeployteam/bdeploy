@@ -90,6 +90,11 @@ export class InstanceAddEditComponent implements OnInit {
       if (e.uuid && this.instanceFormGroup.disabled) {
         this.loading = false;
         this.instanceFormGroup.enable();
+
+        if (!this.isCreate()) {
+          this.productNameControl.disable();
+          this.productTagControl.disable();
+        }
       }
     });
 
