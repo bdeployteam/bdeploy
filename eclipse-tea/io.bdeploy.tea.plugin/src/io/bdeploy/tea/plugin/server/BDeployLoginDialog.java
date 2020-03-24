@@ -80,7 +80,7 @@ public class BDeployLoginDialog extends TitleAreaDialog {
     }
 
     private void updateState() {
-        getButton(OK).setEnabled(this.user != null && this.pass != null && !this.user.isBlank() && !this.pass.isBlank());
+        getButton(OK).setEnabled(this.user != null && this.pass != null && !this.user.isEmpty() && !this.pass.isEmpty());
     }
 
     public BDeployTargetSpec getServer() {
