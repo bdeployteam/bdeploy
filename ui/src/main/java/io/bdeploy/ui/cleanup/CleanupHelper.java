@@ -45,6 +45,7 @@ import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.interfaces.remote.SlaveCleanupResource;
 import io.bdeploy.ui.api.Minion;
+import io.bdeploy.ui.api.MinionMode;
 
 /**
  * Shared logic for cleanups on the master. Both immediate and two-stage cleanup is supported.
@@ -82,8 +83,13 @@ public class CleanupHelper {
 
             InstanceGroupConfiguration cfg = new InstanceGroupManifest(hive).read();
             if (cfg != null) {
-                cleanInstanceGroup(context, immediate, provider, groups, group, hive, cfg);
+                cleanInstanceGroup(minion, context, immediate, provider, groups, group, hive, cfg);
             }
+        }
+
+        // no slaves to cleanup on central. actual slave cleanup for managed masters done on each master.
+        if (minion.getMode() == MinionMode.CENTRAL) {
+            return groups;
         }
 
         // minions cleanup
@@ -114,7 +120,7 @@ public class CleanupHelper {
         return groups;
     }
 
-    private static void cleanInstanceGroup(SecurityContext context, boolean immediate, MasterProvider provider,
+    private static void cleanInstanceGroup(Minion minion, SecurityContext context, boolean immediate, MasterProvider provider,
             List<CleanupGroup> groups, String group, BHive hive, InstanceGroupConfiguration cfg) {
 
         List<CleanupAction> instanceGroupActions = new ArrayList<>();
@@ -122,15 +128,18 @@ public class CleanupHelper {
 
         SortedSet<Manifest.Key> allManifests4deletion = new TreeSet<>(); // collect all keys for meta cleanup
 
-        // auto uninstall of old instance version
-        SortedSet<Key> latestImKeys = InstanceManifest.scan(hive, true);
-        for (Key key : latestImKeys) {
-            InstanceManifest im = InstanceManifest.of(hive, key);
-            if (im.getConfiguration().autoUninstall) {
-                SortedSet<Key> keys = findInstanceVersions4Uninstall(context, group, hive, im, provider);
-                instanceVersions4Uninstall.put(im.getManifest().getName(), keys);
-                allManifests4deletion.addAll(keys);
-                instanceGroupActions.addAll(uninstallInstanceVersions(context, hive, keys, immediate, provider));
+        // for central, don't auto-uninstall. only auto-clean products which are not known to be used.
+        if (minion.getMode() != MinionMode.CENTRAL) {
+            // auto uninstall of old instance version
+            SortedSet<Key> latestImKeys = InstanceManifest.scan(hive, true);
+            for (Key key : latestImKeys) {
+                InstanceManifest im = InstanceManifest.of(hive, key);
+                if (im.getConfiguration().autoUninstall) {
+                    SortedSet<Key> keys = findInstanceVersions4Uninstall(context, group, hive, im, provider);
+                    instanceVersions4Uninstall.put(im.getManifest().getName(), keys);
+                    allManifests4deletion.addAll(keys);
+                    instanceGroupActions.addAll(uninstallInstanceVersions(context, hive, keys, immediate, provider));
+                }
             }
         }
 

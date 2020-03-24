@@ -303,7 +303,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
 
         createJobScheduler();
 
-        if (master && masterMode != MinionMode.CENTRAL) {
+        if (master) {
             MasterCleanupJob.create(this, getState().cleanupSchedule);
         }
         CleanupDownloadDirJob.create(scheduler, downloadDir);
