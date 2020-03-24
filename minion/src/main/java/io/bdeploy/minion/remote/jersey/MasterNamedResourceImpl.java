@@ -186,23 +186,29 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         // record de-activation
         String activeTag = imf.getState(hive).read().activeTag;
         if (activeTag != null) {
-            InstanceManifest oldIm = InstanceManifest.load(hive, imf.getConfiguration().uuid, activeTag);
-            oldIm.getHistory(hive).record(Action.DEACTIVATE, context.getUserPrincipal().getName(), null);
+            try {
+                InstanceManifest oldIm = InstanceManifest.load(hive, imf.getConfiguration().uuid, activeTag);
+                oldIm.getHistory(hive).record(Action.DEACTIVATE, context.getUserPrincipal().getName(), null);
 
-            // make sure all nodes which no longer participate are deactivated.
-            for (Map.Entry<String, Manifest.Key> oldNode : oldIm.getInstanceNodeManifests().entrySet()) {
-                // deactivation by activation later on.
-                if (imf.getInstanceNodeManifests().containsKey(oldNode.getKey())) {
-                    continue;
+                // make sure all nodes which no longer participate are deactivated.
+                for (Map.Entry<String, Manifest.Key> oldNode : oldIm.getInstanceNodeManifests().entrySet()) {
+                    // deactivation by activation later on.
+                    if (imf.getInstanceNodeManifests().containsKey(oldNode.getKey())) {
+                        continue;
+                    }
+
+                    RemoteService rs = root.getMinions().getRemote(oldNode.getKey());
+                    if (rs == null) {
+                        log.info("Minion {} no longer available for de-activation", oldNode.getKey());
+                        continue;
+                    }
+
+                    ResourceProvider.getResource(rs, SlaveDeploymentResource.class, context).deactivate(oldNode.getValue());
                 }
-
-                RemoteService rs = root.getMinions().getRemote(oldNode.getKey());
-                if (rs == null) {
-                    log.info("Minion {} no longer available for de-activation", oldNode.getKey());
-                    continue;
-                }
-
-                ResourceProvider.getResource(rs, SlaveDeploymentResource.class, context).deactivate(oldNode.getValue());
+            } catch (Exception e) {
+                // in case the old version disappeared (manual deletion, automatic migration, ...) we do not
+                // want to fail to activate the new version...
+                log.debug("Cannot set old version to de-activated", e);
             }
         }
 
