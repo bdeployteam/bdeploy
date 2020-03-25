@@ -164,7 +164,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
             // Log details about the server version
             // NOTE: Not all servers can tell us their version
-            Version serverVersion = getServerVersion();
+            Version serverVersion = getServerVersion(descriptor);
             if (VersionHelper.isUndefined(serverVersion)) {
                 log.info("Server version: Undefined.");
             } else {
@@ -216,14 +216,14 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 helpAndFail(ex.getMessage());
             }
             LauncherUpdateDialog dialog = new LauncherUpdateDialog();
-            dialog.showUpdateRequired(ex);
+            dialog.showUpdateRequired(descriptor, ex);
         } catch (Exception ex) {
             log.error("Failed to launch application.", ex);
             if (config.exitOnError()) {
                 helpAndFail(ex.getMessage());
             }
             LauncherErrorDialog dialog = new LauncherErrorDialog();
-            dialog.showError(ex);
+            dialog.showError(descriptor, ex);
         } finally {
             if (auditor != null) {
                 auditor.close();
@@ -636,7 +636,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /**
      * Returns the server version or null in case that the version cannot be determined
      */
-    private Version getServerVersion() {
+    public static Version getServerVersion(ClickAndStartDescriptor descriptor) {
         try {
             CommonRootResource resource = ResourceProvider.getResource(descriptor.host, CommonRootResource.class, null);
             return resource.getVersion();

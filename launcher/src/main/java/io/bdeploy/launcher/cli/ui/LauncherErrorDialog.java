@@ -1,7 +1,9 @@
 package io.bdeploy.launcher.cli.ui;
 
+import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
+
 /**
- * A dialog showing the exception that occured during launching.
+ * A dialog showing the exception that occurred during launching.
  */
 public class LauncherErrorDialog extends LauncherDialog {
 
@@ -12,7 +14,7 @@ public class LauncherErrorDialog extends LauncherDialog {
      */
     public static void main(String[] args) {
         LauncherErrorDialog dialog = new LauncherErrorDialog();
-        dialog.showError(new RuntimeException());
+        dialog.showError(null, new RuntimeException());
     }
 
     /**
@@ -24,10 +26,8 @@ public class LauncherErrorDialog extends LauncherDialog {
 
     /**
      * Opens the dialog to show the error message to the user. Blocks until the user closes the dialog.
-     *
-     * @param ex the exception that occurred
      */
-    public void showError(Throwable ex) {
+    public void showError(ClickAndStartDescriptor config, Throwable ex) {
         setVisible(true);
 
         // Default icon and text in header
@@ -39,7 +39,7 @@ public class LauncherErrorDialog extends LauncherDialog {
                 "If the problem persists, contact the system administrator.</html>");
 
         // Detailed error message including stacktrace
-        errorDetails.setText(getDetailedErrorMessage(ex));
+        errorDetails.setText(getDetailedErrorMessage(config, ex));
 
         // Block until dialog is closed
         waitForExit();

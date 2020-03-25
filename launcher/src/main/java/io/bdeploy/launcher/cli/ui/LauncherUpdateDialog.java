@@ -1,5 +1,6 @@
 package io.bdeploy.launcher.cli.ui;
 
+import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.launcher.cli.SoftwareUpdateException;
 
 /**
@@ -11,7 +12,7 @@ public class LauncherUpdateDialog extends LauncherDialog {
 
     public static void main(String[] args) {
         LauncherUpdateDialog dialog = new LauncherUpdateDialog();
-        dialog.showUpdateRequired(new SoftwareUpdateException("myApp", "Installed=1.2.0 Available=1.3.0"));
+        dialog.showUpdateRequired(null, new SoftwareUpdateException("myApp", "Installed=1.2.0 Available=1.3.0"));
     }
 
     /**
@@ -24,7 +25,7 @@ public class LauncherUpdateDialog extends LauncherDialog {
     /**
      * Opens the dialog to show that a required update is available but cannot be installed.
      */
-    public void showUpdateRequired(SoftwareUpdateException ex) {
+    public void showUpdateRequired(ClickAndStartDescriptor config, SoftwareUpdateException ex) {
         setVisible(true);
 
         // Default icon and text in header
@@ -37,7 +38,7 @@ public class LauncherUpdateDialog extends LauncherDialog {
                 "Contact the system administrator.</html>");
 
         // Detailed error message including version
-        errorDetails.setText(getDetailedErrorMessage(ex));
+        errorDetails.setText(getDetailedErrorMessage(config, ex));
 
         // Block until dialog is closed
         waitForExit();

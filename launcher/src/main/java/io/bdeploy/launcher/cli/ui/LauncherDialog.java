@@ -39,6 +39,9 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.ProcessHelper;
+import io.bdeploy.common.util.VersionHelper;
+import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
+import io.bdeploy.launcher.cli.LauncherTool;
 
 /**
  * Base class providing a header, content and footer area.
@@ -204,7 +207,7 @@ public abstract class LauncherDialog extends JFrame {
     }
 
     /** Returns the detailed error message to be displayed */
-    protected static String getDetailedErrorMessage(Throwable ex) {
+    protected static String getDetailedErrorMessage(ClickAndStartDescriptor config, Throwable ex) {
         StringBuilder builder = new StringBuilder();
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
@@ -214,6 +217,18 @@ public abstract class LauncherDialog extends JFrame {
         StringWriter writer = new StringWriter();
         ex.printStackTrace(new PrintWriter(writer));
         builder.append("*** Stacktrace: \n").append(writer);
+        builder.append("\n");
+
+        builder.append("*** BDeploy properties: \n");
+        builder.append("LauncherVersion=").append(VersionHelper.getVersion()).append("\n");
+        if (config != null) {
+            builder.append("ServerVersion=").append(getServerVersion(config)).append("\n");
+            builder.append("ApplicationId=").append(config.applicationId).append("\n");
+            builder.append("GroupId=").append(config.groupId).append("\n");
+            builder.append("InstanceId=").append(config.instanceId).append("\n");
+            builder.append("Host=").append(config.host.getUri()).append("\n");
+            builder.append("Token=").append(config.host.getAuthPack()).append("\n");
+        }
         builder.append("\n");
 
         builder.append("*** System properties: \n");
@@ -244,6 +259,15 @@ public abstract class LauncherDialog extends JFrame {
 
         // No specific information to display
         return null;
+    }
+
+    /** Returns the version of the remove BDdeploy server */
+    private static String getServerVersion(ClickAndStartDescriptor config) {
+        try {
+            return LauncherTool.getServerVersion(config).toString();
+        } catch (Exception ex) {
+            return ex.getMessage();
+        }
     }
 
     /** Disposes the dialog and signals that the main thread can continue */
