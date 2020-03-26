@@ -168,15 +168,16 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
         if (newest == null) {
             throw new WebApplicationException("Cannot find instance " + instanceId, Status.NOT_FOUND);
         }
-        String activeTag = getState(newest, root.getHive()).read().activeTag;
+        BHive hive = root.getHive();
+        String activeTag = getState(newest, hive).read().activeTag;
         if (activeTag == null) {
             throw new WebApplicationException("Cannot find active version for instance " + instanceId, Status.NOT_FOUND);
         }
 
         Key activeKey = new Manifest.Key(newest.getKey().getName(), activeTag);
 
-        InstanceNodeController inc = new InstanceNodeController(root.getHive(), root.getDeploymentDir(),
-                InstanceNodeManifest.of(root.getHive(), activeKey));
+        InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentDir(),
+                InstanceNodeManifest.of(hive, activeKey));
 
         Path dataRoot = inc.getDeploymentPathProvider().get(SpecialDirectory.DATA);
 

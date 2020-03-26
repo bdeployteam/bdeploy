@@ -1,5 +1,6 @@
 package io.bdeploy.minion.cli;
 
+import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -47,12 +48,13 @@ public class StorageTool extends ConfiguredCliTool<StorageConfig> {
     protected void run(StorageConfig config) {
         helpAndFailIfMissing(config.root(), "Missing --root");
 
+        PrintStream out = out();
         try (MinionRoot r = new MinionRoot(Paths.get(config.root()), getActivityReporter())) {
             List<Path> original = r.getStorageLocations();
             if (config.add() != null) {
                 Path p = Paths.get(config.add());
                 if (original.contains(p)) {
-                    out().println(p + " already registered");
+                    out.println(p + " already registered");
                     return;
                 }
                 PathHelper.mkdirs(p);
@@ -65,9 +67,9 @@ public class StorageTool extends ConfiguredCliTool<StorageConfig> {
                 Path p = Paths.get(config.remove());
                 r.modifyState(s -> s.storageLocations.remove(p));
             } else if (config.list()) {
-                r.getStorageLocations().forEach(out()::println);
+                r.getStorageLocations().forEach(out::println);
             } else {
-                out().println("Nothing to do.");
+                out.println("Nothing to do.");
             }
         }
     }
