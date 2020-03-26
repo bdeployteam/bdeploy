@@ -33,11 +33,13 @@ public class BDeployLoginDialog extends TitleAreaDialog {
 
     private String user;
     private String pass;
+    private final boolean source;
 
-    public BDeployLoginDialog(Shell parentShell, String serverName, String serverUrl) {
+    public BDeployLoginDialog(Shell parentShell, String serverName, String serverUrl, boolean source) {
         super(parentShell);
         this.serverName = serverName;
         this.serverUrl = serverUrl;
+        this.source = source;
     }
 
     @Override
@@ -48,6 +50,14 @@ public class BDeployLoginDialog extends TitleAreaDialog {
         Composite comp = new Composite(parent, SWT.NONE);
         GridDataFactory.fillDefaults().grab(true, true).applyTo(comp);
         GridLayoutFactory.fillDefaults().numColumns(2).margins(20, 20).applyTo(comp);
+
+        if (source) {
+            Label lblSource = new Label(comp, SWT.NONE);
+            lblSource.setText(
+                    "Provide credentials for the software repository server to fetch missing required dependencies.\nThis is the server configured in the TEA BDeploy Preferences: "
+                            + serverUrl);
+            GridDataFactory.fillDefaults().grab(true, false).span(2, 1).applyTo(lblSource);
+        }
 
         Label lblUser = new Label(comp, SWT.NONE);
         lblUser.setText("User");

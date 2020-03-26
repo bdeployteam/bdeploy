@@ -157,15 +157,17 @@ public class BDeployBuildProductTask {
                     DependencyFetcher groupFetcher = new RemoteDependencyFetcher(
                             new RemoteService(UriBuilder.fromUri(pushTarget.uri).build(), pushTarget.token),
                             pushTarget.instanceGroup, reporter);
+
+                    // synchronizing dependency fetcher that tries the target server first, and the source server second.
                     fetcher = new DependencyFetcher() {
 
                         @Override
-                        public SortedSet<Key> fetch(BHive hive, SortedSet<String> deps, OperatingSystem os) {
-                            SortedSet<Key> k = groupFetcher.fetch(hive, deps, os);
-                            if (k == null) {
-                                k = origFetcher.fetch(hive, deps, os);
+                        public synchronized SortedSet<Key> fetch(BHive hive, SortedSet<String> deps, OperatingSystem os) {
+                            try {
+                                return groupFetcher.fetch(hive, deps, os);
+                            } catch (Exception e) {
+                                return origFetcher.fetch(hive, deps, os);
                             }
-                            return k;
                         }
                     };
                 }

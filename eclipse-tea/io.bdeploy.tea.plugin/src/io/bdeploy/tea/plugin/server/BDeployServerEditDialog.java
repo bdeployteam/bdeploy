@@ -95,7 +95,7 @@ public class BDeployServerEditDialog extends TitleAreaDialog {
 
             @Override
             public void widgetSelected(SelectionEvent e) {
-                BDeployLoginDialog dlg = new BDeployLoginDialog(getShell(), txtName.getText(), txtUri.getText());
+                BDeployLoginDialog dlg = new BDeployLoginDialog(getShell(), txtName.getText(), txtUri.getText(), false);
                 dlg.setBlockOnOpen(true);
                 if (dlg.open() == OK) {
                     txtToken.setText(dlg.getServer().token);
