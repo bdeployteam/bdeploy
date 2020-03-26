@@ -94,7 +94,7 @@ public class BDeployProductTaskChain implements TaskChain {
         source = dlg.isClearSourceToken() ? null : loadSourceServer(prefs);
 
         if (source == null) {
-            BDeployLoginDialog srcDlg = new BDeployLoginDialog(parent, "BDeploy Software Repositories", cfg.bdeployServer);
+            BDeployLoginDialog srcDlg = new BDeployLoginDialog(parent, "BDeploy Software Repositories", cfg.bdeployServer, true);
             srcDlg.setBlockOnOpen(true);
             if (srcDlg.open() != Dialog.OK) {
                 throw new OperationCanceledException();
