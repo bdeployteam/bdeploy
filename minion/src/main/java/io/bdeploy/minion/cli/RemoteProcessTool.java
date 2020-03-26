@@ -53,28 +53,40 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
 
     @Override
     protected void run(RemoteProcessConfig config, RemoteService svc) {
-        helpAndFailIfMissing(config.uuid(), "Missing --uuid");
-        helpAndFailIfMissing(config.instanceGroup(), "Missing --instanceGroup");
+        String instanceId = config.uuid();
+        helpAndFailIfMissing(instanceId, "Missing --uuid");
+
+        String groupName = config.instanceGroup();
+        helpAndFailIfMissing(groupName, "Missing --instanceGroup");
 
         if (!config.start() && !config.status() && !config.stop()) {
             helpAndFailIfMissing(null, "Missing --start or --stop or --status");
         }
 
         MasterRootResource proxy = ResourceProvider.getResource(svc, MasterRootResource.class, null);
-        MasterNamedResource master = proxy.getNamedMaster(config.instanceGroup());
+        MasterNamedResource master = proxy.getNamedMaster(groupName);
+        String appId = config.application();
         if (config.start() || config.stop()) {
             if (config.start()) {
-                master.start(config.uuid(), config.application());
+                if (appId == null || appId.isEmpty()) {
+                    master.start(instanceId);
+                } else {
+                    master.start(instanceId, appId);
+                }
             } else if (config.stop()) {
-                master.stop(config.uuid(), config.application());
+                if (appId == null || appId.isEmpty()) {
+                    master.stop(instanceId);
+                } else {
+                    master.stop(instanceId, appId);
+                }
             }
         }
 
-        InstanceStatusDto status = master.getStatus(config.uuid());
-        if (config.application() == null) {
+        InstanceStatusDto status = master.getStatus(instanceId);
+        if (appId == null) {
             printAllProcessDetails(status);
         } else {
-            ProcessStatusDto appStatus = status.getAppStatus(config.application());
+            ProcessStatusDto appStatus = status.getAppStatus(appId);
             out().println(appStatus);
         }
     }

@@ -149,9 +149,6 @@ java configuration Managed-Slave : minion-base {
  */
 java configuration InteractiveShell : minion-base {
 	argument "shell";
-	
-	environment BDEPLOY_REMOTE="https://localhost:7701/api";
-	environment BDEPLOY_TOKENFILE="${workspace_loc}/runtime/token.txt";
 }
 
 /**
