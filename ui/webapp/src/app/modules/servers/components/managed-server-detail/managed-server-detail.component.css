@@ -5,13 +5,12 @@
 }
 
 .node-table-container {
-  display: flex;
   margin-top: 10px;
   margin-bottom: 10px;
 }
 
 .node-table {
-  flex: 1 0 auto;
+  width: 100%;
 }
 
 .last-sync-label {
