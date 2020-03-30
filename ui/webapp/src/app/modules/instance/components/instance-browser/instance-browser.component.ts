@@ -6,7 +6,7 @@ import { AuthenticationService } from 'src/app/modules/core/services/authenticat
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { SORT_PURPOSE } from '../../../../models/consts';
 import { DataList } from '../../../../models/dataList';
-import { InstanceConfiguration, InstanceDto, InstancePurpose, MinionMode, ProductDto } from '../../../../models/gen.dtos';
+import { InstanceDto, InstancePurpose, MinionMode } from '../../../../models/gen.dtos';
 import { Logger, LoggingService } from '../../../core/services/logging.service';
 import { ProductService } from '../../../instance-group/services/product.service';
 import { InstanceService } from '../../services/instance.service';
@@ -23,7 +23,6 @@ export class InstanceBrowserComponent implements OnInit {
 
   loading = true;
   hasProducts = false;
-  products: ProductDto[];
   instanceDtoList: DataList<InstanceDto> = new DataList();
   purposes: InstancePurpose[] = [];
 
@@ -73,22 +72,14 @@ export class InstanceBrowserComponent implements OnInit {
       this.log.debug(`Got ${instanceDtos.length} instances grouped into ${this.purposes.length} purposes`);
     });
 
-    const productPromise = this.productService.getProducts(this.instanceGroupName);
-    productPromise.subscribe(products => {
-      this.hasProducts = products.length > 0;
-      this.products = products;
+    const productPromise = this.productService.getProductCount(this.instanceGroupName);
+    productPromise.subscribe(count => {
+      this.hasProducts = count > 0;
     });
 
     forkJoin([instancePromise, productPromise]).subscribe(result => {
       this.loading = false;
     });
-  }
-
-  getProductOfInstance(instance: InstanceConfiguration): ProductDto {
-    if (!this.products) {
-      return null;
-    }
-    return this.products.find(p => p.key.name === instance.product.name && p.key.tag === instance.product.tag);
   }
 
   getInstanceDtosByPurpose(purpose: InstancePurpose): InstanceDto[] {

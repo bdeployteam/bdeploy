@@ -26,6 +26,12 @@ export class ProductService {
     return this.http.get<ProductDto[]>(url);
   }
 
+  public getProductCount(instanceGroupName: string): Observable<number> {
+    const url: string = this.buildProductUrl(instanceGroupName) + '/count';
+    this.log.debug('getProductCount: ' + url);
+    return this.http.get<number>(url);
+  }
+
   public deleteProductVersion(instanceGroupName: string, key: ManifestKey) {
     const url: string = this.buildProductNameTagUrl(instanceGroupName, key);
     this.log.debug('deleteProductVersion: ' + url);
