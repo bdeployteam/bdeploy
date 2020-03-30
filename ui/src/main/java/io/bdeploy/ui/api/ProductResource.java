@@ -28,6 +28,10 @@ public interface ProductResource {
     @Path("/list")
     public List<ProductDto> list();
 
+    @GET
+    @Path("/count")
+    public Long count();
+
     @DELETE
     @Path("/{name : .+}/{tag}")
     @RequiredPermission(permission = Permission.ADMIN)
