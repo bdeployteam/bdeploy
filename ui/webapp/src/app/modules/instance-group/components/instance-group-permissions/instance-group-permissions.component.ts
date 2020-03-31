@@ -34,8 +34,27 @@ export class InstanceGroupPermissionsComponent implements OnInit {
   public loading = true;
 
   public dataSource: MatTableDataSource<UserInfo> = null;
+  private filterPredicate: (d, f) => boolean;
   public userAll: UserInfo[] = [];
   private userTableOri: UserInfo[]; // --> dirty detection
+
+  private _filterValue: string = '';
+  get filterValue() {
+    return this._filterValue;
+  }
+  set filterValue(filterValue: string) {
+    this._filterValue = filterValue.trim().toLowerCase();
+    this.updateFilter();
+  }
+
+  private _showGlobal = true;
+  get showGlobal(): boolean {
+    return this._showGlobal;
+  }
+  set showGlobal(showGlobal: boolean) {
+    this._showGlobal = showGlobal;
+    this.updateFilter();
+  }
 
   public displayedColumns: string[] = ['gravatar', 'name', 'fullName', 'email', 'read', 'write', 'admin', 'delete'];
 
@@ -97,9 +116,29 @@ export class InstanceGroupPermissionsComponent implements OnInit {
       this.dataSource = new MatTableDataSource(userTable);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
-
+      this.dataSource.filterPredicate = (data, filter) => {
+        return (this.showGlobal || this.hasScoped(data))
+          && (this.filterPredicate(data.name, this.filterValue)
+          || this.filterPredicate(data.fullName, this.filterValue)
+          || this.filterPredicate(data.email, this.filterValue));
+      };
+      this.updateFilter();
       this.loading = false;
     });
+  }
+
+  private updateFilter() {
+    try {
+      const filterRegex = new RegExp(this._filterValue);
+      this.filterPredicate = (d, f) => d && d.toLowerCase().match(f);
+    } catch (e) {
+      this.filterPredicate = (d, f) => d && d.toLowerCase().includes(f);
+    }
+    this.dataSource.filter = 'x'; // re-set a dummy value -> triggers update
+
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
   }
 
   public onAdd() {
@@ -116,6 +155,7 @@ export class InstanceGroupPermissionsComponent implements OnInit {
         clone.permissions.push({scope: this.nameParam, permission: Permission.READ});
         this.dataSource.data.push(clone);
         this.dataSource.data = this.dataSource.data; // triggers table update
+        this.updateFilter();
       }
     });
   }
@@ -126,6 +166,7 @@ export class InstanceGroupPermissionsComponent implements OnInit {
     if (!hasScopedRead) {
       user.permissions.push({scope: this.nameParam, permission: Permission.READ});
     }
+    this.updateFilter();
   }
 
   public onRevokeWrite(user: UserInfo): void {
@@ -133,6 +174,7 @@ export class InstanceGroupPermissionsComponent implements OnInit {
     if (this.hasGlobalRead(user)) {
       this.onDelete(user);
     }
+    this.updateFilter();
   }
 
   public onGrantAdmin(user: UserInfo): void {
@@ -141,6 +183,7 @@ export class InstanceGroupPermissionsComponent implements OnInit {
     if (!hasScopedWrite) {
       this.onGrantWrite(user);
     }
+    this.updateFilter();
   }
 
   public onRevokeAdmin(user: UserInfo): void {
@@ -148,6 +191,7 @@ export class InstanceGroupPermissionsComponent implements OnInit {
     if (this.hasGlobalWrite(user)) {
       this.onDelete(user);
     }
+    this.updateFilter();
   }
 
   public onDelete(user: UserInfo): void {
@@ -158,6 +202,7 @@ export class InstanceGroupPermissionsComponent implements OnInit {
       // remove user from table
       this.dataSource.data = this.dataSource.data.filter(u => u.name !== user.name);
     }
+    this.updateFilter();
   }
 
   async onDiscardChanges(): Promise<void> {

@@ -20,6 +20,10 @@
   flex: 1 1 auto;
 }
 
+.search {
+  margin-right: 20px;
+}
+
 .content {
   margin: 20px;
 }

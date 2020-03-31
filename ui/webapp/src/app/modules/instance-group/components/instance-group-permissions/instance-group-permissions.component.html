@@ -3,6 +3,11 @@
     <button mat-icon-button type="button" (click)='location.back()'><mat-icon>chevron_left</mat-icon></button>
     <span>Instance Group: {{nameParam}}</span>
     <span class="fill-space"></span>
+    <mat-slide-toggle class="search" [(ngModel)]="showGlobal">Show User with Global Access</mat-slide-toggle>
+    <mat-form-field class="search" [floatLabel]='"never"'>
+      <mat-icon matSuffix>search</mat-icon>
+      <input matInput [(ngModel)]="filterValue" placeholder="Search..." />
+    </mat-form-field>
     <button mat-button type="button" (click)="onDiscardChanges()" *ngIf="isDirty()">DISCARD</button>
     <button mat-raised-button color="primary" type="submit" (click)="onSave()" [disabled]="!isDirty()">SAVE</button>
   </mat-toolbar>
