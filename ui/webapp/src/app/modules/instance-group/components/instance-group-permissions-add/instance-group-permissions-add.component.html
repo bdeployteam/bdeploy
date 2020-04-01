@@ -1,6 +1,6 @@
 <h1 mat-dialog-title>Add User</h1>
-<div mat-dialog-content>
-  <form>
+<form>
+  <div mat-dialog-content>
     <div mat-dialog-content class='flex-content'>
         <mat-form-field>
           <input matInput placeholder="User to add" [matAutocomplete]="auto" [formControl]="userControl">
@@ -19,9 +19,9 @@
             </mat-autocomplete>
         </mat-form-field>
     </div>
-  </form>
-</div>
-<div mat-dialog-actions align="end">
-  <button mat-raised-button [mat-dialog-close]="null">Cancel</button>
-  <button mat-raised-button color="primary" [disabled]="!isValid()" [mat-dialog-close]="getResult()">OK</button>
-</div>
+  </div>
+  <div mat-dialog-actions align="end">
+    <button mat-raised-button type="button" [mat-dialog-close]="null">Cancel</button>
+    <button mat-raised-button type="submit" color="primary" [disabled]="!isValid()" [mat-dialog-close]="getResult()">OK</button>
+  </div>
+</form>
