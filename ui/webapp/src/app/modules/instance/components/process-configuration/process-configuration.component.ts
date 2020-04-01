@@ -892,6 +892,9 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   shouldShowProduct(toggle: MatSlideToggle, tag: ProductDto): boolean {
+    if (!this.selectedConfig) {
+      return false;
+    }
     if (toggle.checked) {
       return true;
     }
