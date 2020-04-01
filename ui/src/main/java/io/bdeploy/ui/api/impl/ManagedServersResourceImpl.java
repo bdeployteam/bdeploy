@@ -435,7 +435,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
     @Override
     public List<ProductDto> listProducts(String groupName, String serverName) {
         RemoteService svc = getConfiguredRemote(groupName, serverName);
-        return ResourceProvider.getResource(svc, InstanceGroupResource.class, context).getProductResource(groupName).list();
+        return ResourceProvider.getResource(svc, InstanceGroupResource.class, context).getProductResource(groupName).list(null);
     }
 
     @Override

@@ -78,13 +78,13 @@ export class ProductSyncComponent implements OnInit, OnDestroy {
     this.resetProgress();
 
     // load products from source server
-    let call0 = this.productService.getProducts(this.instanceGroup);
+    let call0 = this.productService.getProducts(this.instanceGroup, null);
     if (this.getMinionMode(this.sourceSelection) !== MinionMode.CENTRAL) {
       call0 = this.servers.productsOfManagedServer(this.instanceGroup, this.sourceSelection);
     }
 
     // load products from the target server
-    let call1 = this.productService.getProducts(this.instanceGroup);
+    let call1 = this.productService.getProducts(this.instanceGroup, null);
     if (this.getMinionMode(this.targetSelection) !== MinionMode.CENTRAL) {
       call1 = this.servers.productsOfManagedServer(this.instanceGroup, this.targetSelection);
     }

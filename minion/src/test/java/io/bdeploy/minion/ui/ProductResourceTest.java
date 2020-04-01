@@ -35,12 +35,12 @@ public class ProductResourceTest {
         Key prod = TestFactory.pushProduct(group.name, remote, tmp).getKey();
         ProductResource products = root.getProductResource(group.name);
 
-        assertEquals(1, products.list().size());
-        assertEquals(prod, products.list().get(0).key);
+        assertEquals(1, products.list(null).size());
+        assertEquals(prod, products.list(null).get(0).key);
 
         products.delete(prod.getName(), prod.getTag());
 
-        assertTrue(products.list().isEmpty());
+        assertTrue(products.list(null).isEmpty());
     }
 
     @Test

@@ -76,7 +76,7 @@
           Product: <b *ngIf="!loading">{{ isProductAvailable(selectedConfig) ? getProductOfInstance(selectedConfig).name : selectedConfig.instance.product.name }}</b>
         </div>
         <div>
-          Version: <b *ngIf="!loading">{{ selectedConfig.instance.product.tag }}</b>&nbsp;<span *ngIf="!loading && !isProductAvailable(selectedConfig)" class="product-unavailable" matTooltip="Required product version is not available.">N/A</span>
+          Version: <b *ngIf="!loading">{{ selectedConfig.instance.product.tag }}</b>&nbsp;<span *ngIf="!productsLoading && !isProductAvailable(selectedConfig)" class="product-unavailable" matTooltip="Required product version is not available.">N/A</span>
         </div>
         <div>
           Purpose: <b *ngIf="!loading">{{ selectedConfig.instance.purpose }}</b>
@@ -150,7 +150,7 @@
             [activatedInstanceTag]="deploymentState.activeTag"
             [node]="node"
             [processConfig]="selectedConfig"
-            [productMissing]="!isProductAvailable(selectedConfig)"
+            [productMissing]="!productsLoading && !isProductAvailable(selectedConfig)"
             [manageApplications]="isSidenavApplications()"
             [isReadonly]="isReadonly()"
             [minionConfig]="minionConfigs[node.nodeName]"
@@ -229,7 +229,7 @@
                 [isRunningOrScheduled]='isRunningOrScheduledVersion(config.version.key.tag)'
                 [selected]="isVersionSelected(config)"
                 [dirty]="config.dirty"
-                [productAvailable]="isProductAvailable(config)"
+                [productAvailable]="productsLoading || isProductAvailable(config)"
                 [disabled]="loading"
                 [readOnly]='isCentral() && !syncComponent.isInSync()'>
               </app-instance-version-card>
@@ -238,10 +238,12 @@
         </div>
         <div *ngIf='isSidenavProducts()'>
           <mat-toolbar class='products-toolbar'>
+            <button mat-icon-button matTooltip="Refresh Product List" (click)='loadProducts(selectedConfig)'><mat-icon>refresh</mat-icon></button>
+            <div class='vert-speparator'></div>
             <mat-slide-toggle #showAll>Show all</mat-slide-toggle>
           </mat-toolbar>
           <div class='card-list-container'>
-            <mat-progress-spinner *ngIf='productsLoading'></mat-progress-spinner>
+            <mat-progress-spinner *ngIf='productsLoading || productUpdating'></mat-progress-spinner>
             <ng-container *ngFor='let tag of productTags'>
               <app-product-tag-card *ngIf='shouldShowProduct(showAll, tag)'
                 [product]='tag'
