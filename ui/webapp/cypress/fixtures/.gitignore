@@ -1,5 +1,4 @@
 # don't update token when the build writes the file
 token.json
 *.zip
-managed-ident.json
-central-ident.json
+managed-ident.txt

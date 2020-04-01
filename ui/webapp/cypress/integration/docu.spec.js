@@ -73,9 +73,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.contains('button', 'add').click();
     cy.get('input[placeholder^="Instance group ID"]').type('Demo');
     cy.get('input[placeholder=Description]').type('Demo Instance Group');
-    cy.fixture('bdeploy.png').then(fileContent => {
-      cy.get('input[type=file]').upload({ fileContent: fileContent, fileName: 'bdeploy.png', mimeType: 'image/png' });
-    });
+    cy.get('input[type=file]').attachFile({ filePath: 'bdeploy.png', mimeType: 'image/png' });
     cy.get('.logo-img').should('exist');
     cy.screenshot('BDeploy_Create_IG');
     cy.contains('button', 'SAVE').click();
@@ -98,19 +96,13 @@ describe('Creates screenshots for the user documentation', () => {
     // Upload products
     cy.contains('button', 'cloud_upload').click();
     cy.get('mat-dialog-container').within(() => {
-      cy.fixture('test-product-1-direct.zip').then(zip => {
-        cy.get('input[type=file]').upload({
-          fileName: 'test-product-1-direct.zip',
-          fileContent: zip,
-          mimeType: 'application/zip',
-        });
+      cy.get('input[type=file]').attachFile({
+        filePath: 'test-product-1-direct.zip',
+        mimeType: 'application/zip',
       });
-      cy.fixture('test-product-2-direct.zip').then(zip => {
-        cy.get('input[type=file]').upload({
-          fileName: 'test-product-2-direct.zip',
-          fileContent: zip,
-          mimeType: 'application/zip',
-        });
+      cy.get('input[type=file]').attachFile({
+        filePath: 'test-product-2-direct.zip',
+        mimeType: 'application/zip',
       });
       cy.screenshot('BDeploy_Product_Upload_Before');
 
@@ -442,16 +434,13 @@ describe('Creates screenshots for the user documentation', () => {
     // Upload external software
     cy.contains('button', 'cloud_upload').click();
     cy.get('mat-dialog-container').within(() => {
-      cy.fixture('external-software-hive.zip').then(zip => {
-        cy.get('input[type=file]').upload({
-          fileName: 'external-software-hive.zip',
-          fileContent: zip,
-          mimeType: 'application/zip',
-        });
-        cy.contains('button', 'Upload').click();
-        cy.get('td:contains("Upload successful")').should('have.length', 1);
-        cy.contains('button', 'Close').click();
+      cy.get('input[type=file]').attachFile({
+        filePath: 'external-software-hive.zip',
+        mimeType: 'application/zip',
       });
+      cy.contains('button', 'Upload').click();
+      cy.get('td:contains("Upload successful")').should('have.length', 1);
+      cy.contains('button', 'Close').click();
     });
 
     // Take screenshot of detail page

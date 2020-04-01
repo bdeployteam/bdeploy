@@ -12,9 +12,7 @@ Cypress.Commands.add('createInstanceGroup', function(name, mode = 'STANDALONE') 
   cy.get('input[placeholder^="Instance group ID"]').should('exist').and('have.focus').type(name);
   cy.get('input[placeholder=Description]').type(name);
 
-  cy.fixture('bdeploy.png').then(fileContent => {
-    cy.get('input[type=file]').upload({ fileContent: fileContent, fileName: 'bdeploy.png', mimeType: 'image/png' });
-  });
+  cy.get('input[type=file]').attachFile({ filePath: 'bdeploy.png', mimeType: 'image/png' });
 
   cy.get('.logo-img').should('exist');
 
@@ -63,12 +61,9 @@ Cypress.Commands.add('uploadProductIntoGroup', function(groupName,fileName, mode
   cy.contains('button', 'cloud_upload').should('be.visible').and('be.enabled').click();
 
   cy.get('mat-dialog-container').within(() => {
-    cy.fixture(fileName).then(zip => {
-      cy.get('input[type=file]').upload({
-        fileName: fileName,
-        fileContent: zip,
-         mimeType: 'application/zip',
-      });
+    cy.get('input[type=file]').attachFile({
+      filePath: fileName,
+      mimeType: 'application/zip',
     });
 
     cy.contains('button', 'Upload').should('be.enabled').click();
@@ -121,7 +116,7 @@ Cypress.Commands.add('attachManaged', function(groupName, screenshot = false) {
   }
   cy.contains('button', 'Continue Manually').should('exist').and('be.enabled').click();
 
-  cy.contains('button', 'Download').should('exist').and('be.enabled').downloadBlobFile('managed-ident.json');
+  cy.contains('button', 'Download').should('exist').and('be.enabled').downloadBlobFile('managed-ident.txt');
 
   cy.visitBDeploy('/', 'CENTRAL');
   cy.get('[data-cy=group-' + groupName + ']')
@@ -142,12 +137,9 @@ Cypress.Commands.add('attachManaged', function(groupName, screenshot = false) {
   }
 
   cy.contains('mat-step-header', 'Attach Managed Server').parent().within(e => {
-    cy.fixture('managed-ident.json').then(json => {
-      cy.get('input[data-cy="managed-ident"]').upload({
-        fileName: 'managed-ident.json',
-        fileContent: JSON.stringify(json),
-        mimeType: 'application/json',
-      });
+    cy.get('input[data-cy="managed-ident"]').attachFile({
+      filePath: 'managed-ident.txt',
+      mimeType: 'text/plain',
     });
 
     cy.contains('Successfully read information for').should('exist').and('be.visible');
