@@ -243,9 +243,9 @@
             <mat-slide-toggle #showAll>Show all</mat-slide-toggle>
           </mat-toolbar>
           <div class='card-list-container'>
-            <mat-progress-spinner *ngIf='productsLoading || productUpdating'></mat-progress-spinner>
+            <mat-spinner *ngIf='productsLoading || productUpdating'></mat-spinner>
             <ng-container *ngFor='let tag of productTags'>
-              <app-product-tag-card *ngIf='shouldShowProduct(showAll, tag)'
+              <app-product-tag-card *ngIf='!productsLoading && shouldShowProduct(showAll, tag)'
                 [product]='tag'
                 [current]='selectedConfig.instance.product'
                 (select)='updateProduct($event)'>
