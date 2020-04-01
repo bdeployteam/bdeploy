@@ -111,6 +111,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
   public loading = true;
   public productsLoading = false;
+  public productUpdating = false;
   public isRunningOutOfSync = false;
 
   // Refresh timer and configuration
@@ -361,6 +362,8 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.loadProducts(newSelectedConfig);
+
     const selectedVersion = newSelectedConfig.version;
 
     const call1 = this.instanceService
@@ -374,7 +377,6 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
         }),
       );
     const call2 = this.instanceService.getNodeConfiguration(this.groupParam, this.uuidParam, selectedVersion.key.tag); // => results[1]
-    const call3 = this.productService.getProducts(this.groupParam); // => result[2];
 
     // Gather node state only in managed / standalone mode
     let call4 = of({});
@@ -383,21 +385,25 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     }
     const call5 = this.instanceService.getMinionConfiguration(this.groupParam, this.uuidParam, selectedVersion.key.tag); // results[5]
 
-    forkJoin([call1, call2, call3, call4, call5]).subscribe(results => {
-      newSelectedConfig.setNodeList(results[1], results[4]);
+    forkJoin([call1, call2, call4, call5]).subscribe(results => {
+      newSelectedConfig.setNodeList(results[1], results[3]);
       newSelectedConfig.setApplications(results[0]);
       this.selectedConfig = newSelectedConfig;
 
-      const filtered = results[2].filter(x => x.key.name === this.selectedConfig.version.product.name);
-      this.productTags = sortByTags(filtered, p => p.key.tag, false);
-
-      this.minionStates = results[3];
-      this.minionConfigs = results[4];
+      this.minionStates = results[2];
+      this.minionConfigs = results[3];
 
       this.loading = false;
       this.updateDirtyStateAndValidate();
       this.onProcessStatusChanged();
       this.createStickyHeader();
+    });
+  }
+
+  loadProducts(config: ProcessConfigDto) {
+    this.productsLoading = true;
+    this.productService.getProducts(this.groupParam, config.version.product.name).pipe(finalize(() => this.productsLoading = false)).subscribe(r => {
+      this.productTags = sortByTags(r, p => p.key.tag, false);
     });
   }
 
@@ -520,6 +526,9 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   public isProductAvailable(config: ProcessConfigDto): boolean {
+    if (!this.productTags || !config) {
+      return false;
+    }
     return this.productTags.find(p => isEqual(p.key, config.version.product)) !== undefined;
   }
 
@@ -898,7 +907,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
   async updateProduct(product: ProductDto): Promise<void> {
     const oldProduct = this.selectedConfig.instance.product;
-    this.productsLoading = true;
+    this.productUpdating = true;
     this.productService.updateProduct(this.selectedConfig, product);
 
     // Fetch applications of the new product and old product
@@ -912,7 +921,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     const newApps = await Promise.resolve(newAppsPromise);
     const oldApps = await Promise.resolve(oldAppsPromise);
     this.updateApplications(newApps, oldApps);
-    this.productsLoading = false;
+    this.productUpdating = false;
   }
 
   updateApplications(newApps: ApplicationDto[], oldApps: ApplicationDto[]) {

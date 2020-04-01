@@ -134,7 +134,7 @@ export class InstanceAddEditComponent implements OnInit {
       this.log.debug('got purposes ' + this.purposes);
     });
 
-    this.productService.getProducts(this.groupParam).subscribe(products => {
+    this.productService.getProducts(this.groupParam, null).subscribe(products => {
       this.products = products;
       this.log.debug('got ' + products.length + ' products');
     });

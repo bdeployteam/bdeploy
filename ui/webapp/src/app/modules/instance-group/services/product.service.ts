@@ -20,10 +20,10 @@ export class ProductService {
     private loggingService: LoggingService,
     private downloadService: DownloadService) {}
 
-  public getProducts(instanceGroupName: string): Observable<ProductDto[]> {
+  public getProducts(instanceGroupName: string, productName: string): Observable<ProductDto[]> {
     const url: string = this.buildProductUrl(instanceGroupName) + '/list';
     this.log.debug('getProducts: ' + url);
-    return this.http.get<ProductDto[]>(url);
+    return this.http.get<ProductDto[]>(url, { params: { name: productName ? productName : '' } });
   }
 
   public getProductCount(instanceGroupName: string): Observable<number> {

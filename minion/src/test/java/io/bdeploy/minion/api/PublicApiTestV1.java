@@ -162,7 +162,7 @@ public class PublicApiTestV1 {
         local.execute(new PushOperation().addManifest(prodKey).addManifest(prod2Key).setHiveName("IG").setRemote(remote));
 
         ProductResource pr = igr.getProductResource("IG");
-        List<ProductDto> list = pr.list();
+        List<ProductDto> list = pr.list(null);
 
         assertEquals(2, list.size());
 

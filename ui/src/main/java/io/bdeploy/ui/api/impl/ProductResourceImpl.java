@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -72,11 +73,16 @@ public class ProductResourceImpl implements ProductResource {
     }
 
     @Override
-    public List<ProductDto> list() {
+    public List<ProductDto> list(String name) {
         List<ProductDto> result = new ArrayList<>();
         SortedSet<Key> scan = ProductManifest.scan(hive);
 
-        scan.stream().map(k -> ProductManifest.of(hive, k)).forEach(pm -> result.add(ProductDto.create(pm)));
+        Predicate<ProductManifest> filter = p -> true;
+        if (name != null && !name.isBlank()) {
+            filter = p -> p.getKey().getName().equals(name);
+        }
+
+        scan.stream().map(k -> ProductManifest.of(hive, k)).filter(filter).forEach(pm -> result.add(ProductDto.create(pm)));
 
         return result;
     }
