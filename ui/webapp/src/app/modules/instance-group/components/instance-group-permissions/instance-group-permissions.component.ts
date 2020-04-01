@@ -130,6 +130,9 @@ export class InstanceGroupPermissionsComponent implements OnInit {
 
   public onRevokeWrite(user: UserInfo): void {
     user.permissions = user.permissions.filter(c => c.scope === null || c.permission === Permission.READ);
+    if (this.hasGlobalRead(user)) {
+      this.onDelete(user);
+    }
   }
 
   public onGrantAdmin(user: UserInfo): void {
@@ -142,6 +145,9 @@ export class InstanceGroupPermissionsComponent implements OnInit {
 
   public onRevokeAdmin(user: UserInfo): void {
     user.permissions = user.permissions.filter(c => c.scope === null || c.permission !== Permission.ADMIN);
+    if (this.hasGlobalWrite(user)) {
+      this.onDelete(user);
+    }
   }
 
   public onDelete(user: UserInfo): void {
