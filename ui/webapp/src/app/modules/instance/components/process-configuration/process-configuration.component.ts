@@ -1217,8 +1217,8 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       this.removeNotification(this.notificationUpdate);
     }
 
-    if (!this.applicationService.isAllValid()) {
-      this.issueCache = this.getValidationIssues();
+    this.issueCache = this.getValidationIssues();
+    if (!this.applicationService.isAllValid() && this.issueCache && this.issueCache.length) {
       this.addNotification(this.notificationValidationIssues, Severity.ERROR, 5);
     } else {
       this.removeNotification(this.notificationValidationIssues);
@@ -1240,12 +1240,12 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   getValidationIssues(): {context: EditAppConfigContext, issue: string}[] {
-    if (!this.selectedConfig || this.selectedConfig.readonly) {
-      return [];
-    }
-
     if (!this.isProductAvailable(this.selectedConfig)) {
       return [{ context: null, issue: 'The required product version is not available' }];
+    }
+
+    if (!this.selectedConfig || this.selectedConfig.readonly) {
+      return [];
     }
 
     const result = [];
