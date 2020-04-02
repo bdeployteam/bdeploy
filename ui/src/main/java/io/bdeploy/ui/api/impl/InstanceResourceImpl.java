@@ -467,7 +467,7 @@ public class InstanceResourceImpl implements InstanceResource {
     public void install(String instanceId, String tag) {
         InstanceManifest instance = InstanceManifest.load(hive, instanceId, tag);
         RemoteService svc = mp.getControllingMaster(hive, instance.getManifest());
-        try (Activity deploy = reporter.start("Deploying " + instance.getConfiguration().name + ":" + tag);
+        try (Activity deploy = reporter.start("Installing " + instance.getConfiguration().name + ":" + tag);
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
             // 1. push config to remote (small'ish).
             hive.execute(new PushOperation().setRemote(svc).addManifest(instance.getManifest()).setHiveName(group));
@@ -492,7 +492,7 @@ public class InstanceResourceImpl implements InstanceResource {
     public void uninstall(String instanceId, String tag) {
         InstanceManifest instance = InstanceManifest.load(hive, instanceId, tag);
         RemoteService svc = mp.getControllingMaster(hive, instance.getManifest());
-        try (Activity deploy = reporter.start("Undeploying " + instance.getConfiguration().name + ":" + tag);
+        try (Activity deploy = reporter.start("Uninstalling " + instance.getConfiguration().name + ":" + tag);
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
 
             // 1: check for running or scheduled applications

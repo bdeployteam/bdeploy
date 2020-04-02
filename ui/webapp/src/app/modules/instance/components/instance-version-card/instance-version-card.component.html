@@ -1,8 +1,8 @@
 <mat-card [ngClass]="getCardStyle()" matRipple attr.data-cy='{{isActive ? "active" : "" }}'>
   <div class="flex-row">
     <div class='header-icon'>
-        <mat-spinner *ngIf="isLoading" diameter="24" color="accent"></mat-spinner>
-        <ng-container *ngIf="!isLoading">
+        <mat-spinner *ngIf="activity" diameter="24" color="accent" [matTooltip]='activity'></mat-spinner>
+        <ng-container *ngIf="!activity">
           <mat-icon class='icon-margin' *ngIf="isActive" matTooltip="Installed and active">check_circle</mat-icon>
           <mat-icon class='icon-margin' *ngIf="isDeployed && !isAutoUninstall" matTooltip="Installed">check_circle_outline</mat-icon>
           <mat-icon class='icon-margin icon-uninstall' *ngIf="isDeployed && isAutoUninstall" matTooltip="Will be uninstalled by cleanup">check_circle_outline</mat-icon>
@@ -12,10 +12,10 @@
     <span class="spacer"></span>
     <span *ngIf="!productAvailable" class="product-unavailable" matTooltip="Required product version is not available.">N/A</span>
     <mat-menu #appMenu="matMenu" xPosition="before">
-      <button mat-menu-item (click)="install.emit(instanceVersionDto.key)" [disabled]='dirty || readOnly || !productAvailable || isDeployed || isActive'><mat-icon>layers</mat-icon>Install</button>
-      <button mat-menu-item (click)="uninstall.emit(instanceVersionDto.key)" [disabled]='dirty || readOnly || !isDeployed || isActive || isRunningOrScheduled'><mat-icon>layers_clear</mat-icon>Uninstall</button>
+      <button mat-menu-item (click)="install.emit(instanceVersionDto.key)" [disabled]='activity || dirty || readOnly || !productAvailable || isDeployed || isActive'><mat-icon>layers</mat-icon>Install</button>
+      <button mat-menu-item (click)="uninstall.emit(instanceVersionDto.key)" [disabled]='activity || dirty || readOnly || !isDeployed || isActive || isRunningOrScheduled'><mat-icon>layers_clear</mat-icon>Uninstall</button>
       <mat-divider></mat-divider>
-      <button mat-menu-item (click)="activate.emit(instanceVersionDto.key)" [disabled]='dirty || readOnly || !productAvailable || !isDeployed'><mat-icon>star</mat-icon>Activate</button>
+      <button mat-menu-item (click)="activate.emit(instanceVersionDto.key)" [disabled]='activity || dirty || readOnly || !productAvailable || !isDeployed'><mat-icon>star</mat-icon>Activate</button>
       <mat-divider></mat-divider>
       <button mat-menu-item (click)="export.emit(instanceVersionDto.key)"><mat-icon>import_export</mat-icon>Export</button>
     </mat-menu>

@@ -1,5 +1,5 @@
 import { NestedTreeControl } from '@angular/cdk/tree';
-import { Component, Input, OnDestroy, OnInit, TemplateRef } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef } from '@angular/core';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
 import ReconnectingWebSocket from 'reconnecting-websocket';
@@ -25,11 +25,14 @@ export class RemoteProgressComponent implements OnInit, OnDestroy {
     this.startEventListener();
   }
 
+  @Output()
+  public events = new EventEmitter<ActivitySnapshotTreeNode[]>();
+
   treeControl = new NestedTreeControl<ActivitySnapshotTreeNode>(n => n.children);
   treeDataSource = new MatTreeNestedDataSource<ActivitySnapshotTreeNode>();
   hasChild = (_: number, node: ActivitySnapshotTreeNode) => !!node.children && node.children.length > 0;
 
-  constructor(private events: RemoteEventsService, private loggingService: LoggingService, private bottomSheet: MatBottomSheet, private systemService: SystemService) {}
+  constructor(private eventsService: RemoteEventsService, private loggingService: LoggingService, private bottomSheet: MatBottomSheet, private systemService: SystemService) {}
 
   ngOnInit() {}
 
@@ -41,11 +44,13 @@ export class RemoteProgressComponent implements OnInit, OnDestroy {
     const blob = message.data as Blob;
     const r = new FileReader();
     r.onload = () => {
-      const list = this.events.parseEvent(r.result, scope);
+      const list = this.eventsService.parseEvent(r.result, scope);
       if (list && list.length === 0) {
         this.remoteProgressElements = null;
+        this.events.emit([]); // explicit "reset".
       } else {
         this.remoteProgressElements = list;
+        this.events.emit(list);
       }
       this.treeDataSource.data = this.remoteProgressElements;
     };
@@ -53,7 +58,7 @@ export class RemoteProgressComponent implements OnInit, OnDestroy {
   }
 
   private startEventListener() {
-    this.ws = this.events.createActivitiesWebSocket(this._scope);
+    this.ws = this.eventsService.createActivitiesWebSocket(this._scope);
     this.ws.addEventListener('error', () => {
       this.systemService.backendUnreachable();
       this.remoteProgressElements = null;

@@ -17,13 +17,13 @@ export class InstanceVersionCardComponent implements OnChanges {
   @Input() instanceGroup: string;
   @Input() instanceUuid: string;
   @Input() readOnly: boolean;
+  @Input() activity: string;
 
   @Output() install = new EventEmitter<ManifestKey>();
   @Output() activate = new EventEmitter<ManifestKey>();
   @Output() uninstall = new EventEmitter<ManifestKey>();
   @Output() export = new EventEmitter<ManifestKey>();
 
-  isLoading: boolean;
   isActive: boolean;
   isDeployed: boolean;
   isRunning: boolean;

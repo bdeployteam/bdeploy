@@ -27,7 +27,7 @@ import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox
 import { DownloadService } from '../../../shared/services/download.service';
 import { LauncherService } from '../../../shared/services/launcher.service';
 import { MessageboxService } from '../../../shared/services/messagebox.service';
-import { RemoteEventsService } from '../../../shared/services/remote-events.service';
+import { ActivitySnapshotTreeNode, RemoteEventsService } from '../../../shared/services/remote-events.service';
 import { compareTags, sortByTags } from '../../../shared/utils/manifest.utils';
 import { ApplicationService } from '../../services/application.service';
 import { InstanceService } from '../../services/instance.service';
@@ -129,6 +129,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   public updateStatus: UpdateStatus;
 
   private reloadPending = false;
+  private currentEvents: ActivitySnapshotTreeNode[];
 
   constructor(
     public authService: AuthenticationService,
@@ -249,7 +250,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
           // avoid reload if we did it ourselves. still delay a little as the event may arrive
           // before the actual call returned and a reload was initiated by the instance version card.
           if (new Date().getTime() - this.lastStateReload >= 150) {
-            this.loadDeploymentStates(() => {});
+            this.loadDeploymentStates();
           }
         }, 100);
       }
@@ -404,6 +405,9 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     this.productsLoading = true;
     this.productService.getProducts(this.groupParam, config.version.product.name).pipe(finalize(() => this.productsLoading = false)).subscribe(r => {
       this.productTags = sortByTags(r, p => p.key.tag, false);
+      if (this.selectedConfig) {
+        this.updateDirtyStateAndValidate();
+      }
     });
   }
 
@@ -417,11 +421,10 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     );
   }
 
-  loadDeploymentStates(finalizer: () => void) {
+  loadDeploymentStates() {
     this.lastStateReload = new Date().getTime();
     this.instanceService
       .getDeploymentStates(this.groupParam, this.uuidParam)
-      .pipe(finalize(finalizer))
       .subscribe(r => {
         this.deploymentState = r;
         this.doTriggerProcessStatusUpdate();
@@ -851,37 +854,33 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   doInstallVersion(manifest: ManifestKey, card: InstanceVersionCardComponent) {
-    card.isLoading = true;
     const resultPromise = this.instanceService.install(this.groupParam, this.uuidParam, manifest);
     resultPromise
       .pipe(
         finalize(() => {
-          this.loadDeploymentStates(() => (card.isLoading = false));
+          this.loadDeploymentStates();
         }),
       )
       .subscribe(_ => {});
   }
 
   doUninstallVersion(manifest: ManifestKey, card: InstanceVersionCardComponent) {
-    card.isLoading = true;
     const resultPromise = this.instanceService.uninstall(this.groupParam, this.uuidParam, manifest);
     resultPromise
       .pipe(
         finalize(() => {
-          this.loadDeploymentStates(() => (card.isLoading = false));
+          this.loadDeploymentStates();
         }),
       )
       .subscribe(_ => {});
   }
 
   doActivateVersion(manifest: ManifestKey, card: InstanceVersionCardComponent) {
-    card.isLoading = true;
-
     const resultPromise = this.instanceService.activate(this.groupParam, this.uuidParam, manifest);
     resultPromise
       .pipe(
         finalize(() => {
-          this.loadDeploymentStates(() => (card.isLoading = false));
+          this.loadDeploymentStates();
           const newSelectedConfig = this.processConfigs.find(cfg => cfg.version.key.tag === manifest.tag);
           if (newSelectedConfig) {
             this.loadInstance(newSelectedConfig);
@@ -1261,6 +1260,50 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     }
 
     return result;
+  }
+
+  updateRemoteEvents(events: ActivitySnapshotTreeNode[]) {
+    this.currentEvents = events;
+  }
+
+  getInstanceVersionActivity(config: ProcessConfigDto): string {
+    if (!this.currentEvents || !this.currentEvents.length) {
+      return null;
+    }
+
+    const matches = this.getActivitiesWithScopeRecursive([this.groupParam, this.uuidParam, config.version.key.tag], this.currentEvents);
+    if (!matches || !matches.length) {
+      return null;
+    }
+
+    const first = matches[0];
+    return first.snapshot.name + ' - initiated by ' + first.snapshot.user;
+  }
+
+  getActivitiesWithScopeRecursive(scope: string[], nodes: ActivitySnapshotTreeNode[]): ActivitySnapshotTreeNode[] {
+    const matching: ActivitySnapshotTreeNode[] = [];
+    nodes.forEach(event => {
+      // DFS check children as not only root level nodes can match.
+      if (event.children && event.children.length) {
+        const matchingChildren = this.getActivitiesWithScopeRecursive(scope, event.children);
+        if (matchingChildren.length) {
+          matching.push(event);
+          return; // break early, this event is already matching through children.
+        }
+      }
+
+      const snapshot = event.snapshot;
+      if (snapshot.scope.length < scope.length) {
+        return; // event has less scope than required.
+      }
+
+      const scopeSlice = snapshot.scope.slice(0, scope.length);
+      if (isEqual(scopeSlice, scope)) {
+        matching.push(event);
+      }
+    });
+
+    return matching;
   }
 
 }
