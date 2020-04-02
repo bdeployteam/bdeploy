@@ -359,6 +359,7 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
         appConfig: this.appConfig,
       },
     });
+    this.processSheet.afterDismissed().subscribe(_ => this.processSheet = null);
   }
 
   countProcessRecursive(parent: ProcessDetailDto): number {
