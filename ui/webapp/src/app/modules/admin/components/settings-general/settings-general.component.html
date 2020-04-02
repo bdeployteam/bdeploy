@@ -3,13 +3,13 @@
   <button mat-raised-button [disabled]='settings.isLoading() || !settings.isDirty()' (click)='settings.revert()'>DISCARD</button>
   <button mat-raised-button color="primary" [disabled]='settings.isLoading() || !settings.isDirty()' (click)='settings.save()'>SAVE</button>
 </mat-toolbar>
-<div class="content">
+<div class="content centered">
   <mat-tab-group class='tab-container' dynamicHeight='true'>
     <mat-tab label='Look & Feel'>
-      <div class="content" *ngIf='settings.isLoading()'>
-        <mat-spinner></mat-spinner>
+      <div class="content centered" *ngIf='settings.isLoading()'>
+        <mat-spinner [diameter]='48'></mat-spinner>
       </div>
-      <div class='tab-content' *ngIf='!settings.isLoading()'>
+      <div class='content' *ngIf='!settings.isLoading()'>
         <p>
           Control the appearence of the Web Application with the following settings.
         </p>

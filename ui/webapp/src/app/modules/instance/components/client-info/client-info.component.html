@@ -24,7 +24,7 @@
 
     <button class="align-left" mat-button (click)="downloadInstaller()" [disabled]="!hasLauncher() || downloading" matTooltip="Download Installer">
       <mat-icon *ngIf="!downloading">cloud_download</mat-icon>
-      <mat-progress-spinner *ngIf="downloading" [mode]="'indeterminate'" diameter='24' class="progress-spinner"> </mat-progress-spinner>
+      <mat-spinner *ngIf="downloading" diameter='24' class="progress-spinner"> </mat-spinner>
       <span class="button-text">Installer</span>
     </button>
     <mat-divider></mat-divider>

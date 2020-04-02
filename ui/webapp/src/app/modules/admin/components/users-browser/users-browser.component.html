@@ -6,8 +6,8 @@
   </mat-form-field>
 </mat-toolbar>
 
-<div class="content" *ngIf='isLoading()'>
-  <mat-spinner></mat-spinner>
+<div class="content centered" *ngIf='isLoading()'>
+  <mat-spinner [diameter]='48'></mat-spinner>
 </div>
 <div class="content" [hidden]='isLoading()'>
   <table mat-table class="users-table" [dataSource]="dataSource" matSort [matSortActive]="INITIAL_SORT_COLUMN" [matSortDirection]="INITIAL_SORT_DIRECTION">

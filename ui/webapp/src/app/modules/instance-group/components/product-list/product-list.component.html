@@ -5,7 +5,7 @@
         <div class='spacer'></div>
         <app-product-info-card [productDto]="prod"></app-product-info-card>
         <button mat-icon-button *ngIf='exporting !== prod' [disabled]='exporting' (click)="export(prod)" class="icon-button" matTooltip='Download product version as ZIP'><mat-icon>cloud_download</mat-icon></button>
-        <mat-progress-spinner *ngIf='exporting === prod' mode='indeterminate' diameter='24' class='progress-spinner'></mat-progress-spinner>
+        <mat-spinner *ngIf='exporting === prod' diameter='24' class='progress-spinner'></mat-spinner>
         <div [matTooltip]='deleteTooltip(prod)'>
           <button mat-icon-button (click)="delete(prod)" class="icon-button" [disabled]="!authService.isScopedAdmin(instanceGroup) || usageCount(prod) > 0"><mat-icon>delete</mat-icon></button>
         </div>

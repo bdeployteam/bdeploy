@@ -1,7 +1,7 @@
 <mat-card [ngClass]="getCardStyle()" matRipple attr.data-cy='{{isActive ? "active" : "" }}'>
   <div class="flex-row">
     <div class='header-icon'>
-        <mat-progress-spinner *ngIf="isLoading" diameter="24" color="accent" mode="indeterminate"></mat-progress-spinner>
+        <mat-spinner *ngIf="isLoading" diameter="24" color="accent"></mat-spinner>
         <ng-container *ngIf="!isLoading">
           <mat-icon class='icon-margin' *ngIf="isActive" matTooltip="Installed and active">check_circle</mat-icon>
           <mat-icon class='icon-margin' *ngIf="isDeployed && !isAutoUninstall" matTooltip="Installed">check_circle_outline</mat-icon>

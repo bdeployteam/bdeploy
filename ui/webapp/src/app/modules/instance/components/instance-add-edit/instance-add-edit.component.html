@@ -13,7 +13,7 @@
           <span> UUID: <b>{{uuidControl.value}}</b> </span>
         </ng-container>
         <ng-container *ngIf="loading">
-          <mat-progress-spinner [mode]="'indeterminate'" diameter="16"></mat-progress-spinner>
+          <mat-spinner diameter="16"></mat-spinner>
           <span class="loading-text"> <b>{{loadingText}}</b> </span>
         </ng-container>
       </mat-toolbar-row>

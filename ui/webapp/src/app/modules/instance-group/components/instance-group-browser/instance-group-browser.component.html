@@ -7,7 +7,7 @@
   </mat-form-field>
 </mat-toolbar>
 <div *ngIf="groupsLoading || recentLoading" class="loading-container">
-  <mat-progress-spinner [mode]="'indeterminate'" class="loading-spinner" mode></mat-progress-spinner>
+    <mat-spinner  [diameter]='48'></mat-spinner>
 </div>
 
 <ng-container *ngIf='!groupsLoading && instanceGroupList.isEmpty()'>

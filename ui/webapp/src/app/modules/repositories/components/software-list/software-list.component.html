@@ -4,7 +4,7 @@
           <div>{{version.name}}:{{version.tag}}</div>
           <div class='spacer'></div>
           <button mat-icon-button *ngIf='exporting !== version' [disabled]='exporting' (click)="export(version)" class="icon-button" matTooltip='Download software package version as ZIP'><mat-icon>cloud_download</mat-icon></button>
-          <mat-progress-spinner *ngIf='exporting === version' mode='indeterminate' diameter='24' class='progress-spinner'></mat-progress-spinner>
+          <mat-spinner *ngIf='exporting === version' diameter='24' class='progress-spinner'></mat-spinner>
           <button mat-icon-button (click)="delete(version)" class="icon-button"><mat-icon>delete</mat-icon></button>
       </div>
     </mat-list-item>

@@ -32,7 +32,7 @@
 </mat-toolbar>
 
 <div *ngIf="loading" class="loading-container">
-  <mat-progress-spinner [mode]="'indeterminate'" class="loading-spinner" mode></mat-progress-spinner>
+  <mat-spinner [diameter]="48"></mat-spinner>
 </div>
 <ng-container *ngIf="!loading">
   <div *ngIf="!hasProducts && instanceDtoList.isEmpty()" class="list-heading center">

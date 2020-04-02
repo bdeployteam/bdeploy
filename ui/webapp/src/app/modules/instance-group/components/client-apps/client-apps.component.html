@@ -15,7 +15,7 @@
   </mat-toolbar>
 
   <div *ngIf="isLoading()" class="loading-container">
-    <mat-progress-spinner [mode]="'indeterminate'" class="loading-spinner"></mat-progress-spinner>
+    <mat-spinner [diameter]="48"></mat-spinner>
   </div>
   <ng-container *ngIf="!isLoading()">
     <p class="banner banner-warn-theme" *ngIf="!hasApps">

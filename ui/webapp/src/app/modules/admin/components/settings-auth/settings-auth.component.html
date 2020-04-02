@@ -3,13 +3,13 @@
   <button mat-raised-button [disabled]='settings.isLoading() || !settings.isDirty()' (click)='settings.revert()'>DISCARD</button>
   <button mat-raised-button color="primary" [disabled]='settings.isLoading() || !settings.isDirty()' (click)='settings.save()'>SAVE</button>
 </mat-toolbar>
-<div class="content">
+<div class="content centered">
   <mat-tab-group class='tab-container' dynamicHeight='true'>
     <mat-tab label='Local Users'>
-      <div class="content" *ngIf='settings.isLoading()'>
-        <mat-spinner></mat-spinner>
+      <div class="content centered" *ngIf='settings.isLoading()'>
+        <mat-spinner [diameter]='48'></mat-spinner>
       </div>
-      <div class='tab-content' *ngIf='!settings.isLoading()'>
+      <div class='content' *ngIf='!settings.isLoading()'>
         <p>
           You may disable local user login. Be aware that logging in will be impossible if no other
           authentication mechanism (e.g. LDAP) is able to authenticate users.
@@ -18,10 +18,10 @@
       </div>
     </mat-tab>
     <mat-tab label='LDAP'>
-        <div class="content" *ngIf='settings.isLoading()'>
-          <mat-spinner></mat-spinner>
+        <div class="content centered" *ngIf='settings.isLoading()'>
+          <mat-spinner [diameter]='48'></mat-spinner>
         </div>
-        <div class='tab-content' *ngIf='!settings.isLoading()'>
+        <div class='content' *ngIf='!settings.isLoading()'>
         <p>
           Configure one or more LDAP servers to enable LDAP authentication. Users will be created on
           first login. The order of the servers in the configuration determines the order in which

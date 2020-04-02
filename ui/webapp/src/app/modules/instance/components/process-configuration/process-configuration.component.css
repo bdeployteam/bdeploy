@@ -114,7 +114,8 @@
   flex-direction: row;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: start;
+  padding: 20px;
 }
 
 .toolbar-info-grid {

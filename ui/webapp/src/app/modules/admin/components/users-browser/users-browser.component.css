@@ -21,7 +21,13 @@
 }
 
 .content {
-  margin: 20px;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.centered {
+  align-items: center;
 }
 
 .users-table {
