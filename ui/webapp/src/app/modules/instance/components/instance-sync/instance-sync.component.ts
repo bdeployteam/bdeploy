@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { format } from 'date-fns';
+import { finalize } from 'rxjs/operators';
 import { ManagedMasterDto, MinionMode } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
@@ -31,6 +32,8 @@ export class InstanceSyncComponent implements OnChanges {
 
   @Output()
   stateUpdateEvent = new EventEmitter<any>();
+
+  sycnInProgress = false;
 
   server: ManagedMasterDto;
 
@@ -70,7 +73,8 @@ export class InstanceSyncComponent implements OnChanges {
       return;
     }
     try {
-      await this.managedServers.synchronize(this.instanceGroup, this.server.hostName).toPromise();
+      this.sycnInProgress = true;
+      await this.managedServers.synchronize(this.instanceGroup, this.server.hostName).pipe(finalize(() => this.sycnInProgress = false)).toPromise();
       this.ngOnChanges();
       this.syncEvent.emit(null);
     } catch (e) {

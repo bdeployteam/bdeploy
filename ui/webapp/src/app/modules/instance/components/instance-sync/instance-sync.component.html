@@ -13,7 +13,8 @@
           : 'No permission to synchronize with ' + server.description + ' (' + server.hostName + ').'">
       <mat-icon>dns</mat-icon>
       <div><b>{{ server.description }}</b></div>
-      <mat-icon [ngClass]="isInSync() || !isSyncAllowed() ? [] : ['sync-button-need-sync']">access_time</mat-icon>
+      <mat-icon *ngIf='!sycnInProgress' [ngClass]="isInSync() || !isSyncAllowed() ? [] : ['sync-button-need-sync']">access_time</mat-icon>
+      <mat-spinner [diameter]='24' *ngIf='sycnInProgress'></mat-spinner>
       <div>{{ getDate(server.lastSync) }}<span class='press-to-sync' *ngIf='isSyncAllowed()'>(Press to sync)</span></div>
     </div>
   </ng-container>
