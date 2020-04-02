@@ -1,17 +1,22 @@
 package io.bdeploy.jersey;
 
 import java.security.Principal;
+import java.util.Collection;
+import java.util.Collections;
 
 import javax.ws.rs.core.SecurityContext;
 
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.ScopedPermission;
+import io.bdeploy.common.security.ScopedPermission.Permission;
 
 /**
  * A simple {@link SecurityContext} which provides information based on the
  * authentication token used to authenticate a service call.
  */
 public class JerseySecurityContext implements SecurityContext {
+
+    private static final ScopedPermission WEAK_READ = new ScopedPermission(Permission.READ);
 
     private final ApiAccessToken token;
     private final String onBehalfOf;
@@ -54,7 +59,15 @@ public class JerseySecurityContext implements SecurityContext {
      * @return {@code true} if authorized or {@code false} otherwise
      */
     public boolean isAuthorized(ScopedPermission scopedPermission) {
-        for (ScopedPermission sc : token.getPermissions()) {
+        Collection<ScopedPermission> perms = token.getPermissions();
+
+        // if the token is weak, it has implicit global read, as it may only access @WeakTokenAllowed annotated
+        // endpoints anyway. This is an orthogonal mechanism to "normal" authentication.
+        if (token.isWeak()) {
+            perms = Collections.singleton(WEAK_READ);
+        }
+
+        for (ScopedPermission sc : perms) {
             if (sc.satisfies(scopedPermission)) {
                 return true;
             }

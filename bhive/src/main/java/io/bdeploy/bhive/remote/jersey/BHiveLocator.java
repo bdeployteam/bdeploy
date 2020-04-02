@@ -4,6 +4,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.common.security.RequiredPermission;
+import io.bdeploy.common.security.ScopedPermission.Permission;
 
 /**
  * Root resource location for all hives.
@@ -21,6 +23,7 @@ public interface BHiveLocator {
      * @return the {@link BHiveResource} which can be used to actually access the named {@link BHive}.
      */
     @Path("{hive}")
+    @RequiredPermission(scope = "hive", permission = Permission.READ)
     public BHiveResource getNamedHive(@PathParam("hive") String name);
 
 }

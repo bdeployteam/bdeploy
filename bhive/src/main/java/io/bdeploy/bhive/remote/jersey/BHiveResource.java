@@ -15,6 +15,8 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
+import io.bdeploy.common.security.RequiredPermission;
+import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.WeakTokenAllowed;
 
 /**
@@ -41,6 +43,7 @@ public interface BHiveResource {
      */
     @POST
     @Path("/manifest_remove")
+    @RequiredPermission(permission = Permission.WRITE)
     public void removeManifest(Manifest.Key key);
 
     /**
@@ -82,6 +85,7 @@ public interface BHiveResource {
     @PUT
     @Path("/push")
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)
+    @RequiredPermission(permission = Permission.WRITE)
     public void push(java.nio.file.Path zipedHive);
 
     /**

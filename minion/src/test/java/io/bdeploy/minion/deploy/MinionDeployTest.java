@@ -137,7 +137,7 @@ public class MinionDeployTest {
         cdesc.applicationId = "client";
         cdesc.groupId = "demo";
         cdesc.instanceId = uuid;
-        cdesc.host = new RemoteService(remote.getUri(), master.getNamedMaster("demo").generateWeakToken("client"));
+        cdesc.host = new RemoteService(remote.getUri(), master.getNamedMaster("demo").generateWeakToken("Test"));
 
         Path bdeployFile = tmp.resolve("client.bdeploy");
         Files.write(bdeployFile, StorageHelper.toRawBytes(cdesc));

@@ -72,7 +72,6 @@ public class BDeployChooseProductFileDialog extends TitleAreaDialog {
         nameCol.getColumn().setText("Name");
         nameCol.setLabelProvider(new ColumnLabelProvider() {
 
-            @SuppressWarnings("unchecked")
             @Override
             public String getText(Object element) {
                 return ((Map.Entry<String, String>) element).getKey();
@@ -84,7 +83,6 @@ public class BDeployChooseProductFileDialog extends TitleAreaDialog {
         fileCol.getColumn().setText("File");
         fileCol.setLabelProvider(new ColumnLabelProvider() {
 
-            @SuppressWarnings("unchecked")
             @Override
             public String getText(Object element) {
                 return ((Map.Entry<String, String>) element).getValue();

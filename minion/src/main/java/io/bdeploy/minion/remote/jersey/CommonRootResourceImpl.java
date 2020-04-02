@@ -10,10 +10,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.SecurityContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +25,8 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.Version;
+import io.bdeploy.common.security.ScopedPermission;
+import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
@@ -30,6 +35,8 @@ import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
 import io.bdeploy.interfaces.remote.CommonInstanceResource;
 import io.bdeploy.interfaces.remote.CommonRootResource;
+import io.bdeploy.jersey.JerseySecurityContext;
+import io.bdeploy.ui.api.AuthService;
 
 public class CommonRootResourceImpl implements CommonRootResource {
 
@@ -43,6 +50,12 @@ public class CommonRootResourceImpl implements CommonRootResource {
 
     @Context
     private ResourceContext rc;
+
+    @Inject
+    private AuthService auth;
+
+    @Context
+    private ContainerRequestContext context;
 
     @Override
     public Version getVersion() {
@@ -89,12 +102,29 @@ public class CommonRootResourceImpl implements CommonRootResource {
 
     @Override
     public List<InstanceGroupConfiguration> getInstanceGroups() {
+        // need to obtain from request to avoid SecurityContextInjectee wrapper.
+        SecurityContext ctx = context.getSecurityContext();
+        if (!(ctx instanceof JerseySecurityContext)) {
+            throw new ForbiddenException(
+                    "User '" + ctx.getUserPrincipal().getName() + "' is not authorized to access requested resource.");
+        }
+        JerseySecurityContext securityContext = (JerseySecurityContext) ctx;
+
         List<InstanceGroupConfiguration> result = new ArrayList<>();
         for (Map.Entry<String, BHive> entry : registry.getAll().entrySet()) {
             InstanceGroupConfiguration cfg = new InstanceGroupManifest(entry.getValue()).read();
-            if (cfg != null) {
-                result.add(cfg);
+            if (cfg == null) {
+                continue;
             }
+            // The current user must have at least scoped read permissions
+            ScopedPermission requiredPermission = new ScopedPermission(cfg.name, Permission.READ);
+            if (!securityContext.isAuthorized(requiredPermission)) {
+                if (!auth.isAuthorized(securityContext.getUserPrincipal().getName(), requiredPermission)) {
+                    continue;
+                }
+            }
+
+            result.add(cfg);
         }
         return result;
     }

@@ -3,9 +3,11 @@
  */
 package io.bdeploy.tea.plugin.server;
 
+import java.lang.reflect.InvocationTargetException;
 import java.security.GeneralSecurityException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -14,13 +16,17 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -116,17 +122,48 @@ public class BDeployLoginDialog extends TitleAreaDialog {
     }
 
     private String login() {
-        ClientBuilder builder = ClientBuilder.newBuilder().hostnameVerifier((h, s) -> true).sslContext(createTrustAllContext());
-        Response result = builder.build().target(serverUrl).path("/public/v1/login").queryParam("user", user)
-                .queryParam("pass", pass).queryParam("full", "true").request().get();
+        getButton(OK).setEnabled(false);
+        setMessage("Logging in...", IMessageProvider.INFORMATION);
 
-        if (result.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
-            setMessage("Error logging in to " + serverUrl + ": " + result.getStatusInfo().getReasonPhrase(),
-                    IMessageProvider.ERROR);
-            return null;
-        } else {
-            return result.readEntity(String.class);
+        AtomicReference<String> ref = new AtomicReference<>();
+
+        IRunnableWithProgress job = m -> {
+            m.beginTask("Logging in...", IProgressMonitor.UNKNOWN);
+            try {
+                ClientBuilder builder = ClientBuilder.newBuilder().hostnameVerifier((h, s) -> true)
+                        .sslContext(createTrustAllContext());
+                Response result = builder.build().target(serverUrl).path("/public/v1/login").queryParam("user", user)
+                        .queryParam("pass", pass).queryParam("full", "true").request().get();
+
+                if (result.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
+                    Display.getDefault()
+                            .asyncExec(() -> setMessage(
+                                    "Error logging in to " + serverUrl + ": " + result.getStatusInfo().getReasonPhrase(),
+                                    IMessageProvider.ERROR));
+                    return;
+                } else {
+                    ref.set(result.readEntity(String.class));
+                    return;
+                }
+            } finally {
+                m.done();
+            }
+        };
+
+        ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+        try {
+            pmd.run(true, false, job);
+        } catch (InvocationTargetException e) {
+            setMessage("Error logging in to " + serverUrl + ": " + e.getTargetException().toString());
+            e.printStackTrace();
+        } catch (Exception e) {
+            setMessage("Error logging in to " + serverUrl + ": " + e.toString());
+            e.printStackTrace();
+        } finally {
+            getButton(OK).setEnabled(true);
         }
+
+        return ref.get();
     }
 
     private SSLContext createTrustAllContext() {
