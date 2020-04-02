@@ -511,7 +511,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
   onDownloadClickAndStart(app: ApplicationConfiguration) {
     this.instanceService.createClickAndStartDescriptor(this.groupParam, this.uuidParam, app.uid).subscribe(data => {
-      this.downloadService.downloadJson(app.name + '.bdeploy', data);
+      this.downloadService.downloadJson(app.name + ' (' + this.groupParam + ' - ' + this.selectedConfig.instance.name + ')' + '.bdeploy', data);
     });
   }
 
