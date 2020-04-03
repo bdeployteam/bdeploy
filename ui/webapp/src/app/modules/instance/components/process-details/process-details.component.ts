@@ -400,7 +400,8 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
       height: '90%',
       width: '90%',
       positionStrategy: this.overlay.position().global().centerHorizontally().centerVertically(),
-      hasBackdrop: true
+      hasBackdrop: true,
+      disposeOnNavigation: true,
     });
     this.overlayRef.backdropClick().subscribe(() => this.closeOutputOverlay());
 

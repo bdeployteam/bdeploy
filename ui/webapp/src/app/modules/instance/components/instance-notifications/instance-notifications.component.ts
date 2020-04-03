@@ -84,6 +84,7 @@ export class InstanceNotificationsComponent implements OnInit {
       scrollStrategy: this.overlay.scrollStrategies.close(),
       hasBackdrop: true,
       backdropClass: 'info-backdrop',
+      disposeOnNavigation: true,
     });
     this.overlayRef.backdropClick().subscribe(() => this.closeOverlay());
 

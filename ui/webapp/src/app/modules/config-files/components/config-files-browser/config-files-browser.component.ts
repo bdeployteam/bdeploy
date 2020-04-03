@@ -389,6 +389,7 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
         .centerHorizontally()
         .centerVertically(),
       hasBackdrop: true,
+      disposeOnNavigation: true,
     });
 
     const portal = new TemplatePortal(template, this.viewContainerRef);

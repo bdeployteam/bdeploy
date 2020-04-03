@@ -74,6 +74,7 @@ export class InstanceVersionHistoryCardComponent implements OnInit {
         .withPush(),
       scrollStrategy: this.overlay.scrollStrategies.close(),
       hasBackdrop: true,
+      disposeOnNavigation: true,
       backdropClass: 'info-backdrop',
     });
     this.overlayRef.backdropClick().subscribe(() => this.closeOverlay());

@@ -747,6 +747,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
       scrollStrategy: this.overlay.scrollStrategies.close(),
       hasBackdrop: true,
       backdropClass: 'info-backdrop',
+      disposeOnNavigation: true,
     });
     this.overlayRef.backdropClick().subscribe(() => this.closeOverlay());
 

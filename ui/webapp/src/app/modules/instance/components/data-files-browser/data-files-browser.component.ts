@@ -2,10 +2,10 @@ import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Location } from '@angular/common';
 import { Component, OnInit, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { MatTabChangeEvent } from '@angular/material/tabs';
-import { MatPaginator } from '@angular/material/paginator';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { InstanceConfiguration, InstanceDirectory, InstanceDirectoryEntry, StringEntryChunkDto } from '../../../../models/gen.dtos';
@@ -179,6 +179,7 @@ export class DataFilesBrowserComponent implements OnInit {
         .centerHorizontally()
         .centerVertically(),
       hasBackdrop: true,
+      disposeOnNavigation: true,
     });
     this.overlayRef.backdropClick().subscribe(() => this.closeOutputOverlay());
 

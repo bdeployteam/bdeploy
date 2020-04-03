@@ -41,6 +41,7 @@ export class ThemeChooserComponent implements OnInit {
       scrollStrategy: this.overlay.scrollStrategies.close(),
       hasBackdrop: true,
       backdropClass: 'chooser-backdrop',
+      disposeOnNavigation: true,
     });
     this.overlayRef.backdropClick().subscribe(() => this.closeOverlay());
 
