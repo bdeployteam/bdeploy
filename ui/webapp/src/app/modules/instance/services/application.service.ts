@@ -725,14 +725,17 @@ export class ApplicationService {
   ) {
     // Order of parameters is important. Thus we need to insert a missing parameter
     // at the correct index in the config array.
+    let lastRenderedIndex = 0;
     for (let index = 0; index < descs.length; index++) {
       const desc = descs[index];
 
       // Create parameter if it is not yet defined but mandatory
-      let config = configs.find(c => c.uid === desc.uid);
+      const configIndex = configs.findIndex(c => c.uid === desc.uid);
+      lastRenderedIndex = Math.max(lastRenderedIndex, configIndex);
+      let config = configIndex === -1 ? undefined : configs[configIndex];
       if (!config && desc.mandatory) {
         config = this.createParameter(desc, templates);
-        configs.splice(index, 0, config);
+        configs.splice(lastRenderedIndex + 1, 0, config);
         continue;
       }
       // Ignore if parameter is not yet defined
