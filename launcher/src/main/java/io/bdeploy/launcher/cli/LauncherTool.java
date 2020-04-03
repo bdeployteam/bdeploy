@@ -566,7 +566,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         ClientSoftwareConfiguration newConfig = new ClientSoftwareConfiguration();
         newConfig.launcher = launcher;
         manifest.update(descriptor.applicationId, newConfig);
-        log.info("Launcher successfully installed.", version);
+        log.info("Launcher successfully installed: {}", version);
     }
 
     /**

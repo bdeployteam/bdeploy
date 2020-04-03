@@ -1,6 +1,5 @@
 package io.bdeploy.interfaces.manifest;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Optional;
@@ -73,7 +72,7 @@ public class SettingsManifest {
             } else if (lds.pass != null && !lds.pass.isEmpty()) {
                 try {
                     lds.pass = SecurityHelper.decrypt(lds.pass, key);
-                } catch (GeneralSecurityException | IOException e) {
+                } catch (GeneralSecurityException e) {
                     log.error("Cannot decrypt password for {}", lds.server, e);
                 }
             } else {
@@ -91,7 +90,7 @@ public class SettingsManifest {
             } else {
                 try {
                     lds.pass = SecurityHelper.encrypt(lds.pass, key);
-                } catch (GeneralSecurityException | IOException e) {
+                } catch (GeneralSecurityException e) {
                     throw new IllegalStateException("Cannot encrypt password for server: " + lds.server, e);
                 }
             }
@@ -104,7 +103,7 @@ public class SettingsManifest {
         if (oldLds != null) {
             try {
                 lds.pass = SecurityHelper.encrypt(oldLds.pass, key);
-            } catch (GeneralSecurityException | IOException e) {
+            } catch (GeneralSecurityException e) {
                 throw new IllegalStateException("Cannot encrypt password for server: " + lds.server, e);
             }
         } else {

@@ -71,7 +71,7 @@ public class SecurityHelper {
      * @param key the key to use to encrypt
      * @return the encrypted data
      */
-    public static String encrypt(String data, SecretKeySpec key) throws GeneralSecurityException, IOException {
+    public static String encrypt(String data, SecretKeySpec key) throws GeneralSecurityException {
         Cipher pbeCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         pbeCipher.init(Cipher.ENCRYPT_MODE, key);
         AlgorithmParameters parameters = pbeCipher.getParameters();
@@ -86,7 +86,7 @@ public class SecurityHelper {
      * @param key the key to use to decrypt the data
      * @return the decrypted data
      */
-    public static String decrypt(String data, SecretKeySpec key) throws GeneralSecurityException, IOException {
+    public static String decrypt(String data, SecretKeySpec key) throws GeneralSecurityException {
         String iv = data.split(":")[0];
         String property = data.split(":")[1];
         Cipher pbeCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");

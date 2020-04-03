@@ -118,10 +118,9 @@ public class CommonRootResourceImpl implements CommonRootResource {
             }
             // The current user must have at least scoped read permissions
             ScopedPermission requiredPermission = new ScopedPermission(cfg.name, Permission.READ);
-            if (!securityContext.isAuthorized(requiredPermission)) {
-                if (!auth.isAuthorized(securityContext.getUserPrincipal().getName(), requiredPermission)) {
-                    continue;
-                }
+            if (!securityContext.isAuthorized(requiredPermission)
+                    && !auth.isAuthorized(securityContext.getUserPrincipal().getName(), requiredPermission)) {
+                continue;
             }
 
             result.add(cfg);

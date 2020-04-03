@@ -318,11 +318,11 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
     public ScopedManifestKey getNewestLauncher(OperatingSystem os) {
         List<Key> versions = getLauncherVersions();
         return versions.stream().map(ScopedManifestKey::parse).filter(smk -> smk.getOperatingSystem() == os)
-                .filter(smk -> matchesRunningVersion(smk)).reduce((first, second) -> second).orElse(null);
+                .filter(this::matchesRunningVersion).reduce((first, second) -> second).orElse(null);
     }
 
     /** Returns whether or not this version matches the running version */
-    private static boolean matchesRunningVersion(ScopedManifestKey smk) {
+    private boolean matchesRunningVersion(ScopedManifestKey smk) {
         // Development environment: Take latest available launcher
         if (VersionHelper.isRunningUndefined()) {
             return true;
