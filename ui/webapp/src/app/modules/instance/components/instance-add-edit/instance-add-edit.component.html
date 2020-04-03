@@ -2,17 +2,17 @@
   <form [formGroup]="instanceFormGroup" (ngSubmit)="onSubmit()">
     <mat-toolbar class="mat-elevation-z1 header-toolbar">
       <mat-toolbar-row>
-        <button mat-icon-button type="button" [disabled]="loading" (click)='location.back()'><mat-icon>chevron_left</mat-icon></button>
+        <button mat-icon-button type="button" [disabled]="loading || productsLoading" (click)='location.back()'><mat-icon>chevron_left</mat-icon></button>
         <span *ngIf="isCreate()">Instance Group: {{groupParam}}</span>
         <span *ngIf="!isCreate()">Instance: {{groupParam}} - {{nameControl.value}}</span>
         <span class="fill-space"></span>
-        <button mat-raised-button color="primary" type="submit" [disabled]="loading || !isModified() || !instanceFormGroup.valid">SAVE</button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="loading || productsLoading || !isModified() || !instanceFormGroup.valid">SAVE</button>
       </mat-toolbar-row>
       <mat-toolbar-row class="subHeader">
-        <ng-container *ngIf="!loading">
+        <ng-container *ngIf="!loading && !productsLoading">
           <span> UUID: <b>{{uuidControl.value}}</b> </span>
         </ng-container>
-        <ng-container *ngIf="loading">
+        <ng-container *ngIf="loading || productsLoading">
           <mat-spinner diameter="16"></mat-spinner>
           <span class="loading-text"> <b>{{loadingText}}</b> </span>
         </ng-container>

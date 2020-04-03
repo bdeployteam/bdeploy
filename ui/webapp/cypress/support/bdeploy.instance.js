@@ -15,6 +15,9 @@ Cypress.Commands.add('createInstance', function(group, name, mode = 'STANDALONE'
   cy.get('[placeholder=Purpose]').click()
   cy.get('mat-option').contains('TEST').click()
 
+  // in case products have not yet been fully loaded.
+  cy.waitUntilContentLoaded();
+
   cy.get('[placeholder=Product]').click()
   cy.get('mat-option').contains('Demo Product').click();
 

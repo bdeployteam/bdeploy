@@ -35,6 +35,7 @@ export class InstanceAddEditComponent implements OnInit {
   public products: ProductDto[] = [];
   public servers: ManagedMasterDto[] = [];
 
+  public productsLoading = true;
   public loading = false;
   public loadingText: string;
 
@@ -91,6 +92,10 @@ export class InstanceAddEditComponent implements OnInit {
         this.loading = false;
         this.instanceFormGroup.enable();
 
+        if (this.productsLoading) {
+          this.loadingText = 'Loading...';
+        }
+
         if (!this.isCreate()) {
           this.productNameControl.disable();
           this.productTagControl.disable();
@@ -134,7 +139,7 @@ export class InstanceAddEditComponent implements OnInit {
       this.log.debug('got purposes ' + this.purposes);
     });
 
-    this.productService.getProducts(this.groupParam, null).subscribe(products => {
+    this.productService.getProducts(this.groupParam, null).pipe(finalize(() => this.productsLoading = false)).subscribe(products => {
       this.products = products;
       this.log.debug('got ' + products.length + ' products');
     });
