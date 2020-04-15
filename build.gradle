@@ -17,7 +17,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.adarshr:gradle-test-logger-plugin:2.0.0'
-        classpath 'ru.vyarus:gradle-quality-plugin:4.1.0'
+        classpath 'ru.vyarus:gradle-quality-plugin:4.2.0'
         classpath 'gradle.plugin.net.ossindex:ossindex-gradle-plugin:0.4.11'
         classpath 'org.cyclonedx:cyclonedx-gradle-plugin:1.1.3'
     }
@@ -110,10 +110,10 @@ configure(actualSubprojects) {
     compileJava.options.encoding = 'UTF-8'
 
     dependencies {
-        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.1',
-                           'org.junit.jupiter:junit-jupiter-params:5.6.1',
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2',
+                           'org.junit.jupiter:junit-jupiter-params:5.6.2',
                            'org.hamcrest:hamcrest-core:2.2'
-        testRuntimeOnly    'org.junit.jupiter:junit-jupiter-engine:5.6.1'
+        testRuntimeOnly    'org.junit.jupiter:junit-jupiter-engine:5.6.2'
     }
 
     eclipse.classpath.file {
@@ -123,7 +123,6 @@ configure(actualSubprojects) {
             }
         }
     }
-
 
     audit {
         rateLimitAsError = false
@@ -140,11 +139,6 @@ configure(actualSubprojects) {
         strict = false
 
         lintOptions = [ 'all', '-try' ]
-    }
-
-    afterEvaluate {
-        // avoid conflict with spotbugs SLF4J version
-        configurations.spotbugs { exclude module: 'slf4j-simple' }
     }
 
     jacocoTestReport {

@@ -2,7 +2,7 @@ plugins {
   id 'eclipse'
   id 'java-library'
   id 'com.github.johnrengelman.shadow' version '5.2.0'
-  id "io.swagger.core.v3.swagger-gradle-plugin" version "2.1.1"
+  id "io.swagger.core.v3.swagger-gradle-plugin" version "2.1.2"
 }
 
 dependencies {
@@ -12,7 +12,7 @@ dependencies {
         project(":bhive"),
     )
     api(
-        'io.swagger.core.v3:swagger-annotations:2.1.1',
+        'io.swagger.core.v3:swagger-annotations:2.1.2',
     )
 }
 
