@@ -17,6 +17,8 @@ import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.apache.logging.log4j.core.util.KeyValuePair;
 import org.apache.logging.log4j.message.SimpleMessage;
 import org.apache.logging.log4j.util.StringMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The {@link RollingFileAuditor} logs audit records to a human readable log and to a programmatically readable JSON file. It must
@@ -24,6 +26,7 @@ import org.apache.logging.log4j.util.StringMap;
  */
 public class RollingFileAuditor implements Auditor {
 
+    private static final Logger log = LoggerFactory.getLogger(RollingFileAuditor.class);
     private static final String LOG_PATTERN = "%d{dd-HH:mm:ss.SSS} | %-5level | AUD/%-11X{WHO} | %-7X{METHOD} | %-40X{WHAT} | %-40msg | %X{PARAMETERS}%n";
 
     private final Path logDir;
@@ -48,34 +51,38 @@ public class RollingFileAuditor implements Auditor {
      */
     @Override
     public void audit(AuditRecord record) {
-        if (logAppender.isStopped() || jsonAppender.isStopped()) {
-            return;
+        try {
+            if (logAppender.isStopped() || jsonAppender.isStopped()) {
+                return;
+            }
+
+            Log4jLogEvent.Builder builder = Log4jLogEvent.newBuilder();
+            builder.setMessage(new SimpleMessage(record.message));
+            switch (record.severity) {
+                case NORMAL:
+                    builder.setLevel(Level.INFO);
+                    break;
+                case WARNING:
+                    builder.setLevel(Level.WARN);
+                    break;
+                case ERROR:
+                    builder.setLevel(Level.ERROR);
+                    break;
+            }
+
+            StringMap contextData = ContextDataFactory.createContextData();
+            contextData.putValue("WHO", record.who);
+            contextData.putValue("WHAT", record.what);
+            contextData.putValue("PARAMETERS", record.parameters);
+            contextData.putValue("METHOD", record.method);
+            builder.setContextData(contextData);
+
+            Log4jLogEvent logEvent = builder.build();
+            jsonAppender.append(logEvent);
+            logAppender.append(logEvent);
+        } catch (Exception e) {
+            log.error("Cannot write audit log", e);
         }
-
-        Log4jLogEvent.Builder builder = Log4jLogEvent.newBuilder();
-        builder.setMessage(new SimpleMessage(record.message));
-        switch (record.severity) {
-            case NORMAL:
-                builder.setLevel(Level.INFO);
-                break;
-            case WARNING:
-                builder.setLevel(Level.WARN);
-                break;
-            case ERROR:
-                builder.setLevel(Level.ERROR);
-                break;
-        }
-
-        StringMap contextData = ContextDataFactory.createContextData();
-        contextData.putValue("WHO", record.who);
-        contextData.putValue("WHAT", record.what);
-        contextData.putValue("PARAMETERS", record.parameters);
-        contextData.putValue("METHOD", record.method);
-        builder.setContextData(contextData);
-
-        Log4jLogEvent logEvent = builder.build();
-        jsonAppender.append(logEvent);
-        logAppender.append(logEvent);
     }
 
     @Override
