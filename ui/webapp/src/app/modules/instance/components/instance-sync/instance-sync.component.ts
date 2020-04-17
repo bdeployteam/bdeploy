@@ -80,7 +80,7 @@ export class InstanceSyncComponent implements OnChanges {
     } catch (e) {
       this.messageBoxService.open({
         title: 'Synchronization Error',
-        message: 'Synchronization failed. The remote master server might be offline.',
+        message: `Synchronization failed. The remote master server might be offline.<br/>Error Message: ${e.statusText}`,
         mode: MessageBoxMode.ERROR});
     }
   }

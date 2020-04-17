@@ -32,6 +32,7 @@ import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.remote.SlaveDeploymentResource;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
+import io.bdeploy.jersey.fs.FileSystemSpaceService;
 import io.bdeploy.minion.MinionConfigVariableResolver;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.MinionState;
@@ -45,6 +46,9 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
 
     @Inject
     private ActivityReporter reporter;
+
+    @Inject
+    private FileSystemSpaceService fsss;
 
     /**
      * @param inm the {@link InstanceNodeManifest} to read state from.
@@ -60,6 +64,11 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
 
         Activity deploying = reporter.start("Deploying " + key);
         try {
+            if (!fsss.hasFreeSpace(root.getDeploymentDir())) {
+                throw new WebApplicationException("Not enough free space in " + root.getDeploymentDir(),
+                        Status.SERVICE_UNAVAILABLE);
+            }
+
             InstanceNodeManifest inm = InstanceNodeManifest.of(hive, key);
             InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentDir(), inm);
             inc.addAdditionalVariableResolver(new MinionConfigVariableResolver(root));

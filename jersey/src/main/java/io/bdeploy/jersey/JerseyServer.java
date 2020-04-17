@@ -59,6 +59,7 @@ import io.bdeploy.jersey.activity.JerseyRemoteActivityResourceImpl;
 import io.bdeploy.jersey.activity.JerseyRemoteActivityScopeServerFilter;
 import io.bdeploy.jersey.audit.Auditor;
 import io.bdeploy.jersey.audit.Log4jAuditor;
+import io.bdeploy.jersey.fs.FileSystemSpaceService;
 import io.bdeploy.jersey.resources.JerseyMetricsResourceImpl;
 
 /**
@@ -92,6 +93,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
 
     public static final String START_TIME = "StartTime";
     public static final String BROADCAST_EXECUTOR = "BcExecutor";
+    public static final String FILE_SYSTEM_MIN_SPACE = "FileSystemMinSpace";
 
     private final int port;
     private final ResourceConfig rc = new ResourceConfig();
@@ -337,6 +339,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             bind(startTime).named(START_TIME).to(Instant.class);
             bind(broadcastScheduler).named(BROADCAST_EXECUTOR).to(ScheduledExecutorService.class);
             bind(JerseyScopeService.class).in(Singleton.class).to(JerseyScopeService.class);
+            bind(FileSystemSpaceService.class).in(Singleton.class).to(FileSystemSpaceService.class);
 
             // need to lazily access the auditor in case it is changed later.
             bindFactory(new JerseyAuditorBridgeFactory()).to(Auditor.class);

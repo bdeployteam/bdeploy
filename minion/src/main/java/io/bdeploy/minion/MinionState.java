@@ -56,6 +56,11 @@ public class MinionState {
     public List<Path> storageLocations = new ArrayList<>();
 
     /**
+     * Minimum available disc space on working directories.
+     */
+    public Long storageMinFree = 1l * 1024 * 1024 * 1024;
+
+    /**
      * 'Cron' format schedule for cleanup job.
      */
     public String cleanupSchedule;

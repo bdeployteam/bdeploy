@@ -213,6 +213,7 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
             bind(root).to(MinionRoot.class);
             bind(root).to(Minion.class);
             bind(root.getUsers()).to(AuthService.class);
+            bind(root.getState().storageMinFree).named(JerseyServer.FILE_SYSTEM_MIN_SPACE).to(Long.class);
             bind(activityBc).named(JerseyBroadcastingActivityReporter.ACTIVITY_BROADCASTER).to(JerseyEventBroadcaster.class);
         }
     }
