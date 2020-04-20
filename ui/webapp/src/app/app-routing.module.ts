@@ -32,7 +32,6 @@ const routes: Routes = [
   {
     path: 'softwarerepo',
     loadChildren: () => import('./modules/repositories/repositories.module').then(x => x.RepositoriesModule),
-    canActivate: [AdminGuard]
   },
   {
     path: 'servers',

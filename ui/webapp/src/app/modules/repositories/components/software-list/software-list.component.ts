@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { finalize } from 'rxjs/operators';
+import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { ManifestKey } from '../../../../models/gen.dtos';
 import { LoggingService } from '../../../core/services/logging.service';
 import { DownloadService } from '../../../shared/services/download.service';
@@ -36,7 +37,10 @@ export class SoftwareListComponent implements OnInit {
 
   public exporting: ManifestKey = null;
 
-  constructor(private softwareService: SoftwareService, private loggingService: LoggingService, private downloadService: DownloadService) { }
+  constructor(private softwareService: SoftwareService,
+     private loggingService: LoggingService,
+     private downloadService: DownloadService,
+     private authService: AuthenticationService) { }
 
   ngOnInit() {
   }
@@ -58,4 +62,7 @@ export class SoftwareListComponent implements OnInit {
       });
   }
 
+  public isReadOnly(): boolean {
+    return !this.authService.isGlobalAdmin();
+  }
 }

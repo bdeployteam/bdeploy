@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { SoftwareRepositoryConfiguration } from '../../../../models/gen.dtos';
 import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
 import { MessageboxService } from '../../../shared/services/messagebox.service';
@@ -14,7 +15,9 @@ export class SoftwareRepositoryCardComponent implements OnInit {
   @Input() repository: SoftwareRepositoryConfiguration = null;
   @Output() removeEvent = new EventEmitter<boolean>();
 
-  constructor(private repoService: SoftwareRepositoryService, private mbService: MessageboxService) { }
+  constructor(private repoService: SoftwareRepositoryService,
+    private mbService: MessageboxService,
+    private authService: AuthenticationService) { }
 
   ngOnInit() {
   }
@@ -38,6 +41,10 @@ export class SoftwareRepositoryCardComponent implements OnInit {
             }
           );
       });
+  }
+
+  public isReadOnly(): boolean {
+    return !this.authService.isGlobalAdmin();
   }
 
 }
