@@ -164,10 +164,10 @@ describe('Creates screenshots for the user documentation', () => {
 
     // Configure Applications
     cy.get('button').contains('Configure Applications').click();
-    cy.getNodeCard('master').contains('Drop server application here').then(el => {
+    cy.getNodeCard('master').contains('Drop server application here').should('be.visible').then(el => {
       cy.contains('app-application-descriptor-card', 'Server Application').dragTo(el);
     })
-    cy.getNodeCard('Client Applications').contains('Drop client application here').then(el => {
+    cy.getNodeCard('Client Applications').contains('Drop client application here').should('be.visible').then(el => {
       cy.contains('app-application-descriptor-card', 'Client Application').dragTo(el);
     })
 
