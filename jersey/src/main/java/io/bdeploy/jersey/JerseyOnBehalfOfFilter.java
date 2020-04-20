@@ -13,7 +13,7 @@ public class JerseyOnBehalfOfFilter implements ClientRequestFilter {
     private final String onBehalf;
 
     public JerseyOnBehalfOfFilter(SecurityContext context) {
-        this.onBehalf = context == null ? null : context.getUserPrincipal().getName();
+        this.onBehalf = (context == null || context.getUserPrincipal() == null) ? null : context.getUserPrincipal().getName();
     }
 
     @Override

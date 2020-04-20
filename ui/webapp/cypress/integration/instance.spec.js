@@ -143,8 +143,9 @@ describe('Instance Tests', function () {
       cy.contains('button', 'close').click();
     })
 
-    cy.contains('tr', 'cypress.txt').contains('mat-icon', 'cloud_download').downloadBlobFileShould(resp => {
-      expect(resp).to.contain('TEST');
+    cy.contains('tr', 'cypress.txt').contains('mat-icon', 'cloud_download').downloadFile('data.txt');
+    cy.fixture('data.txt').then(txt => {
+      expect(txt).to.contain('TEST');
     })
   })
 
