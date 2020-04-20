@@ -76,7 +76,9 @@ public class WebSocketTest {
 
                             result.complete(message);
 
-                            webSocket.close();
+                            if (webSocket != null) {
+                                webSocket.close();
+                            }
                         }
                     }).build()).get();
 
