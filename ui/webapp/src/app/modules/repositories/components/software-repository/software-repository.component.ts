@@ -5,6 +5,7 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatDrawer } from '@angular/material/sidenav';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { ManifestKey } from '../../../../models/gen.dtos';
 import { Logger, LoggingService } from '../../../core/services/logging.service';
 import { FileUploadComponent } from '../../../shared/components/file-upload/file-upload.component';
@@ -41,6 +42,7 @@ export class SoftwareRepositoryComponent implements OnInit, OnDestroy {
     public location: Location,
     private softwareService: SoftwareService,
     public dialog: MatDialog,
+    private authService: AuthenticationService,
   ) { }
 
   ngOnInit() {
@@ -102,6 +104,10 @@ export class SoftwareRepositoryComponent implements OnInit, OnDestroy {
       .subscribe(e => {
         this.loadSoftwares();
       });
+  }
+
+  public isReadOnly(): boolean {
+    return !this.authService.isGlobalAdmin();
   }
 
 }

@@ -28,4 +28,4 @@
   </mat-grid-tile>
 </mat-grid-list>
 
-<button mat-fab class="add-button" [routerLink]="['/softwarerepo/add']"><mat-icon>add</mat-icon></button>
+<button mat-fab class="add-button" [disabled]="isReadOnly()" [routerLink]="['/softwarerepo/add']"><mat-icon>add</mat-icon></button>

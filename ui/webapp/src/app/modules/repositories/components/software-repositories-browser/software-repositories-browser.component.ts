@@ -74,4 +74,7 @@ export class SoftwareRepositoriesBrowserComponent implements OnInit, OnDestroy {
     this.softwareRepositoryList.remove(c => c === repository);
   }
 
+  public isReadOnly(): boolean {
+    return !this.authService.isGlobalAdmin();
+  }
 }
