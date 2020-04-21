@@ -44,7 +44,8 @@ export class InstanceGroupPermissionsAddComponent implements OnInit {
   private filter(input: string): UserInfo[] {
     const inputLC = input ? input.toLowerCase() : '';
     return this.data.all.filter(
-      u => u.name.toLowerCase().indexOf(inputLC) >= 0 && this.data.displayed.find(d => d.name === u.name) === undefined
+      u => (u.name.toLowerCase().indexOf(inputLC) >= 0 || (u.fullName && u.fullName.toLowerCase().indexOf(inputLC) >= 0))
+        && this.data.displayed.find(d => d.name === u.name) === undefined
     );
   }
 
