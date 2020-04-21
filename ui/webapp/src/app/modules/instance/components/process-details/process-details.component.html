@@ -1,63 +1,97 @@
 <mat-toolbar>
-    <mat-toolbar-row>
-      <span>{{appConfig.name}}</span>
-      <div class='spacer'></div>
-      <div *ngIf='loading'><mat-spinner diameter='24'></mat-spinner></div>
-      <app-process-status [instanceTag]="instanceTag" [appId]="appConfig.uid" [iconWhenStopped]="true"></app-process-status>
-    </mat-toolbar-row>
-    <mat-toolbar-row class="subHeader subHeaderTheme">
-        <span> ID: {{appConfig.uid}}</span>
-    </mat-toolbar-row>
-  </mat-toolbar>
-<div class='flex-column' *ngIf="status">
-  <div class="outdated" *ngIf="isRunningOutOfSync()" matTooltip="Application is running in a version that is no longer activated.">
+  <mat-toolbar-row>
+    <span>{{ appConfig.name }}</span>
+    <div class="spacer"></div>
+    <div *ngIf="loading"><mat-spinner diameter="24"></mat-spinner></div>
+    <app-process-status
+      [instanceTag]="instanceTag"
+      [appId]="appConfig.uid"
+      [iconWhenStopped]="true"
+    ></app-process-status>
+  </mat-toolbar-row>
+  <mat-toolbar-row class="subHeader subHeaderTheme">
+    <span> ID: {{ appConfig.uid }}</span>
+  </mat-toolbar-row>
+</mat-toolbar>
+<div class="flex-column" *ngIf="status">
+  <div
+    class="outdated"
+    *ngIf="isRunningOutOfSync()"
+    matTooltip="Application is running in a version that is no longer activated."
+  >
     Outdated
   </div>
-  <div class='info-grid'>
+  <div class="info-grid">
     <ng-container *ngIf="isStopped() || isCrashedPermanently()">
       <mat-icon>timer</mat-icon>
       <div>Stopped At:</div>
-      <div>{{getStopTime()}}</div>
+      <div>{{ getStopTime() }}</div>
     </ng-container>
     <ng-container *ngIf="isRunning() || isRunningUnstable()">
       <mat-icon>timelapse</mat-icon>
       <div>Up Time:</div>
-      <div>{{uptimeString}}</div>
+      <div>{{ uptimeString }}</div>
 
       <mat-icon>timer</mat-icon>
       <div>Started At:</div>
-      <div>{{getStartTime()}}</div>
+      <div>{{ getStartTime() }}</div>
     </ng-container>
     <ng-container *ngIf="isCrashedWaiting()">
       <mat-icon>report</mat-icon>
-      <div>Stopped At:</div><div>{{getStopTime()}}</div>
-      <mat-progress-spinner [value]="restartProgress" color="primary" [diameter]="24"></mat-progress-spinner>
+      <div>Stopped At:</div>
+      <div>{{ getStopTime() }}</div>
+      <mat-progress-spinner
+        [value]="restartProgress"
+        color="primary"
+        [diameter]="24"
+      ></mat-progress-spinner>
       <div>Restart In:</div>
-      <span title="{{restartProgressText}}">{{restartProgressText}}</span>
+      <span title="{{ restartProgressText }}">{{ restartProgressText }}</span>
     </ng-container>
     <mat-icon>flight_takeoff</mat-icon>
     <div>Start Type:</div>
-    <div matTooltip="{{getStartTypeHint()}}">{{getStartTypeText()}}</div>
+    <div matTooltip="{{ getStartTypeHint() }}">{{ getStartTypeText() }}</div>
 
     <mat-icon>favorite_outline</mat-icon>
     <div>Keep Alive:</div>
-    <div matTooltip="{{getKeepAliveHint()}}">{{getKeepAliveText()}}</div>
+    <div matTooltip="{{ getKeepAliveHint() }}">{{ getKeepAliveText() }}</div>
   </div>
-  <ng-container *ngIf='getStatusDetails()'>
+  <ng-container *ngIf="getStatusDetails()">
     <mat-divider></mat-divider>
-    <div class='info-detail'>{{getStatusDetails()}}</div>
+    <div class="info-detail">{{ getStatusDetails() }}</div>
   </ng-container>
   <mat-divider></mat-divider>
-  <div class='flex-row flex-row-center'>
-    <button mat-icon-button color='primary' class='control-button' (click)='start()' [disabled]='!canStart()' matTooltip="Start">
+  <div class="flex-row flex-row-center">
+    <button
+      mat-icon-button
+      color="primary"
+      class="control-button"
+      (click)="start()"
+      [disabled]="!canStart()"
+      matTooltip="Start"
+    >
       <mat-icon>play_arrow</mat-icon>
     </button>
-    <mat-divider [vertical]="true" class='control-divider'></mat-divider>
-    <button mat-icon-button color='primary' class='control-button' (click)='stop()' [disabled]='!canStop()' matTooltip="Stop">
+    <mat-divider [vertical]="true" class="control-divider"></mat-divider>
+    <button
+      mat-icon-button
+      color="primary"
+      class="control-button"
+      (click)="stop()"
+      [disabled]="!canStop()"
+      matTooltip="Stop"
+    >
       <mat-icon>stop</mat-icon>
     </button>
-    <mat-divider [vertical]="true" class='control-divider'></mat-divider>
-    <button mat-icon-button color='primary' class='control-button' (click)='restart()' [disabled]='!canRestart()' matTooltip="Restart">
+    <mat-divider [vertical]="true" class="control-divider"></mat-divider>
+    <button
+      mat-icon-button
+      color="primary"
+      class="control-button"
+      (click)="restart()"
+      [disabled]="!canRestart()"
+      matTooltip="Restart"
+    >
       <mat-icon>replay</mat-icon>
     </button>
   </div>
@@ -65,13 +99,32 @@
   <mat-divider></mat-divider>
 
   <div class="icon-toolbar">
-    <button mat-icon-button (click)='showProcessList()' [disabled]='!isRunningOrUnstable()' matTooltip="Show processes">
-      <mat-icon [matBadge]="getProcessCount()" [matBadgeHidden]="!isRunningOrUnstable()" matBadgeSize="small">settings</mat-icon>
+    <button
+      mat-icon-button
+      (click)="showProcessList()"
+      [disabled]="!isRunningOrUnstable()"
+      matTooltip="Show processes"
+    >
+      <mat-icon
+        [matBadge]="getProcessCount()"
+        [matBadgeHidden]="!isRunningOrUnstable()"
+        matBadgeSize="small"
+        >settings</mat-icon
+      >
     </button>
     <ng-template #terminal>
-      <app-file-viewer class='output-overlay' (closeEvent)='closeOutputOverlay()' [title]='"Output of " + appConfig.name' [initialEntry]='getCurrentOutputEntryFetcher()' [contentFetcher]='getOutputContentFetcher()' [follow]='isRunning()'></app-file-viewer>
+      <app-file-viewer
+        class="output-overlay"
+        (closeEvent)="closeOutputOverlay()"
+        [title]="'Output of ' + appConfig.name"
+        [initialEntry]="getCurrentOutputEntryFetcher()"
+        [contentFetcher]="getOutputContentFetcher()"
+        [contentDownloader]="getContentDownloader()"
+        [follow]="isRunning()"
+      ></app-file-viewer>
     </ng-template>
-    <button mat-icon-button (click)='openOutputOverlay(terminal)'><mat-icon>message</mat-icon></button>
+    <button mat-icon-button (click)="openOutputOverlay(terminal)">
+      <mat-icon>message</mat-icon>
+    </button>
   </div>
-
 </div>

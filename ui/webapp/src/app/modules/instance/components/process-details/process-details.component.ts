@@ -392,6 +392,15 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
     };
   }
 
+  getContentDownloader(): () => void {
+    return () => {
+      const tag: string = this.status ? this.status.instanceTag : (this.activatedInstanceTag ? this.activatedInstanceTag : this.instanceTag);
+      this.instanceService.getApplicationOutputEntry(this.instanceGroup, this.instanceId, tag, this.appConfig.uid, true).subscribe(dir => {
+        this.instanceService.downloadDataFileContent(this.instanceGroup, this.instanceId, dir, dir.entries[0]);
+      });
+    };
+  }
+
   /** Opens a modal overlay popup showing the given template */
   openOutputOverlay(template: TemplateRef<any>) {
     this.closeOutputOverlay();

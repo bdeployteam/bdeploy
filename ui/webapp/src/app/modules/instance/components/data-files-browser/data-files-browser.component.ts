@@ -157,6 +157,10 @@ export class DataFilesBrowserComponent implements OnInit {
     };
   }
 
+  getContentDownloader(): () => void {
+    return () => this.instanceService.downloadDataFileContent(this.groupParam, this.uuidParam, this.activeInstanceDirectory, this.activeInstanceDirectoryEntry);
+  }
+
   openOutputOverlay(
     instanceDirectory: InstanceDirectory,
     instanceDirectoryEntry: InstanceDirectoryEntry,
