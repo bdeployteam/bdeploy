@@ -34,6 +34,7 @@ import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.ManifestRefLoadOperation;
 import io.bdeploy.bhive.op.ObjectLoadOperation;
+import io.bdeploy.bhive.op.ObjectSizeOperation;
 import io.bdeploy.bhive.op.PruneOperation;
 import io.bdeploy.bhive.op.TreeLoadOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
@@ -138,6 +139,7 @@ public class HiveResourceImpl implements HiveResource {
             HiveEntryDto entry = new HiveEntryDto(key.getName(), key.getType());
             ObjectId entryOid = tree.getChildren().get(key);
             entry.id = entryOid.getId();
+            entry.size = hive.execute(new ObjectSizeOperation().addObject(entryOid));
             if (key.getType() == EntryType.MANIFEST) {
                 SortedMap<ObjectId, Key> r = hive.execute(new ManifestRefLoadOperation().addManifestRef(entryOid));
                 Key ref = r.get(entryOid);

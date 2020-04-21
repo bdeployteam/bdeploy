@@ -63,6 +63,13 @@ export class HiveService {
     return this.http.get(url, { params: params, responseType: 'blob' });
   }
 
+  public downloadAscii(hive: string, id: string) {
+    this.log.debug('download(' + hive + ', ' + id + ')');
+    const url: string = this.cfg.config.api + '/hive/download';
+    const params: HttpParams = new HttpParams().set('hive', hive).set('id', id);
+    return this.http.get(url, { params: params, responseType: 'text'});
+  }
+
   public download(hive: string, id: string) {
     this.log.debug('download(' + hive + ', ' + id + ')');
     const url: string = this.cfg.config.api + '/hive/download';
