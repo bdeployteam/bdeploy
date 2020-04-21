@@ -1,25 +1,35 @@
 package io.bdeploy.bhive.cli;
 
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.SortedMap;
 import java.util.SortedSet;
 
+import javax.ws.rs.core.UriBuilder;
+
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.cli.ManifestTool.ManifestConfig;
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.bhive.op.CopyOperation;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
+import io.bdeploy.bhive.op.ObjectListOperation;
 import io.bdeploy.bhive.remote.RemoteBHive;
+import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 
 /**
- * A tool to list and manage (delete) manifests in a hive.
+ * A tool to list and manage (delete, export) manifests in a hive.
  */
 @Help("Query and manipulate manifests in the given BHive")
 @CliName("manifest")
@@ -42,6 +52,9 @@ public class ManifestTool extends RemoteServiceTool<ManifestConfig> {
 
         @Help("Manifest(s) to manipulate/list. Format is 'name:tag'. Name without tag is supported to list tags of a given name.")
         String manifest() default "";
+
+        @Help("Path to a ZIP file where the manifest and all its dependencies should be saved to.")
+        String saveTo();
     }
 
     public ManifestTool() {
@@ -54,7 +67,7 @@ public class ManifestTool extends RemoteServiceTool<ManifestConfig> {
             helpAndFailIfMissing(config.hive(), "Missing --hive");
         }
 
-        if (!config.list() && !config.delete()) {
+        if (!config.list() && !config.delete() && config.saveTo() == null) {
             helpAndFail("Nothing to do, please give more options");
         }
 
@@ -68,6 +81,9 @@ public class ManifestTool extends RemoteServiceTool<ManifestConfig> {
     private void runOnRemoteHive(ManifestConfig config, RemoteService svc) {
         if (config.delete()) {
             throw new UnsupportedOperationException("Remote manifest deletion not supported.");
+        }
+        if (config.saveTo() != null) {
+            throw new UnsupportedOperationException("Remote manifest saving not supported.");
         }
 
         try (RemoteBHive rh = RemoteBHive.forService(svc, config.source(), getActivityReporter())) {
@@ -100,9 +116,43 @@ public class ManifestTool extends RemoteServiceTool<ManifestConfig> {
 
             if (config.delete()) {
                 helpAndFailIfMissing(config.manifest(), "Missing --manifest");
-                hive.execute(new ManifestDeleteOperation().setToDelete(Manifest.Key.parse(config.manifest())));
+                Key manifest = Manifest.Key.parse(config.manifest());
+                hive.execute(new ManifestDeleteOperation().setToDelete(manifest));
             }
 
+            if (config.saveTo() != null) {
+                doSaveTo(config, hive);
+            }
+        }
+
+    }
+
+    private void doSaveTo(ManifestConfig config, BHive hive) {
+        helpAndFailIfMissing(config.manifest(), "Missing --manifest");
+        Key manifest = Manifest.Key.parse(config.manifest());
+        Path tmpFile = null;
+        try {
+            tmpFile = Files.createTempDirectory("bdeploy-");
+
+            // Determine required objects
+            ObjectListOperation scan = new ObjectListOperation();
+            scan.addManifest(manifest);
+            SortedSet<ObjectId> objectIds = hive.execute(scan);
+
+            // Copy objects into the target hive
+            URI targetUri = UriBuilder.fromUri("jar:" + Paths.get(config.saveTo()).toUri()).build();
+            try (BHive zipHive = new BHive(targetUri, new ActivityReporter.Null())) {
+                CopyOperation op = new CopyOperation().setDestinationHive(zipHive);
+                op.addManifest(manifest);
+                objectIds.forEach(op::addObject);
+                hive.execute(op);
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to save manifest", ex);
+        } finally {
+            if (tmpFile != null) {
+                PathHelper.deleteRecursive(tmpFile);
+            }
         }
     }
 
