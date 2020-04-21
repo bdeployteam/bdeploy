@@ -173,4 +173,13 @@ public interface InstanceResource {
             @PathParam("minion") String minion, InstanceDirectoryEntry entry, @QueryParam("offset") long offset,
             @QueryParam("limit") long limit);
 
+    @POST
+    @Path("/{instance}/request/{minion}")
+    public String getContentStreamRequest(@ActivityScope @PathParam("instance") String instanceId,
+            @PathParam("minion") String minion, InstanceDirectoryEntry entry);
+
+    @GET
+    @Unsecured
+    @Path("/{instance}/stream/{token}")
+    public Response getContentStream(@ActivityScope @PathParam("instance") String instanceId, @PathParam("token") String token);
 }

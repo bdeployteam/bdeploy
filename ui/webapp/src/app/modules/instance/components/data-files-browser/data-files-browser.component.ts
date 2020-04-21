@@ -94,10 +94,7 @@ export class DataFilesBrowserComponent implements OnInit {
 
   public download(instanceDirectory: InstanceDirectory, instanceDirectoryEntry: InstanceDirectoryEntry) {
     this.instanceService
-      .getContentChunk(this.groupParam, this.uuidParam, instanceDirectory, instanceDirectoryEntry, 0, 0, true)
-      .subscribe(dto => {
-        this.downloadFile(instanceDirectoryEntry.path, dto.content);
-      });
+      .downloadDataFileContent(this.groupParam, this.uuidParam, instanceDirectory, instanceDirectoryEntry);
   }
 
   private downloadFile(filename: string, data: string): void {

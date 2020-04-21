@@ -1,5 +1,6 @@
 package io.bdeploy.interfaces.remote;
 
+import java.io.InputStream;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -10,6 +11,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.interfaces.directory.EntryChunk;
@@ -76,5 +78,14 @@ public interface SlaveDeploymentResource {
     @POST
     @Path("/dataDir/entry")
     public EntryChunk getEntryContent(InstanceDirectoryEntry entry, @QueryParam("o") long offset, @QueryParam("l") long limit);
+
+    /**
+     * @param entry the entry to stream. The stream will include the complete content of the file.
+     * @return an {@link InputStream} that can be used to stream the file.
+     */
+    @POST
+    @Path("/dataDir/streamEntry")
+    @Produces("*/*")
+    public Response getEntryStream(InstanceDirectoryEntry entry);
 
 }

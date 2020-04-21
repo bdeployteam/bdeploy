@@ -18,6 +18,7 @@ import java.util.TreeMap;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 
@@ -644,6 +645,16 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         }
         SlaveDeploymentResource sdr = ResourceProvider.getResource(svc, SlaveDeploymentResource.class, context);
         return sdr.getEntryContent(entry, offset, limit);
+    }
+
+    @Override
+    public Response getEntryStream(String minion, InstanceDirectoryEntry entry) {
+        RemoteService svc = root.getMinions().getRemote(minion);
+        if (svc == null) {
+            throw new WebApplicationException("Cannot find minion " + minion, Status.NOT_FOUND);
+        }
+        SlaveDeploymentResource sdr = ResourceProvider.getResource(svc, SlaveDeploymentResource.class, context);
+        return sdr.getEntryStream(entry);
     }
 
     @Override

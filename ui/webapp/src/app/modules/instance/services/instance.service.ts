@@ -250,6 +250,14 @@ export class InstanceService {
     return this.http.post<StringEntryChunkDto>(url, ide, options);
   }
 
+  public downloadDataFileContent(instanceGroupName: string, instanceName: string, id: InstanceDirectory, ide: InstanceDirectoryEntry) {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/request/' + id.minion;
+    this.log.debug('downloadDataFileContent');
+    this.http.post(url, ide, { responseType: 'text'}).subscribe(token => {
+      this.downloadService.download(this.buildInstanceUrl(instanceGroupName, instanceName) + '/stream/' + token);
+    });
+  }
+
   public createClickAndStartDescriptor(
     instanceGroupName: string,
     instanceName: string,

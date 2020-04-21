@@ -91,6 +91,8 @@ import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
+import io.bdeploy.ui.InstanceEntryStreamRequestService;
+import io.bdeploy.ui.InstanceEntryStreamRequestService.EntryRequest;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.ConfigFileResource;
 import io.bdeploy.ui.api.InstanceResource;
@@ -138,6 +140,9 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Inject
     private InstanceEventManager iem;
+
+    @Inject
+    private InstanceEntryStreamRequestService iesrs;
 
     public InstanceResourceImpl(String group, BHive hive) {
         this.group = group;
@@ -814,6 +819,25 @@ public class InstanceResourceImpl implements InstanceResource {
             return null;
         }
         return new StringEntryChunkDto(chunk);
+    }
+
+    @Override
+    public String getContentStreamRequest(String instanceId, String minion, InstanceDirectoryEntry entry) {
+        return iesrs.createRequest(new EntryRequest(minion, instanceId, entry));
+    }
+
+    @Override
+    public Response getContentStream(String instanceId, String token) {
+        EntryRequest rq = iesrs.consumeRequestToken(token);
+
+        InstanceManifest im = readInstance(instanceId, rq.entry.tag);
+        if (im == null) {
+            throw new WebApplicationException("Cannot load " + instanceId + ":" + rq.entry.tag, Status.NOT_FOUND);
+        }
+
+        RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
+        MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class, context);
+        return root.getNamedMaster(group).getEntryStream(rq.minion, rq.entry);
     }
 
 }
