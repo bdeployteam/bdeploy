@@ -19,6 +19,7 @@
       [title]='activeInstanceDirectoryEntry ? activeInstanceDirectoryEntry.path: ""'
       [initialEntry]='getCurrentOutputEntryFetcher()'
       [contentFetcher]='getOutputContentFetcher()'
+      [contentDownloader]='getContentDownloader()'
       [follow]='false'>
     </app-file-viewer>
   </ng-template>

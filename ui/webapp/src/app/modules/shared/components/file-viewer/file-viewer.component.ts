@@ -15,6 +15,7 @@ export class FileViewerComponent implements OnInit, OnDestroy {
   @Input() title: String;
   @Input() initialEntry: () => Observable<InstanceDirectoryEntry>;
   @Input() contentFetcher: (offset: number, length: number) => Observable<StringEntryChunkDto>;
+  @Input() contentDownloader: () => void;
   @Input() follow = false;
 
   @Output() closeEvent = new EventEmitter<void>();
