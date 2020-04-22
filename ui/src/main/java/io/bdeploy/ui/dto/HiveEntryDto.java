@@ -13,6 +13,7 @@ public class HiveEntryDto {
 
     public String name;
     public Tree.EntryType type;
+    public long size;
 
     public HiveEntryDto(String name, Tree.EntryType type) {
         this.name = name;

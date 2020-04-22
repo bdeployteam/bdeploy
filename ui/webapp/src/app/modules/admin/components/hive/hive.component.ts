@@ -17,6 +17,9 @@ import { HiveService } from '../../services/hive.service';
   styleUrls: ['./hive.component.css'],
 })
 export class HiveComponent implements OnInit {
+
+  public FILE_SIZE_LIMIT = 100000; // non-static because referenced in template
+
   log: Logger = this.loggingService.getLogger('HiveComponent');
 
   @Input('hive')
@@ -24,12 +27,18 @@ export class HiveComponent implements OnInit {
     this.selectHive(hive);
   }
 
-  public displayedColumns: string[] = ['type', 'name', 'delete', 'download'];
+  public displayedColumns: string[] = ['type', 'name', 'size', 'delete', 'download'];
 
   public _hive: string;
   public longRunningOperation = false;
   public paths: { [key: string]: HiveEntryDto[] } = {};
   public entries: HiveEntryDto[];
+
+  private asciiTypes = ['json', 'xml', 'yaml', 'bat', 'sh', 'txt', 'asc'];
+
+  public fileEntry: HiveEntryDto;
+  public fileContent: any;
+  public fileContentLoading = false;
 
   @ViewChild('hivetable', { static: true }) hivetable: CdkTable<any>;
 
@@ -85,6 +94,7 @@ export class HiveComponent implements OnInit {
 
   public selectTop(): void {
     this.log.debug('selectTop()');
+    this.closeFile();
     this.paths[this._hive] = [];
     if (this._hive == null) {
       this.setEntries([]);
@@ -97,6 +107,7 @@ export class HiveComponent implements OnInit {
 
   public selectHistory(index: number): void {
     this.log.debug('selectHistory(' + index + ')');
+    this.closeFile();
     const entry: HiveEntryDto = this.paths[this._hive][index];
     this.paths[this._hive] = this.paths[this._hive].slice(0, index);
     this.selectRow(entry);
@@ -114,7 +125,26 @@ export class HiveComponent implements OnInit {
         this.paths[this._hive].push(entry);
         this.setEntries(entries);
       });
+    } else if (this.isBlob(entry) && this.asciiTypes.indexOf(this.getExtension(entry.name).toLowerCase()) >= 0) {
+      this.fileEntry = entry;
+      if (entry.size <= this.FILE_SIZE_LIMIT) {
+        this.loadFileContent(entry);
+      }
     }
+  }
+
+  public closeFile(): void {
+    this.fileEntry = undefined;
+    this.fileContent = undefined;
+  }
+
+  public loadFileContent(entry: HiveEntryDto): void {
+    this.fileContentLoading = true;
+    this.hiveService.downloadAscii(this._hive, entry.id)
+      .pipe(finalize(() => (this.fileContentLoading = false)))
+      .subscribe(content => {
+        this.fileContent = content;
+    });
   }
 
   public download(entry: HiveEntryDto): void {
@@ -245,4 +275,8 @@ export class HiveComponent implements OnInit {
     }
   }
 
+  private getExtension(filename: String): String {
+    const dotidx = filename.indexOf('.');
+    return dotidx < 0 ? '' : filename.substr(dotidx + 1);
+  }
 }
