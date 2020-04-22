@@ -43,7 +43,7 @@ Additionally, documentation deliverables can be found in the `./doc/build/docs/d
 
 To be able to build, start and debug BDeploy backend applications from the Eclipse IDE, you need to perform some extra setup steps:
 
-* On the command line (see <<Repository and Gradle Build>>) generate the *Eclipse IDE* project files by running `./gradlew eclipse`.
+* On the command line (see <<Repository and Gradle Build>>) generate the *Eclipse IDE* project files by running `./gradlew eclipse` (`gradlew eclipse` on windows).
 * Start the *Eclipse IDE* - choose a workspace, e.g. `/work/bdeploy/workspace`.
 * Open the *Git Repositories* view.
 * Click *Add existing local repository*, browse to the repository location (e.g. `/work/bdeploy/bdeploy`) and add it.
@@ -58,9 +58,9 @@ This results in a complete BDeploy workspace setup which compiles automatically.
 
 BDeploy uses *LcDsl* launch configurations to run binaries. You can find launch configurations in the *Launch Configurations* view.
 
-* Find and run (hint: right clik) the `Master-Init` launch configuration.
+* Find and run (hint: right click) the `Master-Init` launch configuration.
 ** This will initialize a BDeploy *master root* inside the chosen workspace directory, e.g. `/work/bdeploy/workspace/runtime/master`.
-* Find and run the `Master-AddUser` launch configuration to add a user to the BDeploy *master root* (so you can authenticate through the Web UI later).
+** A default user will be created: username = admin, password = admin.
 * Finally find and run the `Master` launch configuration to spin up a BDeploy *master*.
 
 [NOTE]
@@ -71,7 +71,8 @@ The BDeploy master will host the Web UI also when started from the *Eclipse IDE*
 To spin up a matching frontend for the master started in <<Running BDeploy from Eclipse>> you need to start the *Angular* application from within *VSCode*.
 
 * On the command line, navigate the the `./ui/webapp` directory in the repository (e.g. `/work/bdeploy/bdeploy/ui/webapp`) and run *VSCode* in the current directory using `code .`
-* Open a terminal in *VSCode* (kbd:[Ctrl+\`]) and run `ng serve` to start the *Angular* development server. This will take a while to compile the Web UI.
+* Open a terminal in *VSCode* and run `ng serve` to start the *Angular* development server. This will take a while to compile the Web UI.
+** The terminal can be opened using menu:Terminal[New Terminal].
 ** The application will be started at http://localhost:4200 by default.
 
 [WARNING]
