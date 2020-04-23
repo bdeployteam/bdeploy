@@ -14,8 +14,8 @@
       Create new parameter
     </button>
   </mat-dialog-actions>
-  <mat-dialog-content fxFlex>
-    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+  <mat-dialog-content fxFlex class="mat-elevation-z2">
+    <table mat-table [dataSource]="dataSource">
       <tr mat-header-row *matHeaderRowDef="columnsToDisplay; sticky: true"></tr>
       <tr mat-row *matRowDef="let row; columns: columnsToDisplay"></tr>
 

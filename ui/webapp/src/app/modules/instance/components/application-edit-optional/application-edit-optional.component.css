@@ -4,14 +4,12 @@
 
 .mat-dialog-content {
   overflow: visible!;
+  padding: 0px 4px;
+  margin: 10px 0px;
 }
 
 .container {
   height: 100%;
-}
-
-.mat-dialog-content {
-  padding: 0.5em 1.5em;
 }
 
 .mat-form-field {
@@ -21,7 +19,6 @@
 
 .mat-table {
   width: 100%;
-  margin-bottom: 1em;
 }
 
 .mat-cell {
