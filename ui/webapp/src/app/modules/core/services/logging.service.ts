@@ -85,8 +85,12 @@ export class Logger {
     return this.loglevel || (this.parent ? this.parent.getLogLevel() : LogLevel.INFO);
   }
 
-  public error(msg: string|ErrorMessage): void {
+  public errorWithGuiMessage(msg: string|ErrorMessage): void {
     this.appValve.error(msg);
+    this.log(LogLevel.ERROR, this, msg);
+  }
+
+  public error(msg: string|ErrorMessage): void {
     this.log(LogLevel.ERROR, this, msg);
   }
 

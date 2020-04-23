@@ -65,7 +65,7 @@ export class SoftwareRepoAddEditComponent implements OnInit {
           this.clonedSoftwareRepo = cloneDeep(softwareRepo);
         },
         error => {
-          this.log.error(new ErrorMessage('reading software repository failed', error));
+          this.log.errorWithGuiMessage(new ErrorMessage('reading software repository failed', error));
         },
       );
     }

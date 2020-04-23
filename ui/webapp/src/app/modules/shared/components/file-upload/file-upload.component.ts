@@ -64,7 +64,7 @@ export class FileUploadComponent implements OnInit, OnDestroy {
     // start event source - can't filter by narrow scope as there might be multiple uploads
     this.ws = this.eventService.createActivitiesWebSocket([]);
     this.ws.addEventListener('error', (err) => {
-      this.log.error(new ErrorMessage('Error while processing events', err));
+      this.log.errorWithGuiMessage(new ErrorMessage('Error while processing events', err));
     });
     this.ws.addEventListener('message', e => this.onEventReceived(e));
   }

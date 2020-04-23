@@ -107,7 +107,7 @@ export class InstanceGroupAddEditComponent implements OnInit {
           }
         },
         error => {
-          this.log.error(new ErrorMessage('reading instance group failed', error));
+          this.log.errorWithGuiMessage(new ErrorMessage('reading instance group failed', error));
         },
       );
     }

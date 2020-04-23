@@ -23,6 +23,10 @@ export class LoginComponent implements OnInit, OnDestroy {
   public username = new FormControl('', [Validators.required]);
   public password = new FormControl('', [Validators.required]);
 
+  public loginFailed = false;
+  public loginFailedMessage;
+
+
   constructor(
     private loggingService: LoggingService,
     private route: ActivatedRoute,
@@ -62,17 +66,21 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.auth.authenticate(this.username.value, this.password.value).subscribe(
       result => {
-        this.log.info('user "' + this.username.value + '" successfully logged in');
+        this.log.info('User "' + this.username.value + '" successfully logged in');
         this.loggingService.dismissOpenMessage(); // close any open "error" popup.
       },
       error => {
+
         if (error.status === 401) {
-          this.log.error('user "' + this.username.value + '" failed to authenticate');
-          this.loading = false;
+          this.loginFailedMessage = 'User "' + this.username.value + '" failed to authenticate';
         } else {
-          this.log.error(new ErrorMessage('Error authenticating "' + this.username.value + '"', error));
-          this.loading = false;
+          this.loginFailedMessage = new ErrorMessage('Error authenticating "' + this.username.value + '"', error)
         }
+
+        this.log.error(this.loginFailedMessage);
+        this.loginFailed = true;
+        this.loading = false;
+
       }
     );
   }

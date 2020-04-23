@@ -173,7 +173,7 @@ export class HiveComponent implements OnInit {
 
   delete(entry: HiveEntryDto) {
     if (!this.isTopLevelManifest(entry)) {
-      this.log.error('Can only delete manifests');
+      this.log.errorWithGuiMessage('Can only delete manifests');
       return;
     }
 
