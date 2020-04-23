@@ -60,6 +60,9 @@ import io.bdeploy.jersey.activity.JerseyRemoteActivityScopeServerFilter;
 import io.bdeploy.jersey.audit.Auditor;
 import io.bdeploy.jersey.audit.Log4jAuditor;
 import io.bdeploy.jersey.fs.FileSystemSpaceService;
+import io.bdeploy.jersey.monitoring.JerseyServerMonitor;
+import io.bdeploy.jersey.monitoring.JerseyServerMonitoringResourceImpl;
+import io.bdeploy.jersey.monitoring.JerseyServerMonitoringSamplerService;
 import io.bdeploy.jersey.resources.JerseyMetricsResourceImpl;
 
 /**
@@ -110,6 +113,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
     private HttpServer server;
     private HttpHandler root;
     private Auditor auditor = new Log4jAuditor();
+    private final JerseyServerMonitor monitor = new JerseyServerMonitor();
     private final Map<String, WebSocketApplication> wsApplications = new TreeMap<>();
 
     private UserValidator userValidator;
@@ -243,6 +247,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             rc.register(JerseyExceptionMapper.class);
             rc.register(JerseyRemoteActivityResourceImpl.class);
             rc.register(JerseyRemoteActivityScopeServerFilter.class);
+            rc.register(JerseyServerMonitoringResourceImpl.class);
             rc.register(new JerseyLazyReporterInitializer());
             rc.register(new JerseyServerReporterContextResolver());
             rc.register(new JerseyWriteLockFilter());
@@ -253,6 +258,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             if (root != null) {
                 server.getServerConfiguration().addHttpHandler(root, HttpHandlerRegistration.ROOT);
             }
+            monitor.setServer(server);
 
             WebSocketAddOn wsao = new WebSocketAddOn();
             for (NetworkListener listener : server.getListeners()) {
@@ -279,7 +285,6 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
 
             // register all WebSocketApplications on their path.
             wsApplications.forEach((path, app) -> WebSocketEngine.getEngine().register("/ws", path, app));
-
             server.getHttpHandler().setAllowEncodedSlash(true);
             server.start();
 
@@ -340,6 +345,9 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             bind(broadcastScheduler).named(BROADCAST_EXECUTOR).to(ScheduledExecutorService.class);
             bind(JerseyScopeService.class).in(Singleton.class).to(JerseyScopeService.class);
             bind(FileSystemSpaceService.class).in(Singleton.class).to(FileSystemSpaceService.class);
+
+            // bind instance to start sampling thread immediately.
+            bind(new JerseyServerMonitoringSamplerService(monitor)).to(JerseyServerMonitoringSamplerService.class);
 
             // need to lazily access the auditor in case it is changed later.
             bindFactory(new JerseyAuditorBridgeFactory()).to(Auditor.class);
