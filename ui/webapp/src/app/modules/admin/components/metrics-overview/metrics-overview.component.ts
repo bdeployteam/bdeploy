@@ -1,11 +1,12 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatOptionSelectionChange } from '@angular/material/core';
 import { BarHorizontalComponent } from '@swimlane/ngx-charts';
-import { MetricBundle, MetricGroup, TimerMetric } from '../../../../models/gen.dtos';
+import { Logger, LoggingService } from 'src/app/modules/core/services/logging.service';
+import { JerseyServerMonitoringDto, MetricBundle, MetricGroup, TimerMetric } from '../../../../models/gen.dtos';
 import { MetricsService } from '../../services/metrics.service';
 
 export interface SeriesElement {
-  name: string;
+  name: any;
   value: number;
 }
 
@@ -15,12 +16,27 @@ export interface SeriesElement {
   styleUrls: ['./metrics-overview.component.css']
 })
 export class MetricsOverviewComponent implements OnInit {
+  private readonly log: Logger = this.loggingService.getLogger('MetricsOverviewComponent');
 
   loading = true;
   allMetrics: Map<MetricGroup, MetricBundle>;
   selectedGroup: MetricGroup;
   groupCounts: SeriesElement[];
   selectedTimer: TimerMetric;
+  serverStats: JerseyServerMonitoringDto;
+
+  // converted data for serverstats
+  vmCpu = [];
+  vmCpuRef = [];
+  vmMem = [];
+  vmMemRef = [];
+  req = [];
+  reqAbs = [];
+  poolSize = [];
+  poolSizeRef = [];
+  poolTasks = [];
+  conBytes = [];
+  conBytesAbs = [];
 
   colorScheme = {
     domain: ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA']
@@ -33,7 +49,7 @@ export class MetricsOverviewComponent implements OnInit {
 
   countGraphHeight = 100;
 
-  constructor(private metrics: MetricsService) { }
+  constructor(private metrics: MetricsService, private loggingService: LoggingService) { }
 
   ngOnInit() {
     this.metrics.getAllMetrics().subscribe(r => {
@@ -65,28 +81,199 @@ export class MetricsOverviewComponent implements OnInit {
     return this.allMetrics.get(group).timers[name];
   }
 
-  select(event: MatOptionSelectionChange) {
+  selectServer(event: MatOptionSelectionChange) {
     if (!event.isUserInput) { return; }
 
     this.selectedTimer = null;
     this.timerSeries = null;
     this.referenceLines = null;
+    this.selectedGroup = null;
 
-      this.selectedGroup = event.source.value;
+    this.vmCpu = [];
+    this.vmCpuRef = [];
+    this.vmMem = [];
+    this.vmMemRef = [];
+    this.req = [];
+    this.reqAbs = [];
+    this.poolSize = [];
+    this.poolSizeRef = [];
+    this.poolTasks = [];
+    this.conBytes = [];
+    this.conBytesAbs = [];
 
-      const x: SeriesElement[] = [];
+    this.metrics.getServerMetrics().subscribe(r => {
+      this.serverStats = r;
 
-      for (const t of this.getTimers(this.selectedGroup)) {
-        const tm = this.getTimer(this.selectedGroup, t);
+      // calculate series for monitoring graphs.
+      const vmCpuThreadCount: SeriesElement[] = [];
+      let vmCpuCount = 0;
+      let vmMemMax = 0;
 
-        x.push({
-          name: t,
-          value: tm.counter.value
-        });
+      const vmMemTotal: SeriesElement[] = [];
+      const vmMemUsed: SeriesElement[] = [];
+
+      const reqReceived: SeriesElement[] = [];
+      const reqCompleted: SeriesElement[] = [];
+      const reqTimedOut: SeriesElement[] = [];
+      const reqCancelled: SeriesElement[] = [];
+
+      const reqReceivedAbs: SeriesElement[] = [];
+      const reqCompletedAbs: SeriesElement[] = [];
+      const reqTimedOutAbs: SeriesElement[] = [];
+      const reqCancelledAbs: SeriesElement[] = [];
+
+      let lastReqReceived = this.serverStats?.snapshots[0]?.reqReceived;
+      let lastReqCompleted = this.serverStats?.snapshots[0]?.reqCompleted;
+      let lastReqTimedOut = this.serverStats?.snapshots[0]?.reqTimedOut;
+      let lastReqCancelled = this.serverStats?.snapshots[0]?.reqCancelled;
+
+      let poolCoreSize = 0;
+      let poolMaxSize = 0;
+      let poolHighestCurrent = 0;
+      const poolCurrentSize: SeriesElement[] = [];
+      const poolExceeded: SeriesElement[] = [];
+      let lastPoolExceeded = this.serverStats?.snapshots[0]?.poolExceeded;
+
+      const poolTasksQueued: SeriesElement[] = [];
+      const poolTasksFinished: SeriesElement[] = [];
+      const poolTasksCancelled: SeriesElement[] = [];
+
+      let lastTasksQueued = this.serverStats?.snapshots[0]?.poolTasksQueued;
+      let lastTasksFinished = this.serverStats?.snapshots[0]?.poolTasksFinished;
+      let lastTasksCancelled = this.serverStats?.snapshots[0]?.poolTasksCancelled;
+
+      const conBytesRead: SeriesElement[] = [];
+      const conBytesWritten: SeriesElement[] = [];
+
+      const conBytesReadAbs: SeriesElement[] = [];
+      const conBytesWrittenAbs: SeriesElement[] = [];
+
+      let lastBytesRead = this.serverStats?.snapshots[0]?.conBytesRead;
+      let lastBytesWritten = this.serverStats?.snapshots[0]?.conBytesWritten;
+
+      for (const snap of this.serverStats.snapshots) {
+        if (vmCpuCount === 0) {
+          vmCpuCount = snap.vmCpus;
+        }
+        if (vmMemMax === 0) {
+          vmMemMax = snap.vmMaxMem;
+        }
+        if (snap.vmCpus !== vmCpuCount) {
+          vmCpuCount = snap.vmCpus;
+          this.log.warn('Server CPU count changed!');
+        }
+        if (snap.vmMaxMem !== vmMemMax) {
+          vmMemMax = snap.vmMaxMem;
+          this.log.warn('Server Maximum Memory changed!');
+        }
+
+        const label = new Date(snap.snapshotTime);
+
+        vmCpuThreadCount.push({name: label, value: snap.vmThreads});
+        vmMemTotal.push({name: label, value: snap.vmTotalMem / (1024 * 1024)});
+        vmMemUsed.push({name: label, value: (snap.vmTotalMem - snap.vmFreeMem) / (1024 * 1024)});
+
+        reqCompleted.push({name: label, value: (snap.reqCompleted - lastReqCompleted)});
+        reqReceived.push({name: label, value: (snap.reqReceived - lastReqReceived)});
+        reqCancelled.push({name: label, value: (snap.reqCancelled - lastReqCancelled)});
+        reqTimedOut.push({name: label, value: (snap.reqTimedOut - lastReqTimedOut)});
+
+        lastReqCompleted = snap.reqCompleted;
+        lastReqReceived = snap.reqReceived;
+        lastReqCancelled = snap.reqCancelled;
+        lastReqTimedOut = snap.reqTimedOut;
+
+        reqCompletedAbs.push({name: label, value: (snap.reqCompleted)});
+        reqReceivedAbs.push({name: label, value: (snap.reqReceived)});
+        reqCancelledAbs.push({name: label, value: (snap.reqCancelled + 3)});
+        reqTimedOutAbs.push({name: label, value: (snap.reqTimedOut + 6)});
+
+        poolCoreSize = snap.poolCoreSize;
+        poolMaxSize = snap.poolMaxSize;
+        poolCurrentSize.push({name: label, value: snap.poolCurrentSize});
+        poolExceeded.push({name: label, value: (snap.poolExceeded - lastPoolExceeded)});
+        lastPoolExceeded = snap.poolExceeded;
+        if (snap.poolCurrentSize > poolHighestCurrent) {
+          poolHighestCurrent = snap.poolCurrentSize;
+        }
+
+        poolTasksQueued.push({name: label, value: (snap.poolTasksQueued - lastTasksQueued)});
+        poolTasksFinished.push({name: label, value: (snap.poolTasksFinished - lastTasksFinished)});
+        poolTasksCancelled.push({name: label, value: (snap.poolTasksCancelled - lastTasksCancelled)});
+
+        lastTasksQueued = snap.poolTasksQueued;
+        lastTasksFinished = snap.poolTasksFinished;
+        lastTasksCancelled = snap.poolTasksCancelled;
+
+        conBytesRead.push({name: label, value: (snap.conBytesRead - lastBytesRead)});
+        conBytesWritten.push({name: label, value: (snap.conBytesWritten - lastBytesWritten)});
+
+        lastBytesRead = snap.conBytesRead;
+        lastBytesWritten = snap.conBytesWritten;
+
+        conBytesReadAbs.push({name: label, value: (snap.conBytesRead / (1024 * 1024))});
+        conBytesWrittenAbs.push({name: label, value: (snap.conBytesWritten / (1024 * 1024))});
       }
 
-      this.countGraphHeight = (x.length * 25) + 100;
-      this.groupCounts = x;
+      this.vmCpu.push({name: 'Threads', series: vmCpuThreadCount});
+      this.vmCpuRef.push({name: 'CPU Count', value: vmCpuCount});
+
+      this.vmMem.push({name: 'Total Memory MB', series: vmMemTotal});
+      this.vmMem.push({name: 'Used Memory MB', series: vmMemUsed});
+      this.vmMemRef.push({name: 'Max Memory MB', value: vmMemMax / (1024 * 1024)});
+
+      this.req.push({name: 'Received', series: reqReceived});
+      this.req.push({name: 'Completed', series: reqCompleted});
+      this.req.push({name: 'Cancelled', series: reqCancelled});
+      this.req.push({name: 'Timed Out', series: reqTimedOut});
+
+      this.reqAbs.push({name: 'Received', series: reqReceivedAbs});
+      this.reqAbs.push({name: 'Completed', series: reqCompletedAbs});
+      this.reqAbs.push({name: 'Cancelled', series: reqCancelledAbs});
+      this.reqAbs.push({name: 'Timed Out', series: reqTimedOutAbs});
+
+      this.poolSize.push({name: 'Current Size', series: poolCurrentSize});
+      this.poolSize.push({name: 'Times Limit Exceeded', series: poolExceeded});
+      this.poolSizeRef.push({name: 'Core Size', value: poolCoreSize});
+      if ((poolHighestCurrent * 2) >= poolMaxSize) {
+        this.poolSizeRef.push({name: 'Maximum Pool Size', value: poolMaxSize});
+      }
+
+      this.poolTasks.push({name: 'Queued', series: poolTasksQueued});
+      this.poolTasks.push({name: 'Finished', series: poolTasksFinished});
+      this.poolTasks.push({name: 'Cancelled', series: poolTasksCancelled});
+
+      this.conBytes.push({name: 'Read', series: conBytesRead});
+      this.conBytes.push({name: 'Written', series: conBytesWritten});
+
+      this.conBytesAbs.push({name: 'Read', series: conBytesReadAbs});
+      this.conBytesAbs.push({name: 'Written', series: conBytesWrittenAbs});
+    });
+  }
+
+  select(event: MatOptionSelectionChange) {
+    if (!event.isUserInput) { return; }
+
+    this.serverStats = null;
+    this.selectedTimer = null;
+    this.timerSeries = null;
+    this.referenceLines = null;
+
+    this.selectedGroup = event.source.value;
+
+    const x: SeriesElement[] = [];
+
+    for (const t of this.getTimers(this.selectedGroup)) {
+      const tm = this.getTimer(this.selectedGroup, t);
+
+      x.push({
+        name: t,
+        value: tm.counter.value
+      });
+    }
+
+    this.countGraphHeight = (x.length * 25) + 100;
+    this.groupCounts = x;
   }
 
   selectTimer(t: SeriesElement) {

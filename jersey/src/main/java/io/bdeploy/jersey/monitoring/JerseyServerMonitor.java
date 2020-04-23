@@ -1,5 +1,6 @@
 package io.bdeploy.jersey.monitoring;
 
+import java.lang.management.ManagementFactory;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 
@@ -71,7 +72,7 @@ public class JerseyServerMonitor {
         snapshot.reqTimedOut = reqTimedOut.longValue();
         snapshot.reqCancelled = reqCancelled.longValue();
 
-        snapshot.vmThreads = Thread.activeCount();
+        snapshot.vmThreads = ManagementFactory.getThreadMXBean().getThreadCount();
         snapshot.vmCpus = Runtime.getRuntime().availableProcessors();
         snapshot.vmMaxMem = Runtime.getRuntime().maxMemory();
         snapshot.vmFreeMem = Runtime.getRuntime().freeMemory();

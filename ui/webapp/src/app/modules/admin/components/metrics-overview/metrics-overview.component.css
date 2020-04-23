@@ -14,6 +14,21 @@
   flex-direction: row;
 }
 
+.chart-wrapper {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+}
+
+.flex-chart-2 {
+  flex: 50%;
+  min-height: 250px;
+  position: relative;
+}
+
 .details-group {
   display: flex;
   flex-direction: column;
