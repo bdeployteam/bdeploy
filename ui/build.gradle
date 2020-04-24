@@ -244,6 +244,7 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
         // Metrics
         'io.bdeploy.jersey.resources.JerseyMetricsResource$MetricBundle',
         'io.bdeploy.common.metrics.Metrics$MetricGroup',
+        'io.bdeploy.jersey.monitoring.JerseyServerMonitoringDto',
     ]
     customTypeMappings = [
         'java.net.URI:string',
