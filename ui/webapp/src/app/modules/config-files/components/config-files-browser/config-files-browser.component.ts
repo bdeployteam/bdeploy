@@ -416,7 +416,7 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
 
   handleDrop(fileList: FileList, fileName: HTMLInputElement, input: HTMLInputElement) {
     if (fileList.length > 1) {
-      this.log.error('Only single file uploads allowed');
+      this.log.errorWithGuiMessage('Only single file uploads allowed');
       return;
     }
     input.files = fileList;

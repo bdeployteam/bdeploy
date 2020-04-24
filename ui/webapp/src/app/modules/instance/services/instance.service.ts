@@ -75,7 +75,7 @@ export class InstanceService {
           this.systemService.backendUnreachable();
         } else {
           const displayPath = new URL(url).pathname;
-          this.log.error(new ErrorMessage(e.status + ': ' + e.statusText + ': ' + displayPath, e));
+          this.log.errorWithGuiMessage(new ErrorMessage(e.status + ': ' + e.statusText + ': ' + displayPath, e));
         }
         return of(null);
       }

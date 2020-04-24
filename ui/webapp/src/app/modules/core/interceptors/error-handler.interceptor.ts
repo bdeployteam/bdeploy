@@ -37,7 +37,7 @@ export class HttpErrorHandlerInterceptor implements HttpInterceptor {
           } catch (error) {
             this.log.warn(new ErrorMessage('Cannot parse request URL', error));
           }
-          this.log.error(new ErrorMessage(e.status + ': ' + e.statusText + ': ' + displayPath, e));
+          this.log.errorWithGuiMessage(new ErrorMessage(e.status + ': ' + e.statusText + ': ' + displayPath, e));
         }
         return of(null);
       }
