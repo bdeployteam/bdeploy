@@ -722,9 +722,10 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   public shouldShowNode(node: InstanceNodeConfigurationDto) {
     const isClientNode = node.nodeName === CLIENT_NODE_NAME;
     const productHasClientApps = this.hasClientApplications();
+    const productHasServerApps = this.hasServerApplications();
     const hasConfiguredClientApp =
       node.nodeConfiguration && node.nodeConfiguration.applications && node.nodeConfiguration.applications.length > 0;
-    return !isClientNode || (isClientNode && productHasClientApps) || hasConfiguredClientApp;
+    return (!isClientNode && productHasServerApps) || (isClientNode && productHasClientApps) || hasConfiguredClientApp;
   }
 
   shouldShowVersion(toggle: MatSlideToggle, config: ProcessConfigDto): boolean {
