@@ -98,6 +98,7 @@ export const EMPTY_PARAMETER_DESCRIPTOR: ParameterDescriptor = {
   type: ParameterType.STRING,
   valueAsSeparateArg: false,
   valueSeparator: null,
+  suggestedValues: null,
 };
 
 export const EMPTY_DEPLOYMENT_STATE: InstanceStateRecord = {

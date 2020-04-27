@@ -114,6 +114,18 @@
                 </div>
               </ng-container>
 
+              <mat-form-field *ngSwitchCase="parameterType.ENUMERATION">
+                <div *ngIf="param.desc.hasValue || param.desc.mandatory">
+                  <input matInput [matAutocomplete]="auto" name="{{instanceGroup}}-{{appConfigContext.instanceNodeConfigurationDto.nodeConfiguration.uuid}}-{{param.desc.uid}}" placeholder="{{getCtrlPlaceholderText(param.desc)}}" [formControlName]="param.desc.uid" type="{{getCtrlInputType(param.desc.type)}}"/>
+                  <mat-autocomplete #auto="matAutocomplete">
+                    <mat-option *ngFor="let suggestedValue of param.desc.suggestedValues" [value]="suggestedValue">
+                      {{suggestedValue}}
+                    </mat-option>
+                  </mat-autocomplete>
+                </div>
+                <mat-error *ngIf="!isCtrlValid(param.desc.uid)">{{getCtrlErrorMessage(param.desc.uid)}}</mat-error>
+              </mat-form-field>
+
               <mat-form-field *ngSwitchDefault>
                 <input matInput name="{{instanceGroup}}-{{appConfigContext.instanceNodeConfigurationDto.nodeConfiguration.uuid}}-{{param.desc.uid}}" placeholder="{{getCtrlPlaceholderText(param.desc)}}" [formControlName]="param.desc.uid" type="{{getCtrlInputType(param.desc.type)}}"/>
                 <mat-error *ngIf="!isCtrlValid(param.desc.uid)">{{getCtrlErrorMessage(param.desc.uid)}}</mat-error>

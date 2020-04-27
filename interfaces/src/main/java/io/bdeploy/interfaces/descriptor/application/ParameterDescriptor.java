@@ -1,5 +1,8 @@
 package io.bdeploy.interfaces.descriptor.application;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.processing.Generated;
 
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
@@ -13,7 +16,8 @@ public class ParameterDescriptor implements Comparable<ParameterDescriptor> {
         STRING,
         NUMERIC,
         BOOLEAN,
-        PASSWORD
+        PASSWORD,
+        ENUMERATION
     }
 
     /**
@@ -107,6 +111,11 @@ public class ParameterDescriptor implements Comparable<ParameterDescriptor> {
      * The type of the parameter. Used for validation purposes.
      */
     public ParameterType type = ParameterType.STRING;
+
+    /**
+     * Possible values for the parameter
+     */
+    public List<String> suggestedValues = new ArrayList<>();
 
     @Override
     public int compareTo(ParameterDescriptor o) {
