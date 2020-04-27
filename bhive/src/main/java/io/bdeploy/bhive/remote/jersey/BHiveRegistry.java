@@ -12,12 +12,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Function;
 
 import org.glassfish.hk2.utilities.Binder;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.common.util.RuntimeAssert;
 
 /**
@@ -32,12 +34,25 @@ public class BHiveRegistry implements AutoCloseable {
     private final Set<Path> locations = new TreeSet<>();
     private final Map<String, BHive> hives = new TreeMap<>();
     private final ActivityReporter reporter;
+    private final Function<BHive, Permission> permissionClassifier;
 
     /**
      * @param reporter the {@link ActivityReporter} used for all {@link BHive} discovered by the registry
+     * @param permissionClassifier a classifier which determines the required access permission per BHive. It is allowed to return
+     *            <code>null</code> (no permission required).
      */
-    public BHiveRegistry(ActivityReporter reporter) {
+    public BHiveRegistry(ActivityReporter reporter, Function<BHive, Permission> permissionClassifier) {
         this.reporter = reporter;
+        this.permissionClassifier = permissionClassifier;
+    }
+
+    public Permission getRequiredPermission(BHive hive) {
+        if (permissionClassifier == null) {
+            // default is to require read permission on a hive.
+            return Permission.READ;
+        }
+
+        return permissionClassifier.apply(hive);
     }
 
     /**

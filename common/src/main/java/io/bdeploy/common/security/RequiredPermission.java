@@ -35,4 +35,14 @@ public @interface RequiredPermission {
      */
     public String scope() default "";
 
+    /**
+     * References a method on the resource which accepts the scope as string, and returns the required minimum permission on that
+     * scope.
+     * <p>
+     * The referenced method will be called during checks for required permissions on the annotated object, using the value of the
+     * parameter denoted by the scope parameter and is expected to return an object of type {@link Permission} or
+     * <code>null</code> if no permission is required.
+     */
+    public String dynamicPermission() default "";
+
 }

@@ -6,9 +6,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
+import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.remote.jersey.BHiveJacksonModule;
 import io.bdeploy.bhive.remote.jersey.BHiveLocatorImpl;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
@@ -21,8 +23,10 @@ import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.MinionRootValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.interfaces.manifest.MinionManifest;
+import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
@@ -170,7 +174,15 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
     }
 
     public static BHiveRegistry registerCommonResources(RegistrationTarget srv, MinionRoot root, ActivityReporter reporter) {
-        BHiveRegistry r = new BHiveRegistry(reporter);
+        Function<BHive, Permission> hivePermissionClassifier = h -> {
+            if (new SoftwareRepositoryManifest(h).read() != null) {
+                // in case of software repos, we want to grant read access to ANYBODY.
+                return null;
+            }
+            return Permission.READ;
+        };
+
+        BHiveRegistry r = new BHiveRegistry(reporter, hivePermissionClassifier);
 
         // register the root hive as default for slaves.
         r.register(JerseyRemoteBHive.DEFAULT_NAME, root.getHive());

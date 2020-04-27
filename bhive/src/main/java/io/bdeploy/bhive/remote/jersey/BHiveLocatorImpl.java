@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response.Status;
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.jersey.fs.FileSystemSpaceService;
 
 /**
@@ -36,6 +38,9 @@ public class BHiveLocatorImpl implements BHiveLocator {
     @Context
     private ResourceContext rc;
 
+    @Context
+    private ContainerRequestContext context;
+
     @Override
     public BHiveResource getNamedHive(String name) {
         BHive hive = registry.get(name);
@@ -56,6 +61,15 @@ public class BHiveLocatorImpl implements BHiveLocator {
             }
         }
         return rc.initResource(new BHiveResourceImpl(hive, reporter));
+    }
+
+    @Override
+    public Permission getRequiredPermission(String name) {
+        BHive hive = registry.get(name);
+        if (hive == null) {
+            throw new WebApplicationException(Status.NOT_FOUND);
+        }
+        return registry.getRequiredPermission(registry.get(name));
     }
 
 }
