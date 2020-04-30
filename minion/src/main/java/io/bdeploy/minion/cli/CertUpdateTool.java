@@ -40,7 +40,7 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
         String root();
 
         @Help(value = "Override user questions and assume consent", arg = false)
-        boolean yes();
+        boolean yes() default false;
     }
 
     public CertUpdateTool() {
