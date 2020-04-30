@@ -13,6 +13,7 @@ import { EditAppConfigContext, ProcessConfigDto } from '../../../../models/proce
 import { getAppOs } from '../../../shared/utils/manifest.utils';
 import { ApplicationService } from '../../services/application.service';
 
+
 @Component({
   selector: 'app-instance-node-card',
   templateUrl: './instance-node-card.component.html',
@@ -54,7 +55,10 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
 
   public nodeApps: ApplicationConfiguration[] = [];
 
-  constructor(private appService: ApplicationService, private dragulaService: DragulaService) {}
+  constructor(
+    private appService: ApplicationService,
+    private dragulaService: DragulaService,
+    ) {}
 
   ngOnInit() {
     this.subscription = new Subscription();
@@ -165,7 +169,8 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
 
   /**
    * Called when the user drops an existing application on this node or
-   * when the user drops a new application group from the sidebar
+   * when the user drops a new application group from the sidebar or
+   * when a user pastes an application
    */
   private addProcess(data: any, targetIndex: number) {
     if (!this.node.nodeConfiguration) {
@@ -219,6 +224,39 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
 
   onSelect(process: ApplicationConfiguration): void {
     this.selectAppConfigEvent.emit(process);
+  }
+
+  onPaste(){
+    console.log("Attempting to paste from clipboard");
+
+    const readClipboard = navigator.clipboard.readText().then(
+     data => {
+        console.log("Pasted string: ", data);
+        var appConfig = JSON.parse(data) as ApplicationConfiguration;
+
+        const productKey = this.processConfig.instance.product;
+        const appKey = appConfig.application;
+
+        this.appService.getDescriptor(this.instanceGroupName, productKey, appKey).subscribe(desc => {
+          // Generate unique identifier
+          this.appService.createUuid(this.instanceGroupName).subscribe(uid => {
+
+            appConfig.application.tag = productKey.tag;
+            appConfig.uid = uid;
+
+            // Lookup parameter in all available applications
+            const apps = this.appService.getAllApps(this.processConfig);
+            this.appService.updateApplicationParamsForPastedApplication(appConfig, desc, apps);
+
+            const targetIndex = this.nodeApps.length;
+            this.addProcess(appConfig, targetIndex);
+
+           });
+        });
+      },
+      data => {
+        console.error("Unable to paste from clipboard");
+      });
   }
 
   fireEditAppConfigEvent(appConfig: ApplicationConfiguration) {

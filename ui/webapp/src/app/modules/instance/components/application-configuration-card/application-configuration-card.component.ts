@@ -56,6 +56,15 @@ export class ApplicationConfigurationCardComponent implements OnInit {
     this.editEvent.emit(this.appConfig);
   }
 
+  onCopy(){
+    navigator.clipboard.writeText(JSON.stringify(this.appConfig)).then(
+      function() {
+        console.log("Copied to clipboard successfully");
+      }, function() {
+        console.error("Unable to write to clipboard.");
+      });
+  }
+
   onEndpointEdit() {
     this.editEndpointsEvent.emit(this.appConfig);
   }

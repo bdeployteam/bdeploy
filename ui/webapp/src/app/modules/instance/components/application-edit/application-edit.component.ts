@@ -841,7 +841,13 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     // New custom will be added as last one
     const newUid = paramUid + '.custom';
     const lastParam = findLastParameter(this.linkedDescriptors.values());
-    const newParam = this.insertCustomParameter(newUid, lastParam.desc.uid);
+
+    var predecessorId = "";
+    if(lastParam){
+      predecessorId = lastParam.desc.uid;
+    }
+
+    const newParam = this.insertCustomParameter(newUid, predecessorId);
 
     // render the parameter according to the descriptor
     const value = this.appService.preRenderParameter(param.descriptor, param.config.value);
