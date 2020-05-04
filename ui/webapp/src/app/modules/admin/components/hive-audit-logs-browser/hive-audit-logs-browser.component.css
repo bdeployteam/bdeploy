@@ -1,0 +1,13 @@
+.filter-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.filter-slider {
+  margin-left: 16px;
+}
+
+.mat-form-field {
+  width: 100%;
+}

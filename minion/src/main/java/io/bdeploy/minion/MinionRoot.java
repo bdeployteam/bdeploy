@@ -135,9 +135,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         return getState().officialName;
     }
 
-    /**
-     * @return the {@link Auditor} responsible for this {@link MinionRoot}.
-     */
+    @Override
     public Auditor getAuditor() {
         return auditor;
     }

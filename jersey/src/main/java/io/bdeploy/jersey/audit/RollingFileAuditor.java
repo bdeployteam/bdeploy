@@ -27,7 +27,14 @@ import org.slf4j.LoggerFactory;
 public class RollingFileAuditor implements Auditor {
 
     private static final Logger log = LoggerFactory.getLogger(RollingFileAuditor.class);
-    private static final String LOG_PATTERN = "%d{dd-HH:mm:ss.SSS} | %-5level | AUD/%-11X{WHO} | %-7X{METHOD} | %-40X{WHAT} | %-40msg | %X{PARAMETERS}%n";
+    public static final String LOG_PATTERN = "%d{dd-HH:mm:ss.SSS} | %-5level | AUD/%-11X{WHO} | %-7X{METHOD} | %-40X{WHAT} | %-40msg | %X{PARAMETERS}%n";
+    public static final int LOG_MAX_INDEX = 3;
+
+    public static final String LOG_TXT_FILENAME = "audit.log";
+    public static final String LOG_TXT_FILEPATTERN = "audit-%i.log.gz";
+
+    public static final String LOG_JSON_FILENAME = "audit.json";
+    public static final String LOG_JSON_FILEPATTERN = "audit-%i.json.gz";
 
     private final Path logDir;
     private final RollingFileAppender logAppender;
@@ -104,10 +111,21 @@ public class RollingFileAuditor implements Auditor {
         return logDir.resolve(jsonAppender.getFileName());
     }
 
+    public Path[] getJsonBackups() {
+        List<Path> paths = new ArrayList<>();
+        for (int i = 1; i <= LOG_MAX_INDEX; i++) {
+            Path p = logDir.resolve(jsonAppender.getFilePattern().replace("%i", "" + i));
+            if (p.toFile().exists()) {
+                paths.add(p);
+            }
+        }
+        return paths.toArray(Path[]::new);
+    }
+
     /**
-     * Returns the path to the current JSON file that is beeing used.
+     * Returns the path to the current human readable log file that is beeing used.
      *
-     * @return the current JSON file
+     * @return the current human readable log file
      */
     public Path getLogFile() {
         return logDir.resolve(logAppender.getManager().getFileName());
@@ -119,12 +137,13 @@ public class RollingFileAuditor implements Auditor {
     private RollingFileAppender createFileAppender(Path logDir) {
         RollingFileAppender.Builder<?> builder = RollingFileAppender.newBuilder();
         builder.setName("auditLogger");
-        builder.withFileName(logDir.resolve("audit.log").toString());
-        builder.withFilePattern(logDir.resolve("audit-%i.log.gz").toString());
+        builder.withFileName(logDir.resolve(LOG_TXT_FILENAME).toString());
+        builder.withFilePattern(logDir.resolve(LOG_TXT_FILEPATTERN).toString());
         builder.withPolicy(SizeBasedTriggeringPolicy.createPolicy("5M"));
         builder.setLayout(PatternLayout.newBuilder().withPattern(LOG_PATTERN).build());
-        builder.withStrategy(DefaultRolloverStrategy.newBuilder()
-                .withCompressionLevelStr(String.valueOf(Deflater.DEFAULT_COMPRESSION)).withMax("3").build());
+        builder.withStrategy(
+                DefaultRolloverStrategy.newBuilder().withCompressionLevelStr(String.valueOf(Deflater.DEFAULT_COMPRESSION))
+                        .withMax(Integer.toString(LOG_MAX_INDEX)).build());
         return builder.build();
     }
 
@@ -140,13 +159,14 @@ public class RollingFileAuditor implements Auditor {
 
         RollingFileAppender.Builder<?> builder = RollingFileAppender.newBuilder();
         builder.setName("auditJsonLogger");
-        builder.withFileName(logDir.resolve("audit.json").toString());
-        builder.withFilePattern(logDir.resolve("audit-%i.json.gz").toString());
+        builder.withFileName(logDir.resolve(LOG_JSON_FILENAME).toString());
+        builder.withFilePattern(logDir.resolve(LOG_JSON_FILEPATTERN).toString());
         builder.withPolicy(SizeBasedTriggeringPolicy.createPolicy("10M"));
         builder.setLayout(JsonLayout.newBuilder().setCompact(true).setEventEol(true).setConfiguration(new DefaultConfiguration())
                 .setAdditionalFields(fields.toArray(new KeyValuePair[0])).build());
-        builder.withStrategy(DefaultRolloverStrategy.newBuilder()
-                .withCompressionLevelStr(String.valueOf(Deflater.DEFAULT_COMPRESSION)).withMax("3").build());
+        builder.withStrategy(
+                DefaultRolloverStrategy.newBuilder().withCompressionLevelStr(String.valueOf(Deflater.DEFAULT_COMPRESSION))
+                        .withMax(Integer.toString(LOG_MAX_INDEX)).build());
         return builder.build();
     }
 

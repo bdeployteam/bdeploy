@@ -1,0 +1,7 @@
+<div class="margin-container">
+  <div class="filter-container">
+    <mat-slide-toggle class="filter-slider" (change)="toggleColumns($event)">Show all Columns</mat-slide-toggle>
+  </div>
+
+  <app-audit-log [dataProvider]="dataProvider"></app-audit-log>
+</div>

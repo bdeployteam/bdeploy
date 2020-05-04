@@ -20,6 +20,7 @@ public class UiResources {
     public static void register(RegistrationTarget server) {
         server.registerRoot(new CLStaticHttpHandler(UiResources.class.getClassLoader(), "/webapp/"));
         server.register(AuthResourceImpl.class);
+        server.register(AuditResourceImpl.class);
         server.register(HiveResourceImpl.class);
         server.register(BackendInfoResourceImpl.class);
 

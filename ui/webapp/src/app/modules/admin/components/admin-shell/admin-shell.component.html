@@ -10,9 +10,11 @@
       <div class='menu-group'>Housekeeping</div>
       <a mat-list-item [routerLink]='[{outlets: { panel: ["manualcleanup"] } }]'><mat-icon class="nav-icon">delete_sweep</mat-icon>Manual Cleanup</a>
       <a mat-list-item [routerLink]='[{outlets: { panel: ["hive"] } }]'><mat-icon class="nav-icon">sd_storage</mat-icon>Hive Browser</a>
+      <a mat-list-item [routerLink]='[{outlets: { panel: ["hiveauditlogs"] } }]'><mat-icon class="nav-icon">message</mat-icon>Hive Audit Logs</a>
 
       <div class='menu-group'>Maintenance</div>
       <a mat-list-item [routerLink]='[{outlets: { panel: ["metrics"] } }]'><mat-icon class="nav-icon">timeline</mat-icon>Metrics</a>
+      <a mat-list-item [routerLink]='[{outlets: { panel: ["auditlogs"] } }]'><mat-icon class="nav-icon">message</mat-icon>Audit Log</a>
       <a mat-list-item [routerLink]='[{outlets: { panel: ["systemsoftware"] } }]'><mat-icon class="nav-icon">system_update</mat-icon>BDeploy Update</a>
     </mat-nav-list>
   </mat-sidenav>

@@ -214,6 +214,7 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
         'io.bdeploy.interfaces.configuration.instance.FileStatusDto',
         // UI only DTOs
         'io.bdeploy.ui.dto.ApplicationDto',
+        'io.bdeploy.ui.dto.AuditLogDto',
         'io.bdeploy.ui.dto.CredentialsDto',
         'io.bdeploy.ui.dto.ClientApplicationDto',
         'io.bdeploy.ui.dto.InstanceDto',

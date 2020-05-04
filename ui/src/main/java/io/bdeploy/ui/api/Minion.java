@@ -8,6 +8,7 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
+import io.bdeploy.jersey.audit.Auditor;
 
 /**
  * Represents a master or a slave.
@@ -72,6 +73,11 @@ public interface Minion {
      * @return the hostname used to init the minion's root.
      */
     public String getHostName();
+
+    /**
+     * @return the {@link Auditor} responsible for this Minion.
+     */
+    public Auditor getAuditor();
 
     /**
      * Returns whether or not the minion represents the master.

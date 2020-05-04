@@ -14,6 +14,7 @@
 @import 'app/modules/shared/components/file-upload/file-upload-theme.scss';
 @import 'app/modules/admin/components/hive/hive-theme.scss';
 @import 'app/modules/admin/components/admin-shell/admin-shell.theme.scss';
+@import 'app/modules/admin/components/audit-log/audit-log-theme.scss';
 
 @import 'app/modules/servers/components/attach-central/attach-central-theme.scss';
 @import 'app/modules/servers/components/product-sync/product-sync-theme.scss';
@@ -44,6 +45,7 @@
   // application component themes
   @include instance-group-delete-dialog-theme($theme);
   @include hive-theme($theme);
+  @include audit-log-theme($theme);
   @include instance-card-theme($theme);
   @include instance-node-card-theme($theme);
   @include instance-version-card-theme($theme);

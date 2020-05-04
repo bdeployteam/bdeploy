@@ -5,8 +5,12 @@ import { CoreModule } from '../core/core.module';
 import { SharedModule } from '../shared/shared.module';
 import { AdminRoutingModule } from './admin-routing.module';
 import { AdminShellComponent } from './components/admin-shell/admin-shell.component';
+import { AuditLogComponent } from './components/audit-log/audit-log.component';
+import { AuditLogsBrowserComponent } from './components/audit-logs-browser/audit-logs-browser.component';
+import { HiveAuditLogsBrowserComponent } from './components/hive-audit-logs-browser/hive-audit-logs-browser.component';
 import { HiveBrowserComponent } from './components/hive-browser/hive-browser.component';
 import { HiveComponent } from './components/hive/hive.component';
+import { MasterCleanupGroupComponent } from './components/master-cleanup-group/master-cleanup-group.component';
 import { MasterCleanupComponent } from './components/master-cleanup/master-cleanup.component';
 import { MetricsOverviewComponent } from './components/metrics-overview/metrics-overview.component';
 import { SettingsAuthLdapServerComponent } from './components/settings-auth-ldap-server/settings-auth-ldap-server.component';
@@ -17,12 +21,14 @@ import { UpdateCardComponent } from './components/update-card/update-card.compon
 import { UpdateDialogComponent } from './components/update-dialog/update-dialog.component';
 import { UserGlobalPermissionsComponent } from './components/user-global-permissions/user-global-permissions.component';
 import { UsersBrowserComponent } from './components/users-browser/users-browser.component';
-import { MasterCleanupGroupComponent } from './components/master-cleanup-group/master-cleanup-group.component';
 
 @NgModule({
   declarations: [
+    AuditLogComponent,
+    AuditLogsBrowserComponent,
     HiveComponent,
     HiveBrowserComponent,
+    HiveAuditLogsBrowserComponent,
     UpdateBrowserComponent,
     UpdateCardComponent,
     UpdateDialogComponent,

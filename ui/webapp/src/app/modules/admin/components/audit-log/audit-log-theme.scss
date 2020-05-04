@@ -1,0 +1,21 @@
+@import '~@angular/material/theming';
+
+@mixin audit-log-theme($theme) {
+  $dark: map-get($theme, is-dark);
+  $prim: map-get($theme, 'primary');
+  $warn: map-get($theme, 'warn');
+  $errorLight: #ee0000;
+
+  .infoIconTheme {
+    color: if($dark, mat-color($prim, 400), mat-color($prim, 600));
+  }
+
+  .warningIconTheme {
+    color: if($dark, mat-color($warn, 400), mat-color($warn, 600));
+  }
+
+  .errorIconTheme {
+    color: $errorLight;
+  }
+
+}
