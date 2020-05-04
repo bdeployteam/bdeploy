@@ -23,7 +23,13 @@ public interface BHiveLocator {
      * @return the {@link BHiveResource} which can be used to actually access the named {@link BHive}.
      */
     @Path("{hive}")
-    @RequiredPermission(scope = "hive", permission = Permission.READ)
+    @RequiredPermission(scope = "hive", permission = Permission.READ, dynamicPermission = "getRequiredPermission")
     public BHiveResource getNamedHive(@PathParam("hive") String name);
+
+    /**
+     * @param name the name of the hive to check
+     * @return the minimum required permission to access this hive.
+     */
+    public Permission getRequiredPermission(String name);
 
 }

@@ -1,6 +1,7 @@
 package io.bdeploy.ui.api.impl;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.ArrayList;
@@ -17,11 +18,16 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
+import org.glassfish.jersey.internal.inject.InjectionManager;
 import org.glassfish.jersey.server.ExtendedUriInfo;
+import org.glassfish.jersey.server.model.MethodHandler;
 import org.glassfish.jersey.server.model.ResourceMethod;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission;
+import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.jersey.JerseySecurityContext;
 import io.bdeploy.ui.api.AuthService;
 
@@ -38,8 +44,13 @@ import io.bdeploy.ui.api.AuthService;
 @Priority(Priorities.AUTHORIZATION)
 public class PermissionRequestFilter implements ContainerRequestFilter {
 
+    private static final Logger log = LoggerFactory.getLogger(PermissionRequestFilter.class);
+
     @Inject
     private AuthService authService;
+
+    @Inject
+    private InjectionManager im;
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
@@ -76,8 +87,7 @@ public class PermissionRequestFilter implements ContainerRequestFilter {
 
         // Check if the user has the permissions declared on each involved method
         for (ResourceMethod resourceMethod : methods) {
-            Method method = resourceMethod.getInvocable().getDefinitionMethod();
-            RequiredPermission requiredPermission = getRequiredPermission(method);
+            RequiredPermission requiredPermission = getRequiredPermission(uriInfo, resourceMethod);
             if (requiredPermission == null) {
                 continue;
             }
@@ -103,13 +113,85 @@ public class PermissionRequestFilter implements ContainerRequestFilter {
 
     /**
      * Returns the defined permission or {@code null} if not defined on the method or on class level.
+     *
+     * @param uriInfo
      */
-    private RequiredPermission getRequiredPermission(Method method) {
-        RequiredPermission permission = method.getAnnotation(RequiredPermission.class);
+    private RequiredPermission getRequiredPermission(ExtendedUriInfo uriInfo, ResourceMethod resourceMethod) {
+        Method method = resourceMethod.getInvocable().getDefinitionMethod();
+        RequiredPermission permission = getPossiblyDynamicPermission(uriInfo, resourceMethod,
+                method.getAnnotation(RequiredPermission.class));
         if (permission != null) {
             return permission;
         }
-        return method.getDeclaringClass().getAnnotation(RequiredPermission.class);
+        return getPossiblyDynamicPermission(uriInfo, resourceMethod,
+                method.getDeclaringClass().getAnnotation(RequiredPermission.class));
+    }
+
+    private RequiredPermission getPossiblyDynamicPermission(ExtendedUriInfo uriInfo, ResourceMethod resourceMethod,
+            RequiredPermission perm) {
+        if (perm == null || perm.dynamicPermission().isEmpty()) {
+            return perm;
+        }
+
+        // check on a method which returns the actual permission.
+        String scopeValue = getScopedValue(uriInfo, perm.scope());
+
+        MethodHandler handler = resourceMethod.getInvocable().getHandler();
+        Method dynamicPermMethod;
+        try {
+            dynamicPermMethod = handler.getHandlerClass().getMethod(perm.dynamicPermission(), String.class);
+        } catch (NoSuchMethodException e) {
+            log.error("Static configuration error: cannot find dynamic permission method {} on {}", perm.dynamicPermission(),
+                    handler.getHandlerClass(), e);
+            return perm;
+        } catch (Exception e) {
+            log.error("Unexpected error when trying to resolve dynamic permission method {} on {}", perm.dynamicPermission(),
+                    handler.getHandlerClass(), e);
+            return perm;
+        }
+
+        Object instance = handler.getInstance(im);
+        if (instance == null) {
+            log.error("Cannot get/create instance of dynamic permission handler class {}", handler.getHandlerClass());
+            return perm;
+        }
+
+        try {
+            Permission dynPerm = (Permission) dynamicPermMethod.invoke(instance, scopeValue);
+            if (dynPerm == null) {
+                return null;
+            }
+            return createDynamicAnnotation(perm, dynPerm);
+        } catch (Exception e) {
+            log.error("Cannot invoke dynamic permission handler {} on {}", perm.dynamicPermission(), handler.getHandlerClass(),
+                    e);
+            return perm;
+        }
+    }
+
+    private RequiredPermission createDynamicAnnotation(RequiredPermission perm, Permission dynPerm) {
+        return new RequiredPermission() {
+
+            @Override
+            public Class<? extends Annotation> annotationType() {
+                return RequiredPermission.class;
+            }
+
+            @Override
+            public String scope() {
+                return perm.scope();
+            }
+
+            @Override
+            public Permission permission() {
+                return dynPerm;
+            }
+
+            @Override
+            public String dynamicPermission() {
+                return "";
+            }
+        };
     }
 
     /**
@@ -141,5 +223,4 @@ public class PermissionRequestFilter implements ContainerRequestFilter {
         // We cannot find a parameter with the given name. Thats an error and the annotation must be fixed
         throw new IllegalStateException("URI does not contain a parameter with the name '" + scopeParam + "'");
     }
-
 }

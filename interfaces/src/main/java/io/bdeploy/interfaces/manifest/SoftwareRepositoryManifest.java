@@ -49,7 +49,7 @@ public class SoftwareRepositoryManifest {
                 .setRelativePath(SoftwareRepositoryConfiguration.FILE_NAME))) {
             return StorageHelper.fromStream(is, SoftwareRepositoryConfiguration.class);
         } catch (IOException e) {
-            throw new IllegalStateException("Cannot load instance group descriptor from: " + mf.getKey(), e);
+            throw new IllegalStateException("Cannot load software repository descriptor from: " + mf.getKey(), e);
         }
     }
 

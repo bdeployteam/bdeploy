@@ -115,7 +115,7 @@ public class MasterCleanupJob implements Job {
         log.info("Performing cleanup on all slaves");
 
         // no activity reporting on local hives right now (outside request scope, could only use Stream instead).
-        try (BHiveRegistry registry = new BHiveRegistry(new ActivityReporter.Null())) {
+        try (BHiveRegistry registry = new BHiveRegistry(new ActivityReporter.Null(), null)) {
             mr.getStorageLocations().forEach(registry::scanLocation);
 
             CleanupHelper.cleanAllMinions(null, mr, registry, true, (h, i) -> mr.getSelf());

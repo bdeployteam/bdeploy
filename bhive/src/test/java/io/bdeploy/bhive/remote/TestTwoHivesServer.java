@@ -44,7 +44,7 @@ public class TestTwoHivesServer {
         BHive h1 = new BHive(tmp.resolve("1").toUri(), r);
         BHive h2 = new BHive(tmp.resolve("2").toUri(), r);
 
-        registry = new BHiveRegistry(r);
+        registry = new BHiveRegistry(r, null);
 
         registry.register("h1", h1);
         registry.register("h2", h2);
