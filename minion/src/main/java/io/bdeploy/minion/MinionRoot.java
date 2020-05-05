@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.util.ArrayList;
@@ -463,9 +464,11 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
 
     private void storeConfig(String name, Object cfg) {
         Path cfgPath = config.resolve(name);
+        Path cfgTmpPath = config.resolve(name + ".tmp");
 
         try {
-            Files.write(cfgPath, StorageHelper.toRawBytes(cfg));
+            Files.write(cfgTmpPath, StorageHelper.toRawBytes(cfg));
+            Files.move(cfgTmpPath, cfgPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new IllegalStateException("Cannot save minion config " + name, e);
         }
