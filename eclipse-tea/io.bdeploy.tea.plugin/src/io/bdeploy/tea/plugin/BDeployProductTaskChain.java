@@ -14,6 +14,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.ws.rs.core.UriBuilder;
+
 import org.eclipse.core.internal.variables.StringVariableManager;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -23,6 +25,7 @@ import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.extensions.Service;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.tea.core.BackgroundTask;
 import org.eclipse.tea.core.TaskExecutionContext;
@@ -40,7 +43,10 @@ import org.eclipse.tea.library.build.tasks.jar.TaskInitJarCache;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.prefs.BackingStoreException;
 
+import io.bdeploy.api.remote.v1.PublicRootResource;
 import io.bdeploy.bhive.util.StorageHelper;
+import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.tea.plugin.BDeployBuildProductTask.ProductDesc;
 import io.bdeploy.tea.plugin.server.BDeployLoginDialog;
 import io.bdeploy.tea.plugin.server.BDeployTargetSpec;
@@ -80,18 +86,35 @@ public class BDeployProductTaskChain implements TaskChain {
 
         Path rootPath = listPath.getParent();
 
-        BDeployChooseProductFileDialog dlg = new BDeployChooseProductFileDialog(parent, listDesc);
-        dlg.setBlockOnOpen(true);
-        if (dlg.open() != Dialog.OK) {
-            throw new OperationCanceledException();
-        }
-
-        target = dlg.getChosenTarget();
-        bdeployProductFile = rootPath.resolve(dlg.getChosenFile());
-
         // Need to make sure that the source server is available for us, otherwise prompt login.
         IEclipsePreferences prefs = InstanceScope.INSTANCE.getNode("io.bdeploy.tea.plugin.source");
-        source = dlg.isClearSourceToken() ? null : loadSourceServer(prefs);
+        source = loadSourceServer(prefs);
+        String srcMsg = checkServer(source);
+        if (srcMsg != null) {
+            source = null;
+            MessageDialog.openWarning(parent, "Software Repository Login",
+                    "Software repository server login has been reset, you need to re-login (" + srcMsg + ")");
+        }
+
+        while (target == null) {
+            BDeployChooseProductFileDialog dlg = new BDeployChooseProductFileDialog(parent, listDesc);
+            dlg.setBlockOnOpen(true);
+            if (dlg.open() != Dialog.OK) {
+                throw new OperationCanceledException();
+            }
+
+            target = dlg.getChosenTarget();
+            bdeployProductFile = rootPath.resolve(dlg.getChosenFile());
+
+            String trgMsg = checkServer(target);
+            if (trgMsg != null) {
+                target = null;
+                bdeployProductFile = null;
+
+                MessageDialog.openWarning(parent, "Server Login",
+                        "The selected server's login is invalid, please re-login (" + trgMsg + ")");
+            }
+        }
 
         if (source == null) {
             BDeployLoginDialog srcDlg = new BDeployLoginDialog(parent, "BDeploy Software Repositories", cfg.bdeployServer, true);
@@ -102,6 +125,22 @@ public class BDeployProductTaskChain implements TaskChain {
             source = srcDlg.getServer();
             saveSourceServer(prefs, source);
         }
+    }
+
+    private String checkServer(BDeployTargetSpec remote) {
+        try {
+            if (remote == null) {
+                return "No remote server data";
+            }
+            RemoteService svc = new RemoteService(UriBuilder.fromUri(remote.uri).build(), remote.token);
+            PublicRootResource master = JerseyClientFactory.get(svc).getProxyClient(PublicRootResource.class);
+
+            // any actual remote call to verify the connection.
+            master.getSoftwareRepositories();
+        } catch (Exception e) {
+            return e.toString();
+        }
+        return null;
     }
 
     private BDeployTargetSpec loadSourceServer(IEclipsePreferences prefs) {
