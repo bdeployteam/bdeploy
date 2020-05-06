@@ -7,15 +7,15 @@ abstract java configuration minion-base {
 
 /** Launches the master with a single slave */
 group configuration MasterSlave {
-	adopt member Master regex ".*Started.*";
-	adopt member Slave;
+	adopt member Slave regex ".*Started.*";
+	adopt member Master;
 }
 
 /** Launches the central master with a managed master + slave*/
 group configuration CentralMasterSlave {
-	adopt member Central-Master regex ".*Started.*";
-	adopt member Managed-Master regex ".*Started.*";
-	adopt member Managed-Slave;
+	adopt member Managed-Slave regex ".*Started.*";
+	adopt member Managed-Master;
+	adopt member Central-Master;
 }
 
 /**
