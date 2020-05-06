@@ -119,7 +119,7 @@ public class RollingFileAuditor implements Auditor {
                 paths.add(p);
             }
         }
-        return paths.toArray(Path[]::new);
+        return paths.toArray(new Path[0]);
     }
 
     /**
