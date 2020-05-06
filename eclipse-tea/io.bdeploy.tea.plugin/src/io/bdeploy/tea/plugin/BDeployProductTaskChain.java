@@ -67,7 +67,9 @@ public class BDeployProductTaskChain implements TaskChain {
 
     @TaskChainUiInit
     public void uiInit(Shell parent, BDeployConfig cfg) throws IOException, CoreException {
+        // instance can be re-used - clear data.
         bdeployProductFile = null;
+        target = null;
 
         if (cfg.bdeployProductListFile == null || cfg.bdeployProductListFile.isEmpty()) {
             throw new IllegalArgumentException("No BDeploy Product List File set in configuration");
@@ -175,11 +177,11 @@ public class BDeployProductTaskChain implements TaskChain {
         TaskInitJarCache cache = new TaskInitJarCache(dirs.getNewCacheDirectory("jar"));
         c.addTask(cache);
 
-        if (bdeployProductFile == null) {
+        if (bdeployProductFile == null && cfg.bdeployProductFile != null) {
             bdeployProductFile = Paths.get(cfg.bdeployProductFile);
         }
 
-        if (cfg == null || bdeployProductFile == null) {
+        if (bdeployProductFile == null) {
             throw new IllegalStateException("BDeploy is not configured, set configuration");
         }
 
