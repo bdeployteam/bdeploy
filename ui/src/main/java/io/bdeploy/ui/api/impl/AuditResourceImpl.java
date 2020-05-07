@@ -43,7 +43,7 @@ public class AuditResourceImpl implements AuditResource {
 
     @Override
     public List<AuditLogDto> hiveAuditLog(String hiveParam, long lastInstant, int lineLimit) {
-        log.debug("hiveAuditLog(\"{}\",\"{}\",\\\"{}\\\")", hiveParam, lastInstant, lineLimit);
+        log.debug("hiveAuditLog({},{},{})", hiveParam, lastInstant, lineLimit);
         BHive hive = registry.get(hiveParam);
         if (hive != null && hive.getAuditor() instanceof RollingFileAuditor) {
             return scanFiles((RollingFileAuditor) hive.getAuditor(), lastInstant, lineLimit);
@@ -54,41 +54,33 @@ public class AuditResourceImpl implements AuditResource {
 
     @Override
     public List<AuditLogDto> auditLog(long lastInstant, int lineLimit) {
-        log.debug("auditLog(\"{}\",\\\"{}\\\")", lastInstant, lineLimit);
+        log.debug("auditLog({},{})", lastInstant, lineLimit);
         return scanFiles((RollingFileAuditor) minion.getAuditor(), lastInstant, lineLimit);
     }
 
     private List<AuditLogDto> scanFiles(RollingFileAuditor auditor, long lastInstant, int lineLimit) {
-        log.debug("scanFiles(<auditor>,\"{}\",\\\"{}\\\")", lastInstant, lineLimit);
+        log.debug("scanFiles(<auditor>,{},{})", lastInstant, lineLimit);
         List<AuditLogDto> result = new ArrayList<>();
         Path currentPath = auditor.getJsonFile();
-        InputStream is = null;
-        try {
-            // scan current log
-            is = Files.newInputStream(currentPath);
-            boolean readMore = scanFile(result, is, lastInstant, lineLimit);
-            is.close();
-            is = null;
 
-            // scan archived logs
-            Path[] backupFiles = auditor.getJsonBackups();
-            for (int i = 0; readMore && i < backupFiles.length; i++) {
-                currentPath = backupFiles[i];
-                is = new GZIPInputStream(Files.newInputStream(currentPath));
-                readMore = scanFile(result, is, lastInstant, lineLimit);
-                is.close();
-                is = null;
-            }
+        // scan current log
+        boolean readMore = false;
+        try (InputStream is = Files.newInputStream(currentPath)) {
+            readMore = scanFile(result, is, lastInstant, lineLimit);
         } catch (IOException e) {
-            log.error("Failed to open " + currentPath.toString(), e);
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException ee) {
-                    log.error("Failed to close " + currentPath.toString(), ee);
-                }
+            log.error("Failed to open {}", currentPath.toString(), e);
+        }
+
+        // scan archived logs
+        Path[] backupFiles = auditor.getJsonBackups();
+        for (int i = 0; readMore && i < backupFiles.length; i++) {
+            currentPath = backupFiles[i];
+            try (InputStream gis = new GZIPInputStream(Files.newInputStream(currentPath))) {
+                readMore = scanFile(result, gis, lastInstant, lineLimit);
+            } catch (IOException e) {
+                log.error("Failed to open {}", currentPath.toString(), e);
             }
+
         }
         return result;
     }

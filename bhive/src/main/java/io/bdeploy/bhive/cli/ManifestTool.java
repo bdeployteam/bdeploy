@@ -148,7 +148,7 @@ public class ManifestTool extends RemoteServiceTool<ManifestConfig> {
                 hive.execute(op);
             }
         } catch (Exception ex) {
-            throw new RuntimeException("Failed to save manifest", ex);
+            throw new IllegalStateException("Failed to save manifest", ex);
         } finally {
             if (tmpFile != null) {
                 PathHelper.deleteRecursive(tmpFile);
