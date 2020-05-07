@@ -28,6 +28,10 @@ Behind each parameter there is a small popup that can contain a short descriptio
 
 *Validation Issues* are displayed per group in the respective title. Only complete configurations can be accepted.
 
+The context menu on an application card allows you to copy an application definition. This can be pasted on any node of the correct type using the context menu on the according node when in *Configure Applications* mode.
+
+image::images/BDeploy_Paste_Application.png[Paste Application,align=center, width=480, link="images/BDeploy_Paste_Application.png"]
+
 ===== Optional Parameters
 
 *Optional Parameters* can be selected for each group using the btn:[Manage Optional Parameters] dialog (available only if *Optional Parameters* are available) and then configured like other parameters.
@@ -127,3 +131,12 @@ All *Applications* are marked as modified as they are now based on a different *
 Changing the *Product Version* can result in validation issues and automated adjustment of parameters. *Product Versions* can contain different *Applications*, so that with the change of the *Product Version* e.g. a previously configured *Application* must be deleted because it has been removed from the product. If parameters definitions are changed, validation errors may occur which must be corrected before saving (e.g. new mandatory parameters, parameters no longer supported, etc.). These errors will cause a visual indicator on affected applications, as well as a textual description of the problem in the notifications area.
 
 image::images/BDeploy_Product_Downgrade_Validation.png[Validation Issues After Product Version Change,align=center,width=480,link="images/BDeploy_Product_Downgrade_Validation.png"]
+
+==== Import/Export
+
+Instance versions can be exported and downloaded from the *Instance Version* card's context menu. This will download this specific instance version's raw data as a _ZIP_. This _ZIP_ will contain the complete instance configuration as well as all configuration files currently stored with the instance.
+
+The content of the _ZIP_ can be edited offline, and re-imported using the *Instance*'s (not *Instance Version*) context menu to create a new *Instance Version*. The file structure inside the _ZIP_ must be exactly the same as when exporting.
+
+[WARNING]
+This mechanism allows access to the most internal data structures of *BDeploy*. Great care has to be taken to not damage any of the data on import.

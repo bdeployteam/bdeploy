@@ -4,11 +4,14 @@ import { format } from 'date-fns';
 import { cloneDeep } from 'lodash';
 import { DragulaService } from 'ng2-dragula';
 import { Subscription } from 'rxjs';
+import { Logger, LoggingService } from 'src/app/modules/core/services/logging.service';
+import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
+import { MessageboxService } from 'src/app/modules/shared/services/messagebox.service';
 import { convert2String } from 'src/app/modules/shared/utils/version.utils';
 import { ApplicationGroup } from '../../../../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_APPLICATION_CONFIGURATION, EMPTY_INSTANCE_NODE_CONFIGURATION, EMPTY_PROCESS_CONTROL_CONFIG } from '../../../../models/consts';
 import { EventWithCallback } from '../../../../models/event';
-import { ApplicationConfiguration, ApplicationDto, InstanceNodeConfiguration, InstanceNodeConfigurationDto, MinionDto, MinionStatusDto } from '../../../../models/gen.dtos';
+import { ApplicationConfiguration, ApplicationDto, ApplicationType, InstanceNodeConfiguration, InstanceNodeConfigurationDto, MinionDto, MinionStatusDto } from '../../../../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../../../../models/process.model';
 import { getAppOs } from '../../../shared/utils/manifest.utils';
 import { ApplicationService } from '../../services/application.service';
@@ -24,6 +27,8 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
   private readonly VALID_DROP_ZONE_CLASS = 'instance-node-valid-drop-zone';
   private readonly INVALID_DROP_ZONE_CLASS = 'instance-node-invalid-drop-zone';
   private readonly CURRENT_DRAG_CONTAINER_CLASS = 'current-drag-container';
+
+  private log: Logger = this.loggingService.getLogger('InstanceNodeCardComponent');
 
   @Input() instanceGroupName: string;
   @Input() activatedInstanceTag: string;
@@ -58,6 +63,8 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
   constructor(
     private appService: ApplicationService,
     private dragulaService: DragulaService,
+    private mbService: MessageboxService,
+    private loggingService: LoggingService,
     ) {}
 
   ngOnInit() {
@@ -226,18 +233,26 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
     this.selectAppConfigEvent.emit(process);
   }
 
-  onPaste(){
-    console.log("Attempting to paste from clipboard");
-
+  onPaste() {
     const readClipboard = navigator.clipboard.readText().then(
      data => {
-        console.log("Pasted string: ", data);
-        var appConfig = JSON.parse(data) as ApplicationConfiguration;
+        let appConfig = null;
+        try {
+          appConfig = JSON.parse(data) as ApplicationConfiguration;
+        } catch (e) {
+          this.mbService.open({title: 'Invalid Data', message: 'The data in the clipboard cannot be interpreted as application', mode: MessageBoxMode.WARNING});
+          return;
+        }
 
         const productKey = this.processConfig.instance.product;
         const appKey = appConfig.application;
 
         this.appService.getDescriptor(this.instanceGroupName, productKey, appKey).subscribe(desc => {
+          if ((desc.type === ApplicationType.SERVER && this.isClientApplicationsNode()) || (desc.type === ApplicationType.CLIENT && !this.isClientApplicationsNode())) {
+            this.mbService.open({title: 'Wrong Type', message: 'Application cannot be pasted on this node.', mode: MessageBoxMode.INFO});
+            return;
+          }
+
           // Generate unique identifier
           this.appService.createUuid(this.instanceGroupName).subscribe(uid => {
 
@@ -255,7 +270,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
         });
       },
       data => {
-        console.error("Unable to paste from clipboard");
+        this.log.error('Unable to paste from clipboard');
       });
   }
 
