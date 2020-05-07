@@ -114,7 +114,7 @@
                 </div>
               </ng-container>
 
-              <mat-form-field *ngSwitchCase="parameterType.ENUMERATION">
+              <mat-form-field *ngSwitchCase="parameterType.STRING">
                 <div *ngIf="param.desc.hasValue || param.desc.mandatory">
                   <input matInput [matAutocomplete]="auto" name="{{instanceGroup}}-{{appConfigContext.instanceNodeConfigurationDto.nodeConfiguration.uuid}}-{{param.desc.uid}}" placeholder="{{getCtrlPlaceholderText(param.desc)}}" [formControlName]="param.desc.uid" type="{{getCtrlInputType(param.desc.type)}}"/>
                   <mat-autocomplete #auto="matAutocomplete">
