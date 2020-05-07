@@ -49,7 +49,7 @@ export enum SidenavMode {
   selector: 'app-process-configuration',
   templateUrl: './process-configuration.component.html',
   styleUrls: ['./process-configuration.component.css'],
-  providers: [ApplicationService, LauncherService],
+  providers: [ApplicationService, LauncherService, ProcessService],
 })
 export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   public static readonly DROPLIST_APPLICATIONS = 'APPLICATIONS';

@@ -6,9 +6,7 @@ import { ProcessState, ProcessStatusDto } from '../../../models/gen.dtos';
 import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
 import { InstanceService } from './instance.service';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable()
 export class ProcessService {
   constructor(private http: HttpClient, private instanceService: InstanceService) {}
 
@@ -31,7 +29,7 @@ export class ProcessService {
     }
     this.loading = true;
     const url = this.instanceService.buildInstanceUrl(instanceGroup, instanceId) + '/processes';
-    const promise = this.http.get<{ [key: string]: ProcessStatusDto }>(url, { headers: suppressGlobalErrorHandling(new HttpHeaders({'ignoreLoadingBar': ''})) });
+    const promise = this.http.get<{ [key: string]: ProcessStatusDto }>(url, { headers: suppressGlobalErrorHandling(new HttpHeaders()) });
     promise.pipe(catchError(r => of(null)), finalize(() => (this.loading = false))).subscribe(result => {
       if (!result) {
         return; // error
