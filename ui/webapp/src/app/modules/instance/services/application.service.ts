@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { cloneDeep, intersection, isEqual } from 'lodash';
 import { Observable } from 'rxjs';
 import { UnknownParameter } from '../../../models/application.model';
-import { CLIENT_NODE_NAME, EMPTY_COMMAND_CONFIGURATION, EMPTY_PARAMETER_CONFIGURATION } from '../../../models/consts';
+import { CLIENT_NODE_NAME, EMPTY_COMMAND_CONFIGURATION, EMPTY_PARAMETER_CONFIGURATION, EMPTY_PARAMETER_DESCRIPTOR } from '../../../models/consts';
 import { ApplicationConfiguration, ApplicationDescriptor, ApplicationDto, ApplicationType, InstanceNodeConfigurationDto, ManifestKey, ParameterConfiguration, ParameterDescriptor, ParameterType } from '../../../models/gen.dtos';
 import { ProcessConfigDto } from '../../../models/process.model';
 import { ConfigService } from '../../core/services/config.service';
@@ -723,6 +723,82 @@ export class ApplicationService {
     oldDescs: ParameterDescriptor[],
     templates: ApplicationConfiguration[],
   ) {
+
+    this.correctParameterConfigurations(configs, descs, templates);
+
+    // Verify that all parameters are still defined in the new version
+    const unknownAppParams: UnknownParameter[] = [];
+    for (const config of configs) {
+      const oldDefinition = oldDescs.find(d => d.uid === config.uid);
+      const newDefinition = descs.find(d => d.uid === config.uid);
+      // Parameter was not defined in the old version -> must be a custom param
+      if (!oldDefinition) {
+        continue;
+      }
+      // Parameter is defined in both versions -> OK still there
+      if ((newDefinition && oldDefinition) || newDefinition) {
+        continue;
+      }
+      // Parameter defined in old but not present in new one
+      unknownAppParams.push(new UnknownParameter(oldDefinition, config));
+    }
+    this.setUnknownParameters(appUid, unknownAppParams);
+  }
+
+  updateApplicationParamsForPastedApplication(
+    app: ApplicationConfiguration,
+    desc: ApplicationDescriptor,
+    templates: ApplicationConfiguration[],
+  ) {
+    if (desc.startCommand) {
+      app.start.executable = desc.startCommand.launcherPath;
+      this.updateParametersForPastedApplication(
+        app.uid,
+        app.start.parameters,
+        desc.startCommand.parameters,
+        templates,
+      );
+    }
+    if (desc.stopCommand) {
+      app.stop.executable = desc.stopCommand.launcherPath;
+      this.updateParametersForPastedApplication(
+        app.uid,
+        app.stop.parameters,
+        desc.stopCommand.parameters,
+        templates,
+      );
+    }
+    if (desc.endpoints && desc.endpoints.http) {
+      if (!app.endpoints || ! app.endpoints.http) {
+        app.endpoints = { http: [] };
+      }
+      const finalEps = [];
+      for (const cep of app.endpoints.http) {
+        const existing = desc.endpoints.http.findIndex(p => p.id === cep.id);
+        if (existing !== -1) {
+          // still existing endpoint, keep it
+          finalEps.push(cep);
+        }
+        // otherwise the endpoint is dropped, no longer existing in the application descriptor.
+      }
+
+      for (const ep of desc.endpoints.http) {
+        const existing = app.endpoints.http.findIndex(p => p.id === ep.id);
+        if (existing === -1) {
+          // newly added endpoint
+          finalEps.push(ep);
+        }
+      }
+
+      app.endpoints.http = finalEps;
+    }
+  }
+
+  correctParameterConfigurations(
+    configs: ParameterConfiguration[],
+    descs: ParameterDescriptor[],
+    templates: ApplicationConfiguration[],
+  ){
     // Order of parameters is important. Thus we need to insert a missing parameter
     // at the correct index in the config array.
     let lastRenderedIndex = 0;
@@ -748,22 +824,36 @@ export class ApplicationService {
         this.updateParameterValue(config, desc, templates);
       }
     }
+  }
 
-    // Verify that all parameters are still defined in the new version
+  updateParametersForPastedApplication(
+    appUid: string,
+    configs: ParameterConfiguration[],
+    descs: ParameterDescriptor[],
+    templates: ApplicationConfiguration[],
+  ) {
+
+    this.correctParameterConfigurations(configs, descs, templates);
+
+    // Verify that all parameters are still defined in the current version
     const unknownAppParams: UnknownParameter[] = [];
     for (const config of configs) {
-      const oldDefinition = oldDescs.find(d => d.uid === config.uid);
-      const newDefinition = descs.find(d => d.uid === config.uid);
-      // Parameter was not defined in the old version -> must be a custom param
-      if (!oldDefinition) {
+      const exisitingDescriptor = descs.find(d => d.uid === config.uid);
+
+      if (exisitingDescriptor) {
         continue;
       }
-      // Parameter is defined in both versions -> OK still there
-      if ((newDefinition && oldDefinition) || newDefinition) {
-        continue;
-      }
-      // Parameter defined in old but not present in new one
-      unknownAppParams.push(new UnknownParameter(oldDefinition, config));
+
+      var unknownDescriptor = cloneDeep(EMPTY_PARAMETER_DESCRIPTOR);
+      unknownDescriptor.uid = config.uid;
+      unknownDescriptor.name = config.uid;
+      unknownDescriptor.defaultValue = config.value;
+      unknownDescriptor.hasValue = true;
+      unknownDescriptor.valueSeparator = " , ";
+      unknownDescriptor.valueAsSeparateArg = true;
+
+      // Parameter not present in currnet version
+      unknownAppParams.push(new UnknownParameter(unknownDescriptor, config));
     }
     this.setUnknownParameters(appUid, unknownAppParams);
   }

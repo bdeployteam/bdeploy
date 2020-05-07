@@ -1,4 +1,5 @@
 <mat-card #appNodeCard class="node-card instance-node-card-theme">
+
   <!-- server applications node header -->
   <mat-card-header *ngIf="!isClientApplicationsNode()" class='node-card-header instance-node-card-header-theme'>
     <div mat-card-avatar class='instance-node-avatar-container' *ngIf='minionConfig'>
@@ -17,6 +18,14 @@
     <ng-container *ngIf="!minionConfig">
         <mat-icon class='instance-node-offline' [matTooltip]="getNodeStatusTooltip()">error</mat-icon>
     </ng-container>
+    <div *ngIf='manageApplications && !isReadonly'>
+      <mat-menu #appMenu="matMenu" xPosition="before">
+        <button mat-menu-item (click)="onPaste()"><mat-icon>post_add</mat-icon>Paste</button>
+      </mat-menu>
+      <button class="option-button" mat-icon-button [matMenuTriggerFor]="appMenu" appClickStopPropagation>
+        <mat-icon>more_vert</mat-icon>
+      </button>
+    </div>
   </mat-card-header>
 
   <!-- client applications node header -->
@@ -26,6 +35,15 @@
     </div>
     <mat-card-title>Client Applications</mat-card-title>
     <mat-card-subtitle class='node-card-subtitle'>Published client applications</mat-card-subtitle>
+    <span class="fill-space"></span>
+    <div *ngIf='manageApplications && !isReadonly'>
+      <mat-menu #appMenu="matMenu" xPosition="before">
+        <button mat-menu-item (click)="onPaste()"><mat-icon>post_add</mat-icon>Paste</button>
+      </mat-menu>
+      <button class="option-button" mat-icon-button [matMenuTriggerFor]="appMenu" appClickStopPropagation>
+        <mat-icon>more_vert</mat-icon>
+      </button>
+    </div>
   </mat-card-header>
 
   <mat-card-content class='node-card-content'>
