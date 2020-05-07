@@ -31,6 +31,9 @@ public class FileSystemSpaceService {
     public boolean hasFreeSpace(Path path) {
         try {
             FileStore store = Files.getFileStore(path);
+            if (store == null) {
+                return true; // cannot check.
+            }
             long free = store.getUsableSpace();
             return free > minFreeBytes.get();
         } catch (Exception e) {
