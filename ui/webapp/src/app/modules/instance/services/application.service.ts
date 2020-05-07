@@ -852,7 +852,7 @@ export class ApplicationService {
       unknownDescriptor.valueSeparator = " , ";
       unknownDescriptor.valueAsSeparateArg = true;
 
-      // Parameter not present in currnet version
+      // Parameter not present in current version
       unknownAppParams.push(new UnknownParameter(unknownDescriptor, config));
     }
     this.setUnknownParameters(appUid, unknownAppParams);

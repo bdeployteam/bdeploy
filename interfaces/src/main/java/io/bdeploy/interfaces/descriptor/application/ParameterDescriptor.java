@@ -16,8 +16,7 @@ public class ParameterDescriptor implements Comparable<ParameterDescriptor> {
         STRING,
         NUMERIC,
         BOOLEAN,
-        PASSWORD,
-        ENUMERATION
+        PASSWORD
     }
 
     /**
