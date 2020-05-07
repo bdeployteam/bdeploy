@@ -68,6 +68,9 @@ startCommand: <6>
       groupName: "My Parameters"
       parameter: "--text"
       mandatory: true
+      suggestedValues:
+        - "Value 1"
+        - "Value 2"
 
 stopCommand: <7>
   ...
@@ -147,6 +150,11 @@ Parameters appear on the final command line in *exact* the order as they appear 
 |
 |no
 a|An optional group name. The configuration UI may use this information to group parameters with the same `groupName` together.
+
+|`suggestedValues`
+|
+|no
+|An optional list of suggested values for paremters of type `STRING` (the default). The Web UI will present this list when editing the parameter value.
 
 [CAUTION]
 Although parameters in the UI are grouped together (and thus might change order), the order in which parameters appear on the final command line is exactly the order in which they are defined in the `app-info.yaml` file.
