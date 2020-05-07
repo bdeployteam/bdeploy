@@ -145,15 +145,25 @@ Press the btn:[Execute all Actions] button to actually perform the calculated ac
 [NOTE]
 The dialog automatically resets itself after a certain timeout. This is to prevent execution of too old actions which might no longer be valid.
 
-==== BHive Browser
-The *BHive Browser* from the *Administration* menu is an internal tool for administrative purposes. It allows viewing and browsing the internals of the *BDeploy* storage. The drop-down at the top of the dialog is used to switch between the available hives. The _default_ hive is the internal storage where metadata about users and outer hives are stored. The actual data is stored in the individual hives itself.
+==== Hive Browser
+The *Hive Browser* from the *Administration* menu is an internal tool for administrative purposes. It allows viewing and browsing the internals of the *BDeploy* storage. The drop-down at the top of the dialog is used to switch between the available hives. The _default_ hive is the internal storage where metadata about users and outer hives are stored. The actual data is stored in the individual hives itself.
 
 [CAUTION]
 It has the power to destroy _everything_ - use with extreme caution.
 
+==== Hive Audit Logs
+
+The Hive Audit Log browser allows to view all audit logs on any of the *BHive* managed by the server.
+
+==== Audit Log
+
+The system Audit Log browser allows to view the master servers main audit log, which includes information about tools run on the root directory, as well as every request made to the APIs.
+
 ==== Metrics
 
 This dialog provides a quick way to investigate potential performance issues in the server itself by providing access to the in-memory metrics kept track by the server for all actions and requests performed.
+
+The `SERVER` metrics will show various system information about the Java Virtual Machine of the master hosting the Web UI.
 
 ==== Log Level
 
