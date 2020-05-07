@@ -182,6 +182,13 @@ describe('Creates screenshots for the user documentation', () => {
     cy.waitUntilContentLoaded();
 
     cy.getApplicationConfigCard('master', 'Server Application').contains('more_vert').click();
+    cy.contains('button', 'Copy').click();
+    cy.getNodeCard('master').contains('mat-card-header', 'master').contains('button', 'more_vert').click();
+    cy.wait(250);
+    cy.screenshot('BDeploy_Paste_Application');
+    cy.contains('button', 'Paste').type('{esc}');
+
+    cy.getApplicationConfigCard('master', 'Server Application').contains('more_vert').click();
 
     // Process Configuration
     cy.get('button').contains('Configure').click();
