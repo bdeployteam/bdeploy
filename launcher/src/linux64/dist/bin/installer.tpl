@@ -15,6 +15,8 @@ mkdir -p "${T}"
 trap "{ rm -rf ${T}; }" EXIT
 
 T_BDEPLOY_FILE="${T}/${BDEPLOY_APP_UID}.bdeploy"
+B_DESKTOP_FILE="bdeploy-${BDEPLOY_APP_UID}.desktop"
+B_DESKTOP_UNINSTALL_FILE="bdeploy-uninstall-${BDEPLOY_APP_UID}.desktop"
 
 cat > "${T_BDEPLOY_FILE}" <<EOF
 {{BDEPLOY_FILE}}
@@ -39,7 +41,9 @@ require_tool base64
 require_tool openssl
 
 type xdg-desktop-menu > /dev/null
-HAVE_XDG_DESKTOP=$?
+HAVE_XDG_DESKTOP_MENU=$?
+type xdg-desktop-icon > /dev/null
+HAVE_XDG_DESKTOP_ICON=$?
 
 dl() {
   # find certificate from embedded JSON
@@ -107,7 +111,7 @@ else
 
     rm -f ${T_DL}
 
-    if [[ ${HAVE_XDG_DESKTOP} == 0 ]]; then
+    if [[ ${HAVE_XDG_DESKTOP_MENU} == 0 ]]; then
         echo "Creating file association..."
         ${L_HOME}/bin/file-assoc.sh
     fi
@@ -124,7 +128,7 @@ echo "Updating icon..."
 B_ICONS="${B_HOME}/.icons"
 APP_ICON="${B_ICONS}/${BDEPLOY_APP_UID}.ico"
 APP_ICON_PNG="${B_ICONS}/${BDEPLOY_APP_UID}.png"
-if [[ -n "${BDEPLOY_ICON_URL}" && ${HAVE_XDG_DESKTOP} == 0 ]]; then
+if [[ -n "${BDEPLOY_ICON_URL}" && ${HAVE_XDG_DESKTOP_MENU} == 0 ]]; then
     require_tool convert
     require_tool identify
 
@@ -147,13 +151,61 @@ if [[ -n "${BDEPLOY_ICON_URL}" && ${HAVE_XDG_DESKTOP} == 0 ]]; then
     fi
 fi
 
-# STEP 3: create desktop file for client for current user.
-echo "Installing application shortcut..."
+# STEP 3: create application file
+echo "Installing application file..."
 B_LAUNCHES_HOME="${B_HOME}/.launches"
 mkdir -p "${B_LAUNCHES_HOME}"
 cp "${T_BDEPLOY_FILE}" "${B_LAUNCHES_HOME}"
 
-T_LINK="${T}/bdeploy-${BDEPLOY_APP_UID}.desktop"
+# STEP 4: create uninstaller
+echo "Creating uninstaller..."
+B_UNINSTALL_HOME="${B_HOME}/.uninstall"
+mkdir -p "${B_UNINSTALL_HOME}"
+B_UNINSTALLER="${B_UNINSTALL_HOME}/bdeploy-uninstall-${BDEPLOY_APP_UID}.run"
+
+echo '#!/usr/bin/env bash' > "${B_UNINSTALLER}"
+# remove menu entry
+if [[ ${HAVE_XDG_DESKTOP_MENU} == 0 ]]; then
+    echo "xdg-desktop-menu uninstall ${B_DESKTOP_FILE}" >> "${B_UNINSTALLER}"
+    echo "xdg-desktop-menu uninstall ${B_DESKTOP_UNINSTALL_FILE}" >> "${B_UNINSTALLER}"
+fi
+# remove desktop icon
+if [[ ${HAVE_XDG_DESKTOP_ICON} == 0 ]]; then
+    echo "xdg-desktop-icon uninstall ${B_DESKTOP_FILE}" >> "${B_UNINSTALLER}"
+fi
+
+# uninstall application
+echo "${L_HOME}/bin/launcher uninstaller --app=${BDEPLOY_APP_UID}" >> "${B_UNINSTALLER}"
+
+# remove icons
+APP_ICON="${B_ICONS}/${BDEPLOY_APP_UID}.ico"
+echo "if [[ -e ${APP_ICON} ]]; then rm ${APP_ICON}; fi" >> "${B_UNINSTALLER}"
+
+APP_ICON_PNG="${B_ICONS}/${BDEPLOY_APP_UID}.png"
+echo "if [[ -e ${APP_ICON_PNG} ]]; then rm ${APP_ICON_PNG}; fi" >> "${B_UNINSTALLER}"
+
+# remove .bdeploy file
+BDEPLOY_FILE=${B_LAUNCHES_HOME}/${BDEPLOY_APP_UID}.bdeploy
+echo "if [[ -e ${BDEPLOY_FILE} ]]; then rm ${BDEPLOY_FILE}; fi" >> "${B_UNINSTALLER}"
+
+# remove uninstaller file itself
+echo "if [[ -e ${B_UNINSTALLER} ]]; then rm ${B_UNINSTALLER}; fi" >> "${B_UNINSTALLER}"
+
+chmod +x "${B_UNINSTALLER}"
+
+# STEP 5: create desktop entries
+echo "Creating menu entries and desktop icon..."
+T_BDEPLOY_LINK="${T}/bdeploy-folder.directory"
+cat > "${T_BDEPLOY_LINK}" <<EOF
+[Desktop Entry]
+Version=1.0
+Type=Directory
+Name=BDeploy-Apps
+Comment=BDeploy Applications
+Icon=${L_HOME}/bin/logo128.png
+EOF
+
+T_LINK="${T}/${B_DESKTOP_FILE}"
 cat > "${T_LINK}" <<EOF
 [Desktop Entry]
 Version=1.0
@@ -165,11 +217,27 @@ Icon=${APP_ICON_PNG}
 Terminal=false
 EOF
 
-if [[ ${HAVE_XDG_DESKTOP} == 0 ]]; then
-    xdg-desktop-menu install "${T_LINK}"
+T_UNINSTALL_LINK="${T}/${B_DESKTOP_UNINSTALL_FILE}"
+cat > "${T_UNINSTALL_LINK}" <<EOF
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Uninstall_${BDEPLOY_APP_NAME}
+Comment=Uninstall BDeploy Application: ${BDEPLOY_APP_NAME} (${BDEPLOY_APP_UID})
+Exec=${B_UNINSTALLER}
+Icon=${L_HOME}/bin/logo128.png
+Terminal=false
+EOF
+
+if [[ ${HAVE_XDG_DESKTOP_MENU} == 0 ]]; then
+    xdg-desktop-menu install "${T_BDEPLOY_LINK}" "${T_LINK}"
+    xdg-desktop-menu install "${T_BDEPLOY_LINK}" "${T_UNINSTALL_LINK}"
+    if [[ ${HAVE_XDG_DESKTOP_ICON} == 0 ]]; then
+        xdg-desktop-icon install "${T_LINK}"
+    fi
 fi
 
-# STEP 4: Launch directly.
+# STEP 6: Launch directly.
 echo "Launching ${BDEPLOY_APP_NAME}"
 ${L_HOME}/bin/launcher "${B_LAUNCHES_HOME}/${BDEPLOY_APP_UID}.bdeploy"
 
