@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.audit.AuditParameterExtractor.NoAudit;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.objects.ManifestDatabase;
@@ -23,6 +24,7 @@ import io.bdeploy.common.ActivityReporter.Activity;
  */
 public class ManifestDeleteOldByIdOperation extends BHive.Operation<Void> {
 
+    @NoAudit
     private static final Logger log = LoggerFactory.getLogger(ManifestDeleteOldByIdOperation.class);
 
     private String manifestName;
