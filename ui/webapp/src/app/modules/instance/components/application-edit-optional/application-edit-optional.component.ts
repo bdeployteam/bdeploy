@@ -25,15 +25,10 @@ export class ApplicationEditOptionalComponent implements OnInit {
     this.clonedParameters = cloneDeep(this.parameters);
     this.dataSource = new MatTableDataSource<LinkedParameter>(this.parameters);
     this.dataSource.filterPredicate = (p, f) => {
-      if (p.desc.name.toLowerCase().indexOf(f.toLowerCase()) !== -1) {
-        return true;
-      }
-
-      if (p.desc.longDescription.toLowerCase().indexOf(f.toLowerCase()) !== -1) {
-        return true;
-      }
-
-      return false;
+      const name = p.desc.name ? p.desc.name.toLowerCase() : '';
+      const desc = p.desc.longDescription ? p.desc.longDescription.toLowerCase() : '';
+      const filter = f.toLowerCase();
+      return name.indexOf(filter) !== -1 || desc.indexOf(filter) !== -1;
     };
   }
 
