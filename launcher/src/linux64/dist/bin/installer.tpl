@@ -178,10 +178,7 @@ fi
 echo "${L_HOME}/bin/launcher uninstaller --app=${BDEPLOY_APP_UID}" >> "${B_UNINSTALLER}"
 
 # remove icons
-APP_ICON="${B_ICONS}/${BDEPLOY_APP_UID}.ico"
 echo "if [[ -e ${APP_ICON} ]]; then rm ${APP_ICON}; fi" >> "${B_UNINSTALLER}"
-
-APP_ICON_PNG="${B_ICONS}/${BDEPLOY_APP_UID}.png"
 echo "if [[ -e ${APP_ICON_PNG} ]]; then rm ${APP_ICON_PNG}; fi" >> "${B_UNINSTALLER}"
 
 # remove .bdeploy file
