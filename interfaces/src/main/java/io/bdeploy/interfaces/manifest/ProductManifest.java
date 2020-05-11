@@ -13,12 +13,15 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
+import io.bdeploy.bhive.objects.view.TreeView;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.ManifestRefScanOperation;
 import io.bdeploy.bhive.op.ObjectLoadOperation;
+import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.bhive.op.TreeLoadOperation;
 import io.bdeploy.bhive.util.StorageHelper;
+import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 
 /**
  * A special manifestation of a {@link Manifest} which must follow a certain layout and groups multiple applications together
@@ -62,10 +65,10 @@ public class ProductManifest {
         SortedSet<Key> otherRefs = new TreeSet<>();
 
         for (Manifest.Key ref : allRefs) {
-            try {
-                ApplicationManifest.of(hive, ref);
+            TreeView tv = hive.execute(new ScanOperation().setMaxDepth(1).setFollowReferences(false).setManifest(ref));
+            if (tv.getChildren().containsKey(ApplicationDescriptor.FILE_NAME)) {
                 appRefs.add(ref);
-            } catch (Exception e) {
+            } else {
                 // not an application
                 otherRefs.add(ref);
             }
