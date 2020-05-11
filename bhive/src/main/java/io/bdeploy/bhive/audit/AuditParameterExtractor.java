@@ -5,6 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -48,6 +49,7 @@ public class AuditParameterExtractor {
      * logs.
      */
     public enum AuditStrategy {
+
         TO_STRING(Object::toString),
         COLLECTION_SIZE(x -> Integer.toString(((Collection<?>) x).size())),
         COLLECTION_PEEK(x -> {
@@ -89,7 +91,7 @@ public class AuditParameterExtractor {
 
         for (Field field : clazz.getDeclaredFields()) {
             AuditParameterExtractor.NoAudit na = field.getAnnotation(AuditParameterExtractor.NoAudit.class);
-            if (na != null) {
+            if (na != null || Modifier.isStatic(field.getModifiers())) {
                 if (log.isTraceEnabled()) {
                     log.trace("Skipping audit of {}", field);
                 }
