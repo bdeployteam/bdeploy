@@ -29,6 +29,7 @@ export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
   public showIcon: boolean;
   public showOutOfSync: boolean;
   public showOutOfSyncText: boolean;
+  public showNotLoadedIcon: boolean;
 
   public statusIcon: string;
   public statusHint: string;
@@ -70,19 +71,21 @@ export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
   onStatusChanged() {
     this.resetState();
 
+    var status;
     if (this.appId) {
-      const status = this.processService.getStatusOfApp(this.appId);
+      status = this.processService.getStatusOfApp(this.appId);
       if (status) {
         this.updateSingleState(status);
       }
     } else {
-      const status = this.processService.getStatusOfTag(this.instanceTag);
+      status = this.processService.getStatusOfTag(this.instanceTag);
       if (status) {
         this.updateMultiState(status);
       }
     }
 
     this.showIcon = this.getShowIcon();
+    this.showNotLoadedIcon = !this.processService.loading && !status;
     this.showOutOfSyncText = this.getShowOutOfSyncText();
     this.statusIcon = this.getStatusIcon();
     this.statusClass = this.getStatusClass();
@@ -91,6 +94,7 @@ export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
 
   resetState() {
     this.showIcon = false;
+    this.showNotLoadedIcon = false;
     this.showOutOfSyncText = false;
     this.processState = ProcessState.STOPPED;
   }
