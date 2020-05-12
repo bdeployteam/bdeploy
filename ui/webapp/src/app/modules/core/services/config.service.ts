@@ -3,10 +3,14 @@ import { Injectable } from '@angular/core';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Observable } from 'rxjs';
+import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
+import { MessageboxService } from 'src/app/modules/shared/services/messagebox.service';
+import { convert2String } from 'src/app/modules/shared/utils/version.utils';
 import { environment } from 'src/environments/environment';
 import { BackendInfoDto, MinionMode, MinionStatusDto, Version } from '../../../models/gen.dtos';
 import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
 import { LoggingService, LogLevel } from './logging.service';
+
 
 export interface AppConfig {
   version: Version;
@@ -26,6 +30,7 @@ export class ConfigService {
     private loggingService: LoggingService,
     iconRegistry: MatIconRegistry,
     sanitizer: DomSanitizer,
+    private mbService: MessageboxService,
   ) {
     iconRegistry.addSvgIcon('bdeploy', sanitizer.bypassSecurityTrustResourceUrl('assets/logo-single-path-square.svg'));
     iconRegistry.addSvgIcon('progress', sanitizer.bypassSecurityTrustResourceUrl('assets/progress.svg'));
@@ -35,6 +40,7 @@ export class ConfigService {
     iconRegistry.addSvgIcon('WINDOWS', sanitizer.bypassSecurityTrustResourceUrl('assets/windows.svg'));
     iconRegistry.addSvgIcon('AIX', sanitizer.bypassSecurityTrustResourceUrl('assets/aix.svg'));
     iconRegistry.addSvgIcon('MACOS', sanitizer.bypassSecurityTrustResourceUrl('assets/mac.svg'));
+    setInterval(() => this.isNewVersionAvailable(), 60000);
   }
 
   load(): Promise<AppConfig> {
@@ -51,6 +57,24 @@ export class ConfigService {
         this.loggingService.getLogger(null).info('Remote reports mode ' + this.config.mode);
         resolve(this.config);
       });
+    });
+  }
+
+  public isNewVersionAvailable(){
+    this.getBackendInfo().subscribe((bv) => {
+
+      const currentVersion = convert2String(this.config.version);
+      const newVersion = convert2String(bv.version);
+
+      if(currentVersion != newVersion){
+
+        this.loggingService.getLogger(null).info("A new version is available! old: " + currentVersion + " | new: " + newVersion);
+
+        this.mbService.open({title: 'New Version', message: 'A software update has been installed on the server. The page needs to be re-loaded to continue working.', mode: MessageBoxMode.INFO}).subscribe(r => {
+          window.location.reload();
+        });
+
+      }
     });
   }
 
