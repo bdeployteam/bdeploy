@@ -32,12 +32,23 @@ import './bdeploy.admin'
 import './dragdrop'
 import 'cypress-file-upload'
 
-Cypress.Commands.add('clickContextMenuItem', { prevSubject: true}, function(subject, item) {
+Cypress.Commands.add('clickContextMenuDialog', { prevSubject: true}, function(subject, item, dialogItem) {
   let wrapped = cy.wrap(subject);
-
   wrapped.find('button').contains('more_vert').click();
   cy.get('[role=menuitem]').contains(item).should('be.enabled').click().should('not.exist');
+  if (dialogItem) {
+    cy.contains('mat-dialog-container', dialogItem).should('exist')
+  } else {
+    cy.get('div.cdk-overlay-backdrop').should('exist');
+  }
+  return wrapped;
+});
 
+Cypress.Commands.add('clickContextMenuAction', { prevSubject: true}, function(subject, item) {
+  let wrapped = cy.wrap(subject);
+  wrapped.find('button').contains('more_vert').click();
+  cy.get('[role=menuitem]').contains(item).should('be.enabled').click().should('not.exist');
+  cy.get('div.cdk-overlay-backdrop').should('not.exist');
   return wrapped;
 });
 

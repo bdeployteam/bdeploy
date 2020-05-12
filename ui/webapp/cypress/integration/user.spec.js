@@ -19,7 +19,7 @@ describe('User Accounts Test', function() {
 
   it('edits the user', function() {
     cy.contains('tr', demoUser).should('exist');
-    cy.contains('tr', demoUser).clickContextMenuItem('Edit');
+    cy.contains('tr', demoUser).clickContextMenuDialog('Edit', 'Edit User');
 
     cy.get('input[placeholder="Full Name"]').should('exist').click();
     cy.get('input[placeholder="Full Name"]').clear().type('John Doe');
@@ -34,14 +34,14 @@ describe('User Accounts Test', function() {
 
   it('Deactivates the user', function() {
     cy.waitUntilContentLoaded();
-    cy.contains('tr', demoUser).clickContextMenuItem('Set Inactive');
+    cy.contains('tr', demoUser).clickContextMenuAction('Set Inactive');
     cy.contains('td', 'check_box').should('exist');
     cy.screenshot('BDeploy_UserAccounts_Inactive');
   })
 
   it('Activates the user', function() {
     cy.waitUntilContentLoaded();
-    cy.contains('tr', demoUser).clickContextMenuItem('Set Active');
+    cy.contains('tr', demoUser).clickContextMenuAction('Set Active');
     cy.contains('td', 'check_box').should('not.exist');
   })
 

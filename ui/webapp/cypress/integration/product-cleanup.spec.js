@@ -40,7 +40,7 @@ describe('Product Cleanup Test', function() {
   it('Configures a server application', function() {
     cy.gotoInstance(instanceGroupName, instanceUuid);
 
-    cy.get('app-instance-group-logo').parent().clickContextMenuItem('Configure Applications');
+    cy.get('app-instance-group-logo').parent().clickContextMenuAction('Configure Applications');
 
     cy.getNodeCard('master').contains('Drop server application here').should('be.visible').then(el => {
       cy.contains('app-application-descriptor-card', 'Server Application').dragTo(el);

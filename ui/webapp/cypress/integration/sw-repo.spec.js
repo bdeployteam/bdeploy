@@ -20,13 +20,13 @@ describe('Software Repository Tests', () => {
     cy.contains('mat-card', repoName).should('exist');
   });
 
-  it('Delete Instance Group', () => {
+  it('Delete Software Repository', () => {
     cy.visit('/#/softwarerepo/browser');
     cy.waitUntilContentLoaded();
 
     cy.contains('mat-card', repoName)
       .should('exist')
-      .clickContextMenuItem('Delete');
+      .clickContextMenuDialog('Delete');
     cy.contains('mat-dialog-container', 'Delete Software Repository: ' + repoName)
       .should('exist')
       .within(dialog => {

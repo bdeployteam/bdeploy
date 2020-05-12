@@ -42,7 +42,7 @@ Cypress.Commands.add('deleteInstance', function(group, instanceUuid, mode = 'STA
   cy.visitBDeploy('/#/instance/browser/' + group, mode);
 
   // open the menu on the card
-  cy.contains('mat-card', instanceUuid).clickContextMenuItem('Delete')
+  cy.contains('mat-card', instanceUuid).clickContextMenuDialog('Delete', 'Delete Instance')
 
   // place a trigger on the endpoint, so we can later wait for it
   cy.server()
@@ -93,7 +93,7 @@ Cypress.Commands.add('installAndActivate', {prevSubject: true}, (subject) => {
   cy.get('mat-loading-spinner').should('not.exist');
 
   // should be in the instance version list now, install
-  cy.wrap(subject).clickContextMenuItem('Install')
+  cy.wrap(subject).clickContextMenuAction('Install')
 
   // wait for progress and the icon to appear
   cy.wrap(subject).waitUntilContentLoaded()
@@ -107,7 +107,7 @@ Cypress.Commands.add('activate', {prevSubject: true}, (subject) => {
   cy.get('mat-loading-spinner').should('not.exist');
 
   // activate the installed instance version
-  cy.wrap(subject).clickContextMenuItem('Activate')
+  cy.wrap(subject).clickContextMenuAction('Activate')
 
   // wait for progress and the icon to appear
   cy.wrap(subject).waitUntilContentLoaded()
@@ -174,7 +174,7 @@ Cypress.Commands.add('deleteMissingParameter', function(name) {
 
 Cypress.Commands.add('createNewInstanceVersionByDummyChange', function(instanceGroupName, instanceUuid, nodeName, applicationName, mode = 'STANDALONE') {
   cy.gotoInstance(instanceGroupName, instanceUuid, mode);
-  cy.getApplicationConfigCard(nodeName, applicationName).clickContextMenuItem('Configure')
+  cy.getApplicationConfigCard(nodeName, applicationName).clickContextMenuAction('Configure')
 
   // toggle 'Keep Alive' slider
   cy.contains('div', 'Keep Alive').find('.mat-slide-toggle-thumb').first().click();

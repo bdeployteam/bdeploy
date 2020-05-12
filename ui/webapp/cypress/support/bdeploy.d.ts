@@ -153,10 +153,18 @@ declare namespace Cypress {
     /**
      * Chained off any DOM element, will try to find the context menu within this element
      * (looking for a button using the 'more_vert' icon) and then click the named item within.
-     * @param item the context menu item to click
+     * @param item the context menu action to click
      * @returns the original subject the command has been chained of.
      */
-    clickContextMenuItem(item: string): Chainable<Subject>;
+    clickContextMenuDialog(item: string, dialogItem: string): Chainable<Subject>;
+
+    /**
+     * Chained off any DOM element, will try to find the context menu within this element
+     * (looking for a button using the 'more_vert' icon) and then click the named item within.
+     * @param item the context menu dialog entry to click
+     * @returns the original subject the command has been chained of.
+     */
+    clickContextMenuAction(item: string): Chainable<Subject>;
 
     /**
      * Chain off a clickable element which will trigger downloadLocation.click in the application.

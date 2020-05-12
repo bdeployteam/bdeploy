@@ -157,7 +157,7 @@ describe("Central/Managed Basic Test", function() {
   it("configures instance on managed and sync to central", () => {
     cy.gotoInstance(groupName, managedInstance, 'MANAGED');
 
-    cy.get('app-instance-group-logo').parent().clickContextMenuItem('Configure Applications');
+    cy.get('app-instance-group-logo').parent().clickContextMenuAction('Configure Applications');
 
     cy.getNodeCard('master').contains('Drop server application here').should('be.visible').then(el => {
       cy.contains('app-application-descriptor-card', 'Server Application').dragTo(el);
@@ -178,7 +178,7 @@ describe("Central/Managed Basic Test", function() {
     cy.waitUntilContentLoaded();
 
     // create a config file
-    cy.get('app-instance-group-logo').parent().clickContextMenuItem('Configuration Files');
+    cy.get('app-instance-group-logo').parent().clickContextMenuAction('Configuration Files');
     cy.contains('button', 'add').click();
     cy.get('input[placeholder="Enter path for file"]').clear().type('cypress.cfg')
     cy.typeInAceEditor('CY-CFG');
@@ -205,7 +205,7 @@ describe("Central/Managed Basic Test", function() {
     cy.getApplicationConfigCard('master', 'Server Application').should('exist')
     cy.getApplicationConfigCard('Client Applications', 'Client Application').should('exist')
 
-    cy.get('app-instance-group-logo').parent().clickContextMenuItem('Configuration Files');
+    cy.get('app-instance-group-logo').parent().clickContextMenuAction('Configuration Files');
     cy.contains('td', 'cypress.cfg').should('exist');
   });
 
@@ -238,7 +238,7 @@ describe("Central/Managed Basic Test", function() {
     cy.contains('app-product-tag-card', '2.0.0').should('exist').contains('button', 'arrow_upward').click();
     cy.waitUntilContentLoaded();
 
-    cy.getApplicationConfigCard('master', 'Server Application').clickContextMenuItem('Configure')
+    cy.getApplicationConfigCard('master', 'Server Application').clickContextMenuAction('Configure')
 
     // set sleep parameter
     cy.addAndSetOptionalParameter('Sleep Configuration', 'Sleep Timeout', '120');

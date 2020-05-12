@@ -37,7 +37,7 @@ Cypress.Commands.add('deleteUser', function(username) {
   cy.waitUntilContentLoaded();
 
   cy.contains('tr', username).should('exist');
-  cy.contains('tr', username).clickContextMenuItem('Delete');
+  cy.contains('tr', username).clickContextMenuDialog('Delete', 'Delete');
 
   cy.contains('div', 'Do you really want to delete user ' + username + '?').should('exist');
 
@@ -49,7 +49,7 @@ Cypress.Commands.add('deleteUser', function(username) {
  */
 Cypress.Commands.add('setGlobalPermission', function(username, permission, docuScreenshots = false) {
   cy.contains('tr', username).should('exist');
-  cy.contains('tr', username).clickContextMenuItem('Global Permissions');
+  cy.contains('tr', username).clickContextMenuDialog('Global Permissions', 'Global Permissions for');
 
   if (permission === '(none)') {
     cy.get('app-user-global-permissions').contains('span', permission).click();
