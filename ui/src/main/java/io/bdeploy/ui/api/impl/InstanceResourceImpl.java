@@ -54,6 +54,7 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.StreamHelper;
+import io.bdeploy.common.util.TagComparator;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.common.util.UuidHelper;
@@ -155,6 +156,7 @@ public class InstanceResourceImpl implements InstanceResource {
         auth.addRecentlyUsedInstanceGroup(context.getUserPrincipal().getName(), group);
 
         SortedSet<Key> imKeys = InstanceManifest.scan(hive, true);
+        SortedSet<Key> scan = ProductManifest.scan(hive);
 
         for (Key imKey : imKeys) {
             InstanceManifest im = InstanceManifest.of(hive, imKey);
@@ -186,8 +188,25 @@ public class InstanceResourceImpl implements InstanceResource {
                 log.error("Cannot contact master for {}.", config.uuid, e);
             }
 
+            boolean newerVersionAvailable = false;
+
+            if (productDto != null && productDto.key != null) {
+                String productName = productDto.key.getName();
+                String productTag = productDto.key.getTag();
+
+                int asc = -1;
+
+                Optional<String> newestProductVersion = scan.stream().filter(key -> key.getName().equals(productName))
+                        .map(key -> key.getTag()).sorted((a, b) -> (new TagComparator()).compare(a, b) * asc).findFirst();
+
+                if (newestProductVersion.isPresent()) {
+                    String newestProductTag = newestProductVersion.get();
+                    newerVersionAvailable = productTag.compareTo(newestProductTag) * asc >= 0 ? false : true;
+                }
+            }
+
             // Clear security token before sending via REST
-            result.add(InstanceDto.create(config, productDto, activeProduct, activeProductDto));
+            result.add(InstanceDto.create(config, productDto, activeProduct, activeProductDto, newerVersionAvailable));
         }
         return result;
     }
