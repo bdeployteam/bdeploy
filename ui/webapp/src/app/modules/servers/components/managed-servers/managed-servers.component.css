@@ -4,6 +4,7 @@
   bottom: 40px !important;
   left: auto !important;
   position: fixed !important;
+  z-index: 9999;
 }
 
 .list-heading {
