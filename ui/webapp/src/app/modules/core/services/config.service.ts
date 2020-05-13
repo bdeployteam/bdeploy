@@ -24,6 +24,7 @@ export interface AppConfig {
 })
 export class ConfigService {
   config: AppConfig;
+  newVersionInterval;
 
   constructor(
     private http: HttpClient,
@@ -41,6 +42,7 @@ export class ConfigService {
     iconRegistry.addSvgIcon('AIX', sanitizer.bypassSecurityTrustResourceUrl('assets/aix.svg'));
     iconRegistry.addSvgIcon('MACOS', sanitizer.bypassSecurityTrustResourceUrl('assets/mac.svg'));
     setInterval(() => this.isNewVersionAvailable(), 60000);
+    this.newVersionInterval = setInterval(() => this.isNewVersionAvailable(), 60000);
   }
 
   load(): Promise<AppConfig> {
@@ -76,6 +78,10 @@ export class ConfigService {
 
       }
     });
+  }
+
+  public stopNewVersionInterval(){
+    clearInterval(this.newVersionInterval);
   }
 
   public getWsUrl(): string {

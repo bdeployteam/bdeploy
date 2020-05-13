@@ -157,6 +157,8 @@ export class UpdateBrowserComponent implements OnInit {
       return;
     }
 
+    this.cfgService.stopNewVersionInterval();
+
     // perform update call and then wait some seconds for the master to go down.
     await this.openUpdateDialog(this.updService.updateBdeploy(keys.keys).toPromise().then(() => new Promise(r => setTimeout(r, 5000))));
 
