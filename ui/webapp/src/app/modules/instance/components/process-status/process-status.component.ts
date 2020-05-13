@@ -1,8 +1,10 @@
 import { Component, Input, OnChanges, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { ProcessState, ProcessStatusDto } from '../../../../models/gen.dtos';
+import { MinionMode, ProcessState, ProcessStatusDto } from '../../../../models/gen.dtos';
+import { ConfigService } from '../../../core/services/config.service';
 import { unsubscribe } from '../../../shared/utils/object.utils';
 import { ProcessService } from '../../services/process.service';
+
 
 @Component({
   selector: 'app-process-status',
@@ -36,7 +38,10 @@ export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
   public statusClass: string[] = [];
   public statusCount: number;
 
-  constructor(private processService: ProcessService) {
+  constructor(
+    private processService: ProcessService,
+    private configService: ConfigService,
+  ) {
     this.initIcons();
   }
 
@@ -85,7 +90,7 @@ export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     this.showIcon = this.getShowIcon();
-    this.showNotLoadedIcon = !this.processService.loading && !status;
+    this.showNotLoadedIcon = !this.processService.loading && !status && this.isCentral();
     this.showOutOfSyncText = this.getShowOutOfSyncText();
     this.statusIcon = this.getStatusIcon();
     this.statusClass = this.getStatusClass();
@@ -267,4 +272,9 @@ export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
   isCrashedPermanently() {
     return this.processState === ProcessState.CRASHED_PERMANENTLY;
   }
+
+  isCentral() {
+    return this.configService.config.mode === MinionMode.CENTRAL;
+  }
+
 }
