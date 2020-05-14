@@ -30,6 +30,7 @@
     "core-js": "^3.6.5",
     "date-fns": "^2.12.0",
     "js-base64": "^2.5.2",
+    "ng-terminal": "^2.4.0",
     "ng2-ace-editor": "^0.3.9",
     "ng2-dragula": "^2.1.1",
     "ngx-clipboard": "^13.0.0",

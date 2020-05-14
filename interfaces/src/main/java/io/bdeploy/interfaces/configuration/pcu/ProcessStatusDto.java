@@ -43,6 +43,9 @@ public class ProcessStatusDto {
     /** Total number of retry attempts that are executed */
     public long maxRetryCount;
 
+    /** True if the stdin stream is available/open for writing */
+    public boolean hasStdin;
+
     @Override
     public String toString() {
         List<String> logs = new ArrayList<>();
@@ -59,6 +62,9 @@ public class ProcessStatusDto {
         List<String> logs = new ArrayList<>();
         logs.add("ProcessController [" + instanceUid + " / " + instanceTag + " / " + appUid + "]");
         logs.add("State: " + processState);
+        if (processState.isRunning()) {
+            logs.add("STDIN: " + (hasStdin ? "available" : "not available"));
+        }
         if (!processState.isRunning() && stopTime > 0) {
             logs.add("Stopped At: " + format.format(new Date(stopTime)));
         }

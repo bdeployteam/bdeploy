@@ -386,7 +386,8 @@ describe('Creates screenshots for the user documentation', () => {
     // Process Output
     cy.wait(2000); // this is required here to give the process time to start. otherwise the out.txt does not yet exist
     cy.contains('button','message').click();
-    cy.contains('Got some text').should('be.visible');
+    cy.contains('Output of').should('be.visible');
+    cy.wait(1000); // some time for the terminal to paint the output
     cy.screenshot('BDeploy_Process_Output');
     cy.get('.cdk-overlay-backdrop').click('top', {force:true, multiple: true});
 
@@ -403,6 +404,8 @@ describe('Creates screenshots for the user documentation', () => {
 
     // Data File Content
     cy.contains('td', 'documentation.txt').click();
+    cy.contains('mat-toolbar', 'documentation.txt').should('be.visible');
+    cy.wait(1000); // some time for the terminal to paint the output
     cy.screenshot('BDeploy_DataFiles_Show');
     cy.get('.cdk-overlay-backdrop').click('top', {force:true, multiple: true});
   });

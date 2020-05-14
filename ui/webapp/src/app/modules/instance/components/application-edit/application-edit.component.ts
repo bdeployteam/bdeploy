@@ -426,6 +426,13 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
       this.appConfigContext.applicationConfiguration.processControl.keepAlive = v;
     });
     this.formGroup.addControl('$appKeepAlive', keepAlive);
+
+    const attachStdin = new FormControl();
+    attachStdin.setValue(this.appConfigContext.applicationConfiguration.processControl.attachStdin);
+    attachStdin.valueChanges.subscribe(v => {
+      this.appConfigContext.applicationConfiguration.processControl.attachStdin = v;
+    });
+    this.formGroup.addControl('$appAttachStdin', attachStdin);
   }
 
   /** Updates the from to ensure that all desired parameters are rendered */

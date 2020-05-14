@@ -46,4 +46,9 @@ public class ProcessControlDescriptor {
      */
     public long gracePeriod = 30000;
 
+    /**
+     * Specifies if a process expects input on stdin.
+     */
+    public boolean attachStdin = false;
+
 }

@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { NgTerminalModule } from 'ng-terminal';
 import { CoreModule } from '../core/core.module';
 import { FileUploadComponent } from './components/file-upload/file-upload.component';
 import { FileViewerComponent } from './components/file-viewer/file-viewer.component';
@@ -22,6 +23,7 @@ import { RemoteProgressComponent } from './components/remote-progress/remote-pro
   imports: [
     CommonModule,
     CoreModule,
+    NgTerminalModule,
   ],
   exports: [
     RemoteProgressComponent,

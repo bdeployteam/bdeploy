@@ -94,4 +94,13 @@ public class SlaveProcessResourceImpl implements SlaveProcessResource {
         return null;
     }
 
+    @Override
+    public void writeToStdin(String instanceId, String applicationId, String data) {
+        MinionProcessController processController = root.getProcessController();
+        InstanceProcessController instanceController = processController.get(instanceId);
+        if (instanceController == null) {
+            throw new WebApplicationException("Instance with ID '" + instanceId + "' is unknown");
+        }
+        instanceController.writeToStdin(applicationId, data);
+    }
 }

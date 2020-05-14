@@ -444,4 +444,33 @@ public class InstanceProcessController {
         return processMap.get(tag);
     }
 
+    public void writeToStdin(String applicationId, String data) {
+        // Find the process that is running
+        ProcessController process = null;
+        try {
+            readLock.lock();
+            for (ProcessList list : processMap.values()) {
+                Map<String, ProcessController> running = list.getWithState(SET_RUNNING);
+                process = running.get(applicationId);
+                if (process != null) {
+                    break;
+                }
+            }
+        } finally {
+            readLock.unlock();
+        }
+
+        // Throw if we cannot find a running process
+        if (process == null) {
+            throw new PcuRuntimeException("Application not running");
+        }
+        try {
+            process.writeToStdin(data);
+        } catch (Exception ex) {
+            String tag = process.getStatus().instanceTag;
+            logger.log(l -> l.error("Failed to write data to application", ex), tag, applicationId);
+        }
+
+    }
+
 }

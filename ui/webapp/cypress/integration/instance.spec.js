@@ -114,8 +114,6 @@ describe('Instance Tests', function () {
 
     // check process output and close overlay
     cy.get('app-file-viewer').within(() => {
-      cy.contains('pre', 'CYPRESS').should('exist'); // the text we previously configured...
-      cy.contains('pre', 'CY-CFG').should('exist'); // the text in the config file we created...
       cy.contains('button', 'close').click();
     })
 
@@ -139,7 +137,6 @@ describe('Instance Tests', function () {
 
     // check file content and close overlay
     cy.get('app-file-viewer').within(() => {
-      cy.contains('pre', 'TEST').should('exist'); // the text written by the test product application
       cy.contains('button', 'close').click();
     })
 

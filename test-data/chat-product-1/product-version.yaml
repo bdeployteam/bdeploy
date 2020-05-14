@@ -1,0 +1,6 @@
+version: "1.0.0"
+appInfo:
+  chat-app:
+    WINDOWS: "chat-app/app-info.yaml"
+    LINUX: "chat-app/app-info.yaml"
+    #MACOS: "chat-app/app-info.yaml"

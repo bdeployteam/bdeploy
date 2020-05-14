@@ -19,6 +19,7 @@ public class ProcessControlConfiguration {
         config.keepAlive = false;
         config.noOfRetries = 3;
         config.gracePeriod = Duration.ofSeconds(30).toMillis();
+        config.attachStdin = false;
         return config;
     }
 
@@ -42,5 +43,10 @@ public class ProcessControlConfiguration {
      * Grace period in milliseconds for the application to stop when told to do so.
      */
     public long gracePeriod;
+
+    /**
+     * Specifies if a process expects input on stdin.
+     */
+    public boolean attachStdin;
 
 }

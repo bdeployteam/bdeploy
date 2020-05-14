@@ -93,6 +93,12 @@ public class ProcessResourceImpl implements ProcessResource {
         return master.getDataDirectorySnapshots(instanceId);
     }
 
+    @Override
+    public void writeToStdin(String processId, String data) {
+        MasterNamedResource master = getMasterResource();
+        master.writeToStdin(instanceId, processId, data);
+    }
+
     private MasterNamedResource getMasterResource() {
         InstanceManifest manifest = InstanceManifest.load(hive, instanceId, null);
         MasterRootResource root = ResourceProvider.getResource(mp.getControllingMaster(hive, manifest.getManifest()),

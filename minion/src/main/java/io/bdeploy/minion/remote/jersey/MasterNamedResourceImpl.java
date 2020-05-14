@@ -834,4 +834,16 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         return root.createWeakToken(principal);
     }
 
+    @Override
+    public void writeToStdin(String instanceId, String applicationId, String data) {
+        InstanceStatusDto status = getStatus(instanceId);
+        String minion = status.getNodeWhereAppIsRunning(applicationId);
+        if (minion == null) {
+            throw new WebApplicationException("Application is not running on any node.", Status.INTERNAL_SERVER_ERROR);
+        }
+
+        RemoteService service = root.getMinions().getRemote(minion);
+        SlaveProcessResource spc = ResourceProvider.getResource(service, SlaveProcessResource.class, context);
+        spc.writeToStdin(instanceId, applicationId, data);
+    }
 }

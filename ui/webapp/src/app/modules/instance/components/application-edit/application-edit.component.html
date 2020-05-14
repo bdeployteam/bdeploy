@@ -7,14 +7,14 @@
       </div>
     </div>
     <div class="container">
-      <mat-grid-list cols="4" rowHeight="5em">
-        <mat-grid-tile>
+      <mat-grid-list cols="12" rowHeight="5em">
+        <mat-grid-tile colspan="3">
           <mat-form-field>
             <input matInput placeholder="Description" [formControlName]="'$appCfgName'" type="text" />
             <mat-error *ngIf="!isCtrlValid('$appCfgName')">{{getCtrlErrorMessage('$appCfgName')}}</mat-error>
           </mat-form-field>
         </mat-grid-tile>
-        <mat-grid-tile *ngIf="!isClientApplication()">
+        <mat-grid-tile *ngIf="!isClientApplication()" colspan="3">
           <mat-form-field>
             <mat-label>Start Type</mat-label>
             <mat-select [formControlName]="'$appStartType'">
@@ -25,15 +25,21 @@
             <mat-error *ngIf="!isCtrlValid('$appStartType')">{{getCtrlErrorMessage('$appStartType')}}</mat-error>
           </mat-form-field>
         </mat-grid-tile>
-        <mat-grid-tile *ngIf="!isClientApplication()">
+        <mat-grid-tile *ngIf="!isClientApplication()" colspan="2">
           <div class="boolean-param-field">
             <mat-slide-toggle class="boolean-param-widget" [formControlName]="'$appKeepAlive'"> </mat-slide-toggle>
             <label class="boolean-param-label"> Keep Alive </label>
           </div>
         </mat-grid-tile>
-        <mat-grid-tile *ngIf="!isClientApplication()">
+        <mat-grid-tile *ngIf="!isClientApplication()" colspan="2">
+          <div class="boolean-param-field">
+            <mat-slide-toggle class="boolean-param-widget" [formControlName]="'$appAttachStdin'"> </mat-slide-toggle>
+            <label class="boolean-param-label"> Attach STDIN </label>
+          </div>
+        </mat-grid-tile>
+        <mat-grid-tile *ngIf="!isClientApplication()" colspan="2">
           <mat-form-field>
-            <input matInput placeholder="Stop timeout [ms]" [formControlName]="'$appGracePeriod'" type="number"
+            <input matInput placeholder="Stop Timeout [ms]" [formControlName]="'$appGracePeriod'" type="number"
               matTooltip="Maximum time the process may take to terminate after it retrieved a stop signal. If the time exceeds, the application is terminated forcefully." />
             <mat-error *ngIf="!isCtrlValid('$appGracePeriod')">{{getCtrlErrorMessage('$appGracePeriod')}}</mat-error>
           </mat-form-field>

@@ -158,6 +158,7 @@ export class ApplicationService {
       keepAlive: appDesc.processControl.supportsKeepAlive,
       gracePeriod: appDesc.processControl.gracePeriod,
       noOfRetries: appDesc.processControl.noOfRetries,
+      attachStdin: appDesc.processControl.attachStdin,
     };
 
     // Initialize start command

@@ -121,6 +121,9 @@
         [contentFetcher]="getOutputContentFetcher()"
         [contentDownloader]="getContentDownloader()"
         [follow]="isRunning()"
+        [supportsStdin]="supportsStdin()"
+        [hasStdin]="hasStdin()"
+        (inputEvent)="onInputEvent($event)"
       ></app-file-viewer>
     </ng-template>
     <button mat-icon-button (click)="openOutputOverlay(terminal)">

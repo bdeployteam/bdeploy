@@ -28,3 +28,55 @@
 pre {
   white-space: pre-wrap;
 }
+
+.stdin-separator {
+  background: 3px;
+  width: 100%;
+}
+
+.stdin-container {
+  display: flex;
+  flex-direction: row;
+}
+
+.input-container {
+  flex: 1 0 auto;
+}
+
+.input-field {
+  width: 100%;
+}
+
+.input-actions {
+  margin: 4px 8px;
+}
+
+.input-actions button {
+  align-self: start;
+  height: 59px;
+}
+
+.connected {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background-color: lightgreen;
+  padding: 4px 8px;
+  border-radius: 8px;
+  color: white;
+  margin-right: 20px;
+  font-size: smaller;
+}
+
+.connected mat-icon {
+  margin-right: 4px;
+}
+
+.disconnected {
+  background-color: red;
+  padding: 4px 8px;
+  border-radius: 8px;
+  color: white;
+  margin-right: 20px;
+  font-size: smaller;
+}

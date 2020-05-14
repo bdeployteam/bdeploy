@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
@@ -57,4 +58,9 @@ public interface ProcessResource {
     @GET
     @Path("/dataDirSnapshot")
     public List<InstanceDirectory> getDataDirSnapshot();
+
+    @POST
+    @Path("/{processId}/stdin")
+    @RequiredPermission(permission = Permission.WRITE)
+    public void writeToStdin(@PathParam("processId") String processId, String data);
 }

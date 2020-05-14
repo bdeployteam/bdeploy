@@ -313,6 +313,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
     }
     processControlConfig.keepAlive = processControlDesc.supportsKeepAlive;
     processControlConfig.noOfRetries = processControlDesc.noOfRetries;
+    processControlConfig.attachStdin = processControlDesc.attachStdin;
 
     // Lookup parameter in all available applications
     const apps = this.appService.getAllApps(this.processConfig);

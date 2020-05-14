@@ -2,6 +2,7 @@ package io.bdeploy.pcu;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.ProcessHandle.Info;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -86,6 +87,9 @@ public class ProcessController {
 
     /** The native process. Null if not running */
     private ProcessHandle process;
+
+    /** The STDIN of process if available, null otherwise */
+    private OutputStream processStdin;
 
     /** Future to test for process termination */
     private CompletableFuture<ProcessHandle> processExit;
@@ -262,6 +266,7 @@ public class ProcessController {
             dto.stopTime = stopTime.toEpochMilli();
         }
 
+        dto.hasStdin = processState.isRunning() && processStdin != null;
         return dto;
     }
 
@@ -354,6 +359,18 @@ public class ProcessController {
         executeLocked("Detach", false, this::doDetach);
     }
 
+    public void writeToStdin(String data) {
+        if (processStdin != null) {
+            try {
+                String tmp = data + System.lineSeparator();
+                processStdin.write(tmp.getBytes());
+                processStdin.flush();
+            } catch (IOException e) {
+                logger.log(l -> l.error("Failed to write to STDIN.", e));
+            }
+        }
+    }
+
     /** Starts the application */
     private void doStart(boolean resetRecoverCount) {
         if (processState.isRunning()) {
@@ -383,7 +400,9 @@ public class ProcessController {
         }
 
         try {
-            process = launch(processConfig.start).toHandle();
+            Process p = launch(processConfig.start);
+            process = p.toHandle();
+            processStdin = p.getOutputStream();
             processExit = process.onExit();
             startTime = process.info().startInstant().orElseGet(() -> {
                 logger.log(l -> l.error("Start time of process not available, falling back to current time. PID = {}.",

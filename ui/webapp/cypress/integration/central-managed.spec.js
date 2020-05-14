@@ -273,7 +273,6 @@ describe("Central/Managed Basic Test", function() {
 
     // check process output and close overlay
     cy.get('app-file-viewer').within(() => {
-      cy.contains('pre', 'FIXED_VALUE').should('exist'); // default parameter value
       cy.contains('button', 'close').click();
     })
 
@@ -298,7 +297,6 @@ describe("Central/Managed Basic Test", function() {
 
     // check process output and close overlay
     cy.get('app-file-viewer').within(() => {
-      cy.contains('pre', 'FIXED_VALUE').should('exist'); // default parameter value
       cy.contains('button', 'close').click();
     })
 

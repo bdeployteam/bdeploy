@@ -221,4 +221,18 @@ public interface MasterNamedResource {
     @Path("/weak-token")
     public String generateWeakToken(String principal);
 
+    /**
+     * Writes data to the stdin stream of an application.
+     *
+     * @param instanceId
+     *            the unique id of the instance.
+     * @param applicationId
+     *            the unique ID of the application.
+     * @param data
+     *            the data to write to stdin of the application.
+     */
+    @POST
+    @Path("/stdin")
+    public void writeToStdin(@QueryParam("u") String instanceId, @QueryParam("a") String applicationId, String data);
+
 }

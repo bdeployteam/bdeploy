@@ -67,16 +67,16 @@ int randomServerPort() {
     }
 }
 
-void createProductTasks(String prodNum) {
-    task "product${prodNum}Zip" (type: Zip) {
-        from fileTree(dir: "${projectDir}/test-product-${prodNum}")
-        archiveName "test-product-${prodNum}-direct.zip"
+void createProductTasks(String taskName, String prod) {
+    task "${taskName}" (type: Zip) {
+        from fileTree(dir: "${projectDir}/${prod}")
+        archiveName "${prod}-direct.zip"
         destinationDir file("${buildDir}/distribution/")
-        inputs.dir file("${projectDir}/test-product-${prodNum}")
+        inputs.dir file("${projectDir}/${prod}")
     }
 
     build {
-        dependsOn "product${prodNum}Zip"
+        dependsOn "${taskName}"
     }
 }
 
@@ -185,8 +185,9 @@ task externalSoftwareZip(type: Zip, dependsOn: [externalSoftwareWindows, externa
 }
 
 // now define the dynamic tasks for each product
-createProductTasks("1")
-createProductTasks("2")
+createProductTasks("product1Zip", "test-product-1")
+createProductTasks("product2Zip", "test-product-2")
+createProductTasks("product3Zip", "chat-product-1")
 
 // now the tasks for binary (upgrade) tests
 task releaseTest() {
@@ -218,6 +219,7 @@ githubRelease {
     releaseAssets.from(fileTree(project(":api").resolve.outputDir))
     releaseAssets.from(project(":test-data").product1Zip)
     releaseAssets.from(project(":test-data").product2Zip)
+    releaseAssets.from(project(":test-data").product3Zip)
 
     // increase read and write timeouts as the files are rather large :)
     client new OkHttpClient.Builder().readTimeout(10, TimeUnit.MINUTES).writeTimeout(10, TimeUnit.MINUTES).build();

@@ -1,0 +1,6 @@
+name: "Demo Chat App"
+product: "io.bdeploy/chat-app"
+vendor: BDeploy Team
+applications:
+- "chat-app"
+versionFile: "product-version.yaml"

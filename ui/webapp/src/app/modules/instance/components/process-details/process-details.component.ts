@@ -165,6 +165,14 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
     return this.isRunning() || this.isRunningUnstable();
   }
 
+  supportsStdin(): boolean {
+    return this.appConfig.processControl.attachStdin;
+  }
+
+  hasStdin(): boolean {
+    return this.appConfig.processControl.attachStdin && this.isRunning() && this.status.hasStdin;
+  }
+
   /** Returns whether or not this tag represents the active one */
   isActivated() {
     return this.instanceTag === this.activatedInstanceTag;
@@ -425,5 +433,9 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
       this.overlayRef.dispose();
       this.overlayRef = null;
     }
+  }
+
+  public onInputEvent(input: string) {
+    this.processService.writeToStdin(this.instanceGroup, this.instanceId, this.appConfig.uid, input).subscribe(r => {});
   }
 }

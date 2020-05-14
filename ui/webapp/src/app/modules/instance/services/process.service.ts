@@ -177,6 +177,14 @@ export class ProcessService {
   }
 
   /**
+   * Starts the application with the given ID.
+   */
+  public writeToStdin(instanceGroup: string, instance: string, processId: string, data: string) {
+    const url = this.instanceService.buildInstanceUrl(instanceGroup, instance) + '/processes/' + processId + '/stdin';
+    return this.http.post(url, data);
+  }
+
+  /**
    * Groups the running applications by their instance tag.
    */
   groupByTag(apps: ProcessStatusDto[]) {

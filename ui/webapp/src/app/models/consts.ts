@@ -143,4 +143,5 @@ export const EMPTY_PROCESS_CONTROL_CONFIG: ProcessControlConfiguration = {
   keepAlive: false,
   noOfRetries: 5,
   startType: ApplicationStartType.MANUAL,
+  attachStdin: false,
 };
