@@ -3,6 +3,7 @@ package io.bdeploy.ui.api.impl;
 import javax.inject.Singleton;
 
 import org.glassfish.grizzly.http.server.CLStaticHttpHandler;
+import org.glassfish.grizzly.http.server.HttpHandlerRegistration;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 import io.bdeploy.bhive.util.StorageHelper;
@@ -18,7 +19,7 @@ public class UiResources {
     }
 
     public static void register(RegistrationTarget server) {
-        server.registerRoot(new CLStaticHttpHandler(UiResources.class.getClassLoader(), "/webapp/"));
+        server.addHandler(new CLStaticHttpHandler(UiResources.class.getClassLoader(), "/webapp/"), HttpHandlerRegistration.ROOT);
         server.register(AuthResourceImpl.class);
         server.register(AuditResourceImpl.class);
         server.register(HiveResourceImpl.class);

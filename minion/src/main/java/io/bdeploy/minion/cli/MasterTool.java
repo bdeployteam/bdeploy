@@ -23,7 +23,6 @@ import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.SlaveDeploymentResource;
-import io.bdeploy.jersey.JerseyCorsFilter;
 import io.bdeploy.jersey.JerseyServer;
 import io.bdeploy.jersey.RegistrationTarget;
 import io.bdeploy.jersey.audit.AuditRecord;
@@ -105,11 +104,13 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
                     }
                     return !info.inactive;
                 });
+                srv.setCorsEnabled(config.allowCors());
+
                 r.setUpdateManager(new JerseyAwareMinionUpdateManager(srv));
                 r.onStartup();
 
                 delegate.setDelegate(srv.getRemoteActivityReporter());
-                registerMasterResources(srv, config.publishWebapp(), config.allowCors(), r, srv.getRemoteActivityReporter());
+                registerMasterResources(srv, config.publishWebapp(), r, srv.getRemoteActivityReporter());
 
                 if (config.shutdownToken() != null) {
                     srv.register(new RemoteShutdownImpl(srv, config.shutdownToken()));
@@ -123,7 +124,7 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
         }
     }
 
-    public static void registerMasterResources(RegistrationTarget srv, boolean webapp, boolean allowcors, MinionRoot minionRoot,
+    public static void registerMasterResources(RegistrationTarget srv, boolean webapp, MinionRoot minionRoot,
             ActivityReporter reporter) {
         BHiveRegistry reg = SlaveTool.registerCommonResources(srv, minionRoot, reporter);
         minionRoot.setupServerTasks(true, minionRoot.getMode());
@@ -149,10 +150,6 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
 
         if (webapp) {
             UiResources.register(srv);
-        }
-
-        if (allowcors) {
-            srv.register(JerseyCorsFilter.class);
         }
 
         // scan storage locations, register hives
