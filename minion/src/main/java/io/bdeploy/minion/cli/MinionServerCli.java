@@ -33,6 +33,7 @@ public class MinionServerCli extends ToolBase {
         register(RemoteDeploymentTool.class);
         register(RemoteProcessTool.class);
         register(RemoteInstanceGroupTool.class);
+        register(RemotePluginTool.class);
     }
 
     public static void main(String... args) throws Exception {

@@ -155,6 +155,8 @@
               </ng-template>
 
               <div class="icons">
+                <app-custom-editor *ngIf='param.desc.customEditor && !readonly' (valueConfirmed)='customValueConfirmed(param, $event)' [instanceGroup]='instanceGroup' [descriptor]='param.desc' [value]='param.conf' [product]='appConfigContext.product'></app-custom-editor>
+
                 <button mat-icon-button type="button" #globalButton (click)="openOverlay(param, globalButton, globalPopup)" *ngIf="param.desc.global">
                   <mat-icon class="icons">public</mat-icon>
                 </button>

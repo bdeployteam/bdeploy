@@ -116,6 +116,11 @@ public class ParameterDescriptor implements Comparable<ParameterDescriptor> {
      */
     public List<String> suggestedValues = new ArrayList<>();
 
+    /**
+     * If set, try to use a custom editor contributed by a plugin to edit this parameter.
+     */
+    public String customEditor;
+
     @Override
     public int compareTo(ParameterDescriptor o) {
         return uid.compareTo(o.uid);

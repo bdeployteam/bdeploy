@@ -51,6 +51,8 @@ import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
+import io.bdeploy.interfaces.plugin.PluginManager;
+import io.bdeploy.jersey.JerseyServer;
 import io.bdeploy.jersey.audit.Auditor;
 import io.bdeploy.jersey.audit.RollingFileAuditor;
 import io.bdeploy.minion.job.CleanupDownloadDirJob;
@@ -59,6 +61,7 @@ import io.bdeploy.minion.migration.MinionStateMigration;
 import io.bdeploy.minion.migration.SettingsConfigurationMigration;
 import io.bdeploy.minion.migration.SystemUserMigration;
 import io.bdeploy.minion.migration.UpdatePackagingMigration;
+import io.bdeploy.minion.plugin.PluginManagerImpl;
 import io.bdeploy.minion.user.UserDatabase;
 import io.bdeploy.pcu.InstanceProcessController;
 import io.bdeploy.pcu.MinionProcessController;
@@ -92,6 +95,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     private MinionUpdateManager updateManager = t -> log.error("No Update Manager, cannot update Minion!");
 
     private Scheduler scheduler;
+    private PluginManager pluginManager;
 
     public MinionRoot(Path root, ActivityReporter reporter) {
         super(root.resolve("etc"));
@@ -640,6 +644,19 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         } catch (Exception e) {
             throw new WebApplicationException("Cannot sign executable", e);
         }
+    }
+
+    public PluginManager createPluginManager(JerseyServer srv) {
+        if (pluginManager != null) {
+            return pluginManager;
+        }
+        pluginManager = new PluginManagerImpl(getHive(), srv);
+        return pluginManager;
+    }
+
+    @Override
+    public PluginManager getPluginManager() {
+        return pluginManager;
     }
 
 }

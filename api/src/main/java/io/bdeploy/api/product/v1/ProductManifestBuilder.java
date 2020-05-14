@@ -35,11 +35,13 @@ public class ProductManifestBuilder {
     public static final String PRODUCT_LABEL = "X-Product";
     public static final String PRODUCT_DESC = "product.json";
     public static final String CONFIG_ENTRY = "config";
+    public static final String PLUGINS_ENTRY = "plugins";
 
     private final Map<String, Manifest.Key> applications = new TreeMap<>();
     private final Map<String, String> labels = new TreeMap<>();
-    private Path configTemplates;
     private final ProductDescriptor desc;
+    private Path configTemplates;
+    private Path pluginFolder;
 
     public ProductManifestBuilder(ProductDescriptor desc) {
         this.desc = desc;
@@ -52,6 +54,11 @@ public class ProductManifestBuilder {
 
     public ProductManifestBuilder setConfigTemplates(Path templates) {
         configTemplates = templates;
+        return this;
+    }
+
+    public ProductManifestBuilder setPluginFolder(Path plugins) {
+        pluginFolder = plugins;
         return this;
     }
 
@@ -75,6 +82,12 @@ public class ProductManifestBuilder {
         if (configTemplates != null) {
             ObjectId configId = hive.execute(new ImportTreeOperation().setSourcePath(configTemplates));
             tree.add(new Tree.Key(CONFIG_ENTRY, Tree.EntryType.TREE), configId);
+        }
+
+        // import product-bound plugins
+        if (pluginFolder != null) {
+            ObjectId pluginId = hive.execute(new ImportTreeOperation().setSourcePath(pluginFolder));
+            tree.add(new Tree.Key(PLUGINS_ENTRY, Tree.EntryType.TREE), pluginId);
         }
 
         Manifest.Builder m = new Manifest.Builder(manifest);
@@ -135,7 +148,16 @@ public class ProductManifestBuilder {
             builder.setConfigTemplates(cfgDir);
         }
 
-        // 8. generate product
+        // 8. product-bound plugins
+        if (prod.pluginFolder != null) {
+            Path pluginPath = descriptorPath.getParent().resolve(prod.pluginFolder);
+            if (!Files.isDirectory(pluginPath)) {
+                throw new IllegalStateException("Plugin directory not found: " + pluginPath);
+            }
+            builder.setPluginFolder(pluginPath);
+        }
+
+        // 9. generate product
         builder.insert(hive, prodKey, prod.product);
 
         return prodKey;

@@ -2,7 +2,7 @@ import { cloneDeep } from 'lodash';
 import { getAppKeyName } from '../modules/shared/utils/manifest.utils';
 import { ApplicationGroup } from './application.model';
 import { CLIENT_NODE_NAME, EMPTY_INSTANCE_NODE_CONFIGURATION, EMPTY_INSTANCE_NODE_CONFIGURATION_DTO } from './consts';
-import { ApplicationConfiguration, ApplicationDto, ApplicationType, InstanceConfiguration, InstanceNodeConfigurationDto, InstanceNodeConfigurationListDto, InstanceVersionDto, MinionDto } from './gen.dtos';
+import { ApplicationConfiguration, ApplicationDto, ApplicationType, InstanceConfiguration, InstanceNodeConfigurationDto, InstanceNodeConfigurationListDto, InstanceVersionDto, ManifestKey, MinionDto } from './gen.dtos';
 
 /**
  * Context information for EventEmitter
@@ -11,6 +11,7 @@ export class EditAppConfigContext {
   constructor(
     public instanceNodeConfigurationDto: InstanceNodeConfigurationDto,
     public applicationConfiguration: ApplicationConfiguration,
+    public product: ManifestKey,
   ) {}
 }
 

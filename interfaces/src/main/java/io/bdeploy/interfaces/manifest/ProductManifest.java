@@ -2,6 +2,8 @@ package io.bdeploy.interfaces.manifest;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -14,6 +16,7 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.objects.view.TreeView;
+import io.bdeploy.bhive.objects.view.scanner.TreeVisitor;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.ManifestRefScanOperation;
@@ -35,15 +38,17 @@ public class ProductManifest {
     private final ProductDescriptor desc;
     private final Manifest manifest;
     private final ObjectId cfgTreeId;
+    private final List<ObjectId> plugins;
 
     private ProductManifest(String name, Manifest manifest, SortedSet<Manifest.Key> applications,
-            SortedSet<Manifest.Key> references, ProductDescriptor desc, ObjectId cfgTreeId) {
+            SortedSet<Manifest.Key> references, ProductDescriptor desc, ObjectId cfgTreeId, List<ObjectId> plugins) {
         this.prodName = name;
         this.manifest = manifest;
         this.applications = applications;
         this.references = references;
         this.desc = desc;
         this.cfgTreeId = cfgTreeId;
+        this.plugins = plugins;
     }
 
     /**
@@ -91,11 +96,28 @@ public class ProductManifest {
             cfgEntry = entries.get(configKey);
         }
 
-        return new ProductManifest(label, mf, appRefs, otherRefs, desc, cfgEntry);
+        List<ObjectId> plugins = new ArrayList<>();
+        Tree.Key pluginKey = new Tree.Key(ProductManifestBuilder.PLUGINS_ENTRY, Tree.EntryType.TREE);
+        if (entries.containsKey(pluginKey)) {
+            TreeView tv = hive.execute(new ScanOperation().setTree(entries.get(pluginKey)));
+            tv.visit(new TreeVisitor.Builder().onBlob(b -> plugins.add(b.getElementId())).build());
+        }
+
+        return new ProductManifest(label, mf, appRefs, otherRefs, desc, cfgEntry, plugins);
     }
 
+    /**
+     * @return the tree ID of the config file template folder.
+     */
     public ObjectId getConfigTemplateTreeId() {
         return cfgTreeId;
+    }
+
+    /**
+     * @return a list of plugin files discovered in the products plugin folder.
+     */
+    public List<ObjectId> getPlugins() {
+        return plugins;
     }
 
     /**

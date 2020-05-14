@@ -1,5 +1,6 @@
 package io.bdeploy.minion.cli;
 
+import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.SortedSet;
 
@@ -10,6 +11,8 @@ import io.bdeploy.api.product.v1.impl.RemoteDependencyFetcher;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.bhive.op.ObjectLoadOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.common.cfg.Configuration.ConfigurationNameMapping;
@@ -22,6 +25,7 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
+import io.bdeploy.interfaces.plugin.PluginHeader;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.minion.cli.ProductTool.ProductConfig;
 
@@ -110,6 +114,17 @@ public class ProductTool extends RemoteServiceTool<ProductConfig> {
                 out().println("  Other References:");
                 for (Manifest.Key otherKey : pmf.getReferences()) {
                     out().println(String.format("    %1$-48s", otherKey));
+                }
+                if (!pmf.getPlugins().isEmpty()) {
+                    out().println("  Product-Bound Plugins:");
+                    for (ObjectId id : pmf.getPlugins()) {
+                        try (InputStream is = hive.execute(new ObjectLoadOperation().setObject(id))) {
+                            PluginHeader hdr = PluginHeader.read(is);
+                            out().println(String.format("    %1$-40s %2$20s %3$10s", id, hdr.name, hdr.version));
+                        } catch (Exception e) {
+                            out().println("    cannot read plugin " + id + ": " + e.toString());
+                        }
+                    }
                 }
             }
         }

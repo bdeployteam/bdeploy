@@ -99,6 +99,7 @@ export const EMPTY_PARAMETER_DESCRIPTOR: ParameterDescriptor = {
   valueAsSeparateArg: false,
   valueSeparator: null,
   suggestedValues: null,
+  customEditor: null,
 };
 
 export const EMPTY_DEPLOYMENT_STATE: InstanceStateRecord = {

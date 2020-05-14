@@ -40,6 +40,7 @@ import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.minion.MinionDto;
+import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
@@ -145,8 +146,8 @@ public class CleanupHelper {
 
         // cleanup of unused products
         if (cfg.autoDelete) {
-            instanceGroupActions.addAll(
-                    deleteUnusedProducts(context, hive, instanceVersions4Uninstall, allManifests4deletion, immediate, provider));
+            instanceGroupActions.addAll(deleteUnusedProducts(context, hive, minion, instanceVersions4Uninstall,
+                    allManifests4deletion, immediate, provider));
         }
 
         instanceGroupActions.addAll(cleanupMetaManifests(context, hive, allManifests4deletion, immediate, provider));
@@ -277,7 +278,7 @@ public class CleanupHelper {
         return actions;
     }
 
-    private static List<CleanupAction> deleteUnusedProducts(SecurityContext context, BHive hive,
+    private static List<CleanupAction> deleteUnusedProducts(SecurityContext context, BHive hive, Minion minion,
             Map<String, SortedSet<Key>> instanceVersions4Uninstall, SortedSet<Manifest.Key> allManifests4deletion,
             boolean immediate, MasterProvider provider) {
         List<CleanupAction> actions = new ArrayList<>();
@@ -307,7 +308,8 @@ public class CleanupHelper {
 
         // create actions for unused products (older than the oldest product in use)
         SortedSet<Manifest.Key> manifests4deletion = new TreeSet<>();
-        createDeleteProductsActions(hive, actions, manifests4deletion, allProductsMap, usedProductsMap);
+        createDeleteProductsActions(hive, minion.getPluginManager(), actions, manifests4deletion, allProductsMap,
+                usedProductsMap);
 
         if (immediate) {
             perform(context, hive, actions, provider);
@@ -318,7 +320,7 @@ public class CleanupHelper {
         return actions;
     }
 
-    private static void createDeleteProductsActions(BHive hive, List<CleanupAction> actions,
+    private static void createDeleteProductsActions(BHive hive, PluginManager pmgr, List<CleanupAction> actions,
             SortedSet<Manifest.Key> manifests4deletion, Map<String, SortedSet<Key>> allProductsMap,
             Map<String, SortedSet<Key>> usedProductsMap) {
         for (SortedSet<Key> pVersionKeys : allProductsMap.values()) {
@@ -333,6 +335,10 @@ public class CleanupHelper {
                 // If sorting of tags is broken, it should affect both sets (allProductsMap AND usedProducts) and this should
                 // protect all used products in use, but it's still being checked here again ;-)
                 if (usedProducts == null || !usedProducts.contains(versionKey)) {
+                    // if it's unused, we can anyhow unload any plugin loaded from here.
+                    pmgr.unloadProduct(versionKey);
+
+                    // prepare actions for removing the product all together.
                     ProductManifest pm = ProductManifest.of(hive, versionKey);
                     manifests4deletion.add(versionKey);
                     actions.add(new CleanupAction(CleanupType.DELETE_MANIFEST, versionKey.toString(), "Delete product \""

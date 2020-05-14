@@ -1,0 +1,10 @@
+<ng-template #editorPopup>
+  <h3>Edit {{descriptor.name}}</h3>
+  <div #editorPanel class='editorPanel'></div>
+  <div mat-dialog-actions align="end">
+    <button mat-raised-button [mat-dialog-close]="null">Cancel</button>
+    <button mat-raised-button [disabled]='!valid' [mat-dialog-close]="currentValue" color="primary">Apply</button>
+  </div>
+</ng-template>
+
+<button mat-icon-button [disabled]='!plugin' (click)='showEditor(editorPopup)'><mat-icon [matTooltip]='!plugin ? "Required custom editor not (yet) loaded" : "Open custom editor to modify the parameter value"'>edit</mat-icon></button>

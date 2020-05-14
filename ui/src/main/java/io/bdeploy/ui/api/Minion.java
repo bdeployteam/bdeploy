@@ -8,6 +8,7 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
+import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.jersey.audit.Auditor;
 
 /**
@@ -106,5 +107,10 @@ public interface Minion {
      *            the URL that will be embedded in the signature.
      */
     public void signExecutable(File executable, String appName, String appUrl);
+
+    /**
+     * @return the {@link PluginManager} for the minion.
+     */
+    public PluginManager getPluginManager();
 
 }

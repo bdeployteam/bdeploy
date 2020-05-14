@@ -28,6 +28,7 @@ import { ProcessStatusComponent } from './components/process-status/process-stat
 import { InstanceRoutingModule } from './instance-routing.module';
 import { InstanceSyncComponent } from './components/instance-sync/instance-sync.component';
 import { ApplicationEditEndpointsComponent } from './components/application-edit-endpoints/application-edit-endpoints.component';
+import { CustomEditorComponent } from './components/custom-editor/custom-editor.component';
 
 @NgModule({
   declarations: [
@@ -55,6 +56,7 @@ import { ApplicationEditEndpointsComponent } from './components/application-edit
     InstanceNotificationsItemComponent,
     InstanceSyncComponent,
     ApplicationEditEndpointsComponent,
+    CustomEditorComponent,
   ],
   entryComponents: [
     ApplicationEditManualComponent,

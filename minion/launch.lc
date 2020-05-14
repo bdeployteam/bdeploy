@@ -30,6 +30,7 @@ java configuration Master-Init : minion-base {
 	argument "--mode=STANDALONE";
 	argument "--initUser=admin";
 	argument "--initPassword=admin";
+	argument "--tokenFile=${workspace_loc}/runtime/token.txt";
 }
 
 /**
@@ -166,6 +167,21 @@ java configuration Master-MigrateMode : minion-base {
 	argument "set-mode";
 	argument "--root=${workspace_loc}/runtime/master";
 	argument "--mode=${string_prompt:Target Mode}";
+}
+
+/* Plugin related configurations */
+java configuration Master-ListPlugins : minion-base {
+	argument "remote-plugin";
+	argument "--remote=https://localhost:7701/api";
+	argument "--tokenFile=${workspace_loc}/runtime/token.txt";
+	argument "--list";
+}
+
+java configuration Master-AddPlugin : minion-base {
+	argument "remote-plugin";
+	argument "--remote=https://localhost:7701/api";
+	argument "--tokenFile=${workspace_loc}/runtime/token.txt";
+	argument "--add=${file_prompt:Plugin JAR}";
 }
 
 /**

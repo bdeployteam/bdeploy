@@ -134,6 +134,17 @@ public class BDeployBuildProductTask {
                     FileUtils.mkdirs(cfgDir);
                     FileUtils.copyDirectory(source, cfgDir);
                 }
+
+                if (pd.pluginFolder != null && !pd.pluginFolder.isEmpty()) {
+                    File source = desc.productInfo.getParent().resolve(pd.pluginFolder).toFile();
+                    if (!source.isDirectory()) {
+                        throw new IllegalStateException("Cannot find " + source);
+                    }
+                    File pluginDir = new File(prodInfoDir, source.getName());
+                    FileUtils.deleteDirectory(pluginDir);
+                    FileUtils.mkdirs(pluginDir);
+                    FileUtils.copyDirectory(source, pluginDir);
+                }
             }
 
             // 2: create product and import into bhive
