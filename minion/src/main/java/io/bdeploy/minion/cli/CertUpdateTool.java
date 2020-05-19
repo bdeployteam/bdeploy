@@ -41,6 +41,9 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
 
         @Help(value = "Override user questions and assume consent", arg = false)
         boolean yes() default false;
+
+        @Help("Target file to export the current certificate and key to")
+        String export();
     }
 
     public CertUpdateTool() {
@@ -77,6 +80,9 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
                 doUpdateCertificate(mr, ks, ksp, cert);
 
                 out().println("Certificate updated.");
+            } else if (config.export() != null) {
+                Path pem = Paths.get(config.export());
+                BCX509Helper.exportPrivateCertificateAsPem(ks, ksp, pem);
             } else {
                 out().println("Nothing to do...");
             }

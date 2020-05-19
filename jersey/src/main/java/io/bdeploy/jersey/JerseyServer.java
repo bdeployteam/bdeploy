@@ -309,6 +309,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
 
                 cc.setCompressionMode(CompressionMode.ON);
                 cc.setCompressionMinSize(CL_BUFFER_SIZE);
+                cc.setDecompressionEnabled(true);
 
                 // enable WebSockets on the listener
                 listener.registerAddOn(wsao);
