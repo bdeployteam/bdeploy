@@ -9,7 +9,7 @@ import { cloneDeep, isEqual } from 'lodash';
 import { Observable, of } from 'rxjs';
 import { CustomParameter, findFirstParameter, findLastParameter, GroupNames, LinkedParameter, NamedParameter, UnknownParameter } from '../../../../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_PARAMETER_CONFIGURATION, EMPTY_PARAMETER_DESCRIPTOR } from '../../../../models/consts';
-import { ApplicationConfiguration, ApplicationDescriptor, ApplicationStartType, ParameterDescriptor, ParameterType } from '../../../../models/gen.dtos';
+import { ApplicationConfiguration, ApplicationDescriptor, ApplicationStartType, CustomEditor, ParameterDescriptor, ParameterType } from '../../../../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../../../../models/process.model';
 import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
 import { MessageboxService } from '../../../shared/services/messagebox.service';
@@ -478,7 +478,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     }
 
     // Disable in case of a fixed parameter
-    if (descriptor.fixed || descriptor.customEditor) {
+    if (descriptor.fixed) {
       control.disable();
     }
 
@@ -489,6 +489,15 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
 
     control.updateValueAndValidity();
     return control;
+  }
+
+  /**
+   * Disables a control once it's custom editor is loaded.
+   */
+  disableForCustomEditor(param: LinkedParameter, editor: CustomEditor) {
+    if (!editor.allowDirectEdit) {
+      this.formGroup.controls[param.desc.uid].disable();
+    }
   }
 
   /** Opens the dialog manage custom parameters */

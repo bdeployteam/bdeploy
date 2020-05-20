@@ -1,7 +1,10 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, ElementRef, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { ManifestKey, ParameterConfiguration, ParameterDescriptor, PluginInfoDto } from 'src/app/models/gen.dtos';
-import { EditorPlugin, PluginService } from 'src/app/modules/core/services/plugin.service';
+import { tap } from 'rxjs/operators';
+import { CustomEditor, ManifestKey, ParameterConfiguration, ParameterDescriptor, PluginInfoDto } from 'src/app/models/gen.dtos';
+import { PluginService } from 'src/app/modules/core/services/plugin.service';
+import { EditorPlugin } from 'src/app/modules/shared/plugins/plugin.editor';
 
 @Component({
   selector: 'app-custom-editor',
@@ -25,10 +28,14 @@ export class CustomEditorComponent implements OnInit {
   @Output()
   valueConfirmed: EventEmitter<any> = new EventEmitter<any>();
 
+  @Output()
+  pluginLoaded: EventEmitter<CustomEditor> = new EventEmitter<CustomEditor>();
+
   @ViewChild('editorPanel', {static: false})
   editorPanel: ElementRef<any>;
 
   plugin: PluginInfoDto;
+  error: HttpErrorResponse;
 
   currentValue: any;
   valid = false;
@@ -37,11 +44,19 @@ export class CustomEditorComponent implements OnInit {
   constructor(private plugins: PluginService, private dialog: MatDialog) { }
 
   ngOnInit(): void {
-    this.plugins.getEditorPlugin(this.instanceGroup, this.product, this.descriptor.customEditor).subscribe(r => this.plugin = r);
+    this.plugins.getEditorPlugin(this.instanceGroup, this.product, this.descriptor.customEditor).pipe(tap(n => {}, e => {
+      console.log('Cannot load custom editor for type ' + this.descriptor.customEditor, e);
+      if (e instanceof HttpErrorResponse) {
+        this.error = e;
+      }
+    })).subscribe(r => {
+      this.plugin = r;
+      this.pluginLoaded.emit(this.findEditor());
+    });
   }
 
   showEditor(popup: TemplateRef<any>) {
-    this.plugins.load(this.plugin, this.plugin.editors.find(e => e.typeName === this.descriptor.customEditor)).then(m => {
+    this.plugins.load(this.plugin, this.findEditor()).then(m => {
       const editor = new m.default(this.plugins.getApi(this.plugin)) as EditorPlugin;
 
       this.dialogRef = this.dialog.open(popup, {
@@ -60,4 +75,7 @@ export class CustomEditorComponent implements OnInit {
     });
   }
 
+  private findEditor(): CustomEditor {
+    return this.plugin.editors.find(e => e.typeName === this.descriptor.customEditor);
+  }
 }

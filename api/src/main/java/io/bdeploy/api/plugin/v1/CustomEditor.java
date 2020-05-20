@@ -17,17 +17,21 @@ public class CustomEditor {
 
     private final String modulePath;
     private final String typeName;
+    private final boolean allowDirectEdit;
 
     /**
      * @param modulePath the relative path to the plugins ES6 module file. Must be hosted by a {@link PluginAssets} in the same
      *            plugin.
      * @param typeName the type name of the editor. This is a custom string which is defined by the plugin. app-info.yaml
      *            maintainers can use this type name to request usage of this plugins {@link CustomEditor}.
+     * @param allowDirectEdit whether direct/manual editing of the raw value should still be permitted.
      */
     @JsonCreator
-    public CustomEditor(@JsonProperty("modulePath") String modulePath, @JsonProperty("typeName") String typeName) {
+    public CustomEditor(@JsonProperty("modulePath") String modulePath, @JsonProperty("typeName") String typeName,
+            @JsonProperty("allowDirectEdit") boolean allowDirectEdit) {
         this.modulePath = modulePath;
         this.typeName = typeName;
+        this.allowDirectEdit = allowDirectEdit;
     }
 
     /**
@@ -42,6 +46,13 @@ public class CustomEditor {
      */
     public String getTypeName() {
         return typeName;
+    }
+
+    /**
+     * @return whether direct editing is still allowed even though the plugin was loaded.
+     */
+    public boolean isAllowDirectEdit() {
+        return allowDirectEdit;
     }
 
 }

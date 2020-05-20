@@ -1,7 +1,7 @@
 :prewrap!:
 :prewrap!:
 :favicon: images/logo.ico
-:source-highlighter: coderay
+:source-highlighter: prettify
 :icons: font
 :docinfo: shared
 :docinfodir: ../common

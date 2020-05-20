@@ -42,6 +42,9 @@ public class RemotePluginTool extends RemoteServiceTool<RemotePluginConfig> {
         @Help("Path to a plugin JAR file which should be added as global plugin")
         String add();
 
+        @Help(value = "Replace an existing plugin of the same name and version", arg = false)
+        boolean replace() default false;
+
         @Help("ID of a global plugin to unload and uninstall from the server")
         String remove();
 
@@ -75,7 +78,7 @@ public class RemotePluginTool extends RemoteServiceTool<RemotePluginConfig> {
             }
         } else if (config.add() != null) {
             try {
-                addPlugin(svc, config.add());
+                addPlugin(svc, config.add(), config.replace());
             } catch (IOException e) {
                 throw new IllegalStateException("Cannot add plugin", e);
             }
@@ -88,7 +91,7 @@ public class RemotePluginTool extends RemoteServiceTool<RemotePluginConfig> {
         }
     }
 
-    private void addPlugin(RemoteService svc, String file) throws IOException {
+    private void addPlugin(RemoteService svc, String file, boolean replace) throws IOException {
         Path plugin = Paths.get(file);
         if (!Files.isRegularFile(plugin)) {
             out().println("Not a file: " + file);
@@ -108,6 +111,9 @@ public class RemotePluginTool extends RemoteServiceTool<RemotePluginConfig> {
             mp.bodyPart(bp);
 
             WebTarget target = JerseyClientFactory.get(svc).getBaseTarget().path("/plugin-admin/upload-global");
+            if (replace) {
+                target = target.queryParam("replace", true);
+            }
             Response response = target.request().post(Entity.entity(mp, MediaType.MULTIPART_FORM_DATA_TYPE));
 
             if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {

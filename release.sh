@@ -40,6 +40,14 @@ if [[ -z "${GH_TOKEN}" ]]; then
     die "GH_TOKEN variable must contain the GitHub token which is allowed to create a release"
 fi
 
+if [[ -z "${SONATYPE_USER}" ]]; then
+    die "SONATYPE_USER variable must contain the Nexus user which is allowed to push and create a release"
+fi
+
+if [[ -z "${SONATYPE_TOKEN}" ]]; then
+    die "SONATYPE_TOKEN variable must contain the Nexus token which is allowed to create a release"
+fi
+
 CURRENT_VER="$(cat "$ROOT/bdeploy.version")"
 
 if [[ ${CURRENT_VER} != *"-SNAPSHOT" ]]; then
@@ -98,6 +106,7 @@ git commit -m "Release $REL_VER"
 git push https://$GH_USER:$GH_TOKEN@github.com/bdeployteam/bdeploy.git HEAD:master
 
 ./gradlew githubRelease -PgithubToken=$GH_TOKEN "${GRADLE_ARG_ARR[@]}"
+./gradlew publish -PsonatypeUser=$SONATYPE_USER -PsonatypeToken=$SONATYPE_TOKEN "${GRADLE_ARG_ARR[@]}"
 ./gradlew setVersion -PtargetVersion=$NEXT_VER "${GRADLE_ARG_ARR[@]}"
 ./gradlew addTestVersion -PaddVersion=$REL_VER "${GRADLE_ARG_ARR[@]}"
 [[ -z "${NO_TESTS}" ]] && ./gradlew build releaseTest -x test -x runCypressHeadless "${GRADLE_ARG_ARR[@]}"

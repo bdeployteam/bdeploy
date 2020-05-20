@@ -1,26 +1,10 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { CustomEditor, ManifestKey, PluginInfoDto } from 'src/app/models/gen.dtos';
+import { Api } from '../../shared/plugins/plugin.api';
+import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
 import { ConfigService } from './config.service';
-
-export interface EditorPlugin {
-  new(api: Api);
-
-  // onRead = plugin reads value to be edited (initially).
-  // onUpdate = called when plugin updates the valued.
-  bind(onRead: () => string, onUpdate: (value: string) => void, onValidStateChange: (valid: boolean) => void): HTMLElement;
-}
-
-// the Api interface is passed to the plugins constructor. it holds callbacks which can perform API calls to the plugin's server side.
-// this way the plugin does not need to know how to perform REST calls at all and can be independent of angular, etc.
-export interface Api {
-  get(path: string, params?: {[key: string]: string}): Promise<any>;
-  put(path: string, body: any, params?: {[key: string]: string}): Promise<any>;
-  post(path: string, body: any, params?: {[key: string]: string}): Promise<any>;
-  delete(path: string, params?: {[key: string]: string}): Promise<any>;
-  getResourceUrl(): string;
-}
 
 @Injectable({
   providedIn: 'root'
@@ -31,7 +15,7 @@ export class PluginService {
 
   public getEditorPlugin(group: string, product: ManifestKey, editorType: string): Observable<PluginInfoDto> {
     const url = this.config.config.api + '/plugin-admin/get-editor/' + group + '/' + editorType;
-    return this.http.post<PluginInfoDto>(url, product);
+    return this.http.post<PluginInfoDto>(url, product, { headers: suppressGlobalErrorHandling(new HttpHeaders) });
   }
 
   private buildPluginUrl(plugin: PluginInfoDto, path: string): string {

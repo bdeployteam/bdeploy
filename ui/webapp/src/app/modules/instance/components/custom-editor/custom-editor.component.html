@@ -7,4 +7,4 @@
   </div>
 </ng-template>
 
-<button mat-icon-button [disabled]='!plugin' (click)='showEditor(editorPopup)'><mat-icon [matTooltip]='!plugin ? "Required custom editor not (yet) loaded" : "Open custom editor to modify the parameter value"'>edit</mat-icon></button>
+<button mat-icon-button [disabled]='!plugin' (click)='showEditor(editorPopup)'><mat-icon [matTooltip]='!plugin ? (!error ? "Required custom editor not (yet) loaded" : ("Error loading custom editor: " + error.statusText)) : "Open custom editor to modify the parameter value"'>edit</mat-icon></button>

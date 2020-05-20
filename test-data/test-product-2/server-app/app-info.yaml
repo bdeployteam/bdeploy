@@ -23,6 +23,13 @@ startCommand:
       groupName: "Test Parameters"
       parameter: "--text"
       mandatory: false
+    - uid: "param.encoded"
+      name: "Encoded Text"
+      longDescription: "An encoded text parameter - requires plugin which provides BASE64_EDITOR"
+      groupName: "Test Parameters"
+      parameter: "--text"
+      mandatory: false
+      customEditor: "BASE64_EDITOR"
     - uid: "param.global"
       name: "Global"
       longDescription: "A global parameter"

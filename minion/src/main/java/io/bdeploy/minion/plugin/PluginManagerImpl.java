@@ -7,6 +7,8 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -18,6 +20,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.bdeploy.api.plugin.v1.CustomEditor;
 import io.bdeploy.api.plugin.v1.Plugin;
 import io.bdeploy.api.plugin.v1.PluginAssets;
 import io.bdeploy.bhive.BHive;
@@ -55,7 +58,7 @@ public class PluginManagerImpl implements PluginManager {
         for (Manifest.Key key : PluginManifest.scan(globalHive)) {
             try {
                 loadGlobalPlugin(PluginManifest.of(globalHive, key).getPlugin());
-            } catch (Exception e) {
+            } catch (Throwable e) { // can throw Errors if API incompatible
                 log.warn("Cannot load global plugin from " + key, e);
             }
         }
@@ -178,8 +181,14 @@ public class PluginManagerImpl implements PluginManager {
     }
 
     private PluginInfoDto getInfoFromHandle(PluginInternalHandle handle) {
+        Collection<CustomEditor> customEditors = Collections.emptyList();
+        try {
+            customEditors = handle.plugin.getCustomEditors();
+        } catch (Throwable t) {
+            log.error("Cannot read custom editors from plugin " + handle.header.name + ":" + handle.header.version, t);
+        }
         return new PluginInfoDto(handle.id, handle.header.name, handle.header.version, handle.global,
-                new ArrayList<>(handle.plugin.getCustomEditors()));
+                new ArrayList<>(customEditors));
     }
 
     /**

@@ -298,15 +298,17 @@ applications:
   - my-app2
   
 configTemplates: my-config <5>
-versionFile: my-versions.yaml <6>
+pluginFolder: my-plugins <6>
+versionFile: my-versions.yaml <7>
 ----
 
 <1> A human readable name of the *Product* for display purposes in the Web UI
 <2> A unique ID of the *Product* which is used to base *Instances* of. This should not change, as changing the *Product* ID of an existing *Instance* is not supported.
 <3> The vendor of the product. Displayed in the Web UI and used when installing client applications.
 <4> The list of *Applications* which are part of the *Product*. These IDs can be anything, they just have to match the IDs used in the `product-version.yaml` referenced below.
-<5> Optional: An relative path to a directory containing configuration file templates, which will be used as the default set of configuration files when creating an *Instance* from the resulting *Product*.
-<6> The `product-version.yaml` which associates the *Application* IDs (used above) with actual paths to *Applications* on the file system.
+<5> Optional: A relative path to a directory containing configuration file templates, which will be used as the default set of configuration files when creating an *Instance* from the resulting *Product*.
+<6> Optioanl: A relative path to a directory containing one or more plugin JAR files. These plugins are loaded by the server on demand and provided for use when configuring applications which use this very product version.
+<7> The `product-version.yaml` which associates the *Application* IDs (used above) with actual paths to *Applications* on the file system.
 
 ==== product-version.yaml
 

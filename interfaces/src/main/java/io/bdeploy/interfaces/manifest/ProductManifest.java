@@ -100,7 +100,11 @@ public class ProductManifest {
         Tree.Key pluginKey = new Tree.Key(ProductManifestBuilder.PLUGINS_ENTRY, Tree.EntryType.TREE);
         if (entries.containsKey(pluginKey)) {
             TreeView tv = hive.execute(new ScanOperation().setTree(entries.get(pluginKey)));
-            tv.visit(new TreeVisitor.Builder().onBlob(b -> plugins.add(b.getElementId())).build());
+            tv.visit(new TreeVisitor.Builder().onBlob(b -> {
+                if (b.getName().toLowerCase().endsWith(".jar")) {
+                    plugins.add(b.getElementId());
+                }
+            }).build());
         }
 
         return new ProductManifest(label, mf, appRefs, otherRefs, desc, cfgEntry, plugins);

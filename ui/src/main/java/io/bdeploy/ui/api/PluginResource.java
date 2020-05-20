@@ -9,6 +9,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -73,7 +74,8 @@ public interface PluginResource {
     @Path("/upload-global")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @RequiredPermission(permission = Permission.ADMIN)
-    public PluginInfoDto uploadGlobalPlugin(@FormDataParam("plugin") InputStream inputStream);
+    public PluginInfoDto uploadGlobalPlugin(@FormDataParam("plugin") InputStream inputStream,
+            @QueryParam("replace") boolean replace);
 
     /**
      * @param id the id of the plugin to remove.

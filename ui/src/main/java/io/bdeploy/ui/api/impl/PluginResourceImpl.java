@@ -1,5 +1,6 @@
 package io.bdeploy.ui.api.impl;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -148,11 +149,31 @@ public class PluginResourceImpl implements PluginResource {
     }
 
     @Override
-    public PluginInfoDto uploadGlobalPlugin(InputStream inputStream) {
+    public PluginInfoDto uploadGlobalPlugin(InputStream inputStream, boolean replace) {
         BHive hive = getDefaultHive();
 
         try {
             byte[] bytes = StreamHelper.read(inputStream);
+
+            if (replace) {
+                try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
+                    PluginHeader hdr = PluginHeader.read(bais);
+
+                    // unload in case it is loaded
+                    for (PluginInfoDto x : getLoadedPlugins()) {
+                        if (x.name.equals(hdr.name) && x.version.equals(hdr.version)) {
+                            manager.unload(x.id);
+                        }
+                    }
+
+                    // remove it completely.
+                    for (PluginInfoDto x : getNotLoadedGlobalPlugin()) {
+                        if (x.name.equals(hdr.name) && x.version.equals(hdr.version)) {
+                            deleteGlobalPlugin(x.id);
+                        }
+                    }
+                }
+            }
 
             PluginManifest.Builder builder = new PluginManifest.Builder();
             builder.setData(bytes);
