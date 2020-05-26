@@ -1256,7 +1256,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     for (const app of Array.from(issues.keys())) {
       const appAndNode = this.getAppAndNodeById(app);
       for (const issue of issues.get(app)) {
-        result.push({context: new EditAppConfigContext(appAndNode.node, appAndNode.app), issue});
+        result.push({context: new EditAppConfigContext(appAndNode.node, appAndNode.app, this.selectedConfig.instance.product), issue});
       }
     }
 

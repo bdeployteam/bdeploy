@@ -49,6 +49,7 @@ import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
+import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.ui.api.ApplicationResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.ProductResource;
@@ -65,6 +66,9 @@ public class ProductResourceImpl implements ProductResource {
 
     @Inject
     private Minion minion;
+
+    @Inject
+    private PluginManager pm;
 
     private final BHive hive;
 
@@ -104,6 +108,9 @@ public class ProductResourceImpl implements ProductResource {
         if (getProductUseCount(name, tag) > 0) {
             throw new WebApplicationException("Product version is still in use", Status.BAD_REQUEST);
         }
+
+        // unload any plugins loaded from this version
+        pm.unloadProduct(key);
 
         // This assumes that no single application version is used in multiple products.
         ProductManifest pmf = ProductManifest.of(hive, key);

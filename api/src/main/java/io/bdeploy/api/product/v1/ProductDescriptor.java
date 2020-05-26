@@ -44,6 +44,14 @@ public class ProductDescriptor {
     public String configTemplates;
 
     /**
+     * Relative path to a directory containing product-bound plugins.
+     * <p>
+     * These plugins are loaded into the server on demand when configuring applications for this product. They can define
+     * additional editor controls for certain parameters, etc.
+     */
+    public String pluginFolder;
+
+    /**
      * Relative path to a file containing the {@link ProductVersionDescriptor} which may be generated or static.
      */
     public String versionFile;

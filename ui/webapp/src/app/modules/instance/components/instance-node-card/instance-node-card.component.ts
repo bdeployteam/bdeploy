@@ -275,11 +275,11 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
   }
 
   fireEditAppConfigEvent(appConfig: ApplicationConfiguration) {
-    this.editAppConfigEvent.emit(new EditAppConfigContext(this.node, appConfig));
+    this.editAppConfigEvent.emit(new EditAppConfigContext(this.node, appConfig, this.processConfig.instance.product));
   }
 
   fireEditEndpointsAppConfigEvent(appConfig: ApplicationConfiguration) {
-    this.editAppEndpointsEvent.emit(new EditAppConfigContext(this.node, appConfig));
+    this.editAppEndpointsEvent.emit(new EditAppConfigContext(this.node, appConfig, this.processConfig.instance.product));
   }
 
   /** Returns whether or not at least one app has been added to the node */

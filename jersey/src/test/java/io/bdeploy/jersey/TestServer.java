@@ -290,6 +290,10 @@ public class TestServer
             this.server.start();
         }
 
+        public JerseyServer getServer() {
+            return server;
+        }
+
         @Override
         public void close() {
             server.close();

@@ -7,7 +7,7 @@ import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/mes
 import { MessageboxService } from 'src/app/modules/shared/services/messagebox.service';
 import { convert2String } from 'src/app/modules/shared/utils/version.utils';
 import { environment } from 'src/environments/environment';
-import { BackendInfoDto, MinionMode, MinionStatusDto, Version } from '../../../models/gen.dtos';
+import { BackendInfoDto, MinionMode, MinionStatusDto, PluginInfoDto, Version } from '../../../models/gen.dtos';
 import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
 import { LoggingService, LogLevel } from './logging.service';
 
@@ -94,6 +94,10 @@ export class ConfigService {
     } else {
       throw new Error('Cannot figure out WebSocket URL');
     }
+  }
+
+  public getPluginUrl(plugin: PluginInfoDto) {
+    return this.config.api + '/plugins/' + plugin.id.id;
   }
 
   public getBackendInfo(): Observable<BackendInfoDto> {

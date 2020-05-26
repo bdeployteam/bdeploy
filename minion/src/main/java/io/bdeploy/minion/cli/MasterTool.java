@@ -21,6 +21,7 @@ import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
+import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.SlaveDeploymentResource;
 import io.bdeploy.jersey.JerseyServer;
@@ -110,7 +111,8 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
                 r.onStartup();
 
                 delegate.setDelegate(srv.getRemoteActivityReporter());
-                registerMasterResources(srv, config.publishWebapp(), r, srv.getRemoteActivityReporter());
+                registerMasterResources(srv, config.publishWebapp(), r, srv.getRemoteActivityReporter(),
+                        r.createPluginManager(srv));
 
                 if (config.shutdownToken() != null) {
                     srv.register(new RemoteShutdownImpl(srv, config.shutdownToken()));
@@ -125,7 +127,7 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
     }
 
     public static void registerMasterResources(RegistrationTarget srv, boolean webapp, MinionRoot minionRoot,
-            ActivityReporter reporter) {
+            ActivityReporter reporter, PluginManager pluginManager) {
         BHiveRegistry reg = SlaveTool.registerCommonResources(srv, minionRoot, reporter);
         minionRoot.setupServerTasks(true, minionRoot.getMode());
 
@@ -145,6 +147,9 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
                 // required for SoftwareUpdateResourceImpl.
                 bind(MasterRootResourceImpl.class).to(MasterRootResource.class);
                 bind(ControllingMasterProvider.class).in(Singleton.class).to(MasterProvider.class);
+                if (pluginManager != null) {
+                    bind(pluginManager).to(PluginManager.class);
+                }
             }
         });
 

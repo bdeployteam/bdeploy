@@ -1,0 +1,10 @@
+.editorPanel {
+  min-width: 500px;
+  min-height: 50px;
+
+  padding: 10px;
+
+  border: 1px dotted grey;
+
+  background-color: white;
+}

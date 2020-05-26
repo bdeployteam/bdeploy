@@ -478,7 +478,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     }
 
     // Disable in case of a fixed parameter
-    if (descriptor.fixed) {
+    if (descriptor.fixed || descriptor.customEditor) {
       control.disable();
     }
 
@@ -842,8 +842,8 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     const newUid = paramUid + '.custom';
     const lastParam = findLastParameter(this.linkedDescriptors.values());
 
-    var predecessorId = "";
-    if(lastParam){
+    let predecessorId = '';
+    if (lastParam) {
       predecessorId = lastParam.desc.uid;
     }
 
@@ -869,5 +869,9 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     this.removeUnknownParameter(paramUid);
     this.updateAppCfgParameterOrder();
     this.updateFormGroup();
+  }
+
+  customValueConfirmed(param: LinkedParameter, value: any) {
+    this.formGroup.controls[param.desc.uid].setValue(value);
   }
 }

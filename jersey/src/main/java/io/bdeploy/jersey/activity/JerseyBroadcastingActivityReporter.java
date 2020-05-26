@@ -168,7 +168,7 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
                 if (parent != null) {
                     currentActivity.set(parent);
                 } else {
-                    log.warn("Parent activity no longer available: {}", act);
+                    log.debug("Parent activity no longer available: {}", act);
                 }
             } else {
                 // no parent set - we are top-level.

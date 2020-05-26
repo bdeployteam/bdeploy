@@ -21,6 +21,7 @@ import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.ApiAccessToken.Builder;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.jersey.TestServer;
 import io.bdeploy.jersey.audit.RollingFileAuditor;
 import io.bdeploy.minion.cli.InitTool;
@@ -77,8 +78,12 @@ public class TestMinion extends TestServer {
 
         setAuditor(new RollingFileAuditor(cmr.mr.getAuditLogDir()));
 
-        MasterTool.registerMasterResources(this, true, cmr.mr, new ActivityReporter.Null());
+        // create the server.
         super.beforeEach(context);
+
+        PluginManager pm = cmr.mr
+                .createPluginManager(getExtensionStore(context).get(CloseableServer.class, CloseableServer.class).getServer());
+        MasterTool.registerMasterResources(this, true, cmr.mr, new ActivityReporter.Null(), pm);
     }
 
     @Override
