@@ -9,6 +9,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.UriBuilder;
 
 import org.glassfish.grizzly.http.server.CLStaticHttpHandler;
+import org.glassfish.grizzly.http.server.HttpHandlerRegistration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -25,7 +26,7 @@ public class RootTest {
     public RootTest() {
         // registers a handler which will server /fake-webapp/* from the current class loader,
         // which corresponds to the src/test/resources/fake-webapp folder in this project.
-        ext.registerRoot(new CLStaticHttpHandler(RootTest.class.getClassLoader(), "/fake-webapp/"));
+        ext.addHandler(new CLStaticHttpHandler(RootTest.class.getClassLoader(), "/fake-webapp/"), HttpHandlerRegistration.ROOT);
     }
 
     @Test

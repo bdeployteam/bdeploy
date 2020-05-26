@@ -7,8 +7,10 @@ import java.net.URI;
 import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -20,6 +22,7 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.ext.Provider;
 
 import org.glassfish.grizzly.http.server.HttpHandler;
+import org.glassfish.grizzly.http.server.HttpHandlerRegistration;
 import org.glassfish.grizzly.websockets.WebSocketApplication;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.jersey.server.spi.Container;
@@ -69,7 +72,7 @@ public class TestServer
     private final List<AutoCloseable> resources = new ArrayList<>();
     private final Map<String, WebSocketApplication> wsApplications = new TreeMap<>();
 
-    private HttpHandler rootHandler;
+    private final Map<HttpHandlerRegistration, HttpHandler> handlers = new HashMap<>();
     private ServiceLocator rootLocator;
     private Auditor auditor;
 
@@ -138,8 +141,15 @@ public class TestServer
     }
 
     @Override
-    public void registerRoot(HttpHandler handler) {
-        rootHandler = handler;
+    public void addHandler(HttpHandler handler, HttpHandlerRegistration reg) {
+        handlers.put(reg, handler);
+    }
+
+    @Override
+    public void removeHandler(HttpHandler handler) {
+        Set<HttpHandlerRegistration> r = handlers.entrySet().stream().filter(e -> e.getValue().equals(handler))
+                .map(Map.Entry::getKey).collect(Collectors.toSet());
+        r.forEach(handlers::remove);
     }
 
     @Override
@@ -276,7 +286,7 @@ public class TestServer
             if (auditor != null) {
                 this.server.setAuditor(auditor);
             }
-            this.server.registerRoot(rootHandler);
+            handlers.forEach((r, h) -> this.server.addHandler(h, r));
             this.server.start();
         }
 

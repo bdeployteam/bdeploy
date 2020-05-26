@@ -7,12 +7,15 @@ import java.security.KeyStore;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -24,7 +27,6 @@ import javax.ws.rs.ext.Provider;
 
 import org.glassfish.grizzly.http.CompressionConfig;
 import org.glassfish.grizzly.http.CompressionConfig.CompressionMode;
-import org.glassfish.grizzly.http.server.CLStaticHttpHandler;
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.HttpHandlerRegistration;
 import org.glassfish.grizzly.http.server.HttpServer;
@@ -71,10 +73,6 @@ import io.bdeploy.jersey.resources.JerseyMetricsResourceImpl;
  * <p>
  * Use {@link #register(Object)} to register additional resource, filters and
  * providers before starting the server.
- * <p>
- * {@link #registerRoot(HttpHandler)} can be used to register a Grizzly
- * {@link HttpHandler} for the root context ("/") of the server. This can be
- * used to register a web application using e.g. {@link CLStaticHttpHandler}.
  */
 public class JerseyServer implements AutoCloseable, RegistrationTarget {
 
@@ -110,13 +108,15 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
     private final ScheduledExecutorService broadcastScheduler = Executors.newScheduledThreadPool(1,
             new NamedDaemonThreadFactory(() -> "Scheduled Broadcast " + broadcasterId.incrementAndGet()));
 
+    private final Map<HttpHandlerRegistration, HttpHandler> preRegistrations = new HashMap<>();
     private HttpServer server;
-    private HttpHandler root;
     private Auditor auditor = new Log4jAuditor();
     private final JerseyServerMonitor monitor = new JerseyServerMonitor();
     private final Map<String, WebSocketApplication> wsApplications = new TreeMap<>();
 
     private UserValidator userValidator;
+
+    private boolean corsEnabled;
 
     /**
      * @param port the port to listen on
@@ -162,6 +162,13 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
     }
 
     /**
+     * @param allowCors whether this server instance will allow cross origin requests - mainly for development.
+     */
+    public void setCorsEnabled(boolean allowCors) {
+        this.corsEnabled = allowCors;
+    }
+
+    /**
      * Sets the auditor that will be used by the server to log requests. The auditor will be closed
      * when the server is terminated.
      *
@@ -201,12 +208,26 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
         }
     }
 
-    /**
-     * @param handler the root ("/") context path handler.
-     */
     @Override
-    public void registerRoot(HttpHandler handler) {
-        root = handler;
+    public void addHandler(HttpHandler handler, HttpHandlerRegistration registration) {
+        if (server == null) {
+            preRegistrations.put(registration, handler);
+        } else {
+            server.getServerConfiguration().addHttpHandler(handler, registration);
+        }
+    }
+
+    @Override
+    public void removeHandler(HttpHandler handler) {
+        if (server == null) {
+            // data is organized differently in grizzly. they remember a list of registrations per handler instead
+            // of mapping registrations to handlers, which is way easier, since registrations have equals/hashCode anyway.
+            Set<HttpHandlerRegistration> r = preRegistrations.entrySet().stream().filter(e -> e.getValue().equals(handler))
+                    .map(Map.Entry::getKey).collect(Collectors.toSet());
+
+            r.forEach(preRegistrations::remove);
+        }
+        server.getServerConfiguration().removeHttpHandler(handler);
     }
 
     @Override
@@ -232,31 +253,11 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             sslEngine.setEnabledProtocols(new String[] { "TLSv1", "TLSv1.1", "TLSv1.2" });
 
             // default features
-            rc.register(new ServerObjectBinder());
-            rc.register(JerseyObjectMapper.class);
-            rc.register(JacksonFeature.class);
-            rc.register(MultiPartFeature.class);
-            rc.register(new JerseyAuthenticationProvider(store, userValidator));
-            rc.register(JerseyAuthenticationUnprovider.class);
-            rc.register(JerseyAuthenticationWeakenerProvider.class);
-            rc.register(JerseyPathReader.class);
-            rc.register(JerseyPathWriter.class);
-            rc.register(JerseyMetricsFilter.class);
-            rc.register(JerseyMetricsResourceImpl.class);
-            rc.register(JerseyAuditingFilter.class);
-            rc.register(JerseyExceptionMapper.class);
-            rc.register(JerseyRemoteActivityResourceImpl.class);
-            rc.register(JerseyRemoteActivityScopeServerFilter.class);
-            rc.register(JerseyServerMonitoringResourceImpl.class);
-            rc.register(new JerseyLazyReporterInitializer());
-            rc.register(new JerseyServerReporterContextResolver());
-            rc.register(new JerseyWriteLockFilter());
-
-            rc.property(ServerProperties.OUTBOUND_CONTENT_LENGTH_BUFFER, CL_BUFFER_SIZE);
+            registerDefaultResources(rc);
 
             server = GrizzlyHttpServerFactory.createHttpServer(jerseyUri, rc, true, sslEngine, false);
-            if (root != null) {
-                server.getServerConfiguration().addHttpHandler(root, HttpHandlerRegistration.ROOT);
+            for (Map.Entry<HttpHandlerRegistration, HttpHandler> regs : preRegistrations.entrySet()) {
+                server.getServerConfiguration().addHttpHandler(regs.getValue(), regs.getKey());
             }
             monitor.setServer(server);
 
@@ -292,6 +293,39 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
         } catch (GeneralSecurityException | IOException e) {
             throw new IllegalStateException("Cannot start server", e);
         }
+    }
+
+    /**
+     * @param config a ResourceConfig to enrich with all the default resources and features used by the BDeploy JAX-RS
+     *            infrastructure. Allows to create additional JAX-RS applications which use the same setup as BDeploy itself.
+     *            This is useful e.g. for plugins which should use the same filters/features as BDeploy.
+     */
+    public void registerDefaultResources(ResourceConfig config) {
+        config.register(new ServerObjectBinder());
+        config.register(JerseyObjectMapper.class);
+        config.register(JacksonFeature.class);
+        config.register(MultiPartFeature.class);
+        config.register(new JerseyAuthenticationProvider(store, userValidator));
+        config.register(JerseyAuthenticationUnprovider.class);
+        config.register(JerseyAuthenticationWeakenerProvider.class);
+        config.register(JerseyPathReader.class);
+        config.register(JerseyPathWriter.class);
+        config.register(JerseyMetricsFilter.class);
+        config.register(JerseyMetricsResourceImpl.class);
+        config.register(JerseyAuditingFilter.class);
+        config.register(JerseyExceptionMapper.class);
+        config.register(JerseyRemoteActivityResourceImpl.class);
+        config.register(JerseyRemoteActivityScopeServerFilter.class);
+        config.register(JerseyServerMonitoringResourceImpl.class);
+        config.register(new JerseyLazyReporterInitializer());
+        config.register(new JerseyServerReporterContextResolver());
+        config.register(new JerseyWriteLockFilter());
+
+        if (corsEnabled) {
+            config.register(JerseyCorsFilter.class);
+        }
+
+        config.property(ServerProperties.OUTBOUND_CONTENT_LENGTH_BUFFER, CL_BUFFER_SIZE);
     }
 
     /**

@@ -77,7 +77,7 @@ public class TestMinion extends TestServer {
 
         setAuditor(new RollingFileAuditor(cmr.mr.getAuditLogDir()));
 
-        MasterTool.registerMasterResources(this, true, true, cmr.mr, new ActivityReporter.Null());
+        MasterTool.registerMasterResources(this, true, cmr.mr, new ActivityReporter.Null());
         super.beforeEach(context);
     }
 
