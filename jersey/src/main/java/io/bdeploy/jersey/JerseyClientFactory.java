@@ -25,6 +25,7 @@ import org.glassfish.jersey.client.RequestEntityProcessing;
 import org.glassfish.jersey.client.proxy.WebResourceFactory;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.glassfish.jersey.message.GZipEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -152,6 +153,10 @@ public class JerseyClientFactory {
         builder.sslContext(sslContext);
         builder.hostnameVerifier((h, s) -> true);
         builder.register(new JerseyObjectMapper(additionalModules));
+
+        builder.register(GZipEncoder.class);
+        builder.register(JerseyGZipFilter.class);
+
         builder.register(JacksonFeature.class);
         builder.register(MultiPartFeature.class);
         builder.register(new ClientBearerFilter(bearer));
