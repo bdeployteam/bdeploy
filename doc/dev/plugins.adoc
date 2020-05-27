@@ -1,12 +1,21 @@
 == Plugins
 
-*BDeploy* has preliminary plugin support, for now mainly to contribute custom parameter editors, for example to contribute an encryption algorithm to a password input field, etc.
+*BDeploy* has plugin support, for now mainly to contribute custom parameter editors, for example to contribute an encryption algorithm to a password input field, etc.
 
 From a low level viewpoint, plugins (as of now) may:
 
 * Contribute JAX-RS endpoints to the server side. These endpoints are provided in a dedicated JAX-RS application on the server, so basically all kinds of Providers, Features, Filters and Resources can be registered on the plugins behalf.
-* Contribute static resources. Those are served from a dedicated location per-plugin, and can host all kinds of static resources, including the required ES6 JavaScript modules used to provide custom editor UI.
+* Contribute static assets. Those are served from a dedicated location per-plugin, and can host all kinds of static resources, including the required ES6 JavaScript modules used to provide custom editor UI.
 * Define custom editors and provide the matching ES6 module through the static resources mentioned above.
+
+image::images/plugins.svg[Plugins,align=center,width=480,link="images/plugins.svg"]
+
+<1> The server will first load any global plugins that are installed. When loading a plugin, it is internally registered and a dedicated namespace is assigned where resources are served. The server will register the plugins JAX-RS endpoints and all static assets provided by the plugin under this context path. They are then directly accessible from the outside.
+<2> The Web UI will query for available custom editors once a parameter specifies it requires one (see `app-info.yaml` -> `customEditor` in the end user documentation).
+<3> The Web UI's plugin service will query the backend for plugins which can provide the requested editor(s). This will also demand-load plugins which are provided by the product backing the instance currently being edited. This works the same as for global plugins above.
+<4> Assuming the backend returned a plugin providing a suitable custom editor, the custom editor metadata includes the path to the JavaScript (ES6) module to load. The module is loaded into the Web application.
+<5> Then it is instantiated and passed an API object which can be used to transparently access the plugins exposed resources (JAX-RS API, static assets).
+<6> The custom editor is bound to the Web UI on demand and can now perform edit operations on parametes, using its backend resources as required.
 
 === Plugin Distribution
 
