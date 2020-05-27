@@ -17,7 +17,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.adarshr:gradle-test-logger-plugin:2.0.0'
-        classpath 'ru.vyarus:gradle-quality-plugin:4.2.0'
+        classpath 'ru.vyarus:gradle-quality-plugin:4.3.0'
         classpath 'gradle.plugin.net.ossindex:ossindex-gradle-plugin:0.4.11'
         classpath 'org.cyclonedx:cyclonedx-gradle-plugin:1.1.3'
     }
