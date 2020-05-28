@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.tea.core.services.TaskingLog;
 
 import io.bdeploy.api.product.v1.ProductManifestBuilder;
 import io.bdeploy.bhive.BHive;
@@ -42,11 +43,13 @@ public class BDeployChooseProductToPushDialog extends TitleAreaDialog {
     private BDeployTargetSpec target;
     private final File hive;
     private Runnable buttonUpdate;
+    private final TaskingLog log;
 
-    public BDeployChooseProductToPushDialog(Shell parentShell, File hive) {
+    public BDeployChooseProductToPushDialog(Shell parentShell, File hive, TaskingLog log) {
         super(parentShell);
 
         this.hive = hive;
+        this.log = log;
     }
 
     public Manifest.Key getChosenProduct() {
@@ -67,7 +70,7 @@ public class BDeployChooseProductToPushDialog extends TitleAreaDialog {
         GridDataFactory.fillDefaults().grab(true, true).applyTo(comp);
         GridLayoutFactory.fillDefaults().margins(20, 20).applyTo(comp);
 
-        BDeployServerPanel panel = new BDeployServerPanel(comp);
+        BDeployServerPanel panel = new BDeployServerPanel(comp, log);
         GridDataFactory.fillDefaults().grab(true, true).hint(300, 150).applyTo(panel);
 
         TableViewer tv;

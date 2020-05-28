@@ -33,10 +33,10 @@ public class BDeployProductPushTaskChain implements TaskChain {
     private BDeployTargetSpec target;
 
     @TaskChainUiInit
-    public void uiInit(Shell parent, BuildDirectories dirs) throws IOException, CoreException {
+    public void uiInit(Shell parent, BuildDirectories dirs, TaskingLog log) throws IOException, CoreException {
         File hive = new File(dirs.getProductDirectory(), "bhive");
 
-        BDeployChooseProductToPushDialog dlg = new BDeployChooseProductToPushDialog(parent, hive);
+        BDeployChooseProductToPushDialog dlg = new BDeployChooseProductToPushDialog(parent, hive, log);
         dlg.setBlockOnOpen(true);
         if (dlg.open() != Dialog.OK) {
             throw new OperationCanceledException();

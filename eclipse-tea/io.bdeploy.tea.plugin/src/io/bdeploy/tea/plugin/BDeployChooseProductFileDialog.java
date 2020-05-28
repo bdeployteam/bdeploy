@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.tea.core.services.TaskingLog;
 
 import io.bdeploy.tea.plugin.server.BDeployServerPanel;
 import io.bdeploy.tea.plugin.server.BDeployTargetSpec;
@@ -31,11 +32,13 @@ public class BDeployChooseProductFileDialog extends TitleAreaDialog {
     private BDeployTargetSpec target;
     private final BDeployProductListDescriptor products;
     private Runnable buttonUpdate;
+    private final TaskingLog log;
 
-    public BDeployChooseProductFileDialog(Shell parentShell, BDeployProductListDescriptor products) {
+    public BDeployChooseProductFileDialog(Shell parentShell, BDeployProductListDescriptor products, TaskingLog log) {
         super(parentShell);
 
         this.products = products;
+        this.log = log;
     }
 
     public String getChosenFile() {
@@ -94,7 +97,7 @@ public class BDeployChooseProductFileDialog extends TitleAreaDialog {
         GridDataFactory.fillDefaults().grab(true, false).applyTo(radioPush);
         radioPush.setText("Push result to selected target:");
 
-        BDeployServerPanel panel = new BDeployServerPanel(comp);
+        BDeployServerPanel panel = new BDeployServerPanel(comp, log);
         GridDataFactory.fillDefaults().hint(300, 150).applyTo(panel);
 
         buttonUpdate = () -> {

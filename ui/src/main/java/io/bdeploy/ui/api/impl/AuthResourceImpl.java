@@ -12,6 +12,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 
+import io.bdeploy.api.remote.v1.dto.CredentialsApi;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.interfaces.UserChangePasswordDto;
 import io.bdeploy.interfaces.UserInfo;
@@ -19,7 +20,6 @@ import io.bdeploy.ui.api.AuthAdminResource;
 import io.bdeploy.ui.api.AuthResource;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.Minion;
-import io.bdeploy.ui.dto.CredentialsDto;
 
 public class AuthResourceImpl implements AuthResource {
 
@@ -36,7 +36,7 @@ public class AuthResourceImpl implements AuthResource {
     private ResourceContext rc;
 
     @Override
-    public Response authenticate(CredentialsDto credentials) {
+    public Response authenticate(CredentialsApi credentials) {
         String token = doAuthenticate(credentials, false);
         // cookie not set to 'secure' to allow sending during development.
         // cookie header set manually, as the NewCookie API does not support SameSite policies.
@@ -45,12 +45,12 @@ public class AuthResourceImpl implements AuthResource {
     }
 
     @Override
-    public Response authenticatePacked(CredentialsDto credentials) {
+    public Response authenticatePacked(CredentialsApi credentials) {
         String tokenPack = doAuthenticate(credentials, true);
         return Response.ok().entity(tokenPack).build();
     }
 
-    private String doAuthenticate(CredentialsDto cred, boolean pack) {
+    private String doAuthenticate(CredentialsApi cred, boolean pack) {
         UserInfo info = auth.authenticate(cred.user, cred.password);
         if (info != null) {
             return minion.createToken(cred.user, info.permissions, pack);

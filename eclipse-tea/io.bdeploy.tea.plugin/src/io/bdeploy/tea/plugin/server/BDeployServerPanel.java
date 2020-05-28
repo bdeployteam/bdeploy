@@ -24,6 +24,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import org.eclipse.tea.core.services.TaskingLog;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 
@@ -43,9 +44,11 @@ public class BDeployServerPanel extends Composite {
     private ToolBar tb;
     private ToolItem edit;
     private ToolItem remove;
+    private final TaskingLog log;
 
-    public BDeployServerPanel(Composite parent) {
+    public BDeployServerPanel(Composite parent, TaskingLog log) {
         super(parent, SWT.NONE);
+        this.log = log;
 
         preferences = InstanceScope.INSTANCE.getNode("io.bdeploy.tea.plugin.servers");
 
@@ -187,7 +190,7 @@ public class BDeployServerPanel extends Composite {
 
     private void add() {
         BDeployTargetSpec spec = new BDeployTargetSpec();
-        if (new BDeployServerEditDialog(getShell(), spec).open() == Dialog.OK) {
+        if (new BDeployServerEditDialog(getShell(), spec, log).open() == Dialog.OK) {
             servers.servers.add(spec);
             save();
         }
@@ -195,7 +198,7 @@ public class BDeployServerPanel extends Composite {
     }
 
     private void edit() {
-        if (new BDeployServerEditDialog(getShell(), selected).open() == Dialog.OK) {
+        if (new BDeployServerEditDialog(getShell(), selected, log).open() == Dialog.OK) {
             save();
         } else {
             load();

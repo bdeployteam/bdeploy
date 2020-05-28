@@ -12,6 +12,7 @@ import javax.ws.rs.core.UriInfo;
 
 import io.bdeploy.api.remote.v1.PublicInstanceResource;
 import io.bdeploy.api.remote.v1.PublicRootResource;
+import io.bdeploy.api.remote.v1.dto.CredentialsApi;
 import io.bdeploy.api.remote.v1.dto.InstanceGroupConfigurationApi;
 import io.bdeploy.api.remote.v1.dto.SoftwareRepositoryConfigurationApi;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
@@ -19,7 +20,6 @@ import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfigurat
 import io.bdeploy.minion.remote.jersey.CommonRootResourceImpl;
 import io.bdeploy.ui.api.AuthResource;
 import io.bdeploy.ui.api.impl.AuthResourceImpl;
-import io.bdeploy.ui.dto.CredentialsDto;
 
 /**
  * V1 implementation of the public API.
@@ -41,9 +41,19 @@ public class PublicRootResourceImpl implements PublicRootResource {
     public Response login(String user, String pass, boolean full) {
         AuthResource auth = rc.getResource(AuthResourceImpl.class);
         if (full) {
-            return auth.authenticatePacked(new CredentialsDto(user, pass));
+            return auth.authenticatePacked(new CredentialsApi(user, pass));
         } else {
-            return auth.authenticate(new CredentialsDto(user, pass));
+            return auth.authenticate(new CredentialsApi(user, pass));
+        }
+    }
+
+    @Override
+    public Response login2(CredentialsApi credentials, boolean full) {
+        AuthResource auth = rc.getResource(AuthResourceImpl.class);
+        if (full) {
+            return auth.authenticatePacked(credentials);
+        } else {
+            return auth.authenticate(credentials);
         }
     }
 

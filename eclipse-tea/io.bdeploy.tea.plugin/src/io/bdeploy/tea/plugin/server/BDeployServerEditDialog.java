@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.tea.core.services.TaskingLog;
 
 import io.bdeploy.api.remote.v1.PublicRootResource;
 import io.bdeploy.api.remote.v1.dto.InstanceGroupConfigurationApi;
@@ -37,10 +38,12 @@ public class BDeployServerEditDialog extends TitleAreaDialog {
     private ComboViewer comboIg;
     private Button btnLoad;
     private Button btnLogin;
+    private final TaskingLog log;
 
-    public BDeployServerEditDialog(Shell parentShell, BDeployTargetSpec template) {
+    public BDeployServerEditDialog(Shell parentShell, BDeployTargetSpec template, TaskingLog log) {
         super(parentShell);
         this.template = template;
+        this.log = log;
 
         setBlockOnOpen(true);
     }
@@ -95,7 +98,7 @@ public class BDeployServerEditDialog extends TitleAreaDialog {
 
             @Override
             public void widgetSelected(SelectionEvent e) {
-                BDeployLoginDialog dlg = new BDeployLoginDialog(getShell(), txtName.getText(), txtUri.getText(), false);
+                BDeployLoginDialog dlg = new BDeployLoginDialog(getShell(), txtName.getText(), txtUri.getText(), false, log);
                 dlg.setBlockOnOpen(true);
                 if (dlg.open() == OK) {
                     txtToken.setText(dlg.getServer().token);

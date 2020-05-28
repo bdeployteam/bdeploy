@@ -215,7 +215,6 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
         // UI only DTOs
         'io.bdeploy.ui.dto.ApplicationDto',
         'io.bdeploy.ui.dto.AuditLogDto',
-        'io.bdeploy.ui.dto.CredentialsDto',
         'io.bdeploy.ui.dto.ClientApplicationDto',
         'io.bdeploy.ui.dto.InstanceDto',
         'io.bdeploy.ui.dto.InstanceClientAppsDto',
@@ -243,6 +242,7 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
         'io.bdeploy.interfaces.manifest.managed.ManagedMasterDto',
         'io.bdeploy.interfaces.plugin.PluginInfoDto',
         'io.bdeploy.jersey.ws.WebSocketInitDto',
+        'io.bdeploy.api.remote.v1.dto.CredentialsApi',
         // Metrics
         'io.bdeploy.jersey.resources.JerseyMetricsResource$MetricBundle',
         'io.bdeploy.common.metrics.Metrics$MetricGroup',

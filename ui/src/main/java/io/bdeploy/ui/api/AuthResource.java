@@ -11,12 +11,12 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import io.bdeploy.api.remote.v1.dto.CredentialsApi;
 import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.UserChangePasswordDto;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
-import io.bdeploy.ui.dto.CredentialsDto;
 
 @Path("/auth")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -29,15 +29,15 @@ public interface AuthResource {
      */
     @POST
     @Unsecured
-    public Response authenticate(CredentialsDto credentials);
+    public Response authenticate(CredentialsApi credentials);
 
     /**
-     * Same as {@link #authenticate(CredentialsDto)} but returns a authentication pack suitable for CLI and other tools.
+     * Same as {@link #authenticate(CredentialsApi)} but returns a authentication pack suitable for CLI and other tools.
      */
     @POST
     @Path("/packed")
     @Unsecured
-    public Response authenticatePacked(CredentialsDto credentials);
+    public Response authenticatePacked(CredentialsApi credentials);
 
     /**
      * Return a list of recently used instance groups.

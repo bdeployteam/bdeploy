@@ -13,7 +13,10 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Response.Status.Family;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -30,6 +33,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.tea.core.services.TaskingLog;
+
+import io.bdeploy.api.remote.v1.dto.CredentialsApi;
 
 public class BDeployLoginDialog extends TitleAreaDialog {
 
@@ -40,12 +46,14 @@ public class BDeployLoginDialog extends TitleAreaDialog {
     private String user;
     private String pass;
     private final boolean source;
+    private final TaskingLog log;
 
-    public BDeployLoginDialog(Shell parentShell, String serverName, String serverUrl, boolean source) {
+    public BDeployLoginDialog(Shell parentShell, String serverName, String serverUrl, boolean source, TaskingLog log) {
         super(parentShell);
         this.serverName = serverName;
         this.serverUrl = serverUrl;
         this.source = source;
+        this.log = log;
     }
 
     @Override
@@ -132,14 +140,23 @@ public class BDeployLoginDialog extends TitleAreaDialog {
             try {
                 ClientBuilder builder = ClientBuilder.newBuilder().hostnameVerifier((h, s) -> true)
                         .sslContext(createTrustAllContext());
-                Response result = builder.build().target(serverUrl).path("/public/v1/login").queryParam("user", user)
-                        .queryParam("pass", pass).queryParam("full", "true").request().get();
+
+                Response result;
+                Entity<CredentialsApi> entity = Entity.entity(new CredentialsApi(user, pass), MediaType.APPLICATION_JSON_TYPE);
+                result = builder.build().target(serverUrl).path("/public/v1/login2").queryParam("full", "true").request()
+                        .post(entity);
+
+                if (result.getStatusInfo().getFamily() == Family.SERVER_ERROR
+                        || result.getStatus() == Status.NOT_FOUND.getStatusCode()) {
+                    log.warn("Server does not support login2");
+                    result = builder.build().target(serverUrl).path("/public/v1/login").queryParam("user", user)
+                            .queryParam("pass", pass).queryParam("full", "true").request().get();
+                }
 
                 if (result.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
-                    Display.getDefault()
-                            .asyncExec(() -> setMessage(
-                                    "Error logging in to " + serverUrl + ": " + result.getStatusInfo().getReasonPhrase(),
-                                    IMessageProvider.ERROR));
+                    String reason = result.getStatusInfo().getReasonPhrase();
+                    Display.getDefault().asyncExec(
+                            () -> setMessage("Error logging in to " + serverUrl + ": " + reason, IMessageProvider.ERROR));
                     return;
                 } else {
                     ref.set(result.readEntity(String.class));

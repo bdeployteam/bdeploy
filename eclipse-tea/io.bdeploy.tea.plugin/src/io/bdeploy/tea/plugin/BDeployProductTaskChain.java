@@ -66,7 +66,7 @@ public class BDeployProductTaskChain implements TaskChain {
     private BDeployTargetSpec source;
 
     @TaskChainUiInit
-    public void uiInit(Shell parent, BDeployConfig cfg) throws IOException, CoreException {
+    public void uiInit(Shell parent, BDeployConfig cfg, TaskingLog log) throws IOException, CoreException {
         // instance can be re-used - clear data.
         bdeployProductFile = null;
         target = null;
@@ -99,7 +99,7 @@ public class BDeployProductTaskChain implements TaskChain {
         }
 
         while (target == null) {
-            BDeployChooseProductFileDialog dlg = new BDeployChooseProductFileDialog(parent, listDesc);
+            BDeployChooseProductFileDialog dlg = new BDeployChooseProductFileDialog(parent, listDesc, log);
             dlg.setBlockOnOpen(true);
             if (dlg.open() != Dialog.OK) {
                 throw new OperationCanceledException();
@@ -119,7 +119,8 @@ public class BDeployProductTaskChain implements TaskChain {
         }
 
         if (source == null) {
-            BDeployLoginDialog srcDlg = new BDeployLoginDialog(parent, "BDeploy Software Repositories", cfg.bdeployServer, true);
+            BDeployLoginDialog srcDlg = new BDeployLoginDialog(parent, "BDeploy Software Repositories", cfg.bdeployServer, true,
+                    log);
             srcDlg.setBlockOnOpen(true);
             if (srcDlg.open() != Dialog.OK) {
                 throw new OperationCanceledException();

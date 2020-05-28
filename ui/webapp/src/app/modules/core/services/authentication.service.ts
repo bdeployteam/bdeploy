@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { CookieService } from 'ngx-cookie-service';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
-import { CredentialsDto, Permission, UserChangePasswordDto, UserInfo } from '../../../models/gen.dtos';
+import { CredentialsApi, Permission, UserChangePasswordDto, UserInfo } from '../../../models/gen.dtos';
 import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
 import { ConfigService } from './config.service';
 import { Logger, LoggingService } from './logging.service';
@@ -24,7 +24,7 @@ export class AuthenticationService {
     this.log.debug('authenticate("' + username + '", <...>)');
 
     return this.http.post(this.cfg.config.api + '/auth',
-     { user: username, password: password } as CredentialsDto,
+     { user: username, password: password } as CredentialsApi,
      { responseType: 'text', headers: suppressGlobalErrorHandling(new HttpHeaders) }).pipe(
         tap(
           result => {
