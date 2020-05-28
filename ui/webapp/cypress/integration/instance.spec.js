@@ -140,7 +140,8 @@ describe('Instance Tests', function () {
       cy.contains('button', 'close').click();
     })
 
-    cy.contains('tr', 'cypress.txt').contains('mat-icon', 'cloud_download').downloadFile('data.txt');
+    cy.wait(200); // wait for the animation to complete and the backdrop to disappear.
+    cy.contains('tr', 'cypress.txt').contains('mat-icon', 'cloud_download').should('be.visible').downloadFile('data.txt');
     cy.fixture('data.txt').then(txt => {
       expect(txt).to.contain('TEST');
     })
