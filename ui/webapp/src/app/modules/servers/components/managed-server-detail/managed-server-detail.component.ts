@@ -70,7 +70,7 @@ export class ManagedServerDetailComponent implements OnInit {
     if (this.instances.length > 0) {
       doIt = await this.messageBoxService.openAsync({
         title: 'Delete Managed Server',
-        message: `Are you sure you want to delete the selected managed server from the central server? This will delete <b>${this.instances.length}</b> instances from the central server as well (but not from the managed server).`,
+        message: `Are you sure you want to delete the selected managed server from the central server? This will delete <strong>${this.instances.length}</strong> instances from the central server as well (but not from the managed server).`,
         mode: MessageBoxMode.CONFIRM_WARNING,
       });
     } else {

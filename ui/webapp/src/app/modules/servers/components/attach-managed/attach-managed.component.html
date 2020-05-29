@@ -13,7 +13,7 @@
       <p>
         This page can be used to attach a BDeploy server running in managed mode to this central server. You will need the counterpart on
         the managed server which contains the managed server identification as dragable element. This page can be found by clicking the
-        <b>Attach Instance Group</b> button on the <b>Instance Groups</b> page.
+        <strong>Attach Instance Group</strong> button on the <strong>Instance Groups</strong> page.
       </p>
       <div class='button-container'>
         <button mat-raised-button matStepperNext>Next</button>
@@ -21,7 +21,7 @@
     </mat-step>
     <mat-step label="Attach Managed Server" #attachStep [completed]='attachPayload'>
       <p>
-        Drag the managed server information from the managed server's <b>Attach to Central Server</b> page and drop it on the zone below.
+        Drag the managed server information from the managed server's <strong>Attach to Central Server</strong> page and drop it on the zone below.
       </p>
       <div class='drag-container' *ngIf='!attachPayload'>
         <mat-card class='drag-card drop-card' (drop)='onDrop($event)' (dragover)='onOver($event)'>
@@ -30,7 +30,7 @@
         <input type="file" hidden (change)="onUpload($event)" data-cy="managed-ident">
       </div>
       <p *ngIf='attachPayload'>
-        Successfully read information for <b>{{attachPayload.hostName}}</b>.
+        Successfully read information for <strong>{{attachPayload.hostName}}</strong>.
       </p>
       <div class='button-container'>
         <button mat-raised-button matStepperPrevious (click)='attachPayload = null'>Back</button>

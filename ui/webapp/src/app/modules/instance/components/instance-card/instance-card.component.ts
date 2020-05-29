@@ -39,7 +39,7 @@ export class InstanceCardComponent implements OnInit {
     this.mbService
       .open({
         title: 'Delete Instance ' + this.instanceDto.instanceConfiguration.name,
-        message: 'Deleting an instance <b>cannot be undone</b>.',
+        message: 'Deleting an instance <strong>cannot be undone</strong>.',
         mode: MessageBoxMode.CONFIRM_WARNING
       })
       .subscribe(result => {

@@ -13,8 +13,8 @@
     <p>
       This page can be used to attach this BDeploy server to a central, controlling server. You will need
       to open the counterpart on the central server as well to be able to drag between the two pages.
-      The page on the central server can be found by clicking the <b>Add</b> button after selecting  the
-      <b>Managed Servers</b> dialog in the drop down context menu of an instance group.
+      The page on the central server can be found by clicking the <strong>Add</strong> button after selecting  the
+      <strong>Managed Servers</strong> dialog in the drop down context menu of an instance group.
     </p>
     <div class='button-container'>
       <button mat-raised-button matStepperNext [disabled]='!attachPayload'>Next</button>
@@ -34,7 +34,7 @@
     </div>
     <p>
       After dragging, complete configuration of the connection on the central server. The wizard will continue automatically once the connection is established.
-      If the connection cannot be established, click <b>Continue Manually</b> to manually proceed with attaching.
+      If the connection cannot be established, click <strong>Continue Manually</strong> to manually proceed with attaching.
     </p>
     <div class='button-container'>
       <button mat-raised-button matStepperPrevious>Back</button>
@@ -47,7 +47,7 @@
   <mat-step label="Manual Configuration of Central Server" optional="true" #manualStep>
     <p>
       Note that this step is only necessary if the central server cannot contact this managed server (temporarily or permanently).
-      If not even drag and drop to the central server works, click <b>Download for manual setup</b> and drag the file to the central
+      If not even drag and drop to the central server works, click <strong>Download for manual setup</strong> and drag the file to the central
       server instead.
     </p>
     <div class='drag-container'>
@@ -70,7 +70,7 @@
       <ng-container *ngIf='remoteAttached'>
         <mat-icon>check_circle_outline</mat-icon>
         <p>
-          This managed server has been attached and the Instance Group <b>{{remoteAttached.name}}</b> has been added.
+          This managed server has been attached and the Instance Group <strong>{{remoteAttached.name}}</strong> has been added.
         </p>
         <div class='drag-container'>
           <app-instance-group-card [instanceGroup]='remoteAttached'></app-instance-group-card>

@@ -11,7 +11,7 @@
   <mat-drawer-container class="drawer-container" (backdropClick)='sidenav.close()'>
     <mat-drawer #appsidenav mode="over" position="end" disableClose>
       <div class='drawer-wrapper'>
-        <mat-toolbar class="mat-elevation-z1 fixed-toolbar">Product Versions for&nbsp;<b>{{selectedProductLatestVersion ? selectedProductLatestVersion.name : 'none'}}</b></mat-toolbar>
+        <mat-toolbar class="mat-elevation-z1 fixed-toolbar">Product Versions for&nbsp;<strong>{{selectedProductLatestVersion ? selectedProductLatestVersion.name : 'none'}}</strong></mat-toolbar>
         <app-product-list class='drawer-content' [products]='selectedProductVersions' [instanceGroup]='instanceGroup' (deleted)='versionDeleted()'></app-product-list>
       </div>
     </mat-drawer>

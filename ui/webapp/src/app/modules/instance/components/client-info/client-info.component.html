@@ -28,7 +28,7 @@
       <span class="button-text">Installer</span>
     </button>
     <mat-divider></mat-divider>
-    <p><b>Click & Start:</b></p>
+    <p><strong>Click & Start:</strong></p>
     <p>With Click & Start, you launch the application simply by clicking on the provided link.</p>
     <p>
       The launcher application needs to be installed and the browser needs to be configured to
@@ -36,7 +36,7 @@
     </p>
   </ng-container>
   <ng-container *ngIf='!isActiveVersion()'>
-    <p><b>Downloads are only available for active instance versions.</b></p>
+    <p><strong>Downloads are only available for active instance versions.</strong></p>
     <p>For a better overview of available/active versions, visit the <a [routerLink]="['/instancegroup/clientapps', instanceGroup]">Client Applications</a> page.</p>
   </ng-container>
   <mat-divider></mat-divider>

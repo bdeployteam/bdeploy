@@ -169,30 +169,30 @@
         Details of selected element:
         <div class="details-element-group">
           <span
-            >Count: <b>{{ selectedTimer.counter.value }}</b></span
+            >Count: <strong>{{ selectedTimer.counter.value }}</strong></span
           >
           <span
-            >Rate [mean]: <b>{{ selectedTimer.meter.meanRate }}</b></span
+            >Rate [mean]: <strong>{{ selectedTimer.meter.meanRate }}</strong></span
           >
           <span
-            >Rate [1min]: <b>{{ selectedTimer.meter.oneMinRate }}</b></span
+            >Rate [1min]: <strong>{{ selectedTimer.meter.oneMinRate }}</strong></span
           >
           <mat-divider></mat-divider>
           <span
             >Time [75th]:
-            <b>{{ toMillis(selectedTimer.histogram.p75th) }} ms</b></span
+            <strong>{{ toMillis(selectedTimer.histogram.p75th) }} ms</strong></span
           >
           <span
             >Time [99th]:
-            <b>{{ toMillis(selectedTimer.histogram.p99th) }} ms</b></span
+            <strong>{{ toMillis(selectedTimer.histogram.p99th) }} ms</strong></span
           >
           <span
             >Time [min]:
-            <b>{{ toMillis(selectedTimer.histogram.min) }} ms</b></span
+            <strong>{{ toMillis(selectedTimer.histogram.min) }} ms</strong></span
           >
           <span
             >Time [max]:
-            <b>{{ toMillis(selectedTimer.histogram.max) }} ms</b></span
+            <strong>{{ toMillis(selectedTimer.histogram.max) }} ms</strong></span
           >
         </div>
         <mat-divider></mat-divider>

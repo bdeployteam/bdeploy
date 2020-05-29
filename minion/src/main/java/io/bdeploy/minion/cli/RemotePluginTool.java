@@ -104,21 +104,22 @@ public class RemotePluginTool extends RemoteServiceTool<RemotePluginConfig> {
         }
 
         try (InputStream is = Files.newInputStream(plugin)) {
-            MultiPart mp = new MultiPart();
-            StreamDataBodyPart bp = new StreamDataBodyPart("plugin", is);
-            bp.setFilename("plugin.jar");
-            bp.setMediaType(MediaType.APPLICATION_OCTET_STREAM_TYPE);
-            mp.bodyPart(bp);
+            try (MultiPart mp = new MultiPart()) {
+                StreamDataBodyPart bp = new StreamDataBodyPart("plugin", is);
+                bp.setFilename("plugin.jar");
+                bp.setMediaType(MediaType.APPLICATION_OCTET_STREAM_TYPE);
+                mp.bodyPart(bp);
 
-            WebTarget target = JerseyClientFactory.get(svc).getBaseTarget().path("/plugin-admin/upload-global");
-            if (replace) {
-                target = target.queryParam("replace", true);
-            }
-            Response response = target.request().post(Entity.entity(mp, MediaType.MULTIPART_FORM_DATA_TYPE));
+                WebTarget target = JerseyClientFactory.get(svc).getBaseTarget().path("/plugin-admin/upload-global");
+                if (replace) {
+                    target = target.queryParam("replace", true);
+                }
+                Response response = target.request().post(Entity.entity(mp, MediaType.MULTIPART_FORM_DATA_TYPE));
 
-            if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
-                throw new IllegalStateException("Upload failed: " + response.getStatusInfo().getStatusCode() + ": "
-                        + response.getStatusInfo().getReasonPhrase());
+                if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
+                    throw new IllegalStateException("Upload failed: " + response.getStatusInfo().getStatusCode() + ": "
+                            + response.getStatusInfo().getReasonPhrase());
+                }
             }
         }
     }

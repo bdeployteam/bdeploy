@@ -10,11 +10,11 @@
       </mat-toolbar-row>
       <mat-toolbar-row class="subHeader">
         <ng-container *ngIf="!loading && !productsLoading">
-          <span> UUID: <b>{{uuidControl.value}}</b> </span>
+          <span> UUID: <strong>{{uuidControl.value}}</strong> </span>
         </ng-container>
         <ng-container *ngIf="loading || productsLoading">
           <mat-spinner diameter="16"></mat-spinner>
-          <span class="loading-text"> <b>{{loadingText}}</b> </span>
+          <span class="loading-text"> <strong>{{loadingText}}</strong> </span>
         </ng-container>
       </mat-toolbar-row>
     </mat-toolbar>

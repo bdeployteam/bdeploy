@@ -29,7 +29,7 @@ Cypress.Commands.add('createInstance', function(group, name, mode = 'STANDALONE'
     cy.get('mat-option').contains(server).click();
   }
 
-  return cy.get('mat-toolbar-row').contains('UUID').get('b').then(el => {
+  return cy.get('mat-toolbar-row').contains('UUID').get('strong').then(el => {
     const uuid = el.text();
     cy.contains('button', 'SAVE').click();
     cy.waitUntilContentLoaded();

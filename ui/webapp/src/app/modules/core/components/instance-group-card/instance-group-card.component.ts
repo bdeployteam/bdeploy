@@ -55,7 +55,7 @@ export class InstanceGroupCardComponent implements OnInit {
       // need to convert mode to enable.
       if (this.instanceGroup.managed) {
         // group is managed but we're no longer a managed server -> migrate
-        this.mb.open({title: 'Migrate from Managed Instance Group', message: `The Instance Group <b>${this.instanceGroup.name}</b> was previously managed by a central server. This server has been migrated to a standalone mode. You need to confirm that this Instance Group may be migrated to standalone.`, mode: MessageBoxMode.CONFIRM}).subscribe(r => {
+        this.mb.open({title: 'Migrate from Managed Instance Group', message: `The Instance Group <strong>${this.instanceGroup.name}</strong> was previously managed by a central server. This server has been migrated to a standalone mode. You need to confirm that this Instance Group may be migrated to standalone.`, mode: MessageBoxMode.CONFIRM}).subscribe(r => {
           if (r) {
             this.instanceGroup.managed = false;
             this.instanceGroupService.updateInstanceGroup(this.instanceGroup.name, this.instanceGroup).subscribe(_ => {
@@ -65,7 +65,7 @@ export class InstanceGroupCardComponent implements OnInit {
         });
       } else {
         // group is not managed but we're no longer a standalone server -> need to attach!
-        this.mb.open({title: 'Migrate from Standalone Instance Group', message: `The Instance Group <b>${this.instanceGroup.name}</b> was created in standalone mode. This server has been migrated to a managed mode. You need to attach this Instance Group to an Instance Group <b>with the exact same name</b> on a Central Server to continue using it.`, mode: MessageBoxMode.CONFIRM}).subscribe(r => {
+        this.mb.open({title: 'Migrate from Standalone Instance Group', message: `The Instance Group <strong>${this.instanceGroup.name}</strong> was created in standalone mode. This server has been migrated to a managed mode. You need to attach this Instance Group to an Instance Group <strong>with the exact same name</strong> on a Central Server to continue using it.`, mode: MessageBoxMode.CONFIRM}).subscribe(r => {
           if (r) {
             this.initiateMigration();
           }
@@ -80,7 +80,7 @@ export class InstanceGroupCardComponent implements OnInit {
     const needMigration = await this.managedServers.isDataMigrationRequired(this.instanceGroup.name).toPromise();
 
     if (needMigration) {
-      const r = await this.mb.openAsync({title: 'Data Migration', message: `The Instance Group <b>${this.instanceGroup.name}</b> contains instance data which needs to be migrated. This migration will <b>discard</b> old instance versions and create a new, compatible configuration from the <b>latest</b> instance version.`, mode: MessageBoxMode.CONFIRM_WARNING});
+      const r = await this.mb.openAsync({title: 'Data Migration', message: `The Instance Group <strong>${this.instanceGroup.name}</strong> contains instance data which needs to be migrated. This migration will <strong>discard</strong> old instance versions and create a new, compatible configuration from the <strong>latest</strong> instance version.`, mode: MessageBoxMode.CONFIRM_WARNING});
       if (r) {
         await this.managedServers.performDataMigration(this.instanceGroup.name).toPromise();
       } else {

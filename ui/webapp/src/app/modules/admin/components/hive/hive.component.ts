@@ -181,12 +181,12 @@ export class HiveComponent implements OnInit {
       .open({
         title: 'Delete Manifest',
         message:
-          'Really delete <b>' +
+          'Really delete <strong>' +
           entry.mName +
           ':' +
           entry.mTag +
-          '</b>? This cannot be undone!' +
-          '<br><br><b>ATTENTION</b>: There is no check whether this manifest is still referenced.',
+          '</strong>? This cannot be undone!' +
+          '<br><br><strong>ATTENTION</strong>: There is no check whether this manifest is still referenced.',
         mode: MessageBoxMode.QUESTION,
       })
       .subscribe(r => {

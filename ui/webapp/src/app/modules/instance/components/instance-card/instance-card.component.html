@@ -18,16 +18,16 @@
     <div class='info-grid'>
       {{instanceDto.instanceConfiguration.description}}
       <div>
-        <span *ngIf='instanceDto.productDto'>Product: <b [matTooltip]='instanceDto.productDto.name'>{{instanceDto.productDto.name}}</b></span>
-        <span *ngIf='!instanceDto.productDto'>Product: <b>{{instanceDto.instanceConfiguration.product.name}}</b></span>
+        <span *ngIf='instanceDto.productDto'>Product: <strong [matTooltip]='instanceDto.productDto.name'>{{instanceDto.productDto.name}}</strong></span>
+        <span *ngIf='!instanceDto.productDto'>Product: <strong>{{instanceDto.instanceConfiguration.product.name}}</strong></span>
 
         <span *ngIf='instanceDto.activeProduct'>&nbsp;
-          Active Product Version: <b>{{instanceDto.activeProduct.tag}}</b>&nbsp;
+          Active Product Version: <strong>{{instanceDto.activeProduct.tag}}</strong>&nbsp;
           <span *ngIf='!instanceDto.activeProductDto' class="product-unavailable" matTooltip="Required product version is not available.">N/A</span>
         </span>
 
         <span *ngIf='!instanceDto.activeProduct'>&nbsp;
-          Product Version: <b>{{instanceDto.instanceConfiguration.product.tag}}</b>&nbsp;
+          Product Version: <strong>{{instanceDto.instanceConfiguration.product.tag}}</strong>&nbsp;
           <span *ngIf='!instanceDto.productDto' class="product-unavailable" matTooltip="Required product version is not available.">N/A</span>
         </span>
 

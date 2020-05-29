@@ -41,4 +41,4 @@ jobs:
         node-version: '10.x'
 
     - name: Build and Test
-      run: ./gradlew --stacktrace clean build releaseTest -PrecordCypress '-Dtestlogger.theme=plain-parallel'
+      run: ./gradlew --stacktrace clean build releaseTest sonarqube -PrecordCypress '-Dtestlogger.theme=plain-parallel' -Dsonar.login=${{ secrets.SONARCLOUD_TOKEN }}

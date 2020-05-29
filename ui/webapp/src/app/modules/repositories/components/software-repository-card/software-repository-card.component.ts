@@ -26,7 +26,7 @@ export class SoftwareRepositoryCardComponent implements OnInit {
     this.mbService
       .open({
         title: 'Delete Software Repository: ' + this.repository.name,
-        message: 'Deleting a Software Repository <b>cannot be undone</b>.',
+        message: 'Deleting a Software Repository <strong>cannot be undone</strong>.',
         mode: MessageBoxMode.CONFIRM_WARNING
       })
       .subscribe(result => {

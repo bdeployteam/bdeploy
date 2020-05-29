@@ -35,11 +35,11 @@
     <div class='validation-item-list'>
       <ng-container *ngFor='let item of issueCache'>
         <ng-container *ngIf='item.context'>
-          <div><b>{{item.context.applicationConfiguration.name}}:</b> {{item.issue}}</div>
+          <div><strong>{{item.context.applicationConfiguration.name}}:</strong> {{item.issue}}</div>
           <button mat-icon-button matTooltip="Edit affected application" (click)='instanceNotifications.closeOverlay(); onEditApp(item.context)'><mat-icon>arrow_forward</mat-icon></button>
         </ng-container>
         <ng-container *ngIf='!item.context'>
-          <div><b>{{item.issue}}</b></div>
+          <div><strong>{{item.issue}}</strong></div>
           <div></div>
         </ng-container>
       </ng-container>
@@ -73,16 +73,16 @@
       <div class="spacer"></div>
       <div class="toolbar-info-grid">
         <div>
-          Product: <b *ngIf="!loading">{{ isProductAvailable(selectedConfig) ? getProductOfInstance(selectedConfig).name : selectedConfig.instance.product.name }}</b>
+          Product: <strong *ngIf="!loading">{{ isProductAvailable(selectedConfig) ? getProductOfInstance(selectedConfig).name : selectedConfig.instance.product.name }}</strong>
         </div>
         <div>
-          Version: <b *ngIf="!loading">{{ selectedConfig.instance.product.tag }}</b>&nbsp;<span *ngIf="!productsLoading && !isProductAvailable(selectedConfig)" class="product-unavailable" matTooltip="Required product version is not available.">N/A</span>
+          Version: <strong *ngIf="!loading">{{ selectedConfig.instance.product.tag }}</strong>&nbsp;<span *ngIf="!productsLoading && !isProductAvailable(selectedConfig)" class="product-unavailable" matTooltip="Required product version is not available.">N/A</span>
         </div>
         <div>
-          Purpose: <b *ngIf="!loading">{{ selectedConfig.instance.purpose }}</b>
+          Purpose: <strong *ngIf="!loading">{{ selectedConfig.instance.purpose }}</strong>
         </div>
         <div>
-          Auto Start: <b *ngIf="!loading">{{ selectedConfig.instance.autoStart ? 'Enabled' : 'Disabled' }}</b>
+          Auto Start: <strong *ngIf="!loading">{{ selectedConfig.instance.autoStart ? 'Enabled' : 'Disabled' }}</strong>
         </div>
       </div>
       <div class="spacer"></div>

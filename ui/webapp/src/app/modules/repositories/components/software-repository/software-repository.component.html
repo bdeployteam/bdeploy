@@ -9,7 +9,7 @@
     <mat-drawer-container class="drawer-container" (backdropClick)='sidenav.close()'>
       <mat-drawer #appsidenav mode="over" position="end" disableClose>
         <div class='drawer-wrapper'>
-          <mat-toolbar class="mat-elevation-z1 fixed-toolbar">Versions for&nbsp;<b>{{selectedSoftwarePackageName ? selectedSoftwarePackageName : 'none'}}</b></mat-toolbar>
+          <mat-toolbar class="mat-elevation-z1 fixed-toolbar">Versions for&nbsp;<strong>{{selectedSoftwarePackageName ? selectedSoftwarePackageName : 'none'}}</strong></mat-toolbar>
           <app-software-list class='drawer-content' [softwareRepositoryName]="softwareRepositoryName" [softwareVersions]='softwarePackages.get(selectedSoftwarePackageName)' (deleted)='versionDeleted()'></app-software-list>
         </div>
       </mat-drawer>

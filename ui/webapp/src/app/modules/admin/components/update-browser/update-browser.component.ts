@@ -148,9 +148,9 @@ export class UpdateBrowserComponent implements OnInit {
       }
     }
 
-    let text = `Confirm that the system should be updated to version <b>${keys.tag}</b>`;
+    let text = `Confirm that the system should be updated to version <strong>${keys.tag}</strong>`;
     if (keys.snapshot) {
-      text += '<br/><br/><b>WARNING:</b> You are about to install a snapshot version that is not yet released.';
+      text += '<br/><br/><strong>WARNING:</strong> You are about to install a snapshot version that is not yet released.';
     }
     const doUpdate = await this.mbService.openAsync({title: 'Confirm Update', message: text , mode: MessageBoxMode.QUESTION});
     if (!doUpdate) {

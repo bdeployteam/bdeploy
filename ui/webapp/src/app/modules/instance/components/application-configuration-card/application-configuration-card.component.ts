@@ -72,7 +72,7 @@ export class ApplicationConfigurationCardComponent implements OnInit {
   onDelete(): void {
     const resultPromise = this.mbService.open({
       title: 'Delete ' + this.appConfig.name,
-      message: 'Deleting a process <b>cannot be undone</b>.',
+      message: 'Deleting a process <strong>cannot be undone</strong>.',
       mode: MessageBoxMode.CONFIRM_WARNING,
     });
     resultPromise.subscribe(result => {

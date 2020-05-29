@@ -256,8 +256,9 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
                     .map(Map.Entry::getKey).collect(Collectors.toSet());
 
             r.forEach(preRegistrations::remove);
+        } else {
+            server.getServerConfiguration().removeHttpHandler(handler);
         }
-        server.getServerConfiguration().removeHttpHandler(handler);
     }
 
     @Override

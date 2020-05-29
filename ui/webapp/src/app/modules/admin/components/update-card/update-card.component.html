@@ -1,6 +1,6 @@
 <mat-card>
     <div class='flex-line'>
-      <b>{{version.tag}}</b>&nbsp;({{version.snapshot ? 'SNAPSHOT' : 'RELEASE'}})<ng-container *ngIf='version.current'>&nbsp;-&nbsp;<b>current</b></ng-container>
+      <strong>{{version.tag}}</strong>&nbsp;({{version.snapshot ? 'SNAPSHOT' : 'RELEASE'}})<ng-container *ngIf='version.current'>&nbsp;-&nbsp;<strong>current</strong></ng-container>
       <div class='spacer'></div>
       <ng-container *ngFor='let os of version.oss'>
         <button mat-icon-button (click)='getDownload(os)' [disabled]='deleteRunning' matTooltip="Download for {{os}}">

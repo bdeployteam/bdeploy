@@ -141,9 +141,9 @@
                 <mat-card class="info-card">
                   <div class="mat-title">{{param.desc.name}}</div>
                     <mat-card-content class="info-grid">
-                      <div><b>Description:</b></div>
+                      <div><strong>Description:</strong></div>
                       <div class="info-grid-span-2">{{param.desc.longDescription ? param.desc.longDescription : '(none)'}}</div>
-                      <div><b>Default:</b></div>
+                      <div><strong>Default:</strong></div>
                       <div class="info-default-value">{{param.desc.defaultValue ? (param.desc.type === parameterType.PASSWORD ? '*'.repeat(param.desc.defaultValue.length) : param.desc.defaultValue) : '(none)'}}</div>
                         <button mat-icon-button type="button" class="info-restore-button" [disabled]="!param.desc.defaultValue || readonly" (click)="revertValue(param)" matTooltip="Restore default value">
                         <mat-icon>undo</mat-icon>
