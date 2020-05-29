@@ -1,4 +1,4 @@
 <div [ngStyle]='getStyle(hostSize)'>
   <mat-icon [ngStyle]='getStyle(avatarSize)' *ngIf='!gravatar || !mail'>account_circle</mat-icon>
-  <img *ngIf='gravatar && mail' ngxGravatar fallback='mm' [email]='mail' [size]='avatarSize'>
+  <img *ngIf='gravatar && mail' ngxGravatar fallback='mm' [email]='mail' [size]='avatarSize' alt='user avatar'>
 </div>

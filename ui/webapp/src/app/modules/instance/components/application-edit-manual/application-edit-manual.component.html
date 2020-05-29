@@ -16,11 +16,13 @@
   </mat-dialog-actions>
   <mat-dialog-content fxFlex class="mat-elevation-z2">
     <table mat-table [dataSource]="dataSource">
+      <caption style="display: none;">Parameters</caption>
+
       <tr mat-header-row *matHeaderRowDef="columnsToDisplay; sticky: true"></tr>
       <tr mat-row *matRowDef="let row; columns: columnsToDisplay"></tr>
 
       <ng-container matColumnDef="uid">
-        <th mat-header-cell *matHeaderCellDef>
+        <th scope="col" mat-header-cell *matHeaderCellDef>
           <div class="header-with-icon">
             <mat-icon matTooltip="The unique ID of the parameter." [matTooltipPosition]="'above'">info</mat-icon>
             <div>UID</div>
@@ -35,7 +37,7 @@
       </ng-container>
 
       <ng-container matColumnDef="predecessor">
-        <th mat-header-cell *matHeaderCellDef>
+        <th scope="col" mat-header-cell *matHeaderCellDef>
           <div class="header-with-icon">
             <mat-icon matTooltip="Defines the position where the parameter is inserted into the command line." [matTooltipPosition]="'above'">info</mat-icon>
             <div>Predecessor</div>
@@ -57,7 +59,7 @@
       </ng-container>
 
       <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>
+        <th scope="col" mat-header-cell *matHeaderCellDef>
           <div class="header-with-icon">
             <div>Actions</div>
           </div>
