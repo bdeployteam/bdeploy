@@ -41,4 +41,6 @@ jobs:
         node-version: '10.x'
 
     - name: Build and Test
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: ./gradlew --stacktrace clean build releaseTest sonarqube -PrecordCypress '-Dtestlogger.theme=plain-parallel' -Dsonar.login=${{ secrets.SONARCLOUD_TOKEN }}
