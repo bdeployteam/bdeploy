@@ -12,9 +12,10 @@
   <mat-card *ngIf="!editMode" class="config-card">
     <mat-card-content class="config-card-content">
       <table mat-table class="filelist-table" [dataSource]="listConfigFiles()" #filetable>
+        <caption style="display: none;">Config Files</caption>
 
         <ng-container matColumnDef="icon">
-          <th mat-header-cell *matHeaderCellDef></th>
+          <th scope="col" mat-header-cell *matHeaderCellDef></th>
           <td mat-cell *matCellDef="let path" class="icon-column">
             <mat-icon *ngIf='isDeleted(path)' matTooltip='This file will be deleted on save.'>delete</mat-icon>
             <div *ngIf='!isDeleted(path)' class='icon-stack'>
@@ -28,12 +29,12 @@
         </ng-container>
 
         <ng-container matColumnDef="path">
-          <th mat-header-cell *matHeaderCellDef>Configuration file path</th>
+          <th scope="col" mat-header-cell *matHeaderCellDef>Configuration file path</th>
           <td mat-cell *matCellDef="let path" class="wide-column"><span>{{ path }}</span></td>
         </ng-container>
 
         <ng-container matColumnDef="delete">
-          <th mat-header-cell *matHeaderCellDef>Del.</th>
+          <th scope="col" mat-header-cell *matHeaderCellDef>Del.</th>
           <td mat-cell *matCellDef="let path" class="icon-column">
             <button mat-icon-button *ngIf="!isDeleted(path)" (click)="deleteFile(path); filetable.renderRows()" matTooltip="Delete File"><mat-icon>delete</mat-icon></button>
             <button mat-icon-button *ngIf="isDeleted(path)" (click)="restoreFile(path); filetable.renderRows()" matTooltip="Restore File"><mat-icon >undo</mat-icon></button>
@@ -41,14 +42,14 @@
         </ng-container>
 
         <ng-container matColumnDef="copy">
-          <th mat-header-cell *matHeaderCellDef>Copy</th>
+          <th scope="col" mat-header-cell *matHeaderCellDef>Copy</th>
           <td mat-cell *matCellDef="let path">
             <button mat-icon-button *ngIf="!isDeleted(path)" (click)="editFile(path, true); filetable.renderRows()" matTooltip="Copy and Edit File"><mat-icon>file_copy</mat-icon></button>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="edit">
-          <th mat-header-cell *matHeaderCellDef>Edit</th>
+          <th scope="col" mat-header-cell *matHeaderCellDef>Edit</th>
           <td mat-cell *matCellDef="let path" class="icon-column" >
             <button mat-icon-button *ngIf="!isDeleted(path)" (click)="editFile(path, false); filetable.renderRows()" matTooltip="Edit File"><mat-icon>edit</mat-icon></button>
           </td>

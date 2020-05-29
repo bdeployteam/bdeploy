@@ -17,7 +17,7 @@
       <span class='welcomeText'>Welcome to BDeploy!</span>
     </p>
     <p>
-      <span class='headerText' *ngIf="authService.isGlobalAdmin()">To get you started quickly, consider reading our <a href='https://bdeploy.io/user/index.html#_getting_started' target="_blank">documentation</a>!</span>
+      <span class='headerText' *ngIf="authService.isGlobalAdmin()">To get you started quickly, consider reading our <a rel="noopener noreferrer" href='https://bdeploy.io/user/index.html#_getting_started' target="_blank">documentation</a>!</span>
     </p>
     <mat-divider></mat-divider>
     <ng-container *ngIf='authService.isGlobalAdmin() && isAddAllowed()'>
