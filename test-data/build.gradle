@@ -12,12 +12,12 @@ plugins {
 ext {
     testServerRoot = "${buildDir}/test-root"
     testServerHost = "localhost"
-    testServerPort = randomServerPort()
+    testServerPort = 7711
 
     testServerRootCentral = "${buildDir}/test-root-central"
     testServerRootManaged = "${buildDir}/test-root-managed"
-    testServerPortCentral = randomServerPort()
-    testServerPortManaged = randomServerPort()
+    testServerPortCentral = 7715
+    testServerPortManaged = 7716
 
     _testBinVersions = new File(projectDir, "test.versions") as String[]
 

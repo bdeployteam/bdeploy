@@ -1,7 +1,3 @@
-def webappDir = "$projectDir/webapp"
-
-apply plugin: 'cz.habarta.typescript-generator'
-
 buildscript {
     repositories {
         jcenter()
@@ -11,6 +7,15 @@ buildscript {
         classpath 'cz.habarta.typescript-generator:typescript-generator-gradle-plugin:2.23.603'
     }
 }
+
+plugins {
+    id "com.github.psxpaul.execfork" version "0.1.13"
+}
+
+apply plugin: 'cz.habarta.typescript-generator'
+
+def webappDir = "$projectDir/webapp"
+
 
 dependencies {
     implementation(
@@ -35,12 +40,25 @@ ext.sharedNpmLogic = { task, List<String> target ->
     configure(task) {
         workingDir "$webappDir"
         group = BasePlugin.BUILD_GROUP
-        def cmd = []
         if (!org.gradle.internal.os.OperatingSystem.current().isWindows()) {
             commandLine (["npm"] + target)
         } else {
             commandLine (["npm.cmd"] + target)
         }
+    }
+}
+
+ext.sharedServeLogic = { task, List<String> target -> 
+    configure(task) {
+        workingDir "$webappDir"
+        group = BasePlugin.BUILD_GROUP
+        if (!org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+            executable "npm"
+        } else {
+            executable "npm.cmd"
+        }
+
+        args = ["run", "--", "ng", "serve"] + target
     }
 }
 
@@ -59,7 +77,46 @@ task updateFixtureProducts(type: Copy) {
     }
 }
 
-task updateFixtures(dependsOn: [':test-data:setupDemoServer', 'updateFixtureProducts']) {
+task triggerStopCoverageStandalone {
+    doLast {
+        println "Stop Coverage for Standalone"
+    }
+}
+
+task runCoverageServerStandalone(type: com.github.psxpaul.task.ExecFork) {
+    sharedServeLogic(it, ["-c", "cov-standalone"])
+    waitForOutput = "Compiled successfully"
+    timeout = 120
+    stopAfter = triggerStopCoverageStandalone
+}
+
+task triggerStopCoverageCentral {
+    doLast {
+        println "Stop Coverage for Central"
+    }
+}
+
+task runCoverageServerCentral(type: com.github.psxpaul.task.ExecFork) {
+    sharedServeLogic(it, ["-c", "cov-central"])
+    waitForOutput = "Compiled successfully"
+    timeout = 120
+    stopAfter = triggerStopCoverageCentral
+}
+
+task triggerStopCoverageManaged {
+    doLast {
+        println "Stop Coverage for Managed"
+    }
+}
+
+task runCoverageServerManaged(type: com.github.psxpaul.task.ExecFork) {
+    sharedServeLogic(it, ["-c", "cov-managed"])
+    waitForOutput = "Compiled successfully"
+    timeout = 120
+    stopAfter = triggerStopCoverageManaged
+}
+
+task updateFixtures(dependsOn: [':test-data:setupDemoServer', 'updateFixtureProducts', runCoverageServerStandalone, runCoverageServerCentral, runCoverageServerManaged]) {
     // currently nothing...
 }
 
@@ -68,11 +125,11 @@ List<String> getCypressConfig() {
     def centralPort = project(":test-data").testServerPortCentral
     def managedPort = project(":test-data").testServerPortManaged
     return [
-        "--config", "baseUrl=https://localhost:${standalonePort}",
+        "--config", "baseUrl=http://localhost:4210",
         "--env", "backendBaseUrl=https://localhost:${standalonePort}/api"
-        + ",baseUrlCentral=https://localhost:${centralPort}"
+        + ",baseUrlCentral=http://localhost:4211"
         + ",backendBaseUrlCentral=https://localhost:${centralPort}/api"
-        + ",baseUrlManaged=https://localhost:${managedPort}"
+        + ",baseUrlManaged=http://localhost:4212"
         + ",backendBaseUrlManaged=https://localhost:${managedPort}/api"
     ]
 
@@ -148,7 +205,7 @@ task runDevCypress(type: Exec) {
 }
 
 // this one is required to stop the server and accumulate coverage data
-task doneWithCypressHeadless(dependsOn: ':test-data:triggerStopBDeploy') {
+task doneWithCypressHeadless(dependsOn: [':test-data:triggerStopBDeploy', triggerStopCoverageStandalone, triggerStopCoverageCentral, triggerStopCoverageManaged]) {
     doLast {
         println('Cypress Testing done...')
     }
@@ -157,6 +214,9 @@ task doneWithCypressHeadless(dependsOn: ':test-data:triggerStopBDeploy') {
 }
 
 project(':test-data').tasks['triggerStopBDeploy'].mustRunAfter runCypressHeadless
+triggerStopCoverageStandalone.mustRunAfter runCypressHeadless
+triggerStopCoverageCentral.mustRunAfter runCypressHeadless
+triggerStopCoverageManaged.mustRunAfter runCypressHeadless
 test.dependsOn doneWithCypressHeadless
 
 task release(type: Copy, dependsOn: runCypressHeadless) {
@@ -293,6 +353,7 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
 sonarqube {
     properties {
         properties["sonar.sources"] += "${projectDir}/webapp/src"
+        property "sonar.javascript.lcov.reportPaths", "${projectDir}/webapp/coverage/lcov.info"
     }
 }
 

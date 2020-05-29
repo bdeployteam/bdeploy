@@ -109,13 +109,57 @@
                   "with": "src/environments/environment.dev-managed.ts"
                 }
               ]
+            },
+            "cov-standalone": {
+              "budgets": [
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.cov-standalone.ts"
+                }
+              ]
+            },
+            "cov-central": {
+              "budgets": [
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.cov-central.ts"
+                }
+              ]
+            },
+            "cov-managed": {
+              "budgets": [
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.cov-managed.ts"
+                }
+              ]
             }
+
           }
         },
         "serve": {
-          "builder": "@angular-devkit/build-angular:dev-server",
+          "builder": "ngx-build-plus:dev-server",
           "options": {
-            "browserTarget": "webapp:build"
+            "browserTarget": "webapp:build",
+            "extraWebpackConfig": "./cypress/coverage.webpack.js"
           },
           "configurations": {
             "production": {
@@ -128,7 +172,20 @@
             "managed": {
               "browserTarget": "webapp:build:managed",
               "port": 4202
+            },
+            "cov-standalone": {
+              "browserTarget": "webapp:build:cov-standalone",
+              "port": 4210
+            },
+            "cov-central": {
+              "browserTarget": "webapp:build:cov-central",
+              "port": 4211
+            },
+            "cov-managed": {
+              "browserTarget": "webapp:build:cov-managed",
+              "port": 4212
             }
+
           }
         },
         "extract-i18n": {

@@ -12,8 +12,10 @@
 // the project's config changing)
 const request = require('request');
 const fs = require('fs-extra');
+const cypressTypeScriptPreprocessor = require('./cy-ts-preprocessor')
+
 module.exports = (on, config) => {
-  require('cypress-terminal-report').installPlugin(on);
+  // require('cypress-terminal-report').installPlugin(on);
 
   on('task', {
     downloadFileFromUrl(args) {
@@ -33,4 +35,13 @@ module.exports = (on, config) => {
       });
     }
   })
+
+  on('file:preprocessor', cypressTypeScriptPreprocessor);
+
+  // enable code coverage collection
+  require('@cypress/code-coverage/task')(on, config);
+
+  // IMPORTANT to return the config object
+  // with the any changed environment variables
+  return config;
 }
