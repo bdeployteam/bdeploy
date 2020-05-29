@@ -87,7 +87,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
 
     // Remove visualization of valid targets for dropping elements
     this.subscription.add(
-      this.dragulaService.dragend().subscribe(({}) => {
+      this.dragulaService.dragend().subscribe(_ => {
         this.onDragEnd();
       }),
     );

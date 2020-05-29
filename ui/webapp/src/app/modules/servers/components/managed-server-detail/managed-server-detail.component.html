@@ -10,11 +10,12 @@
 
   <div class='node-table-container' *ngIf='dataSource'>
     <table mat-table [dataSource]="dataSource" class="mat-elevation-z2 node-table">
+      <caption style="display: none;">Minions</caption>
       <tr mat-header-row *matHeaderRowDef="columnsToDisplay; sticky: true"></tr>
       <tr mat-row *matRowDef="let row; columns: columnsToDisplay"></tr>
 
       <ng-container matColumnDef="minion">
-        <th mat-header-cell *matHeaderCellDef>
+        <th scope="col" mat-header-cell *matHeaderCellDef>
           Minion Name
         </th>
         <td mat-cell *matCellDef="let row">
@@ -24,28 +25,28 @@
       </ng-container>
 
       <ng-container matColumnDef="os">
-        <th mat-header-cell *matHeaderCellDef>OS</th>
+        <th scope="col" mat-header-cell *matHeaderCellDef>OS</th>
         <td mat-cell *matCellDef="let row">
           <mat-icon [svgIcon]='row.config.os' matTooltip='{{ row.config.os }}'></mat-icon>
         </td>
       </ng-container>
 
       <ng-container matColumnDef="version">
-        <th mat-header-cell *matHeaderCellDef>System Version</th>
+        <th scope="col" mat-header-cell *matHeaderCellDef>System Version</th>
         <td mat-cell *matCellDef="let row">
           {{ getVersion(row.config.version) }}
         </td>
       </ng-container>
 
       <ng-container matColumnDef="url">
-        <th mat-header-cell *matHeaderCellDef>URL (as known by target server)</th>
+        <th scope="col" mat-header-cell *matHeaderCellDef>URL (as known by target server)</th>
         <td mat-cell *matCellDef="let row">
           {{ row.config.remote.uri }}
         </td>
       </ng-container>
 
       <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <th scope="col" mat-header-cell *matHeaderCellDef>Status</th>
         <td mat-cell *matCellDef="let row">
           <ng-container>
             <mat-spinner *ngIf="isUpdateInProgress()" class="update-table-icon" diameter="24"> </mat-spinner>

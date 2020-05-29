@@ -44,7 +44,6 @@
 
 .default-toolbar {
   display: flex;
-  flex-direction: row;
   flex-flow: row-reverse;
 }
 
@@ -150,7 +149,6 @@
 
 .products-toolbar {
   display: flex;
-  flex-direction: row;
   flex-flow: row-reverse;
 }
 
