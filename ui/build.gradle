@@ -290,6 +290,12 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
     }
 }
 
+sonarqube {
+    properties {
+        properties["sonar.sources"] += "${projectDir}/webapp/src"
+    }
+}
+
 processResources.dependsOn "buildAngular"
 processResources.dependsOn "copyUserDoc"
 clean.dependsOn "cleanAngular"

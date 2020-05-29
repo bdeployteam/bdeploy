@@ -581,6 +581,9 @@ sonarqube {
     properties {
         property "sonar.projectKey", "bdeployteam_bdeploy"
         property "sonar.coverage.jacoco.xmlReportPaths", "$buildDir/reports/jacoco/jacocoFullReport/jacocoFullReport.xml"
+        property "sonar.verbose", "true"
+        property "sonar.host.url", "https://sonarcloud.io"
+        property "sonar.organization", "bdeployteam"
     }
 }
 
