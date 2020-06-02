@@ -95,8 +95,7 @@ export class ApplicationService {
   public updateGlobalParameters(
     appDesc: ApplicationDescriptor,
     template: ApplicationConfiguration,
-    processConfig: ProcessConfigDto,
-  ) {
+    apps: ApplicationConfiguration[]) {
     // Build index for quick parameter lookup
     const paraDescMap = new Map<string, ParameterDescriptor>();
     for (const paraDesc of appDesc.startCommand.parameters) {
@@ -108,7 +107,6 @@ export class ApplicationService {
     }
 
     // Process start and stop command of all apps
-    const apps = this.getAllApps(processConfig);
     for (const app of apps) {
       // Do not update ourself. Changes are already applied
       if (app.uid === template.uid) {
@@ -682,11 +680,18 @@ export class ApplicationService {
         templates,
       );
     }
+    this.updateEndpoints(app,desc);
+  }
+
+  /**
+   * Creates missing endpoints and ensures that all defined ones are still valid.
+   */
+  updateEndpoints(app: ApplicationConfiguration, desc: ApplicationDescriptor) {
+    const finalEps = [];
     if (desc.endpoints && desc.endpoints.http) {
       if (!app.endpoints || ! app.endpoints.http) {
         app.endpoints = { http: [] };
       }
-      const finalEps = [];
       for (const cep of app.endpoints.http) {
         const existing = desc.endpoints.http.findIndex(p => p.id === cep.id);
         if (existing !== -1) {
@@ -703,9 +708,8 @@ export class ApplicationService {
           finalEps.push(ep);
         }
       }
-
-      app.endpoints.http = finalEps;
     }
+    app.endpoints.http = finalEps;
   }
 
   /**
@@ -746,6 +750,9 @@ export class ApplicationService {
     this.setUnknownParameters(appUid, unknownAppParams);
   }
 
+  /**
+   * Creates missing parameters and ensures that all defined ones are still valid.
+   */
   updateApplicationParamsForPastedApplication(
     app: ApplicationConfiguration,
     desc: ApplicationDescriptor,
@@ -769,29 +776,13 @@ export class ApplicationService {
         templates,
       );
     }
-    if (desc.endpoints && desc.endpoints.http) {
-      if (!app.endpoints || ! app.endpoints.http) {
-        app.endpoints = { http: [] };
-      }
-      const finalEps = [];
-      for (const cep of app.endpoints.http) {
-        const existing = desc.endpoints.http.findIndex(p => p.id === cep.id);
-        if (existing !== -1) {
-          // still existing endpoint, keep it
-          finalEps.push(cep);
-        }
-        // otherwise the endpoint is dropped, no longer existing in the application descriptor.
-      }
+    this.updateEndpoints(app,desc);
 
-      for (const ep of desc.endpoints.http) {
-        const existing = app.endpoints.http.findIndex(p => p.id === ep.id);
-        if (existing === -1) {
-          // newly added endpoint
-          finalEps.push(ep);
-        }
-      }
-
-      app.endpoints.http = finalEps;
+    // We need to take all existing apps as templates as
+    // not all apps have all parameters
+    const apps = Array.of(app);
+    for(const template of templates) {
+      this.updateGlobalParameters(desc, template, apps);
     }
   }
 
@@ -840,7 +831,6 @@ export class ApplicationService {
     const unknownAppParams: UnknownParameter[] = [];
     for (const config of configs) {
       const exisitingDescriptor = descs.find(d => d.uid === config.uid);
-
       if (exisitingDescriptor) {
         continue;
       }

@@ -679,7 +679,8 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     this.activeNodeConfig.applications[appIdx] = updated;
 
     // Update global parameters of all apps
-    this.applicationService.updateGlobalParameters(appDesc, updated, this.selectedConfig);
+    const allApps = this.applicationService.getAllApps(this.selectedConfig);
+    this.applicationService.updateGlobalParameters(appDesc, updated, allApps);
 
     // Remove all resolved unknown parameters
     this.applicationService.setUnknownParameters(updated.uid, this.editComponent.unknownParameters);

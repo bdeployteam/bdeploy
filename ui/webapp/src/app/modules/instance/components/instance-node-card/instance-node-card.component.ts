@@ -234,9 +234,8 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
   }
 
   onPaste() {
-    const readClipboard = navigator.clipboard.readText().then(
-     data => {
-        let appConfig = null;
+    navigator.clipboard.readText().then(data => {
+        let appConfig:ApplicationConfiguration = null;
         try {
           appConfig = JSON.parse(data) as ApplicationConfiguration;
         } catch (e) {
@@ -259,13 +258,13 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
             appConfig.application.tag = productKey.tag;
             appConfig.uid = uid;
 
-            // Lookup parameter in all available applications
+            // Update parameters for pasted app
             const apps = this.appService.getAllApps(this.processConfig);
             this.appService.updateApplicationParamsForPastedApplication(appConfig, desc, apps);
 
+            // Insert at the end
             const targetIndex = this.nodeApps.length;
             this.addProcess(appConfig, targetIndex);
-
            });
         });
       },
