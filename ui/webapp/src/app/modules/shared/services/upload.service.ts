@@ -1,4 +1,4 @@
-import { HttpClient, HttpEventType, HttpHeaders, HttpRequest, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpEventType, HttpHeaders, HttpParams, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { Logger, LoggingService } from '../../core/services/logging.service';
@@ -43,6 +43,13 @@ export class UploadStatus {
   processingHint: string;
 }
 
+export interface UrlParameter {
+  id: string;
+  name: string;
+  type: string;
+  value: any;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -57,12 +64,17 @@ export class UploadService {
    *
    *  @param url the target URL to post the files to
    *  @param files the files to upload
+   *  @param urlParameter additional url parameter per file
+   *  @param formDataParam the FormData's property name that holds the file
    *  @returns a map containing the upload status for each file
    */
-  public upload(url: string, files: File[]): Map<String, UploadStatus> {
+  public upload(url: string, files: File[], urlParameter: UrlParameter[][], formDataParam: string): Map<String, UploadStatus> {
     const result: Map<String, UploadStatus> = new Map();
 
-    files.forEach(file => {
+    for(let i in files) {
+      const file = files[i];
+      const params = urlParameter[i];
+
       // create a new progress-subject for every file
       const uploadStatus = new UploadStatus();
       const progressSubject = new Subject<number>();
@@ -79,13 +91,26 @@ export class UploadService {
 
       // create a new multipart-form for every file
       const formData: FormData = new FormData();
-      formData.append('file', file, file.name);
+      formData.append(formDataParam, file, file.name);
 
       // Suppress global error handling and enable progress reporting
       const options = {
         reportProgress: true,
         headers: suppressGlobalErrorHandling(new HttpHeaders({ 'X-Proxy-Activity-Scope': uploadStatus.scope })),
       };
+
+      // create and set additional HttpParams
+      if (params) {
+        let httpParams = new HttpParams();
+        params.forEach(p => {
+          if(p.type === 'boolean') {
+            httpParams = httpParams.set(p.id, p.value === true ? 'true' : 'false');
+          } else {
+            httpParams = httpParams.set(p.id, p.value);
+          }
+        });
+        options['params'] = httpParams;
+      }
 
       // create a http-post request and pass the form
       const req = new HttpRequest('POST', url, formData, options);
@@ -113,7 +138,7 @@ export class UploadService {
           stateSubject.complete();
         },
       );
-    });
+    };
     return result;
   }
 

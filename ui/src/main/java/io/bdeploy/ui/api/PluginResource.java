@@ -27,6 +27,13 @@ import io.bdeploy.jersey.ActivityScope;
 public interface PluginResource {
 
     /**
+     * @return all plugins
+     */
+    @GET
+    @Path("/list")
+    public List<PluginInfoDto> getPlugins();
+
+    /**
      * @return all currently loaded plugins
      */
     @GET

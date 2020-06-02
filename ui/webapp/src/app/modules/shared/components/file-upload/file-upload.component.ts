@@ -1,19 +1,23 @@
 import { Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatTable } from '@angular/material/table';
+import { cloneDeep } from 'lodash';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import { forkJoin } from 'rxjs';
 import { ManifestKey } from '../../../../models/gen.dtos';
 import { ErrorMessage, LoggingService } from '../../../core/services/logging.service';
 import { MessageboxService } from '../../services/messagebox.service';
 import { ActivitySnapshotTreeNode, RemoteEventsService } from '../../services/remote-events.service';
-import { UploadService, UploadState, UploadStatus } from '../../services/upload.service';
+import { UploadService, UploadState, UploadStatus, UrlParameter } from '../../services/upload.service';
 import { MessageBoxMode } from '../messagebox/messagebox.component';
 
 export interface UploadData {
   title: string;
   headerMessage: string;
   url: string;
+  urlParameter: UrlParameter[];
+  formDataParam: string;
+  resultDetailsEvaluator: (status: UploadStatus) => string,
   mimeTypes: string[];
   mimeTypeErrorMessage: string;
 }
@@ -32,10 +36,18 @@ export class FileUploadComponent implements OnInit, OnDestroy {
 
   @ViewChild(MatTable, { static: true })
   public table: MatTable<any>;
-  public columnsToDisplay = ['status', 'fileName', 'progress', 'action'];
+  public get columnsToDisplay() {
+    let result = ['status', 'fileName'];
+    if (this.uploadData.urlParameter) {
+      this.uploadData.urlParameter.forEach(o => result.push(o.id));
+    }
+    result.push('progress', 'action');
+    return result;
+  };
 
   /** The files to be uploaded */
   public files: File[] = [];
+  public filesParameter: UrlParameter[][] = [];
 
   /** Files to be uploaded */
   public uploads: Map<String, UploadStatus>;
@@ -61,6 +73,10 @@ export class FileUploadComponent implements OnInit, OnDestroy {
     ) {}
 
   ngOnInit(): void {
+    // default formDataParam to 'file'
+    if (this.uploadData.formDataParam == null) {
+      this.uploadData.formDataParam = 'file';
+    }
     // start event source - can't filter by narrow scope as there might be multiple uploads
     this.ws = this.eventService.createActivitiesWebSocket([]);
     this.ws.addEventListener('error', (err) => {
@@ -96,6 +112,7 @@ export class FileUploadComponent implements OnInit, OnDestroy {
   removeFile(file: File) {
     const idx = this.files.indexOf(file);
     this.files.splice(idx, 1);
+    this.filesParameter.splice(idx, 1);
     this.uploadEnabled = this.files.length > 0;
     this.dialogRef.disableClose = this.files.length > 0;
     this.table.renderRows();
@@ -110,6 +127,7 @@ export class FileUploadComponent implements OnInit, OnDestroy {
         }
         const idx = this.files.indexOf(us.file);
         this.files.splice(idx, 1);
+        this.filesParameter.splice(idx, 1);
         this.uploads.delete(us.file.name);
       });
     }
@@ -129,6 +147,20 @@ export class FileUploadComponent implements OnInit, OnDestroy {
         return;
       }
       this.files.push(file);
+      const pclone = cloneDeep(this.getUrlParameter());
+      pclone.forEach(p => {
+        if (!p.value) {
+          switch (p.type) {
+            case 'boolean': 
+              p.value = false; 
+              break;
+            case 'string': 
+              p.value = ''; 
+              break;
+          }
+        }
+      });
+      this.filesParameter.push(pclone);
     }
 
     // Update dialog state
@@ -202,12 +234,20 @@ export class FileUploadComponent implements OnInit, OnDestroy {
       return 'Upload failed. ' + status.detail;
     }
     if (this.isFinished(file)) {
-      if (status.detail.length === 0) {
-        return 'Software version already exists. Nothing to do.';
+      if (this.uploadData.resultDetailsEvaluator) {
+        return this.uploadData.resultDetailsEvaluator(status);
+      } else {
+        return this.defaultResultDetailsEvaluation(status);
       }
-      const softwares: ManifestKey[] = status.detail;
-      return 'Upload successful. New software package(s): ' + softwares.map(key => key.name + ' ' + key.tag).join(',');
     }
+  }
+
+  private defaultResultDetailsEvaluation(status: UploadStatus) {
+    if (status.detail.length === 0) {
+      return 'Software version already exists. Nothing to do.';
+    }
+    const softwares: ManifestKey[] = status.detail;
+    return 'Upload successful. New software package(s): ' + softwares.map(key => key.name + ' ' + key.tag).join(',');
   }
 
   onEventReceived(e: MessageEvent) {
@@ -287,7 +327,7 @@ export class FileUploadComponent implements OnInit, OnDestroy {
     this.showCancelButton = false;
 
     // start the upload and save the progress map
-    this.uploads = this.uploadService.upload(this.uploadData.url, this.files);
+    this.uploads = this.uploadService.upload(this.uploadData.url, this.files, this.filesParameter, this.uploadData.formDataParam);
     const allObservables = [];
     this.uploads.forEach(e => {
       allObservables.push(e.progressObservable);
@@ -334,6 +374,15 @@ export class FileUploadComponent implements OnInit, OnDestroy {
 
   getUploadProgress(file: File) {
     return this.getUploadStatus(file).progressObservable;
+  }
+
+  getUrlParameter(): UrlParameter[] {
+    return this.uploadData.urlParameter ? this.uploadData.urlParameter : [];
+  }
+
+  getUrlParameter4File(file: File, paramIdx: number): UrlParameter {
+    const idx = this.files.indexOf(file);
+    return this.filesParameter[idx][paramIdx];
   }
 
 }

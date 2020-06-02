@@ -43,28 +43,39 @@ public class PluginResourceImpl implements PluginResource {
     private BHiveRegistry reg;
 
     @Override
+    public List<PluginInfoDto> getPlugins() {
+        return getPluginsInternal(true, true);
+    }
+
+    @Override
     public List<PluginInfoDto> getLoadedPlugins() {
-        return manager.getPlugins();
+        return getPluginsInternal(true, false);
     }
 
     @Override
     public List<PluginInfoDto> getNotLoadedGlobalPlugin() {
-        List<PluginInfoDto> result = new ArrayList<>();
+        return getPluginsInternal(false, true);
+    }
 
-        BHive hive = getDefaultHive();
-        for (Manifest.Key key : PluginManifest.scan(hive)) {
-            PluginManifest mf = PluginManifest.of(hive, key);
+    private List<PluginInfoDto> getPluginsInternal(boolean loaded, boolean notLoaded) {
+        List<PluginInfoDto> result = loaded ? manager.getPlugins() : new ArrayList<>();
 
-            if (!manager.isLoaded(mf.getPlugin())) {
-                try (InputStream is = hive.execute(new ObjectLoadOperation().setObject(mf.getPlugin()))) {
-                    PluginHeader hdr = PluginHeader.read(is);
-                    result.add(new PluginInfoDto(mf.getPlugin(), hdr.name, hdr.version, true, Collections.emptyList()));
-                } catch (IOException e) {
-                    log.error("Cannot load plugin " + key, e);
+        if (notLoaded) {
+            BHive hive = getDefaultHive();
+            for (Manifest.Key key : PluginManifest.scan(hive)) {
+                PluginManifest mf = PluginManifest.of(hive, key);
+
+                if (!manager.isLoaded(mf.getPlugin())) {
+                    try (InputStream is = hive.execute(new ObjectLoadOperation().setObject(mf.getPlugin()))) {
+                        PluginHeader hdr = PluginHeader.read(is);
+                        result.add(
+                                new PluginInfoDto(mf.getPlugin(), hdr.name, hdr.version, true, false, Collections.emptyList()));
+                    } catch (IOException e) {
+                        log.error("Cannot load plugin " + key, e);
+                    }
                 }
             }
         }
-
         return result;
     }
 
