@@ -909,7 +909,11 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   async updateProduct(product: ProductDto): Promise<void> {
-    const oldProduct = this.selectedConfig.instance.product;
+    let oldProduct = this.processConfigs[0].version.product;
+    if (this.processConfigs[0].dirty && this.processConfigs.length > 1) {
+      oldProduct = this.processConfigs[1].version.product; // always use the latest saved product version to compare to.
+    }
+    console.log(oldProduct);
     this.productUpdating = true;
     this.productService.updateProduct(this.selectedConfig, product);
 
