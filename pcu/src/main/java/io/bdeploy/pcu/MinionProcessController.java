@@ -10,6 +10,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.util.MdcLogger;
+import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 
 /**
@@ -109,6 +110,20 @@ public class MinionProcessController {
         } finally {
             writeLock.unlock();
         }
+    }
+
+    /**
+     * Returns detailed information about the process launched for a given application.
+     *
+     * @param instanceId
+     *            the instance ID
+     * @param appUid
+     *            the application ID
+     * @return the DTO containing the details
+     */
+    public ProcessDetailDto getDetails(String instanceId, String appUid) {
+        InstanceProcessController ipc = get(instanceId);
+        return ipc.getDetails(appUid);
     }
 
 }

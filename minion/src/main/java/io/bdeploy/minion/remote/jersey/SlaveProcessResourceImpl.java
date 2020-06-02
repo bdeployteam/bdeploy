@@ -8,6 +8,7 @@ import javax.ws.rs.WebApplicationException;
 
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
+import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
 import io.bdeploy.interfaces.remote.SlaveProcessResource;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
@@ -70,6 +71,12 @@ public class SlaveProcessResourceImpl implements SlaveProcessResource {
             return new InstanceNodeStatusDto();
         }
         return instanceController.getStatus();
+    }
+
+    @Override
+    public ProcessDetailDto getProcessDetails(String instanceId, String appUid) {
+        MinionProcessController processController = root.getProcessController();
+        return processController.getDetails(instanceId, appUid);
     }
 
     @Override

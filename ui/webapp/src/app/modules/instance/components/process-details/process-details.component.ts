@@ -7,7 +7,7 @@ import { format } from 'date-fns';
 import { Observable, Subscription } from 'rxjs';
 import { finalize, map, mergeMap } from 'rxjs/operators';
 import { ProcessConfigDto } from 'src/app/models/process.model';
-import { ApplicationConfiguration, ApplicationStartType, InstanceDirectoryEntry, ParameterType, ProcessDetailDto, ProcessState, ProcessStatusDto, StringEntryChunkDto } from '../../../../models/gen.dtos';
+import { ApplicationConfiguration, ApplicationStartType, InstanceDirectoryEntry, ParameterType, ProcessDetailDto, ProcessHandleDto, ProcessState, StringEntryChunkDto } from '../../../../models/gen.dtos';
 import { unsubscribe } from '../../../shared/utils/object.utils';
 import { InstanceService } from '../../services/instance.service';
 import { ProcessService } from '../../services/process.service';
@@ -28,7 +28,7 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
   @Input() appConfig: ApplicationConfiguration;
   @Input() processConfig: ProcessConfigDto;
 
-  status: ProcessStatusDto;
+  details: ProcessDetailDto;
   subscription: Subscription;
 
   loading = true;
@@ -71,33 +71,36 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
 
   /** Called when the status of the process changed */
   onStatusChanged() {
-    this.status = this.processService.getStatusOfApp(this.appConfig.uid);
-    this.loading = false;
+    // Fetch detailed status
+    var promise = this.processService.getDetailsOfApp(this.instanceGroup, this.instanceId, this.appConfig.uid);
+    promise.pipe(finalize(() => this.loading = false)).subscribe(r => {
+      this.details = r;
 
-    // Clear interval handle
-    if (this.restartProgressHandle) {
-      clearInterval(this.restartProgressHandle);
-    }
+      // Clear interval handle
+      if (this.restartProgressHandle) {
+        clearInterval(this.restartProgressHandle);
+      }
 
-    // Schedule update countdown
-    if (this.isCrashedWaiting()) {
-      this.restartProgressHandle = setInterval(() => this.doUpdateRestartProgress(), 1000);
-      this.doUpdateRestartProgress();
-    }
+      // Schedule update countdown
+      if (this.isCrashedWaiting()) {
+        this.restartProgressHandle = setInterval(() => this.doUpdateRestartProgress(), 1000);
+        this.doUpdateRestartProgress();
+      }
 
-    // Clear uptimeString handle
-    if (this.uptimeCalculateHandle) {
-      clearTimeout(this.uptimeCalculateHandle);
-    }
+      // Clear uptimeString handle
+      if (this.uptimeCalculateHandle) {
+        clearTimeout(this.uptimeCalculateHandle);
+      }
 
-    if (this.isRunningOrUnstable()) {
-      this.uptimeCalculateHandle = setTimeout(() => this.calculateUptimeString(), 1);
-    }
+      if (this.isRunningOrUnstable()) {
+        this.uptimeCalculateHandle = setTimeout(() => this.calculateUptimeString(), 1);
+      }
 
-    // Update sheet when open
-    if (this.bottomSheet && this.bottomSheet.instance && this.bottomSheet.instance.setStatus) {
-      this.bottomSheet.instance.setStatus(this.status);
-    }
+      // Update sheet when open
+      if (this.bottomSheet && this.bottomSheet.instance && this.bottomSheet.instance.setStatus) {
+        this.bottomSheet.instance.setStatus(this.details);
+      }
+    });
   }
 
   reLoadStatus() {
@@ -173,7 +176,7 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   hasStdin(): boolean {
-    return this.appConfig.processControl.attachStdin && this.isRunning() && this.status.hasStdin;
+    return this.appConfig.processControl.attachStdin && this.isRunning() && this.details.hasStdin;
   }
 
   /** Returns whether or not this tag represents the active one */
@@ -182,17 +185,20 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   isMyVersion() {
-    return this.status.instanceTag === this.instanceTag;
+    return this.details?.status.instanceTag === this.instanceTag;
   }
 
   /** Returns whether or not the status of the process corresponds to the activated one */
   isOutOfSync() {
-    return this.status.instanceTag !== this.activatedInstanceTag;
+    return this.details?.status.instanceTag !== this.activatedInstanceTag;
   }
 
   /** Returns whether or not the process is running in a not-activated version */
   isRunningOutOfSync() {
-    const state = this.status.processState;
+    if(!this.details) {
+      return false;
+    }
+    const state = this.details.status.processState;
     const desired = new Set();
     desired.add(ProcessState.RUNNING);
     desired.add(ProcessState.RUNNING_UNSTABLE);
@@ -219,7 +225,7 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   canStart() {
-    return (this.isStopped() || this.isCrashedPermanently() || this.isCrashedWaiting()) && this.isMyVersion();
+    return (this.isStopped() || this.isCrashedPermanently() || this.isCrashedWaiting()) && this.isMyVersion() && this.isActivated();
   }
 
   canStop() {
@@ -231,25 +237,25 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   getStartTime() {
-    return format(new Date(this.status.processDetails.startTime), 'dd.MM.yyyy HH:mm');
+    return format(new Date(this.details.handle.startTime), 'dd.MM.yyyy HH:mm');
   }
 
   getStopTime() {
-    if (this.status.stopTime === -1) {
+    if (this.details.stopTime === -1) {
       return '-';
     }
-    return format(new Date(this.status.stopTime), 'dd.MM.yyyy HH:mm');
+    return format(new Date(this.details.stopTime), 'dd.MM.yyyy HH:mm');
   }
 
   getRestartTime() {
-    return format(new Date(this.status.recoverAt), 'dd.MM.yyyy HH:mm');
+    return format(new Date(this.details.recoverAt), 'dd.MM.yyyy HH:mm');
   }
 
   private calculateUptimeString() {
     this.uptimeCalculateHandle = null;
     if (this.isRunningOrUnstable()) {
       const now = Date.now();
-      const ms = now - this.status.processDetails.startTime;
+      const ms = now - this.details.handle.startTime;
       const sec = Math.floor(ms / 1000) % 60;
       const min = Math.floor(ms / 60000) % 60;
       const hours = Math.floor(ms / 3600000) % 24;
@@ -318,10 +324,10 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   getProcessCount() {
-    if (!this.status || !this.status.processDetails) {
+    if (!this.details || !this.details.handle) {
       return 0;
     }
-    return this.countProcessRecursive(this.status.processDetails);
+    return this.countProcessRecursive(this.details.handle);
   }
 
   getStatusDetails() {
@@ -344,18 +350,18 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   hasState(desired: ProcessState) {
-    if (!this.status) {
+    if (!this.details) {
       return false;
     }
-    return this.status.processState === desired;
+    return this.details.status.processState === desired;
   }
 
   doUpdateRestartProgress() {
-    const diff = this.status.recoverAt - Date.now();
+    const diff = this.details.recoverAt - Date.now();
     if (diff < 100) {
       this.reLoadStatus();
     } else {
-      const totalSeconds = this.status.recoverDelay + 2;
+      const totalSeconds = this.details.recoverDelay + 2;
       const remainingSeconds = Math.round(diff / 1000);
       this.restartProgress = 100 - 100 * (remainingSeconds / totalSeconds);
       this.restartProgressText = remainingSeconds + ' seconds';
@@ -366,7 +372,7 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
     this.bottomSheet = this.bottomSheetSvc.open(ProcessListComponent, {
       panelClass: 'process-sheet',
       data: {
-        statusDto: this.status,
+        statusDto: this.details,
         appConfig: this.appConfig,
       },
     });
@@ -413,7 +419,7 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
     this.bottomSheet.afterDismissed().subscribe(_ => this.bottomSheet = null);
   }
 
-  countProcessRecursive(parent: ProcessDetailDto): number {
+  countProcessRecursive(parent: ProcessHandleDto): number {
     let number = 1;
     parent.children.forEach(child => {
       number += this.countProcessRecursive(child);
@@ -422,7 +428,7 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   getCurrentOutputEntryFetcher(): () => Observable<InstanceDirectoryEntry> {
-    const tag: string = this.status ? this.status.instanceTag : (this.activatedInstanceTag ? this.activatedInstanceTag : this.instanceTag);
+    const tag: string = this.details ? this.details.status.instanceTag : (this.activatedInstanceTag ? this.activatedInstanceTag : this.instanceTag);
     return () => this.instanceService.getApplicationOutputEntry(this.instanceGroup, this.instanceId, tag, this.appConfig.uid, false).pipe(
       map(dir => {
         if (!dir.entries || !dir.entries.length) {
@@ -436,7 +442,7 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
 
   getOutputContentFetcher(): (offset: number, limit: number) => Observable<StringEntryChunkDto> {
     return (offset, limit) => {
-      const tag: string = this.status ? this.status.instanceTag : (this.activatedInstanceTag ? this.activatedInstanceTag : this.instanceTag);
+      const tag: string = this.details ? this.details.status.instanceTag : (this.activatedInstanceTag ? this.activatedInstanceTag : this.instanceTag);
       return this.instanceService.getApplicationOutputEntry(this.instanceGroup, this.instanceId, tag, this.appConfig.uid, true).pipe(
         mergeMap(dir => this.instanceService.getContentChunk(this.instanceGroup, this.instanceId, dir, dir.entries[0], offset, limit, true))
       );
@@ -445,7 +451,7 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
 
   getContentDownloader(): () => void {
     return () => {
-      const tag: string = this.status ? this.status.instanceTag : (this.activatedInstanceTag ? this.activatedInstanceTag : this.instanceTag);
+      const tag: string = this.details ? this.details.status.instanceTag : (this.activatedInstanceTag ? this.activatedInstanceTag : this.instanceTag);
       this.instanceService.getApplicationOutputEntry(this.instanceGroup, this.instanceId, tag, this.appConfig.uid, true).subscribe(dir => {
         this.instanceService.downloadDataFileContent(this.instanceGroup, this.instanceId, dir, dir.entries[0]);
       });

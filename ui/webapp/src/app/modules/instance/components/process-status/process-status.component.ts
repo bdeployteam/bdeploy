@@ -5,7 +5,6 @@ import { ConfigService } from '../../../core/services/config.service';
 import { unsubscribe } from '../../../shared/utils/object.utils';
 import { ProcessService } from '../../services/process.service';
 
-
 @Component({
   selector: 'app-process-status',
   templateUrl: './process-status.component.html',
@@ -76,7 +75,7 @@ export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
   onStatusChanged() {
     this.resetState();
 
-    var status;
+    let status;
     if (this.appId) {
       status = this.processService.getStatusOfApp(this.appId);
       if (status) {
@@ -150,7 +149,7 @@ export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
     if (this.isRunning()) {
       styles.push('app-process-running');
     }
-    if(this.isStopPlanned()) {
+    if (this.isStopPlanned()) {
       styles.push('app-process-running');
     }
     if (this.isStopped()) {
@@ -187,7 +186,7 @@ export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
       }
       return 'Application crashed permanently.';
     }
-    if(this.isStopPlanned()) {
+    if (this.isStopPlanned()) {
       if (this.showStateOfAllApps()) {
         return 'One or more applications are going to be stopped.';
       }

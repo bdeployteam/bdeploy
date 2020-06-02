@@ -38,6 +38,8 @@ import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.InstanceImportExportHelper;
 import io.bdeploy.interfaces.cleanup.CleanupGroup;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
+import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
+import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.InstanceDirectory;
@@ -102,6 +104,11 @@ public class MinionDeployTest {
         InstanceStatusDto status = master.getNamedMaster("demo").getStatus(uuid);
         System.out.println(status);
         assertTrue(status.isAppRunningOrScheduled("app"));
+        assertEquals(ProcessState.RUNNING, status.node2Applications.get("master").getStatus("app").processState);
+
+        ProcessDetailDto details = master.getNamedMaster("demo").getProcessDetails(uuid, "app");
+        assertNotNull(details);
+        assertEquals(ProcessState.RUNNING, details.status.processState);
 
         // give the script a bit to write output
         Thread.sleep(200);

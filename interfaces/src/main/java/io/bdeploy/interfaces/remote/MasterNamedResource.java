@@ -20,6 +20,7 @@ import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
+import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.InstanceDirectory;
 import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
@@ -213,8 +214,19 @@ public interface MasterNamedResource {
      * @return the running applications
      */
     @GET
-    @Path("/status")
+    @Path("/process-status")
     public InstanceStatusDto getStatus(@QueryParam("u") String instanceId);
+
+    /**
+     * Returns the full status of a single application.
+     *
+     * @param instanceId the unique id of the instance.
+     * @param appUid the application UID to query
+     * @return the full detailed status of the process.
+     */
+    @GET
+    @Path("/process-details")
+    public ProcessDetailDto getProcessDetails(@QueryParam("u") String instanceId, @QueryParam("a") String appUid);
 
     /**
      * @param principal the principal name to issue the token to.

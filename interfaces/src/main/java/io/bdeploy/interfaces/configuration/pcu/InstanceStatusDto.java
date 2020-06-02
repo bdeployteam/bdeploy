@@ -38,6 +38,13 @@ public class InstanceStatusDto {
     }
 
     /**
+     * Returns the instance ID.
+     */
+    public String getInstanceId() {
+        return instanceId;
+    }
+
+    /**
      * Returns a human-readable string of the current instance status.
      */
     public List<String> log() {
@@ -145,7 +152,7 @@ public class InstanceStatusDto {
      *            the application identifier
      * @return the name of the node
      */
-    public String getNodeWhereAppIsDeployedInActiveVersion(String applicationId) {
+    public String getNodeWhereAppIsDeployed(String applicationId) {
         for (Map.Entry<String, InstanceNodeStatusDto> entry : node2Applications.entrySet()) {
             String nodeName = entry.getKey();
             InstanceNodeStatusDto nodeDto = entry.getValue();

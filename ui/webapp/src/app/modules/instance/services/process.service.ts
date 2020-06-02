@@ -1,8 +1,8 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { EventEmitter, Injectable } from '@angular/core';
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
-import { ProcessState, ProcessStatusDto } from '../../../models/gen.dtos';
+import { ProcessDetailDto, ProcessState, ProcessStatusDto } from '../../../models/gen.dtos';
 import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
 import { InstanceService } from './instance.service';
 
@@ -28,7 +28,7 @@ export class ProcessService {
       return;
     }
     this.loading = true;
-    const url = this.instanceService.buildInstanceUrl(instanceGroup, instanceId) + '/processes';
+    const url = this.instanceService.buildInstanceUrl(instanceGroup, instanceId) + '/processes/';
     const promise = this.http.get<{ [key: string]: ProcessStatusDto }>(url, { headers: suppressGlobalErrorHandling(new HttpHeaders()) });
     promise.pipe(catchError(r => of(null)), finalize(() => (this.loading = false))).subscribe(result => {
       if (!result) {
@@ -57,6 +57,11 @@ export class ProcessService {
       return null;
     }
     return status;
+  }
+
+  public getDetailsOfApp(instanceGroup: string, instanceId: string, appId: string): Observable<ProcessDetailDto> {
+    const url = this.instanceService.buildInstanceUrl(instanceGroup, instanceId) + '/processes/' + appId;
+    return this.http.get<ProcessDetailDto>(url, { headers: suppressGlobalErrorHandling(new HttpHeaders()) });
   }
 
   /**

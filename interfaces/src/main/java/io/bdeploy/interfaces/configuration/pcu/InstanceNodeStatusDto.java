@@ -63,7 +63,7 @@ public class InstanceNodeStatusDto {
         logs.add("Active Tag: " + activeTag);
         logs.add("Running Apps: ");
         for (ProcessStatusDto process : runningOrScheduled.values()) {
-            process.logProcessDetails().forEach(l -> logs.add("\t" + l));
+            process.logStatusDetails().forEach(l -> logs.add("\t" + l));
         }
         if (runningOrScheduled.isEmpty()) {
             logs.add("\t(Nothing)");

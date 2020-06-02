@@ -9,6 +9,7 @@ import javax.ws.rs.core.SecurityContext;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
+import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 import io.bdeploy.interfaces.directory.InstanceDirectory;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
@@ -37,17 +38,16 @@ public class ProcessResourceImpl implements ProcessResource {
     }
 
     @Override
-    public ProcessStatusDto getStatus(String processId) {
-        MasterNamedResource master = getMasterResource();
-        InstanceStatusDto instanceStatus = master.getStatus(instanceId);
-        return instanceStatus.getAppStatus(processId);
-    }
-
-    @Override
     public Map<String, ProcessStatusDto> getStatus() {
         MasterNamedResource master = getMasterResource();
         InstanceStatusDto instanceStatus = master.getStatus(instanceId);
         return instanceStatus.getAppStatus();
+    }
+
+    @Override
+    public ProcessDetailDto getDetails(String appId) {
+        MasterNamedResource master = getMasterResource();
+        return master.getProcessDetails(instanceId, appId);
     }
 
     @Override
