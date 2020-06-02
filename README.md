@@ -8,9 +8,6 @@
   <a href="https://github.com/bdeployteam/bdeploy/actions?query=workflow%3A%22BDeploy+CI+-+Windows%22+branch%3Amaster" title="GitHub CI - Windows">
    <img src="https://github.com/bdeployteam/bdeploy/workflows/BDeploy%20CI%20-%20Windows/badge.svg?branch=master" />
   </a>
-  <a href="https://travis-ci.com/bdeployteam/bdeploy" title="Travis CI - Linux">
-   <img src="https://travis-ci.com/bdeployteam/bdeploy.svg?branch=master" />
-  </a>
   <a href="https://sonarcloud.io/dashboard?id=bdeployteam_bdeploy" title="Quality Gate">
    <img src="https://sonarcloud.io/api/project_badges/measure?metric=alert_status&project=bdeployteam_bdeploy" />
   </a>
