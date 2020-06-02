@@ -48,7 +48,7 @@ ext.sharedNpmLogic = { task, List<String> target ->
     }
 }
 
-ext.sharedServeLogic = { task, List<String> target -> 
+ext.sharedCoverageServeLogic = { task, List<String> target -> 
     configure(task) {
         workingDir "$webappDir"
         group = BasePlugin.BUILD_GROUP
@@ -84,7 +84,7 @@ task triggerStopCoverageStandalone {
 }
 
 task runCoverageServerStandalone(type: com.github.psxpaul.task.ExecFork) {
-    sharedServeLogic(it, ["-c", "cov-standalone"])
+    sharedCoverageServeLogic(it, ["-c", "cov-standalone"])
     waitForOutput = "Compiled successfully"
     timeout = 120
     stopAfter = triggerStopCoverageStandalone
@@ -97,7 +97,7 @@ task triggerStopCoverageCentral {
 }
 
 task runCoverageServerCentral(type: com.github.psxpaul.task.ExecFork) {
-    sharedServeLogic(it, ["-c", "cov-central"])
+    sharedCoverageServeLogic(it, ["-c", "cov-central"])
     waitForOutput = "Compiled successfully"
     timeout = 120
     stopAfter = triggerStopCoverageCentral
@@ -110,7 +110,7 @@ task triggerStopCoverageManaged {
 }
 
 task runCoverageServerManaged(type: com.github.psxpaul.task.ExecFork) {
-    sharedServeLogic(it, ["-c", "cov-managed"])
+    sharedCoverageServeLogic(it, ["-c", "cov-managed"])
     waitForOutput = "Compiled successfully"
     timeout = 120
     stopAfter = triggerStopCoverageManaged

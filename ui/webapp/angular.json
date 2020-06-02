@@ -158,8 +158,7 @@
         "serve": {
           "builder": "ngx-build-plus:dev-server",
           "options": {
-            "browserTarget": "webapp:build",
-            "extraWebpackConfig": "./cypress/coverage.webpack.js"
+            "browserTarget": "webapp:build"
           },
           "configurations": {
             "production": {
@@ -175,17 +174,19 @@
             },
             "cov-standalone": {
               "browserTarget": "webapp:build:cov-standalone",
-              "port": 4210
+              "port": 4210,
+              "extraWebpackConfig": "./cypress/coverage.webpack.js"
             },
             "cov-central": {
               "browserTarget": "webapp:build:cov-central",
-              "port": 4211
+              "port": 4211,
+              "extraWebpackConfig": "./cypress/coverage.webpack.js"
             },
             "cov-managed": {
               "browserTarget": "webapp:build:cov-managed",
-              "port": 4212
+              "port": 4212,
+              "extraWebpackConfig": "./cypress/coverage.webpack.js"
             }
-
           }
         },
         "extract-i18n": {
