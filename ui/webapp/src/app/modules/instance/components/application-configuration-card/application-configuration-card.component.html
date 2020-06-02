@@ -4,7 +4,7 @@
     <span class="spacer"></span>
     <mat-menu #appMenu="matMenu" xPosition="before">
       <button mat-menu-item *ngIf="!isReadonly" (click)="onEdit()" [disabled]="!authService.isScopedWrite(instanceGroupName) || isMissing()"><mat-icon>edit</mat-icon>Configure</button>
-      <button mat-menu-item *ngIf="isReadonly" (click)="onEdit()" [disabled]="isMissing()"><mat-icon></mat-icon>View</button>
+      <button mat-menu-item *ngIf="isReadonly" (click)="onEdit()" [disabled]="isMissing()"><mat-icon>visibility</mat-icon>View</button>
       <button mat-menu-item *ngIf="hasEndpoints()" (click)='onEndpointEdit()' [disabled]='isMissing()'><mat-icon>settings_ethernet</mat-icon>Endpoints</button>
       <ng-container *ngIf='isClient'>
         <mat-divider></mat-divider>
