@@ -122,7 +122,7 @@ export class ApplicationService {
           continue;
         }
         const globalValue = paraValues.get(param.uid);
-        if (!globalValue) {
+        if (globalValue === null || globalValue === undefined) {
           continue;
         }
         param.value = globalValue;
