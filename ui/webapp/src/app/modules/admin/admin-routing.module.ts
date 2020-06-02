@@ -8,6 +8,7 @@ import { BackButtonGuard } from './components/hive-browser/back-button.guard';
 import { HiveBrowserComponent } from './components/hive-browser/hive-browser.component';
 import { MasterCleanupComponent } from './components/master-cleanup/master-cleanup.component';
 import { MetricsOverviewComponent } from './components/metrics-overview/metrics-overview.component';
+import { PluginsBrowserComponent } from './components/plugins-browser/plugins-browser.component';
 import { SettingsAuthComponent } from './components/settings-auth/settings-auth.component';
 import { SettingsGeneralComponent } from './components/settings-general/settings-general.component';
 import { UpdateBrowserComponent } from './components/update-browser/update-browser.component';
@@ -25,6 +26,7 @@ const ADMIN_ROUTES: Route[] = [
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'general', outlet: 'panel' },
       { path: 'general', component: SettingsGeneralComponent, canDeactivate: [CanDeactivateGuard], outlet: 'panel' },
+      { path: 'plugins', component: PluginsBrowserComponent, outlet: 'panel' },
       { path: 'authentication', component: SettingsAuthComponent, canDeactivate: [CanDeactivateGuard], outlet: 'panel' },
       { path: 'users', component: UsersBrowserComponent, canDeactivate: [CanDeactivateGuard], outlet: 'panel' },
       { path: 'hive', component: HiveBrowserComponent, canDeactivate: [BackButtonGuard], outlet: 'panel' },

@@ -187,7 +187,7 @@ public class PluginManagerImpl implements PluginManager {
         } catch (Throwable t) {
             log.error("Cannot read custom editors from plugin " + handle.header.name + ":" + handle.header.version, t);
         }
-        return new PluginInfoDto(handle.id, handle.header.name, handle.header.version, handle.global,
+        return new PluginInfoDto(handle.id, handle.header.name, handle.header.version, handle.global, true,
                 new ArrayList<>(customEditors));
     }
 

@@ -18,15 +18,17 @@ public class PluginInfoDto {
     public String name;
     public String version;
     public boolean global;
+    public boolean loaded;
 
     @JsonCreator
     public PluginInfoDto(@JsonProperty("id") ObjectId id, @JsonProperty("name") String name,
             @JsonProperty("version") String version, @JsonProperty("global") boolean global,
-            @JsonProperty("editors") List<CustomEditor> editors) {
+            @JsonProperty("loaded") boolean loaded, @JsonProperty("editors") List<CustomEditor> editors) {
         this.id = id;
         this.name = name;
         this.version = version;
         this.global = global;
+        this.loaded = loaded;
         this.editors = editors;
     }
 

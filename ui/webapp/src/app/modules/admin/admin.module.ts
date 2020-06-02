@@ -13,6 +13,7 @@ import { HiveComponent } from './components/hive/hive.component';
 import { MasterCleanupGroupComponent } from './components/master-cleanup-group/master-cleanup-group.component';
 import { MasterCleanupComponent } from './components/master-cleanup/master-cleanup.component';
 import { MetricsOverviewComponent } from './components/metrics-overview/metrics-overview.component';
+import { PluginsBrowserComponent } from './components/plugins-browser/plugins-browser.component';
 import { SettingsAuthLdapServerComponent } from './components/settings-auth-ldap-server/settings-auth-ldap-server.component';
 import { SettingsAuthComponent } from './components/settings-auth/settings-auth.component';
 import { SettingsGeneralComponent } from './components/settings-general/settings-general.component';
@@ -41,6 +42,7 @@ import { UsersBrowserComponent } from './components/users-browser/users-browser.
     UsersBrowserComponent,
     UserGlobalPermissionsComponent,
     MasterCleanupGroupComponent,
+    PluginsBrowserComponent
   ],
   entryComponents: [
     UpdateDialogComponent,
