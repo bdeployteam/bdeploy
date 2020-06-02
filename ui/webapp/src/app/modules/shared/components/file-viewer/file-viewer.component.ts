@@ -63,7 +63,7 @@ export class FileViewerComponent implements OnInit, AfterViewInit, OnChanges, On
       this.setupStdin(this.hasStdin);
     }
   }
-  
+
   ngOnChanges(changes: SimpleChanges) {
     for (let p in changes) {
       if (!changes[p].firstChange) {
@@ -77,6 +77,7 @@ export class FileViewerComponent implements OnInit, AfterViewInit, OnChanges, On
   }
 
   ngOnDestroy() {
+    this.follow = false; // avoid self-re-scheduling
     this.clearTimer();
     if (this.stdinSubscription) {
       this.stdinSubscription.unsubscribe();
@@ -114,8 +115,8 @@ export class FileViewerComponent implements OnInit, AfterViewInit, OnChanges, On
           this.updateInput();
         }
       }
-      if(this.follow) {
-        setTimeout(() => this.updateTail(), 1000);
+      if (this.follow) {
+        this.timer = setTimeout(() => this.updateTail(), 1000);
       }
   });
   }
@@ -127,7 +128,7 @@ export class FileViewerComponent implements OnInit, AfterViewInit, OnChanges, On
   onToggleFollow(checked: boolean) {
     this.follow = checked;
     if (checked) {
-      setTimeout(() => this.updateTail(), 1000);
+      this.timer = setTimeout(() => this.updateTail(), 1000);
     } else {
       this.clearTimer();
       if (this.supportsStdin && this.hasStdin) {
@@ -176,7 +177,7 @@ export class FileViewerComponent implements OnInit, AfterViewInit, OnChanges, On
           this.clearInput();
           if(input.length === 1) {
             this.buffer = [this.buffer.slice(0, this.bufferCursorPos), input, this.buffer.slice(this.bufferCursorPos)].join('');
-            this.bufferCursorPos++; 
+            this.bufferCursorPos++;
           } else if (input.startsWith(FileViewerComponent.CSI)) {
             const seq = input.substr(FileViewerComponent.CSI.length);
             switch (seq) {
@@ -189,7 +190,7 @@ export class FileViewerComponent implements OnInit, AfterViewInit, OnChanges, On
               case 'H': // pos 1
                 this.bufferCursorPos = 0;
                 break;
-              case 'F': // end 
+              case 'F': // end
                 this.bufferCursorPos = this.buffer.length;
                 break;
             }
