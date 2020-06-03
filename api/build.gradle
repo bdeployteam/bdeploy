@@ -2,6 +2,7 @@ plugins {
   id 'eclipse'
   id 'java-library'
   id 'maven-publish'
+  id 'signing'
   id 'com.github.johnrengelman.shadow' version '5.2.0'
   id "io.swagger.core.v3.swagger-gradle-plugin" version "2.1.2"
 }
@@ -39,17 +40,37 @@ resolve {
     ]
 }
 
+evaluationDependsOn(':bhive')
+evaluationDependsOn(':common')
+evaluationDependsOn(':jersey')
+
 task allSourcesJar(type: Jar, dependsOn: classes) {
 	group = 'build'
 	classifier = 'sources'
-	from { collectSourceSetsIncludingSubmodules(project) } // we return here a closure to do this lazy, after all projects are configured by gradle
+	from files([project, project(":bhive"), project(":jersey"), project(":common")].collect { it.sourceSets.main.allSource })
+}
+
+task allJavadoc(type: Javadoc) {
+    source files([project, project(":bhive"), project(":jersey"), project(":common")].collect { it.sourceSets.main.allJava })
+    classpath = files([project, project(":bhive"), project(":jersey"), project(":common")].collect { it.sourceSets.main.compileClasspath })
+    destinationDir = file("${buildDir}/docs/javadoc")
+
+    options.addBooleanOption('html5', true)
+    options.addStringOption('Xdoclint:-missing', '-quiet')
+}
+
+task allJavadocJar(type: Jar, dependsOn: allJavadoc) {
+    classifier = 'javadoc'
+    from allJavadoc.destinationDir
 }
 
 artifacts {
 	archives allSourcesJar
+	archives allJavadocJar
 }
 
 shadowJar.dependsOn allSourcesJar
+shadowJar.dependsOn allJavadocJar
 
 publishing {
 	publications {
@@ -57,6 +78,7 @@ publishing {
 			project.shadow.component(pub)
 			
 			artifact allSourcesJar
+            artifact allJavadocJar
 
             pom {
                 name = 'BDeploy Public API'
@@ -72,6 +94,20 @@ publishing {
                     connection = 'scm:git:https://github.com/bdeployteam/bdeploy.git'
                     developerConnection = 'scm:git:git@github.com:bdeployteam/bdeploy.git'
                     url = 'https://github.com/bdeployteam/bdeploy'
+                }
+                developers {
+                    developer {
+                        id = 'mduft'
+                        name = 'Markus Duft'
+                    }
+                    developer {
+                        id = 'mheiss'
+                        name = 'Michael Heiss'
+                    }
+                    developer {
+                        id = 'turlaub'
+                        name = 'Thomas Urlaub'
+                    }
                 }
             }
 		}
@@ -94,21 +130,7 @@ publishing {
 	}
 }
 
-// workaround for missing gradle shadow plugin feature, see https://github.com/johnrengelman/shadow/issues/41
-private Set<SourceDirectorySet> collectSourceSetsIncludingSubmodules(Project project){
-	Set<SourceDirectorySet> result = [].toSet()
-	recursiveCollectSourceSets(project, [].toSet(), result)
-	return result
+signing {
+    sign publishing.publications.shadow
 }
 
-private void recursiveCollectSourceSets(Project visitingProject,
-					Set<Project> visitedProjects,
-					Set<SourceDirectorySet> collectedSourceSets) {
-	if (!visitedProjects.contains(visitingProject)) {
-		visitedProjects.add(visitingProject)
-		collectedSourceSets.add(visitingProject.sourceSets.main.allSource)
-		visitingProject.configurations.implementation.getAllDependencies().withType(ProjectDependency).each { ProjectDependency pd ->
-			recursiveCollectSourceSets(pd.getDependencyProject(), visitedProjects, collectedSourceSets)
-		}
-	}
-}
