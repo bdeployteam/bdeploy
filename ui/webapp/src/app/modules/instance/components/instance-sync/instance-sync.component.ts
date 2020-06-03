@@ -75,7 +75,7 @@ export class InstanceSyncComponent implements OnChanges {
     try {
       this.sycnInProgress = true;
       await this.managedServers.synchronize(this.instanceGroup, this.server.hostName).pipe(finalize(() => this.sycnInProgress = false)).toPromise();
-      this.ngOnChanges();
+      await this.ngOnChanges();
       this.syncEvent.emit(null);
     } catch (e) {
       this.messageBoxService.open({

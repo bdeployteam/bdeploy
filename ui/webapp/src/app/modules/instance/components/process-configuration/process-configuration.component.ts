@@ -398,6 +398,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       this.updateDirtyStateAndValidate();
       this.onProcessStatusChanged();
       this.createStickyHeader();
+      this.checkForUpdateInMemory();
     });
   }
 
@@ -1181,6 +1182,38 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
   isUpdateFailed() {
     return this.updateStatus && isUpdateFailed(this.updateStatus);
+  }
+
+  checkForUpdateInMemory() {
+    if (this.syncComponent.isInSync() && this.isCentral()) {
+      const dto = this.syncComponent.server;
+      let managed: MinionDto = null;
+      for (const minion of Object.values(dto.minions.minions)) {
+        if (minion.master) {
+          managed = minion;
+          break;
+        }
+      }
+      if (!managed) {
+        this.log.warn('Cannot find managed master information to check for updates');
+        return;
+      }
+
+      const vm = managed.version;
+      const vc = this.configService.config.version;
+
+      this.updateDto = {
+        forceUpdate: false,
+        packagesToInstall: [],
+        packagesToTransfer: [],
+        runningVersion: vm,
+        updateVersion: vc,
+        updateAvailable: (
+          vc.major > vm.major ||
+          (vc.major === vm.major && vc.minor > vm.minor) ||
+          (vc.major === vm.major && vc.minor === vm.minor && vc.micro > vm.micro))
+      };
+    }
   }
 
   private addNotification(template: TemplateRef<any>, severity: Severity, priority: number) {
