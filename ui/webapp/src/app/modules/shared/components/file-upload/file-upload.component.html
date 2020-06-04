@@ -7,7 +7,7 @@
         <button [disabled]="uploading" (click)="addFiles()" class="browseButton">browse.</button>
     </div>
     <mat-dialog-content fxFlex>
-      <input type="file" #file style="display: none" (change)="onFilesAdded()" accept="application/x-zip-compressed"  multiple />
+      <input type="file" #file style="display: none" (change)="onFilesAdded()" [accept]="getAcceptedFileTypes()"  multiple />
       <table mat-table [dataSource]="files" class="mat-elevation-z8">
         <caption style="display: none;">Files</caption>
         <tr mat-header-row *matHeaderRowDef="columnsToDisplay; sticky: true"></tr>

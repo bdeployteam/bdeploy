@@ -9,7 +9,6 @@ import { ErrorMessage, LoggingService } from '../../../core/services/logging.ser
 import { MessageboxService } from '../../services/messagebox.service';
 import { ActivitySnapshotTreeNode, RemoteEventsService } from '../../services/remote-events.service';
 import { UploadService, UploadState, UploadStatus, UrlParameter } from '../../services/upload.service';
-import { MessageBoxMode } from '../messagebox/messagebox.component';
 
 export interface UploadData {
   title: string;
@@ -17,9 +16,8 @@ export interface UploadData {
   url: string;
   urlParameter: UrlParameter[];
   formDataParam: string;
-  resultDetailsEvaluator: (status: UploadStatus) => string,
-  mimeTypes: string[];
-  mimeTypeErrorMessage: string;
+  resultDetailsEvaluator: (status: UploadStatus) => string;
+  fileTypes: string[];
 }
 
 @Component({
@@ -36,14 +34,15 @@ export class FileUploadComponent implements OnInit, OnDestroy {
 
   @ViewChild(MatTable, { static: true })
   public table: MatTable<any>;
+
   public get columnsToDisplay() {
-    let result = ['status', 'fileName'];
+    const result = ['status', 'fileName'];
     if (this.uploadData.urlParameter) {
       this.uploadData.urlParameter.forEach(o => result.push(o.id));
     }
     result.push('progress', 'action');
     return result;
-  };
+  }
 
   /** The files to be uploaded */
   public files: File[] = [];
@@ -137,25 +136,16 @@ export class FileUploadComponent implements OnInit, OnDestroy {
     // Append newly selected files to the queue
     for (let i = 0; i < fileList.length; i++) {
       const file: File = fileList[i];
-      const type: string = file.type;
-      if (!this.isValidFileType(type)) {
-        this.messageBoxService.open({
-          title: 'Unsupported File Type',
-          message: this.uploadData.mimeTypeErrorMessage,
-          mode: MessageBoxMode.ERROR,
-        });
-        return;
-      }
       this.files.push(file);
       const pclone = cloneDeep(this.getUrlParameter());
       pclone.forEach(p => {
         if (!p.value) {
           switch (p.type) {
-            case 'boolean': 
-              p.value = false; 
+            case 'boolean':
+              p.value = false;
               break;
-            case 'string': 
-              p.value = ''; 
+            case 'string':
+              p.value = '';
               break;
           }
         }
@@ -171,11 +161,8 @@ export class FileUploadComponent implements OnInit, OnDestroy {
     this.table.renderRows();
   }
 
-  isValidFileType(fileType: string): boolean {
-    if (!this.uploadData.mimeTypes) {
-      return true;
-    }
-    return this.uploadData.mimeTypes.includes(fileType);
+  getAcceptedFileTypes() {
+    return this.uploadData.fileTypes.join(',');
   }
 
   isInQueue(file: File) {

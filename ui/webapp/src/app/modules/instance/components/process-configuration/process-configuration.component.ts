@@ -1116,8 +1116,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       title: 'Import Instance Version',
       headerMessage: `Import a new instance version from a previously exported instance version. The target server of the imported version is ignored.`,
       url: this.instanceService.getImportUrl(this.groupParam, this.uuidParam),
-      mimeTypes: ['application/x-zip-compressed', 'application/zip'],
-      mimeTypeErrorMessage: 'Only ZIP files can be uploaded.',
+      fileTypes: ['.zip'],
     };
     this.dialog
       .open(FileUploadComponent, config)

@@ -112,9 +112,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
       title: 'Upload Products',
       headerMessage: 'Upload products into this instance group. The selected archive may either contain a new product or a new version of an existing product.',
       url: this.productService.getProductUploadUrl(this.instanceGroup),
-      mimeTypes: ['application/x-zip-compressed', 'application/zip'],
-      mimeTypeErrorMessage: 'Only ZIP files can be uploaded.'
-    }
+      fileTypes: ['.zip']
+    };
     this.dialog
       .open(FileUploadComponent, config)
       .afterClosed()
