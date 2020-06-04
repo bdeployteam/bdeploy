@@ -4,10 +4,7 @@ plugins {
 }
 
 repositories {
-    mavenLocal()
-    maven {
-        url 'https://oss.sonatype.org/content/repositories/snapshots'
-    }
+    mavenCentral()
 }
 
 version = "1.0.0"
@@ -16,7 +13,7 @@ sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
 dependencies {
-    implementation 'io.bdeploy:api:2.3.0-SNAPSHOT'
+    implementation 'io.bdeploy:api:2.3.0'
 }
 
 eclipse {
