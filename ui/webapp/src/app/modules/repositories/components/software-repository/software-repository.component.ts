@@ -95,8 +95,7 @@ export class SoftwareRepositoryComponent implements OnInit, OnDestroy {
       title: 'Upload Software Packages',
       headerMessage: 'Upload software packages into this software repository. The selected archive may contain any new software package or a new version of an existing software package.',
       url: this.softwareService.getSoftwareUploadUrl(this.softwareRepositoryName),
-      mimeTypes: ['application/x-zip-compressed', 'application/zip'],
-      mimeTypeErrorMessage: 'Only ZIP files can be uploaded.'
+      fileTypes: ['.zip'],
     };
     this.dialog
       .open(FileUploadComponent, config)

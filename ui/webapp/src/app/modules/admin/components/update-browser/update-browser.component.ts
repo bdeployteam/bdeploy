@@ -187,8 +187,7 @@ export class UpdateBrowserComponent implements OnInit {
       title: 'Upload Update Packages',
       headerMessage: `Upload update packages for BDeploy or the BDeploy Client Launcher. You can provide multiple packages at once.`,
       url: this.updService.getUploadUrl(),
-      mimeTypes: ['application/x-zip-compressed', 'application/zip'],
-      mimeTypeErrorMessage: 'Only update ZIP files can be uploaded.'
+      fileTypes: ['.zip']
     };
     this.dialog
       .open(FileUploadComponent, config)

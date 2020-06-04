@@ -119,8 +119,7 @@ export class PluginsBrowserComponent implements OnInit, AfterViewInit {
       headerMessage: 'Upload global plugins. The selected archive may either contain a new plugin or a new version of an existing plugin.',
       url: this.pluginAdminService.getGlobalUploadUrl(),
       urlParameter: [{id: 'replace', name: 'Replace', type: 'boolean'}],
-      mimeTypes: ['application/x-java-archive'],
-      mimeTypeErrorMessage: 'Only JAR files can be uploaded.',
+      fileTypes: ['.jar'],
       formDataParam: 'plugin',
       resultDetailsEvaluator: (status: UploadStatus) => {
         if (status.detail == null) {
@@ -129,7 +128,7 @@ export class PluginsBrowserComponent implements OnInit, AfterViewInit {
           return 'Installed and loaded plugin ' + status.detail.name + ' (' + status.detail.version + ')';
         }
       }
-    }
+    };
     this.dialog
       .open(FileUploadComponent, config)
       .afterClosed()
