@@ -184,7 +184,11 @@ public class JerseyClientFactory {
     }
 
     public static void setProxyUuid(String uuid) {
-        proxyUuid.set(uuid);
+        if (uuid == null) {
+            proxyUuid.remove();
+        } else {
+            proxyUuid.set(uuid);
+        }
     }
 
     public static String getProxyUuid() {
