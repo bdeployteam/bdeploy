@@ -48,6 +48,19 @@ if [[ -z "${SONATYPE_TOKEN}" ]]; then
     die "SONATYPE_TOKEN variable must contain the Nexus token which is allowed to create a release"
 fi
 
+if [[ -z "${GPG_ID}" ]]; then
+    die "GPG_ID variable must contain the GPG Key which is used to signe artifacts"
+fi
+
+if [[ -z "${GPG_PASS}" ]]; then
+    die "GPG_PASS variable must contain the passphrase for the GPG Key"
+fi
+
+if [[ -z "${GPG_FILE}" ]]; then
+    die "GPG_FILE variable must contain the path to the GPG Keyring file"
+fi
+
+
 CURRENT_VER="$(cat "$ROOT/bdeploy.version")"
 
 if [[ ${CURRENT_VER} != *"-SNAPSHOT" ]]; then
@@ -101,7 +114,7 @@ fi
 [[ -n "${NO_TESTS}" ]] && ./gradlew clean build release updateDocuScreenshots -x test -x releaseTest -x runCypressHeadless "${GRADLE_ARG_ARR[@]}"
 [[ -z "${NO_TESTS}" ]] && ./gradlew clean build release updateDocuScreenshots -x releaseTest "${GRADLE_ARG_ARR[@]}"
 
-./gradlew publish -PsonatypeUser=$SONATYPE_USER -PsonatypeToken=$SONATYPE_TOKEN "${GRADLE_ARG_ARR[@]}"
+./gradlew publish -PsonatypeUser=$SONATYPE_USER -PsonatypeToken=$SONATYPE_TOKEN -Psigning.keyId=$GPG_ID -Psigning.password=$GPG_PASS -Psigning.secretKeyRingFile=$GPG_FILE "${GRADLE_ARG_ARR[@]}"
 
 git add bdeploy.version doc test-data
 git commit -m "Release $REL_VER"
