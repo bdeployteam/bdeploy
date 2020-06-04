@@ -172,7 +172,7 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
                 }
             } else {
                 // no parent set - we are top-level.
-                currentActivity.set(null);
+                currentActivity.remove();
             }
         } else if (current != null) {
             // we're finishing something which is not current -> warn & ignore
