@@ -52,6 +52,11 @@ public class ProductDescriptor {
     public String pluginFolder;
 
     /**
+     * A list of relative paths to YAML files containing instance templates.
+     */
+    public List<String> templates = new ArrayList<>();
+
+    /**
      * Relative path to a file containing the {@link ProductVersionDescriptor} which may be generated or static.
      */
     public String versionFile;

@@ -8,6 +8,9 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.bdeploy.api.product.v1.ProductDescriptor;
 import io.bdeploy.api.product.v1.ProductManifestBuilder;
 import io.bdeploy.bhive.BHive;
@@ -25,12 +28,15 @@ import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.bhive.op.TreeLoadOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
+import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
 
 /**
  * A special manifestation of a {@link Manifest} which must follow a certain layout and groups multiple applications together
  * which are deployed via an 'instance' to for a version-consistent bundle.
  */
 public class ProductManifest {
+
+    private static final Logger log = LoggerFactory.getLogger(ProductManifest.class);
 
     private final SortedSet<Manifest.Key> applications;
     private final SortedSet<Manifest.Key> references;
@@ -39,9 +45,11 @@ public class ProductManifest {
     private final Manifest manifest;
     private final ObjectId cfgTreeId;
     private final List<ObjectId> plugins;
+    private final List<InstanceTemplateDescriptor> templates;
 
     private ProductManifest(String name, Manifest manifest, SortedSet<Manifest.Key> applications,
-            SortedSet<Manifest.Key> references, ProductDescriptor desc, ObjectId cfgTreeId, List<ObjectId> plugins) {
+            SortedSet<Manifest.Key> references, ProductDescriptor desc, ObjectId cfgTreeId, List<ObjectId> plugins,
+            List<InstanceTemplateDescriptor> templates) {
         this.prodName = name;
         this.manifest = manifest;
         this.applications = applications;
@@ -49,6 +57,7 @@ public class ProductManifest {
         this.desc = desc;
         this.cfgTreeId = cfgTreeId;
         this.plugins = plugins;
+        this.templates = templates;
     }
 
     /**
@@ -107,7 +116,22 @@ public class ProductManifest {
             }).build());
         }
 
-        return new ProductManifest(label, mf, appRefs, otherRefs, desc, cfgEntry, plugins);
+        List<InstanceTemplateDescriptor> templates = new ArrayList<>();
+        Tree.Key templateKey = new Tree.Key(ProductManifestBuilder.TEMPLATES_ENTRY, Tree.EntryType.TREE);
+        if (entries.containsKey(templateKey)) {
+            TreeView tv = hive.execute(new ScanOperation().setTree(entries.get(templateKey)));
+            tv.visit(new TreeVisitor.Builder().onBlob(b -> {
+                if (b.getName().toLowerCase().endsWith(".yaml")) {
+                    try (InputStream is = hive.execute(new ObjectLoadOperation().setObject(b.getElementId()))) {
+                        templates.add(StorageHelper.fromYamlStream(is, InstanceTemplateDescriptor.class));
+                    } catch (Exception e) {
+                        log.warn("Cannot load instance template from {}, {}", manifest, b.getPathString(), e);
+                    }
+                }
+            }).build());
+        }
+
+        return new ProductManifest(label, mf, appRefs, otherRefs, desc, cfgEntry, plugins, templates);
     }
 
     /**
@@ -122,6 +146,13 @@ public class ProductManifest {
      */
     public List<ObjectId> getPlugins() {
         return plugins;
+    }
+
+    /**
+     * @return a list of instance templates which can be used to populate empty instances.
+     */
+    public List<InstanceTemplateDescriptor> getInstanceTemplates() {
+        return templates;
     }
 
     /**

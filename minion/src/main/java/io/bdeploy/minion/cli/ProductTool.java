@@ -23,6 +23,7 @@ import io.bdeploy.common.cfg.ExistingPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.UnitHelper;
+import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.plugin.PluginHeader;
@@ -103,10 +104,10 @@ public class ProductTool extends RemoteServiceTool<ProductConfig> {
     private void listProducts(BHive hive) {
         SortedSet<Key> scan = ProductManifest.scan(hive);
         for (Key key : scan) {
-            out().println(String.format("%1$-50s %2$-30s", key, ProductManifest.of(hive, key).getProduct()));
+            ProductManifest pmf = ProductManifest.of(hive, key);
+            out().println(String.format("%1$-50s %2$-30s", key, pmf.getProduct()));
 
             if (isVerbose()) {
-                ProductManifest pmf = ProductManifest.of(hive, key);
                 for (Manifest.Key appKey : pmf.getApplications()) {
                     ApplicationManifest amf = ApplicationManifest.of(hive, appKey);
                     out().println(String.format("  %1$-48s %2$-30s", appKey, amf.getDescriptor().name));
@@ -124,6 +125,12 @@ public class ProductTool extends RemoteServiceTool<ProductConfig> {
                         } catch (Exception e) {
                             out().println("    cannot read plugin " + id + ": " + e.toString());
                         }
+                    }
+                }
+                if (!pmf.getInstanceTemplates().isEmpty()) {
+                    out().println("  Instance Templates:");
+                    for (InstanceTemplateDescriptor tpl : pmf.getInstanceTemplates()) {
+                        out().println(String.format("    %1$-40s %2$40s", tpl.name, tpl.description));
                     }
                 }
             }

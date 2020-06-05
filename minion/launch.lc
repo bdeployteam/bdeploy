@@ -269,6 +269,7 @@ java configuration Managed-AddUser : minion-base {
 }
 
 java configuration Master-Product-List : minion-base {
+	argument "-v";
 	argument "product";
 	argument "--list";
 	argument "--hive=${folder_prompt:Path to Hive}";
