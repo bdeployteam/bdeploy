@@ -107,10 +107,6 @@ export class ManagedServersService {
     });
   }
 
-  public getUpdatesFor(group: string, server: string): Observable<MinionUpdateDto> {
-    return this.http.get<MinionUpdateDto>(this.config.config.api + '/managed-servers/minion-updates/' + group + '/' + server);
-  }
-
   public transferUpdate(group: string, server: string, update: MinionUpdateDto): Observable<any> {
     return this.http.post(this.config.config.api + '/managed-servers/minion-transfer-updates/' + group + '/' + server, update);
   }

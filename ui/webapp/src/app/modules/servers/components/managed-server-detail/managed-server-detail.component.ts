@@ -160,7 +160,7 @@ export class ManagedServerDetailComponent implements OnInit {
         throw e;
       })).toPromise();
       this.minionState = await this.managedServers.minionsStateOfManagedServer(this.instanceGroupName, this.server.hostName).toPromise();
-      this.updateDto = await this.managedServers.getUpdatesFor(this.instanceGroupName, this.server.hostName).toPromise();
+      this.updateDto = this.server?.update;
       this.synchronized = true;
     } catch {
       this.minionState = null;

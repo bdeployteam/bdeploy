@@ -144,6 +144,7 @@ export class AttachManagedComponent implements OnInit {
       auth: this.attachPayload.auth,
       minions : this.attachPayload.minions,
       lastSync: 0,
+      update: null,
     };
   }
 

@@ -19,10 +19,10 @@ import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
+import io.bdeploy.interfaces.manifest.managed.MinionUpdateDto;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.jersey.ActivityScope;
-import io.bdeploy.ui.dto.MinionUpdateDto;
 import io.bdeploy.ui.dto.ProductDto;
 import io.bdeploy.ui.dto.ProductTransferDto;
 
@@ -145,12 +145,6 @@ public interface ManagedServersResource {
     @Path("/active-transfers/{group}")
     @RequiredPermission(scope = "group", permission = Permission.ADMIN)
     public SortedSet<ProductDto> getActiveTransfers(@ActivityScope @PathParam("group") String groupName);
-
-    @GET
-    @Path("/minion-updates/{group}/{server}")
-    @RequiredPermission(scope = "group", permission = Permission.WRITE)
-    public MinionUpdateDto getUpdates(@ActivityScope @PathParam("group") String groupName,
-            @PathParam("server") String serverName);
 
     @POST
     @Path("/minion-transfer-updates/{group}/{server}")
