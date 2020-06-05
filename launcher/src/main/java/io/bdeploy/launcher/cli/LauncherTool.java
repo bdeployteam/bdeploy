@@ -184,7 +184,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
                 // Launch the application or delegate launching
                 Process process;
-                if (!VersionHelper.equals(runningVersion, requiredVersion)) {
+                if (!VersionHelper.equals(runningVersion, requiredVersion) && !VersionHelper.isUndefined(runningVersion)) {
                     log.info("Application requires an older launcher version. Delegating...");
                     doInstallSideBySide(hive, requiredLauncher);
                     process = doDelegateLaunch(requiredVersion, config.launch());
@@ -372,20 +372,25 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         ApplicationConfiguration appCfg = clientAppCfg.appConfig;
 
         // Check if the application directory is already present
-        Collection<String> missing = getMissingArtifacts(hive, clientAppCfg);
-        if (missing.isEmpty()) {
-            log.info("Application is already installed. Nothing to install/update.");
-            return;
+        String appName = appCfg.name;
+        try {
+            Collection<String> missing = getMissingArtifacts(hive, clientAppCfg);
+            if (missing.isEmpty()) {
+                log.info("Application is already installed. Nothing to install/update.");
+                return;
+            }
+            log.info("Missing artifacts {}", missing);
+
+            // Throw an exception if we do not have write permissions in the directory
+            if (readOnlyRootDir) {
+                throw new SoftwareUpdateException(appName,
+                        "Missing artifacts: " + missing.stream().collect(Collectors.joining(",")));
+            }
+        } catch (Exception e) {
+            log.warn("Cannot verify that application is installed, re-installing", e);
         }
         Key appKey = appCfg.application;
         log.info("Starting installation of application {}", appKey);
-        log.info("Missing artifacts {}", missing);
-
-        // Throw an exception if we do not have write permissions in the directory
-        String appName = appCfg.name;
-        if (readOnlyRootDir) {
-            throw new SoftwareUpdateException(appName, "Missing artifacts: " + missing.stream().collect(Collectors.joining(",")));
-        }
 
         // Fetch the application and all the requirements
         try (Activity info = reporter.start("Downloading...")) {
