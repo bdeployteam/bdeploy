@@ -1,4 +1,4 @@
-package io.bdeploy.ui.dto;
+package io.bdeploy.interfaces.manifest.managed;
 
 import java.util.Collection;
 import java.util.Collections;

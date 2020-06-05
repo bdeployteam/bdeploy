@@ -65,6 +65,7 @@ import io.bdeploy.interfaces.manifest.managed.ControllingMaster;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasters;
 import io.bdeploy.interfaces.manifest.managed.ManagedMastersConfiguration;
+import io.bdeploy.interfaces.manifest.managed.MinionUpdateDto;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
@@ -82,7 +83,6 @@ import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
 import io.bdeploy.ui.dto.CentralIdentDto;
-import io.bdeploy.ui.dto.MinionUpdateDto;
 import io.bdeploy.ui.dto.ProductDto;
 import io.bdeploy.ui.dto.ProductTransferDto;
 
@@ -355,80 +355,88 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             throw new WebApplicationException("Server is no longer in managed mode: " + serverName, Status.EXPECTATION_FAILED);
         }
 
-        // 1. Sync instance group data with managed server.
-        CommonRootResource root = ResourceProvider.getResource(svc, CommonRootResource.class, context);
-        if (root.getInstanceGroups().stream().map(g -> g.name).noneMatch(n -> n.equals(groupName))) {
-            throw new WebApplicationException("Instance group (no longer?) found on the managed server", Status.NOT_FOUND);
-        }
-
-        Manifest.Key igKey = new InstanceGroupManifest(hive).getKey();
-        try (RemoteBHive rbh = RemoteBHive.forService(svc, groupName, reporter)) {
-            // ALWAYS delete all instance group information on the target - we win!
-            // otherwise the target may have a manifest with a higher tag number and win.
-            SortedMap<Key, ObjectId> keys = rbh.getManifestInventory(igKey.getName());
-            // maybe not optimal to do a call per manifest...
-            keys.keySet().forEach(rbh::removeManifest);
-        }
-        hive.execute(new PushOperation().addManifest(igKey).setRemote(svc).setHiveName(groupName));
-
-        // 2. Fetch all instance and meta manifests, no products.
-        CommonRootResource masterRoot = ResourceProvider.getResource(svc, CommonRootResource.class, context);
-        CommonInstanceResource master = masterRoot.getInstanceResource(groupName);
-        SortedMap<Key, InstanceConfiguration> instances = master.listInstanceConfigurations(true);
-        List<String> instanceIds = instances.values().stream().map(ic -> ic.uuid).collect(Collectors.toList());
-
-        FetchOperation fetchOp = new FetchOperation().setRemote(svc).setHiveName(groupName);
-        try (RemoteBHive rbh = RemoteBHive.forService(svc, groupName, reporter)) {
-            SortedSet<Manifest.Key> keysToFetch = new TreeSet<>();
-
-            // maybe we can scope this down a little in the future.
-            rbh.getManifestInventory(instanceIds.toArray(String[]::new)).forEach((k, v) -> keysToFetch.add(k));
-
-            // we're also interested in all the related meta manifests.
-            rbh.getManifestInventory(instanceIds.stream().map(s -> MetaManifest.META_PREFIX + s).toArray(String[]::new))
-                    .forEach((k, v) -> keysToFetch.add(k));
-
-            // set calculated keys to fetch operation.
-            keysToFetch.forEach(fetchOp::addManifest);
-        }
-
-        hive.execute(fetchOp);
-
-        // 3. Remove local instances no longer available on the remote
-        SortedSet<Key> keysOnCentral = InstanceManifest.scan(hive, true);
-        for (Key key : keysOnCentral) {
-            InstanceManifest im = InstanceManifest.of(hive, key);
-            if (instanceIds.contains(im.getConfiguration().uuid)) {
-                continue; // OK. instance exists
-            }
-
-            if (!serverName.equals(new ControllingMaster(hive, key).read().getName())) {
-                continue; // OK. other server or null (should not happen).
-            }
-
-            // Not OK: instance no longer on server.
-            SortedSet<Key> allInstanceObjects = hive
-                    .execute(new ManifestListOperation().setManifestName(im.getConfiguration().uuid));
-            allInstanceObjects.forEach(x -> hive.execute(new ManifestDeleteOperation().setToDelete(x)));
-        }
-
-        // 4. for all the fetched manifests, if they are instances, associate the server with it
-        for (Manifest.Key instance : instances.keySet()) {
-            new ControllingMaster(hive, instance).associate(serverName);
-        }
-
-        // 5. Fetch minion information and store in the managed masters
         ManagedMasters mm = new ManagedMasters(hive);
         ManagedMasterDto attached = mm.read().getManagedMaster(serverName);
+
+        // 1. Fetch information about updates, possibly required
+        attached.update = getUpdates(groupName, serverName);
+
+        // don't continue actual data sync if update MUST be installed.
+        if (!attached.update.forceUpdate) {
+            // 2. Sync instance group data with managed server.
+            CommonRootResource root = ResourceProvider.getResource(svc, CommonRootResource.class, context);
+            if (root.getInstanceGroups().stream().map(g -> g.name).noneMatch(n -> n.equals(groupName))) {
+                throw new WebApplicationException("Instance group (no longer?) found on the managed server", Status.NOT_FOUND);
+            }
+
+            Manifest.Key igKey = new InstanceGroupManifest(hive).getKey();
+            try (RemoteBHive rbh = RemoteBHive.forService(svc, groupName, reporter)) {
+                // ALWAYS delete all instance group information on the target - we win!
+                // otherwise the target may have a manifest with a higher tag number and win.
+                SortedMap<Key, ObjectId> keys = rbh.getManifestInventory(igKey.getName());
+                // maybe not optimal to do a call per manifest...
+                keys.keySet().forEach(rbh::removeManifest);
+            }
+            hive.execute(new PushOperation().addManifest(igKey).setRemote(svc).setHiveName(groupName));
+
+            // 3. Fetch all instance and meta manifests, no products.
+            CommonRootResource masterRoot = ResourceProvider.getResource(svc, CommonRootResource.class, context);
+            CommonInstanceResource master = masterRoot.getInstanceResource(groupName);
+            SortedMap<Key, InstanceConfiguration> instances = master.listInstanceConfigurations(true);
+            List<String> instanceIds = instances.values().stream().map(ic -> ic.uuid).collect(Collectors.toList());
+
+            FetchOperation fetchOp = new FetchOperation().setRemote(svc).setHiveName(groupName);
+            try (RemoteBHive rbh = RemoteBHive.forService(svc, groupName, reporter)) {
+                SortedSet<Manifest.Key> keysToFetch = new TreeSet<>();
+
+                // maybe we can scope this down a little in the future.
+                rbh.getManifestInventory(instanceIds.toArray(String[]::new)).forEach((k, v) -> keysToFetch.add(k));
+
+                // we're also interested in all the related meta manifests.
+                rbh.getManifestInventory(instanceIds.stream().map(s -> MetaManifest.META_PREFIX + s).toArray(String[]::new))
+                        .forEach((k, v) -> keysToFetch.add(k));
+
+                // set calculated keys to fetch operation.
+                keysToFetch.forEach(fetchOp::addManifest);
+            }
+
+            hive.execute(fetchOp);
+
+            // 4. Remove local instances no longer available on the remote
+            SortedSet<Key> keysOnCentral = InstanceManifest.scan(hive, true);
+            for (Key key : keysOnCentral) {
+                InstanceManifest im = InstanceManifest.of(hive, key);
+                if (instanceIds.contains(im.getConfiguration().uuid)) {
+                    continue; // OK. instance exists
+                }
+
+                if (!serverName.equals(new ControllingMaster(hive, key).read().getName())) {
+                    continue; // OK. other server or null (should not happen).
+                }
+
+                // Not OK: instance no longer on server.
+                SortedSet<Key> allInstanceObjects = hive
+                        .execute(new ManifestListOperation().setManifestName(im.getConfiguration().uuid));
+                allInstanceObjects.forEach(x -> hive.execute(new ManifestDeleteOperation().setToDelete(x)));
+            }
+
+            // 5. for all the fetched manifests, if they are instances, associate the server with it
+            for (Manifest.Key instance : instances.keySet()) {
+                new ControllingMaster(hive, instance).associate(serverName);
+            }
+            attached.lastSync = Instant.now();
+        }
+
+        // 6. Fetch minion information and store in the managed masters
         Map<String, MinionStatusDto> status = backendInfo.getNodeStatus();
         Map<String, MinionDto> config = status.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().config));
         MinionConfiguration minions = attached.minions;
         minions.replaceWith(config);
 
-        // 5. update last sync timestamp on attachment of server.
-        attached.lastSync = Instant.now();
+        // 7. update current information in the hive.
         mm.attach(attached, true);
+
         return attached;
     }
 
@@ -448,8 +456,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         return transfers.getActiveTransfers(groupName);
     }
 
-    @Override
-    public MinionUpdateDto getUpdates(String groupName, String serverName) {
+    private MinionUpdateDto getUpdates(String groupName, String serverName) {
         // Determine OS of the master
         Optional<MinionDto> masterDto = getMinionsOfManagedServer(groupName, serverName).values().stream()
                 .filter(dto -> dto.master).findFirst();
@@ -505,6 +512,13 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         // Updates are stored in the local default hive
         BHive defaultHive = registry.get(JerseyRemoteBHive.DEFAULT_NAME);
         defaultHive.execute(push.setRemote(svc));
+
+        // update the information in the hive.
+        BHive hive = getInstanceGroupHive(groupName);
+        ManagedMasters mm = new ManagedMasters(hive);
+        ManagedMasterDto attached = mm.read().getManagedMaster(serverName);
+        attached.update = getUpdates(groupName, serverName);
+        mm.attach(attached, true);
     }
 
     @Override
@@ -523,6 +537,13 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         // Trigger the update on the master node
         RemoteService svc = getConfiguredRemote(groupName, serverName);
         UpdateHelper.update(svc, server, true);
+
+        // update the information in the hive.
+        BHive hive = getInstanceGroupHive(groupName);
+        ManagedMasters mm = new ManagedMasters(hive);
+        ManagedMasterDto attached = mm.read().getManagedMaster(serverName);
+        attached.update = getUpdates(groupName, serverName);
+        mm.attach(attached, true);
     }
 
     @Override
