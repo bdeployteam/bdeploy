@@ -143,6 +143,8 @@
                     <mat-card-content class="info-grid">
                       <div><strong>Description:</strong></div>
                       <div class="info-grid-span-2">{{param.desc.longDescription ? param.desc.longDescription : '(none)'}}</div>
+                      <div><strong>Raw Parameter:</strong></div>
+                      <div class="info-grid-span-2">{{param.desc.parameter}} (value: {{param.desc.hasValue ? "yes" : "no"}}{{ (param.desc.hasValue && !param.desc.valueAsSeparateArg) ? (", separator: " + param.desc.valueSeparator) : ""}})</div>
                       <div><strong>Default:</strong></div>
                       <div class="info-default-value">{{param.desc.defaultValue ? (param.desc.type === parameterType.PASSWORD ? '*'.repeat(param.desc.defaultValue.length) : param.desc.defaultValue) : '(none)'}}</div>
                         <button mat-icon-button type="button" class="info-restore-button" [disabled]="!param.desc.defaultValue || readonly" (click)="revertValue(param)" matTooltip="Restore default value">
