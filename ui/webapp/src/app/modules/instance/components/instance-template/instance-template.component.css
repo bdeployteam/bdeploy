@@ -1,0 +1,76 @@
+.flex-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.description {
+  line-height: normal;
+  white-space: normal;
+}
+
+.center-toggles {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.toggle-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  min-width: 200px;
+  max-width: 200px;
+
+  min-height: 200px;
+  max-height: 200px;
+}
+
+mat-button-toggle-group {
+  flex-wrap: wrap;
+}
+
+.hintText {
+  font-size: smaller;
+  border-bottom: 1px dotted grey;
+  margin-bottom: 5px;
+  padding-bottom: 5px;
+}
+
+.node-mapping {
+  margin-left: 20px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.spacer {
+  flex: 1 0 auto;
+}
+
+.node-select {
+  margin-left: 10px;
+  max-width: 300px;
+}
+
+.status {
+  display: flex;
+  flex-direction: row;
+}
+
+.status > * {
+  margin-right: 10px;
+}
+
+.variable-fields {
+  display: flex;
+  flex-direction: column;
+}
+
+::ng-deep .mat-horizontal-stepper-header{
+  pointer-events: none !important;
+}

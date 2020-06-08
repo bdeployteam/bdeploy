@@ -34,6 +34,7 @@ import { InstanceService } from '../../services/instance.service';
 import { ProcessService } from '../../services/process.service';
 import { InstanceNotification, Severity } from '../instance-notifications/instance-notifications.component';
 import { InstanceSyncComponent } from '../instance-sync/instance-sync.component';
+import { InstanceTemplateComponent } from '../instance-template/instance-template.component';
 import { InstanceVersionCardComponent } from '../instance-version-card/instance-version-card.component';
 import { ProcessDetailsComponent } from '../process-details/process-details.component';
 
@@ -113,6 +114,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   public productsLoading = false;
   public productUpdating = false;
   public isRunningOutOfSync = false;
+  public applyingTemplate = false;
 
   // Refresh timer and configuration
   public autoRefreshInterval = 10;
@@ -1313,6 +1315,27 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     });
 
     return matching;
+  }
+
+  isEmptyInstance() {
+    for (const node of this.selectedConfig.nodeList.nodeConfigDtos) {
+      if (node?.nodeConfiguration?.applications?.length) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  onApplyTemplate(instanceTemplate: InstanceTemplateComponent, $event) {
+    $event.preventDefault();
+
+    this.applyingTemplate = true;
+    instanceTemplate.fillFromTemplate(this.selectedConfig, this.getProductOfInstance(this.selectedConfig));
+  }
+
+  onApplyTemplateFinished() {
+    this.applyingTemplate = false;
+    this.updateDirtyStateAndValidate();
   }
 
 }

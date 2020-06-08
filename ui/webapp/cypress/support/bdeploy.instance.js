@@ -187,5 +187,5 @@ Cypress.Commands.add('createNewInstanceVersionByDummyChange', function(instanceG
 
 Cypress.Commands.add('typeInAceEditor', function(text) {
   //See https://github.com/cypress-io/cypress/issues/1818#issuecomment-523487038
-  cy.get(".ace_text-input").first().focus().type(text)
+  cy.get(".ace_text-input").first().focus().type(text, {force:true})
 })

@@ -2,6 +2,7 @@ package io.bdeploy.interfaces.descriptor.template;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlConfiguration;
 
@@ -25,9 +26,9 @@ public class InstanceTemplateApplication {
     /**
      * The process control configuration to apply.
      * <p>
-     * Note that the default is 'MANUAL' start type, even if the application supports others.
+     * This is interpreted as {@link ProcessControlConfiguration}, but defined as Map to allow partial deserialization.
      */
-    public ProcessControlConfiguration processControl = ProcessControlConfiguration.createDefault();
+    public Map<String, Object> processControl;
 
     public List<InstanceTemplateParameter> startParameters = new ArrayList<>();
 

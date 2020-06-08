@@ -1,0 +1,18 @@
+<ng-template #infoPopup>
+  <mat-card class="info">
+      <div class="mat-title">{{node.name}}</div>
+      <p>{{node.description}}</p>
+      <mat-card-content class="process-list">
+        <div><strong>Application</strong></div>
+        <div><strong>Description</strong></div>
+        <ng-container *ngFor='let app of node.applications; let i = index;'>
+          <mat-chip-list><mat-chip>{{appNames[i]}}</mat-chip></mat-chip-list>
+          <span>{{appDescriptions[i]}}</span>
+        </ng-container>
+      </mat-card-content>
+  </mat-card>
+</ng-template>
+
+<button mat-icon-button type="button" #infoButton (click)="openOverlay(infoButton, infoPopup)">
+  <mat-icon class="info-icon">info</mat-icon>
+</button>

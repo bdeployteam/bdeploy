@@ -222,3 +222,33 @@
 
   margin: 15px;
 }
+
+.emptyHint {
+  margin-top: 75px;
+}
+
+.list-heading {
+  margin-top: 30px;
+  margin-left: 15px;
+}
+
+.center {
+  text-align: center;
+}
+
+.headerText {
+  font-size: 1.5em;
+  margin-left: 15px;
+  vertical-align: middle;
+}
+
+.headerTextSmall {
+  font-size: 1.2em;
+  margin-left: 15px;
+  vertical-align: middle;
+}
+
+.headerIcon {
+  font-size: 2em;
+  vertical-align: middle;
+}

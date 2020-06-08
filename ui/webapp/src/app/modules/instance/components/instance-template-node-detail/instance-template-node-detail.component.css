@@ -1,0 +1,17 @@
+.info {
+  min-width: 400px;
+  max-width: 800px;
+}
+
+.info-backdrop {
+  opacity: 10;
+}
+
+.process-list {
+  display: grid;
+  grid-template-columns: auto auto;
+  row-gap: 5px;
+  column-gap: 5px;
+
+  align-items: center;
+}

@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { cloneDeep, intersection, isEqual } from 'lodash';
 import { Observable } from 'rxjs';
 import { UnknownParameter } from '../../../models/application.model';
-import { CLIENT_NODE_NAME, EMPTY_COMMAND_CONFIGURATION, EMPTY_PARAMETER_CONFIGURATION, EMPTY_PARAMETER_DESCRIPTOR } from '../../../models/consts';
+import { CLIENT_NODE_NAME, EMPTY_APPLICATION_CONFIGURATION, EMPTY_COMMAND_CONFIGURATION, EMPTY_PARAMETER_CONFIGURATION, EMPTY_PARAMETER_DESCRIPTOR, EMPTY_PROCESS_CONTROL_CONFIG } from '../../../models/consts';
 import { ApplicationConfiguration, ApplicationDescriptor, ApplicationDto, ApplicationType, InstanceNodeConfigurationDto, ManifestKey, ParameterConfiguration, ParameterDescriptor, ParameterType } from '../../../models/gen.dtos';
 import { ProcessConfigDto } from '../../../models/process.model';
 import { ConfigService } from '../../core/services/config.service';
@@ -878,5 +878,42 @@ export class ApplicationService {
 
     // App is supported by the target container
     return true;
+  }
+
+  /** Creates a new application configuration and initializes it with default values */
+  createNewAppConfig(instanceGroupName: string, config: ProcessConfigDto, app: ApplicationDto): Promise<ApplicationConfiguration> {
+    const appConfig = cloneDeep(EMPTY_APPLICATION_CONFIGURATION);
+    appConfig.processControl = cloneDeep(EMPTY_PROCESS_CONTROL_CONFIG);
+    appConfig.application = app.key;
+    appConfig.name = app.name;
+
+    // default process control configuration
+    const processControlDesc = app.descriptor.processControl;
+    const processControlConfig = appConfig.processControl;
+    processControlConfig.gracePeriod = processControlDesc.gracePeriod;
+    if (processControlDesc.supportedStartTypes) {
+      processControlConfig.startType = processControlDesc.supportedStartTypes[0];
+    }
+    processControlConfig.keepAlive = processControlDesc.supportsKeepAlive;
+    processControlConfig.noOfRetries = processControlDesc.noOfRetries;
+    processControlConfig.attachStdin = processControlDesc.attachStdin;
+
+    // Lookup parameter in all available applications
+    const apps = this.getAllApps(config);
+
+    // Load descriptor and initialize configuration
+    const productKey = config.instance.product;
+    const appKey = appConfig.application;
+    const promise = new Promise<ApplicationConfiguration>((resolve) => {
+      this.getDescriptor(instanceGroupName, productKey, appKey).subscribe(desc => {
+        // Generate unique identifier
+        this.createUuid(instanceGroupName).subscribe(uid => {
+          appConfig.uid = uid;
+          this.initAppConfig(appConfig, desc, apps);
+          resolve(appConfig);
+        });
+      });
+    });
+    return promise;
   }
 }

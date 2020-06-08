@@ -9,9 +9,9 @@ import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/mes
 import { MessageboxService } from 'src/app/modules/shared/services/messagebox.service';
 import { convert2String } from 'src/app/modules/shared/utils/version.utils';
 import { ApplicationGroup } from '../../../../models/application.model';
-import { CLIENT_NODE_NAME, EMPTY_APPLICATION_CONFIGURATION, EMPTY_INSTANCE_NODE_CONFIGURATION, EMPTY_PROCESS_CONTROL_CONFIG } from '../../../../models/consts';
+import { CLIENT_NODE_NAME, EMPTY_INSTANCE_NODE_CONFIGURATION } from '../../../../models/consts';
 import { EventWithCallback } from '../../../../models/event';
-import { ApplicationConfiguration, ApplicationDto, ApplicationType, InstanceNodeConfiguration, InstanceNodeConfigurationDto, MinionDto, MinionStatusDto } from '../../../../models/gen.dtos';
+import { ApplicationConfiguration, ApplicationType, InstanceNodeConfiguration, InstanceNodeConfigurationDto, MinionDto, MinionStatusDto } from '../../../../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../../../../models/process.model';
 import { getAppOs } from '../../../shared/utils/manifest.utils';
 import { ApplicationService } from '../../services/application.service';
@@ -189,14 +189,18 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
       const group = data as ApplicationGroup;
       if (this.isClientApplicationsNode()) {
         for (const app of group.applications) {
-          const newCfg = this.createNewAppConfig(app);
-          this.nodeApps.splice(targetIndex, 0, newCfg);
+          this.appService.createNewAppConfig(this.instanceGroupName, this.processConfig, app).then(cfg => {
+            this.nodeApps.splice(targetIndex, 0, cfg);
+            this.editNodeAppsEvent.emit();
+          });
         }
       } else {
         const nodeOs = this.minionConfig.os;
         const app = group.getAppFor(nodeOs);
-        const newCfg = this.createNewAppConfig(app);
-        this.nodeApps.splice(targetIndex, 0, newCfg);
+        this.appService.createNewAppConfig(this.instanceGroupName, this.processConfig, app).then(cfg => {
+          this.nodeApps.splice(targetIndex, 0, cfg);
+          this.editNodeAppsEvent.emit();
+        });
       }
     } else {
       // Simply add the given app to our list of applications
@@ -235,7 +239,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
 
   onPaste() {
     navigator.clipboard.readText().then(data => {
-        let appConfig:ApplicationConfiguration = null;
+        let appConfig: ApplicationConfiguration = null;
         try {
           appConfig = JSON.parse(data) as ApplicationConfiguration;
         } catch (e) {
@@ -294,41 +298,6 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
     this.node.nodeConfiguration.name = this.processConfig.instance.name;
     this.node.nodeConfiguration.autoStart = true;
     this.nodeApps = this.node.nodeConfiguration.applications;
-  }
-
-  /** Creates a new application configuration and initializes it with default values */
-  createNewAppConfig(app: ApplicationDto): ApplicationConfiguration {
-    const appConfig = cloneDeep(EMPTY_APPLICATION_CONFIGURATION);
-    appConfig.processControl = cloneDeep(EMPTY_PROCESS_CONTROL_CONFIG);
-    appConfig.application = app.key;
-    appConfig.name = app.name;
-
-    // default process control configuration
-    const processControlDesc = app.descriptor.processControl;
-    const processControlConfig = appConfig.processControl;
-    processControlConfig.gracePeriod = processControlDesc.gracePeriod;
-    if (processControlDesc.supportedStartTypes) {
-      processControlConfig.startType = processControlDesc.supportedStartTypes[0];
-    }
-    processControlConfig.keepAlive = processControlDesc.supportsKeepAlive;
-    processControlConfig.noOfRetries = processControlDesc.noOfRetries;
-    processControlConfig.attachStdin = processControlDesc.attachStdin;
-
-    // Lookup parameter in all available applications
-    const apps = this.appService.getAllApps(this.processConfig);
-
-    // Load descriptor and initialize configuration
-    const productKey = this.processConfig.instance.product;
-    const appKey = appConfig.application;
-    this.appService.getDescriptor(this.instanceGroupName, productKey, appKey).subscribe(desc => {
-      // Generate unique identifier
-      this.appService.createUuid(this.instanceGroupName).subscribe(uid => {
-        appConfig.uid = uid;
-        this.appService.initAppConfig(appConfig, desc, apps);
-        this.editNodeAppsEvent.emit();
-      });
-    });
-    return appConfig;
   }
 
   countForeignApps(foreign: InstanceNodeConfiguration[]): number {

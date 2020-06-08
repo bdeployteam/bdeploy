@@ -190,9 +190,7 @@ describe("Central/Managed Basic Test", function() {
     // make sure that the instance version is NOT yet visible on the central
     cy.gotoInstance(groupName, managedInstance, 'CENTRAL');
 
-    cy.getApplicationConfigCard('master', 'Server Application').should('not.exist')
-    cy.getApplicationConfigCard('Client Applications', 'Client Application').should('not.exist')
-
+    cy.contains('No applications have been configured yet').should('exist')
     // cannot check configuration file here, as it would require a sync :)
 
     // now sync to central and make sure it appeared

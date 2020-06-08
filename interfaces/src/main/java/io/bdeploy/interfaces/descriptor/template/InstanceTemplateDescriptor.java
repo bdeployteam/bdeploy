@@ -19,6 +19,11 @@ public class InstanceTemplateDescriptor {
     public String description;
 
     /**
+     * A list of user-provided variables which can be used in the template.
+     */
+    public List<InstanceTemplateVariable> variables = new ArrayList<>();
+
+    /**
      * A list of node definitions
      */
     public List<InstanceTemplateNode> nodes = new ArrayList<>();

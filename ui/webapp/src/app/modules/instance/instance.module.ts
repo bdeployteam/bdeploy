@@ -29,6 +29,8 @@ import { InstanceRoutingModule } from './instance-routing.module';
 import { InstanceSyncComponent } from './components/instance-sync/instance-sync.component';
 import { ApplicationEditEndpointsComponent } from './components/application-edit-endpoints/application-edit-endpoints.component';
 import { CustomEditorComponent } from './components/custom-editor/custom-editor.component';
+import { InstanceTemplateComponent } from './components/instance-template/instance-template.component';
+import { InstanceTemplateNodeDetailComponent } from './components/instance-template-node-detail/instance-template-node-detail.component';
 
 @NgModule({
   declarations: [
@@ -57,6 +59,8 @@ import { CustomEditorComponent } from './components/custom-editor/custom-editor.
     InstanceSyncComponent,
     ApplicationEditEndpointsComponent,
     CustomEditorComponent,
+    InstanceTemplateComponent,
+    InstanceTemplateNodeDetailComponent,
   ],
   entryComponents: [
     ApplicationEditManualComponent,

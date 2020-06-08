@@ -141,7 +141,29 @@
   <!-- Nodes overview and sidebar -->
   <div class="drawer-container" *ngIf="!editMode">
     <div class="nodes-container">
-      <ng-container *ngIf="!loading">
+      <ng-template #emptyHint>
+        <div class='center emptyHint' *ngIf='!loading && isProductAvailable(selectedConfig)'>
+          <p>
+            <span class="headerText">No applications have been configured yet.</span>
+          </p>
+          <p *ngIf='!isReadonly()'>
+            <span class="headerTextSmall">You can start from scratch and</span>
+            <span class="material-icons headerIcon">&nbsp;layers</span>
+            <span class="headerText"><a href='#' (click)="setSidenavApplications(); $event.preventDefault();">Configure Applications</a></span>
+          </p>
+          <p *ngIf='!isReadonly() && getProductOfInstance(selectedConfig)?.templates?.length'>
+            <app-instance-template #instanceTemplate
+              [instanceGroupName]='groupParam'
+              [minionConfigs]='minionConfigs'
+              [product]='getProductOfInstance(selectedConfig)'
+              (templateApplied)='onApplyTemplateFinished()'></app-instance-template>
+            <span class="headerTextSmall">Or you can start from a pre-built</span>
+            <span class="material-icons headerIcon">&nbsp;store</span>
+            <span class="headerText"><a href='#' (click)="onApplyTemplate(instanceTemplate, $event)">Instance Template</a></span>
+          </p>
+        </div>
+      </ng-template>
+      <ng-container *ngIf="!loading && !applyingTemplate && (!isEmptyInstance() || isSidenavApplications()); else emptyHint">
         <ng-container *ngFor="let node of selectedConfig.nodeList.nodeConfigDtos">
           <app-instance-node-card
             class="node"
