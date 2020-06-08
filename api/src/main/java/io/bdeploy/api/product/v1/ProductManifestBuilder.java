@@ -17,6 +17,8 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
+import io.bdeploy.bhive.model.Tree.EntryType;
+import io.bdeploy.bhive.op.ImportFileOperation;
 import io.bdeploy.bhive.op.ImportObjectOperation;
 import io.bdeploy.bhive.op.ImportOperation;
 import io.bdeploy.bhive.op.ImportTreeOperation;
@@ -36,12 +38,14 @@ public class ProductManifestBuilder {
     public static final String PRODUCT_DESC = "product.json";
     public static final String CONFIG_ENTRY = "config";
     public static final String PLUGINS_ENTRY = "plugins";
+    public static final String TEMPLATES_ENTRY = "templates";
 
     private final Map<String, Manifest.Key> applications = new TreeMap<>();
     private final Map<String, String> labels = new TreeMap<>();
     private final ProductDescriptor desc;
     private Path configTemplates;
     private Path pluginFolder;
+    private final List<Path> templates = new ArrayList<>();
 
     public ProductManifestBuilder(ProductDescriptor desc) {
         this.desc = desc;
@@ -67,6 +71,11 @@ public class ProductManifestBuilder {
         return this;
     }
 
+    public ProductManifestBuilder addInstanceTemplate(Path tmplPath) {
+        templates.add(tmplPath);
+        return this;
+    }
+
     public void insert(BHive hive, Manifest.Key manifest, String productName) {
         Tree.Builder tree = new Tree.Builder();
 
@@ -89,6 +98,15 @@ public class ProductManifestBuilder {
             ObjectId pluginId = hive.execute(new ImportTreeOperation().setSourcePath(pluginFolder));
             tree.add(new Tree.Key(PLUGINS_ENTRY, Tree.EntryType.TREE), pluginId);
         }
+
+        // import templates
+        Tree.Builder templTree = new Tree.Builder();
+        for (Path p : templates) {
+            ObjectId id = hive.execute(new ImportFileOperation().setFile(p));
+            templTree.add(new Tree.Key(id.toString() + ".yaml", EntryType.BLOB), id);
+        }
+        tree.add(new Tree.Key(TEMPLATES_ENTRY, EntryType.TREE),
+                hive.execute(new InsertArtificialTreeOperation().setTree(templTree)));
 
         Manifest.Builder m = new Manifest.Builder(manifest);
         labels.forEach(m::addLabel);
@@ -157,7 +175,18 @@ public class ProductManifestBuilder {
             builder.setPluginFolder(pluginPath);
         }
 
-        // 9. generate product
+        // 9. instance templates
+        if (prod.templates != null && !prod.templates.isEmpty()) {
+            for (String tmpl : prod.templates) {
+                Path tmplPath = descriptorPath.getParent().resolve(tmpl);
+                if (!Files.isRegularFile(tmplPath)) {
+                    throw new IllegalStateException("Instance Template descriptor not found: " + tmplPath);
+                }
+                builder.addInstanceTemplate(tmplPath);
+            }
+        }
+
+        // 10. generate product
         builder.insert(hive, prodKey, prod.product);
 
         return prodKey;
