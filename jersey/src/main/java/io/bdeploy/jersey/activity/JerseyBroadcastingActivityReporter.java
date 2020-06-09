@@ -66,6 +66,13 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
         return 0;
     }
 
+    /**
+     * Reset the current active activity on this thread. Maybe used in error scenarios, etc.
+     */
+    public static void resetThread() {
+        currentActivity.remove();
+    }
+
     @Inject
     public JerseyBroadcastingActivityReporter(@Named(JerseyServer.BROADCAST_EXECUTOR) ScheduledExecutorService scheduler) {
         scheduler.scheduleAtFixedRate(this::sendUpdate, 1, 1, TimeUnit.SECONDS);

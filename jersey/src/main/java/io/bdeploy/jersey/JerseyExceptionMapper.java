@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.ActivityReporter.ActivityCancelledException;
 import io.bdeploy.common.util.ExceptionHelper;
+import io.bdeploy.jersey.activity.JerseyBroadcastingActivityReporter;
 
 @Provider
 public class JerseyExceptionMapper implements ExceptionMapper<RuntimeException> {
@@ -21,6 +22,9 @@ public class JerseyExceptionMapper implements ExceptionMapper<RuntimeException> 
 
     @Override
     public Response toResponse(RuntimeException exception) {
+        // make sure no activities stay active.
+        JerseyBroadcastingActivityReporter.resetThread();
+
         if (exception instanceof WebApplicationException && (exception.getCause() == null || exception.getCause() == exception)) {
             WebApplicationException webEx = (WebApplicationException) exception;
 

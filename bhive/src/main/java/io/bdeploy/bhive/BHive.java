@@ -33,6 +33,7 @@ import io.bdeploy.common.util.ExceptionHelper;
 import io.bdeploy.common.util.FutureHelper;
 import io.bdeploy.common.util.NamedDaemonThreadFactory;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.jersey.activity.JerseyBroadcastingActivityReporter;
 import io.bdeploy.jersey.audit.AuditRecord;
 import io.bdeploy.jersey.audit.AuditRecord.Severity;
 import io.bdeploy.jersey.audit.Auditor;
@@ -234,7 +235,14 @@ public class BHive implements AutoCloseable, BHiveExecution {
          *         {@link FutureHelper#awaitAll(java.util.Collection)}.
          */
         protected Future<?> submitFileOperation(Runnable op) {
-            return fileOps.submit(op);
+            return fileOps.submit(() -> {
+                try {
+                    op.run();
+                } catch (Throwable t) {
+                    JerseyBroadcastingActivityReporter.resetThread();
+                    throw t;
+                }
+            });
         }
 
         /**

@@ -10,6 +10,7 @@ import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.core.Response.Status.Family;
 import javax.ws.rs.core.Response.StatusType;
 
+import io.bdeploy.jersey.activity.JerseyBroadcastingActivityReporter;
 import io.bdeploy.jersey.audit.AuditRecord;
 import io.bdeploy.jersey.audit.AuditRecord.Severity;
 import io.bdeploy.jersey.audit.Auditor;
@@ -41,6 +42,8 @@ public class JerseyAuditingFilter implements ContainerResponseFilter {
         auditor.audit(AuditRecord.Builder.fromRequest(requestContext)
                 .setSeverity(responseContext.getStatus() > 400 ? Severity.WARNING : Severity.NORMAL)
                 .setMessage(status.getStatusCode() + ": " + status.getReasonPhrase()).build());
+
+        JerseyBroadcastingActivityReporter.resetThread();
     }
 
 }
