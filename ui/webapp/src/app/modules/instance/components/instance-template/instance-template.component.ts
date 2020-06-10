@@ -219,7 +219,7 @@ export class InstanceTemplateComponent implements OnInit {
       const opNum = Number(op);
       const valNum = Number(val);
 
-      if (opNum === NaN || valNum === NaN) {
+      if (Number.isNaN(opNum) || Number.isNaN(valNum)) {
         this.log.error(`Invalid variable substitution for ${variable}: '${op}' or '${val}' is not a number.`);
         return variable;
       }
