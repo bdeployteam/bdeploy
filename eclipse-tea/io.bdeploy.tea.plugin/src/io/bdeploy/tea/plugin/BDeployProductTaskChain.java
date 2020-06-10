@@ -91,7 +91,7 @@ public class BDeployProductTaskChain implements TaskChain {
         // Need to make sure that the source server is available for us, otherwise prompt login.
         IEclipsePreferences prefs = InstanceScope.INSTANCE.getNode("io.bdeploy.tea.plugin.source");
         source = loadSourceServer(prefs);
-        String srcMsg = checkServer(source);
+        String srcMsg = checkServer(source, cfg.bdeployServer);
         if (srcMsg != null) {
             source = null;
             MessageDialog.openWarning(parent, "Software Repository Login",
@@ -108,7 +108,7 @@ public class BDeployProductTaskChain implements TaskChain {
             target = dlg.getChosenTarget();
             bdeployProductFile = rootPath.resolve(dlg.getChosenFile());
 
-            String trgMsg = checkServer(target);
+            String trgMsg = checkServer(target, null);
             if (trgMsg != null) {
                 target = null;
                 bdeployProductFile = null;
@@ -130,10 +130,13 @@ public class BDeployProductTaskChain implements TaskChain {
         }
     }
 
-    private String checkServer(BDeployTargetSpec remote) {
+    private String checkServer(BDeployTargetSpec remote, String expectedServer) {
         try {
             if (remote == null) {
                 return "No remote server data";
+            }
+            if (expectedServer != null && !remote.uri.equals(expectedServer)) {
+                return "Server configuration changed";
             }
             RemoteService svc = new RemoteService(UriBuilder.fromUri(remote.uri).build(), remote.token);
             PublicRootResource master = JerseyClientFactory.get(svc).getProxyClient(PublicRootResource.class);
