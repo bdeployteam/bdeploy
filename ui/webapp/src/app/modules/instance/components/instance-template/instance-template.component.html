@@ -15,15 +15,17 @@
             </mat-button-toggle-group>
           </div>
           <div *ngIf='selectedTemplate'>
-            <div class='hintText'>Please select a mapping from nodes defined in the template to nodes available on your system. Applications will be created on the selected nodes. The same node may be selected more than once to create application from multiple template-defined nodes on a single available node.</div>
-            <div *ngFor='let node of selectedTemplate.nodes; let nodeIndex = index' class='node-mapping'>
-              <span>{{node.name}}</span>
-              <div class='spacer'></div>
-              <app-instance-template-node-detail [node]='node' [product]='product' [config]='config'></app-instance-template-node-detail>
-              <mat-select [(value)]='nodeMappings[nodeIndex]' class='node-select'>
-                <mat-option value='__none'>None (don't create)</mat-option>
-                <mat-option *ngFor='let physNode of getNodesForType(node)' [value]='physNode'>{{getNiceName(physNode)}}</mat-option>
-              </mat-select>
+            <div class='hintText'>Please select a mapping from groups defined in the template to nodes available on your system. Applications will be created on the selected nodes. The same node may be selected more than once to create application from multiple template-defined groups on a single available node.</div>
+            <div class='node-mapping-container'>
+              <div *ngFor='let group of selectedTemplate.groups; let groupIndex = index' class='node-mapping'>
+                <span>{{group.name}}</span>
+                <div class='spacer'></div>
+                <app-instance-template-group-detail [group]='group' [product]='product' [config]='config'></app-instance-template-group-detail>
+                <mat-select [(value)]='nodeMappings[groupIndex]' class='node-select'>
+                  <mat-option value='__none'>None (don't create)</mat-option>
+                  <mat-option *ngFor='let physNode of getNodesForType(group)' [value]='physNode'>{{getNiceName(physNode)}}</mat-option>
+                </mat-select>
+              </div>
             </div>
           </div>
         </div>

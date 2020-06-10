@@ -48,6 +48,12 @@ mat-button-toggle-group {
   align-items: center;
 }
 
+.node-mapping-container {
+  min-height: 100px;
+  max-height: 250px;
+  overflow: auto;
+}
+
 .spacer {
   flex: 1 0 auto;
 }

@@ -2,18 +2,18 @@ import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, Input, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
 import { MatButton } from '@angular/material/button';
-import { ApplicationType, InstanceTemplateApplication, InstanceTemplateNode, ProductDto } from 'src/app/models/gen.dtos';
+import { ApplicationType, InstanceTemplateApplication, InstanceTemplateGroup, ProductDto } from 'src/app/models/gen.dtos';
 import { ProcessConfigDto } from 'src/app/models/process.model';
 
 @Component({
-  selector: 'app-instance-template-node-detail',
-  templateUrl: './instance-template-node-detail.component.html',
-  styleUrls: ['./instance-template-node-detail.component.css']
+  selector: 'app-instance-template-group-detail',
+  templateUrl: './instance-template-group-detail.component.html',
+  styleUrls: ['./instance-template-group-detail.component.css']
 })
-export class InstanceTemplateNodeDetailComponent implements OnInit {
+export class InstanceTemplateGroupDetailComponent implements OnInit {
 
   @Input()
-  node: InstanceTemplateNode;
+  group: InstanceTemplateGroup;
 
   @Input()
   config: ProcessConfigDto;
@@ -32,9 +32,9 @@ export class InstanceTemplateNodeDetailComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    for (let i = 0; i < this.node.applications.length; ++i) {
-      const app = this.node.applications[i];
-      this.appNames[i] = app.name ? app.name : this.calculateName(app, this.node.type);
+    for (let i = 0; i < this.group.applications.length; ++i) {
+      const app = this.group.applications[i];
+      this.appNames[i] = app.name ? app.name : this.calculateName(app, this.group.type);
       this.appDescriptions[i] = app.description ? app.description : ('A default ' + this.appNames[i]);
     }
   }

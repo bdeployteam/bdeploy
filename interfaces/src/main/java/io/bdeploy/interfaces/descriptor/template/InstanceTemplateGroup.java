@@ -5,28 +5,25 @@ import java.util.List;
 
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor.ApplicationType;
 
-public class InstanceTemplateNode {
+public class InstanceTemplateGroup {
 
     /**
-     * The name of the node.
-     * <p>
-     * Note that this is not required to be an actual existing node. The user will have to map "template" nodes to "physical"
-     * nodes once the template is applied.
+     * The name of the group.
      */
     public String name;
 
     /**
-     * A description of the contents of this node.
+     * A description of the contents of this group.
      */
     public String description;
 
     /**
-     * The type of applications hosted on this node.
+     * The type of applications contained in this group.
      */
     public ApplicationType type;
 
     /**
-     * The applications which should be configured on this virtual node.
+     * The applications which should be configured by this group.
      */
     public List<InstanceTemplateApplication> applications = new ArrayList<>();
 

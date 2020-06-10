@@ -4,7 +4,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { cloneDeep } from 'lodash';
 import { ApplicationGroup } from 'src/app/models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_INSTANCE_NODE_CONFIGURATION } from 'src/app/models/consts';
-import { ApplicationConfiguration, ApplicationDto, ApplicationType, InstanceNodeConfigurationDto, InstanceTemplateApplication, InstanceTemplateDescriptor, InstanceTemplateNode, MinionDto, ProcessControlConfiguration, ProductDto } from 'src/app/models/gen.dtos';
+import { ApplicationConfiguration, ApplicationDto, ApplicationType, InstanceNodeConfigurationDto, InstanceTemplateApplication, InstanceTemplateDescriptor, InstanceTemplateGroup, MinionDto, ProcessControlConfiguration, ProductDto } from 'src/app/models/gen.dtos';
 import { ProcessConfigDto } from 'src/app/models/process.model';
 import { Logger, LoggingService } from 'src/app/modules/core/services/logging.service';
 import { ApplicationService } from '../../services/application.service';
@@ -52,17 +52,8 @@ export class InstanceTemplateComponent implements OnInit {
     this.selectedTemplate = this.allTemplates[index];
 
     this.nodeMappings = [];
-    for (let i = 0; i < this.selectedTemplate.nodes.length; ++i) {
-      const node = this.selectedTemplate.nodes[i];
-      if (this.config.nodeList.nodeConfigDtos.find(inc => inc.nodeName === node.name)) {
-        this.nodeMappings[i] = node.name;
-      } else {
-        if (node.type === ApplicationType.CLIENT) {
-          this.nodeMappings[i] = CLIENT_NODE_NAME;
-        } else {
-          this.nodeMappings[i] = '__none';
-        }
-      }
+    for (let i = 0; i < this.selectedTemplate.groups.length; ++i) {
+      this.nodeMappings[i] = '__none';
     }
 
     this.variables = {};
@@ -80,8 +71,8 @@ export class InstanceTemplateComponent implements OnInit {
     return nodeName;
   }
 
-  getNodesForType(node: InstanceTemplateNode): string[] {
-    if (node.type === ApplicationType.CLIENT) {
+  getNodesForType(group: InstanceTemplateGroup): string[] {
+    if (group.type === ApplicationType.CLIENT) {
       return [CLIENT_NODE_NAME];
     } else {
       return this.config.nodeList.nodeConfigDtos.filter(n => n.nodeName !== CLIENT_NODE_NAME).map(n => n.nodeName);
@@ -111,7 +102,7 @@ export class InstanceTemplateComponent implements OnInit {
   async applyTemplate() {
     for (let i = 0; i < this.nodeMappings.length; ++i) {
       const mapping = this.nodeMappings[i];
-      const nodeTemplate = this.selectedTemplate.nodes[i];
+      const nodeTemplate = this.selectedTemplate.groups[i];
 
       if (mapping === '__none') {
         continue;

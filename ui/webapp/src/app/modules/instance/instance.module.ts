@@ -7,10 +7,12 @@ import { SharedModule } from '../shared/shared.module';
 import { ApplicationConfigurationCardComponent } from './components/application-configuration-card/application-configuration-card.component';
 import { ApplicationDescriptorCardComponent } from './components/application-descriptor-card/application-descriptor-card.component';
 import { ApplicationEditCommandPreviewComponent } from './components/application-edit-command-preview/application-edit-command-preview.component';
+import { ApplicationEditEndpointsComponent } from './components/application-edit-endpoints/application-edit-endpoints.component';
 import { ApplicationEditManualComponent } from './components/application-edit-manual/application-edit-manual.component';
 import { ApplicationEditOptionalComponent } from './components/application-edit-optional/application-edit-optional.component';
 import { ApplicationEditComponent } from './components/application-edit/application-edit.component';
 import { ClientInfoComponent } from './components/client-info/client-info.component';
+import { CustomEditorComponent } from './components/custom-editor/custom-editor.component';
 import { DataFilesBrowserComponent } from './components/data-files-browser/data-files-browser.component';
 import { InstanceAddEditComponent } from './components/instance-add-edit/instance-add-edit.component';
 import { InstanceBrowserComponent } from './components/instance-browser/instance-browser.component';
@@ -18,6 +20,9 @@ import { InstanceCardComponent } from './components/instance-card/instance-card.
 import { InstanceNodeCardComponent } from './components/instance-node-card/instance-node-card.component';
 import { InstanceNotificationsItemComponent } from './components/instance-notifications-item/instance-notifications-item.component';
 import { InstanceNotificationsComponent } from './components/instance-notifications/instance-notifications.component';
+import { InstanceSyncComponent } from './components/instance-sync/instance-sync.component';
+import { InstanceTemplateGroupDetailComponent } from './components/instance-template-group-detail/instance-template-group-detail.component';
+import { InstanceTemplateComponent } from './components/instance-template/instance-template.component';
 import { InstanceVersionCardComponent } from './components/instance-version-card/instance-version-card.component';
 import { InstanceVersionHistoryCardComponent } from './components/instance-version-history-card/instance-version-history-card.component';
 import { ProcessConfigurationComponent } from './components/process-configuration/process-configuration.component';
@@ -26,11 +31,6 @@ import { ProcessListComponent } from './components/process-list/process-list.com
 import { ProcessStartConfirmComponent } from './components/process-start-confirm/process-start-confirm.component';
 import { ProcessStatusComponent } from './components/process-status/process-status.component';
 import { InstanceRoutingModule } from './instance-routing.module';
-import { InstanceSyncComponent } from './components/instance-sync/instance-sync.component';
-import { ApplicationEditEndpointsComponent } from './components/application-edit-endpoints/application-edit-endpoints.component';
-import { CustomEditorComponent } from './components/custom-editor/custom-editor.component';
-import { InstanceTemplateComponent } from './components/instance-template/instance-template.component';
-import { InstanceTemplateNodeDetailComponent } from './components/instance-template-node-detail/instance-template-node-detail.component';
 
 @NgModule({
   declarations: [
@@ -60,7 +60,7 @@ import { InstanceTemplateNodeDetailComponent } from './components/instance-templ
     ApplicationEditEndpointsComponent,
     CustomEditorComponent,
     InstanceTemplateComponent,
-    InstanceTemplateNodeDetailComponent,
+    InstanceTemplateGroupDetailComponent,
   ],
   entryComponents: [
     ApplicationEditManualComponent,
