@@ -64,6 +64,9 @@ namespace Bdeploy.Launcher
         // The deserialized application descriptor
         private ClickAndStartDescriptor descriptor;
 
+        // The logger that consumes StandardOut and StandardError 
+        private ILogger appLogger;
+
         /// <summary>
         /// Creates a new instance of the launcher.
         /// </summary>
@@ -106,6 +109,10 @@ namespace Bdeploy.Launcher
                 Log.Debug("Starting launcher with arguments: {0}", builder.ToString());
             }
 
+            // Create special logger that writes to a separate file
+            string path = Path.Combine(PathProvider.GetLogsDir(), GetAppLoggerName());
+            appLogger = LogFactory.GetAppLogger(path);
+
             // Startup minion and wait for termination
             using (Process process = new Process())
             {
@@ -117,6 +124,8 @@ namespace Bdeploy.Launcher
                 process.StartInfo.ErrorDialog = false;
                 process.StartInfo.RedirectStandardOutput = true;
                 process.StartInfo.RedirectStandardError = true;
+                process.OutputDataReceived += Process_OutputDataReceived;
+                process.ErrorDataReceived += Process_ErrorDataReceived;
                 process.Start();
 
                 // Write log file about the startup
@@ -124,10 +133,9 @@ namespace Bdeploy.Launcher
                 Log.Information("Output of launcher is written to a separate log file.");
                 Log.Information("See {0} for more details.", GetAppLoggerName());
 
-                // Capture output and write to logfile
-                Task logTask = Task.Run(() => CopyToLog(process));
-
                 // Wait until the process terminates
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
                 process.WaitForExit();
                 int exitCode = process.ExitCode;
                 Log.Information("Launcher terminated. ExitCode = {0}", exitCode);
@@ -193,6 +201,20 @@ namespace Bdeploy.Launcher
                 }
                 FileHelper.DeleteFile(UPDATE_LOCK);
             }
+        }
+
+        /// <summary>
+        /// Callback method that logs the message that is written to the process error stream
+        /// </summary>
+        private void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e) {
+            appLogger.Error(e.Data);
+        }
+
+        /// <summary>
+        /// Callback method that logs the message that is written to the process output stream
+        /// </summary>
+        private void Process_OutputDataReceived(object sender, DataReceivedEventArgs e) {
+            appLogger.Information(e.Data);
         }
 
         /// <summary>
@@ -324,24 +346,6 @@ namespace Bdeploy.Launcher
                 return false;
             }
             return true;
-        }
-
-        /// <summary>
-        /// Reads output from the given process and writes it to the logger as DEBUG message.
-        /// </summary>
-        private void CopyToLog(Process process)
-        {
-            // Create special logger that writes to a separate file
-            string path = Path.Combine(PathProvider.GetLogsDir(), GetAppLoggerName());
-            ILogger appLogger = LogFactory.GetAppLogger(path);
-
-            // Log output for debugging purpose
-            string line;
-            StreamReader reader = process.StandardOutput;
-            while ((line = reader.ReadLine()) != null)
-            {
-                appLogger.Information(line);
-            }
         }
 
         /// <summary>
