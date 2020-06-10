@@ -1,6 +1,6 @@
 <mat-toolbar class="mat-elevation-z1 header-toolbar">
   <button mat-icon-button type="button" (click)='location.back()'><mat-icon>chevron_left</mat-icon></button>
-  <span>Instance Group: {{instanceGroupName}}</span>
+  <span>Instance Group: <app-instance-group-title [instanceGroup]='instanceGroupName'></app-instance-group-title></span>
 </mat-toolbar>
 
 <div *ngIf="loading" class="loading-container">

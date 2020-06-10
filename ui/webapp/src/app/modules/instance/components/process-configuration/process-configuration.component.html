@@ -56,7 +56,7 @@
       <button mat-icon-button type="button" (click)="onDiscardAppChanges(true)" *ngIf="editMode">
         <mat-icon>chevron_left</mat-icon>
       </button>
-      <span>Instance: {{ groupParam }} - {{ selectedConfig?.instance?.name }}</span>
+      <span>Instance: <app-instance-group-title [instanceGroup]='groupParam'></app-instance-group-title> - {{ selectedConfig?.instance?.name }}</span>
       <span class="fill-space"></span>
       <app-instance-notifications #instanceNotifications [notifications]='notifications'></app-instance-notifications>
       <ng-container *ngIf="!editMode">

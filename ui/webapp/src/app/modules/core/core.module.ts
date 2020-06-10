@@ -46,6 +46,7 @@ import { GlobalErrorHandler } from 'src/app/modules/core/global-error-handler';
 import { ConnectionLostComponent } from './components/connection-lost/connection-lost.component';
 import { InstanceGroupCardComponent } from './components/instance-group-card/instance-group-card.component';
 import { InstanceGroupLogoComponent } from './components/instance-group-logo/instance-group-logo.component';
+import { InstanceGroupTitleComponent } from './components/instance-group-title/instance-group-title.component';
 import { LoginComponent } from './components/login/login.component';
 import { LogoComponent } from './components/logo/logo.component';
 import { MainNavComponent } from './components/main-nav/main-nav.component';
@@ -86,6 +87,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     UserEditComponent,
     UserPasswordComponent,
     VersionPipe,
+    InstanceGroupTitleComponent,
   ],
   entryComponents: [
     ConnectionLostComponent,
@@ -194,6 +196,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     ManagedServerUpdateComponent,
     InstanceGroupLogoComponent,
     InstanceGroupCardComponent,
+    InstanceGroupTitleComponent,
     ProductTagCardComponent,
     ProductInfoCardComponent,
     UserAvatarComponent,
