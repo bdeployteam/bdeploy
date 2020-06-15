@@ -99,7 +99,7 @@ Cypress.Commands.add('downloadFile', { prevSubject: true }, (subject, fileName) 
   cy.window().then(win => {
     const stubbed = cy.stub(win.downloadLocation, 'assign', (link) => {});
 
-    cy.wrap(subject).click().then(() => {
+    cy.wrap(subject).click().should(() => {
       expect(stubbed).to.be.calledOnce;
 
       var url = stubbed.args[0][0];
