@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.objects.MarkerDatabase;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.Version;
 import io.bdeploy.common.cfg.Configuration.Help;
@@ -55,8 +56,11 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
             rootDir = ClientPathHelper.getBDeployHome();
         }
         Path bhiveDir = rootDir.resolve("bhive");
+        MarkerDatabase.lockRoot(rootDir);
         try (BHive hive = new BHive(bhiveDir.toUri(), new ActivityReporter.Null())) {
             doUninstall(rootDir, hive, config.app());
+        } finally {
+            MarkerDatabase.unlockRoot(rootDir);
         }
     }
 

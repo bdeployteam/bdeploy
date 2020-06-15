@@ -6,12 +6,16 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.util.PathHelper;
 
 public class MarkerDatabase extends ObjectDatabase {
 
+    private static final Logger log = LoggerFactory.getLogger(MarkerDatabase.class);
     private static final String LOCK_FILE = ".lock";
 
     public MarkerDatabase(Path root, ActivityReporter reporter) {
@@ -52,11 +56,16 @@ public class MarkerDatabase extends ObjectDatabase {
      * @param root the root directory to lock.
      */
     public static void lockRoot(Path root) {
-        for (int i = 0; i < 10_000; ++i) {
+        boolean infoWritten = false;
+        for (int i = 0; i < 100_000; ++i) {
             try {
-                Files.createFile(root.resolve(LOCK_FILE));
+                Files.createFile(root.resolve(LOCK_FILE)).toFile().deleteOnExit();
                 return;
             } catch (FileAlreadyExistsException e) {
+                if (!infoWritten) {
+                    log.info("Waiting for " + root);
+                    infoWritten = true;
+                }
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException ie) {
@@ -78,7 +87,7 @@ public class MarkerDatabase extends ObjectDatabase {
      */
     public static void waitRootLock(Path root) {
         Path lockFile = root.resolve(LOCK_FILE);
-        for (int i = 0; i < 10_000; ++i) {
+        for (int i = 0; i < 100_000; ++i) {
             if (Files.exists(lockFile)) {
                 try {
                     Thread.sleep(10);

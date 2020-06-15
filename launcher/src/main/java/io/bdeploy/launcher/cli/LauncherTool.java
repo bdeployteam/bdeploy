@@ -26,6 +26,7 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.bhive.objects.MarkerDatabase;
 import io.bdeploy.bhive.op.ExportOperation;
 import io.bdeploy.bhive.op.remote.FetchOperation;
 import io.bdeploy.bhive.op.remote.TransferStatistics;
@@ -175,8 +176,16 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             LauncherSplashReporter reporter = new LauncherSplashReporter(splash);
             try (BHive hive = new BHive(bhiveDir.toUri(), auditor, reporter)) {
                 // Check for and install launcher updates
-                Entry<Version, Key> requiredLauncher = getLatestLauncherVersion(reporter, serverVersion);
-                doCheckForLauncherUpdate(hive, reporter, requiredLauncher);
+                try (Activity waiting = reporter.start("Waiting for other launchers...")) {
+                    MarkerDatabase.lockRoot(rootDir);
+                }
+                Entry<Version, Key> requiredLauncher;
+                try {
+                    requiredLauncher = getLatestLauncherVersion(reporter, serverVersion);
+                    doCheckForLauncherUpdate(hive, reporter, requiredLauncher);
+                } finally {
+                    MarkerDatabase.unlockRoot(rootDir);
+                }
 
                 // We always try to use the launcher matching the server version
                 // If no launcher is installed we simply use the currently running version
@@ -199,7 +208,14 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 // Cleanup the installation directory and the hive.
                 if (!readOnlyRootDir) {
                     ClientCleanup cleanup = new ClientCleanup(hive, appDir, poolDir);
-                    cleanup.run();
+                    try (Activity waiting = reporter.start("Waiting for other launchers...")) {
+                        MarkerDatabase.lockRoot(rootDir); // this could wait for other launchers.
+                    }
+                    try {
+                        cleanup.run();
+                    } finally {
+                        MarkerDatabase.unlockRoot(rootDir);
+                    }
                 }
 
                 // Wait until the process terminates
@@ -316,7 +332,14 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
 
         // Install the application into the pool if missing
-        installApplication(hive, splash, reporter, clientAppCfg);
+        try (Activity waiting = reporter.start("Waiting for other launchers...")) {
+            MarkerDatabase.lockRoot(rootDir);
+        }
+        try {
+            installApplication(hive, splash, reporter, clientAppCfg);
+        } finally {
+            MarkerDatabase.unlockRoot(rootDir);
+        }
 
         // Launch the application
         try (Activity info = reporter.start("Launching...")) {
@@ -350,17 +373,35 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
 
         log.info("Updating launcher from {} to {}", runningVersion, latestVersion);
+        Path next = null;
+        Path updateMarker = updateDir.resolve(".updating");
+
         try (Activity updating = reporter.start("Updating Launcher")) {
+            if (Files.isRegularFile(updateMarker)) {
+                log.warn("Found existing update marker");
+                if (System.currentTimeMillis() - Files.getLastModifiedTime(updateMarker).toMillis() > 60_000) {
+                    log.warn("Stale update marker found, removing");
+                    Files.delete(updateMarker);
+                } else {
+                    throw new IllegalStateException("Update in progress by another launcher");
+                }
+            }
+
             // found a newer version to install.
             hive.execute(new FetchOperation().addManifest(launcher).setRemote(descriptor.host));
 
             // write to target directory
-            Path next = UpdateHelper.prepareUpdateDirectory(updateDir);
+            next = UpdateHelper.prepareUpdateDirectory(updateDir);
             hive.execute(new ExportOperation().setManifest(launcher).setTarget(next));
+
+            // create a marker for others which will gain the lock after we exit for restart.
+            Files.createFile(updateMarker);
 
             // Signal that a new update is available
             log.info("Restarting...");
             System.exit(UpdateHelper.CODE_UPDATE);
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot create update marker");
         }
     }
 
