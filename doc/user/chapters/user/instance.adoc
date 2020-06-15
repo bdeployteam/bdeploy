@@ -140,3 +140,23 @@ The content of the _ZIP_ can be edited offline, and re-imported using the *Insta
 
 [WARNING]
 This mechanism allows access to the most internal data structures of *BDeploy*. Great care has to be taken to not damage any of the data on import.
+
+==== Instance Templates
+
+A product can define and include *Instance Templates*. These templates can be applied on an empty instance (e.g. after creating one).
+
+image::images/BDeploy_Instance_Template_Empty.png[Instance Template on empty instance,align=center,width=480,link="images/BDeploy_Instance_Template_Empty.png"]
+
+The *Instance Template* link is only available if the product contains templates to start from. Clicking it will open up the *Instance Template* wizard.
+
+image::images/BDeploy_Instance_Template_Dialog_Groups.png[Instance Template Dialog Group Selection,align=center,width=480,link="images/BDeploy_Instance_Template_Dialog_Groups.png"]
+
+Selecting a template (here: _Default Configuration_) will show a list of _groups_ defined in the template. These _groups_ can be assigned to compatible nodes - groups containing server applications to server nodes, and groups containing client applications to the special _Client Applications_ node. Selecting _None_ as target node will skip the processes in this group. Click the (i) info icon to display details about a group, including all processes configured in the template group.
+
+Clicking btn:[Next] will show a list of template variables to fill out. Template variables can be used by templates to query required user input, so all template variables are mandatory.
+
+image::images/BDeploy_Instance_Template_Dialog_Variables.png[Instance Template Dialog Variables,align=center,width=480,link="images/BDeploy_Instance_Template_Dialog_Variables.png"]
+
+Clicking btn:[Next] and then btn:[Close] once the template has been applied will create the processes defined in the template. The configuration will *not* be saved automatically, to allow further tuning of the configuration before doing so.
+
+image::images/BDeploy_Instance_Template_Processes.png[Instance Template Dialog Variables,align=center,width=480,link="images/BDeploy_Instance_Template_Processes.png"]

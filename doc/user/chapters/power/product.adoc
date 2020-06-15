@@ -4,7 +4,8 @@ This chapter is intended for those who want to integrate their own *Product* to 
 
 <<_app_info_yaml, app-info.yaml>>:: YAML file to describe one single *Application*. It is required once for every client and server *Application* of the product. 
 <<_product_info_yaml, product-info.yaml>>:: YAML file with meta-data for the whole product.
-<<_product_version_yaml,product-version.yaml>>:: YAML file required for every *Product Version*. 
+<<_product_version_yaml,product-version.yaml>>:: YAML file required for every *Product Version*.
+<<_instance_template_yaml,instance-template.yaml>>:: optional YAML file which can be used to define *Instance Templates*
 
 This chapter will walk you through these artifacs, what they are for and how to define them.
 
@@ -299,7 +300,9 @@ applications:
   
 configTemplates: my-config <5>
 pluginFolder: my-plugins <6>
-versionFile: my-versions.yaml <7>
+templates:
+  - 'my-templates/template.yaml' <7>
+versionFile: my-versions.yaml <8>
 ----
 
 <1> A human readable name of the *Product* for display purposes in the Web UI
@@ -308,7 +311,8 @@ versionFile: my-versions.yaml <7>
 <4> The list of *Applications* which are part of the *Product*. These IDs can be anything, they just have to match the IDs used in the `product-version.yaml` referenced below.
 <5> Optional: A relative path to a directory containing configuration file templates, which will be used as the default set of configuration files when creating an *Instance* from the resulting *Product*.
 <6> Optioanl: A relative path to a directory containing one or more plugin JAR files. These plugins are loaded by the server on demand and provided for use when configuring applications which use this very product version.
-<7> The `product-version.yaml` which associates the *Application* IDs (used above) with actual paths to *Applications* on the file system.
+<7> A reference to a template YAML file which defines an <<_instance_template_yaml,`instance-template.yaml`>>
+<8> The `product-version.yaml` which associates the *Application* IDs (used above) with actual paths to *Applications* on the file system.
 
 ==== product-version.yaml
 
@@ -317,7 +321,7 @@ There is no actual requirement for the file to be named `product-version.yaml` a
 
 The `product-version.yaml` file associates *Application* IDs used in the `product-info.yaml` with actual locations on the local disc. This is used to find an import each included *Application* when importing the *Product*.
 
-The reason why this file is separate from the `product-info.yaml` is because its content (e.g. version) is specific to a single product *Build* . Therfore the `product-version.yaml` ideally is created during the build process of the product by the build system of your choice. This is different to the `app-info.yaml` files and the `product-info.yaml` file as they are written manually. 
+The reason why this file is separate from the `product-info.yaml` is because its content (e.g. version) is specific to a single product *Build* . Therfore the `product-version.yaml` ideally is created during the build process of the product by the build system of your choice. This is different to the `app-info.yaml` files and the `product-info.yaml` file as they are written manually.
 
 [source,yaml]
 ----
@@ -335,6 +339,58 @@ appInfo:
 <2> The *Application* ID must match the one used in `product-info.yaml`.
 <3> You may have different binaries for a single application depending on the target operating system. It is not required to provide every application for every operating system. You can just leave out operating systems you don't care about.
 <4> You can also use the exact same *Application* directory and `app-info.yaml` to satisfy multiple operating system targets for one *Application*.
+
+==== instance-template.yaml
+
+[NOTE]
+There is no actual requirement for the file to be named `instance-template.yaml` as it is referenced from the `product-info.yaml` by relative path anyway. Multiple *Instance Template* YAML files can exist and be referenced by `product-info.yaml`.
+
+This file defines a single *Instance Template*. A <<_product_info_yaml,`product-info.yaml`>> can reference multiple templates, from which the user can choose.
+
+[source,yaml]
+----
+name: Default Configuration <1>
+description: "Creates an instance with the default server and client configuration"
+
+variables: <2>
+  - uid: sleep-timeout
+    name: "Sleep Timeout"
+    description: "The amount of time the server application should sleep"
+    defaultValue: 60
+
+groups: <3>
+- name: "Server Apps"
+  description: "All server applications"
+
+  applications:
+  - application: server-app
+    name: "Server No Sleep"
+    description: "Server application which immediately exits"
+  - application: server-app <4>
+    name: "Server With Sleep"
+    description: "Server application which sleeps before exiting"
+    processControl:
+      startType: MANUAL_CONFIRM
+    startParameters: <5>
+    - uid: param.sleep
+      value: "{{T:sleep-timeout}}"
+- name: "Client Apps"
+  type: CLIENT <6>
+  description: "All client applications"
+  
+  applications:
+  - application: client-app
+    description: "A default client application."
+----
+
+<1> Each *Instance Template* has a name and a description, which are shown on the *Instance Template* Wizard.
+<2> A template can define (and use, see further down in the example) variables which are mandatory input by the user when using the template.
+<3> A template defines one or more groups. Each group can be assigned to a physical node available on the target system. Groups can be skipped by not assigning them to a node, so they provide a mechanism to provide logical groups of processes that belong together and might be optional. It is up to the user whether a group is mapped to a node, or not. Multiple groups can be mapped to the same phsysical node.
+<4> A template group contains one or more application configurations, which can consist of process control configuration and parameter definitions for the start command of that application.
+<5> Start command parameters are referenced by their UID, defined in <<_app_info_yaml,`app-info.yaml`>>. If a value is given, this value is applied. If not, the default value is used. If a parameter is optional, it will be added to the configuration if it is referenced in the template, regardless of whether a value is given or not.
+<6> A template group can have either type `SERVER` (default) or `CLIENT`. A group may only contain applications of a compatible type, i.e. only `SERVER` applications in `SERVER` type group.
+
+An instance template will be presented to the user when visiting an <<Instance Templates,Empty Instance>>.
 
 === Building a Product
 

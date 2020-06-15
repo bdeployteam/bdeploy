@@ -1,0 +1,31 @@
+name: Default Configuration
+description: "Creates an instance with the default server and client configuration"
+
+variables:
+  - uid: sleep-timeout
+    name: "Sleep Timeout"
+    description: "The amount of time the server application should sleep"
+    defaultValue: 60
+
+groups:
+- name: "Server Apps"
+  description: "All server applications"
+
+  applications:
+  - application: server-app
+    name: "Server No Sleep"
+    description: "Server application which immediately exits"
+  - application: server-app
+    name: "Server With Sleep"
+    description: "Server application which sleeps before exiting"
+    startParameters:
+    - uid: param.sleep
+      value: "{{T:sleep-timeout}}"
+- name: "Client Apps"
+  type: CLIENT
+  description: "All client applications"
+  
+  applications:
+  - application: client-app
+    description: "A default client application."
+    

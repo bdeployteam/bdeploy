@@ -31,7 +31,7 @@
         </div>
         <div mat-dialog-actions align="end">
           <button mat-raised-button type="button" (click)='dialogRef.close()'>Cancel</button>
-          <button mat-raised-button type="button" color="primary" (click)='stepper.next()' [disabled]='!selectedTemplate'>Next</button>
+          <button mat-raised-button type="button" data-cy='next1' color="primary" (click)='stepper.next()' [disabled]='!selectedTemplate'>Next</button>
         </div>
       </mat-step>
       <mat-step label='Variables'>
@@ -47,7 +47,7 @@
           <div mat-dialog-actions align="end">
             <button mat-raised-button type="button" (click)='dialogRef.close()'>Cancel</button>
             <button mat-raised-button type="button" (click)='stepper.previous()'>Back</button>
-            <button mat-raised-button type="button" (click)='stepper.next(); applyTemplate();' color="primary" [disabled]='varForm.invalid'>Next</button>
+            <button mat-raised-button type="button" data-cy='next2' (click)='stepper.next(); applyTemplate();' color="primary" [disabled]='varForm.invalid'>Next</button>
           </div>
         </form>
       </mat-step>

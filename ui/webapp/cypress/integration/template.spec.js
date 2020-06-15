@@ -1,0 +1,75 @@
+describe('Instance Tests', function () {
+  var instanceUuid;
+
+  beforeEach(function () {
+    cy.login();
+  })
+
+  /**
+   * Creates a new instance group and uploads a demo product
+   */
+  it('Create a new group', function () {
+    cy.createInstanceGroup('Test');
+    cy.uploadProductIntoGroup('Test', 'test-product-1-direct.zip');
+    cy.uploadProductIntoGroup('Test', 'test-product-2-direct.zip');
+  })
+
+  /**
+   * Creates a new instance within the previously created group.
+   */
+  it('Create a instance', function () {
+    cy.createInstance('Test', 'CreateInstanceTest').then(uuid => {
+      instanceUuid = uuid;
+
+      cy.get('body').contains(instanceUuid).should('exist');
+    })
+  })
+
+  /**
+   * Create a configuration for a server process
+   */
+  it('Create from template', function () {
+    cy.visit('/#/instance/browser/Test')
+    cy.waitUntilContentLoaded();
+
+    cy.get('mat-card-subtitle').contains(instanceUuid).click();
+    cy.waitUntilContentLoaded();
+
+    cy.screenshot('BDeploy_Instance_Template_Empty');
+    cy.contains('a', 'Instance Template').should('exist').and('be.visible').click();
+    cy.contains('button', 'Default Configuration').click();
+
+    cy.contains('div', 'Server Apps').contains('mat-select', 'None').click();
+    cy.contains('mat-option', 'master').click();
+
+    cy.contains('div', 'Client Apps').contains('mat-select', 'None').click();
+    cy.contains('mat-option', 'Client Applications').click();
+
+    cy.screenshot('BDeploy_Instance_Template_Dialog_Groups');
+
+    cy.get('button[data-cy=next1]').click();
+
+    cy.wait(100); // animation
+    cy.screenshot('BDeploy_Instance_Template_Dialog_Variables');
+
+    cy.get('button[data-cy=next2]').click();
+    cy.contains('button', 'Close').click();
+
+    cy.getApplicationConfigCard('master', 'Server With Sleep').should('exist');
+    cy.getApplicationConfigCard('master', 'Server No Sleep').should('exist');
+
+    cy.getApplicationConfigCard('Client Applications', 'Client Application').should('exist');
+
+    cy.screenshot('BDeploy_Instance_Template_Processes');
+
+    cy.contains('button', 'SAVE').click();
+  })
+
+  /**
+   * Delete the instance and the group
+   */
+  it('Delete the instance', function () {
+    cy.deleteInstance('Test', instanceUuid);
+    cy.deleteInstanceGroup('Test');
+  })
+})
