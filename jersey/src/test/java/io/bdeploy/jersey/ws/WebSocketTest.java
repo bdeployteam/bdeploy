@@ -85,10 +85,10 @@ public class WebSocketTest {
             String r = result.get();
 
             assertEquals(testPayload, r);
+            assertTrue(closed.get());
             assertTrue(connected.get());
             assertTrue(received.get());
             assertTrue(sent.get());
-            assertTrue(closed.get());
         }
     }
 
