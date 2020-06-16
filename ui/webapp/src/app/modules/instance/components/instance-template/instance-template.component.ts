@@ -133,8 +133,12 @@ export class InstanceTemplateComponent implements OnInit {
           }
         } else if (this.minionConfigs[physNode.nodeName]?.os) {
           const appDesc = appGroup.getAppFor(this.minionConfigs[physNode.nodeName].os);
-          const cfg = await this.appService.createNewAppConfig(this.instanceGroupName, this.config, appDesc);
-          this.applyApplicationTemplate(physNode, cfg, appDesc, app);
+          if (appDesc) {
+            const cfg = await this.appService.createNewAppConfig(this.instanceGroupName, this.config, appDesc);
+            this.applyApplicationTemplate(physNode, cfg, appDesc, app);
+          } else {
+            this.log.warn('Cannot find application ' + appGroup.appName + ' for target node OS: ' + physNode.nodeName);
+          }
         } else {
           this.log.error(`Cannot determin how to add application to node: ${targetAppName} to ${physNode.nodeName}`);
         }

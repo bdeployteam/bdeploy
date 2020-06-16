@@ -153,6 +153,10 @@ image::images/BDeploy_Instance_Template_Dialog_Groups.png[Instance Template Dial
 
 Selecting a template (here: _Default Configuration_) will show a list of _groups_ defined in the template. These _groups_ can be assigned to compatible nodes - groups containing server applications to server nodes, and groups containing client applications to the special _Client Applications_ node. Selecting _None_ as target node will skip the processes in this group. Click the (i) info icon to display details about a group, including all processes configured in the template group.
 
+When creating configurations on a `SERVER` node, applications will be added matching the nodes OS. If a server application is included in a group which is not available for the target OS, it is ignored.
+
+When creating configurations for a `CLIENT` group, applications are added to the _Client Applications_ virtual node, one for each OS supported by the application.
+
 Clicking btn:[Next] will show a list of template variables to fill out. Template variables can be used by templates to query required user input, so all template variables are mandatory.
 
 image::images/BDeploy_Instance_Template_Dialog_Variables.png[Instance Template Dialog Variables,align=center,width=480,link="images/BDeploy_Instance_Template_Dialog_Variables.png"]

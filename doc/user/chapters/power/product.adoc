@@ -384,11 +384,11 @@ groups: <3>
 ----
 
 <1> Each *Instance Template* has a name and a description, which are shown on the *Instance Template* Wizard.
-<2> A template can define (and use, see further down in the example) variables which are mandatory input by the user when using the template.
-<3> A template defines one or more groups. Each group can be assigned to a physical node available on the target system. Groups can be skipped by not assigning them to a node, so they provide a mechanism to provide logical groups of processes that belong together and might be optional. It is up to the user whether a group is mapped to a node, or not. Multiple groups can be mapped to the same phsysical node.
-<4> A template group contains one or more application configurations, which can consist of process control configuration and parameter definitions for the start command of that application.
+<2> A template can define (and use) template variables which are mandatory input by the user when using the template. A template variable can be referenced in parameter value definitions using the `{{T:varname}}` syntax. If the parameter value is numeric, you can also use simple arithmetic operations on the template variable like `{{T:varname:+10}}` which will add 10 to the numeric value of the template variable.
+<3> A template defines one or more groups of applications to configure. Each group can be assigned to a physical node available on the target system. Groups can be skipped by not assigning them to a node, so they provide a mechanism to provide logical groups of processes (as result of configuring the applications) that belong together and might be optional. It is up to the user whether a group is mapped to a node, or not. Multiple groups can be mapped to the same phsysical node.
+<4> A template group contains one or more applications to configure, which each can consist of process control configuration and parameter definitions for the start command of the resulting process.
 <5> Start command parameters are referenced by their UID, defined in <<_app_info_yaml,`app-info.yaml`>>. If a value is given, this value is applied. If not, the default value is used. If a parameter is optional, it will be added to the configuration if it is referenced in the template, regardless of whether a value is given or not.
-<6> A template group can have either type `SERVER` (default) or `CLIENT`. A group may only contain applications of a compatible type, i.e. only `SERVER` applications in `SERVER` type group.
+<6> A template group can have either type `SERVER` (default) or `CLIENT`. A group may only contain applications of a compatible type, i.e. only `SERVER` applications in `SERVER` type group. When applying the group to a node, applications will be instantiated to processes according to their supported OS and the nodes physical OS. If a `SERVER` application does not support the target nodes OS, it is ignored.
 
 An instance template will be presented to the user when visiting an <<Instance Templates,Empty Instance>>.
 
