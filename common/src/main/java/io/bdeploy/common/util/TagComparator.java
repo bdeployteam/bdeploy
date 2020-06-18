@@ -27,9 +27,13 @@ public class TagComparator implements Comparator<String>, Serializable {
 
             int comp;
             if (a_isnum && b_isnum) {
-                Integer aNum = Integer.valueOf(aValue);
-                Integer bNum = Integer.valueOf(bValue);
-                comp = aNum.compareTo(bNum);
+                try {
+                    Long aNum = Long.valueOf(aValue);
+                    Long bNum = Long.valueOf(bValue);
+                    comp = aNum.compareTo(bNum);
+                } catch (NumberFormatException e) {
+                    comp = aValue.compareTo(bValue);
+                }
             } else {
                 comp = aValue.compareTo(bValue);
             }
