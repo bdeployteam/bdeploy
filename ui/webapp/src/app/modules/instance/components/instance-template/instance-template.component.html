@@ -31,7 +31,7 @@
         </div>
         <div mat-dialog-actions align="end">
           <button mat-raised-button type="button" (click)='dialogRef.close()'>Cancel</button>
-          <button mat-raised-button type="button" data-cy='next1' color="primary" (click)='stepper.next()' [disabled]='!selectedTemplate'>Next</button>
+          <button mat-raised-button type="button" data-cy='next1' color="primary" (click)='stepper.next()' [disabled]='!selectedTemplate || !isNodeMappingSelected()'>Next</button>
         </div>
       </mat-step>
       <mat-step label='Variables'>
@@ -52,10 +52,26 @@
         </form>
       </mat-step>
       <mat-step label='Applying'>
-        <div *ngIf='statusText' class='status'><mat-spinner [diameter]='24'></mat-spinner>{{statusText}}</div>
-        <div *ngIf='!statusText'>Done.</div>
+        <div class='node-mapping-container'>
+          <div *ngFor='let group of selectedTemplate?.groups; let groupIndex = index' class='node-mapping'>
+            <ng-container *ngIf='nodeMappings[groupIndex] !== "__none"'>
+              <ng-container *ngIf='hasStatusForEachProcess(messages[groupIndex], group)'>
+                <mat-icon class='template-message'>check</mat-icon>
+              </ng-container>
+              <ng-container *ngIf='!hasStatusForEachProcess(messages[groupIndex], group)'>
+                <mat-spinner *ngIf='messages[groupIndex]?.length' style='margin-right: 5px' [diameter]='24'></mat-spinner>
+                <div *ngIf='!messages[groupIndex]?.length' style='width: 24px; height: 24px; margin-right: 5px'></div>
+              </ng-container>
+
+              <span>{{group.name}}</span>
+              <div class='spacer'></div>
+              <app-instance-template-group-detail [group]='group' [product]='product' [config]='config' [status]='messages[groupIndex]'></app-instance-template-group-detail>
+            </ng-container>
+          </div>
+        </div>
         <div mat-dialog-actions align="end">
-          <button mat-raised-button type="submit" color="primary" (click)='dialogRef.close()' [disabled]='statusText'>Close</button>
+          <div *ngIf='!applyDone' class='status'><mat-spinner [diameter]='24'></mat-spinner></div>
+          <button mat-raised-button type="submit" color="primary" (click)='dialogRef.close()' [disabled]='!applyDone'>Close</button>
         </div>
       </mat-step>
     </mat-horizontal-stepper>

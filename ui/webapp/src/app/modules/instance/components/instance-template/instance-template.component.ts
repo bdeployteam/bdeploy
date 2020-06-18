@@ -6,8 +6,13 @@ import { ApplicationGroup } from 'src/app/models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_INSTANCE_NODE_CONFIGURATION } from 'src/app/models/consts';
 import { ApplicationConfiguration, ApplicationDto, ApplicationType, InstanceNodeConfigurationDto, InstanceTemplateApplication, InstanceTemplateDescriptor, InstanceTemplateGroup, MinionDto, ProcessControlConfiguration, ProductDto } from 'src/app/models/gen.dtos';
 import { ProcessConfigDto } from 'src/app/models/process.model';
-import { Logger, LoggingService } from 'src/app/modules/core/services/logging.service';
+import { getAppOs } from 'src/app/modules/shared/utils/manifest.utils';
 import { ApplicationService } from '../../services/application.service';
+
+export interface ApplyMessage {
+  icon: string;
+  message: string;
+}
 
 @Component({
   selector: 'app-instance-template',
@@ -15,8 +20,6 @@ import { ApplicationService } from '../../services/application.service';
   styleUrls: ['./instance-template.component.css']
 })
 export class InstanceTemplateComponent implements OnInit {
-
-  private readonly log: Logger = this.loggingService.getLogger('InstanceTemplateComponent');
 
   @Input()
   instanceGroupName: string;
@@ -39,10 +42,11 @@ export class InstanceTemplateComponent implements OnInit {
 
   variables: {[key: string]: string};
   nodeMappings: string[];
-  statusText = 'Applying template...';
+  messages: ApplyMessage[][][] = [];
+  applyDone = false;
   dialogRef: MatDialogRef<any>;
 
-  constructor(private dialog: MatDialog, private appService: ApplicationService, private loggingService: LoggingService) { }
+  constructor(private dialog: MatDialog, private appService: ApplicationService) { }
 
   ngOnInit(): void {
   }
@@ -99,10 +103,20 @@ export class InstanceTemplateComponent implements OnInit {
     });
   }
 
+  isNodeMappingSelected() {
+    if (!this.nodeMappings.filter(m => m !== '__none')?.length) {
+      return false;
+    }
+    return true;
+  }
+
   async applyTemplate() {
     for (let i = 0; i < this.nodeMappings.length; ++i) {
       const mapping = this.nodeMappings[i];
       const nodeTemplate = this.selectedTemplate.groups[i];
+
+      const nodeStatus: ApplyMessage[][] = [];
+      this.messages.push(nodeStatus);
 
       if (mapping === '__none') {
         continue;
@@ -117,37 +131,57 @@ export class InstanceTemplateComponent implements OnInit {
       }
 
       for (const app of nodeTemplate.applications) {
-        const appgroups: ApplicationGroup[] = nodeTemplate.type === ApplicationType.CLIENT ? this.config.clientApps : this.config.serverApps;
+        const appStatus: ApplyMessage[] = [];
+        nodeStatus.push(appStatus);
+
+        const type = nodeTemplate.type === ApplicationType.CLIENT ? ApplicationType.CLIENT : ApplicationType.SERVER;
+        const appgroups: ApplicationGroup[] = type === ApplicationType.CLIENT ? this.config.clientApps : this.config.serverApps;
         const targetAppName = this.product.product + '/' + app.application;
         const appGroup = appgroups.find(grp => grp.appKeyName === targetAppName);
 
         if (!appGroup) {
-          this.log.warn(`Cannot find application ${targetAppName} in ${JSON.stringify(appgroups)}`);
+          appStatus.push({icon: 'error', message: `Cannot find application ${targetAppName} in product for a node of type ${type}. This is an error in the template.`});
+          continue;
         }
 
         // create the according applications, applying existing global parameters or default values as required.
         if (physNode.nodeName === CLIENT_NODE_NAME) {
           for (const perOsApp of appGroup.applications) {
             const cfg = await this.appService.createNewAppConfig(this.instanceGroupName, this.config, perOsApp);
-            this.applyApplicationTemplate(physNode, cfg, perOsApp, app);
+            this.applyApplicationTemplate(physNode, cfg, perOsApp, app, appStatus);
           }
         } else if (this.minionConfigs[physNode.nodeName]?.os) {
           const appDesc = appGroup.getAppFor(this.minionConfigs[physNode.nodeName].os);
           if (appDesc) {
             const cfg = await this.appService.createNewAppConfig(this.instanceGroupName, this.config, appDesc);
-            this.applyApplicationTemplate(physNode, cfg, appDesc, app);
+            this.applyApplicationTemplate(physNode, cfg, appDesc, app, appStatus);
           } else {
-            this.log.warn('Cannot find application ' + appGroup.appName + ' for target node OS: ' + physNode.nodeName);
+            appStatus.push({icon: 'warning', message: 'Cannot find application ' + appGroup.appName + ' for target node OS: ' + this.getNiceName(physNode.nodeName)});
           }
         } else {
-          this.log.error(`Cannot determin how to add application to node: ${targetAppName} to ${physNode.nodeName}`);
+          appStatus.push({icon: 'error', message: `Cannot determin how to add application to node: ${targetAppName} to ${physNode.nodeName}`});
         }
       }
     }
-    this.statusText = null;
+    this.applyDone = true;
   }
 
-  private applyApplicationTemplate(node: InstanceNodeConfigurationDto, app: ApplicationConfiguration, desc: ApplicationDto, templ: InstanceTemplateApplication) {
+  hasStatusForEachProcess(messages: ApplyMessage[][], group: InstanceTemplateGroup) {
+    if (!messages) {
+      return false;
+    }
+    if (messages?.length < group.applications.length) {
+      return false;
+    }
+    for (const msgs of messages) {
+      if (!msgs?.length) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private applyApplicationTemplate(node: InstanceNodeConfigurationDto, app: ApplicationConfiguration, desc: ApplicationDto, templ: InstanceTemplateApplication, status: ApplyMessage[]) {
     if (templ.name) {
       app.name = templ.name;
     }
@@ -164,7 +198,7 @@ export class InstanceTemplateComponent implements OnInit {
     for (const param of templ.startParameters) {
       const paramDesc = desc.descriptor.startCommand.parameters.find(p => p.uid === param.uid);
       if (!paramDesc) {
-        this.log.warn(`Cannot find parameter ${param.uid} in application ${desc.name}`);
+        status.push({icon: 'warning', message: `Cannot find parameter ${param.uid} in application ${desc.name}. This is an error in the template.`});
         continue;
       }
 
@@ -183,7 +217,7 @@ export class InstanceTemplateComponent implements OnInit {
           while (found) {
             const rex = new RegExp('{{T:([^}]*)}}').exec(paramCfg.value);
             if (rex) {
-              paramCfg.value = paramCfg.value.replace(rex[0], this.expandVar(rex[1]));
+              paramCfg.value = paramCfg.value.replace(rex[0], this.expandVar(rex[1], status));
             } else {
               found = false;
             }
@@ -199,9 +233,14 @@ export class InstanceTemplateComponent implements OnInit {
 
     // if this application set a global parameter, apply to all others.
     this.appService.updateGlobalParameters(desc.descriptor, app, this.appService.getAllApps(this.config));
+    if (desc.descriptor.type === ApplicationType.CLIENT) {
+      status.push({icon: 'check', message: 'Client created for ' + getAppOs(desc.key)});
+    } else {
+      status.push({icon: 'check', message: 'Process created.'});
+    }
   }
 
-  expandVar(variable: string): string {
+  expandVar(variable: string, status: ApplyMessage[]): string {
     let varName = variable;
     const colIndex = varName.indexOf(':');
     if (colIndex !== -1) {
@@ -215,7 +254,7 @@ export class InstanceTemplateComponent implements OnInit {
       const valNum = Number(val);
 
       if (Number.isNaN(opNum) || Number.isNaN(valNum)) {
-        this.log.error(`Invalid variable substitution for ${variable}: '${op}' or '${val}' is not a number.`);
+        status.push({icon: 'error', message: `Invalid variable substitution for ${variable}: '${op}' or '${val}' is not a number.`});
         return variable;
       }
       return (valNum + opNum).toString();

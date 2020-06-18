@@ -84,3 +84,21 @@ mat-button-toggle-group {
 .mat-dialog-content {
   max-height: 95%;
 }
+
+.message-container {
+  display: grid;
+  grid-template-columns: 24px auto;
+  grid-template-rows: repeat(auto-fill, minmax(32px, min-content));
+
+  align-items: center;
+
+  row-gap: 5px;
+  column-gap: 5px;
+}
+
+.flex-reverse-scroll {
+  display: flex;
+  flex-direction: column-reverse;
+  max-height: 200px;
+  overflow-y: auto;
+}

@@ -1,0 +1,23 @@
+@import '~@angular/material/theming';
+
+@mixin instance-template-theme($theme) {
+  $dark: map-get($theme, 'is-dark');
+  $warn: mat-color(map-get($theme, 'accent'));
+  $error: mat-color(map-get($theme, 'warn'));
+  $message: if($dark, mat-color($mat-grey, 600), mat-color($mat-grey, 400));
+
+  .template-warning {
+    color: $warn;
+    margin-right: 5px;
+  }
+
+  .template-error {
+    color: $error;
+    margin-right: 5px;
+  }
+
+  .template-message {
+    color: $message;
+    margin-right: 5px;
+  }
+}

@@ -1,9 +1,10 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, Input, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
+import { Component, Input, IterableDiffers, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { ApplicationType, InstanceTemplateApplication, InstanceTemplateGroup, ProductDto } from 'src/app/models/gen.dtos';
 import { ProcessConfigDto } from 'src/app/models/process.model';
+import { ApplyMessage } from '../instance-template/instance-template.component';
 
 @Component({
   selector: 'app-instance-template-group-detail',
@@ -21,6 +22,9 @@ export class InstanceTemplateGroupDetailComponent implements OnInit {
   @Input()
   product: ProductDto;
 
+  @Input()
+  status: ApplyMessage[][];
+
   appNames: string[] = [];
   appDescriptions: string[] = [];
 
@@ -28,7 +32,8 @@ export class InstanceTemplateGroupDetailComponent implements OnInit {
 
   constructor(
     private overlay: Overlay,
-    private viewContainerRef: ViewContainerRef
+    private viewContainerRef: ViewContainerRef,
+    private iterableDiffers: IterableDiffers
   ) { }
 
   ngOnInit(): void {
@@ -36,6 +41,62 @@ export class InstanceTemplateGroupDetailComponent implements OnInit {
       const app = this.group.applications[i];
       this.appNames[i] = app.name ? app.name : this.calculateName(app, this.group.type);
       this.appDescriptions[i] = app.description ? app.description : ('A default ' + this.appNames[i]);
+    }
+  }
+
+  hasErrors(messages: ApplyMessage[]) {
+    return this.hasIcon(messages, 'error');
+  }
+
+  hasWarnings(messages: ApplyMessage[]) {
+    return this.hasIcon(messages, 'warning');
+  }
+
+  hasIcon(messages: ApplyMessage[], icon: string) {
+    if (!messages) {
+      return false;
+    }
+    for (const msg of messages) {
+      if (msg.icon === icon) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  getTopIcon() {
+    if (this.status) {
+      for (const perApp of this.status) {
+        if (this.hasErrors(perApp)) {
+          return 'error';
+        }
+      }
+      for (const perApp of this.status) {
+        if (this.hasWarnings(perApp)) {
+          return 'warning';
+        }
+      }
+    }
+    return 'info';
+  }
+
+  getClass(icon: string) {
+    if (icon === 'error') {
+      return 'template-error';
+    } else if (icon === 'warning') {
+      return 'template-warning';
+    } else {
+      return 'template-message';
+    }
+  }
+
+  getChipColor(app: InstanceTemplateApplication, status: ApplyMessage[]) {
+    if (this.hasErrors(status)) {
+      return 'warn';
+    } else if (this.hasWarnings(status)) {
+      return 'accent';
+    } else {
+      return undefined;
     }
   }
 
