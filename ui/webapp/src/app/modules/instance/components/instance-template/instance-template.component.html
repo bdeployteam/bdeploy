@@ -41,7 +41,12 @@
           </ng-template>
           <div *ngIf='selectedTemplate?.variables?.length; else noVarHint' class='variable-fields'>
             <mat-form-field *ngFor='let variable of selectedTemplate.variables'>
-              <input matInput type='text' [name]='variable.uid' [id]='variable.uid' required [(ngModel)]='variables[variable.uid]' [placeholder]='variable.name' [matTooltip]='variable.description'>
+              <input matInput [matAutocomplete]='auto' type='text' [name]='variable.uid' [id]='variable.uid' required [(ngModel)]='variables[variable.uid]' [placeholder]='variable.name' [matTooltip]='variable.description'>
+              <mat-autocomplete #auto="matAutocomplete">
+                <mat-option *ngFor="let suggestedValue of variable.suggestedValues" [value]="suggestedValue">
+                  {{suggestedValue}}
+                </mat-option>
+              </mat-autocomplete>
             </mat-form-field>
           </div>
           <div mat-dialog-actions align="end">

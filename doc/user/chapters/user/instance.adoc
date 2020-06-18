@@ -141,9 +141,29 @@ The content of the _ZIP_ can be edited offline, and re-imported using the *Insta
 [WARNING]
 This mechanism allows access to the most internal data structures of *BDeploy*. Great care has to be taken to not damage any of the data on import.
 
+==== Application Templates
+
+A product may contain *Application Templates*. These are pre-defined configurations for applications, resulting in a more complete process configuration when dragged to the target node. If an application has an attached *Application Template*, it's application card will contain a drop down (_Choose Application Template_), which - when clicked - will show all available templates to choose from. 
+
+image::images/BDeploy_Application_Template_Choose.png[Application Template Drop Down,align=center,width=480,link="images/BDeploy_Application_Template_Choose.png"]
+
+After choosing a template, dragging the card to the target node as usual will create the process configuration from this template instead of starting from scratch. In case the template requires user input (i.e. it defines mandatory template variables), the user is prompted to fill them out before the process is created.
+
+image::images/BDeploy_Application_Template_Variables.png[Application Template Variables,align=center,width=480,link="images/BDeploy_Application_Template_Variables.png"]
+
+Finally, the process configuration is created from the application template using the given variable values.
+
+[NOTE]
+You will notice that the name of the process now matches the name of the template, not the name of the underlying application.
+
+image::images/BDeploy_Application_Template_Process.png[Application Template Process,align=center,width=480,link="images/BDeploy_Application_Template_Process.png"]
+
 ==== Instance Templates
 
-A product can define and include *Instance Templates*. These templates can be applied on an empty instance (e.g. after creating one).
+A product can define and include *Instance Templates*. These templates can be applied on an empty instance (e.g. after creating one). They can define processes just like *Application Templates*, in fact they can even include existing *Application Templates*.
+
+[INFO]
+The advantage of an *Instance Template* is that it can contain more knowledge of how processes need to be set up to work together, wheras *Application Templates* define configuration for a single application.
 
 image::images/BDeploy_Instance_Template_Empty.png[Instance Template on empty instance,align=center,width=480,link="images/BDeploy_Instance_Template_Empty.png"]
 

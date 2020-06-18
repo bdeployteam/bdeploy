@@ -1,8 +1,13 @@
 <mat-card matRipple>
   <div class="app-title mat-title" title="Application UID: {{applicationGroup.appKeyName}}">{{applicationGroup.appName}}</div>
-  <div class="icons">
-    <ng-container *ngFor="let os of applicationGroup.operatingSystems">
-      <mat-icon class="icon" [svgIcon]='os' title="Available for {{os}}"></mat-icon>
+  <div class='wrapper'>
+    <ng-container *ngIf='applicationGroup.availableTemplates.length > 0'>
+      <mat-select [(value)]='applicationGroup.selectedTemplate' class='select' placeholder='Choose Application Template'>
+        <mat-option [value]='null'>None (start from scratch)</mat-option>
+        <mat-option *ngFor='let t of applicationGroup.availableTemplates' [value]='t.id' [matTooltip]='t.description'>{{t.name}}</mat-option>
+      </mat-select>
     </ng-container>
+    <div class='spacer'></div>
+    <app-application-descriptor-detail [applicationGroup]='applicationGroup'></app-application-descriptor-detail>
   </div>
 </mat-card>

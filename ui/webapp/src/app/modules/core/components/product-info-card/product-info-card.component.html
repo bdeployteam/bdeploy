@@ -9,6 +9,26 @@
             <mat-chip *ngFor="let labelKey of getLabelKeys()"><span class="label-key">{{labelKey}}: </span><span>{{productDto.labels[labelKey]}}</span></mat-chip>
           </mat-chip-list>
         </mat-card-content>
+        <div class='scrollable-container'>
+          <ng-container *ngIf='productDto.instanceTemplates?.length'>
+            <hr>
+            <div>
+              Instance Templates
+              <ul>
+                <li *ngFor='let template of productDto.instanceTemplates'>{{template.name}}</li>
+              </ul>
+            </div>
+          </ng-container>
+          <ng-container *ngIf='productDto.applicationTemplates?.length'>
+            <hr>
+            <div>
+              Application Templates
+              <ul>
+                <li *ngFor='let template of productDto.applicationTemplates'>{{template.name}}</li>
+              </ul>
+            </div>
+          </ng-container>
+        </div>
     </mat-card>
   </ng-template>
 

@@ -7,3 +7,8 @@ export interface AppConfig {
   mode: MinionMode;
   version: Version;
 }
+
+export interface StatusMessage {
+  icon: string;
+  message: string;
+}

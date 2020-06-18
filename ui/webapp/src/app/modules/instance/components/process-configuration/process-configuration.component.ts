@@ -391,6 +391,9 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     forkJoin([call1, call2, call4, call5]).subscribe(results => {
       newSelectedConfig.setNodeList(results[1], results[3]);
       newSelectedConfig.setApplications(results[0]);
+      if (this.productTags) {
+        this.setApplicationTemplates(newSelectedConfig);
+      }
       this.selectedConfig = newSelectedConfig;
 
       this.minionStates = results[2];
@@ -412,9 +415,24 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     this.productService.getProducts(this.groupParam, config.version.product.name).pipe(finalize(() => this.productsLoading = false)).subscribe(r => {
       this.productTags = sortByTags(r, p => p.key.tag, false);
       if (this.selectedConfig) {
+        this.setApplicationTemplates(this.selectedConfig);
         this.updateDirtyStateAndValidate();
       }
     });
+  }
+
+  setApplicationTemplates(config: ProcessConfigDto) {
+    const prod = this.getProductOfInstance(config);
+    if (!prod) {
+      return;
+    }
+
+    for (const app of config.serverApps) {
+      const tpls = prod.applicationTemplates.filter(t => (prod.product + '/' + t.application) === app.appKeyName);
+      if (tpls && tpls.length) {
+        app.availableTemplates = tpls;
+      }
+    }
   }
 
   isCentral() {

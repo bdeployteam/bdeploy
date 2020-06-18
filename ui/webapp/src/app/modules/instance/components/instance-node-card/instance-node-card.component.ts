@@ -1,9 +1,11 @@
 import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { format } from 'date-fns';
 import { cloneDeep } from 'lodash';
 import { DragulaService } from 'ng2-dragula';
 import { Subscription } from 'rxjs';
+import { StatusMessage } from 'src/app/models/config.model';
 import { Logger, LoggingService } from 'src/app/modules/core/services/logging.service';
 import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
 import { MessageboxService } from 'src/app/modules/shared/services/messagebox.service';
@@ -11,10 +13,11 @@ import { convert2String } from 'src/app/modules/shared/utils/version.utils';
 import { ApplicationGroup } from '../../../../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_INSTANCE_NODE_CONFIGURATION } from '../../../../models/consts';
 import { EventWithCallback } from '../../../../models/event';
-import { ApplicationConfiguration, ApplicationType, InstanceNodeConfiguration, InstanceNodeConfigurationDto, MinionDto, MinionStatusDto } from '../../../../models/gen.dtos';
+import { ApplicationConfiguration, ApplicationDto, ApplicationTemplateDescriptor, ApplicationType, InstanceNodeConfiguration, InstanceNodeConfigurationDto, MinionDto, MinionStatusDto, ProductDto } from '../../../../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../../../../models/process.model';
 import { getAppOs } from '../../../shared/utils/manifest.utils';
 import { ApplicationService } from '../../services/application.service';
+import { ApplicationTemplateVariableDialogComponent, VariableInput } from '../application-template-variable-dialog/application-template-variable-dialog.component';
 
 
 @Component({
@@ -40,6 +43,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
   @Input() isInstanceDirty: boolean;
   @Input() minionConfig: MinionDto;
   @Input() minionState: MinionStatusDto;
+  @Input() productTags: ProductDto[];
 
   @Output() editAppConfigEvent = new EventEmitter<EditAppConfigContext>();
   @Output() editAppEndpointsEvent = new EventEmitter<EditAppConfigContext>();
@@ -65,6 +69,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
     private dragulaService: DragulaService,
     private mbService: MessageboxService,
     private loggingService: LoggingService,
+    private dialog: MatDialog,
     ) {}
 
   ngOnInit() {
@@ -174,6 +179,78 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
     this.editNodeAppsEvent.emit();
   }
 
+  getProductOfInstance(pcd: ProcessConfigDto): ProductDto {
+    return this.productTags.find(
+      p => p.key.name === pcd.instance.product.name && p.key.tag === pcd.instance.product.tag,
+    );
+  }
+
+  getApplicationTemplate(id: string, pcd: ProcessConfigDto): ApplicationTemplateDescriptor {
+    const prod = this.getProductOfInstance(pcd);
+    if (!prod) {
+      return null;
+    }
+    return prod.applicationTemplates.find(t => t.id === id);
+  }
+
+  async applyApplicationTemplate(id: string, cfg: ApplicationConfiguration, app: ApplicationDto): Promise<boolean> {
+    if (!id) {
+      return true; // that's ok
+    }
+    const tpl = this.getApplicationTemplate(id, this.processConfig);
+
+    if (!tpl) {
+      this.mbService.open({title: 'Cannot apply Template', message: `Cannot find template with id ${id} for application ${cfg.application.name}`, mode: MessageBoxMode.ERROR});
+      return false; // not found
+    }
+
+    const tplVars = {};
+    if (tpl.variables?.length) {
+      const vars: VariableInput[] = [];
+      for (const variable of tpl.variables) {
+        vars.push({
+          uid: variable.uid,
+          name: variable.name,
+          description: variable.description,
+          value: variable.defaultValue,
+          suggestedValues: variable.suggestedValues ? variable.suggestedValues : []
+        });
+
+        const result = await this.dialog.open(ApplicationTemplateVariableDialogComponent, {
+          width: '600px',
+          data: vars
+        }).afterClosed().toPromise();
+
+        if (!result) {
+          this.mbService.open({title: 'Cannot apply Template', message: `Cannot apply template, missing template variable input.`, mode: MessageBoxMode.ERROR});
+          return false;
+        }
+
+        for (const r of result) {
+          tplVars[r.uid] = r.value;
+        }
+      }
+    }
+
+    const msgs: StatusMessage[] = [];
+    this.appService.applyApplicationTemplate(this.processConfig, this.node, cfg, app, tpl, tplVars, msgs);
+    const errors = [];
+    for (const msg of msgs) {
+      if (msg.icon === 'warning') {
+        this.log.warn(msg.message);
+      }
+      if (msg.icon === 'error') {
+        this.log.error(msg.message);
+        errors.push(msg);
+      }
+    }
+    if (errors.length) {
+      this.mbService.open({title: 'Cannot apply Template', message: `There have been ${errors.length} errors. See console for details.`, mode: MessageBoxMode.ERROR});
+      return false;
+    }
+    return true; // yay!
+  }
+
   /**
    * Called when the user drops an existing application on this node or
    * when the user drops a new application group from the sidebar or
@@ -190,25 +267,33 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
       if (this.isClientApplicationsNode()) {
         for (const app of group.applications) {
           this.appService.createNewAppConfig(this.instanceGroupName, this.processConfig, app).then(cfg => {
-            this.nodeApps.splice(targetIndex, 0, cfg);
-            this.editNodeAppsEvent.emit();
+            this.applyApplicationTemplate(group.selectedTemplate, cfg, app).then(r => {
+              if (r) {
+                this.nodeApps.splice(targetIndex, 0, cfg);
+                this.editNodeAppsEvent.emit();
+              }
+            });
           });
         }
       } else {
         const nodeOs = this.minionConfig.os;
         const app = group.getAppFor(nodeOs);
         this.appService.createNewAppConfig(this.instanceGroupName, this.processConfig, app).then(cfg => {
-          this.nodeApps.splice(targetIndex, 0, cfg);
-          this.editNodeAppsEvent.emit();
+          this.applyApplicationTemplate(group.selectedTemplate, cfg, app).then(r => {
+            if (r) {
+              this.nodeApps.splice(targetIndex, 0, cfg);
+              this.editNodeAppsEvent.emit();
+            }
+          });
         });
       }
     } else {
       // Simply add the given app to our list of applications
       this.nodeApps.splice(targetIndex, 0, data);
-    }
 
-    // Notify about the change
-    this.editNodeAppsEvent.emit();
+      // Notify about the change
+      this.editNodeAppsEvent.emit();
+    }
   }
 
   /**

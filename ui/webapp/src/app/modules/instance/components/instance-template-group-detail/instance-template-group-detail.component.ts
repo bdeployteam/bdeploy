@@ -1,10 +1,10 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, Input, IterableDiffers, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
+import { Component, Input, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
 import { MatButton } from '@angular/material/button';
-import { ApplicationType, InstanceTemplateApplication, InstanceTemplateGroup, ProductDto } from 'src/app/models/gen.dtos';
+import { StatusMessage } from 'src/app/models/config.model';
+import { ApplicationType, InstanceTemplateGroup, ProductDto, TemplateApplication } from 'src/app/models/gen.dtos';
 import { ProcessConfigDto } from 'src/app/models/process.model';
-import { ApplyMessage } from '../instance-template/instance-template.component';
 
 @Component({
   selector: 'app-instance-template-group-detail',
@@ -23,7 +23,7 @@ export class InstanceTemplateGroupDetailComponent implements OnInit {
   product: ProductDto;
 
   @Input()
-  status: ApplyMessage[][];
+  status: StatusMessage[][];
 
   appNames: string[] = [];
   appDescriptions: string[] = [];
@@ -33,7 +33,6 @@ export class InstanceTemplateGroupDetailComponent implements OnInit {
   constructor(
     private overlay: Overlay,
     private viewContainerRef: ViewContainerRef,
-    private iterableDiffers: IterableDiffers
   ) { }
 
   ngOnInit(): void {
@@ -44,15 +43,15 @@ export class InstanceTemplateGroupDetailComponent implements OnInit {
     }
   }
 
-  hasErrors(messages: ApplyMessage[]) {
+  hasErrors(messages: StatusMessage[]) {
     return this.hasIcon(messages, 'error');
   }
 
-  hasWarnings(messages: ApplyMessage[]) {
+  hasWarnings(messages: StatusMessage[]) {
     return this.hasIcon(messages, 'warning');
   }
 
-  hasIcon(messages: ApplyMessage[], icon: string) {
+  hasIcon(messages: StatusMessage[], icon: string) {
     if (!messages) {
       return false;
     }
@@ -90,7 +89,7 @@ export class InstanceTemplateGroupDetailComponent implements OnInit {
     }
   }
 
-  getChipColor(app: InstanceTemplateApplication, status: ApplyMessage[]) {
+  getChipColor(app: TemplateApplication, status: StatusMessage[]) {
     if (this.hasErrors(status)) {
       return 'warn';
     } else if (this.hasWarnings(status)) {
@@ -100,12 +99,12 @@ export class InstanceTemplateGroupDetailComponent implements OnInit {
     }
   }
 
-  calculateName(app: InstanceTemplateApplication, type: ApplicationType): string {
+  calculateName(app: TemplateApplication, type: ApplicationType): string {
     const appGrp = this.getApplicationGroup(type, app);
     return appGrp?.appName ? appGrp.appName : 'Unknown';
   }
 
-  private getApplicationGroup(type: ApplicationType, app: InstanceTemplateApplication) {
+  private getApplicationGroup(type: ApplicationType, app: TemplateApplication) {
     return (type === ApplicationType.CLIENT ? this.config.clientApps : this.config.serverApps).find(a => a.appKeyName === this.product.product + '/' + app.application);
   }
 
