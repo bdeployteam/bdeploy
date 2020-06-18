@@ -18,7 +18,7 @@ export class InstanceGroupTitleComponent implements OnInit {
   ngOnInit(): void {
     this.title = this.instanceGroup;
     this.igService.getInstanceGroup(this.instanceGroup).subscribe(r => {
-      this.title = r.title;
+      this.title = (r.title && r.title.length) ? r.title : r.name;
     });
   }
 
