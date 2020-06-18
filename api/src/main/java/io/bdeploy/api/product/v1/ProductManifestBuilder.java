@@ -51,32 +51,32 @@ public class ProductManifestBuilder {
         this.desc = desc;
     }
 
-    public ProductManifestBuilder add(Manifest.Key application) {
+    public synchronized ProductManifestBuilder add(Manifest.Key application) {
         applications.put(application.directoryFriendlyName(), application);
         return this;
     }
 
-    public ProductManifestBuilder setConfigTemplates(Path templates) {
+    public synchronized ProductManifestBuilder setConfigTemplates(Path templates) {
         configTemplates = templates;
         return this;
     }
 
-    public ProductManifestBuilder setPluginFolder(Path plugins) {
+    public synchronized ProductManifestBuilder setPluginFolder(Path plugins) {
         pluginFolder = plugins;
         return this;
     }
 
-    public ProductManifestBuilder addLabel(String key, String value) {
+    public synchronized ProductManifestBuilder addLabel(String key, String value) {
         labels.put(key, value);
         return this;
     }
 
-    public ProductManifestBuilder addInstanceTemplate(Path tmplPath) {
+    public synchronized ProductManifestBuilder addInstanceTemplate(Path tmplPath) {
         templates.add(tmplPath);
         return this;
     }
 
-    public void insert(BHive hive, Manifest.Key manifest, String productName) {
+    public synchronized void insert(BHive hive, Manifest.Key manifest, String productName) {
         Tree.Builder tree = new Tree.Builder();
 
         // add application references
