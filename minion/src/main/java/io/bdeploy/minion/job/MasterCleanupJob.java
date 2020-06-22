@@ -66,7 +66,7 @@ public class MasterCleanupJob implements Job {
             } else {
                 nextRun = scheduler.scheduleJob(job, trigger);
             }
-            log.info("Job '{}' scheduled. Trigger '{}'. Next run '{}'.", job.getDescription(), DEFAULT_CLEANUP_SCHEDULE,
+            log.info("Job '{}' scheduled. Trigger '{}'. Next run '{}'.", job.getDescription(), cronSchedule,
                     DateHelper.format(nextRun));
         } catch (SchedulerException e) {
             throw new IllegalStateException("Cannot schedule cleanup job", e);
