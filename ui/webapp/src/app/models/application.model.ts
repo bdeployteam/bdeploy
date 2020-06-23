@@ -1,6 +1,6 @@
 import { ApplicationService } from '../modules/instance/services/application.service';
 import { getAppKeyName, getAppOs } from '../modules/shared/utils/manifest.utils';
-import { ApplicationDto, ApplicationType, OperatingSystem, ParameterConfiguration, ParameterDescriptor, ParameterType } from './gen.dtos';
+import { ApplicationDto, ApplicationTemplateDescriptor, ApplicationType, OperatingSystem, ParameterConfiguration, ParameterDescriptor, ParameterType } from './gen.dtos';
 
 /**
  * Default group names used in the application
@@ -175,6 +175,12 @@ export class ApplicationGroup {
 
   /** The type of the applications */
   public appType: ApplicationType;
+
+  /** Available templates for this application */
+  public availableTemplates: ApplicationTemplateDescriptor[] = [];
+
+  /** The template ID selected in the configure application panel */
+  public selectedTemplate: string = null;
 
   /**
    * Adds a new application to this list. Must have the same base name.

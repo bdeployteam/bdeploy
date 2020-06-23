@@ -151,7 +151,7 @@
             <span class="material-icons headerIcon">&nbsp;layers</span>
             <span class="headerText"><a href='#' (click)="setSidenavApplications(); $event.preventDefault();">Configure Applications</a></span>
           </p>
-          <p *ngIf='!isReadonly() && getProductOfInstance(selectedConfig)?.templates?.length'>
+          <p *ngIf='!isReadonly() && getProductOfInstance(selectedConfig)?.instanceTemplates?.length'>
             <app-instance-template #instanceTemplate
               [instanceGroupName]='groupParam'
               [minionConfigs]='minionConfigs'
@@ -172,6 +172,7 @@
             [activatedInstanceTag]="deploymentState.activeTag"
             [node]="node"
             [processConfig]="selectedConfig"
+            [productTags]='productTags'
             [productMissing]="!productsLoading && !isProductAvailable(selectedConfig)"
             [manageApplications]="isSidenavApplications()"
             [isReadonly]="isReadonly()"

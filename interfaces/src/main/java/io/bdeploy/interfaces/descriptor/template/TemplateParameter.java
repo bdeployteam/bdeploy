@@ -1,6 +1,6 @@
 package io.bdeploy.interfaces.descriptor.template;
 
-public class InstanceTemplateParameter {
+public class TemplateParameter {
 
     /**
      * The UID of the parameter as defined in the applications app-info.yaml.

@@ -3,6 +3,8 @@ package io.bdeploy.api.product.v1;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 import io.bdeploy.bhive.model.Manifest;
 
 /**
@@ -54,7 +56,13 @@ public class ProductDescriptor {
     /**
      * A list of relative paths to YAML files containing instance templates.
      */
-    public List<String> templates = new ArrayList<>();
+    @JsonAlias("templates") // compat, remove after 2.5.0
+    public List<String> instanceTemplates = new ArrayList<>();
+
+    /**
+     * A list of relative paths to YAML files containing application templates.
+     */
+    public List<String> applicationTemplates = new ArrayList<>();
 
     /**
      * Relative path to a file containing the {@link ProductVersionDescriptor} which may be generated or static.

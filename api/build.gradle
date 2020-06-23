@@ -130,7 +130,9 @@ publishing {
 	}
 }
 
-signing {
-    sign publishing.publications.shadow
+if(!project.version.endsWith('-SNAPSHOT')) {
+    signing {
+        sign publishing.publications.shadow
+    }
 }
 

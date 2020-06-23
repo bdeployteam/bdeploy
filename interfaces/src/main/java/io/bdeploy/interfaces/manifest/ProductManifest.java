@@ -28,7 +28,10 @@ import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.bhive.op.TreeLoadOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
+import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
+import io.bdeploy.interfaces.descriptor.template.TemplateApplication;
+import io.bdeploy.interfaces.descriptor.template.TemplateVariable;
 
 /**
  * A special manifestation of a {@link Manifest} which must follow a certain layout and groups multiple applications together
@@ -45,11 +48,12 @@ public class ProductManifest {
     private final Manifest manifest;
     private final ObjectId cfgTreeId;
     private final List<ObjectId> plugins;
-    private final List<InstanceTemplateDescriptor> templates;
+    private final List<InstanceTemplateDescriptor> instanceTemplates;
+    private final List<ApplicationTemplateDescriptor> applicationTemplates;
 
     private ProductManifest(String name, Manifest manifest, SortedSet<Manifest.Key> applications,
             SortedSet<Manifest.Key> references, ProductDescriptor desc, ObjectId cfgTreeId, List<ObjectId> plugins,
-            List<InstanceTemplateDescriptor> templates) {
+            List<InstanceTemplateDescriptor> instanceTemplates, List<ApplicationTemplateDescriptor> applicationTemplates) {
         this.prodName = name;
         this.manifest = manifest;
         this.applications = applications;
@@ -57,7 +61,8 @@ public class ProductManifest {
         this.desc = desc;
         this.cfgTreeId = cfgTreeId;
         this.plugins = plugins;
-        this.templates = templates;
+        this.instanceTemplates = instanceTemplates;
+        this.applicationTemplates = applicationTemplates;
     }
 
     /**
@@ -131,7 +136,96 @@ public class ProductManifest {
             }).build());
         }
 
-        return new ProductManifest(label, mf, appRefs, otherRefs, desc, cfgEntry, plugins, templates);
+        List<ApplicationTemplateDescriptor> applicationTemplates = new ArrayList<>();
+        Tree.Key appTemplateKey = new Tree.Key(ProductManifestBuilder.APP_TEMPLATES_ENTRY, Tree.EntryType.TREE);
+        if (entries.containsKey(appTemplateKey)) {
+            TreeView tv = hive.execute(new ScanOperation().setTree(entries.get(appTemplateKey)));
+            tv.visit(new TreeVisitor.Builder().onBlob(b -> {
+                if (b.getName().toLowerCase().endsWith(".yaml")) {
+                    try (InputStream is = hive.execute(new ObjectLoadOperation().setObject(b.getElementId()))) {
+                        applicationTemplates.add(StorageHelper.fromYamlStream(is, ApplicationTemplateDescriptor.class));
+                    } catch (Exception e) {
+                        log.warn("Cannot load application template from {}, {}", manifest, b.getPathString(), e);
+                    }
+                }
+            }).build());
+        }
+
+        // lazy, DFS resolving of all templates.
+        resolveTemplates(templates, applicationTemplates);
+
+        return new ProductManifest(label, mf, appRefs, otherRefs, desc, cfgEntry, plugins, templates, applicationTemplates);
+    }
+
+    private static void resolveTemplates(List<InstanceTemplateDescriptor> instTemplates,
+            List<ApplicationTemplateDescriptor> appTemplates) {
+        for (var itd : instTemplates) {
+            for (var group : itd.groups) {
+                for (var app : group.applications) {
+                    resolveAppTemplate(app, appTemplates, itd.variables);
+                }
+            }
+        }
+
+        for (ApplicationTemplateDescriptor atd : appTemplates) {
+            resolveAppTemplate(atd, appTemplates, atd.variables);
+        }
+    }
+
+    private static void resolveAppTemplate(TemplateApplication app, List<ApplicationTemplateDescriptor> appTemplates,
+            List<TemplateVariable> varList) {
+        if (app.resolved) {
+            return;
+        }
+
+        if (app.template != null) {
+            var parent = appTemplates.stream().filter(t -> app.template.equals(t.id)).findFirst();
+            if (!parent.isPresent()) {
+                log.error("Template error. Cannot find template " + app.template);
+                return;
+            }
+            var parentDesc = parent.get();
+            if (!parentDesc.resolved) {
+                resolveAppTemplate(parentDesc, appTemplates, parentDesc.variables);
+            }
+
+            // add variables from parent template to next outer variables.
+            for (var variable : parentDesc.variables) {
+                var existing = varList.stream().filter(v -> v.uid.equals(variable.uid)).findAny();
+                if (!existing.isPresent()) {
+                    varList.add(variable);
+                }
+            }
+
+            // merge simple attributes
+            app.application = resolveStringValue(app.application, parentDesc.application);
+            app.name = resolveStringValue(app.name, parentDesc.name);
+            app.description = resolveStringValue(app.description, parentDesc.description);
+
+            // merge process control partial object as map
+            for (var entry : parentDesc.processControl.entrySet()) {
+                if (!app.processControl.containsKey(entry.getKey())) {
+                    app.processControl.put(entry.getKey(), entry.getValue());
+                }
+            }
+
+            // merge start parameters
+            for (var param : parentDesc.startParameters) {
+                var existing = app.startParameters.stream().filter(p -> p.uid.equals(param.uid)).findAny();
+                if (!existing.isPresent()) {
+                    app.startParameters.add(param);
+                }
+            }
+        }
+
+        app.resolved = true;
+    }
+
+    private static String resolveStringValue(String ours, String theirs) {
+        if (ours != null) {
+            return ours;
+        }
+        return theirs;
     }
 
     /**
@@ -152,7 +246,14 @@ public class ProductManifest {
      * @return a list of instance templates which can be used to populate empty instances.
      */
     public List<InstanceTemplateDescriptor> getInstanceTemplates() {
-        return templates;
+        return instanceTemplates;
+    }
+
+    /**
+     * @return a list of application templates which can be used when creating applications.
+     */
+    public List<ApplicationTemplateDescriptor> getApplicationTemplates() {
+        return applicationTemplates;
     }
 
     /**

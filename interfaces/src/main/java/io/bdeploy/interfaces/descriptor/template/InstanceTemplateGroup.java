@@ -25,6 +25,6 @@ public class InstanceTemplateGroup {
     /**
      * The applications which should be configured by this group.
      */
-    public List<InstanceTemplateApplication> applications = new ArrayList<>();
+    public List<TemplateApplication> applications = new ArrayList<>();
 
 }

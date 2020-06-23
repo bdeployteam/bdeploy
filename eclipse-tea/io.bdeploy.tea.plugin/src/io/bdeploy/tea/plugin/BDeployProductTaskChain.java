@@ -108,6 +108,11 @@ public class BDeployProductTaskChain implements TaskChain {
             target = dlg.getChosenTarget();
             bdeployProductFile = rootPath.resolve(dlg.getChosenFile());
 
+            if (target == null) {
+                // that's OK - package instead of push.
+                break;
+            }
+
             String trgMsg = checkServer(target, null);
             if (trgMsg != null) {
                 target = null;

@@ -23,7 +23,7 @@ public class InstanceTemplateDescriptor {
     /**
      * A list of user-provided variables which can be used in the template.
      */
-    public List<InstanceTemplateVariable> variables = new ArrayList<>();
+    public List<TemplateVariable> variables = new ArrayList<>();
 
     /**
      * A list of group definitions

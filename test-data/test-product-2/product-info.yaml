@@ -5,8 +5,11 @@ applications:
 - "server-app"
 - "client-app"
 
-templates:
+instanceTemplates:
 - "product-template.yaml"
+
+applicationTemplates:
+- "app-templates/server-with-sleep.yaml"
 
 versionFile: "product-version.yaml"
 

@@ -3,16 +3,11 @@ import { MatButtonToggleChange } from '@angular/material/button-toggle';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { cloneDeep } from 'lodash';
 import { ApplicationGroup } from 'src/app/models/application.model';
+import { StatusMessage } from 'src/app/models/config.model';
 import { CLIENT_NODE_NAME, EMPTY_INSTANCE_NODE_CONFIGURATION } from 'src/app/models/consts';
-import { ApplicationConfiguration, ApplicationDto, ApplicationType, InstanceNodeConfigurationDto, InstanceTemplateApplication, InstanceTemplateDescriptor, InstanceTemplateGroup, MinionDto, ProcessControlConfiguration, ProductDto } from 'src/app/models/gen.dtos';
+import { ApplicationType, InstanceTemplateDescriptor, InstanceTemplateGroup, MinionDto, ProductDto } from 'src/app/models/gen.dtos';
 import { ProcessConfigDto } from 'src/app/models/process.model';
-import { getAppOs } from 'src/app/modules/shared/utils/manifest.utils';
 import { ApplicationService } from '../../services/application.service';
-
-export interface ApplyMessage {
-  icon: string;
-  message: string;
-}
 
 @Component({
   selector: 'app-instance-template',
@@ -42,7 +37,7 @@ export class InstanceTemplateComponent implements OnInit {
 
   variables: {[key: string]: string};
   nodeMappings: string[];
-  messages: ApplyMessage[][][] = [];
+  messages: StatusMessage[][][] = [];
   applyDone = false;
   dialogRef: MatDialogRef<any>;
 
@@ -85,7 +80,7 @@ export class InstanceTemplateComponent implements OnInit {
 
   public fillFromTemplate(config: ProcessConfigDto, product: ProductDto) {
     this.selectedTemplate = null;
-    this.allTemplates = product.templates;
+    this.allTemplates = product.instanceTemplates;
     this.config = config;
 
     if (!this.allTemplates || !this.allTemplates.length || config.readonly) {
@@ -115,7 +110,7 @@ export class InstanceTemplateComponent implements OnInit {
       const mapping = this.nodeMappings[i];
       const nodeTemplate = this.selectedTemplate.groups[i];
 
-      const nodeStatus: ApplyMessage[][] = [];
+      const nodeStatus: StatusMessage[][] = [];
       this.messages.push(nodeStatus);
 
       if (mapping === '__none') {
@@ -131,7 +126,7 @@ export class InstanceTemplateComponent implements OnInit {
       }
 
       for (const app of nodeTemplate.applications) {
-        const appStatus: ApplyMessage[] = [];
+        const appStatus: StatusMessage[] = [];
         nodeStatus.push(appStatus);
 
         const type = nodeTemplate.type === ApplicationType.CLIENT ? ApplicationType.CLIENT : ApplicationType.SERVER;
@@ -148,13 +143,15 @@ export class InstanceTemplateComponent implements OnInit {
         if (physNode.nodeName === CLIENT_NODE_NAME) {
           for (const perOsApp of appGroup.applications) {
             const cfg = await this.appService.createNewAppConfig(this.instanceGroupName, this.config, perOsApp);
-            this.applyApplicationTemplate(physNode, cfg, perOsApp, app, appStatus);
+            this.appService.applyApplicationTemplate(this.config, physNode, cfg, perOsApp, app, this.variables, appStatus);
+            physNode.nodeConfiguration.applications.push(cfg);
           }
         } else if (this.minionConfigs[physNode.nodeName]?.os) {
           const appDesc = appGroup.getAppFor(this.minionConfigs[physNode.nodeName].os);
           if (appDesc) {
             const cfg = await this.appService.createNewAppConfig(this.instanceGroupName, this.config, appDesc);
-            this.applyApplicationTemplate(physNode, cfg, appDesc, app, appStatus);
+            this.appService.applyApplicationTemplate(this.config, physNode, cfg, appDesc, app, this.variables, appStatus);
+            physNode.nodeConfiguration.applications.push(cfg);
           } else {
             appStatus.push({icon: 'warning', message: 'Cannot find application ' + appGroup.appName + ' for target node OS: ' + this.getNiceName(physNode.nodeName)});
           }
@@ -166,7 +163,7 @@ export class InstanceTemplateComponent implements OnInit {
     this.applyDone = true;
   }
 
-  hasStatusForEachProcess(messages: ApplyMessage[][], group: InstanceTemplateGroup) {
+  hasStatusForEachProcess(messages: StatusMessage[][], group: InstanceTemplateGroup) {
     if (!messages) {
       return false;
     }
@@ -179,99 +176,6 @@ export class InstanceTemplateComponent implements OnInit {
       }
     }
     return true;
-  }
-
-  private applyApplicationTemplate(node: InstanceNodeConfigurationDto, app: ApplicationConfiguration, desc: ApplicationDto, templ: InstanceTemplateApplication, status: ApplyMessage[]) {
-    if (templ.name) {
-      app.name = templ.name;
-    }
-    if (templ.processControl) {
-      // partially deserialized - only apply specified attributes.
-      const pc = templ.processControl as ProcessControlConfiguration;
-      if (pc.attachStdin !== undefined) { app.processControl.attachStdin = pc.attachStdin; }
-      if (pc.gracePeriod !== undefined) { app.processControl.gracePeriod = pc.gracePeriod; }
-      if (pc.keepAlive !== undefined) { app.processControl.keepAlive = pc.keepAlive; }
-      if (pc.noOfRetries !== undefined) { app.processControl.noOfRetries = pc.noOfRetries; }
-      if (pc.startType !== undefined) { app.processControl.startType = pc.startType; }
-    }
-
-    for (const param of templ.startParameters) {
-      const paramDesc = desc.descriptor.startCommand.parameters.find(p => p.uid === param.uid);
-      if (!paramDesc) {
-        status.push({icon: 'warning', message: `Cannot find parameter ${param.uid} in application ${desc.name}. This is an error in the template.`});
-        continue;
-      }
-
-      // find or create parameter if not there yet.
-      let paramCfg = app.start.parameters.find(p => p.uid === param.uid);
-      if (!paramCfg) {
-        paramCfg = this.appService.createParameter(paramDesc, this.appService.getAllApps(this.config));
-        app.start.parameters.push(paramCfg); // order is corrected later on.
-      }
-
-      if (param.value) {
-        paramCfg.value = param.value;
-
-        if (paramCfg.value.indexOf('{{T:') !== -1) {
-          let found = true;
-          while (found) {
-            const rex = new RegExp('{{T:([^}]*)}}').exec(paramCfg.value);
-            if (rex) {
-              paramCfg.value = paramCfg.value.replace(rex[0], this.expandVar(rex[1], status));
-            } else {
-              found = false;
-            }
-          }
-        }
-
-        paramCfg.preRendered = this.appService.preRenderParameter(paramDesc, paramCfg.value);
-      }
-    }
-
-    this.updateParameterOrder(app, desc);
-    node.nodeConfiguration.applications.push(app);
-
-    // if this application set a global parameter, apply to all others.
-    this.appService.updateGlobalParameters(desc.descriptor, app, this.appService.getAllApps(this.config));
-    if (desc.descriptor.type === ApplicationType.CLIENT) {
-      status.push({icon: 'check', message: 'Client created for ' + getAppOs(desc.key)});
-    } else {
-      status.push({icon: 'check', message: 'Process created.'});
-    }
-  }
-
-  expandVar(variable: string, status: ApplyMessage[]): string {
-    let varName = variable;
-    const colIndex = varName.indexOf(':');
-    if (colIndex !== -1) {
-      varName = varName.substr(0, colIndex);
-    }
-    const val = this.variables[varName];
-
-    if (colIndex !== -1) {
-      const op = variable.substr(colIndex + 1);
-      const opNum = Number(op);
-      const valNum = Number(val);
-
-      if (Number.isNaN(opNum) || Number.isNaN(valNum)) {
-        status.push({icon: 'error', message: `Invalid variable substitution for ${variable}: '${op}' or '${val}' is not a number.`});
-        return variable;
-      }
-      return (valNum + opNum).toString();
-    }
-
-    return val;
-  }
-
-  updateParameterOrder(app: ApplicationConfiguration, desc: ApplicationDto) {
-    const params = app.start.parameters;
-    const descs = desc.descriptor.startCommand.parameters;
-
-    // there can be no custom parameters in templates, so no need to care of them. only parameters for which descriptors exist
-    // can be there.
-    params.sort((a, b) => {
-      return descs.findIndex(p => a.uid === p.uid) - descs.findIndex(p => b.uid === p.uid);
-    });
   }
 
 }

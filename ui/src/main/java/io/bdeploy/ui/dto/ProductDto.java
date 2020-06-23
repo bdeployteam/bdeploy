@@ -5,6 +5,7 @@ import java.util.Map;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 
@@ -16,7 +17,8 @@ public class ProductDto {
     public Manifest.Key key;
     public Map<String, String> labels;
     public ObjectId configTree;
-    public List<InstanceTemplateDescriptor> templates;
+    public List<InstanceTemplateDescriptor> instanceTemplates;
+    public List<ApplicationTemplateDescriptor> applicationTemplates;
 
     public static ProductDto create(ProductManifest manifest) {
         ProductDto dto = new ProductDto();
@@ -26,7 +28,8 @@ public class ProductDto {
         dto.key = manifest.getKey();
         dto.labels = manifest.getLabels();
         dto.configTree = manifest.getConfigTemplateTreeId();
-        dto.templates = manifest.getInstanceTemplates();
+        dto.instanceTemplates = manifest.getInstanceTemplates();
+        dto.applicationTemplates = manifest.getApplicationTemplates();
         return dto;
     }
 

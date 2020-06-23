@@ -31,6 +31,8 @@ import { ProcessListComponent } from './components/process-list/process-list.com
 import { ProcessStartConfirmComponent } from './components/process-start-confirm/process-start-confirm.component';
 import { ProcessStatusComponent } from './components/process-status/process-status.component';
 import { InstanceRoutingModule } from './instance-routing.module';
+import { ApplicationDescriptorDetailComponent } from './components/application-descriptor-detail/application-descriptor-detail.component';
+import { ApplicationTemplateVariableDialogComponent } from './components/application-template-variable-dialog/application-template-variable-dialog.component';
 
 @NgModule({
   declarations: [
@@ -61,6 +63,8 @@ import { InstanceRoutingModule } from './instance-routing.module';
     CustomEditorComponent,
     InstanceTemplateComponent,
     InstanceTemplateGroupDetailComponent,
+    ApplicationDescriptorDetailComponent,
+    ApplicationTemplateVariableDialogComponent,
   ],
   entryComponents: [
     ApplicationEditManualComponent,

@@ -1,0 +1,11 @@
+.info-list {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-auto-rows: 30px;
+
+  align-items: center;
+
+  row-gap: 5px;
+  column-gap: 5px;
+}
+

@@ -23,6 +23,7 @@ import io.bdeploy.common.cfg.ExistingPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.UnitHelper;
+import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
@@ -131,6 +132,12 @@ public class ProductTool extends RemoteServiceTool<ProductConfig> {
                     out().println("  Instance Templates:");
                     for (InstanceTemplateDescriptor tpl : pmf.getInstanceTemplates()) {
                         out().println(String.format("    %1$-40s %2$40s", tpl.name, tpl.description));
+                    }
+                }
+                if (!pmf.getApplicationTemplates().isEmpty()) {
+                    out().println("  Application Templates:");
+                    for (ApplicationTemplateDescriptor tpl : pmf.getApplicationTemplates()) {
+                        out().println(String.format("    %1$-30s %2$30s %3$40s", tpl.id, tpl.name, tpl.description));
                     }
                 }
             }

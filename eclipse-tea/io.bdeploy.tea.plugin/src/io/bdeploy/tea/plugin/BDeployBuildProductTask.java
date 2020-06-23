@@ -146,8 +146,18 @@ public class BDeployBuildProductTask {
                     FileUtils.copyDirectory(source, pluginDir);
                 }
 
-                if (pd.templates != null && !pd.templates.isEmpty()) {
-                    for (String tmpl : pd.templates) {
+                if (pd.instanceTemplates != null && !pd.instanceTemplates.isEmpty()) {
+                    for (String tmpl : pd.instanceTemplates) {
+                        Path source = desc.productInfo.getParent().resolve(tmpl);
+                        Path target = prodInfoDir.toPath().resolve(desc.productInfo.getParent().relativize(source));
+
+                        FileUtils.mkdirs(target.getParent().toFile());
+                        FileUtils.copyFile(source.toFile(), target.toFile());
+                    }
+                }
+
+                if (pd.applicationTemplates != null && !pd.applicationTemplates.isEmpty()) {
+                    for (String tmpl : pd.applicationTemplates) {
                         Path source = desc.productInfo.getParent().resolve(tmpl);
                         Path target = prodInfoDir.toPath().resolve(desc.productInfo.getParent().relativize(source));
 

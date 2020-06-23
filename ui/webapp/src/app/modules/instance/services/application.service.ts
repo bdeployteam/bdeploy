@@ -2,13 +2,15 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { cloneDeep, intersection, isEqual } from 'lodash';
 import { Observable } from 'rxjs';
+import { StatusMessage } from 'src/app/models/config.model';
 import { UnknownParameter } from '../../../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_APPLICATION_CONFIGURATION, EMPTY_COMMAND_CONFIGURATION, EMPTY_PARAMETER_CONFIGURATION, EMPTY_PARAMETER_DESCRIPTOR, EMPTY_PROCESS_CONTROL_CONFIG } from '../../../models/consts';
-import { ApplicationConfiguration, ApplicationDescriptor, ApplicationDto, ApplicationType, InstanceNodeConfigurationDto, ManifestKey, ParameterConfiguration, ParameterDescriptor, ParameterType } from '../../../models/gen.dtos';
+import { ApplicationConfiguration, ApplicationDescriptor, ApplicationDto, ApplicationType, InstanceNodeConfigurationDto, ManifestKey, ParameterConfiguration, ParameterDescriptor, ParameterType, ProcessControlConfiguration, TemplateApplication } from '../../../models/gen.dtos';
 import { ProcessConfigDto } from '../../../models/process.model';
 import { ConfigService } from '../../core/services/config.service';
 import { Logger, LoggingService } from '../../core/services/logging.service';
 import { InstanceGroupService } from '../../instance-group/services/instance-group.service';
+import { getAppOs } from '../../shared/utils/manifest.utils';
 import { findEntry } from '../../shared/utils/object.utils';
 import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
 
@@ -680,7 +682,7 @@ export class ApplicationService {
         templates,
       );
     }
-    this.updateEndpoints(app,desc);
+    this.updateEndpoints(app, desc);
   }
 
   /**
@@ -776,12 +778,12 @@ export class ApplicationService {
         templates,
       );
     }
-    this.updateEndpoints(app,desc);
+    this.updateEndpoints(app, desc);
 
     // We need to take all existing apps as templates as
     // not all apps have all parameters
     const apps = Array.of(app);
-    for(const template of templates) {
+    for (const template of templates) {
       this.updateGlobalParameters(desc, template, apps);
     }
   }
@@ -790,7 +792,7 @@ export class ApplicationService {
     configs: ParameterConfiguration[],
     descs: ParameterDescriptor[],
     templates: ApplicationConfiguration[],
-  ){
+  ) {
     // Order of parameters is important. Thus we need to insert a missing parameter
     // at the correct index in the config array.
     let lastRenderedIndex = 0;
@@ -835,12 +837,12 @@ export class ApplicationService {
         continue;
       }
 
-      var unknownDescriptor = cloneDeep(EMPTY_PARAMETER_DESCRIPTOR);
+      const unknownDescriptor = cloneDeep(EMPTY_PARAMETER_DESCRIPTOR);
       unknownDescriptor.uid = config.uid;
       unknownDescriptor.name = config.uid;
       unknownDescriptor.defaultValue = config.value;
       unknownDescriptor.hasValue = true;
-      unknownDescriptor.valueSeparator = " , ";
+      unknownDescriptor.valueSeparator = ' , ';
       unknownDescriptor.valueAsSeparateArg = true;
 
       // Parameter not present in current version
@@ -916,4 +918,105 @@ export class ApplicationService {
     });
     return promise;
   }
+
+  public applyApplicationTemplate(
+    config: ProcessConfigDto,
+    node: InstanceNodeConfigurationDto,
+    app: ApplicationConfiguration,
+    desc: ApplicationDto,
+    templ: TemplateApplication,
+    variables: {[key: string]: string},
+    status: StatusMessage[]
+  ) {
+    if (templ.name) {
+      app.name = templ.name;
+    }
+    if (templ.processControl) {
+      // partially deserialized - only apply specified attributes.
+      const pc = templ.processControl as ProcessControlConfiguration;
+      if (pc.attachStdin !== undefined) { app.processControl.attachStdin = pc.attachStdin; }
+      if (pc.gracePeriod !== undefined) { app.processControl.gracePeriod = pc.gracePeriod; }
+      if (pc.keepAlive !== undefined) { app.processControl.keepAlive = pc.keepAlive; }
+      if (pc.noOfRetries !== undefined) { app.processControl.noOfRetries = pc.noOfRetries; }
+      if (pc.startType !== undefined) { app.processControl.startType = pc.startType; }
+    }
+
+    for (const param of templ.startParameters) {
+      const paramDesc = desc.descriptor.startCommand.parameters.find(p => p.uid === param.uid);
+      if (!paramDesc) {
+        status.push({icon: 'warning', message: `Cannot find parameter ${param.uid} in application ${desc.name}. This is an error in the template.`});
+        continue;
+      }
+
+      // find or create parameter if not there yet.
+      let paramCfg = app.start.parameters.find(p => p.uid === param.uid);
+      if (!paramCfg) {
+        paramCfg = this.createParameter(paramDesc, this.getAllApps(config));
+        app.start.parameters.push(paramCfg); // order is corrected later on.
+      }
+
+      if (param.value) {
+        paramCfg.value = param.value;
+
+        if (paramCfg.value.indexOf('{{T:') !== -1) {
+          let found = true;
+          while (found) {
+            const rex = new RegExp('{{T:([^}]*)}}').exec(paramCfg.value);
+            if (rex) {
+              paramCfg.value = paramCfg.value.replace(rex[0], this.expandVar(rex[1], variables, status));
+            } else {
+              found = false;
+            }
+          }
+        }
+
+        paramCfg.preRendered = this.preRenderParameter(paramDesc, paramCfg.value);
+      }
+    }
+
+    this.updateParameterOrder(app, desc);
+
+    // if this application set a global parameter, apply to all others.
+    this.updateGlobalParameters(desc.descriptor, app, this.getAllApps(config));
+    if (desc.descriptor.type === ApplicationType.CLIENT) {
+      status.push({icon: 'check', message: 'Client created for ' + getAppOs(desc.key)});
+    } else {
+      status.push({icon: 'check', message: 'Process created.'});
+    }
+  }
+
+  expandVar(variable: string, variables: {[key: string]: string}, status: StatusMessage[]): string {
+    let varName = variable;
+    const colIndex = varName.indexOf(':');
+    if (colIndex !== -1) {
+      varName = varName.substr(0, colIndex);
+    }
+    const val = variables[varName];
+
+    if (colIndex !== -1) {
+      const op = variable.substr(colIndex + 1);
+      const opNum = Number(op);
+      const valNum = Number(val);
+
+      if (Number.isNaN(opNum) || Number.isNaN(valNum)) {
+        status.push({icon: 'error', message: `Invalid variable substitution for ${variable}: '${op}' or '${val}' is not a number.`});
+        return variable;
+      }
+      return (valNum + opNum).toString();
+    }
+
+    return val;
+  }
+
+  updateParameterOrder(app: ApplicationConfiguration, desc: ApplicationDto) {
+    const params = app.start.parameters;
+    const descs = desc.descriptor.startCommand.parameters;
+
+    // there can be no custom parameters in templates, so no need to care of them. only parameters for which descriptors exist
+    // can be there.
+    params.sort((a, b) => {
+      return descs.findIndex(p => a.uid === p.uid) - descs.findIndex(p => b.uid === p.uid);
+    });
+  }
+
 }

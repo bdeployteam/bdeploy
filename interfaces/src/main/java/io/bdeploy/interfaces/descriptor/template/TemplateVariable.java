@@ -1,6 +1,8 @@
 package io.bdeploy.interfaces.descriptor.template;
 
-public class InstanceTemplateVariable {
+import java.util.List;
+
+public class TemplateVariable {
 
     /**
      * A unique ID in the template
@@ -21,5 +23,10 @@ public class InstanceTemplateVariable {
      * Default value as string, can be interpreted as number, etc. depending on the target parameter type.
      */
     public String defaultValue;
+
+    /**
+     * A list of values suggested by the variable input field in the UI.
+     */
+    public List<String> suggestedValues;
 
 }

@@ -5,7 +5,8 @@ This chapter is intended for those who want to integrate their own *Product* to 
 <<_app_info_yaml, app-info.yaml>>:: YAML file to describe one single *Application*. It is required once for every client and server *Application* of the product. 
 <<_product_info_yaml, product-info.yaml>>:: YAML file with meta-data for the whole product.
 <<_product_version_yaml,product-version.yaml>>:: YAML file required for every *Product Version*.
-<<_instance_template_yaml,instance-template.yaml>>:: optional YAML file which can be used to define *Instance Templates*
+<<_application_template_yaml,application-template.yaml>>:: optional YAML file(s) which can be used to define *Application Templates*
+<<_instance_template_yaml,instance-template.yaml>>:: optional YAML file(s) which can be used to define *Instance Templates*
 
 This chapter will walk you through these artifacs, what they are for and how to define them.
 
@@ -300,9 +301,11 @@ applications:
   
 configTemplates: my-config <5>
 pluginFolder: my-plugins <6>
-templates:
-  - 'my-templates/template.yaml' <7>
-versionFile: my-versions.yaml <8>
+applicationTemplates:
+  - 'my-templates/app-template.yaml' <7>
+instanceTemplates:
+  - 'my-templates/template.yaml' <8>
+versionFile: my-versions.yaml <9>
 ----
 
 <1> A human readable name of the *Product* for display purposes in the Web UI
@@ -311,8 +314,9 @@ versionFile: my-versions.yaml <8>
 <4> The list of *Applications* which are part of the *Product*. These IDs can be anything, they just have to match the IDs used in the `product-version.yaml` referenced below.
 <5> Optional: A relative path to a directory containing configuration file templates, which will be used as the default set of configuration files when creating an *Instance* from the resulting *Product*.
 <6> Optioanl: A relative path to a directory containing one or more plugin JAR files. These plugins are loaded by the server on demand and provided for use when configuring applications which use this very product version.
-<7> A reference to a template YAML file which defines an <<_instance_template_yaml,`instance-template.yaml`>>
-<8> The `product-version.yaml` which associates the *Application* IDs (used above) with actual paths to *Applications* on the file system.
+<7> A reference to an application template YAML file which defines an <<_application_template_yaml,`application-template.yaml`>>.
+<8> A reference to an instance template YAML file which defines an <<_instance_template_yaml,`instance-template.yaml`>>
+<9> The `product-version.yaml` which associates the *Application* IDs (used above) with actual paths to *Applications* on the file system.
 
 ==== product-version.yaml
 
@@ -340,6 +344,46 @@ appInfo:
 <3> You may have different binaries for a single application depending on the target operating system. It is not required to provide every application for every operating system. You can just leave out operating systems you don't care about.
 <4> You can also use the exact same *Application* directory and `app-info.yaml` to satisfy multiple operating system targets for one *Application*.
 
+==== application-template.yaml
+
+[NOTE]
+There is no actual requirement for the file to be named `application-template.yaml` as it is referenced from the `product-info.yaml` by relative path anyway. Multiple *Application Template* YAML files can exist and be referenced by `product-info.yaml`.
+
+This file defines a single *Application Template*. A <<_product_info_yaml,`product-info.yaml`>> can reference multiple templates, from which the user can choose.
+
+[source,yaml]
+----
+id: server-with-sleep <1>
+application: server-app
+name: "Server With Sleep"
+description: "Server application which sleeps before exiting"
+
+variables: <2>
+  - uid: sleep-timeout
+    name: "Sleep Timeout"
+    description: "The amount of time the server application should sleep"
+    defaultValue: 60
+    suggestedValues:
+    - '60'
+    - '120'
+
+processControl: <3>
+  startType: MANUAL_CONFIRM
+  keepAlive: false
+  noOfRetries: 3
+  gracePeriod: 30000
+  attachStdin: true
+
+startParameters: <4>
+- uid: param.sleep
+  value: "{{T:sleep-timeout}}"
+----
+
+<1> An *Application Template* must have an ID. This can be used to reference it from an *Instance Template*.
+<2> A template can define (and use) template variables which are mandatory input by the user when using the template. A template variable can be referenced in parameter value definitions using the `{{T:varname}}` syntax. If the parameter value is numeric, you can also use simple arithmetic operations on the template variable like `{{T:varname:+10}}` which will add 10 to the numeric value of the template variable.
+<3> A template can define arbitrary process control parameters to further control the default process control settings.
+<4> Start command parameters are referenced by their UID, defined in <<_app_info_yaml,`app-info.yaml`>>. If a value is given, this value is applied. If not, the default value is used. If a parameter is optional, it will be added to the configuration if it is referenced in the template, regardless of whether a value is given or not.
+
 ==== instance-template.yaml
 
 [NOTE]
@@ -366,16 +410,17 @@ groups: <3>
   - application: server-app
     name: "Server No Sleep"
     description: "Server application which immediately exits"
-  - application: server-app <4>
+  - template: server-with-sleep <4>
+  - application: server-app <5>
     name: "Server With Sleep"
     description: "Server application which sleeps before exiting"
     processControl:
       startType: MANUAL_CONFIRM
-    startParameters: <5>
+    startParameters: <6>
     - uid: param.sleep
       value: "{{T:sleep-timeout}}"
 - name: "Client Apps"
-  type: CLIENT <6>
+  type: CLIENT <7>
   description: "All client applications"
   
   applications:
@@ -386,9 +431,10 @@ groups: <3>
 <1> Each *Instance Template* has a name and a description, which are shown on the *Instance Template* Wizard.
 <2> A template can define (and use) template variables which are mandatory input by the user when using the template. A template variable can be referenced in parameter value definitions using the `{{T:varname}}` syntax. If the parameter value is numeric, you can also use simple arithmetic operations on the template variable like `{{T:varname:+10}}` which will add 10 to the numeric value of the template variable.
 <3> A template defines one or more groups of applications to configure. Each group can be assigned to a physical node available on the target system. Groups can be skipped by not assigning them to a node, so they provide a mechanism to provide logical groups of processes (as result of configuring the applications) that belong together and might be optional. It is up to the user whether a group is mapped to a node, or not. Multiple groups can be mapped to the same phsysical node.
-<4> A template group contains one or more applications to configure, which each can consist of process control configuration and parameter definitions for the start command of the resulting process.
-<5> Start command parameters are referenced by their UID, defined in <<_app_info_yaml,`app-info.yaml`>>. If a value is given, this value is applied. If not, the default value is used. If a parameter is optional, it will be added to the configuration if it is referenced in the template, regardless of whether a value is given or not.
-<6> A template group can have either type `SERVER` (default) or `CLIENT`. A group may only contain applications of a compatible type, i.e. only `SERVER` applications in `SERVER` type group. When applying the group to a node, applications will be instantiated to processes according to their supported OS and the nodes physical OS. If a `SERVER` application does not support the target nodes OS, it is ignored.
+<4> *Instance Templates* can reference *Application Templates* by their `id`. The *Instance Templates* can further refine an *Application Template* by setting any of the valid application fields in addition to the template reference.
+<5> A template group contains one or more applications to configure, which each can consist of process control configuration and parameter definitions for the start command of the resulting process - exactly the same fields are valid as for *Application Tempaltes* - except for the `id` which is not required.
+<6> Start command parameters are referenced by their UID, defined in <<_app_info_yaml,`app-info.yaml`>>. If a value is given, this value is applied. If not, the default value is used. If a parameter is optional, it will be added to the configuration if it is referenced in the template, regardless of whether a value is given or not.
+<7> A template group can have either type `SERVER` (default) or `CLIENT`. A group may only contain applications of a compatible type, i.e. only `SERVER` applications in `SERVER` type group. When applying the group to a node, applications will be instantiated to processes according to their supported OS and the nodes physical OS. If a `SERVER` application does not support the target nodes OS, it is ignored.
 
 An instance template will be presented to the user when visiting an <<Instance Templates,Empty Instance>>.
 
