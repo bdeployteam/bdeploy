@@ -7,12 +7,12 @@ import { UserInfo } from 'src/app/models/gen.dtos';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 
 @Component({
-  selector: 'app-instance-group-permissions-add',
-  templateUrl: './instance-group-permissions-add.component.html',
-  styleUrls: ['./instance-group-permissions-add.component.css'],
+  selector: 'app-user-picker',
+  templateUrl: './user-picker.component.html',
+  styleUrls: ['./user-picker.component.css'],
   providers: [SettingsService]
 })
-export class InstanceGroupPermissionsAddComponent implements OnInit {
+export class UserPickerComponent implements OnInit {
 
   private static MAX_OPTIONS = 100;
 
@@ -28,13 +28,13 @@ export class InstanceGroupPermissionsAddComponent implements OnInit {
     this.filteredUsers = this.userControl.valueChanges.pipe(
       startWith(''),
       map(input => this.filter(input)),
-      map(users => users.slice(0, InstanceGroupPermissionsAddComponent.MAX_OPTIONS))
+      map(users => users.slice(0, UserPickerComponent.MAX_OPTIONS))
     );
 
     this.filteredUsersShortened = this.userControl.valueChanges.pipe(
       startWith(false),
       map(input => this.filter(input)),
-      map(users => users.length > InstanceGroupPermissionsAddComponent.MAX_OPTIONS)
+      map(users => users.length > UserPickerComponent.MAX_OPTIONS)
       );
   }
 

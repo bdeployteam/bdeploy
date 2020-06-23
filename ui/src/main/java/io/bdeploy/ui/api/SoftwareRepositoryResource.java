@@ -1,6 +1,7 @@
 package io.bdeploy.ui.api;
 
 import java.util.List;
+import java.util.SortedSet;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -14,6 +15,8 @@ import javax.ws.rs.core.MediaType;
 
 import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
+import io.bdeploy.interfaces.UserInfo;
+import io.bdeploy.interfaces.UserPermissionUpdateDto;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
 import io.bdeploy.jersey.ActivityScope;
 
@@ -45,5 +48,15 @@ public interface SoftwareRepositoryResource {
 
     @Path("/{softwareRepository}/content")
     public SoftwareResource getSoftwareResource(@ActivityScope @PathParam("softwareRepository") String softwareRepository);
+
+    @GET
+    @Path("/{repo}/users")
+    @RequiredPermission(permission = Permission.ADMIN)
+    public SortedSet<UserInfo> getAllUser(@ActivityScope @PathParam("repo") String repo);
+
+    @POST
+    @Path("/{repo}/permissions")
+    @RequiredPermission(permission = Permission.ADMIN)
+    public void updatePermissions(@ActivityScope @PathParam("repo") String repo, UserPermissionUpdateDto[] permissions);
 
 }

@@ -74,6 +74,6 @@ export class SoftwareListComponent implements OnInit {
   }
 
   public isReadOnly(): boolean {
-    return !this.authService.isGlobalAdmin();
+    return !this.authService.isScopedWrite(this.softwareRepositoryName);
   }
 }

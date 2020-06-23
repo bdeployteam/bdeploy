@@ -6,7 +6,7 @@ import java.util.SortedSet;
 
 import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.interfaces.UserInfo;
-import io.bdeploy.interfaces.configuration.instance.InstanceGroupPermissionDto;
+import io.bdeploy.interfaces.UserPermissionUpdateDto;
 
 public interface AuthService {
 
@@ -23,19 +23,19 @@ public interface AuthService {
     public void updateUserInfo(UserInfo info);
 
     /**
-     * Updates the ScopedPermissions for a list of users on a single InstanceGroup.
+     * Updates the ScopedPermissions for a list of users on a single instance group or software repository.
      *
-     * @param group the name of the InstanceGroup.
+     * @param target the name of the instance group or software repository.
      * @param permissions list of user with granted Permission.
      */
-    public void updateInstanceGroupPermissions(String group, InstanceGroupPermissionDto[] permissions);
+    public void updatePermissions(String target, UserPermissionUpdateDto[] permissions);
 
     /**
-     * Removes the ScopedCapabilities for all users on a single InstanceGroup.
+     * Removes the ScopedCapabilities for all users on a single instance group or software repository.
      *
-     * @param group the name of the InstanceGroup.
+     * @param target the name of the instance group or software repository.
      */
-    public void removeInstanceGroupPermissions(String group);
+    public void removePermissions(String target);
 
     /**
      * @param user the user to create

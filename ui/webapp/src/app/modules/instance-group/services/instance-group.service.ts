@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { InstanceClientAppsDto, InstanceGroupConfiguration, InstanceGroupPermissionDto, OperatingSystem, UserInfo } from '../../../models/gen.dtos';
+import { InstanceClientAppsDto, InstanceGroupConfiguration, OperatingSystem, UserInfo, UserPermissionUpdateDto } from '../../../models/gen.dtos';
 import { ConfigService } from '../../core/services/config.service';
 import { Logger, LoggingService } from '../../core/services/logging.service';
 import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
@@ -68,7 +68,7 @@ export class InstanceGroupService {
     return this.http.get<UserInfo[]>(url);
   }
 
-  public updateInstanceGroupPermissions(name: string, permissions: InstanceGroupPermissionDto[]) {
+  public updateInstanceGroupPermissions(name: string, permissions: UserPermissionUpdateDto[]) {
     const url: string = this.cfg.config.api + InstanceGroupService.BASEPATH + '/' + name + '/permissions';
     this.log.debug('updateInstanceGroupPermissions: ' + url);
     return this.http.post(url, permissions);
