@@ -16,13 +16,14 @@ import io.bdeploy.common.ActivityReporter.Activity;
 public class ImportTreeOperation extends BHive.Operation<ObjectId> {
 
     private Path toImport;
+    private boolean skipEmpty = false;
 
     @Override
     public ObjectId call() throws Exception {
         assertNotNull(toImport, "Source path not set");
 
         try (Activity activity = getActivityReporter().start("Importing tree...", -1)) {
-            return getObjectManager().importTree(toImport);
+            return getObjectManager().importTree(toImport, skipEmpty);
         }
     }
 
@@ -32,6 +33,14 @@ public class ImportTreeOperation extends BHive.Operation<ObjectId> {
      */
     public ImportTreeOperation setSourcePath(Path toImport) {
         this.toImport = toImport;
+        return this;
+    }
+
+    /**
+     * @param skip whether to skip empty directories while importing
+     */
+    public ImportTreeOperation setSkipEmpty(boolean skip) {
+        this.skipEmpty = skip;
         return this;
     }
 

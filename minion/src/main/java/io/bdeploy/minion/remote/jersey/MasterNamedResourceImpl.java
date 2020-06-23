@@ -536,7 +536,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             applyUpdates(updates, cfgDir);
 
             // 3. re-import new tree from temp directory
-            return hive.execute(new ImportTreeOperation().setSourcePath(cfgDir));
+            return hive.execute(new ImportTreeOperation().setSkipEmpty(true).setSourcePath(cfgDir));
         } catch (IOException e) {
             throw new WebApplicationException("Cannot update configuration files", e);
         } finally {

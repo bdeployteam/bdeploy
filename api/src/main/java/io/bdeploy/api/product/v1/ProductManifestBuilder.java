@@ -96,13 +96,13 @@ public class ProductManifestBuilder {
 
         // create config file tree
         if (configTemplates != null) {
-            ObjectId configId = hive.execute(new ImportTreeOperation().setSourcePath(configTemplates));
+            ObjectId configId = hive.execute(new ImportTreeOperation().setSkipEmpty(true).setSourcePath(configTemplates));
             tree.add(new Tree.Key(CONFIG_ENTRY, Tree.EntryType.TREE), configId);
         }
 
         // import product-bound plugins
         if (pluginFolder != null) {
-            ObjectId pluginId = hive.execute(new ImportTreeOperation().setSourcePath(pluginFolder));
+            ObjectId pluginId = hive.execute(new ImportTreeOperation().setSkipEmpty(true).setSourcePath(pluginFolder));
             tree.add(new Tree.Key(PLUGINS_ENTRY, Tree.EntryType.TREE), pluginId);
         }
 

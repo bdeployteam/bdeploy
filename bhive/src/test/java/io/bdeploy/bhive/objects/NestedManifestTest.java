@@ -52,7 +52,7 @@ public class NestedManifestTest extends DbTestBase {
             ManifestDatabase mdb = new ManifestDatabase(mdbDir);
             ObjectManager om = new ObjectManager(getObjectDatabase(), mdb, reporter, s);
 
-            ObjectId treeId = om.importTree(tmp);
+            ObjectId treeId = om.importTree(tmp, false);
 
             Manifest.Key na = new Manifest.Key("nested-a", "v1");
             Manifest.Key nb = new Manifest.Key("nested-b", "v1");
