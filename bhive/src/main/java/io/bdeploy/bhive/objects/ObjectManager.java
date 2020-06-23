@@ -92,12 +92,14 @@ public class ObjectManager {
     /**
      * Import a {@link Path} recursively into the underlying {@link ObjectDatabase}.
      *
+     * @param location the location to import recursively
+     * @param skipEmpty whether to skip empty directories
      * @return the {@link ObjectId} of the resulting {@link Tree}.
      */
-    public ObjectId importTree(Path location) {
+    public ObjectId importTree(Path location, boolean skipEmpty) {
         Activity importing = reporter.start("Importing objects...", 0);
         try {
-            return internalImportTree(location, importing);
+            return internalImportTree(location, importing, skipEmpty);
         } catch (IOException e) {
             throw new IllegalStateException("Cannot import " + location, e);
         } finally {
@@ -107,17 +109,23 @@ public class ObjectManager {
 
     /**
      * Recursively import a tree, parallelizing imports on the same path levels.
+     *
+     * @param skipEmpty
      */
-    private ObjectId internalImportTree(Path location, Activity importing) throws IOException {
+    private ObjectId internalImportTree(Path location, Activity importing, boolean skipEmpty) throws IOException {
         Tree.Builder tree = new Tree.Builder();
 
         List<Future<?>> filesOnLevel = new ArrayList<>();
         try (DirectoryStream<Path> list = Files.newDirectoryStream(location)) {
             for (Path path : list) {
                 if (Files.isDirectory(path)) {
+                    if (skipEmpty && PathHelper.isDirEmpty(path)) {
+                        continue;
+                    }
+
                     // recursively calculate ObjectId from sub-tree.
                     tree.add(new Tree.Key(path.getFileName().toString(), Tree.EntryType.TREE),
-                            internalImportTree(path, importing));
+                            internalImportTree(path, importing, skipEmpty));
                 } else {
                     // insert an actual file into the tree.
                     filesOnLevel.add(fileOps.submit(() -> {

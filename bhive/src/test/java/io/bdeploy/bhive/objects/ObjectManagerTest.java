@@ -7,6 +7,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.BufferedReader;
@@ -32,6 +33,7 @@ import io.bdeploy.bhive.objects.view.ElementView;
 import io.bdeploy.bhive.objects.view.ManifestRefView;
 import io.bdeploy.bhive.objects.view.MissingObjectView;
 import io.bdeploy.bhive.objects.view.TreeView;
+import io.bdeploy.bhive.objects.view.scanner.TreeVisitor;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.ContentHelper;
@@ -39,6 +41,7 @@ import io.bdeploy.common.SlowTest;
 import io.bdeploy.common.TempDirectory;
 import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.TestActivityReporter;
+import io.bdeploy.common.util.PathHelper;
 
 @ExtendWith(TempDirectory.class)
 @ExtendWith(TestActivityReporter.class)
@@ -52,7 +55,7 @@ public class ObjectManagerTest extends DbTestBase {
         ExecutorService s = Executors.newFixedThreadPool(1);
         try {
             ObjectManager mgr = new ObjectManager(getObjectDatabase(), null, r, s);
-            ObjectId tree = mgr.importTree(mySource);
+            ObjectId tree = mgr.importTree(mySource, false);
 
             // 2 trees (root, "dir"), 2 blobs (test.txt, file.txt).
             assertThat(getObjectDatabase().getAllObjects().size(), is(4));
@@ -98,7 +101,7 @@ public class ObjectManagerTest extends DbTestBase {
 
             Activity importActivity = r.start("Importing test files...");
             ObjectManager mgr = new ObjectManager(getObjectDatabase(), null, r, s);
-            mgr.importTree(mySource);
+            mgr.importTree(mySource, false);
             importActivity.done();
             System.err.println("Importing took " + importActivity.duration() + "ms.");
         } finally {
@@ -114,7 +117,7 @@ public class ObjectManagerTest extends DbTestBase {
         ExecutorService s = Executors.newFixedThreadPool(1);
         try {
             ObjectManager mgr = new ObjectManager(getObjectDatabase(), mdb, r, s);
-            ObjectId tree = mgr.importTree(mySource);
+            ObjectId tree = mgr.importTree(mySource, false);
 
             Manifest.Key refKey = new Manifest.Key("ref", "1");
             mdb.addManifest(new Manifest.Builder(refKey).setRoot(tree).build(null));
@@ -136,6 +139,31 @@ public class ObjectManagerTest extends DbTestBase {
 
             assertIterableEquals(Arrays.asList("app", "test.txt"),
                     ((TreeView) l1.get("app")).getChildren().get("test.txt").getPath());
+        } finally {
+            s.shutdownNow();
+        }
+    }
+
+    @Test
+    public void testEmptyDirImport(@TempDir Path tmp, ActivityReporter r) throws Exception {
+        Path mySource = ContentHelper.genSimpleTestTree(tmp, "source");
+
+        Path emptyDir = mySource.resolve("emptyDir");
+        PathHelper.mkdirs(emptyDir);
+
+        ManifestDatabase mdb = new ManifestDatabase(tmp.resolve("mdb"));
+        ExecutorService s = Executors.newFixedThreadPool(1);
+        try {
+            ObjectManager mgr = new ObjectManager(getObjectDatabase(), mdb, r, s);
+            ObjectId treeWithEmpty = mgr.importTree(mySource, false);
+            ObjectId treeWithoutEmpty = mgr.importTree(mySource, true);
+
+            assertNotEquals(treeWithEmpty, treeWithoutEmpty);
+
+            mgr.scan(treeWithoutEmpty, 3, false).visit(new TreeVisitor.Builder().onTree(t -> {
+                assertNotEquals("emptyDir", t.getName());
+                return true;
+            }).build());
         } finally {
             s.shutdownNow();
         }

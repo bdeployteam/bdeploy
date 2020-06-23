@@ -109,7 +109,7 @@ public class InstanceImportExportHelper {
             ObjectId cfgId = null;
             Path cfgDir = zroot.resolve(CONFIG_DIR);
             if (Files.exists(cfgDir)) {
-                cfgId = target.execute(new ImportTreeOperation().setSourcePath(cfgDir));
+                cfgId = target.execute(new ImportTreeOperation().setSkipEmpty(true).setSourcePath(cfgDir));
             }
 
             return importFromData(target, cfg, cfgId, uuid, minions);
