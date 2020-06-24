@@ -5,7 +5,7 @@
       The selected application template requires template variables to be provided.
     </p>
     <mat-form-field *ngFor='let variable of variables'>
-      <input matInput [matAutocomplete]='auto' type='text' name='variable.uid' required [(ngModel)]='variable.value' [placeholder]='variable.name' [matTooltip]='variable.description'>
+      <input matInput [matAutocomplete]='auto' type='text' [name]='variable.uid' required [(ngModel)]='variable.value' [placeholder]='variable.name' [matTooltip]='variable.description'>
       <mat-autocomplete #auto="matAutocomplete">
         <mat-option *ngFor="let suggestedValue of variable.suggestedValues" [value]="suggestedValue">
           {{suggestedValue}}

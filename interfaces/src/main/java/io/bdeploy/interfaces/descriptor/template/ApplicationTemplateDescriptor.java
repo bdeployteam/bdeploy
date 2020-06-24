@@ -1,5 +1,6 @@
 package io.bdeploy.interfaces.descriptor.template;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ApplicationTemplateDescriptor extends TemplateApplication {
@@ -12,5 +13,5 @@ public class ApplicationTemplateDescriptor extends TemplateApplication {
     /**
      * Local variable declarations.
      */
-    public List<TemplateVariable> variables;
+    public List<TemplateVariable> variables = new ArrayList<>();
 }

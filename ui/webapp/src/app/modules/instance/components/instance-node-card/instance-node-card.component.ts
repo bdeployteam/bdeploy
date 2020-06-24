@@ -215,20 +215,20 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
           value: variable.defaultValue,
           suggestedValues: variable.suggestedValues ? variable.suggestedValues : []
         });
+      }
 
-        const result = await this.dialog.open(ApplicationTemplateVariableDialogComponent, {
-          width: '600px',
-          data: vars
-        }).afterClosed().toPromise();
+      const result = await this.dialog.open(ApplicationTemplateVariableDialogComponent, {
+        width: '600px',
+        data: vars
+      }).afterClosed().toPromise();
 
-        if (!result) {
-          this.mbService.open({title: 'Cannot apply Template', message: `Cannot apply template, missing template variable input.`, mode: MessageBoxMode.ERROR});
-          return false;
-        }
+      if (!result) {
+        this.mbService.open({title: 'Cannot apply Template', message: `Cannot apply template, missing template variable input.`, mode: MessageBoxMode.ERROR});
+        return false;
+      }
 
-        for (const r of result) {
-          tplVars[r.uid] = r.value;
-        }
+      for (const r of result) {
+        tplVars[r.uid] = r.value;
       }
     }
 
