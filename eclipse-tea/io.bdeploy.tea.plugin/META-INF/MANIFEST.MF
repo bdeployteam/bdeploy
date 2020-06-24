@@ -7,7 +7,7 @@ Automatic-Module-Name: org.eclipse.tea.library.bdeploy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: %providerName
 Bundle-ClassPath: .,
- maven/api-2.5.0-SNAPSHOT.jar
+ maven/api-2.5.0.jar
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.tea.core;bundle-version="1.1.0",
  org.eclipse.tea.core.ui;bundle-version="1.1.0",
@@ -24,7 +24,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.e4.core.di.annotations,
  org.eclipse.e4.core.di.extensions
 Bundle-ActivationPolicy: lazy
-Build-Maven: io.bdeploy:api:2.5.0-SNAPSHOT
+Build-Maven: io.bdeploy:api:2.5.0
 Export-Package: io.bdeploy.common.util,
  io.bdeploy.tea.plugin,
  io.bdeploy.tea.plugin.rcp,
