@@ -28,6 +28,9 @@ import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.j256.simplemagic.ContentInfo;
@@ -55,6 +58,8 @@ import io.bdeploy.common.util.PathHelper;
  * Provides higher level operations on the {@link ObjectDatabase}.
  */
 public class ObjectManager {
+
+    private static final Logger log = LoggerFactory.getLogger(ObjectManager.class);
 
     private final ObjectDatabase db;
     private final ManifestDatabase mdb;
@@ -119,8 +124,12 @@ public class ObjectManager {
         try (DirectoryStream<Path> list = Files.newDirectoryStream(location)) {
             for (Path path : list) {
                 if (Files.isDirectory(path)) {
-                    if (skipEmpty && PathHelper.isDirEmpty(path)) {
-                        continue;
+                    try {
+                        if (skipEmpty && PathHelper.isDirEmpty(path)) {
+                            continue;
+                        }
+                    } catch (UnsupportedOperationException e) {
+                        log.warn("Cannot check if directory is empty: " + path);
                     }
 
                     // recursively calculate ObjectId from sub-tree.
