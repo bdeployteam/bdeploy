@@ -214,6 +214,9 @@ describe("Central/Managed Basic Test", function() {
     cy.contains('mat-icon', 'dns').click();
     cy.waitUntilContentLoaded();
 
+    // fresh load to make sure the current state is OK
+    cy.gotoInstance(groupName, managedInstance, 'CENTRAL');
+
     cy.getLatestInstanceVersion().installAndActivate();
 
     cy.gotoInstance(groupName, managedInstance, 'MANAGED');
@@ -261,6 +264,9 @@ describe("Central/Managed Basic Test", function() {
 
     cy.contains('mat-icon', 'dns').click();
     cy.waitUntilContentLoaded();
+
+    // fresh load to make sure the current state is OK
+    cy.gotoInstance(groupName, managedInstance, 'CENTRAL');
 
     cy.startProcess('master', 'Server Application');
 
@@ -310,6 +316,9 @@ describe("Central/Managed Basic Test", function() {
 
     cy.contains('mat-icon', 'dns').click();
     cy.waitUntilContentLoaded();
+
+    // fresh load to make sure the current state is OK
+    cy.gotoInstance(groupName, managedInstance, 'CENTRAL');
 
     cy.getApplicationConfigCard('master', 'Server Application').click();
     cy.getApplicationConfigCard('master', 'Server Application').within(() => {

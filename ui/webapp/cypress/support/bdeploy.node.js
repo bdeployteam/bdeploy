@@ -14,6 +14,12 @@ Cypress.Commands.add('waitUntilContentLoaded', function() {
   cy.get('ngx-loading-bar').children().should('not.exist'); // page not yet loaded fully (e.g. lazy loading large module)
 
   cy.get('body').then($body => {
+    if($body.find('span:contains("Loading Module...")').length > 0) {
+      cy.get('span:contains("Loading Module...")').should('not.exist');
+    }
+  });
+
+  cy.get('body').then($body => {
     if($body.find('mat-progress-spinner').length > 0) {
       cy.get('mat-progress-spinner').should('not.be.visible');
     }
