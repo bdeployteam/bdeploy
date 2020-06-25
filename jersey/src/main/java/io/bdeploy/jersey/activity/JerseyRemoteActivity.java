@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.ActivitySnapshot;
-import io.bdeploy.common.util.UuidHelper;
 
 final class JerseyRemoteActivity implements Activity {
 
@@ -23,7 +22,7 @@ final class JerseyRemoteActivity implements Activity {
     private final LongSupplier currentWork;
     private final long start;
     private final String uuid;
-    private String parentUuid;
+    private final String parentUuid;
     private final List<String> scope;
     private long stop = 0;
     private boolean cancel = false;
@@ -32,42 +31,17 @@ final class JerseyRemoteActivity implements Activity {
 
     private final String user;
 
-    public JerseyRemoteActivity(Consumer<JerseyRemoteActivity> onDone, String name, LongSupplier maxWork, LongSupplier currentWork,
-            List<String> scope, String user) {
-        this.onDone = onDone;
-        this.name = name;
-        this.maxWork = maxWork;
-        this.currentWork = currentWork != null ? currentWork : localCurrent::sum;
-        this.start = System.currentTimeMillis();
-        this.uuid = UuidHelper.randomId();
-        this.scope = scope;
-        this.user = user;
-        this.onCancel = null; // not required for local activities
-
-        // wire activities by UUID. this is done so that serialization of activity "trees" stays
-        // as flat as it is - otherwise too much traffic to clients would be produced. Clients
-        // need to convert the flat list of activities to a tree representation when interested.
-        JerseyRemoteActivity parent = JerseyBroadcastingActivityReporter.currentActivity.get();
-        if (parent != null) {
-            this.parentUuid = parent.uuid;
-        }
-        JerseyBroadcastingActivityReporter.currentActivity.set(this);
-
-        if (log.isTraceEnabled()) {
-            log.trace("Begin: [{}] {}", uuid, name);
-        }
-    }
-
     /**
      * Directly create an activity - used by {@link JerseyRemoteActivityProxy}
      */
-    JerseyRemoteActivity(Consumer<JerseyRemoteActivity> onDone, Consumer<JerseyRemoteActivity> onCancel, String name, LongSupplier maxWork,
-            LongSupplier currentWork, List<String> scope, String user, long start, String uuid, String parentUuid) {
+    JerseyRemoteActivity(Consumer<JerseyRemoteActivity> onDone, Consumer<JerseyRemoteActivity> onCancel, String name,
+            LongSupplier maxWork, LongSupplier currentWork, List<String> scope, String user, long start, String uuid,
+            String parentUuid) {
         this.onDone = onDone;
         this.onCancel = onCancel;
         this.name = name;
         this.maxWork = maxWork;
-        this.currentWork = currentWork;
+        this.currentWork = currentWork != null ? currentWork : localCurrent::sum;
         this.start = start;
         this.uuid = uuid;
         this.scope = scope;

@@ -25,6 +25,7 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivitySnapshot;
 import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.jersey.JerseyScopeService;
 import io.bdeploy.jersey.JerseyServer;
 import io.bdeploy.jersey.ws.JerseyEventBroadcaster;
@@ -38,7 +39,15 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
     public static final String ACTIVITY_BROADCASTER = "JerseyActivityBroadcaster";
 
     private static final Logger log = LoggerFactory.getLogger(JerseyBroadcastingActivityReporter.class);
-    static final ThreadLocal<JerseyRemoteActivity> currentActivity = new ThreadLocal<>();
+
+    /**
+     * All state must be static (VM global) as this service might be instantiated from multiple Jersey applications (plug-ins).
+     * It seems that HK2 has a bug where it changes the registration for a singleton service in a locator if the service is
+     * registered as singleton in ANOTHER locator...
+     */
+    private static final List<JerseyRemoteActivity> globalActivities = new ArrayList<>();
+    private static final ThreadLocal<JerseyRemoteActivity> currentActivity = new ThreadLocal<>();
+    private static final Set<List<String>> activeScopes = new TreeSet<>(JerseyBroadcastingActivityReporter::compareScopes);
 
     @Inject
     private JerseyScopeService jss;
@@ -48,9 +57,7 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
     @Optional
     private JerseyEventBroadcaster bc;
 
-    private final Set<List<String>> activeScopes = new TreeSet<>(this::compareScopes);
-
-    private int compareScopes(List<String> a, List<String> b) {
+    private static int compareScopes(List<String> a, List<String> b) {
         if (a.size() > b.size()) {
             return 1;
         }
@@ -66,13 +73,6 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
         return 0;
     }
 
-    /**
-     * Reset the current active activity on this thread. Maybe used in error scenarios, etc.
-     */
-    public static void resetThread() {
-        currentActivity.remove();
-    }
-
     @Inject
     public JerseyBroadcastingActivityReporter(@Named(JerseyServer.BROADCAST_EXECUTOR) ScheduledExecutorService scheduler) {
         scheduler.scheduleAtFixedRate(this::sendUpdate, 1, 1, TimeUnit.SECONDS);
@@ -83,36 +83,40 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
             return;
         }
 
-        List<ActivitySnapshot> list = getGlobalActivities().stream().filter(Objects::nonNull).map(JerseyRemoteActivity::snapshot)
-                .collect(Collectors.toList());
+        try {
+            List<ActivitySnapshot> list = getGlobalActivities().stream().filter(Objects::nonNull)
+                    .map(JerseyRemoteActivity::snapshot).collect(Collectors.toList());
 
-        // split to distinct lists per scope name
-        Map<List<String>, List<ActivitySnapshot>> perScope = new TreeMap<>(this::compareScopes);
-        for (ActivitySnapshot snapshot : list) {
-            List<ActivitySnapshot> forScope = perScope.computeIfAbsent(snapshot.scope, k -> new ArrayList<>());
+            // split to distinct lists per scope name
+            Map<List<String>, List<ActivitySnapshot>> perScope = new TreeMap<>(JerseyBroadcastingActivityReporter::compareScopes);
+            for (ActivitySnapshot snapshot : list) {
+                List<ActivitySnapshot> forScope = perScope.computeIfAbsent(snapshot.scope, k -> new ArrayList<>());
 
-            forScope.add(snapshot);
+                forScope.add(snapshot);
 
-            while (addChildren(forScope, list) != 0) {
-                // intentionally left blank :)
+                while (addChildren(forScope, list) != 0) {
+                    // intentionally left blank :)
+                }
             }
-        }
-        activeScopes.addAll(perScope.keySet());
+            activeScopes.addAll(perScope.keySet());
 
-        for (Map.Entry<List<String>, List<ActivitySnapshot>> e : perScope.entrySet()) {
-            bc.send(e.getValue(), e.getKey());
-        }
-
-        List<List<String>> scopesToRemove = new ArrayList<>();
-        for (List<String> active : activeScopes) {
-            if (!perScope.containsKey(active)) {
-                scopesToRemove.add(active);
+            for (Map.Entry<List<String>, List<ActivitySnapshot>> e : perScope.entrySet()) {
+                bc.send(e.getValue(), e.getKey());
             }
-        }
 
-        for (List<String> toRemove : scopesToRemove) {
-            activeScopes.remove(toRemove);
-            bc.send(Collections.emptyList(), toRemove);
+            List<List<String>> scopesToRemove = new ArrayList<>();
+            for (List<String> active : activeScopes) {
+                if (!perScope.containsKey(active)) {
+                    scopesToRemove.add(active);
+                }
+            }
+
+            for (List<String> toRemove : scopesToRemove) {
+                activeScopes.remove(toRemove);
+                bc.send(Collections.emptyList(), toRemove);
+            }
+        } catch (Exception e) {
+            log.error("Error while broadcasting activities", e);
         }
     }
 
@@ -136,11 +140,6 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
         return children.size();
     }
 
-    /**
-     * All running activities.
-     */
-    private final List<JerseyRemoteActivity> globalActivities = new ArrayList<>();
-
     @Override
     public Activity start(String activity) {
         return start(activity, -1l);
@@ -156,7 +155,23 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
         List<String> scope = JerseyRemoteActivityScopeServerFilter.getRequestActivityScope(jss);
         String user = jss.getUser();
 
-        JerseyRemoteActivity act = new JerseyRemoteActivity(this::done, activity, maxValue, currentValue, scope, user);
+        // wire activities by UUID. this is done so that serialization of activity "trees" stays
+        // as flat as it is - otherwise too much traffic to clients would be produced. Clients
+        // need to convert the flat list of activities to a tree representation when interested.
+        JerseyRemoteActivity parent = currentActivity.get();
+        String parentUuid = null;
+        if (parent != null) {
+            parentUuid = parent.getUuid();
+        }
+
+        JerseyRemoteActivity act = new JerseyRemoteActivity(this::done, null, activity, maxValue, currentValue, scope, user,
+                System.currentTimeMillis(), UuidHelper.randomId(), parentUuid);
+
+        if (log.isTraceEnabled()) {
+            log.trace("Begin: [{}] {}", act.getUuid(), activity);
+        }
+
+        currentActivity.set(act);
         globalActivities.add(act);
         return act;
     }
@@ -170,12 +185,11 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
         if (current != null && current.getUuid().equals(act.getUuid())) {
             // current is the one we're finishing
             if (act.getParentUuid() != null) {
-                JerseyRemoteActivity parent = globalActivities.stream().filter(Objects::nonNull)
-                        .filter(a -> a.getUuid().equals(act.getParentUuid())).findFirst().orElse(null);
+                JerseyRemoteActivity parent = getActivityById(act.getParentUuid());
                 if (parent != null) {
                     currentActivity.set(parent);
                 } else {
-                    log.debug("Parent activity no longer available: {}", act);
+                    log.warn("Parent activity no longer available: {} for {}", act.getParentUuid(), act);
                 }
             } else {
                 // no parent set - we are top-level.

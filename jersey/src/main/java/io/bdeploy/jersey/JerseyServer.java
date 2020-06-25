@@ -42,9 +42,11 @@ import org.glassfish.grizzly.websockets.WebSocketEngine;
 import org.glassfish.hk2.api.Factory;
 import org.glassfish.hk2.utilities.Binder;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
+import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpContainer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.glassfish.jersey.server.ContainerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
 import org.glassfish.jersey.server.spi.Container;
@@ -120,6 +122,8 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
     private UserValidator userValidator;
 
     private boolean corsEnabled;
+
+    private GrizzlyHttpContainer container;
 
     /**
      * @param port the port to listen on
@@ -287,6 +291,8 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             registerDefaultResources(rc);
 
             server = GrizzlyHttpServerFactory.createHttpServer(jerseyUri, rc, true, sslEngine, false);
+            container = ContainerFactory.createContainer(GrizzlyHttpContainer.class, rc);
+            server = GrizzlyHttpServerFactory.createHttpServer(jerseyUri, container, true, sslEngine, false);
             for (Map.Entry<HttpHandlerRegistration, HttpHandler> regs : preRegistrations.entrySet()) {
                 server.getServerConfiguration().addHttpHandler(regs.getValue(), regs.getKey());
             }
@@ -407,10 +413,11 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
         protected void configure() {
             bind(JerseyBroadcastingActivityReporter.class).in(Singleton.class).to(JerseyBroadcastingActivityReporter.class);
             bind(JerseyWriteLockService.class).in(Singleton.class).to(JerseyWriteLockService.class);
-            bind(startTime).named(START_TIME).to(Instant.class);
-            bind(broadcastScheduler).named(BROADCAST_EXECUTOR).to(ScheduledExecutorService.class);
             bind(JerseyScopeService.class).in(Singleton.class).to(JerseyScopeService.class);
             bind(FileSystemSpaceService.class).in(Singleton.class).to(FileSystemSpaceService.class);
+
+            bind(startTime).named(START_TIME).to(Instant.class);
+            bind(broadcastScheduler).named(BROADCAST_EXECUTOR).to(ScheduledExecutorService.class);
 
             // bind instance to start sampling thread immediately.
             bind(new JerseyServerMonitoringSamplerService(monitor)).to(JerseyServerMonitoringSamplerService.class);
