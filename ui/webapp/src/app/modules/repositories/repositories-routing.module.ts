@@ -4,6 +4,7 @@ import { AuthGuard } from '../shared/guards/authentication.guard';
 import { CanDeactivateGuard } from '../shared/guards/can-deactivate.guard';
 import { SoftwareRepoAddEditComponent } from './components/software-repo-add-edit/software-repo-add-edit.component';
 import { SoftwareRepositoriesBrowserComponent } from './components/software-repositories-browser/software-repositories-browser.component';
+import { SoftwareRepositoryPermissionsComponent } from './components/software-repository-permissions/software-repository-permissions.component';
 import { SoftwareRepositoryComponent } from './components/software-repository/software-repository.component';
 
 const REPO_ROUTES: Route[] = [
@@ -26,6 +27,13 @@ const REPO_ROUTES: Route[] = [
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
     data: { title: 'Edit Software Repository (${params["name"]})', header: 'Edit Software Repository' }
+  },
+  {
+    path: 'permissions/:name',
+    component: SoftwareRepositoryPermissionsComponent,
+    canActivate: [AuthGuard],
+    canDeactivate: [CanDeactivateGuard],
+    data: { title: 'Manage Permissions of Software Repository (${params["name"]})', header: 'Software Repository Permissions' }
   },
   {
     path: 'packages/:name',

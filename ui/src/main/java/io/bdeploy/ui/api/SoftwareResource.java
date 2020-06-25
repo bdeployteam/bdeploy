@@ -32,7 +32,7 @@ public interface SoftwareResource {
 
     @DELETE
     @Path("/{name : .+}/{tag}")
-    @RequiredPermission(permission = Permission.ADMIN)
+    @RequiredPermission(permission = Permission.WRITE, scope = "softwareRepository")
     public void delete(@PathParam("name") String name, @PathParam("tag") String tag);
 
     @GET
@@ -42,7 +42,7 @@ public interface SoftwareResource {
     @POST
     @Path("/upload")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @RequiredPermission(permission = Permission.ADMIN)
+    @RequiredPermission(permission = Permission.WRITE, scope = "softwareRepository")
     public List<Manifest.Key> upload(@FormDataParam("file") InputStream inputStream);
 
 }

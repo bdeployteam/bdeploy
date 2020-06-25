@@ -38,7 +38,7 @@ import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.interfaces.UserInfo;
-import io.bdeploy.interfaces.configuration.instance.InstanceGroupPermissionDto;
+import io.bdeploy.interfaces.UserPermissionUpdateDto;
 import io.bdeploy.interfaces.manifest.SettingsManifest;
 import io.bdeploy.interfaces.settings.AuthenticationSettingsDto;
 import io.bdeploy.minion.MinionRoot;
@@ -92,19 +92,19 @@ public class UserDatabase implements AuthService {
     }
 
     @Override
-    public synchronized void updateInstanceGroupPermissions(String group, InstanceGroupPermissionDto[] permissions) {
-        for (InstanceGroupPermissionDto dto : permissions) {
+    public synchronized void updatePermissions(String target, UserPermissionUpdateDto[] permissions) {
+        for (UserPermissionUpdateDto dto : permissions) {
             UserInfo info = getUser(dto.user);
             if (info == null) {
                 throw new IllegalStateException("Cannot find user " + dto.user);
             }
 
             // clear all scoped permissions for 'group'
-            info.permissions.removeIf(c -> group.equals(c.scope));
+            info.permissions.removeIf(c -> target.equals(c.scope));
 
             // add given scoped permission
             if (dto.permission != null) {
-                info.permissions.add(new ScopedPermission(group, dto.permission));
+                info.permissions.add(new ScopedPermission(target, dto.permission));
             }
 
             internalUpdate(info.name, info);
@@ -112,15 +112,15 @@ public class UserDatabase implements AuthService {
     }
 
     @Override
-    public void removeInstanceGroupPermissions(String group) {
+    public void removePermissions(String group) {
         SortedSet<UserInfo> allUsers = getAll();
-        Set<InstanceGroupPermissionDto> changedPermissions = new HashSet<>();
+        Set<UserPermissionUpdateDto> changedPermissions = new HashSet<>();
         for (UserInfo userInfo : allUsers) {
             if (userInfo.permissions.removeIf(c -> group.equals(c.scope))) {
-                changedPermissions.add(new InstanceGroupPermissionDto(userInfo.name, null));
+                changedPermissions.add(new UserPermissionUpdateDto(userInfo.name, null));
             }
         }
-        updateInstanceGroupPermissions(group, changedPermissions.toArray(InstanceGroupPermissionDto[]::new));
+        updatePermissions(group, changedPermissions.toArray(UserPermissionUpdateDto[]::new));
     }
 
     @Override

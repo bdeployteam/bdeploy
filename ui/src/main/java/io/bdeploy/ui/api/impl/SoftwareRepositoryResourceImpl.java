@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
@@ -18,8 +19,11 @@ import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
+import io.bdeploy.interfaces.UserInfo;
+import io.bdeploy.interfaces.UserPermissionUpdateDto;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
 import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
+import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.SoftwareRepositoryResource;
 import io.bdeploy.ui.api.SoftwareResource;
 
@@ -33,6 +37,9 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
 
     @Inject
     private BHiveRegistry registry;
+
+    @Inject
+    private AuthService auth;
 
     @Override
     public List<SoftwareRepositoryConfiguration> list() {
@@ -101,6 +108,20 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
         }
         registry.unregister(repo);
         PathHelper.deleteRecursive(Paths.get(bHive.getUri()));
+    }
+
+    @Override
+    public SortedSet<UserInfo> getAllUser(String repo) {
+        BHive bHive = registry.get(repo);
+        if (bHive == null) {
+            throw new WebApplicationException("Hive '" + repo + "' does not exist");
+        }
+        return auth.getAll();
+    }
+
+    @Override
+    public void updatePermissions(String group, UserPermissionUpdateDto[] permissions) {
+        auth.updatePermissions(group, permissions);
     }
 
 }

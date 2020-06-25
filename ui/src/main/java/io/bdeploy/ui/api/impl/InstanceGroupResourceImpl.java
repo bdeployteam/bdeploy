@@ -39,9 +39,9 @@ import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.UserInfo;
+import io.bdeploy.interfaces.UserPermissionUpdateDto;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
-import io.bdeploy.interfaces.configuration.instance.InstanceGroupPermissionDto;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
@@ -161,8 +161,8 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
     }
 
     @Override
-    public void updatePermissions(String group, InstanceGroupPermissionDto[] permissions) {
-        auth.updateInstanceGroupPermissions(group, permissions);
+    public void updatePermissions(String group, UserPermissionUpdateDto[] permissions) {
+        auth.updatePermissions(group, permissions);
     }
 
     @Override
@@ -171,7 +171,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
         if (bHive == null) {
             throw new WebApplicationException("Hive '" + group + "' does not exist");
         }
-        auth.removeInstanceGroupPermissions(group);
+        auth.removePermissions(group);
         registry.unregister(group);
         PathHelper.deleteRecursive(Paths.get(bHive.getUri()));
     }

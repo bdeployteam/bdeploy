@@ -125,6 +125,16 @@ describe('Instance Group Tests', () => {
     cy.contains('tr', globalNone).should('not.exist');
   })
 
+  it('Deletes the users', () => {
+    cy.visit('/#/admin/all/(panel:users)');
+    cy.waitUntilContentLoaded();
+
+    cy.deleteUser(globalAdmin);
+    cy.deleteUser(globalWrite);
+    cy.deleteUser(globalRead);
+    cy.deleteUser(globalNone);
+  })
+
   it('Delete instance group', () => {
     cy.visit('/');
     cy.deleteInstanceGroup(groupName);

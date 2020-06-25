@@ -58,6 +58,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
 import { UserEditComponent } from './components/user-edit/user-edit.component';
 import { UserInfoComponent } from './components/user-info/user-info.component';
 import { UserPasswordComponent } from './components/user-password/user-password.component';
+import { UserPickerComponent } from './components/user-picker/user-picker.component';
 import { ClickStopPropagationDirective } from './directives/click-stop-propagation.directive';
 import { FileDropDirective } from './directives/file-drop.directive';
 import { httpInterceptorProviders } from './interceptors';
@@ -88,11 +89,13 @@ export function loadAppConfig(cfgService: ConfigService) {
     UserPasswordComponent,
     VersionPipe,
     InstanceGroupTitleComponent,
+    UserPickerComponent,
   ],
   entryComponents: [
     ConnectionLostComponent,
     UserEditComponent,
     UserPasswordComponent,
+    UserPickerComponent,
   ],
   providers: [
     httpInterceptorProviders,

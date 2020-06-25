@@ -180,6 +180,7 @@ task updateDocuScreenshots(type: Copy, dependsOn: runCypressHeadless) {
     from fileTree(dir: "${webappDir}/cypress/screenshots/instance-group.spec.js").matching { include "*.png" }
     from fileTree(dir: "${webappDir}/cypress/screenshots/user.spec.js").matching { include "*.png" }
     from fileTree(dir: "${webappDir}/cypress/screenshots/template.spec.js").matching { include "*.png" }
+    from fileTree(dir: "${webappDir}/cypress/screenshots/sw-repo.spec.js").matching { include "*.png" }
     into new File(project(":doc").projectDir, "user/images")
 
     doLast {  
@@ -270,7 +271,6 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
         'io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto',
         'io.bdeploy.interfaces.configuration.instance.InstanceConfiguration',
         'io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration',
-        'io.bdeploy.interfaces.configuration.instance.InstanceGroupPermissionDto',
         'io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration',
         'io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration',
         'io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto',
@@ -300,6 +300,7 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
         'io.bdeploy.interfaces.minion.MinionStatusDto',
         'io.bdeploy.interfaces.manifest.state.InstanceStateRecord',
         'io.bdeploy.interfaces.UserInfo',
+        'io.bdeploy.interfaces.UserPermissionUpdateDto',
         'io.bdeploy.interfaces.UserChangePasswordDto',
         'io.bdeploy.interfaces.manifest.managed.ManagedMasterDto',
         'io.bdeploy.interfaces.plugin.PluginInfoDto',

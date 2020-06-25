@@ -33,3 +33,17 @@ The available software packages can be viewed and downloaded if required. Please
 
 image::images/BDeploy_SWRepo_Ext_Software.png[Software Repository with External Software,align=center,width=480,link="images/BDeploy_SWRepo_Ext_Software.png"]
 image::images/BDeploy_SWRepo_Ext_Software_Details.png[Software Details,align=center,width=480,link="images/BDeploy_SWRepo_Ext_Software_Details.png"]
+
+==== Software Repositories Access
+
+*Software Repositories* are created and managed by global administrators. A *Software Repository* is always visible and readable for all users. Write permissions are required to manage the software packages in the repository. To be able to upload software, a user therefore requires global administration or write permissions or must have write permissions assigned directly to the repository.
+
+image::images/BDeploy_Demo-Repository_Permissions_Global.png[Global Software Repository Permissions, align=center, width=480, link="images/BDeploy_Demo-Repository_Permissions_Global.png"]
+
+Use the btn:[+] button to add a user to the list. The input field suggests matching users from the list of all users.
+
+image::images/BDeploy_Demo-Repository_Permissions_AddUser1.png[Grant Write Access to the Software Repository, align=center, width=480, link="images/BDeploy_Demo-Repository_Permissions_AddUser1.png"]
+
+Adding a user grants write access to the *Software Repository*. The bin icon in the last column removes the user from the list. Users with global administration or write permission cannot be removed.
+
+image::images/BDeploy_Demo-Repository_Permissions_AddUser2.png[Grant Write Access to the Software Repository, align=center, width=480, link="images/BDeploy_Demo-Repository_Permissions_AddUser2.png"]

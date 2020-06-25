@@ -106,7 +106,7 @@ export class SoftwareRepositoryComponent implements OnInit, OnDestroy {
   }
 
   public isReadOnly(): boolean {
-    return !this.authService.isGlobalAdmin();
+    return !this.authService.isScopedWrite(this.softwareRepositoryName);
   }
 
 }

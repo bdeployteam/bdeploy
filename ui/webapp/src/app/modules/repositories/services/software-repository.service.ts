@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { SoftwareRepositoryConfiguration } from '../../../models/gen.dtos';
+import { SoftwareRepositoryConfiguration, UserInfo, UserPermissionUpdateDto } from '../../../models/gen.dtos';
 import { ConfigService } from '../../core/services/config.service';
 import { Logger, LoggingService } from '../../core/services/logging.service';
 
@@ -48,6 +48,18 @@ export class SoftwareRepositoryService {
     const url: string = this.cfg.config.api + SoftwareRepositoryService.BASEPATH + '/' + name;
     this.log.debug('deleteSoftwareRepository: ' + url);
     return this.http.delete(url);
+  }
+
+  public getAllUsers(name: string): Observable<UserInfo[]> {
+    const url: string = this.cfg.config.api + SoftwareRepositoryService.BASEPATH + '/' + name + '/users';
+    this.log.debug('getAllUsers: ' + url);
+    return this.http.get<UserInfo[]>(url);
+  }
+
+  public updateSoftwareRepositoryPermissions(name: string, permissions: UserPermissionUpdateDto[]) {
+    const url: string = this.cfg.config.api + SoftwareRepositoryService.BASEPATH + '/' + name + '/permissions';
+    this.log.debug('updateSoftwareRepositoryPermissions: ' + url);
+    return this.http.post(url, permissions);
   }
 
 }
