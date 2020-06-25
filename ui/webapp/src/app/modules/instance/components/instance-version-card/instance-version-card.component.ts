@@ -18,6 +18,7 @@ export class InstanceVersionCardComponent implements OnChanges {
   @Input() instanceUuid: string;
   @Input() readOnly: boolean;
   @Input() activity: string;
+  @Input() autoUninstallEnabled: boolean;
 
   @Output() install = new EventEmitter<ManifestKey>();
   @Output() activate = new EventEmitter<ManifestKey>();
@@ -41,7 +42,8 @@ export class InstanceVersionCardComponent implements OnChanges {
       this.isActive = this.state.activeTag === this.instanceVersionDto.key.tag;
       this.isDeployed = this.state.installedTags.findIndex(this.tagPredicate()) !== -1 && !this.isActive;
 
-      this.isAutoUninstall = (this.state.activeTag && +this.state.activeTag > +this.instanceVersionDto.key.tag) && //
+      this.isAutoUninstall = this.autoUninstallEnabled && //
+        (this.state.activeTag && +this.state.activeTag > +this.instanceVersionDto.key.tag) && //
         (!this.state.lastActiveTag || +this.state.lastActiveTag > +this.instanceVersionDto.key.tag);
     }
   }

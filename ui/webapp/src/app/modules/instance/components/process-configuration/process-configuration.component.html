@@ -255,7 +255,8 @@
                 [productAvailable]="productsLoading || isProductAvailable(config)"
                 [disabled]="loading"
                 [activity]='getInstanceVersionActivity(config)'
-                [readOnly]='isCentral() && !syncComponent.isInSync()'>
+                [readOnly]='isCentral() && !syncComponent.isInSync()'
+                [autoUninstallEnabled]='selectedConfig.instance.autoUninstall'>
               </app-instance-version-card>
             </ng-container>
           </div>
