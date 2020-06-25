@@ -136,7 +136,11 @@ public class MetaManifest<T> {
             // read existing version if it is present
             Manifest mf = target
                     .execute(new ManifestLoadOperation().setManifest(new Manifest.Key(metaName, id.get().toString())));
-            oldTree = target.execute(new TreeLoadOperation().setTree(mf.getRoot()));
+            try {
+                oldTree = target.execute(new TreeLoadOperation().setTree(mf.getRoot()));
+            } catch (Exception e) {
+                log.error("Cannot load previous version of MetaManifest: " + mf, e);
+            }
         }
 
         Manifest.Key targetKey = new Manifest.Key(metaName, targetTag);
