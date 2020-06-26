@@ -551,7 +551,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         resolvers.add(new ParameterValueResolver(new ApplicationParameterProvider(clientCfg.instanceConfig)));
 
         // Enable resolving of path variables
-        DeploymentPathProvider pathProvider = new DeploymentPathProvider(appsDir, "1");
+        DeploymentPathProvider pathProvider = new DeploymentPathProvider(appDir, "1");
         resolvers.add(new DeploymentPathResolver(pathProvider));
 
         // Enable resolving of manifest variables
