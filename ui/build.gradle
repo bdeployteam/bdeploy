@@ -4,7 +4,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'cz.habarta.typescript-generator:typescript-generator-gradle-plugin:2.23.603'
+        classpath 'cz.habarta.typescript-generator:typescript-generator-gradle-plugin:2.24.612'
     }
 }
 
