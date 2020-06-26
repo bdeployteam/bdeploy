@@ -9,6 +9,7 @@ import { compareTags } from '../../../shared/utils/manifest.utils';
 })
 export class ProductTagCardComponent implements OnInit {
 
+  @Input() public instanceGroup: string;
   @Input() public product: ProductDto;
   @Input() public current: ManifestKey;
   @Output() public select = new EventEmitter<ProductDto>();

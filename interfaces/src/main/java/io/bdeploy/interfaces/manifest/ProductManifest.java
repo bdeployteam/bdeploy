@@ -135,6 +135,7 @@ public class ProductManifest {
                 }
             }).build());
         }
+        templates.sort((a, b) -> a.name.compareTo(b.name));
 
         List<ApplicationTemplateDescriptor> applicationTemplates = new ArrayList<>();
         Tree.Key appTemplateKey = new Tree.Key(ProductManifestBuilder.APP_TEMPLATES_ENTRY, Tree.EntryType.TREE);
@@ -153,6 +154,8 @@ public class ProductManifest {
 
         // lazy, DFS resolving of all templates.
         resolveTemplates(templates, applicationTemplates);
+
+        applicationTemplates.sort((a, b) -> a.name.compareTo(b.name));
 
         return new ProductManifest(label, mf, appRefs, otherRefs, desc, cfgEntry, plugins, templates, applicationTemplates);
     }

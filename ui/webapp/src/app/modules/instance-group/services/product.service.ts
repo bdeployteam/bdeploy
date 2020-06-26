@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ManifestKey, ProductDto } from '../../../models/gen.dtos';
+import { InstanceUsageDto, ManifestKey, ProductDto } from '../../../models/gen.dtos';
 import { ProcessConfigDto } from '../../../models/process.model';
 import { ConfigService } from '../../core/services/config.service';
 import { Logger, LoggingService } from '../../core/services/logging.service';
@@ -42,6 +42,12 @@ export class ProductService {
     const url = this.buildProductNameTagUrl(instanceGroupName, key) + '/useCount';
     this.log.debug('getProductVersionUseCount: ' + url);
     return this.http.get(url, { responseType: 'text' });
+  }
+
+  public getProductVersionUsedIn(instanceGroupName: string, key: ManifestKey): Observable<InstanceUsageDto[]> {
+    const url = this.buildProductNameTagUrl(instanceGroupName, key) + '/usedIn';
+    this.log.debug('getProductVersionUsedIn: ' + url);
+    return this.http.get<InstanceUsageDto[]>(url);
   }
 
   public getProductDiskUsage(instanceGroupName: string, key: ManifestKey): Observable<string> {

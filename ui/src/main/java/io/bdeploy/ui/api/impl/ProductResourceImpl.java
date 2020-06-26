@@ -53,6 +53,7 @@ import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.ui.api.ApplicationResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.ProductResource;
+import io.bdeploy.ui.dto.InstanceUsageDto;
 import io.bdeploy.ui.dto.ProductDto;
 
 public class ProductResourceImpl implements ProductResource {
@@ -156,6 +157,36 @@ public class ProductResourceImpl implements ProductResource {
         }
 
         return count;
+    }
+
+    @Override
+    public List<InstanceUsageDto> getProductUsedIn(String name, String tag) {
+        Manifest.Key checkKey = new Manifest.Key(name, tag);
+
+        // InstanceManifests using the product version grouped by instance
+        Map<String, Set<InstanceManifest>> uuid2imSet = InstanceManifest.scan(hive, false).stream()
+                .map(k -> InstanceManifest.of(hive, k)).filter(im -> im.getConfiguration().product.equals(checkKey))
+                .collect(Collectors.groupingBy(im -> im.getConfiguration().uuid, Collectors.toSet()));
+
+        List<InstanceUsageDto> result = new ArrayList<>();
+
+        for (Set<InstanceManifest> mfSet : uuid2imSet.values()) {
+            // grouped by UUID so we need to read the installed state only once per instance.
+            Set<String> installedTags = mfSet.stream().findFirst().get().getState(hive).read().installedTags;
+
+            mfSet.stream().filter(mf -> installedTags.contains(mf.getManifest().getTag())).sorted(
+                    (a, b) -> Long.compare(Long.parseLong(a.getManifest().getTag()), Long.parseLong(b.getManifest().getTag())))
+                    .forEach(mf -> {
+                        InstanceUsageDto dto = new InstanceUsageDto();
+                        dto.uuid = mf.getConfiguration().uuid;
+                        dto.name = mf.getConfiguration().name;
+                        dto.description = mf.getConfiguration().description;
+                        dto.tag = mf.getManifest().getTag();
+                        result.add(dto);
+                    });
+        }
+
+        return result;
     }
 
     @Override

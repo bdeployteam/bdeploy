@@ -15,7 +15,57 @@
   font-weight: lighter;
 }
 
-.scrollable-container {
-  max-height: 300px;
+.chip-wrapper {
+  margin-top: 10px;
+}
+
+.instance-template-table {
+  margin-top: 10px;
+  max-height: 290px;
   overflow-y: auto;
+
+  display: grid;
+
+  grid-template-columns: 100px 70px auto;
+  row-gap: 5px;
+  column-gap: 5px;
+
+  align-items: center;
+}
+
+.application-template-table {
+  margin-top: 10px;
+  max-height: 290px;
+  overflow-y: auto;
+
+  display: grid;
+
+  grid-template-columns: 180px 160px auto;
+  row-gap: 5px;
+  column-gap: 5px;
+
+  align-items: center;
+}
+
+.used-in-table {
+  margin-top: 10px;
+  max-height: 290px;
+  overflow-y: auto;
+
+  display: grid;
+
+  grid-template-columns: 100px 50px 160px auto;
+  row-gap: 5px;
+  column-gap: 5px;
+
+  align-items: center;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  height: 50px;
 }

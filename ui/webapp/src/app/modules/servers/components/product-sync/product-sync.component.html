@@ -85,7 +85,7 @@
               <div class='product-row'>
                 <div>{{prod.key.tag}}</div>
                 <div class='spacer'></div>
-                <app-product-info-card [productDto]="prod"></app-product-info-card>
+                <app-product-info-card [productDto]="prod" [instanceGroup]='instanceGroup'></app-product-info-card>
                 <mat-icon (click)="selectProductVersion(prod)">arrow_forward</mat-icon>
               </div>
             </mat-list-item>
@@ -95,7 +95,7 @@
               <div class='product-row'>
                 <div>{{prod.name}}:{{prod.key.tag}}</div>
                 <div class='spacer'></div>
-                <app-product-info-card [productDto]="prod"></app-product-info-card>
+                <app-product-info-card [productDto]="prod" [instanceGroup]='instanceGroup'></app-product-info-card>
               </div>
               <mat-icon  (click)="deselectProductVersion(prod)">close</mat-icon>
             </mat-list-item>

@@ -18,6 +18,7 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
+import io.bdeploy.ui.dto.InstanceUsageDto;
 import io.bdeploy.ui.dto.ProductDto;
 
 @Path("/product")
@@ -48,6 +49,10 @@ public interface ProductResource {
     @GET
     @Path("/{name : .+}/{tag}/useCount")
     public Long getProductUseCount(@PathParam("name") String name, @PathParam("tag") String tag);
+
+    @GET
+    @Path("/{name : .+}/{tag}/usedIn")
+    public List<InstanceUsageDto> getProductUsedIn(@PathParam("name") String name, @PathParam("tag") String tag);
 
     @GET
     @Path("/{name : .+}/{tag}/zip")

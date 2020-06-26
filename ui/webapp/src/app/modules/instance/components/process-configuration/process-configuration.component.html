@@ -271,6 +271,7 @@
             <mat-spinner [diameter]='48' *ngIf='productsLoading || productUpdating'></mat-spinner>
             <ng-container *ngFor='let tag of productTags'>
               <app-product-tag-card *ngIf='!productsLoading && shouldShowProduct(showAll, tag)'
+                [instanceGroup]='groupParam'
                 [product]='tag'
                 [current]='selectedConfig.instance.product'
                 (select)='updateProduct($event)'>
