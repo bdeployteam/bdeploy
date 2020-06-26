@@ -15,7 +15,7 @@ import { CLIENT_NODE_NAME, EMPTY_INSTANCE_NODE_CONFIGURATION } from '../../../..
 import { EventWithCallback } from '../../../../models/event';
 import { ApplicationConfiguration, ApplicationDto, ApplicationTemplateDescriptor, ApplicationType, InstanceNodeConfiguration, InstanceNodeConfigurationDto, MinionDto, MinionStatusDto, ProductDto } from '../../../../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../../../../models/process.model';
-import { getAppOs } from '../../../shared/utils/manifest.utils';
+import { getAppOs, updateAppOs } from '../../../shared/utils/manifest.utils';
 import { ApplicationService } from '../../services/application.service';
 import { ApplicationTemplateVariableDialogComponent, VariableInput } from '../application-template-variable-dialog/application-template-variable-dialog.component';
 
@@ -330,6 +330,11 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
         } catch (e) {
           this.mbService.open({title: 'Invalid Data', message: 'The data in the clipboard cannot be interpreted as application', mode: MessageBoxMode.WARNING});
           return;
+        }
+
+        // change OS if required
+        if (!this.isClientApplicationsNode()) {
+          appConfig.application = updateAppOs(appConfig.application, this.minionConfig.os);
         }
 
         const productKey = this.processConfig.instance.product;

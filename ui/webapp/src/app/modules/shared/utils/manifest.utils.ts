@@ -19,6 +19,18 @@ export function getAppOs(appKey: ManifestKey): OperatingSystem {
   return OperatingSystem[osName];
 }
 
+export function updateAppOs(appKey: ManifestKey, os: OperatingSystem): ManifestKey {
+  const fullName = appKey.name;
+  const lastSlashIdx = fullName.lastIndexOf('/') + 1;
+  const osName = fullName.substring(lastSlashIdx).toUpperCase();
+  const oldOs = OperatingSystem[osName];
+  if (oldOs === os) {
+    return appKey;
+  } else {
+    return { name: fullName.substring(0, lastSlashIdx) + os.toLowerCase(), tag: appKey.tag };
+  }
+}
+
 /**
  * Sorts the given array of records by tags
  */
