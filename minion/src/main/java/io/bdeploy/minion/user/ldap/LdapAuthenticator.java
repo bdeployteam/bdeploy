@@ -160,13 +160,18 @@ public class LdapAuthenticator implements Authenticator {
 
         // TODO: test pooling: env.put("com.sun.jndi.ldap.connect.pool", "true");
 
-        LdapContext ctx = new InitialLdapContext(env, null);
+        try {
+            LdapContext ctx = new InitialLdapContext(env, null);
 
-        ctx.addToEnvironment(Context.SECURITY_PRINCIPAL, server.user);
-        ctx.addToEnvironment(Context.SECURITY_CREDENTIALS, server.pass);
-        ctx.reconnect(null);
+            ctx.addToEnvironment(Context.SECURITY_PRINCIPAL, server.user);
+            ctx.addToEnvironment(Context.SECURITY_CREDENTIALS, server.pass);
+            ctx.reconnect(null);
+            return ctx;
+        } catch (Exception e) {
+            log.error("Cannot create initial connection to {} as {}", server.server, server.user, e);
+            throw e;
+        }
 
-        return ctx;
     }
 
     private void closeServerContext(DirContext ctx) throws NamingException {
