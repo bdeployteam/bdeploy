@@ -3,6 +3,7 @@ package io.bdeploy.pcu;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.ProcessBuilder.Redirect;
 import java.lang.ProcessHandle.Info;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -400,7 +401,7 @@ public class ProcessController {
         }
 
         try {
-            Process p = launch(processConfig.start);
+            Process p = launch(processConfig.start, false);
             process = p.toHandle();
             processStdin = p.getOutputStream();
             processExit = process.onExit();
@@ -773,13 +774,17 @@ public class ProcessController {
      * @return the process handle
      * @throws IOException in case of an error starting the {@link Process}.
      */
-    private Process launch(List<String> cmd) throws IOException {
+    private Process launch(List<String> cmd, boolean append) throws IOException {
         List<String> command = replaceVariables(cmd);
         logger.log(l -> l.debug("Launching new process {}", command));
 
         ProcessBuilder b = new ProcessBuilder(command).directory(processDir.toFile());
         b.redirectErrorStream(true);
-        b.redirectOutput(processDir.resolve(OUT_TXT).toFile());
+        if (append) {
+            b.redirectOutput(Redirect.appendTo(processDir.resolve(OUT_TXT).toFile()));
+        } else {
+            b.redirectOutput(Redirect.to(processDir.resolve(OUT_TXT).toFile()));
+        }
         return b.start();
     }
 
@@ -825,7 +830,7 @@ public class ProcessController {
         }
         try {
             logger.log(l -> l.info("Invoking configured stop command {}.", stopCommand));
-            Process p = launch(stopCommand);
+            Process p = launch(stopCommand, true);
             boolean exited = p.waitFor(processConfig.processControl.gracePeriod, TimeUnit.MILLISECONDS);
             if (!exited) {
                 // stop command did not complete within allowed time, kill both
