@@ -1,11 +1,13 @@
 package io.bdeploy.interfaces.variables;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.MoreCollectors;
 
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
+import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 
 /**
@@ -68,7 +70,13 @@ public class ApplicationParameterProvider {
     }
 
     public String getParam(ApplicationConfiguration app, String paramId) {
-        return app.start.parameters.stream().filter(p -> p.uid.equals(paramId)).collect(MoreCollectors.onlyElement()).value;
+        List<ParameterConfiguration> params = app.start.parameters.stream().filter(p -> p.uid.equals(paramId))
+                .collect(Collectors.toList());
+        if (params.size() != 1) {
+            throw new IllegalArgumentException(
+                    "Cannot find unique parameter " + paramId + " for application " + app.name + ", found " + params.size());
+        }
+        return params.get(0).value;
     }
 
 }
