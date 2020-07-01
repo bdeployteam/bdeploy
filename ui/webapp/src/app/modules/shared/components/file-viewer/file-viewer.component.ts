@@ -2,6 +2,7 @@ import { AfterViewInit, Component, EventEmitter, Input, OnChanges, OnDestroy, On
 import { FormBuilder } from '@angular/forms';
 import { NgTerminal } from 'ng-terminal';
 import { Observable, Subscription } from 'rxjs';
+import { IDisposable } from 'xterm';
 import { InstanceDirectoryEntry, StringEntryChunkDto } from '../../../../models/gen.dtos';
 import { InstanceService } from '../../../instance/services/instance.service';
 
@@ -46,6 +47,7 @@ export class FileViewerComponent implements OnInit, AfterViewInit, OnChanges, On
   private offset = 0;
 
   private stdinSubscription : Subscription;
+  private resizeDisposable: IDisposable;
   buffer: string = '';
   bufferCursorPos: number = 0;
   initialCursorX: number; // cursor posX after terminal output (input field origin X)
@@ -59,6 +61,12 @@ export class FileViewerComponent implements OnInit, AfterViewInit, OnChanges, On
   }
 
   ngAfterViewInit() {
+    this.term.underlying.attachCustomKeyEventHandler(event => {
+      // prevent default handling of Ctrl-C/Ctrl-X (otherwise it resets the selections
+      // and default Ctrl-C/X has nothing to copy) and Ctrl-V
+      return !event.ctrlKey || 'cxv'.indexOf(event.key.toLowerCase()) === -1;
+    });
+
     if (this.supportsStdin) {
       this.setupStdin(this.hasStdin);
     }
@@ -146,7 +154,7 @@ export class FileViewerComponent implements OnInit, AfterViewInit, OnChanges, On
 
   setupStdin(connect: boolean) {
     if (connect) {
-      this.term.underlying.onResize(data => {
+      this.resizeDisposable = this.term.underlying.onResize(data => {
         if (this.supportsStdin && this.hasStdin && this.follow) {
           setTimeout(dim => {
             this.clearInput();
@@ -156,6 +164,7 @@ export class FileViewerComponent implements OnInit, AfterViewInit, OnChanges, On
       });
 
       this.stdinSubscription = this.term.keyInput.subscribe(input => {
+        // keyboard input usually is a single charactor or CSI sequence, but clipboard content is a string
         if (!this.follow) {
           return;
         }
@@ -164,43 +173,58 @@ export class FileViewerComponent implements OnInit, AfterViewInit, OnChanges, On
           this.initialCursorX = this.cursorX;
         }
 
-        if (input === '\r') {
-          this.sendStdin();
-        } else if (input.charCodeAt(0) === 0x7f) {
-          if(this.bufferCursorPos > 0) {
+        let idx = 0;
+        while (idx < input.length) {
+          if (input[idx] === '\r') {
+            idx++;
+            this.sendStdin();
+          } else if (input.charCodeAt(idx) === 0x7f) {
+            idx++;
+            if(this.bufferCursorPos > 0) {
+              this.clearInput();
+              this.buffer = this.buffer.substring(0, this.bufferCursorPos -1) + this.buffer.substring(this.bufferCursorPos);
+              this.bufferCursorPos--;
+              this.updateInput();
+            }
+          } else {
             this.clearInput();
-            this.buffer = this.buffer.substring(0, this.bufferCursorPos -1) + this.buffer.substring(this.bufferCursorPos);
-            this.bufferCursorPos--;
+            if (input.charCodeAt(idx) >= 32) {
+              this.buffer = [this.buffer.slice(0, this.bufferCursorPos), input[idx], this.buffer.slice(this.bufferCursorPos)].join('');
+              this.bufferCursorPos++;
+              idx++;
+            } else if (input.substr(idx).startsWith(FileViewerComponent.CSI)) {
+              idx += FileViewerComponent.CSI.length;
+              if (idx < input.length) {
+                switch (input[idx]) {
+                  case 'C': // cursor right
+                    this.bufferCursorPos = this.bufferCursorPos + (this.buffer.length > this.bufferCursorPos ? 1 : 0);
+                    break;
+                  case 'D': // cursor left
+                    this.bufferCursorPos = this.bufferCursorPos - (this.bufferCursorPos > 0 ? 1 : 0);
+                    break;
+                  case 'H': // pos 1
+                    this.bufferCursorPos = 0;
+                    break;
+                  case 'F': // end
+                    this.bufferCursorPos = this.buffer.length;
+                    break;
+                }
+                idx++;
+              }
+            } else {
+              // consume and ignore input character
+              idx++;
+            }
             this.updateInput();
           }
-        } else {
-          this.clearInput();
-          if(input.length === 1) {
-            this.buffer = [this.buffer.slice(0, this.bufferCursorPos), input, this.buffer.slice(this.bufferCursorPos)].join('');
-            this.bufferCursorPos++;
-          } else if (input.startsWith(FileViewerComponent.CSI)) {
-            const seq = input.substr(FileViewerComponent.CSI.length);
-            switch (seq) {
-              case 'C': // cursor right
-                this.bufferCursorPos = this.bufferCursorPos + (this.buffer.length > this.bufferCursorPos ? 1 : 0);
-                break;
-              case 'D': // cursor left
-                this.bufferCursorPos = this.bufferCursorPos - (this.bufferCursorPos > 0 ? 1 : 0);
-                break;
-              case 'H': // pos 1
-                this.bufferCursorPos = 0;
-                break;
-              case 'F': // end
-                this.bufferCursorPos = this.buffer.length;
-                break;
-            }
-          }
-          this.updateInput();
-        }
+        };
+
       })
     } else if (this.stdinSubscription) {
       this.stdinSubscription.unsubscribe();
       this.stdinSubscription = null;
+      this.resizeDisposable.dispose();
+      this.resizeDisposable = null;
     }
   }
 
