@@ -830,6 +830,7 @@ public class ProcessController {
         }
         try {
             logger.log(l -> l.info("Invoking configured stop command {}.", stopCommand));
+            long stopCommandStartTime = System.currentTimeMillis();
             Process p = launch(stopCommand, true);
             boolean exited = p.waitFor(processConfig.processControl.gracePeriod, TimeUnit.MILLISECONDS);
             if (!exited) {
@@ -845,9 +846,22 @@ public class ProcessController {
                 // stop command completed within the timeout, check status
                 int exitValue = p.exitValue();
                 if (exitValue != 0) {
-                    logger.log(l -> l.warn("Stop command exited with non-zero code: {} ", exitValue));
+                    logger.log(l -> l.warn("Stop command exited with non-zero code: {}", exitValue));
                 } else {
-                    logger.log(l -> l.info("Stop command exited with return code 0 "));
+                    long remainingGracePeriod = processConfig.processControl.gracePeriod
+                            - (System.currentTimeMillis() - stopCommandStartTime);
+                    logger.log(l -> l.info("Stop command exited with return code 0, remaining grace period: {}",
+                            remainingGracePeriod));
+
+                    // stop command exited, lets give the process a little extra time to exit as well.
+                    try {
+                        processExit.get(remainingGracePeriod, TimeUnit.MILLISECONDS);
+                        logger.log(l -> l.info("Stop command successfullly terminated main process"));
+                    } catch (TimeoutException e) {
+                        logger.log(l -> l.warn("Main process did not exit after stop grace period"));
+                    } catch (Exception e) {
+                        logger.log(l -> l.warn("Exception while waiting for application to terminate.", e));
+                    }
                 }
             }
         } catch (Exception e) {
