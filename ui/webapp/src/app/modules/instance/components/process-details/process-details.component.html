@@ -120,7 +120,7 @@
         [initialEntry]="getCurrentOutputEntryFetcher()"
         [contentFetcher]="getOutputContentFetcher()"
         [contentDownloader]="getContentDownloader()"
-        [follow]="isRunning()"
+        [follow]="true"
         [supportsStdin]="supportsStdin()"
         [hasStdin]="hasStdin()"
         (inputEvent)="onInputEvent($event)"
