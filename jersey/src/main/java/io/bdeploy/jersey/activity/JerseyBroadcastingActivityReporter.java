@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.LongSupplier;
@@ -45,7 +46,7 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
      * It seems that HK2 has a bug where it changes the registration for a singleton service in a locator if the service is
      * registered as singleton in ANOTHER locator...
      */
-    private static final List<JerseyRemoteActivity> globalActivities = new ArrayList<>();
+    private static final List<JerseyRemoteActivity> globalActivities = new CopyOnWriteArrayList<>();
     private static final ThreadLocal<JerseyRemoteActivity> currentActivity = new ThreadLocal<>();
     private static final Set<List<String>> activeScopes = new TreeSet<>(JerseyBroadcastingActivityReporter::compareScopes);
 
