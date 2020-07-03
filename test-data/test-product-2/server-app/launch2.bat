@@ -45,6 +45,14 @@ IF NOT "%1" == "" (
         SHIFT
         goto subprocess
     )
+    IF "%1" == "--server" (
+        echo "Server port: %2"
+        SHIFT
+    )
+    IF "%1" == "--client" (
+        echo "Client port: %2"
+        SHIFT
+    )
 
     SHIFT
     GOTO :loop

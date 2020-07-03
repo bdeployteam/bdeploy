@@ -213,6 +213,8 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
       case ParameterType.BOOLEAN:
         return 'checkbox';
       case ParameterType.NUMERIC:
+      case ParameterType.SERVER_PORT:
+      case ParameterType.CLIENT_PORT:
         return 'number';
       case ParameterType.PASSWORD:
         return 'password';
@@ -472,7 +474,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     if (descriptor.mandatory && type !== ParameterType.BOOLEAN) {
       validators.push(Validators.required);
     }
-    if (descriptor.type === ParameterType.NUMERIC) {
+    if (descriptor.type === ParameterType.NUMERIC || descriptor.type === ParameterType.CLIENT_PORT || descriptor.type === ParameterType.SERVER_PORT) {
       validators.push(ParameterValidators.numeric);
     }
     control.setValidators(validators);

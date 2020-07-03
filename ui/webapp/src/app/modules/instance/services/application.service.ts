@@ -390,6 +390,8 @@ export class ApplicationService {
         }
         return paraDef.name + ': Invalid value configured. Expecting true or false but was ' + value;
       }
+      case ParameterType.SERVER_PORT:
+      case ParameterType.CLIENT_PORT:
       case ParameterType.NUMERIC: {
         // Convert string to number. Returns NaN if conversion is not possible
         const numeric = Number(value);
