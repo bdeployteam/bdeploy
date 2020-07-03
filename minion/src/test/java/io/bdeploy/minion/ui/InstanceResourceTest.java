@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
@@ -294,6 +295,47 @@ public class InstanceResourceTest {
         assertEquals("My Instance", readVersion.name);
 
         assertThrows(NotFoundException.class, () -> res.readVersion(instance.uuid, "3"));
+    }
+
+    @Test
+    void checkPortStates(InstanceGroupResource root, RemoteService remote, @TempDir Path tmp) throws Exception {
+        InstanceGroupConfiguration group = new InstanceGroupConfiguration();
+        group.name = "demo";
+        group.description = "Demo";
+        root.create(group);
+
+        Manifest.Key product = TestFactory.pushProduct(group.name, remote, tmp).getKey();
+
+        InstanceResource res = root.getInstanceResource(group.name);
+        assertTrue(res.list().isEmpty());
+
+        InstanceConfiguration instance = new InstanceConfiguration();
+        instance.product = product;
+        instance.uuid = root.createUuid(group.name);
+        instance.name = "My Instance";
+        instance.purpose = InstancePurpose.PRODUCTIVE;
+
+        res.create(instance, null);
+
+        int port = 0;
+        try (ServerSocket ss = new ServerSocket(port)) {
+            ss.setReuseAddress(true);
+            port = ss.getLocalPort();
+        }
+
+        // it is free now
+        Map<Integer, Boolean> portStates = root.getInstanceResource("demo").getPortStates(instance.uuid, "master",
+                Collections.singletonList(port));
+        assertEquals(1, portStates.size());
+        assertEquals(Boolean.FALSE, portStates.get(port));
+
+        try (ServerSocket ss = new ServerSocket(port)) {
+            ss.setReuseAddress(true);
+
+            portStates = root.getInstanceResource("demo").getPortStates(instance.uuid, "master", Collections.singletonList(port));
+            assertEquals(1, portStates.size());
+            assertEquals(Boolean.TRUE, portStates.get(port));
+        }
     }
 
 }
