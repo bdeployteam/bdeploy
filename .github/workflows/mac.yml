@@ -38,7 +38,7 @@ jobs:
     - name: Setup NodeJS
       uses: actions/setup-node@v1
       with:
-        node-version: '10.x'
+        node-version: '12.x'
 
     - name: Build and Test
       run: ./gradlew -stacktrace clean build -PcypressIgnoreExitValue '-Dtestlogger.theme=plain-parallel'
