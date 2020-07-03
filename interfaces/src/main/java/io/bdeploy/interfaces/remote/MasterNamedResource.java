@@ -2,6 +2,7 @@ package io.bdeploy.interfaces.remote;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -234,5 +235,14 @@ public interface MasterNamedResource {
     @POST
     @Path("/stdin")
     public void writeToStdin(@QueryParam("u") String instanceId, @QueryParam("a") String applicationId, String data);
+
+    /**
+     * @param minion the minion to check port availability on.
+     * @param ports the ports to check whether they are open/used or not on the machine
+     * @return a state for each port, true for 'used', false for 'free'.
+     */
+    @POST
+    @Path("/check-ports")
+    public Map<Integer, Boolean> getPortStates(@QueryParam("m") String minion, List<Integer> ports);
 
 }

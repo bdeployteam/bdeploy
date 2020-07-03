@@ -6,11 +6,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.net.ServerSocket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
@@ -324,6 +327,22 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
         } catch (IOException e) {
             throw new WebApplicationException("Cannot provide download for entry", e);
         }
+    }
+
+    @Override
+    public Map<Integer, Boolean> getPortStates(List<Integer> ports) {
+        Map<Integer, Boolean> result = new TreeMap<>();
+
+        for (Integer port : ports) {
+            try (ServerSocket ss = new ServerSocket(port)) {
+                ss.setReuseAddress(true);
+                result.put(port, false); // free
+            } catch (IOException e) {
+                result.put(port, true); // used
+            }
+        }
+
+        return result;
     }
 
 }

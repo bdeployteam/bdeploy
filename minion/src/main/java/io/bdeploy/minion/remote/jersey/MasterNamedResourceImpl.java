@@ -846,4 +846,14 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         SlaveProcessResource spc = ResourceProvider.getResource(service, SlaveProcessResource.class, context);
         spc.writeToStdin(instanceId, applicationId, data);
     }
+
+    @Override
+    public Map<Integer, Boolean> getPortStates(String minion, List<Integer> ports) {
+        RemoteService svc = root.getMinions().getRemote(minion);
+        if (svc == null) {
+            throw new WebApplicationException("Cannot find minion " + minion, Status.NOT_FOUND);
+        }
+        SlaveDeploymentResource sdr = ResourceProvider.getResource(svc, SlaveDeploymentResource.class, context);
+        return sdr.getPortStates(ports);
+    }
 }

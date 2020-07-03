@@ -182,4 +182,9 @@ public interface InstanceResource {
     @Unsecured
     @Path("/{instance}/stream/{token}")
     public Response getContentStream(@ActivityScope @PathParam("instance") String instanceId, @PathParam("token") String token);
+
+    @POST
+    @Path("/{instance}/check-ports/{minion}")
+    public Map<Integer, Boolean> getPortStates(@ActivityScope @PathParam("instance") String instanceId,
+            @PathParam("minion") String minion, List<Integer> ports);
 }

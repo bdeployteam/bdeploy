@@ -2,6 +2,7 @@ package io.bdeploy.interfaces.remote;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -87,5 +88,13 @@ public interface SlaveDeploymentResource {
     @Path("/dataDir/streamEntry")
     @Produces("*/*")
     public Response getEntryStream(InstanceDirectoryEntry entry);
+
+    /**
+     * @param ports the ports to check whether they are open/used or not on the machine
+     * @return a state for each port, true for 'used', false for 'free'.
+     */
+    @POST
+    @Path("/check-ports")
+    public Map<Integer, Boolean> getPortStates(List<Integer> ports);
 
 }

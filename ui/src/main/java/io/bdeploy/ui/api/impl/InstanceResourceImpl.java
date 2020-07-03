@@ -859,4 +859,15 @@ public class InstanceResourceImpl implements InstanceResource {
         return root.getNamedMaster(group).getEntryStream(rq.minion, rq.entry);
     }
 
+    @Override
+    public Map<Integer, Boolean> getPortStates(String instanceId, String minion, List<Integer> ports) {
+        InstanceManifest im = readInstance(instanceId);
+        if (im == null) {
+            throw new WebApplicationException("Cannot load " + instanceId, Status.NOT_FOUND);
+        }
+        RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
+        MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class, context);
+        return root.getNamedMaster(group).getPortStates(minion, ports);
+    }
+
 }
