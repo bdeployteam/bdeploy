@@ -34,6 +34,14 @@ while [[ $# -gt 0 ]]; do
                 ((PROCCNT = PROCCNT - 1))
             done
             ;;
+        --server=*)
+            SRVPORT=${1##--server=}
+            echo "Server port: ${SRVPORT}"
+            ;;
+        --client=*)
+            CLIENTPORT=${1##--client=}
+            echo "Client port: ${CLIENTPORT}"
+            ;;
         *)
             echo "Unsupported argument: $1"
             exit 2

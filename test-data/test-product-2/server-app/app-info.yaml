@@ -85,6 +85,18 @@ startCommand:
       parameter: "--sleep"
       defaultValue: "10"
       type: NUMERIC
+    - uid: "param.server.port"
+      name: "Test Server Port"
+      longDescription: "A server port - which will never be opened by the test product"
+      groupName: "Test Parameters"
+      parameter: "--server"
+      type: SERVER_PORT
+    - uid: "param.client.port"
+      name: "Test Client Port"
+      longDescription: "A client port"
+      groupName: "Test Parameters"
+      parameter: "--client"
+      type: CLIENT_PORT
 
 endpoints:
     http:
