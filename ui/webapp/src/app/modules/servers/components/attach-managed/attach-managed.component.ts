@@ -7,6 +7,7 @@ import { MatStep, MatStepper } from '@angular/material/stepper';
 import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { ServerValidators } from 'src/app/modules/shared/validators/server.validator';
 import { ManagedMasterDto } from '../../../../models/gen.dtos';
 import { ErrorMessage } from '../../../core/services/logging.service';
 import { DownloadService } from '../../../shared/services/download.service';
@@ -47,7 +48,7 @@ export class AttachManagedComponent implements OnInit {
     this.infoGroup = this.fb.group({
       name: ['', Validators.required],
       desc: ['', Validators.required],
-      uri: ['', Validators.required],
+      uri: ['', [Validators.required, ServerValidators.serverApiUrl]],
     });
   }
 
@@ -103,9 +104,15 @@ export class AttachManagedComponent implements OnInit {
     if (!this.serverNameControl.value) {
       this.serverNameControl.setValue(this.attachPayload.hostName);
     }
+    this.serverNameControl.markAsTouched();
+    if (!this.serverDescControl.value) {
+      this.serverDescControl.setValue(this.attachPayload.description);
+    }
+    this.serverDescControl.markAsTouched();
     if (!this.serverUriControl.value) {
       this.serverUriControl.setValue(this.attachPayload.uri);
     }
+    this.serverUriControl.markAsTouched();
   }
 
   autoAddServer() {

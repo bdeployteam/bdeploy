@@ -10,7 +10,6 @@ import { ManagedServerEditComponent } from './components/managed-server-edit/man
 import { ManagedServersComponent } from './components/managed-servers/managed-servers.component';
 import { ProductSyncComponent } from './components/product-sync/product-sync.component';
 import { ServersRoutingModule } from './servers-routing.module';
-import { ServerUrlValidatorDirective } from './validators/server-url-validator.directive';
 
 
 
@@ -21,8 +20,7 @@ import { ServerUrlValidatorDirective } from './validators/server-url-validator.d
     ManagedServersComponent,
     ManagedServerDetailComponent,
     ProductSyncComponent,
-    ManagedServerEditComponent,
-    ServerUrlValidatorDirective
+    ManagedServerEditComponent
   ],
   entryComponents: [
     ManagedServerEditComponent
