@@ -1,0 +1,23 @@
+<form #portsForm='ngForm'>
+  <ng-container *ngFor='let node of processConfig.nodeList.nodeConfigDtos'>
+    <ng-container *ngFor='let app of node.nodeConfiguration.applications'>
+      <mat-card *ngIf='hasPorts(app, node)' class="node-card instance-node-card-theme">
+        <mat-card-header class='node-card-header instance-node-card-header-theme'>
+          <div mat-card-avatar class='instance-node-avatar-container'>
+            <mat-icon class='instance-node-avatar'>layers</mat-icon>
+          </div>
+          <mat-card-title>{{ app.name }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class='node-card-content'>
+          <div class='port-parameters'>
+            <div class='port-parameter' *ngFor='let param of getPortParams(app)'>
+              <mat-form-field class='port-editor'>
+                <input matInput (input)='onChange(param.paramCfg, $event.target.value)' [value]='param.paramCfg.value' name="{{instanceGroup}}-{{app.uid}}-{{param.paramCfg.uid}}" placeholder="{{param.paramDesc.name}}" type="number"/>
+              </mat-form-field>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </ng-container>
+  </ng-container>
+</form>

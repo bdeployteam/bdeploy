@@ -65,7 +65,7 @@
       </ng-container>
       <ng-container *ngIf="editMode">
         <button mat-button type="button" [disabled]="!cancelEnabled" (click)="onDiscardAppChanges(false)">CANCEL</button>
-        <button mat-raised-button color="primary" type="submit" [disabled]="!saveEnabled" (click)="onApplyAppChanges()">APPLY</button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="!saveEnabled" (click)="editPortsMode ? onApplyPortChanges() : onApplyAppChanges()">APPLY</button>
       </ng-container>
     </mat-toolbar-row>
     <mat-toolbar-row class="subHeader">
@@ -127,6 +127,9 @@
         <mat-divider></mat-divider>
         <button mat-menu-item (click)="setSidenavApplications()" [disabled]="!authService.isScopedWrite(groupParam) || isSidenavApplications() || !isEditable() || !isProductAvailable(selectedConfig)">
           <mat-icon>layers</mat-icon>Configure Applications
+        </button>
+        <button mat-menu-item (click)="onEditPorts()" [disabled]="!authService.isScopedWrite(groupParam) || !isEditable() || !isProductAvailable(selectedConfig)">
+          <mat-icon>settings_ethernet</mat-icon>Configure Ports
         </button>
         <button mat-menu-item (click)="setSidenavProducts()" [disabled]="!authService.isScopedWrite(groupParam) || isSidenavProducts() || !isEditable()">
           <mat-icon>apps</mat-icon>Change Product Version
@@ -305,7 +308,7 @@
   </div>
   <!-- Edit component. Replaces nodes and sidebar -->
   <div class="drawer-container" *ngIf="editMode">
-    <app-application-edit *ngIf='!editEndpointsMode' #editComponent
+    <app-application-edit *ngIf='!editEndpointsMode && !editPortsMode' #editComponent
       class="nodes-container"
       [instanceGroup]="groupParam"
       [processConfig]="selectedConfig"
@@ -323,5 +326,12 @@
       [readonly]="isReadonly()"
       (validationStateChanged)="updateDirtyStateAndValidate()">
     </app-application-edit-endpoints>
+    <app-instance-edit-ports *ngIf='editPortsMode' #editComponent
+      class='nodes-container'
+      [instanceGroup]="groupParam"
+      [processConfig]="editPortConfigContext"
+      [minionConfigs]='minionConfigs'
+      (validationStateChanged)="updateDirtyStateAndValidate()">
+    </app-instance-edit-ports>
   </div>
 </div>

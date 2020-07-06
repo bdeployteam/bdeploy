@@ -7,6 +7,7 @@ interface PortSheetData {
   instanceGroup: string;
   instanceId: string;
   minionName: string;
+  appName: string;
   ports: number[];
   labels: string[];
 }
