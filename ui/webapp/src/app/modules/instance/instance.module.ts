@@ -33,6 +33,7 @@ import { ProcessStatusComponent } from './components/process-status/process-stat
 import { InstanceRoutingModule } from './instance-routing.module';
 import { ApplicationDescriptorDetailComponent } from './components/application-descriptor-detail/application-descriptor-detail.component';
 import { ApplicationTemplateVariableDialogComponent } from './components/application-template-variable-dialog/application-template-variable-dialog.component';
+import { ProcessPortListComponent } from './components/process-port-list/process-port-list.component';
 
 @NgModule({
   declarations: [
@@ -65,6 +66,7 @@ import { ApplicationTemplateVariableDialogComponent } from './components/applica
     InstanceTemplateGroupDetailComponent,
     ApplicationDescriptorDetailComponent,
     ApplicationTemplateVariableDialogComponent,
+    ProcessPortListComponent,
   ],
   entryComponents: [
     ApplicationEditManualComponent,

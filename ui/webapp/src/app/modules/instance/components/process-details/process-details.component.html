@@ -129,5 +129,13 @@
     <button mat-icon-button (click)="openOutputOverlay(terminal)">
       <mat-icon>message</mat-icon>
     </button>
+    <button
+      mat-icon-button
+      (click)="showPortList()"
+      [disabled]="!isRunningOrUnstable()"
+      matTooltip="Show ports"
+    >
+      <mat-icon>settings_ethernet</mat-icon>
+    </button>
   </div>
 </div>

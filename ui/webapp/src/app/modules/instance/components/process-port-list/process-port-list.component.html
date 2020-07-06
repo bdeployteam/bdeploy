@@ -1,0 +1,17 @@
+<div *ngIf='loading' class='loading-container'>
+  <mat-spinner [diameter]='24'></mat-spinner>
+</div>
+
+<ng-container *ngIf='!loading'>
+<h2>Server Ports of {{data.appName}} on {{data.minionName}}</h2>
+<div class='port-list'>
+  <strong>Description</strong>
+  <strong>Port</strong>
+  <strong>State</strong>
+  <ng-container *ngFor='let port of data.ports; let i = index'>
+    <span>{{data.labels[i]}}</span>
+    <span>{{port}}</span>
+    <span><mat-icon [ngClass]='states[port] ? "port-open" : "port-closed"'>{{states[port] ? 'done' : 'warning'}}</mat-icon></span>
+  </ng-container>
+</div>
+</ng-container>

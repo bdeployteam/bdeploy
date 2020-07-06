@@ -29,6 +29,7 @@
 @import 'app/modules/instance/components/application-configuration-card/application-configuration-card-theme.scss';
 @import 'app/modules/instance/components/process-configuration/process-configuration-theme.scss';
 @import 'app/modules/instance/components/process-details/process-details-theme.scss';
+@import 'app/modules/instance/components/process-port-list/process-port-list-theme.scss';
 @import 'app/modules/instance/components/process-status/process-status-theme.scss';
 @import 'app/modules/instance/components/client-info/client-info-theme.scss';
 @import 'app/modules/instance/components/instance-notifications/instance-notifications-theme.scss';
@@ -57,6 +58,7 @@
   @include instance-group-logo-theme($theme);
   @include process-configuration-theme($theme);
   @include process-details-theme($theme);
+  @include process-port-list-theme($theme);
   @include process-status-theme($theme);
   @include client-info-theme($theme);
   @include client-apps-theme($theme);
