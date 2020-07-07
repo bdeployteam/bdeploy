@@ -1,0 +1,40 @@
+.node-card {
+  flex: 1 0 auto;
+  margin: 15px;
+  padding: 0 !important;
+}
+
+.node-card-header {
+  padding: 10px !important;
+  border-radius: 5px 5px 0px 0px;
+}
+
+.node-card-content {
+  padding: 5px !important;
+}
+
+.node-card-subtitle {
+  margin-top: -11px !important;
+  margin-bottom: 0;
+}
+
+.port-parameters {
+  display: grid;
+  grid-template-columns: 50% 50%;
+
+  margin: 20px;
+
+  column-gap: 10px;
+  row-gap: 5px;
+
+  align-items: center;
+}
+
+.port-parameter {
+  display: flex;
+  flex-direction: row;
+}
+
+.port-editor {
+  flex: 1 0 auto;
+}

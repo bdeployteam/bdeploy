@@ -5,6 +5,8 @@
   column-gap: 5px;
 
   align-items: center;
+
+  margin: 10px;
 }
 
 .loading-container {

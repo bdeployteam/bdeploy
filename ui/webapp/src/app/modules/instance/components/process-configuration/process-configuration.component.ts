@@ -101,9 +101,11 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
   public editMode = false;
   public editEndpointsMode = false;
+  public editPortsMode = false;
   public editAppConfigContext: EditAppConfigContext;
   public activeNodeConfig: InstanceNodeConfiguration;
   public instanceGroup: InstanceGroupConfiguration;
+  public editPortConfigContext: ProcessConfigDto;
 
   public cancelEnabled = true;
   public saveEnabled = false;
@@ -696,6 +698,16 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     this.setEditMode(true, true);
   }
 
+  public onEditPorts() {
+    this.editPortConfigContext = cloneDeep(this.selectedConfig);
+    this.setEditMode(true, false, true);
+  }
+
+  public onApplyPortChanges() {
+    this.selectedConfig = this.editPortConfigContext;
+    this.setEditMode(false);
+  }
+
   public onApplyAppChanges() {
     const updated = this.editComponent.appConfigContext.applicationConfiguration;
     const appDesc = this.editComponent.appDesc;
@@ -1000,9 +1012,10 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   /** Switches the edit to the desired state */
-  setEditMode(editMode: boolean, endpoints: boolean = false) {
+  setEditMode(editMode: boolean, endpoints: boolean = false, ports: boolean = false) {
     this.editMode = editMode;
     this.editEndpointsMode = endpoints;
+    this.editPortsMode = ports;
     if (editMode) {
       this.pageTitle = this.titleService.getHeaderTitle();
       this.titleService.setHeaderTitle('Process Settings');
