@@ -1,0 +1,14 @@
+.port-list {
+  display: grid;
+  grid-template-columns: auto 100px 24px;
+  row-gap: 5px;
+  column-gap: 5px;
+
+  align-items: center;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}

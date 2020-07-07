@@ -287,6 +287,16 @@ export class InstanceService {
     return this.buildInstanceUrl(instanceGroupName, instanceName) + '/import';
   }
 
+    /**
+   * Fetches the states of each given application's server ports on the target minion.
+   * <p>
+   * The result is grouped by application (UUID) and contains a state per port (true/false).
+   */
+  public getOpenPorts(instanceGroup: string, instance: string, minion: string,  ports: number[]): Observable<{[key: number]: boolean}> {
+    const url = this.buildInstanceUrl(instanceGroup, instance) + '/check-ports/' + minion;
+    return this.http.post<{[key: number]: boolean}>(url, ports);
+  }
+
   public buildGroupUrl(instanceGroupName: string): string {
     return this.cfg.config.api + InstanceGroupService.BASEPATH + '/' + instanceGroupName + '/instance';
   }

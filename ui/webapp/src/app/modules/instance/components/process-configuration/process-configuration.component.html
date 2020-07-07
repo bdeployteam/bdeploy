@@ -285,7 +285,8 @@
             [instanceId]='uuidParam'
             [instanceTag]='selectedConfig.version.key.tag'
             [activatedInstanceTag]="deploymentState.activeTag"
-            [appConfig]='selectedProcess'>
+            [appConfig]='selectedProcess'
+            [processConfig]='selectedConfig'>
           </app-process-details>
         </div>
         <div *ngIf='isSidenavClientInfo()'>

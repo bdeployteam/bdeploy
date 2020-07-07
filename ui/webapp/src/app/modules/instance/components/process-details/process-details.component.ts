@@ -6,11 +6,13 @@ import { MatDialog } from '@angular/material/dialog';
 import { format } from 'date-fns';
 import { Observable, Subscription } from 'rxjs';
 import { finalize, map, mergeMap } from 'rxjs/operators';
-import { ApplicationConfiguration, ApplicationStartType, InstanceDirectoryEntry, ProcessDetailDto, ProcessState, ProcessStatusDto, StringEntryChunkDto } from '../../../../models/gen.dtos';
+import { ProcessConfigDto } from 'src/app/models/process.model';
+import { ApplicationConfiguration, ApplicationStartType, InstanceDirectoryEntry, ParameterType, ProcessDetailDto, ProcessState, ProcessStatusDto, StringEntryChunkDto } from '../../../../models/gen.dtos';
 import { unsubscribe } from '../../../shared/utils/object.utils';
 import { InstanceService } from '../../services/instance.service';
 import { ProcessService } from '../../services/process.service';
 import { ProcessListComponent } from '../process-list/process-list.component';
+import { ProcessPortListComponent } from '../process-port-list/process-port-list.component';
 import { ProcessStartConfirmComponent } from '../process-start-confirm/process-start-confirm.component';
 
 @Component({
@@ -24,6 +26,7 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
   @Input() instanceTag: string;
   @Input() activatedInstanceTag: string;
   @Input() appConfig: ApplicationConfiguration;
+  @Input() processConfig: ProcessConfigDto;
 
   status: ProcessStatusDto;
   subscription: Subscription;
@@ -36,12 +39,12 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
   uptimeString = '';
   uptimeCalculateHandle: any;
 
-  processSheet: MatBottomSheetRef<ProcessListComponent>;
+  bottomSheet: MatBottomSheetRef<any>;
 
   private overlayRef: OverlayRef;
 
   constructor(private overlay: Overlay,
-    private viewContainerRef: ViewContainerRef, private processService: ProcessService, private instanceService: InstanceService, private bottomSheet: MatBottomSheet, private dialog: MatDialog) {}
+    private viewContainerRef: ViewContainerRef, private processService: ProcessService, private instanceService: InstanceService, private bottomSheetSvc: MatBottomSheet, private dialog: MatDialog) {}
 
   ngOnInit() {
     this.subscription = this.processService.subscribe(() => this.onStatusChanged());
@@ -92,8 +95,8 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     // Update sheet when open
-    if (this.processSheet && this.processSheet.instance) {
-      this.processSheet.instance.setStatus(this.status);
+    if (this.bottomSheet && this.bottomSheet.instance) {
+      this.bottomSheet.instance.setStatus(this.status);
     }
   }
 
@@ -360,14 +363,54 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   showProcessList() {
-    this.processSheet = this.bottomSheet.open(ProcessListComponent, {
+    this.bottomSheet = this.bottomSheetSvc.open(ProcessListComponent, {
       panelClass: 'process-sheet',
       data: {
         statusDto: this.status,
         appConfig: this.appConfig,
       },
     });
-    this.processSheet.afterDismissed().subscribe(_ => this.processSheet = null);
+    this.bottomSheet.afterDismissed().subscribe(_ => this.bottomSheet = null);
+  }
+
+  showPortList() {
+    let minionName = null;
+    const ports = [];
+    const labels = [];
+
+    for (const node of this.processConfig.nodeList.nodeConfigDtos) {
+      for (const app of node.nodeConfiguration.applications) {
+        if (app.uid === this.appConfig.uid) {
+          minionName = node.nodeName;
+          for (const paramCfg of this.appConfig.start.parameters) {
+            const appDesc = this.processConfig.nodeList.applications[this.appConfig.application.name];
+            const paramDesc = appDesc.startCommand.parameters.find(p => p.uid === paramCfg.uid);
+            if (paramDesc.type === ParameterType.SERVER_PORT) {
+              // we want this one :)
+              ports.push(paramCfg.value);
+              labels.push(paramDesc.name);
+            }
+          }
+          break;
+        }
+      }
+      if (minionName) {
+        break;
+      }
+    }
+
+    this.bottomSheet = this.bottomSheetSvc.open(ProcessPortListComponent, {
+      panelClass: 'process-sheet',
+      data: {
+        instanceGroup: this.instanceGroup,
+        instanceId: this.instanceId,
+        minionName: minionName,
+        appName: this.appConfig.name,
+        ports: ports,
+        labels: labels
+      },
+    });
+    this.bottomSheet.afterDismissed().subscribe(_ => this.bottomSheet = null);
   }
 
   countProcessRecursive(parent: ProcessDetailDto): number {
