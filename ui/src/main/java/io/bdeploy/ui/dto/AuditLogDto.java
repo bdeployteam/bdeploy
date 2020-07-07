@@ -59,6 +59,24 @@ public class AuditLogDto {
         this.what = what;
         this.method = method;
         this.parameters = parameters;
+    }
+
+    public AuditLogDto(String line) {
+
+        this.instant = Instant.ofEpochSecond(0, 0);
+        this.endOfBatch = false;
+
+        this.thread = "";
+        this.threadId = 0;
+        this.threadPriority = 0;
+
+        this.level = "INVALID";
+        this.message = line;
+
+        this.who = "";
+        this.what = "Invalid Log Record!";
+        this.method = "";
+        this.parameters = "";
 
     }
 }
