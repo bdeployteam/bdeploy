@@ -56,9 +56,9 @@
       <th scope="col" mat-header-cell *matHeaderCellDef>Level</th>
       <td mat-cell *matCellDef="let element">
         <span class="level-box">
-        <mat-icon *ngIf='element.level === "ERROR"' class='errorIconTheme'>error</mat-icon>
+        <mat-icon *ngIf='(element.level === "ERROR" || element.level === "INVALID")' class='errorIconTheme'>error</mat-icon>
         <mat-icon *ngIf='element.level === "WARN"' class='warningIconTheme'>warning</mat-icon>
-        <mat-icon *ngIf='element.level !== "ERROR" && element.level !== "WARN"' class='infoIconTheme'>info</mat-icon>
+        <mat-icon *ngIf='element.level !== "ERROR" && element.level !== "WARN" && element.level !== "INVALID"' class='infoIconTheme'>info</mat-icon>
         <span class="level-text">{{ element.level }}</span>
         </span>
       </td>

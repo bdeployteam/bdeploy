@@ -90,7 +90,7 @@ export class AuditLogComponent implements OnInit, OnChanges {
   }
 
   public formatInstant(instant: number) {
-    return format(new Date(instant), 'dd.MM.yyyy HH:mm:ss.SSS');
+    return instant === 0 ? '' : format(new Date(instant), 'dd.MM.yyyy HH:mm:ss.SSS');
   }
 
   public isLongText(text: string): boolean {

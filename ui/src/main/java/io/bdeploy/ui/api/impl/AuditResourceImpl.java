@@ -93,7 +93,12 @@ public class AuditResourceImpl implements AuditResource {
         String line;
         boolean first = true;
         while ((line = br.readLine()) != null) {
-            AuditLogDto dto = mapper.readValue(line, AuditLogDto.class);
+            AuditLogDto dto;
+            try {
+                dto = mapper.readValue(line, AuditLogDto.class);
+            } catch (IOException ioe) {
+                dto = new AuditLogDto(line);
+            }
 
             if (first) {
                 first = false;
