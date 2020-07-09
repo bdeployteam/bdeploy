@@ -95,7 +95,7 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     // Update sheet when open
-    if (this.bottomSheet && this.bottomSheet.instance) {
+    if (this.bottomSheet && this.bottomSheet.instance && this.bottomSheet.instance.setStatus) {
       this.bottomSheet.instance.setStatus(this.status);
     }
   }

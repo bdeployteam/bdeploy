@@ -38,3 +38,29 @@
 .port-editor {
   flex: 1 0 auto;
 }
+
+.port-actions {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  width: 100%;
+}
+
+.port-actions button {
+  margin: 5px;
+}
+
+.list-heading {
+  margin-top: 30px;
+  margin-left: 15px;
+}
+
+.center {
+  text-align: center;
+}
+
+.headerText {
+  font-size: 1.5em;
+  margin-left: 15px;
+  vertical-align: middle;
+}

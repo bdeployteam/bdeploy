@@ -1,0 +1,10 @@
+@import '~@angular/material/theming';
+
+@mixin instance-shift-ports-theme($theme) {
+  $warn: map-get($theme, 'warn');
+
+  .port-target-bad {
+    color: mat-color($warn);
+  }
+
+}

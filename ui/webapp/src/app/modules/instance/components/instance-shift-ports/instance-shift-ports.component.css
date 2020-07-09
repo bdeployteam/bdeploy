@@ -1,0 +1,39 @@
+.amount-input {
+  width: 100%;
+}
+
+.table-container {
+  max-height: 400px;
+  overflow: auto;
+}
+
+.mat-table {
+  width: 100%;
+}
+
+.mat-cell {
+  padding: 5px;
+  word-break: break-all;
+  justify-content: center;
+}
+
+.mat-header-cell {
+  padding: 5px;
+}
+
+.mat-column-status {
+  width: 10px;
+}
+
+.mat-column-current {
+  width: 60px;
+}
+
+.mat-column-target {
+  width: 60px;
+}
+
+.mat-column-type {
+  width: 24px;
+  color: grey;
+}

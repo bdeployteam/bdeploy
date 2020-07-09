@@ -699,12 +699,13 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   public onEditPorts() {
-    this.editPortConfigContext = cloneDeep(this.selectedConfig);
+    this.editPortConfigContext = cloneDeep(this.processConfigs[0]);
     this.setEditMode(true, false, true);
   }
 
   public onApplyPortChanges() {
-    this.selectedConfig = this.editPortConfigContext;
+    this.processConfigs[0] = this.editPortConfigContext;
+    this.selectedConfig = this.processConfigs[0];
     this.setEditMode(false);
   }
 

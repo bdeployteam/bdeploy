@@ -128,8 +128,8 @@
         <button mat-menu-item (click)="setSidenavApplications()" [disabled]="!authService.isScopedWrite(groupParam) || isSidenavApplications() || !isEditable() || !isProductAvailable(selectedConfig)">
           <mat-icon>layers</mat-icon>Configure Applications
         </button>
-        <button style='display:none' mat-menu-item (click)="onEditPorts()" [disabled]="!authService.isScopedWrite(groupParam) || !isEditable() || !isProductAvailable(selectedConfig)">
-          <mat-icon>settings_ethernet</mat-icon>Configure Ports
+        <button mat-menu-item (click)="onEditPorts()" [disabled]="!authService.isScopedWrite(groupParam) || !isEditable() || !isProductAvailable(selectedConfig)">
+          <mat-icon>power</mat-icon>Configure Ports
         </button>
         <button mat-menu-item (click)="setSidenavProducts()" [disabled]="!authService.isScopedWrite(groupParam) || isSidenavProducts() || !isEditable()">
           <mat-icon>apps</mat-icon>Change Product Version
@@ -329,6 +329,7 @@
     <app-instance-edit-ports *ngIf='editPortsMode' #editComponent
       class='nodes-container'
       [instanceGroup]="groupParam"
+      [instanceId]='uuidParam'
       [processConfig]="editPortConfigContext"
       [minionConfigs]='minionConfigs'
       (validationStateChanged)="updateDirtyStateAndValidate()">

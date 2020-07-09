@@ -1,23 +1,38 @@
-<form #portsForm='ngForm'>
-  <ng-container *ngFor='let node of processConfig.nodeList.nodeConfigDtos'>
-    <ng-container *ngFor='let app of node.nodeConfiguration.applications'>
-      <mat-card *ngIf='hasPorts(app, node)' class="node-card instance-node-card-theme">
-        <mat-card-header class='node-card-header instance-node-card-header-theme'>
-          <div mat-card-avatar class='instance-node-avatar-container'>
-            <mat-icon class='instance-node-avatar'>layers</mat-icon>
-          </div>
-          <mat-card-title>{{ app.name }}</mat-card-title>
-        </mat-card-header>
-        <mat-card-content class='node-card-content'>
-          <div class='port-parameters'>
-            <div class='port-parameter' *ngFor='let param of getPortParams(app)'>
-              <mat-form-field class='port-editor'>
-                <input matInput (input)='onChange(param.paramCfg, $event.target.value)' [value]='param.paramCfg.value' name="{{instanceGroup}}-{{app.uid}}-{{param.paramCfg.uid}}" placeholder="{{param.paramDesc.name}}" type="number"/>
-              </mat-form-field>
+<div *ngIf='!hasAnyPorts'class="list-heading center">
+  <p>
+    <span class="headerText">This instance has no process with defined server port parameters.</span>
+  </p>
+</div>
+
+<ng-container *ngIf='hasAnyPorts'>
+  <mat-toolbar class='mat-elevation-z1'>
+    <div class='port-actions'>
+      <button mat-raised-button color='primary' (click)='shiftPorts()'>SHIFT PORTS</button>
+      <button mat-raised-button (click)='exportCsv()'>EXPORT CSV</button>
+    </div>
+  </mat-toolbar>
+
+  <form #portsForm='ngForm'>
+    <ng-container *ngFor='let node of processConfig.nodeList.nodeConfigDtos'>
+      <ng-container *ngFor='let app of node.nodeConfiguration.applications'>
+        <mat-card *ngIf='hasPorts(app, node)' class="node-card instance-node-card-theme">
+          <mat-card-header class='node-card-header instance-node-card-header-theme'>
+            <div mat-card-avatar class='instance-node-avatar-container'>
+              <mat-icon class='instance-node-avatar'>layers</mat-icon>
             </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
+            <mat-card-title>{{ app.name }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content class='node-card-content'>
+            <div class='port-parameters'>
+              <div class='port-parameter' *ngFor='let param of getPortParams(app)'>
+                <mat-form-field class='port-editor'>
+                  <input matInput appValidPort #editor (input)='onChange(param, editor.value)' [ngModel]='param.paramCfg.value' name="{{app.uid}}-{{param.paramCfg.uid}}" placeholder="{{param.paramDesc.name}}" type="number"/>
+                </mat-form-field>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </ng-container>
     </ng-container>
-  </ng-container>
-</form>
+  </form>
+</ng-container>

@@ -1,0 +1,73 @@
+<h2 mat-dialog-title>Shift Ports</h2>
+<div mat-dialog-content>
+  <p>
+    This dialog allows to shift all client and server ports by a given value. Negative values are supported. Please deselect any ports that should not be shifted. Take special care to not shift ports which reference external systems.
+  </p>
+  <mat-form-field class='amount-input'>
+    <mat-label>Amount to shift</mat-label>
+    <input matInput type='number' #shiftAmount matTooltip='The amount to shift all ports. Negative values are supported.'>
+  </mat-form-field>
+
+  <div class="table-container mat-elevation-z2">
+    <table mat-table [dataSource]="dataSource">
+      <caption style='display: none;'>Ports to shift</caption>
+
+      <tr mat-header-row *matHeaderRowDef="columnsToDisplay; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: columnsToDisplay"></tr>
+
+      <ng-container matColumnDef="status">
+        <th scope="col" mat-header-cell *matHeaderCellDef>
+          <mat-checkbox
+            (change)="toggleSelection()"
+            [checked]="isAllSelected()"
+            [indeterminate]="isAtLeastOneSelected() && !isAllSelected()"
+          >
+          </mat-checkbox>
+        </th>
+        <td mat-cell *matCellDef="let row">
+          <mat-checkbox (click)="$event.stopPropagation()" (change)="toggleRowSelection(row)" [checked]="row.selected">
+          </mat-checkbox>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="type">
+        <th scope="col" mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let row">
+          <mat-icon>{{ row.client ? 'computer' : 'dns'}}</mat-icon>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="application">
+        <th scope="col" mat-header-cell *matHeaderCellDef>Application</th>
+        <td mat-cell *matCellDef="let row">
+          {{ row.applicationName }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="name">
+        <th scope="col" mat-header-cell *matHeaderCellDef>Parameter</th>
+        <td mat-cell *matCellDef="let row" [matTooltip]='row.desc.longDescription'>
+          {{ row.desc.name }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="current">
+        <th scope="col" mat-header-cell *matHeaderCellDef>Current</th>
+        <td mat-cell *matCellDef="let row" [matTooltip]='row.desc.longDescription'>
+          {{ row.cfg.value }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="target">
+        <th scope="col" mat-header-cell *matHeaderCellDef>Target</th>
+        <td [ngClass]='getTargetClass(row, shiftAmount.value)' mat-cell *matCellDef="let row" [matTooltip]='row.desc.longDescription'>
+          {{ getTargetValue(row, shiftAmount.value) }}
+        </td>
+      </ng-container>
+    </table>
+  </div>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-raised-button [mat-dialog-close]="null">Cancel</button>
+  <button mat-raised-button color="primary" [mat-dialog-close]="shiftAmount.value" [disabled]='!shiftAmount.value || !isAtLeastOneSelected()'>Apply</button>
+</div>

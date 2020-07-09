@@ -35,6 +35,7 @@ import { ApplicationDescriptorDetailComponent } from './components/application-d
 import { ApplicationTemplateVariableDialogComponent } from './components/application-template-variable-dialog/application-template-variable-dialog.component';
 import { ProcessPortListComponent } from './components/process-port-list/process-port-list.component';
 import { InstanceEditPortsComponent } from './components/instance-edit-ports/instance-edit-ports.component';
+import { InstanceShiftPortsComponent } from './components/instance-shift-ports/instance-shift-ports.component';
 
 @NgModule({
   declarations: [
@@ -69,6 +70,7 @@ import { InstanceEditPortsComponent } from './components/instance-edit-ports/ins
     ApplicationTemplateVariableDialogComponent,
     ProcessPortListComponent,
     InstanceEditPortsComponent,
+    InstanceShiftPortsComponent,
   ],
   entryComponents: [
     ApplicationEditManualComponent,

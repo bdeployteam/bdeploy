@@ -36,6 +36,7 @@
 @import 'app/modules/instance/components/instance-notifications/instance-notifications-theme.scss';
 @import 'app/modules/instance/components/instance-sync/instance-sync-theme.scss';
 @import 'app/modules/instance/components/instance-template/instance-template-theme.scss';
+@import 'app/modules/instance/components/instance-shift-ports/instance-shift-ports-theme.scss';
 
 @mixin all-themes($theme) {
   // general angular material theme
@@ -71,6 +72,7 @@
   @include instance-notifications-theme($theme);
   @include instance-sync-theme($theme);
   @include instance-template-theme($theme);
+  @include instance-shift-ports-theme($theme);
 
   .mat-badge-content {
     background-color: rgb(194, 194, 194);
