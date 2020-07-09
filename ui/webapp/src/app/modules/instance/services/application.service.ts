@@ -670,7 +670,7 @@ export class ApplicationService {
         app.uid,
         app.start.parameters,
         desc.startCommand.parameters,
-        oldDesc ? oldDesc.startCommand.parameters : [],
+        oldDesc?.startCommand?.parameters ? oldDesc.startCommand.parameters : [],
         templates,
       );
     }
@@ -680,7 +680,7 @@ export class ApplicationService {
         app.uid,
         app.stop.parameters,
         desc.stopCommand.parameters,
-        oldDesc ? oldDesc.stopCommand.parameters : [],
+        oldDesc?.stopCommand?.parameters ? oldDesc.stopCommand.parameters : [],
         templates,
       );
     }
