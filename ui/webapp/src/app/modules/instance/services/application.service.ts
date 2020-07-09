@@ -723,6 +723,7 @@ export class ApplicationService {
    * Update fixed parameters to the newest value.
    * Set global parameters
    * Check if previously configured parameter is not available any more
+   * Check parameter sequence according to the new definition
    *
    */
   updateParameter(
@@ -733,6 +734,38 @@ export class ApplicationService {
     templates: ApplicationConfiguration[],
   ) {
 
+    // Check parameter sequence according to the new definition (~= Bubblesort)
+    for (let i=0; i < configs.length - 1; i++) {
+      // Config param position in definition
+      const i_descIdx = descs.findIndex(d => d.uid === configs[i].uid);
+
+      // Find config parameter with smallest posiition after current one
+      let m = configs.length;
+      let m_descIdx = descs.length;
+      for (let j=i+1; j < configs.length; j++) {
+        let j_descIdx = descs.findIndex(d => d.uid === configs[j].uid);
+        if (j_descIdx >= 0 && j_descIdx < m_descIdx) {
+          m_descIdx = j_descIdx;
+          m = j;
+        }
+      }
+
+      // Need to reorder?
+      if (m_descIdx < i_descIdx) {
+        // Keep custom parameter right behind the parameter where they have been before
+        // (just a best guess, this might be correct or wrong -- who knows...)
+        let numParam = 1;
+        for (let k=m+1; k < configs.length; k++) {
+          let k_descIdx = descs.findIndex(d => d.uid === configs[k].uid);
+          if (k_descIdx != -1) {
+            break;
+          }
+          numParam++;
+        }
+        configs.splice(i, 0, ...configs.splice(m, numParam));
+      }
+    }
+
     this.correctParameterConfigurations(configs, descs, templates);
 
     // Verify that all parameters are still defined in the new version
@@ -740,16 +773,10 @@ export class ApplicationService {
     for (const config of configs) {
       const oldDefinition = oldDescs.find(d => d.uid === config.uid);
       const newDefinition = descs.find(d => d.uid === config.uid);
-      // Parameter was not defined in the old version -> must be a custom param
-      if (!oldDefinition) {
-        continue;
+      // Collect parameter not defined in the new version any more
+      if (oldDefinition && !newDefinition) {
+        unknownAppParams.push(new UnknownParameter(oldDefinition, config));
       }
-      // Parameter is defined in both versions -> OK still there
-      if ((newDefinition && oldDefinition) || newDefinition) {
-        continue;
-      }
-      // Parameter defined in old but not present in new one
-      unknownAppParams.push(new UnknownParameter(oldDefinition, config));
     }
     this.setUnknownParameters(appUid, unknownAppParams);
   }
