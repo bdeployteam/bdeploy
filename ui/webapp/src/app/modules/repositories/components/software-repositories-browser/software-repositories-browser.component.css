@@ -26,3 +26,22 @@
   font-size: 2em;
   vertical-align: middle;
 }
+
+.headerButton{
+  font-size:1.1em;
+}
+
+.headerButton .mat-icon{
+  margin:0 5px 3px 0;
+}
+
+.repositories-Wrapper{
+  display:flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  padding:10px 10px 10px 55px;
+}
+
+.software-repository-card{
+  margin: 15px;
+}

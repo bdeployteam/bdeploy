@@ -34,12 +34,12 @@
 
     <ng-container matColumnDef="delete">
       <th scope="col" mat-header-cell *matHeaderCellDef></th>
-      <td mat-cell *matCellDef="let element" align="right"><mat-icon class="icon-button" (click)="delete(element)" *ngIf="isTopLevelManifest(element)">delete</mat-icon></td>
+      <td mat-cell *matCellDef="let element" align="right"><mat-icon class="icon-button" (click)="delete(element)" *ngIf="isTopLevelManifest(element)"  matTooltip="Delete File" matTooltipShowDelay="1000">delete</mat-icon></td>
     </ng-container>
 
     <ng-container matColumnDef="download">
       <th scope="col" mat-header-cell *matHeaderCellDef></th>
-      <td mat-cell *matCellDef="let element" align="right"><mat-icon class="icon-button" (click)="download(element)">cloud_download</mat-icon></td>
+      <td mat-cell *matCellDef="let element" align="right"><mat-icon class="icon-button" (click)="download(element)"  matTooltip="Download File" matTooltipShowDelay="1000">cloud_download</mat-icon></td>
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

@@ -25,8 +25,7 @@
         <span class="headerText">No instance groups have been created yet. Start by creating a new one.</span>
       </p>
       <p>
-        <span class="material-icons headerIcon">add</span>
-        <span class="headerText"><a [routerLink]="['/instancegroup/add']">Create Instance Group</a></span>
+        <button mat-raised-button class="headerButton"[routerLink]="['/instancegroup/add']"><mat-icon>add</mat-icon> Instance Group</button>
       </p>
     </ng-container>
     <ng-container *ngIf='authService.isGlobalAdmin() && isAttachAllowed()'>
@@ -48,20 +47,18 @@
 
 <div *ngIf="!instanceGroupList.isEmpty() && (displayRecent | async)">
     <p class="list-heading">Recently used:</p>
-    <mat-grid-list cols="{{columns}}" rowHeight="200px" gutterSize="10px">
-      <mat-grid-tile *ngFor="let recentGroup of filterRecent(recent) | slice:0:columns">
-        <app-instance-group-card [instanceGroup]='recentGroup' (removeEvent)=removeGroup(recentGroup) [isAttachAllowed]='isAttachManagedAllowed()'></app-instance-group-card>
-      </mat-grid-tile>
-    </mat-grid-list>
+    <div class="recentGroup-Wrapper" >
+      <app-instance-group-card class="group-card" *ngFor="let recentGroup of filterRecent(recent)" [instanceGroup]='recentGroup' (removeEvent)=removeGroup(recentGroup) [isAttachAllowed]='isAttachManagedAllowed()'></app-instance-group-card>
+    </div>
+
+
     <mat-divider class="list-divider"></mat-divider>
     <p class="list-heading">All Instance Groups:</p>
 </div>
 
-<mat-grid-list cols="{{columns}}" rowHeight="200px" gutterSize="10px">
-  <mat-grid-tile *ngFor="let group of instanceGroupList.filtered">
-    <app-instance-group-card [instanceGroup]='group' (removeEvent)=removeGroup(group) [isAttachAllowed]='isAttachManagedAllowed()'></app-instance-group-card>
-  </mat-grid-tile>
-</mat-grid-list>
+<div class="instanceGroup-Wrapper">
+  <app-instance-group-card class="group-card" *ngFor="let group of instanceGroupList.filtered" [instanceGroup]='group' (removeEvent)=removeGroup(group) [isAttachAllowed]='isAttachManagedAllowed()'></app-instance-group-card>
+</div>
 
-<button mat-fab class="add-button" *ngIf='isAddAllowed()' [routerLink]="['/instancegroup/add']" [disabled]="!authService.isGlobalAdmin()"><mat-icon>add</mat-icon></button>
+<button mat-fab class="add-button" *ngIf='isAddAllowed()' [routerLink]="['/instancegroup/add']" matTooltip="Add Instance Group" matTooltipShowDelay="1000" [disabled]="!authService.isGlobalAdmin()"><mat-icon>add</mat-icon></button>
 <button mat-fab class="add-button" *ngIf='isAttachAllowed()' [routerLink]="['/servers/attach/central']" [disabled]="!authService.isGlobalAdmin()" matTooltip="Attach Instance Group from Central Server"><mat-icon>link</mat-icon></button>
