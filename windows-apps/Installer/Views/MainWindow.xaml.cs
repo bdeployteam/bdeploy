@@ -8,18 +8,15 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
-namespace Bdeploy.Installer
-{
+namespace Bdeploy.Installer {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
-    {
+    public partial class MainWindow : Window {
         private readonly AppInstaller Installer;
         private bool detailsVisible = false;
 
-        public MainWindow(AppInstaller installer)
-        {
+        public MainWindow(AppInstaller installer) {
             InitializeComponent();
             Installer = installer;
 
@@ -45,46 +42,36 @@ namespace Bdeploy.Installer
             LauncherGrid.Visibility = Visibility.Hidden;
         }
 
-        private void Installer_LauncherInstalled(object sender, EventArgs e)
-        {
-            Dispatcher.Invoke(() =>
-            {
+        private void Installer_LauncherInstalled(object sender, EventArgs e) {
+            Dispatcher.Invoke(() => {
                 ProgressGrid.Visibility = Visibility.Hidden;
                 LauncherGrid.Visibility = Visibility.Visible;
             });
         }
 
-        private void Installer_AppInfo(object sender, AppInfoEventArgs e)
-        {
-            Dispatcher.Invoke(() =>
-            {
+        private void Installer_AppInfo(object sender, AppInfoEventArgs e) {
+            Dispatcher.Invoke(() => {
                 ApplicationName.Text = e.AppName ?? "";
                 ApplicationVendor.Text = e.VendorName ?? "";
             });
         }
 
-        private void Installer_IconLoaded(object sender, IconEventArgs e)
-        {
-            Dispatcher.Invoke(() =>
-            {
+        private void Installer_IconLoaded(object sender, IconEventArgs e) {
+            Dispatcher.Invoke(() => {
                 ApplicationIcon.Source = BitmapFrame.Create(new System.Uri(e.Icon));
             });
         }
 
-        private void Installer_Error(object sender, MessageEventArgs e)
-        {
-            Dispatcher.Invoke(() =>
-            {
+        private void Installer_Error(object sender, MessageEventArgs e) {
+            Dispatcher.Invoke(() => {
                 ProgressGrid.Visibility = Visibility.Hidden;
                 ErrorGrid.Visibility = Visibility.Visible;
                 ErrorDetails.Text = GetDetailedErrorMessage(e.Message);
             });
         }
 
-        private void Installer_NewSubtask(object sender, SubTaskEventArgs e)
-        {
-            Dispatcher.Invoke(() =>
-            {
+        private void Installer_NewSubtask(object sender, SubTaskEventArgs e) {
+            Dispatcher.Invoke(() => {
                 ProgressBar.IsIndeterminate = e.TotalWork == -1;
                 ProgressBar.Value = 0;
                 ProgressBar.Minimum = 0;
@@ -93,51 +80,40 @@ namespace Bdeploy.Installer
             });
         }
 
-        private void Installer_Worked(object sender, WorkedEventArgs e)
-        {
-            Dispatcher.Invoke(() =>
-            {
+        private void Installer_Worked(object sender, WorkedEventArgs e) {
+            Dispatcher.Invoke(() => {
                 ProgressBar.Value += e.Worked;
             });
         }
 
-        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
             DragMove();
         }
 
-        private void Window_MinimizeButton_Click(object sender, RoutedEventArgs e)
-        {
+        private void Window_MinimizeButton_Click(object sender, RoutedEventArgs e) {
             WindowState = WindowState.Minimized;
         }
 
-        private void Window_CloseButton_Click(object sender, RoutedEventArgs e)
-        {
+        private void Window_CloseButton_Click(object sender, RoutedEventArgs e) {
             Installer.Canceled = true;
 
             // Application cannot be closed while we do some task
-            if (ProgressGrid.Visibility == Visibility.Hidden)
-            {
+            if (ProgressGrid.Visibility == Visibility.Hidden) {
                 Close();
             }
         }
 
-        private void CloseButton_Click(object sender, RoutedEventArgs e)
-        {
+        private void CloseButton_Click(object sender, RoutedEventArgs e) {
             Close();
         }
 
-        private void DetailsButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (detailsVisible)
-            {
+        private void DetailsButton_Click(object sender, RoutedEventArgs e) {
+            if (detailsVisible) {
                 ErrorMessage.Visibility = Visibility.Visible;
                 ErrorDetails.Visibility = Visibility.Hidden;
                 ErrorDetailsButton.Content = "Show Details";
                 Height = 300;
-            }
-            else
-            {
+            } else {
                 ErrorMessage.Visibility = Visibility.Hidden;
                 ErrorDetails.Visibility = Visibility.Visible;
                 ErrorDetailsButton.Content = "Hide Details";
@@ -146,13 +122,11 @@ namespace Bdeploy.Installer
             detailsVisible = !detailsVisible;
         }
 
-        private void ClipboardButton_Click(object sender, RoutedEventArgs e)
-        {
+        private void ClipboardButton_Click(object sender, RoutedEventArgs e) {
             Clipboard.SetText(ErrorDetails.Text);
         }
 
-        private string GetDetailedErrorMessage(string message)
-        {
+        private string GetDetailedErrorMessage(string message) {
             StringBuilder builder = new StringBuilder();
             builder.AppendFormat("*** Date: {0}", DateTime.Now.ToString("dd.MM.yyyy hh:mm:ss"));
             builder.AppendLine().AppendLine();
@@ -166,8 +140,7 @@ namespace Bdeploy.Installer
             builder.AppendLine().AppendLine();
 
             builder.Append("*** System environment variables: ").AppendLine();
-            foreach (DictionaryEntry entry in Environment.GetEnvironmentVariables())
-            {
+            foreach (DictionaryEntry entry in Environment.GetEnvironmentVariables()) {
                 builder.AppendFormat("{0}={1}", entry.Key, entry.Value).AppendLine();
             }
             builder.AppendLine();
@@ -180,8 +153,7 @@ namespace Bdeploy.Installer
             return builder.ToString();
         }
 
-        private string ReadValueName(String valueName)
-        {
+        private string ReadValueName(String valueName) {
             return Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion", valueName, "").ToString();
         }
     }

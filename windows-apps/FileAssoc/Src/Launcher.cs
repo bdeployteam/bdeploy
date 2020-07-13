@@ -1,27 +1,21 @@
 ﻿
-using System.Diagnostics;
 using System.ComponentModel;
-using System.IO;
+using System.Diagnostics;
 
-namespace Bdeploy.FileAssoc
-{
+namespace Bdeploy.FileAssoc {
     /// <summary>
     /// Utility class to launch a process
     /// </summary>
-    class Launcher
-    {
+    class Launcher {
         public static readonly int OPERATION_CANCELED = -2;
 
         /// <summary>
         /// Launches the current application again with admin privileges. Waits for the termination
         /// </summary>
         /// <returns> Exit code of the process. -2 if the user cancels the operation (UAC)</returns>
-        public static int RunAsAdmin(string arguments)
-        {
-            try
-            {
-                using (Process process = new Process())
-                {
+        public static int RunAsAdmin(string arguments) {
+            try {
+                using (Process process = new Process()) {
                     process.StartInfo.FileName = Process.GetCurrentProcess().MainModule.FileName;
                     process.StartInfo.Verb = "runas";
                     process.StartInfo.Arguments = arguments;
@@ -29,9 +23,7 @@ namespace Bdeploy.FileAssoc
                     process.WaitForExit();
                     return process.ExitCode;
                 }
-            }
-            catch (Win32Exception)
-            {
+            } catch (Win32Exception) {
                 // Thrown when the user cancels the UAC dialog
                 return OPERATION_CANCELED;
             }

@@ -45,11 +45,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FileHelper.cs" />
-    <Compile Include="Models.cs" />
-    <Compile Include="PathProvider.cs" />
-    <Compile Include="Shortcut.cs" />
-    <Compile Include="Utils.cs" />
+    <Compile Include="Src\FileHelper.cs" />
+    <Compile Include="Src\Models.cs" />
+    <Compile Include="Src\PathProvider.cs" />
+    <Compile Include="Src\Shortcut.cs" />
+    <Compile Include="Src\SoftwareEntry.cs" />
+    <Compile Include="Src\Utils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

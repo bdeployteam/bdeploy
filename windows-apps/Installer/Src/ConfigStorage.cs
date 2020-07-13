@@ -7,8 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 
-namespace Bdeploy.Installer.Models
-{
+namespace Bdeploy.Installer.Models {
     /// <summary>
     /// Knows how to read and write the embedded configuration file. 
     /// 
@@ -30,8 +29,7 @@ namespace Bdeploy.Installer.Models
     /// modifications the size of the entire block is not changed.
     /// 
     /// </summary>
-    public class ConfigStorage
-    {
+    public class ConfigStorage {
         public static readonly string RESOURCE_NAME = "Bdeploy.Installer.Resources.config.txt";
 
         public static readonly string START_MARKER = "###START_BDEPLOY###";
@@ -44,10 +42,8 @@ namespace Bdeploy.Installer.Models
         /// <summary>
         /// Returns the configuration to use. Either the one passed to the application or the embedded is used.
         /// </summary>
-        public static Config GetConfig(StartupEventArgs e)
-        {
-            if (e.Args.Length == 1 && File.Exists(e.Args[0]))
-            {
+        public static Config GetConfig(StartupEventArgs e) {
+            if (e.Args.Length == 1 && File.Exists(e.Args[0])) {
                 return ConfigStorage.ReadConfigurationFromFile(e.Args[0]);
             }
             return ConfigStorage.ReadEmbeddedConfiguration();
@@ -57,8 +53,7 @@ namespace Bdeploy.Installer.Models
         /// De-Serializes the configuration from the given file.
         /// </summary>
         /// <returns></returns>
-        public static Config ReadConfigurationFromFile(string file)
-        {
+        public static Config ReadConfigurationFromFile(string file) {
             string payload = File.ReadAllText(file);
             return DeserializeConfig(payload);
         }
@@ -67,8 +62,7 @@ namespace Bdeploy.Installer.Models
         /// De-Serializes the embedded configuration 
         /// </summary>
         /// <returns></returns>
-        public static Config ReadEmbeddedConfiguration()
-        {
+        public static Config ReadEmbeddedConfiguration() {
             string payload = ReadEmbeddedConfigFile();
             return DeserializeConfig(payload);
         }
@@ -76,13 +70,11 @@ namespace Bdeploy.Installer.Models
         /// <summary>
         /// Parses the payload in order to extract the deserialze the configuration object.
         /// </summary>
-        private static Config DeserializeConfig(string payload)
-        {
+        private static Config DeserializeConfig(string payload) {
             string regex = string.Format("{0}.*{1}(.*){2}.*{3}", START_MARKER, START_CONFIG, END_CONFIG, END_MARKER);
             Regex rx = new Regex(regex, RegexOptions.Singleline | RegexOptions.IgnoreCase);
             Match match = rx.Match(payload);
-            if (!match.Success)
-            {
+            if (!match.Success) {
                 Console.WriteLine("Regex not matching.");
                 return null;
             }
@@ -96,11 +88,9 @@ namespace Bdeploy.Installer.Models
         /// <summary>
         /// Serializes the configururation to the given file. 
         /// </summary>
-        public static void WriteConfiguration(string file, Config config)
-        {
+        public static void WriteConfiguration(string file, Config config) {
             var encoding = new UTF8Encoding(false);
-            using (StreamWriter writer = new StreamWriter(new FileStream(file, FileMode.Create), encoding))
-            {
+            using (StreamWriter writer = new StreamWriter(new FileStream(file, FileMode.Create), encoding)) {
                 // Write header of file
                 writer.Write(START_MARKER);
 
@@ -115,8 +105,7 @@ namespace Bdeploy.Installer.Models
                 // Write dummy-data at the end until the desired size is reached
                 writer.Flush();
                 long remaingBytes = FILE_SIZE - writer.BaseStream.Length - END_MARKER.Length;
-                for (long i = 0; i < remaingBytes; i++)
-                {
+                for (long i = 0; i < remaingBytes; i++) {
                     writer.Write('0');
                 }
                 writer.Write(END_MARKER);
@@ -127,12 +116,10 @@ namespace Bdeploy.Installer.Models
         /// Reads the embedded configuration file and returns the payload as string
         /// </summary>
         /// <returns></returns>
-        public static string ReadEmbeddedConfigFile()
-        {
+        public static string ReadEmbeddedConfigFile() {
             var assembly = Assembly.GetExecutingAssembly();
             using (Stream stream = assembly.GetManifestResourceStream(RESOURCE_NAME))
-            using (StreamReader reader = new StreamReader(stream))
-            {
+            using (StreamReader reader = new StreamReader(stream)) {
                 return reader.ReadToEnd();
             }
         }
