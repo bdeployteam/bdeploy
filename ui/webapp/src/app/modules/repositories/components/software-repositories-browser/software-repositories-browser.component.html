@@ -15,17 +15,13 @@
         </span>
       </p>
       <p>
-        <span class="material-icons headerIcon">add</span>
-        <span class="headerText"><a [routerLink]="['/softwarerepo/add']">Create Software Repository</a></span>
+          <button class="headerButton" mat-raised-button [routerLink]="['/softwarerepo/add']"><mat-icon>add</mat-icon>Create Software Repository</button>
       </p>
   </div>
 </ng-container>
 
+<div class="repositories-Wrapper">
+  <app-software-repository-card class="software-repository-card" *ngFor="let repository of softwareRepositoryList.data" [repository]="repository" (removeEvent)="onRemoveRepo(repository)"></app-software-repository-card>
+</div>
 
-<mat-grid-list *ngIf='!loading' cols="{{columns}}" rowHeight="200px" gutterSize="10px">
-  <mat-grid-tile *ngFor="let repository of softwareRepositoryList.data">
-    <app-software-repository-card [repository]="repository" (removeEvent)="onRemoveRepo(repository)"></app-software-repository-card>
-  </mat-grid-tile>
-</mat-grid-list>
-
-<button mat-fab class="add-button" [disabled]="isReadOnly()" [routerLink]="['/softwarerepo/add']"><mat-icon>add</mat-icon></button>
+<button mat-fab class="add-button" [disabled]="isReadOnly()" [routerLink]="['/softwarerepo/add']" matTooltip="Add Software Repository" matTooltipShowDelay="1000"><mat-icon>add</mat-icon></button>

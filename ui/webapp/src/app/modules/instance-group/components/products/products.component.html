@@ -23,8 +23,8 @@
       <div *ngIf="!loading">
         <div *ngIf="products.size === 0" class="list-heading center">
           <p>
-            <span class="material-icons headerIcon">cloud_upload</span>
-            <span class="headerText">No products are defined. Start by uploading a new one.</span>
+            <p class="headerText">No products are defined. Start by uploading a new one.</p>
+            <button class="headerButton" (click)="openUploadDialog()" mat-raised-button [disabled]="!authService.isScopedAdmin(instanceGroup)"><mat-icon>cloud_upload</mat-icon> upload Product</button>
           <p>
         </div>
         <mat-grid-list cols="{{columns}}" rowHeight="220px" gutterSize="10px">
@@ -33,7 +33,7 @@
           </mat-grid-tile>
         </mat-grid-list>
       </div>
-      <button mat-fab class="add-button" (click)="openUploadDialog()" [disabled]="!authService.isScopedAdmin(instanceGroup)"><mat-icon>cloud_upload</mat-icon></button>
+      <button mat-fab class="add-button" (click)="openUploadDialog()" [disabled]="!authService.isScopedAdmin(instanceGroup)" matTooltip="Upload Product" matTooltipShowDelay="1000"><mat-icon>cloud_upload</mat-icon></button>
       <button mat-fab class="sync-button" *ngIf='isCentral()' [routerLink]='["/servers/product-sync", instanceGroup]' color="primary" [disabled]="!authService.isScopedAdmin(instanceGroup)"><mat-icon>sync_alt</mat-icon></button>
     </mat-drawer-content>
   </mat-drawer-container>

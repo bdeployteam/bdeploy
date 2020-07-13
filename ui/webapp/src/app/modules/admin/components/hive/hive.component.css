@@ -60,3 +60,7 @@ table {
   justify-content: center;
   margin-top: 16px;
 }
+
+.icon-button{
+  cursor:pointer;
+}

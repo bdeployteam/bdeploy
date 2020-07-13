@@ -63,8 +63,8 @@
         <input type="file" hidden (change)="onLogoChange($event)" #fileInput>
       </div>
 
-      <div class="logo-box logo-preview">
-        <div class="logo-img" *ngIf="getLogoUrl() != null">
+      <div class="logo-box logo-preview"  *ngIf="getLogoUrl() != null">
+        <div class="logo-img">
           <img class="logo" [src]="getLogoUrl()" alt='logo'>
         </div>
       </div>

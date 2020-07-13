@@ -69,7 +69,7 @@
 }
 
 .headerText {
-  font-size: 1.5em;
+  font-size: 1.3em;
   margin-left: 15px;
   vertical-align: middle;
 }
@@ -93,4 +93,8 @@
   border-left: 1px solid;
 
   margin: 15px;
+}
+
+.headerText .mat-icon{
+  margin:0 5px 5px 0;
 }

@@ -15,3 +15,7 @@
   flex-direction: row;
   padding-bottom: 8px;
 }
+
+textarea{
+  resize:none;
+}

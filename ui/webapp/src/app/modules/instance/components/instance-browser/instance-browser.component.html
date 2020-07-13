@@ -40,8 +40,7 @@
       <span class="headerText">No products are available in this instance group. Start by uploading a new one so that a new instance can be created.</span>
     </p>
     <p>
-      <span class="material-icons headerIcon">apps</span>
-      <span class="headerText"><a [routerLink]="['/instancegroup/products', instanceGroupName]">Manage Products</a></span>
+      <button class="headerText" mat-raised-button [routerLink]="['/instancegroup/products', instanceGroupName]"><mat-icon>apps</mat-icon>Manage Products</button>
     </p>
   </div>
   <div *ngIf="hasProducts && instanceDtoList.isEmpty()" class="list-heading center">

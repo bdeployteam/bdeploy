@@ -33,7 +33,7 @@
 }
 
 .headerText {
-  font-size: 1.3em;
+  font-size: 1.1em;
   vertical-align: middle;
 }
 
@@ -45,4 +45,28 @@
 .headerIcon {
   font-size: 1.7em;
   vertical-align: middle;
+}
+
+.headerButton{
+  font-size:1.1em
+}
+
+.headerButton .mat-icon{
+  margin:0 5px 3px 0;
+}
+
+.instanceGroup-Wrapper{
+  display:flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  padding:10px 10px 10px 55px;
+}
+
+.recentGroup-Wrapper{
+  display:flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  overflow:hidden;
+  height:200px;
+  padding:10px 10px 10px 55px;
 }

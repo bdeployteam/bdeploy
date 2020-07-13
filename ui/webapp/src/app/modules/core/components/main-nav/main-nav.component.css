@@ -42,6 +42,9 @@
   margin-right: 10px;
 }
 
+.mat-toolbar{
+  padding:10px;
+}
 .spacer {
   flex: 1 1 auto;
 }
@@ -88,6 +91,9 @@ footer {
   width: 48px;
 }
 
+.menu-button{
+  margin-right:5px;
+}
 .server-type-hint {
   font-size: 0.7em;
   font-weight: bold;
