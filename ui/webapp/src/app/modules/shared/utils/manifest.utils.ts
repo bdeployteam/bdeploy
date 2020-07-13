@@ -49,8 +49,8 @@ export function sortByTags(records: any[], accessor: (record: any) => string, as
 export function compareTags(tagA: string, tagB: string): number {
   // split tags into parts, e.g. "5.9.0-N20190830" -> ["5", "9", "0", "N20190830"]
   const tagTokenRegex = /[^0-9a-zA-Z]+/;
-  const a: string[] = tagA.split(tagTokenRegex);
-  const b: string[] = tagB.split(tagTokenRegex);
+  const a: string[] = tagA ? tagA.split(tagTokenRegex) : [];
+  const b: string[] = tagB ? tagB.split(tagTokenRegex) : [];
   // sort  by tokens
   for (let i = 0; i < Math.min(a.length, b.length); i++) {
     const a_isnum = /^\d+$/.test(a[i]);

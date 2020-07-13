@@ -59,7 +59,9 @@ export class HiveComponent implements OnInit {
     // sort by name ascending + sort by tag descending (newest first)
     this.entries = entries.sort((a, b) => {
       if (this.isManifest(a) && this.isManifest(b)) {
-        const c = a.mName.localeCompare(b.mName);
+        const _a = a.mName ? a.mName : a.name;
+        const _b = b.mName ? b.mName : b.name;
+        const c = _a.localeCompare(_b);
         if (c === 0) {
           return -1 * compareTags(a.mTag, b.mTag);
         }
