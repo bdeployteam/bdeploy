@@ -2,15 +2,12 @@
 using System;
 using System.IO;
 
-namespace Bdeploy.Shared
-{
-    public class Shortcut
-    {
+namespace Bdeploy.Shared {
+    public class Shortcut {
         /// <summary>
         /// Creates a shortcut for the given application on the desktop using the given name and icon
         /// </summary>
-        public static void CreateDesktopLink(string group, string instance, string appName, string targetPath, string workingDir, string iconFile)
-        {
+        public static string CreateDesktopLink(string group, string instance, string appName, string targetPath, string workingDir, string iconFile) {
             group = FileHelper.GetSafeFilename(group);
             instance = FileHelper.GetSafeFilename(instance);
             appName = FileHelper.GetSafeFilename(appName);
@@ -26,13 +23,13 @@ namespace Bdeploy.Shared
             linkFile.IconLocation = iconFile;
             linkFile.Description = appName;
             linkFile.Save();
+            return linkPath;
         }
 
         /// <summary>
         /// Creates a shortcut for the given application in the start menu of the user.
         /// </summary>
-        public static void CreateStartMenuLink(string group, string instance, string appName, string productVendor, string targetPath, string workingDir, string iconFile)
-        {
+        public static string CreateStartMenuLink(string group, string instance, string appName, string productVendor, string targetPath, string workingDir, string iconFile) {
             group = FileHelper.GetSafeFilename(group);
             instance = FileHelper.GetSafeFilename(instance);
             appName = FileHelper.GetSafeFilename(appName);
@@ -51,6 +48,7 @@ namespace Bdeploy.Shared
             linkFile.IconLocation = iconFile;
             linkFile.Description = appName;
             linkFile.Save();
+            return linkPath;
         }
     }
 }

@@ -1,90 +1,72 @@
-﻿using System;
-using System.Windows;
+﻿using Bdeploy.Shared;
 using Microsoft.Win32;
+using System;
 using System.IO;
-using Bdeploy.Shared;
+using System.Windows;
 
-namespace Bdeploy.FileAssoc
-{
+namespace Bdeploy.FileAssoc {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
-    {
-        public MainWindow()
-        {
+    public partial class MainWindow : Window {
+        public MainWindow() {
             InitializeComponent();
             InitDefaults();
         }
 
-        private void InitDefaults()
-        {
+        private void InitDefaults() {
             LauncherPath.Text = Path.Combine(Utils.GetWorkingDir(), "BDeploy.exe");
         }
 
-        private void BrowseLauncher_Click(object sender, RoutedEventArgs e)
-        {
+        private void BrowseLauncher_Click(object sender, RoutedEventArgs e) {
             //Let the user chosse the launcher
-            OpenFileDialog dlg = new OpenFileDialog
-            {
+            OpenFileDialog dlg = new OpenFileDialog {
                 DefaultExt = ".exe",
                 Filter = "BDeploy Launcher (*.exe)|*.exe"
             };
 
             // Display OpenFileDialog by calling ShowDialog method 
             Nullable<bool> result = dlg.ShowDialog();
-            if (result != true)
-            {
+            if (result != true) {
                 return;
             }
 
             LauncherPath.Text = dlg.FileName;
         }
 
-        private void CreateAssociation_Click(object sender, RoutedEventArgs e)
-        {
+        private void CreateAssociation_Click(object sender, RoutedEventArgs e) {
             string path = LauncherPath.Text.ToLower();
             FileAssociation.CreateAssociation(path);
         }
 
-        private void DeleteAssociation_Click(object sender, RoutedEventArgs e)
-        {
+        private void DeleteAssociation_Click(object sender, RoutedEventArgs e) {
             FileAssociation.RemoveAssociation();
         }
 
-        private void CreateAssociationAsAdmin_Click(object sender, RoutedEventArgs e)
-        {
-            if (Utils.IsAdmin())
-            {
+        private void CreateAssociationAsAdmin_Click(object sender, RoutedEventArgs e) {
+            if (Utils.IsAdmin()) {
                 string path = LauncherPath.Text.ToLower();
                 FileAssociation.CreateAssociationForAllUsers(path);
-            }
-            else
-            {
+            } else {
                 string argument = "/CreateForAllUsers \"" + LauncherPath.Text.ToLower() + "\"";
                 Launcher.RunAsAdmin(argument);
             }
         }
 
-        private void DeleteAssociationAsAdmin_Click(object sender, RoutedEventArgs e)
-        {
+        private void DeleteAssociationAsAdmin_Click(object sender, RoutedEventArgs e) {
             // Remove for this user
             FileAssociation.RemoveAssociation();
 
             // Remove for all others
-            if (Utils.IsAdmin())
-            {
+            if (Utils.IsAdmin()) {
                 FileAssociation.RemoveAssociationForAllUsers();
-            }
-            else
-            {
+            } else {
                 string argument = "/RemoveForAllUsers";
                 Launcher.RunAsAdmin(argument);
             }
         }
 
-        private void LauncherPath_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
-        {
+        private void LauncherPath_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e) {
             string filePath = LauncherPath.Text.ToLower();
             bool fileExists = File.Exists(filePath);
 
