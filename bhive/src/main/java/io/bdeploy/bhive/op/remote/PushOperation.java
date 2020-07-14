@@ -37,7 +37,6 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
     @Override
     public TransferStatistics call() throws Exception {
         TransferStatistics stats = new TransferStatistics();
-        SortedSet<Manifest.Key> toPush = new TreeSet<>();
 
         try (Activity activity = getActivityReporter().start("Pushing manifests...", -1)) {
             if (manifests.isEmpty()) {
@@ -45,27 +44,27 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
             }
 
             try (RemoteBHive rh = RemoteBHive.forService(getRemote(), hiveName, getActivityReporter())) {
+
+                // add all referenced manifests
+                manifests.addAll(manifests.parallelStream()
+                        .flatMap(m -> execute(new ManifestRefScanOperation().setManifest(m)).values().stream())
+                        .collect(Collectors.toSet()));
+
+                // read remote inventory
                 SortedMap<Manifest.Key, ObjectId> remoteManifests = rh
                         .getManifestInventory(manifests.parallelStream().map(Manifest.Key::toString).toArray(String[]::new));
 
-                for (Manifest.Key key : manifests) {
-                    if (remoteManifests.containsKey(key)) {
-                        continue;
-                    }
-                    toPush.add(key);
-                }
+                // remove all manifests that already exist
+                manifests.removeIf(m -> remoteManifests.containsKey(m));
 
-                // explicitly push and create on the remote any referenced manifests.
-                manifests.forEach(m -> toPush.addAll(execute(new ManifestRefScanOperation().setManifest(m)).values()));
-
-                if (toPush.isEmpty()) {
+                if (manifests.isEmpty()) {
                     return stats;
                 }
 
-                stats.sumManifests = toPush.size();
+                stats.sumManifests = manifests.size();
 
                 // create a view of every manifest on our side. does not follow references as references are scanned above.
-                List<TreeView> snapshots = toPush.stream()
+                List<TreeView> snapshots = manifests.stream()
                         .map(m -> execute(new ScanOperation().setManifest(m).setFollowReferences(false)))
                         .collect(Collectors.toList());
 
@@ -100,7 +99,7 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
                             getActivityReporter())) {
                         CopyOperation op = new CopyOperation().setDestinationHive(emptyHive).setPartialAllowed(true);
                         missingObjects.forEach(op::addObject);
-                        toPush.forEach(op::addManifest);
+                        manifests.forEach(op::addManifest);
 
                         execute(op); // perform copy.
                     } // important: close hive to sync with filesystem
