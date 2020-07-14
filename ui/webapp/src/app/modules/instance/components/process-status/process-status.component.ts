@@ -171,7 +171,7 @@ export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
   getStatusTooltip() {
     if (this.isCrashedWaiting()) {
       if (this.showStateOfAllApps()) {
-        return 'One ore more applications recently crashed.';
+        return 'One or more applications recently crashed.';
       }
       if (this.getShowOutOfSync()) {
         return 'Application recently crashed in a different version.';
@@ -180,7 +180,7 @@ export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
     }
     if (this.isCrashedPermanently()) {
       if (this.showStateOfAllApps()) {
-        return 'One ore more applications permanently crashed.';
+        return 'One or more applications permanently crashed.';
       }
       if (this.getShowOutOfSync()) {
         return 'Application crashed permanently in a different version.';
@@ -189,13 +189,13 @@ export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
     }
     if(this.isStopPlanned()) {
       if (this.showStateOfAllApps()) {
-        return 'One ore more applications are going to be stopped.';
+        return 'One or more applications are going to be stopped.';
       }
       return 'Application is about to be stopped.';
     }
     if (this.isRunning()) {
       if (this.showStateOfAllApps()) {
-        return 'One ore more applications are running.';
+        return 'One or more applications are running.';
       }
       if (this.getShowOutOfSync()) {
         return 'Application is running in a different version.';

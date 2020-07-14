@@ -156,7 +156,7 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
         InstanceProcessController controller = processController.getOrCreate(hive, inm);
         InstanceNodeStatusDto status = controller.getStatus();
         if (status.areAppsRunningOrScheduledInVersion(key.getName())) {
-            throw new WebApplicationException("Key " + key + " has one ore more applications running.", Status.BAD_REQUEST);
+            throw new WebApplicationException("Key " + key + " has one or more applications running.", Status.BAD_REQUEST);
         }
 
         // Remove active version from state if removed.
