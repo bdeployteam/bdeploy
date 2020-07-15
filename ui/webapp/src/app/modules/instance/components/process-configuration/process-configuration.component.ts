@@ -171,6 +171,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
         this.loading = true;
         this.selectedConfig = null;
         this.selectedProcess = null;
+        this.setSidenavVersions();
 
         this.groupParam = p['group'];
         this.uuidParam = p['uuid'];
