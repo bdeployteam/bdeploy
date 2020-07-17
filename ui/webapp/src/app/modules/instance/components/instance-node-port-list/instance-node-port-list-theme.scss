@@ -1,0 +1,14 @@
+@import '~@angular/material/theming';
+
+@mixin instance-node-port-list-theme($theme) {
+  $dark: map-get($theme, is-dark);
+  $warn: map-get($theme, 'warn');
+
+  .port-open {
+    color: if($dark, mat-color($mat-green, 400), mat-color($mat-green, 600));
+  }
+
+  .port-closed {
+    color: mat-color($warn);
+  }
+}
