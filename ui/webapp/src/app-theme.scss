@@ -25,6 +25,7 @@
 
 @import 'app/modules/instance/components/instance-card/instance-card-theme.scss';
 @import 'app/modules/instance/components/instance-node-card/instance-node-card-theme.scss';
+@import 'app/modules/instance/components/instance-node-port-list/instance-node-port-list-theme.scss';
 @import 'app/modules/instance/components/instance-version-card/instance-version-card-theme.scss';
 @import 'app/modules/instance/components/application-edit/application-edit-theme.scss';
 @import 'app/modules/instance/components/application-configuration-card/application-configuration-card-theme.scss';
@@ -52,6 +53,7 @@
   @include audit-log-theme($theme);
   @include instance-card-theme($theme);
   @include instance-node-card-theme($theme);
+  @include instance-node-port-list-theme($theme);
   @include instance-version-card-theme($theme);
   @include application-edit-theme($theme);
   @include product-tag-card-theme($theme);

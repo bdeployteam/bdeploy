@@ -1,0 +1,28 @@
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mat-table {
+  width: 100%;
+}
+
+.mat-header-cell {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.mat-cell {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.mat-column-port {
+  text-align: right;
+  width: 40px;
+}
+
+.mat-column-state {
+  text-align: center;
+}
