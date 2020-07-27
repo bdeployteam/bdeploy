@@ -72,8 +72,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
     productPromise.pipe(finalize(() => this.loading = false)).subscribe(p => {
       this.products = new Map();
       p.forEach(prod => {
-        this.products.set(prod.name, this.products.get(prod.name) || []);
-        this.products.get(prod.name).push(prod);
+        this.products.set(prod.key.name, this.products.get(prod.key.name) || []);
+        this.products.get(prod.key.name).push(prod);
       });
       this.productsKeys = Array.from(this.products.keys());
       this.productsKeys.forEach(key => {
