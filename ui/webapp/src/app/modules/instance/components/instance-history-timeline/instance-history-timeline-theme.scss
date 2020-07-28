@@ -1,0 +1,14 @@
+@import "~@angular/material/theming";
+
+@mixin instance-history-timeline-theme($theme){
+
+  $isDark: map-get($theme,"is-dark");
+  .timeline_line{
+    background-color: mat-color(if($isDark,mat-palette($mat-grey,700),mat-palette($mat-grey,400)));
+  }
+
+  .timeline_circle{
+    background-color: mat-color(map-get($theme,primary));
+    box-shadow: 0 0 3px 1px if($isDark,rgba(0,0,0,0.3),rgba(50,50,50,0.3));
+  }
+}

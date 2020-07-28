@@ -245,10 +245,20 @@
 .headerTextSmall {
   font-size: 1.2em;
   margin-left: 15px;
+  margin-top:15px;
+  margin-bottom:12px;
   vertical-align: middle;
 }
 
 .headerIcon {
   font-size: 2em;
   vertical-align: middle;
+}
+
+.headerButton{
+  margin-left:5px;
+}
+
+.headerButton .mat-icon{
+  margin:0 5px 2px 0;
 }

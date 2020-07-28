@@ -1,0 +1,10 @@
+<div class="timeline_wrapper">
+  <div class="timeline_line" #timeline_line></div>
+  <div class="timeline_list" #timeline_list>
+    <div class="timeline_item" *ngFor="let entry of entries" > <div class="timeline_circle"></div>
+      <app-instance-history-timeline-card #timeline_card [entry]="entry" (add-to-comparison)="addToComparisonEvent($event)" (cardOpen)="cardOpened($event)" (cardClose)="cardClosed()">
+      </app-instance-history-timeline-card>
+    </div>
+  </div>
+</div>
+<mat-spinner [diameter]="30" *ngIf="loading" class="loading-spinner"></mat-spinner>

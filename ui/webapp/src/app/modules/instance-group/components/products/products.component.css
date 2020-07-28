@@ -89,3 +89,14 @@
 .headerButton .mat-icon{
   margin:0 5px 2px 0;
 }
+
+.products-browser-wrapper{
+  display:flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  padding:15px;
+}
+
+app-product-card{
+  margin:15px;
+}

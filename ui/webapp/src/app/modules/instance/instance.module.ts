@@ -20,6 +20,9 @@ import { InstanceAddEditComponent } from './components/instance-add-edit/instanc
 import { InstanceBrowserComponent } from './components/instance-browser/instance-browser.component';
 import { InstanceCardComponent } from './components/instance-card/instance-card.component';
 import { InstanceEditPortsComponent } from './components/instance-edit-ports/instance-edit-ports.component';
+import { InstanceHistoryTimelineCardComponent } from './components/instance-history-timeline-card/instance-history-timeline-card.component';
+import { InstanceHistoryTimelineComponent } from './components/instance-history-timeline/instance-history-timeline.component';
+import { InstanceHistoryComponent } from './components/instance-history/instance-history.component';
 import { InstanceNodeCardComponent } from './components/instance-node-card/instance-node-card.component';
 import { InstanceNodePortListComponent } from './components/instance-node-port-list/instance-node-port-list.component';
 import { InstanceNotificationsItemComponent } from './components/instance-notifications-item/instance-notifications-item.component';
@@ -73,6 +76,9 @@ import { InstanceRoutingModule } from './instance-routing.module';
     ProcessPortListComponent,
     InstanceEditPortsComponent,
     InstanceShiftPortsComponent,
+    InstanceHistoryComponent,
+    InstanceHistoryTimelineComponent,
+    InstanceHistoryTimelineCardComponent
   ],
   entryComponents: [
     ApplicationEditManualComponent,

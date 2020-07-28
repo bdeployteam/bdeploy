@@ -49,3 +49,11 @@
   justify-content: flex-end;
   align-items: center;
 }
+
+.headerButton{
+  font-size:1.1em
+}
+
+.headerButton .mat-icon{
+  margin:0 5px 3px 0;
+}

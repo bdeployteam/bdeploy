@@ -1,0 +1,116 @@
+mat-toolbar{
+  z-index:1;
+}
+
+:host{
+  height: 100%;
+  display:flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+::ng-deep .history-search-field span.ng-tns-c108-3{
+  color:rgb(180,180,180);
+}
+
+:host ::ng-deep .instance-history-card-button:active{
+  background-color: rgba(0,0,0,0.1);
+  transition:all 0.2s;
+}
+
+:host ::ng-deep .instance-history-card-button{
+  transition:all 0.5s;
+}
+
+.toolbar-title span{
+  font-weight:lighter;
+}
+
+.toolbar-title{
+  font-weight:normal;
+}
+
+.close-all-button{
+  margin-left:5px
+}
+
+.accordionBehaviour-button{
+  margin-left:40px;
+  font-size:smaller;
+  font-weight: lighter;
+}
+
+.history-compare-input{
+  background-color: inherit;
+  border: none;
+  width: 30px;
+  font-family: inherit;
+  color:inherit;
+  padding:0 5px;
+  outline: none;
+}
+
+.compare-versions{
+  margin-left: auto;
+  font-size:0.6em;
+  height:64px;
+  display:flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.instance-history-comparison-dialog{
+  position:fixed;
+  padding: 20px 30px 10px 30px;
+  top:50%;
+  left:50%;
+  z-index:3;
+  transform:translate(-50%,-50%);
+
+  border-radius: 5px;
+  box-sizing: border-box;
+
+  max-height:95vh;
+  overflow:auto;
+
+  min-width: 350px;
+}
+
+.instance-history-comparison-dialog>ul{
+  margin-top: 10px;
+  padding:10px;
+  font-weight: lighter;
+}
+
+.instance-history-comparison-dialog>em{
+  display:block;
+  width:100%;
+  text-align: center;
+}
+
+.instance-history-comparison-dialog-header{
+  display:flex;
+  flex-direction: row;
+  align-items: center;
+  position:relative;
+  margin-top:10px;
+}
+
+.instance-history-comparison-dialog-header span{
+  margin: 0 10px;
+}
+
+.instance-history-comparison-dialog-header .version-left{
+  margin-left: auto;
+}
+
+.instance-history-comparison-dialog-header .version-right{
+  margin-right: auto;
+}
+
+.instance-history-comparison-dialog-header button{
+  margin-left: auto;
+  position:absolute;
+  right:-27px;
+  top:-47px;
+}

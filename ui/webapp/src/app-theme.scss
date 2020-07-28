@@ -38,6 +38,8 @@
 @import 'app/modules/instance/components/instance-sync/instance-sync-theme.scss';
 @import 'app/modules/instance/components/instance-template/instance-template-theme.scss';
 @import 'app/modules/instance/components/instance-shift-ports/instance-shift-ports-theme.scss';
+@import 'app/modules/instance/components/instance-history-timeline/instance-history-timeline-theme.scss';
+@import 'app/modules/instance/components/instance-history/instance-history-theme.scss';
 
 @mixin all-themes($theme) {
   // general angular material theme
@@ -75,6 +77,8 @@
   @include instance-sync-theme($theme);
   @include instance-template-theme($theme);
   @include instance-shift-ports-theme($theme);
+  @include instance-history-timeline-theme($theme);
+  @include instance-history-theme($theme);
 
   .mat-badge-content {
     background-color: rgb(194, 194, 194);

@@ -1,0 +1,77 @@
+
+.timeline-card_header{
+  width:100%;
+  margin: 0 15px 0 0;
+  background-color:none;
+  border-bottom-left-radius: 0;
+}
+
+.timeline-card_header p{
+  font-size:1.2em;
+  margin:10px 0 3px 0;
+  text-align: center;
+}
+
+.timeline-card_header div{
+  text-align: end;
+  font-size: 0.85em;
+  margin-bottom:10px;
+}
+
+.mat-expansion-panel-header{
+  height:auto;
+  transition: all 0.2s;
+}
+
+.timeline-card_content{
+  margin:10px 0 0 0;
+  font-weight: lighter;
+}
+
+.mat-expansion-panel-body{
+  padding:10px;
+}
+
+.mat-expanded{
+  transition: all 0.2s;
+}
+
+.content-title-wrapper{
+  display:flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.content-title-wrapper button{
+  margin-left:auto;
+}
+
+.content-title-wrapper app-user-avatar{
+  margin: 10px 10px 10px 0;
+}
+
+.changes-compared-text{
+  margin: 5px 0 3px 0;
+}
+
+::ng-deep em{
+  font-style: normal;
+  font-weight: 500;
+}
+
+::ng-deep i{
+  font-style: italic;
+  font-weight: normal;
+}
+
+::ng-deep ul{
+  padding-left:30px;
+  list-style-type:none;
+  padding-bottom: 5px;
+  margin: 0;
+}
+
+::ng-deep .timeline-card_content{
+  padding-left:10px;
+  padding-top: 10px;
+}

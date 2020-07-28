@@ -154,6 +154,37 @@ describe('Instance Tests', function () {
     cy.get('[role=menuitem]').contains('Export').should('be.enabled').downloadFile('export-test.zip');
   })
 
+  it("Check the instance history",()=>{
+    cy.visit('/#/instance/history/Test/' + instanceUuid);
+    cy.waitUntilContentLoaded();
+
+    cy.screenshot("BDeploy_User_History_Overview")
+
+    // check if there is the right amount of events
+    cy.get(".timeline_item").should("have.length","6");
+
+    // open cards
+    cy.contains("Version 4: Creation").click();
+    cy.contains("Version 4: Activation").click();
+    cy.screenshot("BDeploy_User_History_OpenedCard");
+
+    // check if cards contain expected text
+    cy.contains("Version 4: Creation").parent().parent().parent().parent().find(".timeline-card_content")
+      .should("contain.html","master").and("contain.html","Parameter")
+      .and("contain.html","param.sleep").parent().find(".content-title-wrapper button").click();
+
+    cy.contains("Version 2: Creation").click().parent().parent().parent().parent().find(".timeline-card_content")
+      .should("contain.html","master:").and("contain.html","Server Application");
+
+    // check comparison dialog
+    cy.get(".history-compare-input").eq(1).type("1");
+    cy.get(".compare-versions").find("button").click();
+    cy.get(".instance-history-comparison-dialog").should("contain.html","master:")
+      .and("contain.html","Config files").and("contain.html","cypress.cfg");
+
+    cy.screenshot("BDeploy_User_History_ComparisonDialog");
+  });
+
   /**
    * Delete the instance and the group
    */

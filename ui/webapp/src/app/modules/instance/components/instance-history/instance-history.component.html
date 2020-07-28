@@ -1,0 +1,92 @@
+<mat-toolbar class="mat-elevation-z1 instance-history_main-toolbar">
+  <mat-toolbar-row class="toolbar-row-1st">
+    <button mat-icon-button (click)="location.back()"> <mat-icon>chevron_left</mat-icon></button>
+    <div class="toolbar-title"> <span> Instance: </span><app-instance-group-title [instanceGroup]="groupParam"></app-instance-group-title>/ {{instance? instance.name:""}}</div>
+    <div class="compare-versions">
+      Compare Versions
+      <div style="margin-top:-10px">
+        <input #compare_a class="history-compare-input" (keydown)="compareInputKeydown($event,0)"/>
+        <button mat-icon-button matTooltip="Compare versions" matTooltipShowDelay="1000"  (click)="compareVersion()"><mat-icon>arrow_right_alt</mat-icon></button>
+        <input #compare_b class="history-compare-input" (keydown)="compareInputKeydown($event,1)"/>
+      </div>
+    </div>
+    <button class="accordionBehaviour-button" matTooltip="show only one at a time" matTooltipShowDelay="500" mat-icon-button (click)="accordionBehaviour = !accordionBehaviour; accordionBehaviour? closeAll() : null"><mat-icon color="accent" *ngIf="accordionBehaviour">view_day</mat-icon><mat-icon *ngIf="!accordionBehaviour">view_day</mat-icon></button>
+    <button class="close-all-button" mat-icon-button matTooltip="close all cards" matTooltipShowDelay="500" [disabled]="accordionBehaviour" (click)="closeAll()"><mat-icon>indeterminate_check_box</mat-icon></button>
+  </mat-toolbar-row>
+</mat-toolbar>
+
+<div *ngIf="compareDialogOpen" @fade class="instance-history-comparison-dialog">
+  <em>Changes between versions</em>
+  <div class="instance-history-comparison-dialog-header">
+    <span class="version-left">{{compareInputA.nativeElement.value}}</span>
+    <mat-icon>arrow_right_alt</mat-icon>
+    <span class="version-right">{{compareInputB.nativeElement.value}}</span>
+    <button (click)="compareDialogOpen = false" mat-icon-button><mat-icon>close</mat-icon></button>
+  </div>
+  <mat-divider></mat-divider>
+  <ul *ngIf="compareDialogContent != null">
+    <li *ngFor="let property of compareDialogContent.properties | keyvalue">
+      {{property.key}}: <i>{{property.value[0]}}</i> --> <i>{{property.value[1]}}</i></li>
+
+    <li *ngFor="let node of compareDialogContent.nodes | keyvalue">
+      <span *ngIf="node.key != '__ClientApplications' else clientApplications">Node <em>{{node.key}}:</em></span>
+      <ng-template #clientApplications><em>Client Applications:</em></ng-template>
+      <ul>
+        <li *ngFor="let added of node.value.added">Added <i>{{added}}</i></li>
+        <li *ngFor="let deleted of node.value.deleted">Deleted <i>{{deleted}}</i></li>
+
+        <li *ngFor="let changed of node.value.changed | keyvalue">
+          Application <em>{{changed.key}}:</em>
+          <ul>
+
+            <li *ngFor="let property of changed.value.properties|keyvalue">
+              {{property.key}}: <i>{{property.value[0]}}</i> --> <i>{{property.value[1]}}</i></li>
+            <li *ngIf="!isEmpty(changed.value.processControlProperties)">
+              Process control:
+              <ul>
+                <li *ngFor="let property of changed.value.processControlProperties|keyvalue">
+                  {{property.key}}: <i>{{property.value[0]}}</i> --> <i>{{property.value[1]}}</i></li>
+              </ul>
+            </li>
+
+            <li *ngIf="changed.value.parameters != null">
+              Parameters:
+              <ul>
+                <li *ngFor="let added of changed.value.parameters.added">
+                  Added <em>{{added[0]}}</em>:<i>{{added[1]}}</i></li>
+                <li *ngFor="let deleted of changed.value.parameters.deleted">
+                  Deleted  <em>{{deleted[0]}}:</em><i>{{deleted[1]}}</i></li>
+              </ul>
+            </li>
+
+            <li *ngFor="let addedEndpoint of changed.value.addedEndpoints">
+              Added http-endpoint at <i>{{addedEndpoint}}</i></li>
+            <li *ngFor="let deletedEndpoint of changed.value.deletedEndpoints">
+              Added http-endpoint at <i>{{deletedEndpoint}}</i></li>
+            <li *ngFor="let endpoint of changed.value.endpoints|keyvalue">
+              Http-endpoint at {{endpoint.key}}:
+              <ul>
+                <li *ngFor="let property of endpoint.value.properties|keyvalue">
+                  {{property.key}}: <i>{{property.value[0]}}</i> --> <i>{{property.value[1]}}</i></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+
+    <li *ngIf="compareDialogContent.configFiles != null">
+      Config files:
+      <ul>
+        <li *ngFor="let added of compareDialogContent.configFiles.added">
+          Added <i>{{added}}</i></li>
+        <li *ngFor="let deleted of compareDialogContent.configFiles.deleted">
+          Deleted <i>{{deleted}}</i></li>
+        <li *ngFor="let changed of compareDialogContent.configFiles.changed">
+          Changed <i>{{changed}}</i></li>
+      </ul>
+    </li>
+  </ul>
+</div>
+
+<app-instance-history-timeline [loading]="loading" [accordion-behaviour]="accordionBehaviour" (add-to-comparison)="addVersionToCompare($event)" [entry-list]="historyEntries" #timeline (scrolled-down)="onScrolledDown()"></app-instance-history-timeline>

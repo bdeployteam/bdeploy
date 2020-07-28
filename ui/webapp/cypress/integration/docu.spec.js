@@ -128,7 +128,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.login();
     cy.visit('/#/instance/browser/Demo').waitUntilContentLoaded();
     cy.contains('No instances have been defined yet.').should('be.visible');
-    cy.contains('a', 'Create Instance').click();
+    cy.contains('button', 'Add Instance').click();
 
     // Create new instance
     cy.get('[placeholder=Name]').type('Demo Instance');

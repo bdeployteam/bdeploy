@@ -22,16 +22,12 @@
       </div>
       <div *ngIf="!loading">
         <div *ngIf="products.size === 0" class="list-heading center">
-          <p>
             <p class="headerText">No products are defined. Start by uploading a new one.</p>
-            <button class="headerButton" (click)="openUploadDialog()" mat-raised-button [disabled]="!authService.isScopedAdmin(instanceGroup)"><mat-icon>cloud_upload</mat-icon> upload Product</button>
-          <p>
+            <button class="headerButton" (click)="openUploadDialog()" mat-raised-button [disabled]="!authService.isScopedAdmin(instanceGroup)"><mat-icon>cloud_upload</mat-icon> Upload Product</button>
         </div>
-        <mat-grid-list cols="{{columns}}" rowHeight="220px" gutterSize="10px">
-          <mat-grid-tile *ngFor="let prod of productsKeys">
-            <app-product-card [instanceGroup]='instanceGroup' [product]="prod" [productVersions]='products.get(prod)' (select)='openProduct(prod)'></app-product-card>
-          </mat-grid-tile>
-        </mat-grid-list>
+        <div class="products-browser-wrapper">
+          <app-product-card *ngFor="let prod of productsKeys" [instanceGroup]='instanceGroup' [product]="prod" [productVersions]='products.get(prod)' (select)='openProduct(prod)'></app-product-card>
+        </div>
       </div>
       <button mat-fab class="add-button" (click)="openUploadDialog()" [disabled]="!authService.isScopedAdmin(instanceGroup)" matTooltip="Upload Product" matTooltipShowDelay="1000"><mat-icon>cloud_upload</mat-icon></button>
       <button mat-fab class="sync-button" *ngIf='isCentral()' [routerLink]='["/servers/product-sync", instanceGroup]' color="primary" [disabled]="!authService.isScopedAdmin(instanceGroup)"><mat-icon>sync_alt</mat-icon></button>

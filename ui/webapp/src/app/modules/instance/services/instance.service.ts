@@ -2,7 +2,7 @@ import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular
 import { Injectable } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { ClickAndStartDescriptor, ConfigFileDto, FileStatusDto, InstanceConfiguration, InstanceConfigurationDto, InstanceDirectory, InstanceDirectoryEntry, InstanceDto, InstanceManifestHistoryDto, InstanceNodeConfigurationListDto, InstancePurpose, InstanceStateRecord, InstanceVersionDto, ManifestKey, MinionDto, MinionStatusDto, StringEntryChunkDto } from '../../../models/gen.dtos';
+import { ClickAndStartDescriptor, ConfigFileDto, FileStatusDto, HistoryEntryDto, HistoryEntryVersionDto, InstanceConfiguration, InstanceConfigurationDto, InstanceDirectory, InstanceDirectoryEntry, InstanceDto, InstanceManifestHistoryDto, InstanceNodeConfigurationListDto, InstancePurpose, InstanceStateRecord, InstanceVersionDto, ManifestKey, MinionDto, MinionStatusDto, StringEntryChunkDto } from '../../../models/gen.dtos';
 import { ConfigService } from '../../core/services/config.service';
 import { ErrorMessage, Logger, LoggingService } from '../../core/services/logging.service';
 import { SystemService } from '../../core/services/system.service';
@@ -303,5 +303,40 @@ export class InstanceService {
 
   public buildInstanceUrl(instanceGroupName: string, instanceName: string): string {
     return this.buildGroupUrl(instanceGroupName) + '/' + instanceName;
+  }
+
+  public getInstanceHistory(
+    instanceGroupName: string,
+    instanceId: string,
+    amount: number,
+  ): Observable<HistoryEntryDto[]> {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceId) + '/history';
+    const params = new HttpParams().set("amount",amount.toString());
+    this.log.debug('getInstanceHistory: ' + url);
+    return this.http.get<HistoryEntryDto[]>(url,{params:params});
+  }
+
+  public getMoreInstanceHistory(
+    instanceGroupName: string,
+    instanceId: string,
+    amount: number,
+    offset: number
+  ): Observable<HistoryEntryDto[]> {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceId) + '/more-history';
+    const params = new HttpParams().set("amount",amount.toString()).set("offset",offset.toString());
+    this.log.debug('getMoreInstanceHistory: ' + url);
+    return this.http.get<HistoryEntryDto[]>(url,{params:params});
+  }
+
+  public getVersionComparison(
+    instanceGroupName: string,
+    instanceId: string,
+    versionA: Number,
+    versionB: Number
+  ): Observable<HistoryEntryVersionDto> {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceId) + '/compare-versions';
+    const params = new HttpParams().set("a",versionA.toString()).set("b",versionB.toString());
+    this.log.debug('getVersionComparison: ' + url);
+    return this.http.get<HistoryEntryVersionDto>(url,{params:params});
   }
 }

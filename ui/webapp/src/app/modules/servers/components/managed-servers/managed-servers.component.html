@@ -12,10 +12,7 @@
     <p>
       <span class="headerText">No managed servers are attached to this instance group.</span>
     </p>
-    <p>
-      <span class="material-icons headerIcon">link</span>
-      <span class="headerText"><a [routerLink]="['/servers/attach/managed', instanceGroupName]">Attach Managed Server</a></span>
-    </p>
+      <button mat-raised-button [routerLink]="['/servers/attach/managed', instanceGroupName]"><mat-icon>link</mat-icon>Attach Managed Server</button>
   </div>
   <div *ngIf="managedServers && managedServers.length > 0" class="content-container">
     <mat-accordion multi='true'>

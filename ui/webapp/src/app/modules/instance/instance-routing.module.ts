@@ -5,6 +5,7 @@ import { CanDeactivateGuard } from '../shared/guards/can-deactivate.guard';
 import { DataFilesBrowserComponent } from './components/data-files-browser/data-files-browser.component';
 import { InstanceAddEditComponent } from './components/instance-add-edit/instance-add-edit.component';
 import { InstanceBrowserComponent } from './components/instance-browser/instance-browser.component';
+import { InstanceHistoryComponent } from './components/instance-history/instance-history.component';
 import { ProcessConfigurationComponent } from './components/process-configuration/process-configuration.component';
 
 const INSTANCE_ROUTES: Route[] = [
@@ -42,6 +43,13 @@ const INSTANCE_ROUTES: Route[] = [
     canDeactivate: [CanDeactivateGuard],
     data: { title: 'Data Files (${params["group"]} - ${params["uuid"]})', header: 'Data Files' }
   },
+  {
+    path:'history/:group/:uuid',
+    component:InstanceHistoryComponent,
+    canActivate:[AuthGuard],
+    canDeactivate:[CanDeactivateGuard],
+    data: {title: 'History (${params["group"]} - ${params["uuid"]})', header: "Instance History"}
+  }
 ];
 
 @NgModule({

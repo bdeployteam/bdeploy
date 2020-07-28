@@ -48,8 +48,7 @@
       <span class="headerText">No instances have been defined yet.</span>
     </p>
     <p>
-      <span class="material-icons headerIcon">add</span>
-      <span class="headerText"><a color="primary" [routerLink]="['/instance/add', instanceGroupName]">Create Instance</a></span>
+      <button class="headerButton" mat-raised-button [routerLink]="['/instance/add', instanceGroupName]"><mat-icon>add</mat-icon> Add Instance</button>
     </p>
   </div>
   <div *ngFor="let purpose of purposes">
@@ -61,6 +60,6 @@
   </div>
 </ng-container>
 
-<button mat-fab class="add-button" [routerLink]="['/instance/add', instanceGroupName]" [disabled]="!authService.isScopedAdmin(instanceGroupName) || !hasProducts">
+<button mat-fab class="add-button" [routerLink]="['/instance/add', instanceGroupName]" [disabled]="!authService.isScopedAdmin(instanceGroupName) || !hasProducts" matTooltip="Add Instance" matTooltipShowDelay="1000">
   <mat-icon>add</mat-icon>
 </button>

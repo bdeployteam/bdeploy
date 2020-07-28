@@ -36,7 +36,7 @@ describe('Instance Tests', function () {
     cy.waitUntilContentLoaded();
 
     cy.screenshot('BDeploy_Instance_Template_Empty');
-    cy.contains('a', 'Instance Template').should('exist').and('be.visible').click();
+    cy.contains('button', 'Instance Template').should('exist').and('be.visible').click();
     cy.contains('button', 'Default Configuration').click();
 
     cy.contains('div', 'Server Apps').contains('mat-select', 'None').click();

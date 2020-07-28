@@ -1,0 +1,83 @@
+<mat-expansion-panel #panel (opened)="cardOpened()" (closed)="cardClosed()">
+  <mat-expansion-panel-header>
+    <div class="timeline-card_header"> <p>{{entry.title}}</p><div>{{formatDate(entry.timestamp)}}</div> </div>
+  </mat-expansion-panel-header>
+  <div class="content-title-wrapper">
+    <app-user-avatar [avatarSize]="20" [hostSize]="20" [mail]="this.entry.email != ''?this.entry.email:null"></app-user-avatar>
+    <span>{{this.entry.user}}</span>
+    <button *ngIf="entry.type=='CREATE'" mat-icon-button matTooltip="compare Versions" matTooltipShowDelay="500" (click)="addToComparisonClick()"><mat-icon>compare_arrows</mat-icon></button>
+  </div>
+
+  <div *ngIf="entry.type=='CREATE' && entry.version != 1" class="changes-compared-text">
+    changes compared to last version
+  <mat-divider></mat-divider>
+  </div>
+  <ul class="timeline-card_content" *ngIf="entry != null && entry.content != null">
+
+    <li *ngFor="let property of entry.content.properties | keyvalue">
+      {{property.key}}: <i>{{property.value[0]}}</i> --> <i>{{property.value[1]}}</i></li>
+
+    <li *ngFor="let node of entry.content.nodes | keyvalue">
+      <span *ngIf="node.key != '__ClientApplications' else clientApplications">Node <em>{{node.key}}:</em></span>
+      <ng-template #clientApplications><em>Client Applications:</em></ng-template>
+      <ul>
+        <li *ngFor="let added of node.value.added">Added <i>{{added}}</i></li>
+        <li *ngFor="let deleted of node.value.deleted">Deleted <i>{{deleted}}</i></li>
+
+        <li *ngFor="let changed of node.value.changed | keyvalue">
+          Application <em>{{changed.key}}:</em>
+          <ul>
+
+            <li *ngFor="let property of changed.value.properties|keyvalue">
+              {{property.key}}: <i>{{property.value[0]}}</i> --> <i>{{property.value[1]}}</i></li>
+            <li *ngIf="!isEmpty(changed.value.processControlProperties)">
+              Process control:
+              <ul>
+                <li *ngFor="let property of changed.value.processControlProperties|keyvalue">
+                  {{property.key}}: <i>{{property.value[0]}}</i> --> <i>{{property.value[1]}}</i></li>
+              </ul>
+            </li>
+
+            <li *ngIf="changed.value.parameters != null">
+              Parameters:
+              <ul>
+                <li *ngFor="let added of changed.value.parameters.added">
+                  Added <em>{{added[0]}}</em>:<i>{{added[1]}}</i></li>
+                <li *ngFor="let deleted of changed.value.parameters.deleted">
+                  Deleted  <em>{{deleted[0]}}:</em><i>{{deleted[1]}}</i></li>
+                <li *ngFor="let changedParameter of changed.value.parameters.changed | keyvalue">
+                  <em>{{changedParameter.key}}: </em> <i>{{changedParameter.value[0]}}</i> --> <i>{{changedParameter.value[1]}}</i>
+                </li>
+              </ul>
+            </li>
+
+            <li *ngFor="let addedEndpoint of changed.value.addedEndpoints">
+              Added http-endpoint at <i>{{addedEndpoint}}</i></li>
+            <li *ngFor="let deletedEndpoint of changed.value.deletedEndpoints">
+              Deleted http-endpoint at <i>{{deletedEndpoint}}</i></li>
+            <li *ngFor="let endpoint of changed.value.endpoints|keyvalue">
+              Http-endpoint at <em>{{endpoint.key}}</em>:
+              <ul>
+                <li *ngFor="let property of endpoint.value.properties|keyvalue">
+                  <span *ngIf="property.value != null else endpointPassword">{{property.key}}: <i>{{property.value[0]}}</i> --> <i>{{property.value[1]}}</i></span>
+                  <ng-template #endpointPassword>{{property.key}} changed</ng-template></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+
+    <li *ngIf="entry.content.configFiles != null">
+      Config files:
+      <ul>
+        <li *ngFor="let added of entry.content.configFiles.added">
+          Added <i>{{added}}</i></li>
+        <li *ngFor="let deleted of entry.content.configFiles.deleted">
+          Deleted <i>{{deleted}}</i></li>
+        <li *ngFor="let changed of entry.content.configFiles.changed">
+          Changed <i>{{changed}}</i></li>
+      </ul>
+    </li>
+  </ul>
+</mat-expansion-panel>

@@ -1,0 +1,80 @@
+:host{
+  display: block;
+  overflow:auto;
+  scroll-behavior: smooth;
+}
+
+.timeline_list{
+  margin:20px 0;
+}
+
+.timeline_wrapper{
+  position:relative;
+}
+.timeline_line{
+  position:absolute;
+  top:20px;
+  bottom:20px;
+  left:50%;
+  width:4px;
+  margin-left:-2px;
+  border-radius: 0 0 2px 2px;
+}
+
+.timeline_item{
+  position:relative;
+}
+
+app-instance-history-timeline-card{
+  display:block;
+  position: relative;
+  padding:0 30px;
+  box-sizing: border-box;
+  width:50%;
+}
+
+.timeline_list :nth-child(even) app-instance-history-timeline-card{
+  left:50%;
+}
+
+.timeline_list :nth-child(even) app-instance-history-timeline-card ::ng-deep .timeline-card_header div{
+  text-align: left;
+}
+
+.timeline_circle{
+  width: 24px;
+  height: 24px;
+  position: absolute;
+  left:50%;
+  margin-left:-12px;
+  margin-top:15px;
+  border-radius: 50%;
+}
+
+.loading-spinner{
+  margin:0 auto;
+}
+
+@media only screen and (max-width: 750px){
+  app-instance-history-timeline-card{
+      left:0 !important;
+      width:100%;
+      padding:0 30px 15px 40px;
+  }
+
+  app-instance-history-timeline-card ::ng-deep .timeline-card_header div{
+    text-align: left !important;
+  }
+
+
+  .timeline_circle{
+      left:17px !important;
+  }
+
+  .timeline_line{
+      left:16px !important;
+      margin-left:0;
+      bottom:35px;
+  }
+}
+

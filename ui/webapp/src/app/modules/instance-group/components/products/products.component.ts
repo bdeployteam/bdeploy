@@ -1,10 +1,8 @@
 import { Location } from '@angular/common';
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { MediaChange, MediaObserver } from '@angular/flex-layout';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatDrawer } from '@angular/material/sidenav';
 import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { MinionMode, ProductDto } from '../../../../models/gen.dtos';
@@ -18,7 +16,7 @@ import { ProductService } from '../../services/product.service';
   templateUrl: './products.component.html',
   styleUrls: ['./products.component.css'],
 })
-export class ProductsComponent implements OnInit, OnDestroy {
+export class ProductsComponent implements OnInit {
   @ViewChild('appsidenav', { static: true })
   sidenav: MatDrawer;
 
@@ -27,15 +25,12 @@ export class ProductsComponent implements OnInit, OnDestroy {
   public selectedProductKey: string = null;
   public productsKeys: string[];
 
-  private subscription: Subscription;
   private grid = new Map([['xs', 1], ['sm', 1], ['md', 2], ['lg', 3], ['xl', 5]]);
 
   loading = false;
-  columns = 3; // calculated number of columns
 
   constructor(
     public authService: AuthenticationService,
-    private mediaObserver: MediaObserver,
     private productService: ProductService,
     private route: ActivatedRoute,
     public dialog: MatDialog,
@@ -46,10 +41,6 @@ export class ProductsComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.instanceGroup = this.route.snapshot.paramMap.get('group');
     this.loadProducts();
-
-    this.subscription = this.mediaObserver.media$.subscribe((change: MediaChange) => {
-      this.columns = this.grid.get(change.mqAlias);
-    });
   }
 
   isCentral() {
@@ -91,10 +82,6 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
   versionDeleted(): void {
     this.loadProducts();
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
   }
 
   openProduct(productKey: string): void {

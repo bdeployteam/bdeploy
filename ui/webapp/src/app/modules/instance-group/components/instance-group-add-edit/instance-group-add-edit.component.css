@@ -55,3 +55,8 @@ mat-form-field {
   font-size: 0.75em;
   text-overflow: ellipsis;
 }
+
+.logo-box-placeholder{
+  text-align: center;
+  font-size:1.3em;
+}

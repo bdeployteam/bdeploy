@@ -32,6 +32,8 @@ import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.jersey.ActivityScope;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
+import io.bdeploy.ui.dto.HistoryEntryDto;
+import io.bdeploy.ui.dto.HistoryEntryVersionDto;
 import io.bdeploy.ui.dto.InstanceDto;
 import io.bdeploy.ui.dto.InstanceManifestHistoryDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
@@ -187,4 +189,19 @@ public interface InstanceResource {
     @Path("/{instance}/check-ports/{minion}")
     public Map<Integer, Boolean> getPortStates(@ActivityScope @PathParam("instance") String instanceId,
             @PathParam("minion") String minion, List<Integer> ports);
+
+    @GET
+    @Path("/{instance}/history")
+    public List<HistoryEntryDto> getInstanceHistory(@ActivityScope @PathParam("instance") String instanceId,
+            @QueryParam("amount") int amount);
+
+    @GET
+    @Path("/{instance}/more-history")
+    public List<HistoryEntryDto> getMoreInstanceHistory(@ActivityScope @PathParam("instance") String instanceId,
+            @QueryParam("amount") int amount, @QueryParam("offset") int offset);
+
+    @GET
+    @Path("/{instance}/compare-versions")
+    public HistoryEntryVersionDto compareInstanceHistory(@ActivityScope @PathParam("instance") String instanceId,
+            @QueryParam("a") int versionA, @QueryParam("b") int versionB);
 }

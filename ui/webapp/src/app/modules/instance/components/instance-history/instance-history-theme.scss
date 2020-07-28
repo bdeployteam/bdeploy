@@ -1,0 +1,13 @@
+@import "~@angular/material/theming";
+
+@mixin instance-history-theme($theme){
+  $dark: map-get($theme,"is-dark");
+  .history-compare-input{
+    border-bottom: mat-color(if($dark,mat-palette($mat-grey,700),mat-palette($mat-grey,400))) solid 1px !important;
+  }
+
+  .instance-history-comparison-dialog{
+    background-color: if($dark,rgba(66,66,66),white);
+    box-shadow: 0 4px 8px 0 if($dark,rgba(0,0,0,0.4),rgba(0,0,0,0.2)) !important;
+  }
+}
