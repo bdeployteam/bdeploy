@@ -30,6 +30,11 @@ public class ApplicationDescriptor extends ApplicationDescriptorApi implements C
     public ApplicationType type = ApplicationType.SERVER;
 
     /**
+     * Provides information about exit codes of the application.
+     */
+    public ApplicationExitCodeDescriptor exitCodes = new ApplicationExitCodeDescriptor();
+
+    /**
      * Provides branding information (splash, icon, ...).
      * <p>
      * This information is evaluated and used for instance by the client launcher, possibly by others.

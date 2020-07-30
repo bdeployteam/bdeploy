@@ -54,9 +54,12 @@ namespace Bdeploy.Launcher {
             launcher.UpdateFailed += Launcher_UpdateFailed;
             launcher.UpdateWaiting += Launcher_UpdateWaiting;
             launcher.StartUpdating += Launcher_StartUpdating;
-
             int exitCode = launcher.Start();
-            if (exitCode != EX_UPDATE) {
+
+            // Check if another launcher has launched us
+            // If so then exit code handling is done by the other launcher
+            bool isDelegate = Environment.GetEnvironmentVariable("BDEPLOY_DELEGATE") != null;
+            if (exitCode != EX_UPDATE || isDelegate) {
                 return exitCode;
             }
 

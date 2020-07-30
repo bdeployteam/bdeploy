@@ -52,6 +52,8 @@ import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationBrandingDescriptor;
+import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
+import io.bdeploy.interfaces.descriptor.application.ApplicationExitCodeDescriptor;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
@@ -84,6 +86,22 @@ import io.bdeploy.launcher.cli.ui.LauncherUpdateDialog;
 public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
     private static final Logger log = LoggerFactory.getLogger(LauncherTool.class);
+
+    /**
+     * Environment variable that is set in case that one launcher delegates launching to another (older) one.
+     * When this is set, the delegated launcher will not perform any update handling. Sample: User want to launch an application
+     * that requires an older launcher. In that case the following processes are involved:
+     *
+     * <pre>
+     *      Native Launcher ---> Java Launcher ---> Native Launcher 2 ---> Java Launcher 2 ---> Application
+     * </pre>
+     *
+     * If the <tt>Application</tt> terminates then the <tt>Java Launcher 2</tt> evaluates the exit code and maps the application
+     * specific exit code to our internal update code if required. The <tt>Native Launcher 2</tt> and the <tt>Java Launcher</tt>
+     * will just forward the exit code. The <tt>Native Launcher</tt> will perform the update and restart. The <tt>Application</tt>
+     * is again started by the responsible launcher.
+     */
+    private static final String BDEPLOY_DELEGATE = "BDEPLOY_DELEGATE";
 
     public @interface LauncherConfig {
 
@@ -134,6 +152,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /** The launch descriptor */
     private ClickAndStartDescriptor descriptor;
 
+    /** Configuration about the launched application */
+    private ClientApplicationConfiguration clientAppCfg;
+
     /** Indicates whether or not the root is read-only */
     private boolean readOnlyRootDir;
 
@@ -176,19 +197,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             LauncherSplashReporter reporter = new LauncherSplashReporter(splash);
             try (BHive hive = new BHive(bhiveDir.toUri(), auditor, reporter)) {
                 // Check for and install launcher updates
-                try (Activity waiting = reporter.start("Waiting for other launchers...")) {
-                    MarkerDatabase.lockRoot(rootDir);
-                }
-                Entry<Version, Key> requiredLauncher;
-                try {
-                    requiredLauncher = getLatestLauncherVersion(reporter, serverVersion);
-                    doCheckForLauncherUpdate(hive, reporter, requiredLauncher);
-                } finally {
-                    MarkerDatabase.unlockRoot(rootDir);
-                }
-
                 // We always try to use the launcher matching the server version
                 // If no launcher is installed we simply use the currently running version
+                Entry<Version, Key> requiredLauncher = doSelfUpdate(hive, reporter, serverVersion);
                 Version requiredVersion = requiredLauncher != null ? requiredLauncher.getKey() : runningVersion;
 
                 // Launch the application or delegate launching
@@ -197,8 +208,10 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                     log.info("Application requires an older launcher version. Delegating...");
                     doInstallSideBySide(hive, requiredLauncher);
                     process = doDelegateLaunch(requiredVersion, config.launch());
+                    log.info("Launcher successfully launched. PID={}", process.pid());
                 } else {
                     process = doLaunch(hive, reporter, splash);
+                    log.info("Application successfully launched. PID={}", process.pid());
                 }
 
                 // Hide progress reporting
@@ -219,12 +232,31 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 }
 
                 // Wait until the process terminates
-                log.info("Launcher successfully launched. PID={}", process.pid());
-                if (!config.dontWait()) {
-                    doMonitorProcess(process);
-                } else {
-                    log.info("Detaching...");
+                if (config.dontWait()) {
+                    log.info("Detaching and terminating.");
+                    return;
                 }
+                int exitCode = doMonitorProcess(process);
+
+                // The delegated launcher launcher has already evaluated the exit
+                // code and translated the application specific exit code
+                // We just need to terminate with the given code
+                if (clientAppCfg == null) {
+                    log.info("Delegated launcher terminated with exit code {}.", exitCode);
+                    doExit(exitCode);
+                    return;
+                }
+
+                // Application request an update. We will terminate the launcher
+                // so that potential launcher updates are also applied
+                ApplicationDescriptor appDesc = clientAppCfg.appDesc;
+                ApplicationExitCodeDescriptor exitCodes = appDesc.exitCodes;
+                if (exitCodes != null && exitCodes.update != null && exitCodes.update == exitCode) {
+                    log.info("Application signaled that updates should be installed. Restarting...");
+                    doExit(UpdateHelper.CODE_UPDATE);
+                    return;
+                }
+                log.info("Application terminated with exit code {}.", exitCode);
             }
         } catch (SoftwareUpdateException ex) {
             log.error("Software update cannot be installed.", ex);
@@ -247,14 +279,34 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
     }
 
-    /** Waits until the given process terminates */
-    private void doMonitorProcess(Process process) {
+    /** Terminates the VM with the given exit code */
+    @SuppressFBWarnings("DM_EXIT")
+    private static void doExit(Integer exitCode) {
+        System.exit(exitCode);
+    }
+
+    /** Updates the launcher if there is a new version available */
+    private Entry<Version, Key> doSelfUpdate(BHive hive, LauncherSplashReporter reporter, Version serverVersion) {
+        try (Activity waiting = reporter.start("Waiting for other launchers...")) {
+            MarkerDatabase.lockRoot(rootDir);
+        }
         try {
-            int exitCode = process.waitFor();
-            log.info("Launcher terminated with exit code {}.", exitCode);
+            Entry<Version, Key> requiredLauncher = getLatestLauncherVersion(reporter, serverVersion);
+            doCheckForLauncherUpdate(hive, reporter, requiredLauncher);
+            return requiredLauncher;
+        } finally {
+            MarkerDatabase.unlockRoot(rootDir);
+        }
+    }
+
+    /** Waits until the given process terminates */
+    private int doMonitorProcess(Process process) {
+        try {
+            return process.waitFor();
         } catch (InterruptedException e) {
-            log.warn("Waiting for launcher exit interrupted.");
+            log.warn("Waiting for application exit interrupted.");
             Thread.currentThread().interrupt();
+            return -1;
         }
     }
 
@@ -311,7 +363,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         MasterNamedResource namedMaster = master.getNamedMaster(descriptor.groupId);
 
         // Fetch more information from the remote server.
-        ClientApplicationConfiguration clientAppCfg;
         try (Activity info = reporter.start("Loading meta-data...")) {
             log.info("Fetching client configuration from server...");
             clientAppCfg = namedMaster.getClientConfiguration(descriptor.instanceId, descriptor.applicationId);
@@ -348,7 +399,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     }
 
     /** Checks for updates and installs them if required */
-    @SuppressFBWarnings("DM_EXIT")
     private void doCheckForLauncherUpdate(BHive hive, ActivityReporter reporter, Map.Entry<Version, Key> latestLauncher) {
         if (VersionHelper.isRunningUndefined()) {
             log.info("Running version is undefined. Skipping updates...");
@@ -370,6 +420,14 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         if (PathHelper.isReadOnly(rootDir)) {
             throw new SoftwareUpdateException("launcher",
                     "Installed=" + runningVersion.toString() + " Available=" + latestVersion.toString());
+        }
+
+        // In case that another launcher has launched us then we do not perform any updates
+        // We just exit with the update code so that the outer launcher can do all required tasks
+        if (System.getenv(BDEPLOY_DELEGATE) != null) {
+            log.info("Update of launcher required. Delegating to parent to do this...");
+            doExit(UpdateHelper.CODE_UPDATE);
+            return;
         }
 
         log.info("Updating launcher from {} to {}", runningVersion, latestVersion);
@@ -399,7 +457,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
             // Signal that a new update is available
             log.info("Restarting...");
-            System.exit(UpdateHelper.CODE_UPDATE);
+            doExit(UpdateHelper.CODE_UPDATE);
         } catch (IOException e) {
             throw new IllegalStateException("Cannot create update marker");
         }
@@ -639,6 +697,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             Map<String, String> env = b.environment();
             env.put(ClientPathHelper.BDEPLOY_HOME, homeDir.toFile().getAbsolutePath());
 
+            // Notify the launcher that he runs in a special mode.
+            // In that mode he will forward all exit codes without special handling.
+            env.put(BDEPLOY_DELEGATE, "TRUE");
             return b.start();
         } catch (IOException e) {
             throw new IllegalStateException("Cannot start launcher.", e);
