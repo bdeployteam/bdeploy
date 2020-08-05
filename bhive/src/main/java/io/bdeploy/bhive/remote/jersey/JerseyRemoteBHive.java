@@ -1,8 +1,11 @@
 package io.bdeploy.bhive.remote.jersey;
 
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.SortedMap;
 import java.util.SortedSet;
+
+import javax.ws.rs.NotFoundException;
 
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
@@ -71,11 +74,32 @@ public class JerseyRemoteBHive implements RemoteBHive {
     }
 
     @Override
-    public Path fetch(SortedSet<ObjectId> availableObjects, SortedSet<Key> manifestsToFetch) {
+    public Long pushAsStream(InputStream in) {
+        try {
+            return client.pushAsStream(in);
+        } catch (NotFoundException nfe) {
+            throw new UnsupportedOperationException("Pushing as stream not supported", nfe);
+        }
+    }
+
+    @Override
+    public Path fetch(SortedSet<ObjectId> objects, SortedSet<Key> manifests) {
         FetchSpec spec = new FetchSpec();
-        spec.requiredObjects = availableObjects;
-        spec.manifestsToFetch = manifestsToFetch;
+        spec.objects = objects;
+        spec.manifests = manifests;
         return client.fetch(spec);
+    }
+
+    @Override
+    public InputStream fetchAsStream(SortedSet<ObjectId> objects, SortedSet<Key> manifests) {
+        try {
+            FetchSpec spec = new FetchSpec();
+            spec.objects = objects;
+            spec.manifests = manifests;
+            return client.fetchAsStream(spec);
+        } catch (NotFoundException nfe) {
+            throw new UnsupportedOperationException("Fetching as stream not supported", nfe);
+        }
     }
 
     @Override

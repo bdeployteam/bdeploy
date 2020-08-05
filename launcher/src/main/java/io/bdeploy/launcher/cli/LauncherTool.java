@@ -502,8 +502,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             if (stats.sumManifests == 0) {
                 log.info("Local hive already contains all required arfifacts. No manifests where fetched.");
             } else {
-                log.info("Fetched {} manifests from server. Total size {}", stats.sumManifests,
-                        UnitHelper.formatFileSize(stats.transferSize));
+                log.info("Fetched {} manifests from server. Total size {}. Duration {}", stats.sumManifests,
+                        UnitHelper.formatFileSize(stats.transferSize), DurationHelper.formatDuration(stats.duration));
             }
         }
 

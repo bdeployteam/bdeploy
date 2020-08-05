@@ -1,6 +1,7 @@
 package io.bdeploy.common.util;
 
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -58,6 +59,19 @@ public class StreamHelper {
 
         // EOF or end of region to check without encountering zero byte
         return true;
+    }
+
+    /**
+     * Closes the given object without throwing an {@link IOException} exception.
+     */
+    public static void close(Closeable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (IOException ioe) {
+                // Ignore
+            }
+        }
     }
 
 }

@@ -1,5 +1,6 @@
 package io.bdeploy.bhive.op;
 
+import java.util.Collection;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -23,11 +24,12 @@ public class ObjectExistsOperation extends BHive.Operation<SortedSet<ObjectId>> 
     public SortedSet<ObjectId> call() throws Exception {
         SortedSet<ObjectId> existing = new TreeSet<>();
 
-        try (Activity activity = getActivityReporter().start("Checking objects...", -1)) {
+        try (Activity activity = getActivityReporter().start("Checking objects...", objects.size())) {
             for (ObjectId o : objects) {
                 if (getObjectManager().db(x -> x.hasObject(o))) {
                     existing.add(o);
                 }
+                activity.worked(1);
             }
         }
 
@@ -40,6 +42,13 @@ public class ObjectExistsOperation extends BHive.Operation<SortedSet<ObjectId>> 
     public ObjectExistsOperation addObject(ObjectId obj) {
         objects.add(obj);
         return this;
+    }
+
+    /**
+     * Add all {@link ObjectId} to check for existence
+     */
+    public void addAll(Collection<ObjectId> objs) {
+        objects.addAll(objs);
     }
 
 }

@@ -14,4 +14,6 @@ public class TransferStatistics {
 
     public long transferSize;
 
+    public long duration;
+
 }

@@ -1,5 +1,8 @@
 package io.bdeploy.bhive.remote;
 
+import java.io.InputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.SortedMap;
@@ -21,6 +24,8 @@ import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.ObjectExistsOperation;
 import io.bdeploy.bhive.op.ObjectListOperation;
+import io.bdeploy.bhive.op.ObjectReadOperation;
+import io.bdeploy.bhive.op.ObjectWriteOperation;
 import io.bdeploy.bhive.op.PruneOperation;
 import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.common.ActivityReporter;
@@ -116,6 +121,11 @@ public class LocalBHiveAdapter implements RemoteBHive {
     }
 
     @Override
+    public Long pushAsStream(InputStream in) {
+        return hive.execute(new ObjectReadOperation().stream(in));
+    }
+
+    @Override
     public Path fetch(SortedSet<ObjectId> requiredObjects, SortedSet<Manifest.Key> manifestsToFetch) {
         try {
             // assume no manifests are present in the target. filtering must happen before
@@ -134,6 +144,23 @@ public class LocalBHiveAdapter implements RemoteBHive {
             return tmpHive;
         } catch (Exception e) {
             throw new IllegalStateException("Cannot fetch from local repository", e);
+        }
+    }
+
+    @Override
+    public InputStream fetchAsStream(SortedSet<ObjectId> objects, SortedSet<Manifest.Key> manifests) {
+        try {
+            PipedInputStream input = new PipedInputStream();
+            PipedOutputStream output = new PipedOutputStream(input);
+            Thread thread = new Thread(() -> {
+                hive.execute(new ObjectWriteOperation().stream(output).manifests(manifests).objects(objects));
+            });
+            thread.setDaemon(true);
+            thread.setName("Write-Objects");
+            thread.start();
+            return input;
+        } catch (Exception ex) {
+            throw new IllegalStateException("Cannot fetch as stream", ex);
         }
     }
 

@@ -1,6 +1,7 @@
 package io.bdeploy.bhive.remote.jersey;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -71,10 +72,20 @@ public class BHiveResourceImpl implements BHiveResource {
         }
     }
 
-    @DeleteAfterWrite
     @Override
+    public Long pushAsStream(InputStream in) {
+        return wrapper.pushAsStream(in);
+    }
+
+    @Override
+    @DeleteAfterWrite
     public java.nio.file.Path fetch(FetchSpec spec) {
-        return wrapper.fetch(spec.requiredObjects, spec.manifestsToFetch);
+        return wrapper.fetch(spec.objects, spec.manifests);
+    }
+
+    @Override
+    public InputStream fetchAsStream(FetchSpec spec) {
+        return wrapper.fetchAsStream(spec.objects, spec.manifests);
     }
 
 }

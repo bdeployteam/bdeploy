@@ -1,5 +1,6 @@
 package io.bdeploy.bhive.remote.jersey;
 
+import java.io.InputStream;
 import java.util.SortedMap;
 import java.util.SortedSet;
 
@@ -89,9 +90,17 @@ public interface BHiveResource {
     public void push(java.nio.file.Path zipedHive);
 
     /**
-     * Fetch manifests from the remote as ZIPed {@link BHive}. Objects with an
-     * {@link ObjectId} contained in the availableObjects {@link SortedSet} are not
-     * included.
+     * Streams manifests and objects into the remove hive.
+     */
+    @PUT
+    @Path("/pushAsStream")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.APPLICATION_OCTET_STREAM)
+    @RequiredPermission(permission = Permission.WRITE)
+    public Long pushAsStream(InputStream in);
+
+    /**
+     * Fetch manifests from the remote as ZIPed {@link BHive}.
      * <p>
      * The caller is responsible for cleaning up the file pointed at by the returned
      * {@link Path}.
@@ -102,10 +111,19 @@ public interface BHiveResource {
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public java.nio.file.Path fetch(FetchSpec spec);
 
+    /**
+     * Streams manifests and objects from the remove hive.
+     */
+    @POST
+    @WeakTokenAllowed
+    @Path("/fetchAsStream")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public InputStream fetchAsStream(FetchSpec spec);
+
     public static class FetchSpec {
 
-        SortedSet<ObjectId> requiredObjects;
-        SortedSet<Manifest.Key> manifestsToFetch;
+        SortedSet<ObjectId> objects;
+        SortedSet<Manifest.Key> manifests;
     }
 
     public static class ObjectListSpec {

@@ -21,9 +21,15 @@ import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.util.PathHelper;
 
 /**
- * A {@link Path} based store for objects. The meaning of {@link Path} may
- * change depending on the underlying {@link FileSystem}, it may - for instance
- * - be a ZIP file or a directory.
+ * A simple key-value data store. For each object that is added to the database a {@linkplain ObjectId ObjectId} is calculated
+ * that can be used later to retrieve the content again. The identifier is based on the content. Two objects having the same
+ * identifier will be stored once. Additional metadata like the name or type of the added object is not stored.
+ * <p>
+ * Each object is stored internally as single file named with the {@linkplain ObjectId object identifier}. Files are placed in
+ * subdirectories to keep the overall amount of files per directory small. The first four characters of the identifier are used
+ * to determine the target directory. Two levels of directories are used. The first level is based on the first two characters and
+ * the second level on the next two characters.
+ * </p>
  */
 public class ObjectDatabase extends LockableDatabase {
 

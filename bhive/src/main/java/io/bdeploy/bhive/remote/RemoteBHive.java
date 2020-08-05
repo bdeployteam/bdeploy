@@ -1,5 +1,6 @@
 package io.bdeploy.bhive.remote;
 
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -65,9 +66,19 @@ public interface RemoteBHive extends AutoCloseable {
     public void push(Path zipedHive);
 
     /**
+     * Streams objects directly into the given remote hive.
+     */
+    public Long pushAsStream(InputStream in);
+
+    /**
      * Fetch manifests from the remote as ZIPed {@link BHive}. Only objects in the given requiredObjects are included.
      */
-    public Path fetch(SortedSet<ObjectId> requiredObjects, SortedSet<Manifest.Key> manifestsToFetch);
+    public Path fetch(SortedSet<ObjectId> objects, SortedSet<Manifest.Key> manifests);
+
+    /**
+     * Streams the given objects one after each other to the given output stream.
+     */
+    public InputStream fetchAsStream(SortedSet<ObjectId> objects, SortedSet<Key> manifests);
 
     /**
      * Figures out the type of {@link RemoteBHive} required for the given

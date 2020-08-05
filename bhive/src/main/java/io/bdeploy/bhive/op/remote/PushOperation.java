@@ -1,5 +1,8 @@
 package io.bdeploy.bhive.op.remote;
 
+import java.io.IOException;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -13,6 +16,7 @@ import javax.ws.rs.core.UriBuilder;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.ReadOnlyOperation;
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.objects.view.ManifestRefView;
 import io.bdeploy.bhive.objects.view.TreeView;
@@ -20,6 +24,7 @@ import io.bdeploy.bhive.objects.view.scanner.TreeVisitor;
 import io.bdeploy.bhive.op.CopyOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestRefScanOperation;
+import io.bdeploy.bhive.op.ObjectWriteOperation;
 import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.bhive.remote.RemoteBHive;
 import io.bdeploy.common.ActivityReporter.Activity;
@@ -90,25 +95,8 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
                 SortedSet<ObjectId> missingObjects = rh.getMissingObjects(requiredObjects);
                 stats.sumMissingObjects = missingObjects.size();
 
-                // STEP 6: create temp hive, copy objects and manifests
-                Path tmpHive = Files.createTempFile("push-", ".zip");
-                Files.delete(tmpHive); // need to delete to re-create with ZipFileSystem
-
-                try {
-                    try (BHive emptyHive = new BHive(UriBuilder.fromUri("jar:" + tmpHive.toUri()).build(),
-                            getActivityReporter())) {
-                        CopyOperation op = new CopyOperation().setDestinationHive(emptyHive).setPartialAllowed(true);
-                        missingObjects.forEach(op::addObject);
-                        manifests.forEach(op::addManifest);
-
-                        execute(op); // perform copy.
-                    } // important: close hive to sync with filesystem
-
-                    stats.transferSize = Files.size(tmpHive);
-                    rh.push(tmpHive);
-                } finally {
-                    Files.deleteIfExists(tmpHive);
-                }
+                // STEP 6: copy objects and manifests
+                stats.transferSize = push(rh, missingObjects, manifests);
             }
         }
         return stats;
@@ -156,6 +144,49 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
     public PushOperation setHiveName(String name) {
         hiveName = name;
         return this;
+    }
+
+    private long push(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests) throws IOException {
+        try {
+            return pushAsStream(rh, objects, manifests);
+        } catch (UnsupportedOperationException ex) {
+            return pushAsZip(rh, objects, manifests);
+        }
+    }
+
+    private long pushAsZip(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests) throws IOException {
+        Path tmpHive = Files.createTempFile("push-", ".zip");
+        Files.delete(tmpHive); // need to delete to re-create with ZipFileSystem
+
+        try {
+            try (BHive emptyHive = new BHive(UriBuilder.fromUri("jar:" + tmpHive.toUri()).build(), getActivityReporter())) {
+                CopyOperation op = new CopyOperation().setDestinationHive(emptyHive).setPartialAllowed(true);
+                objects.forEach(op::addObject);
+                manifests.forEach(op::addManifest);
+
+                execute(op); // perform copy.
+            } // important: close hive to sync with filesystem
+
+            long fileSize = Files.size(tmpHive);
+            rh.push(tmpHive);
+            return fileSize;
+        } finally {
+            Files.deleteIfExists(tmpHive);
+        }
+    }
+
+    private long pushAsStream(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests) throws IOException {
+        PipedInputStream input = new PipedInputStream();
+        PipedOutputStream output = new PipedOutputStream(input);
+
+        Thread thread = new Thread(() -> {
+            execute(new ObjectWriteOperation().stream(output).manifests(manifests).objects(objects));
+        });
+        thread.setDaemon(true);
+        thread.setName("Write-Objects");
+        thread.start();
+
+        return rh.pushAsStream(input);
     }
 
 }

@@ -2,8 +2,11 @@ package io.bdeploy.bhive.op.remote;
 
 import static io.bdeploy.common.util.RuntimeAssert.assertNotNull;
 
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -12,9 +15,11 @@ import javax.ws.rs.core.UriBuilder;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.CopyOperation;
 import io.bdeploy.bhive.op.ObjectExistsOperation;
+import io.bdeploy.bhive.op.ObjectReadOperation;
 import io.bdeploy.bhive.remote.RemoteBHive;
 import io.bdeploy.common.ActivityReporter.Activity;
 
@@ -35,6 +40,7 @@ public class FetchOperation extends RemoteOperation<TransferStatistics, FetchOpe
         SortedSet<Manifest.Key> toFetch = new TreeSet<>();
         SortedSet<ObjectId> toFetchRootTrees = new TreeSet<>();
 
+        Instant start = Instant.now();
         try (Activity activity = getActivityReporter().start("Fetching manifests...", -1)) {
             try (RemoteBHive rh = RemoteBHive.forService(getRemote(), hiveName, getActivityReporter())) {
                 // is manifests are empty, the array will be empty, returning all manifests on the remote
@@ -69,7 +75,7 @@ public class FetchOperation extends RemoteOperation<TransferStatistics, FetchOpe
 
                 // STEP 2: Figure out which trees we already have locally.
                 ObjectExistsOperation findExistingTrees = new ObjectExistsOperation();
-                requiredTrees.forEach(findExistingTrees::addObject);
+                findExistingTrees.addAll(requiredTrees);
                 SortedSet<ObjectId> treesWeAlreadyHave = execute(findExistingTrees);
 
                 // STEP 3: Figure out the trees which we /do/ need to fetch
@@ -82,7 +88,7 @@ public class FetchOperation extends RemoteOperation<TransferStatistics, FetchOpe
 
                 // STEP 5: from these objects check which are existing locally
                 ObjectExistsOperation findExistingObjects = new ObjectExistsOperation();
-                requiredObjects.forEach(findExistingObjects::addObject);
+                findExistingObjects.addAll(requiredObjects);
                 SortedSet<ObjectId> existingObjects = execute(findExistingObjects);
 
                 // STEP 6 calculate which objects are missing from the required and existing ones
@@ -91,14 +97,10 @@ public class FetchOperation extends RemoteOperation<TransferStatistics, FetchOpe
                 stats.sumMissingObjects = missingObjects.size();
 
                 // STEP 7: fetch from the remote all required objects and manifests.
-                Path z = rh.fetch(missingObjects, toFetch);
-                stats.transferSize = Files.size(z);
-                try (BHive zHive = new BHive(UriBuilder.fromUri("jar:" + z.toUri()).build(), getActivityReporter())) {
-                    zHive.execute(new CopyOperation().setDestinationHive(this).setPartialAllowed(false));
-                } finally {
-                    Files.deleteIfExists(z);
-                }
+                stats.transferSize = fetch(rh, missingObjects, toFetch);
             }
+        } finally {
+            stats.duration = Duration.between(start, Instant.now()).toMillis();
         }
         return stats;
     }
@@ -115,6 +117,30 @@ public class FetchOperation extends RemoteOperation<TransferStatistics, FetchOpe
 
     public SortedSet<Manifest.Key> getManifests() {
         return manifests;
+    }
+
+    private long fetch(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests) throws Exception {
+        try {
+            return fetchAsStream(rh, objects, manifests);
+        } catch (UnsupportedOperationException ex) {
+            return fetchAsZip(rh, objects, manifests);
+        }
+    }
+
+    private long fetchAsZip(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests) throws Exception {
+        Path z = rh.fetch(objects, manifests);
+        long transferSize = Files.size(z);
+        try (BHive zHive = new BHive(UriBuilder.fromUri("jar:" + z.toUri()).build(), getActivityReporter())) {
+            zHive.execute(new CopyOperation().setDestinationHive(this).setPartialAllowed(false));
+        } finally {
+            Files.deleteIfExists(z);
+        }
+        return transferSize;
+    }
+
+    private long fetchAsStream(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests) throws Exception {
+        InputStream stream = rh.fetchAsStream(objects, manifests);
+        return execute(new ObjectReadOperation().stream(stream));
     }
 
 }
