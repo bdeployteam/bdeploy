@@ -8,9 +8,9 @@ Cypress.Commands.add('createInstanceGroup', function(name, mode = 'STANDALONE') 
   cy.contains('button', 'add').click();
 
   cy.contains('button', 'SAVE').should('exist').and('be.disabled');
-  cy.get('input[placeholder^="Instance group ID"]').should('exist').click();
-  cy.get('input[placeholder^="Instance group ID"]').should('exist').and('have.focus').type(name);
-  cy.get('input[placeholder=Description]').type(name);
+  cy.get('input[data-placeholder^="Instance group ID"]').should('exist').click();
+  cy.get('input[data-placeholder^="Instance group ID"]').should('exist').and('have.focus').type(name);
+  cy.get('input[data-placeholder=Description]').type(name);
 
   cy.get('input[type=file]').attachFile({ filePath: 'bdeploy.png', mimeType: 'image/png' });
 
@@ -36,7 +36,7 @@ Cypress.Commands.add('deleteInstanceGroup', function(name, mode = 'STANDALONE') 
     .within(dialog => {
       cy.contains('Deleting an instance group cannot be undone').should('exist');
       cy.contains('button', 'Delete').should('be.disabled');
-      cy.get('input[placeholder="Instance Group ID"]')
+      cy.get('input[data-placeholder="Instance Group ID"]')
         .clear()
         .type(name);
       cy.contains('button', 'Delete')
@@ -150,7 +150,7 @@ Cypress.Commands.add('attachManaged', function(groupName, screenshot = false) {
   })
 
   cy.contains('mat-step-header', 'Additional Information').parent().within(e => {
-    cy.get('input[placeholder=Description]').should('exist').and('be.visible').and('be.empty').type('Managed Server');
+    cy.get('input[data-placeholder=Description]').should('exist').and('be.visible').and('be.empty').type('Managed Server');
     if(screenshot) {
       cy.screenshot('BDeploy_Central_Attach_Info')
     }

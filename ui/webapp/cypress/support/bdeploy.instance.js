@@ -8,8 +8,8 @@ Cypress.Commands.add('createInstance', function(group, name, mode = 'STANDALONE'
 
   // attention: the button contains 'add' not '+' (mat-icon('add') = '+')
   cy.contains('button', 'add').click();
-  cy.get('[placeholder=Name]').type(name)
-  cy.get('[placeholder=Description]').type('Test Instance for automated test')
+  cy.get('[data-placeholder=Name]').type(name)
+  cy.get('[data-placeholder=Description]').type('Test Instance for automated test')
 
   // angular drop down is something very different from a native HTML select/option
   cy.get('[placeholder=Purpose]').click()
@@ -147,13 +147,13 @@ Cypress.Commands.add('addAndSetOptionalParameter', function(panel, name, value) 
   cy.get('@panel').click();
   cy.get('@panel').contains('button', 'Manage Optional').click();
 
-  cy.get('[placeholder=Filter').type(name);
+  cy.get('[data-placeholder=Filter').type(name);
 
   cy.get('mat-dialog-container').contains('td', name).closest('tr').find('mat-checkbox').click();
   cy.get('mat-dialog-container').contains('button', 'Save').click();
 
-  cy.get('@panel').find('[placeholder="' + name + '"]').should('exist')
-  cy.get('@panel').find('[placeholder="' + name + '"]').clear().type(value, { parseSpecialCharSequences: false })
+  cy.get('@panel').find('[data-placeholder="' + name + '"]').should('exist')
+  cy.get('@panel').find('[data-placeholder="' + name + '"]').clear().type(value, { parseSpecialCharSequences: false })
 })
 
 Cypress.Commands.add('convertMissingToCustomParameter', function(id, name) {
@@ -162,7 +162,7 @@ Cypress.Commands.add('convertMissingToCustomParameter', function(id, name) {
 
   cy.contains('mat-expansion-panel', 'Custom Parameters').as('panel');
   cy.get('@panel').click();
-  cy.get('@panel').find('[placeholder="' + id + '.custom"]').should('exist')
+  cy.get('@panel').find('[data-placeholder="' + id + '.custom"]').should('exist')
 })
 
 Cypress.Commands.add('deleteMissingParameter', function(name) {

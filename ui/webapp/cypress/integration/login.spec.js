@@ -5,8 +5,8 @@ describe('Login to Web UI', function () {
     cy.url().should('include', '/login')
     cy.contains('Login');
 
-    cy.get('[placeholder="Username"]').type('admin');
-    cy.get('[placeholder="Password"]').type('admin');
+    cy.get('[data-placeholder="Username"]').type('admin');
+    cy.get('[data-placeholder="Password"]').type('admin');
 
     cy.get('[type="submit"]').click();
 

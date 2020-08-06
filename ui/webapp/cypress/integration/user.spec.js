@@ -21,9 +21,9 @@ describe('User Accounts Test', function() {
     cy.contains('tr', demoUser).should('exist');
     cy.contains('tr', demoUser).clickContextMenuDialog('Edit', 'Edit User');
 
-    cy.get('input[placeholder="Full Name"]').should('exist').click();
-    cy.get('input[placeholder="Full Name"]').clear().type('John Doe');
-    cy.get('input[placeholder="E-Mail Address"]').clear().type('john-doe' + mailDomain);
+    cy.get('input[data-placeholder="Full Name"]').should('exist').click();
+    cy.get('input[data-placeholder="Full Name"]').clear().type('John Doe');
+    cy.get('input[data-placeholder="E-Mail Address"]').clear().type('john-doe' + mailDomain);
 
     cy.screenshot('BDeploy_UserAccounts_Edit');
     cy.contains('button', 'Apply').click();

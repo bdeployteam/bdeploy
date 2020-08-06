@@ -51,7 +51,7 @@ describe('Instance Tests', function () {
 
     cy.wait(100); // animation
 
-    cy.get('[placeholder="Text Value"]').type('Test Value');
+    cy.get('[data-placeholder="Text Value"]').type('Test Value');
     cy.screenshot('BDeploy_Instance_Template_Dialog_Variables');
 
     cy.get('button[data-cy=next2]').click();
@@ -85,7 +85,7 @@ describe('Instance Tests', function () {
     })
 
     cy.get('mat-dialog-container').within(_ => {
-      cy.get('[placeholder="Sleep Timeout"]').clear().type('100');
+      cy.get('[data-placeholder="Sleep Timeout"]').clear().type('100');
       cy.screenshot('BDeploy_Application_Template_Variables', { padding: 20 });
       cy.contains('button', 'Apply').click();
     });

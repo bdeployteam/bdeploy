@@ -50,11 +50,11 @@ describe('Creates screenshots for the user documentation', () => {
     cy.contains('button', 'add').click();
 
     cy.get('mat-dialog-container').within(() => {
-      cy.get('[placeholder="Server URL"]').clear().type('ldaps://my-server');
-      cy.get('[placeholder=Description]').type('My LDAP Server');
-      cy.get('[placeholder="Server User"]').type('ldap.user@my-domain.com');
-      cy.get('[placeholder="Account Base"]').type('dc=my-domain,dc=com').blur();
-      cy.get('[placeholder="Server Password"]').type('xxx');
+      cy.get('[data-placeholder="Server URL"]').clear().type('ldaps://my-server');
+      cy.get('[data-placeholder=Description]').type('My LDAP Server');
+      cy.get('[data-placeholder="Server User"]').type('ldap.user@my-domain.com');
+      cy.get('[data-placeholder="Account Base"]').type('dc=my-domain,dc=com').blur();
+      cy.get('[data-placeholder="Server Password"]').type('xxx');
 
       cy.screenshot('BDeploy_LDAP_Server_Config', { padding: 20 });
 
@@ -71,8 +71,8 @@ describe('Creates screenshots for the user documentation', () => {
 
     // Create instance group
     cy.contains('button', 'add').click();
-    cy.get('input[placeholder^="Instance group ID"]').type('Demo');
-    cy.get('input[placeholder=Description]').type('Demo Instance Group');
+    cy.get('input[data-placeholder^="Instance group ID"]').type('Demo');
+    cy.get('input[data-placeholder=Description]').type('Demo Instance Group');
     cy.get('input[type=file]').attachFile({ filePath: 'bdeploy.png', mimeType: 'image/png' });
     cy.get('.logo-img').should('exist');
     cy.screenshot('BDeploy_Create_IG');
@@ -131,10 +131,10 @@ describe('Creates screenshots for the user documentation', () => {
     cy.contains('button', 'Add Instance').click();
 
     // Create new instance
-    cy.get('[placeholder=Name]').type('Demo Instance');
+    cy.get('[data-placeholder=Name]').type('Demo Instance');
     cy.get('[placeholder=Purpose]').click();
     cy.get('mat-option').contains('DEVELOPMENT').click();
-    cy.get('[placeholder=Description]').type('Demo Instance');
+    cy.get('[data-placeholder=Description]').type('Demo Instance');
     cy.get('[placeholder=Product]').click();
     cy.get('mat-option').contains('Demo Product').click();
     cy.get('[placeholder=Version]').click();
@@ -202,10 +202,10 @@ describe('Creates screenshots for the user documentation', () => {
     cy.wait(250);
     cy.screenshot('BDeploy_Process_Optional_Parameters');
 
-    cy.get('[placeholder=Filter').type("Sleep Timeout");
+    cy.get('[data-placeholder=Filter').type("Sleep Timeout");
     cy.get('mat-dialog-container').contains('td', "Sleep Timeout").closest('tr').find('mat-checkbox').click();
     cy.get('mat-dialog-container').contains('button', 'Save').click();
-    cy.get('[placeholder="Sleep Timeout"]').clear().type('10');
+    cy.get('[data-placeholder="Sleep Timeout"]').clear().type('10');
     cy.screenshot('BDeploy_Process_Optional_Configured');
 
     // Custom Parameters
@@ -218,7 +218,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.get('mat-option').should('not.be.visible');
     cy.screenshot('BDeploy_Process_Custom_Create');
     cy.get('mat-dialog-container').contains('button', 'Apply').click();
-    cy.get('[placeholder=custom-param-1]').type("--customValue=Demo");
+    cy.get('[data-placeholder=custom-param-1]').type("--customValue=Demo");
     cy.screenshot('BDeploy_Process_Custom_Value');
 
     // Command Line Preview
@@ -240,7 +240,7 @@ describe('Creates screenshots for the user documentation', () => {
     // Configuration files editor
     cy.contains('button', 'add').click();
     cy.contains('New File').should('exist');
-    cy.get('[placeholder="Enter path for file"]').type('test.json');
+    cy.get('[data-placeholder="Enter path for file"]').type('test.json');
     cy.typeInAceEditor('{{}{enter}    "json": "is great"');
 
     cy.screenshot('BDeploy_CfgFile_New');
@@ -430,9 +430,9 @@ describe('Creates screenshots for the user documentation', () => {
     cy.contains('Software Repositories').should('exist');
     cy.contains('button', 'add').click();
     cy.contains('button', 'SAVE').should('exist').and('be.disabled');
-    cy.get('input[placeholder^="Software Repository name"]').click();
-    cy.get('input[placeholder^="Software Repository name"]').type('External');
-    cy.get('input[placeholder=Description]').type('External Software Repository');
+    cy.get('input[data-placeholder^="Software Repository name"]').click();
+    cy.get('input[data-placeholder^="Software Repository name"]').type('External');
+    cy.get('input[data-placeholder=Description]').type('External Software Repository');
     cy.get('button').contains('SAVE').click();
     cy.waitUntilContentLoaded();
     cy.screenshot('BDeploy_SWRepos');

@@ -18,8 +18,8 @@ describe('Software Repository Tests', () => {
 
     cy.contains('button', 'add').click();
 
-    cy.get('input[placeholder^="Software Repository name"]').type(repoName);
-    cy.get('input[placeholder=Description]').type('Automated Test Repo ' + repoName);
+    cy.get('input[data-placeholder^="Software Repository name"]').type(repoName);
+    cy.get('input[data-placeholder=Description]').type('Automated Test Repo ' + repoName);
 
     cy.contains('button', 'SAVE').click();
     cy.waitUntilContentLoaded();
@@ -66,8 +66,8 @@ describe('Software Repository Tests', () => {
     cy.screenshot('BDeploy_Demo-Repository_Permissions_AddUser1');
     cy.contains('button', 'OK').should('exist').and('be.disabled');
 
-    cy.get('input[placeholder="User to add"]').should('exist').click();
-    cy.get('input[placeholder="User to add"]').should('exist').and('have.focus').type(globalNone);
+    cy.get('input[data-placeholder="User to add"]').should('exist').click();
+    cy.get('input[data-placeholder="User to add"]').should('exist').and('have.focus').type(globalNone);
     cy.contains('button', 'OK').click();
 
     cy.contains('tr', globalAdmin).should('exist');

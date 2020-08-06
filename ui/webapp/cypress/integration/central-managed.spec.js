@@ -180,7 +180,7 @@ describe("Central/Managed Basic Test", function() {
     // create a config file
     cy.get('app-instance-group-logo').parent().clickContextMenuAction('Configuration Files');
     cy.contains('button', 'add').click();
-    cy.get('input[placeholder="Enter path for file"]').clear().type('cypress.cfg')
+    cy.get('input[data-placeholder="Enter path for file"]').clear().type('cypress.cfg')
     cy.typeInAceEditor('CY-CFG');
     cy.contains('button', 'APPLY').click();
     cy.contains('td', 'cypress.cfg').should('exist');

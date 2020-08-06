@@ -102,8 +102,8 @@ describe('Instance Group Tests', () => {
     cy.contains('button', 'add').click();
     cy.contains('button', 'OK').should('exist').and('be.disabled');
 
-    cy.get('input[placeholder="User to add"]').should('exist').click();
-    cy.get('input[placeholder="User to add"]').should('exist').and('have.focus').type(globalNone);
+    cy.get('input[data-placeholder="User to add"]').should('exist').click();
+    cy.get('input[data-placeholder="User to add"]').should('exist').and('have.focus').type(globalNone);
 
     cy.screenshot('BDeploy_Demo_Permissions_AddUser1');
     cy.contains('button', 'OK').click();

@@ -2,9 +2,9 @@
  * Command: searchUser
  */
 Cypress.Commands.add('searchUser', function(username = null) {
-  cy.get('input[placeholder="Search..."').click().clear();
+  cy.get('input[data-placeholder="Search..."').click().clear();
   if (username) {
-    cy.get('input[placeholder="Search..."').type(username);
+    cy.get('input[data-placeholder="Search..."').type(username);
   }
 })
 
@@ -15,12 +15,12 @@ Cypress.Commands.add('createUser', function(username, fullname, email, password,
   cy.get('.add-button').click();
   cy.contains('button', 'Apply').should('exist').and('be.disabled');
 
-  cy.get('input[placeholder="Username"]').should('exist').click();
-  cy.get('input[placeholder="Username"]').should('exist').and('have.focus').type(username);
-  cy.get('input[placeholder="Full Name"]').type(fullname);
-  cy.get('input[placeholder="E-Mail Address"]').type(email);
-  cy.get('input[placeholder="New Password"]').type(password);
-  cy.get('input[placeholder="Confirm New Password"]').type(password);
+  cy.get('input[data-placeholder="Username"]').should('exist').click();
+  cy.get('input[data-placeholder="Username"]').should('exist').and('have.focus').type(username);
+  cy.get('input[data-placeholder="Full Name"]').type(fullname);
+  cy.get('input[data-placeholder="E-Mail Address"]').type(email);
+  cy.get('input[data-placeholder="New Password"]').type(password);
+  cy.get('input[data-placeholder="Confirm New Password"]').type(password);
   cy.contains('button', 'Apply').should('exist').and('enabled');
 
   if (docuScreenshots) {
