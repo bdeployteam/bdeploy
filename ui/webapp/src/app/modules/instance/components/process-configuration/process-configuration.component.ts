@@ -19,6 +19,7 @@ import { EditAppConfigContext, ProcessConfigDto } from '../../../../models/proce
 import { ConfigService } from '../../../core/services/config.service';
 import { HeaderTitleService } from '../../../core/services/header-title.service';
 import { Logger, LoggingService } from '../../../core/services/logging.service';
+import { RoutingHistoryService } from '../../../core/services/routing-history.service';
 import { SystemService } from '../../../core/services/system.service';
 import { ProductService } from '../../../instance-group/services/product.service';
 import { ManagedServersService } from '../../../servers/services/managed-servers.service';
@@ -156,6 +157,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     private configService: ConfigService,
     private managedServers: ManagedServersService,
     private router: Router,
+    public routingHistoryService:RoutingHistoryService,
   ) {}
 
   ngOnInit() {

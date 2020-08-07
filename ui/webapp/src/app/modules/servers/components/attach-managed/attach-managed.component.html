@@ -1,5 +1,5 @@
 <mat-toolbar class="mat-elevation-z1 header-toolbar">
-  <button mat-icon-button type="button" (click)='location.back()'><mat-icon>chevron_left</mat-icon></button>
+  <button mat-icon-button type="button" (click)="routingHistoryService.back('servers/browser/'+instanceGroupName)"><mat-icon>chevron_left</mat-icon></button>
   <span>Attach Managed Server: <app-instance-group-title [instanceGroup]='instanceGroupName'></app-instance-group-title></span>
 </mat-toolbar>
 

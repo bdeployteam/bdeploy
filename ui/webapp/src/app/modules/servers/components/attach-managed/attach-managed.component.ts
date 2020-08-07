@@ -7,6 +7,7 @@ import { MatStep, MatStepper } from '@angular/material/stepper';
 import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { ServerValidators } from 'src/app/modules/shared/validators/server.validator';
 import { ManagedMasterDto } from '../../../../models/gen.dtos';
 import { ErrorMessage } from '../../../core/services/logging.service';
@@ -42,6 +43,7 @@ export class AttachManagedComponent implements OnInit {
     private fb: FormBuilder,
     private dlService: DownloadService,
     private managedServers: ManagedServersService,
+    public routingHistoryService:RoutingHistoryService
   ) {}
 
   ngOnInit() {

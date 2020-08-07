@@ -11,6 +11,7 @@ import { finalize } from 'rxjs/operators';
 import { Permission, ScopedPermission, UserInfo } from 'src/app/models/gen.dtos';
 import { UserPickerComponent } from 'src/app/modules/core/components/user-picker/user-picker.component';
 import { Logger, LoggingService } from 'src/app/modules/core/services/logging.service';
+import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
 import { MessageboxService } from 'src/app/modules/shared/services/messagebox.service';
@@ -71,7 +72,8 @@ export class InstanceGroupPermissionsComponent implements OnInit {
     public settings: SettingsService,
     private loggingService: LoggingService,
     public location: Location,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    public routingHistoryService: RoutingHistoryService,
   ) { }
 
   ngOnInit() {

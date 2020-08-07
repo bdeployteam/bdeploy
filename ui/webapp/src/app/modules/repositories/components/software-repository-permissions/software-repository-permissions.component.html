@@ -1,6 +1,6 @@
 <section class="mat-typography dialog">
   <mat-toolbar class="mat-elevation-z1 header-toolbar">
-    <button mat-icon-button type="button" (click)='location.back()'><mat-icon>chevron_left</mat-icon></button>
+    <button mat-icon-button type="button" (click)="routingHistoryService.back('softwarerepo/browser')"><mat-icon>chevron_left</mat-icon></button>
     <span>Software Repository: {{nameParam}}</span>
     <span class="fill-space"></span>
     <mat-slide-toggle class="search" [(ngModel)]="showGlobal">Show User with Global Access</mat-slide-toggle>

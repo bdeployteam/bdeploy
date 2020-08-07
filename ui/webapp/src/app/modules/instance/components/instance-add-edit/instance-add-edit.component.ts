@@ -8,6 +8,7 @@ import { ActivatedRoute } from '@angular/router';
 import { cloneDeep, isEqual } from 'lodash';
 import { Observable, of } from 'rxjs';
 import { finalize } from 'rxjs/operators';
+import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { EMPTY_INSTANCE } from '../../../../models/consts';
 import { InstanceConfiguration, InstancePurpose, InstanceVersionDto, ManagedMasterDto, MinionMode, ProductDto } from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
@@ -76,7 +77,8 @@ export class InstanceAddEditComponent implements OnInit {
     private viewContainerRef: ViewContainerRef,
     private overlay: Overlay,
     private config: ConfigService,
-    private managedServers: ManagedServersService
+    private managedServers: ManagedServersService,
+    public routingHistoryService:RoutingHistoryService,
   ) {}
 
   ngOnInit() {

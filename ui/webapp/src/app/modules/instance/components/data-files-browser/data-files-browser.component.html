@@ -1,6 +1,6 @@
 <div class="box">
   <mat-toolbar class="mat-elevation-z1 header-toolbar">
-    <button mat-icon-button type="button" (click)='location.back()'><mat-icon>chevron_left</mat-icon></button>
+    <button mat-icon-button type="button" (click)="routingHistoryService.back('/instance/overview/'+groupParam+'/'+uuidParam)"><mat-icon>chevron_left</mat-icon></button>
     <span>Instance: <app-instance-group-title [instanceGroup]='groupParam'></app-instance-group-title> - {{instanceVersion?.name}}</span>
     <span class="fill-space"></span>
     <button mat-button (click)="reload()"><mat-icon>refresh</mat-icon></button>

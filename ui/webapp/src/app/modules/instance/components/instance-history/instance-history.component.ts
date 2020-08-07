@@ -4,6 +4,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HistoryEntryDto, HistoryEntryVersionDto, InstanceConfiguration } from 'src/app/models/gen.dtos';
 import { LoggingService } from 'src/app/modules/core/services/logging.service';
+import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { InstanceHistoryTimelineComponent } from 'src/app/modules/instance/components/instance-history-timeline/instance-history-timeline.component';
 import { InstanceService } from '../../services/instance.service';
 
@@ -52,6 +53,7 @@ export class InstanceHistoryComponent implements OnInit{
     private instanceService:InstanceService,
     public location:Location,
     private loggingService:LoggingService,
+    public routingHistoryService:RoutingHistoryService,
     ) {
     }
 

@@ -15,6 +15,7 @@ import 'brace/theme/twilight';
 import { Base64 } from 'js-base64';
 import { cloneDeep } from 'lodash';
 import { Observable, of, Subscription } from 'rxjs';
+import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { FileStatusDto, FileStatusType, InstanceConfiguration } from '../../../../models/gen.dtos';
 import { Logger, LoggingService } from '../../../core/services/logging.service';
 import { ThemeService } from '../../../core/services/theme.service';
@@ -91,6 +92,7 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
     private messageBoxService: MessageboxService,
     private overlay: Overlay,
     private viewContainerRef: ViewContainerRef,
+    public routingHistoryService:RoutingHistoryService,
   ) {}
 
   public ngOnInit(): void {

@@ -8,6 +8,7 @@ import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { MatTabChangeEvent } from '@angular/material/tabs';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
+import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { InstanceConfiguration, InstanceDirectory, InstanceDirectoryEntry, StringEntryChunkDto } from '../../../../models/gen.dtos';
 import { DownloadService } from '../../../shared/services/download.service';
 import { InstanceService } from '../../services/instance.service';
@@ -56,6 +57,7 @@ export class DataFilesBrowserComponent implements OnInit {
     private instanceService: InstanceService,
     public location: Location,
     private dlService: DownloadService,
+    public routingHistoryService:RoutingHistoryService,
   ) {}
 
   public ngOnInit(): void {

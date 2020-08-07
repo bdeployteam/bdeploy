@@ -5,6 +5,7 @@ import { MatDrawer } from '@angular/material/sidenav';
 import { ActivatedRoute } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
+import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { MinionMode, ProductDto } from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
 import { FileUploadComponent } from '../../../shared/components/file-upload/file-upload.component';
@@ -36,6 +37,7 @@ export class ProductsComponent implements OnInit {
     public dialog: MatDialog,
     public location: Location,
     private config: ConfigService,
+    public routingHistoryService:RoutingHistoryService,
   ) {}
 
   ngOnInit() {

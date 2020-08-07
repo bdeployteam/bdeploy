@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { cloneDeep, isEqual } from 'lodash';
 import { Observable, of } from 'rxjs';
 import { finalize } from 'rxjs/operators';
+import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { EMPTY_SOFTWARE_REPO } from '../../../../models/consts';
 import { SoftwareRepositoryConfiguration } from '../../../../models/gen.dtos';
 import { ErrorMessage, Logger, LoggingService } from '../../../core/services/logging.service';
@@ -46,7 +47,8 @@ export class SoftwareRepoAddEditComponent implements OnInit {
     private loggingService: LoggingService,
     private messageBoxService: MessageboxService,
     public location: Location,
-    private router: Router
+    private router: Router,
+    public routingHistoryService:RoutingHistoryService,
   ) {}
 
   ngOnInit() {
