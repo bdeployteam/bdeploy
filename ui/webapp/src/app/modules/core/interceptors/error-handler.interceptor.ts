@@ -26,9 +26,12 @@ export class HttpErrorHandlerInterceptor implements HttpInterceptor {
         this.snackbar.open(`Unfortunately, /${e.url} was not found (wrong URL or insufficient rights), we returned you to the safe-zone.`, 'DISMISS', { panelClass: 'error-snackbar' });
         this.router.navigate(['/instancegroup/browser']);
         return of(null);
-    } else if (e instanceof HttpErrorResponse && e.status !== 401 && !request.headers.has(NO_ERROR_HANDLING_HDR)) {
-      // let 401 pass through for logout redirection in the other interceptor :)
-      if (e.status === 0) {
+      } else if (e instanceof HttpErrorResponse && e.status === 499) {
+        // special version mismatch code.
+        this.log.errorWithGuiMessage(new ErrorMessage(e.statusText, e));
+      } else if (e instanceof HttpErrorResponse && e.status !== 401 && !request.headers.has(NO_ERROR_HANDLING_HDR)) {
+        // let 401 pass through for logout redirection in the other interceptor :)
+        if (e.status === 0) {
           this.systemService.backendUnreachable();
         } else {
           let displayPath = request.url;

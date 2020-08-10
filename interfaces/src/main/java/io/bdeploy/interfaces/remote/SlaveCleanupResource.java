@@ -15,10 +15,12 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.interfaces.cleanup.CleanupAction;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
+import io.bdeploy.interfaces.remote.versioning.VersionMismatchDetect;
 
 @Path("/cleanup")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@VersionMismatchDetect
 public interface SlaveCleanupResource {
 
     /**

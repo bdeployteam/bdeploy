@@ -4,6 +4,7 @@ import javax.ws.rs.core.SecurityContext;
 
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.interfaces.remote.versioning.VersionMismatchFilter;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.JerseyOnBehalfOfFilter;
 
@@ -20,6 +21,7 @@ public class ResourceProvider {
      */
     public static JerseyClientFactory of(RemoteService svc) {
         JerseyClientFactory jcf = JerseyClientFactory.get(svc);
+        jcf.register(new VersionMismatchFilter(jcf));
         jcf.register(JerseyRemoteBHive.HIVE_JACKSON_MODULE);
         return jcf;
     }

@@ -24,6 +24,7 @@ import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.InstanceDirectory;
 import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
+import io.bdeploy.interfaces.remote.versioning.VersionMismatchDetect;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.WeakTokenAllowed;
 
 /**
@@ -31,6 +32,7 @@ import io.bdeploy.jersey.JerseyAuthenticationProvider.WeakTokenAllowed;
  */
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+@VersionMismatchDetect
 public interface MasterNamedResource {
 
     /**
