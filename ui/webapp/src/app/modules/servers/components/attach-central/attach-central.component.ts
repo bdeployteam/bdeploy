@@ -2,6 +2,7 @@ import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatStep, MatStepper } from '@angular/material/stepper';
 import ReconnectingWebSocket from 'reconnecting-websocket';
+import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { InstanceGroupConfiguration, ManagedMasterDto } from '../../../../models/gen.dtos';
 import { ErrorMessage, LoggingService } from '../../../core/services/logging.service';
 import { InstanceGroupService } from '../../../instance-group/services/instance-group.service';
@@ -37,6 +38,7 @@ export class AttachCentralComponent implements OnInit, OnDestroy {
     private igService: InstanceGroupService,
     private dlService: DownloadService,
     private managedServers: ManagedServersService,
+    public routingHistoryService:RoutingHistoryService,
   ) {}
 
   ngOnInit() {

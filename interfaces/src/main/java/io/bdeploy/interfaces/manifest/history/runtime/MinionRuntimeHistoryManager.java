@@ -9,13 +9,10 @@ public class MinionRuntimeHistoryManager {
 
     private final MetaManifest<MinionRuntimeHistory> meta;
     private final BHiveExecution hive;
-    private final Manifest.Key parent;
 
     public MinionRuntimeHistoryManager(Manifest.Key Manifest, BHiveExecution hive) {
         this.meta = new MetaManifest<>(Manifest, true, MinionRuntimeHistory.class);
         this.hive = hive;
-        parent = Manifest;
-
     }
 
     public MinionRuntimeHistory getFullHistory() {

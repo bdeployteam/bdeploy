@@ -50,7 +50,7 @@
 <div class="box">
   <mat-toolbar class="mat-elevation-z1 header-toolbar process-config-header">
     <mat-toolbar-row id="page-header">
-      <button mat-icon-button type="button" (click)='location.back()' *ngIf="!editMode">
+      <button mat-icon-button type="button" (click)="routingHistoryService.back('instance/browser/'+groupParam)" *ngIf="!editMode">
         <mat-icon>chevron_left</mat-icon>
       </button>
       <button mat-icon-button type="button" (click)="onDiscardAppChanges(true)" *ngIf="editMode">

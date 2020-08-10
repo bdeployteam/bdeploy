@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
+import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { SORT_PURPOSE } from '../../../../models/consts';
 import { DataList } from '../../../../models/dataList';
 import { InstanceDto, InstancePurpose, MinionMode } from '../../../../models/gen.dtos';
@@ -34,6 +35,7 @@ export class InstanceBrowserComponent implements OnInit {
     private loggingService: LoggingService,
     public location: Location,
     private config: ConfigService,
+    public routingHistoryService:RoutingHistoryService,
   ) {}
 
   ngOnInit(): void {

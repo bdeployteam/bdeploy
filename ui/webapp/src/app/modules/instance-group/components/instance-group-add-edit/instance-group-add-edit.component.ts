@@ -9,6 +9,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { cloneDeep, isEqual } from 'lodash';
 import { Observable, of } from 'rxjs';
 import { finalize } from 'rxjs/operators';
+import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { EMPTY_INSTANCE_GROUP } from '../../../../models/consts';
 import { InstanceGroupConfiguration, MinionMode } from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
@@ -75,6 +76,7 @@ export class InstanceGroupAddEditComponent implements OnInit {
     private viewContainerRef: ViewContainerRef,
     private overlay: Overlay,
     private config: ConfigService,
+    public routingHistoryService:RoutingHistoryService,
   ) {}
 
   ngOnInit() {

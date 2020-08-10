@@ -2,7 +2,7 @@
   <form [formGroup]="instanceFormGroup" (ngSubmit)="onSubmit()">
     <mat-toolbar class="mat-elevation-z1 header-toolbar">
       <mat-toolbar-row>
-        <button mat-icon-button type="button" [disabled]="loading || productsLoading" (click)='location.back()'><mat-icon>chevron_left</mat-icon></button>
+        <button mat-icon-button type="button" [disabled]="loading || productsLoading" (click)="routingHistoryService.back('/instance/browser/'+groupParam)"><mat-icon>chevron_left</mat-icon></button>
         <span *ngIf="isCreate()">Instance Group: <app-instance-group-title [instanceGroup]='groupParam'></app-instance-group-title></span>
         <span *ngIf="!isCreate()">Instance: <app-instance-group-title [instanceGroup]='groupParam'></app-instance-group-title> - {{nameControl.value}}</span>
         <span class="fill-space"></span>

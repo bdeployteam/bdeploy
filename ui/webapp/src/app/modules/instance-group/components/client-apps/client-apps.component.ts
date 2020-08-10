@@ -2,6 +2,7 @@ import { Location } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { finalize } from 'rxjs/operators';
+import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { SORT_PURPOSE } from '../../../../models/consts';
 import { ClientApplicationDto, InstanceClientAppsDto, InstanceConfiguration, InstanceGroupConfiguration, InstancePurpose, OperatingSystem } from '../../../../models/gen.dtos';
 import { SoftwareUpdateService } from '../../../admin/services/software-update.service';
@@ -34,6 +35,7 @@ export class ClientAppsComponent implements OnInit {
     public downloadService: DownloadService,
     public updateService: SoftwareUpdateService,
     public launcherService: LauncherService,
+    public routingHistoryService: RoutingHistoryService,
   ) {}
 
   ngOnInit() {

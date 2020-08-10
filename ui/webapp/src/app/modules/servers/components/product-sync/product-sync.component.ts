@@ -6,6 +6,7 @@ import { DragulaService } from 'ng2-dragula';
 import { forkJoin, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { ManagedMasterDto, MinionMode, ProductDto, ProductTransferDto } from 'src/app/models/gen.dtos';
+import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { ProductService } from 'src/app/modules/instance-group/services/product.service';
 import { sortByTags } from 'src/app/modules/shared/utils/manifest.utils';
 import { ManagedServersService } from '../../services/managed-servers.service';
@@ -54,7 +55,8 @@ export class ProductSyncComponent implements OnInit, OnDestroy {
     public location: Location,
     private servers: ManagedServersService,
     private productService: ProductService,
-    private dragulaService: DragulaService
+    private dragulaService: DragulaService,
+    public routingHistoryService: RoutingHistoryService,
   ) {}
 
   public ngOnInit(): void {

@@ -6,6 +6,7 @@ import { MatDrawer } from '@angular/material/sidenav';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
+import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { ManifestKey } from '../../../../models/gen.dtos';
 import { Logger, LoggingService } from '../../../core/services/logging.service';
 import { FileUploadComponent } from '../../../shared/components/file-upload/file-upload.component';
@@ -43,6 +44,7 @@ export class SoftwareRepositoryComponent implements OnInit, OnDestroy {
     private softwareService: SoftwareService,
     public dialog: MatDialog,
     private authService: AuthenticationService,
+    public routingHistoryService:RoutingHistoryService,
   ) { }
 
   ngOnInit() {
