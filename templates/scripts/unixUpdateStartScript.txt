@@ -228,6 +228,12 @@ else
     state=\$?
 fi
 
+# Check if another launcher has launched us
+# If so then exit code handling is done by the other launcher
+if [[ -n "\${BDEPLOY_DELEGATE}" ]]; then
+	exit \$state
+fi
+
 if [ \$state == 42 ]; then
     echo "Minion signalled update request, restarting"
     exec "\$0" "\${ORIG_ARGS[@]}"
