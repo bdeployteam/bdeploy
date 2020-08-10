@@ -404,9 +404,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       this.minionStates = results[2];
       this.minionConfigs = results[3];
 
-      if (this.syncComponent.isInSync()) {
-        this.updateDto = this.syncComponent.server.update;
-      }
+      this.updateDto = this.syncComponent.server?.update;
 
       this.loading = false;
       this.updateDirtyStateAndValidate();
@@ -1133,9 +1131,11 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     this.updateStatus = null;
     if (this.syncComponent.isInSync()) {
       this.loadVersions(true);
-      this.updateDto = this.syncComponent.server?.update;
     }
-    this.doTriggerProcessStatusUpdate();
+    this.updateDto = this.syncComponent.server?.update;
+    if(!this.updateDto?.forceUpdate) {
+      this.doTriggerProcessStatusUpdate();
+    }
     this.updateNotifications();
   }
 
