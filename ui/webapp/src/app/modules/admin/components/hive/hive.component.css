@@ -40,6 +40,7 @@ table {
 .flex-row {
   display: flex;
   flex-direction: row;
+  margin-bottom: 5px;
 }
 
 .flex-spacer {
@@ -64,3 +65,19 @@ table {
 .icon-button{
   cursor:pointer;
 }
+
+::ng-deep .flex-row mat-chip-list .mat-chip-list-wrapper{
+  overflow: hidden;
+  flex-wrap: nowrap;
+  margin-right: 5px;
+  margin-top: 1px;
+}
+
+.flex-row mat-chip{
+  flex-shrink: 0;
+}
+
+.back-button{
+  margin-right: 5px;
+}
+

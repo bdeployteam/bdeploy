@@ -1,4 +1,3 @@
-import { LocationStrategy } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { ActivatedRoute } from '@angular/router';
@@ -49,15 +48,9 @@ export class HiveAuditLogsBrowserComponent implements OnInit {
 
   dataProvider: AuditLogDataProvider = null;
 
-  constructor(private location: LocationStrategy, private auditService: AuditService,
-    private hiveService: HiveService, private route: ActivatedRoute,
-    private loggingService: LoggingService,
-  ) {
-    this.location.onPopState(() => {
-      this.hiveService.setBackClicked(true);
-      return false;
-    });
-  }
+  constructor(private auditService: AuditService, private hiveService: HiveService,
+    private route: ActivatedRoute, private loggingService: LoggingService,
+  ) {}
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {

@@ -281,4 +281,22 @@ export class HiveComponent implements OnInit {
     const dotidx = filename.indexOf('.');
     return dotidx < 0 ? '' : filename.substr(dotidx + 1);
   }
+
+  public back(){
+    if(this.fileEntry){
+      this.closeFile()
+    }
+    else{
+      let length = this.paths[this._hive].length;
+      if(length > 1){
+        const entry: HiveEntryDto = this.paths[this._hive][length-2];
+        this.paths[this._hive] = this.paths[this._hive].slice(0, length-2);
+        this.selectRow(entry);
+      }
+      else if(length > 0){
+        this.selectTop();
+      }
+    }
+
+  }
 }

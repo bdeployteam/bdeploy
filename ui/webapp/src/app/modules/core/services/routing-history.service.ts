@@ -14,7 +14,9 @@ export class RoutingHistoryService {
     router.events.pipe(filter(e => e instanceof NavigationStart)).subscribe((e:NavigationStart) => {
       if(e.navigationTrigger === "popstate"){
         this.routedBack = true;
-        this.offset--;
+        if(this.offset > 0){
+          this.offset--;
+        }
       }
     });
     router.events.pipe(filter(e => e instanceof RoutesRecognized),pairwise()).subscribe(() => {

@@ -1,6 +1,7 @@
 <div class="hive-container">
 
   <div class="flex-row">
+    <button class="back-button" mat-icon-button (click)="back()"><mat-icon>chevron_left</mat-icon></button>
     <mat-chip-list>
       <mat-chip (click)="selectTop()" color="accent" selected><mat-icon>home</mat-icon></mat-chip>
       <mat-chip *ngFor="let p of paths[_hive]; index as i" (click)="selectHistory(i); hivetable ? hivetable.renderRows() : null">
