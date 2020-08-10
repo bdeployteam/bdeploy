@@ -68,11 +68,11 @@ app-instance-history-timeline-card{
 
 
   .timeline_circle{
-      left:17px !important;
+      left:18px !important;
   }
 
   .timeline_line{
-      left:16px !important;
+      left:16.5px !important;
       margin-left:0;
       bottom:35px;
   }

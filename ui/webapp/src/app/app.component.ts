@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { HeaderTitleService } from './modules/core/services/header-title.service';
 import { Logger, LoggingService } from './modules/core/services/logging.service';
+import { RoutingHistoryService } from './modules/core/services/routing-history.service';
 
 @Component({
   selector: 'app-root',
@@ -25,6 +26,7 @@ export class AppComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private titleService: Title,
     private headerService: HeaderTitleService,
+    private routingHistoryService: RoutingHistoryService
   ) {
     this.log.info('----------------------------------------');
     this.log.info(this.title + ' started...');
