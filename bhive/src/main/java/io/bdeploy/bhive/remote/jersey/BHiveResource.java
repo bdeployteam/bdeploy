@@ -11,6 +11,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -122,7 +124,10 @@ public interface BHiveResource {
 
     public static class FetchSpec {
 
+        @JsonAlias("requiredObjects")
         SortedSet<ObjectId> objects;
+
+        @JsonAlias("manifestsToFetch")
         SortedSet<Manifest.Key> manifests;
     }
 
