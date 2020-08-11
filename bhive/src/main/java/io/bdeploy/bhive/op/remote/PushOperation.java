@@ -9,9 +9,13 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.core.UriBuilder;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.ReadOnlyOperation;
@@ -35,6 +39,8 @@ import io.bdeploy.common.ActivityReporter.Activity;
  */
 @ReadOnlyOperation
 public class PushOperation extends RemoteOperation<TransferStatistics, PushOperation> {
+
+    private static final Logger log = LoggerFactory.getLogger(PushOperation.class);
 
     private final SortedSet<Manifest.Key> manifests = new TreeSet<>();
     private String hiveName;
@@ -177,15 +183,21 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
 
     private long pushAsStream(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests) throws IOException {
         PipedInputStream input = new PipedInputStream();
-        PipedOutputStream output = new PipedOutputStream(input);
+        CompletableFuture<Void> barrier = new CompletableFuture<>();
 
         Thread thread = new Thread(() -> {
-            execute(new ObjectWriteOperation().stream(output).manifests(manifests).objects(objects));
+            try (PipedOutputStream output = new PipedOutputStream(input)) {
+                barrier.complete(null);
+                execute(new ObjectWriteOperation().stream(output).manifests(manifests).objects(objects));
+            } catch (IOException e) {
+                log.warn("Cannot fully push content via stream", e);
+            }
         });
         thread.setDaemon(true);
         thread.setName("Write-Objects");
         thread.start();
 
+        barrier.join();
         return rh.pushAsStream(input);
     }
 

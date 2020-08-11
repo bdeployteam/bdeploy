@@ -65,7 +65,11 @@ public class ObjectReadOperation extends BHive.Operation<Long> {
                 }
 
                 // Insert manifests as last operation
-                manifests.forEach(mf -> getManifestDatabase().addManifest(mf));
+                manifests.forEach(mf -> {
+                    if (!getManifestDatabase().hasManifest(mf.getKey())) {
+                        getManifestDatabase().addManifest(mf);
+                    }
+                });
 
                 // Release lock as all objects have been inserted
                 MarkerDatabase.waitRootLock(getMarkerRoot());
@@ -106,7 +110,7 @@ public class ObjectReadOperation extends BHive.Operation<Long> {
         public int read() throws IOException {
             byte[] single = new byte[1];
             int num = read(single, 0, 1);
-            return num == -1 ? -1 : single[0];
+            return num == -1 ? -1 : (single[0] & 0xFF);
         }
 
         @Override

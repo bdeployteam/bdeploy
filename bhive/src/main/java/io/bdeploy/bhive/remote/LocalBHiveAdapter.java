@@ -1,5 +1,6 @@
 package io.bdeploy.bhive.remote;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
@@ -9,8 +10,12 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.CompletableFuture;
 
 import javax.ws.rs.core.UriBuilder;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
@@ -36,6 +41,8 @@ import io.bdeploy.common.ActivityReporter.Activity;
  * to specify local {@link BHive}s on the same machine as {@link RemoteBHive}.
  */
 public class LocalBHiveAdapter implements RemoteBHive {
+
+    private static final Logger log = LoggerFactory.getLogger(LocalBHiveAdapter.class);
 
     private final BHive hive;
     private final ActivityReporter reporter;
@@ -149,19 +156,23 @@ public class LocalBHiveAdapter implements RemoteBHive {
 
     @Override
     public InputStream fetchAsStream(SortedSet<ObjectId> objects, SortedSet<Manifest.Key> manifests) {
-        try {
-            PipedInputStream input = new PipedInputStream();
-            PipedOutputStream output = new PipedOutputStream(input);
-            Thread thread = new Thread(() -> {
+        PipedInputStream input = new PipedInputStream();
+        CompletableFuture<Void> barrier = new CompletableFuture<>();
+
+        Thread thread = new Thread(() -> {
+            try (PipedOutputStream output = new PipedOutputStream(input)) {
+                barrier.complete(null);
                 hive.execute(new ObjectWriteOperation().stream(output).manifests(manifests).objects(objects));
-            });
-            thread.setDaemon(true);
-            thread.setName("Write-Objects");
-            thread.start();
-            return input;
-        } catch (Exception ex) {
-            throw new IllegalStateException("Cannot fetch as stream", ex);
-        }
+            } catch (IOException e) {
+                log.warn("Cannot fully send content to fetching client via stream", e);
+            }
+        });
+        thread.setDaemon(true);
+        thread.setName("Write-Objects");
+        thread.start();
+
+        barrier.join();
+        return input;
     }
 
     @Override

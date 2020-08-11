@@ -1,6 +1,9 @@
 package io.bdeploy.pcu.util;
 
 import java.lang.ProcessHandle.Info;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Optional;
 
 import io.bdeploy.interfaces.configuration.pcu.ProcessHandleDto;
 
@@ -22,11 +25,13 @@ public class ProcessHandleDtoHelper {
 
         // Collect process info
         Info info = process.info();
-        if (info.startInstant().isPresent()) {
-            dto.startTime = info.startInstant().get().toEpochMilli();
+        Optional<Instant> startInstant = info.startInstant();
+        if (startInstant.isPresent()) {
+            dto.startTime = startInstant.get().toEpochMilli();
         }
-        if (info.totalCpuDuration().isPresent()) {
-            dto.totalCpuDuration = info.totalCpuDuration().get().getSeconds();
+        Optional<Duration> totalCpuDuration = info.totalCpuDuration();
+        if (totalCpuDuration.isPresent()) {
+            dto.totalCpuDuration = totalCpuDuration.get().getSeconds();
         }
         dto.command = info.command().orElse(null);
         dto.arguments = info.arguments().orElse(null);

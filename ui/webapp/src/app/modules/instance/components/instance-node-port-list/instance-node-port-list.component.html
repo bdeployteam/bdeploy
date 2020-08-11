@@ -6,6 +6,7 @@
   <h2>Server Ports on {{data.minionName}}</h2>
 
   <table mat-table [dataSource]="dataSource" matSort [matSortActive]="INITIAL_SORT_COLUMN" [matSortDirection]="INITIAL_SORT_DIRECTION">
+    <caption style="display: none;">Server Ports</caption>
 
     <ng-container matColumnDef="instance">
       <th scope="col" mat-header-cell *matHeaderCellDef mat-sort-header>Instance</th>

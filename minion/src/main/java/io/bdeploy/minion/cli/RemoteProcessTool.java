@@ -122,7 +122,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                     node.activeTag, handle == null ? "-" : df.format(handle.startTime), handle == null ? "-" : handle.user,
                     handle == null ? "-" : Long.toString(handle.pid)));
 
-            if (isVerbose() && detail != null) {
+            if (isVerbose() && handle != null) {
                 printProcessDetailsRec(handle, "  ");
             }
         }

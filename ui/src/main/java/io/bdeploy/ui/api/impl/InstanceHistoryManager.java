@@ -83,7 +83,7 @@ public class InstanceHistoryManager {
         // configuration history
         String rootName = InstanceManifest.getRootName(instanceId);
         List<Manifest.Key> all = new ArrayList<>(hive.execute(new ManifestListOperation().setManifestName(rootName)));
-        Collections.sort(all, (a, b) -> Integer.parseInt(b.getTag()) - Integer.parseInt(b.getTag()));
+        Collections.sort(all, (a, b) -> Integer.parseInt(b.getTag()) - Integer.parseInt(a.getTag()));
 
         for (Key manifestKey : all) {
             for (InstanceManifestHistoryRecord record : InstanceManifest.of(hive, manifestKey).getHistory(hive)
@@ -161,7 +161,7 @@ public class InstanceHistoryManager {
             returnList = instanceHistory.subList(0, amount);
 
             for (HistoryEntryDto entry : returnList) {
-                if (entry.type == "CREATE" && entry.version > 1) {
+                if ("CREATE".equals(entry.type) && entry.version > 1) {
                     entry.content = versionDifferences(hive,
                             InstanceManifest.load(hive, instanceId, String.valueOf(entry.version - 1)),
                             InstanceManifest.load(hive, instanceId, String.valueOf(entry.version)));
@@ -172,7 +172,7 @@ public class InstanceHistoryManager {
             returnList = instanceHistory.subList(0, instanceHistory.size());
 
             for (HistoryEntryDto entry : returnList) {
-                if (entry.type == "CREATE" && entry.version > 1) {
+                if ("CREATE".equals(entry.type) && entry.version > 1) {
                     entry.content = versionDifferences(hive,
                             InstanceManifest.load(hive, instanceId, String.valueOf(entry.version - 1)),
                             InstanceManifest.load(hive, instanceId, String.valueOf(entry.version)));
@@ -239,7 +239,7 @@ public class InstanceHistoryManager {
                 returnList = cachedHistory.subList(offset, offset + amount);
 
                 for (HistoryEntryDto entry : returnList) {
-                    if (entry.type == "CREATE" && entry.version != 1) {
+                    if ("CREATE".equals(entry.type) && entry.version != 1) {
                         entry.content = versionDifferences(hive,
                                 InstanceManifest.load(hive, instanceId, String.valueOf(entry.version - 1)),
                                 InstanceManifest.load(hive, instanceId, String.valueOf(entry.version)));
@@ -250,7 +250,7 @@ public class InstanceHistoryManager {
                 returnList = cachedHistory.subList(offset, cachedHistory.size());
 
                 for (HistoryEntryDto entry : returnList) {
-                    if (entry.type == "CREATE" && entry.version != 1) {
+                    if ("CREATE".equals(entry.type) && entry.version != 1) {
                         entry.content = versionDifferences(hive,
                                 InstanceManifest.load(hive, instanceId, String.valueOf(entry.version - 1)),
                                 InstanceManifest.load(hive, instanceId, String.valueOf(entry.version)));
