@@ -8,10 +8,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import io.bdeploy.interfaces.configuration.SettingsConfiguration;
+import io.bdeploy.interfaces.remote.versioning.VersionMismatchDetect;
 
 @Path("/master/settings")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+@VersionMismatchDetect
 public interface MasterSettingsResource {
 
     @GET

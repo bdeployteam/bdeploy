@@ -10,10 +10,12 @@ import javax.ws.rs.core.MediaType;
 
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
+import io.bdeploy.interfaces.remote.versioning.VersionMismatchDetect;
 
 @Path("/processes")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@VersionMismatchDetect
 public interface SlaveProcessResource {
 
     /**
