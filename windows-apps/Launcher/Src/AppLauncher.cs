@@ -83,6 +83,7 @@ namespace Bdeploy.Launcher {
             FileStream lockStream = null;
             try {
                 // Try to get an exclusive update lock
+                Directory.CreateDirectory(UPDATES);
                 lockStream = GetUpdateLock();
                 if (lockStream == null) {
                     Log.Information("User canceled installation of updates. Exiting application.");
@@ -94,7 +95,7 @@ namespace Bdeploy.Launcher {
 
                 // Check that we have something to update
                 if (!Directory.Exists(UPDATES_NEXT)) {
-                    Log.Information("Updates have already been installed. Restarting application.");
+                    Log.Information("No updates available or updates have already been installed. Restarting application.");
                     return true;
                 }
 
