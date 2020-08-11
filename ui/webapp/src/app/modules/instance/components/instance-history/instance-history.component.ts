@@ -28,6 +28,10 @@ export class InstanceHistoryComponent implements OnInit{
   loadedAll:boolean = false;
   loading:boolean = false;
 
+  showCreateEvents = true;
+  showConfigEvents = true;
+  showRuntimeEvents = false;
+
   currentOffset:number = 0;
   amount:number = 10;
 
@@ -35,6 +39,7 @@ export class InstanceHistoryComponent implements OnInit{
 
   instance: InstanceConfiguration;
   historyEntries:HistoryEntryDto[];
+  unfilteredEntries:HistoryEntryDto[];
 
   compareVersions:Number[] = [,];
   compareDialogOpen:boolean = false;
@@ -69,7 +74,8 @@ export class InstanceHistoryComponent implements OnInit{
   loadHistory():void{
     this.loading = true;
     this.instanceService.getInstanceHistory(this.groupParam,this.uuidParam,this.amount).subscribe((list:HistoryEntryDto[])=>{
-      this.historyEntries = list;
+      this.unfilteredEntries = list;
+      this.filter();
       this.loading = false;
       if(list.length < this.amount){
         this.loadedAll = true;
@@ -82,7 +88,8 @@ export class InstanceHistoryComponent implements OnInit{
     if(!this.loading){
       this.loading = true;
     this.instanceService.getMoreInstanceHistory(this.groupParam,this.uuidParam,this.amount,this.currentOffset).subscribe((list:HistoryEntryDto[])=>{
-      this.historyEntries = this.historyEntries.concat(list);
+      this.unfilteredEntries = this.unfilteredEntries.concat(list);
+      this.filter();
       this.loading = false;
       if(list.length < this.amount){
         this.loadedAll = true;
@@ -183,5 +190,14 @@ export class InstanceHistoryComponent implements OnInit{
   }
   isEmpty(object){
     return Object.keys(object).length == 0;
+  }
+
+  filter():void{
+    this.historyEntries = this.unfilteredEntries.filter(item => item.type=="CREATE" && this.showCreateEvents || item.type=="CONFIG" && this.showConfigEvents || item.type=="RUNTIME" && this.showRuntimeEvents);
+    setTimeout(()=>{
+      if(!this.timeline.isOverflowing() && !this.loadedAll){
+        this.loadMoreHistory();
+      }
+    },0);
   }
 }

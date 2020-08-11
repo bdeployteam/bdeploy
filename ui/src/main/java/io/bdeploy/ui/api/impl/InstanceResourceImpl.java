@@ -877,12 +877,12 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Override
     public List<HistoryEntryDto> getInstanceHistory(String instanceId, int amount) {
-        return instanceHistory.getInstanceHistory(hive, instanceId, amount);
+        return instanceHistory.getInstanceHistory(hive, instanceId, amount, group);
     }
 
     @Override
     public List<HistoryEntryDto> getMoreInstanceHistory(String instanceId, int amount, int offset) {
-        return instanceHistory.getMoreInstanceHistory(hive, instanceId, amount, offset);
+        return instanceHistory.getMoreInstanceHistory(hive, instanceId, group, amount, offset);
     }
 
     @Override

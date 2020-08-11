@@ -174,8 +174,8 @@ public class MinionDeployTest {
         // 1 instance node manifest, 1 application manifest, 1 dependent manifest
         // 1 instance version dir (not uninstalled before)
         // 1 instance data dir (last version removed), 2 stale pool dirs (application, dependent).
-        // 2 meta manifests (state of instance).
-        assertEquals(9, groups.get(1).actions.size());
+        // 4 meta manifests (state of instance & runtime history).
+        assertEquals(11, groups.get(1).actions.size());
 
         // now actually do it.
         cr.perform(groups);

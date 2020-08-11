@@ -51,7 +51,7 @@ mat-toolbar{
 }
 
 .compare-versions{
-  margin-left: auto;
+  margin-left: 10px;
   font-size:0.6em;
   height:64px;
   display:flex;
@@ -113,4 +113,8 @@ mat-toolbar{
   position:absolute;
   right:-27px;
   top:-47px;
+}
+
+.show-filter-button{
+  margin-left:auto;
 }

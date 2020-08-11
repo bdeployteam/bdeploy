@@ -6,11 +6,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.SecurityContext;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -22,16 +25,26 @@ import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.objects.view.ElementView;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ScanOperation;
+import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
+import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistoryRecord;
+import io.bdeploy.interfaces.manifest.history.runtime.MinionApplicationRuntimeHistory;
+import io.bdeploy.interfaces.manifest.history.runtime.MinionRuntimeHistory;
+import io.bdeploy.interfaces.manifest.history.runtime.MinionRuntimeHistoryDto;
+import io.bdeploy.interfaces.manifest.history.runtime.MinionRuntimeHistoryRecord;
+import io.bdeploy.interfaces.manifest.managed.MasterProvider;
+import io.bdeploy.interfaces.remote.MasterNamedResource;
+import io.bdeploy.interfaces.remote.MasterRootResource;
+import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.dto.HistoryEntryApplicationDto;
 import io.bdeploy.ui.dto.HistoryEntryConfigFilesDto;
@@ -39,6 +52,7 @@ import io.bdeploy.ui.dto.HistoryEntryDto;
 import io.bdeploy.ui.dto.HistoryEntryHttpEndpointDto;
 import io.bdeploy.ui.dto.HistoryEntryNodeDto;
 import io.bdeploy.ui.dto.HistoryEntryParametersDto;
+import io.bdeploy.ui.dto.HistoryEntryRuntimeDto;
 import io.bdeploy.ui.dto.HistoryEntryVersionDto;
 
 public class InstanceHistoryManager {
@@ -49,17 +63,24 @@ public class InstanceHistoryManager {
     @Inject
     private AuthService auth;
 
-    private List<HistoryEntryDto> getCachedHistory(BHive hive, String instanceId) {
+    @Context
+    private SecurityContext context;
+
+    @Inject
+    private MasterProvider mp;
+
+    private List<HistoryEntryDto> getCachedHistory(BHive hive, String instanceId, String group) {
         try {
-            return history.get(instanceId, () -> makeHistory(hive, instanceId));
+            return history.get(instanceId, () -> makeHistory(hive, instanceId, group));
         } catch (ExecutionException e) {
             throw new IllegalStateException("Cannot load history", e);
         }
     }
 
-    private List<HistoryEntryDto> makeHistory(BHive hive, String instanceId) {
+    private List<HistoryEntryDto> makeHistory(BHive hive, String instanceId, String group) {
         List<HistoryEntryDto> instanceHistory = new ArrayList<>();
 
+        // configuration history
         String rootName = InstanceManifest.getRootName(instanceId);
         List<Manifest.Key> all = new ArrayList<>(hive.execute(new ManifestListOperation().setManifestName(rootName)));
         Collections.sort(all, (a, b) -> Integer.parseInt(b.getTag()) - Integer.parseInt(b.getTag()));
@@ -68,8 +89,12 @@ public class InstanceHistoryManager {
             for (InstanceManifestHistoryRecord record : InstanceManifest.of(hive, manifestKey).getHistory(hive)
                     .getFullHistory()) {
 
-                HistoryEntryDto entry = new HistoryEntryDto(record.timestamp, Integer.parseInt(manifestKey.getTag()),
-                        record.action.name());
+                HistoryEntryDto entry = new HistoryEntryDto(record.timestamp, Integer.parseInt(manifestKey.getTag()));
+                if (record.action == Action.CREATE) {
+                    entry.type = "CREATE";
+                } else {
+                    entry.type = "CONFIG";
+                }
                 UserInfo user = null;
                 if (!record.user.isBlank()) {
                     if (record.user.charAt(0) == '[' && record.user.charAt(record.user.length() - 1) == ']') {
@@ -90,9 +115,27 @@ public class InstanceHistoryManager {
                     entry.user = record.user;
                 }
 
-                entry.title = selectTitle(record.action, manifestKey.getTag());
+                entry.title = selectConfigTitle(record.action, manifestKey.getTag());
 
                 instanceHistory.add(entry);
+            }
+        }
+
+        // runtime history
+        RemoteService svc = mp.getControllingMaster(hive, InstanceManifest.load(hive, instanceId, null).getManifest());
+        MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class, context);
+        MasterNamedResource namedMaster = master.getNamedMaster(group);
+        for (Entry<String, MinionRuntimeHistoryDto> dtoEntry : namedMaster.getRuntimeHistory(instanceId).entrySet()) {
+            for (Entry<String, MinionRuntimeHistory> historyEntry : dtoEntry.getValue().entrySet()) {
+                for (Entry<String, MinionApplicationRuntimeHistory> appEntry : historyEntry.getValue().entrySet()) {
+                    for (MinionRuntimeHistoryRecord record : appEntry.getValue().getRecords()) {
+                        HistoryEntryDto entry = new HistoryEntryDto(record.timestamp, Integer.parseInt(historyEntry.getKey()));
+                        entry.type = "RUNTIME";
+                        entry.runtimeEvent = new HistoryEntryRuntimeDto(dtoEntry.getKey(), record.PID, record.state);
+                        entry.title = selectRuntimeTitle(record.state, appEntry.getKey());
+                        instanceHistory.add(entry);
+                    }
+                }
             }
         }
 
@@ -109,8 +152,8 @@ public class InstanceHistoryManager {
      * @param amount how many events to be loaded
      * @return A list of history entries
      */
-    public List<HistoryEntryDto> getInstanceHistory(BHive hive, String instanceId, int amount) {
-        List<HistoryEntryDto> instanceHistory = makeHistory(hive, instanceId);
+    public List<HistoryEntryDto> getInstanceHistory(BHive hive, String instanceId, int amount, String group) {
+        List<HistoryEntryDto> instanceHistory = makeHistory(hive, instanceId, group);
         history.put(instanceId, instanceHistory);
         List<HistoryEntryDto> returnList;
 
@@ -141,7 +184,7 @@ public class InstanceHistoryManager {
 
     }
 
-    private String selectTitle(Action action, String tag) {
+    private String selectConfigTitle(Action action, String tag) {
         switch (action) {
             case CREATE:
                 return "Version " + tag + ": Creation";
@@ -158,6 +201,25 @@ public class InstanceHistoryManager {
         }
     }
 
+    private String selectRuntimeTitle(ProcessState state, String process) {
+        switch (state) {
+            case CRASHED_PERMANENTLY:
+                return "Process " + process + " crashed permanently";
+            case CRASHED_WAITING:
+                return "Process " + process + " chrashed";
+            case RUNNING_STOP_PLANNED:
+                return "Stop of " + process + "planned";
+            case RUNNING_UNSTABLE:
+                return "Restart of process " + process;
+            case RUNNING:
+                return "Start of process " + process;
+            case STOPPED:
+                return "Process " + process + " stopped";
+            default:
+                return "";
+        }
+    }
+
     /**
      * Loads a specified amount of Events and returns them.<br>
      * Computes all differences between two instance versions in a CREATE event. <br>
@@ -167,10 +229,10 @@ public class InstanceHistoryManager {
      * @param offset load events starting from offset
      * @return a List of Events
      */
-    public List<HistoryEntryDto> getMoreInstanceHistory(BHive hive, String instanceId, int amount, int offset) {
+    public List<HistoryEntryDto> getMoreInstanceHistory(BHive hive, String instanceId, String group, int amount, int offset) {
 
         List<HistoryEntryDto> returnList;
-        List<HistoryEntryDto> cachedHistory = getCachedHistory(hive, instanceId);
+        List<HistoryEntryDto> cachedHistory = getCachedHistory(hive, instanceId, group);
 
         if (offset < cachedHistory.size()) {
             if (offset + amount < cachedHistory.size()) {

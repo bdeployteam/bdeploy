@@ -97,7 +97,7 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
             MinionProcessController processController = root.getProcessController();
             InstanceProcessController controller = processController.getOrCreate(hive, inm);
             controller.createProcessControllers(inc.getDeploymentPathProvider(), inc.getResolver(), inm.getKey().getTag(),
-                    inc.getProcessGroupConfiguration());
+                    inc.getProcessGroupConfiguration(), inm.getRuntimeHistory(hive));
         } finally {
             deploying.done();
         }

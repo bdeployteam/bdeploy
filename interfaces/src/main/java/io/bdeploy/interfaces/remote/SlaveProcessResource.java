@@ -12,6 +12,8 @@ import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
 import io.bdeploy.interfaces.remote.versioning.VersionMismatchDetect;
+import io.bdeploy.interfaces.manifest.history.runtime.MinionRuntimeHistoryDto;
+
 
 @Path("/processes")
 @Produces(MediaType.APPLICATION_JSON)
@@ -110,5 +112,14 @@ public interface SlaveProcessResource {
     @POST
     @Path("/stdin")
     public void writeToStdin(@QueryParam("u") String instanceId, @QueryParam("a") String applicationId, String data);
+    
+    /**
+     * loads all runtime events of this minion
+     * @param instanceId the name of the instance
+     * @return a {@link MinionRuntimeHistoryDto}
+     */
+    @GET
+    @Path("/runtimeHistory")
+    public MinionRuntimeHistoryDto getRuntimeHistory(@QueryParam("u") String instanceId);
 
 }

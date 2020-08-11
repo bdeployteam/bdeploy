@@ -24,6 +24,7 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.InstanceDirectory;
 import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
+import io.bdeploy.interfaces.manifest.history.runtime.MinionRuntimeHistoryDto;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.remote.versioning.VersionMismatchDetect;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.WeakTokenAllowed;
@@ -246,7 +247,7 @@ public interface MasterNamedResource {
      * @param data
      *            the data to write to stdin of the application.
      */
-    @POST
+    @POST 
     @Path("/stdin")
     public void writeToStdin(@QueryParam("u") String instanceId, @QueryParam("a") String applicationId, String data);
 
@@ -259,4 +260,13 @@ public interface MasterNamedResource {
     @Path("/check-ports")
     public Map<Integer, Boolean> getPortStates(@QueryParam("m") String minion, List<Integer> ports);
 
+    /**
+     * Loads all runtime events from the minions <br>
+     * and returns them as a dto-tree: minion -> version -> application -> event
+     * @param instanceId the name of the instance
+     * @return a map of {@link MinionRuntimeHistoryDto} with the minion name as the key.
+     */
+    @GET
+    @Path("/runtimeHistory")
+    public Map<String, MinionRuntimeHistoryDto> getRuntimeHistory(@QueryParam("u") String instanceId);
 }
