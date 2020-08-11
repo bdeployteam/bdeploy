@@ -4,7 +4,6 @@ import { CanDeactivateGuard } from '../shared/guards/can-deactivate.guard';
 import { AdminShellComponent } from './components/admin-shell/admin-shell.component';
 import { AuditLogsBrowserComponent } from './components/audit-logs-browser/audit-logs-browser.component';
 import { HiveAuditLogsBrowserComponent } from './components/hive-audit-logs-browser/hive-audit-logs-browser.component';
-import { BackButtonGuard } from './components/hive-browser/back-button.guard';
 import { HiveBrowserComponent } from './components/hive-browser/hive-browser.component';
 import { MasterCleanupComponent } from './components/master-cleanup/master-cleanup.component';
 import { MetricsOverviewComponent } from './components/metrics-overview/metrics-overview.component';
@@ -29,7 +28,7 @@ const ADMIN_ROUTES: Route[] = [
       { path: 'plugins', component: PluginsBrowserComponent, outlet: 'panel' },
       { path: 'authentication', component: SettingsAuthComponent, canDeactivate: [CanDeactivateGuard], outlet: 'panel' },
       { path: 'users', component: UsersBrowserComponent, canDeactivate: [CanDeactivateGuard], outlet: 'panel' },
-      { path: 'hive', component: HiveBrowserComponent, canDeactivate: [BackButtonGuard], outlet: 'panel' },
+      { path: 'hive', component: HiveBrowserComponent, outlet: 'panel' },
       { path: 'hiveauditlogs', component: HiveAuditLogsBrowserComponent, outlet: 'panel' },
       { path: 'systemsoftware', component: UpdateBrowserComponent, outlet: 'panel' },
       { path: 'manualcleanup', component: MasterCleanupComponent, outlet: 'panel' },
