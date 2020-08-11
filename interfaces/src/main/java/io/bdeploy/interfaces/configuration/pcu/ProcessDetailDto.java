@@ -1,68 +1,32 @@
 package io.bdeploy.interfaces.configuration.pcu;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 /**
- * Contains detailed information about a given process and its children.
+ * DTO provided by the PCU with detailed information about a given process and its children.
  */
 public class ProcessDetailDto {
 
-    /** Identifier of the process */
-    public long pid;
+    /** Time when the process stopped / crashed */
+    public long stopTime = -1;
 
-    /** Start time of the process */
-    public long startTime = -1;
+    /** Time when we are going to restart the application */
+    public long recoverAt;
 
-    /** User that launched this process */
-    public String user;
+    /** Duration in seconds that we are waiting before re-launching */
+    public long recoverDelay;
 
-    /** Command-line used to launch this process */
-    public String command;
+    /** Number of retry attempts */
+    public long retryCount;
 
-    /** Command-line used to launch this process */
-    public String[] arguments;
+    /** Total number of retry attempts that are executed */
+    public long maxRetryCount;
 
-    /** Total CPU time accumulated of the process. */
-    public long totalCpuDuration = -1;
+    /** True if the stdin stream is available/open for writing */
+    public boolean hasStdin;
 
-    /** Information about the child processes of this process */
-    public final List<ProcessDetailDto> children = new ArrayList<>();
+    /** Status and instance information */
+    public ProcessStatusDto status;
 
-    @Override
-    public String toString() {
-        return String.join("\n", log());
-    }
-
-    /**
-     * Returns a human readable string of the process details.
-     */
-    public List<String> log() {
-        List<String> log = new ArrayList<>();
-        log.add("ProcessDetail [ PID=" + pid + " ]");
-        if (user != null) {
-            log.add("Started by:  " + user);
-        }
-        if (startTime != -1) {
-            SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-            log.add("Started at:  " + format.format(startTime));
-        }
-        if (command != null) {
-            log.add("Command Line: " + command);
-        }
-        if (arguments != null) {
-            log.add("Arguments: " + Arrays.toString(arguments));
-        }
-        if (!children.isEmpty()) {
-            log.add("Children:");
-            for (ProcessDetailDto child : children) {
-                child.log().forEach(l -> log.add("\t" + l));
-                log.add("\t---");
-            }
-        }
-        return log;
-    }
+    /** Details about the process and its children */
+    public ProcessHandleDto handle;
 
 }

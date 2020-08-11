@@ -12,6 +12,7 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
+import io.bdeploy.interfaces.configuration.pcu.ProcessHandleDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
@@ -84,16 +85,14 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
 
         InstanceStatusDto status = master.getStatus(instanceId);
         if (appId == null) {
-            printAllProcessDetails(status);
+            printAllProcessDetails(master, status);
         } else {
             ProcessStatusDto appStatus = status.getAppStatus(appId);
             out().println(appStatus);
         }
     }
 
-    private void printAllProcessDetails(InstanceStatusDto status) {
-        SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-
+    private void printAllProcessDetails(MasterNamedResource master, InstanceStatusDto status) {
         out().println(
                 String.format(PROCESS_STATUS_FORMAT, "Name", "ID", "Status", "Node", "Tag", "Started At", "OS User", "PID"));
         for (Entry<String, InstanceNodeStatusDto> nodeEntry : status.node2Applications.entrySet()) {
@@ -103,34 +102,37 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
             }
 
             String nodeName = nodeEntry.getKey();
-            printNodeProcesses(df, node, nodeName);
+            printNodeProcesses(master, status.getInstanceId(), node, nodeName);
         }
     }
 
-    private void printNodeProcesses(SimpleDateFormat df, InstanceNodeStatusDto node, String nodeName) {
+    private void printNodeProcesses(MasterNamedResource master, String instanceId, InstanceNodeStatusDto node, String nodeName) {
         Map<String, ProcessStatusDto> allProc = new TreeMap<>();
         allProc.putAll(node.deployed.get(node.activeTag).deployed);
         allProc.putAll(node.runningOrScheduled);
 
+        SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
         for (Map.Entry<String, ProcessStatusDto> procEntry : allProc.entrySet()) {
             ProcessStatusDto ps = procEntry.getValue();
-            ProcessDetailDto detail = ps.processDetails;
+
+            ProcessDetailDto detail = master.getProcessDetails(instanceId, ps.appUid);
+            ProcessHandleDto handle = detail.handle;
 
             out().println(String.format(PROCESS_STATUS_FORMAT, ps.appName, ps.appUid, ps.processState.name(), nodeName,
-                    node.activeTag, detail == null ? "-" : df.format(detail.startTime), detail == null ? "-" : detail.user,
-                    detail == null ? "-" : Long.toString(detail.pid)));
+                    node.activeTag, handle == null ? "-" : df.format(handle.startTime), handle == null ? "-" : handle.user,
+                    handle == null ? "-" : Long.toString(handle.pid)));
 
             if (isVerbose() && detail != null) {
-                printProcessDetailsRec(detail, "  ");
+                printProcessDetailsRec(handle, "  ");
             }
         }
     }
 
-    private void printProcessDetailsRec(ProcessDetailDto pdd, String indent) {
+    private void printProcessDetailsRec(ProcessHandleDto pdd, String indent) {
         out().println(String.format("%1$s [pid=%2$d, cpu=%3$ds] %4$s %5$s", indent, pdd.pid, pdd.totalCpuDuration, pdd.command,
                 (pdd.arguments != null && pdd.arguments.length > 0 ? String.join(" ", pdd.arguments) : "")));
 
-        for (ProcessDetailDto child : pdd.children) {
+        for (ProcessHandleDto child : pdd.children) {
             printProcessDetailsRec(child, indent + "  ");
         }
     }

@@ -10,6 +10,7 @@ import javax.ws.rs.PathParam;
 
 import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
+import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 import io.bdeploy.interfaces.directory.InstanceDirectory;
 import io.bdeploy.jersey.ActivityScope;
@@ -18,27 +19,27 @@ import io.bdeploy.jersey.ActivityScope;
 public interface ProcessResource {
 
     @GET
-    @Path("/{processId}")
-    public ProcessStatusDto getStatus(@ActivityScope @PathParam("processId") String processId);
-
-    @GET
     @Path("/")
     public Map<String, ProcessStatusDto> getStatus();
 
     @GET
-    @Path("/{processId}/start")
-    @RequiredPermission(permission = Permission.WRITE)
-    public void startProcess(@ActivityScope @PathParam("processId") String processId);
+    @Path("/{appId}")
+    public ProcessDetailDto getDetails(@ActivityScope @PathParam("appId") String appId);
 
     @GET
-    @Path("/{processId}/stop")
+    @Path("/{appId}/start")
     @RequiredPermission(permission = Permission.WRITE)
-    public void stopProcess(@ActivityScope @PathParam("processId") String processId);
+    public void startProcess(@ActivityScope @PathParam("appId") String appId);
 
     @GET
-    @Path("/{processId}/restart")
+    @Path("/{appId}/stop")
     @RequiredPermission(permission = Permission.WRITE)
-    public void restartProcess(@ActivityScope @PathParam("processId") String processId);
+    public void stopProcess(@ActivityScope @PathParam("appId") String appId);
+
+    @GET
+    @Path("/{appId}/restart")
+    @RequiredPermission(permission = Permission.WRITE)
+    public void restartProcess(@ActivityScope @PathParam("appId") String appId);
 
     @GET
     @Path("/start")
@@ -60,7 +61,7 @@ public interface ProcessResource {
     public List<InstanceDirectory> getDataDirSnapshot();
 
     @POST
-    @Path("/{processId}/stdin")
+    @Path("/{appId}/stdin")
     @RequiredPermission(permission = Permission.WRITE)
-    public void writeToStdin(@PathParam("processId") String processId, String data);
+    public void writeToStdin(@PathParam("appId") String appId, String data);
 }

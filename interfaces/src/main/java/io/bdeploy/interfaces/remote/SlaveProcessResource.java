@@ -9,6 +9,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
+import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
 import io.bdeploy.interfaces.remote.versioning.VersionMismatchDetect;
 
@@ -70,8 +71,19 @@ public interface SlaveProcessResource {
      * @return the status information
      */
     @GET
-    @Path("/status")
+    @Path("/process-status")
     public InstanceNodeStatusDto getStatus(@QueryParam("u") String instanceId);
+
+    /**
+     * Returns the full status of a single application.
+     *
+     * @param instanceId the unique id of the instance.
+     * @param appUid the application UID to query
+     * @return the full detailed status of the process.
+     */
+    @GET
+    @Path("/process-details")
+    public ProcessDetailDto getProcessDetails(@QueryParam("u") String instanceId, @QueryParam("a") String appUid);
 
     /**
      * @param instanceId the instance UUID

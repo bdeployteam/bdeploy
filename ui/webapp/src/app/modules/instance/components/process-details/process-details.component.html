@@ -13,7 +13,7 @@
     <span> ID: {{ appConfig.uid }}</span>
   </mat-toolbar-row>
 </mat-toolbar>
-<div class="flex-column" *ngIf="status">
+<div class="flex-column">
   <div
     class="outdated"
     *ngIf="isRunningOutOfSync()"
@@ -126,7 +126,7 @@
         (inputEvent)="onInputEvent($event)"
       ></app-file-viewer>
     </ng-template>
-    <button mat-icon-button (click)="openOutputOverlay(terminal)" matTooltip="Show output">
+    <button mat-icon-button (click)="openOutputOverlay(terminal)" [disabled]="!activatedInstanceTag" matTooltip="Show output">
       <mat-icon>message</mat-icon>
     </button>
     <button

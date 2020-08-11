@@ -3,7 +3,7 @@ import { MAT_BOTTOM_SHEET_DATA } from '@angular/material/bottom-sheet';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
-import { ApplicationConfiguration, OperatingSystem, ProcessDetailDto, ProcessStatusDto } from '../../../../models/gen.dtos';
+import { ApplicationConfiguration, OperatingSystem, ProcessDetailDto, ProcessHandleDto } from '../../../../models/gen.dtos';
 import { getAppOs } from '../../../shared/utils/manifest.utils';
 
 @Component({
@@ -21,12 +21,11 @@ export class ProcessListComponent implements OnInit {
   @ViewChild(MatSort, { static: true })
   sort: MatSort;
 
-  public isRunning = false;
-  public statusDto: ProcessStatusDto;
+  public detailsDto: ProcessDetailDto;
   public appConfig: ApplicationConfiguration;
 
   public displayedColumns: string[] = [];
-  public dataSource = new MatTableDataSource<ProcessDetailDto>();
+  public dataSource = new MatTableDataSource<ProcessHandleDto>();
 
   constructor(@Inject(MAT_BOTTOM_SHEET_DATA) public data: any) {
     this.appConfig = data.appConfig;
@@ -39,13 +38,10 @@ export class ProcessListComponent implements OnInit {
     this.dataSource.paginator = this.paginator;
   }
 
-  setStatus(statusDto: ProcessStatusDto) {
-    this.statusDto = statusDto;
-    this.isRunning = this.statusDto.processDetails ? true : false;
+  setStatus(detailsDto: ProcessDetailDto) {
+    this.detailsDto = detailsDto;
     this.dataSource.data.splice(0, this.dataSource.data.length);
-    if (this.isRunning) {
-      this.initDataSource(statusDto.processDetails);
-    }
+    this.initDataSource(detailsDto.handle);
     if (this.table) {
       this.sort.sortChange.emit();
       this.table.renderRows();
@@ -53,7 +49,7 @@ export class ProcessListComponent implements OnInit {
     this.dataSource.paginator = this.paginator;
   }
 
-  initDataSource(parent: ProcessDetailDto) {
+  initDataSource(parent: ProcessHandleDto) {
     this.dataSource.data.push(parent);
     parent.children.forEach(child => {
       this.initDataSource(child);

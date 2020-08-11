@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.bdeploy.common.TempDirectory;
 import io.bdeploy.common.TempDirectory.TempDir;
+import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 
@@ -86,7 +87,7 @@ public class ProcessControllerTest {
 
         // Terminate process using the provided PID
         listener.expect(ProcessState.CRASHED_WAITING, ProcessState.RUNNING_UNSTABLE, ProcessState.RUNNING);
-        ProcessHandle handle = ProcessHandle.of(process.getStatus().processDetails.pid).get();
+        ProcessHandle handle = ProcessHandle.of(process.getDetails().handle.pid).get();
         ProcessHandles.destroy(handle);
 
         // Wait for state transitions from waiting to running
@@ -119,9 +120,9 @@ public class ProcessControllerTest {
         listener.await(TIMEOUT);
 
         // Check if properties are set
-        ProcessStatusDto status = process.getStatus();
-        assertEquals(1, status.retryCount);
-        assertEquals(10, status.recoverDelay);
+        ProcessDetailDto details = process.getDetails();
+        assertEquals(1, details.retryCount);
+        assertEquals(10, details.recoverDelay);
 
         // Recover task must be scheduled
         assertNotNull(process.getRecoverTask());
@@ -227,9 +228,11 @@ public class ProcessControllerTest {
         // Check final state
         ProcessStatusDto status = process.getStatus();
         assertEquals(ProcessState.CRASHED_PERMANENTLY, status.processState);
-        assertEquals(1, status.maxRetryCount);
-        assertEquals(1, status.retryCount);
-        assertEquals(10, status.recoverDelay);
+
+        ProcessDetailDto details = process.getDetails();
+        assertEquals(1, details.maxRetryCount);
+        assertEquals(1, details.retryCount);
+        assertEquals(10, details.recoverDelay);
     }
 
     @Test
@@ -263,14 +266,14 @@ public class ProcessControllerTest {
 
         // Terminate process using the provided PID
         listener.expect(ProcessState.CRASHED_WAITING);
-        ProcessHandle handle = ProcessHandle.of(process.getStatus().processDetails.pid).get();
+        ProcessHandle handle = ProcessHandle.of(process.getDetails().handle.pid).get();
         ProcessHandles.destroy(handle);
         listener.await(TIMEOUT);
 
         // Check if properties are set and that the recover task is scheduled
-        ProcessStatusDto status = process.getStatus();
-        assertEquals(1, status.retryCount);
-        assertEquals(10, status.recoverDelay);
+        ProcessDetailDto details = process.getDetails();
+        assertEquals(1, details.retryCount);
+        assertEquals(10, details.recoverDelay);
         assertNotNull(process.getRecoverTask());
 
         // Now execute start command
@@ -280,8 +283,8 @@ public class ProcessControllerTest {
 
         // Recover task must be canceled and counter must be reset due to the manual start
         assertTrue(process.getRecoverTask() == null);
-        status = process.getStatus();
-        assertEquals(0, status.retryCount);
+        details = process.getDetails();
+        assertEquals(0, details.retryCount);
 
         // Now execute stop command
         listener.expect(ProcessState.STOPPED);

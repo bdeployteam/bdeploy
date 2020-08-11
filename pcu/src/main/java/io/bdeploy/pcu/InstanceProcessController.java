@@ -25,6 +25,7 @@ import io.bdeploy.common.util.MdcLogger;
 import io.bdeploy.common.util.VariableResolver;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
+import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
@@ -39,13 +40,13 @@ import io.bdeploy.pcu.util.Formatter;
  */
 public class InstanceProcessController {
 
+    /** States that indicate that the process is running */
+    private static final Set<ProcessState> SET_RUNNING = Sets.immutableEnumSet(ProcessState.RUNNING,
+            ProcessState.RUNNING_UNSTABLE);
+
     /** States that indicate that the process is running or scheduled */
     private static final Set<ProcessState> SET_RUNNING_SCHEDULED = Sets.immutableEnumSet(ProcessState.RUNNING,
             ProcessState.RUNNING_UNSTABLE, ProcessState.CRASHED_WAITING);
-
-    /** States that indicate that the process is running or scheduled */
-    private static final Set<ProcessState> SET_RUNNING = Sets.immutableEnumSet(ProcessState.RUNNING,
-            ProcessState.RUNNING_UNSTABLE);
 
     private final MdcLogger logger = new MdcLogger(InstanceProcessController.class);
 
@@ -345,7 +346,7 @@ public class InstanceProcessController {
         try {
             readLock.lock();
             for (ProcessList list : processMap.values()) {
-                Map<String, ProcessController> running = list.getWithState(SET_RUNNING);
+                Map<String, ProcessController> running = list.getWithState(SET_RUNNING_SCHEDULED);
                 if (running.containsKey(applicationId)) {
                     ProcessStatusDto dto = running.get(applicationId).getStatus();
                     throw new PcuRuntimeException(
@@ -373,22 +374,7 @@ public class InstanceProcessController {
      *            the application identifier
      */
     public void stop(String applicationId) {
-        // Find the process that is running
-        ProcessController process = null;
-        try {
-            readLock.lock();
-            for (ProcessList list : processMap.values()) {
-                Map<String, ProcessController> running = list.getWithState(SET_RUNNING_SCHEDULED);
-                process = running.get(applicationId);
-                if (process != null) {
-                    break;
-                }
-            }
-        } finally {
-            readLock.unlock();
-        }
-
-        // Throw if we cannot find a running process
+        ProcessController process = findProcessController(applicationId, SET_RUNNING_SCHEDULED);
         if (process == null) {
             throw new PcuRuntimeException("Application not running");
         }
@@ -409,14 +395,33 @@ public class InstanceProcessController {
         try {
             readLock.lock();
             InstanceNodeStatusDto status = new InstanceNodeStatusDto();
+            status.activeTag = activeTag;
             for (Map.Entry<String, ProcessList> entry : processMap.entrySet()) {
                 status.add(entry.getKey(), entry.getValue().getStatus());
             }
-            status.activeTag = activeTag;
             return status;
         } finally {
             readLock.unlock();
         }
+    }
+
+    /**
+     * Returns the detailed process status for the given application.
+     *
+     * @param appId
+     *            the application identifier
+     * @return the process details
+     */
+    public ProcessDetailDto getDetails(String appId) {
+        // Get details if it is running or scheduled
+        ProcessController processController = findProcessController(appId, SET_RUNNING_SCHEDULED);
+        if (processController != null) {
+            return processController.getDetails();
+        }
+
+        // Get details of the activated version
+        ProcessList processList = processMap.get(activeTag);
+        return processList.get(appId).getDetails();
     }
 
     /**
@@ -444,33 +449,43 @@ public class InstanceProcessController {
         return processMap.get(tag);
     }
 
+    /**
+     * Writes the given text to the standard input of the given process.
+     *
+     * @param applicationId the application identifier
+     * @param data the data to write
+     */
     public void writeToStdin(String applicationId, String data) {
-        // Find the process that is running
-        ProcessController process = null;
-        try {
-            readLock.lock();
-            for (ProcessList list : processMap.values()) {
-                Map<String, ProcessController> running = list.getWithState(SET_RUNNING);
-                process = running.get(applicationId);
-                if (process != null) {
-                    break;
-                }
-            }
-        } finally {
-            readLock.unlock();
-        }
-
-        // Throw if we cannot find a running process
+        ProcessController process = findProcessController(applicationId, SET_RUNNING);
         if (process == null) {
             throw new PcuRuntimeException("Application not running");
         }
-        try {
-            process.writeToStdin(data);
-        } catch (Exception ex) {
-            String tag = process.getStatus().instanceTag;
-            logger.log(l -> l.error("Failed to write data to application", ex), tag, applicationId);
-        }
+        process.writeToStdin(data);
+    }
 
+    /**
+     * Returns the process controller responsible for the given application.
+     *
+     * @param applicationId
+     *            the application identifier
+     * @param filters
+     *            find processes matching the given state
+     * @return the controller or {@code null} if the application is not running
+     */
+    private ProcessController findProcessController(String applicationId, Set<ProcessState> filters) {
+        try {
+            readLock.lock();
+            for (ProcessList list : processMap.values()) {
+                Map<String, ProcessController> app2Controller = list.getWithState(filters);
+                ProcessController processController = app2Controller.get(applicationId);
+                if (processController != null) {
+                    return processController;
+                }
+            }
+            return null;
+        } finally {
+            readLock.unlock();
+        }
     }
 
 }

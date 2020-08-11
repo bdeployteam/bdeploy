@@ -56,6 +56,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfigurationDto
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
+import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
 import io.bdeploy.interfaces.directory.EntryChunk;
@@ -716,7 +717,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         }
 
         // Find minion where the application is deployed
-        String minion = status.getNodeWhereAppIsDeployedInActiveVersion(applicationId);
+        String minion = status.getNodeWhereAppIsDeployed(applicationId);
         if (minion == null) {
             throw new WebApplicationException("Application is not deployed on any node.", Status.INTERNAL_SERVER_ERROR);
         }
@@ -827,6 +828,33 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             }
         }
         return instanceStatus;
+    }
+
+    @Override
+    public ProcessDetailDto getProcessDetails(String instanceId, String appUid) {
+        // Check if the application is running on a node
+        InstanceStatusDto status = getStatus(instanceId);
+        String nodeName = status.getNodeWhereAppIsRunning(appUid);
+
+        // Check if the application is deployed on a node
+        if (nodeName == null) {
+            nodeName = status.getNodeWhereAppIsDeployed(appUid);
+        }
+
+        // Application is nowhere deployed and nowhere running
+        if (nodeName == null) {
+            return null;
+        }
+
+        // Query process details
+        try {
+            RemoteService svc = root.getMinions().getRemote(nodeName);
+            SlaveProcessResource spr = ResourceProvider.getResource(svc, SlaveProcessResource.class, context);
+            return spr.getProcessDetails(instanceId, appUid);
+        } catch (Exception e) {
+            throw new WebApplicationException(
+                    "Cannot fetch process status from " + nodeName + " for " + instanceId + ", " + appUid, e);
+        }
     }
 
     @Override

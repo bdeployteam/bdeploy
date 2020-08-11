@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.ProcessBuilder.Redirect;
-import java.lang.ProcessHandle.Info;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -38,6 +37,7 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 import io.bdeploy.pcu.util.Formatter;
+import io.bdeploy.pcu.util.ProcessHandleDtoHelper;
 
 /**
  * Manages a single process.
@@ -240,7 +240,7 @@ public class ProcessController {
     }
 
     /**
-     * Returns a DTO containing information about the process.
+     * Returns a DTO containing information about the process status.
      */
     public ProcessStatusDto getStatus() {
         ProcessStatusDto dto = new ProcessStatusDto();
@@ -249,13 +249,16 @@ public class ProcessController {
         dto.appName = processConfig.name;
         dto.instanceTag = instanceTag;
         dto.instanceUid = instanceUid;
+        return dto;
+    }
 
-        // Collect process information if running
-        if (processState.isRunning()) {
-            dto.processDetails = collectProcessInfo(process);
-        }
-
-        // Retry attempts when process crashed
+    /**
+     * Returns details about the running process
+     *
+     * @return detailed information about the running process
+     */
+    public ProcessDetailDto getDetails() {
+        ProcessDetailDto dto = new ProcessDetailDto();
         dto.maxRetryCount = recoverAttempts;
         if (recoverCount > 0 && stopTime != null) {
             Duration delay = recoverDelays[Math.min(recoverCount, recoverDelays.length - 1)];
@@ -266,30 +269,11 @@ public class ProcessController {
         if (stopTime != null) {
             dto.stopTime = stopTime.toEpochMilli();
         }
-
-        dto.hasStdin = processState.isRunning() && processStdin != null;
-        return dto;
-    }
-
-    /** Recursively collects runtime information about the given process */
-    private ProcessDetailDto collectProcessInfo(ProcessHandle process) {
-        ProcessDetailDto dto = new ProcessDetailDto();
-        dto.pid = process.pid();
-
-        // Collect process info
-        Info info = process.info();
-        if (info.startInstant().isPresent()) {
-            dto.startTime = info.startInstant().get().toEpochMilli();
+        dto.status = getStatus();
+        if (processState.isRunning()) {
+            dto.hasStdin = processStdin != null;
+            dto.handle = ProcessHandleDtoHelper.collectProcessInfo(process);
         }
-        if (info.totalCpuDuration().isPresent()) {
-            dto.totalCpuDuration = info.totalCpuDuration().get().getSeconds();
-        }
-        dto.command = info.command().orElse(null);
-        dto.arguments = info.arguments().orElse(null);
-        dto.user = info.user().orElse(null);
-
-        // Collect child info
-        process.children().forEach(c -> dto.children.add(collectProcessInfo(c)));
         return dto;
     }
 
@@ -360,15 +344,22 @@ public class ProcessController {
         executeLocked("Detach", false, this::doDetach);
     }
 
+    /**
+     * Writes the given data to the standard input of the process.
+     *
+     * @param data the data to write
+     */
     public void writeToStdin(String data) {
-        if (processStdin != null) {
-            try {
-                String tmp = data + System.lineSeparator();
-                processStdin.write(tmp.getBytes());
-                processStdin.flush();
-            } catch (IOException e) {
-                logger.log(l -> l.error("Failed to write to STDIN.", e));
-            }
+        if (processStdin == null) {
+            logger.log(l -> l.error("STDIN not available."));
+            return;
+        }
+        try {
+            String tmp = data + System.lineSeparator();
+            processStdin.write(tmp.getBytes());
+            processStdin.flush();
+        } catch (IOException e) {
+            logger.log(l -> l.error("Failed to write to STDIN.", e));
         }
     }
 
@@ -523,6 +514,7 @@ public class ProcessController {
     /** Cleanup internal members */
     private void cleanup() {
         process = null;
+        processStdin = null;
 
         // Cancel the hook that is notified when the process terminates
         if (processExit != null) {
