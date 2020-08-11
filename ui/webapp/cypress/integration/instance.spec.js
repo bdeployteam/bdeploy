@@ -169,11 +169,11 @@ describe('Instance Tests', function () {
     cy.screenshot("BDeploy_User_History_OpenedCard");
 
     // check if cards contain expected text
-    cy.contains("Version 4: Creation").parent().parent().parent().parent().find(".timeline-card_content")
+    cy.contains("mat-expansion-panel","Version 4: Creation").find(".timeline-card_content")
       .should("contain.html","master").and("contain.html","Parameter")
-      .and("contain.html","param.sleep").parent().find(".content-title-wrapper button").click();
+      .and("contain.html","param.sleep").parent().find(".mat-icon-button").click();
 
-    cy.contains("Version 2: Creation").click().parent().parent().parent().parent().find(".timeline-card_content")
+    cy.contains("mat-expansion-panel","Version 2: Creation").click({force:true}).find(".timeline-card_content")
       .should("contain.html","master:").and("contain.html","Server Application");
 
     // check comparison dialog
@@ -183,6 +183,20 @@ describe('Instance Tests', function () {
       .and("contain.html","Config files").and("contain.html","cypress.cfg");
 
     cy.screenshot("BDeploy_User_History_ComparisonDialog");
+    cy.contains("button","close").click();
+    cy.contains("button","indeterminate_check_box").click();
+
+    // show runtime history
+    cy.contains("button","filter_list_alt").click();
+    cy.screenshot("BDeploy_User_History_ShowMenu");
+
+    cy.contains("button","Runtime events").click();
+    cy.get(".timeline_item").should("have.length","8");
+    cy.contains("button","filter_list_alt").click({force:true});
+    cy.waitUntilContentLoaded();
+    cy.contains("mat-expansion-panel","Start of process Server Application").click().find(".content-runtime-title-wrapper")
+    .should("contain.html","master").and("contain.html","4");
+    cy.screenshot("BDeploy_User_History_RuntimeHistory");
   });
 
   /**

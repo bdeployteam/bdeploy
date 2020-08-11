@@ -55,6 +55,25 @@ app-instance-history-timeline-card{
   margin:0 auto;
 }
 
+.timeline_circle.create{
+  background-color: rgb(63,81,181);
+}
+.timeline_circle.config{
+  background-color: rgb(0, 160, 200);
+}
+.timeline_circle.runtime{
+  background-color: rgb(0, 220, 48);
+}
+.timeline_circle.runtime_stop{
+  background-color: rgb(184, 231, 15);;
+}
+.timeline_circle.runtime_warning{
+  background-color: rgb(236, 168, 20);
+}
+.timeline_circle.runtime_error{
+  background-color: rgb(185, 50, 50);
+}
+
 @media only screen and (max-width: 750px){
   app-instance-history-timeline-card{
       left:0 !important;

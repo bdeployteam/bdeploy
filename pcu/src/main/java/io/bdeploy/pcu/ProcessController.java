@@ -278,6 +278,17 @@ public class ProcessController {
     }
 
     /**
+     * @return the id of the running process<br>
+     *         Null if not running
+     */
+    public String getPID() {
+        if (process != null) {
+            return String.valueOf(process.pid());
+        }
+        return null;
+    }
+
+    /**
      * Returns the process configuration.
      *
      * @return the process configuration

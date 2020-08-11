@@ -30,6 +30,7 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor.ApplicationStartType;
+import io.bdeploy.interfaces.manifest.history.runtime.MinionRuntimeHistoryManager;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 import io.bdeploy.pcu.util.Formatter;
@@ -99,6 +100,41 @@ public class InstanceProcessController {
                 Path processDir = pathProvider.get(SpecialDirectory.RUNTIME).resolve(config.uid);
                 ProcessController controller = new ProcessController(groupConfig.uuid, tag, config, processDir);
                 controller.setVariableResolver(resolver);
+                processList.add(controller);
+                logger.log(l -> l.debug("Creating new process controller."), tag, config.uid);
+            }
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    /**
+     * Creates new process controllers for all applications defined in the process group and adds a listener for runtime events.
+     *
+     * @param pathProvider provides access to the special folders
+     * @param resolver the resolver for variables
+     * @param tag version of the configuration
+     * @param groupConfig the process configuration
+     * @param runtimeHistory the {@link MinionRuntimeHistoryManager} to write to.
+     */
+    public void createProcessControllers(DeploymentPathProvider pathProvider, VariableResolver resolver, String tag,
+            ProcessGroupConfiguration groupConfig, MinionRuntimeHistoryManager runtimeHistory) {
+        try {
+            writeLock.lock();
+            // Create a new list if not yet existing for this tag
+            ProcessList processList = processMap.get(tag);
+            if (processList == null) {
+                processList = new ProcessList(tag, groupConfig);
+                processMap.put(tag, processList);
+            }
+
+            // Add a new controller for each application
+            for (ProcessConfiguration config : groupConfig.applications) {
+                Path processDir = pathProvider.get(SpecialDirectory.RUNTIME).resolve(config.uid);
+                ProcessController controller = new ProcessController(groupConfig.uuid, tag, config, processDir);
+                controller.setVariableResolver(resolver);
+
+                controller.addStatusListener(state -> runtimeHistory.record(controller.getPID(), state, config.name));
                 processList.add(controller);
                 logger.log(l -> l.debug("Creating new process controller."), tag, config.uid);
             }

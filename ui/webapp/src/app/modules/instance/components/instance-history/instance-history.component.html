@@ -2,6 +2,18 @@
   <mat-toolbar-row class="toolbar-row-1st">
     <button mat-icon-button (click)="routingHistoryService.back('instance/overview/'+groupParam+'/'+uuidParam)"> <mat-icon>chevron_left</mat-icon></button>
     <div class="toolbar-title"> <span> Instance: </span><app-instance-group-title [instanceGroup]="groupParam"></app-instance-group-title>/ {{instance? instance.name:""}}</div>
+    <button class="show-filter-button" mat-icon-button [matMenuTriggerFor]="showMenu"><mat-icon>filter_list_alt</mat-icon></button>
+    <mat-menu xPosition="before"  #showMenu="matMenu">
+      <button mat-menu-item appClickStopPropagation (click)="showCreateEvents=!showCreateEvents; filter()">
+        <mat-icon>{{showCreateEvents?'check_box':'check_box_outline_blank'}}</mat-icon> Creation events
+      </button>
+      <button mat-menu-item appClickStopPropagation (click)="showConfigEvents=!showConfigEvents; filter()">
+        <mat-icon>{{showConfigEvents?'check_box':'check_box_outline_blank'}}</mat-icon> Config events
+      </button>
+      <button mat-menu-item appClickStopPropagation (click)="showRuntimeEvents=!showRuntimeEvents; filter()">
+        <mat-icon>{{showRuntimeEvents?'check_box':'check_box_outline_blank'}}</mat-icon> Runtime events
+      </button>
+    </mat-menu>
     <div class="compare-versions">
       Compare Versions
       <div style="margin-top:-10px">

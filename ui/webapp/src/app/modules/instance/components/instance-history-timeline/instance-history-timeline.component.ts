@@ -1,5 +1,5 @@
 import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChildren } from '@angular/core';
-import { HistoryEntryDto } from "../../../../models/gen.dtos";
+import { HistoryEntryDto, ProcessState } from "../../../../models/gen.dtos";
 import { InstanceHistoryTimelineCardComponent } from '../instance-history-timeline-card/instance-history-timeline-card.component';
 
 @Component({
@@ -20,6 +20,8 @@ export class InstanceHistoryTimelineComponent implements OnInit {
 
   openedItem:InstanceHistoryTimelineCardComponent;
   containSearchInput:InstanceHistoryTimelineCardComponent[];
+
+  processState = ProcessState;
 
   constructor(private hostElement:ElementRef) { }
 
@@ -61,5 +63,13 @@ export class InstanceHistoryTimelineComponent implements OnInit {
 
   addToComparisonEvent(event){
     this.addToComparison.emit(event);
+  }
+
+  isOverflowing():boolean{
+    if(this.entries.length > 0){
+      return this.hostElement.nativeElement.scrollHeight > this.hostElement.nativeElement.clientHeight;
+    }else{
+      return false;
+    }
   }
 }

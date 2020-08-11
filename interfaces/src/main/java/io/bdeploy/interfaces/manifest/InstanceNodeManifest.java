@@ -22,6 +22,7 @@ import io.bdeploy.bhive.op.TreeLoadOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
+import io.bdeploy.interfaces.manifest.history.runtime.MinionRuntimeHistoryManager;
 import io.bdeploy.interfaces.manifest.state.InstanceState;
 
 public class InstanceNodeManifest {
@@ -73,6 +74,10 @@ public class InstanceNodeManifest {
      */
     public InstanceState getState(BHiveExecution hive) {
         return new InstanceState(getKey(), hive);
+    }
+
+    public MinionRuntimeHistoryManager getRuntimeHistory(BHiveExecution hive) {
+        return new MinionRuntimeHistoryManager(getKey(), hive);
     }
 
     /**

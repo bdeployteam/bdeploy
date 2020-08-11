@@ -8,11 +8,11 @@ public class HistoryEntryDto {
     public String user = "";
     public String email = "";
     public HistoryEntryVersionDto content = null;
+    public HistoryEntryRuntimeDto runtimeEvent = null;
     public long timestamp;
 
-    public HistoryEntryDto(long timestamp, int version, String type) {
+    public HistoryEntryDto(long timestamp, int version) {
         this.timestamp = timestamp;
         this.version = version;
-        this.type = type;
     }
 }

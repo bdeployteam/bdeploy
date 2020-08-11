@@ -36,18 +36,24 @@
   transition: all 0.2s;
 }
 
-.content-title-wrapper{
+.content-config-title-wrapper{
   display:flex;
   flex-direction: row;
   align-items: center;
 }
 
-.content-title-wrapper button{
+.content-config-title-wrapper button{
   margin-left:auto;
 }
 
-.content-title-wrapper app-user-avatar{
+.content-config-title-wrapper app-user-avatar{
   margin: 10px 10px 10px 0;
+}
+
+.content-runtime-title-wrapper{
+  margin-top: 15px;
+  padding-bottom: 10px;
+  font-weight: lighter;
 }
 
 .changes-compared-text{

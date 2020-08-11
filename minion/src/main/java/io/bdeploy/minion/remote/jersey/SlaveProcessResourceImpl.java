@@ -2,14 +2,22 @@ package io.bdeploy.minion.remote.jersey;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.SortedSet;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 
+import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
+import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
+import io.bdeploy.interfaces.manifest.history.runtime.MinionRuntimeHistory;
+import io.bdeploy.interfaces.manifest.history.runtime.MinionRuntimeHistoryDto;
 import io.bdeploy.interfaces.remote.SlaveProcessResource;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
@@ -109,5 +117,22 @@ public class SlaveProcessResourceImpl implements SlaveProcessResource {
             throw new WebApplicationException("Instance with ID '" + instanceId + "' is unknown");
         }
         instanceController.writeToStdin(applicationId, data);
+    }
+
+    @Override
+    public MinionRuntimeHistoryDto getRuntimeHistory(String instanceId) {
+        BHive hive = root.getHive();
+        Map<String, MinionRuntimeHistory> dto = new HashMap<>();
+        SortedSet<Key> nodeKeys = InstanceNodeManifest.scan(hive);
+
+        for (Key key : nodeKeys) {
+            if (key.getName().split("/")[0].equals(instanceId)) {
+                MinionRuntimeHistory history = InstanceNodeManifest.of(hive, key).getRuntimeHistory(hive).getFullHistory();
+                if (!history.isEmpty()) {
+                    dto.put(key.getTag(), history);
+                }
+            }
+        }
+        return new MinionRuntimeHistoryDto(dto);
     }
 }
