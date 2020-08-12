@@ -25,6 +25,9 @@ export class CustomEditorComponent implements OnInit {
   @Input()
   value: ParameterConfiguration;
 
+  @Input()
+  readonly: boolean;
+
   @Output()
   valueConfirmed: EventEmitter<any> = new EventEmitter<any>();
 
