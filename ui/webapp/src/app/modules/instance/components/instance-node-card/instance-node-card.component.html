@@ -65,6 +65,7 @@
         [instanceVersion]="processConfig.version"
         [activatedTag]="activatedInstanceTag"
         [productMissing]="productMissing"
+        [selected]="selectedProcess!=null && selectedProcess == process"
         (removeEvent)="removeProcess(process)"
         (editEvent)="fireEditAppConfigEvent(process)"
         (editEndpointsEvent)="fireEditEndpointsAppConfigEvent(process)"

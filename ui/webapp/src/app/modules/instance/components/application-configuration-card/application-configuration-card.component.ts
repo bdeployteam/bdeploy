@@ -23,6 +23,7 @@ export class ApplicationConfigurationCardComponent implements OnInit {
   @Input() public isReadonly = false;
   @Input() public isClient = false;
   @Input() public isInstanceDirty = false;
+  @Input() public selected;
 
   @Output() editEvent = new EventEmitter<ApplicationConfiguration>();
   @Output() removeEvent = new EventEmitter<boolean>();
@@ -95,6 +96,9 @@ export class ApplicationConfigurationCardComponent implements OnInit {
     }
     if (this.isForeign) {
       styles.push('app-config-foreign');
+    }
+    if(this.selected){
+      styles.push("app-config-selected");
     }
     return styles;
   }

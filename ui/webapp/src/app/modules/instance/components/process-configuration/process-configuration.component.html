@@ -183,6 +183,7 @@
             [minionConfig]="minionConfigs[node.nodeName]"
             [minionState]="minionStates[node.nodeName]"
             [isInstanceDirty]="isDirtySelected()"
+            [selectedProcess]="node == selectedNode? selectedProcess : null"
             (editAppConfigEvent)="onEditApp($event)"
             (editAppEndpointsEvent)="onEditAppEndpoints($event)"
             (editNodeAppsEvent)="onUpdateNodeApps()"

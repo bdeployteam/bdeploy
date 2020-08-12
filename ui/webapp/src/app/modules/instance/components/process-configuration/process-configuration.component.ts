@@ -91,6 +91,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   public selectedConfig: ProcessConfigDto;
   public processConfigs: ProcessConfigDto[] = [];
   public selectedProcess: ApplicationConfiguration;
+  public selectedNode: InstanceNodeConfigurationDto;
 
   public sidenavMode: SidenavMode = SidenavMode.Versions;
 
@@ -507,10 +508,12 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
   setSidenavVersions(): void {
     this.sidenavMode = SidenavMode.Versions;
+    this.selectedProcess = null;
   }
 
   setSidenavApplications(): void {
     this.sidenavMode = SidenavMode.Applications;
+    this.selectedProcess = null;
   }
 
   setSidenavProcessStatus(process: ApplicationConfiguration): void {
@@ -529,6 +532,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
   setSidenavProducts(): void {
     this.sidenavMode = SidenavMode.Products;
+    this.selectedProcess = null;
   }
 
   public hasClientApplications(): boolean {
@@ -680,6 +684,8 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     if (disallowed.includes(this.sidenavMode)) {
       return;
     }
+
+    this.selectedNode = node;
     if (node.nodeName === CLIENT_NODE_NAME) {
       this.setSideNavClientInfo(process);
     } else {

@@ -46,6 +46,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
   @Input() minionConfig: MinionDto;
   @Input() minionState: MinionStatusDto;
   @Input() productTags: ProductDto[];
+  @Input() selectedProcess: ApplicationConfiguration;
 
   @Output() editAppConfigEvent = new EventEmitter<EditAppConfigContext>();
   @Output() editAppEndpointsEvent = new EventEmitter<EditAppConfigContext>();
