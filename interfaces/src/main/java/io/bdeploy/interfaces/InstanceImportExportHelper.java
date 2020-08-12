@@ -148,7 +148,7 @@ public class InstanceImportExportHelper {
         }
 
         Manifest.Key requiredProduct = icfg.product;
-        if (!target.execute(new ManifestExistsOperation().setManifest(requiredProduct))) {
+        if (!Boolean.TRUE.equals(target.execute(new ManifestExistsOperation().setManifest(requiredProduct)))) {
             throw new IllegalStateException("Required product does not exist: " + requiredProduct);
         }
 

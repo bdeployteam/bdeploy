@@ -11,6 +11,7 @@ import java.util.TreeSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.bdeploy.api.product.v1.ApplicationDescriptorApi;
 import io.bdeploy.api.product.v1.ProductDescriptor;
 import io.bdeploy.api.product.v1.ProductManifestBuilder;
 import io.bdeploy.bhive.BHive;
@@ -27,7 +28,6 @@ import io.bdeploy.bhive.op.ObjectLoadOperation;
 import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.bhive.op.TreeLoadOperation;
 import io.bdeploy.bhive.util.StorageHelper;
-import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.TemplateApplication;
@@ -85,7 +85,7 @@ public class ProductManifest {
 
         for (Manifest.Key ref : allRefs) {
             TreeView tv = hive.execute(new ScanOperation().setMaxDepth(1).setFollowReferences(false).setManifest(ref));
-            if (tv.getChildren().containsKey(ApplicationDescriptor.FILE_NAME)) {
+            if (tv.getChildren().containsKey(ApplicationDescriptorApi.FILE_NAME)) {
                 appRefs.add(ref);
             } else {
                 // not an application
@@ -184,7 +184,7 @@ public class ProductManifest {
         if (app.template != null) {
             var parent = appTemplates.stream().filter(t -> app.template.equals(t.id)).findFirst();
             if (!parent.isPresent()) {
-                log.error("Template error. Cannot find template " + app.template);
+                log.error("Template error. Cannot find template {}", app.template);
                 return;
             }
             var parentDesc = parent.get();

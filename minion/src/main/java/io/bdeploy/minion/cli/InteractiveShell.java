@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.bdeploy.common.cfg.Configuration.Help;
+import io.bdeploy.common.cli.ToolBase;
 import io.bdeploy.common.cli.ToolBase.CliTool;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 
@@ -18,14 +19,14 @@ public class InteractiveShell extends CliTool {
     @Override
     public void run() {
         try {
-            MinionServerCli.setFailWithException(true);
+            ToolBase.setFailWithException(true);
             System.out.println("Interactive shell started.");
             boolean readNextCommand = true;
             while (readNextCommand) {
                 readNextCommand = readAndExecute();
             }
         } finally {
-            MinionServerCli.setFailWithException(false);
+            ToolBase.setFailWithException(false);
         }
     }
 

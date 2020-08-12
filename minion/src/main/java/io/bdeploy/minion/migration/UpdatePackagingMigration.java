@@ -52,7 +52,7 @@ public class UpdatePackagingMigration {
         // launchers in the correct place anyway.
         Manifest.Key currentKey = UpdateHelper.getCurrentKey();
 
-        if (!hive.execute(new ManifestExistsOperation().setManifest(currentKey))) {
+        if (!Boolean.TRUE.equals(hive.execute(new ManifestExistsOperation().setManifest(currentKey)))) {
             // not worth /really/ failing. this should never happen, worst case: manual upload of launchers required.
             log.warn("Cannot find manifest for currently running minion version ({}), cannot perform migration!", currentKey);
             return;

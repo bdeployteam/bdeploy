@@ -7,15 +7,15 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 
 public class MinionRuntimeHistoryRecord {
 
-    public String PID;
+    public String pid;
     public ProcessState state;
     public long timestamp;
 
     @JsonCreator
-    public MinionRuntimeHistoryRecord(@JsonProperty("PID") String processId, @JsonProperty("state") ProcessState state,
+    public MinionRuntimeHistoryRecord(@JsonProperty("pid") String pid, @JsonProperty("state") ProcessState state,
             @JsonProperty("timestamp") long timestamp) {
         this.state = state;
         this.timestamp = timestamp;
-        this.PID = processId;
+        this.pid = pid;
     }
 }

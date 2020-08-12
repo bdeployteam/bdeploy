@@ -129,7 +129,7 @@ public class ObjectManager {
                             continue;
                         }
                     } catch (UnsupportedOperationException e) {
-                        log.warn("Cannot check if directory is empty: " + path);
+                        log.warn("Cannot check if directory is empty: {}", path);
                     }
 
                     // recursively calculate ObjectId from sub-tree.

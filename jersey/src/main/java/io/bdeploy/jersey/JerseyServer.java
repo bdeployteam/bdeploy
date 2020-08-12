@@ -195,7 +195,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
                 response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
                 response.setHeader("Access-Control-Allow-Headers", "*");
                 super.service(request, response);
-            };
+            }
         };
         // need to disable to always hit the service method which sets the CORS headers.
         handler.setFileCacheEnabled(false);

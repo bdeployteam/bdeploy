@@ -5,12 +5,12 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 public class HistoryEntryRuntimeDto {
 
     public String node;
-    public String PID;
+    public String pid;
     public ProcessState state;
 
-    public HistoryEntryRuntimeDto(String node, String PID, ProcessState state) {
+    public HistoryEntryRuntimeDto(String node, String pid, ProcessState state) {
         this.node = node;
-        this.PID = PID;
+        this.pid = pid;
         this.state = state;
     }
 

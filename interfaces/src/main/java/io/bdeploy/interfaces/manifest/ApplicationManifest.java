@@ -6,6 +6,7 @@ import java.io.InputStream;
 
 import javax.annotation.processing.Generated;
 
+import io.bdeploy.api.product.v1.ApplicationDescriptorApi;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
@@ -25,7 +26,7 @@ public class ApplicationManifest implements Comparable<ApplicationManifest> {
 
         am.manifest = hive.execute(new ManifestLoadOperation().setManifest(key));
         try (InputStream is = hive.execute(new TreeEntryLoadOperation().setRootTree(am.manifest.getRoot())
-                .setRelativePath(ApplicationDescriptor.FILE_NAME))) {
+                .setRelativePath(ApplicationDescriptorApi.FILE_NAME))) {
             am.desc = StorageHelper.fromYamlStream(is, ApplicationDescriptor.class);
             am.key = key;
         } catch (IOException e) {

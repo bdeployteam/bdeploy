@@ -57,6 +57,10 @@ import io.bdeploy.ui.dto.HistoryEntryVersionDto;
 
 public class InstanceHistoryManager {
 
+    private static final String HISTORY_RUNTIME = "RUNTIME";
+    private static final String HISTORY_CONFIG = "CONFIG";
+    private static final String HISTORY_CREATE = "CREATE";
+
     private final Cache<String, List<HistoryEntryDto>> history = CacheBuilder.newBuilder()
             .expireAfterAccess(Duration.ofMinutes(5)).maximumSize(10).build();
 
@@ -91,9 +95,9 @@ public class InstanceHistoryManager {
 
                 HistoryEntryDto entry = new HistoryEntryDto(record.timestamp, Integer.parseInt(manifestKey.getTag()));
                 if (record.action == Action.CREATE) {
-                    entry.type = "CREATE";
+                    entry.type = HISTORY_CREATE;
                 } else {
-                    entry.type = "CONFIG";
+                    entry.type = HISTORY_CONFIG;
                 }
                 UserInfo user = null;
                 if (!record.user.isBlank()) {
@@ -130,8 +134,8 @@ public class InstanceHistoryManager {
                 for (Entry<String, MinionApplicationRuntimeHistory> appEntry : historyEntry.getValue().entrySet()) {
                     for (MinionRuntimeHistoryRecord record : appEntry.getValue().getRecords()) {
                         HistoryEntryDto entry = new HistoryEntryDto(record.timestamp, Integer.parseInt(historyEntry.getKey()));
-                        entry.type = "RUNTIME";
-                        entry.runtimeEvent = new HistoryEntryRuntimeDto(dtoEntry.getKey(), record.PID, record.state);
+                        entry.type = HISTORY_RUNTIME;
+                        entry.runtimeEvent = new HistoryEntryRuntimeDto(dtoEntry.getKey(), record.pid, record.state);
                         entry.title = selectRuntimeTitle(record.state, appEntry.getKey());
                         instanceHistory.add(entry);
                     }
@@ -161,7 +165,7 @@ public class InstanceHistoryManager {
             returnList = instanceHistory.subList(0, amount);
 
             for (HistoryEntryDto entry : returnList) {
-                if ("CREATE".equals(entry.type) && entry.version > 1) {
+                if (HISTORY_CREATE.equals(entry.type) && entry.version > 1) {
                     entry.content = versionDifferences(hive,
                             InstanceManifest.load(hive, instanceId, String.valueOf(entry.version - 1)),
                             InstanceManifest.load(hive, instanceId, String.valueOf(entry.version)));
@@ -172,7 +176,7 @@ public class InstanceHistoryManager {
             returnList = instanceHistory.subList(0, instanceHistory.size());
 
             for (HistoryEntryDto entry : returnList) {
-                if ("CREATE".equals(entry.type) && entry.version > 1) {
+                if (HISTORY_CREATE.equals(entry.type) && entry.version > 1) {
                     entry.content = versionDifferences(hive,
                             InstanceManifest.load(hive, instanceId, String.valueOf(entry.version - 1)),
                             InstanceManifest.load(hive, instanceId, String.valueOf(entry.version)));
@@ -239,7 +243,7 @@ public class InstanceHistoryManager {
                 returnList = cachedHistory.subList(offset, offset + amount);
 
                 for (HistoryEntryDto entry : returnList) {
-                    if ("CREATE".equals(entry.type) && entry.version != 1) {
+                    if (HISTORY_CREATE.equals(entry.type) && entry.version != 1) {
                         entry.content = versionDifferences(hive,
                                 InstanceManifest.load(hive, instanceId, String.valueOf(entry.version - 1)),
                                 InstanceManifest.load(hive, instanceId, String.valueOf(entry.version)));
@@ -250,7 +254,7 @@ public class InstanceHistoryManager {
                 returnList = cachedHistory.subList(offset, cachedHistory.size());
 
                 for (HistoryEntryDto entry : returnList) {
-                    if ("CREATE".equals(entry.type) && entry.version != 1) {
+                    if (HISTORY_CREATE.equals(entry.type) && entry.version != 1) {
                         entry.content = versionDifferences(hive,
                                 InstanceManifest.load(hive, instanceId, String.valueOf(entry.version - 1)),
                                 InstanceManifest.load(hive, instanceId, String.valueOf(entry.version)));
@@ -313,29 +317,26 @@ public class InstanceHistoryManager {
         Collections.sort(newNodeNames);
 
         boolean finished = false;
-        int comparison = 0;
 
         for (int i = 0; i <= newNodes.size() && !finished; i++) {
 
             while (true) {
                 if (i >= newNodes.size()) {
                     for (int j = i; j < oldNodes.size(); j++) {
-                        content.nodes.put(oldNodeNames.get(j),
-                                deletedNode(hive, oldNodeNames.get(j), oldNodes.get(oldNodeNames.get(j))));
+                        content.nodes.put(oldNodeNames.get(j), deletedNode(hive, oldNodes.get(oldNodeNames.get(j))));
                     }
                     finished = true;
                     break;
                 }
                 if (i >= oldNodes.size()) {
                     for (int j = i; j < newNodes.size(); j++) {
-                        content.nodes.put(newNodeNames.get(j),
-                                addedNode(hive, newNodeNames.get(j), newNodes.get(newNodeNames.get(j))));
+                        content.nodes.put(newNodeNames.get(j), addedNode(hive, newNodes.get(newNodeNames.get(j))));
                     }
                     finished = true;
                     break;
                 }
 
-                comparison = newNodeNames.get(i).compareTo(oldNodeNames.get(i));
+                int comparison = newNodeNames.get(i).compareTo(oldNodeNames.get(i));
 
                 if (comparison == 0) {
 
@@ -349,14 +350,12 @@ public class InstanceHistoryManager {
                 }
                 if (comparison > 0) {
 
-                    content.nodes.put(oldNodeNames.get(i),
-                            deletedNode(hive, oldNodeNames.get(i), oldNodes.get(oldNodeNames.get(i))));
+                    content.nodes.put(oldNodeNames.get(i), deletedNode(hive, oldNodes.get(oldNodeNames.get(i))));
                     oldNodes.remove(oldNodeNames.get(i));
                     oldNodeNames.remove(i);
                 }
                 if (comparison < 0) {
-                    content.nodes.put(oldNodeNames.get(i),
-                            addedNode(hive, newNodeNames.get(i), newNodes.get(newNodeNames.get(i))));
+                    content.nodes.put(oldNodeNames.get(i), addedNode(hive, newNodes.get(newNodeNames.get(i))));
                     newNodes.remove(newNodeNames.get(i));
                     newNodeNames.remove(i);
                 }
@@ -410,7 +409,7 @@ public class InstanceHistoryManager {
                         finished = true;
                         break;
                     }
-                    comparison = newConfigFileNames.get(i).compareTo(oldConfigFileNames.get(i));
+                    int comparison = newConfigFileNames.get(i).compareTo(oldConfigFileNames.get(i));
 
                     if (comparison == 0) {
                         if (!oldConfigFiles.get(oldConfigFileNames.get(i)).getElementId().getId()
@@ -443,7 +442,7 @@ public class InstanceHistoryManager {
     }
 
     // a node gets added when any applications get added, so print all applications of the new version
-    private HistoryEntryNodeDto addedNode(BHive hive, String NodeName, Key newKey) {
+    private HistoryEntryNodeDto addedNode(BHive hive, Key newKey) {
         List<ApplicationConfiguration> apps = InstanceNodeManifest.of(hive, newKey).getConfiguration().applications;
 
         HistoryEntryNodeDto node = new HistoryEntryNodeDto();
@@ -456,7 +455,7 @@ public class InstanceHistoryManager {
     }
 
     // a node gets deleted when all applications get deleted, so print all applications of the old version
-    private HistoryEntryNodeDto deletedNode(BHive hive, String NodeName, Key oldKey) {
+    private HistoryEntryNodeDto deletedNode(BHive hive, Key oldKey) {
         List<ApplicationConfiguration> apps = InstanceNodeManifest.of(hive, oldKey).getConfiguration().applications;
 
         HistoryEntryNodeDto node = new HistoryEntryNodeDto();
@@ -482,7 +481,6 @@ public class InstanceHistoryManager {
         Collections.sort(newApplications, (a, b) -> a.uid.compareTo(b.uid));
 
         boolean finished = false;
-        int comparison = 0;
 
         for (int i = 0; i <= newApplications.size() && !finished; i++) {
             while (true) {
@@ -501,7 +499,7 @@ public class InstanceHistoryManager {
                     finished = true;
                     break;
                 }
-                comparison = newApplications.get(i).uid.compareTo(oldApplications.get(i).uid);
+                int comparison = newApplications.get(i).uid.compareTo(oldApplications.get(i).uid);
                 if (comparison == 0) {
                     // this application stayed, so look for changes
                     HistoryEntryApplicationDto ret = applicationDifferences(oldApplications.get(i), newApplications.get(i));
@@ -572,7 +570,6 @@ public class InstanceHistoryManager {
         Collections.sort(newParameters, (a, b) -> a.uid.compareTo(b.uid));
 
         boolean finished = false;
-        int comparison = 0;
 
         for (int i = 0; i <= newParameters.size() && !finished; i++) {
             while (true) {
@@ -591,7 +588,7 @@ public class InstanceHistoryManager {
                     finished = true;
                     break;
                 }
-                comparison = newParameters.get(i).uid.compareTo(oldParameters.get(i).uid);
+                int comparison = newParameters.get(i).uid.compareTo(oldParameters.get(i).uid);
                 if (comparison == 0) {
 
                     if (!oldParameters.get(i).value.equals(newParameters.get(i).value)) {
@@ -624,7 +621,6 @@ public class InstanceHistoryManager {
         Collections.sort(newEndpoints, (a, b) -> a.id.compareTo(b.id));
 
         finished = false;
-        comparison = 0;
 
         for (int i = 0; i <= newEndpoints.size() && !finished; i++) {
             while (true) {
@@ -643,7 +639,7 @@ public class InstanceHistoryManager {
                     finished = true;
                     break;
                 }
-                comparison = newEndpoints.get(i).id.compareTo(oldEndpoints.get(i).id);
+                int comparison = newEndpoints.get(i).id.compareTo(oldEndpoints.get(i).id);
 
                 if (comparison == 0) {
                     HistoryEntryHttpEndpointDto ret = endpointsDifferences(oldEndpoints.get(i), newEndpoints.get(i));

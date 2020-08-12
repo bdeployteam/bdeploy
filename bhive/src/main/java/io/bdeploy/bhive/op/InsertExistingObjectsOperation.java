@@ -44,7 +44,7 @@ public class InsertExistingObjectsOperation extends BHive.Operation<Long> {
         try {
             List<Future<?>> inserts = new ArrayList<>();
             for (ObjectId obj : objects) {
-                if (getObjectManager().db(x -> x.hasObject(obj))) {
+                if (Boolean.TRUE.equals(getObjectManager().db(x -> x.hasObject(obj)))) {
                     // have it already.
                     continue;
                 }

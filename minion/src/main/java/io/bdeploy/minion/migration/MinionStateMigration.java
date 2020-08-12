@@ -15,6 +15,7 @@ import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.minion.MinionHelper;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.MinionState;
+import io.bdeploy.ui.api.Minion;
 
 /**
  * Creates {@linkplain MinionManifest manifest} entries for all minions listed in an old minion state map.
@@ -44,9 +45,9 @@ public class MinionStateMigration {
         // Ensure that the self name is set
         MinionState state = root.getState();
         if (state.self == null) {
-            root.modifyState(s -> s.self = MinionRoot.DEFAULT_NAME);
+            root.modifyState(s -> s.self = Minion.DEFAULT_NAME);
             state = root.getState();
-            log.info("Setting self name to '{}'", MinionRoot.DEFAULT_NAME);
+            log.info("Setting self name to '{}'", Minion.DEFAULT_NAME);
         }
 
         // Create an entry for each slave

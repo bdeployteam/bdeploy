@@ -139,7 +139,7 @@ public class MetaManifest<T> {
             try {
                 oldTree = target.execute(new TreeLoadOperation().setTree(mf.getRoot()));
             } catch (Exception e) {
-                log.error("Cannot load previous version of MetaManifest: " + mf, e);
+                log.error("Cannot load previous version of MetaManifest: {}", mf, e);
             }
         }
 

@@ -2,6 +2,7 @@ package io.bdeploy.bhive.op.remote;
 
 import static io.bdeploy.common.util.RuntimeAssert.assertNotNull;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -127,7 +128,7 @@ public class FetchOperation extends RemoteOperation<TransferStatistics, FetchOpe
         }
     }
 
-    private long fetchAsZip(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests) throws Exception {
+    private long fetchAsZip(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests) throws IOException {
         Path z = rh.fetch(objects, manifests);
         long transferSize = Files.size(z);
         try (BHive zHive = new BHive(UriBuilder.fromUri("jar:" + z.toUri()).build(), getActivityReporter())) {
@@ -138,7 +139,7 @@ public class FetchOperation extends RemoteOperation<TransferStatistics, FetchOpe
         return transferSize;
     }
 
-    private long fetchAsStream(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests) throws Exception {
+    private long fetchAsStream(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests) {
         InputStream stream = rh.fetchAsStream(objects, manifests);
         return execute(new ObjectReadOperation().stream(stream));
     }

@@ -47,7 +47,7 @@ public class ObjectConsistencyCheckOperation extends BHive.Operation<Set<Element
         try {
             for (Manifest.Key key : roots) {
                 List<ElementView> existingElements = new ArrayList<>();
-                if (!execute(new ManifestExistsOperation().setManifest(key))) {
+                if (!Boolean.TRUE.equals(execute(new ManifestExistsOperation().setManifest(key)))) {
                     // does not even exist - happens if manifest consistency operation removed it.
                     continue;
                 }

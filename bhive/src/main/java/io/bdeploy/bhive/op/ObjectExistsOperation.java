@@ -26,7 +26,7 @@ public class ObjectExistsOperation extends BHive.Operation<SortedSet<ObjectId>> 
 
         try (Activity activity = getActivityReporter().start("Checking objects...", objects.size())) {
             for (ObjectId o : objects) {
-                if (getObjectManager().db(x -> x.hasObject(o))) {
+                if (Boolean.TRUE.equals(getObjectManager().db(x -> x.hasObject(o)))) {
                     existing.add(o);
                 }
                 activity.worked(1);

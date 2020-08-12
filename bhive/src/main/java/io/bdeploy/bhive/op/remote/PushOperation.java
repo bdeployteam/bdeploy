@@ -66,7 +66,7 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
                         .getManifestInventory(manifests.parallelStream().map(Manifest.Key::toString).toArray(String[]::new));
 
                 // remove all manifests that already exist
-                manifests.removeIf(m -> remoteManifests.containsKey(m));
+                manifests.removeIf(remoteManifests::containsKey);
 
                 if (manifests.isEmpty()) {
                     return stats;
@@ -181,7 +181,7 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
         }
     }
 
-    private long pushAsStream(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests) throws IOException {
+    private long pushAsStream(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests) {
         PipedInputStream input = new PipedInputStream();
         CompletableFuture<Void> barrier = new CompletableFuture<>();
 

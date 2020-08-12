@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.logging.Logger;
 
 import javax.inject.Inject;
 import javax.ws.rs.client.ClientRequestContext;
@@ -13,10 +12,10 @@ import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.core.HttpHeaders;
 
 import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.client.ClientProperties;
-import org.glassfish.jersey.client.internal.LocalizationMessages;
 import org.glassfish.jersey.internal.inject.InjectionManager;
 import org.glassfish.jersey.spi.ContentEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Client filter adding support for {@link org.glassfish.jersey.spi.ContentEncoder content encoding}. The filter adds
@@ -30,6 +29,7 @@ import org.glassfish.jersey.spi.ContentEncoder;
  */
 public final class JerseyGZipFilter implements ClientRequestFilter {
 
+    private static final Logger log = LoggerFactory.getLogger(JerseyGZipFilter.class);
     private static final String GZIP_ENCODING = "gzip";
 
     @Inject
@@ -45,8 +45,7 @@ public final class JerseyGZipFilter implements ClientRequestFilter {
         request.getHeaders().addAll(HttpHeaders.ACCEPT_ENCODING, getSupportedEncodings());
 
         if (!getSupportedEncodings().contains(GZIP_ENCODING)) {
-            Logger.getLogger(getClass().getName()).warning(LocalizationMessages
-                    .USE_ENCODING_IGNORED(ClientProperties.USE_ENCODING, GZIP_ENCODING, getSupportedEncodings()));
+            log.warn("GZIP encoding not supported, supported encodings: {}", getSupportedEncodings());
         } else {
             // don't add Content-Encoding header for requests with no entity and for requests which use multipart
             if (request.hasEntity() && !request.getHeaderString(HttpHeaders.CONTENT_TYPE).contains("multipart")) {

@@ -137,9 +137,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /** Path where the hive is stored */
     private Path bhiveDir;
 
-    /** Path where all apps are stored */
-    private Path appsDir;
-
     /** Path where the launched app is stored */
     private Path appDir;
 
@@ -343,7 +340,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             throw new IllegalStateException("Failed to read " + config.launch(), e);
         }
         bhiveDir = rootDir.resolve("bhive");
-        appsDir = rootDir.resolve("apps");
+        Path appsDir = rootDir.resolve("apps");
         poolDir = appsDir.resolve("pool");
         appDir = appsDir.resolve(descriptor.applicationId);
         readOnlyRootDir = PathHelper.isReadOnly(rootDir);

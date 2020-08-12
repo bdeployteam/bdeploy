@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -48,7 +49,7 @@ import io.bdeploy.launcher.cli.LauncherTool;
  */
 public abstract class LauncherDialog extends JFrame {
 
-    private static final Logger log = LoggerFactory.getLogger(LauncherErrorDialog.class);
+    private static final Logger log = LoggerFactory.getLogger(LauncherDialog.class);
     private static final long serialVersionUID = 1L;
 
     private static final String SHOW_DETAILS_LABEL = "Show Details";
@@ -203,7 +204,7 @@ public abstract class LauncherDialog extends JFrame {
     /** Reads and returns the embedded icon and scales it to the given resolution */
     protected static ImageIcon loadIcon(String iconName, int width, int height) {
         BufferedImage image = loadImage(iconName);
-        return new ImageIcon(image.getScaledInstance(width, height, BufferedImage.SCALE_SMOOTH));
+        return new ImageIcon(image.getScaledInstance(width, height, Image.SCALE_SMOOTH));
     }
 
     /** Returns the detailed error message to be displayed */

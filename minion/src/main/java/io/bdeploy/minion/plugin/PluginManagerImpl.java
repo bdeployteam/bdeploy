@@ -59,7 +59,7 @@ public class PluginManagerImpl implements PluginManager {
             try {
                 loadGlobalPlugin(PluginManifest.of(globalHive, key).getPlugin());
             } catch (Throwable e) { // can throw Errors if API incompatible
-                log.warn("Cannot load global plugin from " + key, e);
+                log.warn("Cannot load global plugin from {}", key, e);
             }
         }
     }
@@ -185,7 +185,7 @@ public class PluginManagerImpl implements PluginManager {
         try {
             customEditors = handle.plugin.getCustomEditors();
         } catch (Throwable t) {
-            log.error("Cannot read custom editors from plugin " + handle.header.name + ":" + handle.header.version, t);
+            log.error("Cannot read custom editors from plugin {}:{}", handle.header.name, handle.header.version, t);
         }
         return new PluginInfoDto(handle.id, handle.header.name, handle.header.version, handle.global, true,
                 new ArrayList<>(customEditors));
@@ -300,9 +300,7 @@ public class PluginManagerImpl implements PluginManager {
 
         @Override
         public Path call() throws Exception {
-            return getObjectManager().db((db) -> {
-                return db.getObjectFile(object);
-            });
+            return getObjectManager().db(db -> db.getObjectFile(object));
         }
 
         public FindFileOperation setObject(ObjectId id) {

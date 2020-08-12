@@ -63,7 +63,7 @@ public class MarkerDatabase extends ObjectDatabase {
                 return;
             } catch (FileAlreadyExistsException e) {
                 if (!infoWritten) {
-                    log.info("Waiting for " + root);
+                    log.info("Waiting for {}", root);
                     infoWritten = true;
                 }
                 try {

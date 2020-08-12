@@ -10,8 +10,8 @@ public class MinionRuntimeHistoryManager {
     private final MetaManifest<MinionRuntimeHistory> meta;
     private final BHiveExecution hive;
 
-    public MinionRuntimeHistoryManager(Manifest.Key Manifest, BHiveExecution hive) {
-        this.meta = new MetaManifest<>(Manifest, true, MinionRuntimeHistory.class);
+    public MinionRuntimeHistoryManager(Manifest.Key manifest, BHiveExecution hive) {
+        this.meta = new MetaManifest<>(manifest, true, MinionRuntimeHistory.class);
         this.hive = hive;
     }
 

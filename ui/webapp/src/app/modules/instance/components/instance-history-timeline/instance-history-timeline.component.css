@@ -65,7 +65,7 @@ app-instance-history-timeline-card{
   background-color: rgb(0, 220, 48);
 }
 .timeline_circle.runtime_stop{
-  background-color: rgb(184, 231, 15);;
+  background-color: rgb(184, 231, 15);
 }
 .timeline_circle.runtime_warning{
   background-color: rgb(236, 168, 20);

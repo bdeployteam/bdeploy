@@ -42,7 +42,7 @@ import io.bdeploy.ui.api.Minion;
 @Singleton
 public class DownloadServiceImpl implements DownloadService {
 
-    private static final Logger log = LoggerFactory.getLogger(InstanceResourceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(DownloadServiceImpl.class);
 
     private static final String ATTACHMENT_DISPOSITION = "attachment";
 

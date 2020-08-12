@@ -124,7 +124,7 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
     public void deactivate(Key key) {
         BHive hive = root.getHive();
 
-        if (!hive.execute(new ManifestExistsOperation().setManifest(key))) {
+        if (!Boolean.TRUE.equals(hive.execute(new ManifestExistsOperation().setManifest(key)))) {
             return;
         }
 
@@ -144,7 +144,7 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
     public void remove(Key key) {
         BHive hive = root.getHive();
 
-        if (!hive.execute(new ManifestExistsOperation().setManifest(key))) {
+        if (!Boolean.TRUE.equals(hive.execute(new ManifestExistsOperation().setManifest(key)))) {
             return;
         }
 

@@ -117,7 +117,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
         // assure that the product has been pushed to the master (e.g. by central).
         Boolean productExists = hive.execute(new ManifestExistsOperation().setManifest(imf.getConfiguration().product));
-        if (!productExists) {
+        if (!Boolean.TRUE.equals(productExists)) {
             throw new WebApplicationException("Cannot find required product " + imf.getConfiguration().product, Status.NOT_FOUND);
         }
 
@@ -339,7 +339,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         Manifest.Key updateTo = new Manifest.Key(product.getName(), productTag);
 
         // validate that the product is there.
-        if (!hive.execute(new ManifestExistsOperation().setManifest(updateTo))) {
+        if (!Boolean.TRUE.equals(hive.execute(new ManifestExistsOperation().setManifest(updateTo)))) {
             throw new WebApplicationException("Cannot find product tag " + productTag, Status.NOT_FOUND);
         }
 

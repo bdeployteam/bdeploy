@@ -22,11 +22,11 @@ public class TagComparator implements Comparator<String>, Serializable {
             String bValue = b[i];
 
             String digit = "\\d+";
-            boolean a_isnum = aValue.matches(digit);
-            boolean b_isnum = bValue.matches(digit);
+            boolean aIsnum = aValue.matches(digit);
+            boolean bIsnum = bValue.matches(digit);
 
             int comp;
-            if (a_isnum && b_isnum) {
+            if (aIsnum && bIsnum) {
                 try {
                     Long aNum = Long.valueOf(aValue);
                     Long bNum = Long.valueOf(bValue);

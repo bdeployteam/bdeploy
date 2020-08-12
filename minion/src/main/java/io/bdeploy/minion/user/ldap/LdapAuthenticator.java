@@ -70,6 +70,9 @@ public class LdapAuthenticator implements Authenticator {
         for (LDAPSettingsDto server : servers) {
             try {
                 LdapContext ctx = createServerContext(server);
+                if (ctx == null) {
+                    return null;
+                }
                 try {
                     UserInfo found = performUserSearch(user, password, server, ctx);
                     if (found != null) {
@@ -169,7 +172,7 @@ public class LdapAuthenticator implements Authenticator {
             return ctx;
         } catch (Exception e) {
             log.error("Cannot create initial connection to {} as {}", server.server, server.user, e);
-            throw e;
+            return null;
         }
 
     }

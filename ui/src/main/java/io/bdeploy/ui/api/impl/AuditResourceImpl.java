@@ -68,7 +68,7 @@ public class AuditResourceImpl implements AuditResource {
         try (InputStream is = Files.newInputStream(currentPath)) {
             readMore = scanFile(result, is, lastInstant, lineLimit);
         } catch (IOException e) {
-            log.error("Failed to open {}", currentPath.toString(), e);
+            log.error("Failed to open {}", currentPath, e);
         }
 
         // scan archived logs
@@ -78,7 +78,7 @@ public class AuditResourceImpl implements AuditResource {
             try (InputStream gis = new GZIPInputStream(Files.newInputStream(currentPath))) {
                 readMore = scanFile(result, gis, lastInstant, lineLimit);
             } catch (IOException e) {
-                log.error("Failed to open {}", currentPath.toString(), e);
+                log.error("Failed to open {}", currentPath, e);
             }
 
         }

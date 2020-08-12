@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
-import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 import com.google.common.base.Splitter;
@@ -273,7 +272,7 @@ public class Configuration {
     }
 
     @SuppressWarnings("unchecked")
-    private Object convertType(Class<?> target, String source, Function<Object, Object> mapper) {
+    private Object convertType(Class<?> target, String source, UnaryOperator<Object> mapper) {
         if (target.equals(String.class)) {
             return mapper.apply(source);
         } else if (target.equals(long.class)) {
