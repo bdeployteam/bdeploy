@@ -8,6 +8,8 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+
 import io.bdeploy.common.cfg.Configuration;
 
 /**
@@ -16,6 +18,7 @@ import io.bdeploy.common.cfg.Configuration;
 public class AuditRecord {
 
     public enum Severity {
+        @JsonEnumDefaultValue
         NORMAL,
         WARNING,
         ERROR

@@ -1,10 +1,13 @@
 package io.bdeploy.api.remote.v1.dto;
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+
 import io.bdeploy.bhive.model.Manifest;
 
 public class InstanceConfigurationApi {
 
     public enum InstancePurposeApi {
+        @JsonEnumDefaultValue
         PRODUCTIVE,
         TEST,
         DEVELOPMENT

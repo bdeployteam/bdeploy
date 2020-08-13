@@ -3,6 +3,8 @@ package io.bdeploy.interfaces.manifest.history;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+
 import io.bdeploy.bhive.BHiveExecution;
 import io.bdeploy.bhive.meta.MetaManifest;
 import io.bdeploy.bhive.model.Manifest;
@@ -21,7 +23,9 @@ public class InstanceManifestHistory {
         INSTALL,
         UNINSTALL,
         ACTIVATE,
-        DEACTIVATE
+        DEACTIVATE,
+        @JsonEnumDefaultValue
+        UNKNOWN
     }
 
     private final MetaManifest<History> meta;

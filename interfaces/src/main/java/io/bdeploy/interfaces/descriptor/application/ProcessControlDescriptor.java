@@ -3,6 +3,8 @@ package io.bdeploy.interfaces.descriptor.application;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+
 /**
  * Describes process control specific characteristics of an {@link ApplicationDescriptor application}.
  */
@@ -12,6 +14,7 @@ public class ProcessControlDescriptor {
         /**
          * Manual-only start using explicit process controls
          */
+        @JsonEnumDefaultValue
         MANUAL,
         /**
          * Same as manual, but user must confirm start

@@ -36,8 +36,9 @@ public class JacksonHelper {
         result.setDefaultPrettyPrinter(pp);
 
         result.enable(SerializationFeature.INDENT_OUTPUT);
-        result.disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
-        result.disable(com.fasterxml.jackson.databind.DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS);
+        result.enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE);
+        result.disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
+        result.disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS);
 
         result.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
         result.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);

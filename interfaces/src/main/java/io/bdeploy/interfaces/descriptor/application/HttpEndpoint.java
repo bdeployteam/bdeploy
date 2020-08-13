@@ -1,8 +1,11 @@
 package io.bdeploy.interfaces.descriptor.application;
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+
 public class HttpEndpoint {
 
     public enum HttpAuthenticationType {
+        @JsonEnumDefaultValue
         NONE,
         BASIC,
         DIGEST

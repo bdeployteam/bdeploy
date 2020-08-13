@@ -1,5 +1,7 @@
 package io.bdeploy.common.util;
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+
 /**
  * Determines OS specifics.
  */
@@ -10,6 +12,7 @@ public class OsHelper {
         LINUX,
         AIX,
         MACOS,
+        @JsonEnumDefaultValue
         UNKNOWN
     }
 
