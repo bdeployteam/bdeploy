@@ -2,6 +2,8 @@ package io.bdeploy.interfaces.descriptor.application;
 
 import javax.annotation.processing.Generated;
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+
 import io.bdeploy.api.product.v1.ApplicationDescriptorApi;
 
 /**
@@ -15,6 +17,7 @@ import io.bdeploy.api.product.v1.ApplicationDescriptorApi;
 public class ApplicationDescriptor extends ApplicationDescriptorApi implements Comparable<ApplicationDescriptor> {
 
     public enum ApplicationType {
+        @JsonEnumDefaultValue
         SERVER,
         CLIENT;
     }

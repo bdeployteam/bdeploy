@@ -1,5 +1,7 @@
 package io.bdeploy.interfaces.configuration.pcu;
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+
 /**
  * Enumeration containing the possible states of a process.
  */
@@ -9,6 +11,7 @@ public enum ProcessState {
      * Process is not running.
      * Indicates the initial state or that the process has been manually stopped or that it terminated expectedly.
      */
+    @JsonEnumDefaultValue
     STOPPED,
 
     /**

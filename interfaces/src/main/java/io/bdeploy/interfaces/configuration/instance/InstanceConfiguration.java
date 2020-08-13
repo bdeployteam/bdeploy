@@ -1,5 +1,7 @@
 package io.bdeploy.interfaces.configuration.instance;
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 
@@ -11,6 +13,7 @@ public class InstanceConfiguration {
     public static final String FILE_NAME = "instance.json";
 
     public enum InstancePurpose {
+        @JsonEnumDefaultValue
         PRODUCTIVE,
         TEST,
         DEVELOPMENT

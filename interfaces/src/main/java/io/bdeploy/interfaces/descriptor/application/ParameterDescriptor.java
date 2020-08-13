@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.annotation.processing.Generated;
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 
 /**
@@ -13,6 +15,7 @@ import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 public class ParameterDescriptor implements Comparable<ParameterDescriptor> {
 
     public enum ParameterType {
+        @JsonEnumDefaultValue
         STRING,
         NUMERIC,
         BOOLEAN,

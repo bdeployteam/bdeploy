@@ -1,5 +1,7 @@
 package io.bdeploy.ui.api;
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+
 /**
  * The mode of the minion, respective any tool which requires a minion root.
  */
@@ -8,6 +10,7 @@ public enum MinionMode {
     /**
      * Standalone means that all operations are regarded 'local', meaning the running process is the master.
      */
+    @JsonEnumDefaultValue
     STANDALONE,
 
     /**
