@@ -12,6 +12,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -93,6 +94,19 @@ public class PathHelper {
         } catch (IOException e) {
             throw new IllegalStateException("Cannot create " + p, e);
         }
+    }
+
+    /**
+     * Renames the given file or directory and then attempts to delete it.
+     */
+    public static boolean moveAndDelete(Path source, Path target) {
+        try {
+            Files.move(source, target, StandardCopyOption.ATOMIC_MOVE);
+        } catch (IOException e) {
+            return false;
+        }
+        deleteRecursive(target);
+        return true;
     }
 
     /**
