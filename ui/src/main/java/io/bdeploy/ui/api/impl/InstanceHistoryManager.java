@@ -220,7 +220,7 @@ public class InstanceHistoryManager {
             case CRASHED_WAITING:
                 return "Process " + process + " chrashed";
             case RUNNING_STOP_PLANNED:
-                return "Stop of " + process + "planned";
+                return "Stop of " + process + " planned";
             case RUNNING_UNSTABLE:
                 return "Restart of process " + process;
             case RUNNING:

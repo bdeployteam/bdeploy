@@ -1,0 +1,59 @@
+=== Instance History
+
+After a while, you will probably end up with a lot of changes and new versions. +
+You can *view* all those changes, *who* made them and *when* they were made on the *instance history page*.
+
+To open the history, go to the *instance overview*, click on the *menu* on the right and click on *instance history*.
+
+You will be greeted with *cards* on each side of a timeline.
+Each *card* consists of a title containing the *event* and the corresponding *version*, as well as the *time* the event happened.
+
+There are three types of events. _Creation_ events, that show a new version, _Deployment_ events that show _Installation_, _Activation_ and _Uninstallation_, and _Runtime_ for events like _starts_, _stops_, _crashes_, etc.
+
+[NOTE]
+If you haven't made any changes, only one card will be shown: _Version 1: Creation_.
+
+Once you *scroll* to the bottom, a loading spinner will show up and more events get *loaded*. +
+You can scroll on until you reach the first event.
+
+image::images/BDeploy_User_History_Overview.png[Instance history, align=center, width=480, link="images/BDeploy_User_History_Overview.png"]
+
+To see the *user* responsible for a _Creation_ or _Deployment_, open a card by clicking on it. +
+_Creation_ cards also list *all changes* of the corresponding version to the previous version.
+
+image::images/BDeploy_User_History_OpenedCard.png[Open card, align=center, width=480, link="images/BDeploy_User_History_OpenedCard.png"]
+
+[TIP]
+To *close all* opened cards, click on the rightmost button of the toolbar on the top. +
+If you want *only one* card open at once, click on the button to the left of it. With that on, once you open a new card, all other cards will be closed. 
+
+
+===== Comparing two versions
+
+You can *compare* any two versions to view all changes made between those versions. +
+Select two versions by clicking on the button with *two arrows* in both _Creation_ cards. + 
+The versions will show up under *_Compare Versions_* in the toolbar on the top.
+To compare them now, click on the *arrow* inbetween.
+
+A *dialog* listing all changes will show up.
+
+image::images/BDeploy_User_History_ComparisonDialog.png[Compare versions, align=center, width=480, link="images/BDeploy_User_History_ComparisonDialog.png"]
+
+===== Filtering events
+
+To *select* which events are shown, click on the *filter button* on the left of _Compare Versions_ and enable/disable the shown events. +
+_Runtime_ events are disabled by default.
+
+image::images/BDeploy_User_History_ShowMenu.png[Filter events, align=center, width=480, link="images/BDeploy_User_History_ShowMenu.png"]
+
+===== Runtime events
+
+_Runtime_ events will show up once you *enabled* them. 
+_Runtime_ cards consist of a title containing the *event* and the corresponding *application*, as well as the *time* the event happened.
+
+The body of _Runtime_ cards list the *node* and *version* of the application.
+
+image::images/BDeploy_User_History_RuntimeHistory.png[Runtime events, align=center, width=480, link="images/BDeploy_User_History_RuntimeHistory.png"]
+
+[NOTE]
+The *process ID* will also show up given that it was present at the *moment* the event happened.

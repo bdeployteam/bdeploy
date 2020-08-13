@@ -185,6 +185,7 @@ describe('Instance Tests', function () {
     cy.screenshot("BDeploy_User_History_ComparisonDialog");
     cy.contains("button","close").click();
     cy.contains("button","indeterminate_check_box").click();
+    cy.wait(200); // wait until click animation of close-all button disappeared
 
     // show runtime history
     cy.contains("button","filter_list_alt").click();
