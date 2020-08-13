@@ -78,14 +78,21 @@ public class ClientCleanup {
         for (Manifest.Key key : available) {
             log.info("Deleting {}", key);
 
-            hive.execute(new ManifestDeleteOperation().setToDelete(key));
-
             Version version = VersionHelper.parse(key.getTag());
             Path launcherPath = ClientPathHelper.getHome(version);
+
+            // File-Locks could prevent that we can delete the folder
+            // thus we first try to rename and then delete
             if (launcherPath.toFile().exists()) {
-                PathHelper.deleteRecursive(launcherPath);
-                log.info("Deleting {}", launcherPath);
+                Path tmpPath = launcherPath.getParent().resolve(launcherPath.getFileName() + "_delete");
+                if (!PathHelper.moveAndDelete(launcherPath, tmpPath)) {
+                    log.warn("Unable to delete unused launcher.");
+                    return;
+                }
             }
+
+            // Delete manifest as last operation
+            hive.execute(new ManifestDeleteOperation().setToDelete(key));
         }
     }
 
@@ -114,12 +121,19 @@ public class ClientCleanup {
         for (Manifest.Key key : availableApps) {
             log.info("Deleting {}", key);
 
-            hive.execute(new ManifestDeleteOperation().setToDelete(key));
-
+            // File-Locks could prevent that we can delete the folder
+            // thus we first try to rename and then delete
             Path pooledPath = poolDir.resolve(key.directoryFriendlyName());
             if (pooledPath.toFile().exists()) {
-                PathHelper.deleteRecursive(pooledPath);
+                Path tmpPath = pooledPath.getParent().resolve(pooledPath.getFileName() + "_delete");
+                if (!PathHelper.moveAndDelete(pooledPath, tmpPath)) {
+                    log.warn("Unable to delete unused pooled application.");
+                    return;
+                }
             }
+
+            // Delete manifest as last operation
+            hive.execute(new ManifestDeleteOperation().setToDelete(key));
         }
     }
 
