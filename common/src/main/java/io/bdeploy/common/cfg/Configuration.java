@@ -273,31 +273,43 @@ public class Configuration {
 
     @SuppressWarnings("unchecked")
     private Object convertType(Class<?> target, String source, UnaryOperator<Object> mapper) {
+        if (target.isAnnotation()) {
+            return get((Class<? extends Annotation>) target);
+        }
+        if (source == null) {
+            throw new IllegalArgumentException("Conversion of null source not possible");
+        }
         if (target.equals(String.class)) {
             return mapper.apply(source);
-        } else if (target.equals(long.class)) {
+        }
+        if (target.equals(long.class)) {
             return Long.parseLong(source);
-        } else if (target.equals(int.class)) {
+        }
+        if (target.equals(int.class)) {
             return Integer.parseInt(source);
-        } else if (target.equals(short.class)) {
+        }
+        if (target.equals(short.class)) {
             return Short.parseShort(source);
-        } else if (target.equals(byte.class)) {
+        }
+        if (target.equals(byte.class)) {
             return Byte.parseByte(source);
-        } else if (target.equals(boolean.class)) {
+        }
+        if (target.equals(boolean.class)) {
             return Boolean.parseBoolean(source);
-        } else if (target.equals(double.class)) {
+        }
+        if (target.equals(double.class)) {
             return Double.parseDouble(source);
-        } else if (target.equals(float.class)) {
+        }
+        if (target.equals(float.class)) {
             return Float.parseFloat(source);
-        } else if (target.equals(char.class)) {
-            if (source == null) {
-                throw new IllegalArgumentException("Character conversion of null source not possible");
-            }
+        }
+        if (target.equals(char.class)) {
             if (source.length() > 1) {
                 throw new IllegalArgumentException("Character conversion with input length > 1: " + source);
             }
             return source.charAt(0);
-        } else if (target.isEnum()) {
+        }
+        if (target.isEnum()) {
             try {
                 return target.getMethod("valueOf", String.class).invoke(null, mapper.apply(source));
             } catch (NoSuchMethodException | IllegalAccessException e) {
@@ -306,17 +318,15 @@ public class Configuration {
             } catch (InvocationTargetException e) {
                 throw new IllegalStateException(e.getTargetException());
             }
-        } else if (target.isArray()) {
+        }
+        if (target.isArray()) {
             List<String> split = Splitter.on(',').trimResults().omitEmptyStrings().splitToList(source);
             Object targetArray = Array.newInstance(target.getComponentType(), split.size());
             for (int i = 0; i < split.size(); ++i) {
                 Array.set(targetArray, i, convertType(target.getComponentType(), split.get(i), mapper));
             }
             return targetArray;
-        } else if (target.isAnnotation()) {
-            return get((Class<? extends Annotation>) target);
         }
-
         throw new IllegalStateException("Unsupported conversion to " + target);
     }
 
