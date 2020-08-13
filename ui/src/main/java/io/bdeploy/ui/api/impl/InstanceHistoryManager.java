@@ -256,16 +256,16 @@ public class InstanceHistoryManager {
 
     // load the runtime history
     private List<HistoryEntryDto> loadRuntimeHistory(BHive hive, String instanceId, String group) {
-        List<HistoryEntryDto> history = new ArrayList<>();
+        List<HistoryEntryDto> content = new ArrayList<>();
 
         RemoteService svc = mp.getControllingMaster(hive, InstanceManifest.load(hive, instanceId, null).getManifest());
         MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class, context);
         MasterNamedResource namedMaster = master.getNamedMaster(group);
 
         for (Entry<String, MinionRuntimeHistoryDto> dto : namedMaster.getRuntimeHistory(instanceId).entrySet()) {
-            computeMinionRuntimeHistory(history, dto.getKey(), dto.getValue());
+            computeMinionRuntimeHistory(content, dto.getKey(), dto.getValue());
         }
-        return history;
+        return content;
     }
 
     private void computeMinionRuntimeHistory(List<HistoryEntryDto> history, String minionName, MinionRuntimeHistoryDto minion) {
@@ -362,7 +362,6 @@ public class InstanceHistoryManager {
                 if (compareNodes(hive, nodes, i, oldNodeNames, newNodeNames, oldNodes, newNodes)) {
                     break;
                 }
-                ;
             }
         }
         return nodes;
