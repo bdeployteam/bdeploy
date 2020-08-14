@@ -33,7 +33,7 @@ public class InstanceProcessControllerTest {
         // Create controller with the two applications
         Map<String, String> variables = Collections.singletonMap("SLEEP_TIME", "600");
         InstanceProcessController controller = new InstanceProcessController(group.uuid);
-        controller.createProcessControllers(new DeploymentPathProvider(tmp, group.uuid), variables::get, "1", group);
+        controller.createProcessControllers(new DeploymentPathProvider(tmp, group.uuid), variables::get, "1", group, null);
         controller.setActiveTag("1");
 
         // Start all applications with auto-start flags
@@ -70,14 +70,14 @@ public class InstanceProcessControllerTest {
         ProcessConfiguration app1 = TestFactory.createConfig(path, "App1", true, "600");
         ProcessConfiguration app2 = TestFactory.createConfig(path, "App2", false, "600");
         ProcessGroupConfiguration group = TestFactory.createGroupConfig("MyInstance", app1, app2);
-        controller.createProcessControllers(new DeploymentPathProvider(path, group.uuid), null, "1", group);
+        controller.createProcessControllers(new DeploymentPathProvider(path, group.uuid), null, "1", group, null);
 
         // Create two applications in version 2 and add to the controller
         path = tmp.resolve("2");
         app1 = TestFactory.createConfig(path, "App1", true, "600");
         app2 = TestFactory.createConfig(path, "App2", false, "600");
         group = TestFactory.createGroupConfig("MyInstance", app1, app2);
-        controller.createProcessControllers(new DeploymentPathProvider(path, group.uuid), null, "2", group);
+        controller.createProcessControllers(new DeploymentPathProvider(path, group.uuid), null, "2", group, null);
 
         // Activate and start version 1
         controller.setActiveTag("1");
@@ -123,7 +123,7 @@ public class InstanceProcessControllerTest {
 
         // Create controller with the two applications
         InstanceProcessController controller = new InstanceProcessController(group.uuid);
-        controller.createProcessControllers(new DeploymentPathProvider(tmp, group.uuid), null, "1", group);
+        controller.createProcessControllers(new DeploymentPathProvider(tmp, group.uuid), null, "1", group, null);
         controller.setActiveTag("1");
 
         // Launch auto-start
@@ -137,7 +137,7 @@ public class InstanceProcessControllerTest {
         // Detach first and create new controller (simulate restart)
         controller.detach();
         controller = new InstanceProcessController(group.uuid);
-        controller.createProcessControllers(new DeploymentPathProvider(tmp, group.uuid), null, "1", group);
+        controller.createProcessControllers(new DeploymentPathProvider(tmp, group.uuid), null, "1", group, null);
         controller.setActiveTag("1");
 
         // Recover running applications
@@ -159,7 +159,7 @@ public class InstanceProcessControllerTest {
 
         // Create controller with the two applications
         InstanceProcessController controller = new InstanceProcessController(group.uuid);
-        controller.createProcessControllers(new DeploymentPathProvider(tmp, group.uuid), null, "1", group);
+        controller.createProcessControllers(new DeploymentPathProvider(tmp, group.uuid), null, "1", group, null);
         controller.setActiveTag("1");
         controller.setOrderProvider(t -> Arrays.asList("App2", "App1"));
 

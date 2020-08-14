@@ -120,7 +120,7 @@ public class FetchOperation extends RemoteOperation<TransferStatistics, FetchOpe
         return manifests;
     }
 
-    private long fetch(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests) throws Exception {
+    private long fetch(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests) throws IOException {
         try {
             return fetchAsStream(rh, objects, manifests);
         } catch (UnsupportedOperationException ex) {
