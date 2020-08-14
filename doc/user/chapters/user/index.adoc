@@ -12,6 +12,8 @@ include::deployment.adoc[]
 
 include::processcontrol.adoc[]
 
+include::history.adoc[]
+
 include::clientapps.adoc[]
 
 include::central.adoc[]
