@@ -18,12 +18,10 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
-import io.bdeploy.interfaces.remote.versioning.VersionMismatchDetect;
 
 @Path("/deployments")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@VersionMismatchDetect
 public interface SlaveDeploymentResource {
 
     /**

@@ -259,7 +259,7 @@ public class InstanceHistoryManager {
         List<HistoryEntryDto> content = new ArrayList<>();
 
         RemoteService svc = mp.getControllingMaster(hive, InstanceManifest.load(hive, instanceId, null).getManifest());
-        MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class, context);
+        MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
         MasterNamedResource namedMaster = master.getNamedMaster(group);
 
         for (Entry<String, MinionRuntimeHistoryDto> dto : namedMaster.getRuntimeHistory(instanceId).entrySet()) {

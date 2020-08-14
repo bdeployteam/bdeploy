@@ -1,0 +1,133 @@
+package io.bdeploy.minion.versioning;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.List;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+
+import io.bdeploy.api.remote.v1.PublicInstanceResource;
+import io.bdeploy.api.remote.v1.PublicRootResource;
+import io.bdeploy.api.remote.v1.dto.CredentialsApi;
+import io.bdeploy.api.remote.v1.dto.InstanceGroupConfigurationApi;
+import io.bdeploy.api.remote.v1.dto.SoftwareRepositoryConfigurationApi;
+import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.jersey.TestServer;
+
+public class VersioningTest {
+
+    @RegisterExtension
+    TestServer srv = new TestServer(VersionedImpl.class, UnversionedImpl.class, FakePRR.class);
+
+    @Path("/versioned")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public interface Versioned {
+
+        @GET
+        public String text();
+    }
+
+    @Path("/versioned")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public interface VersionedV2 {
+
+        @GET
+        @Path("/v2")
+        public String textV2();
+    }
+
+    public static class VersionedImpl implements Versioned {
+
+        @Override
+        public String text() {
+            return "world";
+        }
+    }
+
+    @Path("/unversioned")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public interface Unversioned {
+
+        @GET
+        public String text();
+    }
+
+    @Path("/unversioned")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public interface UnversionedV2 {
+
+        @GET
+        @Path("/v2")
+        public String textV2();
+    }
+
+    public static class UnversionedImpl implements Unversioned {
+
+        @Override
+        public String text() {
+            return "hello";
+        }
+
+    }
+
+    public static class FakePRR implements PublicRootResource {
+
+        @Override
+        public String getVersion() {
+            return "1.2.3";
+        }
+
+        @Override
+        public Response login(String user, String pass, boolean full) {
+            throw new WebApplicationException(Status.NOT_FOUND);
+        }
+
+        @Override
+        public Response login2(CredentialsApi credentials, boolean full) {
+            throw new WebApplicationException(Status.NOT_FOUND);
+        }
+
+        @Override
+        public List<SoftwareRepositoryConfigurationApi> getSoftwareRepositories() {
+            throw new WebApplicationException(Status.NOT_FOUND);
+        }
+
+        @Override
+        public List<InstanceGroupConfigurationApi> getInstanceGroups() {
+            throw new WebApplicationException(Status.NOT_FOUND);
+        }
+
+        @Override
+        public PublicInstanceResource getInstanceResource(String group) {
+            throw new WebApplicationException(Status.NOT_FOUND);
+        }
+
+    }
+
+    @Test
+    void testVersioning(RemoteService svc, Versioned versioned, Unversioned unversioned) {
+
+        assertEquals("hello", unversioned.text());
+        assertEquals("world", versioned.text());
+
+        VersionedV2 versioned2 = ResourceProvider.getVersionedResource(svc, VersionedV2.class, null);
+        UnversionedV2 unversioned2 = ResourceProvider.getResource(svc, UnversionedV2.class, null);
+
+        var wea = assertThrows(WebApplicationException.class, versioned2::textV2);
+        assertEquals(499, wea.getResponse().getStatus());
+
+        var wea2 = assertThrows(WebApplicationException.class, unversioned2::textV2);
+        assertEquals(404, wea2.getResponse().getStatus());
+    }
+}

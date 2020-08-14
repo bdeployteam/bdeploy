@@ -131,7 +131,8 @@ public class CommonInstanceResourceImpl implements CommonInstanceResource {
                         Status.PRECONDITION_FAILED);
             }
 
-            return ResourceProvider.getResource(minion.getMinions().getRemote(minionName), SlaveProxyResource.class, context)
+            return ResourceProvider
+                    .getVersionedResource(minion.getMinions().getRemote(minionName), SlaveProxyResource.class, context)
                     .forward(wrapper);
         }
     }

@@ -356,7 +356,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
     private Process doLaunch(BHive hive, LauncherSplashReporter reporter, LauncherSplash splash) {
         log.info("Launching application {}.", descriptor.applicationId);
-        MasterRootResource master = ResourceProvider.getResource(descriptor.host, MasterRootResource.class, null);
+        MasterRootResource master = ResourceProvider.getVersionedResource(descriptor.host, MasterRootResource.class, null);
         MasterNamedResource namedMaster = master.getNamedMaster(descriptor.groupId);
 
         // Fetch more information from the remote server.
@@ -742,7 +742,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
      */
     public static Version getServerVersion(ClickAndStartDescriptor descriptor) {
         try {
-            CommonRootResource resource = ResourceProvider.getResource(descriptor.host, CommonRootResource.class, null);
+            CommonRootResource resource = ResourceProvider.getVersionedResource(descriptor.host, CommonRootResource.class, null);
             return resource.getVersion();
         } catch (Exception ex) {
             if (log.isDebugEnabled()) {

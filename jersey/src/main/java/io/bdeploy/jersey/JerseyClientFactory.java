@@ -16,7 +16,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
-import javax.ws.rs.client.ClientResponseFilter;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
@@ -61,7 +60,6 @@ public class JerseyClientFactory {
     private final RemoteService svc;
     private ActivityReporter reporter = new ActivityReporter.Null();
     private final Set<com.fasterxml.jackson.databind.Module> additionalModules = new HashSet<>();
-    private final Set<ClientResponseFilter> respFilters = new HashSet<>();
     private WebTarget cachedTarget;
 
     private static final ThreadLocal<String> proxyUuid = new ThreadLocal<>();
@@ -102,14 +100,6 @@ public class JerseyClientFactory {
 
         cachedTarget = null;
         additionalModules.add(o);
-    }
-
-    public synchronized void register(ClientResponseFilter filter) {
-        if (respFilters.contains(filter)) {
-            return;
-        }
-        cachedTarget = null;
-        respFilters.add(filter);
     }
 
     /**
@@ -174,10 +164,6 @@ public class JerseyClientFactory {
         builder.register(JerseyPathWriter.class);
         builder.register(new JerseyClientReporterResolver());
         builder.register(new JerseyRemoteActivityScopeClientFilter(proxyUuid::get));
-
-        for (ClientResponseFilter filter : respFilters) {
-            builder.register(filter);
-        }
 
         for (Object reg : additionalRegistrations) {
             if (reg instanceof Class<?>) {

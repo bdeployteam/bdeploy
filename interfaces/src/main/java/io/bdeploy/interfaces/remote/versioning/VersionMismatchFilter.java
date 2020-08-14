@@ -2,6 +2,7 @@ package io.bdeploy.interfaces.remote.versioning;
 
 import java.io.IOException;
 
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientResponseContext;
@@ -16,7 +17,6 @@ import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.jersey.JerseyClientFactory;
 
 @Provider
-@VersionMismatchDetect
 public class VersionMismatchFilter implements ClientResponseFilter {
 
     public static final int CODE_VERSION_MISMATCH = 499;
@@ -36,6 +36,9 @@ public class VersionMismatchFilter implements ClientResponseFilter {
             String theirVersion;
             try {
                 theirVersion = factory.getProxyClient(PublicRootResource.class).getVersion();
+            } catch (NotFoundException nfe) {
+                log.warn("Server does not implement the version endpoint");
+                return; // version endpoint not supported.
             } catch (Exception e) {
                 log.warn("Cannot check remote version on {}", factory, e);
                 return; // nothing we can do here.

@@ -34,7 +34,7 @@ public class MinionHelper {
     public static MinionStatusDto tryContactMinion(RemoteService remote, int retryCount, int waitTimeInSec) {
         for (int i = 0; i < retryCount; i++) {
             try {
-                MinionStatusResource service = ResourceProvider.getResource(remote, MinionStatusResource.class, null);
+                MinionStatusResource service = ResourceProvider.getVersionedResource(remote, MinionStatusResource.class, null);
                 return service.getStatus();
             } catch (Exception ex) {
                 try {

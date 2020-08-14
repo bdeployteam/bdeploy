@@ -277,7 +277,7 @@ public class InstanceResourceImpl implements InstanceResource {
             remote = mp.getControllingMaster(hive, null);
         }
 
-        return ResourceProvider.getResource(remote, MasterRootResource.class, context);
+        return ResourceProvider.getVersionedResource(remote, MasterRootResource.class, context);
     }
 
     static void syncInstance(Minion minion, ResourceContext rc, String groupName, String instanceId) {
@@ -372,7 +372,7 @@ public class InstanceResourceImpl implements InstanceResource {
         RemoteService master = mp.getControllingMaster(hive, im.getManifest());
         try (Activity deploy = reporter.start("Deleting " + instance + "...");
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(master)) {
-            MasterRootResource root = ResourceProvider.getResource(master, MasterRootResource.class, context);
+            MasterRootResource root = ResourceProvider.getVersionedResource(master, MasterRootResource.class, context);
             InstanceStatusDto status = root.getNamedMaster(group).getStatus(instance);
             for (String app : status.getAppStatus().keySet()) {
                 if (status.isAppRunningOrScheduled(app)) {
@@ -412,7 +412,7 @@ public class InstanceResourceImpl implements InstanceResource {
     public Map<String, MinionStatusDto> getMinionState(String instanceId, String versionTag) {
         if (minion.getMode() != MinionMode.CENTRAL) {
             RemoteService remote = minion.getSelf();
-            MasterRootResource root = ResourceProvider.getResource(remote, MasterRootResource.class, null);
+            MasterRootResource root = ResourceProvider.getVersionedResource(remote, MasterRootResource.class, null);
             return root.getMinions();
         }
         ManagedServersResource msr = rc.initResource(new ManagedServersResourceImpl());
@@ -509,7 +509,7 @@ public class InstanceResourceImpl implements InstanceResource {
                     stats.sumMissingTrees, stats.sumMissingObjects, UnitHelper.formatFileSize(stats.transferSize));
 
             // 3: tell master to deploy
-            MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class, context);
+            MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
             master.getNamedMaster(group).install(instance.getManifest());
         }
 
@@ -525,7 +525,7 @@ public class InstanceResourceImpl implements InstanceResource {
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
 
             // 1: check for running or scheduled applications
-            MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class, context);
+            MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
             MasterNamedResource namedMaster = master.getNamedMaster(group);
             InstanceStatusDto instanceStatus = namedMaster.getStatus(instanceId);
             Map<String, ProcessStatusDto> appStatus = instanceStatus.getAppStatus();
@@ -550,7 +550,7 @@ public class InstanceResourceImpl implements InstanceResource {
         RemoteService svc = mp.getControllingMaster(hive, instance.getManifest());
         try (Activity deploy = reporter.start("Activating " + instanceId + ":" + tag);
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
-            MasterRootResource master = ResourceProvider.getResource(svc, MasterRootResource.class, context);
+            MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
             master.getNamedMaster(group).activate(instance.getManifest());
         }
 
@@ -580,7 +580,8 @@ public class InstanceResourceImpl implements InstanceResource {
         InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
 
         RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
-        MasterNamedResource master = ResourceProvider.getResource(svc, MasterRootResource.class, context).getNamedMaster(group);
+        MasterNamedResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context)
+                .getNamedMaster(group);
 
         ClickAndStartDescriptor desc = new ClickAndStartDescriptor();
         desc.applicationId = applicationId;
@@ -824,7 +825,7 @@ public class InstanceResourceImpl implements InstanceResource {
         }
 
         RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
-        MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class, context);
+        MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
         return root.getNamedMaster(group).getOutputEntry(instanceId, tag, app);
     }
 
@@ -837,7 +838,7 @@ public class InstanceResourceImpl implements InstanceResource {
         }
 
         RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
-        MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class, context);
+        MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
         EntryChunk chunk = root.getNamedMaster(group).getEntryContent(minion, entry, offset, limit);
         if (chunk == null) {
             return null;
@@ -860,7 +861,7 @@ public class InstanceResourceImpl implements InstanceResource {
         }
 
         RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
-        MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class, context);
+        MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
         return root.getNamedMaster(group).getEntryStream(rq.minion, rq.entry);
     }
 
@@ -871,7 +872,7 @@ public class InstanceResourceImpl implements InstanceResource {
             throw new WebApplicationException("Cannot load " + instanceId, Status.NOT_FOUND);
         }
         RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
-        MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class, context);
+        MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
         return root.getNamedMaster(group).getPortStates(minion, ports);
     }
 

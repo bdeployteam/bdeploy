@@ -101,7 +101,7 @@ public class ProcessResourceImpl implements ProcessResource {
 
     private MasterNamedResource getMasterResource() {
         InstanceManifest manifest = InstanceManifest.load(hive, instanceId, null);
-        MasterRootResource root = ResourceProvider.getResource(mp.getControllingMaster(hive, manifest.getManifest()),
+        MasterRootResource root = ResourceProvider.getVersionedResource(mp.getControllingMaster(hive, manifest.getManifest()),
                 MasterRootResource.class, context);
         return root.getNamedMaster(instanceGroup);
     }

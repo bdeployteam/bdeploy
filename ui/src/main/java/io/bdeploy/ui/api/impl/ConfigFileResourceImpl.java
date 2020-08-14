@@ -117,7 +117,7 @@ public class ConfigFileResourceImpl implements ConfigFileResource {
     public void updateConfigFiles(List<FileStatusDto> updates, String expectedTag) {
         InstanceManifest oldConfig = InstanceManifest.load(hive, instanceId, null);
 
-        MasterRootResource root = ResourceProvider.getResource(mp.getControllingMaster(hive, oldConfig.getManifest()),
+        MasterRootResource root = ResourceProvider.getVersionedResource(mp.getControllingMaster(hive, oldConfig.getManifest()),
                 MasterRootResource.class, context);
         MasterNamedResource master = root.getNamedMaster(groupId);
 

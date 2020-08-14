@@ -73,7 +73,8 @@ public class MasterRootResourceImpl implements MasterRootResource {
                 MinionDto config = entry.getValue();
                 try {
                     RemoteService service = config.remote;
-                    MinionStatusResource client = ResourceProvider.getResource(service, MinionStatusResource.class, context);
+                    MinionStatusResource client = ResourceProvider.getVersionedResource(service, MinionStatusResource.class,
+                            context);
                     result.put(name, client.getStatus());
                 } catch (Exception e) {
                     String message = e.getMessage();

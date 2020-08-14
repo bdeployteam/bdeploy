@@ -108,7 +108,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
     @Override
     public void tryAutoAttach(String groupName, ManagedMasterDto target) {
         RemoteService svc = new RemoteService(UriBuilder.fromUri(target.uri).build(), target.auth);
-        CommonRootResource root = ResourceProvider.getResource(svc, CommonRootResource.class, context);
+        CommonRootResource root = ResourceProvider.getVersionedResource(svc, CommonRootResource.class, context);
 
         boolean igExists = false;
         for (InstanceGroupConfiguration cfg : root.getInstanceGroups()) {
@@ -142,7 +142,8 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 synchronize(groupName, target.hostName);
             }
 
-            ResourceProvider.getResource(svc, ManagedServersAttachEventResource.class, context).setLocalAttached(groupName);
+            ResourceProvider.getVersionedResource(svc, ManagedServersAttachEventResource.class, context)
+                    .setLocalAttached(groupName);
         } catch (Exception e) {
             throw new WebApplicationException("Cannot automatically attach managed server " + target.hostName, e);
         }
@@ -169,7 +170,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         RemoteService testSelf = new RemoteService(selfSvc.getUri(), dto.local.auth);
 
         // will throw if there is an authentication problem.
-        InstanceGroupResource self = ResourceProvider.getResource(testSelf, InstanceGroupResource.class, context);
+        InstanceGroupResource self = ResourceProvider.getVersionedResource(testSelf, InstanceGroupResource.class, context);
 
         dto.config.logo = null; // later.
         self.create(dto.config);
@@ -326,7 +327,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
     @Override
     public Map<String, MinionStatusDto> getMinionStateOfManagedServer(String groupName, String serverName) {
         RemoteService svc = getConfiguredRemote(groupName, serverName);
-        MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class, context);
+        MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
         return root.getMinions();
     }
 
@@ -350,7 +351,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         BHive hive = getInstanceGroupHive(groupName);
         RemoteService svc = getConfiguredRemote(groupName, serverName);
 
-        BackendInfoResource backendInfo = ResourceProvider.getResource(svc, BackendInfoResource.class, context);
+        BackendInfoResource backendInfo = ResourceProvider.getVersionedResource(svc, BackendInfoResource.class, context);
         if (backendInfo.getVersion().mode != MinionMode.MANAGED) {
             throw new WebApplicationException("Server is no longer in managed mode: " + serverName, Status.EXPECTATION_FAILED);
         }
@@ -364,7 +365,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         // don't continue actual data sync if update MUST be installed.
         if (!attached.update.forceUpdate) {
             // 2. Sync instance group data with managed server.
-            CommonRootResource root = ResourceProvider.getResource(svc, CommonRootResource.class, context);
+            CommonRootResource root = ResourceProvider.getVersionedResource(svc, CommonRootResource.class, context);
             if (root.getInstanceGroups().stream().map(g -> g.name).noneMatch(n -> n.equals(groupName))) {
                 throw new WebApplicationException("Instance group (no longer?) found on the managed server", Status.NOT_FOUND);
             }
@@ -380,7 +381,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             hive.execute(new PushOperation().addManifest(igKey).setRemote(svc).setHiveName(groupName));
 
             // 3. Fetch all instance and meta manifests, no products.
-            CommonRootResource masterRoot = ResourceProvider.getResource(svc, CommonRootResource.class, context);
+            CommonRootResource masterRoot = ResourceProvider.getVersionedResource(svc, CommonRootResource.class, context);
             CommonInstanceResource master = masterRoot.getInstanceResource(groupName);
             SortedMap<Key, InstanceConfiguration> instances = master.listInstanceConfigurations(true);
             List<String> instanceIds = instances.values().stream().map(ic -> ic.uuid).collect(Collectors.toList());
@@ -443,7 +444,8 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
     @Override
     public List<ProductDto> listProducts(String groupName, String serverName) {
         RemoteService svc = getConfiguredRemote(groupName, serverName);
-        return ResourceProvider.getResource(svc, InstanceGroupResource.class, context).getProductResource(groupName).list(null);
+        return ResourceProvider.getVersionedResource(svc, InstanceGroupResource.class, context).getProductResource(groupName)
+                .list(null);
     }
 
     @Override
@@ -549,7 +551,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
     @Override
     public Version pingServer(String groupName, String serverName) {
         RemoteService svc = getConfiguredRemote(groupName, serverName);
-        BackendInfoResource info = ResourceProvider.getResource(svc, BackendInfoResource.class, null);
+        BackendInfoResource info = ResourceProvider.getVersionedResource(svc, BackendInfoResource.class, null);
         return info.getVersion().version;
     }
 
@@ -587,7 +589,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
     public void performDataMigration(String groupName) {
         BHive hive = getInstanceGroupHive(groupName);
 
-        MasterNamedResource master = ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context)
+        MasterNamedResource master = ResourceProvider.getVersionedResource(minion.getSelf(), MasterRootResource.class, context)
                 .getNamedMaster(groupName);
 
         SortedSet<Key> scan = InstanceManifest.scan(hive, true);

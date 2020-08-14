@@ -99,7 +99,7 @@ public class CleanupHelper {
             log.info("Cleaning on {}, using {} anchors.", slave.getKey(), allUniqueKeysToKeep.size());
 
             RemoteService remote = slave.getValue().remote;
-            SlaveCleanupResource scr = ResourceProvider.getResource(remote, SlaveCleanupResource.class, null);
+            SlaveCleanupResource scr = ResourceProvider.getVersionedResource(remote, SlaveCleanupResource.class, null);
             try {
                 List<CleanupAction> actions = scr.cleanup(allUniqueKeysToKeep, immediate);
                 if (!immediate) {
@@ -193,7 +193,7 @@ public class CleanupHelper {
 
             log.info("Performing cleanup group {} on {}", group.name, group.minion);
 
-            SlaveCleanupResource scr = ResourceProvider.getResource(svc, SlaveCleanupResource.class, null);
+            SlaveCleanupResource scr = ResourceProvider.getVersionedResource(svc, SlaveCleanupResource.class, null);
             try {
                 scr.perform(group.actions);
             } catch (Exception e) {
@@ -243,7 +243,7 @@ public class CleanupHelper {
             InstanceManifest instanceManifest, MasterProvider provider) {
         InstanceStateRecord state = instanceManifest.getState(hive).read();
 
-        MasterRootResource root = ResourceProvider.getResource(
+        MasterRootResource root = ResourceProvider.getVersionedResource(
                 provider.getControllingMaster(hive, instanceManifest.getManifest()), MasterRootResource.class, context);
         MasterNamedResource namedMaster = root.getNamedMaster(group);
 
@@ -384,7 +384,7 @@ public class CleanupHelper {
                     Key imKey = Key.parse(action.what);
                     InstanceGroupConfiguration igc = new InstanceGroupManifest(hive).read();
 
-                    MasterRootResource root = ResourceProvider.getResource(provider.getControllingMaster(hive, imKey),
+                    MasterRootResource root = ResourceProvider.getVersionedResource(provider.getControllingMaster(hive, imKey),
                             MasterRootResource.class, context);
                     root.getNamedMaster(igc.name).uninstall(imKey);
                     break;

@@ -51,12 +51,12 @@ public class BackendInfoResourceImpl implements BackendInfoResource {
         // Central server does not have any nodes. Thus return self only
         if (minion.getMode() == MinionMode.CENTRAL) {
             String name = minion.getMinions().values().keySet().iterator().next();
-            MinionStatusResource status = ResourceProvider.getResource(remote, MinionStatusResource.class, null);
+            MinionStatusResource status = ResourceProvider.getVersionedResource(remote, MinionStatusResource.class, null);
             return Collections.singletonMap(name, status.getStatus());
         }
 
         // Delegate to the master to find out all nodes and their state
-        MasterRootResource root = ResourceProvider.getResource(remote, MasterRootResource.class, null);
+        MasterRootResource root = ResourceProvider.getVersionedResource(remote, MasterRootResource.class, null);
         return root.getMinions();
     }
 
