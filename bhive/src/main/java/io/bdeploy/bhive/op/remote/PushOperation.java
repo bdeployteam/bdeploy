@@ -102,7 +102,7 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
                 stats.sumMissingObjects = missingObjects.size();
 
                 // STEP 6: copy objects and manifests
-                stats.transferSize = push(rh, missingObjects, manifests);
+                stats.transferSize = push(rh, missingObjects, manifests).transferSize;
             }
         }
         return stats;
@@ -152,7 +152,7 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
         return this;
     }
 
-    private long push(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests) throws IOException {
+    private TransferStatistics push(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests) throws IOException {
         try {
             return pushAsStream(rh, objects, manifests);
         } catch (UnsupportedOperationException ex) {
@@ -160,28 +160,30 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
         }
     }
 
-    private long pushAsZip(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests) throws IOException {
+    private TransferStatistics pushAsZip(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests)
+            throws IOException {
         Path tmpHive = Files.createTempFile("push-", ".zip");
         Files.delete(tmpHive); // need to delete to re-create with ZipFileSystem
 
         try {
+            TransferStatistics s;
             try (BHive emptyHive = new BHive(UriBuilder.fromUri("jar:" + tmpHive.toUri()).build(), getActivityReporter())) {
                 CopyOperation op = new CopyOperation().setDestinationHive(emptyHive).setPartialAllowed(true);
                 objects.forEach(op::addObject);
                 manifests.forEach(op::addManifest);
 
-                execute(op); // perform copy.
+                s = execute(op); // perform copy.
             } // important: close hive to sync with filesystem
 
-            long fileSize = Files.size(tmpHive);
+            s.transferSize = Files.size(tmpHive);
             rh.push(tmpHive);
-            return fileSize;
+            return s;
         } finally {
             Files.deleteIfExists(tmpHive);
         }
     }
 
-    private long pushAsStream(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests) {
+    private TransferStatistics pushAsStream(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests) {
         PipedInputStream input = new PipedInputStream();
         CompletableFuture<Void> barrier = new CompletableFuture<>();
 

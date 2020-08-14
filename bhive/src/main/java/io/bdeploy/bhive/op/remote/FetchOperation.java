@@ -98,7 +98,13 @@ public class FetchOperation extends RemoteOperation<TransferStatistics, FetchOpe
                 stats.sumMissingObjects = missingObjects.size();
 
                 // STEP 7: fetch from the remote all required objects and manifests.
-                stats.transferSize = fetch(rh, missingObjects, toFetch);
+                TransferStatistics fs = fetch(rh, missingObjects, toFetch);
+
+                // update statistics with some new knowledge. the fetch call can only know a few numbers,
+                // as for instance the number of trees is irrelevant during actual operation.
+                stats.transferSize = fs.transferSize;
+                stats.sumManifests = fs.sumManifests;
+                stats.sumMissingObjects = fs.sumMissingObjects;
             }
         } finally {
             stats.duration = Duration.between(start, Instant.now()).toMillis();
@@ -120,7 +126,7 @@ public class FetchOperation extends RemoteOperation<TransferStatistics, FetchOpe
         return manifests;
     }
 
-    private long fetch(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests) throws IOException {
+    private TransferStatistics fetch(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests) throws IOException {
         try {
             return fetchAsStream(rh, objects, manifests);
         } catch (UnsupportedOperationException ex) {
@@ -128,18 +134,19 @@ public class FetchOperation extends RemoteOperation<TransferStatistics, FetchOpe
         }
     }
 
-    private long fetchAsZip(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests) throws IOException {
+    private TransferStatistics fetchAsZip(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests)
+            throws IOException {
         Path z = rh.fetch(objects, manifests);
-        long transferSize = Files.size(z);
         try (BHive zHive = new BHive(UriBuilder.fromUri("jar:" + z.toUri()).build(), getActivityReporter())) {
-            zHive.execute(new CopyOperation().setDestinationHive(this).setPartialAllowed(false));
+            TransferStatistics t = zHive.execute(new CopyOperation().setDestinationHive(this).setPartialAllowed(false));
+            t.transferSize = Files.size(z); // transferred size != actual size.
+            return t;
         } finally {
             Files.deleteIfExists(z);
         }
-        return transferSize;
     }
 
-    private long fetchAsStream(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests) {
+    private TransferStatistics fetchAsStream(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests) {
         InputStream stream = rh.fetchAsStream(objects, manifests);
         return execute(new ObjectReadOperation().stream(stream));
     }

@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.bhive.remote.LocalBHiveAdapter;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.jersey.JerseyPathWriter.DeleteAfterWrite;
@@ -73,7 +74,7 @@ public class BHiveResourceImpl implements BHiveResource {
     }
 
     @Override
-    public Long pushAsStream(InputStream in) {
+    public TransferStatistics pushAsStream(InputStream in) {
         return wrapper.pushAsStream(in);
     }
 

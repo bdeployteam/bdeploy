@@ -2,6 +2,8 @@ package io.bdeploy.bhive.op;
 
 import static io.bdeploy.common.util.RuntimeAssert.assertNotNull;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -14,6 +16,7 @@ import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditWith;
 import io.bdeploy.bhive.audit.AuditParameterExtractor.NoAudit;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.common.ActivityReporter.Activity;
 
 /**
@@ -23,7 +26,7 @@ import io.bdeploy.common.ActivityReporter.Activity;
  * If no {@link Manifest} or {@link ObjectId} is set, the whole contents of the
  * local {@link BHive} the operation is executed on will be copied.
  */
-public class CopyOperation extends BHive.Operation<Void> {
+public class CopyOperation extends BHive.Operation<TransferStatistics> {
 
     @AuditWith(AuditStrategy.COLLECTION_SIZE)
     private final SortedSet<ObjectId> objects = new TreeSet<>();
@@ -36,7 +39,10 @@ public class CopyOperation extends BHive.Operation<Void> {
     private boolean partialAllowed;
 
     @Override
-    public Void call() throws Exception {
+    public TransferStatistics call() throws Exception {
+        TransferStatistics result = new TransferStatistics();
+        Instant start = Instant.now();
+
         assertNotNull(destinationHive, "Destination Hive not set");
 
         try (Activity activity = getActivityReporter().start("Copying objects...")) {
@@ -46,6 +52,9 @@ public class CopyOperation extends BHive.Operation<Void> {
                 execute(new ManifestListOperation()).forEach(manifests::add);
                 execute(new ObjectListOperation()).forEach(objects::add);
             }
+
+            result.sumManifests = manifests.size();
+            result.sumMissingObjects = objects.size();
 
             // Create markers in the destination hive
             String markerUuid = destinationHive.execute(new CreateObjectMarkersOperation().setObjectIds(objects));
@@ -79,9 +88,11 @@ public class CopyOperation extends BHive.Operation<Void> {
             }
 
             destinationHive.execute(new ClearObjectMarkersOperation().setMarkersUuuid(markerUuid));
+        } finally {
+            result.duration = Duration.between(start, Instant.now()).toMillis();
         }
 
-        return null;
+        return result;
     }
 
     /**

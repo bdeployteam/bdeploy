@@ -9,6 +9,7 @@ import javax.ws.rs.NotFoundException;
 
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.bhive.remote.RemoteBHive;
 import io.bdeploy.bhive.remote.jersey.BHiveResource.FetchSpec;
 import io.bdeploy.bhive.remote.jersey.BHiveResource.ObjectListSpec;
@@ -74,7 +75,7 @@ public class JerseyRemoteBHive implements RemoteBHive {
     }
 
     @Override
-    public Long pushAsStream(InputStream in) {
+    public TransferStatistics pushAsStream(InputStream in) {
         try {
             return client.pushAsStream(in);
         } catch (NotFoundException nfe) {

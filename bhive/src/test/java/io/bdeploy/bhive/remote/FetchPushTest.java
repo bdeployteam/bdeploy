@@ -15,7 +15,12 @@ import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.bhive.model.Tree;
+import io.bdeploy.bhive.model.Tree.EntryType;
 import io.bdeploy.bhive.op.ImportOperation;
+import io.bdeploy.bhive.op.InsertArtificialTreeOperation;
+import io.bdeploy.bhive.op.InsertManifestOperation;
+import io.bdeploy.bhive.op.InsertManifestRefOperation;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.remote.FetchOperation;
@@ -155,7 +160,7 @@ public class FetchPushTest extends RemoteHiveTestBase {
     @Test
     void pushWithPrunedRemoteLeafTree(@TempDir Path tmp, RemoteService svc, ActivityReporter r) throws IOException {
         // note: the TestHive.class provided hive is used in the base class, don't use.
-        try (BHive local = new BHive(tmp.resolve("h1").toUri(), r); BHive fetchHive = new BHive(tmp.resolve("h2").toUri(), r)) {
+        try (BHive local = new BHive(tmp.resolve("h1").toUri(), r)) {
             Path src = ContentHelper.genSimpleTestTree(tmp, "app");
             Manifest.Key key = new Manifest.Key("app", "v1");
             local.execute(new ImportOperation().setManifest(key).setSourcePath(src));
@@ -178,6 +183,89 @@ public class FetchPushTest extends RemoteHiveTestBase {
             assertEquals(1, s.sumManifests);
             assertEquals(2, s.sumTrees);
             assertEquals(2, s.sumMissingTrees);
+        }
+    }
+
+    @Test
+    void pushFetchWithRefsClean(BHive target, @TempDir Path tmp, RemoteService svc, ActivityReporter r) throws IOException {
+        try (BHive local = new BHive(tmp.resolve("h1").toUri(), r); BHive fetchHive = new BHive(tmp.resolve("h2").toUri(), r)) {
+            Manifest.Key root = createManifestWithRefs(tmp, local);
+
+            // push the manifest to the remote.
+            TransferStatistics s = local.execute(new PushOperation().setRemote(svc).addManifest(root));
+            assertEquals(3, s.sumManifests);
+
+            // Check if all manifests arrived correctly.
+            assertEquals(1, target.execute(new ManifestListOperation().setManifestName("root")).size());
+            assertEquals(1, target.execute(new ManifestListOperation().setManifestName("nested-a")).size());
+            assertEquals(1, target.execute(new ManifestListOperation().setManifestName("nested-b")).size());
+
+            // fetch the manifest to the second local hive.
+            TransferStatistics fs = fetchHive.execute(new FetchOperation().setRemote(svc).addManifest(root));
+            assertEquals(3, fs.sumManifests);
+
+            // Check if all manifests arrived correctly.
+            assertEquals(1, fetchHive.execute(new ManifestListOperation().setManifestName("root")).size());
+            assertEquals(1, fetchHive.execute(new ManifestListOperation().setManifestName("nested-a")).size());
+            assertEquals(1, fetchHive.execute(new ManifestListOperation().setManifestName("nested-b")).size());
+        }
+    }
+
+    private Manifest.Key createManifestWithRefs(Path tmp, BHive local) throws IOException {
+        Path source = ContentHelper.genSimpleTestTree(tmp, "source");
+
+        Manifest.Key na = new Manifest.Key("nested-a", "v1");
+        Manifest.Key nb = new Manifest.Key("nested-b", "v1");
+        Manifest.Key root = new Manifest.Key("root", "v1");
+
+        local.execute(new ImportOperation().setManifest(na).setSourcePath(source));
+        local.execute(new ImportOperation().setManifest(nb).setSourcePath(source));
+
+        Tree.Builder rootTree = new Tree.Builder()
+                .add(new Tree.Key("nested-a", EntryType.MANIFEST),
+                        local.execute(new InsertManifestRefOperation().setManifest(na)))
+                .add(new Tree.Key("nested-b", EntryType.MANIFEST),
+                        local.execute(new InsertManifestRefOperation().setManifest(nb)));
+
+        Manifest.Builder mbr = new Manifest.Builder(root);
+        mbr.setRoot(local.execute(new InsertArtificialTreeOperation().setTree(rootTree)));
+
+        Manifest builtMf = mbr.build(local);
+        local.execute(new InsertManifestOperation().addManifest(builtMf));
+        return root;
+    }
+
+    @Test
+    void pushFetchWithRefsPartial(BHive target, @TempDir Path tmp, RemoteService svc, ActivityReporter r) throws IOException {
+        try (BHive local = new BHive(tmp.resolve("h1").toUri(), r); BHive fetchHive = new BHive(tmp.resolve("h2").toUri(), r)) {
+            Manifest.Key root = createManifestWithRefs(tmp, local);
+
+            // first push one of the leaves
+            Manifest.Key leaf = new Manifest.Key("nested-a", "v1");
+            TransferStatistics ps = local.execute(new PushOperation().setRemote(svc).addManifest(leaf));
+            assertEquals(1, ps.sumManifests);
+
+            // push the manifest to the remote.
+            TransferStatistics s = local.execute(new PushOperation().setRemote(svc).addManifest(root));
+            assertEquals(2, s.sumManifests);
+
+            // Check if all manifests arrived correctly.
+            assertEquals(1, target.execute(new ManifestListOperation().setManifestName("root")).size());
+            assertEquals(1, target.execute(new ManifestListOperation().setManifestName("nested-a")).size());
+            assertEquals(1, target.execute(new ManifestListOperation().setManifestName("nested-b")).size());
+
+            // now fetch one of the leaves
+            TransferStatistics pfs = fetchHive.execute(new FetchOperation().setRemote(svc).addManifest(leaf));
+            assertEquals(1, pfs.sumManifests);
+
+            // fetch the manifest to the second local hive.
+            TransferStatistics fs = fetchHive.execute(new FetchOperation().setRemote(svc).addManifest(root));
+            assertEquals(2, fs.sumManifests);
+
+            // Check if all manifests arrived correctly.
+            assertEquals(1, fetchHive.execute(new ManifestListOperation().setManifestName("root")).size());
+            assertEquals(1, fetchHive.execute(new ManifestListOperation().setManifestName("nested-a")).size());
+            assertEquals(1, fetchHive.execute(new ManifestListOperation().setManifestName("nested-b")).size());
         }
     }
 

@@ -10,6 +10,7 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
+import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.RemoteService;
@@ -68,7 +69,7 @@ public interface RemoteBHive extends AutoCloseable {
     /**
      * Streams objects directly into the given remote hive.
      */
-    public Long pushAsStream(InputStream in);
+    public TransferStatistics pushAsStream(InputStream in);
 
     /**
      * Fetch manifests from the remote as ZIPed {@link BHive}. Only objects in the given requiredObjects are included.

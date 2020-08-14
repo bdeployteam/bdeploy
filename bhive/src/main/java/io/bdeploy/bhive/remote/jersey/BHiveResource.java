@@ -18,6 +18,7 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
+import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.WeakTokenAllowed;
@@ -96,10 +97,10 @@ public interface BHiveResource {
      */
     @PUT
     @Path("/pushAsStream")
-    @Produces(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)
     @RequiredPermission(permission = Permission.WRITE)
-    public Long pushAsStream(InputStream in);
+    public TransferStatistics pushAsStream(InputStream in);
 
     /**
      * Fetch manifests from the remote as ZIPed {@link BHive}.

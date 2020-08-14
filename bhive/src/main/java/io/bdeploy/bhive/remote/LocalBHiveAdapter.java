@@ -33,6 +33,7 @@ import io.bdeploy.bhive.op.ObjectReadOperation;
 import io.bdeploy.bhive.op.ObjectWriteOperation;
 import io.bdeploy.bhive.op.PruneOperation;
 import io.bdeploy.bhive.op.ScanOperation;
+import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 
@@ -128,7 +129,7 @@ public class LocalBHiveAdapter implements RemoteBHive {
     }
 
     @Override
-    public Long pushAsStream(InputStream in) {
+    public TransferStatistics pushAsStream(InputStream in) {
         return hive.execute(new ObjectReadOperation().stream(in));
     }
 

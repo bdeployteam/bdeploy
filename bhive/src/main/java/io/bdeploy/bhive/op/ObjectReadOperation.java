@@ -3,6 +3,8 @@ package io.bdeploy.bhive.op;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
@@ -14,6 +16,7 @@ import io.bdeploy.bhive.audit.AuditParameterExtractor.NoAudit;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.objects.MarkerDatabase;
+import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.util.PathHelper;
@@ -24,13 +27,15 @@ import io.bdeploy.common.util.UuidHelper;
 /**
  * Reads one or more objects from a stream and inserts them into the local hive.
  */
-public class ObjectReadOperation extends BHive.Operation<Long> {
+public class ObjectReadOperation extends BHive.Operation<TransferStatistics> {
 
     @NoAudit
     private InputStream input;
 
     @Override
-    public Long call() throws Exception {
+    public TransferStatistics call() throws Exception {
+        TransferStatistics result = new TransferStatistics();
+        Instant start = Instant.now();
         RuntimeAssert.assertNotNull(input);
         try (CountingInputStream countingIn = new CountingInputStream(input);
                 GZIPInputStream zipIn = new GZIPInputStream(countingIn);
@@ -63,11 +68,13 @@ public class ObjectReadOperation extends BHive.Operation<Long> {
                     objects.add(insertedId);
                     activity.worked(1);
                 }
+                result.sumMissingObjects = counter;
 
                 // Insert manifests as last operation
                 manifests.forEach(mf -> {
                     if (!getManifestDatabase().hasManifest(mf.getKey())) {
                         getManifestDatabase().addManifest(mf);
+                        result.sumManifests++;
                     }
                 });
 
@@ -75,11 +82,13 @@ public class ObjectReadOperation extends BHive.Operation<Long> {
                 MarkerDatabase.waitRootLock(getMarkerRoot());
                 PathHelper.deleteRecursive(getMarkerRoot().resolve(markerUuid));
 
-                return countingIn.getCount();
+                result.transferSize = countingIn.getCount();
             }
         } finally {
             StreamHelper.close(input);
+            result.duration = Duration.between(start, Instant.now()).toMillis();
         }
+        return result;
     }
 
     /**
