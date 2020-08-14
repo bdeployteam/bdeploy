@@ -52,10 +52,12 @@ export class InstanceNodePortListComponent implements OnInit, AfterViewInit {
   ngOnInit() {
     const observables : Observable<Row[]>[] = [];
     // ports of main instance
-    observables.push(
-      this.applicationService.listApplications(this.data.instanceGroup, this.data.node.nodeConfiguration.product, false)
-        .pipe(map(apps => this.collectServerPorts(this.data.node.nodeConfiguration, apps)))
-    );
+    if(this.data.node.nodeConfiguration) {
+      observables.push(
+        this.applicationService.listApplications(this.data.instanceGroup, this.data.node.nodeConfiguration.product, false)
+          .pipe(map(apps => this.collectServerPorts(this.data.node.nodeConfiguration, apps)))
+      );
+    }
     // ports of foreign instances
     this.data.node.foreignNodeConfigurations.forEach(node => {
       observables.push(
@@ -63,6 +65,9 @@ export class InstanceNodePortListComponent implements OnInit, AfterViewInit {
           .pipe(map(apps => this.collectServerPorts(node, apps)))
       );
     });
+    if(observables.length == 0) {
+      this.loading = false;
+    }
 
     forkJoin(observables).subscribe(results => {
       results.forEach(r => this.rows.push(...r));
