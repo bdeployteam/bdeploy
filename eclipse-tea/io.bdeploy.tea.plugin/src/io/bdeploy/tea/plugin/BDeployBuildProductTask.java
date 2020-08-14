@@ -83,7 +83,7 @@ public class BDeployBuildProductTask {
             log.info("Using existing " + target);
         }
 
-        String fullVersion = calculateVersion(bvs);
+        String fullVersion = calculateVersion(bvs, desc.productTag);
 
         ActivityReporter.Stream reporter = new ActivityReporter.Stream(log.info());
         try (BHive bhive = new BHive(target.toURI(), reporter)) {
@@ -237,12 +237,12 @@ public class BDeployBuildProductTask {
         return mapping.getRepository();
     }
 
-    private String calculateVersion(TeaBuildVersionService bvs) {
+    static String calculateVersion(TeaBuildVersionService bvs, String tag) {
         Date date = new Date();
         SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
 
-        if (desc.productTag != null) {
-            return desc.productTag.replace("%D", format.format(date));
+        if (tag != null) {
+            return tag.replace("%D", format.format(date));
         }
 
         String q = bvs.getQualifierFormat();
