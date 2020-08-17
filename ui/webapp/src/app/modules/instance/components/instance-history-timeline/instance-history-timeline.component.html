@@ -2,7 +2,7 @@
   <div class="timeline_line" #timeline_line></div>
   <div class="timeline_list" #timeline_list>
     <div class="timeline_item" *ngFor="let entry of entries" >
-      <div class="timeline_circle" [ngClass]="entry.type=='CREATE'?'create':entry.type=='CONFIG'?'config':
+      <div class="timeline_circle" [ngClass]="entry.type==entryType.CREATE?'create':entry.type==entryType.DEPLOYMENT?'deployment':
       entry.runtimeEvent!=null ? entry.runtimeEvent.state==processState.CRASHED_PERMANENTLY ? 'runtime_error':
       entry.runtimeEvent.state==processState.CRASHED_WAITING ?'runtime_warning':entry.runtimeEvent.state==processState.STOPPED ?'runtime_stop':'runtime':''"></div>
       <app-instance-history-timeline-card #timeline_card [entry]="entry" (add-to-comparison)="addToComparisonEvent($event)" (cardOpen)="cardOpened($event)" (cardClose)="cardClosed()">

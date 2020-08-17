@@ -32,12 +32,12 @@ public class ProcessControllerTest {
 
         // Start and wait until the application is running
         listener.expect(ProcessState.RUNNING);
-        process.start();
+        process.start(null);
         listener.await(TIMEOUT);
         assertEquals(ProcessState.RUNNING, process.getState());
 
         listener.expect(ProcessState.STOPPED);
-        process.stop();
+        process.stop(null);
         listener.await(TIMEOUT);
 
         assertEquals(ProcessState.STOPPED, process.getState());
@@ -50,7 +50,7 @@ public class ProcessControllerTest {
 
         // Start and wait for running
         listener.expect(ProcessState.RUNNING);
-        process.start();
+        process.start(null);
         listener.await(TIMEOUT);
         process.detach();
 
@@ -68,7 +68,7 @@ public class ProcessControllerTest {
 
         // Terminate after recovering
         listener.expect(ProcessState.STOPPED);
-        process.stop();
+        process.stop(null);
         listener.await(TIMEOUT);
         assertEquals(ProcessState.STOPPED, process.getState());
     }
@@ -81,7 +81,7 @@ public class ProcessControllerTest {
 
         StateListener listener = StateListener.createFor(process);
         listener.expect(ProcessState.RUNNING);
-        process.start();
+        process.start(null);
         listener.await(TIMEOUT);
         assertEquals(ProcessState.RUNNING, process.getState());
 
@@ -95,7 +95,7 @@ public class ProcessControllerTest {
 
         // Now shutdown the process again
         listener.expect(ProcessState.STOPPED);
-        process.stop();
+        process.stop(null);
         listener.await(TIMEOUT);
         assertEquals(ProcessState.STOPPED, process.getState());
     }
@@ -111,7 +111,7 @@ public class ProcessControllerTest {
 
         // Start and wait until it is running
         listener.expect(ProcessState.RUNNING);
-        process.start();
+        process.start(null);
         listener.await(TIMEOUT);
         assertEquals(ProcessState.RUNNING, process.getState());
 
@@ -129,7 +129,7 @@ public class ProcessControllerTest {
 
         // Now execute stop command
         listener.expect(ProcessState.STOPPED);
-        process.stop();
+        process.stop(null);
         listener.await(TIMEOUT);
 
         // Recover task must be canceled
@@ -148,7 +148,7 @@ public class ProcessControllerTest {
             startLock.countDown();
             try {
                 startLock.await();
-                process.start();
+                process.start(null);
             } catch (Exception ex) {
                 failedCounter.addAndGet(1);
             }
@@ -158,7 +158,7 @@ public class ProcessControllerTest {
             startLock.countDown();
             try {
                 startLock.await();
-                process.start();
+                process.start(null);
             } catch (Exception ex) {
                 failedCounter.addAndGet(1);
             }
@@ -186,7 +186,7 @@ public class ProcessControllerTest {
             stopLock.countDown();
             try {
                 stopLock.await();
-                process.stop();
+                process.stop(null);
             } catch (Exception ex) {
                 failedCounter.addAndGet(1);
             }
@@ -196,7 +196,7 @@ public class ProcessControllerTest {
             stopLock.countDown();
             try {
                 stopLock.await();
-                process.stop();
+                process.stop(null);
             } catch (Exception ex) {
                 failedCounter.addAndGet(1);
             }
@@ -222,7 +222,7 @@ public class ProcessControllerTest {
         // Start and wait until it permanently crashes
         StateListener listener = StateListener.createFor(process);
         listener.expect(ProcessState.CRASHED_PERMANENTLY);
-        process.start();
+        process.start(null);
         listener.await(TIMEOUT);
 
         // Check final state
@@ -242,7 +242,7 @@ public class ProcessControllerTest {
 
         // Start and wait until it terminates
         listener.expect(ProcessState.RUNNING, ProcessState.STOPPED);
-        process.start();
+        process.start(null);
         listener.await(TIMEOUT);
 
         // Check final state
@@ -260,7 +260,7 @@ public class ProcessControllerTest {
 
         // Start and wait until it is running
         listener.expect(ProcessState.RUNNING);
-        process.start();
+        process.start(null);
         listener.await(TIMEOUT);
         assertEquals(ProcessState.RUNNING, process.getState());
 
@@ -278,7 +278,7 @@ public class ProcessControllerTest {
 
         // Now execute start command
         listener.expect(ProcessState.RUNNING_UNSTABLE, ProcessState.RUNNING);
-        process.start();
+        process.start(null);
         listener.await(TIMEOUT);
 
         // Recover task must be canceled and counter must be reset due to the manual start
@@ -288,7 +288,7 @@ public class ProcessControllerTest {
 
         // Now execute stop command
         listener.expect(ProcessState.STOPPED);
-        process.stop();
+        process.stop(null);
         listener.await(TIMEOUT);
     }
 
@@ -302,12 +302,12 @@ public class ProcessControllerTest {
 
         // Start and wait until the application is running
         listener.expect(ProcessState.RUNNING);
-        process.start();
+        process.start(null);
         listener.await(TIMEOUT);
         assertEquals(ProcessState.RUNNING, process.getState());
 
         listener.expect(ProcessState.STOPPED);
-        process.stop();
+        process.stop(null);
         listener.await(TIMEOUT);
 
         assertEquals(ProcessState.STOPPED, process.getState());

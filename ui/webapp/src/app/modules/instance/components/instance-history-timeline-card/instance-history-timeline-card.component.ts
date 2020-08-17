@@ -1,5 +1,5 @@
 import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
-import { HistoryEntryDto, ProcessState } from 'src/app/models/gen.dtos';
+import { HistoryEntryDto, HistoryEntryType, ProcessState } from 'src/app/models/gen.dtos';
 
 @Component({
   selector: 'app-instance-history-timeline-card',
@@ -10,6 +10,7 @@ export class InstanceHistoryTimelineCardComponent {
 
   public highlighted:boolean = false;
   public processState = ProcessState;
+  public entryType = HistoryEntryType;
 
   @Input() entry:HistoryEntryDto;
 

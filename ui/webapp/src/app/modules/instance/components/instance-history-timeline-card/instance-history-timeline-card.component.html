@@ -2,15 +2,19 @@
   <mat-expansion-panel-header>
     <div class="timeline-card_header"> <p>{{entry.title}}</p><div>{{formatDate(entry.timestamp)}}</div> </div>
   </mat-expansion-panel-header>
-  <div class="content-config-title-wrapper" *ngIf="entry.type=='CREATE' || entry.type=='CONFIG'">
-    <app-user-avatar [avatarSize]="20" [hostSize]="20" [mail]="this.entry.email != ''?this.entry.email:null"></app-user-avatar>
-    <span>{{this.entry.user}}</span>
-    <button *ngIf="entry.type=='CREATE'" mat-icon-button matTooltip="compare Versions" matTooltipShowDelay="500" (click)="addToComparisonClick()"><mat-icon>compare_arrows</mat-icon></button>
+
+  <div class="content-info">
+    <app-user-avatar *ngIf="this.entry.user!=null" [avatarSize]="20" [hostSize]="20" [mail]="this.entry.email != ''?this.entry.email:null"></app-user-avatar>
+    <span *ngIf="this.entry.user!=null else userNotRecorded ">{{this.entry.user}}</span>
+    <ng-template #userNotRecorded><i class="not-recorded">No recorded user</i></ng-template>
+    <button *ngIf="entry.type==entryType.CREATE" mat-icon-button matTooltip="compare Versions" matTooltipShowDelay="500" (click)="addToComparisonClick()"><mat-icon>compare_arrows</mat-icon></button>
   </div>
-  <div class="content-runtime-title-wrapper" *ngIf="entry.type=='RUNTIME'">
-    <span *ngIf="entry.runtimeEvent.PID != null">Process <em>{{entry.runtimeEvent.PID}}</em> on </span>
-    <em>{{entry.runtimeEvent.node}}</em> - version <em>{{entry.version}}</em></div>
-  <div *ngIf="entry.type=='CREATE' && entry.version != 1" class="changes-compared-text">
+  <span *ngIf="entry.type==entryType.RUNTIME" class="content-runtime-info">
+    <span *ngIf="entry.runtimeEvent.pid != null">Process <em>{{entry.runtimeEvent.pid}}</em> on </span>
+    <em>{{entry.runtimeEvent.node}}</em> - version <em>{{entry.version}}</em>
+  </span>
+
+  <div *ngIf="entry.type==entryType.CREATE && entry.version != 1" class="changes-compared-text">
     changes compared to last version
   <mat-divider></mat-divider>
   </div>

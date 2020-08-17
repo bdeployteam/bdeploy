@@ -1,5 +1,5 @@
 import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChildren } from '@angular/core';
-import { HistoryEntryDto, ProcessState } from "../../../../models/gen.dtos";
+import { HistoryEntryDto, HistoryEntryType, ProcessState } from "../../../../models/gen.dtos";
 import { InstanceHistoryTimelineCardComponent } from '../instance-history-timeline-card/instance-history-timeline-card.component';
 
 @Component({
@@ -22,6 +22,7 @@ export class InstanceHistoryTimelineComponent implements OnInit {
   containSearchInput:InstanceHistoryTimelineCardComponent[];
 
   processState = ProcessState;
+  entryType = HistoryEntryType;
 
   constructor(private hostElement:ElementRef) { }
 

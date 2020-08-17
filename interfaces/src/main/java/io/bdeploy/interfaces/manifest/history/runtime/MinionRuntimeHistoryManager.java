@@ -19,8 +19,8 @@ public class MinionRuntimeHistoryManager {
         return readOrCreate();
     }
 
-    public void record(String processId, ProcessState action, String applicationId) {
-        store(readOrCreate().record(new MinionRuntimeHistoryRecord(processId, action, System.currentTimeMillis()),
+    public void record(String processId, ProcessState action, String applicationId, String user) {
+        store(readOrCreate().record(new MinionRuntimeHistoryRecord(processId, action, user, System.currentTimeMillis()),
                 applicationId));
     }
 

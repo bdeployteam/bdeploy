@@ -161,19 +161,19 @@ describe('Instance Tests', function () {
     cy.screenshot("BDeploy_User_History_Overview")
 
     // check if there is the right amount of events
-    cy.get(".timeline_item").should("have.length","6");
+    cy.get(".timeline_item").should("have.length","4");
 
     // open cards
-    cy.contains("Version 4: Creation").click();
-    cy.contains("Version 4: Activation").click();
+    cy.contains("New version: 4").click();
+    cy.contains("New version: 3").click();
     cy.screenshot("BDeploy_User_History_OpenedCard");
 
     // check if cards contain expected text
-    cy.contains("mat-expansion-panel","Version 4: Creation").find(".timeline-card_content")
+    cy.contains("mat-expansion-panel","New version: 4").find(".timeline-card_content")
       .should("contain.html","master").and("contain.html","Parameter")
       .and("contain.html","param.sleep").parent().find(".mat-icon-button").click();
 
-    cy.contains("mat-expansion-panel","Version 2: Creation").click({force:true}).find(".timeline-card_content")
+    cy.contains("mat-expansion-panel","New version: 2").click().find(".timeline-card_content")
       .should("contain.html","master:").and("contain.html","Server Application");
 
     // check comparison dialog
@@ -187,16 +187,21 @@ describe('Instance Tests', function () {
     cy.contains("button","indeterminate_check_box").click();
     cy.wait(200); // wait until click animation of close-all button disappeared
 
-    // show runtime history
+    // show filter
     cy.contains("button","filter_list_alt").click();
     cy.screenshot("BDeploy_User_History_ShowMenu");
 
-    cy.contains("button","Runtime events").click();
-    cy.get(".timeline_item").should("have.length","8");
+    // enable deployments and runtime
+    cy.contains("button","Runtime").click();
+    cy.contains("button","Deployment").click();
     cy.contains("button","filter_list_alt").click({force:true});
     cy.waitUntilContentLoaded();
-    cy.contains("mat-expansion-panel","Start of process Server Application").click().find(".content-runtime-title-wrapper")
+    cy.get(".timeline_item").should("have.length","8");
+
+    // and check them
+    cy.contains("mat-expansion-panel","Start of process Server Application").click().find(".content-runtime-info")
     .should("contain.html","master").and("contain.html","4");
+    cy.contains("mat-expansion-panel","Version 4: Activation").click().find(".content-info").should("contain.html","admin");
     cy.screenshot("BDeploy_User_History_RuntimeHistory");
   });
 

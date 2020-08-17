@@ -66,6 +66,9 @@ public class ProcessController {
     /** Name of the file stored on-disk. Holds information to re-attach to the process */
     private static final String JSON_FILE = "app.json";
 
+    /** Shown user on automated execution */
+    private static final String DEFAULT_USER = "BDeploy System";
+
     private final Path processDir;
     private final String instanceUid;
     private final String instanceTag;
@@ -124,7 +127,7 @@ public class ProcessController {
     private int recoverCount = 0;
 
     /** Listener that is notified when the state changes */
-    private final List<Consumer<ProcessState>> statusListeners = new ArrayList<>();
+    private final List<Consumer<ProcessStateChangeDto>> statusListeners = new ArrayList<>();
 
     /** Replace variables used in the start/stop command and it's arguments */
     private VariableResolver variableResolver;
@@ -175,7 +178,7 @@ public class ProcessController {
      * @param listener
      *            the listener to notify
      */
-    public void addStatusListener(Consumer<ProcessState> listener) {
+    public void addStatusListener(Consumer<ProcessStateChangeDto> listener) {
         this.statusListeners.add(listener);
     }
 
@@ -278,17 +281,6 @@ public class ProcessController {
     }
 
     /**
-     * @return the id of the running process<br>
-     *         Null if not running
-     */
-    public String getPID() {
-        if (process != null) {
-            return String.valueOf(process.pid());
-        }
-        return null;
-    }
-
-    /**
      * Returns the process configuration.
      *
      * @return the process configuration
@@ -306,9 +298,14 @@ public class ProcessController {
 
     /**
      * Starts the process and monitors the execution.
+     *
+     * @param user the user who triggered the start
      */
-    public void start() {
-        executeLocked("Start", false, () -> doStart(true));
+    public void start(String user) {
+        if (user == null) {
+            user = DEFAULT_USER;
+        }
+        executeLocked("Start", false, user, () -> doStart(true));
     }
 
     /**
@@ -317,7 +314,7 @@ public class ProcessController {
      * intend is typically done when stopping multiple processes one after each other to visualize the desired target state.
      */
     public void prepareStop() {
-        executeLocked("PrepareStop", false, this::doPrepareStop);
+        executeLocked("PrepareStop", false, DEFAULT_USER, this::doPrepareStop);
     }
 
     /**
@@ -333,9 +330,14 @@ public class ProcessController {
      * shutdown requests. If that happens then the grace-period of the application must be extended or the application must be
      * fixed to shutdown faster.
      * </p>
+     *
+     * @param user the user who triggered the stop
      */
-    public void stop() {
-        executeLocked("Stop", false, this::doStop);
+    public void stop(String user) {
+        if (user == null) {
+            user = DEFAULT_USER;
+        }
+        executeLocked("Stop", false, user, this::doStop);
     }
 
     /**
@@ -344,7 +346,7 @@ public class ProcessController {
      * if recovering was successfully. Status remains STOPPED if the process is not alive any more.
      */
     public void recover() {
-        executeLocked("Recover", false, this::doRecover);
+        executeLocked("Recover", false, DEFAULT_USER, this::doRecover);
     }
 
     /**
@@ -352,7 +354,7 @@ public class ProcessController {
      * all information that this controller has. Only useful in UNIT tests.
      */
     public void detach() {
-        executeLocked("Detach", false, this::doDetach);
+        executeLocked("Detach", false, DEFAULT_USER, this::doDetach);
     }
 
     /**
@@ -546,7 +548,7 @@ public class ProcessController {
      * then the listeners are only notified about the final state. In all other cases listeners must be notified manually.
      * </p>
      */
-    private void executeLocked(String taskName, boolean wait, Runnable runnable) {
+    private void executeLocked(String taskName, boolean wait, String user, Runnable runnable) {
         // Fail fast if another thread holds the lock
         if (!wait && !lock.tryLock()) {
             throw new PcuRuntimeException("Cannot execute '" + taskName + "' task. Task '" + lockTask + "' is in progress.");
@@ -581,7 +583,12 @@ public class ProcessController {
 
             // Notify listeners when state changes
             if (currentState != oldState) {
-                notifyListeners(currentState);
+                if (process != null) {
+                    notifyListeners(new ProcessStateChangeDto(currentState, user, String.valueOf(process.pid())));
+                } else {
+                    notifyListeners(new ProcessStateChangeDto(currentState, user, null));
+                }
+
             }
         }
     }
@@ -621,7 +628,7 @@ public class ProcessController {
     /** Attaches an exit handle to be notified when the process terminates */
     private void monitorProcess() {
         // Notify when the status changes
-        processExit.thenRunAsync(() -> executeLocked("ExitHook", true, this::onTerminated));
+        processExit.thenRunAsync(() -> executeLocked("ExitHook", true, DEFAULT_USER, this::onTerminated));
 
         // Set to running if launched from stopped or crashed
         if (processState == ProcessState.STOPPED || processState == ProcessState.CRASHED_PERMANENTLY) {
@@ -719,7 +726,7 @@ public class ProcessController {
         }
 
         // Schedule restarting of application based on configured delay
-        Runnable task = () -> executeLocked("Restart", true, this::doRestart);
+        Runnable task = () -> executeLocked("Restart", true, DEFAULT_USER, this::doRestart);
         if (delay.isZero()) {
             logger.log(l -> l.info("Re-launching application immediatly."));
             recoverTask = executorService.schedule(task, 0, TimeUnit.SECONDS);
@@ -747,7 +754,7 @@ public class ProcessController {
 
     /** Switches the state of a process to running if it is alive for a given time period */
     private void doCheckUptime() {
-        executeLocked("CheckUptime", true, () -> {
+        executeLocked("CheckUptime", true, DEFAULT_USER, () -> {
             // Skip monitoring if the process has terminated
             if (processState != ProcessState.RUNNING_UNSTABLE) {
                 return;
@@ -922,10 +929,10 @@ public class ProcessController {
     }
 
     /** Notifies all listeners about the of the process */
-    private void notifyListeners(ProcessState state) {
+    private void notifyListeners(ProcessStateChangeDto status) {
         try {
-            logger.log(l -> l.info("Notify listeners about new process state {}.", state));
-            statusListeners.forEach(c -> c.accept(state));
+            logger.log(l -> l.info("Notify listeners about new process state {}.", status));
+            statusListeners.forEach(c -> c.accept(status));
         } catch (Exception ex) {
             logger.log(l -> l.error("Failed to notify listener about current process status.", ex));
         }

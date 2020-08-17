@@ -99,8 +99,10 @@ public class InstanceProcessController {
                 controller.setVariableResolver(resolver);
 
                 if (runtimeHistory != null) {
-                    controller.addStatusListener(state -> runtimeHistory.record(controller.getPID(), state, config.name));
+                    controller.addStatusListener(
+                            status -> runtimeHistory.record(status.pid, status.state, config.name, status.user));
                 }
+
                 processList.add(controller);
                 logger.log(l -> l.debug("Creating new process controller."), tag, config.uid);
             }
@@ -183,13 +185,15 @@ public class InstanceProcessController {
         }
 
         // Proceed with normal startup of all processes
-        startAll();
+        startAll(null);
     }
 
     /**
      * Starts all applications of the currently active tag.
+     *
+     * @param user the user who triggered the stop - null for default user
      */
-    public void startAll() {
+    public void startAll(String user) {
         if (activeTag == null) {
             throw new PcuRuntimeException("No active tag has been set");
         }
@@ -247,7 +251,7 @@ public class InstanceProcessController {
 
                 // Start it
                 try {
-                    controller.start();
+                    controller.start(user);
                 } catch (Exception ex) {
                     failed.add(appId);
                     logger.log(l -> l.info("Failed to start application.", ex), activeTag, appId);
@@ -268,8 +272,10 @@ public class InstanceProcessController {
      * Stops all running processes of this instance. Processes are stopped in the order that is defined by the given list. If a
      * process is running but it is not contained in this list then it is stopped before all other processes. If the order is
      * undefined for multiple processes then the order is not guaranteed.
+     *
+     * @param user the user who triggered the stop - null for default user
      */
-    public void stopAll() {
+    public void stopAll(String user) {
         // Determine all running versions across all tags
         Map<String, ProcessController> running = new HashMap<>();
         for (ProcessList list : processMap.values()) {
@@ -316,7 +322,7 @@ public class InstanceProcessController {
         while (iter.hasNext()) {
             ProcessController process = iter.next();
             try {
-                process.stop();
+                process.stop(user);
                 iter.remove();
             } catch (Exception ex) {
                 String appId = process.getDescriptor().uid;
@@ -340,8 +346,9 @@ public class InstanceProcessController {
      *
      * @param applicationId
      *            the application identifier
+     * @param user the user who triggered the start
      */
-    public void start(String applicationId) {
+    public void start(String applicationId, String user) {
         if (activeTag == null) {
             throw new PcuRuntimeException("No active tag has been set");
         }
@@ -363,7 +370,7 @@ public class InstanceProcessController {
         try {
             ProcessList list = processMap.get(activeTag);
             ProcessController controller = list.get(applicationId);
-            controller.start();
+            controller.start(user);
         } catch (Exception ex) {
             logger.log(l -> l.error("Failed to start application", ex), activeTag, applicationId);
         }
@@ -374,14 +381,15 @@ public class InstanceProcessController {
      *
      * @param applicationId
      *            the application identifier
+     * @param user the user who triggered the stop
      */
-    public void stop(String applicationId) {
+    public void stop(String applicationId, String user) {
         ProcessController process = findProcessController(applicationId, SET_RUNNING_SCHEDULED);
         if (process == null) {
             throw new PcuRuntimeException("Application not running");
         }
         try {
-            process.stop();
+            process.stop(user);
         } catch (Exception ex) {
             String tag = process.getStatus().instanceTag;
             logger.log(l -> l.error("Failed to stop application", ex), tag, applicationId);

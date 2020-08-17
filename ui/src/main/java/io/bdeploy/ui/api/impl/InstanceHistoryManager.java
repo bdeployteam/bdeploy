@@ -49,6 +49,7 @@ import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.dto.HistoryEntryApplicationDto;
 import io.bdeploy.ui.dto.HistoryEntryConfigFilesDto;
 import io.bdeploy.ui.dto.HistoryEntryDto;
+import io.bdeploy.ui.dto.HistoryEntryDto.HistoryEntryType;
 import io.bdeploy.ui.dto.HistoryEntryHttpEndpointDto;
 import io.bdeploy.ui.dto.HistoryEntryNodeDto;
 import io.bdeploy.ui.dto.HistoryEntryParametersDto;
@@ -56,10 +57,6 @@ import io.bdeploy.ui.dto.HistoryEntryRuntimeDto;
 import io.bdeploy.ui.dto.HistoryEntryVersionDto;
 
 public class InstanceHistoryManager {
-
-    private static final String HISTORY_RUNTIME = "RUNTIME";
-    private static final String HISTORY_CONFIG = "CONFIG";
-    private static final String HISTORY_CREATE = "CREATE";
 
     private final Cache<String, List<HistoryEntryDto>> history = CacheBuilder.newBuilder()
             .expireAfterAccess(Duration.ofMinutes(5)).maximumSize(10).build();
@@ -95,7 +92,7 @@ public class InstanceHistoryManager {
         }
 
         for (HistoryEntryDto entry : returnList) {
-            if (HISTORY_CREATE.equals(entry.type) && entry.version > 1) {
+            if (HistoryEntryType.CREATE.equals(entry.type) && entry.version > 1) {
                 entry.content = versionDifferences(hive,
                         InstanceManifest.load(hive, instanceId, String.valueOf(entry.version - 1)),
                         InstanceManifest.load(hive, instanceId, String.valueOf(entry.version)));
@@ -131,7 +128,7 @@ public class InstanceHistoryManager {
         }
 
         for (HistoryEntryDto entry : returnList) {
-            if (HISTORY_CREATE.equals(entry.type) && entry.version != 1) {
+            if (HistoryEntryType.CREATE.equals(entry.type) && entry.version != 1) {
                 entry.content = versionDifferences(hive,
                         InstanceManifest.load(hive, instanceId, String.valueOf(entry.version - 1)),
                         InstanceManifest.load(hive, instanceId, String.valueOf(entry.version)));
@@ -177,13 +174,13 @@ public class InstanceHistoryManager {
 
                 HistoryEntryDto entry = new HistoryEntryDto(record.timestamp, Integer.parseInt(manifestKey.getTag()));
                 if (record.action == Action.CREATE) {
-                    entry.type = HISTORY_CREATE;
+                    entry.type = HistoryEntryType.CREATE;
                 } else {
-                    entry.type = HISTORY_CONFIG;
+                    entry.type = HistoryEntryType.DEPLOYMENT;
                 }
 
                 entry.title = computeConfigTitle(record.action, manifestKey.getTag());
-                computeUser(entry, record);
+                computeUser(entry, record.user);
 
                 instanceHistory.add(entry);
             }
@@ -199,7 +196,7 @@ public class InstanceHistoryManager {
     private String computeConfigTitle(Action action, String tag) {
         switch (action) {
             case CREATE:
-                return "Version " + tag + ": Creation";
+                return "New version: " + tag;
             case INSTALL:
                 return "Version " + tag + ": Installation";
             case UNINSTALL:
@@ -232,25 +229,28 @@ public class InstanceHistoryManager {
         }
     }
 
-    private void computeUser(HistoryEntryDto entry, InstanceManifestHistoryRecord record) {
-        UserInfo user = null;
-        if (!record.user.isBlank()) {
-            if (record.user.charAt(0) == '[' && record.user.charAt(record.user.length() - 1) == ']') {
-                record.user = record.user.substring(1, record.user.length() - 1);
+    private void computeUser(HistoryEntryDto entry, String user) {
+        UserInfo userInfo = null;
+        if (user != null && !user.isBlank()) {
+            while (user.length() > 2 && user.charAt(0) == '[' && user.charAt(user.length() - 1) == ']') {
+                user = user.substring(1, user.length() - 1);
             }
-            user = auth.getUser(record.user);
+            userInfo = auth.getUser(user);
+        } else {
+            entry.user = null;
+            return;
         }
-        if (user != null) {
-            if (user.email != null && !user.email.isBlank()) {
-                entry.email = user.email;
+        if (userInfo != null) {
+            if (userInfo.email != null && !userInfo.email.isBlank()) {
+                userInfo.email = userInfo.email;
             }
-            if (user.fullName != null && !user.fullName.isBlank()) {
-                entry.user = user.fullName;
+            if (userInfo.fullName != null && !userInfo.fullName.isBlank()) {
+                entry.user = userInfo.fullName;
             } else {
-                entry.user = record.user;
+                entry.user = user;
             }
         } else {
-            entry.user = record.user;
+            entry.user = user;
         }
     }
 
@@ -283,11 +283,15 @@ public class InstanceHistoryManager {
 
     private void computeApplicationRuntimeHistory(List<HistoryEntryDto> history, String minionName, String versionTag,
             String applicationName, MinionApplicationRuntimeHistory application) {
+
         for (MinionRuntimeHistoryRecord record : application.getRecords()) {
             HistoryEntryDto entry = new HistoryEntryDto(record.timestamp, Integer.parseInt(versionTag));
-            entry.type = HISTORY_RUNTIME;
+
+            entry.type = HistoryEntryType.RUNTIME;
             entry.runtimeEvent = new HistoryEntryRuntimeDto(minionName, record.pid, record.state);
             entry.title = computeRuntimeTitle(record.state, applicationName);
+            computeUser(entry, record.user);
+
             history.add(entry);
         }
     }

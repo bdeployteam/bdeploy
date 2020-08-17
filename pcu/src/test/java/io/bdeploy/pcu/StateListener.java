@@ -20,7 +20,7 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessState;
  * Listener that can be added to a process controller to wait for status changes.
  * Enables event-driven testing without hard-coded delays.
  */
-public class StateListener implements Consumer<ProcessState> {
+public class StateListener implements Consumer<ProcessStateChangeDto> {
 
     private static final Logger log = LoggerFactory.getLogger(StateListener.class);
 
@@ -58,16 +58,16 @@ public class StateListener implements Consumer<ProcessState> {
     }
 
     @Override
-    public synchronized void accept(ProcessState current) {
-        log.info("Process state changed to {}", current);
-        events.add(current);
+    public synchronized void accept(ProcessStateChangeDto current) {
+        log.info("Process state changed to {}", current.state);
+        events.add(current.state);
         if (remaining.isEmpty()) {
             throw new RuntimeException(
-                    "No more state changes expected but got <[" + current + "]>. All events <[" + events + "]>  ");
+                    "No more state changes expected but got <[" + current.state + "]>. All events <[" + events + "]>  ");
         }
         // Remove first element when matching
         ProcessState first = remaining.getFirst();
-        if (first == current) {
+        if (first == current.state) {
             remaining.removeFirst();
         }
 

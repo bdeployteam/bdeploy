@@ -8,6 +8,8 @@ import java.util.SortedSet;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.SecurityContext;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -31,6 +33,9 @@ public class SlaveProcessResourceImpl implements SlaveProcessResource {
     @Inject
     private MinionRoot root;
 
+    @Context
+    private SecurityContext context;
+
     @Override
     public void start(String instanceId) {
         MinionProcessController processController = root.getProcessController();
@@ -38,7 +43,7 @@ public class SlaveProcessResourceImpl implements SlaveProcessResource {
         if (instanceController == null) {
             throw new WebApplicationException("Instance with ID '" + instanceId + "' is unknown");
         }
-        instanceController.startAll();
+        instanceController.startAll(context.getUserPrincipal().getName());
     }
 
     @Override
@@ -48,7 +53,7 @@ public class SlaveProcessResourceImpl implements SlaveProcessResource {
         if (instanceController == null) {
             throw new WebApplicationException("Instance with ID '" + instanceId + "' is unknown");
         }
-        instanceController.start(applicationId);
+        instanceController.start(applicationId, context.getUserPrincipal().getName());
     }
 
     @Override
@@ -58,7 +63,7 @@ public class SlaveProcessResourceImpl implements SlaveProcessResource {
         if (instanceController == null) {
             throw new WebApplicationException("Instance with ID '" + instanceId + "' is unknown");
         }
-        instanceController.stopAll();
+        instanceController.stopAll(context.getUserPrincipal().getName());
     }
 
     @Override
@@ -68,7 +73,7 @@ public class SlaveProcessResourceImpl implements SlaveProcessResource {
         if (instanceController == null) {
             throw new WebApplicationException("Instance with ID '" + instanceId + "' is unknown");
         }
-        instanceController.stop(applicationId);
+        instanceController.stop(applicationId, context.getUserPrincipal().getName());
     }
 
     @Override

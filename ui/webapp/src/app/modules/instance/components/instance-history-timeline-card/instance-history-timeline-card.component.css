@@ -36,21 +36,21 @@
   transition: all 0.2s;
 }
 
-.content-config-title-wrapper{
+.content-info{
   display:flex;
   flex-direction: row;
   align-items: center;
 }
 
-.content-config-title-wrapper button{
+.content-info button{
   margin-left:auto;
 }
 
-.content-config-title-wrapper app-user-avatar{
+.content-info app-user-avatar{
   margin: 10px 10px 10px 0;
 }
 
-.content-runtime-title-wrapper{
+.content-runtime-info{
   margin-top: 15px;
   padding-bottom: 10px;
   font-weight: lighter;
@@ -60,24 +60,28 @@
   margin: 5px 0 3px 0;
 }
 
-::ng-deep em{
+.not-recorded{
+  margin: 10px 0;
+}
+
+em{
   font-style: normal;
   font-weight: 500;
 }
 
-::ng-deep i{
+i{
   font-style: italic;
   font-weight: normal;
 }
 
-::ng-deep ul{
+ul{
   padding-left:30px;
   list-style-type:none;
   padding-bottom: 5px;
   margin: 0;
 }
 
-::ng-deep .timeline-card_content{
+.timeline-card_content{
   padding-left:10px;
   padding-top: 10px;
 }

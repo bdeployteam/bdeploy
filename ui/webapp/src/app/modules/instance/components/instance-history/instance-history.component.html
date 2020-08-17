@@ -4,14 +4,14 @@
     <div class="toolbar-title"> <span> Instance: </span><app-instance-group-title [instanceGroup]="groupParam"></app-instance-group-title>/ {{instance? instance.name:""}}</div>
     <button class="show-filter-button" mat-icon-button [matMenuTriggerFor]="showMenu"><mat-icon>filter_list_alt</mat-icon></button>
     <mat-menu xPosition="before"  #showMenu="matMenu">
-      <button mat-menu-item appClickStopPropagation (click)="showCreateEvents=!showCreateEvents; filter()">
-        <mat-icon>{{showCreateEvents?'check_box':'check_box_outline_blank'}}</mat-icon> Creation events
+      <button mat-menu-item appClickStopPropagation (click)="showCreate=!showCreate; filter()">
+        <mat-icon>{{showCreate?'check_box':'check_box_outline_blank'}}</mat-icon> Configuration
       </button>
-      <button mat-menu-item appClickStopPropagation (click)="showConfigEvents=!showConfigEvents; filter()">
-        <mat-icon>{{showConfigEvents?'check_box':'check_box_outline_blank'}}</mat-icon> Config events
+      <button mat-menu-item appClickStopPropagation (click)="showDeployment=!showDeployment; filter()">
+        <mat-icon>{{showDeployment?'check_box':'check_box_outline_blank'}}</mat-icon> Deployment
       </button>
-      <button mat-menu-item appClickStopPropagation (click)="showRuntimeEvents=!showRuntimeEvents; filter()">
-        <mat-icon>{{showRuntimeEvents?'check_box':'check_box_outline_blank'}}</mat-icon> Runtime events
+      <button mat-menu-item appClickStopPropagation (click)="showRuntime=!showRuntime; filter()">
+        <mat-icon>{{showRuntime?'check_box':'check_box_outline_blank'}}</mat-icon> Runtime
       </button>
     </mat-menu>
     <div class="compare-versions">

@@ -2,7 +2,7 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
 import { Location } from '@angular/common';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { HistoryEntryDto, HistoryEntryVersionDto, InstanceConfiguration } from 'src/app/models/gen.dtos';
+import { HistoryEntryDto, HistoryEntryType, HistoryEntryVersionDto, InstanceConfiguration } from 'src/app/models/gen.dtos';
 import { LoggingService } from 'src/app/modules/core/services/logging.service';
 import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { InstanceHistoryTimelineComponent } from 'src/app/modules/instance/components/instance-history-timeline/instance-history-timeline.component';
@@ -28,9 +28,9 @@ export class InstanceHistoryComponent implements OnInit{
   loadedAll:boolean = false;
   loading:boolean = false;
 
-  showCreateEvents = true;
-  showConfigEvents = true;
-  showRuntimeEvents = false;
+  showCreate = true;
+  showDeployment = false;
+  showRuntime = false;
 
   currentOffset:number = 0;
   amount:number = 10;
@@ -193,7 +193,7 @@ export class InstanceHistoryComponent implements OnInit{
   }
 
   filter():void{
-    this.historyEntries = this.unfilteredEntries.filter(item => item.type=="CREATE" && this.showCreateEvents || item.type=="CONFIG" && this.showConfigEvents || item.type=="RUNTIME" && this.showRuntimeEvents);
+    this.historyEntries = this.unfilteredEntries.filter(item => item.type==HistoryEntryType.CREATE && this.showCreate || item.type==HistoryEntryType.DEPLOYMENT && this.showDeployment || item.type==HistoryEntryType.RUNTIME && this.showRuntime);
     setTimeout(()=>{
       if(!this.timeline.isOverflowing() && !this.loadedAll){
         this.loadMoreHistory();

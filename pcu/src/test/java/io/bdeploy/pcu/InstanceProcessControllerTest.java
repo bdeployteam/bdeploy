@@ -37,24 +37,24 @@ public class InstanceProcessControllerTest {
         controller.setActiveTag("1");
 
         // Start all applications with auto-start flags
-        controller.startAll();
+        controller.startAll(null);
         InstanceNodeStatusDto status = controller.getStatus();
         assertTrue(status.areAppsRunningOrScheduled());
         assertTrue(status.areAppsRunningOrScheduledInVersion("1"));
         assertTrue(status.isAppRunningOrScheduled("App1"));
 
         // Start the second application
-        controller.start("App2");
+        controller.start("App2", null);
         status = controller.getStatus();
         assertTrue(status.isAppRunningOrScheduled("App2"));
 
         // Stop one application
-        controller.stop("App1");
+        controller.stop("App1", null);
         status = controller.getStatus();
         assertTrue(!status.isAppRunningOrScheduled("App1"));
 
         // Stop all remaining
-        controller.stopAll();
+        controller.stopAll(null);
         status = controller.getStatus();
         assertTrue(!status.areAppsRunningOrScheduledInVersion("1"));
         assertTrue(!status.areAppsRunningOrScheduled());
@@ -81,7 +81,7 @@ public class InstanceProcessControllerTest {
 
         // Activate and start version 1
         controller.setActiveTag("1");
-        controller.startAll();
+        controller.startAll(null);
 
         // Application 1 must be running in the expected version
         InstanceNodeStatusDto status = controller.getStatus();
@@ -93,7 +93,7 @@ public class InstanceProcessControllerTest {
 
         // Upgrade active version
         controller.setActiveTag("2");
-        controller.start("App2");
+        controller.start("App2", null);
         status = controller.getStatus();
         assertTrue(status.areAppsRunningOrScheduled());
         assertTrue(status.areAppsRunningOrScheduledInVersion("1"));
@@ -102,16 +102,16 @@ public class InstanceProcessControllerTest {
         assertTrue(status.isAppRunningOrScheduled("App2"));
 
         // Try to launch applications again
-        assertThrows(RuntimeException.class, () -> controller.start("App1"));
-        assertThrows(RuntimeException.class, () -> controller.start("App2"));
+        assertThrows(RuntimeException.class, () -> controller.start("App1", null));
+        assertThrows(RuntimeException.class, () -> controller.start("App2", null));
 
         // Move back to version 1 and try again
         controller.setActiveTag("1");
-        assertThrows(RuntimeException.class, () -> controller.start("App1"));
-        assertThrows(RuntimeException.class, () -> controller.start("App2"));
+        assertThrows(RuntimeException.class, () -> controller.start("App1", null));
+        assertThrows(RuntimeException.class, () -> controller.start("App2", null));
 
         // Stop all applications
-        controller.stopAll();
+        controller.stopAll(null);
     }
 
     @Test
@@ -148,7 +148,7 @@ public class InstanceProcessControllerTest {
         assertTrue(!status.isAppRunningOrScheduled("App2"));
 
         // Stop all applications
-        controller.stopAll();
+        controller.stopAll(null);
     }
 
     @Test
@@ -172,13 +172,13 @@ public class InstanceProcessControllerTest {
         pc2.addStatusListener((s) -> order.add(pc2.getDescriptor().uid));
 
         // Launch both applications and verify order
-        controller.startAll();
+        controller.startAll(null);
         assertEquals("App2", order.get(0));
         assertEquals("App1", order.get(1));
 
         // Stop both applications and verify order. Must be reversed
         order.clear();
-        controller.stopAll();
+        controller.stopAll(null);
         assertEquals("App1", order.get(0));
         assertEquals("App2", order.get(1));
     }

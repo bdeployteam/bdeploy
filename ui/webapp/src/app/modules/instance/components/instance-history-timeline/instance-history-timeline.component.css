@@ -58,7 +58,7 @@ app-instance-history-timeline-card{
 .timeline_circle.create{
   background-color: rgb(63,81,181);
 }
-.timeline_circle.config{
+.timeline_circle.deployment{
   background-color: rgb(0, 160, 200);
 }
 .timeline_circle.runtime{
