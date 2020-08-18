@@ -81,12 +81,12 @@ public class BHiveResourceImpl implements BHiveResource {
     @Override
     @DeleteAfterWrite
     public java.nio.file.Path fetch(FetchSpec spec) {
-        return wrapper.fetch(spec.objects, spec.manifests);
+        return wrapper.fetch(spec.requiredObjects, spec.manifestsToFetch);
     }
 
     @Override
     public InputStream fetchAsStream(FetchSpec spec) {
-        return wrapper.fetchAsStream(spec.objects, spec.manifests);
+        return wrapper.fetchAsStream(spec.requiredObjects, spec.manifestsToFetch);
     }
 
 }

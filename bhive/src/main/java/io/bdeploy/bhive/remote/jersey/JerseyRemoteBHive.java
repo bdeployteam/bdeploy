@@ -86,8 +86,8 @@ public class JerseyRemoteBHive implements RemoteBHive {
     @Override
     public Path fetch(SortedSet<ObjectId> objects, SortedSet<Key> manifests) {
         FetchSpec spec = new FetchSpec();
-        spec.objects = objects;
-        spec.manifests = manifests;
+        spec.requiredObjects = objects;
+        spec.manifestsToFetch = manifests;
         return client.fetch(spec);
     }
 
@@ -95,8 +95,8 @@ public class JerseyRemoteBHive implements RemoteBHive {
     public InputStream fetchAsStream(SortedSet<ObjectId> objects, SortedSet<Key> manifests) {
         try {
             FetchSpec spec = new FetchSpec();
-            spec.objects = objects;
-            spec.manifests = manifests;
+            spec.requiredObjects = objects;
+            spec.manifestsToFetch = manifests;
             return client.fetchAsStream(spec);
         } catch (NotFoundException nfe) {
             throw new UnsupportedOperationException("Fetching as stream not supported", nfe);
