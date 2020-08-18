@@ -903,4 +903,8 @@ public class InstanceResourceImpl implements InstanceResource {
         return instanceHistory.compareVersions(hive, instanceId, versionA, versionB);
     }
 
+    @Override
+    public List<HistoryEntryDto> filterInstanceHistory(String instanceId, int amount, int offset, String filter) {
+        return instanceHistory.getFilteredInstanceHistory(hive, instanceId, group, amount, offset, filter);
+    }
 }

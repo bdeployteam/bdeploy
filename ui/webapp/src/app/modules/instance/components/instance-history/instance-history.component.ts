@@ -25,23 +25,26 @@ export class InstanceHistoryComponent implements OnInit{
   groupParam: string = this.route.snapshot.paramMap.get('group');
   uuidParam: string = this.route.snapshot.paramMap.get('uuid');
 
-  loadedAll:boolean = false;
+  private loadedAll:boolean = false;
   loading:boolean = false;
 
   showCreate = true;
   showDeployment = false;
   showRuntime = false;
 
-  currentOffset:number = 0;
-  amount:number = 10;
-
   accordionBehaviour = false;
+
+  private searchTerm:string = null;
+  hintText:string = "";
+
+  private currentOffset:number = 0;
+  private amount:number = 10;
 
   instance: InstanceConfiguration;
   historyEntries:HistoryEntryDto[];
-  unfilteredEntries:HistoryEntryDto[];
+  private allEntries:HistoryEntryDto[];
 
-  compareVersions:Number[] = [,];
+  private compareVersions:Number[] = [,];
   compareDialogOpen:boolean = false;
   compareDialogContent:HistoryEntryVersionDto;
 
@@ -51,16 +54,13 @@ export class InstanceHistoryComponent implements OnInit{
   @ViewChild("compare_a") compareInputA;
   @ViewChild("compare_b") compareInputB;
 
-
-
   constructor(
     private route: ActivatedRoute,
     private instanceService:InstanceService,
     public location:Location,
     private loggingService:LoggingService,
     public routingHistoryService:RoutingHistoryService,
-    ) {
-    }
+    ) {}
 
   ngOnInit(): void {
     this.instanceService.getInstance(this.groupParam,this.uuidParam).subscribe((val)=>this.instance = val);
@@ -71,10 +71,10 @@ export class InstanceHistoryComponent implements OnInit{
     this.timeline.closeAll();
   }
 
-  loadHistory():void{
+  private loadHistory():void{
     this.loading = true;
     this.instanceService.getInstanceHistory(this.groupParam,this.uuidParam,this.amount).subscribe((list:HistoryEntryDto[])=>{
-      this.unfilteredEntries = list;
+      this.allEntries = list;
       this.filter();
       this.loading = false;
       if(list.length < this.amount){
@@ -84,23 +84,29 @@ export class InstanceHistoryComponent implements OnInit{
     });
   }
 
-  loadMoreHistory():void{
+  private loadMoreHistory():void{
     if(!this.loading){
       this.loading = true;
-    this.instanceService.getMoreInstanceHistory(this.groupParam,this.uuidParam,this.amount,this.currentOffset).subscribe((list:HistoryEntryDto[])=>{
-      this.unfilteredEntries = this.unfilteredEntries.concat(list);
-      this.filter();
-      this.loading = false;
-      if(list.length < this.amount){
-        this.loadedAll = true;
+      if(this.searchTerm == null){
+        this.instanceService.getMoreInstanceHistory(this.groupParam,this.uuidParam,this.amount,this.currentOffset).subscribe(e => this.saveHistory(e));
       }
-      this.currentOffset += this.amount
-    });
+      else{
+        this.instanceService.getFilteredHistory(this.groupParam,this.uuidParam,this.amount,this.currentOffset,this.searchTerm).subscribe(e => this.saveHistory(e));
+      }
     }
   }
 
-  onScrolledDown():void{
+  private saveHistory(list:HistoryEntryDto[]){
+    this.allEntries = this.allEntries.concat(list);
+    this.filter();
+    this.loading = false;
+    if(list.length < this.amount){
+      this.loadedAll = true;
+    }
+    this.currentOffset += this.amount
+  }
 
+  onScrolledDown():void{
     if(!this.loadedAll){
       this.loadMoreHistory();
     }
@@ -188,16 +194,31 @@ export class InstanceHistoryComponent implements OnInit{
         }
     });
   }
+
   isEmpty(object){
     return Object.keys(object).length == 0;
   }
 
   filter():void{
-    this.historyEntries = this.unfilteredEntries.filter(item => item.type==HistoryEntryType.CREATE && this.showCreate || item.type==HistoryEntryType.DEPLOYMENT && this.showDeployment || item.type==HistoryEntryType.RUNTIME && this.showRuntime);
+    this.historyEntries = this.allEntries.filter(item => item.type==HistoryEntryType.CREATE && this.showCreate || item.type==HistoryEntryType.DEPLOYMENT && this.showDeployment || item.type==HistoryEntryType.RUNTIME && this.showRuntime);
     setTimeout(()=>{
       if(!this.timeline.isOverflowing() && !this.loadedAll){
         this.loadMoreHistory();
       }
     },0);
+  }
+
+  search(filter:string){
+    this.loadedAll = false;
+    this.currentOffset = 0;
+    this.allEntries = [];
+    if(filter.trim() != ""){
+      this.searchTerm = filter;
+      this.loadMoreHistory();
+    }
+    else{
+      this.searchTerm = null;
+      this.loadHistory();
+    }
   }
 }

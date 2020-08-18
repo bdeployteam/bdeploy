@@ -210,4 +210,9 @@ public interface InstanceResource {
     @Path("/{instance}/compare-versions")
     public HistoryEntryVersionDto compareInstanceHistory(@ActivityScope @PathParam("instance") String instanceId,
             @QueryParam("a") int versionA, @QueryParam("b") int versionB);
+
+    @GET
+    @Path("{instance}/filter-history")
+    public List<HistoryEntryDto> filterInstanceHistory(@ActivityScope @PathParam("instance") String instanceId,
+            @QueryParam("amount") int amount, @QueryParam("offset") int offset, @QueryParam("filter") String filter);
 }

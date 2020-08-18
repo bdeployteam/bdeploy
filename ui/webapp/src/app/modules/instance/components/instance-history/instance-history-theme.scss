@@ -10,4 +10,45 @@
     background-color: if($dark,rgba(66,66,66),white);
     box-shadow: 0 4px 8px 0 if($dark,rgba(0,0,0,0.4),rgba(0,0,0,0.2)) !important;
   }
+
+  .search-history.searchbar{
+    position: relative;
+    display:flex;
+    align-items: flex-end;
+  }
+
+  .search-history .searchbar-line{
+    position:absolute;
+    bottom: 1px;
+    left:0;
+    right:10px;
+    height: 1px;
+    background-color: if($dark,rgb(255, 255, 255),rgba(0, 0, 0, 0.87));
+  }
+
+  .search-history .searchbar-input{
+    background: none;
+    border:none;
+    box-sizing: border-box;
+    font-size:0.8em;
+    margin-bottom: 7px;
+    margin-left: 5px;
+    color:inherit;
+  }
+
+  .search-history .searchbar-focus-line{
+    position:absolute;
+    bottom: 0;
+    height: 2px;
+    left:0;
+    right:10px;
+    background-color: if($dark,rgb(255, 255, 255),rgba(0, 0, 0, 0.87));
+    transform: scale(0);
+    transition: all 0.05s ease-out;
+  }
+
+  .search-history .searchbar-input:focus ~.searchbar-focus-line{
+    transition: all 0.1s ease;
+    transform: scale(1);
+  }
 }
