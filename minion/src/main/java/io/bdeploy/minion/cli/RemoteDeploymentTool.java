@@ -31,10 +31,10 @@ public class RemoteDeploymentTool extends RemoteServiceTool<RemoteDeployConfig> 
         @EnvironmentFallback("REMOTE_BHIVE")
         String instanceGroup();
 
-        @Help("UUID of the instance to manipulate")
+        @Help("UUID of the instance to manipulate or list")
         String uuid();
 
-        @Help("Tag of the instance to manipulate")
+        @Help("Tag of the instance to manipulate or list")
         String tag();
 
         @Help("Product tag to update to")
@@ -66,7 +66,7 @@ public class RemoteDeploymentTool extends RemoteServiceTool<RemoteDeployConfig> 
             MasterRootResource root = ResourceProvider.getResource(svc, MasterRootResource.class, null);
             MasterNamedResource master = root.getNamedMaster(config.instanceGroup());
             if (config.list()) {
-                list(master, commonRoot.getInstanceResource(config.instanceGroup()));
+                list(master, commonRoot.getInstanceResource(config.instanceGroup()), config.uuid(), config.tag());
                 return;
             } else if (config.updateTo() != null) {
                 helpAndFailIfMissing(config.uuid(), "Missing --uuid");
@@ -95,7 +95,7 @@ public class RemoteDeploymentTool extends RemoteServiceTool<RemoteDeployConfig> 
         }
     }
 
-    private void list(MasterNamedResource master, CommonInstanceResource common) {
+    private void list(MasterNamedResource master, CommonInstanceResource common, String filterUuid, String filterTag) {
         out().println(String.format(OUTPUT_FORMAT, "UUID", "Name", "Tag", "Installed", "Active", "Product", "Product Version",
                 "Description"));
 
@@ -106,6 +106,18 @@ public class RemoteDeploymentTool extends RemoteServiceTool<RemoteDeployConfig> 
                 return x;
             }
             return Long.compare(Long.parseLong(b.getKey().getTag()), Long.parseLong(a.getKey().getTag()));
+        }).filter(e -> {
+            if (filterUuid != null && !filterUuid.isBlank()) {
+                if (!filterUuid.equals(e.getValue().uuid)) {
+                    return false;
+                }
+            }
+            if (filterTag != null && !filterTag.isBlank()) {
+                if (!filterTag.equals(e.getKey().getTag())) {
+                    return false;
+                }
+            }
+            return true;
         }).forEachOrdered(e -> {
             String uuid = e.getValue().uuid;
             InstanceStateRecord state = stateCache.computeIfAbsent(uuid, master::getInstanceState);
