@@ -105,6 +105,9 @@ The *Data Files* dialog lists all files that are stored in the data directory of
 
 image::images/BDeploy_DataFiles_Browser.png[Data File Browser,align=center,width=480,link="images/BDeploy_DataFiles_Browser.png"]
 
+[TIP]
+The btn:[delete] button can be used to delete a file. This requires administrative permissions on the server or the instance group.
+
 When opened in place, the btn:[Follow] toggle allows to grab new output as it is written on the server.
 
 image::images/BDeploy_DataFiles_Show.png[Show Data File,align=center,width=480,link="images/BDeploy_DataFiles_Show.png"]

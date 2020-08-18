@@ -330,6 +330,16 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
     }
 
     @Override
+    public void deleteDataEntry(InstanceDirectoryEntry entry) {
+        Path actual = getEntryPath(entry);
+        try {
+            Files.delete(actual);
+        } catch (IOException e) {
+            throw new WebApplicationException("Could not delete data file " + entry.path, e);
+        }
+    }
+
+    @Override
     public Map<Integer, Boolean> getPortStates(List<Integer> ports) {
         Map<Integer, Boolean> result = new TreeMap<>();
 

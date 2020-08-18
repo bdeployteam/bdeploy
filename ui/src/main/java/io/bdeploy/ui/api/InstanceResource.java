@@ -180,6 +180,12 @@ public interface InstanceResource {
     public String getContentStreamRequest(@ActivityScope @PathParam("instance") String instanceId,
             @PathParam("minion") String minion, InstanceDirectoryEntry entry);
 
+    @POST
+    @Path("/{instance}/delete/{minion}")
+    @RequiredPermission(permission = Permission.ADMIN)
+    public void deleteDataFile(@ActivityScope @PathParam("instance") String instanceId, @PathParam("minion") String minion,
+            InstanceDirectoryEntry entry);
+
     @GET
     @Unsecured
     @Path("/{instance}/stream/{token}")

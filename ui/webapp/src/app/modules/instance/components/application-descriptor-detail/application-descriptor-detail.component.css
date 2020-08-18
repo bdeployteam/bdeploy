@@ -1,7 +1,7 @@
 .info-list {
   display: grid;
   grid-template-columns: auto auto;
-  grid-auto-rows: 30px;
+  grid-auto-rows: minmax(30px, auto);
 
   align-items: center;
 

@@ -90,6 +90,13 @@ public interface SlaveDeploymentResource {
     public Response getEntryStream(InstanceDirectoryEntry entry);
 
     /**
+     * @param entry the entry to delete from the data directory.
+     */
+    @POST
+    @Path("/dataDir/deleteEntry")
+    public void deleteDataEntry(InstanceDirectoryEntry entry);
+
+    /**
      * @param ports the ports to check whether they are open/used or not on the machine
      * @return a state for each port, true for 'used', false for 'free'.
      */
