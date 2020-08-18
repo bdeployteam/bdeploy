@@ -53,9 +53,14 @@
                 <td mat-cell *matCellDef="let entry" class="lastModified-column">{{formatLastModified(entry.lastModified)}}</td>
               </ng-container>
 
+              <ng-container matColumnDef="delete">
+                <th scope="col" mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let entry" align="right"><button mat-icon-button (click)="delete(instanceDirectory, entry)" [disabled]="!authService.isScopedAdmin(this.groupParam)"><mat-icon>delete</mat-icon></button></td>
+              </ng-container>
+
               <ng-container matColumnDef="download">
                 <th scope="col" mat-header-cell *matHeaderCellDef></th>
-                <td mat-cell *matCellDef="let entry" align="right"><mat-icon class="icon-column" (click)="download(instanceDirectory, entry)">cloud_download</mat-icon></td>
+                <td mat-cell *matCellDef="let entry" align="right"><button mat-icon-button (click)="download(instanceDirectory, entry)"><mat-icon>cloud_download</mat-icon></button></td>
               </ng-container>
 
               <tr mat-header-row *matHeaderRowDef='displayedColumns'></tr>

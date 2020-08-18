@@ -26,11 +26,6 @@
   width: 100%;
 }
 
-.icon-column {
-  min-width: 40px;
-  cursor: pointer;
-}
-
 .wide-column {
   width: 100%;
   cursor: pointer;

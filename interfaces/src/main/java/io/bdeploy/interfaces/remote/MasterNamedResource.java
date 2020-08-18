@@ -130,6 +130,14 @@ public interface MasterNamedResource {
     public Response getEntryStream(@QueryParam("m") String minion, InstanceDirectoryEntry entry);
 
     /**
+     * @param minion the minion the entry refers to.
+     * @param entry the actual entry to delete.
+     */
+    @POST
+    @Path("/deleteDataEntry")
+    public void deleteDataEntry(@QueryParam("m") String minion, InstanceDirectoryEntry entry);
+
+    /**
      * @param instanceId the deployment/instance uuid
      * @param application the application id
      * @return the applications configuration
@@ -268,4 +276,5 @@ public interface MasterNamedResource {
     @GET
     @Path("/runtimeHistory")
     public Map<String, MinionRuntimeHistoryDto> getRuntimeHistory(@QueryParam("u") String instanceId);
+
 }

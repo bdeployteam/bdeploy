@@ -8,7 +8,10 @@ import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { MatTabChangeEvent } from '@angular/material/tabs';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
+import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
+import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
+import { MessageboxService } from 'src/app/modules/shared/services/messagebox.service';
 import { InstanceConfiguration, InstanceDirectory, InstanceDirectoryEntry, StringEntryChunkDto } from '../../../../models/gen.dtos';
 import { DownloadService } from '../../../shared/services/download.service';
 import { InstanceService } from '../../services/instance.service';
@@ -37,7 +40,7 @@ export class DataFilesBrowserComponent implements OnInit {
   @ViewChild(MatSort)
   sort: MatSort;
 
-  public displayedColumns: string[] = ['icon', 'path', 'size', 'lastModified', 'download'];
+  public displayedColumns: string[] = ['icon', 'path', 'size', 'lastModified', 'delete', 'download'];
 
   public instanceVersion: InstanceConfiguration;
   public instanceDirectories: InstanceDirectory[];
@@ -57,7 +60,9 @@ export class DataFilesBrowserComponent implements OnInit {
     private instanceService: InstanceService,
     public location: Location,
     private dlService: DownloadService,
-    public routingHistoryService:RoutingHistoryService,
+    public routingHistoryService: RoutingHistoryService,
+    public authService: AuthenticationService,
+    private mbService: MessageboxService,
   ) {}
 
   public ngOnInit(): void {
@@ -97,6 +102,17 @@ export class DataFilesBrowserComponent implements OnInit {
   public download(instanceDirectory: InstanceDirectory, instanceDirectoryEntry: InstanceDirectoryEntry) {
     this.instanceService
       .downloadDataFileContent(this.groupParam, this.uuidParam, instanceDirectory, instanceDirectoryEntry);
+  }
+
+  public async delete(instanceDirectory: InstanceDirectory, instanceDirectoryEntry: InstanceDirectoryEntry) {
+    const confirm = await this.mbService.openAsync({title: 'Confirm Delete', message: `Really delete ${instanceDirectoryEntry.path}?`, mode: MessageBoxMode.CONFIRM_WARNING});
+    if (!confirm) {
+      return;
+    }
+    this.instanceService
+      .deleteDataFile(this.groupParam, this.uuidParam, instanceDirectory, instanceDirectoryEntry).subscribe(_ => {
+        this.reload();
+      });
   }
 
   private downloadFile(filename: string, data: string): void {

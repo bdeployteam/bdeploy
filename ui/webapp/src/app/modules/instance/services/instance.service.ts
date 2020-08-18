@@ -258,6 +258,12 @@ export class InstanceService {
     });
   }
 
+  public deleteDataFile(instanceGroupName: string, instanceName: string, id: InstanceDirectory, ide: InstanceDirectoryEntry) {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/delete/' + id.minion;
+    this.log.debug('deleteDataFile');
+    return this.http.post(url, ide);
+  }
+
   public createClickAndStartDescriptor(
     instanceGroupName: string,
     instanceName: string,

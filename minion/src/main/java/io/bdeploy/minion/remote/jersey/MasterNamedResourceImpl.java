@@ -667,6 +667,16 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
+    public void deleteDataEntry(String minion, InstanceDirectoryEntry entry) {
+        RemoteService svc = root.getMinions().getRemote(minion);
+        if (svc == null) {
+            throw new WebApplicationException("Cannot find minion " + minion, Status.NOT_FOUND);
+        }
+        SlaveDeploymentResource sdr = ResourceProvider.getVersionedResource(svc, SlaveDeploymentResource.class, context);
+        sdr.deleteDataEntry(entry);
+    }
+
+    @Override
     public ClientApplicationConfiguration getClientConfiguration(String uuid, String application) {
         String activeTag = getInstanceState(uuid).activeTag;
         if (activeTag == null) {
