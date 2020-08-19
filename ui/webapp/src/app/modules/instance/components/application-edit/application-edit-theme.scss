@@ -10,6 +10,7 @@
 
   .title-theme {
     background-color: $header-color !important;
+    @include mat-elevation-transition(0.3s, ease-in-out)
   }
 
   .mat-expansion-panel-header {

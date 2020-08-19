@@ -1,6 +1,6 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef, ViewContainerRef } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef, ViewContainerRef } from '@angular/core';
 import { FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatButton } from '@angular/material/button';
@@ -17,7 +17,7 @@ import { ParameterValidators } from '../../../shared/validators/parameter.valida
 import { ApplicationService } from '../../services/application.service';
 import { ApplicationEditCommandPreviewComponent } from '../application-edit-command-preview/application-edit-command-preview.component';
 import { ApplicationEditManualComponent, Context } from '../application-edit-manual/application-edit-manual.component';
-import { ApplicationEditOptionalComponent } from '../application-edit-optional/application-edit-optional.component';
+import { ApplicationEditOptionalComponent, EditOptionalData } from '../application-edit-optional/application-edit-optional.component';
 
 @Component({
   selector: 'app-application-edit',
@@ -63,6 +63,12 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
   /** All parameters that have been removed during a product upgrade / downgrade */
   public unknownParameters: UnknownParameter[];
 
+  /** whether the parameter search bar is visible */
+  public searchVisible = false;
+
+  /** the string searched for */
+  public searchString = '';
+
   constructor(
     public appService: ApplicationService,
     private matDialog: MatDialog,
@@ -70,6 +76,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     private viewContainerRef: ViewContainerRef,
     private messageBoxService: MessageboxService,
     private bottomSheet: MatBottomSheet,
+    private cdRef: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
@@ -534,7 +541,8 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     config.height = '60%';
     config.minWidth = '470px';
     config.minHeight = '550px';
-    config.data = cloneDeep(this.getOptionalParameters(groupName));
+    const data: EditOptionalData = { filter: this.searchString, parameters: cloneDeep(this.getOptionalParameters(groupName)) };
+    config.data = data;
     this.matDialog
       .open(ApplicationEditOptionalComponent, config)
       .afterClosed()
@@ -891,5 +899,45 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
 
   customValueConfirmed(param: LinkedParameter, value: any) {
     this.formGroup.controls[param.desc.uid].setValue(value);
+  }
+
+  matchesSearch(param: LinkedParameter): boolean {
+    if (!this.searchVisible || !this.searchString?.length) {
+      return true; // no search - it matches.
+    }
+
+    // add more on demand.
+    const searchIn = [ param?.desc?.name, param?.desc?.longDescription, param?.desc?.parameter ];
+
+    for (const item of searchIn) {
+      if (!item) {
+        continue;
+      }
+      if (item.toLowerCase().indexOf(this.searchString.toLowerCase()) >= 0) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  numberOfMatches(group: string, unrenderenOnly: boolean): number {
+    if (!this.searchVisible || !this.searchString?.length) {
+      return -1; // no search - no matches to highlight.
+    }
+    const params = this.getSearchableParametersOfGroup(group, unrenderenOnly);
+    const matched = params.filter(p => this.matchesSearch(p));
+    return matched.length;
+  }
+
+  /** Returns a list of all parameters referring to the given group */
+  getSearchableParametersOfGroup(groupName: string, unrenderenOnly: boolean) {
+    const params = Array.from(this.linkedDescriptors.values());
+    let filtered = params.filter(lp => lp.desc.groupName === groupName);
+
+    if (unrenderenOnly) {
+      filtered = filtered.filter(lp => !lp.rendered);
+    }
+
+    return filtered;
   }
 }

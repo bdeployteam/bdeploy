@@ -60,6 +60,7 @@ mat-form-field {
   margin-top: 0.5em;
   height: 2.5em;
   position: relative;
+  z-index: 5;
 }
 
 .title-toolbar {
@@ -126,4 +127,28 @@ mat-form-field {
   margin: 10px 5px;
   border-radius: 5px;
   padding: 10px;
+}
+
+.search-bar-up {
+  max-height: 0;
+  overflow-y: hidden;
+  transition: max-height 0.3s ease-in-out;
+}
+
+.search-bar-down {
+  max-height: 60px;
+  overflow-y: hidden;
+  transition: max-height 0.3s ease-in-out;
+}
+
+.search-title {
+  display: flex;
+  flex-direction: column;
+  padding-left: 30px;
+  padding-right: 40px;
+  position: relative;
+}
+
+.fake-badge-padding {
+  padding-left: 5px;
 }

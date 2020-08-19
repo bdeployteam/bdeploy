@@ -28,6 +28,9 @@ Behind each parameter there is a small popup that can contain a short descriptio
 
 *Validation Issues* are displayed per group in the respective title. Only complete configurations can be accepted.
 
+[TIP]
+You can use the _Search Bar_ in the _Parameter Settings_ header to search for and filter parameters. When searching only matching parameters are shown, groups without matches are hidden, and the _Manage Optional Parameters_ button will receive a badge indicating the number of matching _unconfigured_ parameters.
+
 The context menu on an application card allows you to copy an application definition. This can be pasted on any node of the correct type using the context menu on the according node when in *Configure Applications* mode.
 
 image::images/BDeploy_Paste_Application.png[Paste Application,align=center, width=480, link="images/BDeploy_Paste_Application.png"]

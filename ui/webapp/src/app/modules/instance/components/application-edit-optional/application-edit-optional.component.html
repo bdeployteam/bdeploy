@@ -4,7 +4,7 @@
     Select the optional parameters that should be added to the command line arguments of the application.
   </p>
   <mat-form-field>
-    <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Filter" />
+    <input #searchField matInput (keyup)="applyFilter($event.target.value)" placeholder="Filter" />
   </mat-form-field>
   <mat-dialog-content fxFlex class="mat-elevation-z2">
     <table mat-table [dataSource]="dataSource">
@@ -46,6 +46,6 @@
 
   <mat-dialog-actions class="actions">
     <button mat-button [mat-dialog-close]="false">Cancel</button>
-    <button mat-raised-button color="primary" [disabled]="!isDirty" [mat-dialog-close]="parameters">Save</button>
+    <button mat-raised-button color="primary" [disabled]="!isDirty" [mat-dialog-close]="data.parameters">Save</button>
   </mat-dialog-actions>
 </div>
