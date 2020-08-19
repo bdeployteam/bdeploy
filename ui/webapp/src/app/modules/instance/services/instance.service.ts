@@ -345,4 +345,17 @@ export class InstanceService {
     this.log.debug('getVersionComparison: ' + url);
     return this.http.get<HistoryEntryVersionDto>(url,{params:params});
   }
+
+  public getFilteredHistory(
+    instanceGroupName: string,
+    instanceId: string,
+    amount: Number,
+    offset: Number,
+    filter: string,
+  ): Observable<HistoryEntryDto[]> {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceId) + '/filter-history';
+    const params = new HttpParams().set("amount",amount.toString()).set("offset",offset.toString()).set("filter",filter);
+    this.log.debug('getFilteredHistory: ' + url);
+    return this.http.get<HistoryEntryDto[]>(url,{params:params});
+  }
 }

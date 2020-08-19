@@ -70,3 +70,11 @@ The *process ID* will also show up given that it was present at the *moment* the
 image::images/BDeploy_User_History_RuntimeHistory.png[Runtime events, align=center, width=480, link="images/BDeploy_User_History_RuntimeHistory.png"]
 
 
+==== Searching
+
+You can *search* for specific events with the *search-bar* on the top.
+
+After you entered your *search term* and hit *enter* or pressed the search *button* on the right,  +
+all cards of which the *title*, *user* or *PID* contain your term, will show up.
+
+To show everything again, *empty* the search bar first and then hit enter or press the search button.

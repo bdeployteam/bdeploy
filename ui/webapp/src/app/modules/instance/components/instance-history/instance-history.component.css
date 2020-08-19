@@ -28,6 +28,7 @@ mat-toolbar{
 
 .toolbar-title{
   font-weight:normal;
+  margin-right: 30px;
 }
 
 .close-all-button{
@@ -35,7 +36,7 @@ mat-toolbar{
 }
 
 .accordionBehaviour-button{
-  margin-left:40px;
+  margin-left:20px;
   font-size:smaller;
   font-weight: lighter;
 }
@@ -51,7 +52,7 @@ mat-toolbar{
 }
 
 .compare-versions{
-  margin-left: 10px;
+  margin-left: 15px;
   font-size:0.6em;
   height:64px;
   display:flex;
@@ -59,62 +60,98 @@ mat-toolbar{
   align-items: center;
 }
 
+.instance-history-comparison-dialog-screen{
+  position: absolute;
+  top:0;
+  right:0;
+  bottom:0;
+  left:0;
+  background-color: rgba(0,0,0,0.5);
+  z-index:3;
+}
+
 .instance-history-comparison-dialog{
   position:fixed;
-  padding: 20px 30px 10px 30px;
   top:50%;
   left:50%;
-  z-index:3;
   transform:translate(-50%,-50%);
 
-  border-radius: 5px;
+  line-height: 150%;
   box-sizing: border-box;
+  border-radius:5px;
 
-  max-height:95vh;
   overflow:auto;
+  min-width: 400px;
+}
 
-  min-width: 350px;
+.instance-history-comparison-dialog ul{
+  list-style: none;
+  padding-bottom: 5px;
+  padding-left: 30px;
+}
+
+.instance-history-comparison-dialog i{
+  font-style: italic;
+  font-weight: normal;
+}
+
+.instance-history-comparison-dialog em{
+  font-style: normal;
+  font-weight: 500;
 }
 
 .instance-history-comparison-dialog>ul{
-  margin-top: 10px;
-  padding:10px;
+  margin: 0;
+  padding:20px 30px;
+  padding-bottom: 10px;
   font-weight: lighter;
+  overflow-y:auto;
+  overflow-x:visible;
+  max-height: calc(95vh - 115px);
 }
 
-.instance-history-comparison-dialog>em{
+.instance-history-comparison-dialog-header{
+  position: relative;
+  padding: 20px 10px 5px 10px;
+}
+
+
+.instance-history-comparison-dialog-header>button{
+  margin-left: auto;
+  position:absolute;
+  right:0;
+  top:0;
+}
+
+.instance-history-comparison-dialog-header>em{
   display:block;
   width:100%;
   text-align: center;
 }
 
-.instance-history-comparison-dialog-header{
+.instance-history-comparison-dialog-values{
   display:flex;
   flex-direction: row;
   align-items: center;
-  position:relative;
   margin-top:10px;
 }
 
-.instance-history-comparison-dialog-header span{
+.instance-history-comparison-dialog-values span{
   margin: 0 10px;
 }
 
-.instance-history-comparison-dialog-header .version-left{
+.instance-history-comparison-dialog-values .version-left{
   margin-left: auto;
 }
 
-.instance-history-comparison-dialog-header .version-right{
+.instance-history-comparison-dialog-values .version-right{
   margin-right: auto;
-}
-
-.instance-history-comparison-dialog-header button{
-  margin-left: auto;
-  position:absolute;
-  right:-27px;
-  top:-47px;
 }
 
 .show-filter-button{
   margin-left:auto;
+}
+
+.search-history{
+  margin-left: 20px;
 }

@@ -91,14 +91,7 @@ public class InstanceHistoryManager {
             returnList = instanceHistory.subList(0, instanceHistory.size());
         }
 
-        for (HistoryEntryDto entry : returnList) {
-            if (HistoryEntryType.CREATE.equals(entry.type) && entry.version > 1) {
-                entry.content = versionDifferences(hive,
-                        InstanceManifest.load(hive, instanceId, String.valueOf(entry.version - 1)),
-                        InstanceManifest.load(hive, instanceId, String.valueOf(entry.version)));
-            }
-        }
-
+        computeNewVersions(hive, instanceId, returnList);
         return returnList;
 
     }
@@ -127,14 +120,7 @@ public class InstanceHistoryManager {
             return new ArrayList<>();
         }
 
-        for (HistoryEntryDto entry : returnList) {
-            if (HistoryEntryType.CREATE.equals(entry.type) && entry.version != 1) {
-                entry.content = versionDifferences(hive,
-                        InstanceManifest.load(hive, instanceId, String.valueOf(entry.version - 1)),
-                        InstanceManifest.load(hive, instanceId, String.valueOf(entry.version)));
-            }
-        }
-
+        computeNewVersions(hive, instanceId, returnList);
         return returnList;
     }
 
@@ -150,6 +136,35 @@ public class InstanceHistoryManager {
         InstanceManifest a = InstanceManifest.load(hive, instanceId, String.valueOf(versionA));
         InstanceManifest b = InstanceManifest.load(hive, instanceId, String.valueOf(versionB));
         return versionDifferences(hive, a, b);
+    }
+
+    public List<HistoryEntryDto> getFilteredInstanceHistory(BHive hive, String instanceId, String group, int amount, int offset,
+            String filter) {
+
+        List<HistoryEntryDto> cachedHistory = getCachedHistory(hive, instanceId, group);
+        List<HistoryEntryDto> filteredHistory = new ArrayList<>();
+
+        int size = offset + amount;
+        filter = filter.trim().toUpperCase();
+
+        for (int i = 0; i < cachedHistory.size() && filteredHistory.size() < size; i++) {
+            HistoryEntryDto item = cachedHistory.get(i);
+            if (item.title.toUpperCase().contains(filter) || item.user != null && item.user.toUpperCase().contains(filter)) {
+                filteredHistory.add(item);
+            } else if (item.runtimeEvent != null && item.runtimeEvent.pid != null && item.runtimeEvent.pid.contains(filter)) {
+                filteredHistory.add(item);
+            }
+        }
+
+        if (offset >= filteredHistory.size()) {
+            return new ArrayList<>();
+        }
+
+        Collections.sort(filteredHistory, (a, b) -> Long.compare(a.timestamp, b.timestamp) * -1);
+        filteredHistory = filteredHistory.subList(offset, filteredHistory.size());
+        computeNewVersions(hive, instanceId, filteredHistory);
+
+        return filteredHistory;
     }
 
     private List<HistoryEntryDto> getCachedHistory(BHive hive, String instanceId, String group) {
@@ -254,6 +269,18 @@ public class InstanceHistoryManager {
         }
     }
 
+    private void computeNewVersions(BHive hive, String instanceId, List<HistoryEntryDto> entries) {
+        for (HistoryEntryDto entry : entries) {
+            if (entry.type == HistoryEntryType.CREATE) {
+                if (entry.version > 1) {
+                    entry.content = versionDifferences(hive,
+                            InstanceManifest.load(hive, instanceId, String.valueOf(entry.version - 1)),
+                            InstanceManifest.load(hive, instanceId, String.valueOf(entry.version)));
+                }
+            }
+        }
+    }
+
     // load the runtime history
     private List<HistoryEntryDto> loadRuntimeHistory(BHive hive, String instanceId, String group) {
         List<HistoryEntryDto> content = new ArrayList<>();
@@ -296,6 +323,10 @@ public class InstanceHistoryManager {
         }
     }
 
+    private boolean strNotEqual(String a, String b) {
+        return a != null && !a.equals(b);
+    }
+
     // compute differences between two versions
     private HistoryEntryVersionDto versionDifferences(BHive hive, InstanceManifest oldManifest, InstanceManifest newManifest) {
         HistoryEntryVersionDto content = new HistoryEntryVersionDto();
@@ -312,13 +343,13 @@ public class InstanceHistoryManager {
             content.properties.put("Auto-uninstall",
                     new String[] { String.valueOf(oldConfig.autoUninstall), String.valueOf(newConfig.autoUninstall) });
         }
-        if (oldConfig.description != null && !oldConfig.description.equals(newConfig.description)) {
+        if (strNotEqual(oldConfig.description, newConfig.description)) {
             content.properties.put("Description", new String[] { oldConfig.description, newConfig.description });
         }
-        if (oldConfig.name != null && !oldConfig.name.equals(newConfig.name)) {
+        if (strNotEqual(oldConfig.name, newConfig.name)) {
             content.properties.put("Name", new String[] { oldConfig.name, newConfig.name });
         }
-        if (oldConfig.purpose != null && !oldConfig.purpose.toString().equals(newConfig.purpose.toString())) {
+        if (oldConfig.purpose != null && !oldConfig.purpose.equals(newConfig.purpose)) {
             content.properties.put("Purpose", new String[] { oldConfig.purpose.name(), newConfig.purpose.name() });
         }
         if (oldConfig.product != null && !oldConfig.product.getTag().equals(newConfig.product.getTag())) {
@@ -601,10 +632,10 @@ public class InstanceHistoryManager {
 
     private void compareApplicationProperties(HistoryEntryApplicationDto content, ApplicationConfiguration oldConfig,
             ApplicationConfiguration newConfig) {
-        if (oldConfig.name != null && !oldConfig.name.equals(newConfig.name)) {
+        if (strNotEqual(oldConfig.name, newConfig.name)) {
             content.properties.put("Name", new String[] { oldConfig.name, newConfig.name });
         }
-        if (oldConfig.start.executable != null && !oldConfig.start.executable.equals(newConfig.start.executable)) {
+        if (strNotEqual(oldConfig.start.executable, newConfig.start.executable)) {
             content.properties.put("Executable path", new String[] { oldConfig.start.executable, newConfig.start.executable });
         }
 
@@ -759,26 +790,26 @@ public class InstanceHistoryManager {
 
         // test for differences in http endpoint properties
 
-        if (oldEndpoint.authPass != null && !oldEndpoint.authPass.equals(newEndpoint.authPass)) {
+        if (strNotEqual(oldEndpoint.authPass, newEndpoint.authPass)) {
             content.properties.put("Authentication password", null);
         }
-        if (oldEndpoint.authUser != null && !oldEndpoint.authUser.equals(newEndpoint.authUser)) {
+        if (strNotEqual(oldEndpoint.authUser, newEndpoint.authUser)) {
             content.properties.put("User", new String[] { oldEndpoint.authUser, newEndpoint.authUser });
         }
         if (oldEndpoint.authType != newEndpoint.authType) {
             content.properties.put("Authentication type",
                     new String[] { oldEndpoint.authType.name(), newEndpoint.authType.name() });
         }
-        if (oldEndpoint.path != null && !oldEndpoint.path.equals(newEndpoint.path)) {
-            content.properties.put("Path", new String[] { oldEndpoint.authUser, newEndpoint.authUser });
+        if (strNotEqual(oldEndpoint.path, newEndpoint.path)) {
+            content.properties.put("Path", new String[] { oldEndpoint.path, newEndpoint.path });
         }
-        if (oldEndpoint.port != null && !oldEndpoint.port.equals(newEndpoint.port)) {
-            content.properties.put("Port", new String[] { oldEndpoint.authUser, newEndpoint.authUser });
+        if (strNotEqual(oldEndpoint.port, newEndpoint.port)) {
+            content.properties.put("Port", new String[] { oldEndpoint.port, newEndpoint.port });
         }
-        if (oldEndpoint.trustStore != null && !oldEndpoint.trustStore.equals(newEndpoint.trustStore)) {
-            content.properties.put("Trust-store path", new String[] { oldEndpoint.authUser, newEndpoint.authUser });
+        if (strNotEqual(oldEndpoint.trustStore, newEndpoint.trustStore)) {
+            content.properties.put("Trust-store path", new String[] { oldEndpoint.trustStore, newEndpoint.trustStore });
         }
-        if (oldEndpoint.trustStorePass != null && !oldEndpoint.trustStorePass.equals(newEndpoint.trustStorePass)) {
+        if (strNotEqual(oldEndpoint.trustStorePass, newEndpoint.trustStorePass)) {
             content.properties.put("Trust-store password", null);
         }
 
