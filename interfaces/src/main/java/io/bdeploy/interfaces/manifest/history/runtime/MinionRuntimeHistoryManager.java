@@ -19,7 +19,14 @@ public class MinionRuntimeHistoryManager {
         return readOrCreate();
     }
 
-    public void record(String processId, ProcessState action, String applicationId, String user) {
+    /**
+     * Records a single state change event.
+     * <p>
+     * The method is synchronized, since the same instance of the {@link MinionRuntimeHistoryManager} is used for process
+     * controllers. In case a process crashes and is immediately restarted (for instance) events may occur so fast on different
+     * threads for the same application, that a key conflict can occur during recording.
+     */
+    public synchronized void record(String processId, ProcessState action, String applicationId, String user) {
         store(readOrCreate().record(new MinionRuntimeHistoryRecord(processId, action, user, System.currentTimeMillis()),
                 applicationId));
     }
