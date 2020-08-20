@@ -138,7 +138,7 @@ void createServerTasks(String name, String root, int port) {
         setupBDeployEnv(it, root)
         main = project(":minion").mainClassName
         classpath = project(":minion").sourceSets.main.runtimeClasspath
-        args = [ "master" ]
+        args = [ "master", "--allowCors" ]
         waitForPort = port
         stopAfter = triggerStopBDeploy
     }
