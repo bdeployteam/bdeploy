@@ -1,6 +1,6 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
-import { ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef, ViewContainerRef } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef, ViewContainerRef } from '@angular/core';
 import { FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatButton } from '@angular/material/button';
@@ -76,7 +76,6 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     private viewContainerRef: ViewContainerRef,
     private messageBoxService: MessageboxService,
     private bottomSheet: MatBottomSheet,
-    private cdRef: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
