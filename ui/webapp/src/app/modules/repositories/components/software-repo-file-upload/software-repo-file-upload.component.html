@@ -1,0 +1,83 @@
+<div class="dialog" appFileDrop (filesDropped)="addFiles($event)">
+  <h1 mat-dialog-title>Upload Software Packages</h1>
+  <p>Upload software packages into this software repository. The selected archive may contain any new software package or a new version of an existing software package.</p>
+  <div class="dropZone">
+      <mat-icon class="dropZoneIcon">cloud_upload</mat-icon>
+      <span class="dropZoneText">Drop files to upload, or&nbsp;</span>
+      <button [disabled]="uploading" (click)="file.click()" class="browseButton">browse.</button>
+      <input type="file" #file style="display: none" (change)="addFiles(file.files); file.value = ''" accept=".zip"  multiple />
+  </div>
+
+  <mat-dialog-content>
+    <div class="file-table">
+      <div class="flexRow table-header">
+        <div class="status">Status</div> <div class="hive" matTooltip="This package is already a hive">Hive</div>
+        <div class="file-name">File Name</div><div class="progress">Progress</div><div class="action"></div>
+      </div>
+
+      <div class="table-item" *ngFor="let file of files; index as i">
+        <div class="flexRow file-info">
+          <div class="status">
+            <mat-icon *ngIf="hasState(file,uploadState.FINISHED)">cloud_done</mat-icon>
+            <mat-icon *ngIf="hasState(file,uploadState.FAILED)">error</mat-icon>
+            <mat-icon *ngIf="fileInProgress(file)">cloud_queue</mat-icon>
+            <mat-icon *ngIf="fileInQueue(file)">cloud_upload</mat-icon>
+          </div>
+
+          <div class="hive">
+            <mat-checkbox [(ngModel)]="fileData[i].hive" [checked]="fileData[i].hive"></mat-checkbox>
+          </div>
+
+          <div class="file-name"><span>{{file.name}}</span></div>
+
+          <div class="progress">
+            <ng-container *ngIf="hasState(file, uploadState.UPLOADING)">
+              <span>Uploading...</span>
+              <mat-progress-bar mode="determinate" [value]="getUploadProgress(file) | async"></mat-progress-bar>
+            </ng-container>
+            <ng-container *ngIf="hasState(file,uploadState.PROCESSING)">
+              <span *ngIf='!getUploadStatus(file).processingHint'>Processing...</span>
+              <span *ngIf='getUploadStatus(file).processingHint'>{{getUploadStatus(file).processingHint}}</span>
+              <mat-progress-bar *ngIf="(file)" mode="indeterminate"></mat-progress-bar>
+            </ng-container>
+              <ng-container *ngIf="hasState(file,uploadState.FINISHED)">
+                <span class="uploadSuccessful"> {{getResultDetails(file)}} </span>
+            </ng-container>
+            <ng-container *ngIf="hasState(file,uploadState.FAILED)">
+                <span class="uploadError"> {{getResultDetails(file)}} </span>
+            </ng-container>
+          </div>
+
+          <div class="action">
+            <div *ngIf="!fileInProgress(file)">
+              <button mat-icon-button (click)="removeFile(file)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="flexRow file-data" *ngIf="!fileData[i].hive">
+          <div class="package-name">
+            <span class="package-label" >Manifest name</span>
+            <span contenteditable="" [innerHTML]="fileData[i].name" (blur)="fileData[i].name = $event.target.innerHTML"></span>
+          </div>
+          <div class="package-tag">
+            <span class="package-label">Version</span>
+            <span contenteditable="" [innerHTML]="fileData[i].tag" (blur)="fileData[i].tag = $event.target.innerHTML"></span>
+          </div>
+          <div class="package-os">
+            <span class="package-label">Supported OS</span>
+            <mat-button-toggle-group multiple>
+              <mat-button-toggle *ngFor="let os of operatingSystems" [checked]="fileData[i].supportedOS.get(os)" (click)="fileData[i].supportedOS.set(os,!fileData[i].supportedOS.get(os))"><mat-icon [svgIcon]="os"></mat-icon></mat-button-toggle>
+            </mat-button-toggle-group>
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="actions">
+    <button mat-button mat-dialog-close [disabled]="!cancelEnabled">Cancel</button>
+    <button mat-raised-button color="primary" [disabled]="!uploadEnabled" (click)="onOkButtonPressed()">{{buttonText}}</button>
+  </mat-dialog-actions>
+</div>

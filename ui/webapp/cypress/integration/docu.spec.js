@@ -448,8 +448,21 @@ describe('Creates screenshots for the user documentation', () => {
         filePath: 'external-software-hive.zip',
         mimeType: 'application/zip',
       });
+      cy.get(".hive mat-checkbox").click();
+      cy.get('input[type=file]').attachFile({
+        filePath: 'external-software-2-raw-direct.zip',
+        mimeType: 'application/zip',
+      });
+      cy.get(".package-name span[contenteditable]").type("external/software-2");
+      cy.get(".package-tag span[contenteditable]").type("1.0.0");
+      cy.get('.package-os mat-icon[ng-reflect-svg-icon="WINDOWS"]').click();
+      cy.get('.package-os mat-icon[ng-reflect-svg-icon="LINUX"]').click();
+      cy.get('.package-os mat-icon[ng-reflect-svg-icon="MACOS"]').click();
+
+      cy.screenshot('BDeploy_SWRepo_Upload');
+
       cy.contains('button', 'Upload').click();
-      cy.get('td:contains("Upload successful")').should('have.length', 1);
+      cy.contains("Upload successful").should('have.length', 1);
       cy.contains('button', 'Close').click();
     });
 

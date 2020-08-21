@@ -3,6 +3,7 @@ package io.bdeploy.ui.api.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -19,17 +20,20 @@ import javax.ws.rs.core.UriBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.CopyOperation;
+import io.bdeploy.bhive.op.ImportOperation;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestExistsOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ObjectListOperation;
 import io.bdeploy.bhive.op.ObjectSizeOperation;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.common.util.UuidHelper;
@@ -164,4 +168,32 @@ public class SoftwareResourceImpl implements SoftwareResource {
         }
     }
 
+    @Override
+    public List<Key> uploadRawContent(InputStream inputStream, String manifestName, String manifestTag, String supportedOS) {
+        List<Key> result = new ArrayList<>();
+
+        String tmpRawContent = UuidHelper.randomId() + ".zip";
+        Path targetFile = minion.getDownloadDir().resolve(tmpRawContent);
+        try {
+            Files.copy(inputStream, targetFile);
+
+            try (FileSystem zfs = PathHelper.openZip(targetFile)) {
+                Path zroot = zfs.getPath("/");
+                for (String os : supportedOS.split(",")) {
+                    ScopedManifestKey key = new ScopedManifestKey(manifestName, OperatingSystem.valueOf(os), manifestTag);
+
+                    SortedSet<Manifest.Key> existing = hive.execute(new ManifestListOperation());
+                    if (!existing.contains(key.getKey())) {
+                        hive.execute(new ImportOperation().setSourcePath(zroot).setManifest(key.getKey()));
+                        result.add(key.getKey());
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new WebApplicationException("Failed to upload file: " + e.getMessage(), Status.BAD_REQUEST);
+        } finally {
+            PathHelper.deleteRecursive(targetFile);
+        }
+        return result;
+    }
 }

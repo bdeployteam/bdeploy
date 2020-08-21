@@ -29,9 +29,22 @@ The *Software Repositories* page allows maintenance of external software that a 
 
 image::images/BDeploy_SWRepos.png[Software Repositories,align=center,width=480,link="images/BDeploy_SWRepos.png"]
 
-The available software packages can be viewed and downloaded if required. Please note that uploading a new software package requires a special data structure. Simply uploading an arbitrary ZIP file is not working as the required *Metadata* is missing.
+==== Upload software
+
+To upload external software, open a software repository and click on the upload button on the bottom right. +
+Then click on *browse* or *drop files*. You can only upload zip packages.
+
+After selecting files, specify the shown *name* of the software, the *version* and the supported *operating systems*. +
+If you already have a package in a hive structure containing all of this metadata, enable *_hive_*.  
+
+image::images/BDeploy_SWRepo_Upload.png[External Software Upload,align=center,width=480,link="images/BDeploy_SWRepo_Upload.png"]
+
+If the upload was succesful, you can *close* the upload dialog and the software for each operating system will show up.
 
 image::images/BDeploy_SWRepo_Ext_Software.png[Software Repository with External Software,align=center,width=480,link="images/BDeploy_SWRepo_Ext_Software.png"]
+
+The available software packages can be viewed and *downloaded* if required. 
+
 image::images/BDeploy_SWRepo_Ext_Software_Details.png[Software Details,align=center,width=480,link="images/BDeploy_SWRepo_Ext_Software_Details.png"]
 
 ==== Software Repositories Access

@@ -1,23 +1,21 @@
 import { Location } from '@angular/common';
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { MediaChange, MediaObserver } from '@angular/flex-layout';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatDrawer } from '@angular/material/sidenav';
 import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { ManifestKey } from '../../../../models/gen.dtos';
 import { Logger, LoggingService } from '../../../core/services/logging.service';
-import { FileUploadComponent } from '../../../shared/components/file-upload/file-upload.component';
 import { SoftwareService } from '../../services/software.service';
+import { SoftwareRepoFileUploadComponent } from '../software-repo-file-upload/software-repo-file-upload.component';
 
 @Component({
   selector: 'app-software-repository',
   templateUrl: './software-repository.component.html',
   styleUrls: ['./software-repository.component.css']
 })
-export class SoftwareRepositoryComponent implements OnInit, OnDestroy {
+export class SoftwareRepositoryComponent implements OnInit {
 
   private log: Logger = this.loggingService.getLogger('SoftwareRepositoryComponent');
 
@@ -30,14 +28,9 @@ export class SoftwareRepositoryComponent implements OnInit, OnDestroy {
   public get softwarePackageNames(): string[] {return Array.from(this.softwarePackages.keys()); }
   public selectedSoftwarePackageName: string;
 
-  private subscription: Subscription;
-  private grid = new Map([['xs', 1], ['sm', 1], ['md', 2], ['lg', 3], ['xl', 5]]);
-
   loading = false;
-  columns = 3; // calculated number of columns
 
   constructor(
-    private mediaObserver: MediaObserver,
     private route: ActivatedRoute,
     private loggingService: LoggingService,
     public location: Location,
@@ -48,9 +41,6 @@ export class SoftwareRepositoryComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
-    this.subscription = this.mediaObserver.media$.subscribe((change: MediaChange) => {
-      this.columns = this.grid.get(change.mqAlias);
-    });
     this.loadSoftwares();
   }
 
@@ -74,10 +64,6 @@ export class SoftwareRepositoryComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
-  }
-
   public versionDeleted(): void {
     this.loadSoftwares();
   }
@@ -90,21 +76,11 @@ export class SoftwareRepositoryComponent implements OnInit, OnDestroy {
   openUploadDialog() {
     const config = new MatDialogConfig();
     config.width = '70%';
-    config.height = '75%';
+    config.height = '80%';
     config.minWidth = '650px';
     config.minHeight = '550px';
-    config.data = {
-      title: 'Upload Software Packages',
-      headerMessage: 'Upload software packages into this software repository. The selected archive may contain any new software package or a new version of an existing software package.',
-      url: this.softwareService.getSoftwareUploadUrl(this.softwareRepositoryName),
-      fileTypes: ['.zip'],
-    };
-    this.dialog
-      .open(FileUploadComponent, config)
-      .afterClosed()
-      .subscribe(e => {
-        this.loadSoftwares();
-      });
+    config.data = this.softwareRepositoryName
+    this.dialog.open(SoftwareRepoFileUploadComponent,config).afterClosed().subscribe(e=>this.loadSoftwares());
   }
 
   public isReadOnly(): boolean {

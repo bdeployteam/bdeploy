@@ -53,6 +53,10 @@ export class SoftwareService {
     return this.buildSoftwareUrl(softwareRepositoryName) + '/upload';
   }
 
+  public getSoftwareUploadRaw(softwareRepositoryName: string): string{
+    return this.buildSoftwareUrl(softwareRepositoryName) + '/upload-raw-content';
+  }
+
   private buildSoftwareUrl(softwareRepositoryName: string): string {
     return this.cfg.config.api + SoftwareRepositoryService.BASEPATH + '/' + softwareRepositoryName + '/content';
   }

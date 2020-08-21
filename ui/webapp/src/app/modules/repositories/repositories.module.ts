@@ -10,6 +10,7 @@ import { SoftwareRepositoryCardComponent } from './components/software-repositor
 import { SoftwareRepositoryPermissionsComponent } from './components/software-repository-permissions/software-repository-permissions.component';
 import { SoftwareRepositoryComponent } from './components/software-repository/software-repository.component';
 import { RepositoriesRoutingModule } from './repositories-routing.module';
+import { SoftwareRepoFileUploadComponent } from './components/software-repo-file-upload/software-repo-file-upload.component';
 
 
 
@@ -22,6 +23,7 @@ import { RepositoriesRoutingModule } from './repositories-routing.module';
     SoftwareRepoAddEditComponent,
     SoftwareCardComponent,
     SoftwareListComponent,
+    SoftwareRepoFileUploadComponent,
   ],
   imports: [
     CommonModule,

@@ -69,6 +69,7 @@ task updateFixtureProducts(type: Copy) {
     from prj.product1Zip.outputs
     from prj.product2Zip.outputs
     from prj.externalSoftwareZip.outputs
+    from prj.externalSoftware2Zip.outputs
 
     into "${webappDir}/cypress/fixtures"
 

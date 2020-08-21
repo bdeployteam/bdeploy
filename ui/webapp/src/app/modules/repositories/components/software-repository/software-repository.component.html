@@ -25,11 +25,9 @@
               <span class="headerText">No software packages.</span>
             <p>
           </div>
-          <mat-grid-list cols="{{columns}}" rowHeight="220px" gutterSize="10px">
-            <mat-grid-tile *ngFor="let softwarePackageName of softwarePackageNames">
-              <app-software-card [softwareRepositoryName]="softwareRepositoryName" [softwarePackageName]="softwarePackageName" [softwarePackageVersions]='softwarePackages.get(softwarePackageName)' (select)="openSoftwarePackage(softwarePackageName)"></app-software-card>
-            </mat-grid-tile>
-          </mat-grid-list>
+          <div class="software-repo-package-wrapper">
+            <app-software-card *ngFor="let softwarePackageName of softwarePackageNames" [softwareRepositoryName]="softwareRepositoryName" [softwarePackageName]="softwarePackageName" [softwarePackageVersions]='softwarePackages.get(softwarePackageName)' (select)="openSoftwarePackage(softwarePackageName)"></app-software-card>
+          </div>
         </div>
         <button mat-fab class="add-button" (click)="openUploadDialog()" [disabled]="isReadOnly()" matTooltip="Upload Software Packages" matTooltipShowDelay="1000"><mat-icon>cloud_upload</mat-icon></button>
       </mat-drawer-content>

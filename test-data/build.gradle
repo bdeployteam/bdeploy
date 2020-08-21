@@ -188,6 +188,7 @@ task externalSoftwareZip(type: Zip, dependsOn: [externalSoftwareWindows, externa
 createProductTasks("product1Zip", "test-product-1")
 createProductTasks("product2Zip", "test-product-2")
 createProductTasks("product3Zip", "chat-product-1")
+createProductTasks("externalSoftware2Zip","external-software-2-raw")
 
 // now the tasks for binary (upgrade) tests
 task releaseTest() {
