@@ -24,6 +24,9 @@ public class RemoteInstanceGroupTool extends RemoteServiceTool<RemoteInstanceGro
         @Help("Instance Group (and named BHive) to create. Short file-system suitable name.")
         String create();
 
+        @Help("Instance Group display name to be set on creation.")
+        String title();
+
         @Help("Description of the customer")
         String description();
 
@@ -51,14 +54,15 @@ public class RemoteInstanceGroupTool extends RemoteServiceTool<RemoteInstanceGro
             InstanceGroupConfiguration desc = new InstanceGroupConfiguration();
             desc.name = config.create();
             desc.description = config.description();
+            desc.title = config.title();
 
             client.addInstanceGroup(desc, config.storage());
         } else if (config.list()) {
-            out().println(String.format(LIST_FORMAT, "Name", "Ins. Count", "Description"));
+            out().println(String.format(LIST_FORMAT, "Name", "Title", "Ins. Count", "Description"));
             for (InstanceGroupConfiguration cfg : client.getInstanceGroups()) {
                 SortedMap<Manifest.Key, InstanceConfiguration> ics = client.getInstanceResource(cfg.name)
                         .listInstanceConfigurations(true);
-                out().println(String.format(LIST_FORMAT, cfg.name, ics.size(), cfg.description));
+                out().println(String.format(LIST_FORMAT, cfg.name, cfg.title, ics.size(), cfg.description));
             }
         } else if (config.delete() != null) {
             // don't use out() here, really make sure the warning appears on screen.
