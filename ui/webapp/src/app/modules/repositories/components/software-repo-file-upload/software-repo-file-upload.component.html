@@ -56,17 +56,19 @@
             </div>
           </div>
         </div>
-        <div class="flexRow file-data" *ngIf="!fileData[i].hive">
+        <div class="flexRow file-info" *ngIf="!fileData[i].hive">
           <div class="package-name">
-            <span class="package-label" >Manifest name</span>
-            <span contenteditable="" [innerHTML]="fileData[i].name" (blur)="fileData[i].name = $event.target.innerHTML"></span>
+            <mat-form-field class='inline-form-field'>
+              <input matInput required placeholder='Manifest Name' [(ngModel)]='fileData[i].name'>
+            </mat-form-field>
           </div>
           <div class="package-tag">
-            <span class="package-label">Version</span>
-            <span contenteditable="" [innerHTML]="fileData[i].tag" (blur)="fileData[i].tag = $event.target.innerHTML"></span>
+            <mat-form-field class='inline-form-field'>
+              <input matInput required placeholder='Version' [(ngModel)]='fileData[i].tag'>
+            </mat-form-field>
           </div>
           <div class="package-os">
-            <span class="package-label">Supported OS</span>
+            <span class="package-label">Supported OS *</span>
             <mat-button-toggle-group multiple>
               <mat-button-toggle *ngFor="let os of operatingSystems" [checked]="fileData[i].supportedOS.get(os)" (click)="fileData[i].supportedOS.set(os,!fileData[i].supportedOS.get(os))"><mat-icon [svgIcon]="os"></mat-icon></mat-button-toggle>
             </mat-button-toggle-group>
@@ -78,6 +80,6 @@
 
   <mat-dialog-actions class="actions">
     <button mat-button mat-dialog-close [disabled]="!cancelEnabled">Cancel</button>
-    <button mat-raised-button color="primary" [disabled]="!uploadEnabled" (click)="onOkButtonPressed()">{{buttonText}}</button>
+    <button mat-raised-button color="primary" [disabled]="!isAllInfoFilled() || !uploadEnabled" (click)="onOkButtonPressed()">{{buttonText}}</button>
   </mat-dialog-actions>
 </div>

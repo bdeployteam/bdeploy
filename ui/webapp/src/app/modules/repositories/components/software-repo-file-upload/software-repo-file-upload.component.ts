@@ -8,11 +8,12 @@ import { ActivitySnapshotTreeNode, RemoteEventsService } from 'src/app/modules/s
 import { UploadService, UploadState, UploadStatus, UrlParameter } from 'src/app/modules/shared/services/upload.service';
 import { SoftwareService } from '../../services/software.service';
 
-const operatingSystems:OperatingSystem[] = [
+const ALL_OS:OperatingSystem[] = [
   OperatingSystem.WINDOWS,
   OperatingSystem.LINUX,
-  OperatingSystem.MACOS,
-  OperatingSystem.AIX
+  // currently unsupported, or support hidden.
+  // OperatingSystem.MACOS,
+  // OperatingSystem.AIX
 ]
 
 class RepositoryUploadData{
@@ -21,7 +22,7 @@ class RepositoryUploadData{
   public tag:string = "";
   public supportedOS = new Map<OperatingSystem,boolean>();
   constructor(){
-    for(let os of operatingSystems){
+    for(let os of ALL_OS){
       this.supportedOS.set(os,false);
     }
   }
@@ -53,7 +54,7 @@ export class SoftwareRepoFileUploadComponent implements OnInit {
   public fileData:RepositoryUploadData[] = [];
   public files: File[] = [];
 
-  public operatingSystems = operatingSystems;
+  public operatingSystems = ALL_OS;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public repositoryName: string,
@@ -179,27 +180,12 @@ export class SoftwareRepoFileUploadComponent implements OnInit {
         continue;
       }
 
-      if(data.name == ""){
-        this.log.errorWithGuiMessage("insert a manifest name for " + this.files[i].name);
-        return;
-      }
-      if(data.tag == ""){
-        this.log.errorWithGuiMessage("insert a version for " + this.files[i].name);
-        return;
-      }
-
       let os:OperatingSystem[] = [];
       for(let [key,value] of data.supportedOS.entries()) {
         value && os.push(key);
       }
 
-      if(os.length == 0){
-        this.log.errorWithGuiMessage("select at least one operating system for " + this.files[i].name);
-        return;
-      }
-
       rawPackages.push(this.files[i]);
-      console.log(os);
       manifestParameter.push([
         {id: "name",type:"string",name:"manifest name",value:data.name},
         {id: "tag",type:"string",name:"manifest tag",value:data.tag},
@@ -317,5 +303,23 @@ export class SoftwareRepoFileUploadComponent implements OnInit {
     this.files.splice(idx, 1);
     this.uploadEnabled = this.files.length > 0;
     this.dialogRef.disableClose = this.files.length > 0;
+  }
+
+  isAllInfoFilled(): boolean {
+    for(const data of this.fileData) {
+      if(!data.hive) {
+        if(!data.name?.length || !data.tag?.length) {
+          return false;
+        }
+        let os:OperatingSystem[] = [];
+        for(let [key,value] of data.supportedOS.entries()) {
+          value && os.push(key);
+        }
+        if(os.length == 0){
+          return false;
+        }
+      }
+    }
+    return true;
   }
 }

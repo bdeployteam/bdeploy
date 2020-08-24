@@ -453,11 +453,10 @@ describe('Creates screenshots for the user documentation', () => {
         filePath: 'external-software-2-raw-direct.zip',
         mimeType: 'application/zip',
       });
-      cy.get(".package-name span[contenteditable]").type("external/software-2");
-      cy.get(".package-tag span[contenteditable]").type("1.0.0");
+      cy.get('input[data-placeholder="Manifest Name"]').type("external/software-2");
+      cy.get('input[data-placeholder="Version"]').type("1.0.0");
       cy.get('.package-os mat-icon[ng-reflect-svg-icon="WINDOWS"]').click();
       cy.get('.package-os mat-icon[ng-reflect-svg-icon="LINUX"]').click();
-      cy.get('.package-os mat-icon[ng-reflect-svg-icon="MACOS"]').click();
 
       cy.screenshot('BDeploy_SWRepo_Upload');
 

@@ -36,7 +36,7 @@ mat-dialog-content{
 .flexRow{
   display:flex;
   flex-direction: row;
-  height: 56px;
+  height: 65px;
 }
 
 .flexRow>div{
@@ -100,7 +100,8 @@ mat-dialog-content{
   flex-direction: column !important;
   justify-content: center;
   min-width:200px;
-  flex-shrink: 1;
+  flex-grow: 1;
+  align-items :inherit !important;
   padding-left: 24px !important;
 }
 
@@ -147,4 +148,9 @@ mat-dialog-content{
 
 mat-dialog-actions{
   justify-content: flex-end;
+}
+
+.inline-form-field {
+  margin-bottom: -15px;
+  overflow-y: hidden;
 }
