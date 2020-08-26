@@ -257,7 +257,7 @@ public class InstanceHistoryManager {
         }
         if (userInfo != null) {
             if (userInfo.email != null && !userInfo.email.isBlank()) {
-                userInfo.email = userInfo.email;
+                entry.email = userInfo.email;
             }
             if (userInfo.fullName != null && !userInfo.fullName.isBlank()) {
                 entry.user = userInfo.fullName;

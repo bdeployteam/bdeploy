@@ -51,26 +51,26 @@
     <mat-divider></mat-divider>
     <ul *ngIf="compareDialogContent != null">
       <li *ngFor="let property of compareDialogContent.properties | keyvalue">
-        {{property.key}}: <i>{{property.value[0]}}</i> --> <i>{{property.value[1]}}</i></li>
+        {{property.key}}: <em>{{property.value[0]}}</em> --> <em>{{property.value[1]}}</em></li>
 
       <li *ngFor="let node of compareDialogContent.nodes | keyvalue">
         <span *ngIf="node.key != '__ClientApplications' else clientApplications">Node <em>{{node.key}}:</em></span>
         <ng-template #clientApplications><em>Client Applications:</em></ng-template>
         <ul>
-          <li *ngFor="let added of node.value.added">Added <i>{{added}}</i></li>
-          <li *ngFor="let deleted of node.value.deleted">Deleted <i>{{deleted}}</i></li>
+          <li *ngFor="let added of node.value.added">Added <em>{{added}}</em></li>
+          <li *ngFor="let deleted of node.value.deleted">Deleted <em>{{deleted}}</em></li>
 
           <li *ngFor="let changed of node.value.changed | keyvalue">
             Application <em>{{changed.key}}:</em>
             <ul>
 
               <li *ngFor="let property of changed.value.properties|keyvalue">
-                {{property.key}}: <i>{{property.value[0]}}</i> --> <i>{{property.value[1]}}</i></li>
+                {{property.key}}: <em>{{property.value[0]}}</em> --> <em>{{property.value[1]}}</em></li>
               <li *ngIf="!isEmpty(changed.value.processControlProperties)">
                 Process control:
                 <ul>
                   <li *ngFor="let property of changed.value.processControlProperties|keyvalue">
-                    {{property.key}}: <i>{{property.value[0]}}</i> --> <i>{{property.value[1]}}</i></li>
+                    {{property.key}}: <em>{{property.value[0]}}</em> --> <em>{{property.value[1]}}</em></li>
                 </ul>
               </li>
 
@@ -78,21 +78,21 @@
                 Parameters:
                 <ul>
                   <li *ngFor="let added of changed.value.parameters.added">
-                    Added <em>{{added[0]}}</em>:<i>{{added[1]}}</i></li>
+                    Added <em>{{added[0]}}</em>:<em>{{added[1]}}</em></li>
                   <li *ngFor="let deleted of changed.value.parameters.deleted">
-                    Deleted  <em>{{deleted[0]}}:</em><i>{{deleted[1]}}</i></li>
+                    Deleted  <em>{{deleted[0]}}:</em><em>{{deleted[1]}}</em></li>
                 </ul>
               </li>
 
               <li *ngFor="let addedEndpoint of changed.value.addedEndpoints">
-                Added http-endpoint at <i>{{addedEndpoint}}</i></li>
+                Added http-endpoint at <em>{{addedEndpoint}}</em></li>
               <li *ngFor="let deletedEndpoint of changed.value.deletedEndpoints">
-                Added http-endpoint at <i>{{deletedEndpoint}}</i></li>
+                Added http-endpoint at <em>{{deletedEndpoint}}</em></li>
               <li *ngFor="let endpoint of changed.value.endpoints|keyvalue">
                 Http-endpoint at <em>{{endpoint.key}}</em>:
                 <ul>
                   <li *ngFor="let property of endpoint.value.properties|keyvalue">
-                    <span *ngIf="property.value != null else endpointPassword">{{property.key}}: <i>{{property.value[0]}}</i> --> <i>{{property.value[1]}}</i></span>
+                    <span *ngIf="property.value != null else endpointPassword">{{property.key}}: <em>{{property.value[0]}}</em> --> <em>{{property.value[1]}}</em></span>
                     <ng-template #endpointPassword>{{property.key}} changed</ng-template></li>
                 </ul>
               </li>
