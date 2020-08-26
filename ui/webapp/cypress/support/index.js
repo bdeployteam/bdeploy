@@ -16,5 +16,7 @@
 // Import commands.js using ES2015 syntax:
 import './commands'
 
-// Import cypress code-coverage collector plugin
-import '@cypress/code-coverage/support';
+if(Cypress.env('DISABLE_COVERAGE') !== "yes") {
+    // Import cypress code-coverage collector plugin
+    require('@cypress/code-coverage/support')
+}

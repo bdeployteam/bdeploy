@@ -41,5 +41,5 @@ jobs:
         node-version: '12.x'
 
     - name: Build and Test
-      run: ./gradlew -stacktrace clean build -PcypressIgnoreExitValue '-Dtestlogger.theme=plain-parallel'
+      run: ./gradlew -stacktrace clean build -PcypressIgnoreExitValue -PcypressNoCoverage=yes '-Dtestlogger.theme=plain-parallel'
 

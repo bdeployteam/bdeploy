@@ -132,8 +132,8 @@ List<String> getCypressConfig() {
         + ",backendBaseUrlCentral=https://localhost:${centralPort}/api"
         + ",baseUrlManaged=http://localhost:4212"
         + ",backendBaseUrlManaged=https://localhost:${managedPort}/api"
+        + (project.hasProperty('cypressNoCoverage') ? ",DISABLE_COVERAGE=yes" : "")
     ]
-
 }
 
 String cypressCmd() {
