@@ -96,6 +96,7 @@ import io.bdeploy.ui.InstanceEntryStreamRequestService;
 import io.bdeploy.ui.InstanceEntryStreamRequestService.EntryRequest;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.ConfigFileResource;
+import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
 import io.bdeploy.ui.api.ManagedServersResource;
 import io.bdeploy.ui.api.Minion;
@@ -578,8 +579,14 @@ public class InstanceResourceImpl implements InstanceResource {
     @Override
     public ClickAndStartDescriptor getClickAndStartDescriptor(String instanceId, String applicationId) {
         InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
-
         RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
+
+        if (minion.getMode() == MinionMode.CENTRAL) {
+            // delegate to the actual master, so it will return a descriptor which has the "local" URI.
+            return ResourceProvider.getResource(svc, InstanceGroupResource.class, context).getInstanceResource(group)
+                    .getClickAndStartDescriptor(instanceId, applicationId);
+        }
+
         MasterNamedResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context)
                 .getNamedMaster(group);
 
