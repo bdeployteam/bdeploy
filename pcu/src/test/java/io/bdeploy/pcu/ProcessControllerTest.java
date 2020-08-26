@@ -1,6 +1,7 @@
 package io.bdeploy.pcu;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -41,6 +42,7 @@ public class ProcessControllerTest {
         listener.await(TIMEOUT);
 
         assertEquals(ProcessState.STOPPED, process.getState());
+        assertNotEquals(0, process.getStatus().exitCode);
     }
 
     @Test
@@ -247,6 +249,7 @@ public class ProcessControllerTest {
 
         // Check final state
         assertEquals(ProcessState.STOPPED, process.getState());
+        assertEquals(0, process.getStatus().exitCode);
     }
 
     @Test

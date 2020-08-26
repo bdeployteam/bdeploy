@@ -164,16 +164,16 @@ describe('Instance Tests', function () {
     cy.get(".timeline_item").should("have.length","4");
 
     // open cards
-    cy.contains("New version: 4").click();
-    cy.contains("New version: 3").click();
+    cy.contains("Version 4: Created").click();
+    cy.contains("Version 3: Created").click();
     cy.screenshot("BDeploy_User_History_OpenedCard");
 
     // check if cards contain expected text
-    cy.contains("mat-expansion-panel","New version: 4").find(".timeline-card_content")
+    cy.contains("mat-expansion-panel","Version 4: Created").find(".timeline-card_content")
       .should("contain.html","master").and("contain.html","Parameter")
       .and("contain.html","param.sleep").parent().find(".mat-icon-button").click();
 
-    cy.contains("mat-expansion-panel","New version: 2").click().find(".timeline-card_content")
+    cy.contains("mat-expansion-panel","Version 2: Created").click().find(".timeline-card_content")
       .should("contain.html","master:").and("contain.html","Server Application");
 
     // check comparison dialog
@@ -199,9 +199,9 @@ describe('Instance Tests', function () {
     cy.get(".timeline_item").should("have.length","8");
 
     // and check them
-    cy.contains("mat-expansion-panel","Start of process Server Application").click().find(".content-runtime-info")
+    cy.contains("mat-expansion-panel","Server Application started").click().find(".content-runtime-info")
     .should("contain.html","master").and("contain.html","4");
-    cy.contains("mat-expansion-panel","Version 4: Activation").click().find(".content-info").should("contain.html","admin");
+    cy.contains("mat-expansion-panel","Version 4: Activated").click().find(".content-info").should("contain.html","admin");
     cy.screenshot("BDeploy_User_History_RuntimeHistory");
   });
 

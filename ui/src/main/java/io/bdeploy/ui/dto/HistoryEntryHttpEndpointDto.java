@@ -5,5 +5,5 @@ import java.util.Map;
 
 public class HistoryEntryHttpEndpointDto {
 
-    public Map<String, String[]> properties = new HashMap<>();
+    public final Map<String, String[]> properties = new HashMap<>();
 }

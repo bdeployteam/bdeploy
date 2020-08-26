@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class HistoryEntryParametersDto {
 
-    public List<String[]> added = new ArrayList<>();
-    public List<String[]> deleted = new ArrayList<>();
-    public Map<String, String[]> changed = new HashMap<>();
+    public final List<String[]> added = new ArrayList<>();
+    public final List<String[]> deleted = new ArrayList<>();
+    public final Map<String, String[]> changed = new HashMap<>();
 }

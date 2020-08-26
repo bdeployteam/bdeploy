@@ -25,9 +25,10 @@ public class MinionRuntimeHistoryManager {
      * The method is synchronized, since the same instance of the {@link MinionRuntimeHistoryManager} is used for process
      * controllers. In case a process crashes and is immediately restarted (for instance) events may occur so fast on different
      * threads for the same application, that a key conflict can occur during recording.
+     * </p>
      */
-    public synchronized void record(String processId, ProcessState action, String applicationId, String user) {
-        store(readOrCreate().record(new MinionRuntimeHistoryRecord(processId, action, user, System.currentTimeMillis()),
+    public synchronized void record(long processId, int exitCode, ProcessState action, String applicationId, String user) {
+        store(readOrCreate().record(new MinionRuntimeHistoryRecord(processId, exitCode, action, user, System.currentTimeMillis()),
                 applicationId));
     }
 

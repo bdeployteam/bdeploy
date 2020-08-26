@@ -23,9 +23,17 @@
   </div>
   <div class="info-grid">
     <ng-container *ngIf="isStopped() || isCrashedPermanently()">
-      <mat-icon>timer</mat-icon>
-      <div>Stopped At:</div>
-      <div>{{ getStopTime() }}</div>
+      <ng-container *ngIf="details.status.exitCode">
+        <mat-icon>exit_to_app</mat-icon>
+        <div>Exit Code:</div>
+        <div>{{ details.status.exitCode }}</div>
+      </ng-container>
+
+      <ng-container *ngIf="this.details.stopTime > 0">
+        <mat-icon>timer</mat-icon>
+        <div>Stopped At:</div>
+        <div>{{ getStopTime() }}</div>
+      </ng-container>
     </ng-container>
     <ng-container *ngIf="isRunning() || isRunningUnstable()">
       <mat-icon>timelapse</mat-icon>
@@ -48,6 +56,7 @@
       <div>Restart In:</div>
       <span title="{{ restartProgressText }}">{{ restartProgressText }}</span>
     </ng-container>
+
     <mat-icon>flight_takeoff</mat-icon>
     <div>Start Type:</div>
     <div matTooltip="{{ getStartTypeHint() }}">{{ getStartTypeText() }}</div>

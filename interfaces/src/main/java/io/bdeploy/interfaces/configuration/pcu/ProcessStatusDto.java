@@ -23,6 +23,12 @@ public class ProcessStatusDto {
     /** Current process state */
     public ProcessState processState;
 
+    /** The PID of the process */
+    public long pid;
+
+    /** The exit code if available */
+    public int exitCode;
+
     @Override
     public String toString() {
         List<String> logs = new ArrayList<>();

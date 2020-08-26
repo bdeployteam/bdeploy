@@ -58,16 +58,16 @@ public class StateListener implements Consumer<ProcessStateChangeDto> {
     }
 
     @Override
-    public synchronized void accept(ProcessStateChangeDto current) {
-        log.info("Process state changed to {}", current.state);
-        events.add(current.state);
+    public synchronized void accept(ProcessStateChangeDto event) {
+        log.info("Process state changed to {}", event.newState);
+        events.add(event.newState);
         if (remaining.isEmpty()) {
             throw new RuntimeException(
-                    "No more state changes expected but got <[" + current.state + "]>. All events <[" + events + "]>  ");
+                    "No more state changes expected but got <[" + event.newState + "]>. All events <[" + events + "]>  ");
         }
         // Remove first element when matching
         ProcessState first = remaining.getFirst();
-        if (first == current.state) {
+        if (first == event.newState) {
             remaining.removeFirst();
         }
 

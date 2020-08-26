@@ -7,15 +7,18 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 
 public class MinionRuntimeHistoryRecord {
 
-    public String pid;
-    public ProcessState state;
-    public String user;
-    public long timestamp;
+    public final long pid;
+    public final int exitCode;
+    public final ProcessState state;
+    public final String user;
+    public final long timestamp;
 
     @JsonCreator
-    public MinionRuntimeHistoryRecord(@JsonProperty("pid") String pid, @JsonProperty("state") ProcessState state,
-            @JsonProperty("user") String user, @JsonProperty("timestamp") long timestamp) {
+    public MinionRuntimeHistoryRecord(@JsonProperty("pid") long pid, @JsonProperty("exitCode") int exitCode,
+            @JsonProperty("state") ProcessState state, @JsonProperty("user") String user,
+            @JsonProperty("timestamp") long timestamp) {
         this.state = state;
+        this.exitCode = exitCode;
         this.timestamp = timestamp;
         this.pid = pid;
         this.user = user;
