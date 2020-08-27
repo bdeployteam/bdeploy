@@ -267,7 +267,7 @@ void setupBinServerTasks(String version) {
             delete "${buildDir}/bin-root_${key}"
         }
 
-        if(key.startsWith('2')) {
+        if(!key.startsWith('1')) {
             args = [ "init", "--port=${port}", "--dist=ignore", "--mode=standalone", "--initUser=admin", "--initPassword=admin" ]
         } else {
             args = [ "init", "--port=${port}", "--dist=ignore", "--mode=standalone" ]
