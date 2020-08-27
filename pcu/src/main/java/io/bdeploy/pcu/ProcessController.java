@@ -4,10 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.ProcessBuilder.Redirect;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -36,8 +34,6 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessControlConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
-import io.bdeploy.pcu.util.Formatter;
-import io.bdeploy.pcu.util.ProcessHandleDtoHelper;
 
 /**
  * Manages a single process.
@@ -89,8 +85,11 @@ public class ProcessController {
     /** Task scheduled to start the application when crashed */
     private Future<?> recoverTask;
 
-    /** The native process. Null if not running */
-    private ProcessHandle process;
+    /** The native process. Only used to evaluate exit code */
+    private Process process;
+
+    /** The native process handle. Null if not running */
+    private ProcessHandle processHandle;
 
     /** The STDIN of process if available, null otherwise */
     private OutputStream processStdin;
@@ -101,11 +100,8 @@ public class ProcessController {
     /** The current status of the process */
     private ProcessState processState = ProcessState.STOPPED;
 
-    /** Flag indicating whether or not the process is killed intentionally */
-    private boolean stopRequested = false;
-
-    /** Flag indicating that stop command gave up */
-    private boolean stopRequestGaveUp = false;
+    /** Time indicating when the stop request was initiated */
+    private Instant stopRequested = null;
 
     /** Time when the process has been started */
     private Instant startTime;
@@ -159,14 +155,13 @@ public class ProcessController {
         ProcessStatusDto status = getStatus();
         List<String> logs = new ArrayList<>();
         logs.addAll(status.logStatusDetails());
-        logs.add("Alive: " + (process != null ? process.isAlive() : Boolean.FALSE.toString()));
-        if (process != null) {
-            logs.add("Children: " + process.children().count());
+        logs.add("Alive: " + (processHandle != null ? processHandle.isAlive() : Boolean.FALSE.toString()));
+        if (processHandle != null) {
+            logs.add("Children: " + processHandle.children().count());
         }
         logs.add("Directory: " + processDir);
         logs.add("Active Task: " + (lockTask != null ? lockTask : "-"));
         logs.add("Stop Requested: " + stopRequested);
-        logs.add("Stop Request Failed: " + stopRequestGaveUp);
         logs.add("Uptime Task: " + (uptimeTask != null ? !uptimeTask.isDone() : Boolean.FALSE.toString()));
         logs.add("Recover Task: " + (recoverTask != null ? !recoverTask.isDone() : Boolean.FALSE.toString()));
         return String.join("\n", logs);
@@ -252,6 +247,12 @@ public class ProcessController {
         dto.appName = processConfig.name;
         dto.instanceTag = instanceTag;
         dto.instanceUid = instanceUid;
+        if (processHandle != null) {
+            dto.pid = processHandle.pid();
+        }
+        if (process != null && processState.isStopped()) {
+            dto.exitCode = process.exitValue();
+        }
         return dto;
     }
 
@@ -275,7 +276,7 @@ public class ProcessController {
         dto.status = getStatus();
         if (processState.isRunning()) {
             dto.hasStdin = processStdin != null;
-            dto.handle = ProcessHandleDtoHelper.collectProcessInfo(process);
+            dto.handle = ProcessControllerHelper.collectProcessInfo(processHandle);
         }
         return dto;
     }
@@ -302,9 +303,6 @@ public class ProcessController {
      * @param user the user who triggered the start
      */
     public void start(String user) {
-        if (user == null) {
-            user = DEFAULT_USER;
-        }
         executeLocked("Start", false, user, () -> doStart(true));
     }
 
@@ -313,8 +311,8 @@ public class ProcessController {
      * itself. It will still be running and stopping must be explicitly invoked to really terminate the process. Setting this
      * intend is typically done when stopping multiple processes one after each other to visualize the desired target state.
      */
-    public void prepareStop() {
-        executeLocked("PrepareStop", false, DEFAULT_USER, this::doPrepareStop);
+    public void prepareStop(String user) {
+        executeLocked("PrepareStop", false, user, this::doPrepareStop);
     }
 
     /**
@@ -334,9 +332,6 @@ public class ProcessController {
      * @param user the user who triggered the stop
      */
     public void stop(String user) {
-        if (user == null) {
-            user = DEFAULT_USER;
-        }
         executeLocked("Stop", false, user, this::doStop);
     }
 
@@ -378,8 +373,9 @@ public class ProcessController {
 
     /** Starts the application */
     private void doStart(boolean resetRecoverCount) {
+        // Do nothing if already started
         if (processState.isRunning()) {
-            throw new PcuRuntimeException("Application is already running.");
+            return;
         }
         logger.log(l -> l.info("Starting {}", processConfig.name));
 
@@ -399,26 +395,26 @@ public class ProcessController {
 
         // Cancel any pending restart tasks
         stopTime = null;
-        stopRequested = false;
+        stopRequested = null;
         if (recoverTask != null) {
             recoverTask.cancel(false);
         }
 
         try {
-            Process p = launch(processConfig.start, false);
-            process = p.toHandle();
-            processStdin = p.getOutputStream();
-            processExit = process.onExit();
-            startTime = process.info().startInstant().orElseGet(() -> {
+            process = launch(processConfig.start, false);
+            processHandle = process.toHandle();
+            processStdin = process.getOutputStream();
+            processExit = processHandle.onExit();
+            startTime = processHandle.info().startInstant().orElseGet(() -> {
                 logger.log(l -> l.error("Start time of process not available, falling back to current time. PID = {}.",
-                        process.pid()));
+                        processHandle.pid()));
                 return Instant.now();
             });
 
             // Persist the process that we just started to recover it if required
             ProcessControllerDto dto = new ProcessControllerDto();
-            dto.pid = process.pid();
-            dto.startTime = internalGetProcessStartTimestampCorrected(dto.pid, startTime);
+            dto.pid = processHandle.pid();
+            dto.startTime = ProcessControllerHelper.getProcessStartTimestampCorrected(logger, dto.pid, startTime);
             Files.write(infoFile, StorageHelper.toRawBytes(dto));
             logger.log(l -> l.info("Successfully started application. PID = {}.", dto.pid));
 
@@ -434,51 +430,46 @@ public class ProcessController {
     /** Updates the state that stopping is planned */
     private void doPrepareStop() {
         if (!processState.isRunning()) {
-            throw new PcuRuntimeException("Application is already stopped.");
+            return;
         }
         processState = ProcessState.RUNNING_STOP_PLANNED;
     }
 
     /** Stops the application */
-    private void doStop() {
+    private void doStop() throws Exception {
+        // Do nothing if already stopped
         if (processState.isStopped()) {
-            throw new PcuRuntimeException("Application is already stopped.");
+            return;
         }
 
         // Set flag that the termination of the process is expected
-        stopRequested = true;
-        stopRequestGaveUp = false;
+        stopRequested = Instant.now();
         if (processState == ProcessState.CRASHED_WAITING) {
             logger.log(l -> l.info("Aborting restart attempt of application."));
             processState = ProcessState.STOPPED;
             cleanup();
             return;
         }
-        // Stopping could take a while thus we setting the intent
+
+        // Stopping could take a while thus we set the intent
         logger.log(l -> l.info("Stopping {}", processConfig.name));
         processState = ProcessState.RUNNING_STOP_PLANNED;
 
         // try to gracefully stop the process using it's stop command
         doInvokeStopCommand(processConfig.stop);
         if (processExit == null || processExit.isDone()) {
-            afterTerminated();
+            onTerminated();
             return;
         }
 
-        // No stop command defined. Go on with destroying the process via its handle
-        Instant stopRequestedAt = Instant.now();
-        boolean stopped = doDestroyProcess();
-
-        // Inform about the result of the stop operation
-        if (stopped) {
-            afterTerminated();
-            Duration duration = Duration.between(stopRequestedAt, Instant.now());
-            logger.log(l -> l.info("Application is now stopped. Stopping took {}", Formatter.formatDuration(duration)));
-        } else {
-            stopRequestGaveUp = true;
+        // No stop command defined. Go on with destroying the process via the handle
+        if (!doDestroyProcess()) {
+            processState = ProcessState.RUNNING;
             logger.log(l -> l.error("Giving up to terminate application. Process does not respond to kill requests."));
             logger.log(l -> l.error("Application state remains {} ", processState));
+            return;
         }
+        onTerminated();
     }
 
     /** Recovers the application when running */
@@ -497,16 +488,16 @@ public class ProcessController {
         }
 
         // Remember handle and exit hook
-        process = ph.get();
-        processExit = process.onExit();
+        processHandle = ph.get();
+        processExit = processHandle.onExit();
 
         // make sure that this is still the process we're looking for.
-        startTime = process.info().startInstant().orElseGet(() -> {
+        startTime = processHandle.info().startInstant().orElseGet(() -> {
             logger.log(l -> l.warn("Recovering process handle does not have a start time! PID = {}", dto.pid));
             return Instant.now();
         });
 
-        long correctedStart = internalGetProcessStartTimestampCorrected(dto.pid, startTime);
+        long correctedStart = ProcessControllerHelper.getProcessStartTimestampCorrected(logger, dto.pid, startTime);
         if (Long.compare(correctedStart, dto.startTime) == 0) {
             logger.log(l -> l.info("Successfully attached to application. PID = {}.", dto.pid));
             monitorProcess();
@@ -526,7 +517,7 @@ public class ProcessController {
 
     /** Cleanup internal members */
     private void cleanup() {
-        process = null;
+        processHandle = null;
         processStdin = null;
 
         // Cancel the hook that is notified when the process terminates
@@ -548,7 +539,7 @@ public class ProcessController {
      * then the listeners are only notified about the final state. In all other cases listeners must be notified manually.
      * </p>
      */
-    private void executeLocked(String taskName, boolean wait, String user, Runnable runnable) {
+    private void executeLocked(String taskName, boolean wait, String user, RunnableWithException runnable) {
         // Fail fast if another thread holds the lock
         if (!wait && !lock.tryLock()) {
             throw new PcuRuntimeException("Cannot execute '" + taskName + "' task. Task '" + lockTask + "' is in progress.");
@@ -581,14 +572,14 @@ public class ProcessController {
             lockTask = null;
             lock.unlock();
 
+            // Fallback to system if no user is there
+            if (user == null) {
+                user = DEFAULT_USER;
+            }
+
             // Notify listeners when state changes
             if (currentState != oldState) {
-                if (process != null) {
-                    notifyListeners(new ProcessStateChangeDto(currentState, user, String.valueOf(process.pid())));
-                } else {
-                    notifyListeners(new ProcessStateChangeDto(currentState, user, null));
-                }
-
+                notifyListeners(new ProcessStateChangeDto(currentState, oldState, user));
             }
         }
     }
@@ -650,34 +641,32 @@ public class ProcessController {
                 rateInSeconds = 1;
             }
             uptimeTask = executorService.scheduleAtFixedRate(this::doCheckUptime, rateInSeconds, rateInSeconds, TimeUnit.SECONDS);
-            String requiredUptime = Formatter.formatDuration(stableThreshold);
+            String requiredUptime = ProcessControllerHelper.formatDuration(stableThreshold);
             logger.log(l -> l.info("Application will be marked as stable after: {}", requiredUptime));
         }
     }
 
     /** Callback method that is executed when the process terminates */
     private void onTerminated() {
-        try {
-            // Process terminated after stop request. Nothing to do
-            if (stopRequested && !stopRequestGaveUp) {
-                return;
-            }
-            afterTerminated();
-        } catch (Exception ex) {
-            logger.log(l -> l.error("Failed to execute termination hook", ex));
+        // Callback is also called by the exit-handler
+        if (stopTime != null) {
+            return;
         }
-    }
 
-    /** Callback method that is executed after the process terminates */
-    private void afterTerminated() {
         stopTime = Instant.now();
         Duration uptime = Duration.between(startTime, stopTime);
-        String uptimeString = Formatter.formatDuration(uptime);
+        String uptimeString = ProcessControllerHelper.formatDuration(uptime);
+
+        // Try to evaluate the exit code
+        Integer exitCode = ProcessControllerHelper.getExitCode(process);
+        logger.log(l -> l.info("Application terminated. Exit code: {}; Uptime: {} ", exitCode != null ? exitCode : "N/A",
+                uptimeString));
 
         // Someone requested termination
-        if (stopRequested) {
-            logger.log(l -> l.info("Application terminated after stop request. Total uptime: {}", uptimeString));
+        if (stopRequested != null || processState == ProcessState.RUNNING_STOP_PLANNED) {
+            logger.log(l -> l.info("Application remains stopped as stop was requested."));
             processState = ProcessState.STOPPED;
+
             waitForLockRelease();
             cleanup();
             return;
@@ -685,31 +674,24 @@ public class ProcessController {
 
         // One-Shot process that can terminate at any time
         if (!processConfig.processControl.keepAlive) {
-            String message = "Application terminated. Remains stopped as keep-alive is not configured. Total uptime: {}";
-            logger.log(l -> l.info(message, uptimeString));
-            processState = ProcessState.STOPPED;
+            logger.log(l -> l.info("Application remains stopped as keep-alive is not configured."));
+
+            // Set the state depending on the exit code
+            if (exitCode != null && exitCode.intValue() != 0) {
+                logger.log(l -> l.info("Setting state to CRASHED as exit code signals failure."));
+                processState = ProcessState.CRASHED_PERMANENTLY;
+            } else {
+                processState = ProcessState.STOPPED;
+            }
+
             waitForLockRelease();
             cleanup();
             return;
         }
-
-        // Stop already planned. OK do not restart it anymore
-        if (processState == ProcessState.RUNNING_STOP_PLANNED) {
-            String message = "Application terminated. Remains stopped as stopping is already planned. Total uptime: {}";
-            logger.log(l -> l.info(message, uptimeString));
-            processState = ProcessState.STOPPED;
-            waitForLockRelease();
-            cleanup();
-            return;
-        }
-
-        // Process terminated unexpectedly
-        logger.log(l -> l.error("Application terminated unexpectedly. Total uptime: {}", uptimeString));
 
         // Give up when the application keeps crashing
         if (recoverAttempts > 0 && recoverCount >= recoverAttempts) {
-            String message = "Giving up to launch application. Tried {} times to launch without success.";
-            logger.log(l -> l.error(message, recoverCount));
+            logger.log(l -> l.error("Application remains stopped. Tried to relaunch {} times without success.", recoverCount));
             processState = ProcessState.CRASHED_PERMANENTLY;
             waitForLockRelease();
             cleanup();
@@ -731,7 +713,7 @@ public class ProcessController {
             logger.log(l -> l.info("Re-launching application immediatly."));
             recoverTask = executorService.schedule(task, 0, TimeUnit.SECONDS);
         } else {
-            logger.log(l -> l.info("Waiting {} before re-launching application.", Formatter.formatDuration(delay)));
+            logger.log(l -> l.info("Waiting {} before re-launching application.", ProcessControllerHelper.formatDuration(delay)));
             recoverTask = executorService.schedule(task, delay.getSeconds(), TimeUnit.SECONDS);
         }
     }
@@ -886,11 +868,11 @@ public class ProcessController {
         while (!stopped && retryCount < 10) {
             // Destroy or forcibly destroy based on the retry counter
             if (retryCount == 0) {
-                destroy(process);
+                destroy(processHandle);
             } else {
                 int logCount = retryCount;
                 logger.log(l -> l.warn("Attempt {}: Kill application.", logCount));
-                destroyForcibly(process);
+                destroyForcibly(processHandle);
             }
 
             // Wait configured delay to stop
@@ -931,33 +913,11 @@ public class ProcessController {
     /** Notifies all listeners about the of the process */
     private void notifyListeners(ProcessStateChangeDto status) {
         try {
-            logger.log(l -> l.info("Notify listeners about new process state {}.", status));
+            logger.log(l -> l.info("Notify listeners about new process state {}.", status.newState));
             statusListeners.forEach(c -> c.accept(status));
         } catch (Exception ex) {
             logger.log(l -> l.error("Failed to notify listener about current process status.", ex));
         }
-    }
-
-    private long internalGetProcessStartTimestampCorrected(long pid, Instant reportedStartTime) {
-        if (OsHelper.getRunningOs() == OperatingSystem.LINUX) {
-            // see bug DCS-546 - the JVM on linux uses an invalid formula to calculate the absolute timestamp at which a process was started.
-            // There are various dynamically updated offsets and timestamps in play, thus the value may change over time. There /is/ a stable
-            // value we can use, and actually what we do here is the very same thing as the JVM does when reading the start time. The read value
-            // is not absolute though, but relative to the kernel boot time (which is sufficient for what we want). We just omit addition
-            // of real time and boot time offsets as done in the linux kernel when querying the boottime of the kernel.
-            try {
-                // read the single line from /proc/[pid]/stat, field no 22 is the start time.
-                String line = new String(Files.readAllBytes(Paths.get("/proc", String.valueOf(pid), "stat")),
-                        StandardCharsets.UTF_8);
-                String[] split = line.split(" ");
-                return Long.parseLong(split[21]);
-            } catch (Exception e) {
-                logger.log(l -> l.warn("Cannot read corrected start time of process, PID = {}.", pid, e));
-            }
-        }
-
-        // we (for now) trust the OS to deliver a stable absolute timestamp.
-        return reportedStartTime.toEpochMilli();
     }
 
     /** Returns a new-instance of this controller without any runtime data */
@@ -995,6 +955,12 @@ public class ProcessController {
          */
         public long startTime;
 
+    }
+
+    @FunctionalInterface
+    private static interface RunnableWithException {
+
+        public void run() throws Exception;
     }
 
 }

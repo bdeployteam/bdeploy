@@ -340,8 +340,11 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
     if (!this.isActivated()) {
       return 'Process control is disabled because this version is not activated.';
     }
-    if (this.isCrashedPermanently()) {
+    if (this.isCrashedPermanently() && this.appConfig.processControl.keepAlive) {
       return 'The application crashed repeatedly. The process control gave up restarting it.';
+    }
+    if (this.isCrashedPermanently() && !this.appConfig.processControl.keepAlive) {
+      return 'The application terminated with an exit code indicating a failure.';
     }
     if (this.isCrashedWaiting()) {
       return 'The application terminated unexpectedly. The process control is delaying restart for a short time to reduce load on the node.';

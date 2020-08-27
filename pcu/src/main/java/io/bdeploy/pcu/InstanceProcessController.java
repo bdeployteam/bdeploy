@@ -33,7 +33,6 @@ import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor.App
 import io.bdeploy.interfaces.manifest.history.runtime.MinionRuntimeHistoryManager;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
-import io.bdeploy.pcu.util.Formatter;
 
 /**
  * Manages all processes of a given instance and knows which processes from which version are running. The controller will
@@ -99,8 +98,18 @@ public class InstanceProcessController {
                 controller.setVariableResolver(resolver);
 
                 if (runtimeHistory != null) {
-                    controller.addStatusListener(
-                            status -> runtimeHistory.record(status.pid, status.state, config.name, status.user));
+                    controller.addStatusListener((event) -> {
+                        // Do not record planned events
+                        if (event.newState == ProcessState.RUNNING_STOP_PLANNED) {
+                            return;
+                        }
+                        // Do not record internal state changes
+                        if (event.newState == ProcessState.RUNNING && event.oldState == ProcessState.RUNNING_UNSTABLE) {
+                            return;
+                        }
+                        ProcessStatusDto status = controller.getStatus();
+                        runtimeHistory.record(status.pid, status.exitCode, status.processState, config.name, event.user);
+                    });
                 }
 
                 processList.add(controller);
@@ -259,7 +268,8 @@ public class InstanceProcessController {
             }
             Duration duration = Duration.between(start, Instant.now());
             if (failed.isEmpty()) {
-                logger.log(l -> l.info("Applications have been started in {}", Formatter.formatDuration(duration)), activeTag);
+                logger.log(l -> l.info("Applications have been started in {}", ProcessControllerHelper.formatDuration(duration)),
+                        activeTag);
                 return;
             }
             logger.log(l -> l.warn("Not all applications could be started. Failed {}", failed));
@@ -307,7 +317,7 @@ public class InstanceProcessController {
         // Set intend that all should be stopped
         for (ProcessController process : toStop) {
             try {
-                process.prepareStop();
+                process.prepareStop(user);
             } catch (Exception ex) {
                 String appId = process.getDescriptor().uid;
                 String tag = process.getStatus().instanceTag;
@@ -333,7 +343,7 @@ public class InstanceProcessController {
         // Check if we could stop all applications
         Duration duration = Duration.between(start, Instant.now());
         if (toStop.isEmpty()) {
-            logger.log(l -> l.info("Applications have been stopped in {} ", Formatter.formatDuration(duration)));
+            logger.log(l -> l.info("Applications have been stopped in {} ", ProcessControllerHelper.formatDuration(duration)));
             return;
         }
         String stillRunning = toStop.stream().map(pc -> pc.getDescriptor().name).collect(Collectors.joining(","));

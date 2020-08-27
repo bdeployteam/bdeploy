@@ -9,10 +9,11 @@
     <ng-template #userNotRecorded><em class="not-recorded">No recorded user</em></ng-template>
     <button *ngIf="entry.type==entryType.CREATE" mat-icon-button matTooltip="compare Versions" matTooltipShowDelay="500" (click)="addToComparisonClick()"><mat-icon>compare_arrows</mat-icon></button>
   </div>
-  <span *ngIf="entry.type==entryType.RUNTIME" class="content-runtime-info">
-    <span *ngIf="entry.runtimeEvent.pid != null">Process <em>{{entry.runtimeEvent.pid}}</em> on </span>
-    <em>{{entry.runtimeEvent.node}}</em> - version <em>{{entry.version}}</em>
-  </span>
+  <div *ngIf="entry.type==entryType.RUNTIME" class="content-runtime-info">
+    <p *ngIf="entry.runtimeEvent.pid >0"> PID <em>{{entry.runtimeEvent.pid}}</em> </p>
+    <p *ngIf="entry.runtimeEvent.exitCode"> Exit Code <em>{{entry.runtimeEvent.exitCode}}</em> </p>
+    <p>Version <em>{{entry.version}}</em> on node <em>{{entry.runtimeEvent.node}}</em></p>
+  </div>
 
   <div *ngIf="entry.type==entryType.CREATE && entry.version != 1" class="changes-compared-text">
     changes compared to last version

@@ -151,7 +151,8 @@ public class InstanceHistoryManager {
             HistoryEntryDto item = cachedHistory.get(i);
             if (item.title.toUpperCase().contains(filter) || item.user != null && item.user.toUpperCase().contains(filter)) {
                 filteredHistory.add(item);
-            } else if (item.runtimeEvent != null && item.runtimeEvent.pid != null && item.runtimeEvent.pid.contains(filter)) {
+            } else if (item.runtimeEvent != null && item.runtimeEvent.pid > 0
+                    && String.valueOf(item.runtimeEvent.pid).contains(filter)) {
                 filteredHistory.add(item);
             }
         }
@@ -211,15 +212,15 @@ public class InstanceHistoryManager {
     private String computeConfigTitle(Action action, String tag) {
         switch (action) {
             case CREATE:
-                return "New version: " + tag;
+                return "Version " + tag + ": Created";
             case INSTALL:
-                return "Version " + tag + ": Installation";
+                return "Version " + tag + ": Installed";
             case UNINSTALL:
-                return "Version " + tag + ": Uninstallation";
+                return "Version " + tag + ": Uninstalled";
             case ACTIVATE:
-                return "Version " + tag + ": Activation";
+                return "Version " + tag + ": Activated";
             case DEACTIVATE:
-                return "Version " + tag + ": Deactivation";
+                return "Version " + tag + ": Deactivated";
             default:
                 return "";
         }
@@ -227,18 +228,16 @@ public class InstanceHistoryManager {
 
     private String computeRuntimeTitle(ProcessState state, String process) {
         switch (state) {
-            case CRASHED_PERMANENTLY:
-                return "Process " + process + " crashed permanently";
-            case CRASHED_WAITING:
-                return "Process " + process + " chrashed";
-            case RUNNING_STOP_PLANNED:
-                return "Stop of " + process + " planned";
-            case RUNNING_UNSTABLE:
-                return "Restart of process " + process;
             case RUNNING:
-                return "Start of process " + process;
+                return process + " started";
+            case RUNNING_UNSTABLE:
+                return process + " restarted";
             case STOPPED:
-                return "Process " + process + " stopped";
+                return process + " stopped";
+            case CRASHED_WAITING:
+                return process + " crashed";
+            case CRASHED_PERMANENTLY:
+                return process + " crashed permanently.";
             default:
                 return "";
         }
@@ -315,7 +314,7 @@ public class InstanceHistoryManager {
             HistoryEntryDto entry = new HistoryEntryDto(record.timestamp, Integer.parseInt(versionTag));
 
             entry.type = HistoryEntryType.RUNTIME;
-            entry.runtimeEvent = new HistoryEntryRuntimeDto(minionName, record.pid, record.state);
+            entry.runtimeEvent = new HistoryEntryRuntimeDto(minionName, record.pid, record.exitCode, record.state);
             entry.title = computeRuntimeTitle(record.state, applicationName);
             computeUser(entry, record.user);
 
