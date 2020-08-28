@@ -1,0 +1,20 @@
+ul {
+  padding-left: 30px;
+  list-style-type: none;
+  padding-bottom: 5px;
+  margin: 0;
+}
+
+em {
+  font-style: normal;
+  font-weight: 500;
+}
+
+.timeline-card-content {
+  margin: 10px 0 0 0;
+  font-weight: lighter;
+  padding-left: 10px;
+  padding-top: 10px;
+  line-height: 150%;
+}
+

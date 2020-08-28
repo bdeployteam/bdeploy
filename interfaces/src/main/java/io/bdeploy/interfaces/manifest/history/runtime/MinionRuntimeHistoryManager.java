@@ -33,7 +33,6 @@ public class MinionRuntimeHistoryManager {
     }
 
     private MinionRuntimeHistory readOrCreate() {
-
         MinionRuntimeHistory stored = meta.read(hive);
         if (stored == null) {
             return new MinionRuntimeHistory();

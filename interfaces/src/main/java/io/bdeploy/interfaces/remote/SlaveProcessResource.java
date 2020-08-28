@@ -111,10 +111,7 @@ public interface SlaveProcessResource {
     public void writeToStdin(@QueryParam("u") String instanceId, @QueryParam("a") String applicationId, String data);
 
     /**
-     * loads all runtime events of this minion
-     *
-     * @param instanceId the name of the instance
-     * @return a {@link MinionRuntimeHistoryDto}
+     * Returns the runtime events of the given instance. The returned map is indexed by the instance tag.
      */
     @GET
     @Path("/runtimeHistory")

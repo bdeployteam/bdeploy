@@ -2,25 +2,33 @@ package io.bdeploy.interfaces.manifest.history.runtime;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
+/**
+ * The runtime history of all applications running on a minion.
+ */
 public class MinionRuntimeHistoryDto {
 
-    private final Map<String, MinionRuntimeHistory> versions;
+    private final Map<String, MinionRuntimeHistory> tag2History = new HashMap<>();
 
-    public MinionRuntimeHistoryDto(Map<String, MinionRuntimeHistory> dto) {
-        this.versions = dto;
+    /**
+     * Adds a new entry for the given instance tag
+     */
+    public void add(String tag, MinionRuntimeHistory history) {
+        tag2History.put(tag, history);
     }
 
-    public MinionRuntimeHistoryDto() {
-        versions = new HashMap<>();
+    /**
+     * Returns the history for the given tag
+     */
+    public MinionRuntimeHistory get(String tag) {
+        return tag2History.get(tag);
     }
 
-    public Map<String, MinionRuntimeHistory> getVersions() {
-        return versions;
+    /**
+     * Returns all entries indexed by the instance tag.
+     */
+    public Map<String, MinionRuntimeHistory> getTag2History() {
+        return tag2History;
     }
 
-    public Set<Map.Entry<String, MinionRuntimeHistory>> entrySet() {
-        return versions.entrySet();
-    }
 }

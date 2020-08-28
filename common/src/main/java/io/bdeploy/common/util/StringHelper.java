@@ -9,6 +9,20 @@ public class StringHelper {
     }
 
     /**
+     * Returns whether the given string is null or empty
+     */
+    public static boolean isNullOrEmpty(String s) {
+        return s == null || s.isEmpty();
+    }
+
+    /**
+     * Returns whether the given strings are equal
+     */
+    public static boolean notEqual(String a, String b) {
+        return a != null && !a.equals(b);
+    }
+
+    /**
      * Removes all line breaks from the given string
      */
     public static String removeLineBreaks(String s) {

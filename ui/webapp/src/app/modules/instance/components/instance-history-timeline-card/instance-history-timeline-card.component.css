@@ -1,88 +1,59 @@
-
-.timeline-card_header{
-  width:100%;
+.timeline-card-header {
+  width: 100%;
   margin: 0 15px 0 0;
-  background-color:none;
+  background-color: none;
   border-bottom-left-radius: 0;
 }
 
-.timeline-card_header p{
-  font-size:1.2em;
-  margin:10px 0 3px 0;
+.timeline-card-header p {
+  font-size: 1.2em;
+  margin: 10px 0 3px 0;
   text-align: center;
 }
 
-.timeline-card_header div{
+.timeline-card-header div {
   text-align: end;
   font-size: 0.85em;
-  margin-bottom:10px;
+  margin-bottom: 10px;
 }
 
-.mat-expansion-panel-header{
-  height:auto;
+.mat-expansion-panel-header {
+  height: auto;
   transition: all 0.2s;
 }
 
-.timeline-card_content{
-  margin:10px 0 0 0;
-  font-weight: lighter;
+.mat-expansion-panel-body {
+  padding: 10px;
 }
 
-.mat-expansion-panel-body{
-  padding:10px;
-}
-
-.mat-expanded{
+.mat-expanded {
   transition: all 0.2s;
 }
 
-.content-info{
-  display:flex;
+.content-info {
+  display: flex;
   flex-direction: row;
   align-items: center;
 }
 
-.content-info button{
-  margin-left:auto;
+.content-info button {
+  margin-left: auto;
 }
 
-.content-info app-user-avatar{
+.content-info app-user-avatar {
   margin: 10px 10px 10px 0;
 }
 
-.content-runtime-info{
+.not-recorded {
+  margin: 10px 0;
+}
+
+.content-runtime-info {
   margin-top: 15px;
   padding-bottom: 10px;
   font-weight: lighter;
 }
 
-.changes-compared-text{
+.changes-compared-text {
   margin: 5px 0 3px 0;
-}
-
-.not-recorded{
-  margin: 10px 0;
-}
-
-em{
-  font-style: normal;
-  font-weight: 500;
-}
-
-i{
-  font-style: italic;
-  font-weight: normal;
-}
-
-ul{
-  padding-left:30px;
-  list-style-type:none;
-  padding-bottom: 5px;
-  margin: 0;
-}
-
-.timeline-card_content{
-  padding-left:10px;
-  padding-top: 10px;
-  line-height: 150%;
 }

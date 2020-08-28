@@ -5,22 +5,22 @@ You can *view* all those changes, *who* made them and *when* they were made on t
 
 To open the history, go to the *instance overview*, click on the *menu* on the right and click on *instance history*.
 
-You will be greeted with _New version_ *cards* on each side of a timeline.
+You will be greeted with _Creation_ *cards* on each side of a timeline.
 Each *card* consists of a title containing the *event* and the corresponding *version*, as well as the *time* the event happened.
 
-There are three types of events. _New versions_ (configurations), _Deployments_ and _Runtime_ events. +
+There are three types of events. _Version creations_ (configurations), _Deployments_ and _Runtime_ events. +
 _Deployments_ and _Runtime_ events are disabled by default.
 
 [NOTE]
-If you haven't made any changes, only one card will be shown: _New version: 1_.
+If you haven't made any changes, only one card will be shown: _Version 1: Created_.
 
 Once you *scroll* to the bottom, a loading spinner will show up and more events get *loaded*. +
 You can scroll on until you reach the first event.
 
 image::images/BDeploy_User_History_Overview.png[Instance history, align=center, width=480, link="images/BDeploy_User_History_Overview.png"]
 
-To see the *user* responsible for a _New version_, open a card by clicking on it. +
-_New version_ cards also list *all changes* of the corresponding version to the previous version.
+To see the *user* responsible for a _Creation_, open a card by clicking on it. +
+_Creation_ cards also list *all changes* of the corresponding version to the previous version.
 
 image::images/BDeploy_User_History_OpenedCard.png[Open card, align=center, width=480, link="images/BDeploy_User_History_OpenedCard.png"]
 
@@ -31,7 +31,7 @@ If you want *only one* card open at once, click on the button to the left of it.
 ===== Comparing two versions
 
 You can *compare* any two versions to view all changes made between those versions. +
-Select two versions by clicking on the button with *two arrows* in both _New version_ cards. + 
+Select two versions by clicking on the button with *two arrows* in both _Creation_ cards. + 
 The versions will show up under *_Compare Versions_* in the toolbar on the top.
 To compare them now, click on the *arrow* inbetween.
 

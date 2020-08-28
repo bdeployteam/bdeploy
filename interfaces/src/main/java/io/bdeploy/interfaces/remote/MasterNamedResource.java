@@ -24,7 +24,7 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.InstanceDirectory;
 import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
-import io.bdeploy.interfaces.manifest.history.runtime.MinionRuntimeHistoryDto;
+import io.bdeploy.interfaces.manifest.history.runtime.MasterRuntimeHistoryDto;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.WeakTokenAllowed;
 
@@ -267,14 +267,10 @@ public interface MasterNamedResource {
     public Map<Integer, Boolean> getPortStates(@QueryParam("m") String minion, List<Integer> ports);
 
     /**
-     * Loads all runtime events from the minions <br>
-     * and returns them as a dto-tree: minion -> version -> application -> event
-     *
-     * @param instanceId the name of the instance
-     * @return a map of {@link MinionRuntimeHistoryDto} with the minion name as the key.
+     * Loads all runtime events from the minions
      */
     @GET
     @Path("/runtimeHistory")
-    public Map<String, MinionRuntimeHistoryDto> getRuntimeHistory(@QueryParam("u") String instanceId);
+    public MasterRuntimeHistoryDto getRuntimeHistory(@QueryParam("u") String instanceId);
 
 }

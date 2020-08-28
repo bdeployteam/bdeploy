@@ -2,9 +2,6 @@ package io.bdeploy.minion.remote.jersey;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.SortedSet;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
@@ -13,6 +10,7 @@ import javax.ws.rs.core.SecurityContext;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
@@ -126,18 +124,16 @@ public class SlaveProcessResourceImpl implements SlaveProcessResource {
 
     @Override
     public MinionRuntimeHistoryDto getRuntimeHistory(String instanceId) {
-        BHive hive = root.getHive();
-        Map<String, MinionRuntimeHistory> dto = new HashMap<>();
-        SortedSet<Key> nodeKeys = InstanceNodeManifest.scan(hive);
+        MinionRuntimeHistoryDto dto = new MinionRuntimeHistoryDto();
 
-        for (Key key : nodeKeys) {
-            if (key.getName().split("/")[0].equals(instanceId)) {
-                MinionRuntimeHistory history = InstanceNodeManifest.of(hive, key).getRuntimeHistory(hive).getFullHistory();
-                if (!history.isEmpty()) {
-                    dto.put(key.getTag(), history);
-                }
+        BHive hive = root.getHive();
+        for (Key key : hive.execute(new ManifestListOperation().setManifestName(instanceId + "/"))) {
+            MinionRuntimeHistory history = InstanceNodeManifest.of(hive, key).getRuntimeHistory(hive).getFullHistory();
+            if (history.isEmpty()) {
+                continue;
             }
+            dto.add(key.getTag(), history);
         }
-        return new MinionRuntimeHistoryDto(dto);
+        return dto;
     }
 }

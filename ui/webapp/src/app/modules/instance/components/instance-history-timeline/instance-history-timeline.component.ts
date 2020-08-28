@@ -16,13 +16,14 @@ export class InstanceHistoryTimelineComponent implements OnInit {
 
   @Input("entry-list") entries:HistoryEntryDto[] = [];
   @Input("accordion-behaviour") accordionBehaviour = false;
-  @Input("loading") loading:boolean = false;
 
   openedItem:InstanceHistoryTimelineCardComponent;
   containSearchInput:InstanceHistoryTimelineCardComponent[];
 
   processState = ProcessState;
   entryType = HistoryEntryType;
+
+  scrollThreshold = 1; // The distance to the bottom doesn't always become 0 when scrolled down -> threshold when to say scrolled down
 
   constructor(private hostElement:ElementRef) { }
 
@@ -48,7 +49,7 @@ export class InstanceHistoryTimelineComponent implements OnInit {
 
   @HostListener("scroll",["event"])
   onScroll(){
-    if(this.hostElement.nativeElement.scrollTop == this.hostElement.nativeElement.scrollTopMax){
+    if(this.hostElement.nativeElement.scrollHeight - this.hostElement.nativeElement.scrollTop - this.hostElement.nativeElement.clientHeight < this.scrollThreshold){
       this.scrolledDown.emit();
     }
   }

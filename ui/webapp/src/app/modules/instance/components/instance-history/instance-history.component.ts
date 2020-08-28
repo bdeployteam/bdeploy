@@ -1,224 +1,197 @@
-import { animate, state, style, transition, trigger } from '@angular/animations';
-import { Location } from '@angular/common';
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { HistoryEntryDto, HistoryEntryType, HistoryEntryVersionDto, InstanceConfiguration } from 'src/app/models/gen.dtos';
-import { LoggingService } from 'src/app/modules/core/services/logging.service';
-import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
-import { InstanceHistoryTimelineComponent } from 'src/app/modules/instance/components/instance-history-timeline/instance-history-timeline.component';
-import { InstanceService } from '../../services/instance.service';
+import { Location } from "@angular/common";
+import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
+import { MatButton } from '@angular/material/button';
+import { MatDialog } from "@angular/material/dialog";
+import { ActivatedRoute } from "@angular/router";
+import { HistoryEntryDto, InstanceConfiguration } from "src/app/models/gen.dtos";
+import { LoggingService } from "src/app/modules/core/services/logging.service";
+import { RoutingHistoryService } from "src/app/modules/core/services/routing-history.service";
+import { InstanceHistoryTimelineComponent } from "src/app/modules/instance/components/instance-history-timeline/instance-history-timeline.component";
+import { InstanceService } from "../../services/instance.service";
+import { InstanceHistoryCompareComponent } from "../instance-history-compare/instance-history-compare.component";
 
 @Component({
-  selector: 'app-instance-history',
-  templateUrl: './instance-history.component.html',
-  styleUrls: ['./instance-history.component.css'],
-  animations:[trigger("fade",[
-    state("void",style({opacity:0})),
-    transition("void <=> *",[
-      animate("0.05s")
-    ])
-  ])
-  ]
+  selector: "app-instance-history",
+  templateUrl: "./instance-history.component.html",
+  styleUrls: ["./instance-history.component.css"]
 })
-export class InstanceHistoryComponent implements OnInit{
+export class InstanceHistoryComponent implements OnInit {
+  // Amount of history entries to load at once
+  private readonly MAX_RESULTS = 50;
 
-  groupParam: string = this.route.snapshot.paramMap.get('group');
-  uuidParam: string = this.route.snapshot.paramMap.get('uuid');
+  groupParam: string = this.route.snapshot.paramMap.get("group");
+  uuidParam: string = this.route.snapshot.paramMap.get("uuid");
 
-  private loadedAll:boolean = false;
-  loading:boolean = false;
+  loading: boolean = false;
 
+  filterText = "";
   showCreate = true;
   showDeployment = false;
   showRuntime = false;
 
   accordionBehaviour = false;
 
-  private searchTerm:string = null;
-  hintText:string = "";
-
-  private currentOffset:number = 0;
-  private amount:number = 10;
+  private compareVersions: string[] = [,];
 
   instance: InstanceConfiguration;
-  historyEntries:HistoryEntryDto[];
-  private allEntries:HistoryEntryDto[];
+  history: HistoryEntryDto[] = [];
+  nextInstanceTag: string = null;
+  allLoaded = false;
 
-  private compareVersions:Number[] = [,];
-  compareDialogOpen:boolean = false;
-  compareDialogContent:HistoryEntryVersionDto;
+  @ViewChild("searchInput")
+  searchInput: ElementRef<HTMLInputElement>;
 
-  @ViewChild("searchInput") searchInput;
-  @ViewChild("timeline") timeline:InstanceHistoryTimelineComponent;
+  @ViewChild("timeline")
+  timeline: InstanceHistoryTimelineComponent;
 
-  @ViewChild("compare_a") compareInputA;
-  @ViewChild("compare_b") compareInputB;
+  @ViewChild("compareButton")
+  compareButton: MatButton;
+
+  @ViewChild("compareA")
+  compareInputA: ElementRef<HTMLInputElement>;
+
+  @ViewChild("compareB")
+  compareInputB: ElementRef<HTMLInputElement>;
 
   constructor(
     private route: ActivatedRoute,
-    private instanceService:InstanceService,
-    public location:Location,
-    private loggingService:LoggingService,
-    public routingHistoryService:RoutingHistoryService,
-    ) {}
+    private instanceService: InstanceService,
+    public location: Location,
+    private loggingService: LoggingService,
+    public routingHistoryService: RoutingHistoryService,
+    private dialog: MatDialog
+  ) {}
 
   ngOnInit(): void {
-    this.instanceService.getInstance(this.groupParam,this.uuidParam).subscribe((val)=>this.instance = val);
+    this.instanceService
+      .getInstance(this.groupParam, this.uuidParam)
+      .subscribe((val) => (this.instance = val));
     this.loadHistory();
   }
 
-  closeAll():void{
+  closeAll(): void {
     this.timeline.closeAll();
   }
 
-  private loadHistory():void{
+  private loadHistory(): void {
     this.loading = true;
-    this.instanceService.getInstanceHistory(this.groupParam,this.uuidParam,this.amount).subscribe((list:HistoryEntryDto[])=>{
-      this.allEntries = list;
-      this.filter();
-      this.loading = false;
-      if(list.length < this.amount){
-        this.loadedAll = true;
-      }
-      this.currentOffset += this.amount
-    });
+    this.instanceService
+      .getInstanceHistory(
+        this.groupParam,
+        this.uuidParam,
+        this.MAX_RESULTS,
+        this.nextInstanceTag,
+        this.filterText,
+        this.showCreate,
+        this.showDeployment,
+        this.showRuntime
+      )
+      .subscribe((r) => {
+        this.history = this.history.concat(r.events);
+        this.nextInstanceTag = r.next;
+        this.allLoaded = r.next == null;
+        this.loading = false;
+        if (r.errors.length > 0) {
+          this.loggingService.guiError(r.errors.join("\n"));
+        }
+      });
   }
 
-  private loadMoreHistory():void{
-    if(!this.loading){
-      this.loading = true;
-      if(this.searchTerm == null){
-        this.instanceService.getMoreInstanceHistory(this.groupParam,this.uuidParam,this.amount,this.currentOffset).subscribe(e => this.saveHistory(e));
-      }
-      else{
-        this.instanceService.getFilteredHistory(this.groupParam,this.uuidParam,this.amount,this.currentOffset,this.searchTerm).subscribe(e => this.saveHistory(e));
-      }
-    }
-  }
-
-  private saveHistory(list:HistoryEntryDto[]){
-    this.allEntries = this.allEntries.concat(list);
-    this.filter();
-    this.loading = false;
-    if(list.length < this.amount){
-      this.loadedAll = true;
-    }
-    this.currentOffset += this.amount
-  }
-
-  onScrolledDown():void{
-    if(!this.loadedAll){
-      this.loadMoreHistory();
-    }
-  }
-
-  addVersionToCompare(version:number):void{
-    this.compareDialogOpen = false;
-
-    if(this.compareVersions.indexOf(version) != -1){
+  onScrolledDown(): void {
+    if (this.allLoaded) {
       return;
     }
-    if(!this.compareVersions[0]){
-      this.compareVersions[0] = version;
-      this.compareInputA.nativeElement.value = version.toString();
-    }
-    else{
-      if(!this.compareVersions[1]){
-        this.compareVersions[1] = version;
-      }
-      else{
-        this.compareVersions[0] = this.compareVersions[1];
-        this.compareVersions[1] = version;
-      }
-
-      if(this.compareVersions[0] < this.compareVersions[1]){
-        this.compareInputA.nativeElement.value = this.compareVersions[0].toString();
-        this.compareInputB.nativeElement.value = version.toString();
-      }
-      else{
-        this.compareInputA.nativeElement.value = this.compareVersions[1].toString();
-        this.compareInputB.nativeElement.value = this.compareVersions[0].toString();
-      }
-    }
-
+    this.loadHistory();
   }
 
-  compareInputKeydown(event:KeyboardEvent,index):void{
-    this.compareDialogOpen = false;
-    if(this.isNumeric(event.key)){
-      this.compareVersions[index] = parseInt(event.key);
+  compareInputKeydown(event:InputEvent, index: number): void {
+    const input = event.target as HTMLInputElement;
+    const value = input.value.trim();
+    if (this.isNumeric(value)) {
+      this.compareVersions[index] = value;
+    } else if (value.length == 0) {
+      this.compareVersions[index] = null;
     }
+    this.updateCompareButton();
+  }
 
-    else if(event.key=="Enter"){
-      this.compareVersion();
+  updateCompareButton() {
+    if(!this.compareVersions[0] || !this.compareVersions[1]) {
+      this.compareButton.disabled = true;
+    } else if (this.compareVersions[0] == this.compareVersions[1]) {
+      this.compareButton.disabled = true;
+    } else {
+      this.compareButton.disabled = false;
     }
   }
 
-  isNumeric(number:string):boolean{
+  isNumeric(number: string): boolean {
     return !isNaN(parseInt(number));
   }
 
-  compareVersion():void{
+  addVersionToCompare(version: string) {
+    var x = Number(version);
+    if (!this.compareVersions[0]) {
+      this.compareVersions[0] = version;
+      this.compareInputA.nativeElement.value = version;
+    } else if (!this.compareVersions[1]) {
+      this.compareVersions[1] = version;
+      this.compareInputA.nativeElement.value = version;
+    }
+    if (!this.compareVersions[0] || !this.compareVersions[1]) {
+      this.updateCompareButton();
+      return;
+    }
+    var a = Number(this.compareVersions[0]);
+    var b = Number(this.compareVersions[1]);
 
-    let valueA:string = this.compareInputA.nativeElement.value;
-    let valueB:string = this.compareInputB.nativeElement.value;
+    if (a > b) {
+      [a, b] = [b, a];
+    }
+    if (x > b) {
+      b = x;
+    } else if (x < a) {
+      [a, b] = [x, a];
+    } else {
+      a = x;
+    }
 
-    this.instanceService.listInstanceVersions(this.groupParam,this.uuidParam).subscribe((ret)=>{
-        let amount = ret.length;
+    this.compareVersions[0] = a.toString();
+    this.compareVersions[1] = b.toString();
+    this.compareInputA.nativeElement.value = this.compareVersions[0];
+    this.compareInputB.nativeElement.value = this.compareVersions[1];
+    this.updateCompareButton();
+  }
 
-        if(valueA=="" || valueB == "" || valueA == null || valueB == null){
-          this.loggingService.guiError("please select a version");
-
-        }
-        else if(!this.isNumeric(valueA) || !this.isNumeric(valueB)){
-          this.loggingService.guiError("please use a valid number");
-
-        }
-        else if(parseInt(valueA) == parseInt(valueB)){
-          this.loggingService.guiError("you can't compare the same versions");
-        }
-        else if(parseInt(valueA) <= 0 || parseInt(valueB) <= 0 || parseInt(valueA) > amount || parseInt(valueB) > amount){
-          this.loggingService.guiError("please select a version between 1 and " + amount,);
-        }
-        else{
-          if(parseInt(valueA) > parseInt(valueB)){
-            this.compareInputA.nativeElement.value = valueB;
-            this.compareInputB.nativeElement.value = valueA;
-            valueA = valueB;
-            valueB = this.compareInputB.nativeElement.value;
-          }
-            this.instanceService.getVersionComparison(this.groupParam,this.uuidParam,parseInt(valueA),parseInt(valueB)).subscribe((ret)=>{
-              this.compareDialogOpen = true;
-              this.compareDialogContent = ret;
-            });
-        }
+  compareVersion(): void {
+    const data = [
+      this.instanceService,
+      this.groupParam,
+      this.uuidParam,
+      this.compareVersions,
+    ];
+    this.dialog.open(InstanceHistoryCompareComponent, {
+      minWidth: "300px",
+      maxWidth: "800px",
+      data: data ,
+      closeOnNavigation: true,
     });
   }
 
-  isEmpty(object){
-    return Object.keys(object).length == 0;
+  onTypeFilterChanged() {
+    this.resetHistory();
+    this.loadHistory();
   }
 
-  filter():void{
-    this.historyEntries = this.allEntries.filter(item => item.type==HistoryEntryType.CREATE && this.showCreate || item.type==HistoryEntryType.DEPLOYMENT && this.showDeployment || item.type==HistoryEntryType.RUNTIME && this.showRuntime);
-    setTimeout(()=>{
-      if(!this.timeline.isOverflowing() && !this.loadedAll){
-        this.loadMoreHistory();
-      }
-    },0);
+  onTextFilterChanged(filter: string) {
+    this.filterText = filter;
+    this.resetHistory();
+    this.loadHistory();
   }
 
-  search(filter:string){
-    this.loadedAll = false;
-    this.currentOffset = 0;
-    this.allEntries = [];
-    if(filter.trim() != ""){
-      this.searchTerm = filter;
-      this.loadMoreHistory();
-    }
-    else{
-      this.searchTerm = null;
-      this.loadHistory();
-    }
+  resetHistory() {
+    this.history = [];
+    this.allLoaded = false;
+    this.nextInstanceTag = null;
   }
 }

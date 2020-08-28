@@ -2,7 +2,7 @@ import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular
 import { Injectable } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { ClickAndStartDescriptor, ConfigFileDto, FileStatusDto, HistoryEntryDto, HistoryEntryVersionDto, InstanceConfiguration, InstanceConfigurationDto, InstanceDirectory, InstanceDirectoryEntry, InstanceDto, InstanceManifestHistoryDto, InstanceNodeConfigurationListDto, InstancePurpose, InstanceStateRecord, InstanceVersionDto, ManifestKey, MinionDto, MinionStatusDto, StringEntryChunkDto } from '../../../models/gen.dtos';
+import { ClickAndStartDescriptor, ConfigFileDto, FileStatusDto, HistoryEntryVersionDto, HistoryResultDto, InstanceConfiguration, InstanceConfigurationDto, InstanceDirectory, InstanceDirectoryEntry, InstanceDto, InstanceManifestHistoryDto, InstanceNodeConfigurationListDto, InstancePurpose, InstanceStateRecord, InstanceVersionDto, ManifestKey, MinionDto, MinionStatusDto, StringEntryChunkDto } from '../../../models/gen.dtos';
 import { ConfigService } from '../../core/services/config.service';
 import { ErrorMessage, Logger, LoggingService } from '../../core/services/logging.service';
 import { SystemService } from '../../core/services/system.service';
@@ -298,7 +298,7 @@ export class InstanceService {
    * <p>
    * The result is grouped by application (UUID) and contains a state per port (true/false).
    */
-  public getOpenPorts(instanceGroup: string, instance: string, minion: string,  ports: number[]): Observable<{[key: number]: boolean}> {
+  public getOpenPorts(instanceGroup: string, instance: string, minion: string, ports: number[]): Observable<{[key: number]: boolean}> {
     const url = this.buildInstanceUrl(instanceGroup, instance) + '/check-ports/' + minion;
     return this.http.post<{[key: number]: boolean}>(url, ports);
   }
@@ -311,51 +311,25 @@ export class InstanceService {
     return this.buildGroupUrl(instanceGroupName) + '/' + instanceName;
   }
 
-  public getInstanceHistory(
-    instanceGroupName: string,
-    instanceId: string,
-    amount: number,
-  ): Observable<HistoryEntryDto[]> {
+  public getInstanceHistory(instanceGroupName: string, instanceId: string, maxResults: number, startTag: string, filter: string, showCreate: boolean, showDeployment: boolean, showRuntime: boolean): Observable<HistoryResultDto> {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceId) + '/history';
-    const params = new HttpParams().set("amount",amount.toString());
-    this.log.debug('getInstanceHistory: ' + url);
-    return this.http.get<HistoryEntryDto[]>(url,{params:params});
+    var params = new HttpParams().set("maxResults",maxResults.toString());
+    params = params.set("showCreate",showCreate.toString())
+    params = params.set("showDeployment",showDeployment.toString())
+    params = params.set("showRuntime",showRuntime.toString())
+    if(startTag) {
+      params = params.set("startTag",startTag);
+    }
+    if(filter) {
+      params = params.set("filter",filter);
+    }
+    return this.http.get<HistoryResultDto>(url, { params:params });
   }
 
-  public getMoreInstanceHistory(
-    instanceGroupName: string,
-    instanceId: string,
-    amount: number,
-    offset: number
-  ): Observable<HistoryEntryDto[]> {
-    const url: string = this.buildInstanceUrl(instanceGroupName, instanceId) + '/more-history';
-    const params = new HttpParams().set("amount",amount.toString()).set("offset",offset.toString());
-    this.log.debug('getMoreInstanceHistory: ' + url);
-    return this.http.get<HistoryEntryDto[]>(url,{params:params});
-  }
-
-  public getVersionComparison(
-    instanceGroupName: string,
-    instanceId: string,
-    versionA: Number,
-    versionB: Number
-  ): Observable<HistoryEntryVersionDto> {
+  public getVersionComparison(instanceGroupName: string, instanceId: string, versionA: string, versionB: string): Observable<HistoryEntryVersionDto> {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceId) + '/compare-versions';
     const params = new HttpParams().set("a",versionA.toString()).set("b",versionB.toString());
-    this.log.debug('getVersionComparison: ' + url);
     return this.http.get<HistoryEntryVersionDto>(url,{params:params});
   }
 
-  public getFilteredHistory(
-    instanceGroupName: string,
-    instanceId: string,
-    amount: Number,
-    offset: Number,
-    filter: string,
-  ): Observable<HistoryEntryDto[]> {
-    const url: string = this.buildInstanceUrl(instanceGroupName, instanceId) + '/filter-history';
-    const params = new HttpParams().set("amount",amount.toString()).set("offset",offset.toString()).set("filter",filter);
-    this.log.debug('getFilteredHistory: ' + url);
-    return this.http.get<HistoryEntryDto[]>(url,{params:params});
-  }
 }

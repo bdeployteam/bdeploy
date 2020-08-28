@@ -25,7 +25,7 @@ export class InstanceHistoryTimelineCardComponent {
     ){}
 
   addToComparisonClick(){
-    this.addToComparison.emit(this.entry.version);
+    this.addToComparison.emit(this.entry.instanceTag);
   }
 
   cardOpened():void{

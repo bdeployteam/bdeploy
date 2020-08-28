@@ -1,6 +1,6 @@
 <mat-expansion-panel #panel (opened)="cardOpened()" (closed)="cardClosed()">
   <mat-expansion-panel-header>
-    <div class="timeline-card_header"> <p>{{entry.title}}</p><div>{{formatDate(entry.timestamp)}}</div> </div>
+    <div class="timeline-card-header"> <p>{{entry.title}}</p><div>{{formatDate(entry.timestamp)}}</div> </div>
   </mat-expansion-panel-header>
 
   <div class="content-info">
@@ -12,80 +12,13 @@
   <div *ngIf="entry.type==entryType.RUNTIME" class="content-runtime-info">
     <p *ngIf="entry.runtimeEvent.pid >0"> PID <em>{{entry.runtimeEvent.pid}}</em> </p>
     <p *ngIf="entry.runtimeEvent.exitCode"> Exit Code <em>{{entry.runtimeEvent.exitCode}}</em> </p>
-    <p>Version <em>{{entry.version}}</em> on node <em>{{entry.runtimeEvent.node}}</em></p>
+    <p>Version <em>{{entry.instanceTag}}</em> on node <em>{{entry.runtimeEvent.node}}</em></p>
   </div>
 
-  <div *ngIf="entry.type==entryType.CREATE && entry.version != 1" class="changes-compared-text">
-    changes compared to last version
-  <mat-divider></mat-divider>
+  <div *ngIf="entry.type==entryType.CREATE" class="changes-compared-text">
+    Changes compared to previous version
+    <mat-divider></mat-divider>
   </div>
-  <ul class="timeline-card_content" *ngIf="entry != null && entry.content != null">
-
-    <li *ngFor="let property of entry.content.properties | keyvalue">
-      {{property.key}}: <em>{{property.value[0]}}</em> --> <em>{{property.value[1]}}</em></li>
-
-    <li *ngFor="let node of entry.content.nodes | keyvalue">
-      <span *ngIf="node.key != '__ClientApplications' else clientApplications">Node <em>{{node.key}}:</em></span>
-      <ng-template #clientApplications><em>Client Applications:</em></ng-template>
-      <ul>
-        <li *ngFor="let added of node.value.added">Added <em>{{added}}</em></li>
-        <li *ngFor="let deleted of node.value.deleted">Deleted <em>{{deleted}}</em></li>
-
-        <li *ngFor="let changed of node.value.changed | keyvalue">
-          Application <em>{{changed.key}}:</em>
-          <ul>
-
-            <li *ngFor="let property of changed.value.properties|keyvalue">
-              {{property.key}}: <em>{{property.value[0]}}</em> --> <em>{{property.value[1]}}</em></li>
-            <li *ngIf="!isEmpty(changed.value.processControlProperties)">
-              Process control:
-              <ul>
-                <li *ngFor="let property of changed.value.processControlProperties|keyvalue">
-                  {{property.key}}: <em>{{property.value[0]}}</em> --> <em>{{property.value[1]}}</em></li>
-              </ul>
-            </li>
-
-            <li *ngIf="changed.value.parameters != null">
-              Parameters:
-              <ul>
-                <li *ngFor="let added of changed.value.parameters.added">
-                  Added <em>{{added[0]}}</em>:<em>{{added[1]}}</em></li>
-                <li *ngFor="let deleted of changed.value.parameters.deleted">
-                  Deleted  <em>{{deleted[0]}}:</em><em>{{deleted[1]}}</em></li>
-                <li *ngFor="let changedParameter of changed.value.parameters.changed | keyvalue">
-                  <em>{{changedParameter.key}}: </em> <em>{{changedParameter.value[0]}}</em> --> <em>{{changedParameter.value[1]}}</em>
-                </li>
-              </ul>
-            </li>
-
-            <li *ngFor="let addedEndpoint of changed.value.addedEndpoints">
-              Added http-endpoint at <em>{{addedEndpoint}}</em></li>
-            <li *ngFor="let deletedEndpoint of changed.value.deletedEndpoints">
-              Deleted http-endpoint at <em>{{deletedEndpoint}}</em></li>
-            <li *ngFor="let endpoint of changed.value.endpoints|keyvalue">
-              Http-endpoint at <em>{{endpoint.key}}</em>:
-              <ul>
-                <li *ngFor="let property of endpoint.value.properties|keyvalue">
-                  <span *ngIf="property.value != null else endpointPassword">{{property.key}}: <em>{{property.value[0]}}</em> --> <em>{{property.value[1]}}</em></span>
-                  <ng-template #endpointPassword>{{property.key}} changed</ng-template></li>
-              </ul>
-            </li>
-          </ul>
-        </li>
-      </ul>
-    </li>
-
-    <li *ngIf="entry.content.configFiles != null">
-      Config files:
-      <ul>
-        <li *ngFor="let added of entry.content.configFiles.added">
-          Added <em>{{added}}</em></li>
-        <li *ngFor="let deleted of entry.content.configFiles.deleted">
-          Deleted <em>{{deleted}}</em></li>
-        <li *ngFor="let changed of entry.content.configFiles.changed">
-          Changed <em>{{changed}}</em></li>
-      </ul>
-    </li>
-  </ul>
+  <app-instance-history-timeline-content [history]="entry.content"></app-instance-history-timeline-content>
 
 </mat-expansion-panel>

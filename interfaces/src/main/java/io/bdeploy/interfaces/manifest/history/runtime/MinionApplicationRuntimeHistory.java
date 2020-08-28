@@ -3,18 +3,12 @@ package io.bdeploy.interfaces.manifest.history.runtime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The runtime history of an application.
+ */
 public class MinionApplicationRuntimeHistory {
 
-    private final List<MinionRuntimeHistoryRecord> records;
-
-    MinionApplicationRuntimeHistory() {
-        records = new ArrayList<>();
-    }
-
-    MinionApplicationRuntimeHistory(MinionRuntimeHistoryRecord record) {
-        records = new ArrayList<>();
-        records.add(record);
-    }
+    private final List<MinionRuntimeHistoryRecord> records = new ArrayList<>();
 
     public List<MinionRuntimeHistoryRecord> getRecords() {
         return records;

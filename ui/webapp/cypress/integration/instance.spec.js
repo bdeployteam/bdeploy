@@ -169,21 +169,21 @@ describe('Instance Tests', function () {
     cy.screenshot("BDeploy_User_History_OpenedCard");
 
     // check if cards contain expected text
-    cy.contains("mat-expansion-panel","Version 4: Created").find(".timeline-card_content")
-      .should("contain.html","master").and("contain.html","Parameter")
-      .and("contain.html","param.sleep").parent().find(".mat-icon-button").click();
-
-    cy.contains("mat-expansion-panel","Version 2: Created").click().find(".timeline-card_content")
+    cy.contains("mat-expansion-panel","Version 4: Created").should("contain.html","master")
+      .and("contain.html","Parameter").and("contain.html","param.sleep");
+    cy.contains("mat-expansion-panel","Version 2: Created").click()
       .should("contain.html","master:").and("contain.html","Server Application");
 
     // check comparison dialog
-    cy.get(".history-compare-input").eq(1).type("1");
-    cy.get(".compare-versions").find("button").click();
-    cy.get(".instance-history-comparison-dialog").should("contain.html","master:")
+    cy.get(".history-compare-input").eq(0).type("1");
+    cy.get(".history-compare-input").eq(1).type("4");
+    cy.contains('button', 'compare_arrows').click();
+    cy.get(".mat-dialog-container").should("contain.html","master:")
       .and("contain.html","Config files").and("contain.html","cypress.cfg");
-
     cy.screenshot("BDeploy_User_History_ComparisonDialog");
-    cy.contains("button","close").click();
+
+    // close compare dialog
+    cy.get('.cdk-overlay-backdrop').click('top', {force:true, multiple: true});
     cy.contains("button","indeterminate_check_box").click();
     cy.wait(200); // wait until click animation of close-all button disappeared
 
@@ -199,9 +199,10 @@ describe('Instance Tests', function () {
     cy.get(".timeline_item").should("have.length","8");
 
     // and check them
-    cy.contains("mat-expansion-panel","Server Application started").click().find(".content-runtime-info")
-    .should("contain.html","master").and("contain.html","4");
-    cy.contains("mat-expansion-panel","Version 4: Activated").click().find(".content-info").should("contain.html","admin");
+    cy.contains("mat-expansion-panel","Server Application started").click()
+      .should("contain.html","master").and("contain.html","4");
+    cy.contains("mat-expansion-panel","Version 4: Activated").click()
+      .should("contain.html","admin");
     cy.screenshot("BDeploy_User_History_RuntimeHistory");
   });
 

@@ -3,7 +3,7 @@ package io.bdeploy.ui.dto;
 public class HistoryEntryDto {
 
     public final long timestamp;
-    public final int version;
+    public String instanceTag;
 
     public String title = "";
     public HistoryEntryType type;
@@ -12,9 +12,9 @@ public class HistoryEntryDto {
     public HistoryEntryVersionDto content = null;
     public HistoryEntryRuntimeDto runtimeEvent = null;
 
-    public HistoryEntryDto(long timestamp, int version) {
+    public HistoryEntryDto(long timestamp, String instanceTag) {
         this.timestamp = timestamp;
-        this.version = version;
+        this.instanceTag = instanceTag;
     }
 
     public enum HistoryEntryType {

@@ -113,8 +113,9 @@ import io.bdeploy.ui.api.ProcessResource;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
 import io.bdeploy.ui.branding.Branding;
 import io.bdeploy.ui.branding.BrandingConfig;
-import io.bdeploy.ui.dto.HistoryEntryDto;
 import io.bdeploy.ui.dto.HistoryEntryVersionDto;
+import io.bdeploy.ui.dto.HistoryFilterDto;
+import io.bdeploy.ui.dto.HistoryResultDto;
 import io.bdeploy.ui.dto.InstanceDto;
 import io.bdeploy.ui.dto.InstanceManifestHistoryDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
@@ -942,13 +943,16 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     @Override
-    public List<HistoryEntryDto> getInstanceHistory(String instanceId, int amount) {
-        return instanceHistory.getInstanceHistory(hive, instanceId, amount, group);
-    }
-
-    @Override
-    public List<HistoryEntryDto> getMoreInstanceHistory(String instanceId, int amount, int offset) {
-        return instanceHistory.getMoreInstanceHistory(hive, instanceId, group, amount, offset);
+    public HistoryResultDto getInstanceHistory(String instanceId, String startTag, int maxResults, String filter,
+            boolean showCreate, boolean showDeployment, boolean showRuntime) {
+        HistoryFilterDto filterDto = new HistoryFilterDto();
+        filterDto.filterText = filter;
+        filterDto.startTag = startTag;
+        filterDto.maxResults = maxResults;
+        filterDto.showCreateEvents = showCreate;
+        filterDto.showDeploymentEvents = showDeployment;
+        filterDto.showRuntimeEvents = showRuntime;
+        return instanceHistory.getInstanceHistory(hive, group, instanceId, filterDto);
     }
 
     @Override
@@ -956,8 +960,4 @@ public class InstanceResourceImpl implements InstanceResource {
         return instanceHistory.compareVersions(hive, instanceId, versionA, versionB);
     }
 
-    @Override
-    public List<HistoryEntryDto> filterInstanceHistory(String instanceId, int amount, int offset, String filter) {
-        return instanceHistory.getFilteredInstanceHistory(hive, instanceId, group, amount, offset, filter);
-    }
 }

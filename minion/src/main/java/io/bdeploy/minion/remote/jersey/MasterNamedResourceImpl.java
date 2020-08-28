@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -68,7 +67,7 @@ import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
-import io.bdeploy.interfaces.manifest.history.runtime.MinionRuntimeHistoryDto;
+import io.bdeploy.interfaces.manifest.history.runtime.MasterRuntimeHistoryDto;
 import io.bdeploy.interfaces.manifest.state.InstanceState;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
@@ -904,13 +903,18 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
-    public Map<String, MinionRuntimeHistoryDto> getRuntimeHistory(String instanceId) {
-        Map<String, MinionRuntimeHistoryDto> returnValue = new HashMap<>();
-        for (Map.Entry<String, MinionDto> minion : root.getMinions().entrySet()) {
-            SlaveProcessResource spr = ResourceProvider.getVersionedResource(minion.getValue().remote, SlaveProcessResource.class,
-                    context);
-            returnValue.put(minion.getKey(), spr.getRuntimeHistory(instanceId));
+    public MasterRuntimeHistoryDto getRuntimeHistory(String instanceId) {
+        MasterRuntimeHistoryDto history = new MasterRuntimeHistoryDto();
+        for (Map.Entry<String, MinionDto> entry : root.getMinions().entrySet()) {
+            String minionName = entry.getKey();
+            RemoteService service = entry.getValue().remote;
+            try {
+                SlaveProcessResource spr = ResourceProvider.getVersionedResource(service, SlaveProcessResource.class, context);
+                history.add(minionName, spr.getRuntimeHistory(instanceId));
+            } catch (Exception e) {
+                history.addError(minionName, "Cannot load runtime history (" + e.getMessage() + ")");
+            }
         }
-        return returnValue;
+        return history;
     }
 }

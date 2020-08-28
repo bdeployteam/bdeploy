@@ -1,22 +1,18 @@
 package io.bdeploy.ui.api.impl;
 
-import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.SecurityContext;
-
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
@@ -25,7 +21,9 @@ import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.objects.view.ElementView;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ScanOperation;
+import io.bdeploy.bhive.util.ManifestComparator;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
@@ -37,6 +35,7 @@ import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistoryRecord;
+import io.bdeploy.interfaces.manifest.history.runtime.MasterRuntimeHistoryDto;
 import io.bdeploy.interfaces.manifest.history.runtime.MinionApplicationRuntimeHistory;
 import io.bdeploy.interfaces.manifest.history.runtime.MinionRuntimeHistory;
 import io.bdeploy.interfaces.manifest.history.runtime.MinionRuntimeHistoryDto;
@@ -55,11 +54,10 @@ import io.bdeploy.ui.dto.HistoryEntryNodeDto;
 import io.bdeploy.ui.dto.HistoryEntryParametersDto;
 import io.bdeploy.ui.dto.HistoryEntryRuntimeDto;
 import io.bdeploy.ui.dto.HistoryEntryVersionDto;
+import io.bdeploy.ui.dto.HistoryFilterDto;
+import io.bdeploy.ui.dto.HistoryResultDto;
 
 public class InstanceHistoryManager {
-
-    private final Cache<String, List<HistoryEntryDto>> history = CacheBuilder.newBuilder()
-            .expireAfterAccess(Duration.ofMinutes(5)).maximumSize(10).build();
 
     @Inject
     private AuthService auth;
@@ -71,57 +69,82 @@ public class InstanceHistoryManager {
     private MasterProvider mp;
 
     /**
-     * Reads all Instance-History events, saves and returns.<br>
-     * Computes all differences between two instance versions in a CREATE event. <br>
-     * Returns a specified amount of events. <br>
-     *
-     * @param instanceId the uuid of the instance
-     * @param amount how many events to be loaded
-     * @return a list of events
+     * Returns the changes made to an instance.
      */
-    public List<HistoryEntryDto> getInstanceHistory(BHive hive, String instanceId, int amount, String group) {
-        List<HistoryEntryDto> instanceHistory = loadHistory(hive, instanceId, group);
-        history.put(instanceId, instanceHistory);
+    public HistoryResultDto getInstanceHistory(BHive hive, String group, String instanceId, HistoryFilterDto filter) {
+        HistoryResultDto result = new HistoryResultDto();
 
-        List<HistoryEntryDto> returnList;
+        // Determine all versions that are available
+        String rootName = InstanceManifest.getRootName(instanceId);
+        List<Manifest.Key> all = new ArrayList<>(hive.execute(new ManifestListOperation().setManifestName(rootName)));
+        Collections.sort(all, ManifestComparator.NEWEST_FIRST);
 
-        if (amount < instanceHistory.size()) {
-            returnList = instanceHistory.subList(0, amount);
-        } else {
-            returnList = instanceHistory.subList(0, instanceHistory.size());
+        // Determine the range of versions to inspect
+        int firstIdx = StringHelper.isNullOrEmpty(filter.startTag) ? 0 : all.indexOf(new Manifest.Key(rootName, filter.startTag));
+        List<Manifest.Key> subList = all.subList(firstIdx, all.size());
+
+        MasterRuntimeHistoryDto runtimeHistory = new MasterRuntimeHistoryDto();
+        if (filter.showRuntimeEvents) {
+            runtimeHistory = loadRuntimeHistory(hive, group, instanceId);
         }
 
-        computeNewVersions(hive, instanceId, returnList);
-        return returnList;
+        // Load and compute differences
+        for (int i = 0; i < subList.size(); i++) {
+            // Skip inspecting the next entry if we have enough events
+            if (result.events.size() > filter.maxResults) {
+                break;
+            }
 
+            Manifest.Key key = subList.get(i);
+            Manifest.Key nextKey = (i + 1) < (subList.size()) ? subList.get(i + 1) : null;
+            result.next = nextKey != null ? nextKey.getTag() : null;
+
+            // Load history
+            InstanceManifest manifest = InstanceManifest.load(hive, instanceId, key.getTag());
+            List<HistoryEntryDto> events = loadHistory(hive, manifest);
+
+            // Compute difference to previous version
+            Optional<HistoryEntryDto> create = events.stream().filter(e -> e.type == HistoryEntryType.CREATE).findFirst();
+            if (create.isPresent() && nextKey != null) {
+                InstanceManifest nextManifest = InstanceManifest.load(hive, instanceId, nextKey.getTag());
+                create.get().content = versionDifferences(hive, nextManifest, manifest);
+            }
+            result.addAll(events, filter);
+
+            // Append all runtime events from this version
+            for (HistoryEntryDto runtimeEvent : getRuntimeHistory(runtimeHistory, key.getTag())) {
+                result.add(runtimeEvent, filter);
+            }
+        }
+
+        // Check runtime history for errors (minion offline)
+        for (Map.Entry<String, String> entry : runtimeHistory.getMinion2Error().entrySet()) {
+            result.errors.add(entry.getKey() + ": " + entry.getValue());
+        }
+
+        // Sort by creation time
+        Collections.sort(result.events, (a, b) -> Long.compare(a.timestamp, b.timestamp) * -1);
+        return result;
     }
 
-    /**
-     * Loads a specified amount of Events and returns them.<br>
-     * Computes all differences between two instance versions in a CREATE event. <br>
-     *
-     * @param instanceId the uuid of the instance
-     * @param amount how many events to load
-     * @param offset load events starting from offset
-     * @return a list of events
-     */
-    public List<HistoryEntryDto> getMoreInstanceHistory(BHive hive, String instanceId, String group, int amount, int offset) {
+    private List<HistoryEntryDto> loadHistory(BHive hive, InstanceManifest mf) {
+        List<HistoryEntryDto> entries = new ArrayList<>();
+        String tag = mf.getManifest().getTag();
+        for (InstanceManifestHistoryRecord record : mf.getHistory(hive).getFullHistory()) {
+            HistoryEntryType type = computeType(record.action);
+            HistoryEntryDto entry = new HistoryEntryDto(record.timestamp, tag);
 
-        List<HistoryEntryDto> returnList;
-        List<HistoryEntryDto> cachedHistory = getCachedHistory(hive, instanceId, group);
-
-        if (offset < cachedHistory.size()) {
-            if (offset + amount < cachedHistory.size()) {
-                returnList = cachedHistory.subList(offset, offset + amount);
-            } else {
-                returnList = cachedHistory.subList(offset, cachedHistory.size());
+            UserInfo userInfo = computeUser(record.user);
+            if (userInfo != null) {
+                entry.user = userInfo.name;
+                entry.email = userInfo.email;
             }
-        } else {
-            return new ArrayList<>();
-        }
 
-        computeNewVersions(hive, instanceId, returnList);
-        return returnList;
+            entry.title = computeConfigTitle(record.action, tag);
+            entry.type = type;
+            entries.add(entry);
+        }
+        return entries;
     }
 
     /**
@@ -138,75 +161,11 @@ public class InstanceHistoryManager {
         return versionDifferences(hive, a, b);
     }
 
-    public List<HistoryEntryDto> getFilteredInstanceHistory(BHive hive, String instanceId, String group, int amount, int offset,
-            String filter) {
-
-        List<HistoryEntryDto> cachedHistory = getCachedHistory(hive, instanceId, group);
-        List<HistoryEntryDto> filteredHistory = new ArrayList<>();
-
-        int size = offset + amount;
-        filter = filter.trim().toUpperCase();
-
-        for (int i = 0; i < cachedHistory.size() && filteredHistory.size() < size; i++) {
-            HistoryEntryDto item = cachedHistory.get(i);
-            if (item.title.toUpperCase().contains(filter) || item.user != null && item.user.toUpperCase().contains(filter)) {
-                filteredHistory.add(item);
-            } else if (item.runtimeEvent != null && item.runtimeEvent.pid > 0
-                    && String.valueOf(item.runtimeEvent.pid).contains(filter)) {
-                filteredHistory.add(item);
-            }
+    private HistoryEntryType computeType(Action action) {
+        if (action == Action.CREATE) {
+            return HistoryEntryType.CREATE;
         }
-
-        if (offset >= filteredHistory.size()) {
-            return new ArrayList<>();
-        }
-
-        Collections.sort(filteredHistory, (a, b) -> Long.compare(a.timestamp, b.timestamp) * -1);
-        filteredHistory = filteredHistory.subList(offset, filteredHistory.size());
-        computeNewVersions(hive, instanceId, filteredHistory);
-
-        return filteredHistory;
-    }
-
-    private List<HistoryEntryDto> getCachedHistory(BHive hive, String instanceId, String group) {
-        try {
-            return history.get(instanceId, () -> loadHistory(hive, instanceId, group));
-        } catch (ExecutionException e) {
-            throw new IllegalStateException("Cannot load history", e);
-        }
-    }
-
-    // load instance and runtime history
-    private List<HistoryEntryDto> loadHistory(BHive hive, String instanceId, String group) {
-        List<HistoryEntryDto> instanceHistory = new ArrayList<>();
-
-        // load configuration history
-        String rootName = InstanceManifest.getRootName(instanceId);
-        List<Manifest.Key> all = new ArrayList<>(hive.execute(new ManifestListOperation().setManifestName(rootName)));
-
-        for (Key manifestKey : all) {
-            for (InstanceManifestHistoryRecord record : InstanceManifest.of(hive, manifestKey).getHistory(hive)
-                    .getFullHistory()) {
-
-                HistoryEntryDto entry = new HistoryEntryDto(record.timestamp, Integer.parseInt(manifestKey.getTag()));
-                if (record.action == Action.CREATE) {
-                    entry.type = HistoryEntryType.CREATE;
-                } else {
-                    entry.type = HistoryEntryType.DEPLOYMENT;
-                }
-
-                entry.title = computeConfigTitle(record.action, manifestKey.getTag());
-                computeUser(entry, record.user);
-
-                instanceHistory.add(entry);
-            }
-        }
-
-        // add runtime history
-        instanceHistory.addAll(loadRuntimeHistory(hive, instanceId, group));
-
-        Collections.sort(instanceHistory, (a, b) -> Long.compare(a.timestamp, b.timestamp) * -1);
-        return instanceHistory;
+        return HistoryEntryType.DEPLOYMENT;
     }
 
     private String computeConfigTitle(Action action, String tag) {
@@ -243,87 +202,72 @@ public class InstanceHistoryManager {
         }
     }
 
-    private void computeUser(HistoryEntryDto entry, String user) {
-        UserInfo userInfo = null;
-        if (user != null && !user.isBlank()) {
-            while (user.length() > 2 && user.charAt(0) == '[' && user.charAt(user.length() - 1) == ']') {
-                user = user.substring(1, user.length() - 1);
-            }
-            userInfo = auth.getUser(user);
-        } else {
-            entry.user = null;
-            return;
+    private UserInfo computeUser(String user) {
+        if (user == null || user.isBlank()) {
+            return null;
         }
-        if (userInfo != null) {
-            if (userInfo.email != null && !userInfo.email.isBlank()) {
-                entry.email = userInfo.email;
-            }
-            if (userInfo.fullName != null && !userInfo.fullName.isBlank()) {
-                entry.user = userInfo.fullName;
-            } else {
-                entry.user = user;
-            }
-        } else {
-            entry.user = user;
+        // See JerseyOnBehalfOfFilter
+        if (user.startsWith("[") && user.endsWith("]")) {
+            user = user.substring(1, user.length() - 1);
         }
+
+        // Complete information based on the stored user
+        UserInfo userInfo = auth.getUser(user);
+        if (userInfo == null) {
+            return new UserInfo(user);
+        }
+        return userInfo;
     }
 
-    private void computeNewVersions(BHive hive, String instanceId, List<HistoryEntryDto> entries) {
-        for (HistoryEntryDto entry : entries) {
-            if (entry.type == HistoryEntryType.CREATE) {
-                if (entry.version > 1) {
-                    entry.content = versionDifferences(hive,
-                            InstanceManifest.load(hive, instanceId, String.valueOf(entry.version - 1)),
-                            InstanceManifest.load(hive, instanceId, String.valueOf(entry.version)));
-                }
-            }
-        }
-    }
-
-    // load the runtime history
-    private List<HistoryEntryDto> loadRuntimeHistory(BHive hive, String instanceId, String group) {
-        List<HistoryEntryDto> content = new ArrayList<>();
-
+    private MasterRuntimeHistoryDto loadRuntimeHistory(BHive hive, String group, String instanceId) {
         RemoteService svc = mp.getControllingMaster(hive, InstanceManifest.load(hive, instanceId, null).getManifest());
         MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
         MasterNamedResource namedMaster = master.getNamedMaster(group);
-
-        for (Entry<String, MinionRuntimeHistoryDto> dto : namedMaster.getRuntimeHistory(instanceId).entrySet()) {
-            computeMinionRuntimeHistory(content, dto.getKey(), dto.getValue());
-        }
-        return content;
+        return namedMaster.getRuntimeHistory(instanceId);
     }
 
-    private void computeMinionRuntimeHistory(List<HistoryEntryDto> history, String minionName, MinionRuntimeHistoryDto minion) {
-        for (Entry<String, MinionRuntimeHistory> version : minion.entrySet()) {
-            computeVersionRuntimeHistory(history, minionName, version.getKey(), version.getValue());
+    private List<HistoryEntryDto> getRuntimeHistory(MasterRuntimeHistoryDto history, String tag) {
+        List<HistoryEntryDto> result = new ArrayList<>();
+
+        Map<String, MinionRuntimeHistoryDto> minion2History = history.getMinion2History();
+        for (Map.Entry<String, MinionRuntimeHistoryDto> entry : minion2History.entrySet()) {
+            String minion = entry.getKey();
+            MinionRuntimeHistoryDto minionHistoryDto = entry.getValue();
+            MinionRuntimeHistory minionHistory = minionHistoryDto.get(tag);
+            if (minionHistory == null) {
+                continue;
+            }
+            result.addAll(getMinionRuntimeHistory(minion, tag, minionHistory));
         }
+        return result;
     }
 
-    private void computeVersionRuntimeHistory(List<HistoryEntryDto> history, String minionName, String versionTag,
-            MinionRuntimeHistory version) {
-        for (Entry<String, MinionApplicationRuntimeHistory> application : version.entrySet()) {
-            computeApplicationRuntimeHistory(history, minionName, versionTag, application.getKey(), application.getValue());
+    private Collection<HistoryEntryDto> getMinionRuntimeHistory(String minion, String tag, MinionRuntimeHistory minionHistory) {
+        List<HistoryEntryDto> result = new ArrayList<>();
+        for (Map.Entry<String, MinionApplicationRuntimeHistory> entry : minionHistory.getHistory().entrySet()) {
+            String appName = entry.getKey();
+            MinionApplicationRuntimeHistory appHistory = entry.getValue();
+            result.addAll(getApplicationRuntimeHistory(minion, tag, appName, appHistory));
         }
+        return result;
     }
 
-    private void computeApplicationRuntimeHistory(List<HistoryEntryDto> history, String minionName, String versionTag,
-            String applicationName, MinionApplicationRuntimeHistory application) {
-
-        for (MinionRuntimeHistoryRecord record : application.getRecords()) {
-            HistoryEntryDto entry = new HistoryEntryDto(record.timestamp, Integer.parseInt(versionTag));
-
+    private List<HistoryEntryDto> getApplicationRuntimeHistory(String minionName, String tag, String appName,
+            MinionApplicationRuntimeHistory history) {
+        List<HistoryEntryDto> result = new ArrayList<>();
+        for (MinionRuntimeHistoryRecord record : history.getRecords()) {
+            HistoryEntryDto entry = new HistoryEntryDto(record.timestamp, tag);
             entry.type = HistoryEntryType.RUNTIME;
             entry.runtimeEvent = new HistoryEntryRuntimeDto(minionName, record.pid, record.exitCode, record.state);
-            entry.title = computeRuntimeTitle(record.state, applicationName);
-            computeUser(entry, record.user);
-
-            history.add(entry);
+            entry.title = computeRuntimeTitle(record.state, appName);
+            UserInfo userInfo = computeUser(record.user);
+            if (userInfo != null) {
+                entry.user = userInfo.name;
+                entry.email = userInfo.email;
+            }
+            result.add(entry);
         }
-    }
-
-    private boolean strNotEqual(String a, String b) {
-        return a != null && !a.equals(b);
+        return result;
     }
 
     // compute differences between two versions
@@ -342,10 +286,10 @@ public class InstanceHistoryManager {
             content.properties.put("Auto-uninstall",
                     new String[] { String.valueOf(oldConfig.autoUninstall), String.valueOf(newConfig.autoUninstall) });
         }
-        if (strNotEqual(oldConfig.description, newConfig.description)) {
+        if (StringHelper.notEqual(oldConfig.description, newConfig.description)) {
             content.properties.put("Description", new String[] { oldConfig.description, newConfig.description });
         }
-        if (strNotEqual(oldConfig.name, newConfig.name)) {
+        if (StringHelper.notEqual(oldConfig.name, newConfig.name)) {
             content.properties.put("Name", new String[] { oldConfig.name, newConfig.name });
         }
         if (oldConfig.purpose != null && !oldConfig.purpose.equals(newConfig.purpose)) {
@@ -631,10 +575,10 @@ public class InstanceHistoryManager {
 
     private void compareApplicationProperties(HistoryEntryApplicationDto content, ApplicationConfiguration oldConfig,
             ApplicationConfiguration newConfig) {
-        if (strNotEqual(oldConfig.name, newConfig.name)) {
+        if (StringHelper.notEqual(oldConfig.name, newConfig.name)) {
             content.properties.put("Name", new String[] { oldConfig.name, newConfig.name });
         }
-        if (strNotEqual(oldConfig.start.executable, newConfig.start.executable)) {
+        if (StringHelper.notEqual(oldConfig.start.executable, newConfig.start.executable)) {
             content.properties.put("Executable path", new String[] { oldConfig.start.executable, newConfig.start.executable });
         }
 
@@ -789,26 +733,26 @@ public class InstanceHistoryManager {
 
         // test for differences in http endpoint properties
 
-        if (strNotEqual(oldEndpoint.authPass, newEndpoint.authPass)) {
+        if (StringHelper.notEqual(oldEndpoint.authPass, newEndpoint.authPass)) {
             content.properties.put("Authentication password", null);
         }
-        if (strNotEqual(oldEndpoint.authUser, newEndpoint.authUser)) {
+        if (StringHelper.notEqual(oldEndpoint.authUser, newEndpoint.authUser)) {
             content.properties.put("User", new String[] { oldEndpoint.authUser, newEndpoint.authUser });
         }
         if (oldEndpoint.authType != newEndpoint.authType) {
             content.properties.put("Authentication type",
                     new String[] { oldEndpoint.authType.name(), newEndpoint.authType.name() });
         }
-        if (strNotEqual(oldEndpoint.path, newEndpoint.path)) {
+        if (StringHelper.notEqual(oldEndpoint.path, newEndpoint.path)) {
             content.properties.put("Path", new String[] { oldEndpoint.path, newEndpoint.path });
         }
-        if (strNotEqual(oldEndpoint.port, newEndpoint.port)) {
+        if (StringHelper.notEqual(oldEndpoint.port, newEndpoint.port)) {
             content.properties.put("Port", new String[] { oldEndpoint.port, newEndpoint.port });
         }
-        if (strNotEqual(oldEndpoint.trustStore, newEndpoint.trustStore)) {
+        if (StringHelper.notEqual(oldEndpoint.trustStore, newEndpoint.trustStore)) {
             content.properties.put("Trust-store path", new String[] { oldEndpoint.trustStore, newEndpoint.trustStore });
         }
-        if (strNotEqual(oldEndpoint.trustStorePass, newEndpoint.trustStorePass)) {
+        if (StringHelper.notEqual(oldEndpoint.trustStorePass, newEndpoint.trustStorePass)) {
             content.properties.put("Trust-store password", null);
         }
 
