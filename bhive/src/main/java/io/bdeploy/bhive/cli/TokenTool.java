@@ -9,6 +9,9 @@ import io.bdeploy.bhive.cli.TokenTool.TokenConfig;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
+import io.bdeploy.common.cli.ToolCategory;
+import io.bdeploy.common.cli.data.DataResult;
+import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.SecurityHelper;
 
@@ -17,6 +20,7 @@ import io.bdeploy.common.security.SecurityHelper;
  * the private key store.
  */
 @Help("Generate, import and verify access tokens.")
+@ToolCategory(BHiveCli.MAINTENANCE_TOOLS)
 @CliName("token")
 public class TokenTool extends ConfiguredCliTool<TokenConfig> {
 
@@ -52,25 +56,28 @@ public class TokenTool extends ConfiguredCliTool<TokenConfig> {
     }
 
     @Override
-    protected void run(TokenConfig config) {
+    protected RenderableResult run(TokenConfig config) {
         helpAndFailIfMissing(config.keystore(), "Missing --keystore");
         Path ksPath = Paths.get(config.keystore());
         char[] pass = config.passphrase() == null ? null : config.passphrase().toCharArray();
 
         if (config.create()) {
-            createNewToken(ksPath, pass);
+            return createNewToken(ksPath, pass);
         } else if (config.load()) {
             helpAndFailIfMissing(config.pack(), "Missing --pack");
 
             importExistingToken(ksPath, pass, config.pack());
+            return createSuccess();
         } else if (config.check()) {
             helpAndFailIfMissing(config.token(), "Missing --token");
 
-            checkExistingToken(ksPath, pass, config.token());
+            return checkExistingToken(ksPath, pass, config.token());
         } else if (config.dump()) {
             dumpExistingToken(ksPath, pass);
+            return null; // special output
+        } else {
+            return createNoOp();
         }
-
     }
 
     private void dumpExistingToken(Path ksPath, char[] pass) {
@@ -84,20 +91,19 @@ public class TokenTool extends ConfiguredCliTool<TokenConfig> {
         }
     }
 
-    private void createNewToken(Path keystore, char[] passphrase) {
+    private DataResult createNewToken(Path keystore, char[] passphrase) {
         SecurityHelper helper = SecurityHelper.getInstance();
         ApiAccessToken aat = new ApiAccessToken.Builder().forSystem().addPermission(ApiAccessToken.ADMIN_PERMISSION).build();
 
-        out().println("Generating token with 50 years validity");
-
         try {
             String pack = helper.createSignaturePack(aat, keystore, passphrase);
-
-            out().println("Import the following key on the remote using the --load option of the token tool (copy & paste):");
             out().println(pack);
         } catch (Exception e) {
             throw new IllegalStateException("cannot create signature pack", e);
         }
+
+        return createSuccess().addField("Valid For", "50 years").addField("Issued To", aat.getIssuedTo()).addField("Permissions",
+                aat.getPermissions().toString());
     }
 
     private void importExistingToken(Path keystore, char[] passphrase, String sigPack) {
@@ -110,7 +116,7 @@ public class TokenTool extends ConfiguredCliTool<TokenConfig> {
         }
     }
 
-    private void checkExistingToken(Path keystore, char[] passphrase, String token) {
+    private DataResult checkExistingToken(Path keystore, char[] passphrase, String token) {
         checkPrivateKeyStoreExists(keystore);
 
         SecurityHelper helper = SecurityHelper.getInstance();
@@ -119,12 +125,12 @@ public class TokenTool extends ConfiguredCliTool<TokenConfig> {
             KeyStore ks = helper.loadPrivateKeyStore(keystore, passphrase);
             ApiAccessToken pl = helper.getVerifiedPayload(token, ApiAccessToken.class, ks);
             if (pl == null) {
-                out().println("Invalid signature.");
+                return createResultWithMessage("Invalid signature.");
             } else {
                 if (!pl.isValid()) {
-                    out().println("Signature valid, but token expired");
+                    return createResultWithMessage("Signature valid, but token expired");
                 } else {
-                    out().println("Signature valid. Issued to " + pl.getIssuedTo() + ".");
+                    return createResultWithMessage("Signature valid. Issued to " + pl.getIssuedTo() + ".");
                 }
             }
         } catch (Exception e) {

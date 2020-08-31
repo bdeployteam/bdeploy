@@ -26,12 +26,14 @@ if NOT "%ERRORLEVEL%" == "0" (
 )
 
 @rem Execute ${applicationName} (--updateDir BDEPLOY EXTENSION)
-echo "Starting minion with embedded JVM."
+@rem echo "Starting minion with embedded JVM."
 "%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %${optsEnvironmentVar}% <% if ( appNameSystemProperty ) { %>"-D${appNameSystemProperty}=%APP_BASE_NAME%"<% } %> -classpath %CLASSPATH% ${mainClassName} %CMD_LINE_ARGS% "--updateDir=%APP_HOME%\\update"
 
 @rem update requested (exit code == 42)
 IF NOT "%ERRORLEVEL%"=="42" (
-    echo "Minion terminated with exit code %ERRORLEVEL%."
+    IF NOT "%ERRORLEVEL%"=="0" (
+        echo "Minion terminated with exit code %ERRORLEVEL%."
+    )
     goto :end
 )
 echo "Minion signalled update request."

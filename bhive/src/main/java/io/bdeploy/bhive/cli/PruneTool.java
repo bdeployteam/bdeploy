@@ -12,6 +12,9 @@ import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
+import io.bdeploy.common.cli.ToolCategory;
+import io.bdeploy.common.cli.data.DataResult;
+import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.util.UnitHelper;
 
 /**
@@ -19,6 +22,7 @@ import io.bdeploy.common.util.UnitHelper;
  * deleting a manifest.
  */
 @Help("Prune any unreferenced objects from the given BHive")
+@ToolCategory(BHiveCli.MAINTENANCE_TOOLS)
 @CliName("prune")
 public class PruneTool extends ConfiguredCliTool<PruneConfig> {
 
@@ -37,17 +41,21 @@ public class PruneTool extends ConfiguredCliTool<PruneConfig> {
     }
 
     @Override
-    protected void run(PruneConfig config) {
+    protected RenderableResult run(PruneConfig config) {
         helpAndFailIfMissing(config.hive(), "Missing --hive");
 
         try (BHive hive = new BHive(Paths.get(config.hive()).toUri(), getActivityReporter())) {
             SortedMap<ObjectId, Long> result = hive.execute(new PruneOperation());
 
+            DataResult r = createSuccess();
             if (config.verbose()) {
-                result.forEach((k, v) -> out().println(String.format("%1$s %2$s", k, UnitHelper.formatFileSize(v))));
+                result.forEach((k, v) -> r.addField(k.toString(), UnitHelper.formatFileSize(v)));
             }
             long sum = result.values().stream().collect(Collectors.summarizingLong(x -> x)).getSum();
-            out().println(String.format("Removed %1$d objects (%2$s).", result.size(), UnitHelper.formatFileSize(sum)));
+            r.addField("Sum Objects Removed", Integer.toString(result.size()));
+            r.addField("Sum Bytes Freed", UnitHelper.formatFileSize(sum));
+
+            return r;
         }
     }
 

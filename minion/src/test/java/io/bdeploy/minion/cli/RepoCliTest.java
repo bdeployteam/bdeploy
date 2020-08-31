@@ -20,6 +20,7 @@ import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.minion.TestMinion.AuthPack;
+import io.bdeploy.ui.cli.RemoteRepoTool;
 
 @ExtendWith(TestMinion.class)
 public class RepoCliTest {

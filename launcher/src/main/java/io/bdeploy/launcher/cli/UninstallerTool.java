@@ -19,6 +19,7 @@ import io.bdeploy.common.Version;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
+import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.launcher.cli.UninstallerTool.UninstallerConfig;
@@ -44,7 +45,7 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
     }
 
     @Override
-    protected void run(UninstallerConfig config) {
+    protected RenderableResult run(UninstallerConfig config) {
         if (config.app() == null) {
             throw new IllegalStateException("Missing --app argument");
         }
@@ -62,6 +63,7 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
         } finally {
             MarkerDatabase.unlockRoot(rootDir);
         }
+        return createSuccess();
     }
 
     /** Uninstall the given application and removes all not required artifacts */

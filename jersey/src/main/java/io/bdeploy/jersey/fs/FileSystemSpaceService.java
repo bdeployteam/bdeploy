@@ -23,25 +23,37 @@ public class FileSystemSpaceService {
     @Named(JerseyServer.FILE_SYSTEM_MIN_SPACE)
     private Provider<Long> minFreeBytes;
 
+    public long getFreeSpace(Path path) {
+        try {
+            FileStore store = Files.getFileStore(path);
+            if (store == null) {
+                return -1; // cannot check;
+            }
+            long free = store.getUsableSpace();
+            return free;
+        } catch (Exception e) {
+            log.error("Cannot check remaining free disc space for {}", path, e);
+            return -1;
+        }
+    }
+
     /**
      * @param path the path to check
      * @return whether this path (or it's parent directory) has enough free space as configured in the MinionState's
      *         storageMinFree property.
      */
     public boolean hasFreeSpace(Path path) {
-        try {
-            FileStore store = Files.getFileStore(path);
+        long freeSpace = getFreeSpace(path);
 
-            // minFreeBytes is not bound in case of tests, etc.
-            if (store == null || minFreeBytes.get() == null) {
-                return true; // cannot check.
-            }
-            long free = store.getUsableSpace();
-            return free > minFreeBytes.get();
-        } catch (Exception e) {
-            log.error("Cannot check remaining free disc space for {}", path, e);
-            return true; // safety fallback - we continue even though dangerous..
+        // minFreeBytes is not bound in case of tests, etc.
+        if (minFreeBytes.get() == null) {
+            return true; // cannot check.
         }
+
+        if (freeSpace < 0) {
+            return true; // safety fallback - we continue even though dangerous.. 
+        }
+        return freeSpace > minFreeBytes.get();
     }
 
 }

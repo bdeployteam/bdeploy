@@ -10,8 +10,12 @@ import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
+import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.ToolDefaultVerbose;
+import io.bdeploy.common.cli.data.DataResult;
+import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.DurationHelper;
 import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 
@@ -24,6 +28,7 @@ import io.bdeploy.jersey.cli.RemoteServiceTool;
  * file.
  */
 @Help("Push Manifest(s) to a remote BHive instance.")
+@ToolCategory(BHiveCli.REMOTE_TOOLS)
 @CliName("push")
 @ToolDefaultVerbose(true)
 public class PushTool extends RemoteServiceTool<PushConfig> {
@@ -47,7 +52,7 @@ public class PushTool extends RemoteServiceTool<PushConfig> {
     }
 
     @Override
-    protected void run(PushConfig config, RemoteService svc) {
+    protected RenderableResult run(PushConfig config, RemoteService svc) {
         helpAndFailIfMissing(config.hive(), "Missing --hive");
         helpAndFailIfMissing(config.target(), "Missing --target");
 
@@ -61,9 +66,14 @@ public class PushTool extends RemoteServiceTool<PushConfig> {
 
             TransferStatistics stats = hive.execute(op);
 
-            out().println(String.format("Pushed %1$d manifests. %2$d of %3$d trees reused, %4$d objects sent (%5$s)",
-                    stats.sumManifests, stats.sumTrees - stats.sumMissingTrees, stats.sumTrees, stats.sumMissingObjects,
-                    UnitHelper.formatFileSize(stats.transferSize)));
+            DataResult result = createSuccess();
+            result.addField("Number of Manifests", stats.sumManifests);
+            result.addField("Number of reused Trees", stats.sumTrees - stats.sumMissingTrees);
+            result.addField("Number of Objects", stats.sumMissingObjects);
+            result.addField("Transfer size", UnitHelper.formatFileSize(stats.transferSize));
+            result.addField("Duration", DurationHelper.formatDuration(stats.duration));
+
+            return result;
         }
     }
 

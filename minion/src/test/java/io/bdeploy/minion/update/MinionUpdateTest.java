@@ -37,8 +37,8 @@ import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.minion.TestMinion.AuthPack;
 import io.bdeploy.minion.cli.MinionServerCli;
-import io.bdeploy.minion.cli.RemoteMasterTool;
 import io.bdeploy.pcu.TestAppFactory;
+import io.bdeploy.ui.cli.RemoteMasterTool;
 
 @ExtendWith(TestMinion.class)
 @ExtendWith(TempDirectory.class)
@@ -86,7 +86,7 @@ public class MinionUpdateTest {
         local.execute(new PushOperation().addManifest(winUpdateKey).setRemote(remote));
         local.execute(new PushOperation().addManifest(linuxUpdateKey).setRemote(remote));
         local.execute(new PushOperation().addManifest(macUpdateKey).setRemote(remote));
-        UpdateHelper.update(remote, Arrays.asList(winUpdateKey, linuxUpdateKey, macUpdateKey), true);
+        UpdateHelper.update(remote, Arrays.asList(winUpdateKey, linuxUpdateKey, macUpdateKey), true, null);
 
         // check that an update was triggered
         assertTrue(updateTriggered.get());

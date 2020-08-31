@@ -7,7 +7,7 @@ public class ExceptionHelper {
     private ExceptionHelper() {
     }
 
-    public static String mapExceptionCausesToReason(Exception exception) {
+    public static String mapExceptionCausesToReason(Throwable exception) {
         if (exception == null) {
             return "<unknown>";
         }

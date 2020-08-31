@@ -5,6 +5,8 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -49,6 +51,7 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
     public TransferStatistics call() throws Exception {
         TransferStatistics stats = new TransferStatistics();
 
+        Instant start = Instant.now();
         try (Activity activity = getActivityReporter().start("Pushing manifests...", -1)) {
             if (manifests.isEmpty()) {
                 manifests.addAll(execute(new ManifestListOperation()));
@@ -104,6 +107,8 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
                 // STEP 6: copy objects and manifests
                 stats.transferSize = push(rh, missingObjects, manifests).transferSize;
             }
+        } finally {
+            stats.duration = Duration.between(start, Instant.now()).toMillis();
         }
         return stats;
     }

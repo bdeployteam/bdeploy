@@ -10,6 +10,8 @@ import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.MinionRootValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
+import io.bdeploy.common.cli.ToolCategory;
+import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
@@ -21,6 +23,7 @@ import io.bdeploy.minion.cli.HostnameTool.HostnameConfig;
  * Manages storage locations.
  */
 @Help("Manage the minions hostname property.")
+@ToolCategory(MinionServerCli.MGMT_TOOLS)
 @CliName("hostname")
 public class HostnameTool extends ConfiguredCliTool<HostnameConfig> {
 
@@ -40,7 +43,7 @@ public class HostnameTool extends ConfiguredCliTool<HostnameConfig> {
     }
 
     @Override
-    protected void run(HostnameConfig config) {
+    protected RenderableResult run(HostnameConfig config) {
         helpAndFailIfMissing(config.root(), "Missing --root");
         helpAndFailIfMissing(config.update(), "Missing --update");
 
@@ -61,6 +64,7 @@ public class HostnameTool extends ConfiguredCliTool<HostnameConfig> {
 
             r.modifyState(s -> s.officialName = config.update());
         }
+        return createSuccess();
     }
 
 }

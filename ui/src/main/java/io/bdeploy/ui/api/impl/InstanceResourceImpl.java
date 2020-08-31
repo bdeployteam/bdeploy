@@ -21,14 +21,21 @@ import java.util.TreeMap;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.Response.Status.Family;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriBuilder;
 
 import org.apache.commons.codec.binary.Base64;
+import org.glassfish.jersey.media.multipart.MultiPart;
+import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,6 +98,7 @@ import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
 import io.bdeploy.ui.InstanceEntryStreamRequestService;
 import io.bdeploy.ui.InstanceEntryStreamRequestService.EntryRequest;
@@ -560,6 +568,18 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     @Override
+    public void updateTo(String instanceId, String productTag) {
+        InstanceManifest instance = InstanceManifest.load(hive, instanceId, null);
+        RemoteService svc = mp.getControllingMaster(hive, instance.getManifest());
+
+        MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
+        master.getNamedMaster(group).updateTo(instanceId, productTag);
+
+        syncInstance(minion, rc, group, instanceId);
+        iem.stateChanged(instance.getManifest());
+    }
+
+    @Override
     public InstanceManifestHistoryDto getHistory(String instanceId, String tag) {
         InstanceManifest instance = InstanceManifest.load(hive, instanceId, tag);
         InstanceManifestHistory history = instance.getHistory(hive);
@@ -805,6 +825,33 @@ public class InstanceResourceImpl implements InstanceResource {
             throw new WebApplicationException("Cannot load " + instanceId, Status.NOT_FOUND);
         }
 
+        if (minion.getMode() == MinionMode.CENTRAL) {
+            // MUST delegate this 1:1 to managed
+            RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
+
+            try (MultiPart mp = new MultiPart()) {
+                StreamDataBodyPart bp = new StreamDataBodyPart("file", inputStream);
+                bp.setFilename("instance.zip");
+                bp.setMediaType(MediaType.APPLICATION_OCTET_STREAM_TYPE);
+                mp.bodyPart(bp);
+
+                WebTarget target = JerseyClientFactory.get(svc).getBaseTarget()
+                        .path("/group/" + group + "/instance/" + instanceId + "/import");
+                Response response = target.request().post(Entity.entity(mp, MediaType.MULTIPART_FORM_DATA_TYPE));
+
+                if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
+                    throw new IllegalStateException("Import failed: " + response.getStatusInfo().getStatusCode() + ": "
+                            + response.getStatusInfo().getReasonPhrase());
+                }
+                syncInstance(minion, rc, group, instanceId);
+
+                return response.readEntity(new GenericType<List<Key>>() {
+                });
+            } catch (IOException e) {
+                throw new WebApplicationException("Cannot delegate import to managed server", e);
+            }
+        }
+
         Path zip = minion.getDownloadDir().resolve(UuidHelper.randomId() + ".zip");
         try {
             Files.copy(inputStream, zip);
@@ -814,7 +861,6 @@ public class InstanceResourceImpl implements InstanceResource {
             nodes.forEach(config::addMinion);
 
             Key newKey = InstanceImportExportHelper.importFrom(zip, hive, instanceId, config);
-            syncInstance(minion, rc, group, instanceId);
             iem.create(newKey);
             return Collections.singletonList(newKey);
         } catch (IOException e) {

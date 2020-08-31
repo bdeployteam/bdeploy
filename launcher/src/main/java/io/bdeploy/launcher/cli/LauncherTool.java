@@ -41,6 +41,8 @@ import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.ExistingPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
+import io.bdeploy.common.cli.data.RenderableResult;
+import io.bdeploy.common.util.DurationHelper;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
@@ -160,7 +162,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     }
 
     @Override
-    protected void run(LauncherConfig config) {
+    protected RenderableResult run(LauncherConfig config) {
         Auditor auditor = null;
         try {
             doInit(config);
@@ -231,7 +233,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 // Wait until the process terminates
                 if (config.dontWait()) {
                     log.info("Detaching and terminating.");
-                    return;
+                    return null;
                 }
                 int exitCode = doMonitorProcess(process);
 
@@ -241,7 +243,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 if (clientAppCfg == null) {
                     log.info("Delegated launcher terminated with exit code {}.", exitCode);
                     doExit(exitCode);
-                    return;
+                    return null;
                 }
 
                 // Application request an update. We will terminate the launcher
@@ -251,7 +253,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 if (exitCodes != null && exitCodes.update != null && exitCodes.update == exitCode) {
                     log.info("Application signaled that updates should be installed. Restarting...");
                     doExit(UpdateHelper.CODE_UPDATE);
-                    return;
+                    return null;
                 }
                 log.info("Application terminated with exit code {}.", exitCode);
             }
@@ -274,6 +276,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 auditor.close();
             }
         }
+
+        return null;
     }
 
     /** Terminates the VM with the given exit code */

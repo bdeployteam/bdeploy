@@ -1,7 +1,7 @@
 package io.bdeploy.bhive.cli;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -70,11 +70,11 @@ public class BasicToolTest {
 
         // check with tool whether the manifest is there
         String[] output = tools.execute(ManifestTool.class, hiveArg, "--list", "--manifest=test:v1");
-        assertThat(output[0], startsWith("test:v1"));
+        assertThat(output[1], containsString("test:v1"));
 
         // perform FSCK to check for broken database
         output = tools.execute(FsckTool.class, hiveArg, "--manifest=test:v1");
-        assertThat(output[0].trim(), is("Check OK"));
+        assertThat(output[1].trim(), containsString("Success"));
 
         // export to other directory and compare with original source.
         tools.execute(ExportTool.class, hiveArg, "--manifest=test:v1", "--target=" + expDir.toString());
@@ -90,12 +90,12 @@ public class BasicToolTest {
         tools.execute(ImportTool.class, hiveArg, "--source=" + smallSrc2Dir, "--manifest=" + anotherKey2);
 
         output = tools.execute(TreeTool.class, hiveArg, "--list=" + anotherKey);
-        assertEquals(4, output.length);
+        assertEquals(7, output.length);
 
         output = tools.execute(TreeTool.class, hiveArg, "--diff=" + anotherKey, "--diff=" + anotherKey2);
         // one content diff (root), one only left (test.txt), one only right
         // (another.txt).
-        assertEquals(4, output.length);
+        assertEquals(7, output.length);
 
         tools.execute(ManifestTool.class, hiveArg, "--delete", "--manifest=test:v1");
         tools.execute(ManifestTool.class, hiveArg, "--delete", "--manifest=another:v2");

@@ -1,6 +1,5 @@
 package io.bdeploy.minion.cli;
 
-import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -11,8 +10,13 @@ import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.MinionRootValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
+import io.bdeploy.common.cli.ToolCategory;
+import io.bdeploy.common.cli.data.DataTable;
+import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.jersey.audit.AuditRecord;
+import io.bdeploy.jersey.fs.FileSystemSpaceService;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.cli.StorageTool.StorageConfig;
 
@@ -20,6 +24,7 @@ import io.bdeploy.minion.cli.StorageTool.StorageConfig;
  * Manages storage locations.
  */
 @Help("Manage storage locations for the minion.")
+@ToolCategory(MinionServerCli.MGMT_TOOLS)
 @CliName("storage")
 public class StorageTool extends ConfiguredCliTool<StorageConfig> {
 
@@ -45,31 +50,36 @@ public class StorageTool extends ConfiguredCliTool<StorageConfig> {
     }
 
     @Override
-    protected void run(StorageConfig config) {
+    protected RenderableResult run(StorageConfig config) {
         helpAndFailIfMissing(config.root(), "Missing --root");
 
-        PrintStream out = out();
         try (MinionRoot r = new MinionRoot(Paths.get(config.root()), getActivityReporter())) {
             List<Path> original = r.getStorageLocations();
             if (config.add() != null) {
                 Path p = Paths.get(config.add());
                 if (original.contains(p)) {
-                    out.println(p + " already registered");
-                    return;
+                    return createResultWithMessage(p + " already registered.");
                 }
                 PathHelper.mkdirs(p);
                 r.getAuditor().audit(
                         AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("add-storage").build());
                 r.modifyState(s -> s.storageLocations.add(p));
+                return createSuccess();
             } else if (config.remove() != null) {
                 r.getAuditor().audit(
                         AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("remove-storage").build());
                 Path p = Paths.get(config.remove());
                 r.modifyState(s -> s.storageLocations.remove(p));
+                return createSuccess();
             } else if (config.list()) {
-                r.getStorageLocations().forEach(out::println);
+                DataTable t = createDataTable();
+                t.column("Storage Path", 100).column("Free Space", 20);
+                FileSystemSpaceService fsss = new FileSystemSpaceService();
+                r.getStorageLocations()
+                        .forEach(l -> t.row().cell(l).cell(UnitHelper.formatFileSize(fsss.getFreeSpace(l))).build());
+                return t;
             } else {
-                out.println("Nothing to do.");
+                return createNoOp();
             }
         }
     }

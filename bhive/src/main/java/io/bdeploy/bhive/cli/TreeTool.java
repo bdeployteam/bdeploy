@@ -25,12 +25,16 @@ import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
+import io.bdeploy.common.cli.ToolCategory;
+import io.bdeploy.common.cli.data.DataResult;
+import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.util.UnitHelper;
 
 /**
  * A tool to list and diff {@link Manifest} {@link Tree}s.
  */
 @Help("Query and diff manifest root trees in the given BHive")
+@ToolCategory(BHiveCli.MAINTENANCE_TOOLS)
 @CliName("tree")
 public class TreeTool extends ConfiguredCliTool<TreeConfig> {
 
@@ -42,7 +46,7 @@ public class TreeTool extends ConfiguredCliTool<TreeConfig> {
         @EnvironmentFallback("BHIVE")
         String hive();
 
-        @Help("List available manifests")
+        @Help("List content of given manifest")
         String list();
 
         @Help("Give two manifests to diff.")
@@ -54,13 +58,14 @@ public class TreeTool extends ConfiguredCliTool<TreeConfig> {
     }
 
     @Override
-    protected void run(TreeConfig config) {
+    protected RenderableResult run(TreeConfig config) {
         helpAndFailIfMissing(config.hive(), "Missing --hive");
 
         try (BHive hive = new BHive(Paths.get(config.hive()).toUri(), getActivityReporter())) {
             if (config.list() != null) {
                 TreeView snap = hive.execute(new ScanOperation().setManifest(Manifest.Key.parse(config.list())));
                 format(snap);
+                return createSuccess();
             } else if (config.diff().length > 0) {
                 if (config.diff().length != 2) {
                     helpAndFail("Currently only support diff of two manifests");
@@ -68,12 +73,14 @@ public class TreeTool extends ConfiguredCliTool<TreeConfig> {
                 TreeView t1 = hive.execute(new ScanOperation().setManifest(Manifest.Key.parse(config.diff()[0])));
                 TreeView t2 = hive.execute(new ScanOperation().setManifest(Manifest.Key.parse(config.diff()[1])));
 
-                format(new TreeDiff(t1, t2).diff(), t1, hive);
+                return format(new TreeDiff(t1, t2).diff(), t1, hive);
+            } else {
+                return createNoOp();
             }
         }
     }
 
-    private void format(List<TreeElementDiff> diff, TreeView original, BHive hive) {
+    private DataResult format(List<TreeElementDiff> diff, TreeView original, BHive hive) {
         for (TreeElementDiff ted : diff) {
             switch (ted.getType()) {
                 case CONTENT_DIFF:
@@ -107,7 +114,7 @@ public class TreeTool extends ConfiguredCliTool<TreeConfig> {
 
         Long size = hive.execute(oso);
 
-        out().println("updating from left to right would require a " + UnitHelper.formatFileSize(size) + " transfer.");
+        return createSuccess().addField("Difference Size", UnitHelper.formatFileSize(size));
     }
 
     private void format(TreeView snap) {

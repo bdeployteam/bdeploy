@@ -538,7 +538,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
         // Trigger the update on the master node
         RemoteService svc = getConfiguredRemote(groupName, serverName);
-        UpdateHelper.update(svc, server, true);
+        UpdateHelper.update(svc, server, true, context);
 
         // update the information in the hive.
         BHive hive = getInstanceGroupHive(groupName);

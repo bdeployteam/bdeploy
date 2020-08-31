@@ -1,4 +1,4 @@
-package io.bdeploy.minion.cli;
+package io.bdeploy.ui.cli;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,20 +19,22 @@ import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
+import io.bdeploy.common.cli.ToolCategory;
+import io.bdeploy.common.cli.data.DataResult;
+import io.bdeploy.common.cli.data.DataTable;
+import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
-import io.bdeploy.interfaces.plugin.PluginHeader;
 import io.bdeploy.interfaces.plugin.PluginInfoDto;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
-import io.bdeploy.minion.cli.RemotePluginTool.RemotePluginConfig;
 import io.bdeploy.ui.api.PluginResource;
+import io.bdeploy.ui.cli.RemotePluginTool.RemotePluginConfig;
 
 @Help("Investigate a remote master's plugins")
+@ToolCategory(TextUIResources.UI_CATEGORY)
 @CliName("remote-plugin")
 public class RemotePluginTool extends RemoteServiceTool<RemotePluginConfig> {
-
-    private static final String PLUGIN_STATUS_FORMAT = "%1$-41s %2$-30s %3$-10s %4$-7s %5$-7s";
 
     public @interface RemotePluginConfig {
 
@@ -61,24 +63,28 @@ public class RemotePluginTool extends RemoteServiceTool<RemotePluginConfig> {
     }
 
     @Override
-    protected void run(RemotePluginConfig config, RemoteService svc) {
-        PluginResource client = ResourceProvider.getResource(svc, PluginResource.class, null);
+    protected RenderableResult run(RemotePluginConfig config, RemoteService svc) {
+        PluginResource client = ResourceProvider.getResource(svc, PluginResource.class, getLocalContext());
 
         if (config.list()) {
             List<PluginInfoDto> loaded = client.getLoadedPlugins();
             List<PluginInfoDto> notLoaded = client.getNotLoadedGlobalPlugin();
 
-            out().println(String.format(PLUGIN_STATUS_FORMAT, "ID", "Name", "Version", "Loaded", "Global"));
+            DataTable table = createDataTable();
+            table.setCaption("Plugins loaded on " + svc.getUri());
+            table.column("ID", 40).column("Name", 30).column("Version", 10).column("Loaded", 6).column("Global", 6);
+
             for (PluginInfoDto dto : loaded) {
-                out().println(String.format(PLUGIN_STATUS_FORMAT, dto.id, dto.name, dto.version, "*", dto.global ? "*" : ""));
+                table.row().cell(dto.id).cell(dto.name).cell(dto.version).cell("*").cell(dto.global ? "*" : "").build();
             }
 
             for (PluginInfoDto dto : notLoaded) {
-                out().println(String.format(PLUGIN_STATUS_FORMAT, dto.id, dto.name, dto.version, "", dto.global ? "*" : ""));
+                table.row().cell(dto.id).cell(dto.name).cell(dto.version).cell("").cell(dto.global ? "*" : "").build();
             }
+            return table;
         } else if (config.add() != null) {
             try {
-                addPlugin(svc, config.add(), config.replace());
+                return addPlugin(svc, config.add(), config.replace());
             } catch (IOException e) {
                 throw new IllegalStateException("Cannot add plugin", e);
             }
@@ -88,19 +94,16 @@ public class RemotePluginTool extends RemoteServiceTool<RemotePluginConfig> {
             client.loadGlobalPlugin(ObjectId.parse(config.load()));
         } else if (config.remove() != null) {
             client.deleteGlobalPlugin(ObjectId.parse(config.remove()));
+        } else {
+            return createNoOp();
         }
+        return createSuccess();
     }
 
-    private void addPlugin(RemoteService svc, String file, boolean replace) throws IOException {
+    private DataResult addPlugin(RemoteService svc, String file, boolean replace) throws IOException {
         Path plugin = Paths.get(file);
         if (!Files.isRegularFile(plugin)) {
-            out().println("Not a file: " + file);
-        }
-
-        try (InputStream is = Files.newInputStream(plugin)) {
-            // throws in case this is not a valid plugin
-            PluginHeader hdr = PluginHeader.read(is);
-            out().println("Adding plugin " + hdr.name + " " + hdr.version);
+            return createResultWithMessage("Not a file: " + file);
         }
 
         try (InputStream is = Files.newInputStream(plugin)) {
@@ -120,6 +123,11 @@ public class RemotePluginTool extends RemoteServiceTool<RemotePluginConfig> {
                     throw new IllegalStateException("Upload failed: " + response.getStatusInfo().getStatusCode() + ": "
                             + response.getStatusInfo().getReasonPhrase());
                 }
+
+                PluginInfoDto pid = response.readEntity(PluginInfoDto.class);
+
+                return createSuccess().addField("Plugin Name", pid.name).addField("Plugin Version", pid.version)
+                        .addField("Plugin ID", pid.id);
             }
         }
     }

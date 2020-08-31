@@ -5,10 +5,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
-import java.util.Locale;
 
 import org.quartz.CronScheduleBuilder;
 
@@ -18,11 +14,16 @@ import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.MinionRootValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
+import io.bdeploy.common.cli.ToolCategory;
+import io.bdeploy.common.cli.data.DataResult;
+import io.bdeploy.common.cli.data.RenderableResult;
+import io.bdeploy.common.util.DateHelper;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.cli.CleanupTool.CleanupConfig;
 import io.bdeploy.minion.job.MasterCleanupJob;
 
 @Help("Manage cleanup settings")
+@ToolCategory(MinionServerCli.MGMT_TOOLS)
 @CliName("cleanup")
 public class CleanupTool extends ConfiguredCliTool<CleanupConfig> {
 
@@ -38,15 +39,12 @@ public class CleanupTool extends ConfiguredCliTool<CleanupConfig> {
         String setSchedule();
     }
 
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
-            .withLocale(Locale.getDefault()).withZone(ZoneId.systemDefault());
-
     public CleanupTool() {
         super(CleanupConfig.class);
     }
 
     @Override
-    protected void run(CleanupConfig config) {
+    protected RenderableResult run(CleanupConfig config) {
         helpAndFailIfMissing(config.root(), "Missing --root");
         Path root = Paths.get(config.root());
         if (!Files.isDirectory(root)) {
@@ -62,9 +60,12 @@ public class CleanupTool extends ConfiguredCliTool<CleanupConfig> {
                 }
 
                 mr.modifyState(s -> s.cleanupSchedule = config.setSchedule());
+                return createSuccess();
             } else {
-                out().println("Cleanup scheduled at: '" + mr.getState().cleanupSchedule + "', last run at "
-                        + FORMATTER.format(Instant.ofEpochMilli(mr.getState().cleanupLastRun)));
+                DataResult result = createEmptyResult();
+                result.addField("Schedule", mr.getState().cleanupSchedule);
+                result.addField("Last Run", DateHelper.format(Instant.ofEpochMilli(mr.getState().cleanupLastRun)));
+                return result;
             }
         }
     }

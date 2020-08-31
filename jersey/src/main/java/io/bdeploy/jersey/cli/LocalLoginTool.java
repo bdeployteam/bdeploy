@@ -8,13 +8,15 @@ import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.RemoteValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
+import io.bdeploy.common.cli.ToolCategory;
+import io.bdeploy.common.cli.data.DataTable;
+import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.jersey.cli.LocalLoginTool.LoginConfig;
 
 @Help("Manage local login sessions")
+@ToolCategory("Local session and scripting commands")
 @CliName("login")
 public class LocalLoginTool extends ConfiguredCliTool<LoginConfig> {
-
-    private static final String LIST_FORMAT = "%1$-20s %2$-30s %3$-15s %4$s";
 
     @Help("Configuration for remote access")
     public @interface LoginConfig {
@@ -48,7 +50,7 @@ public class LocalLoginTool extends ConfiguredCliTool<LoginConfig> {
     }
 
     @Override
-    protected void run(LoginConfig config) {
+    protected RenderableResult run(LoginConfig config) {
         LocalLoginManager llm = new LocalLoginManager();
 
         if (config.add() != null) {
@@ -59,20 +61,27 @@ public class LocalLoginTool extends ConfiguredCliTool<LoginConfig> {
             llm.setCurrent(config.use());
         } else if (config.list()) {
             LocalLoginData data = llm.read();
-            out().println(String.format(LIST_FORMAT, "Name", "URI", "User", "Current"));
+
+            DataTable table = createDataTable();
+            table.column("Name", 15).column("URI", 40).column("User", 20).column("Active", 6);
             for (Map.Entry<String, LocalLoginServer> entry : data.servers.entrySet()) {
-                out().println(String.format(LIST_FORMAT, entry.getKey(), entry.getValue().url, entry.getValue().user,
-                        (data.current != null && data.current.equals(entry.getKey())) ? "*" : ""));
+                table.row().cell(entry.getKey()).cell(entry.getValue().url).cell(entry.getValue().user)
+                        .cell((data.current != null && data.current.equals(entry.getKey())) ? "*" : "").build();
             }
+            return table;
         } else {
-            out().println("No action given...");
+            return createNoOp();
         }
+
+        return createSuccess();
     }
 
     private void addUser(LoginConfig config, LocalLoginManager llm) {
         helpAndFailIfMissing(config.remote(), "Missing --remote");
 
-        out().println("Please specify user and password for " + config.remote());
+        if (config.user() == null || config.password() == null) {
+            out().println("Please specify user and password for " + config.remote());
+        }
 
         String user;
         if (config.user() != null) {
