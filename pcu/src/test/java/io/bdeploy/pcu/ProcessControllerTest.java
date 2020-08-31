@@ -177,8 +177,8 @@ public class ProcessControllerTest {
         t1.join();
         t2.join();
 
-        // One thread must failed to start because the other one holds the lock
-        assertEquals(1, failedCounter.get());
+        // No thread may fail. One waits for the other and then simply does nothing
+        assertEquals(0, failedCounter.get());
         assertEquals(ProcessState.RUNNING, process.getState());
 
         // Stop in parallel
@@ -211,8 +211,8 @@ public class ProcessControllerTest {
         stopLock.await();
         listener.await(TIMEOUT);
 
-        // One thread must failed to start because the other one holds the lock
-        assertEquals(1, failedCounter.get());
+        // No thread may fail. One waits for the other and then simply does nothing
+        assertEquals(0, failedCounter.get());
         assertEquals(ProcessState.STOPPED, process.getState());
     }
 
