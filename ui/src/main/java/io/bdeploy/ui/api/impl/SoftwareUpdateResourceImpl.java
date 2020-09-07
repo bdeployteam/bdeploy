@@ -90,7 +90,7 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
 
     @Override
     public void updateSelf(List<Key> target) {
-        UpdateHelper.update(minion.getSelf(), target, false);
+        UpdateHelper.update(minion.getSelf(), target, false, context);
     }
 
     @Override

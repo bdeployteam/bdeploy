@@ -1,39 +1,42 @@
 package io.bdeploy.minion.cli;
 
-import io.bdeploy.bhive.cli.TokenTool;
 import io.bdeploy.common.cli.ToolBase;
 import io.bdeploy.jersey.cli.LocalLoginTool;
+import io.bdeploy.ui.cli.TextUIResources;
 
 public class MinionServerCli extends ToolBase {
 
+    public static final String SERVER_TOOLS = "Server commands";
+    public static final String MGMT_TOOLS = "Initialization and local configuration management commands";
+    public static final String LOCAL_SESSION_TOOLS = "Local session and scripting commands";
+    public static final String PRODUCT_TOOLS = "Product management commands";
+    public static final String UTIL_TOOLS = "Utility commands";
+
     public MinionServerCli() {
+        // server commands
+        register(MasterTool.class);
+        register(SlaveTool.class);
+
+        // init and local configuration
         register(InitTool.class);
         register(ModeTool.class);
         register(CleanupTool.class);
-        register(SlaveTool.class);
-        register(InteractiveShell.class);
         register(CertUpdateTool.class);
         register(HostnameTool.class);
-
-        // master only tools
-        register(InstanceTool.class);
-        register(MasterTool.class);
-        register(UserTool.class);
         register(StorageTool.class);
-        register(RemoteRepoTool.class);
 
-        // tools for local use
+        // local session and scripting
+        register(InteractiveShell.class);
         register(LocalLoginTool.class);
+
+        // product management
         register(ProductTool.class);
-        register(TokenTool.class);
+
+        // utilities
         register(BHiveWrapperTool.class);
 
-        // remote client
-        register(RemoteMasterTool.class);
-        register(RemoteDeploymentTool.class);
-        register(RemoteProcessTool.class);
-        register(RemoteInstanceGroupTool.class);
-        register(RemotePluginTool.class);
+        // remote text UI
+        TextUIResources.registerTextUi(this);
     }
 
     public static void main(String... args) throws Exception {

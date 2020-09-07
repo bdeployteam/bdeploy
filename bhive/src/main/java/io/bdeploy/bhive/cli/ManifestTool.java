@@ -19,12 +19,18 @@ import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.ObjectListOperation;
+import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.bhive.remote.RemoteBHive;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
+import io.bdeploy.common.cli.ToolCategory;
+import io.bdeploy.common.cli.data.DataResult;
+import io.bdeploy.common.cli.data.DataTable;
+import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.DurationHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 
@@ -32,6 +38,7 @@ import io.bdeploy.jersey.cli.RemoteServiceTool;
  * A tool to list and manage (delete, export) manifests in a hive.
  */
 @Help("Query and manipulate manifests in the given BHive")
+@ToolCategory(BHiveCli.MAINTENANCE_TOOLS)
 @CliName("manifest")
 public class ManifestTool extends RemoteServiceTool<ManifestConfig> {
 
@@ -62,23 +69,23 @@ public class ManifestTool extends RemoteServiceTool<ManifestConfig> {
     }
 
     @Override
-    protected void run(ManifestConfig config, @RemoteOptional RemoteService svc) {
+    protected RenderableResult run(ManifestConfig config, @RemoteOptional RemoteService svc) {
         if (svc == null) {
             helpAndFailIfMissing(config.hive(), "Missing --hive");
         }
 
         if (!config.list() && !config.delete() && config.saveTo() == null) {
-            helpAndFail("Nothing to do, please give more options");
+            return createNoOp();
         }
 
         if (config.hive() != null) {
-            runOnLocalHive(config);
+            return runOnLocalHive(config);
         } else {
-            runOnRemoteHive(config, svc);
+            return runOnRemoteHive(config, svc);
         }
     }
 
-    private void runOnRemoteHive(ManifestConfig config, RemoteService svc) {
+    private RenderableResult runOnRemoteHive(ManifestConfig config, RemoteService svc) {
         if (config.delete()) {
             throw new UnsupportedOperationException("Remote manifest deletion not supported.");
         }
@@ -90,27 +97,35 @@ public class ManifestTool extends RemoteServiceTool<ManifestConfig> {
             if (config.list()) {
                 SortedMap<Manifest.Key, ObjectId> mfs = rh.getManifestInventory();
                 if (mfs.isEmpty()) {
-                    out().println("No manifests found");
+                    return createResultWithMessage("No manifests found");
                 } else {
+                    DataTable table = createDataTable();
+                    table.column("Key", 50).column("Root", 40);
                     mfs.entrySet().stream().filter(e -> matches(e.getKey(), config))
-                            .forEach(e -> out().println(String.format("%1$-70s %2$s", e.getKey(), e.getValue())));
+                            .forEach(e -> table.row().cell(e.getKey()).cell(e.getValue()).build());
+                    return table;
                 }
             }
         }
+
+        return createSuccess();
     }
 
-    private void runOnLocalHive(ManifestConfig config) {
+    private RenderableResult runOnLocalHive(ManifestConfig config) {
         try (BHive hive = new BHive(Paths.get(config.hive()).toUri(), getActivityReporter())) {
 
             if (config.list()) {
                 SortedSet<Manifest.Key> manifests = hive.execute(new ManifestListOperation());
                 if (manifests.isEmpty()) {
-                    out().println("No manifests found");
+                    return createResultWithMessage("No manifests found");
                 } else {
+                    DataTable table = createDataTable();
+                    table.column("Key", 50).column("Root", 40);
                     manifests.stream().filter(x -> matches(x, config)).forEach(e -> {
                         Manifest m = hive.execute(new ManifestLoadOperation().setManifest(e));
-                        out().println(String.format("%1$-70s %2$s", e, m.getRoot()));
+                        table.row().cell(e).cell(m.getRoot().toString()).build();
                     });
+                    return table;
                 }
             }
 
@@ -118,16 +133,20 @@ public class ManifestTool extends RemoteServiceTool<ManifestConfig> {
                 helpAndFailIfMissing(config.manifest(), "Missing --manifest");
                 Key manifest = Manifest.Key.parse(config.manifest());
                 hive.execute(new ManifestDeleteOperation().setToDelete(manifest));
+
+                return createSuccess().addField("Deleted", manifest.toString());
             }
 
             if (config.saveTo() != null) {
-                doSaveTo(config, hive);
+                return doSaveTo(config, hive);
             }
+
+            return createSuccess();
         }
 
     }
 
-    private void doSaveTo(ManifestConfig config, BHive hive) {
+    private DataResult doSaveTo(ManifestConfig config, BHive hive) {
         helpAndFailIfMissing(config.manifest(), "Missing --manifest");
         Key manifest = Manifest.Key.parse(config.manifest());
         Path tmpFile = null;
@@ -145,7 +164,13 @@ public class ManifestTool extends RemoteServiceTool<ManifestConfig> {
                 CopyOperation op = new CopyOperation().setDestinationHive(zipHive);
                 op.addManifest(manifest);
                 objectIds.forEach(op::addObject);
-                hive.execute(op);
+
+                TransferStatistics stats = hive.execute(op);
+                DataResult result = createSuccess();
+                result.addField("Number of Manifests", stats.sumManifests);
+                result.addField("Number of Objects", stats.sumMissingObjects);
+                result.addField("Duration", DurationHelper.formatDuration(stats.duration));
+                return result;
             }
         } catch (Exception ex) {
             throw new IllegalStateException("Failed to save manifest", ex);

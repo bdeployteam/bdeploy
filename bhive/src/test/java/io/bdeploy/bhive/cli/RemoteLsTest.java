@@ -1,6 +1,6 @@
 package io.bdeploy.bhive.cli;
 
-import static org.hamcrest.CoreMatchers.startsWith;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.nio.file.Path;
@@ -28,7 +28,7 @@ public class RemoteLsTest {
         tools.execute(ImportTool.class, "--hive=" + hive, "--manifest=app:v1", "--source=" + smallSrcDir);
 
         String[] output = tools.execute(ManifestTool.class, "--remote=" + hive.toUri(), "--list");
-        assertThat(output[0], startsWith("app:v1"));
+        assertThat(output[1], containsString("app:v1"));
     }
 
 }

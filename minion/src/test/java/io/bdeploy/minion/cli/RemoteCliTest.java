@@ -31,6 +31,9 @@ import io.bdeploy.minion.TestMinion;
 import io.bdeploy.minion.TestMinion.AuthPack;
 import io.bdeploy.minion.deploy.MinionDeployTest;
 import io.bdeploy.ui.api.CleanupResource;
+import io.bdeploy.ui.cli.RemoteDeploymentTool;
+import io.bdeploy.ui.cli.RemoteInstanceTool;
+import io.bdeploy.ui.cli.RemoteProcessTool;
 
 /**
  * Basically the same test as {@link MinionDeployTest} but using the CLI.
@@ -56,22 +59,22 @@ public class RemoteCliTest {
         /* STEP 5: deploy, activate on remote master */
         assertTrue(master.getNamedMaster("demo").getInstanceState(uuid).installedTags.isEmpty());
         tools.execute(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                "--uuid=" + uuid, "--tag=" + instance.getTag(), "--install");
+                "--uuid=" + uuid, "--version=" + instance.getTag(), "--install");
         assertFalse(master.getNamedMaster("demo").getInstanceState(uuid).installedTags.isEmpty());
 
-        tools.execute(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
+        tools.execute(RemoteInstanceTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
                 "--list");
 
         // test uninstall, re-install once
         tools.execute(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                "--uuid=" + uuid, "--tag=" + instance.getTag(), "--uninstall");
+                "--uuid=" + uuid, "--version=" + instance.getTag(), "--uninstall");
         assertTrue(master.getNamedMaster("demo").getInstanceState(uuid).installedTags.isEmpty());
         tools.execute(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                "--uuid=" + uuid, "--tag=" + instance.getTag(), "--install");
+                "--uuid=" + uuid, "--version=" + instance.getTag(), "--install");
         assertFalse(master.getNamedMaster("demo").getInstanceState(uuid).installedTags.isEmpty());
 
         tools.execute(RemoteDeploymentTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                "--uuid=" + uuid, "--tag=" + instance.getTag(), "--activate");
+                "--uuid=" + uuid, "--version=" + instance.getTag(), "--activate");
         assertEquals(instance.getTag(), master.getNamedMaster("demo").getInstanceState(uuid).activeTag);
 
         /* STEP 6: run/control processes on the remote */
@@ -83,7 +86,7 @@ public class RemoteCliTest {
         assertTrue(status.isAppRunningOrScheduled("app"));
 
         tools.execute(RemoteProcessTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
-                "--uuid=" + uuid, "--status");
+                "--uuid=" + uuid, "--list");
 
         // give the script a bit to write output
         Thread.sleep(200);

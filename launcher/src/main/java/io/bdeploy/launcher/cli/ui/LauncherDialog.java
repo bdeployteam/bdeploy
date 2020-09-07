@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
@@ -37,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.bdeploy.common.util.DateHelper;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.ProcessHelper;
@@ -211,8 +211,7 @@ public abstract class LauncherDialog extends JFrame {
     protected static String getDetailedErrorMessage(ClickAndStartDescriptor config, Throwable ex) {
         StringBuilder builder = new StringBuilder();
 
-        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-        builder.append("*** Date: ").append(sdf.format(new Date())).append("\n");
+        builder.append("*** Date: ").append(DateHelper.format(new Date())).append("\n");
         builder.append("\n");
 
         StringWriter writer = new StringWriter();

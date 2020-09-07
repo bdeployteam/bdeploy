@@ -18,6 +18,8 @@ import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.MinionRootValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
+import io.bdeploy.common.cli.ToolCategory;
+import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
@@ -47,6 +49,7 @@ import io.bdeploy.ui.api.impl.UiResources;
  * {@link SlaveDeploymentResource} API calls.
  */
 @Help("Start a Master Minion.")
+@ToolCategory(MinionServerCli.SERVER_TOOLS)
 @CliName("master")
 public class MasterTool extends ConfiguredCliTool<MasterConfig> {
 
@@ -77,7 +80,7 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
     }
 
     @Override
-    protected void run(MasterConfig config) {
+    protected RenderableResult run(MasterConfig config) {
         helpAndFailIfMissing(config.root(), "Missing --root");
 
         ActivityReporter.Delegating delegate = new ActivityReporter.Delegating();
@@ -124,6 +127,8 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
         } catch (Exception e) {
             throw new IllegalStateException("Cannot start master server", e);
         }
+
+        return null; // usually not reached.
     }
 
     public static void registerMasterResources(RegistrationTarget srv, boolean webapp, MinionRoot minionRoot,

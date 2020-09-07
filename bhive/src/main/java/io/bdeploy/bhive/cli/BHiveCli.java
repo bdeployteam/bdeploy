@@ -10,17 +10,25 @@ import io.bdeploy.common.cli.ToolBase;
  */
 public class BHiveCli extends ToolBase {
 
+    static final String FS_TOOLS = "Filesystem interaction commands";
+    static final String MAINTENANCE_TOOLS = "Analysis and maintenance commands";
+    static final String REMOTE_TOOLS = "Remote server interaction commands";
+    static final String SERVER_TOOLS = "Server commands";
+
     public BHiveCli() {
         register(ImportTool.class);
         register(ExportTool.class);
+
         register(ManifestTool.class);
-        register(PushTool.class);
-        register(FetchTool.class);
         register(FsckTool.class);
         register(PruneTool.class);
-        register(ServeTool.class);
         register(TokenTool.class);
         register(TreeTool.class);
+
+        register(PushTool.class);
+        register(FetchTool.class);
+
+        register(ServeTool.class);
     }
 
     public static void main(String... args) throws Exception {

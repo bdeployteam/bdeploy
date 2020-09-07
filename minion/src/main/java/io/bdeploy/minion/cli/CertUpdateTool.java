@@ -13,6 +13,8 @@ import io.bdeploy.common.cfg.ExistingPathValidator;
 import io.bdeploy.common.cfg.MinionRootValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
+import io.bdeploy.common.cli.ToolCategory;
+import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.SecurityHelper;
@@ -25,6 +27,7 @@ import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.cli.CertUpdateTool.CertUpdateConfig;
 
 @Help("Manage minion certificate")
+@ToolCategory(MinionServerCli.MGMT_TOOLS)
 @CliName("certificate")
 public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
 
@@ -51,7 +54,7 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
     }
 
     @Override
-    protected void run(CertUpdateConfig config) {
+    protected RenderableResult run(CertUpdateConfig config) {
         helpAndFailIfMissing(config.root(), "Missing --root");
         Path root = Paths.get(config.root());
 
@@ -77,28 +80,27 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
                     System.in.read();
                 }
 
-                doUpdateCertificate(mr, ks, ksp, cert);
-
-                out().println("Certificate updated.");
+                return doUpdateCertificate(mr, ks, ksp, cert);
             } else if (config.export() != null) {
                 Path pem = Paths.get(config.export());
                 BCX509Helper.exportPrivateCertificateAsPem(ks, ksp, pem);
+                return createSuccess();
             } else {
-                out().println("Nothing to do...");
+                return createNoOp();
             }
         } catch (GeneralSecurityException | IOException e) {
             throw new IllegalStateException("Cannot update certificate", e);
         }
     }
 
-    private void doUpdateCertificate(MinionRoot mr, Path ks, char[] ksp, Path cert) throws GeneralSecurityException, IOException {
+    private RenderableResult doUpdateCertificate(MinionRoot mr, Path ks, char[] ksp, Path cert)
+            throws GeneralSecurityException, IOException {
         mr.getAuditor()
                 .audit(AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("cert-update").build());
         try {
             BCX509Helper.updatePrivateCertificate(ks, ksp, cert);
         } catch (Exception e) {
-            out().println("ERROR: Cannot update certificate!");
-            e.printStackTrace(out());
+            throw new IllegalStateException("Cannot update certificate from " + cert);
         }
 
         // now update the own access token.
@@ -113,6 +115,8 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
         RemoteService newRemote = new RemoteService(minion.remote.getUri(), pack);
         minion.remote = newRemote;
         mf.update(cfg);
+
+        return createSuccess();
     }
 
 }

@@ -22,16 +22,19 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 import com.google.common.base.Splitter;
 
 import io.bdeploy.common.cli.ToolBase;
+import io.bdeploy.common.cli.data.DataTable;
 
 /**
  * The {@link Configuration} is basically a wrapper around a {@link Map} which
@@ -194,16 +197,19 @@ public class Configuration {
         Class<?> returnType = method.getReturnType();
         if (object != null && returnType.isAssignableFrom(object.getClass())) {
             validateOrThrow(object, method, cv, vmsg);
+            Object result = object;
             if (returnType.isAssignableFrom(String.class)) {
-                return mapper.apply(object);
+                result = mapper.apply(object);
             }
-            return object;
+            conversions.put(method, result);
+            return result;
         }
 
         if (returnType.isPrimitive() && !(object instanceof String)) {
             // implicit conversion through boxing/unboxing. let's just hope the types match
             // ;)
             validateOrThrow(object, method, cv, vmsg);
+            conversions.put(method, object);
             return object;
         }
 
@@ -334,24 +340,29 @@ public class Configuration {
      * Analyze {@link Help} annotations on the target {@link Annotation} and print
      * out help information on the given {@link PrintStream}.
      */
-    public static void formatHelp(Class<? extends Annotation> cfg, PrintStream target, String indent) {
-        for (Method m : cfg.getDeclaredMethods()) {
+    public static void formatHelp(Class<? extends Annotation> cfg, DataTable target) {
+        List<Method> declaredMethods = Arrays.asList(cfg.getDeclaredMethods()).stream()
+                .sorted((a, b) -> a.getName().compareTo(b.getName())).collect(Collectors.toList());
+        for (Method m : declaredMethods) {
             Help h = m.getAnnotation(Help.class);
             ConfigurationNameMapping mapping = m.getAnnotation(ConfigurationNameMapping.class);
             String name = m.getName();
             if (mapping != null) {
                 name = mapping.value();
             }
-            if (h != null) {
-                target.println(indent + String.format("%1$20s%2$4s: %3$s", "--" + name, h.arg() ? "=ARG" : "", h.value()));
-            } else {
-                target.println(indent + name);
-            }
 
             EnvironmentFallback env = m.getAnnotation(EnvironmentFallback.class);
+            String envFb = "";
             if (env != null) {
-                target.println(indent + String.format("%1$24s  (Environment variable '%2$s' is used as fallback if not given)",
-                        "", env.value()));
+                envFb = String.format(" (Environment variable '%1$s' is used as fallback if not given).", env.value());
+            }
+
+            String defVal = m.getDefaultValue() != null && h.arg() ? m.getDefaultValue().toString() : "";
+
+            if (h != null) {
+                target.row().cell(" --" + name + (h.arg() ? "=ARG" : "")).cell(h.value() + envFb).cell(defVal).build();
+            } else {
+                target.row().cell(" --" + name).cell(env != null ? envFb.substring(1) : "").cell(defVal).build();
             }
         }
     }

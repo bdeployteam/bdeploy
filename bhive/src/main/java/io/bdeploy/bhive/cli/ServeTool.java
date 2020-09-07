@@ -17,6 +17,8 @@ import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.ExistingPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
+import io.bdeploy.common.cli.ToolCategory;
+import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.jersey.JerseyServer;
 import io.bdeploy.jersey.ws.BroadcastingAuthenticatedWebSocket;
@@ -25,6 +27,7 @@ import io.bdeploy.jersey.ws.BroadcastingAuthenticatedWebSocket;
  * Starts a HTTP(S) server which serves given {@link BHive}s other the network.
  */
 @Help("Serve given BHives over the network.")
+@ToolCategory(BHiveCli.SERVER_TOOLS)
 @CliName("serve")
 public class ServeTool extends ConfiguredCliTool<ServeConfig> {
 
@@ -49,7 +52,7 @@ public class ServeTool extends ConfiguredCliTool<ServeConfig> {
     }
 
     @Override
-    protected void run(ServeConfig config) {
+    protected RenderableResult run(ServeConfig config) {
         helpAndFailIfMissing(config.serve(), "Missing --serve");
         helpAndFailIfMissing(config.keystore(), "Missing --keystore");
 
@@ -77,6 +80,8 @@ public class ServeTool extends ConfiguredCliTool<ServeConfig> {
         } finally {
             hives.forEach((k, v) -> v.close());
         }
+
+        return null; // usually not reached.
     }
 
     private void runServer(short port, Map<String, BHive> hives, KeyStore ks, char[] passphrase) {

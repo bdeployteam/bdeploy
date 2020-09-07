@@ -13,10 +13,12 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import com.codahale.metrics.Timer;
 
@@ -25,6 +27,10 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.cfg.ConfigValidationException;
 import io.bdeploy.common.cfg.Configuration;
 import io.bdeploy.common.cfg.Configuration.Help;
+import io.bdeploy.common.cli.data.DataFormat;
+import io.bdeploy.common.cli.data.DataResult;
+import io.bdeploy.common.cli.data.DataTable;
+import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.metrics.Metrics;
 import io.bdeploy.common.metrics.Metrics.MetricGroup;
 import io.bdeploy.common.util.VersionHelper;
@@ -34,6 +40,23 @@ import io.bdeploy.common.util.VersionHelper;
  */
 @SuppressFBWarnings
 public abstract class ToolBase {
+
+    private static final String[] LOGO = { //
+            "┌──────────────────────────────┐  ", //
+            "│                   ▄▄▄        │  ", //
+            "│                 ██████       │  ", //
+            "│   █▄           ███████▌      │  ", //
+            "│     ▀█        ████████       │  ", //
+            "│ ▀▀▀▀▄▄▀      ▐███████        │  ", //
+            "│       ▀█▄▄▄  ▐████▀          │  ", //
+            "│       ▄█████  ▀▀             │  ", //
+            "│       ▀█████ ▐██  ██▌        │  ", //
+            "│     ▐██████  ██▌ ▐██▌▐██     │  ", //
+            "│      ████▀  ███ ▄███ ███▄    │  ", //
+            "│                ▄███ ▄██▀     │  ", //
+            "│                              │  ", //
+            "└──────────────────────────────┘  ", //
+    };
 
     private static boolean testMode = false;
     private static boolean testModeLLM = false;
@@ -78,6 +101,7 @@ public abstract class ToolBase {
         ActivityReporter reporter = defaultReporter;
         PrintStream output = null;
         PrintStream reporterOutput = null;
+        DataFormat dataMode = DataFormat.TEXT;
 
         boolean verbose = false;
         boolean closeOutput = false;
@@ -111,6 +135,12 @@ public abstract class ToolBase {
                             streamReporter = new ActivityReporter.Stream(reporterOutput);
                             streamReporter.setVerboseSummary(reporter == null);
                             break;
+                        case "--csv":
+                            dataMode = DataFormat.CSV;
+                            break;
+                        case "--json":
+                            dataMode = DataFormat.JSON;
+                            break;
                         case "--version":
                             String version = VersionHelper.getVersion().toString();
                             System.out.println(version);
@@ -132,21 +162,41 @@ public abstract class ToolBase {
             }
 
             if (args.length <= toolArgNum || tools.get(args[toolArgNum]) == null) {
-                System.out.println("Usage: $0 [-q|-v|-o <file>] <tool> <args...>");
-                System.out.println("  -q      Be quiet - no progress reporting.");
-                System.out.println(
-                        "  -v      Be verbose - show a summary of tasks and durations. No effect if -q is given as well.");
-                System.out.println("  -o <f>  Write output to file <f>. No effect on progress output.");
-                System.out.println("  -op <f> Write progress tracking output to file <f>. No effect on normal output.");
-                System.out.println("  Tools:");
-                tools.entrySet().stream().forEach(e -> {
-                    Help h = e.getValue().getAnnotation(Help.class);
-                    if (h != null) {
-                        System.out.println("  " + String.format("%1$12s: %2$s", e.getKey(), h.value()));
-                    } else {
-                        System.out.println("  " + String.format("%1$12s:", e.getKey()));
-                    }
+                int logo = 0;
+                System.out.println(LOGO[logo++]);
+                System.out.println(LOGO[logo++] + "BHive & BDeploy");
+                System.out.println(LOGO[logo++] + "──────────────────────────────────────────────────────────");
+                System.out.println(LOGO[logo++] + "Usage: $0 <options...> <tool> <args...>");
+                System.out.println(LOGO[logo++]);
+                System.out.println(LOGO[logo++] + "Options:");
+                System.out.println(LOGO[logo++] + "  -q      Be quiet - no progress reporting.");
+                System.out.println(LOGO[logo++] + "  -v      Be verbose. No effect if -q is given as well.");
+                System.out.println(LOGO[logo++] + "  -o <f>  Write output to file <f>. No effect on progress output.");
+                System.out.println(LOGO[logo++] + "  -op <f> Write progress tracking output to file <f>. No");
+                System.out.println(LOGO[logo++] + "          effect on normal output.");
+                System.out.println(LOGO[logo++] + "  --csv   Write data tables in CSV format");
+                System.out.println(LOGO[logo++] + "  --json  Write data tables in JSON format");
+                System.out.println(LOGO[logo++]);
+                System.out.println("Tools:");
+                System.out.println();
+                Map<String, List<Entry<String, Class<? extends CliTool>>>> grouped = tools.entrySet().stream()
+                        .collect(Collectors.groupingBy(e -> getToolCategory(e.getValue()), TreeMap::new, Collectors.toList()));
+                grouped.entrySet().stream().forEach(group -> {
+                    System.out.println("  " + group.getKey() + ":");
+
+                    DataTable table = DataFormat.TEXT.createTable(System.out);
+                    table.setIndentHint(5).setHideHeadersHint(true).setLineWrapHint(true);
+                    table.column("Tool", 20).column("Description", 60);
+
+                    group.getValue().stream().forEach(e -> {
+                        Help h = e.getValue().getAnnotation(Help.class);
+                        table.row().cell(e.getKey()).cell(h.value() != null ? h.value() : "").build();
+                    });
+                    table.render();
+
+                    System.out.println();
                 });
+
                 if (failWithException || testMode) {
                     throw new IllegalArgumentException("Wrong number of arguments");
                 } else {
@@ -180,6 +230,7 @@ public abstract class ToolBase {
             instance.setOutput(output);
             instance.setVerbose(verbose);
             instance.setActivityReporter(reporter);
+            instance.setDataFormat(dataMode);
 
             if (instance instanceof ConfiguredCliTool) {
                 if (((ConfiguredCliTool<?>) instance).getRawConfiguration().getAllRawObjects().containsKey("help")) {
@@ -189,7 +240,11 @@ public abstract class ToolBase {
 
             try (Timer.Context timer = Metrics.getMetric(MetricGroup.CLI)
                     .timer(instance.getClass().getSimpleName() + "/" + args[toolArgNum]).time()) {
-                instance.run();
+                RenderableResult result = instance.run();
+
+                if (result != null) {
+                    result.render();
+                }
             }
         } catch (RuntimeException t) {
             exc = t;
@@ -216,30 +271,21 @@ public abstract class ToolBase {
         // explicit exit, otherwise non-daemon async jersey threads block.
         // The reason is not jersey itself, but it's usage of ForkJoinPool.commonPool.
         if (exc != null) {
-            // just to make absolutely sure.
-            if (output == null) {
-                output = System.out;
-            }
-
-            if (verbose) {
-                exc.printStackTrace(output);
-            } else {
-                Throwable c = exc;
-                while (c != null) {
-                    output.println("ERROR: " + c.toString());
-
-                    Throwable next = c.getCause();
-                    if (next == c) {
-                        break;
-                    }
-
-                    c = next;
-                }
-            }
+            DataResult result = dataMode.createResult(output);
+            result.setException(exc);
+            result.render();
 
             System.exit(1);
         }
         System.exit(0);
+    }
+
+    private String getToolCategory(Class<? extends CliTool> clazz) {
+        ToolCategory annotation = clazz.getAnnotation(ToolCategory.class);
+        if (annotation == null || annotation.value() == null) {
+            return "Ungrouped Tools";
+        }
+        return annotation.value();
     }
 
     /**
@@ -275,7 +321,7 @@ public abstract class ToolBase {
         return name.value();
     }
 
-    protected void register(Class<? extends CliTool> tool) {
+    public void register(Class<? extends CliTool> tool) {
         tools.put(nameOf(tool), tool);
     }
 
@@ -294,6 +340,7 @@ public abstract class ToolBase {
         private ActivityReporter reporter;
         private PrintStream output = System.out;
         private boolean verbose;
+        private DataFormat dataFormat = DataFormat.TEXT;
 
         /**
          * Set an alternative {@link ActivityReporter}.
@@ -307,6 +354,49 @@ public abstract class ToolBase {
          */
         protected ActivityReporter getActivityReporter() {
             return reporter;
+        }
+
+        /**
+         * Sets the mode to render tables with.
+         */
+        public void setDataFormat(DataFormat dataMode) {
+            this.dataFormat = dataMode;
+        }
+
+        /**
+         * @return the current mode tables are rendered in.
+         */
+        protected DataFormat getDataFormat() {
+            return this.dataFormat;
+        }
+
+        protected DataTable createDataTable() {
+            return dataFormat.createTable(output);
+        }
+
+        protected DataResult createSuccess() {
+            return createResultWithMessage("Success");
+        }
+
+        protected DataResult createNoOp() {
+            return createResultWithMessage("Nothing to do (missing arguments?)");
+        }
+
+        protected DataResult createEmptyResult() {
+            return dataFormat.createResult(output);
+        }
+
+        protected DataResult createResultWithMessage(String message) {
+            DataResult result = dataFormat.createResult(output);
+            result.setMessage(message);
+            return result;
+        }
+
+        protected DataResult createResultWithFields(String message, Map<String, String> fields) {
+            DataResult result = dataFormat.createResult(output);
+            result.setMessage(message);
+            fields.entrySet().forEach(e -> result.addField(e.getKey(), e.getValue()));
+            return result;
         }
 
         /**
@@ -341,7 +431,7 @@ public abstract class ToolBase {
         /**
          * Execute the tool.
          */
-        public abstract void run();
+        public abstract RenderableResult run();
     }
 
     /**
@@ -356,11 +446,11 @@ public abstract class ToolBase {
         }
 
         @Override
-        public final void run() {
-            run(args);
+        public final RenderableResult run() {
+            return run(args);
         }
 
-        protected abstract void run(String[] args);
+        protected abstract RenderableResult run(String[] args);
 
     }
 
@@ -400,7 +490,7 @@ public abstract class ToolBase {
         /**
          * @return all {@link Annotation}s for which to render help output.
          */
-        protected Collection<Class<? extends Annotation>> getConfigsForHelp() {
+        protected List<Class<? extends Annotation>> getConfigsForHelp() {
             return Collections.singletonList(configClass);
         }
 
@@ -416,6 +506,7 @@ public abstract class ToolBase {
                 for (Throwable t : e.getSuppressed()) {
                     out().println("  " + t.getMessage());
                 }
+                out().println();
                 throw e;
             }
         }
@@ -428,8 +519,8 @@ public abstract class ToolBase {
         }
 
         @Override
-        public final void run() {
-            run(getConfig(configClass));
+        public final RenderableResult run() {
+            return run(getConfig(configClass));
         }
 
         /**
@@ -439,7 +530,7 @@ public abstract class ToolBase {
         protected void helpAndFailIfMissing(Object argument, String message) {
             if (argument == null || (argument.getClass().isArray() && Array.getLength(argument) == 0)
                     || ((argument instanceof String) && ((String) argument).isEmpty())) {
-                helpAndFail(message);
+                helpAndFail("ERROR: " + message);
             }
         }
 
@@ -447,12 +538,30 @@ public abstract class ToolBase {
          * Display the help text and fail the tool (<code>System.exit(1)</code>).
          */
         protected void helpAndFail(String message) {
-            System.out.println(message);
-            System.out.println();
-            System.out.println("Usage: " + getClass().getSimpleName() + " <args...>");
-            for (Class<? extends Annotation> x : getConfigsForHelp()) {
-                Configuration.formatHelp(x, System.out, "  ");
+            out().println();
+            out().println(message);
+            out().println();
+            DataTable table = getDataFormat().createTable(out());
+            String name = getClass().getSimpleName();
+            CliName annotation = getClass().getAnnotation(CliName.class);
+            if (annotation != null && annotation.value() != null) {
+                name = annotation.value();
             }
+            Help help = getClass().getAnnotation(Help.class);
+            table.setCaption(name + (help != null && help.value() != null ? (": " + help.value()) : ""));
+            table.setLineWrapHint(true).setIndentHint(2);
+            table.column("Argument", 20).column("Description", 70).column("Default", 10);
+
+            List<Class<? extends Annotation>> configsForHelp = getConfigsForHelp();
+            for (int i = 0; i < configsForHelp.size(); ++i) {
+                Class<? extends Annotation> x = configsForHelp.get(i);
+                Configuration.formatHelp(x, table);
+                if (i != (configsForHelp.size() - 1)) {
+                    table.addHorizontalRuler();
+                }
+            }
+            table.render();
+
             if (failWithException || testMode) {
                 throw new IllegalArgumentException(message);
             } else {
@@ -465,7 +574,7 @@ public abstract class ToolBase {
          *
          * @param config the configuration instance for the tool.
          */
-        protected abstract void run(T config);
+        protected abstract RenderableResult run(T config);
     }
 
 }

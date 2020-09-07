@@ -1,6 +1,5 @@
 package io.bdeploy.minion.cli;
 
-import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.SortedSet;
 
@@ -11,8 +10,6 @@ import io.bdeploy.api.product.v1.impl.RemoteDependencyFetcher;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
-import io.bdeploy.bhive.model.ObjectId;
-import io.bdeploy.bhive.op.ObjectLoadOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.common.cfg.Configuration.ConfigurationNameMapping;
@@ -21,20 +18,23 @@ import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.ExistingPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
+import io.bdeploy.common.cli.ToolCategory;
+import io.bdeploy.common.cli.data.DataResult;
+import io.bdeploy.common.cli.data.DataTable;
+import io.bdeploy.common.cli.data.DataTableColumn;
+import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.DurationHelper;
 import io.bdeploy.common.util.UnitHelper;
-import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
-import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
-import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
-import io.bdeploy.interfaces.plugin.PluginHeader;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.minion.cli.ProductTool.ProductConfig;
 
 /**
  * Manages product manifests.
  */
-@Help("Manage product manifests.")
+@Help("Create and manage product manifests locally.")
+@ToolCategory(MinionServerCli.PRODUCT_TOOLS)
 @CliName("product")
 public class ProductTool extends RemoteServiceTool<ProductConfig> {
 
@@ -65,22 +65,22 @@ public class ProductTool extends RemoteServiceTool<ProductConfig> {
     }
 
     @Override
-    protected void run(ProductConfig config, @RemoteOptional RemoteService svc) {
+    protected RenderableResult run(ProductConfig config, @RemoteOptional RemoteService svc) {
         helpAndFailIfMissing(config.hive(), "Missing --hive");
 
         try (BHive hive = new BHive(Paths.get(config.hive()).toUri(), getActivityReporter())) {
             if (config.list()) {
-                listProducts(hive);
+                return listProducts(hive);
             } else if (config.imp() != null) {
-                importProduct(config, svc, hive);
+                return importProduct(config, svc, hive);
             } else {
-                helpAndFail("Missing --list or --import argument");
+                return createNoOp();
             }
         }
 
     }
 
-    private void importProduct(ProductConfig config, RemoteService svc, BHive hive) {
+    private DataResult importProduct(ProductConfig config, RemoteService svc, BHive hive) {
         DependencyFetcher fetcher;
         if (svc != null) {
             fetcher = new RemoteDependencyFetcher(svc, config.instanceGroup(), getActivityReporter());
@@ -88,7 +88,10 @@ public class ProductTool extends RemoteServiceTool<ProductConfig> {
             fetcher = new LocalDependencyFetcher();
         }
 
+        DataResult result = createSuccess();
         Manifest.Key key = ProductManifestBuilder.importFromDescriptor(Paths.get(config.imp()), hive, fetcher, true);
+
+        result.addField("Product Manifest", key);
 
         if (config.push()) {
             helpAndFailIfMissing(svc, "missing --remote");
@@ -96,52 +99,35 @@ public class ProductTool extends RemoteServiceTool<ProductConfig> {
             TransferStatistics stats = hive
                     .execute(new PushOperation().setRemote(svc).setHiveName(config.instanceGroup()).addManifest(key));
 
-            out().println(String.format("Pushed %1$d manifests. %2$d of %3$d trees reused, %4$d objects sent (%5$s)",
-                    stats.sumManifests, stats.sumTrees - stats.sumMissingTrees, stats.sumTrees, stats.sumMissingObjects,
-                    UnitHelper.formatFileSize(stats.transferSize)));
+            result.addField("Number of Manifests", stats.sumManifests);
+            result.addField("Number of reused Trees", stats.sumTrees - stats.sumMissingTrees);
+            result.addField("Number of Objects", stats.sumMissingObjects);
+            result.addField("Transfer size", UnitHelper.formatFileSize(stats.transferSize));
+            result.addField("Duration", DurationHelper.formatDuration(stats.duration));
         }
+        return result;
     }
 
-    private void listProducts(BHive hive) {
+    private DataTable listProducts(BHive hive) {
         SortedSet<Key> scan = ProductManifest.scan(hive);
+        DataTable table = createDataTable();
+        table.setCaption("Products in " + hive.getUri());
+
+        table.column("Name", 25).column("Key", 30).column("Version", 20);
+        table.column(new DataTableColumn("NoOfApplications", "# App.", 6));
+        table.column(new DataTableColumn("NoOfReferences", "# Ref.", 6));
+        table.column(new DataTableColumn("NoOfPlugins", "# Plug.", 7));
+        table.column(new DataTableColumn("NoOfInstanceTemplates", "# Ins.Templ.", 12));
+        table.column(new DataTableColumn("NoOfApplicationTemplates", "# App.Templ.", 12));
+
         for (Key key : scan) {
             ProductManifest pmf = ProductManifest.of(hive, key);
-            out().println(String.format("%1$-50s %2$-30s", key, pmf.getProduct()));
 
-            if (isVerbose()) {
-                for (Manifest.Key appKey : pmf.getApplications()) {
-                    ApplicationManifest amf = ApplicationManifest.of(hive, appKey);
-                    out().println(String.format("  %1$-48s %2$-30s", appKey, amf.getDescriptor().name));
-                }
-                out().println("  Other References:");
-                for (Manifest.Key otherKey : pmf.getReferences()) {
-                    out().println(String.format("    %1$-48s", otherKey));
-                }
-                if (!pmf.getPlugins().isEmpty()) {
-                    out().println("  Product-Bound Plugins:");
-                    for (ObjectId id : pmf.getPlugins()) {
-                        try (InputStream is = hive.execute(new ObjectLoadOperation().setObject(id))) {
-                            PluginHeader hdr = PluginHeader.read(is);
-                            out().println(String.format("    %1$-40s %2$20s %3$10s", id, hdr.name, hdr.version));
-                        } catch (Exception e) {
-                            out().println("    cannot read plugin " + id + ": " + e.toString());
-                        }
-                    }
-                }
-                if (!pmf.getInstanceTemplates().isEmpty()) {
-                    out().println("  Instance Templates:");
-                    for (InstanceTemplateDescriptor tpl : pmf.getInstanceTemplates()) {
-                        out().println(String.format("    %1$-40s %2$40s", tpl.name, tpl.description));
-                    }
-                }
-                if (!pmf.getApplicationTemplates().isEmpty()) {
-                    out().println("  Application Templates:");
-                    for (ApplicationTemplateDescriptor tpl : pmf.getApplicationTemplates()) {
-                        out().println(String.format("    %1$-30s %2$30s %3$40s", tpl.id, tpl.name, tpl.description));
-                    }
-                }
-            }
+            table.row().cell(pmf.getProductDescriptor().name).cell(key.getName()).cell(key.getTag())
+                    .cell(pmf.getApplications().size()).cell(pmf.getReferences().size()).cell(pmf.getPlugins().size())
+                    .cell(pmf.getInstanceTemplates().size()).cell(pmf.getApplicationTemplates().size()).build();
         }
+        return table;
     }
 
 }

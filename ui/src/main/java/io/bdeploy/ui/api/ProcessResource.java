@@ -3,10 +3,13 @@ package io.bdeploy.ui.api;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
 import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
@@ -16,6 +19,8 @@ import io.bdeploy.interfaces.directory.InstanceDirectory;
 import io.bdeploy.jersey.ActivityScope;
 
 @Path("/processes")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
 public interface ProcessResource {
 
     @GET

@@ -1,36 +1,38 @@
-package io.bdeploy.minion.cli;
+package io.bdeploy.ui.cli;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.SortedMap;
 import java.util.stream.Collectors;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
+import io.bdeploy.common.cli.ToolCategory;
+import io.bdeploy.common.cli.data.DataResult;
+import io.bdeploy.common.cli.data.DataTable;
+import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.DateHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
-import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
-import io.bdeploy.minion.cli.RemoteMasterTool.RemoteMasterConfig;
+import io.bdeploy.ui.api.BackendInfoResource;
+import io.bdeploy.ui.cli.RemoteMasterTool.RemoteMasterConfig;
 
 @Help("Investigate a remote master minion")
+@ToolCategory(TextUIResources.UI_CATEGORY)
 @CliName("remote-master")
 public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
 
@@ -52,50 +54,52 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
         boolean yes() default false;
     }
 
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
-            .withLocale(Locale.getDefault()).withZone(ZoneId.systemDefault());
-
     public RemoteMasterTool() {
         super(RemoteMasterConfig.class);
     }
 
     @Override
-    protected void run(RemoteMasterConfig config, RemoteService svc) {
-        MasterRootResource client = ResourceProvider.getResource(svc, MasterRootResource.class, null);
-
+    protected RenderableResult run(RemoteMasterConfig config, RemoteService svc) {
         if (config.minions()) {
-            listMinions(client);
+            return listMinions(svc);
         } else if (config.update() != null) {
             Path zip = Paths.get(config.update());
             if (!Files.isRegularFile(zip)) {
                 out().println(zip + " does not seem to be an update package");
             }
 
-            performUpdate(config, svc, zip);
+            return performUpdate(config, svc, zip);
         } else if (config.launcher() != null) {
             Path zip = Paths.get(config.launcher());
             if (!Files.isReadable(zip)) {
                 out().println(zip + " does not seem to be a launcher package");
             }
 
-            pushLauncher(svc, zip);
+            return pushLauncher(svc, zip);
+        } else {
+            return createNoOp();
         }
     }
 
-    private void listMinions(MasterRootResource client) {
-        SortedMap<String, MinionStatusDto> minions = client.getMinions();
-        String formatString = "%1$-20s %2$-8s %3$25s %4$-10s %5$-15s";
-        out().println(String.format(formatString, "NAME", "STATUS", "START", "OS", "VERSION"));
+    private DataTable listMinions(RemoteService svc) {
+        BackendInfoResource bir = ResourceProvider.getResource(svc, BackendInfoResource.class, getLocalContext());
+        Map<String, MinionStatusDto> minions = bir.getNodeStatus();
+
+        DataTable table = createDataTable();
+        table.setCaption("Minions on " + svc.getUri());
+        table.column("Name", 20).column("Status", 8).column("Start", 25).column("OS", 10).column("Version", 15);
+
         for (Map.Entry<String, MinionStatusDto> e : minions.entrySet()) {
             MinionStatusDto s = e.getValue();
-            String startTime = s.startup != null ? FORMATTER.format(s.startup) : "-";
+            String startTime = s.startup != null ? DateHelper.format(s.startup) : "-";
             String status = s.offline ? "OFFLINE" : "ONLINE";
             MinionDto config = s.config;
-            out().println(String.format(formatString, e.getKey(), status, startTime, config.os, config.version));
+            table.row().cell(e.getKey()).cell(status).cell(startTime).cell(config.os).cell(config.version).build();
         }
+        return table;
     }
 
-    private void performUpdate(RemoteMasterConfig config, RemoteService svc, Path zip) {
+    private DataResult performUpdate(RemoteMasterConfig config, RemoteService svc, Path zip) {
         try {
             Collection<Manifest.Key> keys = importAndPushUpdate(svc, zip, getActivityReporter());
 
@@ -104,16 +108,17 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
                 System.in.read();
             }
 
-            UpdateHelper.update(svc, keys, true);
+            UpdateHelper.update(svc, keys, true, getLocalContext());
+            return createSuccess();
         } catch (IOException e) {
             throw new IllegalStateException("Failed to process update", e);
         }
     }
 
-    private void pushLauncher(RemoteService svc, Path zip) {
+    private DataResult pushLauncher(RemoteService svc, Path zip) {
         try {
-            importAndPushUpdate(svc, zip, getActivityReporter());
-            out().println("Pushed launcher update");
+            Collection<Key> keys = importAndPushUpdate(svc, zip, getActivityReporter());
+            return createSuccess().addField("Keys", keys);
         } catch (IOException e) {
             throw new IllegalStateException("Failed to process launcher", e);
         }

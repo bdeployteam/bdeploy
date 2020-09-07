@@ -1,24 +1,31 @@
-package io.bdeploy.minion.cli;
+package io.bdeploy.ui.cli;
+
+import java.time.Instant;
 
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
+import io.bdeploy.common.cli.ToolCategory;
+import io.bdeploy.common.cli.data.DataTable;
+import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
+import io.bdeploy.common.util.DateHelper;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
-import io.bdeploy.minion.cli.UserTool.UserConfig;
 import io.bdeploy.ui.api.AuthAdminResource;
 import io.bdeploy.ui.api.AuthResource;
+import io.bdeploy.ui.cli.RemoteUserTool.UserConfig;
 
 /**
  * Manages users.
  */
 @Help("Manage (configuration UI) users on a master.")
-@CliName("user")
-public class UserTool extends RemoteServiceTool<UserConfig> {
+@ToolCategory(TextUIResources.UI_CATEGORY)
+@CliName("remote-user")
+public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
 
     public @interface UserConfig {
 
@@ -50,13 +57,13 @@ public class UserTool extends RemoteServiceTool<UserConfig> {
         String createToken();
     }
 
-    public UserTool() {
+    public RemoteUserTool() {
         super(UserConfig.class);
     }
 
     @Override
-    protected void run(UserConfig config, RemoteService remote) {
-        AuthResource auth = ResourceProvider.getResource(remote, AuthResource.class, null);
+    protected RenderableResult run(UserConfig config, RemoteService remote) {
+        AuthResource auth = ResourceProvider.getResource(remote, AuthResource.class, getLocalContext());
         AuthAdminResource admin = auth.getAdmin();
 
         if (config.add() != null) {
@@ -66,16 +73,25 @@ public class UserTool extends RemoteServiceTool<UserConfig> {
         } else if (config.remove() != null) {
             admin.deleteUser(config.remove());
         } else if (config.list()) {
-            String formatString = "%1$-30s %2$-8s %3$-8s %4$-30s";
-            out().println(String.format(formatString, "Username", "External", "Inactive", "Permissions"));
+            DataTable table = createDataTable();
+            table.setCaption("User accounts on " + remote.getUri());
+
+            table.column("Username", 30).column("System", 10).column("Inact.", 6).column("E-Mail", 30)
+                    .column("Last Active Login", 20).column("Permissions", 60);
+
             for (UserInfo info : admin.getAllUser()) {
-                out().println(String.format(formatString, info.name, info.external, info.inactive, info.permissions));
+                table.row().cell(info.name).cell(info.externalSystem).cell(info.inactive ? "*" : "").cell(info.email)
+                        .cell(DateHelper.format(Instant.ofEpochMilli(info.lastActiveLogin))).cell(info.permissions.toString())
+                        .build();
             }
+            return table;
         } else if (config.createToken() != null) {
             createToken(config, auth);
+            return null; // special output
         } else {
-            out().println("Nothing to do, please give more arguments");
+            return createNoOp();
         }
+        return createSuccess();
     }
 
     private void createToken(UserConfig config, AuthResource auth) {

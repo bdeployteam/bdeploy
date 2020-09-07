@@ -13,11 +13,14 @@ import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.NonExistingPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
+import io.bdeploy.common.cli.ToolCategory;
+import io.bdeploy.common.cli.data.RenderableResult;
 
 /**
  * A tool to export a given manifest's files recursively to a target directory.
  */
 @Help("Export a given manifest to a given target location")
+@ToolCategory(BHiveCli.FS_TOOLS)
 @CliName("export")
 public class ExportTool extends ConfiguredCliTool<ExportConfig> {
 
@@ -43,7 +46,7 @@ public class ExportTool extends ConfiguredCliTool<ExportConfig> {
     }
 
     @Override
-    protected void run(ExportConfig config) {
+    protected RenderableResult run(ExportConfig config) {
         helpAndFailIfMissing(config.hive(), "Missing --hive");
         helpAndFailIfMissing(config.manifest(), "Missing --manifest");
 
@@ -56,6 +59,8 @@ public class ExportTool extends ConfiguredCliTool<ExportConfig> {
                     .setTarget(targetPath);
             hive.execute(export);
         }
+
+        return createSuccess();
     }
 
 }

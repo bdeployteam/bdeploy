@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.cli.ToolBase;
 import io.bdeploy.common.cli.ToolBase.CliTool;
+import io.bdeploy.common.cli.data.DataFormat;
+import io.bdeploy.common.cli.data.RenderableResult;
 
 public class TestCliTool implements ParameterResolver {
 
@@ -65,11 +67,17 @@ public class TestCliTool implements ParameterResolver {
     private <T extends CliTool> String[] readOutput(T tool) throws IOException {
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             tool.setOutput(new PrintStream(os));
-            tool.run();
+            tool.setDataFormat(DataFormat.JSON);
+            RenderableResult result = tool.run();
+            if (result != null) {
+                result.render();
+            }
 
-            log.info(tool.getClass().getSimpleName() + " output:\n" + os.toString());
+            String plainOutput = os.toString();
 
-            return os.toString().split("\\r?\\n");
+            log.info(tool.getClass().getSimpleName() + " output:\n" + plainOutput);
+
+            return plainOutput.split("\\r?\\n");
         }
     }
 

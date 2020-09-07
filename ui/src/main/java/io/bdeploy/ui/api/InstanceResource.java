@@ -110,6 +110,11 @@ public interface InstanceResource {
     public void activate(@ActivityScope @PathParam("instance") String instanceId, @ActivityScope @PathParam("tag") String tag);
 
     @GET
+    @Path("/{instance}/updateTo")
+    @RequiredPermission(permission = Permission.WRITE)
+    public void updateTo(@ActivityScope @PathParam("instance") String instanceId, @QueryParam("productTag") String productTag);
+
+    @GET
     @Path("/{instance}/{tag}/history")
     public InstanceManifestHistoryDto getHistory(@ActivityScope @PathParam("instance") String instanceId,
             @ActivityScope @PathParam("tag") String tag);

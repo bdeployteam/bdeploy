@@ -12,12 +12,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriBuilder;
 
 import com.ning.http.client.AsyncHttpClient;
@@ -32,6 +32,7 @@ import io.bdeploy.common.cfg.ExistingPathValidator;
 import io.bdeploy.common.cfg.RemoteValidator;
 import io.bdeploy.common.cli.ToolBase;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
+import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.OnDiscKeyStore;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.jersey.JerseyClientFactory;
@@ -82,7 +83,7 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
     }
 
     @Override
-    protected Collection<Class<? extends Annotation>> getConfigsForHelp() {
+    protected List<Class<? extends Annotation>> getConfigsForHelp() {
         List<Class<? extends Annotation>> help = new ArrayList<>();
         help.add(RemoteConfig.class);
         help.addAll(super.getConfigsForHelp());
@@ -100,7 +101,7 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
     }
 
     @Override
-    protected final void run(T config) {
+    protected final RenderableResult run(T config) {
         RemoteConfig rc = getConfig(RemoteConfig.class);
         boolean optional = isOptional();
 
@@ -123,8 +124,12 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
         }
 
         try (NoThrowAutoCloseable proxy = getActivityReporter().proxyActivities(svc)) {
-            run(config, svc);
+            return run(config, svc);
         }
+    }
+
+    protected SecurityContext getLocalContext() {
+        return null; // always null for the CLI. Ther server will infer the context from the token;
     }
 
     private RemoteService createServiceFromLLM(RemoteConfig rc, boolean optional, LocalLoginManager llm) {
@@ -217,9 +222,10 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
                 helpAndFail("Need either --tokenFile, --token or --keystore arguments to access remote service");
             }
         }
+
         return svc;
     }
 
-    protected abstract void run(T config, RemoteService remote);
+    protected abstract RenderableResult run(T config, RemoteService remote);
 
 }

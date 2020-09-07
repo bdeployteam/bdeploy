@@ -22,6 +22,10 @@ import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.MinionRootValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
+import io.bdeploy.common.cli.ToolCategory;
+import io.bdeploy.common.cli.data.DataResult;
+import io.bdeploy.common.cli.data.DataTable;
+import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.common.security.SecurityHelper;
@@ -58,6 +62,7 @@ import io.bdeploy.ui.api.MinionMode;
  * Manages slaves.
  */
 @Help("Manage minions on a master, or start a non-master minion.")
+@ToolCategory(MinionServerCli.SERVER_TOOLS)
 @CliName("slave")
 public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
 
@@ -86,7 +91,7 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
     }
 
     @Override
-    protected void run(SlaveConfig config, @RemoteOptional RemoteService svc) {
+    protected RenderableResult run(SlaveConfig config, @RemoteOptional RemoteService svc) {
         helpAndFailIfMissing(config.root(), "Missing --root");
         ActivityReporter.Delegating delegate = new ActivityReporter.Delegating();
         delegate.setDelegate(getActivityReporter());
@@ -97,16 +102,17 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
                 r.setUpdateDir(upd);
             }
             if (config.list()) {
-                doListMinions(r);
+                return doListMinions(r);
             } else if (config.add() != null) {
-                doAddMinion(r, config.add(), svc);
+                return doAddMinion(r, config.add(), svc);
             } else if (config.remove() != null) {
-                doRemoveMinion(r, config.remove());
+                return doRemoveMinion(r, config.remove());
             } else {
                 if (r.getMode() != MinionMode.SLAVE) {
                     throw new IllegalStateException("Not a SLAVE root: " + config.root());
                 }
                 doRunMinion(r, delegate);
+                return null; // usually not reached.
             }
         }
     }
@@ -136,12 +142,13 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
         }
     }
 
-    private void doAddMinion(MinionRoot root, String minionName, RemoteService slaveRemote) {
+    private DataResult doAddMinion(MinionRoot root, String minionName, RemoteService slaveRemote) {
         helpAndFailIfMissing(root, "Missing --remote");
         assertTrue(slaveRemote.getUri().getScheme().equalsIgnoreCase("https"), "Only HTTPS slaves supported");
         try {
             // Try to contact the slave to get some information
-            MinionStatusResource statusResource = ResourceProvider.getResource(slaveRemote, MinionStatusResource.class, null);
+            MinionStatusResource statusResource = ResourceProvider.getResource(slaveRemote, MinionStatusResource.class,
+                    getLocalContext());
             MinionStatusDto status = statusResource.getStatus();
 
             // Store information in our hive
@@ -150,27 +157,30 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
             minionConfig.addMinion(minionName, status.config);
             mf.update(minionConfig);
 
-            out().println("Minion '" + minionName + "' successfully added.");
+            return createSuccess().addField("Minion Name", minionName);
         } catch (Exception e) {
             throw new IllegalStateException("Cannot add slave. Check if the slave is online and try again.", e);
         }
     }
 
-    private void doRemoveMinion(MinionRoot root, String minionName) {
+    private DataResult doRemoveMinion(MinionRoot root, String minionName) {
         MinionManifest mf = new MinionManifest(root.getHive());
         MinionConfiguration minionConfig = mf.read();
         minionConfig.removeMinion(minionName);
         mf.update(minionConfig);
-        out().println("Minion '" + minionName + "' successfully removed.");
+        return createSuccess().addField("Minion Name", minionName);
     }
 
-    private void doListMinions(MinionRoot r) {
-        String formatString = "%1$-30s %2$-8s %2$-40s";
+    private RenderableResult doListMinions(MinionRoot r) {
+        DataTable table = createDataTable();
+        table.column("Name", 20).column("OS", 20).column("URI", 50);
+
         for (Map.Entry<String, MinionDto> entry : r.getMinions().entrySet()) {
             String name = entry.getKey();
             MinionDto details = entry.getValue();
-            out().println(String.format(formatString, name, details.os, details.remote));
+            table.row().cell(name).cell(details.os != null ? details.os.name() : "Unknown").cell(details.remote.getUri()).build();
         }
+        return table;
     }
 
     public static BHiveRegistry registerCommonResources(RegistrationTarget srv, MinionRoot root, ActivityReporter reporter) {

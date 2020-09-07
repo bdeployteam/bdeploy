@@ -6,10 +6,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
+import java.util.Collection;
 import java.util.Collections;
 
 import javax.ws.rs.core.UriBuilder;
 
+import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.cfg.Configuration.ConfigurationValueMapping;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
@@ -19,6 +21,9 @@ import io.bdeploy.common.cfg.HostnameValidator;
 import io.bdeploy.common.cfg.NonExistingPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
+import io.bdeploy.common.cli.ToolCategory;
+import io.bdeploy.common.cli.data.DataResult;
+import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.SecurityHelper;
@@ -34,8 +39,10 @@ import io.bdeploy.minion.cli.InitTool.InitConfig;
 import io.bdeploy.minion.job.MasterCleanupJob;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
+import io.bdeploy.ui.cli.RemoteMasterTool;
 
 @Help("Initialize a minion root directory")
+@ToolCategory(MinionServerCli.MGMT_TOOLS)
 @CliName("init")
 public class InitTool extends ConfiguredCliTool<InitConfig> {
 
@@ -84,7 +91,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
     }
 
     @Override
-    protected void run(InitConfig config) {
+    protected RenderableResult run(InitConfig config) {
         helpAndFailIfMissing(config.root(), "Missing --root");
         helpAndFailIfMissing(config.hostname(), "Missing --hostname");
         helpAndFailIfMissing(config.mode(), "Missing --mode");
@@ -95,14 +102,16 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         }
 
         Path root = Paths.get(config.root());
+        DataResult result = createSuccess();
+        result.addField("Root Path", root.toString());
 
         try (MinionRoot mr = new MinionRoot(root, getActivityReporter())) {
             mr.getAuditor().audit(AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("init").build());
-            out().println("Initializing minion keys...");
             String pack = initMinionRoot(root, mr, config.hostname(), config.port(), config.deployments(), config.mode());
 
             if (config.tokenFile() != null) {
                 Files.write(Paths.get(config.tokenFile()), pack.getBytes(StandardCharsets.UTF_8));
+                result.addField("Token File", config.tokenFile());
             } else {
                 if (config.mode() == MinionMode.SLAVE) {
                     out().println(pack);
@@ -112,7 +121,11 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
             if (config.mode() != MinionMode.SLAVE) {
                 mr.getUsers().createLocalUser(config.initUser(), config.initPassword(),
                         Collections.singletonList(ApiAccessToken.ADMIN_PERMISSION));
+
+                result.addField("User Created", config.initUser());
             }
+
+            result.addField("Mode", config.mode().name());
 
             String dist = config.dist();
 
@@ -120,8 +133,6 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
                 // use the installation directory of the application as source for the initial import.
                 Path updRoot = Paths.get(config.updateDir()).getParent();
                 if (Files.exists(updRoot) && Files.exists(updRoot.resolve("version.properties"))) {
-                    out().println(
-                            "Using BDeploy distribution in " + updRoot + " for initial data import. Use --dist to override.");
                     dist = updRoot.toString();
                 }
             }
@@ -129,13 +140,16 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
             // import original version of minion into new bhive for future updates.
             if (!"ignore".equals(dist)) {
                 // same logic as remote update: push the content of the ZIP as new manifest to the local hive.
-                RemoteMasterTool.importAndPushUpdate(new RemoteService(mr.getHiveDir().toUri()), Paths.get(dist),
-                        getActivityReporter());
+                Collection<Key> keys = RemoteMasterTool.importAndPushUpdate(new RemoteService(mr.getHiveDir().toUri()),
+                        Paths.get(dist), getActivityReporter());
+
+                result.addField("Software Imported", keys);
             }
-        } catch (Exception e) {
-            out().println("Failed to initialize minion root.");
-            e.printStackTrace(out());
+        } catch (GeneralSecurityException | IOException e) {
+            throw new IllegalStateException("Cannot initialize minion root", e);
         }
+
+        return result;
     }
 
     public static String initMinionRoot(Path root, MinionRoot mr, String hostname, int port, String deployments, MinionMode mode)

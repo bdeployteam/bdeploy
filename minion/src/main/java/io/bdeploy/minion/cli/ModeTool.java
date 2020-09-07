@@ -11,12 +11,15 @@ import io.bdeploy.common.cfg.Configuration.ValueMapping;
 import io.bdeploy.common.cfg.MinionRootValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
+import io.bdeploy.common.cli.ToolCategory;
+import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.jersey.audit.AuditRecord;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.cli.ModeTool.ModeConfig;
 import io.bdeploy.ui.api.MinionMode;
 
 @Help("Sets the mode of a minion root directory")
+@ToolCategory(MinionServerCli.MGMT_TOOLS)
 @CliName("set-mode")
 public class ModeTool extends ConfiguredCliTool<ModeConfig> {
 
@@ -37,7 +40,7 @@ public class ModeTool extends ConfiguredCliTool<ModeConfig> {
     }
 
     @Override
-    protected void run(ModeConfig config) {
+    protected RenderableResult run(ModeConfig config) {
         helpAndFailIfMissing(config.root(), "Missing --root");
         helpAndFailIfMissing(config.mode(), "Missing --mode");
 
@@ -60,7 +63,7 @@ public class ModeTool extends ConfiguredCliTool<ModeConfig> {
 
             mr.modifyState(s -> s.mode = config.mode());
 
-            out().println("Root mode has been set to " + newMode);
+            return createSuccess().addField("Old Mode", oldMode).addField("New Mode", newMode);
         }
     }
 

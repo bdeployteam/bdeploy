@@ -13,6 +13,9 @@ import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
+import io.bdeploy.common.cli.ToolCategory;
+import io.bdeploy.common.cli.data.DataResult;
+import io.bdeploy.common.cli.data.RenderableResult;
 
 /**
  * A tool to check consistency of manifests and objects.
@@ -21,6 +24,7 @@ import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
  * technically consistent state, but removes inconsistent manifests, so they need to be re-pushed if required.
  */
 @Help("Check manifest and object consistency on a BHive instance. Broken objects will be removed.")
+@ToolCategory(BHiveCli.MAINTENANCE_TOOLS)
 @CliName("fsck")
 public class FsckTool extends ConfiguredCliTool<FsckConfig> {
 
@@ -42,7 +46,7 @@ public class FsckTool extends ConfiguredCliTool<FsckConfig> {
     }
 
     @Override
-    protected void run(FsckConfig config) {
+    protected RenderableResult run(FsckConfig config) {
         helpAndFailIfMissing(config.hive(), "Missing --hive");
 
         try (BHive hive = new BHive(Paths.get(config.hive()).toUri(), getActivityReporter())) {
@@ -51,10 +55,15 @@ public class FsckTool extends ConfiguredCliTool<FsckConfig> {
 
             List<ElementView> broken = hive.execute(op);
 
-            broken.stream().forEach(x -> out().println("PROBLEMATIC OBJECT: " + x));
             if (broken.isEmpty()) {
-                out().println("Check OK");
+                return createSuccess();
             }
+
+            DataResult result = createResultWithMessage("Found " + broken.size() + " damaged objects!");
+            for (ElementView ele : broken) {
+                result.addField(ele.getElementId().toString(), ele.getPathString());
+            }
+            return result;
         }
     }
 

@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import io.bdeploy.api.remote.v1.PublicRootResource;
+import io.bdeploy.bhive.cli.BHiveCli;
 import io.bdeploy.bhive.cli.TokenTool;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.TempDirectory;
@@ -33,6 +34,7 @@ import io.bdeploy.minion.BCX509Helper;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.cli.shutdown.RemoteShutdown;
 import io.bdeploy.ui.api.Minion;
+import io.bdeploy.ui.cli.RemoteUserTool;
 
 @ExtendWith(TempDirectory.class)
 @ExtendWith(TestActivityReporter.class)
@@ -40,6 +42,9 @@ public class MasterCliTest {
 
     @RegisterExtension
     TestCliTool tools = new TestCliTool(new MinionServerCli());
+
+    @RegisterExtension
+    TestCliTool hiveTools = new TestCliTool(new BHiveCli());
 
     @Test
     void testMasterCli(@TempDir Path tmp, ActivityReporter reporter) throws Exception {
@@ -72,13 +77,13 @@ public class MasterCliTest {
 
         Path tmpStore = tmp.resolve("pubstore");
 
-        tools.execute(TokenTool.class, "--keystore=" + tmpStore.toString(), "--passphrase=" + new String(pp), "--load",
+        hiveTools.execute(TokenTool.class, "--keystore=" + tmpStore.toString(), "--passphrase=" + new String(pp), "--load",
                 "--pack=" + pack);
 
-        String[] token = tools.execute(TokenTool.class, "--keystore=" + tmpStore.toString(), "--passphrase=" + new String(pp),
+        String[] token = hiveTools.execute(TokenTool.class, "--keystore=" + tmpStore.toString(), "--passphrase=" + new String(pp),
                 "--dump");
 
-        tools.execute(TokenTool.class, "--keystore=" + ks.toString(), "--passphrase=" + new String(pp), "--check",
+        hiveTools.execute(TokenTool.class, "--keystore=" + ks.toString(), "--passphrase=" + new String(pp), "--check",
                 "--token=" + token[0]);
 
         tools.execute(StorageTool.class, "--root=" + root, "--remove=" + storage.toString());
@@ -90,7 +95,7 @@ public class MasterCliTest {
 
         tools.execute(CleanupTool.class, "--root=" + root, "--setSchedule=1 0 0 * * ?");
         String[] output = tools.execute(CleanupTool.class, "--root=" + root);
-        assertTrue(output[0].startsWith("Cleanup scheduled at: '1 0 0 * * ?', last run"));
+        assertTrue(output[1].contains("1 0 0 * * ?"));
 
         // test certificate update with the same certificate
         try (MinionRoot mr = new MinionRoot(root, reporter)) {
@@ -136,14 +141,14 @@ public class MasterCliTest {
             System.setProperty("user.home", tmp.toString());
 
             output = tools.execute(LocalLoginTool.class, "--list");
-            assertEquals(1, output.length);
+            assertEquals(2, output.length);
 
             tools.execute(LocalLoginTool.class, "--add=MyServer", "--remote=https://localhost:" + port + "/api", "--user=test",
                     "--password=test");
 
             output = tools.execute(LocalLoginTool.class, "--list");
-            assertEquals(2, output.length);
-            assertTrue(output[1].startsWith("MyServer"));
+            assertEquals(3, output.length);
+            assertTrue(output[1].contains("MyServer"));
 
             tools.execute(LocalLoginTool.class, "--add=MyOtherServer", "--remote=https://localhost:" + port + "/api",
                     "--user=test", "--password=test");
@@ -152,7 +157,7 @@ public class MasterCliTest {
 
             // no current tool now.
             output = tools.execute(LocalLoginTool.class, "--list");
-            assertEquals(2, output.length);
+            assertEquals(3, output.length);
             assertFalse(output[1].contains("*"));
 
             // change current
@@ -160,20 +165,20 @@ public class MasterCliTest {
 
             // use the login, test the user tool
             ToolBase.setTestModeForLLM(false); // disable to allow local login manager.
-            tools.execute(UserTool.class, "--add=user1", "--password=user1");
-            tools.execute(UserTool.class, "--update=user1", "--admin");
-            tools.execute(UserTool.class, "--update=user1", "--permission=WRITE", "--scope=IG");
-            output = tools.execute(UserTool.class, "--list");
+            tools.execute(RemoteUserTool.class, "--add=user1", "--password=user1");
+            tools.execute(RemoteUserTool.class, "--update=user1", "--admin");
+            tools.execute(RemoteUserTool.class, "--update=user1", "--permission=WRITE", "--scope=IG");
+            output = tools.execute(RemoteUserTool.class, "--list");
             assertTrue(Arrays.stream(output).anyMatch(s -> s.contains("user1")));
             ToolBase.setTestModeForLLM(true);
 
             output = tools.execute(LocalLoginTool.class, "--list");
-            assertEquals(2, output.length);
+            assertEquals(3, output.length);
             assertTrue(output[1].contains("*"));
 
             tools.execute(LocalLoginTool.class, "--remove=MyOtherServer");
             output = tools.execute(LocalLoginTool.class, "--list");
-            assertEquals(1, output.length);
+            assertEquals(2, output.length);
         } finally {
             ResourceProvider.getResource(self, RemoteShutdown.class, null).shutdown(shutdown);
             master.join();

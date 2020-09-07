@@ -93,6 +93,8 @@ configure(actualSubprojects) {
     apply plugin: 'ru.vyarus.quality'
     apply plugin: 'eclipse'
     apply plugin: "net.ossindex.audit"
+
+    compileJava.options.encoding = 'UTF-8'
 	
 	eclipse {
 		classpath {
@@ -200,6 +202,7 @@ configure(actualSubprojects) {
     }
 
     javadoc {
+        options.encoding = 'UTF-8'
         options.addBooleanOption('html5', true)
         options.addStringOption('Xdoclint:-missing', '-quiet')
     }
@@ -392,6 +395,7 @@ task genJavaDoc(type: Javadoc) {
     source = actualSubprojects*.sourceSets.main.allJava
     destinationDir = reporting.file("javadoc")
     classpath = files(actualSubprojects*.sourceSets.main.compileClasspath)
+    options.encoding = 'UTF-8'
     options.addBooleanOption('html5', true)
     options.addStringOption('Xdoclint:-missing', '-quiet')
 }

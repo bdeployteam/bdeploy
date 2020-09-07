@@ -1,23 +1,25 @@
-package io.bdeploy.minion.cli;
+package io.bdeploy.ui.cli;
 
-import java.util.SortedMap;
+import java.util.List;
 
-import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
+import io.bdeploy.common.cli.ToolCategory;
+import io.bdeploy.common.cli.data.DataTable;
+import io.bdeploy.common.cli.data.DataTableColumn;
+import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
-import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
-import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
-import io.bdeploy.minion.cli.RemoteInstanceGroupTool.RemoteInstanceGroupConfig;
+import io.bdeploy.ui.api.InstanceGroupResource;
+import io.bdeploy.ui.cli.RemoteInstanceGroupTool.RemoteInstanceGroupConfig;
+import io.bdeploy.ui.dto.InstanceDto;
 
 @Help("Create instance group/hive on the remote")
+@ToolCategory(TextUIResources.UI_CATEGORY)
 @CliName("remote-group")
 public class RemoteInstanceGroupTool extends RemoteServiceTool<RemoteInstanceGroupConfig> {
-
-    private static final String LIST_FORMAT = "%1$-20s %2$-10s %3$s";
 
     public @interface RemoteInstanceGroupConfig {
 
@@ -29,9 +31,6 @@ public class RemoteInstanceGroupTool extends RemoteServiceTool<RemoteInstanceGro
 
         @Help("Description of the customer")
         String description();
-
-        @Help("Storage to create the new hive in, defaults to the first available storage.")
-        String storage();
 
         @Help("Delete the given instance group (and associated BHive). This CANNOT BE UNDONE.")
         String delete();
@@ -45,8 +44,8 @@ public class RemoteInstanceGroupTool extends RemoteServiceTool<RemoteInstanceGro
     }
 
     @Override
-    protected void run(RemoteInstanceGroupConfig config, RemoteService svc) {
-        CommonRootResource client = ResourceProvider.getResource(svc, CommonRootResource.class, null);
+    protected RenderableResult run(RemoteInstanceGroupConfig config, RemoteService svc) {
+        InstanceGroupResource client = ResourceProvider.getResource(svc, InstanceGroupResource.class, getLocalContext());
 
         if (config.create() != null) {
             helpAndFailIfMissing(config.description(), "Missing description");
@@ -56,14 +55,19 @@ public class RemoteInstanceGroupTool extends RemoteServiceTool<RemoteInstanceGro
             desc.description = config.description();
             desc.title = config.title();
 
-            client.addInstanceGroup(desc, config.storage());
+            client.create(desc);
+            return createSuccess();
         } else if (config.list()) {
-            out().println(String.format(LIST_FORMAT, "Name", "Title", "Ins. Count", "Description"));
-            for (InstanceGroupConfiguration cfg : client.getInstanceGroups()) {
-                SortedMap<Manifest.Key, InstanceConfiguration> ics = client.getInstanceResource(cfg.name)
-                        .listInstanceConfigurations(true);
-                out().println(String.format(LIST_FORMAT, cfg.name, cfg.title, ics.size(), cfg.description));
+            DataTable table = createDataTable();
+            table.setCaption("Instance Groups on " + svc.getUri());
+            table.column("Name", 20).column("Title", 20).column(new DataTableColumn("instanceCount", "# Ins.", 6))
+                    .column("Description", 50);
+
+            for (InstanceGroupConfiguration cfg : client.list()) {
+                List<InstanceDto> ics = client.getInstanceResource(cfg.name).list();
+                table.row().cell(cfg.name).cell(cfg.title).cell(ics.size()).cell(cfg.description).build();
             }
+            return table;
         } else if (config.delete() != null) {
             // don't use out() here, really make sure the warning appears on screen.
             String confirmation = System.console().readLine(
@@ -71,10 +75,13 @@ public class RemoteInstanceGroupTool extends RemoteServiceTool<RemoteInstanceGro
                     config.delete());
 
             if (confirmation != null && confirmation.equals(config.delete())) {
-                client.deleteInstanceGroup(config.delete());
+                client.delete(config.delete());
+                return createSuccess();
             } else {
-                System.out.println("Aborting, no confirmation to delete");
+                return createResultWithMessage("Aborted, no confirmation");
             }
+        } else {
+            return createNoOp();
         }
 
     }

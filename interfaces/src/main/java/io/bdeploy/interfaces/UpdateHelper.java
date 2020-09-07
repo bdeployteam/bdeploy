@@ -12,6 +12,8 @@ import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import javax.ws.rs.core.SecurityContext;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -255,9 +257,10 @@ public class UpdateHelper {
      *            the update packages
      * @param cleanup
      *            whether or not to clean old versions
+     * @param context the security context identifying the initiating user.
      */
-    public static void update(RemoteService svc, Collection<Key> keys, boolean cleanup) {
-        CommonUpdateResource root = ResourceProvider.getResource(svc, CommonUpdateResource.class, null);
+    public static void update(RemoteService svc, Collection<Key> keys, boolean cleanup, SecurityContext context) {
+        CommonUpdateResource root = ResourceProvider.getResource(svc, CommonUpdateResource.class, context);
 
         Version apiVersion;
         try {

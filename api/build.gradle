@@ -55,6 +55,7 @@ task allJavadoc(type: Javadoc) {
     classpath = files([project, project(":bhive"), project(":jersey"), project(":common")].collect { it.sourceSets.main.compileClasspath })
     destinationDir = file("${buildDir}/docs/javadoc")
 
+    options.encoding = 'UTF-8'
     options.addBooleanOption('html5', true)
     options.addStringOption('Xdoclint:-missing', '-quiet')
 }

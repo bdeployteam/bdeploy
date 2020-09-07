@@ -16,12 +16,15 @@ import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.ExistingPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
+import io.bdeploy.common.cli.ToolCategory;
+import io.bdeploy.common.cli.data.RenderableResult;
 
 /**
  * Import a source directory recursively into a hive and create a manifest for
  * it using the given values.
  */
 @Help("Imports a source directory into a BHive")
+@ToolCategory(BHiveCli.FS_TOOLS)
 @CliName("import")
 public class ImportTool extends ConfiguredCliTool<ImportConfig> {
 
@@ -50,7 +53,7 @@ public class ImportTool extends ConfiguredCliTool<ImportConfig> {
     }
 
     @Override
-    protected void run(ImportConfig config) {
+    protected RenderableResult run(ImportConfig config) {
         helpAndFailIfMissing(config.source(), "Missing --source");
         helpAndFailIfMissing(config.hive(), "Missing --hive");
         helpAndFailIfMissing(config.manifest(), "Missing --manifest");
@@ -79,7 +82,9 @@ public class ImportTool extends ConfiguredCliTool<ImportConfig> {
 
             ImportOperation op = new ImportOperation().setSourcePath(source).setManifest(Manifest.Key.parse(config.manifest()));
             labels.forEach(op::addLabel);
-            hive.execute(op);
+            Manifest.Key result = hive.execute(op);
+
+            return createSuccess().addField("Key", result.toString());
         }
     }
 
