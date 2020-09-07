@@ -469,7 +469,7 @@ public class InstanceResourceImpl implements InstanceResource {
                 result.applications.put(applicationKey.getName(), manifest.getDescriptor());
             }
         } catch (Exception e) {
-            log.warn("Cannot load product of instance version {}: {}", thisIm.getManifest(), productKey);
+            log.warn("Cannot load product of instance version {}: {}", thisIm.getManifest(), productKey, e);
         }
         return result;
     }

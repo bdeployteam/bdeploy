@@ -60,4 +60,13 @@ startCommand:
       parameter: "--sleep"
       defaultValue: "10"
       type: NUMERIC
+    - uid: "param.testboolean"
+      name: "Boolean"
+      longDescription: "A boolean parameter"
+      groupName: "Test Parameters"
+      parameter: "--help"
+      hasValue: false
+      mandatory: true
+      defaultValue: false
+      type: BOOLEAN
 

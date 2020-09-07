@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { StatusMessage } from 'src/app/models/config.model';
 import { UnknownParameter } from '../../../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_APPLICATION_CONFIGURATION, EMPTY_COMMAND_CONFIGURATION, EMPTY_PARAMETER_CONFIGURATION, EMPTY_PARAMETER_DESCRIPTOR, EMPTY_PROCESS_CONTROL_CONFIG } from '../../../models/consts';
-import { ApplicationConfiguration, ApplicationDescriptor, ApplicationDto, ApplicationType, InstanceNodeConfigurationDto, ManifestKey, ParameterConfiguration, ParameterDescriptor, ParameterType, ProcessControlConfiguration, TemplateApplication } from '../../../models/gen.dtos';
+import { ApplicationConfiguration, ApplicationDescriptor, ApplicationDto, ApplicationType, InstanceNodeConfigurationDto, ManifestKey, ParameterConditionType, ParameterConfiguration, ParameterDescriptor, ParameterType, ProcessControlConfiguration, TemplateApplication } from '../../../models/gen.dtos';
 import { ProcessConfigDto } from '../../../models/process.model';
 import { ConfigService } from '../../core/services/config.service';
 import { Logger, LoggingService } from '../../core/services/logging.service';
@@ -165,14 +165,14 @@ export class ApplicationService {
     appConfig.start = cloneDeep(EMPTY_COMMAND_CONFIGURATION);
     if (appDesc.startCommand) {
       appConfig.start.executable = appDesc.startCommand.launcherPath;
-      appConfig.start.parameters = this.createParameters(appDesc.startCommand.parameters, templates);
+      appConfig.start.parameters = this.createParameters(appConfig, appDesc.startCommand.parameters, templates);
     }
 
     // Initialize stop command
     appConfig.stop = cloneDeep(EMPTY_COMMAND_CONFIGURATION);
     if (appDesc.stopCommand) {
       appConfig.stop.executable = appDesc.stopCommand.launcherPath;
-      appConfig.stop.parameters = this.createParameters(appDesc.stopCommand.parameters, templates);
+      appConfig.stop.parameters = this.createParameters(appConfig, appDesc.stopCommand.parameters, templates);
     }
 
     // Initialize endpoints
@@ -180,12 +180,12 @@ export class ApplicationService {
   }
 
   /** Creates and returns an array of parameters based on the given descriptors */
-  createParameters(descs: ParameterDescriptor[], templates: ApplicationConfiguration[]): ParameterConfiguration[] {
+  createParameters(appConfig: ApplicationConfiguration, descs: ParameterDescriptor[], templates: ApplicationConfiguration[]): ParameterConfiguration[] {
     const configs: ParameterConfiguration[] = [];
 
     // Prepare all mandatory parameters
     for (const paraDesc of descs) {
-      if (!paraDesc.mandatory) {
+      if (!paraDesc.mandatory || !this.meetsCondition(paraDesc, descs, appConfig.start.parameters)) {
         continue;
       }
       const config = this.createParameter(paraDesc, templates);
@@ -339,9 +339,11 @@ export class ApplicationService {
     }
     for (const paraDef of desc.startCommand.parameters) {
       const paraCfg = cfg.start.parameters.find(p => p.uid === paraDef.uid);
-      const paraErrors = this.validateParam(paraCfg, paraDef);
-      if (paraErrors) {
-        errors.push(paraErrors);
+      if (this.meetsCondition(paraDef, desc.startCommand.parameters, cfg.start.parameters)) {
+        const paraErrors = this.validateParam(paraCfg, paraDef);
+        if (paraErrors) {
+          errors.push(paraErrors);
+        }
       }
     }
 
@@ -832,7 +834,7 @@ export class ApplicationService {
       const configIndex = configs.findIndex(c => c.uid === desc.uid);
       lastRenderedIndex = Math.max(lastRenderedIndex, configIndex);
       let config = configIndex === -1 ? undefined : configs[configIndex];
-      if (!config && desc.mandatory) {
+      if (!config && desc.mandatory && this.meetsCondition(desc, descs, configs)) {
         config = this.createParameter(desc, templates);
         configs.splice(lastRenderedIndex + 1, 0, config);
         continue;
@@ -1046,6 +1048,48 @@ export class ApplicationService {
     params.sort((a, b) => {
       return descs.findIndex(p => a.uid === p.uid) - descs.findIndex(p => b.uid === p.uid);
     });
+  }
+
+  meetsCondition(param: ParameterDescriptor, allDescriptors: ParameterDescriptor[], allConfigs: ParameterConfiguration[]): boolean {
+    if (!param.condition || !param.condition.parameter) {
+      return true; // no condition, all OK :)
+    }
+
+    const depDesc = allDescriptors.find(p => p.uid === param.condition.parameter);
+    const depCfg = allConfigs.find(p => p.uid === param.condition.parameter);
+    if (!depDesc || !this.meetsCondition(depDesc, allDescriptors, allConfigs)) {
+      return false; // parameter not found?!
+    }
+
+    if (!depCfg || !depCfg.value) {
+      if (param.condition.must === ParameterConditionType.BE_EMPTY) {
+        return true;
+      }
+      return false;
+    }
+
+    const value = depCfg.value;
+
+    switch (param.condition.must) {
+      case ParameterConditionType.EQUAL:
+        return value === param.condition.value;
+      case ParameterConditionType.CONTAIN:
+        return value.indexOf(param.condition.value) !== -1;
+      case ParameterConditionType.START_WITH:
+        return value.startsWith(param.condition.value);
+      case ParameterConditionType.END_WITH:
+        return value.endsWith(param.condition.value);
+      case ParameterConditionType.BE_EMPTY:
+        if (depDesc.type === ParameterType.BOOLEAN) {
+          return value.trim() === 'false';
+        }
+        return value.trim().length <= 0;
+      case ParameterConditionType.BE_NON_EMPTY:
+        if (depDesc.type === ParameterType.BOOLEAN) {
+          return value.trim() === 'true';
+        }
+        return value.trim().length > 0;
+    }
   }
 
 }

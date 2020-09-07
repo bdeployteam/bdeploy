@@ -53,6 +53,10 @@ image::images/BDeploy_Process_Custom_Value.png[Configure Custom Parameter,align=
 
 *Global Parameters* are valid for all *Processes* of an *Instance*. They are also configured in the *Process*, but changes are copied to all other processes that also use this parameter. *Global Parameters* are matched by their parameter UID, and marked with a small globe in the *Process Configuration* dialog.
 
+===== Conditional Parameters
+
+*Conditional Parameters* are parameters which are only configurable if a specific dependent parameter has a certain value. These parameters are hidden until the dependent parameter meets the conditions requirements.
+
 ===== Variables
 
 *BDeploy* provides a mechanism for defining that a parameter should hold a dynamically computed value instead of a fixed one. The general syntax for variables is `{{TYPE:VARNAME:SUBVAR}}`. With that mechanism it is possible to define that a certain parameter holds different values for different operating systems or to refer to parameters defined in a different process. See <<_variable_expansion,Variable Expansion>> for more details.

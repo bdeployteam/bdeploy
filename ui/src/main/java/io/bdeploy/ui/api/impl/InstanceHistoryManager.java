@@ -652,7 +652,7 @@ public class InstanceHistoryManager {
         int comparison = newParameters.get(index).uid.compareTo(oldParameters.get(index).uid);
 
         if (comparison == 0) {
-            if (!oldParameters.get(index).value.equals(newParameters.get(index).value)) {
+            if (StringHelper.notEqual(oldParameters.get(index).value, newParameters.get(index).value)) {
                 parameters.changed.put(oldParameters.get(index).uid,
                         new String[] { oldParameters.get(index).value, newParameters.get(index).value });
             }
