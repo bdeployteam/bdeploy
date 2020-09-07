@@ -2,100 +2,168 @@
 
 *BDeploy* provides a rich CLI which allows automating most interactions with *BDeploy*, e.g. for use in build pipelines, etc.
 
-Each of the binaries provides a set of _commands_ along with available _options_. This chapter describes the available _commands_. The _options_ are well-described when calling the according _command_ with the `--help` _option_.
+The same binaries used to run a *BDeploy* server provide a set of _commands_ along with available _options_. This chapter describes the available _commands_. The _options_ are well-described when calling the according _command_ with the `--help` _option_.
+
+==== Common Options
+
+[%header,cols="25,75"]
+|===
+|Option
+|Description
+
+|`-q`
+|Quiet - no progess reporting on long running operations.
+
+|`-v`
+|Verbose - some tools may include additional information.
+
+|`-vv`
+|Very verbose - enable progress reporting for every tool, show timing summary at the end.
+
+|`-o FILE`
+|Redirect output to the given `FILE`.
+
+|`-op FILE`
+|Redirect progress reporting output to the given `FILE`.
+
+|`--csv`
+|Output any data in CSV format.
+
+|`--json`
+|Output any data in JSON format.
+
+|===
 
 ==== BDeploy CLI
 
-[%header,cols="25,10,65"]
+===== Initialization and local configuration management commands
+
+[%header,cols="25,75"]
 |===
 |Command
-|Remote
 |Description
 
-| `bhive`
-| No
-| Wraps around to the <<_bhive_cli,BHive CLI>>. Can be used to access *BHive* CLI commands if ther *BHive* stand-alone binaries are not available. Usage: `bdeploy bhive <command>`
-
-| `login`
-| Yes
-| Manages login sessions on remote servers. This command eliminates the need to manage tokens yourself. Login sessions are managed per user, can be created, switched and removed. Validity of the login session is the same as for the Web UI. Subsequent commands will use the configured remote login session to perform remote communication.
+| `certificate`
+| Manage the server certificate (export the existing, import a new). This is mainly used to import a properly signed certificate to the _master_, which serves the Web UI using this certificate over HTTPS. *BDeploy* itself does not require a properly signed certificate for internal operation to guarantee <<Security>>.
 
 | `cleanup`
-| No
-|Manage the schedule at which the _master_ performs background cleanup operations on all _slaves_ (including himself).
-
-a| `init`
-| No
-| Initializes a _root_ directory for use with either the `slave` or `master` commands.
-
-The `init` command also generates the initial _security token_, see <<_security,Security>>. It is suggested to use the `--tokenFile` parameter if the token should be stored for later use.
+|Manage the schedule at which the _master_ performs background cleanup operations on all _nodes_ (including himself).
 
 | `hostname`
 | Allows 'renaming' of the minion. The `init` command stores the given hostname, used later on for connections to self and also for variable expansion. If the hostname changed or is no longer valid, the `hostname` tool can update all relevant data.
 
-| `instance`
-| No
-| Tooling to *export* (to _ZIP_) and *import* (from _ZIP_) *Instances* locally.
+a| `init`
+| Initializes a _root_ directory for running a server with either the `slave` or `master` commands.
 
-| `master`
-| No
-a| Runs the *BDeploy* _minion_ in _master_ mode. Requires a root directory initialized with the `init` command.
+| `set-mode`
+| Changes the intended purpose of a *BDeploy* root directory, see <<Migrating between Modes>>.
 
-[NOTE]
-A _master_ is always a _slave_ as well. The _master_ just has the additional capability to control other _slaves_, and provides the configuration Web UI.
+| `storage`
+| Manages available _storage locations_. A _storage location_ is a folder where the *BDeploy* _master_ puts the *BHives* required to store data for *Instance Groups* and *Software Repositories*.
+
+|===
+
+===== Local session and scripting commands
+
+[%header,cols="25,75"]
+|===
+|Command
+|Description
+
+| `login`
+a| Manages local login sessions to remote servers. This command eliminates the need to manage URIs and tokens yourself. Login sessions are managed per user, can be created, switched and removed. Validity of the login session is the same as for the Web UI. Subsequent commands will use the configured remote login session to perform remote communication.
+
+[WARNING]
+Since login sessions are persistent, it can be easy to confuse which session/server is currently worked with. Always verify that the correct session is actively used by commands when performing modifications on the server, e.g. deleting an *Instance*.
+
+|`shell`
+|Provides an interactive shell which can execute tools. The shell can also be fed with a script file which contains a series of commands.
+
+|===
+
+===== Product management commands
+
+[%header,cols="25,75"]
+|===
+|Command
+|Description
 
 | `product`
-| Mixed
 | List or create *Products* locally. Fetches required dependencies from the given remote *BDeploy* server. Has the ability to push the resulting *Product* to the target *BDeploy* server.
 
+|===
+
+===== Remote server management commands
+
+[%header,cols="25,75"]
+|===
+|Command
+|Description
+
+| `remote-central`
+| Manage remote configuration related to _managed_ servers on a _central_ server. Also allows to attach _managed_ servers to a _central_ server.
+
 | `remote-deployment`
-| Yes
 a| Manage *Instance* deployment (_install_, _activate_, _uninstall_, _updateTo_ (product version)) on a remote *BDeploy* server.
 
 [NOTE]
 The `--updateTo` command will only work if the new product version can be updated to without manual changes. If for example a mandatory parameter is added, or a configured application is removed from the product, the update will fail.
 
 | `remote-group`
-| Yes
 | Manage *Instance Groups* on a remote *BDeploy* server.
 
+| `remote-instance`
+| Query and manage *Instances* on the remote *BDeploy* server. Can be used to *export* (to _ZIP_) and *import* (from _ZIP_) *Instances* locally.
+
 | `remote-master`
-| Yes
 | Query and manage system information on a remote *BDeploy* server. Allows to update both the *BDeploy* system software as well as the *BDeploy* launcher binaries.
 
+| `remote-plugin`
+| Manage plugins available on the remote *BDeploy* server or install new ones from local `jar` files.
+
 | `remote-process`
-| Yes
 | Query and manage application processes managed by *BDeploy* on a remote *BDeploy* server.
 
+| `remote-product`
+| Query and manage products available on the given *Instance Group* on a remote *BDeploy* server.
+
 | `remote-repo`
-| Yes
 | Query and manage *Software Repositories* on a remote *BDeploy* server.
 
+| `remote-user`
+| Manages users on a remote *BDeploy* server.
+
+|===
+
+===== Server commands
+
+[%header,cols="25,75"]
+|===
+|Command
+|Description
+
+| `master`
+a| Runs the *BDeploy* _minion_ in _master_ mode. Requires a root directory initialized with the `init` command.
+
+[NOTE]
+A _master_ is always a _slave_ as well. The _master_ just has the additional capability to control other _slaves_, and provides the configuration Web UI.
+
 | `slave`
-| No
 a| Runs the *BDeploy* _minion_ in _slave_ mode. Requires a root directory initialized with the `init` command.
 
 Also used to register a _slave_ with the _master_. For this, the `slave` command is run on the _master_ with the `--add` option.
 
-| `storage`
-| No
-| Manages available _storage locations_. A _storage location_ is a folder where the *BDeploy* _master_ puts the *BHives* required to store data for *Instance Groups* and *Software Repositories*.
+|===
 
-| `token`
-| No
-| Allows generation of new _access tokens_, see <<_security,Security>>.
+===== Utility commands
 
-| `certificate`
-| No
-| Allows to change the certificate used by the *BDeploy* server for token signing and HTTPS traffic encryption.
+[%header,cols="25,75"]
+|===
+|Command
+|Description
 
-| `user`
-| No
-| Manages local users for a _master_. These users can be used to authenticate through the Web UI login dialog.
-
-| `set-mode`
-| No
-| Changes the intended purpose of a *BDeploy* root directory, see <<Migrating between Modes>>.
+| `bhive`
+| Wraps around to the <<_bhive_cli,BHive CLI>>. Can be used to access *BHive* CLI commands if the *BHive* stand-alone binaries are not available. Usage: `bdeploy bhive <command>`
 
 |===
 
@@ -107,67 +175,87 @@ Also used to register a _slave_ with the _master_. For this, the `slave` command
 
 Much like Git, *BHive* only knows two commands that actually perform remote communication: `fetch` and `push`. All other commands are performing their work locally.
 
-[%header,cols="25,10,65"]
+===== Analysis and maintenance commands
+
+[%header,cols="25,75"]
 |===
 |Command
-|Remote
 |Description
 
-| `export`
-| No
-| Reads a *Manifest* from the given *BHive* and writes it's content to a given target folder.
-
-| `fetch`
-| Yes
-| Fetches the given *Manifests* from a given remote *BHive*.
-
 | `fsck`
-| No
 a| Performs a file system check (_fsck_). This involves resolving all inter-*Manifest* dependencies, as well as re-hashing all objects in the underlying storage to assert that all objects in the storage are valid.
 
 Also allows to fix found errors (by deletion). After this, missing *Manifests* must be re-pushed from a *BHive* which still has the required objects.
 
-| `import`
-| No
-| Import a given folder into a given *BHive* and associate the given *Manifest* key with it.
-
 | `manifest`
-| No
 | Manage existing *Manifests* in a given *BHive*.
 
 |`prune`
-| No
 | Remove unreferenced objects from the given *BHive* to free up disc space.
 
-| `push`
-| Yes
-| Push the given *Manifests* to the given remote *BHive*
-
-| `serve`
-| No
-| Serves one or more given *BHives* over the network. The same thing as *BDeploy* does internally, provided as CLI tool for maintenance reasons.
-
 | `token`
-| No
 | Allows generation of new _access tokens_, see <<_security,Security>>.
 
 | `tree`
-| No
 | Read and diff *Manifests* from the given *BHive*. Allows to compare the contents of *Manifests*, view differences and the estimated data transfer required to perform a delta 'update' if a potential remote *BHive* already has one of them.
+
+|===
+
+===== Filesystem interaction commands
+
+[%header,cols="25,75"]
+|===
+|Command
+|Description
+
+| `export`
+| Reads a *Manifest* from the given *BHive* and writes it's content to a given target folder.
+
+| `import`
+| Import a given folder into a given *BHive* and associate the given *Manifest* key with it.
+
+|===
+
+===== Remote server interaction commands
+
+[%header,cols="25,75"]
+|===
+|Command
+|Description
+
+| `fetch`
+| Fetches the given *Manifests* from a given remote *BHive*.
+
+| `push`
+| Push the given *Manifests* to the given remote *BHive*
+
+|===
+
+===== Server commands
+
+[%header,cols="25,75"]
+|===
+|Command
+|Description
+
+
+| `serve`
+| Serves one or more given *BHives* over the network. The same thing as *BDeploy* does internally, provided as CLI tool for maintenance reasons.
 
 |===
 
 ==== Launcher CLI
 
-[%header,cols="25,10,65"]
+[%header,cols="25,75"]
 |===
 |Command
-|Remote
 |Description
 
 | `launcher`
-| No
 | Reads a given `.bdeploy` file, which describes all required information for the launcher to contact a *BDeploy* server and download a _client_ application.
+
+| `uninstaller`
+| Uninstalls a given application and cleans up in the local storage.
 
 |===
 

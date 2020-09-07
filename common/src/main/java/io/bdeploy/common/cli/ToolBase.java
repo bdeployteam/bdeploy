@@ -170,7 +170,7 @@ public abstract class ToolBase {
                 System.out.println(LOGO[logo++]);
                 System.out.println(LOGO[logo++] + "Options:");
                 System.out.println(LOGO[logo++] + "  -q      Be quiet - no progress reporting.");
-                System.out.println(LOGO[logo++] + "  -v      Be verbose. No effect if -q is given as well.");
+                System.out.println(LOGO[logo++] + "  -v|-vv  Be verbose. No effect if -q is given as well.");
                 System.out.println(LOGO[logo++] + "  -o <f>  Write output to file <f>. No effect on progress output.");
                 System.out.println(LOGO[logo++] + "  -op <f> Write progress tracking output to file <f>. No");
                 System.out.println(LOGO[logo++] + "          effect on normal output.");
@@ -226,7 +226,7 @@ public abstract class ToolBase {
             if (reporter == streamReporter) {
                 streamReporter.beginReporting();
             }
-
+            
             instance.setOutput(output);
             instance.setVerbose(verbose);
             instance.setActivityReporter(reporter);

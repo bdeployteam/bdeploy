@@ -4,7 +4,7 @@ import io.bdeploy.common.cli.ToolBase;
 
 public class TextUIResources {
 
-    public static final String UI_CATEGORY = "Remote server tools";
+    public static final String UI_CATEGORY = "Remote server management commands";
 
     public static void registerTextUi(ToolBase tool) {
         tool.register(RemoteInstanceGroupTool.class);
