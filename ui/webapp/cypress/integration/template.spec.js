@@ -61,7 +61,7 @@ describe('Instance Tests', function () {
     cy.getApplicationConfigCard('master', 'Another Server With Sleep').should('exist');
     cy.getApplicationConfigCard('master', 'Server No Sleep').should('exist');
 
-    cy.getApplicationConfigCard('Client Applications', 'Client Application').should('exist');
+    cy.getApplicationConfigCard('Client Applications', 'Client Test Value').should('exist');
 
     cy.screenshot('BDeploy_Instance_Template_Processes');
 

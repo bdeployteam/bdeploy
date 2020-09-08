@@ -960,7 +960,7 @@ export class ApplicationService {
     status: StatusMessage[]
   ) {
     if (templ.name) {
-      app.name = templ.name;
+      app.name = this.performVariableSubst(templ.name, variables, status);
     }
     if (templ.processControl) {
       // partially deserialized - only apply specified attributes.
@@ -987,20 +987,7 @@ export class ApplicationService {
       }
 
       if (param.value) {
-        paramCfg.value = param.value;
-
-        if (paramCfg.value.indexOf('{{T:') !== -1) {
-          let found = true;
-          while (found) {
-            const rex = new RegExp('{{T:([^}]*)}}').exec(paramCfg.value);
-            if (rex) {
-              paramCfg.value = paramCfg.value.replace(rex[0], this.expandVar(rex[1], variables, status));
-            } else {
-              found = false;
-            }
-          }
-        }
-
+        paramCfg.value = this.performVariableSubst(param.value, variables, status);
         paramCfg.preRendered = this.preRenderParameter(paramDesc, paramCfg.value);
       }
     }
@@ -1014,6 +1001,21 @@ export class ApplicationService {
     } else {
       status.push({icon: 'check', message: 'Process created.'});
     }
+  }
+
+  private performVariableSubst(value: string, variables: { [key: string]: string; }, status: StatusMessage[]): string {
+    if (value.indexOf('{{T:') !== -1) {
+      let found = true;
+      while (found) {
+        const rex = new RegExp('{{T:([^}]*)}}').exec(value);
+        if (rex) {
+          value = value.replace(rex[0], this.expandVar(rex[1], variables, status));
+        } else {
+          found = false;
+        }
+      }
+    }
+    return value;
   }
 
   expandVar(variable: string, variables: {[key: string]: string}, status: StatusMessage[]): string {
