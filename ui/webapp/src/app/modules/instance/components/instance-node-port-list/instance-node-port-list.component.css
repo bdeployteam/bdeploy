@@ -26,3 +26,13 @@
 .mat-column-state {
   text-align: center;
 }
+
+.port-list-titlebar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.spacer {
+  flex: 1 0 auto;
+}

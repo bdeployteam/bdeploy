@@ -3,7 +3,11 @@
 </div>
 
 <div class="content" [hidden]='loading'>
-  <h2>Server Ports on {{data.minionName}}</h2>
+  <div class='port-list-titlebar'>
+    <h2>Server Ports on {{data.minionName}}</h2>
+    <span class='spacer'></span>
+    <button mat-icon-button (click)='reload()'><mat-icon>refresh</mat-icon></button>
+  </div>
 
   <table mat-table [dataSource]="dataSource" matSort [matSortActive]="INITIAL_SORT_COLUMN" [matSortDirection]="INITIAL_SORT_DIRECTION">
     <caption style="display: none;">Server Ports</caption>

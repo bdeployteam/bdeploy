@@ -3,7 +3,11 @@
 </div>
 
 <ng-container *ngIf='!loading'>
-<h2>Server Ports of {{data.appName}} on {{data.minionName}}</h2>
+<div class='port-list-titlebar'>
+  <h2>Server Ports of {{data.appName}} on {{data.minionName}}</h2>
+  <span class='spacer'></span>
+  <button mat-icon-button (click)='reload()'><mat-icon>refresh</mat-icon></button>
+</div>
 <div class='port-list'>
   <strong>Description</strong>
   <strong>Port</strong>

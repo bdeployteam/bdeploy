@@ -25,9 +25,12 @@ export class ProcessPortListComponent implements OnInit {
   constructor(@Inject(MAT_BOTTOM_SHEET_DATA) public data: PortSheetData, private instanceService: InstanceService) { }
 
   ngOnInit(): void {
+    this.reload();
+  }
+
+  reload() {
     this.instanceService.getOpenPorts(this.data.instanceGroup, this.data.instanceId, this.data.minionName, this.data.ports).pipe(finalize(() => this.loading = false)).subscribe(r => {
       this.states = r;
     });
   }
-
 }
