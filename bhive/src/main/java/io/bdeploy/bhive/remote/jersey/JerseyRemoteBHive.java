@@ -6,6 +6,7 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.client.ResponseProcessingException;
 
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
@@ -78,7 +79,7 @@ public class JerseyRemoteBHive implements RemoteBHive {
     public TransferStatistics pushAsStream(InputStream in) {
         try {
             return client.pushAsStream(in);
-        } catch (NotFoundException nfe) {
+        } catch (NotFoundException | ResponseProcessingException nfe) {
             throw new UnsupportedOperationException("Pushing as stream not supported", nfe);
         }
     }

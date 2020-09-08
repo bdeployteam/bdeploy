@@ -161,6 +161,7 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
         try {
             return pushAsStream(rh, objects, manifests);
         } catch (UnsupportedOperationException ex) {
+            log.debug("Stream pushing not supported by target server", ex);
             return pushAsZip(rh, objects, manifests);
         }
     }
@@ -196,7 +197,7 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
             try (PipedOutputStream output = new PipedOutputStream(input)) {
                 barrier.complete(null);
                 execute(new ObjectWriteOperation().stream(output).manifests(manifests).objects(objects));
-            } catch (IOException e) {
+            } catch (Exception e) {
                 log.warn("Cannot fully push content via stream", e);
             }
         });
