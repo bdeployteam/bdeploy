@@ -94,7 +94,7 @@ export class InstanceNodePortListComponent implements OnInit, AfterViewInit {
       const appDesc = applications.find(a => a.key.name === app.application.name).descriptor;
       for (const paramCfg of app.start.parameters) {
         const paramDesc = appDesc.startCommand.parameters.find(p => p.uid === paramCfg.uid);
-        if (paramDesc.type === ParameterType.SERVER_PORT) {
+        if (paramDesc && paramDesc.type === ParameterType.SERVER_PORT) {
           const row = {
             instance: instanceNodeConfiguration.name,
             application: app.name,
