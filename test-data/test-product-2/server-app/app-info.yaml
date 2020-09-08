@@ -97,6 +97,68 @@ startCommand:
       groupName: "Test Parameters"
       parameter: "--client"
       type: CLIENT_PORT
+    - uid: "param.testboolean"
+      name: "Boolean"
+      longDescription: "A boolean parameter"
+      groupName: "Test Parameters"
+      parameter: "--help"
+      hasValue: false
+      mandatory: true
+      defaultValue: false
+      type: BOOLEAN
+    - uid: "param.cond.equal"
+      name: "Mandatory Conditional"
+      groupName: "Test Parameters"
+      parameter: "--text"
+      mandatory: true
+      condition:
+        parameter: "param.text"
+        must: EQUAL
+        value: "test"
+    - uid: "param.cond.nonempty"
+      name: "Non-Empty Conditional"
+      groupName: "Test Parameters"
+      parameter: "--text"
+      mandatory: true
+      condition:
+        parameter: "param.testboolean"
+        must: BE_NON_EMPTY
+    - uid: "param.cond.empty"
+      name: "Empty Conditional"
+      groupName: "Test Parameters"
+      parameter: "--text"
+      condition:
+        parameter: "param.testboolean"
+        must: BE_EMPTY
+    - uid: "param.cond.starts"
+      name: "StartsWith Conditional"
+      groupName: "Test Parameters"
+      parameter: "--text"
+      mandatory: true
+      condition:
+        parameter: "param.text"
+        must: START_WITH
+        value: "test"
+    - uid: "param.cond.ends"
+      name: "EndsWith Conditional"
+      groupName: "Test Parameters"
+      parameter: "--text"
+      mandatory: true
+      condition:
+        parameter: "param.text"
+        must: END_WITH
+        value: "test"
+    - uid: "param.cond.contains"
+      name: "Contains Conditional"
+      groupName: "Test Parameters"
+      parameter: "--text"
+      mandatory: true
+      condition:
+        parameter: "param.text"
+        must: CONTAIN
+        value: "test"
+
+
 
 endpoints:
     http:

@@ -73,18 +73,27 @@ startCommand: <6>
       suggestedValues:
         - "Value 1"
         - "Value 2"
+    - uid: "my.param.3"
+      name: "My conditional parameter"
+      longDescription: "This is only visible and configurable if my.param.2 has value 'Value 1'"
+      parameter: "--conditional"
+      mandatory: true
+      condition: <7>
+        parameter: "my.param.2"
+        must: EQUAL
+        value: "Value 1"
 
-stopCommand: <7>
+stopCommand: <8>
   ...
 
-endpoints: <8>
+endpoints: <9>
   http:
-    - id: "my-endpoint" <9>
+    - id: "my-endpoint" <10>
       path: "path/to/the/endpoint"
-      port: "{{V:port-param}}" <10>
+      port: "{{V:port-param}}" <11>
       secure: false
 
-runtimeDependencies: <11>
+runtimeDependencies: <12>
   - "adoptopenjdk/jre:1.8.0_202-b08"
 ----
 
@@ -94,11 +103,12 @@ runtimeDependencies: <11>
 <4> Only relevant for `CLIENT` applications: The `branding` attribute controls the appearance of `CLIENT` type *Applications* when downloaded by the user. It can be used to specify an `icon` (used to decorate desktop links created by the _client installer_), and a `splash` screen. For the `splash`, you can fine tune the exact location used to display progress text and a progress bar while the application is downloaded to the client PC by the <<_launcher_cli,Launcher CLI>>. Paths are interpreted relative to the root folder of the *Application*.
 <5> Only relevant for `SERVER` applications: Process control parameters allow to fine tune how `SERVER` type *Applications* are started and kept alive by *BDeploy*. For details, see the list of <<_supported_processcontrol_attributes, processControl>> attributes.
 <6> The start command of the *Application*. Contains the path to the _executable_ to launch, as well as all known and supported parameters. For details, see the full list of <<_supported_parameters_attributes,parameter>> attributes. To apply e.g. instance-specific values, <<_variable_expansion,Variable Expansion>> is a powerful tool. It can be used for the `launcherPath` and each parameter's `defaultValue`. In the Web UI it can be used for the parameter values.
-<7> The optional stop command can be specified to provide a mechanism for clean application shutdown once *BDeploy* tries to stop a process. This command may use <<_variable_expansion,Variable Expansion>> to access parameter values of the `startCommand` (e.g. configured 'stop port', etc.). It is *not* configurable through the Web UI though. All parameter values will have their (expanded) default values set when the command is run. If no `stopCommand` is specified, *BDeploy* will try to gracefully quit the process (i.e. `SIGTERM`). Both with and without `stopCommand`, *BDeploy* resorts to a `SIGKILL` after the `<<_supported_parameters_attributes,gracePeriod>>` has expired.
-<8> Optional definition of provided endpoints. Currently only HTTP endpoints are supported. These endpoints can be configured on the application later, including additional information like authentication, certificates, etc. *BDeploy* can later on call these endpoints when instructed to do so by a third-party application.
-<9> The ID of the endpoint can be used to call the endpoint remotely by tunneling through potentially multiple levels of *BDeploy* servers.
-<10> <<Variable Expansion>> can be used on most of the endpoint properties.
-<11> Optional runtime dependencies. These dependencies are included in the *Product* when building it. Dependencies are fetched from *<<Software Repositories>>*. `launcherPath` and parameter `defaultValue` (and of course the final configuration values) can access paths within each of the dependencies by using the `{{M:adoptopenjdk/jre:1.8.0_202-b08}}` <<Variable Expansion>>, e.g. `launcherPath: {{M:adoptopenjdk/jre:1.8.0_202-b08}}/bin/java`. Also note that the declared dependency does not specify an operating system. This will be resolved by *BDeploy* to either an exact match, e.g. `adoptopenjdk/jre/linux:1.8.0_202-b08` on `LINUX`.
+<7> A conditional parameter is a parameter with a condition on it. The condition always refers to another parameter on the same application. The parameter with the condition set will only be visible and configurable if the condition on the referenced parameter is met.
+<8> The optional stop command can be specified to provide a mechanism for clean application shutdown once *BDeploy* tries to stop a process. This command may use <<_variable_expansion,Variable Expansion>> to access parameter values of the `startCommand` (e.g. configured 'stop port', etc.). It is *not* configurable through the Web UI though. All parameter values will have their (expanded) default values set when the command is run. If no `stopCommand` is specified, *BDeploy* will try to gracefully quit the process (i.e. `SIGTERM`). Both with and without `stopCommand`, *BDeploy* resorts to a `SIGKILL` after the `<<_supported_parameters_attributes,gracePeriod>>` has expired.
+<9> Optional definition of provided endpoints. Currently only HTTP endpoints are supported. These endpoints can be configured on the application later, including additional information like authentication, certificates, etc. *BDeploy* can later on call these endpoints when instructed to do so by a third-party application.
+<10> The ID of the endpoint can be used to call the endpoint remotely by tunneling through potentially multiple levels of *BDeploy* servers.
+<11> <<Variable Expansion>> can be used on most of the endpoint properties.
+<12> Optional runtime dependencies. These dependencies are included in the *Product* when building it. Dependencies are fetched from *<<Software Repositories>>*. `launcherPath` and parameter `defaultValue` (and of course the final configuration values) can access paths within each of the dependencies by using the `{{M:adoptopenjdk/jre:1.8.0_202-b08}}` <<Variable Expansion>>, e.g. `launcherPath: {{M:adoptopenjdk/jre:1.8.0_202-b08}}/bin/java`. Also note that the declared dependency does not specify an operating system. This will be resolved by *BDeploy* to either an exact match, e.g. `adoptopenjdk/jre/linux:1.8.0_202-b08` on `LINUX`.
 
 ===== Supported `processControl` attributes
 
@@ -238,6 +248,78 @@ The fixed flag will cause the parameter to *always* use the defined default valu
 |no
 |Type of parameter. This defines the type of input field used to edit the parameter. Available are `STRING`, `NUMERIC`, `BOOLEAN`, `PASSWORD`.
 
+|`condition`
+|
+|no
+a| A conditional parameter is a parameter with a condition on it. The condition always refers to another parameter on the same application. The parameter with the condition set will only be visible and configurable if the condition on the referenced parameter is met.
+
+A condition expression (isolated) looks like this:
+
+[source,yaml]
+----
+condition:
+  parameter: "my.param.2"
+  must: EQUAL
+  value: "Value 1"
+----
+
+The condition block understands the following fields:
+
+[%header,cols="20,80"]
+!===
+!Name
+!Description
+
+!`parameter`
+!the referenced parameters UID.
+
+!`must`
+!The type of condition.
+
+!`value`
+!The value to match against if required by the condition type.
+
+!===
+
+The `must` field understands the following condition types:
+
+[%header,cols="20,80"]
+!===
+!Name
+!Description
+
+!`EQUAL`
+!The referenced parameters value must equal the given condition value.
+
+!`CONTAIN`
+!The referenced parameters value must contain the given condition value.
+
+!`START_WITH`
+!The referenced parameters value must start with the given condition value.
+
+!`END_WITH`
+!The referenced parameters value must end with the given condition value.
+
+!`BE_EMPTY`
+a!The referenced parameters value must be empty. In case of `BOOLEAN` parameters the value must be `false`.
+
+[NOTE]
+Leading and trailing whitespaces are ignored for this check.
+
+!`BE_NON_EMPTY`
+a!The referenced parameters value must be any non-empty value. In case of `BOOLEAN` parameters the value must be `true`.
+
+[NOTE]
+Leading and trailing whitespaces are ignored for this check.
+
+!===
+
+[WARNING]
+Be aware that the condition on a parameter has a higher precedence than `mandatory`. A `mandatory` parameter whos condition is not met is still not configurable. As soon as the condition is met, it is automatically added to the configuration using its default value.
+
+[TIP]
+If possible, a parameter with a condition should be defined *after* the parameter referenced in the condition if the referenced parameter is mandatory. This will make a difference when an application configuration is initially created by drag & drop.
+
 |===
 
 ===== Supported `endpoints.http` attributes
@@ -245,7 +327,7 @@ The fixed flag will cause the parameter to *always* use the defined default valu
 [NOTE]
 Endpoints definitions are templates which can later on be configured by the user. The only values not editable by the user are `id` and `path`.
 
-[%header,cols="15,80"]
+[%header,cols="15,85"]
 |===
 |Attribute
 |Description

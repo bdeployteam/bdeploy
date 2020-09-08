@@ -171,6 +171,10 @@ describe('Instance Tests', function () {
     // check if cards contain expected text
     cy.contains("mat-expansion-panel","Version 4: Created").should("contain.html","master")
       .and("contain.html","Parameter").and("contain.html","param.sleep");
+
+    cy.contains("Version 4: Created").click();
+    cy.contains("Version 3: Created").click();
+
     cy.contains("mat-expansion-panel","Version 2: Created").click()
       .should("contain.html","master:").and("contain.html","Server Application");
 

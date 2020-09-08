@@ -126,6 +126,11 @@ public class ParameterDescriptor implements Comparable<ParameterDescriptor> {
      */
     public String customEditor;
 
+    /**
+     * A condition which must be met to show/configure this parameter.
+     */
+    public ParameterCondition condition;
+
     @Override
     public int compareTo(ParameterDescriptor o) {
         return uid.compareTo(o.uid);

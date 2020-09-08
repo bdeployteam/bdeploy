@@ -69,6 +69,9 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
   /** the string searched for */
   public searchString = '';
 
+  /** parameter dependencies for conditional parameters */
+  private dependencies = new Map<string, LinkedParameter[]>();
+
   constructor(
     public appService: ApplicationService,
     private matDialog: MatDialog,
@@ -145,7 +148,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
   }
 
   hasOptionalParameters(groupName: string) {
-    return this.getOptionalParameters(groupName).length > 0;
+    return this.getConfigurableOptionalParameters(groupName).length > 0;
   }
 
   hasCustomParameters(groupName: string) {
@@ -325,8 +328,16 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
       linked.conf = cloneDeep(EMPTY_PARAMETER_CONFIGURATION);
       linked.conf.uid = paraDef.uid;
 
+      // remember dependencies of conditional parameters
+      if (paraDef.condition && paraDef.condition.parameter) {
+        if (!this.dependencies.has(paraDef.condition.parameter)) {
+          this.dependencies.set(paraDef.condition.parameter, []);
+        }
+        this.dependencies.get(paraDef.condition.parameter).push(linked);
+      }
+
       // Mandatory parameters must be visible
-      linked.rendered = paraDef.mandatory;
+      linked.rendered = paraDef.mandatory && this.meetsCondition(linked);
 
       // Setup predecessor/successor chain
       if (previous) {
@@ -345,7 +356,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
       // Make it visible and take its value
       if (linkedPara) {
         linkedPara.conf = cloneDeep(paraCfg);
-        linkedPara.rendered = true;
+        linkedPara.rendered = this.meetsCondition(linkedPara);
         previous = linkedPara;
         continue;
       }
@@ -498,12 +509,40 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     }
 
     // Track value changes and update
+    const deps = this.dependencies.get(linkedPara.desc.uid);
     control.valueChanges.subscribe(v => {
       linkedPara.preRender(this.appService, v);
+
+      // Track dependencies
+      if (deps && deps.length) {
+        let changes = false;
+        for (const dep of deps) {
+          const met = this.meetsCondition(dep);
+
+          // optional parameters simply "appear"
+          if (dep.desc.mandatory && !dep.rendered && met) {
+            dep.rendered = true;
+            changes = true;
+          }
+
+          if (!met && dep.rendered) {
+            dep.rendered = false;
+            changes = true;
+          }
+        }
+        if (changes) {
+          this.updateAppCfgParameterOrder();
+          this.updateFormGroup();
+        }
+      }
     });
 
     control.updateValueAndValidity();
     return control;
+  }
+
+  meetsCondition(param: LinkedParameter): boolean {
+    return this.appService.meetsCondition(param.desc, this.appDesc.startCommand.parameters, this.appConfigContext.applicationConfiguration.start.parameters);
   }
 
   /**
@@ -540,7 +579,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     config.height = '60%';
     config.minWidth = '470px';
     config.minHeight = '550px';
-    const data: EditOptionalData = { filter: this.searchString, parameters: cloneDeep(this.getOptionalParameters(groupName)) };
+    const data: EditOptionalData = { filter: this.searchString, parameters: cloneDeep(this.getConfigurableOptionalParameters(groupName)) };
     config.data = data;
     this.matDialog
       .open(ApplicationEditOptionalComponent, config)
@@ -699,7 +738,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
   }
 
   /** Returns a list of all optional parameters of the given group */
-  getOptionalParameters(groupName: string) {
+  getConfigurableOptionalParameters(groupName: string) {
     const params: LinkedParameter[] = [];
     if (groupName === GroupNames.CUSTOM_PARAMETERS) {
       return params;
@@ -710,6 +749,9 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
         continue;
       }
       if (paraDesc.mandatory) {
+        continue;
+      }
+      if (!this.meetsCondition(linkedParaDesc)) {
         continue;
       }
       params.push(linkedParaDesc);
@@ -934,7 +976,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     let filtered = params.filter(lp => lp.desc.groupName === groupName);
 
     if (unrenderenOnly) {
-      filtered = filtered.filter(lp => !lp.rendered);
+      filtered = filtered.filter(lp => !lp.rendered && this.meetsCondition(lp));
     }
 
     return filtered;
