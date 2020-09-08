@@ -40,6 +40,7 @@ import com.ning.http.client.ws.WebSocketUpgradeHandler;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.SecurityHelper;
+import io.bdeploy.jersey.activity.JerseyClientActivityFilter;
 import io.bdeploy.jersey.activity.JerseyRemoteActivityScopeClientFilter;
 import io.bdeploy.jersey.ws.WebSocketAuthenticatingMessageListener;
 
@@ -54,11 +55,12 @@ public class JerseyClientFactory {
     }
 
     private static final Logger log = LoggerFactory.getLogger(JerseyClientFactory.class);
+    private static ActivityReporter defaultReporter = new ActivityReporter.Null();
 
     private SSLContext sslContext;
     private String bearer;
     private final RemoteService svc;
-    private ActivityReporter reporter = new ActivityReporter.Null();
+    private ActivityReporter reporter = defaultReporter;
     private final Set<com.fasterxml.jackson.databind.Module> additionalModules = new HashSet<>();
     private WebTarget cachedTarget;
 
@@ -108,6 +110,13 @@ public class JerseyClientFactory {
      */
     public void setReporter(ActivityReporter reporter) {
         this.reporter = reporter;
+    }
+
+    /**
+     * @param activityReporter the default {@link ActivityReporter} used for all new {@link JerseyClientFactory}s.
+     */
+    public static void setDefaultReporter(ActivityReporter activityReporter) {
+        defaultReporter = activityReporter;
     }
 
     /**
@@ -164,6 +173,7 @@ public class JerseyClientFactory {
         builder.register(JerseyPathWriter.class);
         builder.register(new JerseyClientReporterResolver());
         builder.register(new JerseyRemoteActivityScopeClientFilter(proxyUuid::get));
+        builder.register(JerseyClientActivityFilter.class);
 
         for (Object reg : additionalRegistrations) {
             if (reg instanceof Class<?>) {

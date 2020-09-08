@@ -123,6 +123,8 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
             ((ActivityReporter.Stream) getActivityReporter()).setProxyConnector(this::connectProxy);
         }
 
+        JerseyClientFactory.setDefaultReporter(getActivityReporter());
+
         try (NoThrowAutoCloseable proxy = getActivityReporter().proxyActivities(svc)) {
             return run(config, svc);
         }

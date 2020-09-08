@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.bdeploy.common.cli.data.DataFormat;
+import io.bdeploy.common.cli.data.DataTable;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.JacksonHelper;
 import io.bdeploy.common.util.JacksonHelper.MapperType;
@@ -240,25 +242,15 @@ public interface ActivityReporter {
             }
 
             if (verbose) {
-                output.println();
-                output.println(String.format("%1$-81s %2$s", "ACTIVITY", "DURATION"));
-                output.println(repeat("=", 90));
-                for (AsyncActivity act : allActivities) {
-                    if (act.isNested) {
-                        output.println(String.format("  %1$-79s %2$8d ms", act.activity, act.duration()));
-                    } else {
-                        output.println(String.format("%1$-81s %2$8d ms", act.activity, act.duration()));
-                    }
-                }
-            }
-        }
+                DataTable table = DataFormat.TEXT.createTable(output);
+                table.column("Activity", 80).column("Duration", 15);
 
-        private static String repeat(String s, int n) {
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < n; ++i) {
-                builder.append(s);
+                for (AsyncActivity act : allActivities) {
+                    table.row().cell((act.isNested ? "  " : "") + act.activity).cell(act.duration() + " ms").build();
+                }
+
+                table.render();
             }
-            return builder.toString();
         }
 
         @Override
