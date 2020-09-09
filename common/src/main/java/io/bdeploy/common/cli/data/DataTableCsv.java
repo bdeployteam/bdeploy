@@ -4,6 +4,8 @@ import java.io.PrintStream;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import io.bdeploy.common.util.StringHelper;
+
 public class DataTableCsv extends DataTableBase {
 
     DataTableCsv(PrintStream output) {
@@ -19,7 +21,7 @@ public class DataTableCsv extends DataTableBase {
                 out().print(quote(row.get(y).data));
 
                 if (y != (row.size() - 1)) {
-                    out().print(",".repeat(row.get(y).span));
+                    out().print(StringHelper.repeat(",", row.get(y).span));
                 } else {
                     out().println();
                 }

@@ -4,6 +4,8 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.bdeploy.common.util.StringHelper;
+
 /**
  * Base class for {@link DataTable} implementations.
  */
@@ -86,7 +88,7 @@ public abstract class DataTableBase implements DataTable {
     protected String expand(String data, int width) {
         String limited = ellipsis(data, width);
         if (limited.length() < width) {
-            return limited + " ".repeat(width - limited.length());
+            return limited + StringHelper.repeat(" ", width - limited.length());
         }
         return limited;
     }

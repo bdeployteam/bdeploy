@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import io.bdeploy.common.util.StringHelper;
+
 public class DataTableText extends DataTableBase {
 
     private static final char CELL_NONE = '─';
@@ -84,7 +86,7 @@ public class DataTableText extends DataTableBase {
         // caption
         if (getCaption() != null) {
             buffer.add(hr(HrMode.TOP));
-            buffer.add(" ".repeat(indent) + content(getCaption(), 0, columns.size()));
+            buffer.add(StringHelper.repeat(" ", indent) + content(getCaption(), 0, columns.size()));
         }
 
         buffer.add(hr(getCaption() != null ? HrMode.CONTENT : HrMode.TOP));
@@ -92,7 +94,7 @@ public class DataTableText extends DataTableBase {
         // headers
         if (!hideHeaders) {
             StringBuilder header = new StringBuilder();
-            header.append(" ".repeat(indent));
+            header.append(StringHelper.repeat(" ", indent));
             for (int i = 0; i < columns.size(); ++i) {
                 header.append(content(columns.get(i).getLabel(), i, 1));
             }
@@ -115,7 +117,7 @@ public class DataTableText extends DataTableBase {
 
             for (List<DataTableCell> data : expanded) {
                 StringBuilder row = new StringBuilder();
-                row.append(" ".repeat(indent));
+                row.append(StringHelper.repeat(" ", indent));
                 int colIndex = 0;
                 for (int i = 0; i < data.size(); ++i) {
                     row.append(content(data.get(i).data, colIndex, data.get(i).span));
@@ -169,7 +171,7 @@ public class DataTableText extends DataTableBase {
                 perColumn.computeIfAbsent(colIndex, k -> new ArrayList<>())
                         .add(new DataTableCell(remaining.substring(0, index), item.span));
 
-                remaining = remaining.substring(index).stripLeading();
+                remaining = remaining.substring(index).trim();
             }
 
             perColumn.computeIfAbsent(colIndex, k -> new ArrayList<>()).add(new DataTableCell(remaining, item.span));
@@ -201,8 +203,8 @@ public class DataTableText extends DataTableBase {
     private void processBuffer(List<String> buffer) {
         for (int i = 0; i < buffer.size(); ++i) {
             String line = buffer.get(i);
-            String prev = " ".repeat(line.length());
-            String next = " ".repeat(line.length());
+            String prev = StringHelper.repeat(" ", line.length());
+            String next = StringHelper.repeat(" ", line.length());
 
             if (i > 0) {
                 prev = buffer.get(i - 1);
@@ -266,11 +268,11 @@ public class DataTableText extends DataTableBase {
         StringBuilder builder = new StringBuilder();
         List<DataTableColumn> columns = getColumns();
 
-        builder.append(" ".repeat(indent)).append(mode.start).append(CELL_NONE);
+        builder.append(StringHelper.repeat(" ", indent)).append(mode.start).append(CELL_NONE);
         for (int i = 0; i < columns.size(); ++i) {
             DataTableColumn column = columns.get(i);
 
-            builder.append(Character.toString(CELL_NONE).repeat(column.getPreferredWidth()));
+            builder.append(StringHelper.repeat(Character.toString(CELL_NONE), column.getPreferredWidth()));
             if (i != (columns.size() - 1)) {
                 builder.append(CELL_NONE).append(CELL_BOTH).append(CELL_NONE);
             } else {
