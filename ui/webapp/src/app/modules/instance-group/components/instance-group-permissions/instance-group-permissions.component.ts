@@ -48,7 +48,7 @@ export class InstanceGroupPermissionsComponent implements OnInit {
     this.updateFilter();
   }
 
-  private _showGlobal = true;
+  private _showGlobal = false;
   get showGlobal(): boolean {
     return this._showGlobal;
   }

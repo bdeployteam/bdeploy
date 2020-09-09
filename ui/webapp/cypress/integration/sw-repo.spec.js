@@ -53,6 +53,8 @@ describe('Software Repository Tests', () => {
     cy.visit('/#/softwarerepo/permissions/' + repoName);
     cy.waitUntilContentLoaded();
 
+    cy.contains('mat-slide-toggle','Global Access').click();
+
     cy.contains('tr', globalAdmin).should('exist');
     cy.contains('tr', globalWrite).should('exist');
     cy.contains('tr', globalRead).should('not.exist');

@@ -55,6 +55,8 @@ describe('Instance Group Tests', () => {
     cy.visit('/#/instancegroup/permissions/' + groupName);
     cy.waitUntilContentLoaded();
 
+    cy.contains('mat-slide-toggle','Global Access').click();
+
     cy.contains('tr', globalAdmin).within(() => {
       cy.get('mat-icon[data-cy="global-read"]').should('exist');
       cy.get('mat-icon[data-cy="global-write"]').should('exist');
