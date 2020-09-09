@@ -2,7 +2,7 @@ apply plugin: 'java-library'
 
 dependencies {
     api (
-        'commons-codec:commons-codec:1.14',
+        'commons-codec:commons-codec:1.15',
         'com.google.guava:guava:29.0-jre',
         'io.dropwizard.metrics:metrics-core:4.1.12.1',
         'org.slf4j:slf4j-api:1.7.30',

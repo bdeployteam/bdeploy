@@ -21,27 +21,27 @@ Cypress.Commands.add('createUser', function(username, fullname, email, password,
   cy.get('input[data-placeholder="E-Mail Address"]').type(email);
   cy.get('input[data-placeholder="New Password"]').type(password);
   cy.get('input[data-placeholder="Confirm New Password"]').type(password);
-  cy.contains('button', 'Apply').should('exist').and('enabled');
+  cy.contains('button', 'Apply').should('exist').and('be.enabled');
 
   if (docuScreenshots) {
     cy.screenshot('BDeploy_UserAccounts_Add');
   }
   cy.contains('button', 'Apply').click();
+  cy.contains('tr', username).should('exist');
 })
 
 /**
  * Command: deleteUser
  */
 Cypress.Commands.add('deleteUser', function(username) {
-  cy.visit('/#/admin/all/(panel:users)');
-  cy.waitUntilContentLoaded();
-
   cy.contains('tr', username).should('exist');
   cy.contains('tr', username).clickContextMenuDialog('Delete', 'Delete');
 
   cy.contains('div', 'Do you really want to delete user ' + username + '?').should('exist');
 
   cy.contains('button', 'OK').click();
+
+  cy.contains('tr', username).should('not.exist');
 })
 
 /**
