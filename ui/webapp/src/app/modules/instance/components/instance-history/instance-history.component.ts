@@ -1,30 +1,30 @@
-import { Location } from "@angular/common";
-import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
+import { Location } from '@angular/common';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { MatButton } from '@angular/material/button';
-import { MatDialog } from "@angular/material/dialog";
-import { ActivatedRoute } from "@angular/router";
-import { HistoryEntryDto, InstanceConfiguration } from "src/app/models/gen.dtos";
-import { LoggingService } from "src/app/modules/core/services/logging.service";
-import { RoutingHistoryService } from "src/app/modules/core/services/routing-history.service";
-import { InstanceHistoryTimelineComponent } from "src/app/modules/instance/components/instance-history-timeline/instance-history-timeline.component";
-import { InstanceService } from "../../services/instance.service";
-import { InstanceHistoryCompareComponent } from "../instance-history-compare/instance-history-compare.component";
+import { MatDialog } from '@angular/material/dialog';
+import { ActivatedRoute } from '@angular/router';
+import { HistoryEntryDto, InstanceConfiguration } from 'src/app/models/gen.dtos';
+import { LoggingService } from 'src/app/modules/core/services/logging.service';
+import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
+import { InstanceHistoryTimelineComponent } from 'src/app/modules/instance/components/instance-history-timeline/instance-history-timeline.component';
+import { InstanceService } from '../../services/instance.service';
+import { InstanceHistoryCompareComponent } from '../instance-history-compare/instance-history-compare.component';
 
 @Component({
-  selector: "app-instance-history",
-  templateUrl: "./instance-history.component.html",
-  styleUrls: ["./instance-history.component.css"]
+  selector: 'app-instance-history',
+  templateUrl: './instance-history.component.html',
+  styleUrls: ['./instance-history.component.css']
 })
 export class InstanceHistoryComponent implements OnInit {
   // Amount of history entries to load at once
   private readonly MAX_RESULTS = 50;
 
-  groupParam: string = this.route.snapshot.paramMap.get("group");
-  uuidParam: string = this.route.snapshot.paramMap.get("uuid");
+  groupParam: string = this.route.snapshot.paramMap.get('group');
+  uuidParam: string = this.route.snapshot.paramMap.get('uuid');
 
   loading: boolean = false;
 
-  filterText = "";
+  filterText = '';
   showCreate = true;
   showDeployment = false;
   showRuntime = false;
@@ -38,19 +38,19 @@ export class InstanceHistoryComponent implements OnInit {
   nextInstanceTag: string = null;
   allLoaded = false;
 
-  @ViewChild("searchInput")
+  @ViewChild('searchInput')
   searchInput: ElementRef<HTMLInputElement>;
 
-  @ViewChild("timeline")
+  @ViewChild('timeline')
   timeline: InstanceHistoryTimelineComponent;
 
-  @ViewChild("compareButton")
+  @ViewChild('compareButton')
   compareButton: MatButton;
 
-  @ViewChild("compareA")
+  @ViewChild('compareA')
   compareInputA: ElementRef<HTMLInputElement>;
 
-  @ViewChild("compareB")
+  @ViewChild('compareB')
   compareInputB: ElementRef<HTMLInputElement>;
 
   constructor(
@@ -92,7 +92,7 @@ export class InstanceHistoryComponent implements OnInit {
         this.allLoaded = r.next == null;
         this.loading = false;
         if (r.errors.length > 0) {
-          this.loggingService.guiError(r.errors.join("\n"));
+          this.loggingService.guiError(r.errors.join('\n'));
         }
       });
   }
@@ -171,8 +171,8 @@ export class InstanceHistoryComponent implements OnInit {
       this.compareVersions,
     ];
     this.dialog.open(InstanceHistoryCompareComponent, {
-      minWidth: "300px",
-      maxWidth: "800px",
+      minWidth: '300px',
+      maxWidth: '800px',
       data: data ,
       closeOnNavigation: true,
     });

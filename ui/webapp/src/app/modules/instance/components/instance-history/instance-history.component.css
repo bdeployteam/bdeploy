@@ -68,8 +68,7 @@ mat-toolbar {
 }
 
 .loading-spinner {
-  margin-top: 1em;
-  margin: 0 auto;
+  margin: 1em auto;
 }
 
 .not-found {
