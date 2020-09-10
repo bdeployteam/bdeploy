@@ -70,7 +70,8 @@
             <mat-paginator
               [pageSizeOptions]="[10, 20, 50, 100, 1000]"
               showFirstLastButtons
-              [pageSize]="INITIAL_PAGE_SIZE"
+              [pageSize]="pageSize"
+              (page)='pageSize = $event.pageSize'
               [pageIndex]="INITIAL_PAGE_INDEX"
               [length]="instanceDirectory.entries.length">
             </mat-paginator>
