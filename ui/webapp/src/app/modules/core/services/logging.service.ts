@@ -211,10 +211,10 @@ export class ConsoleAppender implements Appender {
 
   private fMsg(msg: Object): string {
     if (typeof msg === 'string') {
-      return <string>msg;
+      return msg;
     }
     if (msg instanceof ErrorMessage) {
-      const errorMessage: ErrorMessage = <ErrorMessage>msg;
+      const errorMessage: ErrorMessage = msg;
       const details: any = errorMessage.getDetails();
       if (details instanceof Error) {
         return errorMessage.getMessage() + ': ' + details.stack;

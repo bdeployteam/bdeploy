@@ -118,7 +118,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
 
     private void addProcessDetails(DataResult result, ProcessHandleDto pdd, String indent) {
         result.addField("Process PID=" + pdd.pid,
-                String.format("%1$s└[cpu=%3$ds] %4$s %5$s", indent, pdd.pid, pdd.totalCpuDuration, pdd.command,
+                String.format("%1$s└[cpu=%2$ds] %3$s %4$s", indent, pdd.pid, pdd.totalCpuDuration, pdd.command,
                         (pdd.arguments != null && pdd.arguments.length > 0 ? String.join(" ", pdd.arguments) : "")));
 
         for (ProcessHandleDto child : pdd.children) {
@@ -158,8 +158,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                 }
             });
 
-            addProcessRows(table, ir.getProcessResource(config.uuid()), processEntry.getValue(), processEntry.getKey(), instance,
-                    deploymentStates);
+            addProcessRows(table, ir.getProcessResource(config.uuid()), processEntry.getValue(), instance, deploymentStates);
         }
 
         table.addFooter(" * Versions marked with '*' are out-of-sync (not running from the active version)");
@@ -167,7 +166,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         return table;
     }
 
-    private void addProcessRows(DataTable table, ProcessResource pr, ProcessStatusDto process, String nodeName,
+    private void addProcessRows(DataTable table, ProcessResource pr, ProcessStatusDto process,
             Optional<InstanceConfiguration> instance, InstanceStateRecord deploymentStates) {
         ProcessDetailDto detail = pr.getDetails(process.appUid);
         ProcessHandleDto handle = detail.handle;

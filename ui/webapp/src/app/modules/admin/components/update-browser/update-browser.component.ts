@@ -11,7 +11,7 @@ import { SoftwareUpdateService } from '../../services/software-update.service';
 import { UpdateDialogComponent } from '../update-dialog/update-dialog.component';
 
 export class GroupedKeys {
-  public tag: String;
+  public tag: string;
   public snapshot: boolean;
   public current: boolean;
   public oss: OperatingSystem[];

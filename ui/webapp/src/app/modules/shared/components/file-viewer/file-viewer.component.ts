@@ -1,9 +1,23 @@
-import { AfterViewInit, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  SimpleChanges,
+  ViewChild
+} from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { NgTerminal } from 'ng-terminal';
 import { Observable, Subscription } from 'rxjs';
 import { IDisposable } from 'xterm';
-import { InstanceDirectoryEntry, StringEntryChunkDto } from '../../../../models/gen.dtos';
+import {
+  InstanceDirectoryEntry,
+  StringEntryChunkDto
+} from '../../../../models/gen.dtos';
 import { InstanceService } from '../../../instance/services/instance.service';
 
 const MAX_TAIL = 512 * 1024; // 512KB max initial fetch.
@@ -11,12 +25,12 @@ const MAX_TAIL = 512 * 1024; // 512KB max initial fetch.
 @Component({
   selector: 'app-file-viewer',
   templateUrl: './file-viewer.component.html',
-  styleUrls: ['./file-viewer.component.css']
+  styleUrls: ['./file-viewer.component.css'],
 })
-export class FileViewerComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
-
+export class FileViewerComponent
+  implements OnInit, AfterViewInit, OnChanges, OnDestroy {
   // Sequences documentation: https://xtermjs.org/docs/api/vtfeatures/
-  static ESC: string = '\u001b'; // ESC
+  static ESC = '\u001b'; // ESC
   static SC: string = FileViewerComponent.ESC + '7'; // Save Cursor
   static RC: string = FileViewerComponent.ESC + '8'; // Restore Cursor
 
@@ -26,10 +40,12 @@ export class FileViewerComponent implements OnInit, AfterViewInit, OnChanges, On
   static EL_TO_EOL: string = FileViewerComponent.CSI + '0K'; // clear from cursor to EOL
   static EL_ALL: string = FileViewerComponent.CSI + '2K'; // clear whole line
 
-
-  @Input() title: String;
+  @Input() title: string;
   @Input() initialEntry: () => Observable<InstanceDirectoryEntry>;
-  @Input() contentFetcher: (offset: number, length: number) => Observable<StringEntryChunkDto>;
+  @Input() contentFetcher: (
+    offset: number,
+    length: number
+  ) => Observable<StringEntryChunkDto>;
   @Input() contentDownloader: () => void;
   @Input() follow = false;
 
@@ -37,31 +53,39 @@ export class FileViewerComponent implements OnInit, AfterViewInit, OnChanges, On
 
   @Input() supportsStdin = false;
   @Input() hasStdin = false;
-  @Output() inputEvent = new EventEmitter<String>();
+  @Output() inputEvent = new EventEmitter<string>();
 
   @ViewChild('term', { static: true }) term: NgTerminal;
-  get termCols() {return this.term.underlying ? this.term.underlying.cols : undefined};
-  get cursorX() {return this.term.underlying ? this.term.underlying.buffer.active.cursorX : undefined};
-  content: String = '';
+  get termCols() {
+    return this.term.underlying ? this.term.underlying.cols : undefined;
+  }
+  get cursorX() {
+    return this.term.underlying
+      ? this.term.underlying.buffer.active.cursorX
+      : undefined;
+  }
+  content = '';
   private timer;
   private offset = 0;
 
-  private stdinSubscription : Subscription;
+  private stdinSubscription: Subscription;
   private resizeDisposable: IDisposable;
-  buffer: string = '';
-  bufferCursorPos: number = 0;
+  buffer = '';
+  bufferCursorPos = 0;
   initialCursorX: number; // cursor posX after terminal output (input field origin X)
   inputLineHeight_sav: number;
 
-  constructor(private fb: FormBuilder,
-    private instanceService: InstanceService) { }
+  constructor(
+    private fb: FormBuilder,
+    private instanceService: InstanceService
+  ) {}
 
   ngOnInit() {
     this.loadInitial();
   }
 
   ngAfterViewInit() {
-    this.term.underlying.attachCustomKeyEventHandler(event => {
+    this.term.underlying.attachCustomKeyEventHandler((event) => {
       // prevent default handling of Ctrl-C/Ctrl-X (otherwise it resets the selections
       // and default Ctrl-C/X has nothing to copy) and Ctrl-V
       return !event.ctrlKey || 'cxv'.indexOf(event.key.toLowerCase()) === -1;
@@ -73,7 +97,7 @@ export class FileViewerComponent implements OnInit, AfterViewInit, OnChanges, On
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    for (let p in changes) {
+    for (const p in changes) {
       if (!changes[p].firstChange) {
         if (p === 'hasStdin' && this.supportsStdin) {
           this.setupStdin(changes[p].currentValue);
@@ -94,7 +118,7 @@ export class FileViewerComponent implements OnInit, AfterViewInit, OnChanges, On
 
   loadInitial() {
     this.content = '';
-    this.initialEntry().subscribe(entry => {
+    this.initialEntry().subscribe((entry) => {
       if (entry == null) {
         this.content = 'File not found';
         this.term.write('File not found');
@@ -110,7 +134,7 @@ export class FileViewerComponent implements OnInit, AfterViewInit, OnChanges, On
   }
 
   updateTail() {
-    this.contentFetcher(this.offset, 0).subscribe(chunk => {
+    this.contentFetcher(this.offset, 0).subscribe((chunk) => {
       if (chunk) {
         if (this.supportsStdin && this.hasStdin) {
           this.clearInput();
@@ -126,11 +150,11 @@ export class FileViewerComponent implements OnInit, AfterViewInit, OnChanges, On
       if (this.follow) {
         this.timer = setTimeout(() => this.updateTail(), 1000);
       }
-  });
+    });
   }
 
   public canFollow(): boolean {
-    return !(typeof(this.contentFetcher) === 'undefined');
+    return typeof this.contentFetcher !== 'undefined';
   }
 
   onToggleFollow(checked: boolean) {
@@ -154,16 +178,20 @@ export class FileViewerComponent implements OnInit, AfterViewInit, OnChanges, On
 
   setupStdin(connect: boolean) {
     if (connect) {
-      this.resizeDisposable = this.term.underlying.onResize(data => {
+      this.resizeDisposable = this.term.underlying.onResize((data) => {
         if (this.supportsStdin && this.hasStdin && this.follow) {
-          setTimeout(dim => {
-            this.clearInput();
-            this.updateInput();
-          }, 0, data);
+          setTimeout(
+            (dim) => {
+              this.clearInput();
+              this.updateInput();
+            },
+            0,
+            data
+          );
         }
       });
 
-      this.stdinSubscription = this.term.keyInput.subscribe(input => {
+      this.stdinSubscription = this.term.keyInput.subscribe((input) => {
         // keyboard input usually is a single charactor or CSI sequence, but clipboard content is a string
         if (!this.follow) {
           return;
@@ -180,16 +208,22 @@ export class FileViewerComponent implements OnInit, AfterViewInit, OnChanges, On
             this.sendStdin();
           } else if (input.charCodeAt(idx) === 0x7f) {
             idx++;
-            if(this.bufferCursorPos > 0) {
+            if (this.bufferCursorPos > 0) {
               this.clearInput();
-              this.buffer = this.buffer.substring(0, this.bufferCursorPos -1) + this.buffer.substring(this.bufferCursorPos);
+              this.buffer =
+                this.buffer.substring(0, this.bufferCursorPos - 1) +
+                this.buffer.substring(this.bufferCursorPos);
               this.bufferCursorPos--;
               this.updateInput();
             }
           } else {
             this.clearInput();
             if (input.charCodeAt(idx) >= 32) {
-              this.buffer = [this.buffer.slice(0, this.bufferCursorPos), input[idx], this.buffer.slice(this.bufferCursorPos)].join('');
+              this.buffer = [
+                this.buffer.slice(0, this.bufferCursorPos),
+                input[idx],
+                this.buffer.slice(this.bufferCursorPos),
+              ].join('');
               this.bufferCursorPos++;
               idx++;
             } else if (input.substr(idx).startsWith(FileViewerComponent.CSI)) {
@@ -197,10 +231,13 @@ export class FileViewerComponent implements OnInit, AfterViewInit, OnChanges, On
               if (idx < input.length) {
                 switch (input[idx]) {
                   case 'C': // cursor right
-                    this.bufferCursorPos = this.bufferCursorPos + (this.buffer.length > this.bufferCursorPos ? 1 : 0);
+                    this.bufferCursorPos =
+                      this.bufferCursorPos +
+                      (this.buffer.length > this.bufferCursorPos ? 1 : 0);
                     break;
                   case 'D': // cursor left
-                    this.bufferCursorPos = this.bufferCursorPos - (this.bufferCursorPos > 0 ? 1 : 0);
+                    this.bufferCursorPos =
+                      this.bufferCursorPos - (this.bufferCursorPos > 0 ? 1 : 0);
                     break;
                   case 'H': // pos 1
                     this.bufferCursorPos = 0;
@@ -217,9 +254,8 @@ export class FileViewerComponent implements OnInit, AfterViewInit, OnChanges, On
             }
             this.updateInput();
           }
-        };
-
-      })
+        }
+      });
     } else if (this.stdinSubscription) {
       this.stdinSubscription.unsubscribe();
       this.stdinSubscription = null;
@@ -248,7 +284,7 @@ export class FileViewerComponent implements OnInit, AfterViewInit, OnChanges, On
   private clearInput(): void {
     this.term.write(FileViewerComponent.RC); // restore cursor
     this.term.write(FileViewerComponent.EL_TO_EOL); // clear from cursor to EOL
-    for (let i=0; i < this.inputLineHeight_sav - 1; i++) {
+    for (let i = 0; i < this.inputLineHeight_sav - 1; i++) {
       this.term.write(FileViewerComponent.CNL); // next line
       this.term.write(FileViewerComponent.EL_TO_EOL); // clear whole line
     }
@@ -259,11 +295,16 @@ export class FileViewerComponent implements OnInit, AfterViewInit, OnChanges, On
     this.term.write(this.buffer);
     this.term.write(FileViewerComponent.RC); // restore cursor
     this.term.write(this.buffer.substr(0, this.bufferCursorPos));
-    this.inputLineHeight_sav = Math.max(this.inputLineHeight_sav, this.getInputLineCount());
+    this.inputLineHeight_sav = Math.max(
+      this.inputLineHeight_sav,
+      this.getInputLineCount()
+    );
   }
 
   public getInputLineCount() {
-    return this.buffer ? Math.ceil((this.initialCursorX + this.buffer.length) / this.termCols) : 1;
+    return this.buffer
+      ? Math.ceil((this.initialCursorX + this.buffer.length) / this.termCols)
+      : 1;
   }
 
   public getLineOfCursor() {
@@ -273,6 +314,6 @@ export class FileViewerComponent implements OnInit, AfterViewInit, OnChanges, On
     const totalLen = this.initialCursorX + this.bufferCursorPos;
     const lineNo = Math.floor(totalLen / this.termCols);
     const xPos = totalLen % this.termCols;
-    return (totalLen > 0 && xPos === 0) ? lineNo - 1 : lineNo;
+    return totalLen > 0 && xPos === 0 ? lineNo - 1 : lineNo;
   }
 }

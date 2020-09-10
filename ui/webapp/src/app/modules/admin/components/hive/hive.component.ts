@@ -10,14 +10,12 @@ import { MessageboxService } from '../../../shared/services/messagebox.service';
 import { compareTags } from '../../../shared/utils/manifest.utils';
 import { HiveService } from '../../services/hive.service';
 
-
 @Component({
   selector: 'app-hive',
   templateUrl: './hive.component.html',
   styleUrls: ['./hive.component.css'],
 })
 export class HiveComponent implements OnInit {
-
   public FILE_SIZE_LIMIT = 100000; // non-static because referenced in template
 
   log: Logger = this.loggingService.getLogger('HiveComponent');
@@ -27,7 +25,13 @@ export class HiveComponent implements OnInit {
     this.selectHive(hive);
   }
 
-  public displayedColumns: string[] = ['type', 'name', 'size', 'delete', 'download'];
+  public displayedColumns: string[] = [
+    'type',
+    'name',
+    'size',
+    'delete',
+    'download',
+  ];
 
   public _hive: string;
   public longRunningOperation = false;
@@ -47,7 +51,7 @@ export class HiveComponent implements OnInit {
     private loggingService: LoggingService,
     private snackbarService: MatSnackBar,
     private mbService: MessageboxService,
-    private dlService: DownloadService,
+    private dlService: DownloadService
   ) {}
 
   ngOnInit() {
@@ -66,7 +70,8 @@ export class HiveComponent implements OnInit {
           return -1 * compareTags(a.mTag, b.mTag);
         }
         return c;
-      } else if (a.type === b.type) { // Tree or Blob
+      } else if (a.type === b.type) {
+        // Tree or Blob
         return a.name.localeCompare(b.name);
       } else if (this.isManifest(a)) {
         return -1;
@@ -101,7 +106,7 @@ export class HiveComponent implements OnInit {
     if (this._hive == null) {
       this.setEntries([]);
     } else {
-      this.hiveService.listManifests(this._hive).subscribe(entries => {
+      this.hiveService.listManifests(this._hive).subscribe((entries) => {
         this.setEntries(entries);
       });
     }
@@ -118,16 +123,21 @@ export class HiveComponent implements OnInit {
   public selectRow(entry: HiveEntryDto) {
     this.log.debug('selectRow(' + JSON.stringify(entry) + ')');
     if (this.isManifest(entry)) {
-      this.hiveService.listManifest(this._hive, entry.mName, entry.mTag).subscribe(entries => {
-        this.paths[this._hive].push(entry);
-        this.setEntries(entries);
-      });
+      this.hiveService
+        .listManifest(this._hive, entry.mName, entry.mTag)
+        .subscribe((entries) => {
+          this.paths[this._hive].push(entry);
+          this.setEntries(entries);
+        });
     } else if (this.isTree(entry)) {
-      this.hiveService.list(this._hive, entry.id).subscribe(entries => {
+      this.hiveService.list(this._hive, entry.id).subscribe((entries) => {
         this.paths[this._hive].push(entry);
         this.setEntries(entries);
       });
-    } else if (this.isBlob(entry) && this.asciiTypes.indexOf(this.getExtension(entry.name).toLowerCase()) >= 0) {
+    } else if (
+      this.isBlob(entry) &&
+      this.asciiTypes.indexOf(this.getExtension(entry.name).toLowerCase()) >= 0
+    ) {
       this.fileEntry = entry;
       if (entry.size <= this.FILE_SIZE_LIMIT) {
         this.loadFileContent(entry);
@@ -142,28 +152,35 @@ export class HiveComponent implements OnInit {
 
   public loadFileContent(entry: HiveEntryDto): void {
     this.fileContentLoading = true;
-    this.hiveService.downloadAscii(this._hive, entry.id)
+    this.hiveService
+      .downloadAscii(this._hive, entry.id)
       .pipe(finalize(() => (this.fileContentLoading = false)))
-      .subscribe(content => {
+      .subscribe((content) => {
         this.fileContent = content;
-    });
+      });
   }
 
   public download(entry: HiveEntryDto): void {
     this.log.debug('download(' + JSON.stringify(entry) + ')');
-    const targetFilename = entry.name + (this.isManifest(entry) || this.isTree(entry) ? '.json' : '');
+    const targetFilename =
+      entry.name +
+      (this.isManifest(entry) || this.isTree(entry) ? '.json' : '');
 
     if (this.isManifest(entry)) {
       this.hiveService
         .downloadManifest(this._hive, entry.mName, entry.mTag)
-        .subscribe(data => this.downloadFile(targetFilename, data));
+        .subscribe((data) => this.downloadFile(targetFilename, data));
     } else {
-      this.hiveService.download(this._hive, entry.id).subscribe(data => this.downloadFile(targetFilename, data));
+      this.hiveService
+        .download(this._hive, entry.id)
+        .subscribe((data) => this.downloadFile(targetFilename, data));
     }
   }
 
   private downloadFile(filename: string, data: Blob): void {
-    this.log.debug('downloadFile("' + filename + '", <blob data: ' + data.size + ' bytes>)');
+    this.log.debug(
+      'downloadFile("' + filename + '", <blob data: ' + data.size + ' bytes>)'
+    );
 
     let mediatype = 'application/octet-stream';
     if (filename.endsWith('.json')) {
@@ -191,14 +208,21 @@ export class HiveComponent implements OnInit {
           '<br><br><strong>ATTENTION</strong>: There is no check whether this manifest is still referenced.',
         mode: MessageBoxMode.QUESTION,
       })
-      .subscribe(r => {
+      .subscribe((r) => {
         if (r === true) {
-          this.hiveService.delete(this._hive, entry.mName, entry.mTag).subscribe(e => {
-            this.snackbarService.open(`Manifest ${entry.mName}:${entry.mTag} has been deleted.`, 'DISMISS');
-            const index = this.entries.findIndex(x => x.mName === entry.mName && x.mTag === entry.mTag);
-            this.entries.splice(index, 1);
-            this.hivetable.renderRows();
-          });
+          this.hiveService
+            .delete(this._hive, entry.mName, entry.mTag)
+            .subscribe((e) => {
+              this.snackbarService.open(
+                `Manifest ${entry.mName}:${entry.mTag} has been deleted.`,
+                'DISMISS'
+              );
+              const index = this.entries.findIndex(
+                (x) => x.mName === entry.mName && x.mTag === entry.mTag
+              );
+              this.entries.splice(index, 1);
+              this.hivetable.renderRows();
+            });
         }
       });
   }
@@ -216,12 +240,19 @@ export class HiveComponent implements OnInit {
       return;
     }
     this.startLongRunning();
-    this.hiveService.prune(this._hive).pipe(finalize(() => this.finishLongRunning())).subscribe(
-      r => {
-        this.log.info(`prune on ${this._hive} completed successfully, freeing ${r}`);
-        this.snackbarService.open(`Prune freed ${r} on ${this._hive}.`, 'DISMISS', { duration: 10000 });
-      }
-    );
+    this.hiveService
+      .prune(this._hive)
+      .pipe(finalize(() => this.finishLongRunning()))
+      .subscribe((r) => {
+        this.log.info(
+          `prune on ${this._hive} completed successfully, freeing ${r}`
+        );
+        this.snackbarService.open(
+          `Prune freed ${r} on ${this._hive}.`,
+          'DISMISS',
+          { duration: 10000 }
+        );
+      });
   }
 
   fsckHive(fix: boolean) {
@@ -229,14 +260,19 @@ export class HiveComponent implements OnInit {
       return;
     }
     this.startLongRunning();
-    this.hiveService.fsck(this._hive, fix).pipe(finalize(() => this.finishLongRunning())).subscribe(
-      r => {
+    this.hiveService
+      .fsck(this._hive, fix)
+      .pipe(finalize(() => this.finishLongRunning()))
+      .subscribe((r) => {
         this.log.info(`fsck on ${this._hive} completed successfully`);
-        this.snackbarService.open(`Check found ${Object.keys(r).length} damaged elements.`, 'DISMISS', {
-          duration: 10000,
-        });
-      }
-    );
+        this.snackbarService.open(
+          `Check found ${Object.keys(r).length} damaged elements.`,
+          'DISMISS',
+          {
+            duration: 10000,
+          }
+        );
+      });
   }
 
   public getIcon(entry: HiveEntryDto): string {
@@ -277,26 +313,23 @@ export class HiveComponent implements OnInit {
     }
   }
 
-  private getExtension(filename: String): String {
+  private getExtension(filename: string): string {
     const dotidx = filename.indexOf('.');
     return dotidx < 0 ? '' : filename.substr(dotidx + 1);
   }
 
-  public back(){
-    if(this.fileEntry){
-      this.closeFile()
-    }
-    else{
-      let length = this.paths[this._hive].length;
-      if(length > 1){
-        const entry: HiveEntryDto = this.paths[this._hive][length-2];
-        this.paths[this._hive] = this.paths[this._hive].slice(0, length-2);
+  public back() {
+    if (this.fileEntry) {
+      this.closeFile();
+    } else {
+      const length = this.paths[this._hive].length;
+      if (length > 1) {
+        const entry: HiveEntryDto = this.paths[this._hive][length - 2];
+        this.paths[this._hive] = this.paths[this._hive].slice(0, length - 2);
         this.selectRow(entry);
-      }
-      else if(length > 0){
+      } else if (length > 0) {
         this.selectTop();
       }
     }
-
   }
 }

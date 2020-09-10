@@ -5,7 +5,10 @@ import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { catchError, finalize } from 'rxjs/operators';
 import { PluginInfoDto } from 'src/app/models/gen.dtos';
-import { Logger, LoggingService } from 'src/app/modules/core/services/logging.service';
+import {
+  Logger,
+  LoggingService
+} from 'src/app/modules/core/services/logging.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { FileUploadComponent } from 'src/app/modules/shared/components/file-upload/file-upload.component';
 import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
@@ -17,19 +20,29 @@ import { PluginAdminService } from '../../services/plugin-admin.service';
   selector: 'app-plugins-browser',
   templateUrl: './plugins-browser.component.html',
   styleUrls: ['./plugins-browser.component.css'],
-  providers: [SettingsService]
+  providers: [SettingsService],
 })
 export class PluginsBrowserComponent implements OnInit, AfterViewInit {
-
-  private log: Logger = this.loggingService.getLogger('PluginsBrowserComponent');
+  private log: Logger = this.loggingService.getLogger(
+    'PluginsBrowserComponent'
+  );
 
   public INITIAL_SORT_COLUMN = 'name';
   public INITIAL_SORT_DIRECTION = 'asc';
 
-  public dataSource: MatTableDataSource<PluginInfoDto> = new MatTableDataSource<PluginInfoDto>([]);
+  public dataSource: MatTableDataSource<PluginInfoDto> = new MatTableDataSource<
+    PluginInfoDto
+  >([]);
   private filterPredicate: (d, f) => boolean;
 
-  public displayedColumns: string[] = ['global', 'name', 'version', 'editors', 'loaded', 'actions'];
+  public displayedColumns: string[] = [
+    'global',
+    'name',
+    'version',
+    'editors',
+    'loaded',
+    'actions',
+  ];
 
   @ViewChild(MatPaginator)
   paginator: MatPaginator;
@@ -45,18 +58,19 @@ export class PluginsBrowserComponent implements OnInit, AfterViewInit {
     private loggingService: LoggingService,
     private pluginAdminService: PluginAdminService,
     public settings: SettingsService
-  ) { }
+  ) {}
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
     this.dataSource.filterPredicate = (data, filter) => {
-      return this.filterPredicate(data.name, filter)
-        || this.filterPredicate(data.version, filter)
-        || this.filterPredicate(this.formatEditors(data), filter);
+      return (
+        this.filterPredicate(data.name, filter) ||
+        this.filterPredicate(data.version, filter) ||
+        this.filterPredicate(this.formatEditors(data), filter)
+      );
     };
 
     this.loadPlugins();
@@ -64,17 +78,17 @@ export class PluginsBrowserComponent implements OnInit, AfterViewInit {
 
   loadPlugins() {
     this.loading = true;
-    this.pluginAdminService.getAll()
+    this.pluginAdminService
+      .getAll()
       .pipe(finalize(() => (this.loading = false)))
-      .subscribe(plugins => {
-          this.dataSource.data = plugins;
-      }
-    );
+      .subscribe((plugins) => {
+        this.dataSource.data = plugins;
+      });
   }
 
   public applyFilter(filterValue: string): void {
     try {
-      const filterRegex = new RegExp(filterValue.trim().toLowerCase());
+      new RegExp(filterValue.trim().toLowerCase()).compile();
       this.filterPredicate = (d, f) => d && d.toLowerCase().match(f);
     } catch (e) {
       this.filterPredicate = (d, f) => d && d.toLowerCase().includes(f);
@@ -91,21 +105,37 @@ export class PluginsBrowserComponent implements OnInit, AfterViewInit {
   }
 
   public formatEditors(dto: PluginInfoDto): string {
-    return dto.editors.map(ce => ce.typeName).join(', ');
+    return dto.editors.map((ce) => ce.typeName).join(', ');
   }
 
   public onLoad(dto: PluginInfoDto): void {
     this.loading = true;
-    this.pluginAdminService.loadGlobalPlugin(dto).pipe(catchError(e => { this.loading = false; throw e; })).subscribe(result => {
-      this.loadPlugins();
-    });
+    this.pluginAdminService
+      .loadGlobalPlugin(dto)
+      .pipe(
+        catchError((e) => {
+          this.loading = false;
+          throw e;
+        })
+      )
+      .subscribe((result) => {
+        this.loadPlugins();
+      });
   }
 
   public onUnload(dto: PluginInfoDto): void {
     this.loading = true;
-    this.pluginAdminService.unloadPlugin(dto).pipe(catchError(e => { this.loading = false; throw e; })).subscribe(result => {
-      this.loadPlugins();
-    });
+    this.pluginAdminService
+      .unloadPlugin(dto)
+      .pipe(
+        catchError((e) => {
+          this.loading = false;
+          throw e;
+        })
+      )
+      .subscribe((result) => {
+        this.loadPlugins();
+      });
   }
 
   public openUploadDialog() {
@@ -116,40 +146,56 @@ export class PluginsBrowserComponent implements OnInit, AfterViewInit {
     config.minHeight = '550px';
     config.data = {
       title: 'Upload Plugins',
-      headerMessage: 'Upload global plugins. The selected archive may either contain a new plugin or a new version of an existing plugin.',
+      headerMessage:
+        'Upload global plugins. The selected archive may either contain a new plugin or a new version of an existing plugin.',
       url: this.pluginAdminService.getGlobalUploadUrl(),
-      urlParameter: [{id: 'replace', name: 'Replace', type: 'boolean'}],
+      urlParameter: [{ id: 'replace', name: 'Replace', type: 'boolean' }],
       fileTypes: ['.jar'],
       formDataParam: 'plugin',
       resultDetailsEvaluator: (status: UploadStatus) => {
         if (status.detail == null) {
-          return 'Skipping, already loaded from another location!'
+          return 'Skipping, already loaded from another location!';
         } else {
-          return 'Installed and loaded plugin ' + status.detail.name + ' (' + status.detail.version + ')';
+          return (
+            'Installed and loaded plugin ' +
+            status.detail.name +
+            ' (' +
+            status.detail.version +
+            ')'
+          );
         }
-      }
+      },
     };
     this.dialog
       .open(FileUploadComponent, config)
       .afterClosed()
-      .subscribe(e => {
+      .subscribe((e) => {
         this.loadPlugins();
       });
   }
 
   public onDelete(dto: PluginInfoDto): void {
-    this.messageBoxService.open({
-      title: 'Delete',
-      message: 'Do you really want to delete the plugin ' + dto.name + '?',
-      mode: MessageBoxMode.CONFIRM,
-    }).subscribe(r => {
-      if (r) {
-        this.loading = true;
-        this.pluginAdminService.deleteGlobalPlugin(dto).pipe(catchError(e => { this.loading = false; throw e; })).subscribe(result => {
-          this.loadPlugins();
-        });
-      }
-    });
+    this.messageBoxService
+      .open({
+        title: 'Delete',
+        message: 'Do you really want to delete the plugin ' + dto.name + '?',
+        mode: MessageBoxMode.CONFIRM,
+      })
+      .subscribe((r) => {
+        if (r) {
+          this.loading = true;
+          this.pluginAdminService
+            .deleteGlobalPlugin(dto)
+            .pipe(
+              catchError((e) => {
+                this.loading = false;
+                throw e;
+              })
+            )
+            .subscribe((result) => {
+              this.loadPlugins();
+            });
+        }
+      });
   }
-
 }

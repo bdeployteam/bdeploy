@@ -7,7 +7,11 @@ import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { SORT_PURPOSE } from '../../../../models/consts';
 import { DataList } from '../../../../models/dataList';
-import { InstanceDto, InstancePurpose, MinionMode } from '../../../../models/gen.dtos';
+import {
+  InstanceDto,
+  InstancePurpose,
+  MinionMode
+} from '../../../../models/gen.dtos';
 import { Logger, LoggingService } from '../../../core/services/logging.service';
 import { ProductService } from '../../../instance-group/services/product.service';
 import { InstanceService } from '../../services/instance.service';
@@ -18,7 +22,9 @@ import { InstanceService } from '../../services/instance.service';
   styleUrls: ['./instance-browser.component.css'],
 })
 export class InstanceBrowserComponent implements OnInit {
-  private readonly log: Logger = this.loggingService.getLogger('InstanceBrowserComponent');
+  private readonly log: Logger = this.loggingService.getLogger(
+    'InstanceBrowserComponent'
+  );
 
   instanceGroupName: string = this.route.snapshot.paramMap.get('name');
 
@@ -35,15 +41,22 @@ export class InstanceBrowserComponent implements OnInit {
     private loggingService: LoggingService,
     public location: Location,
     private config: ConfigService,
-    public routingHistoryService:RoutingHistoryService,
+    public routingHistoryService: RoutingHistoryService
   ) {}
 
   ngOnInit(): void {
-    this.instanceDtoList.searchCallback = (instanceDto: InstanceDto, text: string) => {
+    this.instanceDtoList.searchCallback = (
+      instanceDto: InstanceDto,
+      text: string
+    ) => {
       if (instanceDto.instanceConfiguration.name.toLowerCase().includes(text)) {
         return true;
       }
-      if (instanceDto.instanceConfiguration.description.toLowerCase().includes(text)) {
+      if (
+        instanceDto.instanceConfiguration.description
+          .toLowerCase()
+          .includes(text)
+      ) {
         return true;
       }
       if (instanceDto.instanceConfiguration.uuid.toLowerCase() === text) {
@@ -65,29 +78,41 @@ export class InstanceBrowserComponent implements OnInit {
     this.instanceDtoList.clear();
     this.loading = true;
 
-    const instancePromise = this.instanceService.listInstances(this.instanceGroupName);
-    instancePromise.subscribe(instanceDtos => {
+    const instancePromise = this.instanceService.listInstances(
+      this.instanceGroupName
+    );
+    instancePromise.subscribe((instanceDtos) => {
       const unsortedSet = new Set<InstancePurpose>();
-      instanceDtos.forEach(instanceDto => unsortedSet.add(instanceDto.instanceConfiguration.purpose));
+      instanceDtos.forEach((instanceDto) =>
+        unsortedSet.add(instanceDto.instanceConfiguration.purpose)
+      );
       this.purposes = Array.from(unsortedSet).sort(SORT_PURPOSE);
       this.instanceDtoList.addAll(instanceDtos);
-      this.log.debug(`Got ${instanceDtos.length} instances grouped into ${this.purposes.length} purposes`);
+      this.log.debug(
+        `Got ${instanceDtos.length} instances grouped into ${this.purposes.length} purposes`
+      );
     });
 
-    const productPromise = this.productService.getProductCount(this.instanceGroupName);
-    productPromise.subscribe(count => {
+    const productPromise = this.productService.getProductCount(
+      this.instanceGroupName
+    );
+    productPromise.subscribe((count) => {
       this.hasProducts = count > 0;
     });
 
-    forkJoin([instancePromise, productPromise]).subscribe(result => {
+    forkJoin([instancePromise, productPromise]).subscribe((result) => {
       this.loading = false;
     });
   }
 
   getInstanceDtosByPurpose(purpose: InstancePurpose): InstanceDto[] {
-    const filtered = this.instanceDtoList.filtered.filter(instanceDto => instanceDto.instanceConfiguration.purpose === purpose);
+    const filtered = this.instanceDtoList.filtered.filter(
+      (instanceDto) => instanceDto.instanceConfiguration.purpose === purpose
+    );
     const sorted = filtered.sort((a, b) => {
-      return a.instanceConfiguration.name.localeCompare(b.instanceConfiguration.name);
+      return a.instanceConfiguration.name.localeCompare(
+        b.instanceConfiguration.name
+      );
     });
     return sorted;
   }

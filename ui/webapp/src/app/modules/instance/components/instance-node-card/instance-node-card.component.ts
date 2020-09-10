@@ -269,11 +269,10 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
 
     // Create configurations for all supported OS
     if (data instanceof ApplicationGroup) {
-      const group = data as ApplicationGroup;
       if (this.isClientApplicationsNode()) {
-        for (const app of group.applications) {
+        for (const app of data.applications) {
           this.appService.createNewAppConfig(this.instanceGroupName, this.processConfig, app).then(cfg => {
-            this.applyApplicationTemplate(group.selectedTemplate, cfg, app).then(r => {
+            this.applyApplicationTemplate(data.selectedTemplate, cfg, app).then(r => {
               if (r) {
                 this.nodeApps.splice(targetIndex, 0, cfg);
                 this.editNodeAppsEvent.emit();
@@ -283,9 +282,9 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
         }
       } else {
         const nodeOs = this.minionConfig.os;
-        const app = group.getAppFor(nodeOs);
+        const app = data.getAppFor(nodeOs);
         this.appService.createNewAppConfig(this.instanceGroupName, this.processConfig, app).then(cfg => {
-          this.applyApplicationTemplate(group.selectedTemplate, cfg, app).then(r => {
+          this.applyApplicationTemplate(data.selectedTemplate, cfg, app).then(r => {
             if (r) {
               this.nodeApps.splice(targetIndex, 0, cfg);
               this.editNodeAppsEvent.emit();

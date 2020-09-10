@@ -4,7 +4,10 @@ import { Router } from '@angular/router';
 import { ManagedServersService } from 'src/app/modules/servers/services/managed-servers.service';
 import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
 import { MessageboxService } from 'src/app/modules/shared/services/messagebox.service';
-import { InstanceGroupConfiguration, MinionMode } from '../../../../models/gen.dtos';
+import {
+  InstanceGroupConfiguration,
+  MinionMode
+} from '../../../../models/gen.dtos';
 import { InstanceGroupDeleteDialogComponent } from '../../../instance-group/components/instance-group-delete-dialog/instance-group-delete-dialog.component';
 import { InstanceGroupService } from '../../../instance-group/services/instance-group.service';
 import { AuthenticationService } from '../../services/authentication.service';
@@ -14,10 +17,9 @@ import { LoggingService } from '../../services/logging.service';
 @Component({
   selector: 'app-instance-group-card',
   templateUrl: './instance-group-card.component.html',
-  styleUrls: ['./instance-group-card.component.css']
+  styleUrls: ['./instance-group-card.component.css'],
 })
 export class InstanceGroupCardComponent implements OnInit {
-
   private log = this.loggingService.getLogger('InstanceGroupCardComponent');
 
   @Input() instanceGroup: InstanceGroupConfiguration;
@@ -34,17 +36,18 @@ export class InstanceGroupCardComponent implements OnInit {
     private config: ConfigService,
     private router: Router,
     private mb: MessageboxService,
-    private managedServers: ManagedServersService) { }
+    private managedServers: ManagedServersService
+  ) {}
 
   ngOnInit() {}
 
   isModeOk() {
-    if (this.instanceGroup.managed && this.config.config.mode !== MinionMode.STANDALONE) {
-      return true;
-    } else if (!this.instanceGroup.managed && this.config.config.mode === MinionMode.STANDALONE) {
-      return true;
-    }
-    return false;
+    return (
+      (this.instanceGroup.managed &&
+        this.config.config.mode !== MinionMode.STANDALONE) ||
+      (!this.instanceGroup.managed &&
+        this.config.config.mode === MinionMode.STANDALONE)
+    );
   }
 
   onClick() {
@@ -55,21 +58,41 @@ export class InstanceGroupCardComponent implements OnInit {
       // need to convert mode to enable.
       if (this.instanceGroup.managed) {
         // group is managed but we're no longer a managed server -> migrate
-        this.mb.open({title: 'Migrate from Managed Instance Group', message: `The Instance Group <strong>${this.instanceGroup.name}</strong> was previously managed by a central server. This server has been migrated to a standalone mode. You need to confirm that this Instance Group may be migrated to standalone.`, mode: MessageBoxMode.CONFIRM}).subscribe(r => {
-          if (r) {
-            this.instanceGroup.managed = false;
-            this.instanceGroupService.updateInstanceGroup(this.instanceGroup.name, this.instanceGroup).subscribe(_ => {
-              this.router.navigate(['/instance/browser', this.instanceGroup.name]);
-            });
-          }
-        });
+        this.mb
+          .open({
+            title: 'Migrate from Managed Instance Group',
+            message: `The Instance Group <strong>${this.instanceGroup.name}</strong> was previously managed by a central server. This server has been migrated to a standalone mode. You need to confirm that this Instance Group may be migrated to standalone.`,
+            mode: MessageBoxMode.CONFIRM,
+          })
+          .subscribe((r) => {
+            if (r) {
+              this.instanceGroup.managed = false;
+              this.instanceGroupService
+                .updateInstanceGroup(
+                  this.instanceGroup.name,
+                  this.instanceGroup
+                )
+                .subscribe((_) => {
+                  this.router.navigate([
+                    '/instance/browser',
+                    this.instanceGroup.name,
+                  ]);
+                });
+            }
+          });
       } else {
         // group is not managed but we're no longer a standalone server -> need to attach!
-        this.mb.open({title: 'Migrate from Standalone Instance Group', message: `The Instance Group <strong>${this.instanceGroup.name}</strong> was created in standalone mode. This server has been migrated to a managed mode. You need to attach this Instance Group to an Instance Group <strong>with the exact same name</strong> on a Central Server to continue using it.`, mode: MessageBoxMode.CONFIRM}).subscribe(r => {
-          if (r) {
-            this.initiateMigration();
-          }
-        });
+        this.mb
+          .open({
+            title: 'Migrate from Standalone Instance Group',
+            message: `The Instance Group <strong>${this.instanceGroup.name}</strong> was created in standalone mode. This server has been migrated to a managed mode. You need to attach this Instance Group to an Instance Group <strong>with the exact same name</strong> on a Central Server to continue using it.`,
+            mode: MessageBoxMode.CONFIRM,
+          })
+          .subscribe((r) => {
+            if (r) {
+              this.initiateMigration();
+            }
+          });
       }
     } else {
       this.router.navigate(['/instance/browser', this.instanceGroup.name]);
@@ -77,12 +100,20 @@ export class InstanceGroupCardComponent implements OnInit {
   }
 
   async initiateMigration() {
-    const needMigration = await this.managedServers.isDataMigrationRequired(this.instanceGroup.name).toPromise();
+    const needMigration = await this.managedServers
+      .isDataMigrationRequired(this.instanceGroup.name)
+      .toPromise();
 
     if (needMigration) {
-      const r = await this.mb.openAsync({title: 'Data Migration', message: `The Instance Group <strong>${this.instanceGroup.name}</strong> contains instance data which needs to be migrated. This migration will <strong>discard</strong> old instance versions and create a new, compatible configuration from the <strong>latest</strong> instance version.`, mode: MessageBoxMode.CONFIRM_WARNING});
+      const r = await this.mb.openAsync({
+        title: 'Data Migration',
+        message: `The Instance Group <strong>${this.instanceGroup.name}</strong> contains instance data which needs to be migrated. This migration will <strong>discard</strong> old instance versions and create a new, compatible configuration from the <strong>latest</strong> instance version.`,
+        mode: MessageBoxMode.CONFIRM_WARNING,
+      });
       if (r) {
-        await this.managedServers.performDataMigration(this.instanceGroup.name).toPromise();
+        await this.managedServers
+          .performDataMigration(this.instanceGroup.name)
+          .toPromise();
       } else {
         return;
       }
@@ -95,15 +126,19 @@ export class InstanceGroupCardComponent implements OnInit {
     const dialogRef = this.dialog.open(InstanceGroupDeleteDialogComponent, {
       minWidth: '300px',
       maxWidth: '90%',
-      data: { name: this.instanceGroup.name, title: this.instanceGroup.title, confirmation: '' }
+      data: {
+        name: this.instanceGroup.name,
+        title: this.instanceGroup.title,
+        confirmation: '',
+      },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       if (result === false || result === undefined) {
         return;
       }
       if (this.instanceGroup.name === result) {
-        this.instanceGroupService.deleteInstanceGroup(result).subscribe(r => {
+        this.instanceGroupService.deleteInstanceGroup(result).subscribe((r) => {
           this.removeEvent.emit(true);
         });
       } else {
@@ -115,5 +150,4 @@ export class InstanceGroupCardComponent implements OnInit {
   isManagedServer() {
     return this.config.config.mode === MinionMode.MANAGED;
   }
-
 }

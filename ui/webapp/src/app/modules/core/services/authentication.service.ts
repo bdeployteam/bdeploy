@@ -83,9 +83,9 @@ export class AuthenticationService {
     this.cookies.delete('st', '/');
   }
 
-  getRecentInstanceGroups(): Observable<String[]> {
+  getRecentInstanceGroups(): Observable<string[]> {
     this.log.debug('Fetching recent groups...');
-    return this.http.get<String[]>(this.cfg.config.api + '/auth/recent-groups');
+    return this.http.get<string[]>(this.cfg.config.api + '/auth/recent-groups');
   }
 
   isGlobalAdmin(): boolean {
@@ -165,7 +165,7 @@ export class AuthenticationService {
     { responseType: 'text', headers: suppressGlobalErrorHandling(new HttpHeaders()) });
   }
 
-  getAuthPackForUser(genFull: boolean): Observable<String> {
+  getAuthPackForUser(genFull: boolean): Observable<string> {
     this.log.debug('Retrieve auth pack for user');
     return this.http.get(this.cfg.config.api + '/auth/auth-pack', { responseType: 'text', params: new HttpParams().append('full', genFull ? 'true' : 'false')});
   }

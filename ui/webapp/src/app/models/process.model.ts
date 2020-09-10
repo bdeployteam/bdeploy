@@ -119,7 +119,7 @@ export class ProcessConfigDto {
   }
 
   groupApplications(apps: ApplicationDto[], type: ApplicationType): ApplicationGroup[] {
-    const groups = new Map<String, ApplicationGroup>();
+    const groups = new Map<string, ApplicationGroup>();
     for (const app of apps) {
       if (app.descriptor.type !== type) {
         continue;

@@ -4,8 +4,28 @@ import { cloneDeep, intersection, isEqual } from 'lodash-es';
 import { Observable } from 'rxjs';
 import { StatusMessage } from 'src/app/models/config.model';
 import { UnknownParameter } from '../../../models/application.model';
-import { CLIENT_NODE_NAME, EMPTY_APPLICATION_CONFIGURATION, EMPTY_COMMAND_CONFIGURATION, EMPTY_PARAMETER_CONFIGURATION, EMPTY_PARAMETER_DESCRIPTOR, EMPTY_PROCESS_CONTROL_CONFIG } from '../../../models/consts';
-import { ApplicationConfiguration, ApplicationDescriptor, ApplicationDto, ApplicationType, InstanceNodeConfigurationDto, ManifestKey, ParameterConditionType, ParameterConfiguration, ParameterDescriptor, ParameterType, ProcessControlConfiguration, TemplateApplication } from '../../../models/gen.dtos';
+import {
+  CLIENT_NODE_NAME,
+  EMPTY_APPLICATION_CONFIGURATION,
+  EMPTY_COMMAND_CONFIGURATION,
+  EMPTY_PARAMETER_CONFIGURATION,
+  EMPTY_PARAMETER_DESCRIPTOR,
+  EMPTY_PROCESS_CONTROL_CONFIG
+} from '../../../models/consts';
+import {
+  ApplicationConfiguration,
+  ApplicationDescriptor,
+  ApplicationDto,
+  ApplicationType,
+  InstanceNodeConfigurationDto,
+  ManifestKey,
+  ParameterConditionType,
+  ParameterConfiguration,
+  ParameterDescriptor,
+  ParameterType,
+  ProcessControlConfiguration,
+  TemplateApplication
+} from '../../../models/gen.dtos';
 import { ProcessConfigDto } from '../../../models/process.model';
 import { ConfigService } from '../../core/services/config.service';
 import { Logger, LoggingService } from '../../core/services/logging.service';
@@ -18,7 +38,9 @@ import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
   providedIn: 'root',
 })
 export class ApplicationService {
-  private readonly log: Logger = this.loggingService.getLogger('ApplicationService');
+  private readonly log: Logger = this.loggingService.getLogger(
+    'ApplicationService'
+  );
 
   /** The validation state. Key=UID of the application. Value=List of errors */
   private readonly validationStates = new Map<string, string[]>();
@@ -36,19 +58,19 @@ export class ApplicationService {
   private readonly missingApps: ManifestKey[] = [];
 
   /** Keeps track of application names to prevent duplicate server application names */
-  private readonly serverAppNames: String[] = [];
+  private readonly serverAppNames: string[] = [];
 
   constructor(
     private cfg: ConfigService,
     private http: HttpClient,
     private loggingService: LoggingService,
-    private groupService: InstanceGroupService,
+    private groupService: InstanceGroupService
   ) {}
 
   public listApplications(
     instanceGroupName: string,
     product: ManifestKey,
-    customErrorHandling: boolean,
+    customErrorHandling: boolean
   ): Observable<ApplicationDto[]> {
     const url: string = this.buildAppUrl(instanceGroupName, product);
     this.log.debug('listApplications: ' + url);
@@ -64,9 +86,11 @@ export class ApplicationService {
   public getDescriptor(
     instanceGroupName: string,
     productKey: ManifestKey,
-    appKey: ManifestKey,
+    appKey: ManifestKey
   ): Observable<ApplicationDescriptor> {
-    const url = this.buildAppNameTagUrl(instanceGroupName, productKey, appKey) + '/descriptor';
+    const url =
+      this.buildAppNameTagUrl(instanceGroupName, productKey, appKey) +
+      '/descriptor';
     this.log.debug('getDescriptor: ' + url);
     return this.http.get<ApplicationDescriptor>(url);
   }
@@ -75,20 +99,47 @@ export class ApplicationService {
     return this.groupService.createUuid(name);
   }
 
-  private buildAppNameTagUrl(instanceGroupName: string, productKey: ManifestKey, appKey: ManifestKey): string {
-    return this.buildAppUrl(instanceGroupName, productKey) + '/' + appKey.name + '/' + appKey.tag;
+  private buildAppNameTagUrl(
+    instanceGroupName: string,
+    productKey: ManifestKey,
+    appKey: ManifestKey
+  ): string {
+    return (
+      this.buildAppUrl(instanceGroupName, productKey) +
+      '/' +
+      appKey.name +
+      '/' +
+      appKey.tag
+    );
   }
 
-  private buildAppUrl(instanceGroupName: string, productKey: ManifestKey): string {
+  private buildAppUrl(
+    instanceGroupName: string,
+    productKey: ManifestKey
+  ): string {
     return this.buildProductUrl(instanceGroupName, productKey) + '/application';
   }
 
-  private buildProductUrl(instanceGroupName: string, productKey: ManifestKey): string {
-    return this.buildGroupUrl(instanceGroupName) + '/product/' + productKey.name + '/' + productKey.tag;
+  private buildProductUrl(
+    instanceGroupName: string,
+    productKey: ManifestKey
+  ): string {
+    return (
+      this.buildGroupUrl(instanceGroupName) +
+      '/product/' +
+      productKey.name +
+      '/' +
+      productKey.tag
+    );
   }
 
   private buildGroupUrl(instanceGroupName: string): string {
-    return this.cfg.config.api + InstanceGroupService.BASEPATH + '/' + instanceGroupName;
+    return (
+      this.cfg.config.api +
+      InstanceGroupService.BASEPATH +
+      '/' +
+      instanceGroupName
+    );
   }
 
   /**
@@ -97,7 +148,8 @@ export class ApplicationService {
   public updateGlobalParameters(
     appDesc: ApplicationDescriptor,
     template: ApplicationConfiguration,
-    apps: ApplicationConfiguration[]) {
+    apps: ApplicationConfiguration[]
+  ) {
     // Build index for quick parameter lookup
     const paraDescMap = new Map<string, ParameterDescriptor>();
     for (const paraDesc of appDesc.startCommand.parameters) {
@@ -149,7 +201,7 @@ export class ApplicationService {
   public initAppConfig(
     appConfig: ApplicationConfiguration,
     appDesc: ApplicationDescriptor,
-    templates: ApplicationConfiguration[],
+    templates: ApplicationConfiguration[]
   ) {
     // Initialize name
     appConfig.name = appDesc.name;
@@ -165,14 +217,22 @@ export class ApplicationService {
     appConfig.start = cloneDeep(EMPTY_COMMAND_CONFIGURATION);
     if (appDesc.startCommand) {
       appConfig.start.executable = appDesc.startCommand.launcherPath;
-      appConfig.start.parameters = this.createParameters(appConfig, appDesc.startCommand.parameters, templates);
+      appConfig.start.parameters = this.createParameters(
+        appConfig,
+        appDesc.startCommand.parameters,
+        templates
+      );
     }
 
     // Initialize stop command
     appConfig.stop = cloneDeep(EMPTY_COMMAND_CONFIGURATION);
     if (appDesc.stopCommand) {
       appConfig.stop.executable = appDesc.stopCommand.launcherPath;
-      appConfig.stop.parameters = this.createParameters(appConfig, appDesc.stopCommand.parameters, templates);
+      appConfig.stop.parameters = this.createParameters(
+        appConfig,
+        appDesc.stopCommand.parameters,
+        templates
+      );
     }
 
     // Initialize endpoints
@@ -180,12 +240,19 @@ export class ApplicationService {
   }
 
   /** Creates and returns an array of parameters based on the given descriptors */
-  createParameters(appConfig: ApplicationConfiguration, descs: ParameterDescriptor[], templates: ApplicationConfiguration[]): ParameterConfiguration[] {
+  createParameters(
+    appConfig: ApplicationConfiguration,
+    descs: ParameterDescriptor[],
+    templates: ApplicationConfiguration[]
+  ): ParameterConfiguration[] {
     const configs: ParameterConfiguration[] = [];
 
     // Prepare all mandatory parameters
     for (const paraDesc of descs) {
-      if (!paraDesc.mandatory || !this.meetsCondition(paraDesc, descs, appConfig.start.parameters)) {
+      if (
+        !paraDesc.mandatory ||
+        !this.meetsCondition(paraDesc, descs, appConfig.start.parameters)
+      ) {
         continue;
       }
       const config = this.createParameter(paraDesc, templates);
@@ -197,7 +264,10 @@ export class ApplicationService {
   /**
    * Creates and returns a new parameter based on the given descriptor
    */
-  createParameter(paraDesc: ParameterDescriptor, templates: ApplicationConfiguration[]) {
+  createParameter(
+    paraDesc: ParameterDescriptor,
+    templates: ApplicationConfiguration[]
+  ) {
     const config = cloneDeep(EMPTY_PARAMETER_CONFIGURATION);
     config.uid = paraDesc.uid;
     this.updateParameterValue(config, paraDesc, templates);
@@ -211,23 +281,26 @@ export class ApplicationService {
   updateParameterValue(
     config: ParameterConfiguration,
     paraDesc: ParameterDescriptor,
-    templates: ApplicationConfiguration[],
+    templates: ApplicationConfiguration[]
   ) {
     config.value = this.getParameterValue(paraDesc, templates);
     config.preRendered = this.preRenderParameter(paraDesc, config.value);
   }
 
   /** Returns the default value for the given parameter */
-  getParameterValue(paraDesc: ParameterDescriptor, templates: ApplicationConfiguration[]): string {
+  getParameterValue(
+    paraDesc: ParameterDescriptor,
+    templates: ApplicationConfiguration[]
+  ): string {
     // Take default value for a non-global parameter
     if (!paraDesc.global || !templates) {
       return paraDesc.defaultValue;
     }
 
     for (const template of templates) {
-      let para = template.start.parameters.find(p => p.uid === paraDesc.uid);
+      let para = template.start.parameters.find((p) => p.uid === paraDesc.uid);
       if (!para) {
-        para = template.stop.parameters.find(p => p.uid === paraDesc.uid);
+        para = template.stop.parameters.find((p) => p.uid === paraDesc.uid);
       }
       if (para) {
         return para.value;
@@ -284,7 +357,10 @@ export class ApplicationService {
   /**
    * Validates all applications of the given node.
    */
-  public validateNode(nodeConfigDto: InstanceNodeConfigurationDto, apps: { [index: string]: ApplicationDescriptor }) {
+  public validateNode(
+    nodeConfigDto: InstanceNodeConfigurationDto,
+    apps: { [index: string]: ApplicationDescriptor }
+  ) {
     const nodeConfig = nodeConfigDto.nodeConfiguration;
     if (!nodeConfig) {
       return;
@@ -305,11 +381,16 @@ export class ApplicationService {
       const errors = this.validateApp(isClientNode, appCfg, appDesc);
       if (errors.length === 0) {
         this.validationStates.delete(appCfg.uid);
-        this.log.debug('Application ' + appCfg.uid + ' is valid. Resetting error flag.');
+        this.log.debug(
+          'Application ' + appCfg.uid + ' is valid. Resetting error flag.'
+        );
       } else {
         this.validationStates.set(appCfg.uid, errors);
         this.log.debug(
-          'Application ' + appCfg.uid + ' is invalid. Setting error flag. Errors: \n\t' + errors.join('\n'),
+          'Application ' +
+            appCfg.uid +
+            ' is invalid. Setting error flag. Errors: \n\t' +
+            errors.join('\n')
         );
       }
     }
@@ -318,13 +399,19 @@ export class ApplicationService {
   /**
    * Validates if all mandatory parameters are configured and that they have the correct type.
    */
-  public validateApp(isClientNode: boolean, cfg: ApplicationConfiguration, desc: ApplicationDescriptor) {
+  public validateApp(
+    isClientNode: boolean,
+    cfg: ApplicationConfiguration,
+    desc: ApplicationDescriptor
+  ) {
     const errors: string[] = [];
 
     // Check if there are unknown parameters
     const unknownAppParams = this.unknownParameters.get(cfg.uid);
     if (unknownAppParams && unknownAppParams.length > 0) {
-      errors.push('One or more parameters are not defined any more in the current product version.');
+      errors.push(
+        'One or more parameters are not defined any more in the current product version.'
+      );
     }
 
     // Check application type (handle wrong types like missing apps)
@@ -338,8 +425,14 @@ export class ApplicationService {
       errors.push('Start executable command outdated.');
     }
     for (const paraDef of desc.startCommand.parameters) {
-      const paraCfg = cfg.start.parameters.find(p => p.uid === paraDef.uid);
-      if (this.meetsCondition(paraDef, desc.startCommand.parameters, cfg.start.parameters)) {
+      const paraCfg = cfg.start.parameters.find((p) => p.uid === paraDef.uid);
+      if (
+        this.meetsCondition(
+          paraDef,
+          desc.startCommand.parameters,
+          cfg.start.parameters
+        )
+      ) {
         const paraErrors = this.validateParam(paraCfg, paraDef);
         if (paraErrors) {
           errors.push(paraErrors);
@@ -353,7 +446,7 @@ export class ApplicationService {
         errors.push('Stop executable command outdated.');
       }
       for (const paraDef of desc.startCommand.parameters) {
-        const paraCfg = cfg.start.parameters.find(p => p.uid === paraDef.uid);
+        const paraCfg = cfg.start.parameters.find((p) => p.uid === paraDef.uid);
         const paraErrors = this.validateParam(paraCfg, paraDef);
         if (paraErrors) {
           errors.push(paraErrors);
@@ -374,10 +467,15 @@ export class ApplicationService {
   /**
    * Validates this parameter against its definition
    */
-  public validateParam(paraCfg: ParameterConfiguration, paraDef: ParameterDescriptor) {
+  public validateParam(
+    paraCfg: ParameterConfiguration,
+    paraDef: ParameterDescriptor
+  ) {
     // check if a mandatory parameter is missing
     if (paraDef.mandatory && (!paraCfg || !paraCfg.value)) {
-      return paraDef.name + ': Parameter is mandatory but no value is configured.';
+      return (
+        paraDef.name + ': Parameter is mandatory but no value is configured.'
+      );
     }
     if (!paraCfg) {
       return;
@@ -390,7 +488,11 @@ export class ApplicationService {
         if (value === 'true' || value === 'false') {
           return;
         }
-        return paraDef.name + ': Invalid value configured. Expecting true or false but was ' + value;
+        return (
+          paraDef.name +
+          ': Invalid value configured. Expecting true or false but was ' +
+          value
+        );
       }
       case ParameterType.SERVER_PORT:
       case ParameterType.CLIENT_PORT:
@@ -400,7 +502,11 @@ export class ApplicationService {
         if (!Number.isNaN(numeric)) {
           return;
         }
-        return paraDef.name + ': Invalid value configured. Expecting a number but was ' + value;
+        return (
+          paraDef.name +
+          ': Invalid value configured. Expecting a number but was ' +
+          value
+        );
       }
     }
   }
@@ -434,7 +540,7 @@ export class ApplicationService {
    * Returns whether the given ManifestKey is part of the currently validated product
    */
   public isMissing(app: ManifestKey) {
-    return this.missingApps.findIndex(a => isEqual(a, app)) !== -1;
+    return this.missingApps.findIndex((a) => isEqual(a, app)) !== -1;
   }
 
   /**
@@ -498,7 +604,9 @@ export class ApplicationService {
     const nodeListDto = processConfig.nodeList;
     const cloned = processConfig.clonedNodeList.nodeConfigDtos;
     for (const nodeConfigDto of nodeListDto.nodeConfigDtos) {
-      const clonedNodeConfigDto = cloned.find(nc => nc.nodeName === nodeConfigDto.nodeName);
+      const clonedNodeConfigDto = cloned.find(
+        (nc) => nc.nodeName === nodeConfigDto.nodeName
+      );
 
       const nodeConfig = nodeConfigDto.nodeConfiguration;
       const clonedNodeConfig = clonedNodeConfigDto.nodeConfiguration;
@@ -510,45 +618,73 @@ export class ApplicationService {
 
       // Mark all old apps as dirty when current app config is not set any more
       if (!nodeConfig && clonedNodeConfig) {
-        clonedNodeConfig.applications.forEach(a => this.dirtyStates.set(a.uid, true));
-        this.log.debug(nodeConfigDto.nodeName + ': Marking as dirty as all apps have been removed.');
+        clonedNodeConfig.applications.forEach((a) =>
+          this.dirtyStates.set(a.uid, true)
+        );
+        this.log.debug(
+          nodeConfigDto.nodeName +
+            ': Marking as dirty as all apps have been removed.'
+        );
         continue;
       }
 
       // Calculate which apps have been added, removed or updated
       const clonedApps = clonedNodeConfig ? clonedNodeConfig.applications : [];
       const currentApps = nodeConfig.applications;
-      const added = currentApps.filter(a => clonedApps.findIndex(b => a.uid === b.uid) === -1);
-      const removed = clonedApps.filter(a => currentApps.findIndex(b => a.uid === b.uid) === -1);
-      const updated = currentApps.filter(a => clonedApps.findIndex(b => a.uid === b.uid) !== -1);
+      const added = currentApps.filter(
+        (a) => clonedApps.findIndex((b) => a.uid === b.uid) === -1
+      );
+      const removed = clonedApps.filter(
+        (a) => currentApps.findIndex((b) => a.uid === b.uid) === -1
+      );
+      const updated = currentApps.filter(
+        (a) => clonedApps.findIndex((b) => a.uid === b.uid) !== -1
+      );
 
       // Mark all apps that have been added or removed as dirty
       for (const appCfg of removed) {
         this.dirtyStates.set(appCfg.uid, true);
-        this.log.debug('Application ' + appCfg.uid + ' has been removed. Setting dirty flag.');
+        this.log.debug(
+          'Application ' + appCfg.uid + ' has been removed. Setting dirty flag.'
+        );
       }
       for (const appCfg of added) {
         if (!appCfg.uid) {
           continue;
         }
         this.dirtyStates.set(appCfg.uid, true);
-        this.log.debug('Application ' + appCfg.uid + ' has been added. Setting dirty flag.');
+        this.log.debug(
+          'Application ' + appCfg.uid + ' has been added. Setting dirty flag.'
+        );
       }
 
       // Calculate dirty state of existing ones
       for (const appCfg of updated) {
-        const clonedAppCfg = clonedNodeConfig.applications.find(ca => ca.uid === appCfg.uid);
-        const oldPosition = clonedApps.findIndex(b => appCfg.uid === b.uid);
-        const currentPosition = currentApps.findIndex(b => appCfg.uid === b.uid);
-        const appDirty = !isEqual(appCfg, clonedAppCfg) || (oldPosition !== currentPosition);
+        const clonedAppCfg = clonedNodeConfig.applications.find(
+          (ca) => ca.uid === appCfg.uid
+        );
+        const oldPosition = clonedApps.findIndex((b) => appCfg.uid === b.uid);
+        const currentPosition = currentApps.findIndex(
+          (b) => appCfg.uid === b.uid
+        );
+        const appDirty =
+          !isEqual(appCfg, clonedAppCfg) || oldPosition !== currentPosition;
         this.dirtyStates.set(appCfg.uid, appDirty);
         if (appDirty) {
-          this.log.debug('Application ' + appCfg.uid + ' has local changes. Setting dirty flag.');
+          this.log.debug(
+            'Application ' +
+              appCfg.uid +
+              ' has local changes. Setting dirty flag.'
+          );
           this.log.trace('Current: ' + JSON.stringify(appCfg));
           this.log.trace('Clone: ' + JSON.stringify(clonedAppCfg));
           this.log.trace('Positions: ' + oldPosition + ', ' + currentPosition);
         } else {
-          this.log.debug('Application ' + appCfg.uid + ' is in sync now. Removing dirty flag.');
+          this.log.debug(
+            'Application ' +
+              appCfg.uid +
+              ' is in sync now. Removing dirty flag.'
+          );
         }
       }
     }
@@ -563,12 +699,18 @@ export class ApplicationService {
 
     // Check instance for modifications.
     if (!this.dirtyState) {
-      this.dirtyState = !isEqual(processConfig.instance, processConfig.clonedInstance);
+      this.dirtyState = !isEqual(
+        processConfig.instance,
+        processConfig.clonedInstance
+      );
     }
 
     // Calculate overall dirty state of nodes. Detects app re-sorting in the same node
     if (!this.dirtyState) {
-      this.dirtyState = !isEqual(processConfig.nodeList.nodeConfigDtos, processConfig.clonedNodeList.nodeConfigDtos);
+      this.dirtyState = !isEqual(
+        processConfig.nodeList.nodeConfigDtos,
+        processConfig.clonedNodeList.nodeConfigDtos
+      );
     }
 
     // Trace some infos for debugging
@@ -622,15 +764,19 @@ export class ApplicationService {
    * @param apps the current version of the descriptor
    * @param oldApps the previous version of the descriptor
    */
-  updateApplications(config: ProcessConfigDto, apps: ApplicationDto[], oldApps: ApplicationDto[]) {
+  updateApplications(
+    config: ProcessConfigDto,
+    apps: ApplicationDto[],
+    oldApps: ApplicationDto[]
+  ) {
     const descriptors: { [index: string]: ApplicationDescriptor } = {};
     const keys: { [index: string]: ManifestKey } = {};
-    apps.forEach(a => {
+    apps.forEach((a) => {
       descriptors[a.key.name] = a.descriptor;
       keys[a.key.name] = a.key;
     });
     const oldDescriptors: { [index: string]: ApplicationDescriptor } = {};
-    oldApps.forEach(a => {
+    oldApps.forEach((a) => {
       oldDescriptors[a.key.name] = a.descriptor;
     });
 
@@ -650,7 +796,12 @@ export class ApplicationService {
       const oldAppDescriptor = oldDescriptors[newAppManifest.name];
 
       appDesc.application = newAppManifest;
-      this.updateApplicationParams(appDesc, newAppDescriptor, oldAppDescriptor, appDescs);
+      this.updateApplicationParams(
+        appDesc,
+        newAppDescriptor,
+        oldAppDescriptor,
+        appDescs
+      );
     }
 
     config.nodeList.applications = descriptors;
@@ -664,7 +815,7 @@ export class ApplicationService {
     app: ApplicationConfiguration,
     desc: ApplicationDescriptor,
     oldDesc: ApplicationDescriptor,
-    templates: ApplicationConfiguration[],
+    templates: ApplicationConfiguration[]
   ) {
     if (desc.startCommand) {
       app.start.executable = desc.startCommand.launcherPath;
@@ -672,8 +823,10 @@ export class ApplicationService {
         app.uid,
         app.start.parameters,
         desc.startCommand.parameters,
-        oldDesc?.startCommand?.parameters ? oldDesc.startCommand.parameters : [],
-        templates,
+        oldDesc?.startCommand?.parameters
+          ? oldDesc.startCommand.parameters
+          : [],
+        templates
       );
     }
     if (desc.stopCommand) {
@@ -683,7 +836,7 @@ export class ApplicationService {
         app.stop.parameters,
         desc.stopCommand.parameters,
         oldDesc?.stopCommand?.parameters ? oldDesc.stopCommand.parameters : [],
-        templates,
+        templates
       );
     }
     this.updateEndpoints(app, desc);
@@ -695,11 +848,11 @@ export class ApplicationService {
   updateEndpoints(app: ApplicationConfiguration, desc: ApplicationDescriptor) {
     const finalEps = [];
     if (desc.endpoints && desc.endpoints.http) {
-      if (!app.endpoints || ! app.endpoints.http) {
+      if (!app.endpoints || !app.endpoints.http) {
         app.endpoints = { http: [] };
       }
       for (const cep of app.endpoints.http) {
-        const existing = desc.endpoints.http.findIndex(p => p.id === cep.id);
+        const existing = desc.endpoints.http.findIndex((p) => p.id === cep.id);
         if (existing !== -1) {
           // still existing endpoint, keep it
           finalEps.push(cep);
@@ -708,7 +861,7 @@ export class ApplicationService {
       }
 
       for (const ep of desc.endpoints.http) {
-        const existing = app.endpoints.http.findIndex(p => p.id === ep.id);
+        const existing = app.endpoints.http.findIndex((p) => p.id === ep.id);
         if (existing === -1) {
           // newly added endpoint
           finalEps.push(ep);
@@ -733,19 +886,18 @@ export class ApplicationService {
     configs: ParameterConfiguration[],
     descs: ParameterDescriptor[],
     oldDescs: ParameterDescriptor[],
-    templates: ApplicationConfiguration[],
+    templates: ApplicationConfiguration[]
   ) {
-
     // Check parameter sequence according to the new definition (~= Bubblesort)
-    for (let i=0; i < configs.length - 1; i++) {
+    for (let i = 0; i < configs.length - 1; i++) {
       // Config param position in definition
-      const i_descIdx = descs.findIndex(d => d.uid === configs[i].uid);
+      const i_descIdx = descs.findIndex((d) => d.uid === configs[i].uid);
 
       // Find config parameter with smallest posiition after current one
       let m = configs.length;
       let m_descIdx = descs.length;
-      for (let j=i+1; j < configs.length; j++) {
-        let j_descIdx = descs.findIndex(d => d.uid === configs[j].uid);
+      for (let j = i + 1; j < configs.length; j++) {
+        const j_descIdx = descs.findIndex((d) => d.uid === configs[j].uid);
         if (j_descIdx >= 0 && j_descIdx < m_descIdx) {
           m_descIdx = j_descIdx;
           m = j;
@@ -757,9 +909,9 @@ export class ApplicationService {
         // Keep custom parameter right behind the parameter where they have been before
         // (just a best guess, this might be correct or wrong -- who knows...)
         let numParam = 1;
-        for (let k=m+1; k < configs.length; k++) {
-          let k_descIdx = descs.findIndex(d => d.uid === configs[k].uid);
-          if (k_descIdx != -1) {
+        for (let k = m + 1; k < configs.length; k++) {
+          const k_descIdx = descs.findIndex((d) => d.uid === configs[k].uid);
+          if (k_descIdx !== -1) {
             break;
           }
           numParam++;
@@ -773,8 +925,8 @@ export class ApplicationService {
     // Verify that all parameters are still defined in the new version
     const unknownAppParams: UnknownParameter[] = [];
     for (const config of configs) {
-      const oldDefinition = oldDescs.find(d => d.uid === config.uid);
-      const newDefinition = descs.find(d => d.uid === config.uid);
+      const oldDefinition = oldDescs.find((d) => d.uid === config.uid);
+      const newDefinition = descs.find((d) => d.uid === config.uid);
       // Collect parameter not defined in the new version any more
       if (oldDefinition && !newDefinition) {
         unknownAppParams.push(new UnknownParameter(oldDefinition, config));
@@ -789,7 +941,7 @@ export class ApplicationService {
   updateApplicationParamsForPastedApplication(
     app: ApplicationConfiguration,
     desc: ApplicationDescriptor,
-    templates: ApplicationConfiguration[],
+    templates: ApplicationConfiguration[]
   ) {
     if (desc.startCommand) {
       app.start.executable = desc.startCommand.launcherPath;
@@ -797,7 +949,7 @@ export class ApplicationService {
         app.uid,
         app.start.parameters,
         desc.startCommand.parameters,
-        templates,
+        templates
       );
     }
     if (desc.stopCommand) {
@@ -806,7 +958,7 @@ export class ApplicationService {
         app.uid,
         app.stop.parameters,
         desc.stopCommand.parameters,
-        templates,
+        templates
       );
     }
     this.updateEndpoints(app, desc);
@@ -822,7 +974,7 @@ export class ApplicationService {
   correctParameterConfigurations(
     configs: ParameterConfiguration[],
     descs: ParameterDescriptor[],
-    templates: ApplicationConfiguration[],
+    templates: ApplicationConfiguration[]
   ) {
     // Order of parameters is important. Thus we need to insert a missing parameter
     // at the correct index in the config array.
@@ -831,10 +983,14 @@ export class ApplicationService {
       const desc = descs[index];
 
       // Create parameter if it is not yet defined but mandatory
-      const configIndex = configs.findIndex(c => c.uid === desc.uid);
+      const configIndex = configs.findIndex((c) => c.uid === desc.uid);
       lastRenderedIndex = Math.max(lastRenderedIndex, configIndex);
       let config = configIndex === -1 ? undefined : configs[configIndex];
-      if (!config && desc.mandatory && this.meetsCondition(desc, descs, configs)) {
+      if (
+        !config &&
+        desc.mandatory &&
+        this.meetsCondition(desc, descs, configs)
+      ) {
         config = this.createParameter(desc, templates);
         configs.splice(lastRenderedIndex + 1, 0, config);
         continue;
@@ -855,15 +1011,14 @@ export class ApplicationService {
     appUid: string,
     configs: ParameterConfiguration[],
     descs: ParameterDescriptor[],
-    templates: ApplicationConfiguration[],
+    templates: ApplicationConfiguration[]
   ) {
-
     this.correctParameterConfigurations(configs, descs, templates);
 
     // Verify that all parameters are still defined in the current version
     const unknownAppParams: UnknownParameter[] = [];
     for (const config of configs) {
-      const exisitingDescriptor = descs.find(d => d.uid === config.uid);
+      const exisitingDescriptor = descs.find((d) => d.uid === config.uid);
       if (exisitingDescriptor) {
         continue;
       }
@@ -882,7 +1037,7 @@ export class ApplicationService {
     this.setUnknownParameters(appUid, unknownAppParams);
   }
 
-   /**
+  /**
    * Returns whether or not the given element can be dragged to the given target.
    */
   isAppCompatibleWithNode(el: Element, target: Element): boolean {
@@ -893,7 +1048,10 @@ export class ApplicationService {
 
     // Type of application (client, server) must match the type of the target
     const elementType = findEntry(el.className.split(' '), 'dragula-appType-');
-    const containerType = findEntry(target.className.split(' '), 'dragula-nodeType-');
+    const containerType = findEntry(
+      target.className.split(' '),
+      'dragula-nodeType-'
+    );
     if (!isEqual(elementType, containerType)) {
       return false;
     }
@@ -904,7 +1062,10 @@ export class ApplicationService {
       return true;
     }
     const elementOs = findEntry(el.className.split(' '), 'dragula-appOs-');
-    const containerOs = findEntry(target.className.split(' '), 'dragula-nodeOs-');
+    const containerOs = findEntry(
+      target.className.split(' '),
+      'dragula-nodeOs-'
+    );
     if (intersection(elementOs, containerOs).length === 0) {
       return false;
     }
@@ -914,7 +1075,11 @@ export class ApplicationService {
   }
 
   /** Creates a new application configuration and initializes it with default values */
-  createNewAppConfig(instanceGroupName: string, config: ProcessConfigDto, app: ApplicationDto): Promise<ApplicationConfiguration> {
+  createNewAppConfig(
+    instanceGroupName: string,
+    config: ProcessConfigDto,
+    app: ApplicationDto
+  ): Promise<ApplicationConfiguration> {
     const appConfig = cloneDeep(EMPTY_APPLICATION_CONFIGURATION);
     appConfig.processControl = cloneDeep(EMPTY_PROCESS_CONTROL_CONFIG);
     appConfig.application = app.key;
@@ -925,7 +1090,8 @@ export class ApplicationService {
     const processControlConfig = appConfig.processControl;
     processControlConfig.gracePeriod = processControlDesc.gracePeriod;
     if (processControlDesc.supportedStartTypes) {
-      processControlConfig.startType = processControlDesc.supportedStartTypes[0];
+      processControlConfig.startType =
+        processControlDesc.supportedStartTypes[0];
     }
     processControlConfig.keepAlive = processControlDesc.supportsKeepAlive;
     processControlConfig.noOfRetries = processControlDesc.noOfRetries;
@@ -938,14 +1104,16 @@ export class ApplicationService {
     const productKey = config.instance.product;
     const appKey = appConfig.application;
     const promise = new Promise<ApplicationConfiguration>((resolve) => {
-      this.getDescriptor(instanceGroupName, productKey, appKey).subscribe(desc => {
-        // Generate unique identifier
-        this.createUuid(instanceGroupName).subscribe(uid => {
-          appConfig.uid = uid;
-          this.initAppConfig(appConfig, desc, apps);
-          resolve(appConfig);
-        });
-      });
+      this.getDescriptor(instanceGroupName, productKey, appKey).subscribe(
+        (desc) => {
+          // Generate unique identifier
+          this.createUuid(instanceGroupName).subscribe((uid) => {
+            appConfig.uid = uid;
+            this.initAppConfig(appConfig, desc, apps);
+            resolve(appConfig);
+          });
+        }
+      );
     });
     return promise;
   }
@@ -956,7 +1124,7 @@ export class ApplicationService {
     app: ApplicationConfiguration,
     desc: ApplicationDto,
     templ: TemplateApplication,
-    variables: {[key: string]: string},
+    variables: { [key: string]: string },
     status: StatusMessage[]
   ) {
     if (templ.name) {
@@ -965,30 +1133,52 @@ export class ApplicationService {
     if (templ.processControl) {
       // partially deserialized - only apply specified attributes.
       const pc = templ.processControl as ProcessControlConfiguration;
-      if (pc.attachStdin !== undefined) { app.processControl.attachStdin = pc.attachStdin; }
-      if (pc.gracePeriod !== undefined) { app.processControl.gracePeriod = pc.gracePeriod; }
-      if (pc.keepAlive !== undefined) { app.processControl.keepAlive = pc.keepAlive; }
-      if (pc.noOfRetries !== undefined) { app.processControl.noOfRetries = pc.noOfRetries; }
-      if (pc.startType !== undefined) { app.processControl.startType = pc.startType; }
+      if (pc.attachStdin !== undefined) {
+        app.processControl.attachStdin = pc.attachStdin;
+      }
+      if (pc.gracePeriod !== undefined) {
+        app.processControl.gracePeriod = pc.gracePeriod;
+      }
+      if (pc.keepAlive !== undefined) {
+        app.processControl.keepAlive = pc.keepAlive;
+      }
+      if (pc.noOfRetries !== undefined) {
+        app.processControl.noOfRetries = pc.noOfRetries;
+      }
+      if (pc.startType !== undefined) {
+        app.processControl.startType = pc.startType;
+      }
     }
 
     for (const param of templ.startParameters) {
-      const paramDesc = desc.descriptor.startCommand.parameters.find(p => p.uid === param.uid);
+      const paramDesc = desc.descriptor.startCommand.parameters.find(
+        (p) => p.uid === param.uid
+      );
       if (!paramDesc) {
-        status.push({icon: 'warning', message: `Cannot find parameter ${param.uid} in application ${desc.name}. This is an error in the template.`});
+        status.push({
+          icon: 'warning',
+          message: `Cannot find parameter ${param.uid} in application ${desc.name}. This is an error in the template.`,
+        });
         continue;
       }
 
       // find or create parameter if not there yet.
-      let paramCfg = app.start.parameters.find(p => p.uid === param.uid);
+      let paramCfg = app.start.parameters.find((p) => p.uid === param.uid);
       if (!paramCfg) {
         paramCfg = this.createParameter(paramDesc, this.getAllApps(config));
         app.start.parameters.push(paramCfg); // order is corrected later on.
       }
 
       if (param.value) {
-        paramCfg.value = this.performVariableSubst(param.value, variables, status);
-        paramCfg.preRendered = this.preRenderParameter(paramDesc, paramCfg.value);
+        paramCfg.value = this.performVariableSubst(
+          param.value,
+          variables,
+          status
+        );
+        paramCfg.preRendered = this.preRenderParameter(
+          paramDesc,
+          paramCfg.value
+        );
       }
     }
 
@@ -997,19 +1187,29 @@ export class ApplicationService {
     // if this application set a global parameter, apply to all others.
     this.updateGlobalParameters(desc.descriptor, app, this.getAllApps(config));
     if (desc.descriptor.type === ApplicationType.CLIENT) {
-      status.push({icon: 'check', message: 'Client created for ' + getAppOs(desc.key)});
+      status.push({
+        icon: 'check',
+        message: 'Client created for ' + getAppOs(desc.key),
+      });
     } else {
-      status.push({icon: 'check', message: 'Process created.'});
+      status.push({ icon: 'check', message: 'Process created.' });
     }
   }
 
-  private performVariableSubst(value: string, variables: { [key: string]: string; }, status: StatusMessage[]): string {
+  private performVariableSubst(
+    value: string,
+    variables: { [key: string]: string },
+    status: StatusMessage[]
+  ): string {
     if (value.indexOf('{{T:') !== -1) {
       let found = true;
       while (found) {
         const rex = new RegExp('{{T:([^}]*)}}').exec(value);
         if (rex) {
-          value = value.replace(rex[0], this.expandVar(rex[1], variables, status));
+          value = value.replace(
+            rex[0],
+            this.expandVar(rex[1], variables, status)
+          );
         } else {
           found = false;
         }
@@ -1018,7 +1218,11 @@ export class ApplicationService {
     return value;
   }
 
-  expandVar(variable: string, variables: {[key: string]: string}, status: StatusMessage[]): string {
+  expandVar(
+    variable: string,
+    variables: { [key: string]: string },
+    status: StatusMessage[]
+  ): string {
     let varName = variable;
     const colIndex = varName.indexOf(':');
     if (colIndex !== -1) {
@@ -1032,7 +1236,10 @@ export class ApplicationService {
       const valNum = Number(val);
 
       if (Number.isNaN(opNum) || Number.isNaN(valNum)) {
-        status.push({icon: 'error', message: `Invalid variable substitution for ${variable}: '${op}' or '${val}' is not a number.`});
+        status.push({
+          icon: 'error',
+          message: `Invalid variable substitution for ${variable}: '${op}' or '${val}' is not a number.`,
+        });
         return variable;
       }
       return (valNum + opNum).toString();
@@ -1048,17 +1255,26 @@ export class ApplicationService {
     // there can be no custom parameters in templates, so no need to care of them. only parameters for which descriptors exist
     // can be there.
     params.sort((a, b) => {
-      return descs.findIndex(p => a.uid === p.uid) - descs.findIndex(p => b.uid === p.uid);
+      return (
+        descs.findIndex((p) => a.uid === p.uid) -
+        descs.findIndex((p) => b.uid === p.uid)
+      );
     });
   }
 
-  meetsCondition(param: ParameterDescriptor, allDescriptors: ParameterDescriptor[], allConfigs: ParameterConfiguration[]): boolean {
+  meetsCondition(
+    param: ParameterDescriptor,
+    allDescriptors: ParameterDescriptor[],
+    allConfigs: ParameterConfiguration[]
+  ): boolean {
     if (!param.condition || !param.condition.parameter) {
       return true; // no condition, all OK :)
     }
 
-    const depDesc = allDescriptors.find(p => p.uid === param.condition.parameter);
-    const depCfg = allConfigs.find(p => p.uid === param.condition.parameter);
+    const depDesc = allDescriptors.find(
+      (p) => p.uid === param.condition.parameter
+    );
+    const depCfg = allConfigs.find((p) => p.uid === param.condition.parameter);
     if (!depDesc || !this.meetsCondition(depDesc, allDescriptors, allConfigs)) {
       return false; // parameter not found?!
     }
@@ -1093,5 +1309,4 @@ export class ApplicationService {
         return value.trim().length > 0;
     }
   }
-
 }

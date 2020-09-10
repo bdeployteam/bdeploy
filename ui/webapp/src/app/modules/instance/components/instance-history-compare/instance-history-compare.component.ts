@@ -6,12 +6,11 @@ import { InstanceService } from '../../services/instance.service';
 @Component({
   selector: 'app-instance-history-compare',
   templateUrl: './instance-history-compare.component.html',
-  styleUrls: ['./instance-history-compare.component.css']
+  styleUrls: ['./instance-history-compare.component.css'],
 })
 export class InstanceHistoryCompareComponent implements OnInit {
-
   instanceService: InstanceService;
-  instanceGroup:string;
+  instanceGroup: string;
   instanceId: string;
   compareVersionA: string;
   compareVersionB: string;
@@ -27,9 +26,15 @@ export class InstanceHistoryCompareComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.instanceService.getVersionComparison(this.instanceGroup,this.instanceId,this.compareVersionA,this.compareVersionB).subscribe((ret)=>{
-      this.result = ret;
-    });
+    this.instanceService
+      .getVersionComparison(
+        this.instanceGroup,
+        this.instanceId,
+        this.compareVersionA,
+        this.compareVersionB
+      )
+      .subscribe((ret) => {
+        this.result = ret;
+      });
   }
-
 }

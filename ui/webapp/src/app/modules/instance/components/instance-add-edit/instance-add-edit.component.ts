@@ -1,7 +1,12 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Location } from '@angular/common';
-import { Component, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  TemplateRef,
+  ViewContainerRef
+} from '@angular/core';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { ActivatedRoute } from '@angular/router';
@@ -10,7 +15,14 @@ import { Observable, of } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { EMPTY_INSTANCE } from '../../../../models/consts';
-import { InstanceConfiguration, InstancePurpose, InstanceVersionDto, ManagedMasterDto, MinionMode, ProductDto } from '../../../../models/gen.dtos';
+import {
+  InstanceConfiguration,
+  InstancePurpose,
+  InstanceVersionDto,
+  ManagedMasterDto,
+  MinionMode,
+  ProductDto
+} from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
 import { Logger, LoggingService } from '../../../core/services/logging.service';
 import { InstanceGroupService } from '../../../instance-group/services/instance-group.service';
@@ -27,7 +39,9 @@ import { InstanceService } from '../../services/instance.service';
   styleUrls: ['./instance-add-edit.component.css'],
 })
 export class InstanceAddEditComponent implements OnInit {
-  private log: Logger = this.loggingService.getLogger('InstanceAddEditComponent');
+  private log: Logger = this.loggingService.getLogger(
+    'InstanceAddEditComponent'
+  );
 
   public groupParam: string;
   public uuidParam: string;
@@ -54,13 +68,13 @@ export class InstanceAddEditComponent implements OnInit {
       name: ['', Validators.required],
       tag: ['', Validators.required],
     }),
-    autoUninstall: ['']
+    autoUninstall: [''],
   });
 
   public formGroup = this.formBuilder.group({
     managedServer: this.formBuilder.group({
-      name: ['']
-    })
+      name: [''],
+    }),
   });
 
   private overlayRef: OverlayRef;
@@ -78,18 +92,20 @@ export class InstanceAddEditComponent implements OnInit {
     private overlay: Overlay,
     private config: ConfigService,
     private managedServers: ManagedServersService,
-    public routingHistoryService:RoutingHistoryService,
+    public routingHistoryService: RoutingHistoryService
   ) {}
 
   ngOnInit() {
     this.groupParam = this.route.snapshot.paramMap.get('group');
     this.uuidParam = this.route.snapshot.paramMap.get('uuid');
-    this.log.debug('groupParam = ' + this.groupParam + ', nameParam = ' + this.uuidParam);
+    this.log.debug(
+      'groupParam = ' + this.groupParam + ', nameParam = ' + this.uuidParam
+    );
 
     // Disable the form as long as we do not have a UUID
     this.loading = true;
     this.instanceFormGroup.disable();
-    this.instanceFormGroup.valueChanges.subscribe(e => {
+    this.instanceFormGroup.valueChanges.subscribe((e) => {
       if (e.uuid && this.instanceFormGroup.disabled) {
         this.loading = false;
         this.instanceFormGroup.enable();
@@ -107,47 +123,60 @@ export class InstanceAddEditComponent implements OnInit {
 
     if (this.isCreate()) {
       this.loadingText = 'Generating UUID...';
-      this.instanceGroupService.createUuid(this.groupParam).subscribe((uuid: string) => {
-        this.log.debug('got uuid ' + uuid);
-        const instance = cloneDeep(EMPTY_INSTANCE);
-        instance.autoUninstall = true;
-        instance.uuid = uuid;
-        this.instanceFormGroup.patchValue(instance);
-        this.clonedInstance = cloneDeep(instance);
-      });
+      this.instanceGroupService
+        .createUuid(this.groupParam)
+        .subscribe((uuid: string) => {
+          this.log.debug('got uuid ' + uuid);
+          const instance = cloneDeep(EMPTY_INSTANCE);
+          instance.autoUninstall = true;
+          instance.uuid = uuid;
+          this.instanceFormGroup.patchValue(instance);
+          this.clonedInstance = cloneDeep(instance);
+        });
     } else {
       this.loadingText = 'Loading...';
-      this.instanceService.getInstance(this.groupParam, this.uuidParam).subscribe(instance => {
-        this.log.debug('got instance ' + this.uuidParam);
-        this.instanceFormGroup.patchValue(instance);
-        this.clonedInstance = cloneDeep(instance);
-      });
-      // TODO: this could be better (group with above request)
-      this.instanceService.listInstanceVersions(this.groupParam, this.uuidParam).subscribe(vs => {
-        vs.sort((a, b) => {
-          return +b.key.tag - +a.key.tag;
+      this.instanceService
+        .getInstance(this.groupParam, this.uuidParam)
+        .subscribe((instance) => {
+          this.log.debug('got instance ' + this.uuidParam);
+          this.instanceFormGroup.patchValue(instance);
+          this.clonedInstance = cloneDeep(instance);
         });
-        this.expectedVersion = vs[0];
-      });
-      this.managedServers.getServerForInstance(this.groupParam, this.uuidParam, null).subscribe(r => {
-        if (r) {
-          this.managedServerControl.setValue(r.hostName);
-        }
-      });
+      // TODO: this could be better (group with above request)
+      this.instanceService
+        .listInstanceVersions(this.groupParam, this.uuidParam)
+        .subscribe((vs) => {
+          vs.sort((a, b) => {
+            return +b.key.tag - +a.key.tag;
+          });
+          this.expectedVersion = vs[0];
+        });
+      this.managedServers
+        .getServerForInstance(this.groupParam, this.uuidParam, null)
+        .subscribe((r) => {
+          if (r) {
+            this.managedServerControl.setValue(r.hostName);
+          }
+        });
     }
 
-    this.instanceService.listPurpose(this.groupParam).subscribe(purposes => {
+    this.instanceService.listPurpose(this.groupParam).subscribe((purposes) => {
       this.purposes = purposes;
       this.log.debug('got purposes ' + this.purposes);
     });
 
-    this.productService.getProducts(this.groupParam, null).pipe(finalize(() => this.productsLoading = false)).subscribe(products => {
-      this.products = products;
-      this.log.debug('got ' + products.length + ' products');
-    });
+    this.productService
+      .getProducts(this.groupParam, null)
+      .pipe(finalize(() => (this.productsLoading = false)))
+      .subscribe((products) => {
+        this.products = products;
+        this.log.debug('got ' + products.length + ' products');
+      });
 
     // Clear tag if product changed
-    this.productNameControl.valueChanges.subscribe(input => this.productTagControl.reset());
+    this.productNameControl.valueChanges.subscribe((input) =>
+      this.productTagControl.reset()
+    );
 
     // Changing product and tag is not allowed after instance has been created
     // User needs to change that in the process config dialog as all validation and update logic is located there
@@ -159,7 +188,7 @@ export class InstanceAddEditComponent implements OnInit {
 
     if (this.isCentral()) {
       this.managedServerControl.setValidators([Validators.required]);
-      this.managedServers.getManagedServers(this.groupParam).subscribe(r => {
+      this.managedServers.getManagedServers(this.groupParam).subscribe((r) => {
         this.servers = r.sort((a, b) => a.hostName.localeCompare(b.hostName));
       });
     }
@@ -193,40 +222,57 @@ export class InstanceAddEditComponent implements OnInit {
   }
 
   public getProductNames(): string[] {
-    const pNames = Array.from(this.products, p => p.key.name);
-    return pNames.filter((value, index, array) => array.indexOf(value) === index).sort();
+    const pNames = Array.from(this.products, (p) => p.key.name);
+    return pNames
+      .filter((value, index, array) => array.indexOf(value) === index)
+      .sort();
   }
 
   public getProductDisplayName(pName: string): string {
-    const product: ProductDto = this.products.find(e => e.key.name === pName);
+    const product: ProductDto = this.products.find((e) => e.key.name === pName);
     return product.name + (product.vendor ? ' (' + product.vendor + ')' : '');
   }
 
   public getTagsForProduct(): string[] {
     const selectedProduct = this.productNameControl.value;
-    const productVersions = this.products.filter((value, index, array) => value.key.name === selectedProduct);
-    return sortByTags(Array.from(productVersions, p => p.key.tag), p => p, false);
+    const productVersions = this.products.filter(
+      (value, index, array) => value.key.name === selectedProduct
+    );
+    return sortByTags(
+      Array.from(productVersions, (p) => p.key.tag),
+      (p) => p,
+      false
+    );
   }
 
   public onSubmit(): void {
     this.loading = true;
     this.loadingText = 'Saving...';
     const instance: InstanceConfiguration = this.instanceFormGroup.getRawValue();
-    const managedServer = this.managedServerControl ? this.managedServerControl.value : null;
+    const managedServer = this.managedServerControl
+      ? this.managedServerControl.value
+      : null;
     if (this.isCreate()) {
       this.instanceService
         .createInstance(this.groupParam, instance, managedServer)
         .pipe(finalize(() => (this.loading = false)))
-        .subscribe(result => {
+        .subscribe((result) => {
           this.clonedInstance = instance;
           this.log.info('created new instance ' + this.uuidParam);
           this.location.back();
         });
     } else {
       this.instanceService
-        .updateInstance(this.groupParam, this.uuidParam, instance, null, managedServer, this.expectedVersion.key.tag)
+        .updateInstance(
+          this.groupParam,
+          this.uuidParam,
+          instance,
+          null,
+          managedServer,
+          this.expectedVersion.key.tag
+        )
         .pipe(finalize(() => (this.loading = false)))
-        .subscribe(result => {
+        .subscribe((result) => {
           this.clonedInstance = instance;
           this.log.info('updated instance ' + this.uuidParam);
           this.location.back();
@@ -300,5 +346,4 @@ export class InstanceAddEditComponent implements OnInit {
   isCentral() {
     return this.config.config.mode === MinionMode.CENTRAL;
   }
-
 }

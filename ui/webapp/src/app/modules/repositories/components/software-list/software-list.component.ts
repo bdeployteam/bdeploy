@@ -56,7 +56,7 @@ export class SoftwareListComponent implements OnInit {
       mode: MessageBoxMode.CONFIRM,
     }).subscribe(r => {
       if (r) {
-        this.softwareService.deleteSoftwareVersion(this.softwareRepositoryName, softwareVersion).subscribe(r => {
+        this.softwareService.deleteSoftwareVersion(this.softwareRepositoryName, softwareVersion).subscribe(_ => {
           this.deleted.emit();
         });
       }

@@ -87,7 +87,7 @@ public class ProductResourceImpl implements ProductResource {
             filter = p -> p.getKey().getName().equals(name);
         }
 
-        scan.stream().map(k -> ProductManifest.of(hive, k)).filter(filter).forEach(pm -> result.add(ProductDto.create(pm)));
+        scan.stream().map(k -> ProductManifest.of(hive, k)).filter(filter).forEach(p -> result.add(ProductDto.create(p)));
 
         return result;
     }
@@ -311,7 +311,7 @@ public class ProductResourceImpl implements ProductResource {
             ObjectListOperation scan = new ObjectListOperation();
             for (Key productKey : productKeys) {
                 // Ignore existing products
-                if (hive.execute(new ManifestExistsOperation().setManifest(productKey))) {
+                if (Boolean.TRUE.equals(hive.execute(new ManifestExistsOperation().setManifest(productKey)))) {
                     continue;
                 }
                 imported.add(productKey);

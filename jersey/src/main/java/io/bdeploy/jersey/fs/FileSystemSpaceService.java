@@ -29,8 +29,7 @@ public class FileSystemSpaceService {
             if (store == null) {
                 return -1; // cannot check;
             }
-            long free = store.getUsableSpace();
-            return free;
+            return store.getUsableSpace();
         } catch (Exception e) {
             log.error("Cannot check remaining free disc space for {}", path, e);
             return -1;

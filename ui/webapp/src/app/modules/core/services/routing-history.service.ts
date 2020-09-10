@@ -4,34 +4,40 @@ import { NavigationStart, Router, RoutesRecognized } from '@angular/router';
 import { filter, pairwise } from 'rxjs/operators';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class RoutingHistoryService {
   private offset = 0;
   private routedBack = false;
 
-  constructor(private router:Router, private location:Location) {
-    router.events.pipe(filter(e => e instanceof NavigationStart)).subscribe((e:NavigationStart) => {
-      if(e.navigationTrigger === "popstate"){
-        this.routedBack = true;
-        if(this.offset > 0){
-          this.offset--;
+  constructor(private router: Router, private location: Location) {
+    router.events
+      .pipe(filter((e) => e instanceof NavigationStart))
+      .subscribe((e: NavigationStart) => {
+        if (e.navigationTrigger === 'popstate') {
+          this.routedBack = true;
+          if (this.offset > 0) {
+            this.offset--;
+          }
         }
-      }
-    });
-    router.events.pipe(filter(e => e instanceof RoutesRecognized),pairwise()).subscribe(() => {
-      if(!this.routedBack){
-        this.offset++;
-      }
-      this.routedBack = false;
-    });
+      });
+    router.events
+      .pipe(
+        filter((e) => e instanceof RoutesRecognized),
+        pairwise()
+      )
+      .subscribe(() => {
+        if (!this.routedBack) {
+          this.offset++;
+        }
+        this.routedBack = false;
+      });
   }
 
-  back(defaultUrl:string){
-    if(this.offset>0){
+  back(defaultUrl: string) {
+    if (this.offset > 0) {
       this.location.back();
-    }
-    else{
+    } else {
       this.routedBack = true;
       this.router.navigateByUrl(defaultUrl);
     }

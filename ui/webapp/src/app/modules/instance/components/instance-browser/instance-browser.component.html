@@ -7,7 +7,6 @@
     <input matInput type="text" hint="Filter" [(ngModel)]="instanceDtoList.searchString" (ngModelChange)="instanceDtoList.applyFilter()">
     <mat-icon matSuffix>search</mat-icon>
   </mat-form-field>
-  <!-- <span class='menu-separator'>|</span> -->
   <div class='vert-speparator'></div>
   <app-remote-progress [scope]='[instanceGroupName]'></app-remote-progress>
   <mat-menu #appMenu="matMenu" xPosition="before">

@@ -1,7 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash-es';
 import { EMPTY_INSTANCE_BANNER_RECORD } from 'src/app/models/consts';
 
 @Component({

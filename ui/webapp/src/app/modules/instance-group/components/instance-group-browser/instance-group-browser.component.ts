@@ -24,7 +24,7 @@ export class InstanceGroupBrowserComponent implements OnInit, OnDestroy {
   groupsLoading = true;
   recentLoading = true;
   instanceGroupList: DataList<InstanceGroupConfiguration>;
-  recent: String[] = [];
+  recent: string[] = [];
   displayRecent: BehaviorSubject<boolean> = new BehaviorSubject(true);
 
   constructor(

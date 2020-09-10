@@ -49,7 +49,7 @@ export class FileUploadComponent implements OnInit, OnDestroy {
   public filesParameter: UrlParameter[][] = [];
 
   /** Files to be uploaded */
-  public uploads: Map<String, UploadStatus>;
+  public uploads: Map<string, UploadStatus>;
 
   /** Internal state handling */
   public buttonText = 'Upload';

@@ -98,7 +98,7 @@ public class InstanceProcessController {
                 controller.setVariableResolver(resolver);
 
                 if (runtimeHistory != null) {
-                    controller.addStatusListener((event) -> {
+                    controller.addStatusListener(event -> {
                         // Do not record planned events
                         if (event.newState == ProcessState.RUNNING_STOP_PLANNED) {
                             return;

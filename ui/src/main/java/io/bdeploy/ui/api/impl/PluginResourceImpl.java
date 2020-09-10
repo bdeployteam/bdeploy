@@ -71,7 +71,7 @@ public class PluginResourceImpl implements PluginResource {
                         result.add(
                                 new PluginInfoDto(mf.getPlugin(), hdr.name, hdr.version, true, false, Collections.emptyList()));
                     } catch (IOException e) {
-                        log.error("Cannot load plugin " + key, e);
+                        log.error("Cannot load plugin {}", key, e);
                     }
                 }
             }
@@ -90,7 +90,7 @@ public class PluginResourceImpl implements PluginResource {
         for (ObjectId plugin : pm.getPlugins()) {
             try {
                 PluginInfoDto info = manager.load(hive, plugin, product);
-                if (info.editors.stream().filter(e -> e.getTypeName().equals(type)).findAny().isPresent()) {
+                if (info.editors.stream().anyMatch(e -> e.getTypeName().equals(type))) {
                     return info;
                 }
             } catch (Exception e) {

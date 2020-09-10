@@ -8,7 +8,11 @@ import { finalize } from 'rxjs/operators';
 import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { EMPTY_SOFTWARE_REPO } from '../../../../models/consts';
 import { SoftwareRepositoryConfiguration } from '../../../../models/gen.dtos';
-import { ErrorMessage, Logger, LoggingService } from '../../../core/services/logging.service';
+import {
+  ErrorMessage,
+  Logger,
+  LoggingService
+} from '../../../core/services/logging.service';
 import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
 import { MessageboxService } from '../../../shared/services/messagebox.service';
 import { InstanceGroupValidators } from '../../../shared/validators/instance-group.validator';
@@ -30,7 +34,7 @@ export class SoftwareRepoAddEditComponent implements OnInit {
 
   public softwareRepoFormGroup = this.fb.group({
     name: ['', [Validators.required, InstanceGroupValidators.namePattern]], // re-use validator pattern
-    description: ['', Validators.required]
+    description: ['', Validators.required],
   });
 
   get nameControl() {
@@ -48,7 +52,7 @@ export class SoftwareRepoAddEditComponent implements OnInit {
     private messageBoxService: MessageboxService,
     public location: Location,
     private router: Router,
-    public routingHistoryService:RoutingHistoryService,
+    public routingHistoryService: RoutingHistoryService
   ) {}
 
   ngOnInit() {
@@ -61,14 +65,16 @@ export class SoftwareRepoAddEditComponent implements OnInit {
       this.clonedSoftwareRepo = cloneDeep(softwareRepo);
     } else {
       this.softwareRepoService.getSoftwareRepository(this.nameParam).subscribe(
-        softwareRepo => {
+        (softwareRepo) => {
           this.log.debug('got software repository ' + this.nameParam);
           this.softwareRepoFormGroup.setValue(softwareRepo);
           this.clonedSoftwareRepo = cloneDeep(softwareRepo);
         },
-        error => {
-          this.log.errorWithGuiMessage(new ErrorMessage('reading software repository failed', error));
-        },
+        (error) => {
+          this.log.errorWithGuiMessage(
+            new ErrorMessage('reading software repository failed', error)
+          );
+        }
       );
     }
   }
@@ -97,9 +103,9 @@ export class SoftwareRepoAddEditComponent implements OnInit {
         .pipe(
           finalize(() => {
             this.loading = false;
-          }),
+          })
         )
-        .subscribe(result => {
+        .subscribe((result) => {
           this.log.info('created new software repository ' + softwareRepo.name);
           this.clonedSoftwareRepo = softwareRepo;
           this.router.navigate(['/softwarerepo/browser']);
@@ -110,9 +116,9 @@ export class SoftwareRepoAddEditComponent implements OnInit {
         .pipe(
           finalize(() => {
             this.loading = false;
-          }),
+          })
         )
-        .subscribe(result => {
+        .subscribe((result) => {
           this.log.info('updated software repository ' + this.nameParam);
           this.clonedSoftwareRepo = softwareRepo;
           this.router.navigate(['/softwarerepo/browser']);
@@ -135,5 +141,4 @@ export class SoftwareRepoAddEditComponent implements OnInit {
       mode: MessageBoxMode.CONFIRM_WARNING,
     });
   }
-
 }

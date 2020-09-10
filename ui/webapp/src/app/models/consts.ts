@@ -45,8 +45,7 @@ export const EMPTY_USER_CHANGE_PASSWORD_DTO: UserChangePasswordDto  = {
   user: null,
   currentPassword: null,
   newPassword: null
-}
-
+};
 
 export const EMPTY_INSTANCE: InstanceConfiguration = {
   uuid: null,

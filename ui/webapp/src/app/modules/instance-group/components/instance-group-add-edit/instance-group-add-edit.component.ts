@@ -1,7 +1,12 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Location } from '@angular/common';
-import { Component, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  TemplateRef,
+  ViewContainerRef
+} from '@angular/core';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
@@ -11,9 +16,16 @@ import { Observable, of } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { EMPTY_INSTANCE_GROUP } from '../../../../models/consts';
-import { InstanceGroupConfiguration, MinionMode } from '../../../../models/gen.dtos';
+import {
+  InstanceGroupConfiguration,
+  MinionMode
+} from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
-import { ErrorMessage, Logger, LoggingService } from '../../../core/services/logging.service';
+import {
+  ErrorMessage,
+  Logger,
+  LoggingService
+} from '../../../core/services/logging.service';
 import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
 import { MessageboxService } from '../../../shared/services/messagebox.service';
 import { InstanceGroupValidators } from '../../../shared/validators/instance-group.validator';
@@ -76,7 +88,7 @@ export class InstanceGroupAddEditComponent implements OnInit {
     private viewContainerRef: ViewContainerRef,
     private overlay: Overlay,
     private config: ConfigService,
-    public routingHistoryService:RoutingHistoryService,
+    public routingHistoryService: RoutingHistoryService
   ) {}
 
   ngOnInit() {
@@ -90,27 +102,33 @@ export class InstanceGroupAddEditComponent implements OnInit {
       this.clonedInstanceGroup = cloneDeep(instanceGroup);
     } else {
       this.instanceGroupService.getInstanceGroup(this.nameParam).subscribe(
-        instanceGroup => {
+        (instanceGroup) => {
           this.log.debug('got instance group ' + this.nameParam);
           this.instanceGroupFormGroup.setValue(instanceGroup);
           this.clonedInstanceGroup = cloneDeep(instanceGroup);
 
           if (instanceGroup.logo) {
-            this.instanceGroupService.getInstanceGroupImage(this.nameParam).subscribe(data => {
-              this.log.debug('got logo data...');
-              const reader = new FileReader();
-              reader.onload = () => {
-                this.originalLogoUrl = this.sanitizer.bypassSecurityTrustUrl(reader.result.toString());
-              };
-              reader.readAsDataURL(data);
-            });
+            this.instanceGroupService
+              .getInstanceGroupImage(this.nameParam)
+              .subscribe((data) => {
+                this.log.debug('got logo data...');
+                const reader = new FileReader();
+                reader.onload = () => {
+                  this.originalLogoUrl = this.sanitizer.bypassSecurityTrustUrl(
+                    reader.result.toString()
+                  );
+                };
+                reader.readAsDataURL(data);
+              });
           } else {
             this.log.debug('no logo to read...');
           }
         },
-        error => {
-          this.log.errorWithGuiMessage(new ErrorMessage('reading instance group failed', error));
-        },
+        (error) => {
+          this.log.errorWithGuiMessage(
+            new ErrorMessage('reading instance group failed', error)
+          );
+        }
       );
     }
   }
@@ -146,7 +164,8 @@ export class InstanceGroupAddEditComponent implements OnInit {
         } else {
           this.messageBoxService.open({
             title: 'Unsupported Image Type',
-            message: 'Please choose a different image. Supported types: jpeg, png, gif or svg',
+            message:
+              'Please choose a different image. Supported types: jpeg, png, gif or svg',
             mode: MessageBoxMode.ERROR,
           });
         }
@@ -190,37 +209,45 @@ export class InstanceGroupAddEditComponent implements OnInit {
           finalize(() => {
             this.clearLogoUpload();
             this.loading = false;
-          }),
+          })
         )
-        .subscribe(result => {
+        .subscribe((result) => {
           this.log.info('created new instance group ' + instanceGroup.name);
           this.checkImage(instanceGroup.name);
           this.clonedInstanceGroup = instanceGroup;
         });
     } else {
       if (this.config.config.mode === MinionMode.CENTRAL) {
-        this.messageBoxService.open({title: 'Updating Managed Servers', message: 'This action will try to contact and synchronize with all managed servers for this instance group.', mode: MessageBoxMode.CONFIRM_WARNING}).subscribe(r => {
-          if (r) {
-            this.doUpdate(instanceGroup);
-          } else {
-            this.loading = false;
-          }
-        });
+        this.messageBoxService
+          .open({
+            title: 'Updating Managed Servers',
+            message:
+              'This action will try to contact and synchronize with all managed servers for this instance group.',
+            mode: MessageBoxMode.CONFIRM_WARNING,
+          })
+          .subscribe((r) => {
+            if (r) {
+              this.doUpdate(instanceGroup);
+            } else {
+              this.loading = false;
+            }
+          });
       } else {
         this.doUpdate(instanceGroup);
       }
-
     }
   }
 
   private doUpdate(instanceGroup: any) {
     this.instanceGroupService
       .updateInstanceGroup(this.nameParam, instanceGroup)
-      .pipe(finalize(() => {
-        this.clearLogoUpload();
-        this.loading = false;
-      }))
-      .subscribe(result => {
+      .pipe(
+        finalize(() => {
+          this.clearLogoUpload();
+          this.loading = false;
+        })
+      )
+      .subscribe((result) => {
         this.log.info('updated instance group ' + this.nameParam);
         this.checkImage(this.nameParam);
         this.clonedInstanceGroup = instanceGroup;
@@ -229,7 +256,10 @@ export class InstanceGroupAddEditComponent implements OnInit {
 
   isModified(): boolean {
     const instanceGroup: InstanceGroupConfiguration = this.instanceGroupFormGroup.getRawValue();
-    return !isEqual(instanceGroup, this.clonedInstanceGroup) || this.newLogoFile != null;
+    return (
+      !isEqual(instanceGroup, this.clonedInstanceGroup) ||
+      this.newLogoFile != null
+    );
   }
 
   canDeactivate(): Observable<boolean> {
@@ -245,12 +275,13 @@ export class InstanceGroupAddEditComponent implements OnInit {
 
   private checkImage(group: string): void {
     if (this.newLogoFile != null) {
-      this.instanceGroupService.updateInstanceGroupImage(group, this.newLogoFile).pipe(finalize(() => this.loading = false)).subscribe(
-        response => {
+      this.instanceGroupService
+        .updateInstanceGroupImage(group, this.newLogoFile)
+        .pipe(finalize(() => (this.loading = false)))
+        .subscribe((response) => {
           this.router.navigate(['/instancegroup/browser']);
           this.loading = false;
-        }
-      );
+        });
     } else {
       this.router.navigate(['/instancegroup/browser']);
       this.loading = false;
@@ -295,6 +326,4 @@ export class InstanceGroupAddEditComponent implements OnInit {
       this.overlayRef = null;
     }
   }
-
 }
-

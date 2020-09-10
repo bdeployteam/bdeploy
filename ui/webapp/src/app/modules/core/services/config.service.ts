@@ -7,10 +7,15 @@ import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/mes
 import { MessageboxService } from 'src/app/modules/shared/services/messagebox.service';
 import { convert2String } from 'src/app/modules/shared/utils/version.utils';
 import { environment } from 'src/environments/environment';
-import { BackendInfoDto, MinionMode, MinionStatusDto, PluginInfoDto, Version } from '../../../models/gen.dtos';
+import {
+  BackendInfoDto,
+  MinionMode,
+  MinionStatusDto,
+  PluginInfoDto,
+  Version
+} from '../../../models/gen.dtos';
 import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
 import { LoggingService, LogLevel } from './logging.service';
-
 
 export interface AppConfig {
   version: Version;
@@ -31,56 +36,100 @@ export class ConfigService {
     private loggingService: LoggingService,
     iconRegistry: MatIconRegistry,
     sanitizer: DomSanitizer,
-    private mbService: MessageboxService,
+    private mbService: MessageboxService
   ) {
-    iconRegistry.addSvgIcon('bdeploy', sanitizer.bypassSecurityTrustResourceUrl('assets/logo-single-path-square.svg'));
-    iconRegistry.addSvgIcon('progress', sanitizer.bypassSecurityTrustResourceUrl('assets/progress.svg'));
-    iconRegistry.addSvgIcon('plus', sanitizer.bypassSecurityTrustResourceUrl('assets/plus.svg'));
-    iconRegistry.addSvgIcon('star', sanitizer.bypassSecurityTrustResourceUrl('assets/star.svg'));
-    iconRegistry.addSvgIcon('LINUX', sanitizer.bypassSecurityTrustResourceUrl('assets/linux.svg'));
-    iconRegistry.addSvgIcon('WINDOWS', sanitizer.bypassSecurityTrustResourceUrl('assets/windows.svg'));
-    iconRegistry.addSvgIcon('AIX', sanitizer.bypassSecurityTrustResourceUrl('assets/aix.svg'));
-    iconRegistry.addSvgIcon('MACOS', sanitizer.bypassSecurityTrustResourceUrl('assets/mac.svg'));
+    iconRegistry.addSvgIcon(
+      'bdeploy',
+      sanitizer.bypassSecurityTrustResourceUrl(
+        'assets/logo-single-path-square.svg'
+      )
+    );
+    iconRegistry.addSvgIcon(
+      'progress',
+      sanitizer.bypassSecurityTrustResourceUrl('assets/progress.svg')
+    );
+    iconRegistry.addSvgIcon(
+      'plus',
+      sanitizer.bypassSecurityTrustResourceUrl('assets/plus.svg')
+    );
+    iconRegistry.addSvgIcon(
+      'star',
+      sanitizer.bypassSecurityTrustResourceUrl('assets/star.svg')
+    );
+    iconRegistry.addSvgIcon(
+      'LINUX',
+      sanitizer.bypassSecurityTrustResourceUrl('assets/linux.svg')
+    );
+    iconRegistry.addSvgIcon(
+      'WINDOWS',
+      sanitizer.bypassSecurityTrustResourceUrl('assets/windows.svg')
+    );
+    iconRegistry.addSvgIcon(
+      'AIX',
+      sanitizer.bypassSecurityTrustResourceUrl('assets/aix.svg')
+    );
+    iconRegistry.addSvgIcon(
+      'MACOS',
+      sanitizer.bypassSecurityTrustResourceUrl('assets/mac.svg')
+    );
     setInterval(() => this.isNewVersionAvailable(), 60000);
-    this.newVersionInterval = setInterval(() => this.isNewVersionAvailable(), 60000);
+    this.newVersionInterval = setInterval(
+      () => this.isNewVersionAvailable(),
+      60000
+    );
   }
 
   load(): Promise<AppConfig> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       this.getBackendInfo().subscribe((bv) => {
         this.config = {
           version: bv.version,
           api: environment.apiUrl,
           logLevel: environment.logLevel,
-          mode: bv.mode
+          mode: bv.mode,
         };
         this.loggingService.getLogger(null).setLogLevel(this.config.logLevel);
-        this.loggingService.getLogger(null).info('API URL set to ' + this.config.api);
-        this.loggingService.getLogger(null).info('Remote reports mode ' + this.config.mode);
+        this.loggingService
+          .getLogger(null)
+          .info('API URL set to ' + this.config.api);
+        this.loggingService
+          .getLogger(null)
+          .info('Remote reports mode ' + this.config.mode);
         resolve(this.config);
       });
     });
   }
 
-  public isNewVersionAvailable(){
+  public isNewVersionAvailable() {
     this.getBackendInfo().subscribe((bv) => {
-
       const currentVersion = convert2String(this.config.version);
       const newVersion = convert2String(bv.version);
 
-      if(currentVersion != newVersion){
+      if (currentVersion !== newVersion) {
+        this.loggingService
+          .getLogger(null)
+          .info(
+            'A new version is available! old: ' +
+              currentVersion +
+              ' | new: ' +
+              newVersion
+          );
 
-        this.loggingService.getLogger(null).info("A new version is available! old: " + currentVersion + " | new: " + newVersion);
-
-        this.mbService.open({title: 'New Version', message: 'A software update has been installed on the server. The page needs to be re-loaded to continue working.', mode: MessageBoxMode.INFO}).subscribe(r => {
-          window.location.reload();
-        });
-
+        this.mbService
+          .open({
+            title: 'New Version',
+            message:
+              'A software update has been installed on the server. The page needs to be re-loaded to continue working.',
+            mode: MessageBoxMode.INFO,
+          })
+          .subscribe((r) => {
+            window.location.reload();
+          });
       }
     });
   }
 
-  public stopNewVersionInterval(){
+  public stopNewVersionInterval() {
     clearInterval(this.newVersionInterval);
   }
 
@@ -101,15 +150,21 @@ export class ConfigService {
   }
 
   public getBackendInfo(): Observable<BackendInfoDto> {
-    return this.http.get<BackendInfoDto>(environment.apiUrl + '/backend-info/version');
+    return this.http.get<BackendInfoDto>(
+      environment.apiUrl + '/backend-info/version'
+    );
   }
 
   public tryGetBackendInfo(): Observable<BackendInfoDto> {
-    return this.http.get<BackendInfoDto>(environment.apiUrl + '/backend-info/version', { headers: suppressGlobalErrorHandling(new HttpHeaders)});
+    return this.http.get<BackendInfoDto>(
+      environment.apiUrl + '/backend-info/version',
+      { headers: suppressGlobalErrorHandling(new HttpHeaders()) }
+    );
   }
 
   public getNodeStates() {
-    return this.http.get<{ [minionName: string]: MinionStatusDto}[]>(environment.apiUrl + '/backend-info/minion-status');
+    return this.http.get<{ [minionName: string]: MinionStatusDto }[]>(
+      environment.apiUrl + '/backend-info/minion-status'
+    );
   }
-
 }

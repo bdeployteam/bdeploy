@@ -8,9 +8,16 @@ import { ActivatedRoute } from '@angular/router';
 import { cloneDeep } from 'lodash-es';
 import { Observable, of } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { Permission, ScopedPermission, UserInfo } from 'src/app/models/gen.dtos';
+import {
+  Permission,
+  ScopedPermission,
+  UserInfo
+} from 'src/app/models/gen.dtos';
 import { UserPickerComponent } from 'src/app/modules/core/components/user-picker/user-picker.component';
-import { Logger, LoggingService } from 'src/app/modules/core/services/logging.service';
+import {
+  Logger,
+  LoggingService
+} from 'src/app/modules/core/services/logging.service';
 import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
@@ -21,11 +28,12 @@ import { InstanceGroupService } from '../../services/instance-group.service';
   selector: 'app-instance-group-permissions',
   templateUrl: './instance-group-permissions.component.html',
   styleUrls: ['./instance-group-permissions.component.css'],
-  providers: [SettingsService]
+  providers: [SettingsService],
 })
 export class InstanceGroupPermissionsComponent implements OnInit {
-
-  log: Logger = this.loggingService.getLogger('InstanceGroupPermissionsComponent');
+  log: Logger = this.loggingService.getLogger(
+    'InstanceGroupPermissionsComponent'
+  );
 
   nameParam: string;
 
@@ -39,7 +47,7 @@ export class InstanceGroupPermissionsComponent implements OnInit {
   public userAll: UserInfo[] = [];
   private userTableOri: UserInfo[]; // --> dirty detection
 
-  private _filterValue: string = '';
+  private _filterValue = '';
   get filterValue() {
     return this._filterValue;
   }
@@ -57,7 +65,16 @@ export class InstanceGroupPermissionsComponent implements OnInit {
     this.updateFilter();
   }
 
-  public displayedColumns: string[] = ['gravatar', 'name', 'fullName', 'email', 'read', 'write', 'admin', 'delete'];
+  public displayedColumns: string[] = [
+    'gravatar',
+    'name',
+    'fullName',
+    'email',
+    'read',
+    'write',
+    'admin',
+    'delete',
+  ];
 
   @ViewChild(MatPaginator)
   paginator: MatPaginator;
@@ -73,8 +90,8 @@ export class InstanceGroupPermissionsComponent implements OnInit {
     private loggingService: LoggingService,
     public location: Location,
     private route: ActivatedRoute,
-    public routingHistoryService: RoutingHistoryService,
-  ) { }
+    public routingHistoryService: RoutingHistoryService
+  ) {}
 
   ngOnInit() {
     this.nameParam = this.route.snapshot.paramMap.get('name');
@@ -88,25 +105,42 @@ export class InstanceGroupPermissionsComponent implements OnInit {
       this.dataSource.data = [];
     }
 
-    this.instanceGroupService.getAllUsers(this.nameParam).subscribe(users => {
+    this.instanceGroupService.getAllUsers(this.nameParam).subscribe((users) => {
       this.userAll = users;
 
       const userTable: UserInfo[] = [];
       for (const u of users) {
-        const cap4instanceGroup: ScopedPermission[] = this.getFilteredPermissions(u);
+        const cap4instanceGroup: ScopedPermission[] = this.getFilteredPermissions(
+          u
+        );
         if (cap4instanceGroup && cap4instanceGroup.length > 0) {
           const clone = cloneDeep(u);
           clone.permissions = cap4instanceGroup;
           if (this.hasScoped(clone)) {
             // add missing permissions of lower prio (required for grant/revoke actions)
-            const hasScopedRead = clone.permissions.find(c => c.scope !== null && c.permission === Permission.READ) != null;
-            const hasScopedWrite = clone.permissions.find(c => c.scope !== null && c.permission === Permission.WRITE) != null;
-            const hasScopedAdmin = clone.permissions.find(c => c.scope !== null && c.permission === Permission.ADMIN) != null;
+            const hasScopedRead =
+              clone.permissions.find(
+                (c) => c.scope !== null && c.permission === Permission.READ
+              ) != null;
+            const hasScopedWrite =
+              clone.permissions.find(
+                (c) => c.scope !== null && c.permission === Permission.WRITE
+              ) != null;
+            const hasScopedAdmin =
+              clone.permissions.find(
+                (c) => c.scope !== null && c.permission === Permission.ADMIN
+              ) != null;
             if (hasScopedAdmin && !hasScopedWrite) {
-              clone.permissions.push({scope: this.nameParam, permission: Permission.WRITE});
+              clone.permissions.push({
+                scope: this.nameParam,
+                permission: Permission.WRITE,
+              });
             }
             if ((hasScopedAdmin || hasScopedWrite) && !hasScopedRead) {
-              clone.permissions.push({scope: this.nameParam, permission: Permission.READ});
+              clone.permissions.push({
+                scope: this.nameParam,
+                permission: Permission.READ,
+              });
             }
           }
           userTable.push(clone);
@@ -119,10 +153,12 @@ export class InstanceGroupPermissionsComponent implements OnInit {
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
       this.dataSource.filterPredicate = (data, filter) => {
-        return (this.showGlobal || this.hasScoped(data))
-          && (this.filterPredicate(data.name, this.filterValue)
-          || this.filterPredicate(data.fullName, this.filterValue)
-          || this.filterPredicate(data.email, this.filterValue));
+        return (
+          (this.showGlobal || this.hasScoped(data)) &&
+          (this.filterPredicate(data.name, this.filterValue) ||
+            this.filterPredicate(data.fullName, this.filterValue) ||
+            this.filterPredicate(data.email, this.filterValue))
+        );
       };
       this.updateFilter();
       this.loading = false;
@@ -131,7 +167,7 @@ export class InstanceGroupPermissionsComponent implements OnInit {
 
   private updateFilter() {
     try {
-      const filterRegex = new RegExp(this._filterValue);
+      new RegExp(this._filterValue).compile();
       this.filterPredicate = (d, f) => d && d.toLowerCase().match(f);
     } catch (e) {
       this.filterPredicate = (d, f) => d && d.toLowerCase().includes(f);
@@ -144,35 +180,52 @@ export class InstanceGroupPermissionsComponent implements OnInit {
   }
 
   public onAdd() {
-    this.dialog.open(UserPickerComponent, {
-      width: '500px',
-      data: {
-        all: this.userAll,
-        displayed: this.dataSource.data
-      },
-    }).afterClosed().subscribe(r => {
-      if (r) {
-        const clone = cloneDeep(r);
-        clone.permissions = this.getFilteredPermissions(clone);
-        clone.permissions.push({scope: this.nameParam, permission: Permission.READ});
-        this.dataSource.data.push(clone);
-        this.dataSource.data = this.dataSource.data; // triggers table update
-        this.updateFilter();
-      }
-    });
+    this.dialog
+      .open(UserPickerComponent, {
+        width: '500px',
+        data: {
+          all: this.userAll,
+          displayed: this.dataSource.data,
+        },
+      })
+      .afterClosed()
+      .subscribe((r) => {
+        if (r) {
+          const clone = cloneDeep(r);
+          clone.permissions = this.getFilteredPermissions(clone);
+          clone.permissions.push({
+            scope: this.nameParam,
+            permission: Permission.READ,
+          });
+          this.dataSource.data.push(clone);
+          this.dataSource.data = this.dataSource.data; // triggers table update
+          this.updateFilter();
+        }
+      });
   }
 
   public onGrantWrite(user: UserInfo): void {
-    user.permissions.push({scope: this.nameParam, permission: Permission.WRITE});
-    const hasScopedRead = user.permissions.find(c => c.scope !== null && c.permission === Permission.READ) != null;
+    user.permissions.push({
+      scope: this.nameParam,
+      permission: Permission.WRITE,
+    });
+    const hasScopedRead =
+      user.permissions.find(
+        (c) => c.scope !== null && c.permission === Permission.READ
+      ) != null;
     if (!hasScopedRead) {
-      user.permissions.push({scope: this.nameParam, permission: Permission.READ});
+      user.permissions.push({
+        scope: this.nameParam,
+        permission: Permission.READ,
+      });
     }
     this.updateFilter();
   }
 
   public onRevokeWrite(user: UserInfo): void {
-    user.permissions = user.permissions.filter(c => c.scope === null || c.permission === Permission.READ);
+    user.permissions = user.permissions.filter(
+      (c) => c.scope === null || c.permission === Permission.READ
+    );
     if (this.hasGlobalRead(user)) {
       this.onDelete(user);
     }
@@ -180,8 +233,14 @@ export class InstanceGroupPermissionsComponent implements OnInit {
   }
 
   public onGrantAdmin(user: UserInfo): void {
-    user.permissions.push({scope: this.nameParam, permission: Permission.ADMIN});
-    const hasScopedWrite = user.permissions.find(c => c.scope !== null && c.permission === Permission.WRITE) != null;
+    user.permissions.push({
+      scope: this.nameParam,
+      permission: Permission.ADMIN,
+    });
+    const hasScopedWrite =
+      user.permissions.find(
+        (c) => c.scope !== null && c.permission === Permission.WRITE
+      ) != null;
     if (!hasScopedWrite) {
       this.onGrantWrite(user);
     }
@@ -189,7 +248,9 @@ export class InstanceGroupPermissionsComponent implements OnInit {
   }
 
   public onRevokeAdmin(user: UserInfo): void {
-    user.permissions = user.permissions.filter(c => c.scope === null || c.permission !== Permission.ADMIN);
+    user.permissions = user.permissions.filter(
+      (c) => c.scope === null || c.permission !== Permission.ADMIN
+    );
     if (this.hasGlobalWrite(user)) {
       this.onDelete(user);
     }
@@ -199,10 +260,12 @@ export class InstanceGroupPermissionsComponent implements OnInit {
   public onDelete(user: UserInfo): void {
     if (this.hasGlobal(user)) {
       // clear scoped
-      user.permissions = user.permissions.filter(c => c.scope === null);
+      user.permissions = user.permissions.filter((c) => c.scope === null);
     } else {
       // remove user from table
-      this.dataSource.data = this.dataSource.data.filter(u => u.name !== user.name);
+      this.dataSource.data = this.dataSource.data.filter(
+        (u) => u.name !== user.name
+      );
     }
     this.updateFilter();
   }
@@ -226,23 +289,27 @@ export class InstanceGroupPermissionsComponent implements OnInit {
 
     // check user in table (new/mod)
     for (const tab of this.dataSource.data) {
-      const ori = this.userTableOri.find(u => u.name === tab.name);
+      const ori = this.userTableOri.find((u) => u.name === tab.name);
       const tabPermission = this.getHighestScopedPermission(tab);
-      if (!ori || ori && this.getHighestScopedPermission(ori) !== tabPermission) {
-        result.push({user: tab.name, permission: tabPermission});
+      if (
+        !ori ||
+        (ori && this.getHighestScopedPermission(ori) !== tabPermission)
+      ) {
+        result.push({ user: tab.name, permission: tabPermission });
       }
     }
     // find removed user
     for (const ori of this.userTableOri) {
-      const tab = this.dataSource.data.find(u => u.name === ori.name);
+      const tab = this.dataSource.data.find((u) => u.name === ori.name);
       if (!tab) {
-        result.push({user: ori.name, permission: null});
+        result.push({ user: ori.name, permission: null });
       }
     }
 
-    this.instanceGroupService.updateInstanceGroupPermissions(this.nameParam, result)
-      .pipe(finalize(() => this.loading = false))
-      .subscribe(result => {
+    this.instanceGroupService
+      .updateInstanceGroupPermissions(this.nameParam, result)
+      .pipe(finalize(() => (this.loading = false)))
+      .subscribe(_ => {
         this.prepareUsers();
       });
   }
@@ -255,11 +322,14 @@ export class InstanceGroupPermissionsComponent implements OnInit {
       return true;
     }
     for (const ori of this.userTableOri) {
-      const tab = this.dataSource.data.find(u => u.name === ori.name);
+      const tab = this.dataSource.data.find((u) => u.name === ori.name);
       if (!tab) {
         return true;
       }
-      if (this.getHighestScopedPermission(ori) !== this.getHighestScopedPermission(tab)) {
+      if (
+        this.getHighestScopedPermission(ori) !==
+        this.getHighestScopedPermission(tab)
+      ) {
         return true;
       }
     }
@@ -277,26 +347,27 @@ export class InstanceGroupPermissionsComponent implements OnInit {
     });
   }
 
-
   private getHighestScopedPermission(user: UserInfo): Permission {
     if (this.hasAdmin(user)) {
       return Permission.ADMIN;
     } else if (this.hasWrite(user)) {
       return Permission.WRITE;
-    } else if(this.hasRead(user)) {
+    } else if (this.hasRead(user)) {
       return Permission.READ;
     }
     return null;
   }
 
   private getFilteredPermissions(user: UserInfo): ScopedPermission[] {
-    return user.permissions.filter(c => c.scope === null || c.scope === this.nameParam);
+    return user.permissions.filter(
+      (c) => c.scope === null || c.scope === this.nameParam
+    );
   }
 
   //
 
   public hasScoped(user: UserInfo): boolean {
-    return user.permissions.find(c => c.scope === this.nameParam) != null;
+    return user.permissions.find((c) => c.scope === this.nameParam) != null;
   }
 
   public hasRead(user: UserInfo): boolean {
@@ -304,17 +375,25 @@ export class InstanceGroupPermissionsComponent implements OnInit {
   }
 
   public hasWrite(user: UserInfo): boolean {
-    return user.permissions.find(c => c.scope === this.nameParam && c.permission !== Permission.READ) != null; // -> has WRITE or ADMIN
+    return (
+      user.permissions.find(
+        (c) => c.scope === this.nameParam && c.permission !== Permission.READ
+      ) != null
+    ); // -> has WRITE or ADMIN
   }
 
   public hasAdmin(user: UserInfo): boolean {
-    return user.permissions.find(c => c.scope === this.nameParam && c.permission === Permission.ADMIN) != null;
+    return (
+      user.permissions.find(
+        (c) => c.scope === this.nameParam && c.permission === Permission.ADMIN
+      ) != null
+    );
   }
 
   //
 
   public hasGlobal(user: UserInfo): boolean {
-    return user.permissions.find(c => c.scope === null) != null;
+    return user.permissions.find((c) => c.scope === null) != null;
   }
 
   public hasGlobalRead(user: UserInfo): boolean {
@@ -322,11 +401,18 @@ export class InstanceGroupPermissionsComponent implements OnInit {
   }
 
   public hasGlobalWrite(user: UserInfo): boolean {
-    return user.permissions.find(c => c.scope === null && c.permission !== Permission.READ) != null; // -> has global WRITE or ADMIN
+    return (
+      user.permissions.find(
+        (c) => c.scope === null && c.permission !== Permission.READ
+      ) != null
+    ); // -> has global WRITE or ADMIN
   }
 
   public hasGlobalAdmin(user: UserInfo): boolean {
-    return user.permissions.find(c => c.scope === null && c.permission === Permission.ADMIN) != null;
+    return (
+      user.permissions.find(
+        (c) => c.scope === null && c.permission === Permission.ADMIN
+      ) != null
+    );
   }
-
 }

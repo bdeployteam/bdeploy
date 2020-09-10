@@ -11,11 +11,8 @@ public class MinionRuntimeHistory {
     private final Map<String, MinionApplicationRuntimeHistory> applications = new HashMap<>();
 
     public MinionRuntimeHistory record(MinionRuntimeHistoryRecord record, String applicationId) {
-        MinionApplicationRuntimeHistory history = applications.get(applicationId);
-        if (history == null) {
-            history = new MinionApplicationRuntimeHistory();
-            applications.put(applicationId, history);
-        }
+        MinionApplicationRuntimeHistory history = applications.computeIfAbsent(applicationId,
+                k -> new MinionApplicationRuntimeHistory());
         history.addRecord(record);
         return this;
     }

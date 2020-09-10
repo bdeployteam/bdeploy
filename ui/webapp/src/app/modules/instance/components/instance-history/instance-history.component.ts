@@ -3,7 +3,10 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
-import { HistoryEntryDto, InstanceConfiguration } from 'src/app/models/gen.dtos';
+import {
+  HistoryEntryDto,
+  InstanceConfiguration
+} from 'src/app/models/gen.dtos';
 import { LoggingService } from 'src/app/modules/core/services/logging.service';
 import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { InstanceHistoryTimelineComponent } from 'src/app/modules/instance/components/instance-history-timeline/instance-history-timeline.component';
@@ -13,7 +16,7 @@ import { InstanceHistoryCompareComponent } from '../instance-history-compare/ins
 @Component({
   selector: 'app-instance-history',
   templateUrl: './instance-history.component.html',
-  styleUrls: ['./instance-history.component.css']
+  styleUrls: ['./instance-history.component.css'],
 })
 export class InstanceHistoryComponent implements OnInit {
   // Amount of history entries to load at once
@@ -22,7 +25,7 @@ export class InstanceHistoryComponent implements OnInit {
   groupParam: string = this.route.snapshot.paramMap.get('group');
   uuidParam: string = this.route.snapshot.paramMap.get('uuid');
 
-  loading: boolean = false;
+  loading = true;
 
   filterText = '';
   showCreate = true;
@@ -31,7 +34,7 @@ export class InstanceHistoryComponent implements OnInit {
 
   accordionBehaviour = false;
 
-  private compareVersions: string[] = [,];
+  private compareVersions: string[] = [];
 
   instance: InstanceConfiguration;
   history: HistoryEntryDto[] = [];
@@ -104,21 +107,21 @@ export class InstanceHistoryComponent implements OnInit {
     this.loadHistory();
   }
 
-  compareInputKeydown(event:InputEvent, index: number): void {
+  compareInputKeydown(event: InputEvent, index: number): void {
     const input = event.target as HTMLInputElement;
     const value = input.value.trim();
     if (this.isNumeric(value)) {
       this.compareVersions[index] = value;
-    } else if (value.length == 0) {
+    } else if (value.length === 0) {
       this.compareVersions[index] = null;
     }
     this.updateCompareButton();
   }
 
   updateCompareButton() {
-    if(!this.compareVersions[0] || !this.compareVersions[1]) {
+    if (!this.compareVersions[0] || !this.compareVersions[1]) {
       this.compareButton.disabled = true;
-    } else if (this.compareVersions[0] == this.compareVersions[1]) {
+    } else if (this.compareVersions[0] === this.compareVersions[1]) {
       this.compareButton.disabled = true;
     } else {
       this.compareButton.disabled = false;
@@ -126,11 +129,11 @@ export class InstanceHistoryComponent implements OnInit {
   }
 
   isNumeric(number: string): boolean {
-    return !isNaN(parseInt(number));
+    return !isNaN(parseInt(number, 10));
   }
 
   addVersionToCompare(version: string) {
-    var x = Number(version);
+    const x = Number(version);
     if (!this.compareVersions[0]) {
       this.compareVersions[0] = version;
       this.compareInputA.nativeElement.value = version;
@@ -142,8 +145,8 @@ export class InstanceHistoryComponent implements OnInit {
       this.updateCompareButton();
       return;
     }
-    var a = Number(this.compareVersions[0]);
-    var b = Number(this.compareVersions[1]);
+    let a = Number(this.compareVersions[0]);
+    let b = Number(this.compareVersions[1]);
 
     if (a > b) {
       [a, b] = [b, a];
@@ -173,7 +176,7 @@ export class InstanceHistoryComponent implements OnInit {
     this.dialog.open(InstanceHistoryCompareComponent, {
       minWidth: '300px',
       maxWidth: '800px',
-      data: data ,
+      data: data,
       closeOnNavigation: true,
     });
   }

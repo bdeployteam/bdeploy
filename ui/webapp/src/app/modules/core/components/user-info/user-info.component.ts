@@ -21,7 +21,7 @@ export class UserInfoComponent implements OnInit {
   private readonly log: Logger = this.loggingService.getLogger('UserInfoComponent');
 
   public user: UserInfo;
-  public pack: String;
+  public pack: string;
   public genFull = false;
 
   private dialogRef: MatDialogRef<any>;

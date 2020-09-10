@@ -8,9 +8,16 @@ import { ActivatedRoute } from '@angular/router';
 import { cloneDeep } from 'lodash-es';
 import { Observable, of } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { Permission, ScopedPermission, UserInfo } from 'src/app/models/gen.dtos';
+import {
+  Permission,
+  ScopedPermission,
+  UserInfo
+} from 'src/app/models/gen.dtos';
 import { UserPickerComponent } from 'src/app/modules/core/components/user-picker/user-picker.component';
-import { Logger, LoggingService } from 'src/app/modules/core/services/logging.service';
+import {
+  Logger,
+  LoggingService
+} from 'src/app/modules/core/services/logging.service';
 import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
@@ -21,11 +28,12 @@ import { SoftwareRepositoryService } from '../../services/software-repository.se
   selector: 'app-software-repository-permissions',
   templateUrl: './software-repository-permissions.component.html',
   styleUrls: ['./software-repository-permissions.component.css'],
-  providers: [SettingsService]
+  providers: [SettingsService],
 })
 export class SoftwareRepositoryPermissionsComponent implements OnInit {
-
-  log: Logger = this.loggingService.getLogger('SoftwareRepositoryPermissionsComponent');
+  log: Logger = this.loggingService.getLogger(
+    'SoftwareRepositoryPermissionsComponent'
+  );
 
   nameParam: string;
 
@@ -39,7 +47,7 @@ export class SoftwareRepositoryPermissionsComponent implements OnInit {
   public userAll: UserInfo[] = [];
   private userTableOri: UserInfo[]; // --> dirty detection
 
-  private _filterValue: string = '';
+  private _filterValue = '';
   get filterValue() {
     return this._filterValue;
   }
@@ -57,7 +65,14 @@ export class SoftwareRepositoryPermissionsComponent implements OnInit {
     this.updateFilter();
   }
 
-  public displayedColumns: string[] = ['gravatar', 'name', 'fullName', 'email', 'write', 'delete'];
+  public displayedColumns: string[] = [
+    'gravatar',
+    'name',
+    'fullName',
+    'email',
+    'write',
+    'delete',
+  ];
 
   @ViewChild(MatPaginator)
   paginator: MatPaginator;
@@ -73,8 +88,8 @@ export class SoftwareRepositoryPermissionsComponent implements OnInit {
     private loggingService: LoggingService,
     public location: Location,
     private route: ActivatedRoute,
-    public routingHistoryService:RoutingHistoryService,
-  ) { }
+    public routingHistoryService: RoutingHistoryService
+  ) {}
 
   ngOnInit() {
     this.nameParam = this.route.snapshot.paramMap.get('name');
@@ -88,37 +103,41 @@ export class SoftwareRepositoryPermissionsComponent implements OnInit {
       this.dataSource.data = [];
     }
 
-    this.softwareRepositoryService.getAllUsers(this.nameParam).subscribe(users => {
-      this.userAll = users;
+    this.softwareRepositoryService
+      .getAllUsers(this.nameParam)
+      .subscribe((users) => {
+        this.userAll = users;
 
-      const userTable: UserInfo[] = [];
-      for (const u of users) {
-        const cap4repo: ScopedPermission[] = this.getFilteredPermissions(u);
-        if (cap4repo && cap4repo.length > 0) {
-          const clone = cloneDeep(u);
-          clone.permissions = cap4repo;
-          userTable.push(clone);
+        const userTable: UserInfo[] = [];
+        for (const u of users) {
+          const cap4repo: ScopedPermission[] = this.getFilteredPermissions(u);
+          if (cap4repo && cap4repo.length > 0) {
+            const clone = cloneDeep(u);
+            clone.permissions = cap4repo;
+            userTable.push(clone);
+          }
         }
-      }
 
-      this.userTableOri = cloneDeep(userTable);
-      this.dataSource = new MatTableDataSource(userTable);
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sort = this.sort;
-      this.dataSource.filterPredicate = (data, filter) => {
-        return (this.showGlobal || this.hasScoped(data))
-          && (this.filterPredicate(data.name, this.filterValue)
-          || this.filterPredicate(data.fullName, this.filterValue)
-          || this.filterPredicate(data.email, this.filterValue));
-      };
-      this.updateFilter();
-      this.loading = false;
-    });
+        this.userTableOri = cloneDeep(userTable);
+        this.dataSource = new MatTableDataSource(userTable);
+        this.dataSource.paginator = this.paginator;
+        this.dataSource.sort = this.sort;
+        this.dataSource.filterPredicate = (data, filter) => {
+          return (
+            (this.showGlobal || this.hasScoped(data)) &&
+            (this.filterPredicate(data.name, this.filterValue) ||
+              this.filterPredicate(data.fullName, this.filterValue) ||
+              this.filterPredicate(data.email, this.filterValue))
+          );
+        };
+        this.updateFilter();
+        this.loading = false;
+      });
   }
 
   private updateFilter() {
     try {
-      const filterRegex = new RegExp(this._filterValue);
+      new RegExp(this._filterValue).compile();
       this.filterPredicate = (d, f) => d && d.toLowerCase().match(f);
     } catch (e) {
       this.filterPredicate = (d, f) => d && d.toLowerCase().includes(f);
@@ -131,26 +150,34 @@ export class SoftwareRepositoryPermissionsComponent implements OnInit {
   }
 
   public onAdd() {
-    this.dialog.open(UserPickerComponent, {
-      width: '500px',
-      data: {
-        all: this.userAll,
-        displayed: this.dataSource.data
-      },
-    }).afterClosed().subscribe(r => {
-      if (r) {
-        const clone = cloneDeep(r);
-        clone.permissions = this.getFilteredPermissions(clone);
-        clone.permissions.push({scope: this.nameParam, permission: Permission.WRITE});
-        this.dataSource.data.push(clone);
-        this.dataSource.data = this.dataSource.data; // triggers table update
-        this.updateFilter();
-      }
-    });
+    this.dialog
+      .open(UserPickerComponent, {
+        width: '500px',
+        data: {
+          all: this.userAll,
+          displayed: this.dataSource.data,
+        },
+      })
+      .afterClosed()
+      .subscribe((r) => {
+        if (r) {
+          const clone = cloneDeep(r);
+          clone.permissions = this.getFilteredPermissions(clone);
+          clone.permissions.push({
+            scope: this.nameParam,
+            permission: Permission.WRITE,
+          });
+          this.dataSource.data.push(clone);
+          this.dataSource.data = this.dataSource.data; // triggers table update
+          this.updateFilter();
+        }
+      });
   }
 
   public onDelete(user: UserInfo): void {
-    this.dataSource.data = this.dataSource.data.filter(u => u.name !== user.name);
+    this.dataSource.data = this.dataSource.data.filter(
+      (u) => u.name !== user.name
+    );
     this.updateFilter();
   }
 
@@ -173,22 +200,23 @@ export class SoftwareRepositoryPermissionsComponent implements OnInit {
 
     // check user in table (added)
     for (const tab of this.dataSource.data) {
-      const ori = this.userTableOri.find(u => u.name === tab.name);
+      const ori = this.userTableOri.find((u) => u.name === tab.name);
       if (!ori) {
-        result.push({user: tab.name, permission: Permission.WRITE});
+        result.push({ user: tab.name, permission: Permission.WRITE });
       }
     }
     // find removed user
     for (const ori of this.userTableOri) {
-      const tab = this.dataSource.data.find(u => u.name === ori.name);
+      const tab = this.dataSource.data.find((u) => u.name === ori.name);
       if (!tab) {
-        result.push({user: ori.name, permission: null});
+        result.push({ user: ori.name, permission: null });
       }
     }
 
-    this.softwareRepositoryService.updateSoftwareRepositoryPermissions(this.nameParam, result)
-      .pipe(finalize(() => this.loading = false))
-      .subscribe(result => {
+    this.softwareRepositoryService
+      .updateSoftwareRepositoryPermissions(this.nameParam, result)
+      .pipe(finalize(() => (this.loading = false)))
+      .subscribe(_ => {
         this.prepareUsers();
       });
   }
@@ -201,7 +229,7 @@ export class SoftwareRepositoryPermissionsComponent implements OnInit {
       return true;
     }
     for (const ori of this.userTableOri) {
-      const tab = this.dataSource.data.find(u => u.name === ori.name);
+      const tab = this.dataSource.data.find((u) => u.name === ori.name);
       if (!tab) {
         return true;
       }
@@ -222,15 +250,22 @@ export class SoftwareRepositoryPermissionsComponent implements OnInit {
 
   private getFilteredPermissions(user: UserInfo): ScopedPermission[] {
     // scoped WRITE or global WRITE/ADMIN
-    return user.permissions.filter(c => (c.scope === this.nameParam && c.permission == Permission.WRITE) || (c.scope === null && c.permission !== Permission.READ));
+    return user.permissions.filter(
+      (c) =>
+        (c.scope === this.nameParam && c.permission === Permission.WRITE) ||
+        (c.scope === null && c.permission !== Permission.READ)
+    );
   }
 
   public hasScoped(user: UserInfo): boolean {
-    return user.permissions.find(c => c.scope === this.nameParam) != null;
+    return user.permissions.find((c) => c.scope === this.nameParam) != null;
   }
 
   public hasGlobalWrite(user: UserInfo): boolean {
-    return user.permissions.find(c => c.scope === null && c.permission !== Permission.READ) != null; // -> has global WRITE or ADMIN
+    return (
+      user.permissions.find(
+        (c) => c.scope === null && c.permission !== Permission.READ
+      ) != null
+    ); // -> has global WRITE or ADMIN
   }
-
 }

@@ -735,7 +735,7 @@ public class InstanceResourceImpl implements InstanceResource {
         BHive rootHive = reg.get(JerseyRemoteBHive.DEFAULT_NAME);
         Manifest mf = rootHive.execute(new ManifestLoadOperation().setManifest(launcherKey.getKey()));
         TreeEntryLoadOperation findInstallerOp = new TreeEntryLoadOperation().setRootTree(mf.getRoot())
-                .setRelativePath(SoftwareUpdateResourceImpl.INSTALLER_EXE);
+                .setRelativePath(SoftwareUpdateResource.INSTALLER_EXE);
         try (InputStream in = rootHive.execute(findInstallerOp); OutputStream os = Files.newOutputStream(installerPath)) {
             in.transferTo(os);
         } catch (IOException ioe) {
@@ -831,15 +831,15 @@ public class InstanceResourceImpl implements InstanceResource {
             // MUST delegate this 1:1 to managed
             RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
 
-            try (MultiPart mp = new MultiPart()) {
+            try (MultiPart multiPart = new MultiPart()) {
                 StreamDataBodyPart bp = new StreamDataBodyPart("file", inputStream);
                 bp.setFilename("instance.zip");
                 bp.setMediaType(MediaType.APPLICATION_OCTET_STREAM_TYPE);
-                mp.bodyPart(bp);
+                multiPart.bodyPart(bp);
 
                 WebTarget target = JerseyClientFactory.get(svc).getBaseTarget()
                         .path("/group/" + group + "/instance/" + instanceId + "/import");
-                Response response = target.request().post(Entity.entity(mp, MediaType.MULTIPART_FORM_DATA_TYPE));
+                Response response = target.request().post(Entity.entity(multiPart, MediaType.MULTIPART_FORM_DATA_TYPE));
 
                 if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
                     throw new IllegalStateException("Import failed: " + response.getStatusInfo().getStatusCode() + ": "

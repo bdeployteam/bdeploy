@@ -1,4 +1,11 @@
-import { HttpClient, HttpEventType, HttpHeaders, HttpParams, HttpRequest, HttpResponse } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpEventType,
+  HttpHeaders,
+  HttpParams,
+  HttpRequest,
+  HttpResponse
+} from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { Logger, LoggingService } from '../../core/services/logging.service';
@@ -6,7 +13,6 @@ import { suppressGlobalErrorHandling } from '../utils/server.utils';
 
 /** Enumeration of the possible states of an upload */
 export enum UploadState {
-
   /** Files are transferred to the server */
   UPLOADING,
 
@@ -56,7 +62,10 @@ export interface UrlParameter {
 export class UploadService {
   private readonly log: Logger = this.loggingService.getLogger('UploadService');
 
-  constructor(private http: HttpClient, private loggingService: LoggingService) {}
+  constructor(
+    private http: HttpClient,
+    private loggingService: LoggingService
+  ) {}
 
   /**
    * Uploads the given files to the given URL and returns an observable result to track the upload status. For
@@ -68,10 +77,15 @@ export class UploadService {
    *  @param formDataParam the FormData's property name that holds the file
    *  @returns a map containing the upload status for each file
    */
-  public upload(url: string, files: File[], urlParameter: UrlParameter[][], formDataParam: string): Map<String, UploadStatus> {
-    const result: Map<String, UploadStatus> = new Map();
+  public upload(
+    url: string,
+    files: File[],
+    urlParameter: UrlParameter[][],
+    formDataParam: string
+  ): Map<string, UploadStatus> {
+    const result: Map<string, UploadStatus> = new Map();
 
-    for(let i in files) {
+    for (let i = 0; i < files.length; ++i) {
       const file = files[i];
       const params = urlParameter[i];
 
@@ -82,7 +96,7 @@ export class UploadService {
       uploadStatus.file = file;
       uploadStatus.progressObservable = progressSubject.asObservable();
       uploadStatus.stateObservable = stateSubject.asObservable();
-      uploadStatus.stateObservable.subscribe( state => {
+      uploadStatus.stateObservable.subscribe((state) => {
         uploadStatus.state = state;
       });
       uploadStatus.scope = this.uuidv4();
@@ -96,15 +110,20 @@ export class UploadService {
       // Suppress global error handling and enable progress reporting
       const options = {
         reportProgress: true,
-        headers: suppressGlobalErrorHandling(new HttpHeaders({ 'X-Proxy-Activity-Scope': uploadStatus.scope })),
+        headers: suppressGlobalErrorHandling(
+          new HttpHeaders({ 'X-Proxy-Activity-Scope': uploadStatus.scope })
+        ),
       };
 
       // create and set additional HttpParams
       if (params) {
         let httpParams = new HttpParams();
-        params.forEach(p => {
-          if(p.type === 'boolean') {
-            httpParams = httpParams.set(p.id, p.value === true ? 'true' : 'false');
+        params.forEach((p) => {
+          if (p.type === 'boolean') {
+            httpParams = httpParams.set(
+              p.id,
+              p.value === true ? 'true' : 'false'
+            );
           } else {
             httpParams = httpParams.set(p.id, p.value);
           }
@@ -115,13 +134,13 @@ export class UploadService {
       // create a http-post request and pass the form
       const req = new HttpRequest('POST', url, formData, options);
       this.http.request(req).subscribe(
-        event => {
+        (event) => {
           if (event.type === HttpEventType.UploadProgress) {
             const percentDone = Math.round((100 * event.loaded) / event.total);
             progressSubject.next(percentDone);
 
             // Notify that upload is done and that server-side processing begins
-            if(percentDone === 100) {
+            if (percentDone === 100) {
               progressSubject.complete();
               stateSubject.next(UploadState.PROCESSING);
             }
@@ -131,21 +150,24 @@ export class UploadService {
             stateSubject.complete();
           }
         },
-        error => {
-          uploadStatus.detail = error.statusText + ' (Status ' + error.status + ')';
+        (error) => {
+          uploadStatus.detail =
+            error.statusText + ' (Status ' + error.status + ')';
           stateSubject.next(UploadState.FAILED);
           progressSubject.complete();
           stateSubject.complete();
-        },
+        }
       );
-    };
+    }
     return result;
   }
 
   uuidv4() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (
+      c
+    ) {
       // tslint:disable-next-line:no-bitwise
-      const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+      const r = (Math.random() * 16) | 0, v = c === 'x' ? r : (r & 0x3) | 0x8;
       return v.toString(16);
     });
   }

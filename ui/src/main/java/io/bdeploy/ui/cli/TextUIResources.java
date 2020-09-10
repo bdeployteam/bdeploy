@@ -6,6 +6,9 @@ public class TextUIResources {
 
     public static final String UI_CATEGORY = "Remote server management commands";
 
+    private TextUIResources() {
+    }
+
     public static void registerTextUi(ToolBase tool) {
         tool.register(RemoteInstanceGroupTool.class);
         tool.register(RemoteInstanceTool.class);

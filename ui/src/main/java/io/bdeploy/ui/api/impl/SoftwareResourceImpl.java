@@ -141,7 +141,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
                 ObjectListOperation scan = new ObjectListOperation();
                 for (Key manifestKey : manifestKeys) {
                     // Ignore existing software
-                    if (hive.execute(new ManifestExistsOperation().setManifest(manifestKey))) {
+                    if (Boolean.TRUE.equals(hive.execute(new ManifestExistsOperation().setManifest(manifestKey)))) {
                         continue;
                     }
 
