@@ -115,6 +115,9 @@
         <button mat-menu-item [routerLink]="['/instance/edit', groupParam, uuidParam]" [disabled]="!authService.isScopedAdmin(groupParam) || !isEditable()">
           <mat-icon>edit</mat-icon>Edit Instance
         </button>
+        <button mat-menu-item (click)="onConfigureBanner()" [disabled]="!authService.isScopedWrite(groupParam)">
+          <mat-icon>speaker_notes</mat-icon>Configure Banner
+        </button>
         <button mat-menu-item (click)="importInstanceVersion()" [disabled]='!authService.isScopedWrite(groupParam) || isReadonly()'>
           <mat-icon>import_export</mat-icon>Import Instance Version
         </button>
@@ -147,6 +150,11 @@
   <!-- Nodes overview and sidebar -->
   <div class="drawer-container" *ngIf="!editMode">
     <div class="nodes-container">
+
+      <mat-toolbar *ngIf="hasBanner()" class="fixed-toolbar mat-elevation-z1 banner" [ngStyle]="getBannerStyles()">
+        <div>{{instanceBanner.text}}</div>
+      </mat-toolbar>
+
       <ng-template #emptyHint>
         <div class='center emptyHint' *ngIf='!loading && isProductAvailable(selectedConfig)'>
           <p class="headerText">No applications have been configured yet.</p>

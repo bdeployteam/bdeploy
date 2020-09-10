@@ -2,7 +2,7 @@ import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular
 import { Injectable } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { ClickAndStartDescriptor, ConfigFileDto, FileStatusDto, HistoryEntryVersionDto, HistoryResultDto, InstanceConfiguration, InstanceConfigurationDto, InstanceDirectory, InstanceDirectoryEntry, InstanceDto, InstanceManifestHistoryDto, InstanceNodeConfigurationListDto, InstancePurpose, InstanceStateRecord, InstanceVersionDto, ManifestKey, MinionDto, MinionStatusDto, StringEntryChunkDto } from '../../../models/gen.dtos';
+import { ClickAndStartDescriptor, ConfigFileDto, FileStatusDto, HistoryEntryVersionDto, HistoryResultDto, InstanceBannerRecord, InstanceConfiguration, InstanceConfigurationDto, InstanceDirectory, InstanceDirectoryEntry, InstanceDto, InstanceManifestHistoryDto, InstanceNodeConfigurationListDto, InstancePurpose, InstanceStateRecord, InstanceVersionDto, ManifestKey, MinionDto, MinionStatusDto, StringEntryChunkDto } from '../../../models/gen.dtos';
 import { ConfigService } from '../../core/services/config.service';
 import { ErrorMessage, Logger, LoggingService } from '../../core/services/logging.service';
 import { SystemService } from '../../core/services/system.service';
@@ -301,6 +301,18 @@ export class InstanceService {
   public getOpenPorts(instanceGroup: string, instance: string, minion: string, ports: number[]): Observable<{[key: number]: boolean}> {
     const url = this.buildInstanceUrl(instanceGroup, instance) + '/check-ports/' + minion;
     return this.http.post<{[key: number]: boolean}>(url, ports);
+  }
+
+  public getInstanceBanner(instanceGroupName: string, instanceName: string): Observable<InstanceBannerRecord> {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/banner';
+    this.log.debug('getInstanceBanner: ' + url);
+    return this.http.get<InstanceBannerRecord>(url);
+  }
+
+  public updateInstanceBanner(instanceGroupName: string, instanceName: string, instanceBanner: InstanceBannerRecord) {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/banner';
+    this.log.debug('updateInstanceBanner: ' + url);
+    return this.http.post(url, instanceBanner);
   }
 
   public buildGroupUrl(instanceGroupName: string): string {

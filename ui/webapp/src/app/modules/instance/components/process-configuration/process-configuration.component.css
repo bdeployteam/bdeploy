@@ -262,3 +262,10 @@
 .headerButton .mat-icon{
   margin:0 5px 2px 0;
 }
+
+.banner {
+  white-space: normal;
+  height: auto;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}

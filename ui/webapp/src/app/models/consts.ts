@@ -1,4 +1,4 @@
-import { ApplicationConfiguration, ApplicationStartType, CommandConfiguration, InstanceConfiguration, InstanceGroupConfiguration, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstancePurpose, InstanceStateRecord, InstanceVersionDto, ManifestKey, ParameterConfiguration, ParameterDescriptor, ParameterType, ProcessControlConfiguration, SoftwareRepositoryConfiguration, UserChangePasswordDto, UserInfo } from './gen.dtos';
+import { ApplicationConfiguration, ApplicationStartType, CommandConfiguration, InstanceBannerRecord, InstanceConfiguration, InstanceGroupConfiguration, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstancePurpose, InstanceStateRecord, InstanceVersionDto, ManifestKey, ParameterConfiguration, ParameterDescriptor, ParameterType, ProcessControlConfiguration, SoftwareRepositoryConfiguration, UserChangePasswordDto, UserInfo } from './gen.dtos';
 
 // HTTP header constant used to suppress global error handling
 export const NO_ERROR_HANDLING_HDR = 'X-No-Global-Error-Handling';
@@ -57,6 +57,12 @@ export const EMPTY_INSTANCE: InstanceConfiguration = {
   autoStart: false,
   product: EMPTY_MANIFEST_KEY,
   autoUninstall: null
+};
+
+export const EMPTY_INSTANCE_BANNER_RECORD: InstanceBannerRecord = {
+  foregroundColor: null,
+  backgroundColor: null,
+  text: null
 };
 
 export const EMPTY_INSTANCE_GROUP: InstanceGroupConfiguration = {

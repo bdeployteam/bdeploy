@@ -24,6 +24,7 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.InstanceDirectory;
 import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
+import io.bdeploy.interfaces.manifest.banner.InstanceBannerRecord;
 import io.bdeploy.interfaces.manifest.history.runtime.MasterRuntimeHistoryDto;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.WeakTokenAllowed;
@@ -272,5 +273,25 @@ public interface MasterNamedResource {
     @GET
     @Path("/runtimeHistory")
     public MasterRuntimeHistoryDto getRuntimeHistory(@QueryParam("u") String instanceId);
+
+    /**
+     * Returns the instance banner configuration.
+     *
+     * @param instanceId the unique id of the instance.
+     * @return the instance banner configuration.
+     */
+    @GET
+    @Path("/banner")
+    public InstanceBannerRecord getBanner(@QueryParam("u") String instanceId);
+
+    /**
+     * Updates the instance banner configuration.
+     *
+     * @param instanceId the unique id of the instance.
+     * @param instanceBannerRecord the new banner configuration
+     */
+    @POST
+    @Path("/banner")
+    public void updateBanner(@QueryParam("u") String instanceId, InstanceBannerRecord instanceBannerRecord);
 
 }

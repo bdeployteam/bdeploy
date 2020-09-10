@@ -139,6 +139,11 @@ Changing the *Product Version* can result in validation issues and automated adj
 
 image::images/BDeploy_Product_Downgrade_Validation.png[Validation Issues After Product Version Change,align=center,width=480,link="images/BDeploy_Product_Downgrade_Validation.png"]
 
+==== Banner Message
+
+A banner message can be created for an *Instance*, which is displayed very clearly at the top of the overview dialog. The foreground and background colors are freely definable, so that depending on the urgency or content of the message a suitable color, possibly a clear signal color, can be selected.
+Banner messages are maintained on instance level and are not versioned, i.e. they are independent of instance versions. Therefore they outlast configuration changes of an instance. 
+
 ==== Import/Export
 
 Instance versions can be exported and downloaded from the *Instance Version* card's context menu. This will download this specific instance version's raw data as a _ZIP_. This _ZIP_ will contain the complete instance configuration as well as all configuration files currently stored with the instance.

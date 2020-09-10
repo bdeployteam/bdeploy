@@ -40,6 +40,7 @@ import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
+import io.bdeploy.interfaces.manifest.banner.InstanceBanner;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory;
 import io.bdeploy.interfaces.manifest.state.InstanceState;
 
@@ -251,6 +252,14 @@ public class InstanceManifest {
      */
     public InstanceState getState(BHiveExecution bhive) {
         return new InstanceState(getManifest(), bhive);
+    }
+
+    /**
+     * @param bhive the {@link BHiveExecution} used to perform operations on the state.
+     * @return the {@link InstanceBanner} which can be use to set or remove the banner.
+     */
+    public InstanceBanner getBanner(BHiveExecution bhive) {
+        return new InstanceBanner(getManifest(), bhive);
     }
 
     public static class Builder {

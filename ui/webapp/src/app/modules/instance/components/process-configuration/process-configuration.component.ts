@@ -14,7 +14,7 @@ import { InstanceGroupService } from 'src/app/modules/instance-group/services/in
 import { ApplicationGroup } from '../../../../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_DEPLOYMENT_STATE } from '../../../../models/consts';
 import { EventWithCallback } from '../../../../models/event';
-import { ApplicationConfiguration, ApplicationDto, InstanceGroupConfiguration, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstanceStateRecord, InstanceUpdateEventDto, InstanceUpdateEventType, ManifestKey, MinionDto, MinionMode, MinionStatusDto, MinionUpdateDto, ProductDto } from '../../../../models/gen.dtos';
+import { ApplicationConfiguration, ApplicationDto, InstanceBannerRecord, InstanceGroupConfiguration, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstanceStateRecord, InstanceUpdateEventDto, InstanceUpdateEventType, ManifestKey, MinionDto, MinionMode, MinionStatusDto, MinionUpdateDto, ProductDto } from '../../../../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../../../../models/process.model';
 import { ConfigService } from '../../../core/services/config.service';
 import { HeaderTitleService } from '../../../core/services/header-title.service';
@@ -33,6 +33,7 @@ import { compareTags, sortByTags } from '../../../shared/utils/manifest.utils';
 import { ApplicationService } from '../../services/application.service';
 import { InstanceService } from '../../services/instance.service';
 import { ProcessService } from '../../services/process.service';
+import { InstanceBannerEditComponent } from '../instance-banner-edit/instance-banner-edit.component';
 import { InstanceNotification, Severity } from '../instance-notifications/instance-notifications.component';
 import { InstanceSyncComponent } from '../instance-sync/instance-sync.component';
 import { InstanceTemplateComponent } from '../instance-template/instance-template.component';
@@ -87,6 +88,8 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   public groupParam: string;
   public uuidParam: string;
   public pageTitle: string;
+
+  public instanceBanner: InstanceBannerRecord;
 
   public selectedConfig: ProcessConfigDto;
   public processConfigs: ProcessConfigDto[] = [];
@@ -179,6 +182,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
         this.groupParam = p['group'];
         this.uuidParam = p['uuid'];
         this.instanceGroupService.getInstanceGroup(this.groupParam).subscribe(r => this.instanceGroup = r);
+        this.instanceService.getInstanceBanner(this.groupParam, this.uuidParam).subscribe(r => this.instanceBanner = r);
         this.loadVersions(false);
         if (!this.isCentral()) {
           this.enableAutoRefresh();
@@ -1376,6 +1380,36 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   onApplyTemplateFinished() {
     this.applyingTemplate = false;
     this.updateDirtyStateAndValidate();
+  }
+
+  hasBanner(): boolean {
+    return this.instanceBanner && this.instanceBanner.text != null;
+  }
+
+  onConfigureBanner() {
+    this.instanceService.getInstanceBanner(this.groupParam, this.uuidParam).subscribe(banner => {
+      this.instanceBanner = banner;
+      this.dialog.open(InstanceBannerEditComponent, {
+        width: '600px',
+        data: {
+          instanceBanner: this.instanceBanner
+        },
+      }).afterClosed().subscribe(r => {
+        if (r) {
+          this.instanceService.updateInstanceBanner(this.groupParam, this.uuidParam, r).subscribe(_ => {
+              this.instanceBanner = r;
+            }
+          );
+        }
+      });
+    });
+  }
+
+  getBannerStyles() {
+    return {
+      'color': this.instanceBanner.foregroundColor,
+      'background-color': this.instanceBanner.backgroundColor
+    };
   }
 
 }

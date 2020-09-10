@@ -85,6 +85,7 @@ import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
+import io.bdeploy.interfaces.manifest.banner.InstanceBannerRecord;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory;
 import io.bdeploy.interfaces.manifest.managed.ControllingMaster;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
@@ -940,6 +941,30 @@ public class InstanceResourceImpl implements InstanceResource {
         RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
         MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
         return root.getNamedMaster(group).getPortStates(minion, ports);
+    }
+
+    @Override
+    public InstanceBannerRecord getBanner(String instanceId) {
+        InstanceManifest im = readInstance(instanceId);
+        if (im == null) {
+            throw new WebApplicationException("Cannot load " + instanceId, Status.NOT_FOUND);
+        }
+
+        RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
+        MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
+        return root.getNamedMaster(group).getBanner(instanceId);
+    }
+
+    @Override
+    public void updateBanner(String instanceId, InstanceBannerRecord instanceBannerRecord) {
+        InstanceManifest im = readInstance(instanceId);
+        if (im == null) {
+            throw new WebApplicationException("Cannot load " + instanceId, Status.NOT_FOUND);
+        }
+
+        RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
+        MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
+        root.getNamedMaster(group).updateBanner(instanceId, instanceBannerRecord);
     }
 
     @Override

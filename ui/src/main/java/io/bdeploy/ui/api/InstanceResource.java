@@ -27,6 +27,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.directory.InstanceDirectory;
 import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
+import io.bdeploy.interfaces.manifest.banner.InstanceBannerRecord;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
@@ -200,6 +201,15 @@ public interface InstanceResource {
     @Path("/{instance}/check-ports/{minion}")
     public Map<Integer, Boolean> getPortStates(@ActivityScope @PathParam("instance") String instanceId,
             @PathParam("minion") String minion, List<Integer> ports);
+
+    @GET
+    @Path("/{instance}/banner")
+    public InstanceBannerRecord getBanner(@PathParam("instance") String instanceId);
+
+    @POST
+    @Path("/{instance}/banner")
+    @RequiredPermission(permission = Permission.WRITE)
+    public void updateBanner(@PathParam("instance") String instanceId, InstanceBannerRecord instanceBannerRecord);
 
     @GET
     @Path("/{instance}/history")

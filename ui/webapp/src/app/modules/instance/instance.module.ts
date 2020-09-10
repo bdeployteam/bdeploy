@@ -17,6 +17,7 @@ import { ClientInfoComponent } from './components/client-info/client-info.compon
 import { CustomEditorComponent } from './components/custom-editor/custom-editor.component';
 import { DataFilesBrowserComponent } from './components/data-files-browser/data-files-browser.component';
 import { InstanceAddEditComponent } from './components/instance-add-edit/instance-add-edit.component';
+import { InstanceBannerEditComponent } from './components/instance-banner-edit/instance-banner-edit.component';
 import { InstanceBrowserComponent } from './components/instance-browser/instance-browser.component';
 import { InstanceCardComponent } from './components/instance-card/instance-card.component';
 import { InstanceEditPortsComponent } from './components/instance-edit-ports/instance-edit-ports.component';
@@ -83,6 +84,7 @@ import { InstanceRoutingModule } from './instance-routing.module';
     InstanceHistoryTimelineCardComponent,
     InstanceHistoryCompareComponent,
     InstanceHistoryTimelineContentComponent,
+    InstanceBannerEditComponent,
   ],
   entryComponents: [
     ApplicationEditManualComponent,
@@ -90,6 +92,7 @@ import { InstanceRoutingModule } from './instance-routing.module';
     ApplicationEditCommandPreviewComponent,
     ProcessListComponent,
     ProcessStartConfirmComponent,
+    InstanceBannerEditComponent,
   ],
   imports: [
     CommonModule,
