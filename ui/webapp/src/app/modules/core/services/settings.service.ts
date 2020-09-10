@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { cloneDeep, isEqual } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash-es';
 import { SettingsConfiguration } from 'src/app/models/gen.dtos';
 import { ConfigService } from './config.service';
 

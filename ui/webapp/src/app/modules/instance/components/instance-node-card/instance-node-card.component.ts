@@ -3,7 +3,7 @@ import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, 
 import { MatBottomSheet, MatBottomSheetRef } from '@angular/material/bottom-sheet';
 import { MatDialog } from '@angular/material/dialog';
 import { format } from 'date-fns';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash-es';
 import { DragulaService } from 'ng2-dragula';
 import { Subscription } from 'rxjs';
 import { StatusMessage } from 'src/app/models/config.model';

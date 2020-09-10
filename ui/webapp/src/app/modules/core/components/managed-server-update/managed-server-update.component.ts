@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { isEqual } from 'lodash';
+import { isEqual } from 'lodash-es';
 import { tap } from 'rxjs/operators';
 import { ManagedServersService } from 'src/app/modules/servers/services/managed-servers.service';
 import { retryWithDelay } from 'src/app/modules/shared/utils/server.utils';

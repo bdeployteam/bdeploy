@@ -1,7 +1,7 @@
 import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { isEqual } from 'lodash';
+import { isEqual } from 'lodash-es';
 import { DragulaService } from 'ng2-dragula';
 import { forkJoin, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';

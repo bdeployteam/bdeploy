@@ -1,7 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash-es';
 import { EMPTY_USER_INFO } from 'src/app/models/consts';
 import { UserInfo } from 'src/app/models/gen.dtos';
 import { UserValidators } from 'src/app/modules/shared/validators/user.validator';

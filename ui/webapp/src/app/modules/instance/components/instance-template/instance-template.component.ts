@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 import { MatButtonToggleChange } from '@angular/material/button-toggle';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash-es';
 import { ApplicationGroup } from 'src/app/models/application.model';
 import { StatusMessage } from 'src/app/models/config.model';
 import { CLIENT_NODE_NAME, EMPTY_INSTANCE_NODE_CONFIGURATION } from 'src/app/models/consts';

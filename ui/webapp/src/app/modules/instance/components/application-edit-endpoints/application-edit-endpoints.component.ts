@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { cloneDeep, isEqual } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash-es';
 import { Observable, of } from 'rxjs';
 import { ApplicationConfiguration, ApplicationDescriptor, HttpAuthenticationType } from 'src/app/models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from 'src/app/models/process.model';

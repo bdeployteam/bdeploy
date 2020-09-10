@@ -1,4 +1,4 @@
-import { isEqual, isObject, transform } from 'lodash';
+import { isEqual, isObject, transform } from 'lodash-es';
 import { Subscription } from 'rxjs';
 
 /**

@@ -30,6 +30,7 @@
     "core-js": "^3.6.5",
     "date-fns": "^2.16.1",
     "js-base64": "^3.4.5",
+    "lodash-es": "^4.17.15",
     "ng-terminal": "^3.0.0-alpha",
     "ng2-ace-editor": "^0.3.9",
     "ng2-dragula": "^2.1.1",

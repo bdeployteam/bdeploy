@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { cloneDeep, intersection, isEqual } from 'lodash';
+import { cloneDeep, intersection, isEqual } from 'lodash-es';
 import { Observable } from 'rxjs';
 import { StatusMessage } from 'src/app/models/config.model';
 import { UnknownParameter } from '../../../models/application.model';

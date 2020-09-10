@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { isEqual } from 'lodash';
+import { isEqual } from 'lodash-es';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import { ActivitySnapshot, WebSocketInitDto } from '../../../models/gen.dtos';
 import { AuthenticationService } from '../../core/services/authentication.service';

@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { format } from 'date-fns';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash-es';
 import { catchError } from 'rxjs/operators';
 import { isUpdateFailed, isUpdateInProgress, isUpdateSuccess, UpdateStatus } from 'src/app/models/update.model';
 import { convert2String } from 'src/app/modules/shared/utils/version.utils';

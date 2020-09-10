@@ -1,7 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash-es';
 import { ManagedMasterDto } from 'src/app/models/gen.dtos';
 import { ServerValidators } from 'src/app/modules/shared/validators/server.validator';
 

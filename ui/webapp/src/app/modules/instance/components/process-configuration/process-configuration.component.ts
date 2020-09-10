@@ -3,7 +3,7 @@ import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/c
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { cloneDeep, isEqual } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash-es';
 import { DragulaService } from 'ng2-dragula';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import { forkJoin, Observable, of, Subscription } from 'rxjs';

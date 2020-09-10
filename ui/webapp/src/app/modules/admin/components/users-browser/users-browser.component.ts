@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash-es';
 import { catchError, finalize } from 'rxjs/operators';
 import { LDAPSettingsDto, Permission, UserInfo } from 'src/app/models/gen.dtos';
 import { UserEditComponent } from 'src/app/modules/core/components/user-edit/user-edit.component';

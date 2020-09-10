@@ -33,13 +33,9 @@
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
             "allowedCommonJsDependencies": [
-              "lodash",
-              "js-base64",
               "brace/mode/xml",
               "brace/mode/json",
-              "dragula",
-              "contra/emitter",
-              "crossvent"
+              "dragula"
             ],
             "aot": true,
             "outputPath": "dist/webapp",

@@ -1,7 +1,7 @@
 import { Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatTable } from '@angular/material/table';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash-es';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import { forkJoin } from 'rxjs';
 import { ManifestKey } from '../../../../models/gen.dtos';

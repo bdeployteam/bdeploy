@@ -13,7 +13,7 @@ import 'brace/mode/yaml';
 import 'brace/theme/eclipse';
 import 'brace/theme/twilight';
 import { Base64 } from 'js-base64';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash-es';
 import { Observable, of, Subscription } from 'rxjs';
 import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { FileStatusDto, FileStatusType, InstanceConfiguration } from '../../../../models/gen.dtos';

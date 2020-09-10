@@ -2,7 +2,7 @@ import { Component, OnInit, TemplateRef } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash-es';
 import { UserInfo } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from '../../services/authentication.service';
 import { Logger, LoggingService } from '../../services/logging.service';
