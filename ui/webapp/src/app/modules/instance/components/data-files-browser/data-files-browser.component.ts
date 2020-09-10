@@ -31,6 +31,8 @@ export class DataFilesBrowserComponent implements OnInit {
   uuidParam: string = this.route.snapshot.paramMap.get('uuid');
   versionParam: string = this.route.snapshot.paramMap.get('version');
 
+  pageSize = this.INITIAL_PAGE_SIZE;
+
   @ViewChild(MatTable)
   table: MatTable<InstanceDirectoryEntry>;
 
