@@ -337,9 +337,21 @@ void setupBinServerTasks(String version) {
         }
     }
 
+    if(!(key.startsWith('1') || key.startsWith('2') || key.startsWith('3_0'))) {
+        task "binCreateTestInstance_${key}" (type: Exec, dependsOn: "binImportProd2_${key}") {
+            setupTask(it)
+            args = [ "remote-instance", "--create=TestInstance", "--description=XX", "--uuid=aaa-bbb-ccc", "--purpose=TEST", "--product=io.bdeploy/demo/product", "--productVersion=2.0.0" ]
+        }
+    }
+
     task "binImportTestData_${key}" (type: Exec, dependsOn: "binImportProd2_${key}") {
         setupTask(it)
-        args = [ "instance", "--importFrom=${projectDir}/bin-test-data/${version}.zip", "--hive=${buildDir}/bin-root_${key}/storage/Test" ]
+        if(key.startsWith('1') || key.startsWith('2') || key.startsWith('3_0')) {
+            args = [ "instance", "--importFrom=${projectDir}/bin-test-data/${version}.zip", "--hive=${buildDir}/bin-root_${key}/storage/Test" ]
+        } else {
+            dependsOn "binCreateTestInstance_${key}"
+            args = [ "remote-instance", "--importFrom=${projectDir}/bin-test-data/${version}.zip", "--uuid=aaa-bbb-ccc" ]
+        }
     }
 
     task "binSetupDemoServer_${key}"() {
@@ -430,6 +442,9 @@ void setupBinServerTasks(String version) {
     tasks["binUnzipProd2_${key}"].mustRunAfter("binDownloadProd2_${key}")
     tasks["binImportProd1_${key}"].mustRunAfter("binUnzipProd1_${key}")
     tasks["binImportProd2_${key}"].mustRunAfter("binUnzipProd2_${key}")
+    if(!(key.startsWith('1') || key.startsWith('2') || key.startsWith('3_0'))) {
+        tasks["binCreateTestInstance_${key}"].mustRunAfter("binUnzipProd2_${key}")
+    }
     tasks["binImportTestData_${key}"].mustRunAfter("binImportProd2_${key}")
     tasks["binSetupDemoServer_${key}"].mustRunAfter("binImportProd2_${key}")
     tasks["binMigrateToCurrent_${key}"].mustRunAfter("binSetupDemoServer_${key}")

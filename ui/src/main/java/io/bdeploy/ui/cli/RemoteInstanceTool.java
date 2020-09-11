@@ -208,7 +208,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         }
 
         InstanceConfiguration cfg = new InstanceConfiguration();
-        cfg.uuid = UuidHelper.randomId();
+        cfg.uuid = config.uuid() == null ? UuidHelper.randomId() : config.uuid();
         cfg.autoUninstall = true;
         cfg.autoStart = false;
         cfg.description = config.description();
