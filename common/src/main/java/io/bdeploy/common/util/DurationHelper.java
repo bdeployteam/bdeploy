@@ -1,16 +1,17 @@
 package io.bdeploy.common.util;
 
-import java.time.Duration;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class DurationHelper {
+
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("mm 'min' ss 'sec' SSS 'ms'");
 
     private DurationHelper() {
     }
 
     public static String formatDuration(long timeInMillis) {
-        Duration duration = Duration.ofMillis(timeInMillis);
-        return String.format("%02d min %02d sec %02d ms", duration.toMinutes() / 60, duration.toMillis() / 60_000,
-                duration.toNanos() / 1000_000);
+        return SDF.format(new Date(timeInMillis));
     }
 
 }
