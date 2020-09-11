@@ -246,7 +246,9 @@ The fixed flag will cause the parameter to *always* use the defined default valu
 |`type`
 |`STRING`
 |no
-|Type of parameter. This defines the type of input field used to edit the parameter. Available are `STRING`, `NUMERIC`, `BOOLEAN`, `PASSWORD`.
+a|Type of parameter. This defines the type of input field used to edit the parameter. Available are `STRING`, `NUMERIC`, `BOOLEAN`, `PASSWORD`, `CLIENT_PORT`, `SERVER_PORT`
+
+The `CLIENT_PORT` and `SERVER_PORT` types are treated like `NUMERIC` parameters throughout the whole application, with the exception of the dialogs that deal with ports specifically.
 
 |`condition`
 |

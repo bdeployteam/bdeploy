@@ -196,3 +196,11 @@ image::images/BDeploy_Instance_Template_Dialog_Variables.png[Instance Template D
 Clicking btn:[Next] and then btn:[Close] once the template has been applied will create the processes defined in the template. The configuration will *not* be saved automatically, to allow further tuning of the configuration before doing so.
 
 image::images/BDeploy_Instance_Template_Processes.png[Instance Template Dialog Variables,align=center,width=480,link="images/BDeploy_Instance_Template_Processes.png"]
+
+==== Configure Ports
+
+The *Configure Ports* page can be reached from the *Instance* context menu. This page provides a concise overview of all ports (`CLIENT_PORT` and `SERVER_PORT` parameters) used in the *Instance*.
+
+You can edit port assignments directly from this dialog. The *Shift Ports* action allows to bulk edit port parameters and shift them upwards or downwards by a given offset.
+
+The *Export CSV* action allows to export a CSV list of all ports configured in the system. This can be used to pass on information to external partners, for instance for further firewall configuration, etc.

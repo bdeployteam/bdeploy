@@ -93,6 +93,14 @@ Clicking on the terminal icon displayed below the process control actions will o
 
 image::images/BDeploy_Process_Output.png[Show and Follow Process Output,align=center,width=480,link="images/BDeploy_Process_Output.png"]
 
+==== Server Ports
+
+The applications server ports (if any are defined) and their state on the target minion can be viewed by clicking on the plug icon below the process controls. Each parameter of type `SERVER_PORT` is displayed here, with its description and configured value. The state is either a warning icon (port not open) or a green check ico (port is open). "Open" just means that the port is used on the target system currently. *BDeploy* cannot check whether the port was opened by the correct application.
+
+===== Server Ports per Node
+
+The same list of `SERVER_PORT` parameters can be found on a node as well. This will allow to view all port states for all applications configured to that node.
+
 ==== Process listing
 
 Clicking on the gear icon below the process control will open a popup showing all operating system processes that have been started by this *Process*. 
