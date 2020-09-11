@@ -7,7 +7,7 @@
     <app-user-avatar *ngIf="this.entry.user!=null" [avatarSize]="20" [hostSize]="20" [mail]="this.entry.email != ''?this.entry.email:null"></app-user-avatar>
     <span *ngIf="this.entry.user!=null else userNotRecorded ">{{this.entry.user}}</span>
     <ng-template #userNotRecorded><em class="not-recorded">No recorded user</em></ng-template>
-    <button *ngIf="entry.type==entryType.CREATE" mat-icon-button matTooltip="compare Versions" matTooltipShowDelay="500" (click)="addToComparisonClick()"><mat-icon>compare_arrows</mat-icon></button>
+    <button *ngIf="entry.type==entryType.CREATE" mat-icon-button matTooltip="Compare Versions" matTooltipShowDelay="500" (click)="addToComparisonClick()"><mat-icon>compare_arrows</mat-icon></button>
   </div>
   <div *ngIf="entry.type==entryType.RUNTIME" class="content-runtime-info">
     <p *ngIf="entry.runtimeEvent.pid >0"> PID <em>{{entry.runtimeEvent.pid}}</em> </p>

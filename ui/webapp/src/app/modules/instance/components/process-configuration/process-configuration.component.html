@@ -128,7 +128,7 @@
           <mat-icon>folder</mat-icon>Data Files
         </button>
         <button mat-menu-item [routerLink]="['/instance/history',groupParam,uuidParam]">
-          <mat-icon>history</mat-icon>Instance history
+          <mat-icon>history</mat-icon>Instance History
         </button>
         <mat-divider></mat-divider>
         <button mat-menu-item (click)="setSidenavApplications()" [disabled]="!authService.isScopedWrite(groupParam) || isSidenavApplications() || !isEditable() || !isProductAvailable(selectedConfig)">
@@ -161,7 +161,7 @@
           <div *ngIf='!isReadonly()'>
             You can start from scratch and
             <button class="headerButton" mat-raised-button (click)="setSidenavApplications(); $event.preventDefault();">
-              <mat-icon>layers</mat-icon> configure Applications</button>
+              <mat-icon>layers</mat-icon> Configure Applications</button>
           </div>
           <p *ngIf='!isReadonly() && getProductOfInstance(selectedConfig)?.instanceTemplates?.length'>
             <app-instance-template #instanceTemplate

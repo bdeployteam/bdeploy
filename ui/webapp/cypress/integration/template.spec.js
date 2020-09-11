@@ -71,7 +71,7 @@ describe('Instance Tests', function () {
     });
 
     cy.get('app-instance-group-logo').parent().find('button').contains('more_vert').click();
-    cy.get('button').contains('Configure Applications').click();
+    cy.get('button[role=menuitem]').contains('Configure Applications').click();
 
     cy.contains('app-application-descriptor-card', 'Server Application').within(_ => {
       cy.contains('mat-select', 'Choose Application Template').click();

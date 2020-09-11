@@ -163,7 +163,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.screenshot('BDeploy_Instance_Menu');
 
     // Configure Applications
-    cy.get('button').contains('Configure Applications').click();
+    cy.get('button[role=menuitem]').contains('Configure Applications').click();
     cy.getNodeCard('master').contains('Drop server application here').should('be.visible').then(el => {
       cy.contains('app-application-descriptor-card', 'Server Application').dragTo(el);
     })
@@ -175,23 +175,23 @@ describe('Creates screenshots for the user documentation', () => {
     cy.wait(250);
     cy.screenshot('BDeploy_DnD_Applications');
 
-    cy.get('button').contains('Endpoints').click();
+    cy.get('button[role=menuitem]').contains('Endpoints').click();
     cy.waitUntilContentLoaded();
     cy.screenshot('BDeploy_Endpoints_Config');
     cy.get('button').contains('CANCEL').click();
     cy.waitUntilContentLoaded();
 
     cy.getApplicationConfigCard('master', 'Server Application').contains('more_vert').click();
-    cy.contains('button', 'Copy').click();
+    cy.contains('button[role=menuitem]', 'Copy').click();
     cy.getNodeCard('master').contains('mat-card-header', 'master').contains('button', 'more_vert').click();
     cy.wait(250);
     cy.screenshot('BDeploy_Paste_Application');
-    cy.contains('button', 'Paste').type('{esc}');
+    cy.contains('button[role=menuitem]', 'Paste').type('{esc}');
 
     cy.getApplicationConfigCard('master', 'Server Application').contains('more_vert').click();
 
     // Process Configuration
-    cy.get('button').contains('Configure').click();
+    cy.get('button[role=menuitem]').contains('Configure').click();
     cy.waitUntilContentLoaded();
     cy.screenshot('BDeploy_Process_Config');
 

@@ -200,7 +200,6 @@ describe('Instance Tests', function () {
     cy.contains("button","Deployment").click();
     cy.contains("button","filter_list_alt").click({force:true});
     cy.waitUntilContentLoaded();
-    cy.get(".timeline_item").should("have.length","8");
 
     // and check them
     cy.contains("mat-expansion-panel","Server Application started").click()
