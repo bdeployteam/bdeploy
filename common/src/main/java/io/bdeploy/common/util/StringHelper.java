@@ -1,8 +1,5 @@
 package io.bdeploy.common.util;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-
 /**
  * Helper for {@link java.lang.String}
  */
@@ -54,7 +51,8 @@ public class StringHelper {
      * If this string is empty or count is zero then the empty
      * string is returned.
      * <p>
-     * NOTE: Borrowed from the Java 11 implementation in {@link String}.
+     * This is less efficient than the Java 11 implementation as we
+     * cannot reuse the original Strings encoding to fill arrays.
      *
      * @param count number of times to repeat
      * @return A string composed of this string repeated
@@ -75,24 +73,18 @@ public class StringHelper {
         if (len == 0 || count == 0) {
             return "";
         }
-        if (len == 1) {
-            final byte[] single = new byte[count];
-            Arrays.fill(single, value[0]);
-            return new String(single, StandardCharsets.UTF_8);
-        }
         if (Integer.MAX_VALUE / count < len) {
             throw new OutOfMemoryError(
                     "Repeating " + len + " bytes String " + count + " times will produce a String exceeding maximum size.");
         }
-        final int limit = len * count;
-        final byte[] multiple = new byte[limit];
-        System.arraycopy(value, 0, multiple, 0, len);
-        int copied = len;
-        for (; copied < limit - copied; copied <<= 1) {
-            System.arraycopy(multiple, 0, multiple, copied, copied);
+
+        StringBuilder builder = new StringBuilder(string.length() * count);
+
+        while (count-- > 0) {
+            builder.append(string);
         }
-        System.arraycopy(multiple, 0, multiple, copied, limit - copied);
-        return new String(multiple, StandardCharsets.UTF_8);
+
+        return builder.toString();
     }
 
 }
