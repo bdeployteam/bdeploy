@@ -1,4 +1,6 @@
 <form [formGroup]="formGroup" autocomplete="off">
+  <input autocomplete="false" name="hidden" type="text" style="display:none;">
+  <input type="password" style="display:none;" readonly>
   <div class="title title-theme">
     <div class="title-header">Endpoint Settings</div>
     <div class="title-hint info-theme">Configure access to {{appConfigContext.applicationConfiguration.name}} endpoints via BDeploy.</div>
@@ -53,7 +55,7 @@
                 <mat-error *ngIf="!isCtrlValid(ep.id + '_user')">{{getCtrlErrorMessage(ep.id + '_user')}}</mat-error>
               </mat-form-field>
               <mat-form-field>
-                <input matInput [name]="ep.id + '_pass'" placeholder="Password" [formControlName]="ep.id + '_pass'" type="password"/>
+                <input matInput [name]="ep.id + '_pass'" placeholder="Password" [formControlName]="ep.id + '_pass'" type="password" autocomplete="new-password"/>
                 <mat-error *ngIf="!isCtrlValid(ep.id + '_pass')">{{getCtrlErrorMessage(ep.id + '_pass')}}</mat-error>
               </mat-form-field>
             </mat-grid-tile>
@@ -75,7 +77,7 @@
                 <mat-error *ngIf="!isCtrlValid(ep.id + '_trustStore')">{{getCtrlErrorMessage(ep.id + '_trustStore')}}</mat-error>
               </mat-form-field>
               <mat-form-field>
-                <input matInput [name]="ep.id + '_trustStorePass'" placeholder="Trust Store Password" [formControlName]="ep.id + '_trustStorePass'" type="password"/>
+                <input matInput [name]="ep.id + '_trustStorePass'" placeholder="Trust Store Password" [formControlName]="ep.id + '_trustStorePass'" type="password" autocomplete="new-password"/>
                 <mat-error *ngIf="!isCtrlValid(ep.id + '_trustStorePass')">{{getCtrlErrorMessage(ep.id + '_trustStorePass')}}</mat-error>
               </mat-form-field>
             </mat-grid-tile>

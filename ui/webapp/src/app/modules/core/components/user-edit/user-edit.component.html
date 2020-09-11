@@ -16,11 +16,11 @@
     </mat-form-field>
     <div class='flex-horiz' *ngIf="isCreate" formGroupName="passwords">
         <mat-form-field>
-          <input matInput type='password' formControlName="password" placeholder="New Password">
+          <input matInput type='password' autocomplete="new-password" formControlName="password" placeholder="New Password">
           <mat-error>{{getErrorMessage(passwordControl)}}</mat-error>
         </mat-form-field>
         <mat-form-field>
-          <input matInput type='password' formControlName="passwordRepeat" placeholder="Confirm New Password">
+          <input matInput type='password' autocomplete="new-password" formControlName="passwordRepeat" placeholder="Confirm New Password">
           <mat-error>{{getErrorMessage(passwordRepeatControl)}}</mat-error>
         </mat-form-field>
     </div>
