@@ -5,7 +5,7 @@
     <mat-form-field><input matInput type='text' name='desc' required [(ngModel)]='server.description' placeholder="Description"></mat-form-field>
     <div class='flex-horiz'>
       <mat-form-field><input matInput type='text' name='user' required [(ngModel)]='server.user' placeholder="Server User" matTooltip="User used to bind to the server for user lookup"></mat-form-field>
-      <mat-form-field><input matInput type='password' name='pass' [(ngModel)]='server.pass' placeholder="Server Password"></mat-form-field>
+      <mat-form-field><input matInput type='password' autocomplete="new-password" name='pass' [(ngModel)]='server.pass' placeholder="Server Password"></mat-form-field>
     </div>
     <mat-form-field><input matInput type='text' name='base' required [(ngModel)]='server.accountBase' placeholder="Account Base" matTooltip="The base to search in, e.g. 'dc=mycompany,dc=com'"></mat-form-field>
     <mat-form-field><input matInput type='text' name='pattern' required [(ngModel)]='server.accountPattern' placeholder="Account Pattern" matTooltip="Additional filters to apply when looking up accounts, e.g. '(objectCategory=person)(homeMDB=*)'"></mat-form-field>
