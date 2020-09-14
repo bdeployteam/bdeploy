@@ -12,7 +12,7 @@ export class LauncherService {
   public loading = true;
 
   /** Latest launchers from backend */
-  public launcherDto: LauncherDto;
+  public launcherDto: LauncherDto = { launchers: {} };
 
   /**
    * Loads the latest available launchers
