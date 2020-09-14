@@ -4,6 +4,7 @@
 @import 'app-externals.scss';
 @import 'dragular.scss';
 @import 'app-ngx-charts-dark.scss';
+@import 'app-scrollbars.scss';
 
 @import 'app/modules/core/components/main-nav/main-nav-theme.scss';
 @import 'app/modules/core/components/logo/logo-theme.scss';
@@ -91,6 +92,10 @@
   $dark: map-get($theme, 'is-dark');
   a{
     color: if($dark, mat-color($mat-blue, 300), mat-color($mat-blue, 800));
+  }
+
+  * {
+    @include scrollbars(mat-color(map-get($theme, 'primary')), if($dark,#555555, #cccccc));
   }
 }
 
