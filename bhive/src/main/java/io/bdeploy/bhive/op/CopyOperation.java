@@ -45,6 +45,7 @@ public class CopyOperation extends BHive.Operation<TransferStatistics> {
 
         assertNotNull(destinationHive, "Destination Hive not set");
 
+        String markerUuid = null;
         try (Activity activity = getActivityReporter().start("Copying objects...")) {
             if (objects.isEmpty() && manifests.isEmpty()) {
                 // copy all from the local hive; don't check which are reachable from manifests,
@@ -57,7 +58,7 @@ public class CopyOperation extends BHive.Operation<TransferStatistics> {
             result.sumMissingObjects = objects.size();
 
             // Create markers in the destination hive
-            String markerUuid = destinationHive.execute(new CreateObjectMarkersOperation().setObjectIds(objects));
+            markerUuid = destinationHive.execute(new CreateObjectMarkersOperation().setObjectIds(objects));
 
             // Scan for referenced manifests. Referenced manifests are found transitively.
             SortedSet<Manifest.Key> additional = new TreeSet<>();
@@ -86,9 +87,10 @@ public class CopyOperation extends BHive.Operation<TransferStatistics> {
                     destinationHive.execute(destinationCheck);
                 }
             }
-
-            destinationHive.execute(new ClearObjectMarkersOperation().setMarkersUuuid(markerUuid));
         } finally {
+            if (markerUuid != null) {
+                destinationHive.execute(new ClearObjectMarkersOperation().setMarkersUuuid(markerUuid));
+            }
             result.duration = Duration.between(start, Instant.now()).toMillis();
         }
 

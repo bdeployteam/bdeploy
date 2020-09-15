@@ -37,6 +37,7 @@ public class ObjectReadOperation extends BHive.Operation<TransferStatistics> {
         TransferStatistics result = new TransferStatistics();
         Instant start = Instant.now();
         RuntimeAssert.assertNotNull(input);
+        String markerUuid = null;
         try (CountingInputStream countingIn = new CountingInputStream(input);
                 GZIPInputStream zipIn = new GZIPInputStream(countingIn);
                 DataInputStream dataIn = new DataInputStream(zipIn)) {
@@ -55,7 +56,7 @@ public class ObjectReadOperation extends BHive.Operation<TransferStatistics> {
                 }
 
                 // Lock during streaming of objects
-                String markerUuid = UuidHelper.randomId();
+                markerUuid = UuidHelper.randomId();
                 MarkerDatabase.waitRootLock(getMarkerRoot());
                 MarkerDatabase mdb = new MarkerDatabase(getMarkerRoot().resolve(markerUuid), getActivityReporter());
 
@@ -77,14 +78,14 @@ public class ObjectReadOperation extends BHive.Operation<TransferStatistics> {
                         result.sumManifests++;
                     }
                 });
-
-                // Release lock as all objects have been inserted
-                MarkerDatabase.waitRootLock(getMarkerRoot());
-                PathHelper.deleteRecursive(getMarkerRoot().resolve(markerUuid));
-
                 result.transferSize = countingIn.getCount();
             }
         } finally {
+            // In any case release all locks, so even if things went wrong, a FSCK and prune can fix the hive.
+            if (markerUuid != null) {
+                MarkerDatabase.waitRootLock(getMarkerRoot());
+                PathHelper.deleteRecursive(getMarkerRoot().resolve(markerUuid));
+            }
             StreamHelper.close(input);
             result.duration = Duration.between(start, Instant.now()).toMillis();
         }
