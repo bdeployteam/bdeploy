@@ -156,7 +156,7 @@ public class BDeployProductTaskChain implements TaskChain {
         ActivityReporter.Stream reporter = new ActivityReporter.Stream(log.info());
         try (BHive local = new BHive(hive.toURI(), reporter)) {
             BDeployProductDescriptor desc = readProductDescriptor();
-            String fullVersion = BDeployBuildProductTask.calculateVersion(bvs, desc.productTag);
+            String fullVersion = BDeployBuildProductTask.calculateVersion(bvs, cfg, desc.productTag);
 
             Path pdi = bdeployProductFile.getParent().resolve(desc.productInfoYaml);
             String prodId;

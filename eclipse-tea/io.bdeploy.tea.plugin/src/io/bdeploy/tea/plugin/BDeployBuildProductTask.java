@@ -45,6 +45,7 @@ import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
+import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.tea.plugin.server.BDeployTargetSpec;
 import io.bdeploy.tea.plugin.services.BDeployApplicationBuild;
 
@@ -83,7 +84,7 @@ public class BDeployBuildProductTask {
             log.info("Using existing " + target);
         }
 
-        String fullVersion = calculateVersion(bvs, desc.productTag);
+        String fullVersion = calculateVersion(bvs, cfg, desc.productTag);
 
         ActivityReporter.Stream reporter = new ActivityReporter.Stream(log.info());
         try (BHive bhive = new BHive(target.toURI(), reporter)) {
@@ -237,7 +238,7 @@ public class BDeployBuildProductTask {
         return mapping.getRepository();
     }
 
-    static String calculateVersion(TeaBuildVersionService bvs, String tag) {
+    static String calculateVersion(TeaBuildVersionService bvs, BDeployConfig config, String tag) {
         Date date = new Date();
         SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
 
@@ -250,7 +251,12 @@ public class BDeployBuildProductTask {
             q += "%D";
         }
 
-        return bvs.getDisplayVersion().replace("qualifier", q.replace("%D", format.format(date)));
+        String displayVersion = config.bdeployDisplayVersionOverride;
+        if (StringHelper.isNullOrEmpty(displayVersion)) {
+            displayVersion = bvs.getDisplayVersion();
+        }
+
+        return displayVersion.replace("qualifier", q.replace("%D", format.format(date)));
     }
 
     static class ProductDesc {
