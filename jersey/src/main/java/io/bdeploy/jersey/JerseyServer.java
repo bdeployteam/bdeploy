@@ -300,11 +300,10 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
 
             WebSocketAddOn wsao = new WebSocketAddOn();
             for (NetworkListener listener : server.getListeners()) {
-                // default pool size restricts to num CPUs * 2.
                 // we want to have unrestricted thread counts to allow ALL requests to be processed in parallel.
                 // otherwise in-vm communication can soft-lock the process (e.g. push hangs because the reading
                 // thread is not started).
-                final int coresCount = Runtime.getRuntime().availableProcessors() * 2;
+                final int coresCount = 8;
                 ThreadPoolConfig cfg = ThreadPoolConfig.defaultConfig().setPoolName("BDeploy-Transport-Worker")
                         .setCorePoolSize(coresCount).setMaxPoolSize(Integer.MAX_VALUE)
                         .setMemoryManager(listener.getTransport().getMemoryManager());

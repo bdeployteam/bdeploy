@@ -33,8 +33,14 @@ public class JerseyRemoteActivityScopeServerFilter implements ContainerRequestFi
     @Inject
     private JerseyScopeService scopeService;
 
+    @Inject
+    private JerseyBroadcastingActivityReporter reporter;
+
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
+        // thread may have been pooled. if a task crashed quite hard, current activity could still be set.
+        reporter.resetCurrentActivity();
+
         UriInfo plainInfo = requestContext.getUriInfo();
         if (plainInfo instanceof ExtendedUriInfo) {
             List<String> scope = new ArrayList<>();

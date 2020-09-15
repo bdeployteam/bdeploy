@@ -233,6 +233,10 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
         return currentActivity.get();
     }
 
+    void resetCurrentActivity() {
+        currentActivity.remove();
+    }
+
     JerseyRemoteActivity getActivityById(String uuid) {
         return globalActivities.stream().filter(Objects::nonNull).filter(a -> a.getUuid().equals(uuid)).findAny().orElse(null);
     }
