@@ -44,7 +44,7 @@ export class HiveComponent implements OnInit {
   public fileContent: any;
   public fileContentLoading = false;
 
-  @ViewChild('hivetable', { static: true }) hivetable: CdkTable<any>;
+  @ViewChild('hivetable') hivetable: CdkTable<any>;
 
   constructor(
     private hiveService: HiveService,
