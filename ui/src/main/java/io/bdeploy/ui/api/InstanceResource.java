@@ -19,6 +19,7 @@ import javax.ws.rs.core.Response;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.common.security.NoScopeInheritance;
 import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
@@ -76,9 +77,15 @@ public interface InstanceResource {
             @QueryParam("managedServer") String managedServer, @QueryParam("expect") String expectedTag);
 
     @DELETE
-    @Path("/{instance}")
+    @Path("/{instance}/delete")
     @RequiredPermission(permission = Permission.ADMIN)
     public void delete(@ActivityScope @PathParam("instance") String instanceId);
+
+    @DELETE
+    @Path("/{instance}/deleteVersion/{tag}")
+    @NoScopeInheritance // don't inherit the instance group scope, global admin is required.
+    @RequiredPermission(permission = Permission.ADMIN)
+    public void deleteVersion(@ActivityScope @PathParam("instance") String instanceId, @PathParam("tag") String tag);
 
     @GET
     @Path("/{instance}/{tag}/nodeConfiguration")

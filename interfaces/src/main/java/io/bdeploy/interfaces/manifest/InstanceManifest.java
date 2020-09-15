@@ -28,6 +28,7 @@ import io.bdeploy.bhive.op.ImportObjectOperation;
 import io.bdeploy.bhive.op.InsertArtificialTreeOperation;
 import io.bdeploy.bhive.op.InsertManifestOperation;
 import io.bdeploy.bhive.op.InsertManifestRefOperation;
+import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.ManifestMaxIdOperation;
@@ -142,6 +143,25 @@ public class InstanceManifest {
         }
 
         return result;
+    }
+
+    /**
+     * @param hive the {@link BHive}
+     * @param instanceVersion the version to delete, including instance node manifests.
+     */
+    public static void delete(BHive hive, Manifest.Key instanceVersion) {
+        InstanceManifest im = of(hive, instanceVersion);
+        if (im == null) {
+            return;
+        }
+
+        // delete nodes
+        for (Manifest.Key node : im.getInstanceNodeManifests().values()) {
+            hive.execute(new ManifestDeleteOperation().setToDelete(node));
+        }
+
+        // delete version
+        hive.execute(new ManifestDeleteOperation().setToDelete(instanceVersion));
     }
 
     /**

@@ -613,6 +613,11 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
+    public void deleteVersion(String instanceUuid, String tag) {
+        InstanceManifest.delete(hive, new Manifest.Key(InstanceManifest.getRootName(instanceUuid), tag));
+    }
+
+    @Override
     public List<InstanceDirectory> getDataDirectorySnapshots(String instanceId) {
         List<InstanceDirectory> result = new ArrayList<>();
 

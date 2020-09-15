@@ -261,6 +261,7 @@
                 (install)="doInstallVersion($event, appVersionCard)"
                 (uninstall)="doUninstallVersion($event, appVersionCard)"
                 (export)="exportInstanceVersion($event)"
+                (delete)="doDeleteVersion($event)"
                 [state]='deploymentState'
                 [isRunningOrScheduled]='isRunningOrScheduledVersion(config.version.key.tag)'
                 [selected]="isVersionSelected(config)"

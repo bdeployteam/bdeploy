@@ -405,6 +405,30 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     @Override
+    public void deleteVersion(String instanceId, String tag) {
+        // prevent delete if processes are running.
+        InstanceManifest im = readInstance(instanceId);
+        RemoteService master = mp.getControllingMaster(hive, im.getManifest());
+        try (Activity deploy = reporter.start("Deleting " + instanceId + ":" + tag + "...");
+                NoThrowAutoCloseable proxy = reporter.proxyActivities(master)) {
+            MasterRootResource root = ResourceProvider.getVersionedResource(master, MasterRootResource.class, context);
+            if (getDeploymentStates(instanceId).installedTags.contains(tag)) {
+                throw new WebApplicationException("Version " + tag + " is still installed, cannot delete",
+                        Status.EXPECTATION_FAILED);
+            }
+
+            root.getNamedMaster(group).deleteVersion(instanceId, tag);
+
+            // now delete also on the central...
+            if (minion.getMode() == MinionMode.CENTRAL) {
+                InstanceManifest.delete(hive, new Manifest.Key(InstanceManifest.getRootName(instanceId), tag));
+            }
+        }
+
+        syncInstance(minion, rc, group, instanceId);
+    }
+
+    @Override
     public List<InstancePurpose> getPurposes() {
         return Arrays.asList(InstancePurpose.values());
     }

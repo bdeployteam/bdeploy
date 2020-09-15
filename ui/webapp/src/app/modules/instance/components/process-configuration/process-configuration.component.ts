@@ -1077,6 +1077,21 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       .subscribe((_) => {});
   }
 
+  async doDeleteVersion(manifest: ManifestKey) {
+    const result = await this.messageBoxService.openAsync({
+      title: `Delete Version ${manifest.tag}`,
+      message: `Are you sure you want to delete version ${manifest.tag}? This operation CANNOT BE UNDONE.`,
+      mode: MessageBoxMode.QUESTION,
+    });
+
+    // Revert changes done in the virtual node
+    if (!result) {
+      return;
+    }
+
+    this.instanceService.deleteInstanceVersion(this.groupParam, this.uuidParam, manifest.tag).pipe(finalize(() => this.loadVersions(true))).subscribe(_ => {});
+  }
+
   doActivateVersion(manifest: ManifestKey, card: InstanceVersionCardComponent) {
     const resultPromise = this.instanceService.activate(
       this.groupParam,

@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnChanges, Output, Predicate } from '@angular/core';
+import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { InstanceStateRecord, InstanceVersionDto, ManifestKey } from '../../../../models/gen.dtos';
 
 @Component({
@@ -24,6 +25,7 @@ export class InstanceVersionCardComponent implements OnChanges {
   @Output() activate = new EventEmitter<ManifestKey>();
   @Output() uninstall = new EventEmitter<ManifestKey>();
   @Output() export = new EventEmitter<ManifestKey>();
+  @Output() delete = new EventEmitter<ManifestKey>();
 
   isActive: boolean;
   isDeployed: boolean;
@@ -31,7 +33,7 @@ export class InstanceVersionCardComponent implements OnChanges {
 
   isAutoUninstall: boolean;
 
-  constructor() {}
+  constructor(public authService: AuthenticationService) {}
 
   ngOnChanges() {
     if (!this.state || this.dirty) {

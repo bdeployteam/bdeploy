@@ -25,6 +25,7 @@ import org.glassfish.jersey.server.model.ResourceMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.bdeploy.common.security.NoScopeInheritance;
 import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
@@ -87,6 +88,13 @@ public class PermissionRequestFilter implements ContainerRequestFilter {
 
         // Check if the user has the permissions declared on each involved method
         for (ResourceMethod resourceMethod : methods) {
+            NoScopeInheritance noInherit = resourceMethod.getInvocable().getDefinitionMethod()
+                    .getAnnotation(NoScopeInheritance.class);
+            if (noInherit != null) {
+                activeScope = null; // reset.
+
+            }
+
             RequiredPermission requiredPermission = getRequiredPermission(uriInfo, resourceMethod);
             if (requiredPermission == null) {
                 continue;

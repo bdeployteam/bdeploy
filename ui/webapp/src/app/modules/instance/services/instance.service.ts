@@ -84,8 +84,14 @@ export class InstanceService {
   }
 
   public deleteInstance(instanceGroupName: string, instanceName: string) {
-    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName);
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/delete';
     this.log.debug('deleteInstance: ' + url);
+    return this.http.delete(url);
+  }
+
+  public deleteInstanceVersion(instanceGroupName: string, instanceName: string, instanceTag: string) {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/deleteVersion/' + instanceTag;
+    this.log.debug('deleteInstanceVersion: ' + url);
     return this.http.delete(url);
   }
 

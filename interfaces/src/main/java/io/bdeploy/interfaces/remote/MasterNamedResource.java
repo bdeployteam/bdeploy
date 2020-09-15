@@ -84,6 +84,13 @@ public interface MasterNamedResource {
     public void delete(@QueryParam("u") String instanceUuid);
 
     /**
+     * @param instanceUuid the instance to delete
+     */
+    @DELETE
+    @Path("/deleteVersion")
+    public void deleteVersion(@QueryParam("u") String instanceUuid, @QueryParam("t") String tag);
+
+    /**
      * Create a new instance version by updating the underlying product to the given tag.
      *
      * @param uuid the UUID of the instance to update
