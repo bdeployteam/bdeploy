@@ -5,6 +5,7 @@ import java.util.SortedSet;
 
 import javax.inject.Inject;
 
+import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.ui.api.AuthAdminResource;
 import io.bdeploy.ui.api.AuthService;
@@ -55,4 +56,8 @@ public class AuthAdminResourceImpl implements AuthAdminResource {
         return auth.getAll();
     }
 
+    @Override
+    public String createUuid() {
+        return UuidHelper.randomId();
+    }
 }
