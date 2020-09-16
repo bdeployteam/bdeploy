@@ -2,9 +2,6 @@
 
 @mixin instance-history-theme($theme){
   $dark: map-get($theme,"is-dark");
-  .history-compare-input{
-    border-bottom: mat-color(if($dark,mat-palette($mat-grey,700),mat-palette($mat-grey,400))) solid 1px !important;
-  }
 
   .instance-history-comparison-dialog{
     background-color: if($dark,rgba(66,66,66),white);

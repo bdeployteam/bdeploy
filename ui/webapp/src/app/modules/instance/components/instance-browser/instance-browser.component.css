@@ -88,13 +88,6 @@
   padding: 20px;
 }
 
-.vert-speparator {
-  height: 50%;
-  border-left: 1px solid;
-
-  margin: 15px;
-}
-
 .headerText .mat-icon{
   margin:0 5px 5px 0;
 }

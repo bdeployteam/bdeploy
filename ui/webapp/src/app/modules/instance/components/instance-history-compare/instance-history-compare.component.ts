@@ -23,6 +23,17 @@ export class InstanceHistoryCompareComponent implements OnInit {
     this.instanceId = data[2];
     this.compareVersionA = data[3][0];
     this.compareVersionB = data[3][1];
+
+    // always make sure that the lower version is first...
+    let a = Number(this.compareVersionA);
+    let b = Number(this.compareVersionB);
+
+    if (a > b) {
+      [a, b] = [b, a];
+    }
+
+    this.compareVersionA = a.toString();
+    this.compareVersionB = b.toString();
   }
 
   ngOnInit(): void {

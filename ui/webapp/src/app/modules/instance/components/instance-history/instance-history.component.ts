@@ -112,7 +112,7 @@ export class InstanceHistoryComponent implements OnInit {
     const value = input.value.trim();
     if (this.isNumeric(value)) {
       this.compareVersions[index] = value;
-    } else if (value.length === 0) {
+    } else {
       this.compareVersions[index] = null;
     }
     this.updateCompareButton();
@@ -134,35 +134,15 @@ export class InstanceHistoryComponent implements OnInit {
 
   addVersionToCompare(version: string) {
     const x = Number(version);
-    if (!this.compareVersions[0]) {
-      this.compareVersions[0] = version;
-      this.compareInputA.nativeElement.value = version;
-    } else if (!this.compareVersions[1]) {
-      this.compareVersions[1] = version;
-      this.compareInputA.nativeElement.value = version;
-    }
-    if (!this.compareVersions[0] || !this.compareVersions[1]) {
-      this.updateCompareButton();
-      return;
-    }
-    let a = Number(this.compareVersions[0]);
-    let b = Number(this.compareVersions[1]);
 
-    if (a > b) {
-      [a, b] = [b, a];
-    }
-    if (x > b) {
-      b = x;
-    } else if (x < a) {
-      [a, b] = [x, a];
-    } else {
-      a = x;
-    }
+    // push first value to second value
+    this.compareVersions[1] = this.compareVersions[0];
 
-    this.compareVersions[0] = a.toString();
-    this.compareVersions[1] = b.toString();
-    this.compareInputA.nativeElement.value = this.compareVersions[0];
-    this.compareInputB.nativeElement.value = this.compareVersions[1];
+    // set first value to new value
+    this.compareVersions[0] = version;
+
+    this.compareInputA.nativeElement.value = this.compareVersions[0] || '';
+    this.compareInputB.nativeElement.value = this.compareVersions[1] || '';
     this.updateCompareButton();
   }
 
@@ -186,8 +166,7 @@ export class InstanceHistoryComponent implements OnInit {
     this.loadHistory();
   }
 
-  onTextFilterChanged(filter: string) {
-    this.filterText = filter;
+  onTextFilterChanged() {
     this.resetHistory();
     this.loadHistory();
   }

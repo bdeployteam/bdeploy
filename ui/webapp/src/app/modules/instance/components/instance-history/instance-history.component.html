@@ -16,25 +16,30 @@
     </mat-menu>
 
     <div class="compare-versions">
-      Compare Versions
+      <span>Compare Versions</span>
       <div>
-        <input #compareA class="history-compare-input" (input)="compareInputKeydown($event,0)" />
+        <mat-form-field class="history-compare-input">
+          <input matInput #compareA type='number' min="0" (input)="compareInputKeydown($event,0)" />
+        </mat-form-field>
         <mat-icon>arrow_right_alt</mat-icon>
-        <input #compareB class="history-compare-input" (input)="compareInputKeydown($event,1)" />
+        <mat-form-field class="history-compare-input">
+          <input matInput #compareB type='number' min="0" (input)="compareInputKeydown($event,1)" />
+        </mat-form-field>
       </div>
     </div>
     <button #compareButton mat-icon-button matTooltip="Compare versions" matTooltipShowDelay="1000" (click)="compareVersion()" disabled="true">
       <mat-icon>compare_arrows</mat-icon>
     </button>
-    <button class="show-filter-button" mat-icon-button [matMenuTriggerFor]="showMenu" matTooltip="Filter Events" matTooltipShowDelay="1000"><mat-icon>filter_list_alt</mat-icon></button>
-    <button class="accordionBehaviour-button" matTooltip="Show only one at a time" matTooltipShowDelay="1000" mat-icon-button (click)="accordionBehaviour = !accordionBehaviour; accordionBehaviour? closeAll() : null"><mat-icon color="accent" *ngIf="accordionBehaviour">view_day</mat-icon><mat-icon *ngIf="!accordionBehaviour">view_day</mat-icon></button>
-    <button class="close-all-button" mat-icon-button matTooltip="Close all cards" matTooltipShowDelay="1000" [disabled]="accordionBehaviour" (click)="closeAll()"><mat-icon>indeterminate_check_box</mat-icon></button>
+    <div class='vert-speparator'></div>
+    <button mat-icon-button [matMenuTriggerFor]="showMenu" matTooltip="Filter Events" matTooltipShowDelay="1000"><mat-icon>filter_list_alt</mat-icon></button>
+    <button matTooltip="Show only one at a time" matTooltipShowDelay="1000" mat-icon-button (click)="accordionBehaviour = !accordionBehaviour; accordionBehaviour? closeAll() : null"><mat-icon color="accent" *ngIf="accordionBehaviour">view_day</mat-icon><mat-icon *ngIf="!accordionBehaviour">view_day</mat-icon></button>
+    <button mat-icon-button matTooltip="Close all cards" matTooltipShowDelay="1000" [disabled]="accordionBehaviour" (click)="closeAll()"><mat-icon>indeterminate_check_box</mat-icon></button>
 
-    <div class="search-history searchbar">
-      <input class="searchbar-input" (keydown.enter)="onTextFilterChanged(searchInput.value)" #searchInput placeholder="Search...">
-      <button class="searchbar-button" (click)="onTextFilterChanged(searchInput.value)" mat-icon-button><mat-icon>search</mat-icon></button>
-      <div class="searchbar-line"></div> <div class="searchbar-focus-line"></div>
-    </div>
+    <mat-form-field class="search">
+      <mat-label></mat-label>
+      <input matInput type="text" hint="Filter" [(ngModel)]="filterText" (ngModelChange)="onTextFilterChanged()">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
 
   </mat-toolbar-row>
 </mat-toolbar>

@@ -34,8 +34,16 @@ body {
 }
 
 .search {
+  padding-top: 8px;
   font-size: 14px; /* default */
   line-height: 1.0;
+}
+
+.vert-speparator {
+  height: 50%;
+  border-left: 1px solid;
+
+  margin: 15px;
 }
 
 /* D&D */
