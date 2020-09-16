@@ -55,6 +55,8 @@ export class AppComponent implements OnInit {
 
         let title = 'BDeploy';
         if (url.data && url.data.title) {
+          // ATTENTION: params is used in the titles of routes (eval below).
+          const params = url.params;
           // tslint:disable-next-line:no-eval
           const expanded = eval('`' + url.data.title + '`');
           title += ` - ${expanded}`;
