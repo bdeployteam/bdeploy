@@ -23,6 +23,7 @@ import java.util.function.Consumer;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import io.bdeploy.bhive.util.StorageHelper;
+import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.util.MdcLogger;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
@@ -63,7 +64,7 @@ public class ProcessController {
     private static final String JSON_FILE = "app.json";
 
     /** Shown user on automated execution */
-    private static final String DEFAULT_USER = "BDeploy System";
+    private static final String DEFAULT_USER = ApiAccessToken.SYSTEM_USER;
 
     private final Path processDir;
     private final String instanceUid;

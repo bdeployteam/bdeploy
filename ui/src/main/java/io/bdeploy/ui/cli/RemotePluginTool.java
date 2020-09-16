@@ -27,6 +27,7 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.plugin.PluginInfoDto;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyClientFactory;
+import io.bdeploy.jersey.JerseyOnBehalfOfFilter;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.ui.api.PluginResource;
 import io.bdeploy.ui.cli.RemotePluginTool.RemotePluginConfig;
@@ -113,7 +114,8 @@ public class RemotePluginTool extends RemoteServiceTool<RemotePluginConfig> {
                 bp.setMediaType(MediaType.APPLICATION_OCTET_STREAM_TYPE);
                 mp.bodyPart(bp);
 
-                WebTarget target = JerseyClientFactory.get(svc).getBaseTarget().path("/plugin-admin/upload-global");
+                WebTarget target = JerseyClientFactory.get(svc).getBaseTarget(new JerseyOnBehalfOfFilter(getLocalContext()))
+                        .path("/plugin-admin/upload-global");
                 if (replace) {
                     target = target.queryParam("replace", true);
                 }

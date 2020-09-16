@@ -100,6 +100,7 @@ import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyClientFactory;
+import io.bdeploy.jersey.JerseyOnBehalfOfFilter;
 import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
 import io.bdeploy.ui.InstanceEntryStreamRequestService;
 import io.bdeploy.ui.InstanceEntryStreamRequestService.EntryRequest;
@@ -861,7 +862,7 @@ public class InstanceResourceImpl implements InstanceResource {
                 bp.setMediaType(MediaType.APPLICATION_OCTET_STREAM_TYPE);
                 multiPart.bodyPart(bp);
 
-                WebTarget target = JerseyClientFactory.get(svc).getBaseTarget()
+                WebTarget target = JerseyClientFactory.get(svc).getBaseTarget(new JerseyOnBehalfOfFilter(context))
                         .path("/group/" + group + "/instance/" + instanceId + "/import");
                 Response response = target.request().post(Entity.entity(multiPart, MediaType.MULTIPART_FORM_DATA_TYPE));
 
@@ -886,7 +887,7 @@ public class InstanceResourceImpl implements InstanceResource {
             Map<String, MinionDto> nodes = getMinionConfiguration(instanceId, null);
             nodes.forEach(config::addMinion);
 
-            Key newKey = InstanceImportExportHelper.importFrom(zip, hive, instanceId, config);
+            Key newKey = InstanceImportExportHelper.importFrom(zip, hive, instanceId, config, context);
             iem.create(newKey);
             return Collections.singletonList(newKey);
         } catch (IOException e) {

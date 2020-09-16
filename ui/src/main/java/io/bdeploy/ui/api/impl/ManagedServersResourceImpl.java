@@ -75,6 +75,7 @@ import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.MasterSettingsResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.jersey.JerseyOnBehalfOfFilter;
 import io.bdeploy.ui.ProductTransferService;
 import io.bdeploy.ui.api.BackendInfoResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
@@ -182,7 +183,8 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 bp.setMediaType(new MediaType("image", "png"));
                 mp.bodyPart(bp);
 
-                WebTarget target = ResourceProvider.of(testSelf).getBaseTarget().path("/group/" + dto.config.name + "/image");
+                WebTarget target = ResourceProvider.of(testSelf).getBaseTarget(new JerseyOnBehalfOfFilter(context))
+                        .path("/group/" + dto.config.name + "/image");
                 Response response = target.request().post(Entity.entity(mp, MediaType.MULTIPART_FORM_DATA_TYPE));
 
                 if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {

@@ -46,6 +46,10 @@ public class UserInfo implements Comparable<UserInfo> {
         this.name = normalizeName(name);
     }
 
+    public UserInfo(String name, boolean normalize) {
+        this.name = normalize ? normalizeName(name) : name;
+    }
+
     @Override
     public int compareTo(UserInfo o) {
         return name.compareTo(o.name);

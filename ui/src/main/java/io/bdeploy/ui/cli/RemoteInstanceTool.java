@@ -44,6 +44,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyClientFactory;
+import io.bdeploy.jersey.JerseyOnBehalfOfFilter;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.ui.api.BackendInfoResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
@@ -234,7 +235,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
                 bp.setMediaType(MediaType.APPLICATION_OCTET_STREAM_TYPE);
                 mp.bodyPart(bp);
 
-                WebTarget target = JerseyClientFactory.get(svc).getBaseTarget()
+                WebTarget target = JerseyClientFactory.get(svc).getBaseTarget(new JerseyOnBehalfOfFilter(getLocalContext()))
                         .path("/group/" + config.instanceGroup() + "/instance/" + config.uuid() + "/import");
                 Response response = target.request().post(Entity.entity(mp, MediaType.MULTIPART_FORM_DATA_TYPE));
 

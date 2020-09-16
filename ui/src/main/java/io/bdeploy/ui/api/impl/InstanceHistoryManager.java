@@ -214,7 +214,7 @@ public class InstanceHistoryManager {
         // Complete information based on the stored user
         UserInfo userInfo = auth.getUser(user);
         if (userInfo == null) {
-            return new UserInfo(user);
+            return new UserInfo(user, false);
         }
         return userInfo;
     }

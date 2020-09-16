@@ -12,6 +12,8 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import javax.ws.rs.core.SecurityContext;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +27,7 @@ import io.bdeploy.bhive.op.ImportTreeOperation;
 import io.bdeploy.bhive.op.ManifestExistsOperation;
 import io.bdeploy.bhive.op.ManifestMaxIdOperation;
 import io.bdeploy.bhive.util.StorageHelper;
+import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
@@ -32,6 +35,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
+import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 
@@ -97,9 +101,11 @@ public class InstanceImportExportHelper {
      *            target UUID for the instance.
      * @param minions
      *            available minions and their OS
+     * @param context the {@link SecurityContext}
      * @return the resulting {@link Key} in the target {@link BHive}
      */
-    public static Manifest.Key importFrom(Path zipFilePath, BHive target, String uuid, MinionConfiguration minions) {
+    public static Manifest.Key importFrom(Path zipFilePath, BHive target, String uuid, MinionConfiguration minions,
+            SecurityContext context) {
         try (FileSystem zfs = PathHelper.openZip(zipFilePath)) {
             Path zroot = zfs.getPath("/");
 
@@ -112,14 +118,14 @@ public class InstanceImportExportHelper {
                 cfgId = target.execute(new ImportTreeOperation().setSkipEmpty(true).setSourcePath(cfgDir));
             }
 
-            return importFromData(target, cfg, cfgId, uuid, minions);
+            return importFromData(target, cfg, cfgId, uuid, minions, context);
         } catch (IOException e) {
             throw new IllegalStateException("Cannot read ZIP: " + zipFilePath, e);
         }
     }
 
     private static Manifest.Key importFromData(BHive target, InstanceCompleteConfigDto dto, ObjectId cfgId, String uuid,
-            MinionConfiguration minions) {
+            MinionConfiguration minions, SecurityContext context) {
         if (!Objects.equals(dto.config.configTree, cfgId)) {
             log.warn("Configuration tree has unexpected ID: {} <-> {}", dto.config.configTree, cfgId);
         }
@@ -179,7 +185,10 @@ public class InstanceImportExportHelper {
             imfb.addInstanceNodeManifest(minionName, inmBuilder.insert(target));
         }
 
-        return imfb.insert(target);
+        Key result = imfb.insert(target);
+        InstanceManifest.of(target, result).getHistory(target).record(Action.CREATE,
+                context != null ? context.getUserPrincipal().getName() : ApiAccessToken.SYSTEM_USER, null);
+        return result;
     }
 
     private static void reAssignApplications(BHive hive, InstanceNodeConfiguration nodeCfg, String minionName, MinionDto minion) {
