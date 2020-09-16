@@ -45,9 +45,11 @@ import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.dcu.InstanceNodeController;
+import io.bdeploy.interfaces.configuration.SettingsConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.MinionManifest;
+import io.bdeploy.interfaces.manifest.SettingsManifest;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
@@ -658,6 +660,16 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     @Override
     public PluginManager getPluginManager() {
         return pluginManager;
+    }
+
+    @Override
+    public SettingsConfiguration getSettings() {
+        return SettingsManifest.read(hive, getEncryptionKey(), true);
+    }
+
+    @Override
+    public void setSettings(SettingsConfiguration settings) {
+        SettingsManifest.write(hive, settings, getEncryptionKey());
     }
 
 }

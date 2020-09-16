@@ -73,6 +73,7 @@ import io.bdeploy.interfaces.remote.CommonInstanceResource;
 import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
+import io.bdeploy.interfaces.remote.MasterSettingsResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.ui.ProductTransferService;
 import io.bdeploy.ui.api.BackendInfoResource;
@@ -425,17 +426,26 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             for (Manifest.Key instance : instances.keySet()) {
                 new ControllingMaster(hive, instance).associate(serverName);
             }
+
+            // 6. try to sync instance group properties
+            try {
+                MasterSettingsResource msr = ResourceProvider.getVersionedResource(svc, MasterSettingsResource.class, context);
+                msr.mergeInstanceGroupPropertyDescriptors(minion.getSettings().instanceGroup.properties);
+            } catch (Exception e) {
+                log.warn("Cannot sync InstanceGroup properties to managed server, ignoring", e);
+            }
+
             attached.lastSync = Instant.now();
         }
 
-        // 6. Fetch minion information and store in the managed masters
+        // 7. Fetch minion information and store in the managed masters
         Map<String, MinionStatusDto> status = backendInfo.getNodeStatus();
         Map<String, MinionDto> config = status.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().config));
         MinionConfiguration minions = attached.minions;
         minions.replaceWith(config);
 
-        // 7. update current information in the hive.
+        // 8. update current information in the hive.
         mm.attach(attached, true);
 
         return attached;

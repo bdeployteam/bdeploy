@@ -10,6 +10,7 @@ import { MetricsOverviewComponent } from './components/metrics-overview/metrics-
 import { PluginsBrowserComponent } from './components/plugins-browser/plugins-browser.component';
 import { SettingsAuthComponent } from './components/settings-auth/settings-auth.component';
 import { SettingsGeneralComponent } from './components/settings-general/settings-general.component';
+import { SettingsInstanceGroupComponent } from './components/settings-instance-group/settings-instance-group.component';
 import { UpdateBrowserComponent } from './components/update-browser/update-browser.component';
 import { UsersBrowserComponent } from './components/users-browser/users-browser.component';
 
@@ -26,6 +27,7 @@ const ADMIN_ROUTES: Route[] = [
       { path: '', pathMatch: 'full', redirectTo: 'general', outlet: 'panel' },
       { path: 'general', component: SettingsGeneralComponent, canDeactivate: [CanDeactivateGuard], outlet: 'panel' },
       { path: 'plugins', component: PluginsBrowserComponent, outlet: 'panel' },
+      { path: 'instancegroup', component: SettingsInstanceGroupComponent, outlet: 'panel' },
       { path: 'authentication', component: SettingsAuthComponent, canDeactivate: [CanDeactivateGuard], outlet: 'panel' },
       { path: 'users', component: UsersBrowserComponent, canDeactivate: [CanDeactivateGuard], outlet: 'panel' },
       { path: 'hive', component: HiveBrowserComponent, outlet: 'panel' },

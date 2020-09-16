@@ -6,6 +6,7 @@ import java.util.Collection;
 
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.ScopedPermission;
+import io.bdeploy.interfaces.configuration.SettingsConfiguration;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.plugin.PluginManager;
@@ -112,5 +113,17 @@ public interface Minion {
      * @return the {@link PluginManager} for the minion.
      */
     public PluginManager getPluginManager();
+
+    /**
+     * @return the minion settings.
+     */
+    public SettingsConfiguration getSettings();
+
+    /**
+     * Updates the minion settings.
+     *
+     * @param settings the new settings.
+     */
+    public void setSettings(SettingsConfiguration settings);
 
 }
