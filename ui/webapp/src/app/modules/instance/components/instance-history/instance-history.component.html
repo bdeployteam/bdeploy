@@ -4,13 +4,13 @@
     <div class="toolbar-title"> <span> Instance: </span><app-instance-group-title [instanceGroup]="groupParam"></app-instance-group-title>/ {{instance? instance.name:""}}</div>
 
     <mat-menu xPosition="before"  #showMenu="matMenu">
-      <button mat-menu-item appClickStopPropagation (click)="showCreate=!showCreate; onTypeFilterChanged()">
+      <button mat-menu-item appClickStopPropagation (click)="showCreate=!showCreate; onTypeFilterChanged()" [disabled]="loading">
         <mat-icon>{{showCreate?'check_box':'check_box_outline_blank'}}</mat-icon> Configuration
       </button>
-      <button mat-menu-item appClickStopPropagation (click)="showDeployment=!showDeployment; onTypeFilterChanged()">
+      <button mat-menu-item appClickStopPropagation (click)="showDeployment=!showDeployment; onTypeFilterChanged()" [disabled]="loading">
         <mat-icon>{{showDeployment?'check_box':'check_box_outline_blank'}}</mat-icon> Deployment
       </button>
-      <button mat-menu-item appClickStopPropagation (click)="showRuntime=!showRuntime; onTypeFilterChanged()">
+      <button mat-menu-item appClickStopPropagation (click)="showRuntime=!showRuntime; onTypeFilterChanged()" [disabled]="loading">
         <mat-icon>{{showRuntime?'check_box':'check_box_outline_blank'}}</mat-icon> Runtime
       </button>
     </mat-menu>
@@ -19,11 +19,11 @@
       <span>Compare Versions</span>
       <div>
         <mat-form-field class="history-compare-input">
-          <input matInput #compareA type='number' min="0" (input)="compareInputKeydown($event,0)" />
+          <input matInput #compareA type='number' min="0" (input)="compareInputKeydown($event,0)" [disabled]="loading"/>
         </mat-form-field>
         <mat-icon>arrow_right_alt</mat-icon>
         <mat-form-field class="history-compare-input">
-          <input matInput #compareB type='number' min="0" (input)="compareInputKeydown($event,1)" />
+          <input matInput #compareB type='number' min="0" (input)="compareInputKeydown($event,1)" [disabled]="loading"/>
         </mat-form-field>
       </div>
     </div>
@@ -37,7 +37,7 @@
 
     <mat-form-field class="search">
       <mat-label></mat-label>
-      <input matInput type="text" hint="Filter" [(ngModel)]="filterText" (ngModelChange)="onTextFilterChanged()">
+      <input matInput type="text" hint="Filter" [(ngModel)]="filterText" (keydown.enter)="onTextFilterChanged()" [readonly]='loading'>
       <mat-icon matSuffix>search</mat-icon>
     </mat-form-field>
 
@@ -48,8 +48,8 @@
   <mat-spinner [diameter]="48"></mat-spinner>
 </div>
 
-<app-instance-history-timeline [accordion-behaviour]="accordionBehaviour"
-  (add-to-comparison)="addVersionToCompare($event)" [entry-list]="history" #timeline (scrolled-down)="onScrolledDown()">
+<app-instance-history-timeline [accordionBehaviour]="accordionBehaviour"
+  (addToComparison)="addVersionToCompare($event)" [entries]="history" #timeline (scrolledDown)="onScrolledDown()">
 </app-instance-history-timeline>
 
 <div *ngIf="!loading && history.length == 0">

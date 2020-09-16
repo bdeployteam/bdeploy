@@ -5,7 +5,7 @@
       <div class="timeline_circle" [ngClass]="entry.type==entryType.CREATE?'create':entry.type==entryType.DEPLOYMENT?'deployment':
       entry.runtimeEvent!=null ? entry.runtimeEvent.state==processState.CRASHED_PERMANENTLY ? 'runtime_error':
       entry.runtimeEvent.state==processState.CRASHED_WAITING ?'runtime_warning':entry.runtimeEvent.state==processState.STOPPED ?'runtime_stop':'runtime':''"></div>
-      <app-instance-history-timeline-card #timeline_card [entry]="entry" (add-to-comparison)="addToComparisonEvent($event)" (cardOpen)="cardOpened($event)" (cardClose)="cardClosed()">
+      <app-instance-history-timeline-card #timeline_card [entry]="entry" (addToComparison)="addToComparisonEvent($event)" (cardOpen)="cardOpened($event)" (cardClose)="cardClosed()">
       </app-instance-history-timeline-card>
     </div>
   </div>
