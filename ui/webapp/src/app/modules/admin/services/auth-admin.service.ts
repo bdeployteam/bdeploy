@@ -52,4 +52,10 @@ export class AuthAdminService {
     return this.http.post(url, password, options);
   }
 
+  public createUuid(): Observable<string> {
+    const url: string = this.cfg.config.api + AuthAdminService.BASEPATH + '/new-uuid';
+    this.log.debug('createUuid: ' + url);
+    return this.http.get(url, { responseType: 'text' });
+  }
+
 }

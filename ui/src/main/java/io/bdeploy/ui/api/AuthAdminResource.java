@@ -74,4 +74,8 @@ public interface AuthAdminResource {
     @Path("/users")
     public SortedSet<UserInfo> getAllUser();
 
+    @GET
+    @Path("/new-uuid")
+    public String createUuid();
+
 }
