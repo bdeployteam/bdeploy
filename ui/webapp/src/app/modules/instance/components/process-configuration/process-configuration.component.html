@@ -86,7 +86,7 @@
         </div>
       </div>
       <div class="spacer"></div>
-      <app-instance-sync #syncComponent [invisible]='!isActionsVisible()' [instanceGroup]='groupParam' [instance]='uuidParam' [tag]='selectedConfig?.version?.key?.tag' (syncEvent)='onSyncManaged()' (stateUpdateEvent)='onSyncStateUpdate()'></app-instance-sync>
+      <app-instance-sync #syncComponent [invisible]='!isActionsVisible()' [confirmCallback]='onSyncCallbackBound' [instanceGroup]='groupParam' [instance]='uuidParam' [tag]='selectedConfig?.version?.key?.tag' (syncEvent)='onSyncManaged()' (stateUpdateEvent)='onSyncStateUpdate()'></app-instance-sync>
       <span class="fill-space"></span>
       <app-remote-progress *ngIf='isActionsVisible()' [scope]='[groupParam, uuidParam]' (events)='updateRemoteEvents($event)'></app-remote-progress>
       <ng-container *ngIf="isActionsVisible() && autoRefresh">

@@ -27,6 +27,9 @@ export class InstanceSyncComponent implements OnChanges {
   @Input()
   invisible = false;
 
+  @Input()
+  confirmCallback: () => Promise<boolean>;
+
   @Output()
   syncEvent = new EventEmitter<any>();
 
@@ -72,6 +75,11 @@ export class InstanceSyncComponent implements OnChanges {
     if (!this.isSyncAllowed()) {
       return;
     }
+
+    if (this.confirmCallback && !await this.confirmCallback()) {
+      return;
+    }
+
     try {
       this.sycnInProgress = true;
       await this.managedServers.synchronize(this.instanceGroup, this.server.hostName).pipe(finalize(() => this.sycnInProgress = false)).toPromise();

@@ -180,6 +180,8 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   private reloadPending = false;
   private currentEvents: ActivitySnapshotTreeNode[];
 
+  public onSyncCallbackBound = this.onSyncCallback.bind(this);
+
   constructor(
     public authService: AuthenticationService,
     private route: ActivatedRoute,
@@ -788,6 +790,18 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     // Update enabled state of buttons
     this.applicationService.clearState();
     this.updateDirtyStateAndValidate();
+  }
+
+  private async onSyncCallback(): Promise<boolean> {
+    if (!this.discardEnabled) {
+      return new Promise((resolve) => resolve(true));
+    }
+
+    return this.messageBoxService.openAsync({
+      title: 'Discard changes',
+      message: 'Are you sure you want to discard all local changes?',
+      mode: MessageBoxMode.QUESTION,
+    });
   }
 
   public onSelectApp(
