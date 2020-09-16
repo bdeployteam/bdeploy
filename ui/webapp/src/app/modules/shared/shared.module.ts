@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { NgTerminalModule } from 'ng-terminal';
 import { CoreModule } from '../core/core.module';
+import { CustomPropertyEditComponent } from './components/custom-property-edit/custom-property-edit.component';
 import { FileUploadComponent } from './components/file-upload/file-upload.component';
 import { FileViewerComponent } from './components/file-viewer/file-viewer.component';
 import { MessageboxComponent } from './components/messagebox/messagebox.component';
@@ -17,10 +18,12 @@ import { PortValidatorDirective } from './validators/port.validator';
     MessageboxComponent,
     FileUploadComponent,
     PortValidatorDirective,
+    CustomPropertyEditComponent,
   ],
   entryComponents: [
     MessageboxComponent,
     FileUploadComponent,
+    CustomPropertyEditComponent,
   ],
   imports: [
     CommonModule,
@@ -33,6 +36,7 @@ import { PortValidatorDirective } from './validators/port.validator';
     MessageboxComponent,
     FileUploadComponent,
     PortValidatorDirective,
+    CustomPropertyEditComponent,
   ]
 })
 export class SharedModule { }

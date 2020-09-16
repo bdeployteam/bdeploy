@@ -1,0 +1,15 @@
+<h1 mat-dialog-title>Configure Custom Property</h1>
+<form #f="ngForm">
+  <div mat-dialog-content class='content'>
+    <mat-form-field>
+      <input matInput type='text' name='name' required [(ngModel)]='property.name' placeholder="Name" matTooltip="The Property Name">
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput type='text' name='description' required [(ngModel)]='property.description' placeholder="Description">
+    </mat-form-field>
+  </div>
+  <div mat-dialog-actions align="end">
+    <button mat-raised-button type="button" [mat-dialog-close]="null">Cancel</button>
+    <button mat-raised-button type="submit" color="primary" [mat-dialog-close]="property" [disabled]='f.invalid'>Apply</button>
+  </div>
+</form>

@@ -17,6 +17,7 @@ import { PluginsBrowserComponent } from './components/plugins-browser/plugins-br
 import { SettingsAuthLdapServerComponent } from './components/settings-auth-ldap-server/settings-auth-ldap-server.component';
 import { SettingsAuthComponent } from './components/settings-auth/settings-auth.component';
 import { SettingsGeneralComponent } from './components/settings-general/settings-general.component';
+import { SettingsInstanceGroupComponent } from './components/settings-instance-group/settings-instance-group.component';
 import { UpdateBrowserComponent } from './components/update-browser/update-browser.component';
 import { UpdateCardComponent } from './components/update-card/update-card.component';
 import { UpdateDialogComponent } from './components/update-dialog/update-dialog.component';
@@ -39,6 +40,7 @@ import { UsersBrowserComponent } from './components/users-browser/users-browser.
     SettingsAuthComponent,
     SettingsAuthLdapServerComponent,
     SettingsGeneralComponent,
+    SettingsInstanceGroupComponent,
     UsersBrowserComponent,
     UserGlobalPermissionsComponent,
     MasterCleanupGroupComponent,
