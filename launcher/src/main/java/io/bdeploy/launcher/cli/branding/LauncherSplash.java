@@ -202,20 +202,30 @@ public class LauncherSplash implements LauncherSplashDisplay {
         if (splashCfg.textRect != null && splashCfg.textRect.foreground != null) {
             Color textColor = Color.decode(splashCfg.textRect.foreground);
             splashComp.setTextColor(textColor);
+        } else {
+            splashComp.setTextColor(Color.BLACK);
         }
         if (splashCfg.progressRect != null && splashCfg.progressRect.foreground != null) {
             Color progressColor = Color.decode(splashCfg.progressRect.foreground);
             splashComp.setProgressColor(progressColor);
+        } else {
+            splashComp.setProgressColor(Color.BLACK);
         }
 
         // text and progress
         Rectangle textRect = convert(splashCfg.textRect);
         if (textRect != null) {
             splashComp.setText(textRect);
+        } else {
+            // ALWAYS make sure we can render text
+            splashComp.setText(new Rectangle(15, 220, 450, 20));
         }
         Rectangle progressRect = convert(splashCfg.progressRect);
         if (progressRect != null) {
             splashComp.setProgress(progressRect);
+        } else {
+            // ALWAYS make sure we can render progress
+            splashComp.setProgress(new Rectangle(15, 245, 450, 12));
         }
 
         // size and position
