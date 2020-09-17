@@ -990,6 +990,7 @@ public class InstanceResourceImpl implements InstanceResource {
         RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
         MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
         root.getNamedMaster(group).updateBanner(instanceId, instanceBannerRecord);
+        iem.bannerChanged(im.getManifest());
     }
 
     @Override

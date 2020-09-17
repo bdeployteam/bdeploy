@@ -211,12 +211,12 @@ public interface InstanceResource {
 
     @GET
     @Path("/{instance}/banner")
-    public InstanceBannerRecord getBanner(@PathParam("instance") String instanceId);
+    public InstanceBannerRecord getBanner(@ActivityScope @PathParam("instance") String instanceId);
 
     @POST
     @Path("/{instance}/banner")
     @RequiredPermission(permission = Permission.WRITE)
-    public void updateBanner(@PathParam("instance") String instanceId, InstanceBannerRecord instanceBannerRecord);
+    public void updateBanner(@ActivityScope @PathParam("instance") String instanceId, InstanceBannerRecord instanceBannerRecord);
 
     @GET
     @Path("/{instance}/history")

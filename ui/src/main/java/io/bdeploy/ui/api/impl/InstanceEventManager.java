@@ -34,4 +34,8 @@ public class InstanceEventManager {
         bc.send(new InstanceUpdateEventDto(key, InstanceUpdateEventType.STATE_CHANGE), scope.getScope());
     }
 
+    public void bannerChanged(Manifest.Key key) {
+        bc.send(new InstanceUpdateEventDto(key, InstanceUpdateEventType.BANNER_CHANGE), scope.getScope());
+    }
+
 }

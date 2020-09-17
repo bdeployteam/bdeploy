@@ -12,7 +12,8 @@ public class InstanceUpdateEventDto {
      */
     public enum InstanceUpdateEventType {
         CREATE,
-        STATE_CHANGE
+        STATE_CHANGE,
+        BANNER_CHANGE
     }
 
     public Manifest.Key key;

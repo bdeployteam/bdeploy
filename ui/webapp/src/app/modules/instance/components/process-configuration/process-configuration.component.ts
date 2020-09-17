@@ -224,9 +224,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
         this.instanceGroupService
           .getInstanceGroup(this.groupParam)
           .subscribe((r) => (this.instanceGroup = r));
-        this.instanceService
-          .getInstanceBanner(this.groupParam, this.uuidParam)
-          .subscribe((r) => (this.instanceBanner = r));
+        this.loadBanner();
         this.loadVersions(false);
         if (!this.isCentral()) {
           this.enableAutoRefresh();
@@ -292,6 +290,12 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     }
   }
 
+  private loadBanner() {
+    this.instanceService
+      .getInstanceBanner(this.groupParam, this.uuidParam)
+      .subscribe((r) => (this.instanceBanner = r));
+  }
+
   private onRemoteInstanceUpdate(event: MessageEvent) {
     const blob = event.data as Blob;
     const r = new FileReader();
@@ -316,6 +320,8 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
             this.loadDeploymentStates();
           }
         }, 100);
+      } else if (dto.type === InstanceUpdateEventType.BANNER_CHANGE) {
+        this.loadBanner();
       }
     };
     r.readAsText(blob);
