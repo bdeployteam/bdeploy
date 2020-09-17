@@ -97,6 +97,14 @@
   * {
     @include scrollbars(mat-color(map-get($theme, 'primary')), if($dark,#555555, #cccccc));
   }
+
+  .inline-code {
+    font-family: monospace;
+    padding: 2px 4px;
+    color: if($dark, white, black);
+    background-color: if($dark, #333333, #eeeeee);
+    border-radius: 3px;
+  }
 }
 
 @mixin theme-chooser($theme) {

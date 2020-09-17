@@ -102,13 +102,13 @@
         </button>
       </ng-container>
       <mat-menu #appMenu="matMenu" xPosition="before">
-        <button mat-menu-item (click)="startInstance()" [disabled]='!authService.isScopedWrite(groupParam) || !isInstanceActivated() || (isReadonly() && !isActiveVersionSelected())' matTooltip="Starts all processes having the start type 'Instance' configured.">
+        <button mat-menu-item (click)="startInstance()" [disabled]='!authService.isScopedWrite(groupParam) || !isInstanceActivated() || (isReadonly() && !isActiveVersionSelected())' matTooltip="Starts all processes having the start type INSTANCE configured.">
           <mat-icon>play_arrow</mat-icon>Start Instance
         </button>
         <button mat-menu-item (click)="stopInstance()" [disabled]='!authService.isScopedWrite(groupParam) || !isInstanceActivated() || (isReadonly() && !isActiveVersionSelected())' matTooltip="Stops all processes.">
           <mat-icon>stop</mat-icon>Stop Instance
         </button>
-        <button mat-menu-item (click)="restartInstance()" [disabled]='!authService.isScopedWrite(groupParam) || !isInstanceActivated() || (isReadonly() && !isActiveVersionSelected())' matTooltip="Stops all processes, then starts all having the start type 'Instance' configured.">
+        <button mat-menu-item (click)="restartInstance()" [disabled]='!authService.isScopedWrite(groupParam) || !isInstanceActivated() || (isReadonly() && !isActiveVersionSelected())' matTooltip="Stops all processes, then starts all having the start type INSTANCE configured.">
           <mat-icon>replay</mat-icon>Restart Instance
         </button>
         <mat-divider></mat-divider>

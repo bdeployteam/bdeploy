@@ -1186,7 +1186,18 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     this.setSidenavVersions();
   }
 
-  startInstance() {
+  async startInstance() {
+    // make sure this is OK :)
+    if (
+      !(await this.messageBoxService.openAsync({
+        title: 'Start Instance',
+        message: `This will start all processes of <b>${this.selectedConfig.instance.name}</b> which are configured to use the <span class="inline-code">INSTANCE</span> start type. OK?`,
+        mode: MessageBoxMode.QUESTION,
+      }))
+    ) {
+      return;
+    }
+
     // Reduce refresh interval so that the user directly gets feedback about the progress
     this.autoRefreshInterval = 1;
 
@@ -1202,7 +1213,18 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       });
   }
 
-  stopInstance() {
+  async stopInstance() {
+    // make sure this is OK :)
+    if (
+      !(await this.messageBoxService.openAsync({
+        title: 'Stop Instance',
+        message: `This will stop <em>all</em> running processes of <b>${this.selectedConfig.instance.name}</b>. OK?`,
+        mode: MessageBoxMode.QUESTION,
+      }))
+    ) {
+      return;
+    }
+
     // Reduce refresh interval so that the user directly gets feedback about the progress
     this.autoRefreshInterval = 1;
 
@@ -1218,7 +1240,18 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       });
   }
 
-  restartInstance() {
+  async restartInstance() {
+    // make sure this is OK :)
+    if (
+      !(await this.messageBoxService.openAsync({
+        title: 'Restart Instance',
+        message: `This will first stop <em>all</em> running processes of <b>${this.selectedConfig.instance.name}</b>, and then start all processes which are configured to use the <span class="inline-code">INSTANCE</span> start type. OK?`,
+        mode: MessageBoxMode.QUESTION,
+      }))
+    ) {
+      return;
+    }
+
     this.processService
       .restartAll(this.groupParam, this.uuidParam)
       .subscribe((r) => {
