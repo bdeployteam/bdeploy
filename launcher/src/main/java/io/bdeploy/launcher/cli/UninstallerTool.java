@@ -1,13 +1,7 @@
 package io.bdeploy.launcher.cli;
 
-import java.io.IOException;
-import java.lang.ProcessBuilder.Redirect;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +29,7 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
         @Help("The unique identifier of the application to uninstall.")
         String app();
 
-        @Help("Directory where the launcher stores the hive as well as all applications. Defaults to home/.bdeploy.")
+        @Help("Directory where the launcher stores the hive as well as all applications. ")
         String homeDir();
 
     }
@@ -46,16 +40,14 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
 
     @Override
     protected RenderableResult run(UninstallerConfig config) {
+        if (config.homeDir() == null) {
+            throw new IllegalStateException("Missing --homeDir argument");
+        }
         if (config.app() == null) {
             throw new IllegalStateException("Missing --app argument");
         }
-        // Check where to put local data.
-        Path rootDir;
-        if (config.homeDir() != null && !config.homeDir().isEmpty()) {
-            rootDir = Paths.get(config.homeDir());
-        } else {
-            rootDir = ClientPathHelper.getBDeployHome();
-        }
+
+        Path rootDir = Paths.get(config.homeDir()).toAbsolutePath();
         Path bhiveDir = rootDir.resolve("bhive");
         MarkerDatabase.lockRoot(rootDir, null, null);
         try (BHive hive = new BHive(bhiveDir.toUri(), new ActivityReporter.Null())) {
@@ -77,7 +69,7 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
         ClientSoftwareConfiguration config = cmf.readNewest(appUid);
         if (config != null && config.launcher != null) {
             Version version = VersionHelper.tryParse(config.launcher.getTag());
-            doDelegateUninstall(version, appUid);
+            doUninstallVersioned(rootDir, version, appUid);
         } else {
             doUninstallApp(rootDir, appUid);
         }
@@ -88,7 +80,7 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
         }
 
         // Trigger cleanup to remove from hive and from pool
-        ClientCleanup cleanup = new ClientCleanup(hive, appsDir, poolDir);
+        ClientCleanup cleanup = new ClientCleanup(hive, rootDir, appsDir, poolDir);
         cleanup.run();
     }
 
@@ -96,7 +88,6 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
      * Removes the given application from this hive and from the pool
      */
     private void doUninstallApp(Path rootDir, String appUid) {
-        // Delete the directory where application specific files are stored
         Path appsDir = rootDir.resolve("apps");
         Path appDir = appsDir.resolve(appUid);
         if (appDir.toFile().exists()) {
@@ -108,63 +99,11 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
     }
 
     /**
-     * Delegates the removal to the uninstaller with the given version.
+     * Removes the application stored in the given version specific directory
      */
-    private void doDelegateUninstall(Version version, String appUid) {
-        log.info("Delegating uninstallation of {} to version {}", appUid, version);
-
-        // Invoke uninstaller or at least remove files manually
-        Path nativeUninstaller = ClientPathHelper.getNativeUninstaller(version);
-        if (!nativeUninstaller.toFile().exists()) {
-            doManualUninstallation(version, appUid);
-        } else {
-            doStartUninstallation(version, appUid);
-        }
-    }
-
-    /** Triggers the native uninstaller to remove the application */
-    private void doStartUninstallation(Version version, String appUid) {
-        Path homeDir = ClientPathHelper.getHome(version);
-        Path nativeUninstaller = ClientPathHelper.getNativeUninstaller(version);
-
-        List<String> command = new ArrayList<>();
-        command.add(nativeUninstaller.toFile().getAbsolutePath());
-        command.add(appUid);
-
-        log.info("Executing {}", command.stream().collect(Collectors.joining(" ")));
-        try {
-            ProcessBuilder b = new ProcessBuilder(command);
-            b.redirectError(Redirect.INHERIT).redirectInput(Redirect.INHERIT).redirectOutput(Redirect.INHERIT);
-            b.directory(homeDir.resolve("launcher").toFile());
-
-            // We set explicitly overwrite the default environment variables so that the uninstaller is using
-            // the home directory that we specify. Important as the other uninstaller should not use our
-            // hive to prevent unintended side-effects.
-            Map<String, String> env = b.environment();
-            env.put(ClientPathHelper.BDEPLOY_HOME, homeDir.toFile().getAbsolutePath());
-
-            Process process = b.start();
-            log.info("Uninstaller successfully launched. PID={}", process.pid());
-
-            int exitCode = process.waitFor();
-            log.info("Uninstaller terminated with exit code {}.", exitCode);
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot start uninstaller.", e);
-        } catch (InterruptedException e) {
-            log.warn("Waiting for uninstaller interrupted.");
-            Thread.currentThread().interrupt();
-        }
-    }
-
-    /**
-     * Manually removes files from the apps directory. The applications still remains in the pool and in the hive.
-     */
-    private void doManualUninstallation(Version version, String appUid) {
-        log.warn("Native uninstaller not available. Trying to manually remove files...");
-
-        // Remove the apps folder
-        Path rootDir = ClientPathHelper.getHome(version);
-        Path appsDir = rootDir.resolve("apps");
+    private void doUninstallVersioned(Path rootDir, Version version, String appUid) {
+        Path versionedRoot = ClientPathHelper.getHome(rootDir, version);
+        Path appsDir = versionedRoot.resolve("apps");
         Path appDir = appsDir.resolve(appUid);
         if (appDir.toFile().exists()) {
             PathHelper.deleteRecursive(appDir);

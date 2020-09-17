@@ -32,14 +32,16 @@ public class ClientCleanup {
     private static final Logger log = LoggerFactory.getLogger(ClientCleanup.class);
 
     private final BHive hive;
+    private final Path rootDir;
     private final Path appsDir;
     private final Path poolDir;
 
     /**
      * Creates a new cleanup instance using the given hive
      */
-    public ClientCleanup(BHive hive, Path appsDir, Path poolDir) {
+    public ClientCleanup(BHive hive, Path rootDir, Path appsDir, Path poolDir) {
         this.hive = hive;
+        this.rootDir = rootDir;
         this.appsDir = appsDir;
         this.poolDir = poolDir;
     }
@@ -79,7 +81,7 @@ public class ClientCleanup {
             log.info("Deleting {}", key);
 
             Version version = VersionHelper.parse(key.getTag());
-            Path launcherPath = ClientPathHelper.getHome(version);
+            Path launcherPath = ClientPathHelper.getHome(rootDir, version);
 
             // File-Locks could prevent that we can delete the folder
             // thus we first try to rename and then delete

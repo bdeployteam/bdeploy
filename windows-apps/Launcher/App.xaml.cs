@@ -1,4 +1,5 @@
 ﻿using Bdeploy.Installer.Models;
+using Bdeploy.Launcher.Models;
 using Bdeploy.Shared;
 using Serilog;
 using System;
@@ -26,13 +27,14 @@ namespace Bdeploy.Launcher {
             this.ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
             // Initialize logging infrastructure
-            string path = Path.Combine(PathProvider.GetLogsDir(), "launcher-log.txt");
+            string path = Path.Combine(LogFactory.GetLogsDir(), "launcher-log.txt");
             Log.Logger = LogFactory.CreateGlobalLogger(path);
 
             // Launch or Uninstall
             int exitCode;
             if (Utils.HasArgument(e.Args, "/Uninstall")) {
-                exitCode = DoUninstall(e.Args);
+                bool forAllUsers = Utils.HasArgument(e.Args, "/ForAllUsers");
+                exitCode = DoUninstall(e.Args, forAllUsers);
             } else {
                 exitCode = await DoLaunch(e.Args);
             }
@@ -79,13 +81,13 @@ namespace Bdeploy.Launcher {
         /// <summary>
         /// Uninstalls the application using the given arguments
         /// </summary>
-        private int DoUninstall(string[] args) {
+        private int DoUninstall(string[] args, bool forAllUsers) {
             string clickAndStartFile = FindClickAndStart(args);
             if (clickAndStartFile == null) {
                 Console.WriteLine("Unexpected number of arguments. Usage BDeploy.exe /Uninstall myApp.bdeploy");
                 return -1;
             }
-            AppUninstaller uninstaller = new AppUninstaller(clickAndStartFile);
+            AppUninstaller uninstaller = new AppUninstaller(clickAndStartFile, forAllUsers);
             return uninstaller.Start();
         }
 

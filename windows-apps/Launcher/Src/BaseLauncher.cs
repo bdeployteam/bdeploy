@@ -1,6 +1,7 @@
 ﻿using Bdeploy.Shared;
 using Serilog;
 using Serilog.Events;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -15,8 +16,11 @@ namespace Bdeploy.Launcher.Models {
         // The main class of the launcher to execute
         public static readonly string MAIN_CLASS = "io.bdeploy.launcher.cli.LauncherCli";
 
-        /// The full path to the current working directory of the launcher
-        public static readonly string LAUNCHER = Utils.GetWorkingDir();
+        /// The full path to the directory of the launcher executable
+        public static readonly string LAUNCHER = Utils.GetExecutableDir();
+
+        /// The full path to the BDeploy home directory
+        public static readonly string HOME = Directory.GetParent(LAUNCHER).FullName;
 
         // The full path to the embedded JRE executable to use
         public static readonly string JRE = Path.Combine(LAUNCHER, "jre", "bin", "javaw.exe");
@@ -95,7 +99,7 @@ namespace Bdeploy.Launcher.Models {
             }
 
             // Create special logger that writes to a separate file
-            string path = Path.Combine(PathProvider.GetLogsDir(), GetAppLoggerName());
+            string path = Path.Combine(LogFactory.GetLogsDir(), GetAppLoggerName());
             ILogger appLogger = LogFactory.GetAppLogger(path);
 
             // Startup minion and wait for termination
@@ -178,6 +182,5 @@ namespace Bdeploy.Launcher.Models {
                 builder.Append("-Xmx256m ");
             }
         }
-
     }
 }

@@ -1,4 +1,7 @@
-﻿using Serilog;
+﻿using Bdeploy.Shared;
+using Serilog;
+using System;
+using System.IO;
 
 namespace Bdeploy.Launcher {
     /// <summary>
@@ -6,6 +9,29 @@ namespace Bdeploy.Launcher {
     /// </summary>
     class LogFactory {
         private static readonly string TEMPLATE = "{Timestamp:yyyy-MM-dd HH:mm:ss} | PID:{ProcessId} | User:{EnvironmentUserName} | {Level:u3} | {Message:l}{NewLine}{Exception}";
+
+        /// <summary>
+        /// Directory where the logs are stored. (LOCALAPPDATA\logs or USER_AREA\logs) 
+        /// </summary>
+        /// <returns></returns>
+        public static string GetLogsDir() {
+            // Store logs in the provided user area
+            string userArea = Environment.GetEnvironmentVariable("BDEPLOY_USER_AREA");
+            if (userArea != null) {
+                return Path.Combine(userArea, "logs");
+            }
+
+            // Calculate the home directory based on the executable
+            string launcherDir = Utils.GetExecutableDir();
+            string homeDir = Directory.GetParent(launcherDir).FullName;
+            if (!FileHelper.IsReadOnly(homeDir)) {
+                return Path.Combine(homeDir, "logs");
+            }
+
+            // Use the application data folder as fallback
+            string appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            return Path.Combine(appData, "BDeploy", "logs");
+        }
 
         /// <summary>
         /// Creates the default logger used by the application.

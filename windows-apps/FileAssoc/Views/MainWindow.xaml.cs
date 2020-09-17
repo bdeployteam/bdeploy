@@ -15,7 +15,7 @@ namespace Bdeploy.FileAssoc {
         }
 
         private void InitDefaults() {
-            LauncherPath.Text = Path.Combine(Utils.GetWorkingDir(), "BDeploy.exe");
+            LauncherPath.Text = Path.Combine(Utils.GetExecutableDir(), "BDeploy.exe");
         }
 
         private void BrowseLauncher_Click(object sender, RoutedEventArgs e) {
@@ -36,33 +36,33 @@ namespace Bdeploy.FileAssoc {
 
         private void CreateAssociation_Click(object sender, RoutedEventArgs e) {
             string path = LauncherPath.Text.ToLower();
-            FileAssociation.CreateAssociation(path);
+            FileAssociation.CreateAssociation(path, false);
         }
 
         private void DeleteAssociation_Click(object sender, RoutedEventArgs e) {
-            FileAssociation.RemoveAssociation();
+            FileAssociation.RemoveAssociation(false);
         }
 
         private void CreateAssociationAsAdmin_Click(object sender, RoutedEventArgs e) {
             if (Utils.IsAdmin()) {
                 string path = LauncherPath.Text.ToLower();
-                FileAssociation.CreateAssociationForAllUsers(path);
+                FileAssociation.CreateAssociation(path, true);
             } else {
                 string argument = "/CreateForAllUsers \"" + LauncherPath.Text.ToLower() + "\"";
-                Launcher.RunAsAdmin(argument);
+                Utils.RunAsAdmin(argument);
             }
         }
 
         private void DeleteAssociationAsAdmin_Click(object sender, RoutedEventArgs e) {
             // Remove for this user
-            FileAssociation.RemoveAssociation();
+            FileAssociation.RemoveAssociation(false);
 
             // Remove for all others
             if (Utils.IsAdmin()) {
-                FileAssociation.RemoveAssociationForAllUsers();
+                FileAssociation.RemoveAssociation(true);
             } else {
                 string argument = "/RemoveForAllUsers";
-                Launcher.RunAsAdmin(argument);
+                Utils.RunAsAdmin(argument);
             }
         }
 

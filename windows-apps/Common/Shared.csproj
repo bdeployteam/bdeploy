@@ -45,9 +45,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Src\FileAssociation.cs" />
     <Compile Include="Src\FileHelper.cs" />
     <Compile Include="Src\Models.cs" />
-    <Compile Include="Src\PathProvider.cs" />
     <Compile Include="Src\Shortcut.cs" />
     <Compile Include="Src\SoftwareEntry.cs" />
     <Compile Include="Src\Utils.cs" />
