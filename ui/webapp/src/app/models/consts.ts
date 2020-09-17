@@ -70,7 +70,8 @@ export const EMPTY_INSTANCE_GROUP: InstanceGroupConfiguration = {
   description: null,
   logo: null,
   autoDelete: null,
-  managed: false
+  managed: false,
+  instanceProperties: []
 };
 
 export const EMPTY_SOFTWARE_REPO: SoftwareRepositoryConfiguration = {

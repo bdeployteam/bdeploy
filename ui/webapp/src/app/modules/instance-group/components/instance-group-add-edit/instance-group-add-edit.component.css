@@ -2,38 +2,64 @@
   flex: 1 1 auto;
 }
 
-.field-container {
+.box {
+  display: flex;
+  flex-direction: row;
+}
+
+.logo-container {
+  min-width: 240px;
+  max-width: 240px;
+  min-height: 280px;
+  max-height: 280px;
   display: flex;
   flex-direction: column;
 }
 
-mat-form-field {
-  flex: 1 1 auto;
-}
-
-.logo-box {
-  flex: 1 1 auto;
+.logo-title-container {
+  flex: 0 0 auto;
   display: flex;
   flex-direction: row;
-  align-items: center;
 }
 
 .logo-title {
   flex: 1 1 auto;
-}
-
-.logo {
-  flex: 0 0 auto;
-  max-width: 200px;
+  line-height: 40px;
+  padding-left: 20px;
 }
 
 .logo-button {
   flex: 0 0 auto;
 }
 
-.logo-preview {
-  padding: 20px 0px 20px 0px;
+.logo-preview-container {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
+  padding: 20px;
+}
+
+.logo {
+  object-fit: contain;
+  width: 100%;
+  max-width: 200px;
+  max-height: 200px;
+}
+
+.logo-dummy {
+  width: 120px;
+  height: 120px;
+}
+
+.fields-container {
+  flex: 1 1 auto;
+  margin: 40px 0px 20px 20px;
+}
+
+mat-form-field {
+  flex: 1 1 auto;
 }
 
 .boolean-param-field {
@@ -56,7 +82,29 @@ mat-form-field {
   text-overflow: ellipsis;
 }
 
-.logo-box-placeholder{
-  text-align: center;
-  font-size:1.3em;
+.tab-container {
+  padding-top: 20px;
 }
+
+.tab-content {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 10px;
+}
+
+.properties-grid {
+  margin: 20px;
+
+  display: grid;
+  grid-template-columns: auto auto 32px 32px;
+
+  row-gap: 5px;
+  column-gap: 10px;
+
+  align-items: center;
+}
+
+mat-toolbar button {
+  margin-left: 5px;
+}
+

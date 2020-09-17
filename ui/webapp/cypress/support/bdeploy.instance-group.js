@@ -14,7 +14,7 @@ Cypress.Commands.add('createInstanceGroup', function(name, mode = 'STANDALONE') 
 
   cy.get('input[type=file]').attachFile({ filePath: 'bdeploy.png', mimeType: 'image/png' });
 
-  cy.get('.logo-img').should('exist');
+  cy.get('.logo').should('exist');
 
   cy.contains('button', 'SAVE').click();
   cy.waitUntilContentLoaded();

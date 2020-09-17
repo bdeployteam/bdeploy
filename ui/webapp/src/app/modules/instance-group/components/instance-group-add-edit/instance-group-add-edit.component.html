@@ -7,9 +7,24 @@
       <button mat-raised-button color="primary" type="submit" [disabled]="loading || !isModified() || !instanceGroupFormGroup.valid">SAVE</button>
     </mat-toolbar>
 
-    <div class="field-container margin-container">
-      <mat-grid-list cols="2" rowHeight="5em" gutterSize='10px'>
-        <mat-grid-tile>
+    <div class="box margin-container">
+      <div class="logo-container">
+        <div class="logo-title-container">
+          <span class="logo-title">Logo</span>
+          <button mat-icon-button class="logo-button" type="button" [disabled]="loading" (click)="fileInput.click()"><mat-icon>folder_open</mat-icon></button>
+          <button mat-icon-button class="logo-button" type="button" [disabled]="loading" (click)="deleteLogo()"><mat-icon>delete</mat-icon></button>
+          <input type="file" hidden (change)="onLogoChange($event)" #fileInput>
+        </div>
+
+        <div class="logo-preview-container">
+          <img class="logo" [src]="getLogoUrl()" alt='logo' *ngIf="getLogoUrl() != null">
+          <img class="logo-dummy" src="/assets/no-image.svg" alt='logo' *ngIf="getLogoUrl() == null">
+          <p *ngIf="getLogoUrl() == null">No logo defined </p>
+        </div>
+      </div>
+
+      <mat-grid-list cols="4" rowHeight="5em" gutterSize='10px' class="fields-container">
+        <mat-grid-tile colspan="3">
           <mat-form-field>
             <input class="input-field" matInput [readonly]="!isCreate()"
               formControlName="name" placeholder="Instance group ID (Cannot be changed after creation!)" />
@@ -40,14 +55,14 @@
           </div>
         </mat-grid-tile>
 
-        <mat-grid-tile>
+        <mat-grid-tile colspan="4">
           <mat-form-field>
             <input class="input-field" matInput
               formControlName="title" placeholder="Display Title" />
             <mat-error *ngIf="titleControl.invalid">{{getErrorMessage(titleControl)}}</mat-error>
           </mat-form-field>
         </mat-grid-tile>
-        <mat-grid-tile>
+        <mat-grid-tile colspan="4">
           <mat-form-field>
             <input class="input-field" matInput
               formControlName="description" placeholder="Description" />
@@ -55,20 +70,28 @@
           </mat-form-field>
         </mat-grid-tile>
       </mat-grid-list>
-
-      <div class="logo-box">
-        <span class="logo-title">Logo</span>
-        <button mat-icon-button class="logo-button" type="button" [disabled]="loading" (click)="fileInput.click()"><mat-icon>folder_open</mat-icon></button>
-        <button mat-icon-button class="logo-button" type="button" [disabled]="loading" (click)="deleteLogo()"><mat-icon>delete</mat-icon></button>
-        <input type="file" hidden (change)="onLogoChange($event)" #fileInput>
-      </div>
-
-      <div class="logo-box logo-preview"  *ngIf="getLogoUrl() != null">
-        <div class="logo-img">
-          <img class="logo" [src]="getLogoUrl()" alt='logo'>
-        </div>
-      </div>
-      <div class="logo-box-placeholder" *ngIf="getLogoUrl() == null"><p>No logo defined </p></div>
     </div>
+
+    <mat-tab-group class='tab-container margin-container' dynamicHeight='true'>
+      <mat-tab label='Instance Property Definitions'>
+          <div class='tab-content'>
+          <p>
+            Configure properties that are available for all Instances of this Instance Group.
+          </p>
+          <div class='properties-grid'>
+            <ng-container *ngFor='let p of instancePropertiesDescriptors; let f = first; let l = last; let i = index'>
+              <div>{{p.name}}</div>
+              <div>{{p.description}}</div>
+              <div><button mat-icon-button type='button' (click)='editInstanceProperty(p, i)'><mat-icon>edit</mat-icon></button></div>
+              <div><button mat-icon-button type='button' (click)='removeInstanceProperty(i)'><mat-icon>delete</mat-icon></button></div>
+            </ng-container>
+          </div>
+          <div *ngIf='!instancePropertiesDescriptors.length'>
+            No Properties have been configured yet.
+          </div>
+          <button mat-mini-fab style='align-self: flex-end;' type='button' (click)='addInstanceProperty()'><mat-icon>add</mat-icon></button>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
   </form>
 </section>

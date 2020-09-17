@@ -74,7 +74,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.get('input[data-placeholder^="Instance group ID"]').type('Demo');
     cy.get('input[data-placeholder=Description]').type('Demo Instance Group');
     cy.get('input[type=file]').attachFile({ filePath: 'bdeploy.png', mimeType: 'image/png' });
-    cy.get('.logo-img').should('exist');
+    cy.get('.logo').should('exist');
     cy.screenshot('BDeploy_Create_IG');
     cy.contains('button', 'SAVE').click();
 

@@ -9,15 +9,17 @@ import {
 } from '@angular/core';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { cloneDeep, isEqual } from 'lodash-es';
 import { Observable, of } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
+import { CustomPropertyEditComponent } from 'src/app/modules/shared/components/custom-property-edit/custom-property-edit.component';
 import { EMPTY_INSTANCE_GROUP } from '../../../../models/consts';
 import {
-  InstanceGroupConfiguration,
+  CustomPropertyDescriptor, InstanceGroupConfiguration,
   MinionMode
 } from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
@@ -50,6 +52,8 @@ export class InstanceGroupAddEditComponent implements OnInit {
   public newLogoFile: File = null;
   public newLogoUrl: SafeUrl = null;
 
+  public instancePropertiesDescriptors: CustomPropertyDescriptor[] = [];
+
   public clonedInstanceGroup: InstanceGroupConfiguration;
 
   private overlayRef: OverlayRef;
@@ -61,6 +65,7 @@ export class InstanceGroupAddEditComponent implements OnInit {
     logo: [''],
     autoDelete: [''],
     managed: [''],
+    instanceProperties: ['']
   });
 
   get nameControl() {
@@ -88,7 +93,8 @@ export class InstanceGroupAddEditComponent implements OnInit {
     private viewContainerRef: ViewContainerRef,
     private overlay: Overlay,
     private config: ConfigService,
-    public routingHistoryService: RoutingHistoryService
+    public routingHistoryService: RoutingHistoryService,
+    private dialog: MatDialog,
   ) {}
 
   ngOnInit() {
@@ -102,8 +108,12 @@ export class InstanceGroupAddEditComponent implements OnInit {
       this.clonedInstanceGroup = cloneDeep(instanceGroup);
     } else {
       this.instanceGroupService.getInstanceGroup(this.nameParam).subscribe(
-        (instanceGroup) => {
+        instanceGroup => {
           this.log.debug('got instance group ' + this.nameParam);
+          if (!instanceGroup.instanceProperties) {
+            instanceGroup.instanceProperties = [];
+          }
+          this.instancePropertiesDescriptors = instanceGroup.instanceProperties;
           this.instanceGroupFormGroup.setValue(instanceGroup);
           this.clonedInstanceGroup = cloneDeep(instanceGroup);
 
@@ -326,4 +336,37 @@ export class InstanceGroupAddEditComponent implements OnInit {
       this.overlayRef = null;
     }
   }
+
+  addInstanceProperty() {
+    this.dialog.open(CustomPropertyEditComponent, {
+      width: '500px',
+      data: null,
+    }).afterClosed().subscribe(r => {
+      if (r) {
+        this.instancePropertiesDescriptors.push(r);
+        this.sortProperties();
+      }
+    });
+  }
+
+  editInstanceProperty(property: CustomPropertyDescriptor, index: number) {
+    this.dialog.open(CustomPropertyEditComponent, {
+      width: '500px',
+      data: cloneDeep(property),
+    }).afterClosed().subscribe(r => {
+      if (r) {
+        this.instancePropertiesDescriptors.splice(index, 1, r);
+        this.sortProperties();
+      }
+    });
+  }
+
+  removeInstanceProperty(index: number) {
+    this.instancePropertiesDescriptors.splice(index, 1);
+  }
+
+  private sortProperties() {
+      this.instancePropertiesDescriptors = this.instancePropertiesDescriptors.sort((a,b) => a.name.localeCompare(b.name));
+  }
+
 }

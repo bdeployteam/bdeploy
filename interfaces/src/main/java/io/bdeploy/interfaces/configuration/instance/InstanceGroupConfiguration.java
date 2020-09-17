@@ -1,6 +1,10 @@
 package io.bdeploy.interfaces.configuration.instance;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.interfaces.settings.CustomPropertyDescriptor;
 
 public class InstanceGroupConfiguration {
 
@@ -38,4 +42,9 @@ public class InstanceGroupConfiguration {
      * Whether this instance group has been attached to a central server
      */
     public boolean managed;
+
+    /**
+     * Property definitions for instances of this instance group
+     */
+    public List<CustomPropertyDescriptor> instanceProperties = new ArrayList<>();
 }
