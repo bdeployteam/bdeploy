@@ -73,8 +73,27 @@
     </div>
 
     <mat-tab-group class='tab-container margin-container' dynamicHeight='true'>
+      <mat-tab label='Instance Group Properties'>
+        <div class='tab-content'>
+          <p>
+            Properties as defined on system level.
+          </p>
+          <div class='properties-grid'>
+            <ng-container *ngFor='let p of getSortedInstanceGroupPropertyKeys(); let f = first; let l = last; let i = index'>
+              <div>{{p}}</div>
+              <div>{{instanceGroupProperties?.properties[p]}}</div>
+              <div><button mat-icon-button type='button' (click)='editInstanceGroupProperty(p)'><mat-icon>edit</mat-icon></button></div>
+              <div><button mat-icon-button type='button' (click)='removeInstanceGroupProperty(p)'><mat-icon>delete</mat-icon></button></div>
+            </ng-container>
+          </div>
+          <div *ngIf='!hasInstanceGroupProperties()'>
+            No Properties have been configured yet.
+          </div>
+          <button mat-mini-fab style='align-self: flex-end;' type='button' (click)='addInstanceGroupProperty()'><mat-icon>add</mat-icon></button>
+        </div>
+      </mat-tab>
       <mat-tab label='Instance Property Definitions'>
-          <div class='tab-content'>
+        <div class='tab-content'>
           <p>
             Configure properties that are available for all Instances of this Instance Group.
           </p>

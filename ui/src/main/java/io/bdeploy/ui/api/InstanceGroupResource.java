@@ -24,6 +24,7 @@ import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.UserPermissionUpdateDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
+import io.bdeploy.interfaces.manifest.properties.CustomPropertiesRecord;
 import io.bdeploy.jersey.ActivityScope;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import io.bdeploy.ui.dto.InstanceClientAppsDto;
@@ -98,5 +99,15 @@ public interface InstanceGroupResource {
     @RequiredPermission(permission = Permission.READ, scope = "group")
     public Collection<InstanceClientAppsDto> listClientApps(@ActivityScope @PathParam("group") String group,
             @QueryParam("os") OperatingSystem os);
+
+    @GET
+    @Path("/{group}/properties")
+    @RequiredPermission(permission = Permission.READ, scope = "group")
+    public CustomPropertiesRecord getProperties(@ActivityScope @PathParam("group") String group);
+
+    @POST
+    @Path("/{group}/properties")
+    @RequiredPermission(permission = Permission.WRITE, scope = "group")
+    public void updateProperties(@ActivityScope @PathParam("group") String group, CustomPropertiesRecord properties);
 
 }

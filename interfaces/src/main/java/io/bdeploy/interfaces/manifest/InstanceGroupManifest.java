@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.Optional;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveExecution;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
@@ -19,6 +20,7 @@ import io.bdeploy.bhive.op.ManifestNextIdOperation;
 import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
+import io.bdeploy.interfaces.manifest.properties.CustomProperties;
 
 /**
  * Describes the instance group that a named hive is associated with.
@@ -80,6 +82,10 @@ public class InstanceGroupManifest {
 
         mfb.setRoot(hive.execute(new InsertArtificialTreeOperation().setTree(tb)));
         hive.execute(new InsertManifestOperation().addManifest(mfb.build(hive)));
+    }
+
+    public CustomProperties getProperties(BHiveExecution bhive) {
+        return new CustomProperties(getKey(), bhive);
     }
 
 }

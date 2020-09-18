@@ -1,0 +1,9 @@
+.content {
+  display: flex;
+  flex-direction: column;
+}
+
+.description {
+  font-size: smaller;
+  padding-bottom: 16px;
+}

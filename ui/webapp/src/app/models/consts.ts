@@ -1,4 +1,4 @@
-import { ApplicationConfiguration, ApplicationStartType, CommandConfiguration, InstanceBannerRecord, InstanceConfiguration, InstanceGroupConfiguration, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstancePurpose, InstanceStateRecord, InstanceVersionDto, ManifestKey, ParameterConfiguration, ParameterDescriptor, ParameterType, ProcessControlConfiguration, SoftwareRepositoryConfiguration, UserChangePasswordDto, UserInfo } from './gen.dtos';
+import { ApplicationConfiguration, ApplicationStartType, CommandConfiguration, CustomPropertiesRecord, InstanceBannerRecord, InstanceConfiguration, InstanceGroupConfiguration, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstancePurpose, InstanceStateRecord, InstanceVersionDto, ManifestKey, ParameterConfiguration, ParameterDescriptor, ParameterType, ProcessControlConfiguration, SoftwareRepositoryConfiguration, UserChangePasswordDto, UserInfo } from './gen.dtos';
 
 // HTTP header constant used to suppress global error handling
 export const NO_ERROR_HANDLING_HDR = 'X-No-Global-Error-Handling';
@@ -69,7 +69,7 @@ export const EMPTY_INSTANCE_GROUP: InstanceGroupConfiguration = {
   title: null,
   description: null,
   logo: null,
-  autoDelete: null,
+  autoDelete: true,
   managed: false,
   instanceProperties: []
 };
@@ -152,3 +152,7 @@ export const EMPTY_PROCESS_CONTROL_CONFIG: ProcessControlConfiguration = {
   startType: ApplicationStartType.MANUAL,
   attachStdin: false,
 };
+
+export const EMPTY_PROPERTIES_RECORD: CustomPropertiesRecord = {
+  properties: {},
+}

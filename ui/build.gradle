@@ -305,6 +305,7 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
         'io.bdeploy.interfaces.directory.InstanceDirectory',
         'io.bdeploy.interfaces.minion.MinionStatusDto',
         'io.bdeploy.interfaces.manifest.banner.InstanceBannerRecord',
+        'io.bdeploy.interfaces.manifest.properties.CustomPropertiesRecord',
         'io.bdeploy.interfaces.manifest.state.InstanceStateRecord',
         'io.bdeploy.interfaces.UserInfo',
         'io.bdeploy.interfaces.UserPermissionUpdateDto',

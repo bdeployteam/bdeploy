@@ -373,7 +373,10 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 throw new WebApplicationException("Instance group (no longer?) found on the managed server", Status.NOT_FOUND);
             }
 
-            Manifest.Key igKey = new InstanceGroupManifest(hive).getKey();
+            InstanceGroupManifest igm = new InstanceGroupManifest(hive);
+            Manifest.Key igKey = igm.getKey();
+            String propertiesMetaName = igm.getProperties(hive).getMetaManifest().getMetaName();
+            SortedSet<Key> metaManifests = hive.execute(new ManifestListOperation().setManifestName(propertiesMetaName));
             try (RemoteBHive rbh = RemoteBHive.forService(svc, groupName, reporter)) {
                 // ALWAYS delete all instance group information on the target - we win!
                 // otherwise the target may have a manifest with a higher tag number and win.
@@ -381,7 +384,9 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 // maybe not optimal to do a call per manifest...
                 keys.keySet().forEach(rbh::removeManifest);
             }
-            hive.execute(new PushOperation().addManifest(igKey).setRemote(svc).setHiveName(groupName));
+            PushOperation push = new PushOperation().addManifest(igKey).setRemote(svc).setHiveName(groupName);
+            metaManifests.forEach(push::addManifest);
+            hive.execute(push);
 
             // 3. Fetch all instance and meta manifests, no products.
             CommonRootResource masterRoot = ResourceProvider.getVersionedResource(svc, CommonRootResource.class, context);

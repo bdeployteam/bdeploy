@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { InstanceClientAppsDto, InstanceGroupConfiguration, OperatingSystem, UserInfo, UserPermissionUpdateDto } from '../../../models/gen.dtos';
+import { CustomPropertiesRecord, InstanceClientAppsDto, InstanceGroupConfiguration, OperatingSystem, UserInfo, UserPermissionUpdateDto } from '../../../models/gen.dtos';
 import { ConfigService } from '../../core/services/config.service';
 import { Logger, LoggingService } from '../../core/services/logging.service';
 import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
@@ -97,6 +97,18 @@ export class InstanceGroupService {
     const formData = new FormData();
     formData.append('image', file, file.name);
     return this.http.post<Response>(url, formData);
+  }
+
+  public getInstanceGroupProperties(name: string): Observable<CustomPropertiesRecord> {
+    const url: string = this.cfg.config.api + InstanceGroupService.BASEPATH + '/' + name + '/properties';
+    this.log.debug('getInstanceGroupProperties: ' + url);
+    return this.http.get<CustomPropertiesRecord>(url);
+  }
+
+  public updateInstanceGroupProperties(name: string, properties: CustomPropertiesRecord) {
+    const url: string = this.cfg.config.api + InstanceGroupService.BASEPATH + '/' + name + '/properties';
+    this.log.debug('updateInstanceGroupProperties: ' + url);
+    return this.http.post(url, properties);
   }
 
 }

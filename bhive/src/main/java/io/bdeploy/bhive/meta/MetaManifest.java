@@ -189,4 +189,7 @@ public class MetaManifest<T> {
         return metaClazz.getSimpleName() + ".json";
     }
 
+    public String getMetaName() {
+        return metaName;
+    }
 }

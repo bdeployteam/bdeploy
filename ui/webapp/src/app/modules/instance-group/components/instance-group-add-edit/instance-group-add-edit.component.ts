@@ -1,33 +1,23 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Location } from '@angular/common';
-import {
-  Component,
-  OnInit,
-  TemplateRef,
-  ViewContainerRef
-} from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { cloneDeep, isEqual } from 'lodash-es';
-import { Observable, of } from 'rxjs';
+import { forkJoin, Observable, of } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
+import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { CustomPropertyEditComponent } from 'src/app/modules/shared/components/custom-property-edit/custom-property-edit.component';
-import { EMPTY_INSTANCE_GROUP } from '../../../../models/consts';
-import {
-  CustomPropertyDescriptor, InstanceGroupConfiguration,
-  MinionMode
-} from '../../../../models/gen.dtos';
+import { CustomPropertyValueComponent } from 'src/app/modules/shared/components/custom-property-value/custom-property-value.component';
+import { EMPTY_INSTANCE_GROUP, EMPTY_PROPERTIES_RECORD } from '../../../../models/consts';
+import { CustomPropertiesRecord, CustomPropertyDescriptor, InstanceGroupConfiguration, MinionMode } from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
-import {
-  ErrorMessage,
-  Logger,
-  LoggingService
-} from '../../../core/services/logging.service';
+import { ErrorMessage, Logger, LoggingService } from '../../../core/services/logging.service';
 import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
 import { MessageboxService } from '../../../shared/services/messagebox.service';
 import { InstanceGroupValidators } from '../../../shared/validators/instance-group.validator';
@@ -37,6 +27,7 @@ import { InstanceGroupService } from '../../services/instance-group.service';
   selector: 'app-instance-group-add-edit',
   templateUrl: './instance-group-add-edit.component.html',
   styleUrls: ['./instance-group-add-edit.component.css'],
+  providers: [SettingsService]
 })
 export class InstanceGroupAddEditComponent implements OnInit {
   log: Logger = this.loggingService.getLogger('InstanceGroupAddEditComponent');
@@ -52,9 +43,12 @@ export class InstanceGroupAddEditComponent implements OnInit {
   public newLogoFile: File = null;
   public newLogoUrl: SafeUrl = null;
 
-  public instancePropertiesDescriptors: CustomPropertyDescriptor[] = [];
+  public instancePropertiesDescriptors: CustomPropertyDescriptor[] = []; // shortcut into instance group record
+
+  public instanceGroupProperties: CustomPropertiesRecord;
 
   public clonedInstanceGroup: InstanceGroupConfiguration;
+  public clonedInstanceGroupProperties: CustomPropertiesRecord;
 
   private overlayRef: OverlayRef;
 
@@ -93,6 +87,7 @@ export class InstanceGroupAddEditComponent implements OnInit {
     private viewContainerRef: ViewContainerRef,
     private overlay: Overlay,
     private config: ConfigService,
+    private settings: SettingsService,
     public routingHistoryService: RoutingHistoryService,
     private dialog: MatDialog,
   ) {}
@@ -102,26 +97,31 @@ export class InstanceGroupAddEditComponent implements OnInit {
     this.log.debug('nameParam = ' + this.nameParam);
 
     if (this.isCreate()) {
+      // prepare instance group
       const instanceGroup = cloneDeep(EMPTY_INSTANCE_GROUP);
-      instanceGroup.autoDelete = true;
-      this.instanceGroupFormGroup.setValue(instanceGroup);
       this.clonedInstanceGroup = cloneDeep(instanceGroup);
+      this.instanceGroupFormGroup.setValue(instanceGroup);
+      this.instancePropertiesDescriptors = instanceGroup.instanceProperties;
+      // prepare instance group properties values
+      this.instanceGroupProperties = cloneDeep(EMPTY_PROPERTIES_RECORD);
+      this.clonedInstanceGroupProperties = cloneDeep(EMPTY_PROPERTIES_RECORD);
     } else {
-      this.instanceGroupService.getInstanceGroup(this.nameParam).subscribe(
-        instanceGroup => {
-          this.log.debug('got instance group ' + this.nameParam);
+      const og = this.instanceGroupService.getInstanceGroup(this.nameParam);
+      const op = this.instanceGroupService.getInstanceGroupProperties(this.nameParam);
+      forkJoin(og, op).subscribe(
+        result => {
+          const instanceGroup: InstanceGroupConfiguration = result[0];
+
           if (!instanceGroup.instanceProperties) {
             instanceGroup.instanceProperties = [];
           }
-          this.instancePropertiesDescriptors = instanceGroup.instanceProperties;
           this.instanceGroupFormGroup.setValue(instanceGroup);
           this.clonedInstanceGroup = cloneDeep(instanceGroup);
+          this.instancePropertiesDescriptors = instanceGroup.instanceProperties;
 
           if (instanceGroup.logo) {
-            this.instanceGroupService
-              .getInstanceGroupImage(this.nameParam)
+            this.instanceGroupService.getInstanceGroupImage(this.nameParam)
               .subscribe((data) => {
-                this.log.debug('got logo data...');
                 const reader = new FileReader();
                 reader.onload = () => {
                   this.originalLogoUrl = this.sanitizer.bypassSecurityTrustUrl(
@@ -130,14 +130,16 @@ export class InstanceGroupAddEditComponent implements OnInit {
                 };
                 reader.readAsDataURL(data);
               });
-          } else {
-            this.log.debug('no logo to read...');
           }
+
+          this.instanceGroupProperties = result[1];
+          if (!this.instanceGroupProperties.properties) {
+            this.instanceGroupProperties.properties = {};
+          }
+          this.clonedInstanceGroupProperties = cloneDeep(this.instanceGroupProperties);
         },
-        (error) => {
-          this.log.errorWithGuiMessage(
-            new ErrorMessage('reading instance group failed', error)
-          );
+        error => {
+          this.log.errorWithGuiMessage(new ErrorMessage('reading instance group failed', error));
         }
       );
     }
@@ -211,65 +213,71 @@ export class InstanceGroupAddEditComponent implements OnInit {
     this.loading = true;
 
     const instanceGroup = this.instanceGroupFormGroup.getRawValue();
+    const instanceGroupProperties = this.instanceGroupProperties;
 
     if (this.isCreate()) {
-      this.instanceGroupService
-        .createInstanceGroup(instanceGroup)
-        .pipe(
-          finalize(() => {
-            this.clearLogoUpload();
-            this.loading = false;
-          })
-        )
+      // first create group, second set properties third update image on existing group
+      this.instanceGroupService.createInstanceGroup(instanceGroup)
         .subscribe((result) => {
           this.log.info('created new instance group ' + instanceGroup.name);
-          this.checkImage(instanceGroup.name);
           this.clonedInstanceGroup = instanceGroup;
+          this.instanceGroupService
+            .updateInstanceGroupProperties(instanceGroup.name, instanceGroupProperties)
+            .pipe(finalize(() => { this.loading = false; }))
+            .subscribe(result => {
+                this.clonedInstanceGroupProperties = cloneDeep(instanceGroupProperties);
+                this.checkImage(instanceGroup.name);
+              });
         });
     } else {
       if (this.config.config.mode === MinionMode.CENTRAL) {
-        this.messageBoxService
-          .open({
+        this.messageBoxService.open({
             title: 'Updating Managed Servers',
-            message:
-              'This action will try to contact and synchronize with all managed servers for this instance group.',
+            message: 'This action will try to contact and synchronize with all managed servers for this instance group.',
             mode: MessageBoxMode.CONFIRM_WARNING,
           })
           .subscribe((r) => {
             if (r) {
-              this.doUpdate(instanceGroup);
+              this.doUpdate(instanceGroup, instanceGroupProperties);
             } else {
               this.loading = false;
             }
           });
       } else {
-        this.doUpdate(instanceGroup);
+        this.doUpdate(instanceGroup, instanceGroupProperties);
       }
     }
   }
 
-  private doUpdate(instanceGroup: any) {
-    this.instanceGroupService
-      .updateInstanceGroup(this.nameParam, instanceGroup)
-      .pipe(
-        finalize(() => {
-          this.clearLogoUpload();
-          this.loading = false;
-        })
-      )
-      .subscribe((result) => {
-        this.log.info('updated instance group ' + this.nameParam);
-        this.checkImage(this.nameParam);
-        this.clonedInstanceGroup = instanceGroup;
-      });
+  private doUpdate(instanceGroup: any, instanceGroupProperties: CustomPropertiesRecord) {
+    const og = this.instanceGroupService.updateInstanceGroup(this.nameParam, instanceGroup);
+    const op = this.instanceGroupService.updateInstanceGroupProperties(this.nameParam, this.instanceGroupProperties);
+    forkJoin(og, op)
+    .pipe(
+      finalize(() => {this.loading = false;})
+    )
+    .subscribe((result) => {
+      this.log.info('updated instance group ' + this.nameParam);
+      this.clonedInstanceGroup = instanceGroup;
+      this.clonedInstanceGroupProperties = instanceGroupProperties;
+      this.checkImage(this.nameParam);
+    });
   }
 
   isModified(): boolean {
+    return this.isConfigurationModified() || this.isPropertiesModified();
+  }
+
+  isConfigurationModified(): boolean {
     const instanceGroup: InstanceGroupConfiguration = this.instanceGroupFormGroup.getRawValue();
     return (
       !isEqual(instanceGroup, this.clonedInstanceGroup) ||
       this.newLogoFile != null
     );
+  }
+
+  isPropertiesModified(): boolean {
+    return !isEqual(this.instanceGroupProperties, this.clonedInstanceGroupProperties);
   }
 
   canDeactivate(): Observable<boolean> {
@@ -285,16 +293,14 @@ export class InstanceGroupAddEditComponent implements OnInit {
 
   private checkImage(group: string): void {
     if (this.newLogoFile != null) {
-      this.instanceGroupService
-        .updateInstanceGroupImage(group, this.newLogoFile)
-        .pipe(finalize(() => (this.loading = false)))
+      this.instanceGroupService.updateInstanceGroupImage(group, this.newLogoFile)
+        .pipe(finalize(() => {this.clearLogoUpload(); this.loading = false; }))
         .subscribe((response) => {
           this.router.navigate(['/instancegroup/browser']);
-          this.loading = false;
         });
     } else {
-      this.router.navigate(['/instancegroup/browser']);
       this.loading = false;
+      this.router.navigate(['/instancegroup/browser']);
     }
   }
 
@@ -344,7 +350,7 @@ export class InstanceGroupAddEditComponent implements OnInit {
     }).afterClosed().subscribe(r => {
       if (r) {
         this.instancePropertiesDescriptors.push(r);
-        this.sortProperties();
+        this.sortInstanceProperties();
       }
     });
   }
@@ -356,7 +362,7 @@ export class InstanceGroupAddEditComponent implements OnInit {
     }).afterClosed().subscribe(r => {
       if (r) {
         this.instancePropertiesDescriptors.splice(index, 1, r);
-        this.sortProperties();
+        this.sortInstanceProperties();
       }
     });
   }
@@ -365,8 +371,61 @@ export class InstanceGroupAddEditComponent implements OnInit {
     this.instancePropertiesDescriptors.splice(index, 1);
   }
 
-  private sortProperties() {
+  private sortInstanceProperties() {
       this.instancePropertiesDescriptors = this.instancePropertiesDescriptors.sort((a,b) => a.name.localeCompare(b.name));
+  }
+
+  // InstanceGroup Property Values
+
+  addInstanceGroupProperty() {
+    const possibleDescriptors = this.settings.getSettings().instanceGroup.properties.filter(d => !this.instanceGroupProperties.properties[d.name] );
+    this.dialog.open(CustomPropertyValueComponent, {
+      width: '500px',
+      data: {
+        descriptors: possibleDescriptors,
+        propertyName: null,
+        propertyValue: null,
+      },
+    }).afterClosed().subscribe(r => {
+      if (r) {
+        this.instanceGroupProperties.properties[r.name] = r.value;
+      }
+    });
+  }
+
+  editInstanceGroupProperty(propertyName: string) {
+    let descriptor = this.settings.getSettings().instanceGroup.properties.find(d => d.name === propertyName);
+    if (!descriptor) {
+      descriptor = {name: propertyName, description: ''};
+    }
+    this.dialog.open(CustomPropertyValueComponent, {
+      width: '500px',
+      data: {
+        descriptors: [descriptor],
+        propertyName: propertyName,
+        propertyValue: cloneDeep(this.instanceGroupProperties.properties[propertyName])
+      },
+    }).afterClosed().subscribe(r => {
+      if (r) {
+        this.instanceGroupProperties.properties[r.name] = r.value;
+      }
+    });
+  }
+
+  removeInstanceGroupProperty(propertyName: string) {
+    delete this.instanceGroupProperties.properties[propertyName];
+  }
+
+  hasInstanceGroupProperties(): boolean {
+    return Object.keys(this.instanceGroupProperties.properties).length > 0;
+  }
+
+  getSortedInstanceGroupPropertyKeys(): string[] {
+    if (this.instanceGroupProperties?.properties) {
+      return Object.keys(this.instanceGroupProperties.properties).sort((a, b) => a.localeCompare(b));
+    } else {
+      return [];
+    }
   }
 
 }
