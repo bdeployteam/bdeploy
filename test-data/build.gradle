@@ -192,9 +192,11 @@ createProductTasks("externalSoftware2Zip","external-software-2-raw")
 
 // now the tasks for binary (upgrade) tests
 task releaseTest() {
-    // container to depend on all migration tests.
-    if(project(":minion").mac64DistZip.enabled && !org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
-        throw new IllegalStateException("Release tests not supported with MAC support enabled right now")
+    doFirst {
+        // container to depend on all migration tests.
+        if(project(":minion").mac64DistZip.enabled && !org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
+            throw new IllegalStateException("Release tests not supported with MAC support enabled right now")
+        }
     }
 }
 
