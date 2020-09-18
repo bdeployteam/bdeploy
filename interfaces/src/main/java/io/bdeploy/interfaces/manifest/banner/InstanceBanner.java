@@ -11,7 +11,7 @@ public class InstanceBanner {
 
     public InstanceBanner(Manifest.Key instanceManifest, BHiveExecution hive) {
         this.hive = hive;
-        this.meta = new MetaManifest<>(instanceManifest, true, InstanceBannerRecord.class);
+        this.meta = new MetaManifest<>(instanceManifest, false, InstanceBannerRecord.class);
     }
 
     public void set(InstanceBannerRecord banner) {
