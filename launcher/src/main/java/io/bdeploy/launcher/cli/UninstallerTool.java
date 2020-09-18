@@ -57,7 +57,7 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
             rootDir = ClientPathHelper.getBDeployHome();
         }
         Path bhiveDir = rootDir.resolve("bhive");
-        MarkerDatabase.lockRoot(rootDir);
+        MarkerDatabase.lockRoot(rootDir, null, null);
         try (BHive hive = new BHive(bhiveDir.toUri(), new ActivityReporter.Null())) {
             doUninstall(rootDir, hive, config.app());
         } finally {

@@ -15,6 +15,8 @@ import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -88,6 +90,11 @@ import io.bdeploy.launcher.cli.ui.LauncherUpdateDialog;
 public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
     private static final Logger log = LoggerFactory.getLogger(LauncherTool.class);
+
+    /** Lock files should contain the writing PID. In case the process no longer exists, the lock file is invalid. */
+    private static final Supplier<String> LOCK_CONTENT = () -> Long.toString(ProcessHandle.current().pid());
+    /** Validator will check whether the writing PID of the lock file is still there. */
+    private static final Predicate<String> LOCK_VALIDATOR = (pid) -> ProcessHandle.of(Long.parseLong(pid)).isPresent();
 
     /**
      * Environment variable that is set in case that one launcher delegates launching to another (older) one.
@@ -221,7 +228,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 if (!readOnlyRootDir) {
                     ClientCleanup cleanup = new ClientCleanup(hive, appDir, poolDir);
                     try (Activity waiting = reporter.start("Waiting for other launchers...")) {
-                        MarkerDatabase.lockRoot(rootDir); // this could wait for other launchers.
+                        MarkerDatabase.lockRoot(rootDir, LOCK_CONTENT, LOCK_VALIDATOR); // this could wait for other launchers.
                     }
                     try {
                         cleanup.run();
@@ -289,7 +296,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /** Updates the launcher if there is a new version available */
     private Entry<Version, Key> doSelfUpdate(BHive hive, LauncherSplashReporter reporter, Version serverVersion) {
         try (Activity waiting = reporter.start("Waiting for other launchers...")) {
-            MarkerDatabase.lockRoot(rootDir);
+            MarkerDatabase.lockRoot(rootDir, LOCK_CONTENT, LOCK_VALIDATOR);
         }
         try {
             Entry<Version, Key> requiredLauncher = getLatestLauncherVersion(reporter, serverVersion);
@@ -385,7 +392,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Install the application into the pool if missing
         try (Activity waiting = reporter.start("Waiting for other launchers...")) {
-            MarkerDatabase.lockRoot(rootDir);
+            MarkerDatabase.lockRoot(rootDir, LOCK_CONTENT, LOCK_VALIDATOR);
         }
         try {
             installApplication(hive, splash, reporter, clientAppCfg);

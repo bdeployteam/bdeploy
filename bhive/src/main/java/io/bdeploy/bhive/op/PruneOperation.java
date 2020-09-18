@@ -44,7 +44,7 @@ public class PruneOperation extends BHive.Operation<SortedMap<ObjectId, Long>> {
             //  1) No NEW marker databases will be created and no concurrent prune operations will run.
             //  2) Existing transactions will be allowed to continue using their existing marker databases.
             //  3) Upon completion, existing trasactions will block removal of the markers until the root is unlocked.
-            MarkerDatabase.lockRoot(getMarkerRoot());
+            MarkerDatabase.lockRoot(getMarkerRoot(), null, null);
 
             SortedSet<ObjectId> orig = getObjectManager().db(ObjectDatabase::getAllObjects);
             SortedSet<ObjectId> all = new TreeSet<>(orig);

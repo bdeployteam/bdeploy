@@ -5,6 +5,11 @@ import java.io.InputStream;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.common.util.StringHelper;
 
 public class MarkerDatabase extends ObjectDatabase {
 
@@ -54,18 +60,48 @@ public class MarkerDatabase extends ObjectDatabase {
      * only a single lock can exist (intra- & inter-VM).
      *
      * @param root the root directory to lock.
+     * @param lockContentSupplier supplies content to be written to the lock file.
+     * @param lockContentValidator validates the content of the lock file (even from other VMs!) to check whether the file is
+     *            still valid. The lock file is forcefully deleted if not.
      */
-    public static void lockRoot(Path root) {
+    public static void lockRoot(Path root, Supplier<String> lockContentSupplier, Predicate<String> lockContentValidator) {
+        Path lockFile = root.resolve(LOCK_FILE);
+
+        String content = "";
+        if (lockContentSupplier != null) {
+            content = lockContentSupplier.get();
+        }
+
         boolean infoWritten = false;
         for (int i = 0; i < 100_000; ++i) {
             try {
-                Files.createFile(root.resolve(LOCK_FILE)).toFile().deleteOnExit();
+                Files.write(lockFile, Collections.singletonList(content), StandardOpenOption.CREATE_NEW,
+                        StandardOpenOption.DELETE_ON_CLOSE);
                 return;
             } catch (FileAlreadyExistsException e) {
+                // validate to find stale lock files
+                if (lockContentValidator != null) {
+                    try {
+                        List<String> lines = Files.readAllLines(lockFile);
+                        if (!lines.isEmpty() && !StringHelper.isNullOrEmpty(lines.get(0))) {
+                            if (!lockContentValidator.test(lines.get(0))) {
+                                // it is invalid! this means it is a stale lock, we can delete it!
+                                log.warn("Stale lock file detected, forcefully resolving...");
+                                Files.delete(lockFile);
+                                continue;
+                            }
+                        }
+                    } catch (IOException ve) {
+                        // cannot validate, assume it is still valid.
+                        log.warn("Cannot validate lock file, assuming it is valid: " + lockFile + ": " + ve.toString());
+                    }
+                }
+                // inform the user that we're about to wait...
                 if (!infoWritten) {
                     log.info("Waiting for {}", root);
                     infoWritten = true;
                 }
+                // delay a little...
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException ie) {
