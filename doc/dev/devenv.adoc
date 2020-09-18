@@ -81,3 +81,17 @@ BDeploy's backend is HTTPS *only*. It uses a self-signed certificate by default.
 
 This makes it necessary to open a second tab in the browser and navigate to https://localhost:7701 to accept the security exception before the Web UI can communicate with the backend properly. Note that this URL will also load the Web UI once the security exception is in place, but will fail to start (see note above).
 ====
+
+=== Building for other platforms
+
+You can build distribution packages for other platforms by installing their respective JDKs. You need to specify those JDKs as properties during the build. To simplify the process, you can create these entries in `~/.gradle/gradle.properties`:
+
+[source,properties]
+----
+systemProp.win64jdk=/home/mduft/work/jdks/windows/jdk-11.0.8+10
+systemProp.linux64jdk=/home/mduft/work/jdks/linux/jdk-11.0.8+10
+#systemProp.mac64jdk=/home/mduft/work/jdks/mac/jdk-11.0.8+10/Contents/Home
+----
+
+[TIP]
+Of course you need to download those JDKs and adapt the paths to your environment.
