@@ -540,7 +540,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             if (clientAppCfg.clientSplashData != null) {
                 splash.storeSplashImage(branding.splash.image, clientAppCfg.clientSplashData);
             }
-            splash.storeSplashData(branding.splash);
+            splash.storeSplashData(branding);
         }
 
         // Protocol the installation

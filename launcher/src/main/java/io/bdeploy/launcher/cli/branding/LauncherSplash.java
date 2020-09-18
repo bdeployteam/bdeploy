@@ -237,10 +237,10 @@ public class LauncherSplash implements LauncherSplashDisplay {
     /**
      * Writes the splash configuration to the file-system
      */
-    public void storeSplashData(ApplicationSplashDescriptor splashCfg) {
+    public void storeSplashData(ApplicationBrandingDescriptor branding) {
         Path path = appDir.resolve("splash.json");
         try (OutputStream os = Files.newOutputStream(path)) {
-            os.write(StorageHelper.toRawBytes(splashCfg));
+            os.write(StorageHelper.toRawBytes(branding));
         } catch (IOException e) {
             log.warn("Cannot cache splash data to {}", path, e);
         }
