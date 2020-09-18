@@ -72,6 +72,7 @@ namespace Bdeploy.Launcher {
             builder.AppendFormat("{0} ", MAIN_CLASS);
             builder.AppendFormat("launcher ");
             builder.AppendFormat("\"--launch={0}\" ", clickAndStartFile);
+            builder.AppendFormat("\"--homeDir={0}\" ", HOME);
             builder.AppendFormat("\"--updateDir={0}\" ", UPDATES);
             return StartLauncher(builder.ToString());
         }

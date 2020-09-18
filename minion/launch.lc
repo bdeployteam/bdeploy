@@ -216,6 +216,7 @@ java configuration Launcher {
 	argument "-v";
 	argument "launcher";
 	argument "--launch=${file_prompt:.bdeploy file to launch}";
+	argument "--homeDir=${workspace_loc}/runtime/launcher";
 	
 //	vm-argument "-Dsun.java2d.debugfonts=true";
 //	vm-argument "-Dsun.awt.fontconfig=/tmp/markus.properties";
@@ -230,6 +231,7 @@ java configuration Uninstaller {
 	argument "-v";
 	argument "uninstaller";
 	argument "--app=${string_prompt:Enter application UID}";
+	argument "--homeDir=${workspace_loc}/runtime/launcher";
 }
 
 /**

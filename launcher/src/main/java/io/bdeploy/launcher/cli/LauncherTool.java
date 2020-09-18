@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.Callable;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -93,6 +95,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
     /** Lock files should contain the writing PID. In case the process no longer exists, the lock file is invalid. */
     private static final Supplier<String> LOCK_CONTENT = () -> Long.toString(ProcessHandle.current().pid());
+
     /** Validator will check whether the writing PID of the lock file is still there. */
     private static final Predicate<String> LOCK_VALIDATOR = (pid) -> ProcessHandle.of(Long.parseLong(pid)).isPresent();
 
@@ -118,7 +121,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         @Validator(ExistingPathValidator.class)
         String launch();
 
-        @Help("Directory where the launcher stores the hive as well as all applications. Defaults to home/.bdeploy.")
+        @Help("Directory where the launcher stores the hive as well as all applications.")
         String homeDir();
 
         @Help("Directory where the launcher stores essential runtime data.")
@@ -226,15 +229,11 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
                 // Cleanup the installation directory and the hive.
                 if (!readOnlyRootDir) {
-                    ClientCleanup cleanup = new ClientCleanup(hive, appDir, poolDir);
-                    try (Activity waiting = reporter.start("Waiting for other launchers...")) {
-                        MarkerDatabase.lockRoot(rootDir, LOCK_CONTENT, LOCK_VALIDATOR); // this could wait for other launchers.
-                    }
-                    try {
+                    doExecuted(reporter, () -> {
+                        ClientCleanup cleanup = new ClientCleanup(hive, rootDir, appDir, poolDir);
                         cleanup.run();
-                    } finally {
-                        MarkerDatabase.unlockRoot(rootDir);
-                    }
+                        return null;
+                    });
                 }
 
                 // Wait until the process terminates
@@ -295,16 +294,11 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
     /** Updates the launcher if there is a new version available */
     private Entry<Version, Key> doSelfUpdate(BHive hive, LauncherSplashReporter reporter, Version serverVersion) {
-        try (Activity waiting = reporter.start("Waiting for other launchers...")) {
-            MarkerDatabase.lockRoot(rootDir, LOCK_CONTENT, LOCK_VALIDATOR);
-        }
-        try {
+        return doExecuted(reporter, () -> {
             Entry<Version, Key> requiredLauncher = getLatestLauncherVersion(reporter, serverVersion);
             doCheckForLauncherUpdate(hive, reporter, requiredLauncher);
             return requiredLauncher;
-        } finally {
-            MarkerDatabase.unlockRoot(rootDir);
-        }
+        });
     }
 
     /** Waits until the given process terminates */
@@ -323,25 +317,20 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         if (config.launch() == null) {
             throw new IllegalStateException("Missing --launch argument");
         }
+        if (config.homeDir() == null) {
+            throw new IllegalStateException("Missing --homeDir argument");
+        }
 
         // Check where to put local data.
-        if (config.homeDir() != null && !config.homeDir().isEmpty()) {
-            rootDir = Paths.get(config.homeDir());
-        } else {
-            rootDir = ClientPathHelper.getBDeployHome();
-        }
-        rootDir = rootDir.toAbsolutePath();
+        rootDir = Paths.get(config.homeDir()).toAbsolutePath();
         updateDir = PathHelper.ofNullableStrig(config.updateDir());
 
-        // Check if a user-specific directory should be used
-        userArea = PathHelper.ofNullableStrig(System.getenv("BDEPLOY_USER_AREA"));
-        if (userArea != null) {
-            userArea = userArea.toAbsolutePath();
-        }
-
-        // User-Area must be provided when the root is read-only
-        if (PathHelper.isReadOnly(rootDir) && (userArea == null || PathHelper.isReadOnly(userArea))) {
-            throw new IllegalStateException("A user area must be provided when the home directory is read-only");
+        // Try to get a user-area if the root is readonly
+        if (PathHelper.isReadOnly(rootDir)) {
+            userArea = ClientPathHelper.getUserArea();
+            if (userArea == null || PathHelper.isReadOnly(userArea)) {
+                throw new IllegalStateException("The user area '" + userArea + "' does not exist or cannot be modified.");
+            }
         }
 
         Path descriptorFile = Paths.get(config.launch());
@@ -359,9 +348,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         log.info("Home directory: {}{}", rootDir, readOnlyRootDir ? " (readonly)" : "");
         if (userArea != null) {
             log.info("User-area: {}", userArea);
-            if (PathHelper.isReadOnly(userArea)) {
-                throw new IllegalStateException("The user area '" + userArea + "' must be writable. Check permissions.");
-            }
         }
     }
 
@@ -391,18 +377,38 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
 
         // Install the application into the pool if missing
-        try (Activity waiting = reporter.start("Waiting for other launchers...")) {
-            MarkerDatabase.lockRoot(rootDir, LOCK_CONTENT, LOCK_VALIDATOR);
-        }
-        try {
+        doExecuted(reporter, () -> {
             installApplication(hive, splash, reporter, clientAppCfg);
-        } finally {
-            MarkerDatabase.unlockRoot(rootDir);
-        }
+            return null;
+        });
 
         // Launch the application
         try (Activity info = reporter.start("Launching...")) {
             return launchApplication(clientAppCfg);
+        }
+    }
+
+    /**
+     * Locks the root in order to perform the given operation. The lock is not taken if the current user does
+     * not have the permissions to modify the root directory. In that case the operation is directly executed.
+     */
+    private <T> T doExecuted(LauncherSplashReporter reporter, Callable<T> runnable) {
+        if (!readOnlyRootDir) {
+            try (Activity waiting = reporter.start("Waiting for other launchers...")) {
+                MarkerDatabase.lockRoot(rootDir, LOCK_CONTENT, LOCK_VALIDATOR); // this could wait for other launchers.
+            }
+        }
+        try {
+            return runnable.call();
+        } catch (Exception ex) {
+            if (ex instanceof RuntimeException) {
+                throw ((RuntimeException) ex);
+            }
+            throw new RuntimeException("Failed to executed operation", ex);
+        } finally {
+            if (!readOnlyRootDir) {
+                MarkerDatabase.unlockRoot(rootDir);
+            }
         }
     }
 
@@ -480,22 +486,23 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Check if the application directory is already present
         String appName = appCfg.name;
+        Collection<String> missing = Collections.emptyList();
         try {
-            Collection<String> missing = getMissingArtifacts(hive, clientAppCfg);
+            missing = getMissingArtifacts(hive, clientAppCfg);
             if (missing.isEmpty()) {
                 log.info("Application is already installed. Nothing to install/update.");
                 return;
             }
             log.info("Missing artifacts {}", missing);
-
-            // Throw an exception if we do not have write permissions in the directory
-            if (readOnlyRootDir) {
-                throw new SoftwareUpdateException(appName,
-                        "Missing artifacts: " + missing.stream().collect(Collectors.joining(",")));
-            }
         } catch (Exception e) {
             log.warn("Cannot verify that application is installed, re-installing", e);
         }
+
+        // Throw an exception if we do not have write permissions in the directory
+        if (readOnlyRootDir) {
+            throw new SoftwareUpdateException(appName, "Missing artifacts: " + missing.stream().collect(Collectors.joining(",")));
+        }
+
         Key appKey = appCfg.application;
         log.info("Starting installation of application {}", appKey);
 
@@ -654,7 +661,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     private void doInstallSideBySide(BHive hive, Entry<Version, Key> requiredLauncher) {
         // Check if the launcher is already installed
         Version version = requiredLauncher.getKey();
-        Path nativeLauncher = ClientPathHelper.getNativeLauncher(version);
+        Path nativeLauncher = ClientPathHelper.getNativeLauncher(rootDir, version);
         if (nativeLauncher.toFile().exists()) {
             return;
         }
@@ -670,7 +677,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         hive.execute(new FetchOperation().addManifest(launcher).setRemote(descriptor.host));
 
         // write to target directory
-        Path launcherHome = ClientPathHelper.getHome(version).resolve(ClientPathHelper.LAUNCHER_DIR);
+        Path launcherHome = ClientPathHelper.getHome(rootDir, version).resolve(ClientPathHelper.LAUNCHER_DIR);
         hive.execute(new ExportOperation().setManifest(launcher).setTarget(launcherHome));
 
         // Write manifest entry that the launcher needs to be retained
@@ -685,8 +692,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
      * Delegates launching of the application to the given version of the launcher.
      */
     private Process doDelegateLaunch(Version version, String appDescriptor) {
-        Path homeDir = ClientPathHelper.getHome(version);
-        Path nativeLauncher = ClientPathHelper.getNativeLauncher(version);
+        Path homeDir = ClientPathHelper.getHome(rootDir, version);
+        Path nativeLauncher = ClientPathHelper.getNativeLauncher(rootDir, version);
         log.info("Launching application {} using launcher version {}", descriptor.applicationId, version);
 
         List<String> command = new ArrayList<>();
@@ -699,14 +706,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             b.redirectError(Redirect.INHERIT).redirectInput(Redirect.INHERIT).redirectOutput(Redirect.INHERIT);
             b.directory(homeDir.resolve(ClientPathHelper.LAUNCHER_DIR).toFile());
 
-            // We set explicitly overwrite the default environment variables so that the launcher is using
-            // the home directory that we specify. Important as the other launcher should not use our
-            // hive to prevent unintended side-effects.
-            Map<String, String> env = b.environment();
-            env.put(ClientPathHelper.BDEPLOY_HOME, homeDir.toFile().getAbsolutePath());
-
             // Notify the launcher that he runs in a special mode.
             // In that mode he will forward all exit codes without special handling.
+            Map<String, String> env = b.environment();
             env.put(BDEPLOY_DELEGATE, "TRUE");
             return b.start();
         } catch (IOException e) {

@@ -23,10 +23,11 @@ namespace Bdeploy.Installer {
 
             // Whether or not to perform an unattended installation
             bool unattended = Utils.HasArgument(e.Args, "/Unattended");
+            bool forAllUsers = Utils.HasArgument(e.Args, "/ForAllUsers");
 
             // Read configuration and create installer
             Config config = ConfigStorage.GetConfig(e);
-            AppInstaller installer = new AppInstaller(config);
+            AppInstaller installer = new AppInstaller(config, forAllUsers);
 
             // Download and install application
             int setupCode = await InstallIfMissing(installer, config, unattended);
@@ -86,7 +87,7 @@ namespace Bdeploy.Installer {
     /// </summary>
     public sealed class Tool {
         public static int Main() {
-            string basePath = Utils.GetWorkingDir();
+            string basePath = Utils.GetExecutableDir();
             string configFile = Path.GetFullPath(Path.Combine(basePath, "..\\..\\TestData\\Sample.txt"));
             ConfigStorage.WriteConfiguration(configFile, new Config());
             Console.WriteLine("Updated configuration file template.");

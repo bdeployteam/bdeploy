@@ -224,7 +224,7 @@ if [[ \${ORIG_ARGS[0]} == "master" || \${ORIG_ARGS[0]} == "slave" ]]; then
     wait \${JAVA_PID}
     state=\$?
 else
-    "\$JAVACMD" "\$@" "--updateDir=\$APP_HOME/update" 
+    "\$JAVACMD" "\$@" "--updateDir=\$APP_HOME/update" "--homeDir=\$APP_HOME"
     state=\$?
 fi
 

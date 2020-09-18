@@ -1,4 +1,5 @@
-﻿using Bdeploy.Installer.Models;
+﻿using Bdeploy.FileAssoc;
+using Bdeploy.Installer.Models;
 using Bdeploy.Shared;
 using System;
 using System.IO;
@@ -14,24 +15,39 @@ namespace Bdeploy.Installer {
     /// </summary>
     public class AppInstaller {
         /// <summary>
+        /// Flag to install the application for all users
+        /// </summary>
+        private readonly bool forAllUsers;
+
+        /// <summary>
         /// Directory where BDeploy stores all files 
         /// </summary>
-        private readonly string bdeployHome = PathProvider.GetBdeployHome();
+        private readonly string bdeployHome;
 
         /// <summary>
         /// Directory where the launcher is stored. (HOME_DIR\launcher) 
         /// </summary>
-        private readonly string launcherHome = PathProvider.GetLauncherDir();
+        private readonly string launcherHome;
+
+        /// <summary>
+        /// The launcher executable. (HOME_DIR\launcher\BDeploy.exe) 
+        /// </summary>
+        private readonly string launcherExe;
 
         /// <summary>
         /// Directory where the application are stored. (HOME_DIR\apps) 
         /// </summary>
-        private readonly string appsHome = PathProvider.GetApplicationsDir();
+        private readonly string appsHome;
+
+        /// <summary>
+        /// Directory where the temporary files are stored. (HOME_DIR\tmp) 
+        /// </summary>
+        private readonly string tmpDir;
 
         /// <summary>
         /// Lock file that is created to avoid that multiple installers run simultaneously
         /// </summary>
-        private readonly string lockFile = Path.Combine(PathProvider.GetBdeployHome(), ".lock");
+        private readonly string lockFile;
 
         /// <summary>
         /// Flag indicating whether or not to cancel the operattion
@@ -76,8 +92,15 @@ namespace Bdeploy.Installer {
         /// <summary>
         /// Creates a new installer instance.
         /// </summary>
-        public AppInstaller(Config config) {
+        public AppInstaller(Config config, bool forAllUsers) {
             this.config = config;
+            this.forAllUsers = forAllUsers;
+            this.bdeployHome = PathProvider.GetBdeployHome(forAllUsers);
+            this.launcherHome = PathProvider.GetLauncherDir(bdeployHome);
+            this.appsHome = PathProvider.GetApplicationsDir(bdeployHome);
+            this.tmpDir = PathProvider.GetTmpDir(bdeployHome);
+            this.launcherExe = Path.Combine(launcherHome, "BDeploy.exe");
+            this.lockFile = Path.Combine(bdeployHome, ".lock");
         }
 
         /// <summary>
@@ -87,7 +110,7 @@ namespace Bdeploy.Installer {
         public void Launch() {
             string appUid = config.ApplicationUid;
             string appShortcut = Path.Combine(appsHome, appUid, "launch.bdeploy");
-            Utils.RunProcess(PathProvider.GetLauncherExecutable(), appShortcut);
+            Utils.RunProcess(launcherExe, appShortcut);
         }
 
         /// <summary>
@@ -109,13 +132,22 @@ namespace Bdeploy.Installer {
                 }
 
                 // Show error message if we do not have write permissions in our home directory
-                if (FileHelper.IsReadOnly(PathProvider.GetBdeployHome())) {
+                if (FileHelper.IsReadOnly(bdeployHome)) {
                     StringBuilder builder = new StringBuilder();
                     builder.Append("Installation directory is read-only. Please check permissions.").AppendLine().AppendLine();
-                    builder.AppendFormat("BDEPLOY_HOME={0}", PathProvider.GetBdeployHome()).AppendLine();
+                    builder.AppendFormat("BDEPLOY_HOME={0}", bdeployHome).AppendLine();
                     OnError(builder.ToString());
                     return -1;
                 }
+
+                // Show error message if we need administrative privileges
+                if (forAllUsers && !Utils.IsAdmin()) {
+                    StringBuilder builder = new StringBuilder();
+                    builder.AppendLine("Administrative privileges required to install the application for all users.");
+                    OnError(builder.ToString());
+                    return -1;
+                }
+
                 UpdateAppInfo();
 
                 // Prepare directories
@@ -151,7 +183,7 @@ namespace Bdeploy.Installer {
                 }
 
                 // Associate bdeploy files with the launcher
-                CreateFileAssociation();
+                FileAssociation.CreateAssociation(launcherExe, forAllUsers);
 
                 // Store embedded application information
                 // Not present in case that just the launcher should be installed
@@ -174,16 +206,6 @@ namespace Bdeploy.Installer {
         }
 
         /// <summary>
-        /// Associates .bdeploy files with the launcher
-        /// </summary>
-        private void CreateFileAssociation() {
-            string launcher = PathProvider.GetLauncherExecutable();
-            string fileAssoc = PathProvider.GetFileAssocExecutable();
-            string arguments = string.Format("{0} \"{1}\"", "/CreateForCurrentUser", launcher);
-            Utils.RunProcess(fileAssoc, arguments);
-        }
-
-        /// <summary>
         /// Installs the application and creates the shortcut and registry entries
         /// </summary>
         private void InstallApplication() {
@@ -201,16 +223,20 @@ namespace Bdeploy.Installer {
             File.WriteAllText(appDescriptor, config.ClickAndStartDescriptor);
 
             // Read existing registry entry
-            SoftwareEntryData data = SoftwareEntry.Read(config.ApplicationUid);
+            SoftwareEntryData data = SoftwareEntry.Read(config.ApplicationUid, forAllUsers);
             if (data == null) {
                 data = new SoftwareEntryData();
             }
 
             // Only create shortcut if we just have written the descriptor
+            Shortcut shortcut = new Shortcut(instanceGroup, instance, appName, productVendor, appDescriptor, launcherHome, icon);
             if (createShortcut) {
-                data.DesktopShortcut = Shortcut.CreateDesktopLink(instanceGroup, instance, appName, appDescriptor, launcherHome, icon);
-                data.StartMenuShortcut = Shortcut.CreateStartMenuLink(instanceGroup, instance, appName, productVendor, appDescriptor, launcherHome, icon);
+                data.DesktopShortcut = shortcut.CreateDesktopLink(forAllUsers);
+                data.StartMenuShortcut = shortcut.CreateStartMenuLink(forAllUsers);
             }
+
+            // A hint for the uninstaller which registry key should be deleted
+            string uninstallHint = forAllUsers ? "/ForAllUsers" : "";
 
             // Create or update registry entry
             data.noModifyAndRepair = true;
@@ -219,9 +245,9 @@ namespace Bdeploy.Installer {
             data.DisplayName = string.Format("{0} ({1} - {2})", appName, instanceGroup, instance);
             data.InstallDate = DateTime.Now.ToString("yyyyMMdd");
             data.InstallLocation = string.Format("\"{0}\"", Path.Combine(appsHome, appUid));
-            data.UninstallString = string.Format("\"{0}\" /Uninstall \"{1}\"", PathProvider.GetLauncherExecutable(), appDescriptor);
-            data.QuietUninstallString = string.Format("\"{0}\" /Unattended /Uninstall \"{1}\"", PathProvider.GetLauncherExecutable(), appDescriptor);
-            SoftwareEntry.Create(appUid, data);
+            data.UninstallString = string.Format("\"{0}\" {1} /Uninstall \"{2}\"", launcherExe, uninstallHint, appDescriptor);
+            data.QuietUninstallString = string.Format("\"{0}\" /Unattended {1} /Uninstall \"{2}\"", launcherExe, uninstallHint, appDescriptor);
+            SoftwareEntry.Create(appUid, data, forAllUsers);
         }
 
         /// <summary>
@@ -233,7 +259,6 @@ namespace Bdeploy.Installer {
             FileHelper.DeleteDir(launcherHome);
 
             // Prepare tmp directory
-            string tmpDir = PathProvider.GetTmpDir();
             Directory.CreateDirectory(tmpDir);
 
             // Download and extract
@@ -447,7 +472,7 @@ namespace Bdeploy.Installer {
         /// Returns whether or not the launcher is already installed.
         /// </summary>
         private bool IsLauncherInstalled() {
-            return File.Exists(PathProvider.GetLauncherExecutable());
+            return File.Exists(launcherExe);
         }
 
         /// <summary>

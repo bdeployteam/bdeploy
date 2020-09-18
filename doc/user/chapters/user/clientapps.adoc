@@ -10,13 +10,29 @@ The page will offer the appropriate *Client Application* based on the operating 
 *Client Application* are started through a special *Launcher* that needs to be installed on all client computers. The launcher is responsible for keeping the application up-to-date and to pass the configured parameters to the application.
 
 ==== Installer
-An *Installer* is provided for each *Client Application* to make the installation as easy as possible. The installer does not have any prerequisites and can be downloaded and executed by any user. No administrative privileges are required. 
+An *Installer* is provided for each *Client Application* to make the installation as easy as possible. The installer does not have any prerequisites and can be downloaded and executed by any user. 
 
+The *Installer* checks if the latest version of the *Launcher* is already installed. If not then the *Launcher* is downloaded and stored on the client computer. The user can then start a *Client Application* with the branded *Link* that is stored on the *Desktop* or in the *Start Menu*.
 
-The *Installer* will check if the latest version of the *Launcher* is already installed. If not then the *Launcher* is downloaded and stored on the client computer. The user can then start a *Client Application* with the branded *Link* that is stored on the *Desktop* or in the *Start Menu*.
+===== Windows
+By default the *Launcher* is installed for the *Current User* in the _%LOCALAPPDATA%\BDeploy_ folder (_C:/Users/<user>/AppData/Local/BDeploy_). The location can be adopted by setting the *BDEPLOY_HOME* environment variable before launching the installer. No administrative privileges are required for this installation type. 
+
+The *Launcher* can also be installed for *All* users by starting the installer with the */ForAllUsers* flag. The default location in that case is _%ProgramFiles%/BDeploy_ (_C:/Program Files/BDeploy_). The location can be adopted by setting the *BDEPLOY_HOME* environment variable before launching the installer. Ensure that all users have access to the customized location. Otherwise they cannot launch the application.
+
+    ./Installer.exe /ForAllUsers
 
 [NOTE]
-The *Installer* stores the *Launcher* and all *Client Applications* under _%LOCALAPPDATA%\BDeploy_ on Windows or _$HOME/.bdeploy_ on Linux. This location can be changed by setting the environment variable *BDEPLOY_HOME*.
+Installation for *All* users requires administrative privileges. Additional configuration might be required depending on the installation location. See <<Multi-User Installations>> for more information.
+
+===== Unattended Mode
+The *Installer* can also be started in an unattended mode with the */Unattended* flag so that no UI is shown.
+
+    ./Installer.exe /Unattended
+    ./Installer.exe /Unattended /ForAllUsers
+
+==== Linux
+
+The *Installer* stores the *Launcher* and all *Client Applications* in _$HOME/.bdeploy_. This location can be changed by setting the environment variable *BDEPLOY_HOME*.
 
 ==== Click & Start
 *Click & Start* enables the launching of *Client Application* by simply clicking a link in the web browser. In this case the applications are not integrated into the operating system (Start Menu, Desktop Shortcut). A prerequisite is that the *Click & Start Launcher* is deployed on the client computer. This can be done by using the *Click & Start Installer* available in the top-right corner of the *Client Applications* page. The installer will download the *Click & Start Launcher* and associate it with *.bdeploy* files. 

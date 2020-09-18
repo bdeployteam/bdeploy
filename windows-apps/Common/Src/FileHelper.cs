@@ -156,7 +156,7 @@ namespace Bdeploy.Shared {
                 var file = Path.Combine(path, Guid.NewGuid().ToString());
                 FileStream stream = new FileStream(file, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 100);
 
-                // Dipose and remove is success -> write permissions
+                // Dispose and remove if success -> write permissions
                 stream.Dispose();
                 File.Delete(file);
                 return false;

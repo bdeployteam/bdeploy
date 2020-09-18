@@ -31,12 +31,12 @@ namespace Bdeploy.FileAssoc {
                     return false;
                 }
                 string launcherPath = args[1];
-                FileAssociation.CreateAssociationForAllUsers(launcherPath);
+                FileAssociation.CreateAssociation(launcherPath,true);
                 return true;
             }
             if (mainArg == "/CreateForCurrentUser" && args.Length == 2) {
                 string launcherPath = args[1];
-                FileAssociation.CreateAssociation(launcherPath);
+                FileAssociation.CreateAssociation(launcherPath,false);
                 return true;
             }
             if (mainArg == "/RemoveForAllUsers") {
@@ -44,11 +44,11 @@ namespace Bdeploy.FileAssoc {
                     Console.WriteLine("Administrative privileges required to remove association for all users");
                     return false;
                 }
-                FileAssociation.RemoveAssociationForAllUsers();
+                FileAssociation.RemoveAssociation(true);
                 return true;
             }
             if (mainArg == "/RemoveForCurrentUser") {
-                FileAssociation.RemoveAssociation();
+                FileAssociation.RemoveAssociation(false);
                 return true;
             }
             Console.WriteLine("Unsupported argument: Must be one of /CreateForCurrentUser <launcher> /CreateForAllUsers <launcher> /RemoveForAllUsers /RemoveForCurrentUser.");

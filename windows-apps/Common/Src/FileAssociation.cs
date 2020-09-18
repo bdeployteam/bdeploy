@@ -1,12 +1,13 @@
 ﻿using Microsoft.Win32;
 using System;
+using System.Security.AccessControl;
 
 namespace Bdeploy.FileAssoc {
     /// <summary>
     /// Provides API to create or delete associations of a given executable with the .bdeploy extension.
     /// https://docs.microsoft.com/en-us/windows/desktop/shell/fa-sample-scenarios
     /// </summary>
-    class FileAssociation {
+    public class FileAssociation {
         [System.Runtime.InteropServices.DllImport("Shell32.dll")]
         private static extern int SHChangeNotify(int eventId, int flags, IntPtr item1, IntPtr item2);
 
@@ -17,18 +18,10 @@ namespace Bdeploy.FileAssoc {
         /// Creates or updates the programmatic identifier (ProgID) and associates the .bdeploy file extension with it.
         /// </summary>
         /// <param name="path">The absolute path to the launcher</param>
-        public static void CreateAssociation(string path) {
-            using (RegistryKey key = Registry.CurrentUser.CreateSubKey("Software\\Classes")) {
-                DoCreateAssociation(key, path);
-            }
-        }
-
-        /// <summary>
-        /// Creates or updates the programmatic identifier (ProgID) and associates the .bdeploy file extension with it.
-        /// </summary>
-        /// <param name="path">The absolute path to the launcher</param>
-        public static void CreateAssociationForAllUsers(string path) {
-            using (RegistryKey key = Registry.ClassesRoot) {
+        public static void CreateAssociation(string path, bool forAllUsers) {
+            RegistryHive hive = forAllUsers ? RegistryHive.LocalMachine : RegistryHive.CurrentUser;
+            using (RegistryKey root = RegistryKey.OpenBaseKey(hive, RegistryView.Registry64))
+            using (RegistryKey key = root.OpenSubKey("Software\\Classes", true)) {
                 DoCreateAssociation(key, path);
             }
         }
@@ -36,17 +29,10 @@ namespace Bdeploy.FileAssoc {
         /// <summary>
         /// Removes the programatic programmatic identifier (ProgID).
         /// </summary>
-        public static void RemoveAssociation() {
-            using (RegistryKey key = Registry.CurrentUser.CreateSubKey("Software\\Classes")) {
-                DoRemoveAssociation(key);
-            }
-        }
-
-        /// <summary>
-        /// Removes the programatic programmatic identifier (ProgID).
-        /// </summary>
-        public static void RemoveAssociationForAllUsers() {
-            using (RegistryKey key = Registry.ClassesRoot) {
+        public static void RemoveAssociation(bool forAllUsers) {
+            RegistryHive hive = forAllUsers ? RegistryHive.LocalMachine : RegistryHive.CurrentUser;
+            using (RegistryKey root = RegistryKey.OpenBaseKey(hive, RegistryView.Registry64))
+            using (RegistryKey key = root.OpenSubKey("Software\\Classes", true)) {
                 DoRemoveAssociation(key);
             }
         }
@@ -89,12 +75,11 @@ namespace Bdeploy.FileAssoc {
                 string value = (string)bDeployKey.GetValue("");
                 if (value == PROG_ID && bDeployKey.SubKeyCount == 0) {
                     rootKey.DeleteSubKeyTree(FILE_EXT, false);
-                    RefreshExplorer();
-                    return;
-                } else {
-                    RefreshExplorer();
                 }
             }
+
+            // Refresh explorer to pickup changes
+            RefreshExplorer();
         }
     }
 

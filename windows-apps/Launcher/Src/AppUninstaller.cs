@@ -1,6 +1,7 @@
 ﻿using Bdeploy.Launcher.Models;
 using Bdeploy.Shared;
 using Serilog;
+using System.CodeDom;
 using System.IO;
 using System.Text;
 
@@ -12,14 +13,20 @@ namespace Bdeploy.Installer.Models {
     public class AppUninstaller : BaseLauncher {
 
         /// <summary>
+        /// Flag to uninstall the application for all users
+        /// </summary>
+        private readonly bool forAllUsers;
+
+        /// <summary>
         /// Creates a new uninstaller instance.
         /// </summary>
         /// <param name="clickAndStartFile">The .bdeploy file to pass to the companion script</param>
-        public AppUninstaller(string clickAndStartFile) : base(clickAndStartFile) {
+        public AppUninstaller(string clickAndStartFile, bool forAllUsers) : base(clickAndStartFile) {
+            this.forAllUsers = forAllUsers;
         }
 
         /// <summary>
-        /// Starts the LauncherCli to remove the application  described by the ClickAndStart file.
+        /// Starts the LauncherCli to remove the application described by the ClickAndStart file.
         /// </summary>
         public int Start() {
             // Descriptor must be existing and valid
@@ -42,6 +49,7 @@ namespace Bdeploy.Installer.Models {
             builder.AppendFormat("{0} ", MAIN_CLASS);
             builder.AppendFormat("uninstaller ");
             builder.AppendFormat("\"--app={0}\" ", descriptor.ApplicationId);
+            builder.AppendFormat("\"--homeDir={0}\" ", HOME);
 
             // Abort if uninstallation was not OK
             int returnCode = StartLauncher(builder.ToString());
@@ -50,13 +58,15 @@ namespace Bdeploy.Installer.Models {
             }
 
             // Find and delete the registry entry
-            SoftwareEntryData entry = SoftwareEntry.Read(descriptor.ApplicationId);
+            SoftwareEntryData entry = SoftwareEntry.Read(descriptor.ApplicationId, forAllUsers);
             if (entry != null) {
-                SoftwareEntry.Remove(descriptor.ApplicationId);
+                SoftwareEntry.Remove(descriptor.ApplicationId, forAllUsers);
+                Log.Information("Deleted uninstall registry key.");
 
                 // Delete desktop shortcut
                 if (entry.DesktopShortcut != null) {
                     FileHelper.DeleteFile(entry.DesktopShortcut);
+                    Log.Information("Deleted desktop shortcut.");
                 }
 
                 // Delete start menu shortcut and directories if empty
@@ -76,6 +86,7 @@ namespace Bdeploy.Installer.Models {
                     // Delete instance group directory if empty
                     DirectoryInfo vendorDir = instanceGroupDir.Parent;
                     FileHelper.DeleteDirIfEmpty(vendorDir.FullName);
+                    Log.Information("Deleted starmenu shortcut.");
                 }
             }
             // All OK
