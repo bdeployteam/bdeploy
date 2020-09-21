@@ -1,6 +1,5 @@
 {
   "prettier.singleQuote": true,
-  "prettier.trailingComma": "all",
   "prettier.printWidth": 120,
   "prettier.tabWidth": 2,
   "prettier.semi": true,
@@ -10,9 +9,7 @@
     }
   },
   "workbench.colorCustomizations": {},
-  "editor.formatOnSaveMode": "modifications",
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.formatOnSave": true,
   "prettier.jsxSingleQuote": true,
   "javascript.preferences.quoteStyle": "single",
   "typescript.preferences.quoteStyle": "single",
