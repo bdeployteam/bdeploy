@@ -48,6 +48,13 @@ public interface PluginResource {
     public List<PluginInfoDto> getNotLoadedGlobalPlugin();
 
     /**
+     * @return info for all of the products plugins, loaded and not loaded
+     */
+    @POST
+    @Path("/list-product-plugins/{group}")
+    public List<PluginInfoDto> getProductPlugins(@ActivityScope @PathParam("group") String group, Manifest.Key product);
+
+    /**
      * @param product a product from which to lookup and load local plugins.
      * @return a list of plugins, all global and matching local ones from the product.
      */

@@ -8,11 +8,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -50,6 +52,7 @@ import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.plugin.PluginManager;
+import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.ui.api.ApplicationResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.ProductResource;
@@ -71,10 +74,16 @@ public class ProductResourceImpl implements ProductResource {
     @Inject
     private PluginManager pm;
 
+    @Inject
+    private VersionSorterService vss;
+
     private final BHive hive;
 
-    public ProductResourceImpl(BHive hive) {
+    private final String group;
+
+    public ProductResourceImpl(BHive hive, String group) {
         this.hive = hive;
+        this.group = group;
     }
 
     @Override
@@ -88,6 +97,16 @@ public class ProductResourceImpl implements ProductResource {
         }
 
         scan.stream().map(k -> ProductManifest.of(hive, k)).filter(filter).forEach(p -> result.add(ProductDto.create(p)));
+
+        if (!result.isEmpty()) {
+            Map<String, Comparator<Manifest.Key>> comparators = new TreeMap<>();
+            result.sort((a, b) -> {
+                Comparator<Manifest.Key> productVersionComparator = comparators.computeIfAbsent(a.key.getName(),
+                        (k) -> vss.getKeyComparator(group, a.key));
+
+                return productVersionComparator.compare(a.key, b.key);
+            });
+        }
 
         return result;
     }

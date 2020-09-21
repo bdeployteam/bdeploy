@@ -1,9 +1,9 @@
-package io.bdeploy.common.util;
+package io.bdeploy.minion.plugin;
 
 import java.io.Serializable;
 import java.util.Comparator;
 
-public class TagComparator implements Comparator<String>, Serializable {
+class DefaultTagAsVersionComparator implements Comparator<String>, Serializable {
 
     private static final long serialVersionUID = 1L;
 

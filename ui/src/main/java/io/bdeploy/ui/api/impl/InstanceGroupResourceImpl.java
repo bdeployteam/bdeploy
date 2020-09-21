@@ -286,7 +286,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
 
     @Override
     public ProductResource getProductResource(String group) {
-        return rc.initResource(new ProductResourceImpl(getGroupHive(group)));
+        return rc.initResource(new ProductResourceImpl(getGroupHive(group), group));
     }
 
 }

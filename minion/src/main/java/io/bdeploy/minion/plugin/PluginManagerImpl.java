@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.api.plugin.v1.CustomEditor;
+import io.bdeploy.api.plugin.v1.CustomProductVersionSorter;
 import io.bdeploy.api.plugin.v1.Plugin;
 import io.bdeploy.api.plugin.v1.PluginAssets;
 import io.bdeploy.bhive.BHive;
@@ -109,6 +110,19 @@ public class PluginManagerImpl implements PluginManager {
     }
 
     @Override
+    public PluginHeader loadHeader(BHive source, ObjectId id) {
+        if (isLoaded(id)) {
+            return loaded.get(id).header;
+        }
+        Path pluginPath = source.execute(new FindFileOperation().setObject(id));
+        try (InputStream is = Files.newInputStream(pluginPath)) {
+            return PluginHeader.read(is);
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot load plugin from " + pluginPath, e);
+        }
+    }
+
+    @Override
     public void unloadProduct(Key product) {
         List<ObjectId> toUnload = new ArrayList<>();
         for (Map.Entry<ObjectId, PluginInternalHandle> entry : loaded.entrySet()) {
@@ -187,8 +201,16 @@ public class PluginManagerImpl implements PluginManager {
         } catch (Throwable t) {
             log.error("Cannot read custom editors from plugin {}:{}", handle.header.name, handle.header.version, t);
         }
+
+        CustomProductVersionSorter sorter = null;
+        try {
+            sorter = handle.plugin.getCustomSorter();
+        } catch (Throwable t) {
+            log.error("Cannot read custom sorter from plugin {}:{}", handle.header.name, handle.header.version, t);
+        }
+
         return new PluginInfoDto(handle.id, handle.header.name, handle.header.version, handle.global, true,
-                new ArrayList<>(customEditors));
+                new ArrayList<>(customEditors), sorter);
     }
 
     /**

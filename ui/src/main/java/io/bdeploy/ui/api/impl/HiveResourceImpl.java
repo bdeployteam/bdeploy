@@ -42,6 +42,7 @@ import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.util.UnitHelper;
+import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.ui.api.HiveResource;
 import io.bdeploy.ui.dto.HiveEntryDto;
 
@@ -54,6 +55,9 @@ public class HiveResourceImpl implements HiveResource {
 
     @Inject
     private ActivityReporter reporter;
+
+    @Inject
+    private VersionSorterService vss;
 
     @Override
     public List<String> listHives() {
@@ -70,7 +74,7 @@ public class HiveResourceImpl implements HiveResource {
         SortedSet<Manifest.Key> allManifests = hive.execute(new ManifestListOperation());
 
         List<HiveEntryDto> result = new ArrayList<>();
-        allManifests.forEach(m -> {
+        allManifests.stream().sorted(vss.getKeyComparator(null, null)).forEach(m -> {
             HiveEntryDto entry = new HiveEntryDto(m.toString(), Tree.EntryType.MANIFEST);
             entry.mName = m.getName();
             entry.mTag = m.getTag();
@@ -135,7 +139,7 @@ public class HiveResourceImpl implements HiveResource {
     private List<HiveEntryDto> list(BHive hive, ObjectId objectId) {
         Tree tree = hive.execute(new TreeLoadOperation().setTree(objectId));
         List<HiveEntryDto> result = new ArrayList<>();
-        for (Tree.Key key : tree.getChildren().keySet()) {
+        tree.getChildren().keySet().stream().forEach(key -> {
             HiveEntryDto entry = new HiveEntryDto(key.getName(), key.getType());
             ObjectId entryOid = tree.getChildren().get(key);
             entry.id = entryOid.getId();
@@ -153,7 +157,7 @@ public class HiveResourceImpl implements HiveResource {
                 }
             }
             result.add(entry);
-        }
+        });
         return result;
     }
 

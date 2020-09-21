@@ -3,13 +3,11 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatDrawer } from '@angular/material/sidenav';
 import { ActivatedRoute } from '@angular/router';
-import { finalize } from 'rxjs/operators';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { MinionMode, ProductDto } from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
 import { FileUploadComponent } from '../../../shared/components/file-upload/file-upload.component';
-import { sortByTags } from '../../../shared/utils/manifest.utils';
 import { ProductService } from '../../services/product.service';
 
 @Component({
@@ -37,7 +35,7 @@ export class ProductsComponent implements OnInit {
     public dialog: MatDialog,
     public location: Location,
     private config: ConfigService,
-    public routingHistoryService:RoutingHistoryService,
+    public routingHistoryService: RoutingHistoryService
   ) {}
 
   ngOnInit() {
@@ -58,28 +56,28 @@ export class ProductsComponent implements OnInit {
     return versions ? versions[0] : null;
   }
 
-  private loadProducts() {
+  private async loadProducts() {
     this.loading = true;
 
-    const productPromise = this.productService.getProducts(this.instanceGroup, null);
-    productPromise.pipe(finalize(() => this.loading = false)).subscribe(p => {
+    try {
+      const p = await this.productService.getProducts(this.instanceGroup, null).toPromise();
+
       this.products = new Map();
       p.forEach(prod => {
         this.products.set(prod.key.name, this.products.get(prod.key.name) || []);
         this.products.get(prod.key.name).push(prod);
       });
+
       this.productsKeys = Array.from(this.products.keys());
-      this.productsKeys.forEach(key => {
-        const versions: ProductDto[] = this.products.get(key);
-          this.products.set(key, sortByTags(versions, v => v.key.tag, false));
-      });
       if (this.selectedProductKey && this.productsKeys.indexOf(this.selectedProductKey) === -1) {
         this.selectedProductKey = null;
       }
       if (!this.selectedProductKey) {
         this.sidenav.close();
       }
-    });
+    } finally {
+      this.loading = false;
+    }
   }
 
   versionDeleted(): void {

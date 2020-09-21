@@ -31,6 +31,11 @@ public abstract class Plugin {
     public static final String PLUGIN_VERSION_HEADER = "BDeploy-PluginVersion";
 
     /**
+     * A header which is used to discover plugins which allow product version sorting without actually loading those plugins.
+     */
+    public static final String PLUGIN_SORTER_HEADER = "BDeploy-PluginHasVersionSorter";
+
+    /**
      * @return a collection of JAX-RS component classes which should be registered as resources.
      */
     public Collection<Class<?>> getComponentClasses() {
@@ -56,6 +61,13 @@ public abstract class Plugin {
      */
     public Collection<CustomEditor> getCustomEditors() {
         return Collections.emptyList();
+    }
+
+    /**
+     * @return a {@link CustomProductVersionSorter} which provides custom version comparision for the product.
+     */
+    public CustomProductVersionSorter getCustomSorter() {
+        return null;
     }
 
 }

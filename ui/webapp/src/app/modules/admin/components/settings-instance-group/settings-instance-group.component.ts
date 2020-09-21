@@ -85,7 +85,7 @@ export class SettingsInstanceGroupComponent implements OnInit {
 
   private sortProperties() {
     if (this.hasProperties()) {
-      this.settings.getSettings().instanceGroup.properties = this.settings.getSettings().instanceGroup.properties.sort((a,b) => a.name.localeCompare(b.name));
+      this.settings.getSettings().instanceGroup.properties = this.settings.getSettings().instanceGroup.properties.sort((a, b) => a.name.localeCompare(b.name));
     }
   }
 

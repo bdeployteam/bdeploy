@@ -59,22 +59,27 @@ export class CustomEditorComponent implements OnInit {
   }
 
   showEditor(popup: TemplateRef<any>) {
-    this.plugins.load(this.plugin, this.findEditor()).then(m => {
+    this.plugins.load(this.plugin, this.findEditor().modulePath).then((m) => {
       const editor = new m.default(this.plugins.getApi(this.plugin)) as EditorPlugin;
 
       this.dialogRef = this.dialog.open(popup, {
-        width: '600px'
+        width: '600px',
       });
       this.dialogRef.afterOpened().subscribe(() => {
-        this.editorPanel.nativeElement.appendChild(editor.bind(() => this.value.value, (v) => this.currentValue = v, (s) => this.valid = s));
+        this.editorPanel.nativeElement.appendChild(
+          editor.bind(
+            () => this.value.value,
+            (v) => (this.currentValue = v),
+            (s) => (this.valid = s),
+          ),
+        );
       });
-      this.dialogRef.afterClosed().subscribe(v => {
+      this.dialogRef.afterClosed().subscribe((v) => {
         if (v) {
           this.valueConfirmed.emit(v);
         }
         this.dialogRef = null;
       });
-
     });
   }
 

@@ -25,3 +25,9 @@
   grid-template-columns: auto;
   row-gap: 5px;
 }
+
+.product-info {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}

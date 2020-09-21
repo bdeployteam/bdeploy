@@ -11,6 +11,7 @@ import javax.ws.rs.core.SecurityContext;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.interfaces.cleanup.CleanupGroup;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
+import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.ui.api.CleanupResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.cleanup.CleanupHelper;
@@ -26,13 +27,16 @@ public class CleanupResourceImpl implements CleanupResource {
     @Inject
     private BHiveRegistry registry;
 
+    @Inject
+    private VersionSorterService vss;
+
     @Context
     private SecurityContext context;
 
     @Override
     public List<CleanupGroup> calculate() {
         checkMaster();
-        return CleanupHelper.cleanAllMinions(context, minion, registry, false, provider);
+        return CleanupHelper.cleanAllMinions(context, minion, registry, false, provider, vss);
     }
 
     @Override

@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -41,6 +42,7 @@ import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.plugin.PluginManager;
+import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
@@ -71,10 +73,11 @@ public class CleanupHelper {
      *            always empty.
      * @param provider the {@link MasterProvider} which knows how to obtain a communication channel with an instance's controlling
      *            master.
+     * @param vss
      * @return the {@link List} of {@link CleanupGroup}s per minion. Always empty if the immediate parameter is <code>true</code>.
      */
     public static List<CleanupGroup> cleanAllMinions(SecurityContext context, Minion minion, BHiveRegistry registry,
-            boolean immediate, MasterProvider provider) {
+            boolean immediate, MasterProvider provider, VersionSorterService vss) {
 
         List<CleanupGroup> groups = new ArrayList<>();
 
@@ -84,7 +87,7 @@ public class CleanupHelper {
 
             InstanceGroupConfiguration cfg = new InstanceGroupManifest(hive).read();
             if (cfg != null) {
-                cleanInstanceGroup(minion, context, immediate, provider, groups, group, hive, cfg);
+                cleanInstanceGroup(minion, context, immediate, provider, groups, group, hive, cfg, vss);
             }
         }
 
@@ -122,7 +125,7 @@ public class CleanupHelper {
     }
 
     private static void cleanInstanceGroup(Minion minion, SecurityContext context, boolean immediate, MasterProvider provider,
-            List<CleanupGroup> groups, String group, BHive hive, InstanceGroupConfiguration cfg) {
+            List<CleanupGroup> groups, String group, BHive hive, InstanceGroupConfiguration cfg, VersionSorterService vss) {
 
         List<CleanupAction> instanceGroupActions = new ArrayList<>();
         Map<String, SortedSet<Key>> instanceVersions4Uninstall = new HashMap<>();
@@ -146,8 +149,8 @@ public class CleanupHelper {
 
         // cleanup of unused products
         if (cfg.autoDelete) {
-            instanceGroupActions.addAll(deleteUnusedProducts(context, hive, minion, instanceVersions4Uninstall,
-                    allManifests4deletion, immediate, provider));
+            instanceGroupActions.addAll(deleteUnusedProducts(context, hive, group, minion, instanceVersions4Uninstall,
+                    allManifests4deletion, immediate, provider, vss));
         }
 
         instanceGroupActions.addAll(cleanupMetaManifests(context, hive, allManifests4deletion, immediate, provider));
@@ -159,12 +162,12 @@ public class CleanupHelper {
 
     /**
      * Performs all actions calculated by
-     * {@link #cleanAllMinions(SecurityContext, Minion, BHiveRegistry, boolean, MasterProvider)} with
+     * {@link #cleanAllMinions(SecurityContext, Minion, BHiveRegistry, boolean, MasterProvider, VersionSorterService)} with
      * immediate set to <code>false</code>.
      *
      * @param context the caller's security context
      * @param groups the {@link List} of {@link CleanupGroup} calculated by
-     *            {@link #cleanAllMinions(SecurityContext, Minion, BHiveRegistry, boolean, MasterProvider)}.
+     *            {@link #cleanAllMinions(SecurityContext, Minion, BHiveRegistry, boolean, MasterProvider, VersionSorterService)}.
      * @param minion the calling minion - required to be the master.
      * @param registry the BHive registry.
      */
@@ -278,14 +281,19 @@ public class CleanupHelper {
         return actions;
     }
 
-    private static List<CleanupAction> deleteUnusedProducts(SecurityContext context, BHive hive, Minion minion,
+    private static List<CleanupAction> deleteUnusedProducts(SecurityContext context, BHive hive, String group, Minion minion,
             Map<String, SortedSet<Key>> instanceVersions4Uninstall, SortedSet<Manifest.Key> allManifests4deletion,
-            boolean immediate, MasterProvider provider) {
+            boolean immediate, MasterProvider provider, VersionSorterService vss) {
         List<CleanupAction> actions = new ArrayList<>();
 
+        Map<String, Comparator<Key>> comparators = new TreeMap<>();
+
         // map of available products grouped by product name
-        Map<String, SortedSet<Key>> allProductsMap = ProductManifest.scan(hive).stream()
-                .collect(Collectors.groupingBy(Key::getName, Collectors.toCollection(TreeSet::new)));
+        Map<String, List<Key>> allProductsMap = ProductManifest.scan(hive).stream().sorted((a, b) -> {
+            Comparator<Manifest.Key> productVersionComparator = comparators.computeIfAbsent(a.getName(),
+                    (k) -> vss.getKeyComparator(group, a));
+            return productVersionComparator.compare(b, a);
+        }).collect(Collectors.groupingBy(Key::getName, Collectors.toCollection(ArrayList::new)));
 
         // find the oldest instance version per instance that is "under protection", i.e. the product it uses must not be uninstalled
         SortedSet<Key> latestInstanceManifests = InstanceManifest.scan(hive, true);
@@ -308,8 +316,8 @@ public class CleanupHelper {
 
         // create actions for unused products (older than the oldest product in use)
         SortedSet<Manifest.Key> manifests4deletion = new TreeSet<>();
-        createDeleteProductsActions(hive, minion.getPluginManager(), actions, manifests4deletion, allProductsMap,
-                usedProductsMap);
+        createDeleteProductsActions(hive, group, minion.getPluginManager(), actions, manifests4deletion, allProductsMap,
+                usedProductsMap, comparators);
 
         if (immediate) {
             perform(context, hive, actions, provider);
@@ -320,16 +328,18 @@ public class CleanupHelper {
         return actions;
     }
 
-    private static void createDeleteProductsActions(BHive hive, PluginManager pmgr, List<CleanupAction> actions,
-            SortedSet<Manifest.Key> manifests4deletion, Map<String, SortedSet<Key>> allProductsMap,
-            Map<String, SortedSet<Key>> usedProductsMap) {
-        for (SortedSet<Key> pVersionKeys : allProductsMap.values()) {
-            SortedSet<Key> usedProducts = usedProductsMap.get(pVersionKeys.first().getName());
+    private static void createDeleteProductsActions(BHive hive, String group, PluginManager pmgr, List<CleanupAction> actions,
+            SortedSet<Manifest.Key> manifests4deletion, Map<String, List<Key>> allProductsMap,
+            Map<String, SortedSet<Key>> usedProductsMap, Map<String, Comparator<Key>> comparators) {
+        for (List<Key> pVersionKeys : allProductsMap.values()) {
+            SortedSet<Key> usedProducts = usedProductsMap.get(pVersionKeys.get(0).getName());
             // if the product is not used at all, take the newest product version to protect it
-            Key oldestInUse = usedProducts != null && !usedProducts.isEmpty() ? usedProducts.first() : pVersionKeys.last();
+            Key oldestInUse = usedProducts != null && !usedProducts.isEmpty() ? usedProducts.first()
+                    : pVersionKeys.get(pVersionKeys.size() - 1);
+            Comparator<Key> comp = comparators.get(pVersionKeys.get(0).getName());
             for (Key versionKey : pVersionKeys) {
                 // stop at the oldest product in use)
-                if (versionKey.compareTo(oldestInUse) >= 0) {
+                if (comp.compare(versionKey, oldestInUse) <= 0) {
                     break;
                 }
                 // If sorting of tags is broken, it should affect both sets (allProductsMap AND usedProducts) and this should

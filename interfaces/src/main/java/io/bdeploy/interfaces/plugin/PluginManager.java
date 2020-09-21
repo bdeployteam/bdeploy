@@ -39,6 +39,13 @@ public interface PluginManager {
     public PluginInfoDto load(BHive source, ObjectId id, Manifest.Key product);
 
     /**
+     * @param source the source {@link BHive}.
+     * @param id the {@link ObjectId} of the plugin JAR to load the header from.
+     * @return the loaded {@link PluginHeader}. In case the plugin is already loaded, the previously loaded header is returned.
+     */
+    public PluginHeader loadHeader(BHive source, ObjectId id);
+
+    /**
      * Removes the product from all loaded plugin's "requestors". If a product-bound plugin has zero requestors left, it will be
      * unloaded.
      *

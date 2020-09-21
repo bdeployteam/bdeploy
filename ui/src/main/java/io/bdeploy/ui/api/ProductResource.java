@@ -26,6 +26,12 @@ import io.bdeploy.ui.dto.ProductDto;
 @Produces(MediaType.APPLICATION_JSON)
 public interface ProductResource {
 
+    /**
+     * List all products, optionally filtering for a certain name.
+     *
+     * @param name the name to filter for or null to list all products in the instance group.
+     * @return a sorted list of products. Names are sorted lexically, versions are sorted descending (newest version first).
+     */
     @GET
     @Path("/list")
     public List<ProductDto> list(@QueryParam("name") String name);

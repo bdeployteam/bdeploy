@@ -18,7 +18,7 @@
     <div class='intance-card-row'>
     <div class='info-grid'>
       {{instanceDto.instanceConfiguration.description}}
-      <div>
+      <div class='product-info'>
         <span *ngIf='instanceDto.productDto'>Product: <strong [matTooltip]='instanceDto.productDto.name'>{{instanceDto.productDto.name}}</strong></span>
         <span *ngIf='!instanceDto.productDto'>Product: <strong>{{instanceDto.instanceConfiguration.product.name}}</strong></span>
 
@@ -32,9 +32,7 @@
           <span *ngIf='!instanceDto.productDto' class="product-unavailable" matTooltip="Required product version is not available.">N/A</span>
         </span>
 
-        <span>
-          <mat-icon *ngIf="instanceDto.newerVersionAvailable" matTooltip='A newer product version is available'>system_update</mat-icon>
-        </span>
+        <mat-icon *ngIf="instanceDto.newerVersionAvailable" matTooltip='A newer product version is available'>system_update</mat-icon>
 
       </div>
     </div>

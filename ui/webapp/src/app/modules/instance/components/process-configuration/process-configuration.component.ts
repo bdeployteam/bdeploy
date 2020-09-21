@@ -64,7 +64,6 @@ import {
   ActivitySnapshotTreeNode,
   RemoteEventsService
 } from '../../../shared/services/remote-events.service';
-import { compareTags, sortByTags } from '../../../shared/utils/manifest.utils';
 import { ApplicationService } from '../../services/application.service';
 import { InstanceService } from '../../services/instance.service';
 import { ProcessService } from '../../services/process.service';
@@ -201,7 +200,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     private dragulaService: DragulaService,
     private configService: ConfigService,
     private router: Router,
-    public routingHistoryService: RoutingHistoryService
+    public routingHistoryService: RoutingHistoryService,
   ) {}
 
   ngOnInit() {
@@ -516,7 +515,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       .getProducts(this.groupParam, config.version.product.name)
       .pipe(finalize(() => (this.productsLoading = false)))
       .subscribe((r) => {
-        this.productTags = sortByTags(r, (p) => p.key.tag, false);
+        this.productTags = r;
         if (this.selectedConfig) {
           this.setApplicationTemplates(this.selectedConfig);
           this.updateDirtyStateAndValidate();
@@ -1133,16 +1132,18 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       .subscribe((_) => {});
   }
 
-  shouldShowProduct(toggle: MatSlideToggle, tag: ProductDto): boolean {
+  shouldShowProduct(toggle: MatSlideToggle, product: ProductDto): boolean {
     if (!this.selectedConfig) {
       return false;
     }
     if (toggle.checked) {
       return true;
     }
-    return (
-      compareTags(tag.key.tag, this.selectedConfig.version.product.tag) >= 0
-    );
+
+    const selectedIndex = this.productTags.findIndex(p => isEqual(this.selectedConfig.version.product, p.key));
+    const myIndex = this.productTags.indexOf(product);
+
+    return myIndex <= selectedIndex;
   }
 
   /**

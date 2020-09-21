@@ -38,6 +38,7 @@ import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
+import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.SoftwareResource;
 
@@ -50,6 +51,9 @@ public class SoftwareResourceImpl implements SoftwareResource {
 
     @Inject
     private Minion minion;
+
+    @Inject
+    private VersionSorterService vss;
 
     private final BHive hive;
 
@@ -66,6 +70,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
                 result.add(k);
             }
         }
+        result.sort(vss.getKeyComparator(null, null));
         return result;
     }
 

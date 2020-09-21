@@ -54,6 +54,24 @@
               </ng-container>
             </div>
           </mat-tab>
+          <mat-tab label='Plugins'>
+            <div *ngIf='!plugins' class='loading-container'>
+              <mat-spinner [diameter]='24'></mat-spinner>
+            </div>
+            <div *ngIf='plugins' style='margin-top: 10px'>The following table shows all plugins embedded in the product version.</div>
+            <div *ngIf='plugins' class="plugins-table">
+              <strong>ID</strong>
+              <strong>Name</strong>
+              <strong>Version</strong>
+              <strong>Loaded</strong>
+              <ng-container *ngFor='let plugin of plugins'>
+                <span>{{plugin.id.id}}</span>
+                <span>{{plugin.name}}</span>
+                <span>{{plugin.version}}</span>
+                <span>{{plugin.loaded}}</span>
+              </ng-container>
+            </div>
+          </mat-tab>
         </mat-tab-group>
       </mat-card-content>
     </mat-card>

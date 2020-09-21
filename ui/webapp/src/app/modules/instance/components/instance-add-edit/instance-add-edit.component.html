@@ -76,7 +76,7 @@
       <mat-grid-list cols="2" rowHeight="5em">
         <mat-grid-tile>
           <mat-form-field>
-            <mat-select formControlName="name" placeholder="Product">
+            <mat-select formControlName="name" placeholder="Product" (valueChange)='onSelectProduct($event)'>
               <mat-option *ngFor="let pname of getProductNames()" value="{{pname}}">{{getProductDisplayName(pname)}}</mat-option>
             </mat-select>
             <mat-error *ngIf="productNameControl.invalid">{{getErrorMessage(productNameControl)}}</mat-error>
@@ -85,7 +85,7 @@
         <mat-grid-tile>
           <mat-form-field>
             <mat-select formControlName="tag" placeholder="Version">
-              <mat-option *ngFor="let tag of getTagsForProduct()" value="{{tag}}">{{tag}}</mat-option>
+              <mat-option *ngFor="let tag of tags" value="{{tag}}">{{tag}}</mat-option>
             </mat-select>
             <mat-error *ngIf="productTagControl.invalid">{{getErrorMessage(productTagControl)}}</mat-error>
           </mat-form-field>

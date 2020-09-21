@@ -26,6 +26,7 @@ import io.bdeploy.common.util.DateHelper;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.minion.MinionRoot;
+import io.bdeploy.minion.plugin.VersionSorterServiceImpl;
 import io.bdeploy.ui.cleanup.CleanupHelper;
 
 /**
@@ -118,7 +119,8 @@ public class MasterCleanupJob implements Job {
         try (BHiveRegistry registry = new BHiveRegistry(new ActivityReporter.Null(), null)) {
             mr.getStorageLocations().forEach(registry::scanLocation);
 
-            CleanupHelper.cleanAllMinions(null, mr, registry, true, (h, i) -> mr.getSelf());
+            CleanupHelper.cleanAllMinions(null, mr, registry, true, (h, i) -> mr.getSelf(),
+                    new VersionSorterServiceImpl(mr.getPluginManager(), registry));
 
             mr.modifyState(s -> s.cleanupLastRun = System.currentTimeMillis());
             log.info("Cleanup finished");

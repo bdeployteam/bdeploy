@@ -21,7 +21,7 @@
 
 .instance-template-table {
   margin-top: 10px;
-  max-height: 290px;
+  max-height: 190px;
   overflow-y: auto;
 
   display: grid;
@@ -35,7 +35,7 @@
 
 .application-template-table {
   margin-top: 10px;
-  max-height: 290px;
+  max-height: 190px;
   overflow-y: auto;
 
   display: grid;
@@ -49,12 +49,26 @@
 
 .used-in-table {
   margin-top: 10px;
-  max-height: 290px;
+  max-height: 190px;
   overflow-y: auto;
 
   display: grid;
 
   grid-template-columns: 100px 50px 160px auto;
+  row-gap: 5px;
+  column-gap: 5px;
+
+  align-items: center;
+}
+
+.plugins-table {
+  margin-top: 10px;
+  max-height: 190px;
+  overflow-y: auto;
+
+  display: grid;
+
+  grid-template-columns: 310px 100px 100px auto;
   row-gap: 5px;
   column-gap: 5px;
 

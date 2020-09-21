@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { PluginInfoDto } from 'src/app/models/gen.dtos';
+import { ManifestKey, PluginInfoDto } from 'src/app/models/gen.dtos';
 import { ConfigService } from '../../core/services/config.service';
 import { Logger, LoggingService } from '../../core/services/logging.service';
 
@@ -19,6 +19,12 @@ export class PluginAdminService {
     const url: string = this.cfg.config.api + PluginAdminService.BASEPATH + '/list';
     this.log.debug('getAll: ' + url);
     return this.http.get<PluginInfoDto[]>(url);
+  }
+
+  public getProductPlugins(group: String, product: ManifestKey): Observable<PluginInfoDto[]> {
+    const url: string = this.cfg.config.api + PluginAdminService.BASEPATH + '/list-product-plugins/' + group;
+    this.log.debug('getProductPlugins: ' + url);
+    return this.http.post<PluginInfoDto[]>(url, product);
   }
 
   public loadGlobalPlugin(dto: PluginInfoDto) {

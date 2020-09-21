@@ -4,8 +4,9 @@ import { Component, Input, OnInit, TemplateRef, ViewContainerRef } from '@angula
 import { MatButton } from '@angular/material/button';
 import { MatTabChangeEvent } from '@angular/material/tabs';
 import { finalize } from 'rxjs/operators';
+import { PluginAdminService } from 'src/app/modules/admin/services/plugin-admin.service';
 import { ProductService } from 'src/app/modules/instance-group/services/product.service';
-import { InstanceTemplateDescriptor, InstanceUsageDto, ProductDto } from '../../../../models/gen.dtos';
+import { InstanceTemplateDescriptor, InstanceUsageDto, PluginInfoDto, ProductDto } from '../../../../models/gen.dtos';
 
 @Component({
   selector: 'app-product-info-card',
@@ -21,12 +22,16 @@ export class ProductInfoCardComponent implements OnInit {
   usedIn: InstanceUsageDto[];
   loadingUsedIn = false;
 
+  plugins: PluginInfoDto[];
+  loadingPlugins = false;
+
   private overlayRef: OverlayRef;
 
   constructor(
     private overlay: Overlay,
     private viewContainerRef: ViewContainerRef,
     private productService: ProductService,
+    private pluginAdmin: PluginAdminService,
   ) { }
 
   ngOnInit() {
@@ -48,6 +53,13 @@ export class ProductInfoCardComponent implements OnInit {
           this.usedIn = r;
         });
       }
+    } else if(event.tab.textLabel === 'Plugins') {
+      if (!this.plugins && !this.loadingPlugins) {
+        this.loadingPlugins = true;
+        this.pluginAdmin.getProductPlugins(this.instanceGroup, this.productDto.key).subscribe(r => {
+          this.plugins = r;
+        })
+      }
     }
   }
 
@@ -56,8 +68,8 @@ export class ProductInfoCardComponent implements OnInit {
     this.closeOverlay();
 
     this.overlayRef = this.overlay.create({
-      width: '720px',
-      height: '500px',
+      width: '650px',
+      height: '400px',
       positionStrategy: this.overlay.position().flexibleConnectedTo(relative._elementRef)
         .withPositions([{
             overlayX: 'end',

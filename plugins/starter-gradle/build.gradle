@@ -5,6 +5,7 @@ plugins {
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 version = "1.0.0"
@@ -13,7 +14,7 @@ sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
 dependencies {
-    implementation 'io.bdeploy:api:2.3.0'
+    implementation 'io.bdeploy:api:3.2.0-SNAPSHOT'
 }
 
 eclipse {
@@ -26,7 +27,8 @@ jar {
     manifest {
         attributes('BDeploy-Plugin': 'io.bdeploy.plugins.starter.StarterEntry',
                    'BDeploy-PluginName': project.name,
-                   'BDeploy-PluginVersion': project.version)	
+                   'BDeploy-PluginVersion': project.version,
+                   'BDeploy-PluginHasVersionSorter': 'true')
     }
 }
 

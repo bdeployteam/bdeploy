@@ -19,7 +19,6 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
-import io.bdeploy.bhive.op.ObjectLoadOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
 import io.bdeploy.common.Version;
@@ -57,6 +56,23 @@ public class PluginResourceImpl implements PluginResource {
         return getPluginsInternal(false, true);
     }
 
+    @Override
+    public List<PluginInfoDto> getProductPlugins(String group, Manifest.Key product) {
+        BHive hive = reg.get(group);
+        if (hive == null) {
+            throw new WebApplicationException("Instance Group not found: " + group, Status.NOT_FOUND);
+        }
+        ProductManifest pm = ProductManifest.of(hive, product);
+        List<PluginInfoDto> result = new ArrayList<>();
+
+        for (ObjectId id : pm.getPlugins()) {
+            PluginHeader hdr = manager.loadHeader(hive, id);
+            result.add(new PluginInfoDto(id, hdr.name, hdr.version, false, manager.isLoaded(id), Collections.emptyList(), null));
+        }
+
+        return result;
+    }
+
     private List<PluginInfoDto> getPluginsInternal(boolean loaded, boolean notLoaded) {
         List<PluginInfoDto> result = loaded ? manager.getPlugins() : new ArrayList<>();
 
@@ -66,13 +82,9 @@ public class PluginResourceImpl implements PluginResource {
                 PluginManifest mf = PluginManifest.of(hive, key);
 
                 if (!manager.isLoaded(mf.getPlugin())) {
-                    try (InputStream is = hive.execute(new ObjectLoadOperation().setObject(mf.getPlugin()))) {
-                        PluginHeader hdr = PluginHeader.read(is);
-                        result.add(
-                                new PluginInfoDto(mf.getPlugin(), hdr.name, hdr.version, true, false, Collections.emptyList()));
-                    } catch (IOException e) {
-                        log.error("Cannot load plugin {}", key, e);
-                    }
+                    PluginHeader hdr = manager.loadHeader(hive, mf.getPlugin());
+                    result.add(
+                            new PluginInfoDto(mf.getPlugin(), hdr.name, hdr.version, true, false, Collections.emptyList(), null));
                 }
             }
         }
@@ -136,10 +148,10 @@ public class PluginResourceImpl implements PluginResource {
      */
     private boolean isNewerVersion(String v1, String v2) {
         try {
-            Version ver1 = VersionHelper.parse(v1);
-            Version ver2 = VersionHelper.parse(v2);
+            Version ver1 = VersionHelper.tryParse(v1);
+            Version ver2 = VersionHelper.tryParse(v2);
 
-            return ver1.compareTo(ver2) < 0;
+            return VersionHelper.compare(ver1, ver2) < 0;
         } catch (Exception e) {
             return v1.compareTo(v2) < 0;
         }

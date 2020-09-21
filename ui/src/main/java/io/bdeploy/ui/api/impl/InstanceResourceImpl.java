@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -61,7 +62,6 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.StreamHelper;
-import io.bdeploy.common.util.TagComparator;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.common.util.UuidHelper;
@@ -96,6 +96,7 @@ import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
+import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
@@ -162,6 +163,9 @@ public class InstanceResourceImpl implements InstanceResource {
     @Inject
     private InstanceHistoryManager instanceHistory;
 
+    @Inject
+    private VersionSorterService vss;
+
     public InstanceResourceImpl(String group, BHive hive) {
         this.group = group;
         this.hive = hive;
@@ -172,12 +176,18 @@ public class InstanceResourceImpl implements InstanceResource {
         List<InstanceDto> result = new ArrayList<>();
         auth.addRecentlyUsedInstanceGroup(context.getUserPrincipal().getName(), group);
 
+        Map<String, Comparator<String>> comparators = new TreeMap<>();
+
         SortedSet<Key> imKeys = InstanceManifest.scan(hive, true);
         SortedSet<Key> scan = ProductManifest.scan(hive);
 
         for (Key imKey : imKeys) {
             InstanceManifest im = InstanceManifest.of(hive, imKey);
             InstanceConfiguration config = im.getConfiguration();
+
+            // comparator only computed once per product (name), regardless of tag.
+            Comparator<String> productVersionComparator = comparators.computeIfAbsent(im.getConfiguration().product.getName(),
+                    (k) -> vss.getTagComparator(group, im.getConfiguration().product));
 
             ProductDto productDto = null;
             try {
@@ -211,14 +221,13 @@ public class InstanceResourceImpl implements InstanceResource {
                 String productName = productDto.key.getName();
                 String productTag = productDto.key.getTag();
 
-                int asc = -1;
-
+                // reverse order of comparison to get newest version first.
                 Optional<String> newestProductVersion = scan.stream().filter(key -> key.getName().equals(productName))
-                        .map(key -> key.getTag()).sorted((a, b) -> (new TagComparator()).compare(a, b) * asc).findFirst();
+                        .map(key -> key.getTag()).sorted((a, b) -> productVersionComparator.compare(b, a)).findFirst();
 
                 if (newestProductVersion.isPresent()) {
                     String newestProductTag = newestProductVersion.get();
-                    newerVersionAvailable = productTag.compareTo(newestProductTag) * asc >= 0 ? false : true;
+                    newerVersionAvailable = productVersionComparator.compare(productTag, newestProductTag) < 0;
                 }
             }
 

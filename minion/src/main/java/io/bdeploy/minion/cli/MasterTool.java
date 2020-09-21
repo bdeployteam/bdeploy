@@ -24,6 +24,7 @@ import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.interfaces.plugin.PluginManager;
+import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.SlaveDeploymentResource;
 import io.bdeploy.jersey.JerseyServer;
@@ -36,6 +37,7 @@ import io.bdeploy.minion.MinionState;
 import io.bdeploy.minion.api.v1.PublicRootResourceImpl;
 import io.bdeploy.minion.cli.MasterTool.MasterConfig;
 import io.bdeploy.minion.cli.shutdown.RemoteShutdownImpl;
+import io.bdeploy.minion.plugin.VersionSorterServiceImpl;
 import io.bdeploy.minion.remote.jersey.CentralUpdateResourceImpl;
 import io.bdeploy.minion.remote.jersey.CommonRootResourceImpl;
 import io.bdeploy.minion.remote.jersey.JerseyAwareMinionUpdateManager;
@@ -155,6 +157,7 @@ public class MasterTool extends ConfiguredCliTool<MasterConfig> {
                 if (pluginManager != null) {
                     bind(pluginManager).to(PluginManager.class);
                 }
+                bind(new VersionSorterServiceImpl(pluginManager, reg)).to(VersionSorterService.class);
             }
         });
 

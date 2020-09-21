@@ -8,7 +8,6 @@ import { finalize } from 'rxjs/operators';
 import { ManagedMasterDto, MinionMode, ProductDto, ProductTransferDto } from 'src/app/models/gen.dtos';
 import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { ProductService } from 'src/app/modules/instance-group/services/product.service';
-import { sortByTags } from 'src/app/modules/shared/utils/manifest.utils';
 import { ManagedServersService } from '../../services/managed-servers.service';
 
 @Component({
@@ -56,7 +55,7 @@ export class ProductSyncComponent implements OnInit, OnDestroy {
     private servers: ManagedServersService,
     private productService: ProductService,
     private dragulaService: DragulaService,
-    public routingHistoryService: RoutingHistoryService,
+    public routingHistoryService: RoutingHistoryService
   ) {}
 
   public ngOnInit(): void {
@@ -101,11 +100,6 @@ export class ProductSyncComponent implements OnInit, OnDestroy {
         this.sourceProducts.get(prod.name).push(prod);
       });
       this.sourceProductsKeys = Array.from(this.sourceProducts.keys());
-      this.sourceProductsKeys.forEach(key => {
-        const versions: ProductDto[] = this.sourceProducts.get(key);
-          this.sourceProducts.set(key, sortByTags(versions, v => v.key.tag, false));
-      });
-
 
       this.targetProducts = results[1];
       this.processingProducts = results[2];
