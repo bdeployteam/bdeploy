@@ -26,6 +26,7 @@ import com.google.common.io.ByteStreams;
 
 import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.ImportObjectOperation;
@@ -45,7 +46,9 @@ import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
+import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
+import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
@@ -72,6 +75,9 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
 
     @Inject
     private AuthService auth;
+
+    @Inject
+    private PluginManager pm;
 
     @Context
     private SecurityContext context;
@@ -171,6 +177,12 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
         if (bHive == null) {
             throw new WebApplicationException("Hive '" + group + "' does not exist");
         }
+
+        // unload all product-plugins
+        for (Manifest.Key key : ProductManifest.scan(bHive)) {
+            pm.unloadProduct(key);
+        }
+
         auth.removePermissions(group);
         registry.unregister(group);
         PathHelper.deleteRecursive(Paths.get(bHive.getUri()));
