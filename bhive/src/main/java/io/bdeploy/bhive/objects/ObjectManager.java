@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayDeque;
@@ -181,9 +182,24 @@ public class ObjectManager {
                 }
             }
 
+            Path tempLocation = location.getParent().resolve(location.getFileName().toString() + ".xtmp");
+            if (Files.exists(tempLocation)) {
+                PathHelper.deleteRecursive(tempLocation);
+            }
+
             Activity exporting = reporter.start("Writing objects...", 0);
             try {
-                internalExportTree(tree, location, tree, location, exporting, handler);
+                internalExportTree(tree, tempLocation, tree, tempLocation, exporting, handler);
+                Files.move(tempLocation, location, StandardCopyOption.ATOMIC_MOVE);
+            } catch (Throwable t) {
+                try {
+                    if (Files.exists(tempLocation)) {
+                        PathHelper.deleteRecursive(tempLocation);
+                    }
+                } catch (Throwable it) {
+                    t.addSuppressed(it);
+                }
+                throw t;
             } finally {
                 exporting.done();
             }
