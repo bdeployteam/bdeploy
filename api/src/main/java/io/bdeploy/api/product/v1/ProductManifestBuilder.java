@@ -11,13 +11,18 @@ import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
+import java.util.jar.Attributes;
+import java.util.jar.JarInputStream;
 
+import io.bdeploy.api.plugin.v1.Plugin;
 import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.model.Tree.EntryType;
+import io.bdeploy.bhive.objects.view.TreeView;
+import io.bdeploy.bhive.objects.view.scanner.TreeVisitor;
 import io.bdeploy.bhive.op.ImportFileOperation;
 import io.bdeploy.bhive.op.ImportObjectOperation;
 import io.bdeploy.bhive.op.ImportOperation;
@@ -25,6 +30,8 @@ import io.bdeploy.bhive.op.ImportTreeOperation;
 import io.bdeploy.bhive.op.InsertArtificialTreeOperation;
 import io.bdeploy.bhive.op.InsertManifestOperation;
 import io.bdeploy.bhive.op.InsertManifestRefOperation;
+import io.bdeploy.bhive.op.ObjectLoadOperation;
+import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.RuntimeAssert;
@@ -104,6 +111,30 @@ public class ProductManifestBuilder {
         if (pluginFolder != null) {
             ObjectId pluginId = hive.execute(new ImportTreeOperation().setSkipEmpty(true).setSourcePath(pluginFolder));
             tree.add(new Tree.Key(PLUGINS_ENTRY, Tree.EntryType.TREE), pluginId);
+
+            TreeView tv = hive.execute(new ScanOperation().setTree(pluginId));
+            tv.visit(new TreeVisitor.Builder().onBlob(b -> {
+                if (b.getName().toLowerCase().endsWith(".jar")) {
+                    try (JarInputStream jis = new JarInputStream(
+                            hive.execute(new ObjectLoadOperation().setObject(b.getElementId())))) {
+                        java.util.jar.Manifest pluginMf = jis.getManifest();
+                        if (pluginMf == null) {
+                            throw new IllegalStateException("The plugin is not a valid JAR file: " + b.getName());
+                        }
+
+                        Attributes mainAttributes = pluginMf.getMainAttributes();
+                        String mainClass = mainAttributes.getValue(Plugin.PLUGIN_CLASS_HEADER);
+                        String name = mainAttributes.getValue(Plugin.PLUGIN_NAME_HEADER);
+
+                        if (mainClass == null || name == null) {
+                            throw new IllegalStateException("The plugin must define the '" + Plugin.PLUGIN_CLASS_HEADER
+                                    + "' and '" + Plugin.PLUGIN_NAME_HEADER + "' headers: " + b.getName());
+                        }
+                    } catch (IOException e) {
+                        throw new IllegalStateException("The plugin cannot be read: " + b.getName(), e);
+                    }
+                }
+            }).build());
         }
 
         // import instance templates
