@@ -1,71 +1,50 @@
 === Instance History
 
-After a while, you will probably end up with a lot of changes and new versions. +
-You can *view* all those changes, *who* made them and *when* they were made on the *instance history page*.
+After a while, you will probably end up with a lot of changes and new versions. You can *view* all those changes, *who* made them and *when* they were made on the *Instance History Page*. To open the history, go to the *Instance overview*, click on the *menu* on the right and click on *Instance History*.
 
-To open the history, go to the *instance overview*, click on the *menu* on the right and click on *instance history*.
+A timeline with events on each side is shown. There are three types of events _Configuration_, _Deployments_ and _Runtime_ events. Each event has a title the corresponding *version*, as well as the *time* the event happened.
 
-You will be greeted with _Creation_ *cards* on each side of a timeline.
-Each *card* consists of a title containing the *event* and the corresponding *version*, as well as the *time* the event happened.
-
-There are three types of events. _Version creations_ (configurations), _Deployments_ and _Runtime_ events. +
-_Deployments_ and _Runtime_ events are disabled by default.
+[NOTE]
+_Deployments_ and _Runtime_ events are not displayed by default.
 
 [NOTE]
 If you haven't made any changes, only one card will be shown: _Version 1: Created_.
 
-Once you *scroll* to the bottom, a loading spinner will show up and more events get *loaded*. +
-You can scroll on until you reach the first event.
+Once you *scroll* to the bottom, a loading spinner will show up and more events get *loaded*. You can scroll on until you reach the first event.
 
 image::images/BDeploy_User_History_Overview.png[Instance history, align=center, width=480, link="images/BDeploy_User_History_Overview.png"]
 
-To see the *user* responsible for a _Creation_, open a card by clicking on it. +
-_Creation_ cards also list *all changes* of the corresponding version to the previous version.
+To see the *user* responsible for change, open a card by clicking on it. 
 
 image::images/BDeploy_User_History_OpenedCard.png[Open card, align=center, width=480, link="images/BDeploy_User_History_OpenedCard.png"]
 
 [TIP]
-To *close all* opened cards, click on the rightmost button of the toolbar on the top. +
-If you want *only one* card open at once, click on the button to the left of it. With that on, once you open a new card, all other cards will be closed. 
+To *close all* opened cards, click on the rightmost button of the toolbar on the top.  If you want *only one* card open at once, click on the button to the left of it. With that on, once you open a new card, all other cards will be closed. 
 
-===== Comparing two versions
+==== Configuration Events
 
-You can *compare* any two versions to view all changes made between those versions. +
-Select two versions by clicking on the button with *two arrows* in both _Creation_ cards. + 
-The versions will show up under *_Compare Versions_* in the toolbar on the top.
-To compare them now, click on the *arrow* inbetween.
+Each change that leads to a new *Instance Version* is a deployment event. Samples: Adding a new application, chaning the value of a parameter or changing the product version ...
 
-A *dialog* listing all changes will show up.
+The body of the card list *all changes* of the corresponding version to the previous version.
 
-image::images/BDeploy_User_History_ComparisonDialog.png[Compare versions, align=center, width=480, link="images/BDeploy_User_History_ComparisonDialog.png"]
+==== Deployment Events
 
-===== Filtering events
+_Deployments_ events are: `INSTALL`,`ACTIVATE`,`DEACTIVATE`,`UNINSTALL`.
 
-To *select* which events are shown, click on the *filter button* on the left of _Compare Versions_ in the toolbar on top and enable/disable the shown events. +
-
-image::images/BDeploy_User_History_ShowMenu.png[Filter events, align=center, width=480, link="images/BDeploy_User_History_ShowMenu.png"]
-
-==== Deployments
-
-_Deployments_ are: `INSTALL`,`ACTIVATE`,`DEACTIVATE`,`UNINSTALL`.
-
-_Deployments_ will show up once you *enabled* them. +
-Each card consists of a title containing the *deployment type* and the corresponding *version*, as well as the *time* the event happened.
+_Deployments_ will show up once you *enabled* them. Each card consists of a title containing the *deployment type* and the corresponding *version*, as well as the *time* the event happened.
 
 The body of a _Deployment_ card shows the *user* responsible for the *deployment*.
 
-===== Runtime events
+==== Runtime Events
 
-_Runtime_ events are: `START`, `STOP`, `CRASH`, `RESTART`, `PERMANENT CRASH`, `STOP PLANNED`.
+_Runtime_ events are: `START`, `STOP`, `CRASH`, `RESTART`, `PERMANENT CRASH`.
 
-_Runtime_ events will show up once you *enabled* them. +
-Each card consists of a title containing the *event* and the corresponding *application*, as well as the *time* the event happened.
+_Runtime_ events will show up once you *enabled* them. Each card consists of a title containing the *runtime event* and the corresponding *application*, as well as the *time* the event happened.
 
-The body of a _Runtime_ card lists the *User* responsible for the event as well as the *node* and *version* of the application. +
-If the not the user but the *process* or *bdeploy* triggered the _Runtime_ event, *_BDeploy System_* is shown as user.
+The body of a _Runtime_ card lists the *User* responsible for the event as well as the *node* and *version* of the application. If the not the user but the *process* or *BDeploy* triggered the _Runtime_ event, *_BDeploy System_* is shown as user.
 
 [NOTE]
-The *process ID* will also show up given that it was present at the *moment* the event happened.
+The *Process ID* will also show up given that it was present at the *moment* the event happened.
 
 image::images/BDeploy_User_History_RuntimeHistory.png[Runtime events, align=center, width=480, link="images/BDeploy_User_History_RuntimeHistory.png"]
 
@@ -74,7 +53,20 @@ image::images/BDeploy_User_History_RuntimeHistory.png[Runtime events, align=cent
 
 You can *search* for specific events with the *search-bar* on the top.
 
-After you entered your *search term* and hit *enter* or pressed the search *button* on the right,  +
-all cards of which the *title*, *user* or *PID* contain your term, will show up.
+After you entered your *search term* and hit *enter* or pressed the search *button* on the right, all cards of which the *title*, *user* or *PID* contain your term, will show up.
 
 To show everything again, *empty* the search bar first and then hit enter or press the search button.
+
+==== Comparing two versions
+
+You can *compare* any two versions to view all changes made between those versions. Select two versions by clicking on the button with *two arrows*. The versions will show up under *_Compare Versions_* in the toolbar on the top. To compare them now, click on the *arrow* inbetween.
+
+A *dialog* listing all changes will show up.
+
+image::images/BDeploy_User_History_ComparisonDialog.png[Compare versions, align=center, width=480, link="images/BDeploy_User_History_ComparisonDialog.png"]
+
+==== Filtering events
+
+To *select* which events are shown, click on the *filter button* on the left of _Compare Versions_ in the toolbar on top and enable/disable the shown events. 
+
+image::images/BDeploy_User_History_ShowMenu.png[Filter events, align=center, width=480, link="images/BDeploy_User_History_ShowMenu.png"]
