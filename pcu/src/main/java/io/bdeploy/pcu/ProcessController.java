@@ -560,23 +560,18 @@ public class ProcessController {
         } catch (Exception ex) {
             throw new PcuRuntimeException("Failed to execute task '" + taskName + "'", ex);
         } finally {
-            // Remember current state. Releasing the lock could lead
-            // to another state change and result in wrong notifications
-            // send to the listeners
-            ProcessState currentState = processState;
-
-            lockTask = null;
-            lock.unlock();
-
             // Fallback to system if no user is there
             if (user == null) {
                 user = DEFAULT_USER;
             }
 
             // Notify listeners when state changes
-            if (currentState != oldState) {
-                notifyListeners(new ProcessStateChangeDto(currentState, oldState, user));
+            if (processState != oldState) {
+                notifyListeners(new ProcessStateChangeDto(processState, oldState, user));
             }
+
+            lockTask = null;
+            lock.unlock();
         }
     }
 
