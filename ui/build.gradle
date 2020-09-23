@@ -87,7 +87,7 @@ task triggerStopCoverageStandalone {
 task runCoverageServerStandalone(type: com.github.psxpaul.task.ExecFork) {
     sharedCoverageServeLogic(it, ["-c", "cov-standalone"])
     waitForOutput = "Compiled successfully"
-    timeout = 120
+    timeout = 240
     stopAfter = triggerStopCoverageStandalone
 }
 
@@ -100,7 +100,7 @@ task triggerStopCoverageCentral {
 task runCoverageServerCentral(type: com.github.psxpaul.task.ExecFork) {
     sharedCoverageServeLogic(it, ["-c", "cov-central"])
     waitForOutput = "Compiled successfully"
-    timeout = 120
+    timeout = 240
     stopAfter = triggerStopCoverageCentral
 }
 
@@ -113,7 +113,7 @@ task triggerStopCoverageManaged {
 task runCoverageServerManaged(type: com.github.psxpaul.task.ExecFork) {
     sharedCoverageServeLogic(it, ["-c", "cov-managed"])
     waitForOutput = "Compiled successfully"
-    timeout = 120
+    timeout = 240
     stopAfter = triggerStopCoverageManaged
 }
 
