@@ -660,14 +660,15 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     private void doInstallSideBySide(BHive hive, Entry<Version, Key> requiredLauncher) {
         // Check if the launcher is already installed
         Version version = requiredLauncher.getKey();
-        Path nativeLauncher = ClientPathHelper.getNativeLauncher(rootDir, version);
+        Path homeDir = ClientPathHelper.getHome(rootDir, version);
+        Path nativeLauncher = ClientPathHelper.getNativeLauncher(homeDir);
         if (nativeLauncher.toFile().exists()) {
             return;
         }
 
         // Install missing launcher
         log.info("Installing required launcher {}...", version);
-        if (PathHelper.isReadOnly(rootDir)) {
+        if (PathHelper.isReadOnly(homeDir)) {
             throw new SoftwareUpdateException("launcher", "Installed=" + runningVersion.toString() + " Required=" + version);
         }
 
@@ -676,7 +677,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         hive.execute(new FetchOperation().addManifest(launcher).setRemote(descriptor.host));
 
         // write to target directory
-        Path launcherHome = ClientPathHelper.getHome(rootDir, version).resolve(ClientPathHelper.LAUNCHER_DIR);
+        Path launcherHome = homeDir.resolve(ClientPathHelper.LAUNCHER_DIR);
         hive.execute(new ExportOperation().setManifest(launcher).setTarget(launcherHome));
 
         // Write manifest entry that the launcher needs to be retained
@@ -692,7 +693,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
      */
     private Process doDelegateLaunch(Version version, String appDescriptor) {
         Path homeDir = ClientPathHelper.getHome(rootDir, version);
-        Path nativeLauncher = ClientPathHelper.getNativeLauncher(rootDir, version);
+        Path nativeLauncher = ClientPathHelper.getNativeLauncher(homeDir);
         log.info("Launching application {} using launcher version {}", descriptor.applicationId, version);
 
         List<String> command = new ArrayList<>();
@@ -705,9 +706,13 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             b.redirectError(Redirect.INHERIT).redirectInput(Redirect.INHERIT).redirectOutput(Redirect.INHERIT);
             b.directory(homeDir.resolve(ClientPathHelper.LAUNCHER_DIR).toFile());
 
+            // Set the home directory for the launcher. Required for older launchers
+            // Newer launchers do not use the variable any more
+            Map<String, String> env = b.environment();
+            env.put("BDEPLOY_HOME", homeDir.toFile().getAbsolutePath());
+
             // Notify the launcher that he runs in a special mode.
             // In that mode he will forward all exit codes without special handling.
-            Map<String, String> env = b.environment();
             env.put(BDEPLOY_DELEGATE, "TRUE");
             return b.start();
         } catch (IOException e) {

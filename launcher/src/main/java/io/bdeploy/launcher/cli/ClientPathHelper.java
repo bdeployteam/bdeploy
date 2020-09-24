@@ -18,6 +18,9 @@ public class ClientPathHelper {
      */
     public static final String LAUNCHER_DIR = "launcher";
 
+    private static final String LINUX_LAUNCHER = LAUNCHER_DIR;
+    private static final String WIN_LAUNCHER = "BDeploy.exe";
+
     private ClientPathHelper() {
     }
 
@@ -28,7 +31,7 @@ public class ClientPathHelper {
         // Check if a specific directory should be used
         Path userArea = PathHelper.ofNullableStrig(System.getenv("BDEPLOY_USER_AREA"));
         if (userArea != null) {
-            userArea = userArea.toAbsolutePath();
+            return userArea.toAbsolutePath();
         }
 
         // On Windows we default to the local application data folder
@@ -52,14 +55,14 @@ public class ClientPathHelper {
     /**
      * Returns the native launcher used to start the application.
      */
-    public static Path getNativeLauncher(Path root, Version version) {
+    public static Path getNativeLauncher(Path root) {
         // On Windows we are searching for a BDeploy.exe executable in the launcher directory
-        Path launcherHome = root.resolve("launcher");
+        Path launcherHome = root.resolve(LAUNCHER_DIR);
         if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
-            return launcherHome.resolve("BDeploy.exe");
+            return launcherHome.resolve(WIN_LAUNCHER);
         }
         // On Linux and MAC the startup script is in the bin folder
-        return launcherHome.resolve("bin").resolve("launcher");
+        return launcherHome.resolve("bin").resolve(LINUX_LAUNCHER);
     }
 
 }
