@@ -133,8 +133,6 @@ export class InstanceHistoryComponent implements OnInit {
   }
 
   addVersionToCompare(version: string) {
-    const x = Number(version);
-
     // push first value to second value
     this.compareVersions[1] = this.compareVersions[0];
 

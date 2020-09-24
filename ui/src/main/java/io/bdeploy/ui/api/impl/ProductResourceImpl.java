@@ -102,7 +102,7 @@ public class ProductResourceImpl implements ProductResource {
             Map<String, Comparator<Manifest.Key>> comparators = new TreeMap<>();
             result.sort((a, b) -> {
                 Comparator<Manifest.Key> productVersionComparator = comparators.computeIfAbsent(a.key.getName(),
-                        (k) -> vss.getKeyComparator(group, a.key));
+                        k -> vss.getKeyComparator(group, a.key));
 
                 return productVersionComparator.compare(a.key, b.key);
             });

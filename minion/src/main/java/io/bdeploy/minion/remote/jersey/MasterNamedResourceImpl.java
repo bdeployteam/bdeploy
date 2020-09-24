@@ -158,7 +158,6 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 } catch (Exception e) {
                     // in case this did not work, the minion is not available or has another problem
                     // log but don't forward exception to the client
-                    log.warn("Problem communicating with slave {}", minionName, e);
                     throw new WebApplicationException("Minion " + minionName + " is not available", e, Status.BAD_GATEWAY);
                 }
 
@@ -235,7 +234,6 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                     deployment.activate(toDeploy);
                 } catch (Exception e) {
                     // log but don't forward exception to the client
-                    log.warn("Problem communicating with slave {}", minionName, e);
                     throw new WebApplicationException("Cannot activate on " + minionName, e, Status.BAD_GATEWAY);
                 }
 
