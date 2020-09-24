@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
@@ -28,6 +29,7 @@ import io.bdeploy.common.util.PathHelper;
 public class ManifestDatabase extends LockableDatabase {
 
     private final Path root;
+    private final Path tmp;
 
     /**
      * A cache for Manifest objects which need to actually be loaded from disk.
@@ -43,9 +45,14 @@ public class ManifestDatabase extends LockableDatabase {
     public ManifestDatabase(Path root) {
         super(root);
         this.root = root;
+        this.tmp = root.resolve(".tmp");
 
         if (!Files.exists(root)) {
             PathHelper.mkdirs(root);
+        }
+
+        if (!Files.exists(tmp)) {
+            PathHelper.mkdirs(tmp);
         }
     }
 
@@ -77,7 +84,14 @@ public class ManifestDatabase extends LockableDatabase {
             }
             Path pathForKey = getPathForKey(manifest.getKey());
             PathHelper.mkdirs(pathForKey.getParent());
-            Files.write(pathForKey, StorageHelper.toRawBytes(manifest));
+            Path tmpFile = Files.createTempFile(tmp, "mf-", ".tmp");
+            try {
+                Files.write(tmpFile, StorageHelper.toRawBytes(manifest));
+                Files.move(tmpFile, pathForKey, StandardCopyOption.ATOMIC_MOVE);
+            } catch (Throwable t) {
+                PathHelper.deleteRecursive(tmpFile);
+                throw t;
+            }
             manifestCache.put(manifest.getKey(), manifest);
         });
     }
@@ -114,6 +128,10 @@ public class ManifestDatabase extends LockableDatabase {
 
             try (Stream<Path> walk = Files.walk(scanRoot)) {
                 walk.filter(Files::isRegularFile).forEach(f -> {
+                    if (f.startsWith(this.tmp)) {
+                        return;
+                    }
+
                     Path rel = root.relativize(f);
 
                     if (rel.getParent() == null) {
