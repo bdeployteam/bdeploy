@@ -83,17 +83,16 @@ public class MarkerDatabase extends ObjectDatabase {
                 if (lockContentValidator != null) {
                     try {
                         List<String> lines = Files.readAllLines(lockFile);
-                        if (!lines.isEmpty() && !StringHelper.isNullOrEmpty(lines.get(0))) {
-                            if (!lockContentValidator.test(lines.get(0))) {
-                                // it is invalid! this means it is a stale lock, we can delete it!
-                                log.warn("Stale lock file detected, forcefully resolving...");
-                                Files.delete(lockFile);
-                                continue;
-                            }
+                        if (!lines.isEmpty() && !StringHelper.isNullOrEmpty(lines.get(0))
+                                && !lockContentValidator.test(lines.get(0))) {
+                            // it is invalid! this means it is a stale lock, we can delete it!
+                            log.warn("Stale lock file detected, forcefully resolving...");
+                            Files.delete(lockFile);
+                            continue;
                         }
                     } catch (IOException ve) {
                         // cannot validate, assume it is still valid.
-                        log.warn("Cannot validate lock file, assuming it is valid: " + lockFile + ": " + ve.toString());
+                        log.warn("Cannot validate lock file, assuming it is valid: {}: {}", lockFile, ve.toString());
                     }
                 }
                 // inform the user that we're about to wait...

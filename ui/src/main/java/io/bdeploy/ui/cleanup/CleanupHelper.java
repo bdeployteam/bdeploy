@@ -291,7 +291,7 @@ public class CleanupHelper {
         // map of available products grouped by product name
         Map<String, List<Key>> allProductsMap = ProductManifest.scan(hive).stream().sorted((a, b) -> {
             Comparator<Manifest.Key> productVersionComparator = comparators.computeIfAbsent(a.getName(),
-                    (k) -> vss.getKeyComparator(group, a));
+                    k -> vss.getKeyComparator(group, a));
             return productVersionComparator.compare(b, a);
         }).collect(Collectors.groupingBy(Key::getName, Collectors.toCollection(ArrayList::new)));
 
@@ -316,8 +316,8 @@ public class CleanupHelper {
 
         // create actions for unused products (older than the oldest product in use)
         SortedSet<Manifest.Key> manifests4deletion = new TreeSet<>();
-        createDeleteProductsActions(hive, group, minion.getPluginManager(), actions, manifests4deletion, allProductsMap,
-                usedProductsMap, comparators);
+        createDeleteProductsActions(hive, minion.getPluginManager(), actions, manifests4deletion, allProductsMap, usedProductsMap,
+                comparators);
 
         if (immediate) {
             perform(context, hive, actions, provider);
@@ -328,7 +328,7 @@ public class CleanupHelper {
         return actions;
     }
 
-    private static void createDeleteProductsActions(BHive hive, String group, PluginManager pmgr, List<CleanupAction> actions,
+    private static void createDeleteProductsActions(BHive hive, PluginManager pmgr, List<CleanupAction> actions,
             SortedSet<Manifest.Key> manifests4deletion, Map<String, List<Key>> allProductsMap,
             Map<String, SortedSet<Key>> usedProductsMap, Map<String, Comparator<Key>> comparators) {
         for (List<Key> pVersionKeys : allProductsMap.values()) {

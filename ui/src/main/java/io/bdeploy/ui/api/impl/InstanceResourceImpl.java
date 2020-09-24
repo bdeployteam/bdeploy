@@ -187,7 +187,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
             // comparator only computed once per product (name), regardless of tag.
             Comparator<String> productVersionComparator = comparators.computeIfAbsent(im.getConfiguration().product.getName(),
-                    (k) -> vss.getTagComparator(group, im.getConfiguration().product));
+                    k -> vss.getTagComparator(group, im.getConfiguration().product));
 
             ProductDto productDto = null;
             try {
@@ -223,7 +223,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
                 // reverse order of comparison to get newest version first.
                 Optional<String> newestProductVersion = scan.stream().filter(key -> key.getName().equals(productName))
-                        .map(key -> key.getTag()).sorted((a, b) -> productVersionComparator.compare(b, a)).findFirst();
+                        .map(Key::getTag).sorted((a, b) -> productVersionComparator.compare(b, a)).findFirst();
 
                 if (newestProductVersion.isPresent()) {
                     String newestProductTag = newestProductVersion.get();

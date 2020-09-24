@@ -117,9 +117,8 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
     }
 
     private void addProcessDetails(DataResult result, ProcessHandleDto pdd, String indent) {
-        result.addField("Process PID=" + pdd.pid,
-                String.format("%1$s└[cpu=%2$ds] %3$s %4$s", indent, pdd.pid, pdd.totalCpuDuration, pdd.command,
-                        (pdd.arguments != null && pdd.arguments.length > 0 ? String.join(" ", pdd.arguments) : "")));
+        result.addField("Process PID=" + pdd.pid, String.format("%1$s└[cpu=%2$ds] %3$s %4$s", indent, pdd.totalCpuDuration,
+                pdd.command, (pdd.arguments != null && pdd.arguments.length > 0 ? String.join(" ", pdd.arguments) : "")));
 
         for (ProcessHandleDto child : pdd.children) {
             addProcessDetails(result, child, indent + " ");

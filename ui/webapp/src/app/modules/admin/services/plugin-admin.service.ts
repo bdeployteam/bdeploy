@@ -21,7 +21,7 @@ export class PluginAdminService {
     return this.http.get<PluginInfoDto[]>(url);
   }
 
-  public getProductPlugins(group: String, product: ManifestKey): Observable<PluginInfoDto[]> {
+  public getProductPlugins(group: string, product: ManifestKey): Observable<PluginInfoDto[]> {
     const url: string = this.cfg.config.api + PluginAdminService.BASEPATH + '/list-product-plugins/' + group;
     this.log.debug('getProductPlugins: ' + url);
     return this.http.post<PluginInfoDto[]>(url, product);

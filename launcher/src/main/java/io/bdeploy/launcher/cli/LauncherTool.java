@@ -97,7 +97,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     private static final Supplier<String> LOCK_CONTENT = () -> Long.toString(ProcessHandle.current().pid());
 
     /** Validator will check whether the writing PID of the lock file is still there. */
-    private static final Predicate<String> LOCK_VALIDATOR = (pid) -> ProcessHandle.of(Long.parseLong(pid)).isPresent();
+    private static final Predicate<String> LOCK_VALIDATOR = pid -> ProcessHandle.of(Long.parseLong(pid)).isPresent();
 
     /**
      * Environment variable that is set in case that one launcher delegates launching to another (older) one.
@@ -229,7 +229,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
                 // Cleanup the installation directory and the hive.
                 if (!readOnlyRootDir) {
-                    doExecuted(reporter, () -> {
+                    doExecuteLocked(reporter, () -> {
                         ClientCleanup cleanup = new ClientCleanup(hive, rootDir, appDir, poolDir);
                         cleanup.run();
                         return null;
@@ -294,7 +294,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
     /** Updates the launcher if there is a new version available */
     private Entry<Version, Key> doSelfUpdate(BHive hive, LauncherSplashReporter reporter, Version serverVersion) {
-        return doExecuted(reporter, () -> {
+        return doExecuteLocked(reporter, () -> {
             Entry<Version, Key> requiredLauncher = getLatestLauncherVersion(reporter, serverVersion);
             doCheckForLauncherUpdate(hive, reporter, requiredLauncher);
             return requiredLauncher;
@@ -377,7 +377,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
 
         // Install the application into the pool if missing
-        doExecuted(reporter, () -> {
+        doExecuteLocked(reporter, () -> {
             installApplication(hive, splash, reporter, clientAppCfg);
             return null;
         });
@@ -392,7 +392,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
      * Locks the root in order to perform the given operation. The lock is not taken if the current user does
      * not have the permissions to modify the root directory. In that case the operation is directly executed.
      */
-    private <T> T doExecuted(LauncherSplashReporter reporter, Callable<T> runnable) {
+    private <T> T doExecuteLocked(LauncherSplashReporter reporter, Callable<T> runnable) {
         if (!readOnlyRootDir) {
             try (Activity waiting = reporter.start("Waiting for other launchers...")) {
                 MarkerDatabase.lockRoot(rootDir, LOCK_CONTENT, LOCK_VALIDATOR); // this could wait for other launchers.
@@ -400,11 +400,10 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
         try {
             return runnable.call();
+        } catch (RuntimeException rex) {
+            throw rex;
         } catch (Exception ex) {
-            if (ex instanceof RuntimeException) {
-                throw ((RuntimeException) ex);
-            }
-            throw new RuntimeException("Failed to executed operation", ex);
+            throw new RuntimeException("Failed to execute locked operation", ex);
         } finally {
             if (!readOnlyRootDir) {
                 MarkerDatabase.unlockRoot(rootDir);

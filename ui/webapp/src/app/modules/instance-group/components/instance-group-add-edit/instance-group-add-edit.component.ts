@@ -108,7 +108,7 @@ export class InstanceGroupAddEditComponent implements OnInit {
     } else {
       const og = this.instanceGroupService.getInstanceGroup(this.nameParam);
       const op = this.instanceGroupService.getInstanceGroupProperties(this.nameParam);
-      forkJoin(og, op).subscribe(
+      forkJoin([og, op]).subscribe(
         result => {
           const instanceGroup: InstanceGroupConfiguration = result[0];
 
@@ -218,13 +218,13 @@ export class InstanceGroupAddEditComponent implements OnInit {
     if (this.isCreate()) {
       // first create group, second set properties third update image on existing group
       this.instanceGroupService.createInstanceGroup(instanceGroup)
-        .subscribe((result) => {
+        .subscribe(_ => {
           this.log.info('created new instance group ' + instanceGroup.name);
           this.clonedInstanceGroup = instanceGroup;
           this.instanceGroupService
             .updateInstanceGroupProperties(instanceGroup.name, instanceGroupProperties)
             .pipe(finalize(() => { this.loading = false; }))
-            .subscribe(result => {
+            .subscribe(r => {
                 this.clonedInstanceGroupProperties = cloneDeep(instanceGroupProperties);
                 this.checkImage(instanceGroup.name);
               });

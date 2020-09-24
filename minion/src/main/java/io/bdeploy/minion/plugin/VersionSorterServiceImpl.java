@@ -59,14 +59,12 @@ public class VersionSorterServiceImpl implements VersionSorterService {
             for (ObjectId plugin : pm.getPlugins()) {
                 try {
                     PluginHeader hdr = manager.loadHeader(hive, plugin);
-                    if (hdr.sorter) {
-                        // ignores plugin name for now.
-                        if (sorterPlugin == null || VersionHelper.compare(sorterPlugin.version, hdr.version) < 0) {
-                            sorterPlugin = hdr;
-                            sorterPluginId = plugin;
-                            sorterPluginProduct = scanned;
-                            break;
-                        }
+                    // ignores plugin name for now.
+                    if (hdr.sorter && (sorterPlugin == null || VersionHelper.compare(sorterPlugin.version, hdr.version) < 0)) {
+                        sorterPlugin = hdr;
+                        sorterPluginId = plugin;
+                        sorterPluginProduct = scanned;
+                        break;
                     }
                 } catch (Exception e) {
                     log.error("Cannot read plugin information for {}: {}", plugin, e.toString());
