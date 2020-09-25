@@ -73,42 +73,42 @@
     </div>
 
     <mat-tab-group class='tab-container margin-container' dynamicHeight='true'>
-      <mat-tab label='Instance Group Properties'>
+      <mat-tab label='Instance Group Attributes'>
         <div class='tab-content'>
           <p>
-            Properties as defined on system level.
+            Attributes as defined on system level.
           </p>
-          <div class='properties-grid'>
-            <ng-container *ngFor='let p of getSortedInstanceGroupPropertyKeys(); let f = first; let l = last; let i = index'>
-              <div>{{p}}</div>
-              <div>{{instanceGroupProperties?.properties[p]}}</div>
-              <div><button mat-icon-button type='button' (click)='editInstanceGroupProperty(p)'><mat-icon>edit</mat-icon></button></div>
-              <div><button mat-icon-button type='button' (click)='removeInstanceGroupProperty(p)'><mat-icon>delete</mat-icon></button></div>
+          <div class='attributes-grid'>
+            <ng-container *ngFor='let a of getSortedInstanceGroupAttributeKeys()'>
+              <div>{{a}}</div>
+              <div>{{instanceGroupAttributes?.attributes[a]}}</div>
+              <div><button mat-icon-button type='button' (click)='editInstanceGroupAttribute(a)'><mat-icon>edit</mat-icon></button></div>
+              <div><button mat-icon-button type='button' (click)='removeInstanceGroupAttribute(a)'><mat-icon>delete</mat-icon></button></div>
             </ng-container>
           </div>
-          <div *ngIf='!hasInstanceGroupProperties()'>
-            No Properties have been configured yet.
+          <div *ngIf='!hasInstanceGroupAttributes()'>
+            No Attributes have been configured yet.
           </div>
-          <button mat-mini-fab style='align-self: flex-end;' type='button' (click)='addInstanceGroupProperty()'><mat-icon>add</mat-icon></button>
+          <button mat-mini-fab style='align-self: flex-end;' type='button' (click)='addInstanceGroupAttribute()'><mat-icon>add</mat-icon></button>
         </div>
       </mat-tab>
-      <mat-tab label='Instance Property Definitions'>
+      <mat-tab label='Instance Attribute Definitions'>
         <div class='tab-content'>
           <p>
-            Configure properties that are available for all Instances of this Instance Group.
+            Configure attributes that are available for all Instances of this Instance Group.
           </p>
-          <div class='properties-grid'>
-            <ng-container *ngFor='let p of instancePropertiesDescriptors; let f = first; let l = last; let i = index'>
-              <div>{{p.name}}</div>
-              <div>{{p.description}}</div>
-              <div><button mat-icon-button type='button' (click)='editInstanceProperty(p, i)'><mat-icon>edit</mat-icon></button></div>
-              <div><button mat-icon-button type='button' (click)='removeInstanceProperty(i)'><mat-icon>delete</mat-icon></button></div>
+          <div class='attributes-grid'>
+            <ng-container *ngFor='let a of instanceAttributesDescriptors; let i = index'>
+              <div>{{a.name}}</div>
+              <div>{{a.description}}</div>
+              <div><button mat-icon-button type='button' (click)='editInstanceAttribute(a, i)'><mat-icon>edit</mat-icon></button></div>
+              <div><button mat-icon-button type='button' (click)='removeInstanceAttribute(i)'><mat-icon>delete</mat-icon></button></div>
             </ng-container>
           </div>
-          <div *ngIf='!instancePropertiesDescriptors.length'>
-            No Properties have been configured yet.
+          <div *ngIf='!instanceAttributesDescriptors.length'>
+            No Attributes have been configured yet.
           </div>
-          <button mat-mini-fab style='align-self: flex-end;' type='button' (click)='addInstanceProperty()'><mat-icon>add</mat-icon></button>
+          <button mat-mini-fab style='align-self: flex-end;' type='button' (click)='addInstanceAttribute()'><mat-icon>add</mat-icon></button>
         </div>
       </mat-tab>
     </mat-tab-group>

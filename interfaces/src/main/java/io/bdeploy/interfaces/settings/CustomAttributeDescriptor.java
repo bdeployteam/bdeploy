@@ -1,14 +1,14 @@
 package io.bdeploy.interfaces.settings;
 
-public class CustomPropertyDescriptor {
+public class CustomAttributeDescriptor {
 
     /**
-     * Name of the property
+     * Name of the attribute
      */
     public String name;
 
     /**
-     * Description of the property
+     * Description of the attribute
      */
     public String description;
 

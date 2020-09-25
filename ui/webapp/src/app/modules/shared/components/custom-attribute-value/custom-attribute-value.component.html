@@ -1,14 +1,14 @@
-<h1 mat-dialog-title>Edit Custom Property</h1>
+<h1 mat-dialog-title>Edit Custom Attribute</h1>
 <form #f="ngForm">
   <div mat-dialog-content class='content'>
     <mat-form-field>
-      <mat-select name="name" required [disabled]="!isCreate" [(ngModel)]="data.propertyName">
+      <mat-select name="name" required [disabled]="!isCreate" [(ngModel)]="data.attributeName">
         <mat-option *ngFor="let d of data.descriptors" [value]="d.name">{{d.name}}</mat-option>
       </mat-select>
     </mat-form-field>
     <div class="description" *ngIf="getDescription()">{{getDescription()}}</div>
     <mat-form-field>
-      <input matInput type='text' name='value' required [(ngModel)]='data.propertyValue' placeholder="Value">
+      <input matInput type='text' name='value' required [(ngModel)]='data.attributeValue' placeholder="Value">
     </mat-form-field>
   </div>
   <div mat-dialog-actions align="end">

@@ -20,7 +20,7 @@ import io.bdeploy.bhive.op.ManifestNextIdOperation;
 import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
-import io.bdeploy.interfaces.manifest.properties.CustomProperties;
+import io.bdeploy.interfaces.manifest.attributes.CustomAttributes;
 
 /**
  * Describes the instance group that a named hive is associated with.
@@ -84,8 +84,8 @@ public class InstanceGroupManifest {
         hive.execute(new InsertManifestOperation().addManifest(mfb.build(hive)));
     }
 
-    public CustomProperties getProperties(BHiveExecution bhive) {
-        return new CustomProperties(getKey(), bhive);
+    public CustomAttributes getAttributes(BHiveExecution bhive) {
+        return new CustomAttributes(getKey(), bhive);
     }
 
 }

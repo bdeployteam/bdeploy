@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { CustomPropertiesRecord, InstanceClientAppsDto, InstanceGroupConfiguration, OperatingSystem, UserInfo, UserPermissionUpdateDto } from '../../../models/gen.dtos';
+import { CustomAttributesRecord, InstanceClientAppsDto, InstanceGroupConfiguration, OperatingSystem, UserInfo, UserPermissionUpdateDto } from '../../../models/gen.dtos';
 import { ConfigService } from '../../core/services/config.service';
 import { Logger, LoggingService } from '../../core/services/logging.service';
 import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
@@ -99,15 +99,15 @@ export class InstanceGroupService {
     return this.http.post<Response>(url, formData);
   }
 
-  public getInstanceGroupProperties(name: string): Observable<CustomPropertiesRecord> {
-    const url: string = this.cfg.config.api + InstanceGroupService.BASEPATH + '/' + name + '/properties';
-    this.log.debug('getInstanceGroupProperties: ' + url);
-    return this.http.get<CustomPropertiesRecord>(url);
+  public getInstanceGroupAttributes(name: string): Observable<CustomAttributesRecord> {
+    const url: string = this.cfg.config.api + InstanceGroupService.BASEPATH + '/' + name + '/attributes';
+    this.log.debug('getInstanceGroupAttributes: ' + url);
+    return this.http.get<CustomAttributesRecord>(url);
   }
 
-  public updateInstanceGroupProperties(name: string, properties: CustomPropertiesRecord) {
-    const url: string = this.cfg.config.api + InstanceGroupService.BASEPATH + '/' + name + '/properties';
-    this.log.debug('updateInstanceGroupProperties: ' + url);
+  public updateInstanceGroupAttributes(name: string, properties: CustomAttributesRecord) {
+    const url: string = this.cfg.config.api + InstanceGroupService.BASEPATH + '/' + name + '/attributes';
+    this.log.debug('updateInstanceGroupAttributes: ' + url);
     return this.http.post(url, properties);
   }
 

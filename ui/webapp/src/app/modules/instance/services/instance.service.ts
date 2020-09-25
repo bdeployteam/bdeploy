@@ -10,6 +10,7 @@ import { catchError } from 'rxjs/operators';
 import {
   ClickAndStartDescriptor,
   ConfigFileDto,
+  CustomAttributesRecord,
   FileStatusDto,
   HistoryEntryVersionDto,
   HistoryResultDto,
@@ -565,4 +566,17 @@ export class InstanceService {
       .set('b', versionB.toString());
     return this.http.get<HistoryEntryVersionDto>(url, { params: params });
   }
+
+  public getInstanceAttributes(instanceGroupName: string, instanceId: string): Observable<CustomAttributesRecord> {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceId) + '/attributes';
+    this.log.debug('getInstanceAttributes: ' + url);
+    return this.http.get<CustomAttributesRecord>(url);
+  }
+
+  public updateInstanceAttributes(instanceGroupName: string, instanceId: string, attributes: CustomAttributesRecord) {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceId) + '/attributes';
+    this.log.debug('updateInstanceAttributes: ' + url);
+    return this.http.post(url, attributes);
+  }
+
 }

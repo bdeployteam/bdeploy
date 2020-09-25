@@ -66,6 +66,7 @@ import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
+import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.manifest.banner.InstanceBannerRecord;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
 import io.bdeploy.interfaces.manifest.history.runtime.MasterRuntimeHistoryDto;
@@ -932,5 +933,17 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     public void updateBanner(String instanceId, InstanceBannerRecord instanceBannerRecord) {
         InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
         im.getBanner(hive).set(instanceBannerRecord);
+    }
+
+    @Override
+    public CustomAttributesRecord getAttributes(String instanceId) {
+        InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
+        return im.getAttributes(hive).read();
+    }
+
+    @Override
+    public void updateAttributes(String instanceId, CustomAttributesRecord attributes) {
+        InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
+        im.getAttributes(hive).set(attributes);
     }
 }

@@ -85,6 +85,7 @@ import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
+import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.manifest.banner.InstanceBannerRecord;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory;
 import io.bdeploy.interfaces.manifest.managed.ControllingMaster;
@@ -1018,6 +1019,28 @@ public class InstanceResourceImpl implements InstanceResource {
     @Override
     public HistoryEntryVersionDto compareInstanceHistory(String instanceId, int versionA, int versionB) {
         return instanceHistory.compareVersions(hive, instanceId, versionA, versionB);
+    }
+
+    @Override
+    public CustomAttributesRecord getAttributes(String instanceId) {
+        InstanceManifest im = readInstance(instanceId);
+        if (im == null) {
+            throw new WebApplicationException("Cannot load " + instanceId, Status.NOT_FOUND);
+        }
+        RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
+        MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
+        return root.getNamedMaster(group).getAttributes(instanceId);
+    }
+
+    @Override
+    public void updateAttributes(String instanceId, CustomAttributesRecord attributes) {
+        InstanceManifest im = readInstance(instanceId);
+        if (im == null) {
+            throw new WebApplicationException("Cannot load " + instanceId, Status.NOT_FOUND);
+        }
+        RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
+        MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
+        root.getNamedMaster(group).updateAttributes(instanceId, attributes);
     }
 
 }
