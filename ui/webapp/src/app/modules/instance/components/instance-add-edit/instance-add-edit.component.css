@@ -81,3 +81,26 @@ mat-form-field {
 .loading-text {
   margin-left: 0.5em;
 }
+
+.attributes-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  margin-left: 1em;
+}
+
+.attributes-grid {
+  margin-bottom: 20px;
+
+  display: grid;
+  grid-template-columns: auto auto 32px 32px;
+
+  row-gap: 5px;
+  column-gap: 10px;
+
+  align-items: center;
+}
+
+mat-toolbar button {
+  margin-left: 5px;
+}

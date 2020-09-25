@@ -4,20 +4,15 @@ import { Location } from '@angular/common';
 import { Component, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
 import { cloneDeep, isEqual } from 'lodash-es';
-import { Observable, of } from 'rxjs';
+import { forkJoin, Observable, of } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
-import { EMPTY_INSTANCE } from '../../../../models/consts';
-import {
-  InstanceConfiguration,
-  InstancePurpose,
-  InstanceVersionDto,
-  ManagedMasterDto,
-  MinionMode,
-  ProductDto
-} from '../../../../models/gen.dtos';
+import { CustomAttributeValueComponent } from 'src/app/modules/shared/components/custom-attribute-value/custom-attribute-value.component';
+import { EMPTY_ATTRIBUTES_RECORD, EMPTY_INSTANCE } from '../../../../models/consts';
+import { CustomAttributesRecord, InstanceConfiguration, InstanceGroupConfiguration, InstancePurpose, InstanceVersionDto, ManagedMasterDto, MinionMode, ProductDto } from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
 import { Logger, LoggingService } from '../../../core/services/logging.service';
 import { InstanceGroupService } from '../../../instance-group/services/instance-group.service';
@@ -43,11 +38,13 @@ export class InstanceAddEditComponent implements OnInit {
   public servers: ManagedMasterDto[] = [];
   public tags: string[] = [];
 
-  public productsLoading = true;
-  public tagsLoading = false;
   public loading = false;
   public loadingText: string;
 
+  public instanceAttributes: CustomAttributesRecord;
+  public clonedInstanceAttributes: CustomAttributesRecord;
+
+  public instanceGroup: InstanceGroupConfiguration;
   public clonedInstance: InstanceConfiguration;
   private expectedVersion: InstanceVersionDto;
 
@@ -85,104 +82,100 @@ export class InstanceAddEditComponent implements OnInit {
     private viewContainerRef: ViewContainerRef,
     private overlay: Overlay,
     private config: ConfigService,
-    private managedServers: ManagedServersService,
-    public routingHistoryService: RoutingHistoryService
+    private managedServersService: ManagedServersService,
+    public routingHistoryService: RoutingHistoryService,
+    private dialog: MatDialog,
   ) {}
 
   ngOnInit() {
     this.groupParam = this.route.snapshot.paramMap.get('group');
     this.uuidParam = this.route.snapshot.paramMap.get('uuid');
-    this.log.debug('groupParam = ' + this.groupParam + ', nameParam = ' + this.uuidParam);
 
-    // Disable the form as long as we do not have a UUID
     this.loading = true;
     this.instanceFormGroup.disable();
-    this.instanceFormGroup.valueChanges.subscribe((e) => {
-      if (e.uuid && this.instanceFormGroup.disabled) {
-        this.loading = false;
-        this.instanceFormGroup.enable();
-
-        if (this.productsLoading) {
-          this.loadingText = 'Loading...';
-        }
-
-        if (!this.isCreate()) {
-          this.productNameControl.disable();
-        }
-
-        // always disable this first - when a product is selected, this is enabled.
-        this.productTagControl.disable();
-      }
-    });
+    this.formGroup.disable();
 
     if (this.isCreate()) {
       this.loadingText = 'Generating UUID...';
-      this.instanceGroupService.createUuid(this.groupParam).subscribe((uuid: string) => {
-        this.log.debug('got uuid ' + uuid);
+      forkJoin({
+        instanceGroup: this.instanceGroupService.getInstanceGroup(this.groupParam),
+        uuid: this.instanceGroupService.createUuid(this.groupParam),
+        purposes: this.instanceService.listPurpose(this.groupParam),
+        products: this.productService.getProducts(this.groupParam, null),
+        servers: this.isCentral() ? this.managedServersService.getManagedServers(this.groupParam) : of([]),
+      }).pipe(finalize(() => {this.loading = false; }))
+      .subscribe(r => {
         const instance = cloneDeep(EMPTY_INSTANCE);
         instance.autoUninstall = true;
-        instance.uuid = uuid;
+        instance.uuid = r.uuid;
         this.instanceFormGroup.patchValue(instance);
         this.clonedInstance = cloneDeep(instance);
+        this.instanceGroup = r.instanceGroup;
+        this.purposes = r.purposes;
+        this.products = r.products;
+        this.instanceAttributes = cloneDeep(EMPTY_ATTRIBUTES_RECORD);
+        this.clonedInstanceAttributes = cloneDeep(EMPTY_ATTRIBUTES_RECORD);
+        this.servers = r.servers.sort((a, b) => a.hostName.localeCompare(b.hostName));
+
+        this.instanceFormGroup.enable();
+        this.formGroup.enable();
+        this.productTagControl.disable();
       });
     } else {
       this.loadingText = 'Loading...';
-      this.instanceService.getInstance(this.groupParam, this.uuidParam).subscribe((instance) => {
-        this.log.debug('got instance ' + this.uuidParam);
-        this.instanceFormGroup.patchValue(instance);
-        this.clonedInstance = cloneDeep(instance);
-      });
-      // TODO: this could be better (group with above request)
-      this.instanceService.listInstanceVersions(this.groupParam, this.uuidParam).subscribe((vs) => {
-        vs.sort((a, b) => {
-          return +b.key.tag - +a.key.tag;
+      forkJoin({
+        instanceGroup: this.instanceGroupService.getInstanceGroup(this.groupParam),
+        instance: this.instanceService.getInstance(this.groupParam, this.uuidParam),
+        instanceVersions: this.instanceService.listInstanceVersions(this.groupParam, this.uuidParam),
+        managedServer: this.managedServersService.getServerForInstance(this.groupParam, this.uuidParam, null),
+        purposes: this.instanceService.listPurpose(this.groupParam),
+        products: this.productService.getProducts(this.groupParam, null),
+        attributes: this.instanceService.getInstanceAttributes(this.groupParam, this.uuidParam),
+        servers: this.isCentral() ? this.managedServersService.getManagedServers(this.groupParam) : of([]),
+      }).pipe(finalize(() => {this.loading = false; }))
+        .subscribe(r => {
+          this.instanceGroup = r.instanceGroup;
+          this.instanceFormGroup.patchValue(r.instance);
+          this.clonedInstance = cloneDeep(r.instance);
+          r.instanceVersions.sort((a, b) => {
+            return +b.key.tag - +a.key.tag;
+          });
+          this.expectedVersion = r.instanceVersions[0];
+          if (r.managedServer) {
+            this.managedServerControl.setValue(r.managedServer.hostName);
+          }
+          this.purposes = r.purposes;
+          this.products = r.products;
+          this.instanceAttributes = r.attributes;
+          if (!this.instanceAttributes.attributes) {
+            this.instanceAttributes.attributes = {};
+          }
+          this.clonedInstanceAttributes = cloneDeep(r.attributes);
+          this.servers = r.servers.sort((a, b) => a.hostName.localeCompare(b.hostName));
+          this.onSelectProduct(this.clonedInstance.product.name); // calculate tags for product
+
+          this.instanceFormGroup.enable();
+          this.productNameControl.disable();
+          this.productTagControl.disable();
         });
-        this.expectedVersion = vs[0];
-      });
-      this.managedServers.getServerForInstance(this.groupParam, this.uuidParam, null).subscribe((r) => {
-        if (r) {
-          this.managedServerControl.setValue(r.hostName);
-        }
-      });
     }
-
-    this.instanceService.listPurpose(this.groupParam).subscribe((purposes) => {
-      this.purposes = purposes;
-      this.log.debug('got purposes ' + this.purposes);
-    });
-
-    this.productService
-      .getProducts(this.groupParam, null)
-      .pipe(finalize(() => (this.productsLoading = false)))
-      .subscribe((products) => {
-        this.products = products;
-        this.log.debug('got ' + products.length + ' products');
-      });
-
-    // Clear tag if product changed
-    this.productNameControl.valueChanges.subscribe((input) => this.productTagControl.reset());
-
-    // Changing product and tag is not allowed after instance has been created
-    // User needs to change that in the process config dialog as all validation and update logic is located there
-    if (!this.isCreate()) {
-      this.productNameControl.disable();
-      this.managedServerControl.disable();
-    }
-
-    // always disable this first - when a product is selected, this is enabled.
-    this.productTagControl.disable();
 
     if (this.isCentral()) {
       this.managedServerControl.setValidators([Validators.required]);
-      this.managedServers.getManagedServers(this.groupParam).subscribe((r) => {
-        this.servers = r.sort((a, b) => a.hostName.localeCompare(b.hostName));
-      });
     }
   }
 
   isModified(): boolean {
+    return this.isConfigurationModified() || this.isAttributesModified();
+  }
+
+  isConfigurationModified(): boolean {
     const instance: InstanceConfiguration = this.instanceFormGroup.getRawValue();
     return !isEqual(instance, this.clonedInstance);
+  }
+
+  isAttributesModified(): boolean {
+    return !isEqual(this.instanceAttributes, this.clonedInstanceAttributes);
   }
 
   canDeactivate(): Observable<boolean> {
@@ -218,23 +211,14 @@ export class InstanceAddEditComponent implements OnInit {
   }
 
   onSelectProduct(selectedProduct: string) {
-    this.tagsLoading = true;
     this.tags = [];
-    try {
-      if (!selectedProduct) {
-        return;
-      }
-
+    this.productTagControl.disable();
+    if (selectedProduct) {
       const productVersions = this.products.filter((value, index, array) => value.key.name === selectedProduct);
-
-      if (productVersions.length === 0) {
-        return;
-      }
-
       this.tags = Array.from(productVersions, (p) => p.key.tag);
-      this.productTagControl.enable();
-    } finally {
-      this.tagsLoading = false;
+      if (this.tags.length > 0) {
+        this.productTagControl.enable();
+      }
     }
   }
 
@@ -244,21 +228,25 @@ export class InstanceAddEditComponent implements OnInit {
     const instance: InstanceConfiguration = this.instanceFormGroup.getRawValue();
     const managedServer = this.managedServerControl ? this.managedServerControl.value : null;
     if (this.isCreate()) {
-      this.instanceService
-        .createInstance(this.groupParam, instance, managedServer)
-        .pipe(finalize(() => (this.loading = false)))
-        .subscribe((result) => {
-          this.clonedInstance = instance;
-          this.log.info('created new instance ' + this.uuidParam);
+      // first create instance, second set attributes on existing instance
+      this.instanceService.createInstance(this.groupParam, instance, managedServer)
+      .subscribe(r => {
+        this.clonedInstance = instance;
+        this.instanceService.updateInstanceAttributes(this.groupParam, instance.uuid, this.instanceAttributes)
+        .pipe(finalize(() => this.loading = false))
+        .subscribe(a => {
+          this.clonedInstanceAttributes = this.instanceAttributes;
           this.location.back();
         });
+      });
     } else {
-      this.instanceService
-        .updateInstance(this.groupParam, this.uuidParam, instance, null, managedServer, this.expectedVersion.key.tag)
-        .pipe(finalize(() => (this.loading = false)))
-        .subscribe((result) => {
+      forkJoin({
+        configuration: this.instanceService.updateInstance(this.groupParam, this.uuidParam, instance, null, managedServer, this.expectedVersion.key.tag),
+        attributes: this.instanceService.updateInstanceAttributes(this.groupParam, this.uuidParam, this.instanceAttributes),
+      }).pipe(finalize(() => this.loading = false))
+        .subscribe(r => {
           this.clonedInstance = instance;
-          this.log.info('updated instance ' + this.uuidParam);
+          this.clonedInstanceAttributes = this.instanceAttributes;
           this.location.back();
         });
     }
@@ -330,4 +318,56 @@ export class InstanceAddEditComponent implements OnInit {
   isCentral() {
     return this.config.config.mode === MinionMode.CENTRAL;
   }
+
+  addInstanceAttribute() {
+    const possibleDescriptors = this.instanceGroup?.instanceAttributes?.filter(d => !this.instanceAttributes?.attributes[d.name] );
+    this.dialog.open(CustomAttributeValueComponent, {
+      width: '500px',
+      data: {
+        descriptors: possibleDescriptors,
+        attributeName: null,
+        attributeValue: null,
+      },
+    }).afterClosed().subscribe(r => {
+      if (r) {
+        this.instanceAttributes.attributes[r.name] = r.value;
+      }
+    });
+  }
+
+  editInstanceAttribute(attributeName: string) {
+    let descriptor = this.instanceGroup?.instanceAttributes?.find(d => d.name === attributeName);
+    if (!descriptor) {
+      descriptor = {name: attributeName, description: ''};
+    }
+    this.dialog.open(CustomAttributeValueComponent, {
+      width: '500px',
+      data: {
+        descriptors: [descriptor],
+        attributeName: attributeName,
+        attributeValue: cloneDeep(this.instanceAttributes.attributes[attributeName])
+      },
+    }).afterClosed().subscribe(r => {
+      if (r) {
+        this.instanceAttributes.attributes[r.name] = r.value;
+      }
+    });
+  }
+
+  removeInstanceAttribute(attributeName: string) {
+    delete this.instanceAttributes.attributes[attributeName];
+  }
+
+  hasInstanceAttributes(): boolean {
+    return this.instanceAttributes?.attributes && Object.keys(this.instanceAttributes.attributes).length > 0;
+  }
+
+  getSortedInstanceAttributesKeys(): string[] {
+    if (this.instanceAttributes?.attributes) {
+      return Object.keys(this.instanceAttributes.attributes).sort((a, b) => a.localeCompare(b));
+    } else {
+      return [];
+    }
+  }
+
 }

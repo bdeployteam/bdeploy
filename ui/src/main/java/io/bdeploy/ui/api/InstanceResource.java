@@ -28,6 +28,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.directory.InstanceDirectory;
 import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
+import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.manifest.banner.InstanceBannerRecord;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.minion.MinionDto;
@@ -229,5 +230,15 @@ public interface InstanceResource {
     @Path("/{instance}/compare-versions")
     public HistoryEntryVersionDto compareInstanceHistory(@ActivityScope @PathParam("instance") String instanceId,
             @QueryParam("a") int versionA, @QueryParam("b") int versionB);
+
+    @GET
+    @Path("/{instance}/attributes")
+    @RequiredPermission(permission = Permission.READ)
+    public CustomAttributesRecord getAttributes(@ActivityScope @PathParam("instance") String instanceId);
+
+    @POST
+    @Path("/{instance}/attributes")
+    @RequiredPermission(permission = Permission.WRITE)
+    public void updateAttributes(@ActivityScope @PathParam("instance") String instanceId, CustomAttributesRecord attributes);
 
 }

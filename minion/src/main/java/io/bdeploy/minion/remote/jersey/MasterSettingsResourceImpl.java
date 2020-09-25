@@ -8,7 +8,7 @@ import javax.inject.Inject;
 
 import io.bdeploy.interfaces.configuration.SettingsConfiguration;
 import io.bdeploy.interfaces.remote.MasterSettingsResource;
-import io.bdeploy.interfaces.settings.CustomPropertyDescriptor;
+import io.bdeploy.interfaces.settings.CustomAttributeDescriptor;
 import io.bdeploy.ui.api.Minion;
 
 public class MasterSettingsResourceImpl implements MasterSettingsResource {
@@ -27,22 +27,22 @@ public class MasterSettingsResourceImpl implements MasterSettingsResource {
     }
 
     @Override
-    public void mergeInstanceGroupPropertyDescriptors(List<CustomPropertyDescriptor> properties) {
+    public void mergeInstanceGroupAttributesDescriptors(List<CustomAttributeDescriptor> attributes) {
 
         SettingsConfiguration settings = root.getSettings();
 
         boolean changed = false;
-        Map<String, CustomPropertyDescriptor> pMap = settings.instanceGroup.properties.stream()
+        Map<String, CustomAttributeDescriptor> pMap = settings.instanceGroup.attributes.stream()
                 .collect(Collectors.toMap(p -> p.name, p -> p));
-        for (CustomPropertyDescriptor p : properties) {
-            CustomPropertyDescriptor existing = pMap.get(p.name);
-            if (!p.equals(existing)) { // != or null
-                pMap.put(p.name, p);
+        for (CustomAttributeDescriptor a : attributes) {
+            CustomAttributeDescriptor existing = pMap.get(a.name);
+            if (!a.equals(existing)) { // != or null
+                pMap.put(a.name, a);
                 changed = true;
             }
         }
         if (changed) {
-            settings.instanceGroup.properties = pMap.values().stream().sorted((a, b) -> a.name.compareTo(b.name))
+            settings.instanceGroup.attributes = pMap.values().stream().sorted((a, b) -> a.name.compareTo(b.name))
                     .collect(Collectors.toList());
             root.setSettings(settings);
         }

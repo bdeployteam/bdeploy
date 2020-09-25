@@ -10,7 +10,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import io.bdeploy.interfaces.configuration.SettingsConfiguration;
-import io.bdeploy.interfaces.settings.CustomPropertyDescriptor;
+import io.bdeploy.interfaces.settings.CustomAttributeDescriptor;
 
 @Path("/master/settings")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -24,6 +24,6 @@ public interface MasterSettingsResource {
     public void setSettings(SettingsConfiguration settings);
 
     @POST
-    @Path("/groupProperties")
-    public void mergeInstanceGroupPropertyDescriptors(List<CustomPropertyDescriptor> properties);
+    @Path("/groupAttributes")
+    public void mergeInstanceGroupAttributesDescriptors(List<CustomAttributeDescriptor> attributes);
 }

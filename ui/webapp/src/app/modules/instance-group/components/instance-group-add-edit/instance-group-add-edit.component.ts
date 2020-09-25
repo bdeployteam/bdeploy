@@ -12,10 +12,10 @@ import { forkJoin, Observable, of } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
-import { CustomPropertyEditComponent } from 'src/app/modules/shared/components/custom-property-edit/custom-property-edit.component';
-import { CustomPropertyValueComponent } from 'src/app/modules/shared/components/custom-property-value/custom-property-value.component';
-import { EMPTY_INSTANCE_GROUP, EMPTY_PROPERTIES_RECORD } from '../../../../models/consts';
-import { CustomPropertiesRecord, CustomPropertyDescriptor, InstanceGroupConfiguration, MinionMode } from '../../../../models/gen.dtos';
+import { CustomAttributeEditComponent } from 'src/app/modules/shared/components/custom-attribute-edit/custom-attribute-edit.component';
+import { CustomAttributeValueComponent } from 'src/app/modules/shared/components/custom-attribute-value/custom-attribute-value.component';
+import { EMPTY_ATTRIBUTES_RECORD, EMPTY_INSTANCE_GROUP } from '../../../../models/consts';
+import { CustomAttributeDescriptor, CustomAttributesRecord, InstanceGroupConfiguration, MinionMode } from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
 import { ErrorMessage, Logger, LoggingService } from '../../../core/services/logging.service';
 import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
@@ -43,12 +43,12 @@ export class InstanceGroupAddEditComponent implements OnInit {
   public newLogoFile: File = null;
   public newLogoUrl: SafeUrl = null;
 
-  public instancePropertiesDescriptors: CustomPropertyDescriptor[] = []; // shortcut into instance group record
+  public instanceAttributesDescriptors: CustomAttributeDescriptor[] = []; // shortcut into instance group record
 
-  public instanceGroupProperties: CustomPropertiesRecord;
+  public instanceGroupAttributes: CustomAttributesRecord;
 
   public clonedInstanceGroup: InstanceGroupConfiguration;
-  public clonedInstanceGroupProperties: CustomPropertiesRecord;
+  public clonedInstanceGroupAttributes: CustomAttributesRecord;
 
   private overlayRef: OverlayRef;
 
@@ -59,7 +59,7 @@ export class InstanceGroupAddEditComponent implements OnInit {
     logo: [''],
     autoDelete: [''],
     managed: [''],
-    instanceProperties: ['']
+    instanceAttributes: ['']
   });
 
   get nameControl() {
@@ -101,27 +101,27 @@ export class InstanceGroupAddEditComponent implements OnInit {
       const instanceGroup = cloneDeep(EMPTY_INSTANCE_GROUP);
       this.clonedInstanceGroup = cloneDeep(instanceGroup);
       this.instanceGroupFormGroup.setValue(instanceGroup);
-      this.instancePropertiesDescriptors = instanceGroup.instanceProperties;
-      // prepare instance group properties values
-      this.instanceGroupProperties = cloneDeep(EMPTY_PROPERTIES_RECORD);
-      this.clonedInstanceGroupProperties = cloneDeep(EMPTY_PROPERTIES_RECORD);
+      this.instanceAttributesDescriptors = instanceGroup.instanceAttributes;
+      // prepare instance group attributes values
+      this.instanceGroupAttributes = cloneDeep(EMPTY_ATTRIBUTES_RECORD);
+      this.clonedInstanceGroupAttributes = cloneDeep(EMPTY_ATTRIBUTES_RECORD);
     } else {
       const og = this.instanceGroupService.getInstanceGroup(this.nameParam);
-      const op = this.instanceGroupService.getInstanceGroupProperties(this.nameParam);
+      const op = this.instanceGroupService.getInstanceGroupAttributes(this.nameParam);
       forkJoin([og, op]).subscribe(
         result => {
           const instanceGroup: InstanceGroupConfiguration = result[0];
 
-          if (!instanceGroup.instanceProperties) {
-            instanceGroup.instanceProperties = [];
+          if (!instanceGroup.instanceAttributes) {
+            instanceGroup.instanceAttributes = [];
           }
           this.instanceGroupFormGroup.setValue(instanceGroup);
           this.clonedInstanceGroup = cloneDeep(instanceGroup);
-          this.instancePropertiesDescriptors = instanceGroup.instanceProperties;
+          this.instanceAttributesDescriptors = instanceGroup.instanceAttributes;
 
           if (instanceGroup.logo) {
             this.instanceGroupService.getInstanceGroupImage(this.nameParam)
-              .subscribe((data) => {
+              .subscribe(data => {
                 const reader = new FileReader();
                 reader.onload = () => {
                   this.originalLogoUrl = this.sanitizer.bypassSecurityTrustUrl(
@@ -132,11 +132,11 @@ export class InstanceGroupAddEditComponent implements OnInit {
               });
           }
 
-          this.instanceGroupProperties = result[1];
-          if (!this.instanceGroupProperties.properties) {
-            this.instanceGroupProperties.properties = {};
+          this.instanceGroupAttributes = result[1];
+          if (!this.instanceGroupAttributes.attributes) {
+            this.instanceGroupAttributes.attributes = {};
           }
-          this.clonedInstanceGroupProperties = cloneDeep(this.instanceGroupProperties);
+          this.clonedInstanceGroupAttributes = cloneDeep(this.instanceGroupAttributes);
         },
         error => {
           this.log.errorWithGuiMessage(new ErrorMessage('reading instance group failed', error));
@@ -213,19 +213,19 @@ export class InstanceGroupAddEditComponent implements OnInit {
     this.loading = true;
 
     const instanceGroup = this.instanceGroupFormGroup.getRawValue();
-    const instanceGroupProperties = this.instanceGroupProperties;
+    const instanceGroupAttributes = this.instanceGroupAttributes;
 
     if (this.isCreate()) {
-      // first create group, second set properties third update image on existing group
+      // first create group, second set attributes third update image on existing group
       this.instanceGroupService.createInstanceGroup(instanceGroup)
         .subscribe(_ => {
           this.log.info('created new instance group ' + instanceGroup.name);
           this.clonedInstanceGroup = instanceGroup;
           this.instanceGroupService
-            .updateInstanceGroupProperties(instanceGroup.name, instanceGroupProperties)
+            .updateInstanceGroupAttributes(instanceGroup.name, instanceGroupAttributes)
             .pipe(finalize(() => { this.loading = false; }))
             .subscribe(r => {
-                this.clonedInstanceGroupProperties = cloneDeep(instanceGroupProperties);
+                this.clonedInstanceGroupAttributes = cloneDeep(instanceGroupAttributes);
                 this.checkImage(instanceGroup.name);
               });
         });
@@ -236,36 +236,36 @@ export class InstanceGroupAddEditComponent implements OnInit {
             message: 'This action will try to contact and synchronize with all managed servers for this instance group.',
             mode: MessageBoxMode.CONFIRM_WARNING,
           })
-          .subscribe((r) => {
+          .subscribe(r => {
             if (r) {
-              this.doUpdate(instanceGroup, instanceGroupProperties);
+              this.doUpdate(instanceGroup, instanceGroupAttributes);
             } else {
               this.loading = false;
             }
           });
       } else {
-        this.doUpdate(instanceGroup, instanceGroupProperties);
+        this.doUpdate(instanceGroup, instanceGroupAttributes);
       }
     }
   }
 
-  private doUpdate(instanceGroup: any, instanceGroupProperties: CustomPropertiesRecord) {
+  private doUpdate(instanceGroup: any, instanceGroupAttributes: CustomAttributesRecord) {
     const og = this.instanceGroupService.updateInstanceGroup(this.nameParam, instanceGroup);
-    const op = this.instanceGroupService.updateInstanceGroupProperties(this.nameParam, this.instanceGroupProperties);
-    forkJoin(og, op)
+    const op = this.instanceGroupService.updateInstanceGroupAttributes(this.nameParam, this.instanceGroupAttributes);
+    forkJoin([og, op])
     .pipe(
       finalize(() => {this.loading = false;})
     )
-    .subscribe((result) => {
+    .subscribe(_ => {
       this.log.info('updated instance group ' + this.nameParam);
       this.clonedInstanceGroup = instanceGroup;
-      this.clonedInstanceGroupProperties = instanceGroupProperties;
+      this.clonedInstanceGroupAttributes = instanceGroupAttributes;
       this.checkImage(this.nameParam);
     });
   }
 
   isModified(): boolean {
-    return this.isConfigurationModified() || this.isPropertiesModified();
+    return this.isConfigurationModified() || this.isAttributesModified();
   }
 
   isConfigurationModified(): boolean {
@@ -276,8 +276,8 @@ export class InstanceGroupAddEditComponent implements OnInit {
     );
   }
 
-  isPropertiesModified(): boolean {
-    return !isEqual(this.instanceGroupProperties, this.clonedInstanceGroupProperties);
+  isAttributesModified(): boolean {
+    return !isEqual(this.instanceGroupAttributes, this.clonedInstanceGroupAttributes);
   }
 
   canDeactivate(): Observable<boolean> {
@@ -295,7 +295,7 @@ export class InstanceGroupAddEditComponent implements OnInit {
     if (this.newLogoFile != null) {
       this.instanceGroupService.updateInstanceGroupImage(group, this.newLogoFile)
         .pipe(finalize(() => {this.clearLogoUpload(); this.loading = false; }))
-        .subscribe((response) => {
+        .subscribe(_ => {
           this.router.navigate(['/instancegroup/browser']);
         });
     } else {
@@ -343,86 +343,84 @@ export class InstanceGroupAddEditComponent implements OnInit {
     }
   }
 
-  addInstanceProperty() {
-    this.dialog.open(CustomPropertyEditComponent, {
+  addInstanceAttribute() {
+    this.dialog.open(CustomAttributeEditComponent, {
       width: '500px',
       data: null,
     }).afterClosed().subscribe(r => {
       if (r) {
-        this.instancePropertiesDescriptors.push(r);
-        this.sortInstanceProperties();
+        this.instanceAttributesDescriptors.push(r);
+        this.sortInstanceAttributes();
       }
     });
   }
 
-  editInstanceProperty(property: CustomPropertyDescriptor, index: number) {
-    this.dialog.open(CustomPropertyEditComponent, {
+  editInstanceAttribute(attribute: CustomAttributeDescriptor, index: number) {
+    this.dialog.open(CustomAttributeEditComponent, {
       width: '500px',
-      data: cloneDeep(property),
+      data: cloneDeep(attribute),
     }).afterClosed().subscribe(r => {
       if (r) {
-        this.instancePropertiesDescriptors.splice(index, 1, r);
-        this.sortInstanceProperties();
+        this.instanceAttributesDescriptors.splice(index, 1, r);
+        this.sortInstanceAttributes();
       }
     });
   }
 
-  removeInstanceProperty(index: number) {
-    this.instancePropertiesDescriptors.splice(index, 1);
+  removeInstanceAttribute(index: number) {
+    this.instanceAttributesDescriptors.splice(index, 1);
   }
 
-  private sortInstanceProperties() {
-      this.instancePropertiesDescriptors = this.instancePropertiesDescriptors.sort((a,b) => a.name.localeCompare(b.name));
+  private sortInstanceAttributes() {
+      this.instanceAttributesDescriptors = this.instanceAttributesDescriptors.sort((a,b) => a.name.localeCompare(b.name));
   }
 
-  // InstanceGroup Property Values
-
-  addInstanceGroupProperty() {
-    const possibleDescriptors = this.settings.getSettings().instanceGroup.properties.filter(d => !this.instanceGroupProperties.properties[d.name] );
-    this.dialog.open(CustomPropertyValueComponent, {
+  addInstanceGroupAttribute() {
+    const possibleDescriptors = this.settings.getSettings().instanceGroup.attributes.filter(d => !this.instanceGroupAttributes.attributes[d.name] );
+    this.dialog.open(CustomAttributeValueComponent, {
       width: '500px',
       data: {
         descriptors: possibleDescriptors,
-        propertyName: null,
-        propertyValue: null,
+        attributeName: null,
+        attributeValue: null,
       },
     }).afterClosed().subscribe(r => {
       if (r) {
-        this.instanceGroupProperties.properties[r.name] = r.value;
+        this.instanceGroupAttributes.attributes[r.name] = r.value;
       }
     });
   }
 
-  editInstanceGroupProperty(propertyName: string) {
-    let descriptor = this.settings.getSettings().instanceGroup.properties.find(d => d.name === propertyName);
+  editInstanceGroupAttribute(attributeName: string) {
+    let descriptor = this.settings.getSettings().instanceGroup.attributes.find(d => d.name === attributeName);
     if (!descriptor) {
-      descriptor = {name: propertyName, description: ''};
+      descriptor = {name: attributeName, description: ''};
     }
-    this.dialog.open(CustomPropertyValueComponent, {
+    this.dialog.open(CustomAttributeValueComponent, {
       width: '500px',
       data: {
         descriptors: [descriptor],
-        propertyName: propertyName,
-        propertyValue: cloneDeep(this.instanceGroupProperties.properties[propertyName])
+        attributeName: attributeName,
+        attributeValue: cloneDeep(this.instanceGroupAttributes.attributes[attributeName])
       },
     }).afterClosed().subscribe(r => {
       if (r) {
-        this.instanceGroupProperties.properties[r.name] = r.value;
+        this.instanceGroupAttributes.attributes[r.name] = r.value;
       }
     });
   }
 
-  removeInstanceGroupProperty(propertyName: string) {
-    delete this.instanceGroupProperties.properties[propertyName];
+  removeInstanceGroupAttribute(attributeName: string) {
+    delete this.instanceGroupAttributes.attributes[attributeName];
   }
 
-  hasInstanceGroupProperties(): boolean {
-    return Object.keys(this.instanceGroupProperties.properties).length > 0;
+  hasInstanceGroupAttributes(): boolean {
+    return this.instanceGroupAttributes?.attributes && Object.keys(this.instanceGroupAttributes.attributes).length > 0;
   }
 
-  getSortedInstanceGroupPropertyKeys(): string[] {
-    if (this.instanceGroupProperties?.properties) {
-      return Object.keys(this.instanceGroupProperties.properties).sort((a, b) => a.localeCompare(b));
+  getSortedInstanceGroupAttributeKeys(): string[] {
+    if (this.instanceGroupAttributes?.attributes) {
+      return Object.keys(this.instanceGroupAttributes.attributes).sort((a, b) => a.localeCompare(b));
     } else {
       return [];
     }

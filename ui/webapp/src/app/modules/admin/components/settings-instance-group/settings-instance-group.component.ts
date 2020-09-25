@@ -2,11 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { cloneDeep } from 'lodash-es';
 import { Observable, of } from 'rxjs';
-import { CustomPropertyDescriptor, MinionMode } from 'src/app/models/gen.dtos';
+import { CustomAttributeDescriptor, MinionMode } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { Logger, LoggingService } from 'src/app/modules/core/services/logging.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
-import { CustomPropertyEditComponent } from 'src/app/modules/shared/components/custom-property-edit/custom-property-edit.component';
+import { CustomAttributeEditComponent } from 'src/app/modules/shared/components/custom-attribute-edit/custom-attribute-edit.component';
 import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
 import { MessageboxService } from 'src/app/modules/shared/services/messagebox.service';
 
@@ -32,7 +32,7 @@ export class SettingsInstanceGroupComponent implements OnInit {
   ngOnInit() {
   }
 
-  isPropertiesEditable(): boolean {
+  isAttributesEditable(): boolean {
     return this.config.config.mode !== MinionMode.MANAGED;
   }
 
@@ -48,44 +48,44 @@ export class SettingsInstanceGroupComponent implements OnInit {
   }
 
   add() {
-    this.dialog.open(CustomPropertyEditComponent, {
+    this.dialog.open(CustomAttributeEditComponent, {
       width: '500px',
       data: null,
     }).afterClosed().subscribe(r => {
       if (r) {
-        this.getProperties().push(r);
-        this.sortProperties();
+        this.getAttributes().push(r);
+        this.sortAttributes();
       }
     });
   }
 
-  edit(property: CustomPropertyDescriptor, index: number) {
-    this.dialog.open(CustomPropertyEditComponent, {
+  edit(attribute: CustomAttributeDescriptor, index: number) {
+    this.dialog.open(CustomAttributeEditComponent, {
       width: '500px',
-      data: cloneDeep(property),
+      data: cloneDeep(attribute),
     }).afterClosed().subscribe(r => {
       if (r) {
-        this.getProperties().splice(index, 1, r);
-        this.sortProperties();
+        this.getAttributes().splice(index, 1, r);
+        this.sortAttributes();
       }
     });
   }
 
   remove(index: number) {
-    this.getProperties().splice(index, 1);
+    this.getAttributes().splice(index, 1);
   }
 
-  getProperties(): CustomPropertyDescriptor[] {
-    return this.settings.getSettings().instanceGroup.properties;
+  getAttributes(): CustomAttributeDescriptor[] {
+    return this.settings.getSettings().instanceGroup.attributes;
   }
 
-  hasProperties(): boolean {
-    return this.settings?.getSettings()?.instanceGroup?.properties.length > 0;
+  hasAttributes(): boolean {
+    return this.settings?.getSettings()?.instanceGroup?.attributes.length > 0;
   }
 
-  private sortProperties() {
-    if (this.hasProperties()) {
-      this.settings.getSettings().instanceGroup.properties = this.settings.getSettings().instanceGroup.properties.sort((a, b) => a.name.localeCompare(b.name));
+  private sortAttributes() {
+    if (this.hasAttributes()) {
+      this.settings.getSettings().instanceGroup.attributes = this.settings.getSettings().instanceGroup.attributes.sort((a, b) => a.name.localeCompare(b.name));
     }
   }
 

@@ -5,6 +5,6 @@ import java.util.List;
 
 public class InstanceGroupSettingsDto {
 
-    public List<CustomPropertyDescriptor> properties = new ArrayList<>();
+    public List<CustomAttributeDescriptor> attributes = new ArrayList<>();
 
 }

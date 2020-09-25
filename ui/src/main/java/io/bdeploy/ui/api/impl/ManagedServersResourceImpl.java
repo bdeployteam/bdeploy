@@ -375,8 +375,8 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
             InstanceGroupManifest igm = new InstanceGroupManifest(hive);
             Manifest.Key igKey = igm.getKey();
-            String propertiesMetaName = igm.getProperties(hive).getMetaManifest().getMetaName();
-            SortedSet<Key> metaManifests = hive.execute(new ManifestListOperation().setManifestName(propertiesMetaName));
+            String attributesMetaName = igm.getAttributes(hive).getMetaManifest().getMetaName();
+            SortedSet<Key> metaManifests = hive.execute(new ManifestListOperation().setManifestName(attributesMetaName));
             try (RemoteBHive rbh = RemoteBHive.forService(svc, groupName, reporter)) {
                 // ALWAYS delete all instance group information on the target - we win!
                 // otherwise the target may have a manifest with a higher tag number and win.
@@ -437,7 +437,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             // 6. try to sync instance group properties
             try {
                 MasterSettingsResource msr = ResourceProvider.getVersionedResource(svc, MasterSettingsResource.class, context);
-                msr.mergeInstanceGroupPropertyDescriptors(minion.getSettings().instanceGroup.properties);
+                msr.mergeInstanceGroupAttributesDescriptors(minion.getSettings().instanceGroup.attributes);
             } catch (Exception e) {
                 log.warn("Cannot sync InstanceGroup properties to managed server, ignoring", e);
             }

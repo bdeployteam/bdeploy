@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.bdeploy.bhive.model.ObjectId;
-import io.bdeploy.interfaces.settings.CustomPropertyDescriptor;
+import io.bdeploy.interfaces.settings.CustomAttributeDescriptor;
 
 public class InstanceGroupConfiguration {
 
@@ -44,7 +44,7 @@ public class InstanceGroupConfiguration {
     public boolean managed;
 
     /**
-     * Property definitions for instances of this instance group
+     * Attribute definitions for instances of this instance group
      */
-    public List<CustomPropertyDescriptor> instanceProperties = new ArrayList<>();
+    public List<CustomAttributeDescriptor> instanceAttributes = new ArrayList<>();
 }

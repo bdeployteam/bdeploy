@@ -24,6 +24,7 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.InstanceDirectory;
 import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
+import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.manifest.banner.InstanceBannerRecord;
 import io.bdeploy.interfaces.manifest.history.runtime.MasterRuntimeHistoryDto;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
@@ -300,5 +301,25 @@ public interface MasterNamedResource {
     @POST
     @Path("/banner")
     public void updateBanner(@QueryParam("u") String instanceId, InstanceBannerRecord instanceBannerRecord);
+
+    /**
+     * Returns the instance attributes.
+     *
+     * @param instanceId the unique id of the instance.
+     * @return the instance attributes.
+     */
+    @GET
+    @Path("/attributes")
+    public CustomAttributesRecord getAttributes(@QueryParam("u") String instanceId);
+
+    /**
+     * Updates the instance attributes.
+     *
+     * @param instanceId the unique id of the instance.
+     * @param attributes the new attributes
+     */
+    @POST
+    @Path("/attributes")
+    public void updateAttributes(@QueryParam("u") String instanceId, CustomAttributesRecord attributes);
 
 }

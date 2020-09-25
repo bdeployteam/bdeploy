@@ -5,26 +5,26 @@
 </mat-toolbar>
 <div class='content centered'>
   <mat-tab-group class='tab-container' dynamicHeight='true'>
-    <mat-tab label='Global Properties'>
+    <mat-tab label='Global Attributes'>
       <div class="content centered" *ngIf='settings.isLoading()'>
         <mat-spinner [diameter]='48'></mat-spinner>
       </div>
       <div class='content' *ngIf='!settings.isLoading()'>
         <p>
-          Configure global properties that are available for all Instance Groups on this server.
+          Configure global attributes that are available for all Instance Groups on this server.
         </p>
-        <div class='properties-grid' *ngIf='hasProperties()'>
-          <ng-container *ngFor='let p of getProperties(); let f = first; let l = last; let i = index'>
+        <div class='attributes-grid' *ngIf='hasAttributes()'>
+          <ng-container *ngFor='let p of getAttributes(); let i = index'>
             <div>{{p.name}}</div>
             <div>{{p.description}}</div>
-            <div><button mat-icon-button [disabled]='!isPropertiesEditable()' (click)='edit(p, i)'><mat-icon>edit</mat-icon></button></div>
-            <div><button mat-icon-button [disabled]='!isPropertiesEditable()' (click)='remove(i)'><mat-icon>delete</mat-icon></button></div>
+            <div><button mat-icon-button [disabled]='!isAttributesEditable()' (click)='edit(p, i)'><mat-icon>edit</mat-icon></button></div>
+            <div><button mat-icon-button [disabled]='!isAttributesEditable()' (click)='remove(i)'><mat-icon>delete</mat-icon></button></div>
           </ng-container>
         </div>
-        <div *ngIf='!hasProperties()'>
-          No Properties have been configured yet.
+        <div *ngIf='!hasAttributes()'>
+          No Attributes have been configured yet.
         </div>
-        <button mat-mini-fab style='align-self: flex-end;' [disabled]='!isPropertiesEditable()' (click)='add()'>
+        <button mat-mini-fab style='align-self: flex-end;' [disabled]='!isAttributesEditable()' (click)='add()'>
           <mat-icon>add</mat-icon>
         </button>
       </div>

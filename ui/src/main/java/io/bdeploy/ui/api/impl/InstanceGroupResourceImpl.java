@@ -47,8 +47,8 @@ import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
+import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
-import io.bdeploy.interfaces.manifest.properties.CustomPropertiesRecord;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.InstanceGroupResource;
@@ -304,22 +304,22 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
 
     @Override
 
-    public CustomPropertiesRecord getProperties(String group) {
+    public CustomAttributesRecord getAttributes(String group) {
         BHive groupHive = getGroupHive(group);
         InstanceGroupManifest manifest = new InstanceGroupManifest(groupHive);
         if (manifest.getKey() == null) {
             throw new WebApplicationException("Cannot load " + group, Status.NOT_FOUND);
         }
-        return manifest.getProperties(groupHive).read();
+        return manifest.getAttributes(groupHive).read();
     }
 
     @Override
-    public void updateProperties(String group, CustomPropertiesRecord properties) {
+    public void updateAttributes(String group, CustomAttributesRecord attributes) {
         BHive groupHive = getGroupHive(group);
         InstanceGroupManifest manifest = new InstanceGroupManifest(groupHive);
         if (manifest.getKey() == null) {
             throw new WebApplicationException("Cannot load " + group, Status.NOT_FOUND);
         }
-        manifest.getProperties(groupHive).set(properties);
+        manifest.getAttributes(groupHive).set(attributes);
     }
 }
