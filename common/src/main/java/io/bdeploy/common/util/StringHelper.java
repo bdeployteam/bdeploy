@@ -16,7 +16,7 @@ public class StringHelper {
     }
 
     /**
-     * Returns whether the given strings are equal
+     * Returns whether the given strings are NOT equal
      */
     public static boolean notEqual(String a, String b) {
         return a != null && !a.equals(b);

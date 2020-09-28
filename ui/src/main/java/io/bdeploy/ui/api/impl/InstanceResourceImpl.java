@@ -117,6 +117,7 @@ import io.bdeploy.ui.api.ProcessResource;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
 import io.bdeploy.ui.branding.Branding;
 import io.bdeploy.ui.branding.BrandingConfig;
+import io.bdeploy.ui.dto.HistoryCompareDto;
 import io.bdeploy.ui.dto.HistoryEntryVersionDto;
 import io.bdeploy.ui.dto.HistoryFilterDto;
 import io.bdeploy.ui.dto.HistoryResultDto;
@@ -160,9 +161,6 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Inject
     private InstanceEntryStreamRequestService iesrs;
-
-    @Inject
-    private InstanceHistoryManager instanceHistory;
 
     @Inject
     private VersionSorterService vss;
@@ -1004,21 +1002,24 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     @Override
-    public HistoryResultDto getInstanceHistory(String instanceId, String startTag, int maxResults, String filter,
-            boolean showCreate, boolean showDeployment, boolean showRuntime) {
-        HistoryFilterDto filterDto = new HistoryFilterDto();
-        filterDto.filterText = filter;
-        filterDto.startTag = startTag;
-        filterDto.maxResults = maxResults;
-        filterDto.showCreateEvents = showCreate;
-        filterDto.showDeploymentEvents = showDeployment;
-        filterDto.showRuntimeEvents = showRuntime;
-        return instanceHistory.getInstanceHistory(hive, group, instanceId, filterDto);
+    public HistoryResultDto getInstanceHistory(String instanceId, HistoryFilterDto filterDto) {
+        InstanceHistoryManager manager = new InstanceHistoryManager(auth, context, mp, hive);
+        return manager.getInstanceHistory(group, instanceId, filterDto);
     }
 
     @Override
-    public HistoryEntryVersionDto compareInstanceHistory(String instanceId, int versionA, int versionB) {
-        return instanceHistory.compareVersions(hive, instanceId, versionA, versionB);
+    public HistoryEntryVersionDto compareVersions(String instanceId, int versionA, int versionB) {
+        InstanceManifest mfA = InstanceManifest.load(hive, instanceId, String.valueOf(versionA));
+        InstanceManifest mfB = InstanceManifest.load(hive, instanceId, String.valueOf(versionB));
+
+        InstanceHistoryManager manager = new InstanceHistoryManager(auth, context, mp, hive);
+        return manager.compareManifests(mfA, mfB);
+    }
+
+    @Override
+    public HistoryEntryVersionDto compareConfig(HistoryCompareDto dto) {
+        InstanceHistoryManager manager = new InstanceHistoryManager(auth, context, mp, hive);
+        return manager.compare(dto.configA, dto.configB);
     }
 
     @Override

@@ -3,10 +3,7 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
-import {
-  HistoryEntryDto,
-  InstanceConfiguration
-} from 'src/app/models/gen.dtos';
+import { HistoryEntryDto, InstanceConfiguration } from 'src/app/models/gen.dtos';
 import { LoggingService } from 'src/app/modules/core/services/logging.service';
 import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { InstanceHistoryTimelineComponent } from 'src/app/modules/instance/components/instance-history-timeline/instance-history-timeline.component';
@@ -66,9 +63,7 @@ export class InstanceHistoryComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.instanceService
-      .getInstance(this.groupParam, this.uuidParam)
-      .subscribe((val) => (this.instance = val));
+    this.instanceService.getInstance(this.groupParam, this.uuidParam).subscribe((val) => (this.instance = val));
     this.loadHistory();
   }
 
@@ -145,12 +140,21 @@ export class InstanceHistoryComponent implements OnInit {
   }
 
   compareVersion(): void {
-    const data = [
-      this.instanceService,
+    // always make sure that the lower version is first...
+    let a = Number(this.compareVersions[0]);
+    let b = Number(this.compareVersions[1]);
+    if (a > b) {
+      [a, b] = [b, a];
+    }
+    const compareVersionA = a.toString();
+    const compareVersionB = b.toString();
+    const promise = this.instanceService.compareVersions(
       this.groupParam,
       this.uuidParam,
-      this.compareVersions,
-    ];
+      compareVersionA,
+      compareVersionB
+    );
+    const data = [promise, 'Changes between versions ' + compareVersionA + ' -> ' + compareVersionB];
     this.dialog.open(InstanceHistoryCompareComponent, {
       minWidth: '300px',
       maxWidth: '800px',

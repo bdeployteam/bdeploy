@@ -31,7 +31,9 @@ import { EventWithCallback } from '../../../../models/event';
 import {
   ApplicationConfiguration,
   ApplicationDto,
+
   InstanceBannerRecord,
+  InstanceConfigurationDto,
   InstanceGroupConfiguration,
   InstanceNodeConfiguration,
   InstanceNodeConfigurationDto,
@@ -68,6 +70,7 @@ import { ApplicationService } from '../../services/application.service';
 import { InstanceService } from '../../services/instance.service';
 import { ProcessService } from '../../services/process.service';
 import { InstanceBannerEditComponent } from '../instance-banner-edit/instance-banner-edit.component';
+import { InstanceHistoryCompareComponent } from '../instance-history-compare/instance-history-compare.component';
 import {
   InstanceNotification,
   Severity
@@ -795,6 +798,28 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     // Update enabled state of buttons
     this.applicationService.clearState();
     this.updateDirtyStateAndValidate();
+  }
+
+  onViewChanges() {
+      const compareVersionA: InstanceConfigurationDto = {
+        config: this.processConfigs[0].clonedInstance,
+        nodeDtos: this.processConfigs[0].clonedNodeList.nodeConfigDtos,
+      };
+      const compareVersionB: InstanceConfigurationDto = {
+        config: this.processConfigs[0].instance,
+        nodeDtos: this.processConfigs[0].nodeList.nodeConfigDtos,
+      };
+      const promise = this.instanceService.compareConfigs(this.groupParam, this.uuidParam,compareVersionA,compareVersionB);
+      const data = [
+        promise,
+        "Unsaved Changes",
+      ];
+      this.dialog.open(InstanceHistoryCompareComponent, {
+        minWidth: '300px',
+        maxWidth: '800px',
+        data: data,
+        closeOnNavigation: true,
+      });
   }
 
   private async onSyncCallback(): Promise<boolean> {

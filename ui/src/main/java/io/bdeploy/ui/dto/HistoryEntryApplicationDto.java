@@ -14,5 +14,5 @@ public class HistoryEntryApplicationDto {
 
     public List<String> addedEndpoints = new ArrayList<>();
     public List<String> deletedEndpoints = new ArrayList<>();
-    public Map<String, HistoryEntryHttpEndpointDto> endpoints = new HashMap<>();
+    public Map<String, HistoryEntryHttpEndpointDto> changedEndpoints = new HashMap<>();
 }

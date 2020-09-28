@@ -61,6 +61,7 @@
       <app-instance-notifications #instanceNotifications [notifications]='notifications'></app-instance-notifications>
       <ng-container *ngIf="!editMode">
         <button mat-button type="button" (click)="onDiscardChanges()" *ngIf="discardEnabled">DISCARD</button>
+        <button mat-button type="button" (click)="onViewChanges()" *ngIf="saveEnabled">COMPARE</button>
         <button mat-raised-button color="primary" type="submit" [disabled]="!saveEnabled" (click)="onSave()">SAVE</button>
       </ng-container>
       <ng-container *ngIf="editMode">

@@ -49,7 +49,7 @@
           <li *ngFor="let endpoint of changed.value.endpoints|keyvalue">
             Http-endpoint at <em>{{endpoint.key}}</em>:
             <ul>
-              <li *ngFor="let property of endpoint.value.properties|keyvalue">
+              <li *ngFor="let property of endpoint.value.changedEndpoints|keyvalue">
                 <span *ngIf="property.value != null else endpointPassword">{{property.key}}: <em>{{property.value[0]}}</em> --> <em>{{property.value[1]}}</em></span>
                 <ng-template #endpointPassword>{{property.key}} changed</ng-template>
               </li>

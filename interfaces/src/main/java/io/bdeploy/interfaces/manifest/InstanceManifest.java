@@ -226,6 +226,21 @@ public class InstanceManifest {
     }
 
     /**
+     * Returns the name of the node along with the actual node configuration.
+     *
+     * @param hive the hive where the manifest is stored
+     * @return a set containing the name of the node (=key) and its manifest reference (=value)
+     */
+    public Map<String, InstanceNodeConfiguration> getInstanceNodeConfiguration(BHive hive) {
+        Map<String, InstanceNodeConfiguration> result = new TreeMap<>();
+        for (Map.Entry<String, Manifest.Key> entry : getInstanceNodeManifests().entrySet()) {
+            InstanceNodeManifest imf = InstanceNodeManifest.of(hive, entry.getValue());
+            result.put(entry.getKey(), imf.getConfiguration());
+        }
+        return result;
+    }
+
+    /**
      * @param hive the {@link BHive} to scan for available {@link InstanceManifest}s.
      * @return a {@link SortedSet} with all available {@link InstanceManifest}s.
      */

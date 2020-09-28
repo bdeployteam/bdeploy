@@ -55,7 +55,6 @@ public class UiResources {
                 bind(ProductTransferService.class).in(Singleton.class).to(ProductTransferService.class);
                 bind(InstanceEventManager.class).in(Singleton.class).to(InstanceEventManager.class);
                 bind(InstanceEntryStreamRequestService.class).in(Singleton.class).to(InstanceEntryStreamRequestService.class);
-                bind(InstanceHistoryManager.class).in(Singleton.class).to(InstanceHistoryManager.class);
 
                 bind(instanceUpdateBc).named(InstanceEventManager.INSTANCE_BROADCASTER).to(JerseyEventBroadcaster.class);
                 bind(attachEventBc).named(ManagedServersAttachEventResourceImpl.ATTACH_BROADCASTER)

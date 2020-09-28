@@ -35,7 +35,9 @@ import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.jersey.ActivityScope;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
+import io.bdeploy.ui.dto.HistoryCompareDto;
 import io.bdeploy.ui.dto.HistoryEntryVersionDto;
+import io.bdeploy.ui.dto.HistoryFilterDto;
 import io.bdeploy.ui.dto.HistoryResultDto;
 import io.bdeploy.ui.dto.InstanceDto;
 import io.bdeploy.ui.dto.InstanceManifestHistoryDto;
@@ -219,17 +221,18 @@ public interface InstanceResource {
     @RequiredPermission(permission = Permission.WRITE)
     public void updateBanner(@ActivityScope @PathParam("instance") String instanceId, InstanceBannerRecord instanceBannerRecord);
 
-    @GET
+    @POST
     @Path("/{instance}/history")
-    public HistoryResultDto getInstanceHistory(@ActivityScope @PathParam("instance") String instanceId,
-            @QueryParam("startTag") String startTag, @QueryParam("maxResults") int maxResults,
-            @QueryParam("filter") String filter, @QueryParam("showCreate") boolean showCreation,
-            @QueryParam("showDeployment") boolean showDeployment, @QueryParam("showRuntime") boolean showRuntime);
+    public HistoryResultDto getInstanceHistory(@ActivityScope @PathParam("instance") String instanceId, HistoryFilterDto filter);
 
     @GET
-    @Path("/{instance}/compare-versions")
-    public HistoryEntryVersionDto compareInstanceHistory(@ActivityScope @PathParam("instance") String instanceId,
+    @Path("/{instance}/history-compare-versions")
+    public HistoryEntryVersionDto compareVersions(@ActivityScope @PathParam("instance") String instanceId,
             @QueryParam("a") int versionA, @QueryParam("b") int versionB);
+
+    @POST
+    @Path("/{instance}/history-compare-config")
+    public HistoryEntryVersionDto compareConfig(HistoryCompareDto dto);
 
     @GET
     @Path("/{instance}/attributes")
