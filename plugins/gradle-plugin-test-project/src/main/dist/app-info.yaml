@@ -1,0 +1,9 @@
+name: Test Application
+
+supportedOperatingSystems:
+  - LINUX
+  - WINDOWS
+
+startCommand:
+  launcherPath: "{{M:SELF}}/bin/gradle-plugin-test-project{{WINDOWS:.bat}}"
+
