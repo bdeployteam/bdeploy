@@ -99,6 +99,12 @@ export class InstanceGroupService {
     return this.http.post<Response>(url, formData);
   }
 
+  public listInstanceGroupsAttributes(): Observable<{ [index: string]: CustomAttributesRecord }> {
+    const url: string = this.cfg.config.api + InstanceGroupService.BASEPATH + '/list-attributes';
+    this.log.debug('listInstanceGroupsAttributes: ' + url);
+    return this.http.get<{ [index: string]: CustomAttributesRecord }>(url);
+  }
+
   public getInstanceGroupAttributes(name: string): Observable<CustomAttributesRecord> {
     const url: string = this.cfg.config.api + InstanceGroupService.BASEPATH + '/' + name + '/attributes';
     this.log.debug('getInstanceGroupAttributes: ' + url);

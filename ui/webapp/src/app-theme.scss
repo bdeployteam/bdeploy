@@ -23,6 +23,7 @@
 @import 'app/modules/instance-group/components/instance-group-delete-dialog/instance-group-delete-dialog-theme.scss';
 @import 'app/modules/instance-group/components/client-apps/client-apps-theme.scss';
 @import 'app/modules/instance-group/components/instance-group-add-edit/instance-group-add-edit-theme.scss';
+@import 'app/modules/instance-group/components/instance-group-browser/instance-group-browser-theme.scss';
 
 @import 'app/modules/instance/components/instance-card/instance-card-theme.scss';
 @import 'app/modules/instance/components/instance-node-card/instance-node-card-theme.scss';
@@ -35,6 +36,7 @@
 @import 'app/modules/instance/components/process-port-list/process-port-list-theme.scss';
 @import 'app/modules/instance/components/process-status/process-status-theme.scss';
 @import 'app/modules/instance/components/client-info/client-info-theme.scss';
+@import 'app/modules/instance/components/instance-browser/instance-browser-theme.scss';
 @import 'app/modules/instance/components/instance-notifications/instance-notifications-theme.scss';
 @import 'app/modules/instance/components/instance-sync/instance-sync-theme.scss';
 @import 'app/modules/instance/components/instance-template/instance-template-theme.scss';
@@ -66,6 +68,7 @@
   @include product-upload-theme($theme);
   @include instance-group-logo-theme($theme);
   @include instance-group-add-edit-theme($theme);
+  @include instance-group-browser-theme($theme);
   @include process-configuration-theme($theme);
   @include process-details-theme($theme);
   @include process-port-list-theme($theme);
@@ -76,6 +79,7 @@
   @include managed-server-update-theme($theme);
   @include product-sync-theme($theme);
   @include settings-shell-theme($theme);
+  @include instance-browser-theme($theme);
   @include instance-notifications-theme($theme);
   @include instance-sync-theme($theme);
   @include instance-template-theme($theme);

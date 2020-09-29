@@ -235,6 +235,10 @@ public interface InstanceResource {
     public HistoryEntryVersionDto compareConfig(HistoryCompareDto dto);
 
     @GET
+    @Path("/list-attributes")
+    public Map<String, CustomAttributesRecord> listAttributes();
+
+    @GET
     @Path("/{instance}/attributes")
     @RequiredPermission(permission = Permission.READ)
     public CustomAttributesRecord getAttributes(@ActivityScope @PathParam("instance") String instanceId);

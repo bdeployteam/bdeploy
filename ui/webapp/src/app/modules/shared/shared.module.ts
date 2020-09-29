@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { NgTerminalModule } from 'ng-terminal';
 import { CoreModule } from '../core/core.module';
 import { CustomAttributeEditComponent } from './components/custom-attribute-edit/custom-attribute-edit.component';
+import { CustomAttributeGroupingSelectorComponent } from './components/custom-attribute-grouping-selector/custom-attribute-grouping-selector.component';
 import { CustomAttributeValueComponent } from './components/custom-attribute-value/custom-attribute-value.component';
 import { FileUploadComponent } from './components/file-upload/file-upload.component';
 import { FileViewerComponent } from './components/file-viewer/file-viewer.component';
@@ -21,6 +22,7 @@ import { PortValidatorDirective } from './validators/port.validator';
     PortValidatorDirective,
     CustomAttributeEditComponent,
     CustomAttributeValueComponent,
+    CustomAttributeGroupingSelectorComponent,
   ],
   entryComponents: [
     MessageboxComponent,
@@ -41,6 +43,7 @@ import { PortValidatorDirective } from './validators/port.validator';
     PortValidatorDirective,
     CustomAttributeEditComponent,
     CustomAttributeValueComponent,
+    CustomAttributeGroupingSelectorComponent,
   ]
 })
 export class SharedModule { }

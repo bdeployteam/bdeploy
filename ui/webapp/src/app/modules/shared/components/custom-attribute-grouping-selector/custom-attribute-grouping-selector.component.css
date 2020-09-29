@@ -1,0 +1,13 @@
+.grouping {
+  padding-top: 8px;
+  font-size: 14px;
+  line-height: 1.0;
+}
+
+.filterbutton {
+  margin-right: 20px;
+}
+
+.separator {
+  border-bottom: 1px solid;
+}

@@ -1,8 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MediaChange, MediaObserver } from '@angular/flex-layout';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject, forkJoin, Subscription } from 'rxjs';
+import { finalize } from 'rxjs/operators';
+import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { DataList } from '../../../../models/dataList';
-import { InstanceGroupConfiguration, MinionMode } from '../../../../models/gen.dtos';
+import { CustomAttributesRecord, InstanceGroupConfiguration, MinionMode } from '../../../../models/gen.dtos';
 import { AuthenticationService } from '../../../core/services/authentication.service';
 import { ConfigService } from '../../../core/services/config.service';
 import { Logger, LoggingService } from '../../../core/services/logging.service';
@@ -12,6 +14,7 @@ import { InstanceGroupService } from '../../services/instance-group.service';
   selector: 'app-instance-group-browser',
   templateUrl: './instance-group-browser.component.html',
   styleUrls: ['./instance-group-browser.component.css'],
+  providers: [SettingsService]
 })
 export class InstanceGroupBrowserComponent implements OnInit, OnDestroy {
   private readonly log: Logger = this.loggingService.getLogger('InstanceGroupBrowserComponent');
@@ -21,17 +24,22 @@ export class InstanceGroupBrowserComponent implements OnInit, OnDestroy {
   // calculated number of columns
   columns = 3;
 
-  groupsLoading = true;
-  recentLoading = true;
+  loading = true;
   instanceGroupList: DataList<InstanceGroupConfiguration>;
+  instanceGroupsAttributes: { [index: string]: CustomAttributesRecord } = {};
+
   recent: string[] = [];
   displayRecent: BehaviorSubject<boolean> = new BehaviorSubject(true);
+
+  groupAttribute: string;
+  groupAttributeValuesSelected: string[];
 
   constructor(
     private mediaObserver: MediaObserver,
     private instanceGroupService: InstanceGroupService,
     private loggingService: LoggingService,
     public authService: AuthenticationService,
+    public settings: SettingsService,
     private config: ConfigService) { }
 
   ngOnInit(): void {
@@ -41,6 +49,10 @@ export class InstanceGroupBrowserComponent implements OnInit, OnDestroy {
         return true;
       }
       if (group.description.toLowerCase().includes(text)) {
+        return true;
+      }
+      const attributes: {[index: string]: string } = this.instanceGroupsAttributes[group.name].attributes;
+      if (Object.keys(attributes).find(a => attributes[a].toLowerCase().includes(text))) {
         return true;
       }
       return false;
@@ -64,20 +76,18 @@ export class InstanceGroupBrowserComponent implements OnInit, OnDestroy {
   }
 
   private loadInstanceGroups() {
-    this.groupsLoading = true;
-    this.instanceGroupService.listInstanceGroups().subscribe(instanceGroups => {
-      this.instanceGroupList.addAll(instanceGroups);
-      this.log.debug('got ' + instanceGroups.length + ' instance groups');
-      this.groupsLoading = false;
-    });
-
-    this.recentLoading = true;
-    this.authService.getRecentInstanceGroups().subscribe(recent => {
-      this.recent = recent;
-      this.log.debug('got ' + recent.length + ' recent instance groups');
-      this.displayRecent.next(this.recent.length !== 0);
-      this.recentLoading = false;
-    });
+    this.loading = true;
+    forkJoin({
+      instanceGroups: this.instanceGroupService.listInstanceGroups(),
+      instanceGroupsAttributes: this.instanceGroupService.listInstanceGroupsAttributes(),
+      recent: this.authService.getRecentInstanceGroups(),
+    }).pipe(finalize(() => this.loading = false))
+      .subscribe(r => {
+        this.instanceGroupList.addAll(r.instanceGroups);
+        this.instanceGroupsAttributes = r.instanceGroupsAttributes;
+        this.recent = r.recent,
+        this.displayRecent.next(this.recent.length !== 0);
+      });
   }
 
   ngOnDestroy(): void {
@@ -113,4 +123,9 @@ export class InstanceGroupBrowserComponent implements OnInit, OnDestroy {
   isAttachManagedAllowed(): boolean {
     return this.config.config.mode === MinionMode.CENTRAL;
   }
+
+  getGroupsByAttribute(attributeValue: string): InstanceGroupConfiguration[] {
+    return this.instanceGroupList.filtered.filter(g => this.instanceGroupsAttributes[g.name].attributes[this.groupAttribute] == attributeValue);
+  }
+
 }

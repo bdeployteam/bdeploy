@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -1020,6 +1021,16 @@ public class InstanceResourceImpl implements InstanceResource {
     public HistoryEntryVersionDto compareConfig(HistoryCompareDto dto) {
         InstanceHistoryManager manager = new InstanceHistoryManager(auth, context, mp, hive);
         return manager.compare(dto.configA, dto.configB);
+    }
+
+    @Override
+    public Map<String, CustomAttributesRecord> listAttributes() {
+        Map<String, CustomAttributesRecord> result = new HashMap<>();
+        for (Key imKey : InstanceManifest.scan(hive, true)) {
+            InstanceManifest im = InstanceManifest.of(hive, imKey);
+            result.put(im.getConfiguration().uuid, im.getAttributes(hive).read());
+        }
+        return result;
     }
 
     @Override

@@ -1,0 +1,21 @@
+<mat-form-field class="grouping">
+  <mat-label>{{label}}</mat-label>
+  <mat-select [ngModel]="selectedAttribute" (ngModelChange)="updateAttributeSelection($event)">
+    <mat-option [value]=""></mat-option>
+    <mat-option *ngFor="let a of possibleAttributes" [value]="a.name">{{a.name}}</mat-option>
+  </mat-select>
+</mat-form-field>
+<button mat-icon-button class="filterbutton" [matMenuTriggerFor]="showMenu" matTooltip="Property Values Selection" matTooltipShowDelay="1000" [disabled]="!selectedAttribute">
+  <mat-icon>filter_list_alt</mat-icon>
+</button>
+<mat-menu xPosition="before"  #showMenu="matMenu">
+  <button mat-menu-item appClickStopPropagation (click)="selectAllValues()">
+    <mat-icon>check_box</mat-icon>Select All
+  </button>
+  <button class="separator" mat-menu-item appClickStopPropagation (click)="deselectAllValues()">
+    <mat-icon>check_box_outline_blank</mat-icon>Deselect All
+  </button>
+  <button *ngFor="let v of possibleValues" mat-menu-item appClickStopPropagation (click)="toggleValueSelection(v)">
+    <mat-icon>{{isValueSelected(v) ? 'check_box' : 'check_box_outline_blank'}}</mat-icon>{{v? v : "(empty)"}}
+  </button>
+</mat-menu>

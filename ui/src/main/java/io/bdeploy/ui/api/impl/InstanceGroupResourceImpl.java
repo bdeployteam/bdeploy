@@ -8,7 +8,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.SortedSet;
 
@@ -303,7 +305,26 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
     }
 
     @Override
+    public Map<String, CustomAttributesRecord> listAttributes() {
+        Map<String, CustomAttributesRecord> result = new HashMap<>();
 
+        for (BHive groupHive : registry.getAll().values()) {
+            InstanceGroupManifest manifest = new InstanceGroupManifest(groupHive);
+            InstanceGroupConfiguration cfg = manifest.read();
+            if (cfg == null) {
+                continue;
+            }
+            // The current user must have at least scoped read permissions
+            ScopedPermission requiredPermission = new ScopedPermission(cfg.name, Permission.READ);
+            if (!auth.isAuthorized(context.getUserPrincipal().getName(), requiredPermission)) {
+                continue;
+            }
+            result.put(cfg.name, manifest.getAttributes(groupHive).read());
+        }
+        return result;
+    }
+
+    @Override
     public CustomAttributesRecord getAttributes(String group) {
         BHive groupHive = getGroupHive(group);
         InstanceGroupManifest manifest = new InstanceGroupManifest(groupHive);

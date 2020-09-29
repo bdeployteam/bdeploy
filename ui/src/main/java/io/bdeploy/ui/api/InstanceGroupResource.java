@@ -3,6 +3,7 @@ package io.bdeploy.ui.api;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedSet;
 
 import javax.ws.rs.Consumes;
@@ -99,6 +100,10 @@ public interface InstanceGroupResource {
     @RequiredPermission(permission = Permission.READ, scope = "group")
     public Collection<InstanceClientAppsDto> listClientApps(@ActivityScope @PathParam("group") String group,
             @QueryParam("os") OperatingSystem os);
+
+    @GET
+    @Path("/list-attributes")
+    public Map<String, CustomAttributesRecord> listAttributes();
 
     @GET
     @Path("/{group}/attributes")

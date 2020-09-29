@@ -558,6 +558,12 @@ export class InstanceService {
     return this.http.post<HistoryEntryVersionDto>(url, dto);
   }
 
+  public listInstancesAttributes(instanceGroupName: string): Observable<{ [index: string]: CustomAttributesRecord }> {
+    const url: string = this.buildGroupUrl(instanceGroupName) + '/list-attributes';
+    this.log.debug('listInstancesAttributes: ' + url);
+    return this.http.get<{ [index: string]: CustomAttributesRecord }>(url);
+  }
+
   public getInstanceAttributes(instanceGroupName: string, instanceId: string): Observable<CustomAttributesRecord> {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceId) + '/attributes';
     this.log.debug('getInstanceAttributes: ' + url);
