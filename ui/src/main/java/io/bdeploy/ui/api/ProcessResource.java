@@ -67,6 +67,7 @@ public interface ProcessResource {
 
     @POST
     @Path("/{appId}/stdin")
+    @Consumes(MediaType.TEXT_PLAIN)
     @RequiredPermission(permission = Permission.WRITE)
     public void writeToStdin(@PathParam("appId") String appId, String data);
 }
