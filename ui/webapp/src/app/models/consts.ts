@@ -1,4 +1,4 @@
-import { ApplicationConfiguration, ApplicationStartType, CommandConfiguration, CustomAttributesRecord, InstanceBannerRecord, InstanceConfiguration, InstanceGroupConfiguration, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstancePurpose, InstanceStateRecord, InstanceVersionDto, ManifestKey, ParameterConfiguration, ParameterDescriptor, ParameterType, ProcessControlConfiguration, SoftwareRepositoryConfiguration, UserChangePasswordDto, UserInfo } from './gen.dtos';
+import { ApplicationConfiguration, ApplicationStartType, CommandConfiguration, CustomAttributesRecord, HistoryCompareDto, HistoryFilterDto, InstanceBannerRecord, InstanceConfiguration, InstanceGroupConfiguration, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstancePurpose, InstanceStateRecord, InstanceVersionDto, ManifestKey, ParameterConfiguration, ParameterDescriptor, ParameterType, ProcessControlConfiguration, SoftwareRepositoryConfiguration, UserChangePasswordDto, UserInfo } from './gen.dtos';
 
 // HTTP header constant used to suppress global error handling
 export const NO_ERROR_HANDLING_HDR = 'X-No-Global-Error-Handling';
@@ -155,4 +155,18 @@ export const EMPTY_PROCESS_CONTROL_CONFIG: ProcessControlConfiguration = {
 
 export const EMPTY_ATTRIBUTES_RECORD: CustomAttributesRecord = {
   attributes: {},
+}
+
+export const EMPTY_HISTORY_FILTER: HistoryFilterDto = {
+  filterText: null,
+  maxResults: 0,
+  showCreateEvents: false,
+  showDeploymentEvents: false,
+  showRuntimeEvents: false,
+  startTag: null,
+}
+
+export const EMPTY_HISTORY_COMPARE: HistoryCompareDto = {
+  configA: null,
+  configB: null,
 }

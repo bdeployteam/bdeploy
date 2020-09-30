@@ -7,16 +7,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.SecurityContext;
+
+import com.google.common.collect.Sets;
+import com.google.common.collect.Sets.SetView;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.objects.view.ElementView;
 import io.bdeploy.bhive.op.ManifestListOperation;
@@ -28,11 +28,11 @@ import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
+import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
-import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistoryRecord;
 import io.bdeploy.interfaces.manifest.history.runtime.MasterRuntimeHistoryDto;
@@ -59,19 +59,22 @@ import io.bdeploy.ui.dto.HistoryResultDto;
 
 public class InstanceHistoryManager {
 
-    @Inject
-    private AuthService auth;
+    private final BHive hive;
+    private final AuthService auth;
+    private final SecurityContext context;
+    private final MasterProvider mp;
 
-    @Context
-    private SecurityContext context;
-
-    @Inject
-    private MasterProvider mp;
+    public InstanceHistoryManager(AuthService auth, SecurityContext context, MasterProvider mp, BHive hive) {
+        this.auth = auth;
+        this.context = context;
+        this.mp = mp;
+        this.hive = hive;
+    }
 
     /**
      * Returns the changes made to an instance.
      */
-    public HistoryResultDto getInstanceHistory(BHive hive, String group, String instanceId, HistoryFilterDto filter) {
+    public HistoryResultDto getInstanceHistory(String group, String instanceId, HistoryFilterDto filter) {
         HistoryResultDto result = new HistoryResultDto();
 
         // Determine all versions that are available
@@ -85,7 +88,7 @@ public class InstanceHistoryManager {
 
         MasterRuntimeHistoryDto runtimeHistory = new MasterRuntimeHistoryDto();
         if (filter.showRuntimeEvents) {
-            runtimeHistory = loadRuntimeHistory(hive, group, instanceId);
+            runtimeHistory = loadRuntimeHistory(mp, group, instanceId);
         }
 
         // Load and compute differences
@@ -101,13 +104,13 @@ public class InstanceHistoryManager {
 
             // Load history
             InstanceManifest manifest = InstanceManifest.load(hive, instanceId, key.getTag());
-            List<HistoryEntryDto> events = loadHistory(hive, manifest);
+            List<HistoryEntryDto> events = loadHistory(manifest);
 
             // Compute difference to previous version
             Optional<HistoryEntryDto> create = events.stream().filter(e -> e.type == HistoryEntryType.CREATE).findFirst();
             if (create.isPresent() && nextKey != null) {
                 InstanceManifest nextManifest = InstanceManifest.load(hive, instanceId, nextKey.getTag());
-                create.get().content = versionDifferences(hive, nextManifest, manifest);
+                create.get().content = compareManifests(nextManifest, manifest);
             }
             result.addAll(events, filter);
 
@@ -127,7 +130,53 @@ public class InstanceHistoryManager {
         return result;
     }
 
-    private List<HistoryEntryDto> loadHistory(BHive hive, InstanceManifest mf) {
+    /**
+     * Computes the differences between two given instance configurations.
+     *
+     * @param configA
+     *            the first configuration to be compared.
+     * @param configB
+     *            the second configuration of the later version
+     * @return the computed differences
+     */
+    public HistoryEntryVersionDto compare(InstanceConfigurationDto configA, InstanceConfigurationDto configB) {
+        HistoryEntryVersionDto content = new HistoryEntryVersionDto();
+
+        Map<String, InstanceNodeConfiguration> node2ConfigA = configA.nodeDtos.stream().collect(Collectors.toMap(c -> c.nodeName,
+                c -> c.nodeConfiguration == null ? new InstanceNodeConfiguration() : c.nodeConfiguration));
+        Map<String, InstanceNodeConfiguration> node2ConfigB = configB.nodeDtos.stream().collect(Collectors.toMap(c -> c.nodeName,
+                c -> c.nodeConfiguration == null ? new InstanceNodeConfiguration() : c.nodeConfiguration));
+        content.properties = compareInstanceConfiguration(configA.config, configB.config);
+        content.nodes = compareInstanceNodeConfiguration(node2ConfigA, node2ConfigB);
+
+        return content;
+    }
+
+    /**
+     * Computes the differences between two given instance manifests.
+     *
+     * @param mfA
+     *            the first manifest to be compared.
+     * @param mfB
+     *            the second manifest of the later version
+     * @return the computed differences
+     */
+    public HistoryEntryVersionDto compareManifests(InstanceManifest mfA, InstanceManifest mfB) {
+        HistoryEntryVersionDto content = new HistoryEntryVersionDto();
+
+        InstanceConfiguration configA = mfA.getConfiguration();
+        InstanceConfiguration configB = mfB.getConfiguration();
+        Map<String, InstanceNodeConfiguration> node2ConfigA = mfA.getInstanceNodeConfiguration(hive);
+        Map<String, InstanceNodeConfiguration> node2ConfigB = mfB.getInstanceNodeConfiguration(hive);
+
+        content.properties = compareInstanceConfiguration(configA, configB);
+        content.nodes = compareInstanceNodeConfiguration(node2ConfigA, node2ConfigB);
+        content.configFiles = compareConfigFiles(configA, configB);
+
+        return content;
+    }
+
+    private List<HistoryEntryDto> loadHistory(InstanceManifest mf) {
         List<HistoryEntryDto> entries = new ArrayList<>();
         String tag = mf.getManifest().getTag();
         for (InstanceManifestHistoryRecord record : mf.getHistory(hive).getFullHistory()) {
@@ -147,25 +196,387 @@ public class InstanceHistoryManager {
         return entries;
     }
 
-    /**
-     * Computes the differences between two given instance versions.
-     *
-     * @param instanceId the instance to compare versions of
-     * @param versionA the version tag of the earlier version
-     * @param versionB the version tag of the later version
-     * @return a {@link HistoryEntryVersionDto} of the computed differences
-     */
-    public HistoryEntryVersionDto compareVersions(BHive hive, String instanceId, int versionA, int versionB) {
-        InstanceManifest a = InstanceManifest.load(hive, instanceId, String.valueOf(versionA));
-        InstanceManifest b = InstanceManifest.load(hive, instanceId, String.valueOf(versionB));
-        return versionDifferences(hive, a, b);
+    private MasterRuntimeHistoryDto loadRuntimeHistory(MasterProvider mp, String group, String instanceId) {
+        RemoteService svc = mp.getControllingMaster(hive, InstanceManifest.load(hive, instanceId, null).getManifest());
+        MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
+        MasterNamedResource namedMaster = master.getNamedMaster(group);
+        return namedMaster.getRuntimeHistory(instanceId);
     }
 
-    private HistoryEntryType computeType(Action action) {
-        if (action == Action.CREATE) {
-            return HistoryEntryType.CREATE;
+    private List<HistoryEntryDto> getRuntimeHistory(MasterRuntimeHistoryDto history, String tag) {
+        List<HistoryEntryDto> result = new ArrayList<>();
+
+        Map<String, MinionRuntimeHistoryDto> minion2History = history.getMinion2History();
+        for (Map.Entry<String, MinionRuntimeHistoryDto> entry : minion2History.entrySet()) {
+            String minion = entry.getKey();
+            MinionRuntimeHistoryDto minionHistoryDto = entry.getValue();
+            MinionRuntimeHistory minionHistory = minionHistoryDto.get(tag);
+            if (minionHistory == null) {
+                continue;
+            }
+            result.addAll(getMinionRuntimeHistory(minion, tag, minionHistory));
         }
-        return HistoryEntryType.DEPLOYMENT;
+        return result;
+    }
+
+    private Collection<HistoryEntryDto> getMinionRuntimeHistory(String minion, String tag, MinionRuntimeHistory minionHistory) {
+        List<HistoryEntryDto> result = new ArrayList<>();
+        for (Map.Entry<String, MinionApplicationRuntimeHistory> entry : minionHistory.getHistory().entrySet()) {
+            String appName = entry.getKey();
+            MinionApplicationRuntimeHistory appHistory = entry.getValue();
+            result.addAll(getApplicationRuntimeHistory(minion, tag, appName, appHistory));
+        }
+        return result;
+    }
+
+    private List<HistoryEntryDto> getApplicationRuntimeHistory(String minionName, String tag, String appName,
+            MinionApplicationRuntimeHistory history) {
+        List<HistoryEntryDto> result = new ArrayList<>();
+        for (MinionRuntimeHistoryRecord record : history.getRecords()) {
+            HistoryEntryDto entry = new HistoryEntryDto(record.timestamp, tag);
+            entry.type = HistoryEntryType.RUNTIME;
+            entry.runtimeEvent = new HistoryEntryRuntimeDto(minionName, record.pid, record.exitCode, record.state);
+            entry.title = computeRuntimeTitle(record.state, appName);
+            UserInfo userInfo = computeUser(record.user);
+            if (userInfo != null) {
+                entry.user = userInfo.name;
+                entry.email = userInfo.email;
+            }
+            result.add(entry);
+        }
+        return result;
+    }
+
+    private Map<String, String[]> compareInstanceConfiguration(InstanceConfiguration configA, InstanceConfiguration configB) {
+        Map<String, String[]> changes = new TreeMap<>();
+        if (configA.autoStart != configB.autoStart) {
+            changes.put("Auto-start", new String[] { String.valueOf(configA.autoStart), String.valueOf(configB.autoStart) });
+        }
+        if (configA.autoUninstall != configB.autoUninstall) {
+            changes.put("Auto-uninstall",
+                    new String[] { String.valueOf(configA.autoUninstall), String.valueOf(configB.autoUninstall) });
+        }
+        if (StringHelper.notEqual(configA.description, configB.description)) {
+            changes.put("Description", new String[] { configA.description, configB.description });
+        }
+        if (StringHelper.notEqual(configA.name, configB.name)) {
+            changes.put("Name", new String[] { configA.name, configB.name });
+        }
+        if (configA.purpose != null && !configA.purpose.equals(configB.purpose)) {
+            changes.put("Purpose", new String[] { configA.purpose.name(), configB.purpose.name() });
+        }
+        if (configA.product != null && !configA.product.getTag().equals(configB.product.getTag())) {
+            changes.put("Product version", new String[] { configA.product.getTag(), configB.product.getTag() });
+        }
+        return changes;
+    }
+
+    // iterate through nodes and compute deleted, added or changed nodes
+    private Map<String, HistoryEntryNodeDto> compareInstanceNodeConfiguration(Map<String, InstanceNodeConfiguration> node2ConfigA,
+            Map<String, InstanceNodeConfiguration> node2ConfigB) {
+        Map<String, HistoryEntryNodeDto> nodes = new HashMap<>();
+
+        // Compare differences
+        SetView<String> matching = Sets.intersection(node2ConfigA.keySet(), node2ConfigB.keySet());
+        for (String nodeId : matching) {
+            InstanceNodeConfiguration configA = node2ConfigA.get(nodeId);
+            InstanceNodeConfiguration configB = node2ConfigB.get(nodeId);
+            HistoryEntryNodeDto ret = compareInstanceNodeConfiguration(configA, configB);
+            if (ret != null) {
+                nodes.put(nodeId, ret);
+            }
+        }
+
+        // Deleted
+        SetView<String> deleted = Sets.difference(node2ConfigA.keySet(), node2ConfigB.keySet());
+        for (String nodeId : deleted) {
+            List<ApplicationConfiguration> apps = node2ConfigA.get(nodeId).applications;
+            HistoryEntryNodeDto node = new HistoryEntryNodeDto();
+            for (ApplicationConfiguration app : apps) {
+                node.deleted.add(app.name);
+            }
+
+            nodes.put(nodeId, node);
+        }
+
+        // Added
+        SetView<String> added = Sets.difference(node2ConfigB.keySet(), node2ConfigA.keySet());
+        for (String nodeId : added) {
+            List<ApplicationConfiguration> apps = node2ConfigB.get(nodeId).applications;
+            HistoryEntryNodeDto node = new HistoryEntryNodeDto();
+            for (ApplicationConfiguration app : apps) {
+                node.added.add(app.name);
+            }
+            nodes.put(nodeId, node);
+        }
+        return nodes;
+    }
+
+    // iterate through config files and compute deleted, added or changed files
+    private HistoryEntryConfigFilesDto compareConfigFiles(InstanceConfiguration configA, InstanceConfiguration configB) {
+
+        HistoryEntryConfigFilesDto configFiles = new HistoryEntryConfigFilesDto();
+
+        ObjectId configTreeA = configA.configTree;
+        ObjectId configTreeB = configB.configTree;
+
+        if (configTreeA == null) {
+            if (configTreeB != null) {
+                for (String name : hive.execute(new ScanOperation().setTree(configTreeB)).getChildren().keySet()) {
+                    configFiles.added.add(name);
+                }
+            }
+        } else if (configTreeB == null) {
+            for (String name : hive.execute(new ScanOperation().setTree(configTreeA)).getChildren().keySet()) {
+                configFiles.deleted.add(name);
+            }
+        } else {
+            compareConfigFileTree(configFiles, configTreeA, configTreeB);
+        }
+
+        // Check if something has been changed
+        if (configFiles.added.isEmpty() && configFiles.deleted.isEmpty() && configFiles.changed.isEmpty()) {
+            return null;
+        }
+        return configFiles;
+    }
+
+    private void compareConfigFileTree(HistoryEntryConfigFilesDto content, ObjectId configTreeA, ObjectId configTreeB) {
+        Map<String, ElementView> configFilesA = new HashMap<>(
+                hive.execute(new ScanOperation().setTree(configTreeA)).getChildren());
+        Map<String, ElementView> configFilesB = new HashMap<>(
+                hive.execute(new ScanOperation().setTree(configTreeB)).getChildren());
+
+        // Compare differences
+        SetView<String> matching = Sets.intersection(configFilesA.keySet(), configFilesB.keySet());
+        for (String fileName : matching) {
+            ElementView viewA = configFilesA.get(fileName);
+            ElementView viewB = configFilesB.get(fileName);
+            if (!viewA.getElementId().getId().equals(viewB.getElementId().getId())) {
+                content.changed.add(fileName);
+            }
+        }
+
+        // Deleted
+        SetView<String> deleted = Sets.difference(configFilesA.keySet(), configFilesB.keySet());
+        for (String fileName : deleted) {
+            content.deleted.add(fileName);
+        }
+
+        // Added
+        SetView<String> added = Sets.difference(configFilesB.keySet(), configFilesA.keySet());
+        for (String fileName : added) {
+            content.added.add(fileName);
+        }
+    }
+
+    // iterate trough applications and compute deleted, added or changed applications
+    private HistoryEntryNodeDto compareInstanceNodeConfiguration(InstanceNodeConfiguration nodeConfigA,
+            InstanceNodeConfiguration newNodeConfig) {
+        HistoryEntryNodeDto content = new HistoryEntryNodeDto();
+
+        Map<String, ApplicationConfiguration> appsA = nodeConfigA.applications.stream()
+                .collect(Collectors.toMap(a -> a.uid, a -> a));
+        Map<String, ApplicationConfiguration> appsB = newNodeConfig.applications.stream()
+                .collect(Collectors.toMap(a -> a.uid, a -> a));
+
+        // Compare differences
+        SetView<String> matching = Sets.intersection(appsA.keySet(), appsB.keySet());
+        for (String appId : matching) {
+            ApplicationConfiguration configA = appsA.get(appId);
+            ApplicationConfiguration configB = appsB.get(appId);
+            HistoryEntryApplicationDto ret = compareApplicationConfiguration(configA, configB);
+            if (ret != null) {
+                content.changed.put(configB.name, ret);
+            }
+        }
+
+        // Deleted
+        SetView<String> deleted = Sets.difference(appsA.keySet(), appsB.keySet());
+        for (String appId : deleted) {
+            ApplicationConfiguration appConfig = appsA.get(appId);
+            content.deleted.add(appConfig.name);
+        }
+
+        // Added
+        SetView<String> added = Sets.difference(appsB.keySet(), appsA.keySet());
+        for (String appId : added) {
+            ApplicationConfiguration appConfig = appsB.get(appId);
+            content.added.add(appConfig.name);
+        }
+
+        // Check if something has been changed
+        if (content.added.isEmpty() && content.deleted.isEmpty() && content.changed.isEmpty()) {
+            return null;
+        }
+        return content;
+    }
+
+    // compute differences between two applications
+    private HistoryEntryApplicationDto compareApplicationConfiguration(ApplicationConfiguration configA,
+            ApplicationConfiguration configB) {
+        HistoryEntryApplicationDto content = new HistoryEntryApplicationDto();
+
+        content.parameters = compareParameters(configA, configB);
+        content.properties = compareApplicationProperties(configA, configB);
+        compareHttpEndpoints(content, configA, configB);
+
+        // Check if something has been changed
+        if (content.addedEndpoints.isEmpty() && content.deletedEndpoints.isEmpty() && content.changedEndpoints.isEmpty()
+                && content.parameters == null && content.processControlProperties.isEmpty() && content.properties.isEmpty()) {
+            return null;
+        }
+
+        return content;
+
+    }
+
+    private Map<String, String[]> compareApplicationProperties(ApplicationConfiguration configA,
+            ApplicationConfiguration configB) {
+        Map<String, String[]> changes = new TreeMap<>();
+        if (StringHelper.notEqual(configA.name, configB.name)) {
+            changes.put("Name", new String[] { configA.name, configB.name });
+        }
+        if (StringHelper.notEqual(configA.start.executable, configB.start.executable)) {
+            changes.put("Executable path", new String[] { configA.start.executable, configB.start.executable });
+        }
+
+        if (configA.processControl.attachStdin != configB.processControl.attachStdin) {
+            changes.put("Attach to stdin", new String[] { String.valueOf(configA.processControl.attachStdin),
+                    String.valueOf(configB.processControl.attachStdin) });
+        }
+        if (configA.processControl.keepAlive != configB.processControl.keepAlive) {
+            changes.put("Keep alive", new String[] { String.valueOf(configA.processControl.keepAlive),
+                    String.valueOf(configB.processControl.keepAlive) });
+        }
+        if (configA.processControl.gracePeriod != configB.processControl.gracePeriod) {
+            changes.put("Grace period", new String[] { String.valueOf(configA.processControl.gracePeriod),
+                    String.valueOf(configB.processControl.gracePeriod) });
+        }
+        if (configA.processControl.noOfRetries != configB.processControl.noOfRetries) {
+            changes.put("Number of retries", new String[] { String.valueOf(configA.processControl.noOfRetries),
+                    String.valueOf(configB.processControl.noOfRetries) });
+        }
+
+        if (configA.processControl.startType != null
+                && !configA.processControl.startType.equals(configB.processControl.startType)) {
+            changes.put("Start type",
+                    new String[] { configA.processControl.startType.name(), configB.processControl.startType.name() });
+        }
+        return changes;
+    }
+
+    // iterate through parameters and compute deleted, added or changed parameters
+    private HistoryEntryParametersDto compareParameters(ApplicationConfiguration configA, ApplicationConfiguration configB) {
+        HistoryEntryParametersDto parameters = new HistoryEntryParametersDto();
+
+        Map<String, ParameterConfiguration> parametersA = configA.start.parameters.stream()
+                .collect(Collectors.toMap(p -> p.uid, p -> p));
+        Map<String, ParameterConfiguration> parametersB = configB.start.parameters.stream()
+                .collect(Collectors.toMap(p -> p.uid, p -> p));
+
+        // Compare differences
+        SetView<String> matching = Sets.intersection(parametersA.keySet(), parametersB.keySet());
+        for (String appId : matching) {
+            ParameterConfiguration paramConfigA = parametersA.get(appId);
+            ParameterConfiguration paramConfigB = parametersB.get(appId);
+            if (StringHelper.notEqual(paramConfigA.value, paramConfigB.value)) {
+                parameters.changed.put(paramConfigA.uid, new String[] { paramConfigA.value, paramConfigB.value });
+            }
+        }
+
+        // Deleted
+        SetView<String> deleted = Sets.difference(parametersA.keySet(), parametersB.keySet());
+        for (String appId : deleted) {
+            ParameterConfiguration paramConfig = parametersA.get(appId);
+            parameters.deleted.add(new String[] { paramConfig.uid, paramConfig.value });
+        }
+
+        // Added
+        SetView<String> added = Sets.difference(parametersB.keySet(), parametersA.keySet());
+        for (String appId : added) {
+            ParameterConfiguration paramConfig = parametersB.get(appId);
+            parameters.added.add(new String[] { paramConfig.uid, paramConfig.value });
+        }
+
+        // Check if something has been changed
+        if (parameters.added.isEmpty() && parameters.changed.isEmpty() && parameters.deleted.isEmpty()) {
+            return null;
+        }
+        return parameters;
+    }
+
+    // iterate through http endpoints and compute deleted, added or changed endpoints
+    private void compareHttpEndpoints(HistoryEntryApplicationDto content, ApplicationConfiguration configA,
+            ApplicationConfiguration configB) {
+
+        Map<String, HttpEndpoint> endpointsA = configA.endpoints.http.stream().collect(Collectors.toMap(e -> e.id, e -> e));
+        Map<String, HttpEndpoint> endpointsB = configB.endpoints.http.stream().collect(Collectors.toMap(e -> e.id, e -> e));
+
+        // Compare differences
+        SetView<String> matching = Sets.intersection(endpointsA.keySet(), endpointsB.keySet());
+        for (String id : matching) {
+            HttpEndpoint endpointConfigA = endpointsA.get(id);
+            HttpEndpoint endpointConfigB = endpointsB.get(id);
+            HistoryEntryHttpEndpointDto ret = endpointDifferences(endpointConfigA, endpointConfigB);
+            if (!ret.properties.isEmpty()) {
+                content.changedEndpoints.put(endpointConfigA.path + ":" + endpointConfigA.port, ret);
+            }
+        }
+
+        // Deleted
+        SetView<String> deleted = Sets.difference(endpointsA.keySet(), endpointsB.keySet());
+        for (String id : deleted) {
+            HttpEndpoint endpoint = endpointsA.get(id);
+            content.deletedEndpoints.add(endpoint.path + ":" + endpoint.port);
+        }
+
+        // Added
+        SetView<String> added = Sets.difference(endpointsB.keySet(), endpointsA.keySet());
+        for (String id : added) {
+            HttpEndpoint endpoint = endpointsB.get(id);
+            content.addedEndpoints.add(endpoint.path + ":" + endpoint.port);
+        }
+    }
+
+    // compare differences between two http endpoints
+    private HistoryEntryHttpEndpointDto endpointDifferences(HttpEndpoint endpointA, HttpEndpoint endpointB) {
+
+        HistoryEntryHttpEndpointDto content = new HistoryEntryHttpEndpointDto();
+
+        // test for differences in http endpoint properties
+        if (StringHelper.notEqual(endpointA.authPass, endpointB.authPass)) {
+            content.properties.put("Authentication password", null);
+        }
+        if (StringHelper.notEqual(endpointA.authUser, endpointB.authUser)) {
+            content.properties.put("User", new String[] { endpointA.authUser, endpointB.authUser });
+        }
+        if (endpointA.authType != endpointB.authType) {
+            content.properties.put("Authentication type", new String[] { endpointA.authType.name(), endpointB.authType.name() });
+        }
+        if (StringHelper.notEqual(endpointA.path, endpointB.path)) {
+            content.properties.put("Path", new String[] { endpointA.path, endpointB.path });
+        }
+        if (StringHelper.notEqual(endpointA.port, endpointB.port)) {
+            content.properties.put("Port", new String[] { endpointA.port, endpointB.port });
+        }
+        if (StringHelper.notEqual(endpointA.trustStore, endpointB.trustStore)) {
+            content.properties.put("Trust-store path", new String[] { endpointA.trustStore, endpointB.trustStore });
+        }
+        if (StringHelper.notEqual(endpointA.trustStorePass, endpointB.trustStorePass)) {
+            content.properties.put("Trust-store password", null);
+        }
+
+        if (endpointA.secure != endpointB.secure) {
+            content.properties.put("Use https",
+                    new String[] { String.valueOf(endpointA.secure), String.valueOf(endpointB.secure) });
+        }
+        if (endpointA.trustAll != endpointB.trustAll) {
+            content.properties.put("Trust all",
+                    new String[] { String.valueOf(endpointA.trustAll), String.valueOf(endpointB.trustAll) });
+        }
+
+        return content;
     }
 
     private String computeConfigTitle(Action action, String tag) {
@@ -219,552 +630,10 @@ public class InstanceHistoryManager {
         return userInfo;
     }
 
-    private MasterRuntimeHistoryDto loadRuntimeHistory(BHive hive, String group, String instanceId) {
-        RemoteService svc = mp.getControllingMaster(hive, InstanceManifest.load(hive, instanceId, null).getManifest());
-        MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
-        MasterNamedResource namedMaster = master.getNamedMaster(group);
-        return namedMaster.getRuntimeHistory(instanceId);
-    }
-
-    private List<HistoryEntryDto> getRuntimeHistory(MasterRuntimeHistoryDto history, String tag) {
-        List<HistoryEntryDto> result = new ArrayList<>();
-
-        Map<String, MinionRuntimeHistoryDto> minion2History = history.getMinion2History();
-        for (Map.Entry<String, MinionRuntimeHistoryDto> entry : minion2History.entrySet()) {
-            String minion = entry.getKey();
-            MinionRuntimeHistoryDto minionHistoryDto = entry.getValue();
-            MinionRuntimeHistory minionHistory = minionHistoryDto.get(tag);
-            if (minionHistory == null) {
-                continue;
-            }
-            result.addAll(getMinionRuntimeHistory(minion, tag, minionHistory));
+    private HistoryEntryType computeType(Action action) {
+        if (action == Action.CREATE) {
+            return HistoryEntryType.CREATE;
         }
-        return result;
-    }
-
-    private Collection<HistoryEntryDto> getMinionRuntimeHistory(String minion, String tag, MinionRuntimeHistory minionHistory) {
-        List<HistoryEntryDto> result = new ArrayList<>();
-        for (Map.Entry<String, MinionApplicationRuntimeHistory> entry : minionHistory.getHistory().entrySet()) {
-            String appName = entry.getKey();
-            MinionApplicationRuntimeHistory appHistory = entry.getValue();
-            result.addAll(getApplicationRuntimeHistory(minion, tag, appName, appHistory));
-        }
-        return result;
-    }
-
-    private List<HistoryEntryDto> getApplicationRuntimeHistory(String minionName, String tag, String appName,
-            MinionApplicationRuntimeHistory history) {
-        List<HistoryEntryDto> result = new ArrayList<>();
-        for (MinionRuntimeHistoryRecord record : history.getRecords()) {
-            HistoryEntryDto entry = new HistoryEntryDto(record.timestamp, tag);
-            entry.type = HistoryEntryType.RUNTIME;
-            entry.runtimeEvent = new HistoryEntryRuntimeDto(minionName, record.pid, record.exitCode, record.state);
-            entry.title = computeRuntimeTitle(record.state, appName);
-            UserInfo userInfo = computeUser(record.user);
-            if (userInfo != null) {
-                entry.user = userInfo.name;
-                entry.email = userInfo.email;
-            }
-            result.add(entry);
-        }
-        return result;
-    }
-
-    // compute differences between two versions
-    private HistoryEntryVersionDto versionDifferences(BHive hive, InstanceManifest oldManifest, InstanceManifest newManifest) {
-        HistoryEntryVersionDto content = new HistoryEntryVersionDto();
-
-        InstanceConfiguration oldConfig = oldManifest.getConfiguration();
-        InstanceConfiguration newConfig = newManifest.getConfiguration();
-
-        // test for differences in configuration properties
-        if (oldConfig.autoStart != newConfig.autoStart) {
-            content.properties.put("Auto-start",
-                    new String[] { String.valueOf(oldConfig.autoStart), String.valueOf(newConfig.autoStart) });
-        }
-        if (oldConfig.autoUninstall != newConfig.autoUninstall) {
-            content.properties.put("Auto-uninstall",
-                    new String[] { String.valueOf(oldConfig.autoUninstall), String.valueOf(newConfig.autoUninstall) });
-        }
-        if (StringHelper.notEqual(oldConfig.description, newConfig.description)) {
-            content.properties.put("Description", new String[] { oldConfig.description, newConfig.description });
-        }
-        if (StringHelper.notEqual(oldConfig.name, newConfig.name)) {
-            content.properties.put("Name", new String[] { oldConfig.name, newConfig.name });
-        }
-        if (oldConfig.purpose != null && !oldConfig.purpose.equals(newConfig.purpose)) {
-            content.properties.put("Purpose", new String[] { oldConfig.purpose.name(), newConfig.purpose.name() });
-        }
-        if (oldConfig.product != null && !oldConfig.product.getTag().equals(newConfig.product.getTag())) {
-            content.properties.put("Product version", new String[] { oldConfig.product.getTag(), newConfig.product.getTag() });
-        }
-
-        content.nodes = computeNodes(hive, oldManifest, newManifest);
-
-        content.configFiles = setConfigFiles(hive, oldConfig, newConfig);
-
-        return content;
-    }
-
-    // iterate through nodes and compute deleted, added or changed nodes
-    private Map<String, HistoryEntryNodeDto> computeNodes(BHive hive, InstanceManifest oldManifest,
-            InstanceManifest newManifest) {
-        Map<String, HistoryEntryNodeDto> nodes = new HashMap<>();
-        SortedMap<String, Key> oldNodes = new TreeMap<>(oldManifest.getInstanceNodeManifests());
-        SortedMap<String, Key> newNodes = new TreeMap<>(newManifest.getInstanceNodeManifests());
-
-        List<String> oldNodeNames = new ArrayList<>(oldNodes.keySet());
-        Collections.sort(oldNodeNames);
-        List<String> newNodeNames = new ArrayList<>(newNodes.keySet());
-        Collections.sort(newNodeNames);
-
-        boolean finished = false;
-
-        for (int i = 0; i <= newNodes.size() && !finished; i++) {
-
-            while (true) {
-                if (i >= newNodes.size()) {
-                    for (int j = i; j < oldNodes.size(); j++) {
-                        nodes.put(oldNodeNames.get(j), deletedNode(hive, oldNodes.get(oldNodeNames.get(j))));
-                    }
-                    finished = true;
-                    break;
-                }
-                if (i >= oldNodes.size()) {
-                    for (int j = i; j < newNodes.size(); j++) {
-                        nodes.put(newNodeNames.get(j), addedNode(hive, newNodes.get(newNodeNames.get(j))));
-                    }
-                    finished = true;
-                    break;
-                }
-                if (compareNodes(hive, nodes, i, oldNodeNames, newNodeNames, oldNodes, newNodes)) {
-                    break;
-                }
-            }
-        }
-        return nodes;
-    }
-
-    private boolean compareNodes(BHive hive, Map<String, HistoryEntryNodeDto> nodes, int index, List<String> oldNodeNames,
-            List<String> newNodeNames, Map<String, Key> oldNodes, Map<String, Key> newNodes) {
-        int comparison = newNodeNames.get(index).compareTo(oldNodeNames.get(index));
-
-        if (comparison == 0) {
-
-            //this node stayed, so look for changes
-            HistoryEntryNodeDto ret = nodeDifferences(hive, oldNodes.get(oldNodeNames.get(index)),
-                    newNodes.get(newNodeNames.get(index)));
-            if (ret != null) {
-                nodes.put(oldNodeNames.get(index), ret);
-            }
-            return true;
-        }
-        if (comparison > 0) {
-
-            nodes.put(oldNodeNames.get(index), deletedNode(hive, oldNodes.get(oldNodeNames.get(index))));
-            oldNodes.remove(oldNodeNames.get(index));
-            oldNodeNames.remove(index);
-        } else {
-            nodes.put(oldNodeNames.get(index), addedNode(hive, newNodes.get(newNodeNames.get(index))));
-            newNodes.remove(newNodeNames.get(index));
-            newNodeNames.remove(index);
-        }
-        return false;
-    }
-
-    private HistoryEntryNodeDto addedNode(BHive hive, Key newKey) {
-        List<ApplicationConfiguration> apps = InstanceNodeManifest.of(hive, newKey).getConfiguration().applications;
-
-        HistoryEntryNodeDto node = new HistoryEntryNodeDto();
-
-        for (ApplicationConfiguration app : apps) {
-            node.added.add(app.name);
-        }
-
-        return node;
-    }
-
-    private HistoryEntryNodeDto deletedNode(BHive hive, Key oldKey) {
-        List<ApplicationConfiguration> apps = InstanceNodeManifest.of(hive, oldKey).getConfiguration().applications;
-
-        HistoryEntryNodeDto node = new HistoryEntryNodeDto();
-
-        for (ApplicationConfiguration app : apps) {
-            node.deleted.add(app.name);
-        }
-
-        return node;
-    }
-
-    // iterate through config files and compute deleted, added or changed files
-    private HistoryEntryConfigFilesDto setConfigFiles(BHive hive, InstanceConfiguration oldConfig,
-            InstanceConfiguration newConfig) {
-
-        HistoryEntryConfigFilesDto configFiles = new HistoryEntryConfigFilesDto();
-
-        ObjectId oldConfigTree = oldConfig.configTree;
-        ObjectId newConfigTree = newConfig.configTree;
-
-        if (oldConfigTree == null) {
-            if (newConfigTree != null) {
-                for (String name : hive.execute(new ScanOperation().setTree(newConfigTree)).getChildren().keySet()) {
-                    // added file
-                    configFiles.added.add(name);
-                }
-            }
-        } else if (newConfigTree == null) {
-            for (String name : hive.execute(new ScanOperation().setTree(oldConfigTree)).getChildren().keySet()) {
-                // deleted file
-                configFiles.deleted.add(name);
-            }
-        } else {
-            computeConfigFiles(hive, configFiles, oldConfigTree, newConfigTree);
-        }
-        if (configFiles.added.isEmpty() && configFiles.deleted.isEmpty() && configFiles.changed.isEmpty()) {
-            return null;
-        } else {
-            return configFiles;
-        }
-    }
-
-    private void computeConfigFiles(BHive hive, HistoryEntryConfigFilesDto content, ObjectId oldConfigTree,
-            ObjectId newConfigTree) {
-        boolean finished = false;
-        Map<String, ElementView> oldConfigFiles = new HashMap<>(
-                hive.execute(new ScanOperation().setTree(oldConfigTree)).getChildren());
-        Map<String, ElementView> newConfigFiles = new HashMap<>(
-                hive.execute(new ScanOperation().setTree(newConfigTree)).getChildren());
-
-        List<String> oldConfigFileNames = new ArrayList<>(oldConfigFiles.keySet());
-        Collections.sort(oldConfigFileNames);
-        List<String> newConfigFileNames = new ArrayList<>(newConfigFiles.keySet());
-        Collections.sort(newConfigFileNames);
-
-        for (int i = 0; i <= newConfigFiles.size() && !finished; i++) {
-            while (true) {
-                if (i >= newConfigFiles.size()) {
-                    for (int j = i; j < oldConfigFiles.size(); j++) {
-                        // deleted file
-                        content.deleted.add(oldConfigFileNames.get(j));
-                    }
-                    finished = true;
-                    break;
-                }
-                if (i >= oldConfigFiles.size()) {
-                    for (int j = i; j < newConfigFiles.size(); j++) {
-                        // added file
-                        content.added.add(newConfigFileNames.get(j));
-                    }
-                    finished = true;
-                    break;
-                }
-                if (compareConfigFiles(content, i, oldConfigFiles, newConfigFiles, oldConfigFileNames, newConfigFileNames)) {
-                    break;
-                }
-            }
-        }
-    }
-
-    private boolean compareConfigFiles(HistoryEntryConfigFilesDto content, int index, Map<String, ElementView> oldConfigFiles,
-            Map<String, ElementView> newConfigFiles, List<String> oldConfigFileNames, List<String> newConfigFileNames) {
-        int comparison = oldConfigFileNames.get(index).compareTo(oldConfigFileNames.get(index));
-
-        if (comparison == 0) {
-            if (!oldConfigFiles.get(oldConfigFileNames.get(index)).getElementId().getId()
-                    .equals(newConfigFiles.get(newConfigFileNames.get(index)).getElementId().getId())) {
-                content.changed.add(oldConfigFileNames.get(index));
-            }
-            return true;
-        }
-        if (comparison > 0) {
-            // deleted file
-            content.deleted.add(oldConfigFileNames.get(index));
-            oldConfigFiles.remove(oldConfigFileNames.get(index));
-            oldConfigFileNames.remove(index);
-        } else {
-            // added file
-            content.deleted.add(newConfigFileNames.get(index));
-            newConfigFiles.remove(newConfigFileNames.get(index));
-            newConfigFileNames.remove(index);
-        }
-        return false;
-    }
-
-    // iterate trough applications and compute deleted, added or changed applications
-    private HistoryEntryNodeDto nodeDifferences(BHive hive, Key oldKey, Key newKey) {
-        HistoryEntryNodeDto content = new HistoryEntryNodeDto();
-
-        InstanceNodeConfiguration oldNodeConfig = InstanceNodeManifest.of(hive, oldKey).getConfiguration();
-        InstanceNodeConfiguration newNodeConfig = InstanceNodeManifest.of(hive, newKey).getConfiguration();
-
-        List<ApplicationConfiguration> oldApplications = new ArrayList<>(oldNodeConfig.applications);
-        Collections.sort(oldApplications, (a, b) -> a.uid.compareTo(b.uid));
-
-        List<ApplicationConfiguration> newApplications = new ArrayList<>(newNodeConfig.applications);
-        Collections.sort(newApplications, (a, b) -> a.uid.compareTo(b.uid));
-
-        boolean finished = false;
-
-        for (int i = 0; i <= newApplications.size() && !finished; i++) {
-            while (true) {
-                if (i >= newApplications.size()) {
-                    for (int j = i; j < oldApplications.size(); j++) {
-                        content.deleted.add(oldApplications.get(j).name);
-                    }
-
-                    finished = true;
-                    break;
-                }
-                if (i >= oldApplications.size()) {
-                    for (int j = i; j < newApplications.size(); j++) {
-                        content.added.add(newApplications.get(j).name);
-                    }
-                    finished = true;
-                    break;
-                }
-                if (compareApplications(content, i, oldApplications, newApplications)) {
-                    break;
-                }
-            }
-        }
-        if (content.added.isEmpty() && content.deleted.isEmpty() && content.changed.isEmpty()) {
-            return null;
-        }
-        return content;
-    }
-
-    private boolean compareApplications(HistoryEntryNodeDto content, int index, List<ApplicationConfiguration> oldApplications,
-            List<ApplicationConfiguration> newApplications) {
-        int comparison = newApplications.get(index).uid.compareTo(oldApplications.get(index).uid);
-
-        if (comparison == 0) {
-            HistoryEntryApplicationDto ret = applicationDifferences(oldApplications.get(index), newApplications.get(index));
-            if (ret != null) {
-                content.changed.put(oldApplications.get(index).name, ret);
-            }
-
-            return true;
-        } else if (comparison > 0) {
-            content.deleted.add(oldApplications.get(index).name);
-            oldApplications.remove(index);
-        } else {
-            content.added.add(newApplications.get(index).name);
-            newApplications.remove(index);
-        }
-        return false;
-    }
-
-    // compute differences between two applications
-    private HistoryEntryApplicationDto applicationDifferences(ApplicationConfiguration oldConfig,
-            ApplicationConfiguration newConfig) {
-        HistoryEntryApplicationDto content = new HistoryEntryApplicationDto();
-
-        compareApplicationProperties(content, oldConfig, newConfig);
-
-        content.parameters = computeParameters(oldConfig, newConfig);
-
-        computeHttpEndpoints(content, oldConfig, newConfig);
-
-        if (content.addedEndpoints.isEmpty() && content.deletedEndpoints.isEmpty() && content.endpoints.isEmpty()
-                && content.parameters == null && content.processControlProperties.isEmpty() && content.properties.isEmpty()) {
-            return null;
-        }
-        return content;
-
-    }
-
-    private void compareApplicationProperties(HistoryEntryApplicationDto content, ApplicationConfiguration oldConfig,
-            ApplicationConfiguration newConfig) {
-        if (StringHelper.notEqual(oldConfig.name, newConfig.name)) {
-            content.properties.put("Name", new String[] { oldConfig.name, newConfig.name });
-        }
-        if (StringHelper.notEqual(oldConfig.start.executable, newConfig.start.executable)) {
-            content.properties.put("Executable path", new String[] { oldConfig.start.executable, newConfig.start.executable });
-        }
-
-        if (oldConfig.processControl.attachStdin != newConfig.processControl.attachStdin) {
-            content.properties.put("Attach to stdin", new String[] { String.valueOf(oldConfig.processControl.attachStdin),
-                    String.valueOf(newConfig.processControl.attachStdin) });
-        }
-        if (oldConfig.processControl.keepAlive != newConfig.processControl.keepAlive) {
-            content.properties.put("Keep alive", new String[] { String.valueOf(oldConfig.processControl.keepAlive),
-                    String.valueOf(newConfig.processControl.keepAlive) });
-        }
-        if (oldConfig.processControl.gracePeriod != newConfig.processControl.gracePeriod) {
-            content.properties.put("Grace period", new String[] { String.valueOf(oldConfig.processControl.gracePeriod),
-                    String.valueOf(newConfig.processControl.gracePeriod) });
-        }
-        if (oldConfig.processControl.noOfRetries != newConfig.processControl.noOfRetries) {
-            content.properties.put("Number of retries", new String[] { String.valueOf(oldConfig.processControl.noOfRetries),
-                    String.valueOf(newConfig.processControl.noOfRetries) });
-        }
-
-        if (oldConfig.processControl.startType != null
-                && !oldConfig.processControl.startType.equals(newConfig.processControl.startType)) {
-            content.properties.put("Start type",
-                    new String[] { oldConfig.processControl.startType.name(), newConfig.processControl.startType.name() });
-        }
-    }
-
-    // iterate through parameters and compute deleted, added or changed parameters
-    private HistoryEntryParametersDto computeParameters(ApplicationConfiguration oldConfig, ApplicationConfiguration newConfig) {
-        HistoryEntryParametersDto parameters = new HistoryEntryParametersDto();
-
-        List<ParameterConfiguration> oldParameters = oldConfig.start.parameters;
-        List<ParameterConfiguration> newParameters = newConfig.start.parameters;
-
-        Collections.sort(oldParameters, (a, b) -> a.uid.compareTo(b.uid));
-        Collections.sort(newParameters, (a, b) -> a.uid.compareTo(b.uid));
-
-        boolean finished = false;
-
-        for (int i = 0; i <= newParameters.size() && !finished; i++) {
-            while (true) {
-                if (i >= newParameters.size()) {
-                    for (int j = i; j < oldParameters.size(); j++) {
-                        parameters.deleted.add(new String[] { oldParameters.get(j).uid, oldParameters.get(j).value });
-                    }
-
-                    finished = true;
-                    break;
-                }
-                if (i >= oldParameters.size()) {
-                    for (int j = i; j < newParameters.size(); j++) {
-                        parameters.added.add(new String[] { newParameters.get(j).uid, newParameters.get(j).value });
-                    }
-                    finished = true;
-                    break;
-                }
-                if (compareParameters(parameters, i, oldParameters, newParameters)) {
-                    break;
-                }
-
-            }
-        }
-        if (parameters.added.isEmpty() && parameters.changed.isEmpty() && parameters.deleted.isEmpty()) {
-            return null;
-        }
-        return parameters;
-    }
-
-    private boolean compareParameters(HistoryEntryParametersDto parameters, int index, List<ParameterConfiguration> oldParameters,
-            List<ParameterConfiguration> newParameters) {
-        int comparison = newParameters.get(index).uid.compareTo(oldParameters.get(index).uid);
-
-        if (comparison == 0) {
-            if (StringHelper.notEqual(oldParameters.get(index).value, newParameters.get(index).value)) {
-                parameters.changed.put(oldParameters.get(index).uid,
-                        new String[] { oldParameters.get(index).value, newParameters.get(index).value });
-            }
-            return true;
-        }
-        if (comparison > 0) {
-            parameters.deleted.add(new String[] { oldParameters.get(index).uid, oldParameters.get(index).value });
-            oldParameters.remove(index);
-        } else {
-            parameters.added.add(new String[] { newParameters.get(index).uid, newParameters.get(index).value });
-            newParameters.remove(index);
-        }
-        return false;
-    }
-
-    // iterate through http endpoints and compute deleted, added or changed endpoints
-    private void computeHttpEndpoints(HistoryEntryApplicationDto content, ApplicationConfiguration oldConfig,
-            ApplicationConfiguration newConfig) {
-        // iterate trough http endpoints
-        List<HttpEndpoint> oldEndpoints = oldConfig.endpoints.http;
-        List<HttpEndpoint> newEndpoints = newConfig.endpoints.http;
-
-        Collections.sort(oldEndpoints, (a, b) -> a.id.compareTo(b.id));
-        Collections.sort(newEndpoints, (a, b) -> a.id.compareTo(b.id));
-
-        boolean finished = false;
-
-        for (int i = 0; i <= newEndpoints.size() && !finished; i++) {
-            while (true) {
-                if (i >= newEndpoints.size()) {
-                    for (int j = i; j < oldEndpoints.size(); j++) {
-                        content.deletedEndpoints.add(oldEndpoints.get(j).path + ":" + oldEndpoints.get(j).port);
-                    }
-
-                    finished = true;
-                    break;
-                }
-                if (i >= oldEndpoints.size()) {
-                    for (int j = i; j < newEndpoints.size(); j++) {
-                        content.addedEndpoints.add(newEndpoints.get(j).path + ":" + newEndpoints.get(j).port);
-                    }
-                    finished = true;
-                    break;
-                }
-                if (compareHttpEndpoints(content, i, oldEndpoints, newEndpoints)) {
-                    break;
-                }
-
-            }
-        }
-    }
-
-    private boolean compareHttpEndpoints(HistoryEntryApplicationDto content, int index, List<HttpEndpoint> oldEndpoints,
-            List<HttpEndpoint> newEndpoints) {
-        int comparison = newEndpoints.get(index).id.compareTo(oldEndpoints.get(index).id);
-
-        if (comparison == 0) {
-            HistoryEntryHttpEndpointDto ret = endpointDifferences(oldEndpoints.get(index), newEndpoints.get(index));
-            if (!ret.properties.isEmpty()) {
-                content.endpoints.put(oldEndpoints.get(index).path + ":" + oldEndpoints.get(index).port, ret);
-            }
-            return true;
-        }
-        if (comparison > 0) {
-            content.deletedEndpoints.add(oldEndpoints.get(index).path + ":" + oldEndpoints.get(index).port);
-            oldEndpoints.remove(index);
-        } else {
-            content.addedEndpoints.add(newEndpoints.get(index).path + ":" + newEndpoints.get(index).port);
-            newEndpoints.remove(index);
-        }
-        return false;
-    }
-
-    // compare differences between two http endpoints
-    private HistoryEntryHttpEndpointDto endpointDifferences(HttpEndpoint oldEndpoint, HttpEndpoint newEndpoint) {
-
-        HistoryEntryHttpEndpointDto content = new HistoryEntryHttpEndpointDto();
-
-        // test for differences in http endpoint properties
-
-        if (StringHelper.notEqual(oldEndpoint.authPass, newEndpoint.authPass)) {
-            content.properties.put("Authentication password", null);
-        }
-        if (StringHelper.notEqual(oldEndpoint.authUser, newEndpoint.authUser)) {
-            content.properties.put("User", new String[] { oldEndpoint.authUser, newEndpoint.authUser });
-        }
-        if (oldEndpoint.authType != newEndpoint.authType) {
-            content.properties.put("Authentication type",
-                    new String[] { oldEndpoint.authType.name(), newEndpoint.authType.name() });
-        }
-        if (StringHelper.notEqual(oldEndpoint.path, newEndpoint.path)) {
-            content.properties.put("Path", new String[] { oldEndpoint.path, newEndpoint.path });
-        }
-        if (StringHelper.notEqual(oldEndpoint.port, newEndpoint.port)) {
-            content.properties.put("Port", new String[] { oldEndpoint.port, newEndpoint.port });
-        }
-        if (StringHelper.notEqual(oldEndpoint.trustStore, newEndpoint.trustStore)) {
-            content.properties.put("Trust-store path", new String[] { oldEndpoint.trustStore, newEndpoint.trustStore });
-        }
-        if (StringHelper.notEqual(oldEndpoint.trustStorePass, newEndpoint.trustStorePass)) {
-            content.properties.put("Trust-store password", null);
-        }
-
-        if (oldEndpoint.secure != newEndpoint.secure) {
-            content.properties.put("Use https",
-                    new String[] { String.valueOf(oldEndpoint.secure), String.valueOf(newEndpoint.secure) });
-        }
-        if (oldEndpoint.trustAll != newEndpoint.trustAll) {
-            content.properties.put("Trust all",
-                    new String[] { String.valueOf(oldEndpoint.trustAll), String.valueOf(newEndpoint.trustAll) });
-        }
-
-        return content;
+        return HistoryEntryType.DEPLOYMENT;
     }
 }

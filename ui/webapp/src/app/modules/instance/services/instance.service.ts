@@ -5,14 +5,18 @@ import {
   HttpParams
 } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { cloneDeep } from 'lodash-es';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { EMPTY_HISTORY_COMPARE, EMPTY_HISTORY_FILTER } from 'src/app/models/consts';
 import {
   ClickAndStartDescriptor,
   ConfigFileDto,
   CustomAttributesRecord,
   FileStatusDto,
+  HistoryCompareDto,
   HistoryEntryVersionDto,
+  HistoryFilterDto,
   HistoryResultDto,
   InstanceBannerRecord,
   InstanceConfiguration,
@@ -520,51 +524,38 @@ export class InstanceService {
     );
   }
 
-  public buildInstanceUrl(
-    instanceGroupName: string,
-    instanceName: string
-  ): string {
+  public buildInstanceUrl(instanceGroupName: string,instanceName: string): string {
     return this.buildGroupUrl(instanceGroupName) + '/' + instanceName;
   }
 
-  public getInstanceHistory(
-    instanceGroupName: string,
-    instanceId: string,
-    maxResults: number,
-    startTag: string,
-    filter: string,
-    showCreate: boolean,
-    showDeployment: boolean,
-    showRuntime: boolean
-  ): Observable<HistoryResultDto> {
-    const url: string =
-      this.buildInstanceUrl(instanceGroupName, instanceId) + '/history';
-    let params = new HttpParams().set('maxResults', maxResults.toString());
-    params = params.set('showCreate', showCreate.toString());
-    params = params.set('showDeployment', showDeployment.toString());
-    params = params.set('showRuntime', showRuntime.toString());
-    if (startTag) {
-      params = params.set('startTag', startTag);
-    }
-    if (filter) {
-      params = params.set('filter', filter);
-    }
-    return this.http.get<HistoryResultDto>(url, { params: params });
+  public getInstanceHistory(instanceGroupName: string, instanceId: string, maxResults: number, startTag: string, filter: string,
+    showCreate: boolean, showDeployment: boolean, showRuntime: boolean): Observable<HistoryResultDto> {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceId) + '/history';
+
+    const filterDto:HistoryFilterDto = cloneDeep(EMPTY_HISTORY_FILTER);
+    filterDto.showCreateEvents = showCreate;
+    filterDto.showDeploymentEvents = showDeployment;
+    filterDto.showRuntimeEvents = showRuntime;
+    filterDto.maxResults = maxResults;
+    filterDto.startTag = startTag;
+    filterDto.filterText = filter;
+    return this.http.post<HistoryResultDto>(url, filterDto);
   }
 
-  public getVersionComparison(
-    instanceGroupName: string,
-    instanceId: string,
-    versionA: string,
-    versionB: string
-  ): Observable<HistoryEntryVersionDto> {
-    const url: string =
-      this.buildInstanceUrl(instanceGroupName, instanceId) +
-      '/compare-versions';
+  public compareVersions(instanceGroupName: string, instanceId: string, versionA: string, versionB: string): Observable<HistoryEntryVersionDto> {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceId) + '/history-compare-versions';
     const params = new HttpParams()
       .set('a', versionA.toString())
       .set('b', versionB.toString());
     return this.http.get<HistoryEntryVersionDto>(url, { params: params });
+  }
+
+  public compareConfigs(instanceGroupName: string, instanceId: string, configA: InstanceConfigurationDto, configB: InstanceConfigurationDto): Observable<HistoryEntryVersionDto> {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceId) + '/history-compare-config';
+    const dto:HistoryCompareDto = cloneDeep(EMPTY_HISTORY_COMPARE);
+    dto.configA = configA;
+    dto.configB = configB;
+    return this.http.post<HistoryEntryVersionDto>(url, dto);
   }
 
   public getInstanceAttributes(instanceGroupName: string, instanceId: string): Observable<CustomAttributesRecord> {

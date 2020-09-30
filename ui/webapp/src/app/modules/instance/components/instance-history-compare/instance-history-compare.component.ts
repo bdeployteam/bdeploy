@@ -1,7 +1,8 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Observable } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 import { HistoryEntryVersionDto } from 'src/app/models/gen.dtos';
-import { InstanceService } from '../../services/instance.service';
 
 @Component({
   selector: 'app-instance-history-compare',
@@ -9,43 +10,21 @@ import { InstanceService } from '../../services/instance.service';
   styleUrls: ['./instance-history-compare.component.css'],
 })
 export class InstanceHistoryCompareComponent implements OnInit {
-  instanceService: InstanceService;
-  instanceGroup: string;
-  instanceId: string;
-  compareVersionA: string;
-  compareVersionB: string;
-
+  promise: Observable<HistoryEntryVersionDto>;
   result: HistoryEntryVersionDto;
+  title: string;
+
+  loading = false;
 
   constructor(@Inject(MAT_DIALOG_DATA) public data) {
-    this.instanceService = data[0];
-    this.instanceGroup = data[1];
-    this.instanceId = data[2];
-    this.compareVersionA = data[3][0];
-    this.compareVersionB = data[3][1];
-
-    // always make sure that the lower version is first...
-    let a = Number(this.compareVersionA);
-    let b = Number(this.compareVersionB);
-
-    if (a > b) {
-      [a, b] = [b, a];
-    }
-
-    this.compareVersionA = a.toString();
-    this.compareVersionB = b.toString();
+    this.promise = data[0];
+    this.title = data[1];
   }
 
-  ngOnInit(): void {
-    this.instanceService
-      .getVersionComparison(
-        this.instanceGroup,
-        this.instanceId,
-        this.compareVersionA,
-        this.compareVersionB
-      )
-      .subscribe((ret) => {
-        this.result = ret;
-      });
+  ngOnInit() {
+    this.loading = true;
+    this.promise.pipe(finalize(() => (this.loading = false))).subscribe((ret) => {
+      this.result = ret;
+    });
   }
 }
