@@ -193,4 +193,11 @@ public class ManifestDatabase extends LockableDatabase {
         }
     }
 
+    /**
+     * Invalidates all cached data.
+     */
+    public void invalidateCaches() {
+        this.manifestCache.invalidateAll();
+    }
+
 }

@@ -513,6 +513,13 @@ public class ObjectManager {
     }
 
     /**
+     * Invalidates all cached data.
+     */
+    public void invalidateCaches() {
+        this.objectCache.invalidateAll();
+    }
+
+    /**
      * Used for modifying operations on the DB.
      */
     @FunctionalInterface

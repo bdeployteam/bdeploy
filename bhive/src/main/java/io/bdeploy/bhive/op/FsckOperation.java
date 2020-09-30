@@ -25,6 +25,9 @@ public class FsckOperation extends BHive.Operation<List<ElementView>> {
 
     @Override
     public List<ElementView> call() throws Exception {
+        getObjectManager().invalidateCaches();
+        getManifestDatabase().invalidateCaches();
+
         try (Activity activity = getActivityReporter().start("Checking manifests...", -1)) {
             if (manifests.isEmpty()) {
                 SortedSet<Manifest.Key> localManifests = execute(new ManifestListOperation());
@@ -48,6 +51,9 @@ public class FsckOperation extends BHive.Operation<List<ElementView>> {
             problematic.addAll(execute(objCheck));
 
             return problematic;
+        } finally {
+            getObjectManager().invalidateCaches();
+            getManifestDatabase().invalidateCaches();
         }
     }
 
