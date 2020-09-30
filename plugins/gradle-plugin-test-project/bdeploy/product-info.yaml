@@ -1,0 +1,9 @@
+name: Test Product
+product: io.bdeploy/test
+vendor: BDeploy Team
+
+applications:
+  - test
+
+configTemplates: config
+versionFile: product-version.yaml
