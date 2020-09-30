@@ -19,7 +19,7 @@ repositories {
     jcenter()
 }
 
-version = "3.2.0"
+version = "3.1.1"
 group = "io.bdeploy"
 
 dependencies {
@@ -38,6 +38,8 @@ gradlePlugin {
         bdeploy {
             id = 'io.bdeploy.gradle.plugin'
             implementationClass = 'io.bdeploy.gradle.BDeployGradlePlugin'
+            displayName = "BDeploy Gradle plugin"
+            description = 'Plugin which builds BDeploy products from your applications'
         }
     }
 }
@@ -45,12 +47,10 @@ gradlePlugin {
 pluginBundle {
     website = 'https://bdeploy.io/'
     vcsUrl = 'https://github.com/bdeployteam/bdeploy'
-    description = 'Plugin which builds BDeploy products for your applications'
     tags = ['BDeploy', 'deployment', 'application', 'product']
 
     plugins {
         bdeploy {
-            displayName = "BDeploy Gradle plugin"
         }
     }
 }
