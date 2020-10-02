@@ -543,6 +543,132 @@ Once you have a `product-info.yaml` with it's `product-version.yaml` and all the
 * Use `bdeploy product` to import the product by specifying a local *BHive* and the `product-info.yaml` to import from.
 * Use `bhive push` to push the resulting *Product Manifest* from the local *BHive* to an *Instance Group* on a remote *BDeploy* server.
 
+==== Via Gradle
+
+*BDeploy* provides a https://plugins.gradle.org/plugin/io.bdeploy.gradle.plugin[*Gradle* plugin]. This plugin can be used to build a product out of your application.
+
+Given a sample Java application which has been created from the default gradle template using `gradle init`, these are the changes you need to build a *BDeploy* product for this single application. For this demo, the application is named `test`.
+
+[NOTE]
+Add the below code to your existing `build.gradle`
+
+`build.gradle`
+[source,groovy]
+----
+plugins {
+  ...
+  id 'io.bdeploy.gradle.plugin' version '3.1.1-1' <1>
+}
+
+version = "1.0.0-SNAPSHOT" <2>
+
+ext { <3>
+  buildDate = new Date().format('yyyyMMddHHmm')
+  buildVersion = project.version.replaceAll('SNAPSHOT', buildDate)
+}
+
+task buildProduct(type: io.bdeploy.gradle.BDeployProductTask, dependsOn: installDist) { <4>
+  product {
+    version = project.ext.buildVersion
+    productInfo = file('bdeploy/product-info.yaml')
+
+    applications {
+      test {
+        yaml = new File(installDist.destinationDir, 'app-info.yaml')
+      }
+    }
+
+    labels.put('buildDate', project.ext.buildDate)
+  }
+}
+
+task zipProduct(type: io.bdeploy.gradle.BDeployZipTask, dependsOn: buildProduct) { <5>
+  of buildProduct
+  output = new File(buildDir, "product-" + project.ext.buildVersion + ".zip");
+}
+
+
+task pushProduct(type: io.bdeploy.gradle.BDeployPushTask, dependsOn: buildProduct) { <6>
+  of buildProduct
+
+  target.servers {
+    if(project.hasProperty('server')) {
+      myServer { <7>
+        uri = project.getProperty('server')
+        token = project.getProperty('token')
+        instanceGroup = project.getProperty('group')
+      }
+    }
+  }
+}
+
+...
+----
+
+<1> Applies the plugin *BDeploy* gradle plugin.
+<2> Sets the project version. *Gradle* does not strictly require a version, and uses 'unspecified' as default. *BDeploy* requires _some_ sort of version, and setting it for the whole project is good practice.
+<3> Calculate a build date, which will be substituted instead of the `SNAPSHOT` in the version. This is optional, you could just plain use the version set. The actual `buildVersion` used later when building the product is derived from the project version and the `buildDate`.
+<4> This task will actually build the product with the configured version. The actual data about the product is loaded from `bdeploy/product-info.yaml`, which we will create in a second. Note that this task depends on `installDist`, which will unpack the binary distribution of the application in this project into a folder, so *BDeploy* can import the individual files. Depending on the type of application and the way it is built, there might be different ways to achieve this.
+<5> If `buildProduct` built a product, this task will package it as a ZIP file. Note that a ZIP will always contain _all of_ the product, whereas `pushProduct` can push only required deltas which are not present on the target server.
+<6> The `pushProduct` task can push required deltas to one or more configured target servers. When calling this task, you need to set according project properties, e.g. using `-Pserver=https://server:7701/api` or in `~/.gradle/gradle.properties`.
+<7> Multiple target servers can be specified in the `target.servers` section. The plugin will push to each of them.
+
+Next we need the required descriptors for the product and the application. For this sample, the information will be the bare minimum, please see `<<_app_info_yaml, app-info.yaml>>` and `<<_product_info_yaml, product-info.yaml>>` for all supported content.
+
+Lets start off with the `<<_app_info_yaml, app-info.yaml>>`, which describes the `test` application. 
+
+[NOTE]
+This file *must* be part of the binary distribution of an application and reside in its root directory. To achieve this, the most simple way (using the gradle `application` plugin) is to put the file in the subdirectory `src/main/dist` in the project folder.
+
+`src/main/dist/app-inf.yaml`
+[source,yaml]
+----
+name: Test Application
+
+supportedOperatingSystems: <1>
+  - LINUX
+  - WINDOWS
+
+startCommand:
+  launcherPath: "{{M:SELF}}/bin/test{{WINDOWS:.bat}}" <2>
+----
+
+<1> By default, the *BDeploy* plugin will make this application available for *all* the supported platforms. You can configure a _different_ set of Operating Systems to build for in the `test` application configuration in `build.gradle`.
+<2> This demo `app-info.yaml` only defines the path to the launcher, which for this demo project (named `test`) is `bin/test` on `LINUX`, and `bin/test.bat` on `WINDOWS`.
+
+Finally, we need a `<<_product_info_yaml, product-info.yaml>>` describing the product itself. We'll put this file into a `bdeploy` subfolder. This is not required, it can reside anywhere in the project. You just need to adapt the path to it in the `build.gradle`.
+
+[NOTE]
+The reason why you want to put this file into a separate folder is because it allows to reference various other files by relative path. Those files (and folders) must the reside next to the `<<_product_info_yaml, product-info.yaml>>`. Over time this can grow, and may clutter your source folders if you do not separate it.
+
+`bdeploy/product-info.yaml`
+[source,yaml]
+----
+name: Test Product
+product: io.bdeploy/test <1>
+vendor: BDeploy Team
+
+applications:
+  - test <2>
+
+versionFile: product-version.yaml <3>
+----
+
+<1> This is the unique ID of the product. This is basically a 'primary key' and should not change over time.
+<2> The `<<_product_info_yaml, product-info.yaml>>` needs to list included applications. These applications also need to be available from the `product-version.yaml`.
+<3> The `versionFile` parameter *must* be set. If the relative path given here does *not* exist, the *BDeploy* *Gradle* plugin will generate this file for you, using the given version and applications. Otherwise you can provide this file and have more manual control over applications. In case the plugin generates the file for you, it will be deleted right after the build.
+
+That's all that is required to build a product. You can now run `./gradlew zipProduct` on the CLI to try it out. The result will be a `build/product-1.0.0-XXX.zip` where `XXX` is the `buildDate` we set previously. The content of the ZIP file is a *BHive*, which is the internal data format used by *BDeploy*. You can upload this product to any *BDeploy* server using its Web UI.
+
+[NOTE]
+The `build` folder also contains the *BHive* in unzipped form in the `build/productBHive` folder. This folder is temporary but will hold all product versions built since the last `./gradlew clean`. You can use this *BHive* for manual pushing.
+
+[NOTE]
+The `pushProduct` task will do the same thing (build the product) but then push it to a target server. For this, you need to specify the `server`, `token` and `instanceGroup` project properties to match your setup.
+
+[WARNING]
+Using `./gradlew clean buildProduct` you can build the *same* product version over and over again. However once pushed to a remote server, the same product version *must not* be reused. If you try to build and push the *same* version more than once, the server will silently ignore your attempt to push, as it assumes that it already has all the content (it has a product with this version already, and all artifacts are assumed to be immutable in *BDeploy*).
+
 ==== Via Eclipse TEA
 
 *BDeploy* provides integration into https://www.eclipse.org/tea/[Eclipse TEA]. Using this integration, you can easily export *Eclipse RCP* based products as *Applications* and bundle them into a custom *Product*.

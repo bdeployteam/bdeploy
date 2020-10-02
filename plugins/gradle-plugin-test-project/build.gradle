@@ -52,6 +52,12 @@ test {
 }
 
 task buildProduct(type: io.bdeploy.gradle.BDeployProductTask, dependsOn: installDist) {
+    if(project.hasProperty('token')) {
+        repositoryServer {
+            uri = 'https://localhost:7701/api'
+            token = project.getProperty('token')
+        }
+    }
     product {
         version = project.ext.buildVersion
         productInfo = file('bdeploy/product-info.yaml')
@@ -75,10 +81,21 @@ task zipProduct(type: io.bdeploy.gradle.BDeployZipTask, dependsOn: buildProduct)
 task pushProduct(type: io.bdeploy.gradle.BDeployPushTask, dependsOn: buildProduct) {
     of buildProduct
 
-    target {
-        uri = 'https://localhost:7701/api'
-        token = project.getProperty('token')
-        instanceGroup = 'X'
+    target.servers {
+            if(project.hasProperty('token')) {
+                localhost {
+                    uri = 'https://localhost:7701/api'
+                    token = project.getProperty('token')
+                    instanceGroup = project.getProperty('instanceGroup')
+                }
+            }
+            if(project.hasProperty('centralToken')) {
+                central {
+                    uri = 'https://localhost:7705/api'
+                    token = project.getProperty('centralToken')
+                    instanceGroup = project.getProperty('centralInstanceGroup')
+                }
+            }
     }
 }
 

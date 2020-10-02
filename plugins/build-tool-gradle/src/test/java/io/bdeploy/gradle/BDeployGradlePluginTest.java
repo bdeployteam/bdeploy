@@ -3,11 +3,9 @@
  */
 package io.bdeploy.gradle;
 
-import org.gradle.testfixtures.ProjectBuilder;
 import org.gradle.api.Project;
-import org.gradle.api.internal.plugins.PluginApplicationException;
+import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * A simple unit test for the 'io.bdeploy.gradle.greeting' plugin.

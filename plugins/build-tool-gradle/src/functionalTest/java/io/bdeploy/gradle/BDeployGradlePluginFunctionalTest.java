@@ -5,9 +5,7 @@ package io.bdeploy.gradle;
 
 import static org.junit.Assert.assertTrue;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
@@ -66,20 +64,7 @@ public class BDeployGradlePluginFunctionalTest {
         BuildResult result = run(projectDir, "testTask", "--info", "-Ptoken=ABCDEFG");
         assertTrue(result.getOutput().contains("io.bdeploy/test"));
         assertTrue(result.getOutput().contains("2.3.4"));
-        
-        // visual test :)
-        catFile(new File(projectDir, "build/product-version.yaml"));
     }
-
-    private void catFile(File file) throws IOException {
-    	System.out.println(file);
-		try(BufferedReader rdr = new BufferedReader(new FileReader(file))) {
-			String line = null;
-			while((line = rdr.readLine()) != null) {
-				System.out.println(" >> " + line);
-			}
-		}
-	}
 
 	private void writeString(File file, String... lines) throws IOException {
         try (Writer writer = new FileWriter(file)) {

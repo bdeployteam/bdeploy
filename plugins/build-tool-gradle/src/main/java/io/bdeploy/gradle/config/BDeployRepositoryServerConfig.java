@@ -6,11 +6,10 @@ import org.gradle.api.tasks.Optional;
 /**
  * Configures a source or target BDeploy server.
  */
-public class BDeployServerConfig {
+public class BDeployRepositoryServerConfig {
 
 	private String uri;
 	private String token;
-	private String instanceGroup;
 
 	@Optional
 	@Input
@@ -30,16 +29,6 @@ public class BDeployServerConfig {
 	
 	public void setToken(String token) {
 		this.token = token;
-	}
-	
-	@Optional
-	@Input
-	public String getInstanceGroup() {
-		return instanceGroup;
-	}
-	
-	public void setInstanceGroup(String instanceGroup) {
-		this.instanceGroup = instanceGroup;
 	}
 	
 }

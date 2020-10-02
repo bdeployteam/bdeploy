@@ -7,3 +7,5 @@ supportedOperatingSystems:
 startCommand:
   launcherPath: "{{M:SELF}}/bin/gradle-plugin-test-project{{WINDOWS:.bat}}"
 
+#runtimeDependencies:
+#  - external/software:v1.0.0

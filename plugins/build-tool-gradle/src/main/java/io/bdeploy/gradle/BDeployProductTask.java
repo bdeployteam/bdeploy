@@ -36,7 +36,7 @@ import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
-import io.bdeploy.gradle.config.BDeployServerConfig;
+import io.bdeploy.gradle.config.BDeployRepositoryServerConfig;
 import io.bdeploy.gradle.extensions.ApplicationExtension;
 import io.bdeploy.gradle.extensions.BDeployProductExtension;
 
@@ -46,10 +46,9 @@ import io.bdeploy.gradle.extensions.BDeployProductExtension;
  */
 public class BDeployProductTask extends DefaultTask {
 
-	private static final String PRODUCT_VERSION_YAML = "product-version.yaml";
 	private static final Logger log = LoggerFactory.getLogger(BDeployProductTask.class);
 	
-	private BDeployServerConfig repositoryServer = new BDeployServerConfig();
+	private BDeployRepositoryServerConfig repositoryServer = new BDeployRepositoryServerConfig();
 	private final DirectoryProperty localBHive;
 	private boolean dryRun = false;
 	private Key key;
@@ -67,7 +66,7 @@ public class BDeployProductTask extends DefaultTask {
 	
 	@TaskAction
 	public void perform() throws IOException {
-		ActivityReporter reporter = new ActivityReporter.Null();
+		ActivityReporter reporter = getProject().hasProperty("verbose") ? new ActivityReporter.Stream(System.out) : new ActivityReporter.Null();
 		DependencyFetcher fetcher = new LocalDependencyFetcher();
 		
 		// apply from extension if set, but prefer local configuration.
@@ -85,7 +84,6 @@ public class BDeployProductTask extends DefaultTask {
 			throw new IllegalArgumentException("product-info.yaml is not set or does not exist: " + prodInfoYaml);
 		}
 		
-		File pvdFile = new File(prodInfoYaml.getParentFile(), PRODUCT_VERSION_YAML);
 		Path prodInfoLocation = prodInfoYaml.getParentFile().toPath();
 		
 		ProductVersionDescriptor pvd = new ProductVersionDescriptor();
@@ -118,24 +116,34 @@ public class BDeployProductTask extends DefaultTask {
 			pvd.labels.put(label.getKey(), label.getValue());
 		}
 		
+		ProductDescriptor pd = readYaml(prodInfoYaml, ProductDescriptor.class);
+		if(pd.versionFile == null) {
+			throw new IllegalStateException("The " + prodInfoYaml + " must specify a 'versionFile' (which will be generated if it does not exist)");
+		}
+		
+		File pvdFile = new File(prodInfoYaml.getParentFile(), pd.versionFile);
+		
+		log.info(" :: Repository Server: {}", repositoryServer.getUri());
+		log.info(" :: Product: {}", pd.product);
+		log.info(" :: Product Version: {}", version);
+		log.info(" :: Local BHive: {}", hive);
+		
+		if(dryRun) {
+			System.out.println(" >> DRY-RUN - Aborting");
+			return;
+		}
+		
+		boolean delete = false;
 		try {
-			try(OutputStream os = new FileOutputStream(pvdFile)) {
-				os.write(StorageHelper.toRawYamlBytes(pvd));
-			}
-			
-			ProductDescriptor pd = readYaml(prodInfoYaml, ProductDescriptor.class);
-			if(pd.versionFile == null || !pd.versionFile.equals(PRODUCT_VERSION_YAML)) {
-				throw new IllegalStateException("The " + prodInfoYaml + " must contain 'versionFile=" + PRODUCT_VERSION_YAML +"' (this file is generated)");
-			}
-			
-			log.info(" :: Repository Server: {}", repositoryServer.getUri());
-			log.info(" :: Product: {}", pd.product);
-			log.info(" :: Product Version: {}", version);
-			log.info(" :: Local BHive: {}", hive);
-			
-			if(dryRun) {
-				System.out.println(" >> DRY-RUN - Aborting");
-				return;
+			if(pvdFile.exists()) {
+				System.out.println("Using existing version descriptor " + pd.versionFile);
+			} else {
+				pvdFile.getParentFile().mkdirs();
+				
+				delete = true;
+				try(OutputStream os = new FileOutputStream(pvdFile)) {
+					os.write(StorageHelper.toRawYamlBytes(pvd));
+				}
 			}
 			
 			try(BHive localHive = new BHive(hive.toURI(), reporter)) {
@@ -143,7 +151,9 @@ public class BDeployProductTask extends DefaultTask {
 				System.out.println(" >> Imported " + key);
 			}
 		} finally {
-			pvdFile.delete();
+			if(delete) {
+				pvdFile.delete();
+			}
 		}
 	}
 	
@@ -159,11 +169,11 @@ public class BDeployProductTask extends DefaultTask {
 	 * @return the serve which is used to resolve runtimeDependencies of the product.
 	 */
 	@Nested
-	public BDeployServerConfig getRepositoryServer() {
+	public BDeployRepositoryServerConfig getRepositoryServer() {
 		return repositoryServer;
 	}
 	
-	public void repositoryServer(Action<? super BDeployServerConfig> action) {
+	public void repositoryServer(Action<? super BDeployRepositoryServerConfig> action) {
 		action.execute(repositoryServer);
 	}
 	

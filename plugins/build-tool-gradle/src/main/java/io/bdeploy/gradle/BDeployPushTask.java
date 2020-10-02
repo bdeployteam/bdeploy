@@ -2,13 +2,11 @@ package io.bdeploy.gradle;
 
 import javax.ws.rs.core.UriBuilder;
 
-import org.gradle.api.Action;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputDirectory;
-import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.TaskAction;
 
 import io.bdeploy.bhive.BHive;
@@ -16,7 +14,8 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.RemoteService;
-import io.bdeploy.gradle.config.BDeployServerConfig;
+import io.bdeploy.gradle.extensions.BDeployServerExtension;
+import io.bdeploy.gradle.extensions.ServerExtension;
 
 /**
  * Pushes a previously built product to a specified server.
@@ -26,11 +25,11 @@ public class BDeployPushTask extends DefaultTask {
 	private BDeployProductTask productTask;
 	private DirectoryProperty localBHive;
 	private Property<Key> key;
-	private BDeployServerConfig target = new BDeployServerConfig();
 	
 	public BDeployPushTask() {
 		localBHive = getProject().getObjects().directoryProperty();
 		key = getProject().getObjects().property(Key.class);
+		getExtensions().create("target", BDeployServerExtension.class, getProject().getObjects());
 		
 		getProject().afterEvaluate(prj -> {
 			if(productTask != null) {
@@ -46,30 +45,25 @@ public class BDeployPushTask extends DefaultTask {
 	
 	@TaskAction
 	public void perform() {
-		if(target.getUri() == null || target.getToken() == null || target.getInstanceGroup() == null) {
-			throw new IllegalStateException("Set 'target.uri', 'target.token' and 'target.instanceGroup'");
+		BDeployServerExtension ext = getExtensions().getByType(BDeployServerExtension.class);
+		if(ext.getServers().isEmpty()) {
+			throw new IllegalStateException("No server configured");
 		}
 		
-		RemoteService svc = new RemoteService(UriBuilder.fromUri(target.getUri()).build(), target.getToken());
-		
-		System.out.println(" >> Pushing " + key.get() + " to " + svc.getUri());
-		
-		ActivityReporter reporter = new ActivityReporter.Null();
-    	try(BHive local = new BHive(localBHive.getAsFile().get().toURI(), reporter)) {
-    		local.execute(new PushOperation().setRemote(svc).setHiveName(target.getInstanceGroup()).addManifest(key.get()));
-    	}
-	}
-	
-	/**
-	 * @return the target server to push to.
-	 */
-	@Nested
-	public BDeployServerConfig getTarget() {
-		return target;
-	}
-	
-	public void target(Action<? super BDeployServerConfig> action) {
-		action.execute(target);
+		ActivityReporter reporter = getProject().hasProperty("verbose") ? new ActivityReporter.Stream(System.out) : new ActivityReporter.Null();
+		for(ServerExtension target : ext.getServers().getAsMap().values()) {
+			if(!target.getUri().isPresent() || !target.getToken().isPresent() || !target.getInstanceGroup().isPresent()) {
+				throw new IllegalStateException("Set '.uri', '.token' and '.instanceGroup' on " + target.getName());
+			}
+			
+			RemoteService svc = new RemoteService(UriBuilder.fromUri(target.getUri().get()).build(), target.getToken().get());
+			
+			System.out.println(" >> Pushing " + key.get() + " to " + target.getName());
+			
+	    	try(BHive local = new BHive(localBHive.getAsFile().get().toURI(), reporter)) {
+	    		local.execute(new PushOperation().setRemote(svc).setHiveName(target.getInstanceGroup().get()).addManifest(key.get()));
+	    	}
+		}
 	}
 	
 	/**
