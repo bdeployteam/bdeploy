@@ -39,7 +39,16 @@ export class CustomAttributeGroupingSelectorComponent implements OnChanges {
     }
   }
 
-  possibleValues: string[] = [];
+  get possibleValues(): string[] {
+    const r = JSON.parse(sessionStorage.getItem(this.sessionStorageBaseId + '_values'));
+    return r ? r : [];
+  }
+  set possibleValues(values: string[]) {
+    values.sort((a, b) => a ? b ? a.localeCompare(b) : -1 : 1);
+    sessionStorage.setItem(this.sessionStorageBaseId + '_values', JSON.stringify(values));
+  }
+
+
 
   get selectedValues(): string[] {
     const r = JSON.parse(sessionStorage.getItem(this.sessionStorageBaseId + '_selected'));
@@ -65,27 +74,34 @@ export class CustomAttributeGroupingSelectorComponent implements OnChanges {
     }
     const changePAV: SimpleChange = changes['possibleAttributesValuesMap'];
     if(changePAV && !changePAV.firstChange) {
-      this.updatePossibleAttributeValues();
+      // update possible values and find newly appeared values
+      const curPossible = this.findPossibleValues();
+      const newPossibleValues = curPossible.filter(p => this.possibleValues.find(v => p == v) === undefined);
+      this.possibleValues = curPossible;
+
+      const selVal = this.selectedValues;
+      // add new possible values to selection
+      selVal.push(...newPossibleValues);
       // remove disappeared values from selection
-      this.selectedValues = this.selectedValues.filter(a => this.possibleValues.find(v => a == v) !== undefined);
+      this.selectedValues = selVal.filter(a => this.possibleValues.find(v => a == v) !== undefined);
     }
   }
 
   updateAttributeSelection(attribute: string) {
     this.selectedAttribute = attribute;
-    this.updatePossibleAttributeValues();
+    this.possibleValues = this.findPossibleValues();
     this.selectAllValues();
   }
 
-  private updatePossibleAttributeValues() {
-    this.possibleValues = [];
+  private findPossibleValues(): string[] {
     if (this.selectedAttribute) {
       const values = Object.values(this.possibleAttributesValuesMap).map(ca => {
         const v = ca.attributes[this.selectedAttribute];
-        return v ? v : null;
+        return v ? v : null; // avoid undefined
       });
-      this.possibleValues = Array.from(new Set(values)).sort();
+      return Array.from(new Set(values)).sort();
     }
+    return [];
   }
 
   isValueSelected(value: string): boolean {
