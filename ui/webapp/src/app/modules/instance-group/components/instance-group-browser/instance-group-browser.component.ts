@@ -85,7 +85,7 @@ export class InstanceGroupBrowserComponent implements OnInit, OnDestroy {
       .subscribe(r => {
         this.instanceGroupList.addAll(r.instanceGroups);
         this.instanceGroupsAttributes = r.instanceGroupsAttributes;
-        this.recent = r.recent,
+        this.recent = r.recent;
         this.displayRecent.next(this.recent.length !== 0);
       });
   }

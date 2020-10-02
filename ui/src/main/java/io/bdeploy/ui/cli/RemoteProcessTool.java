@@ -145,8 +145,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
 
         for (Entry<String, ProcessStatusDto> processEntry : status.entrySet()) {
             String tag = processEntry.getValue().instanceTag;
-            Optional<InstanceConfiguration> instance = null;
-            instance = instanceInfos.computeIfAbsent(tag, k -> {
+            Optional<InstanceConfiguration> instance = instanceInfos.computeIfAbsent(tag, k -> {
                 try {
                     return Optional.of(ir.readVersion(config.uuid(), tag));
                 } catch (NotFoundException nf) {
@@ -156,7 +155,6 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                     return Optional.ofNullable(null);
                 }
             });
-
             addProcessRows(table, ir.getProcessResource(config.uuid()), processEntry.getValue(), instance, deploymentStates);
         }
 
