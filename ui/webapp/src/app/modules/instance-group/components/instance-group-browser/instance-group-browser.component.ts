@@ -52,7 +52,7 @@ export class InstanceGroupBrowserComponent implements OnInit, OnDestroy {
         return true;
       }
       const attributes: {[index: string]: string } = this.instanceGroupsAttributes[group.name].attributes;
-      if (Object.keys(attributes).find(a => attributes[a].toLowerCase().includes(text))) {
+      if (attributes && Object.keys(attributes).find(a => attributes[a] && attributes[a].toLowerCase().includes(text))) {
         return true;
       }
       return false;

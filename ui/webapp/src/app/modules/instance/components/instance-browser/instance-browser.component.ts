@@ -64,7 +64,7 @@ export class InstanceBrowserComponent implements OnInit {
         return true;
       }
       const attributes: {[index: string]: string } = this.instancesAttributes[instanceDto.instanceConfiguration.uuid].attributes;
-      if (Object.keys(attributes).find(a => attributes[a].toLowerCase().includes(text))) {
+      if (attributes && Object.keys(attributes).find(a => attributes[a] && attributes[a].toLowerCase().includes(text))) {
         return true;
       }
       return false;
