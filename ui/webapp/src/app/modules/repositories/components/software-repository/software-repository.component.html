@@ -10,7 +10,11 @@
       <mat-drawer #appsidenav mode="over" position="end" disableClose>
         <div class='drawer-wrapper'>
           <mat-toolbar class="mat-elevation-z1 fixed-toolbar">Versions for&nbsp;<strong>{{selectedSoftwarePackageName ? selectedSoftwarePackageName : 'none'}}</strong></mat-toolbar>
-          <app-software-list class='drawer-content' [softwareRepositoryName]="softwareRepositoryName" [softwareVersions]='softwarePackages.get(selectedSoftwarePackageName)' (deleted)='versionDeleted()'></app-software-list>
+          <app-software-list class='drawer-content'
+            [softwareRepositoryName]="softwareRepositoryName"
+            [softwareVersions]='getSoftwareVersions(selectedSoftwarePackageName)'
+            (deleted)='versionDeleted()'
+          ></app-software-list>
         </div>
       </mat-drawer>
 
@@ -18,17 +22,28 @@
         <div *ngIf="loading" class="loading-container">
           <mat-spinner [diameter]="48"></mat-spinner>
         </div>
-        <div *ngIf="!loading">
-          <div *ngIf="softwarePackageNames.length === 0" class="list-heading center">
-            <p>
-              <span class="material-icons headerIcon">cloud_upload</span>
-              <span class="headerText">No software packages.</span>
-            <p>
-          </div>
+        <div *ngIf="!loading && productPackageNames.length > 0">
+          <p class="list-heading">PRODUCTS:</p>
           <div class="software-repo-package-wrapper">
-            <app-software-card *ngFor="let softwarePackageName of softwarePackageNames" [softwareRepositoryName]="softwareRepositoryName" [softwarePackageName]="softwarePackageName" [softwarePackageVersions]='softwarePackages.get(softwarePackageName)' (select)="openSoftwarePackage(softwarePackageName)"></app-software-card>
+            <app-software-card *ngFor="let softwarePackageName of productPackageNames" [softwareRepositoryName]="softwareRepositoryName" [softwarePackageName]="softwarePackageName" [softwarePackageVersions]='productPackages.get(softwarePackageName)' (select)="openSoftwarePackage(softwarePackageName)"></app-software-card>
           </div>
         </div>
+        <div *ngIf="!loading && externalPackageNames.length > 0">
+          <p class="list-heading">EXTERNAL SOFTWARE:</p>
+          <div class="software-repo-package-wrapper">
+            <app-software-card *ngFor="let softwarePackageName of externalPackageNames" [softwareRepositoryName]="softwareRepositoryName" [softwarePackageName]="softwarePackageName" [softwarePackageVersions]='externalPackages.get(softwarePackageName)' (select)="openSoftwarePackage(softwarePackageName)"></app-software-card>
+          </div>
+        </div>
+
+        <p *ngIf="productPackageNames.length === 0 && externalPackageNames.length > 0" class="list-heading">NO PRODUCTS</p>
+        <p *ngIf="productPackageNames.length > 0 && externalPackageNames.length === 0" class="list-heading">NO EXTERNAL SOFTWARE</p>
+        <div *ngIf="productPackageNames.length === 0 && externalPackageNames.length === 0" class="list-heading center">
+          <p>
+            <span class="material-icons headerIcon">cloud_upload</span>
+            <span class="headerText">No software packages.</span>
+          <p>
+        </div>
+
         <button mat-fab class="add-button" (click)="openUploadDialog()" [disabled]="isReadOnly()" matTooltip="Upload Software Packages" matTooltipShowDelay="1000"><mat-icon>cloud_upload</mat-icon></button>
       </mat-drawer-content>
     </mat-drawer-container>

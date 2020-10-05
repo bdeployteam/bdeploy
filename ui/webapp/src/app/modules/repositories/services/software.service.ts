@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ManifestKey } from '../../../models/gen.dtos';
@@ -21,10 +21,13 @@ export class SoftwareService {
     private downloadService: DownloadService,
   ) {}
 
-  public listSoftwares(softwareRepositoryName: string): Observable<ManifestKey[]> {
+  public listSoftwares(softwareRepositoryName: string, listProducts: boolean, listGeneric: boolean): Observable<ManifestKey[]> {
     const url: string = this.buildSoftwareUrl(softwareRepositoryName);
+    let params = new HttpParams();
+    params = listProducts ? params.set('products', 'true') : params;
+    params = listGeneric ? params.set('generic', 'true') : params;
     this.log.debug('listSoftwares: ' + url);
-    return this.http.get<ManifestKey[]>(url);
+    return this.http.get<ManifestKey[]>(url, {params: params});
   }
 
   public getSoftwareDiskUsage(softwareRepositoryName: string, key: ManifestKey): Observable<string> {

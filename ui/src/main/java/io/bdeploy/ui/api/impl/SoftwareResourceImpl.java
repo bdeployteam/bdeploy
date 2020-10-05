@@ -20,6 +20,7 @@ import javax.ws.rs.core.UriBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.bdeploy.api.product.v1.ProductManifestBuilder;
 import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
@@ -30,6 +31,7 @@ import io.bdeploy.bhive.op.ImportOperation;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestExistsOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
+import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.ObjectListOperation;
 import io.bdeploy.bhive.op.ObjectSizeOperation;
 import io.bdeploy.common.ActivityReporter;
@@ -62,12 +64,21 @@ public class SoftwareResourceImpl implements SoftwareResource {
     }
 
     @Override
-    public List<Manifest.Key> list() {
+    public List<Manifest.Key> list(boolean products, boolean generic) {
         List<Manifest.Key> result = new ArrayList<>();
         SortedSet<Key> keySet = hive.execute(new ManifestListOperation());
         for (Manifest.Key k : keySet) {
-            if (!SoftwareRepositoryManifest.isSoftwareRepositoryManifest(k)) {
+            if (SoftwareRepositoryManifest.isSoftwareRepositoryManifest(k)) {
+                continue;
+            }
+            if (products && generic) {
                 result.add(k);
+            } else {
+                Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(k));
+                boolean isProduct = mf.getLabels().containsKey(ProductManifestBuilder.PRODUCT_LABEL);
+                if (products && isProduct || generic && !isProduct) {
+                    result.add(k);
+                }
             }
         }
         result.sort(vss.getKeyComparator(null, null));

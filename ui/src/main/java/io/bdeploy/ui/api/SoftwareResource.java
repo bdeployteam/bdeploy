@@ -25,7 +25,7 @@ import io.bdeploy.common.security.ScopedPermission.Permission;
 public interface SoftwareResource {
 
     @GET
-    public List<Manifest.Key> list();
+    public List<Manifest.Key> list(@QueryParam("products") boolean products, @QueryParam("generic") boolean generic);
 
     @GET
     @Path("/{name : .+}/diskUsage")
