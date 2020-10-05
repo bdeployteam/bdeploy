@@ -54,11 +54,11 @@
 </ng-container>
 
 <div *ngIf="!instanceGroupList.isEmpty() && !groupAttribute && (displayRecent | async)">
-    <p class="list-heading">Recently used:</p>
+    <p class="list-heading">RECENTLY USED:</p>
     <div class="recentGroup-Wrapper" >
       <app-instance-group-card class="group-card" *ngFor="let recentGroup of filterRecent(recent)" [instanceGroup]='recentGroup' (removeEvent)=removeGroup(recentGroup) [isAttachAllowed]='isAttachManagedAllowed()'></app-instance-group-card>
     </div>
-    <p class="list-heading">All Instance Groups:</p>
+    <p class="list-heading">ALL INSTANCE GROUPS:</p>
 </div>
 <div class="instanceGroup-Wrapper" *ngIf="!groupAttribute">
   <app-instance-group-card class="group-card" *ngFor="let group of instanceGroupList.filtered" [instanceGroup]='group' (removeEvent)=removeGroup(group) [isAttachAllowed]='isAttachManagedAllowed()'></app-instance-group-card>
