@@ -1,6 +1,8 @@
 package io.bdeploy.interfaces.variables;
 
+import io.bdeploy.api.deploy.v1.InstanceDeploymentInformationApi;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
+import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 
 /**
  * A variable resolver capable to resolve instance specific variables.
@@ -8,10 +10,12 @@ import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 public class InstanceVariableResolver extends PrefixResolver {
 
     private final InstanceNodeConfiguration incf;
+    private final DeploymentPathProvider paths;
 
-    public InstanceVariableResolver(InstanceNodeConfiguration incf) {
+    public InstanceVariableResolver(InstanceNodeConfiguration incf, DeploymentPathProvider paths) {
         super(Variables.INSTANCE_VALUE);
         this.incf = incf;
+        this.paths = paths;
     }
 
     @Override
@@ -27,6 +31,9 @@ public class InstanceVariableResolver extends PrefixResolver {
                 return incf.product == null ? "" : incf.product.getName();
             case "PRODUCT_TAG":
                 return incf.product == null ? "" : incf.product.getTag();
+            case "DEPLOYMENT_INFO_FILE":
+                return paths.get(SpecialDirectory.ROOT).resolve(InstanceDeploymentInformationApi.FILE_NAME).toAbsolutePath()
+                        .toString();
             default:
                 return null;
         }

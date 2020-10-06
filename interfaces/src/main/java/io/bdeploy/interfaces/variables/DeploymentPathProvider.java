@@ -13,6 +13,8 @@ import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 public class DeploymentPathProvider {
 
     public enum SpecialDirectory {
+
+        ROOT("root"),
         CONFIG("config"),
         RUNTIME("runtime"),
         BIN("bin"),
@@ -49,6 +51,8 @@ public class DeploymentPathProvider {
      */
     public Path get(SpecialDirectory dir) {
         switch (dir) {
+            case ROOT:
+                return deploymentDir;
             case DATA:
                 return deploymentDir.resolve(dir.dirName);
             case BIN:

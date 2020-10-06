@@ -612,18 +612,18 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     private Process launchApplication(ClientApplicationConfiguration clientCfg) {
         log.info("Attempting to launch application.");
         ApplicationConfiguration appCfg = clientCfg.appConfig;
+        DeploymentPathProvider pathProvider = new DeploymentPathProvider(appDir, "1");
 
         // General resolvers
         CompositeResolver resolvers = new CompositeResolver();
         resolvers.add(new ApplicationVariableResolver(appCfg));
         resolvers.add(new DelayedVariableResolver(resolvers));
-        resolvers.add(new InstanceVariableResolver(clientCfg.instanceConfig));
+        resolvers.add(new InstanceVariableResolver(clientCfg.instanceConfig, pathProvider));
         resolvers.add(new OsVariableResolver());
         resolvers.add(new EnvironmentVariableResolver());
         resolvers.add(new ParameterValueResolver(new ApplicationParameterProvider(clientCfg.instanceConfig)));
 
         // Enable resolving of path variables
-        DeploymentPathProvider pathProvider = new DeploymentPathProvider(appDir, "1");
         resolvers.add(new DeploymentPathResolver(pathProvider));
 
         // Enable resolving of manifest variables
