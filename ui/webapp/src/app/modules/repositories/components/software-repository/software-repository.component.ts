@@ -3,6 +3,8 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatDrawer } from '@angular/material/sidenav';
 import { ActivatedRoute } from '@angular/router';
+import { forkJoin } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { ManifestKey } from '../../../../models/gen.dtos';
@@ -24,8 +26,13 @@ export class SoftwareRepositoryComponent implements OnInit {
 
   public softwareRepositoryName: string = this.route.snapshot.paramMap.get('name');
 
-  public softwarePackages: Map<string, ManifestKey[]> = new Map();
-  public get softwarePackageNames(): string[] {return Array.from(this.softwarePackages.keys()); }
+  public productPackages: Map<string, ManifestKey[]> = new Map();
+  public get productPackageNames(): string[] {return Array.from(this.productPackages.keys()); }
+
+  public externalPackages: Map<string, ManifestKey[]> = new Map();
+  public get externalPackageNames(): string[] {return Array.from(this.externalPackages.keys()); }
+
+
   public selectedSoftwarePackageName: string;
 
   loading = false;
@@ -41,31 +48,45 @@ export class SoftwareRepositoryComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.loadSoftwares();
+    this.load();
   }
 
-  private loadSoftwares(): void {
-    this.softwareService.listSoftwares(this.softwareRepositoryName).subscribe(
-      manifestKeys => {
-        this.log.debug('got ' + manifestKeys.length + ' manifests');
-
-        this.softwarePackages = new Map();
-        manifestKeys.forEach(key => {
-          this.softwarePackages.set(key.name, this.softwarePackages.get(key.name) || []);
-          this.softwarePackages.get(key.name).push(key);
+  private load(): void {
+    this.loading = true;
+    forkJoin({
+      products: this.softwareService.listSoftwares(this.softwareRepositoryName, true, false),
+      external: this.softwareService.listSoftwares(this.softwareRepositoryName, false, true),
+    }).pipe(finalize(() => this.loading = false))
+      .subscribe(r => {
+        // build products map
+        this.productPackages.clear();
+        r.products.forEach(key => {
+          this.productPackages.set(key.name, this.productPackages.get(key.name) || []);
+          this.productPackages.get(key.name).push(key);
         });
-        if (this.selectedSoftwarePackageName && this.softwarePackages.get(this.selectedSoftwarePackageName) === undefined) {
+        // build external software packages map
+        this.externalPackages.clear();
+        r.external.forEach(key => {
+          this.externalPackages.set(key.name, this.externalPackages.get(key.name) || []);
+          this.externalPackages.get(key.name).push(key);
+        });
+
+        if (this.selectedSoftwarePackageName && this.productPackages.get(this.selectedSoftwarePackageName) === undefined && this.externalPackages.get(this.selectedSoftwarePackageName) === undefined) {
           this.selectedSoftwarePackageName = null;
         }
         if (this.selectedSoftwarePackageName === null) {
           this.sidenav.close();
         }
+      })
+  }
 
-    });
+  public getSoftwareVersions(name: string): ManifestKey[] {
+    const products = this.productPackages.get(name);
+    return products ? products : this.externalPackages.get(name);
   }
 
   public versionDeleted(): void {
-    this.loadSoftwares();
+    this.load();
   }
 
   public openSoftwarePackage(softwarePackageName: string): void {
@@ -80,7 +101,7 @@ export class SoftwareRepositoryComponent implements OnInit {
     config.minWidth = '650px';
     config.minHeight = '550px';
     config.data = this.softwareRepositoryName
-    this.dialog.open(SoftwareRepoFileUploadComponent,config).afterClosed().subscribe(e=>this.loadSoftwares());
+    this.dialog.open(SoftwareRepoFileUploadComponent,config).afterClosed().subscribe(e=>this.load());
   }
 
   public isReadOnly(): boolean {

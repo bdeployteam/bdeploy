@@ -93,7 +93,7 @@ public class RepoResourceTest {
         repos.create(cfg);
 
         SoftwareResource swr = repos.getSoftwareResource("demo");
-        assertTrue(swr.list().isEmpty());
+        assertTrue(swr.list(true, true).isEmpty());
 
         // create test app
         Path sw = tmp.resolve("sw");
@@ -116,7 +116,7 @@ public class RepoResourceTest {
         Response rs = target.request().post(Entity.entity(mp, mp.getMediaType()));
         assertEquals(200, rs.getStatus());
 
-        assertTrue(swr.list().contains(swKey));
+        assertTrue(swr.list(true, true).contains(swKey));
 
         String softwareDiskUsage = swr.getSoftwareDiskUsage(swKey.getName());
         assertNotNull(softwareDiskUsage);
@@ -138,7 +138,7 @@ public class RepoResourceTest {
         ContentHelper.checkDirsEqual(sw, sw2);
 
         swr.delete(swKey.getName(), swKey.getTag());
-        assertTrue(swr.list().isEmpty());
+        assertTrue(swr.list(true, true).isEmpty());
     }
 
 }
