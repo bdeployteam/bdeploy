@@ -83,7 +83,7 @@ public class InstanceNodeController {
 
         // Setup default resolvers for this node
         InstanceNodeConfiguration config = manifest.getConfiguration();
-        this.resolvers.add(new InstanceVariableResolver(config));
+        this.resolvers.add(new InstanceVariableResolver(config, paths));
         this.resolvers.add(new DelayedVariableResolver(resolvers));
         this.resolvers.add(new OsVariableResolver());
         this.resolvers.add(new EnvironmentVariableResolver());

@@ -31,14 +31,19 @@ import org.slf4j.LoggerFactory;
 import com.j256.simplemagic.ContentInfo;
 import com.j256.simplemagic.ContentInfoUtil;
 
+import io.bdeploy.api.deploy.v1.InstanceDeploymentInformationApi;
+import io.bdeploy.api.remote.v1.dto.InstanceConfigurationApi;
+import io.bdeploy.api.remote.v1.dto.InstanceConfigurationApi.InstancePurposeApi;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.ManifestExistsOperation;
+import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.dcu.InstanceNodeController;
+import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
@@ -118,6 +123,31 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
         InstanceProcessController controller = processController.getOrCreate(hive, inm);
         controller.setActiveTag(key.getTag());
         getState(inm, hive).activate(key.getTag());
+
+        // update the public descriptor
+        updateDeploymentInfoFile(toActivate.getDeploymentPathProvider(), inm);
+    }
+
+    private void updateDeploymentInfoFile(DeploymentPathProvider deploymentPathProvider, InstanceNodeManifest inm) {
+        BHive hive = root.getHive();
+        Path file = deploymentPathProvider.get(SpecialDirectory.ROOT).resolve(InstanceDeploymentInformationApi.FILE_NAME);
+
+        // instance description is not available on the node, thus we cannot provide this information here
+        InstanceDeploymentInformationApi desc = new InstanceDeploymentInformationApi();
+        InstanceNodeConfiguration cfg = inm.getConfiguration();
+        desc.instance = new InstanceConfigurationApi();
+        desc.instance.uuid = cfg.uuid;
+        desc.instance.name = cfg.name;
+        desc.instance.product = cfg.product;
+        desc.instance.purpose = cfg.purpose == null ? null : InstancePurposeApi.valueOf(cfg.purpose.name());
+
+        desc.activeInstanceVersion = getState(inm, hive).read().activeTag;
+
+        try (OutputStream os = Files.newOutputStream(file)) {
+            os.write(StorageHelper.toRawBytes(desc));
+        } catch (Exception e) {
+            log.warn("Cannot write information file to {}", file, e);
+        }
     }
 
     @Override

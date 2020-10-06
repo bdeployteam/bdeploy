@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import io.bdeploy.api.deploy.v1.InstanceDeploymentInformationApi;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
@@ -97,6 +98,14 @@ public class MinionDeployTest {
 
         master.getNamedMaster("demo").activate(instance);
         assertEquals(instance.getTag(), master.getNamedMaster("demo").getInstanceState(uuid).activeTag);
+
+        // check the deployment info file for correct content
+        Path infoFile = mr.getDeploymentDir().resolve(uuid).resolve(InstanceDeploymentInformationApi.FILE_NAME);
+        assertTrue(Files.exists(infoFile));
+
+        InstanceDeploymentInformationApi info = StorageHelper.fromPath(infoFile, InstanceDeploymentInformationApi.class);
+        assertEquals(instance.getTag(), info.activeInstanceVersion);
+        assertEquals(uuid, info.instance.uuid);
 
         /* STEP 6: run/control processes on the remote */
         master.getNamedMaster("demo").start(uuid, "app");
