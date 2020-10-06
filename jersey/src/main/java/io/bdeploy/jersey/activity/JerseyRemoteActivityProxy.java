@@ -67,7 +67,7 @@ public class JerseyRemoteActivityProxy implements NoThrowAutoCloseable {
         }
     }
 
-    private void onMessage(byte[] message) {
+    private synchronized void onMessage(byte[] message) {
         // cannot use StorageHelper -> dependency not allowed.
         ObjectMapper om = JacksonHelper.createObjectMapper(MapperType.JSON);
         List<ActivitySnapshot> activities;

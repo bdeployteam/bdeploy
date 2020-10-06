@@ -40,7 +40,7 @@ public class MinionRuntimeHistoryManager {
         return stored;
     }
 
-    public void store(MinionRuntimeHistory history) {
+    private void store(MinionRuntimeHistory history) {
         meta.write(hive, history);
     }
 }
