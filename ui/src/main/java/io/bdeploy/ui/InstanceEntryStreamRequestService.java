@@ -1,9 +1,11 @@
 package io.bdeploy.ui;
 
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 
 import org.jvnet.hk2.annotations.Service;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
@@ -11,7 +13,8 @@ import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
 @Service
 public class InstanceEntryStreamRequestService {
 
-    private final Map<String, EntryRequest> tokens = new TreeMap<>();
+    private final Cache<String, EntryRequest> tokens = CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.MINUTES)
+            .maximumSize(1_000).build();
 
     public static final class EntryRequest {
 
@@ -26,18 +29,21 @@ public class InstanceEntryStreamRequestService {
         }
     }
 
-    public String createRequest(EntryRequest rq) {
+    public synchronized String createRequest(EntryRequest rq) {
         String token;
 
         do {
             token = UuidHelper.randomId();
-        } while (tokens.putIfAbsent(token, rq) != null);
+        } while (tokens.getIfPresent(token) != null);
+
+        // manually add to the cache.
+        tokens.put(token, rq);
 
         return token;
     }
 
-    public EntryRequest consumeRequestToken(String token) {
-        EntryRequest rq = tokens.get(token);
+    public synchronized EntryRequest consumeRequestToken(String token) {
+        EntryRequest rq = tokens.getIfPresent(token);
         if (rq == null) {
             throw new IllegalArgumentException("Illegal access token");
         }

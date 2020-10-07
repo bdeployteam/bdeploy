@@ -43,7 +43,9 @@ public class ProductTransferService {
     private ActivityReporter reporter;
 
     public void initTransfer(BHive instanceGroupHive, String groupName, ProductTransferDto data) {
-        getInTransferFor(groupName).addAll(data.versionsToTransfer);
+        synchronized (inTransfer) {
+            getInTransferFor(groupName).addAll(data.versionsToTransfer);
+        }
 
         // for progress tracking.
         List<String> parentScope = jss.getScope();
@@ -57,7 +59,9 @@ public class ProductTransferService {
                 doTransfer(instanceGroupHive, groupName, data);
             }
         }, transferExec).whenComplete((r, e) -> {
-            getInTransferFor(groupName).removeAll(data.versionsToTransfer);
+            synchronized (inTransfer) {
+                getInTransferFor(groupName).removeAll(data.versionsToTransfer);
+            }
 
             if (e != null) {
                 log.error("Failed to transfer product versions", e);
@@ -107,7 +111,9 @@ public class ProductTransferService {
     }
 
     private SortedSet<ProductDto> getInTransferFor(String groupName) {
-        return inTransfer.computeIfAbsent(groupName, k -> new TreeSet<>((a, b) -> a.key.compareTo(b.key)));
+        synchronized (inTransfer) {
+            return inTransfer.computeIfAbsent(groupName, k -> new TreeSet<>((a, b) -> a.key.compareTo(b.key)));
+        }
     }
 
     public SortedSet<ProductDto> getActiveTransfers(String groupName) {

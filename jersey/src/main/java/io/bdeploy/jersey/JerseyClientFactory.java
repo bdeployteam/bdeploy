@@ -40,7 +40,6 @@ import com.ning.http.client.ws.WebSocketUpgradeHandler;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.SecurityHelper;
-import io.bdeploy.jersey.activity.JerseyClientActivityFilter;
 import io.bdeploy.jersey.activity.JerseyRemoteActivityScopeClientFilter;
 import io.bdeploy.jersey.ws.WebSocketAuthenticatingMessageListener;
 
@@ -173,7 +172,6 @@ public class JerseyClientFactory {
         builder.register(JerseyPathWriter.class);
         builder.register(new JerseyClientReporterResolver());
         builder.register(new JerseyRemoteActivityScopeClientFilter(proxyUuid::get));
-        builder.register(JerseyClientActivityFilter.class);
 
         for (Object reg : additionalRegistrations) {
             if (reg instanceof Class<?>) {
