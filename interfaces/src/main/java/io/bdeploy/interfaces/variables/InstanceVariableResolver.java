@@ -11,11 +11,13 @@ public class InstanceVariableResolver extends PrefixResolver {
 
     private final InstanceNodeConfiguration incf;
     private final DeploymentPathProvider paths;
+    private final String tag;
 
-    public InstanceVariableResolver(InstanceNodeConfiguration incf, DeploymentPathProvider paths) {
+    public InstanceVariableResolver(InstanceNodeConfiguration incf, DeploymentPathProvider paths, String tag) {
         super(Variables.INSTANCE_VALUE);
         this.incf = incf;
         this.paths = paths;
+        this.tag = tag;
     }
 
     @Override
@@ -25,6 +27,8 @@ public class InstanceVariableResolver extends PrefixResolver {
                 return incf.purpose == null ? "" : incf.purpose.name();
             case "UUID":
                 return incf.uuid;
+            case "TAG":
+                return tag;
             case "NAME":
                 return incf.name;
             case "PRODUCT_ID":

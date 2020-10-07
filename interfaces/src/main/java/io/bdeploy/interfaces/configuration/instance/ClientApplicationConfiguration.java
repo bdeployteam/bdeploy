@@ -18,6 +18,8 @@ public class ClientApplicationConfiguration {
 
     public InstanceNodeConfiguration instanceConfig;
 
+    public String activeTag;
+
     public byte[] clientSplashData;
 
     public byte[] clientImageIcon;

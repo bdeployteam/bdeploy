@@ -618,7 +618,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         CompositeResolver resolvers = new CompositeResolver();
         resolvers.add(new ApplicationVariableResolver(appCfg));
         resolvers.add(new DelayedVariableResolver(resolvers));
-        resolvers.add(new InstanceVariableResolver(clientCfg.instanceConfig, pathProvider));
+        resolvers.add(new InstanceVariableResolver(clientCfg.instanceConfig, pathProvider, clientCfg.activeTag));
         resolvers.add(new OsVariableResolver());
         resolvers.add(new EnvironmentVariableResolver());
         resolvers.add(new ParameterValueResolver(new ApplicationParameterProvider(clientCfg.instanceConfig)));

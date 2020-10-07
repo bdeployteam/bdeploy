@@ -689,6 +689,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
         InstanceManifest imf = InstanceManifest.load(hive, uuid, activeTag);
         ClientApplicationConfiguration cfg = new ClientApplicationConfiguration();
+        cfg.activeTag = activeTag;
         cfg.appConfig = imf.getApplicationConfiguration(hive, application);
         if (cfg.appConfig == null) {
             throw new WebApplicationException("Cannot find application " + application + " in instance " + uuid,
