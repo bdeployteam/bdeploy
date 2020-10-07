@@ -62,6 +62,9 @@ public class BDeployProductTask extends DefaultTask {
 				localBHive.set(prj.getLayout().getBuildDirectory().dir("productBHive"));
 			}
 		});
+		
+		// never up to date.
+		getOutputs().upToDateWhen(e -> false);
 	}
 	
 	@TaskAction

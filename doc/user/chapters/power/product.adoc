@@ -563,7 +563,7 @@ plugins {
 version = "1.0.0-SNAPSHOT" <2>
 
 ext { <3>
-  buildDate = new Date().format('yyyyMMddHHmm')
+  buildDate = new Date().format('yyyyMMddHHmmss')
   buildVersion = project.version.replaceAll('SNAPSHOT', buildDate)
 }
 
@@ -596,7 +596,7 @@ task pushProduct(type: io.bdeploy.gradle.BDeployPushTask, dependsOn: buildProduc
       myServer { <7>
         uri = project.getProperty('server')
         token = project.getProperty('token')
-        instanceGroup = project.getProperty('group')
+        instanceGroup = project.getProperty('instanceGroup')
       }
     }
   }
@@ -620,7 +620,7 @@ Lets start off with the `<<_app_info_yaml, app-info.yaml>>`, which describes the
 [NOTE]
 This file *must* be part of the binary distribution of an application and reside in its root directory. To achieve this, the most simple way (using the gradle `application` plugin) is to put the file in the subdirectory `src/main/dist` in the project folder.
 
-`src/main/dist/app-inf.yaml`
+`src/main/dist/app-info.yaml`
 [source,yaml]
 ----
 name: Test Application
@@ -633,7 +633,7 @@ startCommand:
   launcherPath: "{{M:SELF}}/bin/test{{WINDOWS:.bat}}" <2>
 ----
 
-<1> By default, the *BDeploy* plugin will make this application available for *all* the supported platforms. You can configure a _different_ set of Operating Systems to build for in the `test` application configuration in `build.gradle`.
+<1> By default, the *BDeploy* plugin will make this application available for *all* the supported platforms specified in `app-info.yaml`. If required (usually it is not) you can configure a _different_ set of Operating Systems to build for in the `test` application configuration in `build.gradle` by adding a set of operating system literals (e.g. 'WINDOWS', 'LINUX') to the `os` list of the application.
 <2> This demo `app-info.yaml` only defines the path to the launcher, which for this demo project (named `test`) is `bin/test` on `LINUX`, and `bin/test.bat` on `WINDOWS`.
 
 Finally, we need a `<<_product_info_yaml, product-info.yaml>>` describing the product itself. We'll put this file into a `bdeploy` subfolder. This is not required, it can reside anywhere in the project. You just need to adapt the path to it in the `build.gradle`.
@@ -664,7 +664,7 @@ That's all that is required to build a product. You can now run `./gradlew zipPr
 The `build` folder also contains the *BHive* in unzipped form in the `build/productBHive` folder. This folder is temporary but will hold all product versions built since the last `./gradlew clean`. You can use this *BHive* for manual pushing.
 
 [NOTE]
-The `pushProduct` task will do the same thing (build the product) but then push it to a target server. For this, you need to specify the `server`, `token` and `instanceGroup` project properties to match your setup.
+The `pushProduct` task will do the same thing (build the product) but then push it to a target server. For this, you need to specify the `server`, `token` and `instanceGroup` project properties to match your setup. You can get a token by using the `Create Token...` action on the user menu in *BDeploy*. Make sure to create a _full token pack_ for this tool to work.
 
 [WARNING]
 Using `./gradlew clean buildProduct` you can build the *same* product version over and over again. However once pushed to a remote server, the same product version *must not* be reused. If you try to build and push the *same* version more than once, the server will silently ignore your attempt to push, as it assumes that it already has all the content (it has a product with this version already, and all artifacts are assumed to be immutable in *BDeploy*).
