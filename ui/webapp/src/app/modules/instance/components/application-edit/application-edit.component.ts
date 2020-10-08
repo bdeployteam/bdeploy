@@ -1,7 +1,7 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef, ViewContainerRef } from '@angular/core';
-import { FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatButton } from '@angular/material/button';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
@@ -9,7 +9,7 @@ import { cloneDeep, isEqual } from 'lodash-es';
 import { Observable, of } from 'rxjs';
 import { CustomParameter, findFirstParameter, findLastParameter, GroupNames, LinkedParameter, NamedParameter, UnknownParameter } from '../../../../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_PARAMETER_CONFIGURATION, EMPTY_PARAMETER_DESCRIPTOR } from '../../../../models/consts';
-import { ApplicationConfiguration, ApplicationDescriptor, ApplicationStartType, CustomEditor, ParameterDescriptor, ParameterType } from '../../../../models/gen.dtos';
+import { ApplicationConfiguration, ApplicationDescriptor, ApplicationStartType, CustomEditor, ParameterConfiguration, ParameterDescriptor, ParameterType } from '../../../../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../../../../models/process.model';
 import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
 import { MessageboxService } from '../../../shared/services/messagebox.service';
@@ -105,7 +105,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
       }
     }
 
-    // // Notify if the form changes
+    // Notify if the form changes
     this.formGroup.statusChanges.subscribe(status => {
       const isValid = status === 'VALID';
       this.validationStateChanged.emit(isValid);
@@ -208,11 +208,8 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     const control = this.formGroup.controls[paramUid];
     // Numeric must be the first check as a non-numeric value
     // is provided as empty string by the browser
-    if (control.hasError('numeric')) {
-      return 'Only numeric values are allowed.';
-    }
-    if (control.hasError('required')) {
-      return 'Mandatory input required.';
+    if (control.hasError('custom')) {
+      return control.getError('custom');
     }
     return 'Unknown error';
   }
@@ -488,13 +485,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     // whether or not it is shown by default in the UI
     // NO validation of it's value will be performed.
     const type = descriptor.type;
-    if (descriptor.mandatory && type !== ParameterType.BOOLEAN) {
-      validators.push(Validators.required);
-    }
-    if (descriptor.type === ParameterType.NUMERIC || descriptor.type === ParameterType.CLIENT_PORT || descriptor.type === ParameterType.SERVER_PORT) {
-      validators.push(ParameterValidators.numeric);
-    }
-    control.setValidators(validators);
+    control.setValidators([this.fieldValidator(config, descriptor)]);
 
     // Set default value if we have a configuration
     if (type === ParameterType.BOOLEAN) {
@@ -539,6 +530,15 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
 
     control.updateValueAndValidity();
     return control;
+  }
+
+  fieldValidator(paramCfg: ParameterConfiguration, paramDesc: ParameterDescriptor): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } => {
+      const err = this.appService.validateParam(String(control.value), paramDesc);
+      if (err) {
+        return { 'custom': err };
+      }
+    };
   }
 
   meetsCondition(param: LinkedParameter): boolean {

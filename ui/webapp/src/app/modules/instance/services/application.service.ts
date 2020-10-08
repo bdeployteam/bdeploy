@@ -433,7 +433,7 @@ export class ApplicationService {
           cfg.start.parameters
         )
       ) {
-        const paraErrors = this.validateParam(paraCfg, paraDef);
+        const paraErrors = this.validateParam(paraCfg?.value, paraDef);
         if (paraErrors) {
           errors.push(paraErrors);
         }
@@ -447,7 +447,7 @@ export class ApplicationService {
       }
       for (const paraDef of desc.startCommand.parameters) {
         const paraCfg = cfg.start.parameters.find((p) => p.uid === paraDef.uid);
-        const paraErrors = this.validateParam(paraCfg, paraDef);
+        const paraErrors = this.validateParam(paraCfg?.value, paraDef);
         if (paraErrors) {
           errors.push(paraErrors);
         }
@@ -468,21 +468,26 @@ export class ApplicationService {
    * Validates this parameter against its definition
    */
   public validateParam(
-    paraCfg: ParameterConfiguration,
+    value: string,
     paraDef: ParameterDescriptor
   ) {
     // check if a mandatory parameter is missing
-    if (paraDef.mandatory && (!paraCfg || !paraCfg.value)) {
+    if (paraDef.mandatory && (!value)) {
       return (
         paraDef.name + ': Parameter is mandatory but no value is configured.'
       );
     }
-    if (!paraCfg) {
+    if (!value) {
       return;
     }
 
+    if ((value.indexOf('{{') >= 0 || value.indexOf('}}') >= 0)) {
+      if (value.indexOf(':') < 0 || value.indexOf('{{') < 0 || value.indexOf('}}') < 0) {
+        return paraDef.name + ': Invalid substitution';
+      }
+    }
+
     // Validate value against the type
-    const value = paraCfg.value;
     switch (paraDef.type) {
       case ParameterType.BOOLEAN: {
         if (value === 'true' || value === 'false') {
@@ -507,6 +512,13 @@ export class ApplicationService {
           ': Invalid value configured. Expecting a number but was ' +
           value
         );
+      }
+      case ParameterType.URL: {
+        try {
+          const _ = new URL(value);
+        } catch (err) {
+          return paraDef.name + ': Not a valid URL: ' + value;
+        }
       }
     }
   }

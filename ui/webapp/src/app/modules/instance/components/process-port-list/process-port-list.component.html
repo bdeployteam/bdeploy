@@ -8,7 +8,10 @@
   <span class='spacer'></span>
   <button mat-icon-button (click)='reload()'><mat-icon>refresh</mat-icon></button>
 </div>
-<div class='port-list'>
+<div *ngIf='!data?.ports?.length'>
+  No ports are configured for this application.
+</div>
+<div *ngIf='data?.ports?.length' class='port-list'>
   <strong>Description</strong>
   <strong>Port</strong>
   <strong>State</strong>

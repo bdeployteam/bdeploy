@@ -1,15 +1,16 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
-import { ParameterConfiguration, ParameterDescriptor } from 'src/app/models/gen.dtos';
+import { ApplicationConfiguration, ApplicationDescriptor, ParameterConfiguration, ParameterDescriptor, ParameterType } from 'src/app/models/gen.dtos';
 
 export interface ShiftableParameter {
   applicationUid: string;
   applicationName: string;
   cfg: ParameterConfiguration;
   desc: ParameterDescriptor;
-  client: boolean;
   selected: boolean;
+  appCfg: ApplicationConfiguration;
+  appDesc: ApplicationDescriptor;
 }
 
 @Component({
@@ -49,13 +50,31 @@ export class InstanceShiftPortsComponent implements OnInit {
   }
 
   getTargetValue(row: ShiftableParameter, amount: any) {
-    return (Number(row.cfg.value) + Number(amount)).toString();
+    return (Number(this.getPortValue(row)) + Number(amount)).toString();
+  }
+
+  getPortValue(row: ShiftableParameter) {
+    if (row.desc.type === ParameterType.URL) {
+      // the instance-edit-ports component will give us only parameters where this is valid!
+      return new URL(row.cfg.value).port;
+    }
+    return row.cfg.value;
   }
 
   getTargetClass(row: ShiftableParameter, amount: any) {
     const num = Number(this.getTargetValue(row, amount));
-    if(num < 0 || num > 65535) {
+    if (num < 0 || num > 65535) {
       return 'port-target-bad';
+    }
+  }
+
+  getIcon(row: ShiftableParameter) {
+    if (row.desc.type === ParameterType.CLIENT_PORT) {
+      return 'computer';
+    } else if (row.desc.type === ParameterType.SERVER_PORT) {
+      return 'dns';
+    } else if (row.desc.type === ParameterType.URL) {
+      return 'public';
     }
   }
 

@@ -7,6 +7,7 @@
 .node-card-header {
   padding: 10px !important;
   border-radius: 5px 5px 0px 0px;
+  height: 24px;
 }
 
 .node-card-content {
@@ -16,6 +17,10 @@
 .node-card-subtitle {
   margin-top: -11px !important;
   margin-bottom: 0;
+}
+
+.instance-node-avatar-container {
+  width: 24px;
 }
 
 .port-parameters {
@@ -33,6 +38,7 @@
 .port-parameter {
   display: flex;
   flex-direction: row;
+  align-items: center;
 }
 
 .port-editor {
@@ -63,4 +69,8 @@
   font-size: 1.5em;
   margin-left: 15px;
   vertical-align: middle;
+}
+
+.icons {
+  margin-left: 5px;
 }

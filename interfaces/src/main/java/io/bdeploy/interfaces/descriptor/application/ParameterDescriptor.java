@@ -21,7 +21,8 @@ public class ParameterDescriptor implements Comparable<ParameterDescriptor> {
         BOOLEAN,
         PASSWORD,
         SERVER_PORT,
-        CLIENT_PORT
+        CLIENT_PORT,
+        URL
     }
 
     /**

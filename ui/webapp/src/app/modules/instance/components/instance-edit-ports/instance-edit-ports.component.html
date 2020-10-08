@@ -18,7 +18,7 @@
         <mat-card *ngIf='hasPorts(app, node)' class="node-card instance-node-card-theme">
           <mat-card-header class='node-card-header instance-node-card-header-theme'>
             <div mat-card-avatar class='instance-node-avatar-container'>
-              <mat-icon class='instance-node-avatar'>layers</mat-icon>
+              <mat-icon class="instance-node-avatar" [svgIcon]='getAppOsName(app)' title="Operating System: {{getAppOsName(app)}}"></mat-icon>
             </div>
             <mat-card-title>{{ app.name }}</mat-card-title>
           </mat-card-header>
@@ -26,8 +26,9 @@
             <div class='port-parameters'>
               <div class='port-parameter' *ngFor='let param of getPortParams(app)'>
                 <mat-form-field class='port-editor'>
-                  <input matInput appValidPort #editor (input)='onChange(param, editor.value)' [ngModel]='param.paramCfg.value' name="{{app.uid}}-{{param.paramCfg.uid}}" placeholder="{{param.paramDesc.name}}" type="number"/>
+                  <input matInput appValidPort #editor (input)='onChange(param, editor.value)' [ngModel]='getPortValue(param)' name="{{app.uid}}-{{param.paramCfg.uid}}" placeholder="{{param.paramDesc.name}}" type="number"/>
                 </mat-form-field>
+                <mat-icon *ngIf='param.paramDesc.global' class="icons">public</mat-icon>
               </div>
             </div>
           </mat-card-content>

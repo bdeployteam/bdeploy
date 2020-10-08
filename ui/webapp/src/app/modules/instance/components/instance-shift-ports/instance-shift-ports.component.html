@@ -33,7 +33,7 @@
       <ng-container matColumnDef="type">
         <th scope="col" mat-header-cell *matHeaderCellDef>Type</th>
         <td mat-cell *matCellDef="let row">
-          <mat-icon>{{ row.client ? 'computer' : 'dns'}}</mat-icon>
+          <mat-icon>{{ getIcon(row) }}</mat-icon>
         </td>
       </ng-container>
 
@@ -54,7 +54,7 @@
       <ng-container matColumnDef="current">
         <th scope="col" mat-header-cell *matHeaderCellDef>Current</th>
         <td mat-cell *matCellDef="let row" [matTooltip]='row.desc.longDescription'>
-          {{ row.cfg.value }}
+          {{ getPortValue(row) }}
         </td>
       </ng-container>
 

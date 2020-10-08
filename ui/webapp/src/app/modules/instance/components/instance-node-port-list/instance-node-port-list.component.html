@@ -9,7 +9,11 @@
     <button mat-icon-button (click)='reload()'><mat-icon>refresh</mat-icon></button>
   </div>
 
-  <table mat-table [dataSource]="dataSource" matSort [matSortActive]="INITIAL_SORT_COLUMN" [matSortDirection]="INITIAL_SORT_DIRECTION">
+  <div *ngIf='!dataSource.data.length'>
+    No ports are configured on this node.
+  </div>
+
+  <table *ngIf='dataSource.data.length' mat-table [dataSource]="dataSource" matSort [matSortActive]="INITIAL_SORT_COLUMN" [matSortDirection]="INITIAL_SORT_DIRECTION">
     <caption style="display: none;">Server Ports</caption>
 
     <ng-container matColumnDef="instance">
