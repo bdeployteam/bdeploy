@@ -183,6 +183,13 @@ public class ObjectManager {
             }
 
             Path tempLocation = location.getParent().resolve(location.getFileName().toString() + ".xtmp");
+
+            // unfortunately there is no better way to detect a 'ZipPath' as the class is not accessible directly.
+            if (tempLocation.getClass().getSimpleName().contains("Zip")) {
+                // for ZIPs, don't use the temp location.
+                tempLocation = location;
+            }
+
             if (Files.exists(tempLocation)) {
                 PathHelper.deleteRecursive(tempLocation);
             }
