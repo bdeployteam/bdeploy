@@ -377,13 +377,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             Manifest.Key igKey = igm.getKey();
             String attributesMetaName = igm.getAttributes(hive).getMetaManifest().getMetaName();
             SortedSet<Key> metaManifests = hive.execute(new ManifestListOperation().setManifestName(attributesMetaName));
-            try (RemoteBHive rbh = RemoteBHive.forService(svc, groupName, reporter)) {
-                // ALWAYS delete all instance group information on the target - we win!
-                // otherwise the target may have a manifest with a higher tag number and win.
-                SortedMap<Key, ObjectId> keys = rbh.getManifestInventory(igKey.getName());
-                // maybe not optimal to do a call per manifest...
-                keys.keySet().forEach(rbh::removeManifest);
-            }
+
             PushOperation push = new PushOperation().addManifest(igKey).setRemote(svc).setHiveName(groupName);
             metaManifests.forEach(push::addManifest);
             hive.execute(push);
