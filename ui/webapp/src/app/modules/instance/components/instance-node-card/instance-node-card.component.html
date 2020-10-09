@@ -77,31 +77,5 @@
         [isInstanceDirty]="isInstanceDirty">
       </app-application-configuration-card>
     </div>
-
-    <div *ngIf='!isClientApplicationsNode() && node.foreignNodeConfigurations && node.foreignNodeConfigurations.length > 0'>
-      <mat-expansion-panel class='foreign-panel'>
-        <mat-expansion-panel-header>
-          <mat-panel-title class='foreign-panel-header'>
-            Other instances: {{getForeignInstanceText()}}
-          </mat-panel-title>
-        </mat-expansion-panel-header>
-        <div *ngFor="let nodeCfg of node.foreignNodeConfigurations">
-          <div class="foreign-header">
-            Foreign Applications of Instance
-            <a [routerLink]="['/instance/overview', instanceGroupName, nodeCfg.uuid]">{{ nodeCfg.name }}</a>
-          </div>
-          <div class="app-foreign-card-container">
-            <div *ngFor="let cfg of nodeCfg.applications">
-              <app-application-configuration-card
-                class="process-card foreign-process-card"
-                [instanceGroupName]="instanceGroupName"
-                [isForeign]="'true'"
-                [appConfig]="cfg"
-              ></app-application-configuration-card>
-            </div>
-          </div>
-        </div>
-      </mat-expansion-panel>
-    </div>
   </mat-card-content>
 </mat-card>

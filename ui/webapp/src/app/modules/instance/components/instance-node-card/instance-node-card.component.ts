@@ -14,7 +14,7 @@ import { convert2String } from 'src/app/modules/shared/utils/version.utils';
 import { ApplicationGroup } from '../../../../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_INSTANCE_NODE_CONFIGURATION } from '../../../../models/consts';
 import { EventWithCallback } from '../../../../models/event';
-import { ApplicationConfiguration, ApplicationDto, ApplicationTemplateDescriptor, ApplicationType, InstanceNodeConfiguration, InstanceNodeConfigurationDto, MinionDto, MinionStatusDto, ProductDto } from '../../../../models/gen.dtos';
+import { ApplicationConfiguration, ApplicationDto, ApplicationTemplateDescriptor, ApplicationType, InstanceNodeConfigurationDto, MinionDto, MinionStatusDto, ProductDto } from '../../../../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../../../../models/process.model';
 import { getAppOs, updateAppOs } from '../../../shared/utils/manifest.utils';
 import { ApplicationService } from '../../services/application.service';
@@ -393,30 +393,6 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
     this.node.nodeConfiguration.name = this.processConfig.instance.name;
     this.node.nodeConfiguration.autoStart = true;
     this.nodeApps = this.node.nodeConfiguration.applications;
-  }
-
-  countForeignApps(foreign: InstanceNodeConfiguration[]): number {
-    let count = 0;
-
-    if (!foreign || foreign.length === 0) {
-      return count;
-    }
-
-    for (const x of foreign) {
-      count += x.applications.length;
-    }
-
-    return count;
-  }
-
-  getForeignInstanceText(): string {
-    const count = this.countForeignApps(this.node.foreignNodeConfigurations);
-    const appPlural = count === 1 ? '' : 's';
-    const instanceCount = this.node.foreignNodeConfigurations.length;
-    const instancePlural = instanceCount === 1 ? '' : 's';
-    const isAre = count === 1 ? 'is' : 'are';
-
-    return `${count} application${appPlural} from ${instanceCount} instance${instancePlural} ${isAre} configured for this node.`;
   }
 
   isClientApplicationsNode(): boolean {

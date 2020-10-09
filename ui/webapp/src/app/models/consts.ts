@@ -136,8 +136,7 @@ export const EMPTY_INSTANCE_NODE_CONFIGURATION: InstanceNodeConfiguration = {
 
 export const EMPTY_INSTANCE_NODE_CONFIGURATION_DTO: InstanceNodeConfigurationDto = {
   nodeName: null,
-  nodeConfiguration: null,
-  foreignNodeConfigurations: null,
+  nodeConfiguration: null
 };
 
 export const EMPTY_VERSION_DTO: InstanceVersionDto = {

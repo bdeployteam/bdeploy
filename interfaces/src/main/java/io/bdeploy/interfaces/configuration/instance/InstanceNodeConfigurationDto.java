@@ -1,9 +1,7 @@
 package io.bdeploy.interfaces.configuration.instance;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -19,9 +17,6 @@ public class InstanceNodeConfigurationDto {
 
     /** The actual configuration of the node. Not set when no configuration is assigned */
     public InstanceNodeConfiguration nodeConfiguration;
-
-    /** The list of configurations belonging to another instance */
-    public final List<InstanceNodeConfiguration> foreignNodeConfigurations = new ArrayList<>();
 
     @JsonCreator
     public InstanceNodeConfigurationDto(@JsonProperty("nodeName") String nodeName) {

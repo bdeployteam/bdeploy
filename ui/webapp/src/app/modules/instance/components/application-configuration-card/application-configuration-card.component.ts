@@ -19,7 +19,6 @@ export class ApplicationConfigurationCardComponent implements OnInit {
   @Input() public appConfig: ApplicationConfiguration;
   @Input() public activatedTag: string;
   @Input() productMissing: boolean;
-  @Input() public isForeign = false;
   @Input() public isReadonly = false;
   @Input() public isClient = false;
   @Input() public isInstanceDirty = false;
@@ -93,9 +92,6 @@ export class ApplicationConfigurationCardComponent implements OnInit {
     }
     if (this.isMissing()) {
       styles.push('app-config-missing');
-    }
-    if (this.isForeign) {
-      styles.push('app-config-foreign');
     }
     if (this.selected) {
       styles.push('app-config-selected');

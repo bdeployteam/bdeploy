@@ -22,7 +22,7 @@
       <button mat-menu-item (click)="onCopy()"><mat-icon>file_copy</mat-icon>Copy</button>
       <button mat-menu-item (click)="onDelete()" [disabled]="!authService.isScopedWrite(instanceGroupName) || isReadonly"><mat-icon>delete</mat-icon>Delete</button>
     </mat-menu>
-    <button class="option-button" mat-icon-button [matMenuTriggerFor]="appMenu" *ngIf="!isForeign" appClickStopPropagation>
+    <button class="option-button" mat-icon-button [matMenuTriggerFor]="appMenu" appClickStopPropagation>
       <mat-icon>more_vert</mat-icon>
     </button>
   </div>
@@ -34,7 +34,7 @@
       <div class="icons" *ngIf="isClient">
         <mat-icon class="icon" [svgIcon]='appOs' title="{{appOs}} Client Application"></mat-icon>
       </div>
-      <div class="icons" *ngIf="!isForeign && !isInstanceDirty" >
+      <div class="icons" *ngIf="!isInstanceDirty" >
         <app-process-status *ngIf="!isClient" [appId]="appConfig.uid" [instanceTag]="instanceVersion.key.tag" [activatedTag]="activatedTag" [outOfSyncIcon]="true" [outOfSyncText]="true"></app-process-status>
       </div>
     </div>

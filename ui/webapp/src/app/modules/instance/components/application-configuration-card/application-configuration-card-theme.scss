@@ -6,10 +6,6 @@
   $invalid-border: if($dark, mat-color($mat-red, 300), mat-color($mat-red, 200));
   $modified-border: if($dark, mat-color($mat-yellow, 300), mat-color($mat-yellow, 200));
 
-  .app-config-foreign {
-    background-color: if($dark, #424242, #ddd);
-  }
-
   .app-config-invalid {
     border-left: 10px solid $invalid-border;
   }

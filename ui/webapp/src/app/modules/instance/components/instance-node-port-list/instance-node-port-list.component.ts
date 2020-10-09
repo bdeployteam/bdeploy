@@ -43,7 +43,6 @@ export class InstanceNodePortListComponent implements OnInit, AfterViewInit {
   public INITIAL_SORT_DIRECTION = 'asc';
 
   public displayedColumns: string[] = [
-    'instance',
     'application',
     'description',
     'port',
@@ -85,14 +84,6 @@ export class InstanceNodePortListComponent implements OnInit, AfterViewInit {
           )
       );
     }
-    // ports of foreign instances
-    this.data.node.foreignNodeConfigurations.forEach((node) => {
-      observables.push(
-        this.applicationService
-          .listApplications(this.data.instanceGroup, node.product, false)
-          .pipe(map((apps) => this.collectServerPorts(node, apps)))
-      );
-    });
     if (observables.length === 0) {
       this.loading = false;
     }

@@ -89,30 +89,30 @@ public class InstanceResourceTest {
         List<InstanceNodeConfigurationDto> nodeConfigs = instanceConfig.nodeConfigDtos;
         Map<String, InstanceNodeConfigurationDto> node2NodeDto = InstanceNodeConfigurationDto.groupByNode(nodeConfigs);
         assertEquals(4, node2NodeDto.size());
-        verifyNodeDto(node2NodeDto.get("Node1"), true, 0);
-        verifyNodeDto(node2NodeDto.get("Node2"), true, 1);
-        verifyNodeDto(node2NodeDto.get("Node3"), false, 1);
-        verifyNodeDto(node2NodeDto.get(Minion.DEFAULT_NAME), false, 1);
+        verifyNodeDto(node2NodeDto.get("Node1"), true);
+        verifyNodeDto(node2NodeDto.get("Node2"), true);
+        verifyNodeDto(node2NodeDto.get("Node3"), false);
+        verifyNodeDto(node2NodeDto.get(Minion.DEFAULT_NAME), false);
 
         // Verify Instance2
         instanceConfig = instanceResource.getNodeConfigurations("Instance2", "1");
         nodeConfigs = instanceConfig.nodeConfigDtos;
         node2NodeDto = InstanceNodeConfigurationDto.groupByNode(nodeConfigs);
         assertEquals(4, node2NodeDto.size());
-        verifyNodeDto(node2NodeDto.get("Node1"), false, 1);
-        verifyNodeDto(node2NodeDto.get("Node2"), true, 1);
-        verifyNodeDto(node2NodeDto.get("Node3"), false, 1);
-        verifyNodeDto(node2NodeDto.get(Minion.DEFAULT_NAME), false, 1);
+        verifyNodeDto(node2NodeDto.get("Node1"), false);
+        verifyNodeDto(node2NodeDto.get("Node2"), true);
+        verifyNodeDto(node2NodeDto.get("Node3"), false);
+        verifyNodeDto(node2NodeDto.get(Minion.DEFAULT_NAME), false);
 
         // Verify Instance3
         instanceConfig = instanceResource.getNodeConfigurations("Instance3", "1");
         nodeConfigs = instanceConfig.nodeConfigDtos;
         node2NodeDto = InstanceNodeConfigurationDto.groupByNode(nodeConfigs);
         assertEquals(4, node2NodeDto.size());
-        verifyNodeDto(node2NodeDto.get("Node1"), false, 1);
-        verifyNodeDto(node2NodeDto.get("Node2"), false, 2);
-        verifyNodeDto(node2NodeDto.get("Node3"), true, 0);
-        verifyNodeDto(node2NodeDto.get(Minion.DEFAULT_NAME), true, 0);
+        verifyNodeDto(node2NodeDto.get("Node1"), false);
+        verifyNodeDto(node2NodeDto.get("Node2"), false);
+        verifyNodeDto(node2NodeDto.get("Node3"), true);
+        verifyNodeDto(node2NodeDto.get(Minion.DEFAULT_NAME), true);
     }
 
     @Test
@@ -151,10 +151,10 @@ public class InstanceResourceTest {
         assertEquals(4, node2Config.size()); // one for each node available
 
         // Master should not have a configuration
-        verifyNodeDto(node2Config.get(Minion.DEFAULT_NAME), false, 0);
+        verifyNodeDto(node2Config.get(Minion.DEFAULT_NAME), false);
 
         // Node1 should have a configuration
-        verifyNodeDto(node2Config.get("Node1"), true, 0);
+        verifyNodeDto(node2Config.get("Node1"), true);
 
         // Verify configuration
         InstanceNodeConfiguration node1Config = node2Config.get("Node1").nodeConfiguration;
@@ -173,7 +173,7 @@ public class InstanceResourceTest {
         node2Config = InstanceNodeConfigurationDto.groupByNode(availableNodeConfigs);
 
         // Master should not have a configuration
-        verifyNodeDto(node2Config.get(Minion.DEFAULT_NAME), false, 0);
+        verifyNodeDto(node2Config.get(Minion.DEFAULT_NAME), false);
     }
 
     /** Creates a new instance within the given group. A new node config is created for each passed node name */
@@ -203,13 +203,12 @@ public class InstanceResourceTest {
     }
 
     /** Verifies that the own configuration as well as the foreign configuration is as expected */
-    private static void verifyNodeDto(InstanceNodeConfigurationDto nodeDto, boolean hasConfig, int foreignConfigCount) {
+    private static void verifyNodeDto(InstanceNodeConfigurationDto nodeDto, boolean hasConfig) {
         if (hasConfig) {
             assertNotNull(nodeDto.nodeConfiguration);
         } else {
             assertNull(nodeDto.nodeConfiguration);
         }
-        assertEquals(nodeDto.foreignNodeConfigurations.size(), foreignConfigCount);
     }
 
     @Test

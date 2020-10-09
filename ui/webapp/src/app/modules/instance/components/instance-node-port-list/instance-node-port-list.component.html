@@ -16,11 +16,6 @@
   <table *ngIf='dataSource.data.length' mat-table [dataSource]="dataSource" matSort [matSortActive]="INITIAL_SORT_COLUMN" [matSortDirection]="INITIAL_SORT_DIRECTION">
     <caption style="display: none;">Server Ports</caption>
 
-    <ng-container matColumnDef="instance">
-      <th scope="col" mat-header-cell *matHeaderCellDef mat-sort-header>Instance</th>
-      <td mat-cell *matCellDef="let element">{{ element.instance }}</td>
-    </ng-container>
-
     <ng-container matColumnDef="application">
       <th scope="col" mat-header-cell *matHeaderCellDef mat-sort-header>Application</th>
       <td mat-cell *matCellDef="let element">{{ element.application }}</td>

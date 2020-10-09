@@ -483,16 +483,17 @@ public class InstanceResourceImpl implements InstanceResource {
 
         // Insert configuration and create nodes where we still have a configuration
         for (Key imKey : InstanceManifest.scan(hive, true)) {
-            boolean isForeign = !imKey.getName().equals(thisIm.getManifest().getName());
-            if (!isForeign) {
-                imKey = thisIm.getManifest(); // go on with requested tag (versionTag)
+            if (!imKey.getName().equals(thisIm.getManifest().getName())) {
+                continue;
             }
+
+            imKey = thisIm.getManifest(); // go on with requested tag (versionTag)
             String imMaster = new ControllingMaster(hive, imKey).read().getName();
             if (thisMaster != null && !thisMaster.equals(imMaster)) {
                 continue;
             }
             InstanceManifest imf = InstanceManifest.of(hive, imKey);
-            gatherNodeConfigurations(result, imf, isForeign);
+            gatherNodeConfigurations(result, imf);
         }
 
         // Load all available applications
@@ -510,7 +511,7 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     /** Create a new node configuration for each configured instance node configuration */
-    private void gatherNodeConfigurations(InstanceNodeConfigurationListDto result, InstanceManifest im, boolean isForeign) {
+    private void gatherNodeConfigurations(InstanceNodeConfigurationListDto result, InstanceManifest im) {
         // Build a map of configurations indexed by the node name
         Map<String, InstanceNodeConfigurationDto> node2Config = new TreeMap<>();
         result.nodeConfigDtos.forEach(dto -> node2Config.put(dto.nodeName, dto));
@@ -529,11 +530,7 @@ public class InstanceResourceImpl implements InstanceResource {
                 return inc;
             });
 
-            if (!isForeign) {
-                nodeConfig.nodeConfiguration = configuration;
-            } else {
-                nodeConfig.foreignNodeConfigurations.add(configuration);
-            }
+            nodeConfig.nodeConfiguration = configuration;
         }
     }
 
