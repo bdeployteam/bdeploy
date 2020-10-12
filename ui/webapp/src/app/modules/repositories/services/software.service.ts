@@ -1,7 +1,8 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { DeviceDetectorService } from 'ngx-device-detector';
 import { Observable } from 'rxjs';
-import { ManifestKey } from '../../../models/gen.dtos';
+import { ManifestKey, OperatingSystem } from '../../../models/gen.dtos';
 import { ConfigService } from '../../core/services/config.service';
 import { Logger, LoggingService } from '../../core/services/logging.service';
 import { DownloadService } from '../../shared/services/download.service';
@@ -19,6 +20,7 @@ export class SoftwareService {
     private http: HttpClient,
     private loggingService: LoggingService,
     private downloadService: DownloadService,
+    private deviceService: DeviceDetectorService,
   ) {}
 
   public listSoftwares(softwareRepositoryName: string, listProducts: boolean, listGeneric: boolean): Observable<ManifestKey[]> {
@@ -30,8 +32,8 @@ export class SoftwareService {
     return this.http.get<ManifestKey[]>(url, {params: params});
   }
 
-  public getSoftwareDiskUsage(softwareRepositoryName: string, key: ManifestKey): Observable<string> {
-    const url = this.buildSoftwareNameUrl(softwareRepositoryName, key) + '/diskUsage';
+  public getSoftwareDiskUsage(softwareRepositoryName: string, manifestkeyName: string): Observable<string> {
+    const url = this.buildSoftwareUrl(softwareRepositoryName) + '/' + manifestkeyName + '/diskUsage';
     this.log.debug('getSoftwareDiskUsage: ' + url);
     return this.http.get(url, { responseType: 'text' });
   }
@@ -64,12 +66,20 @@ export class SoftwareService {
     return this.cfg.config.api + SoftwareRepositoryService.BASEPATH + '/' + softwareRepositoryName + '/content';
   }
 
-  private buildSoftwareNameUrl(softwareRepositoryName: string, key: ManifestKey): string {
-    return this.buildSoftwareUrl(softwareRepositoryName) + '/' + key.name;
-  }
-
   private buildSoftwareNameTagUrl(softwareRepositoryName: string, key: ManifestKey): string {
     return this.buildSoftwareUrl(softwareRepositoryName) + '/' + key.name + '/' + key.tag;
+  }
+
+  public getRunningOs() {
+    const runningOs = this.deviceService.os;
+    if (runningOs === 'Windows') {
+      return OperatingSystem.WINDOWS;
+    } else if (runningOs === 'Linux') {
+      return OperatingSystem.LINUX;
+    } else if (runningOs === 'Mac') {
+      return OperatingSystem.MACOS;
+    }
+    return OperatingSystem.UNKNOWN;
   }
 
 }

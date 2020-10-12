@@ -11,7 +11,7 @@ import { SORT_PURPOSE } from '../../../../models/consts';
 import { DataList } from '../../../../models/dataList';
 import { CustomAttributesRecord, InstanceDto, InstanceGroupConfiguration, InstancePurpose, MinionMode } from '../../../../models/gen.dtos';
 import { Logger, LoggingService } from '../../../core/services/logging.service';
-import { ProductService } from '../../../instance-group/services/product.service';
+import { ProductService } from '../../../shared/services/product.service';
 import { InstanceService } from '../../services/instance.service';
 
 @Component({

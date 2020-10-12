@@ -27,3 +27,14 @@
 .mat-card-actions {
   text-align: right;
 }
+
+.os-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  flex: 1 0 auto;
+}
+
+.os-icon {
+  margin-right: 10px;
+}

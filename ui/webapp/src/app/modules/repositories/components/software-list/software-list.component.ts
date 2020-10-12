@@ -1,9 +1,10 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { finalize } from 'rxjs/operators';
+import { SoftwarePackageGroup } from 'src/app/models/software.model';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
 import { MessageboxService } from 'src/app/modules/shared/services/messagebox.service';
-import { ManifestKey } from '../../../../models/gen.dtos';
+import { ManifestKey, OperatingSystem } from '../../../../models/gen.dtos';
 import { LoggingService } from '../../../core/services/logging.service';
 import { DownloadService } from '../../../shared/services/download.service';
 import { SoftwareService } from '../../services/software.service';
@@ -18,7 +19,8 @@ export class SoftwareListComponent implements OnInit {
   private log = this.loggingService.getLogger('SoftwareListComponent');
 
   @Input() softwareRepositoryName: string;
-  @Input() softwareVersions: ManifestKey[];
+  @Input() activeOs: OperatingSystem;
+  @Input() softwarePackageGroup: SoftwarePackageGroup;
   @Output() public deleted = new EventEmitter();
 
   public exporting: ManifestKey = null;

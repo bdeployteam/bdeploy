@@ -36,12 +36,12 @@
               </ng-container>
             </div>
           </mat-tab>
-          <mat-tab label='Used In'>
-            <div *ngIf='!usedIn' class='loading-container'>
+          <mat-tab *ngIf="showUsedIn" label='Used In'>
+            <div *ngIf='loadingUsedIn' class='loading-container'>
               <mat-spinner [diameter]='24'></mat-spinner>
             </div>
-            <div *ngIf='usedIn' style='margin-top: 10px'>The following table shows all instances where at least one <strong>installed</strong> instance version uses this product version.</div>
-            <div *ngIf='usedIn' class="used-in-table">
+            <div *ngIf='!loadingUsedIn' style='margin-top: 10px'>The following table shows all instances where at least one <strong>installed</strong> instance version uses this product version.</div>
+            <div *ngIf='!loadingUsedIn' class="used-in-table">
               <strong>ID</strong>
               <strong>Version</strong>
               <strong>Name</strong>
