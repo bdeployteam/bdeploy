@@ -25,6 +25,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
+import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
@@ -264,6 +265,20 @@ public class TestFactory {
         instanceConfig.uuid = name;
         instanceConfig.name = name;
         return instanceConfig;
+    }
+
+    /**
+     * Creates a new software repository configuration.
+     *
+     * @param name
+     *            the name of the software repository
+     * @return the created configuration
+     */
+    public static SoftwareRepositoryConfiguration createSoftwareRepository(String name) {
+        SoftwareRepositoryConfiguration repo = new SoftwareRepositoryConfiguration();
+        repo.name = name;
+        repo.description = "description of " + name;
+        return repo;
     }
 
 }

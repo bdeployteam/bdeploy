@@ -43,6 +43,7 @@ import io.bdeploy.bhive.op.ManifestExistsOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ObjectListOperation;
 import io.bdeploy.bhive.op.ObjectSizeOperation;
+import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
@@ -64,6 +65,9 @@ public class ProductResourceImpl implements ProductResource {
     private static final String RELPATH_ERROR = "Only relative paths within the ZIP file are allowed, '..' is forbidden. Offending path: %1$s";
 
     private static final Logger log = LoggerFactory.getLogger(ProductResourceImpl.class);
+
+    @Inject
+    private BHiveRegistry registry;
 
     @Context
     private ResourceContext rc;
@@ -349,4 +353,19 @@ public class ProductResourceImpl implements ProductResource {
             return imported;
         }
     }
+
+    @Override
+    public void copyProduct(String softwareRepository, String productName, String productTag) {
+        BHive repoHive = registry.get(softwareRepository);
+        if (repoHive == null) {
+            throw new WebApplicationException(Status.NOT_FOUND);
+        }
+        Manifest.Key key = new Manifest.Key(productName, productTag);
+
+        SortedSet<ObjectId> objectIds = repoHive.execute(new ObjectListOperation().addManifest(key));
+        CopyOperation copy = new CopyOperation().setDestinationHive(hive).addManifest(key);
+        objectIds.forEach(copy::addObject);
+        repoHive.execute(copy);
+    }
+
 }

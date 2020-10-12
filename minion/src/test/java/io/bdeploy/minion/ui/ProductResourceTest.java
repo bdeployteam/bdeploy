@@ -16,12 +16,14 @@ import io.bdeploy.common.TempDirectory;
 import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
+import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestFactory;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.ui.api.DownloadService;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.ProductResource;
+import io.bdeploy.ui.api.SoftwareRepositoryResource;
 
 @ExtendWith(TempDirectory.class)
 @ExtendWith(TestMinion.class)
@@ -57,6 +59,24 @@ public class ProductResourceTest {
 
         Response response = dlService.download(zipToken);
         assertEquals(Response.Status.OK, response.getStatusInfo().toEnum());
+    }
+
+    @Test
+    void copyProduct(InstanceGroupResource root, SoftwareRepositoryResource repos, RemoteService remote, @TempDir Path tmp)
+            throws IOException {
+        InstanceGroupConfiguration group = TestFactory.createInstanceGroup("Demo");
+        root.create(group);
+
+        SoftwareRepositoryConfiguration repo = TestFactory.createSoftwareRepository("Repo");
+        repos.create(repo);
+
+        Key prod = TestFactory.pushProduct(repo.name, remote, tmp).getKey();
+
+        ProductResource productResource = root.getProductResource("Demo");
+        productResource.copyProduct("Repo", prod.getName(), prod.getTag());
+
+        assertEquals(1, productResource.list(null).size());
+        assertEquals(prod, productResource.list(null).get(0).key);
     }
 
 }
