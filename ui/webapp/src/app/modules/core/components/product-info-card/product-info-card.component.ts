@@ -5,7 +5,7 @@ import { MatButton } from '@angular/material/button';
 import { MatTabChangeEvent } from '@angular/material/tabs';
 import { finalize } from 'rxjs/operators';
 import { PluginAdminService } from 'src/app/modules/admin/services/plugin-admin.service';
-import { ProductService } from 'src/app/modules/instance-group/services/product.service';
+import { ProductService } from 'src/app/modules/shared/services/product.service';
 import { InstanceTemplateDescriptor, InstanceUsageDto, PluginInfoDto, ProductDto } from '../../../../models/gen.dtos';
 
 @Component({
@@ -17,7 +17,7 @@ export class ProductInfoCardComponent implements OnInit {
 
   @Input() public instanceGroup: string;
   @Input() public productDto: ProductDto;
-
+  @Input() public showUsedIn: boolean = true;
 
   usedIn: InstanceUsageDto[];
   loadingUsedIn = false;

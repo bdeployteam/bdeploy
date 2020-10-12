@@ -471,7 +471,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.screenshot('BDeploy_SWRepo_Ext_Software');
 
     // Capture detail of external software
-    cy.contains('mat-card-title','external/software/windows').click();
+    cy.contains('mat-card-title','external/software').click();
     cy.get('mat-drawer').should('have.css', 'transform', 'none');
     cy.screenshot('BDeploy_SWRepo_Ext_Software_Details');
   });

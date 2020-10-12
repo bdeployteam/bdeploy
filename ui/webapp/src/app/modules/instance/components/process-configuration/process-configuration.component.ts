@@ -56,12 +56,12 @@ import { HeaderTitleService } from '../../../core/services/header-title.service'
 import { Logger, LoggingService } from '../../../core/services/logging.service';
 import { RoutingHistoryService } from '../../../core/services/routing-history.service';
 import { SystemService } from '../../../core/services/system.service';
-import { ProductService } from '../../../instance-group/services/product.service';
 import { FileUploadComponent } from '../../../shared/components/file-upload/file-upload.component';
 import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
 import { DownloadService } from '../../../shared/services/download.service';
 import { LauncherService } from '../../../shared/services/launcher.service';
 import { MessageboxService } from '../../../shared/services/messagebox.service';
+import { ProductService } from '../../../shared/services/product.service';
 import {
   ActivitySnapshotTreeNode,
   RemoteEventsService

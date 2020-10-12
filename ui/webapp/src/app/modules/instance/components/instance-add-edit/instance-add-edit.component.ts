@@ -16,10 +16,10 @@ import { CustomAttributesRecord, InstanceConfiguration, InstanceGroupConfigurati
 import { ConfigService } from '../../../core/services/config.service';
 import { Logger, LoggingService } from '../../../core/services/logging.service';
 import { InstanceGroupService } from '../../../instance-group/services/instance-group.service';
-import { ProductService } from '../../../instance-group/services/product.service';
 import { ManagedServersService } from '../../../servers/services/managed-servers.service';
 import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
 import { MessageboxService } from '../../../shared/services/messagebox.service';
+import { ProductService } from '../../../shared/services/product.service';
 import { InstanceService } from '../../services/instance.service';
 
 @Component({

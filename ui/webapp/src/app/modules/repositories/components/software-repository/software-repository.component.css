@@ -2,6 +2,20 @@
   flex: 1 1 auto;
 }
 
+.toolbar-icons {
+  float: right;
+  margin-left: 1.5em;
+}
+
+.toolbar-icon {
+  padding: 4px;
+}
+
+.toolbar-text {
+  font-size: 0.9em;
+  font-weight: lighter;
+}
+
 .subHeader {
   font-size: smaller;
   font-weight: lighter;
@@ -15,6 +29,10 @@
   flex-flow: column;
   align-items: stretch;
   height: 100%;
+}
+
+mat-drawer {
+  min-width: 25%;
 }
 
 .drawer-container {
@@ -70,13 +88,14 @@
   vertical-align: middle;
 }
 
-.software-repo-package-wrapper{
+.software-repo-package-wrapper {
   display:flex;
   flex-direction: row;
   flex-wrap: wrap;
   padding: 10px 20px;
 }
 
-app-software-card{
+app-software-card, app-product-card {
   margin: 20px 30px;
 }
+

@@ -8,7 +8,7 @@ import { RoutingHistoryService } from 'src/app/modules/core/services/routing-his
 import { MinionMode, ProductDto } from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
 import { FileUploadComponent } from '../../../shared/components/file-upload/file-upload.component';
-import { ProductService } from '../../services/product.service';
+import { ProductService } from '../../../shared/services/product.service';
 
 @Component({
   selector: 'app-products',

@@ -5,8 +5,8 @@ import { InstanceUsageDto, ManifestKey, ProductDto } from '../../../models/gen.d
 import { ProcessConfigDto } from '../../../models/process.model';
 import { ConfigService } from '../../core/services/config.service';
 import { Logger, LoggingService } from '../../core/services/logging.service';
-import { DownloadService } from '../../shared/services/download.service';
-import { InstanceGroupService } from './instance-group.service';
+import { InstanceGroupService } from '../../instance-group/services/instance-group.service';
+import { DownloadService } from './download.service';
 
 @Injectable({
   providedIn: 'root',
@@ -40,7 +40,7 @@ export class ProductService {
 
   public getProductVersionUsageCount(instanceGroupName: string, key: ManifestKey) {
     const url = this.buildProductNameTagUrl(instanceGroupName, key) + '/useCount';
-    this.log.debug('getProductVersionUseCount: ' + url);
+    this.log.debug('getProductVersionUsageCount: ' + url);
     return this.http.get(url, { responseType: 'text' });
   }
 

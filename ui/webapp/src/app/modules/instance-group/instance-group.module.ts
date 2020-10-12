@@ -7,8 +7,6 @@ import { InstanceGroupAddEditComponent } from './components/instance-group-add-e
 import { InstanceGroupBrowserComponent } from './components/instance-group-browser/instance-group-browser.component';
 import { InstanceGroupDeleteDialogComponent } from './components/instance-group-delete-dialog/instance-group-delete-dialog.component';
 import { InstanceGroupPermissionsComponent } from './components/instance-group-permissions/instance-group-permissions.component';
-import { ProductCardComponent } from './components/product-card/product-card.component';
-import { ProductListComponent } from './components/product-list/product-list.component';
 import { ProductsComponent } from './components/products/products.component';
 import { InstanceGroupRoutingModule } from './instance-group-routing.module';
 
@@ -18,8 +16,6 @@ import { InstanceGroupRoutingModule } from './instance-group-routing.module';
     InstanceGroupBrowserComponent,
     InstanceGroupAddEditComponent,
     InstanceGroupDeleteDialogComponent,
-    ProductCardComponent,
-    ProductListComponent,
     ClientAppsComponent,
     InstanceGroupPermissionsComponent,
   ],

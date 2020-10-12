@@ -7,7 +7,7 @@ import { forkJoin, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { ManagedMasterDto, MinionMode, ProductDto, ProductTransferDto } from 'src/app/models/gen.dtos';
 import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
-import { ProductService } from 'src/app/modules/instance-group/services/product.service';
+import { ProductService } from 'src/app/modules/shared/services/product.service';
 import { ManagedServersService } from '../../services/managed-servers.service';
 
 @Component({

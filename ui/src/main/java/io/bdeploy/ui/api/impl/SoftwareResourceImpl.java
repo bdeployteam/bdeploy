@@ -7,7 +7,9 @@ import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 
 import javax.inject.Inject;
@@ -39,6 +41,7 @@ import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.common.util.UuidHelper;
+import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
 import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.ui.api.Minion;
@@ -66,21 +69,23 @@ public class SoftwareResourceImpl implements SoftwareResource {
     @Override
     public List<Manifest.Key> list(boolean products, boolean generic) {
         List<Manifest.Key> result = new ArrayList<>();
+        Set<Manifest.Key> apps = new HashSet<>();
+
         SortedSet<Key> keySet = hive.execute(new ManifestListOperation());
         for (Manifest.Key k : keySet) {
             if (SoftwareRepositoryManifest.isSoftwareRepositoryManifest(k)) {
                 continue;
             }
-            if (products && generic) {
-                result.add(k);
+            // collect all non-products and all manifests that belong to products
+            Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(k));
+            if (mf.getLabels().containsKey(ProductManifestBuilder.PRODUCT_LABEL)) {
+                ProductManifest pmf = ProductManifest.of(hive, k);
+                apps.addAll(pmf.getApplications());
             } else {
-                Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(k));
-                boolean isProduct = mf.getLabels().containsKey(ProductManifestBuilder.PRODUCT_LABEL);
-                if (products && isProduct || generic && !isProduct) {
-                    result.add(k);
-                }
+                result.add(k);
             }
         }
+        result.removeIf(k -> apps.contains(k)); // remove all manifests that belong to a product
         result.sort(vss.getKeyComparator(null, null));
         return result;
     }

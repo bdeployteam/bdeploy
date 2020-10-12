@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { from } from 'rxjs';
 import { finalize, flatMap, tap } from 'rxjs/operators';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
@@ -12,13 +12,14 @@ import { ProductService } from '../../services/product.service';
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.css'],
 })
-export class ProductListComponent implements OnInit {
+export class ProductListComponent implements OnChanges {
   private readonly log = this.loggingService.getLogger('ProductListComponent');
 
   @Input() public instanceGroup: string;
+  @Input() public products: ProductDto[];
+  @Input() public showUsedIn: boolean = true;
   @Output() public deleted = new EventEmitter();
 
-  private _products: ProductDto[];
   private usageCounts: Map<ManifestKey, number> = new Map();
   public exporting: ProductDto;
 
@@ -28,29 +29,15 @@ export class ProductListComponent implements OnInit {
     public authService: AuthenticationService,
     private downloadService: DownloadService) {}
 
-  public get products(): ProductDto[] {
-    return this._products;
-  }
-
-  @Input() public set products(products: ProductDto[]) {
-    this._products = products;
-    this.usageCounts = new Map();
-    if (this._products) {
-      from(this._products)
-        .pipe(
-          flatMap(p => {
-            return this.productService.getProductVersionUsageCount(this.instanceGroup, p.key).pipe(
-              tap(e => {
-                this.usageCounts.set(p.key, parseInt(e, 10));
-              }),
-            );
-          }, 2),
-        )
-        .subscribe();
+  ngOnChanges() {
+    if (this.instanceGroup && this.products && this.products.length > 0) {
+      this.usageCounts = new Map();
+      from(this.products).pipe(flatMap(p => {
+          return this.productService.getProductVersionUsageCount(this.instanceGroup, p.key).pipe(tap(e => {this.usageCounts.set(p.key, parseInt(e, 10));}));
+        }, 2),
+      ).subscribe();
     }
   }
-
-  ngOnInit() {}
 
   delete(product: ProductDto): void {
     this.productService.deleteProductVersion(this.instanceGroup, product.key).subscribe(r => {

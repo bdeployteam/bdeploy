@@ -3,7 +3,7 @@
     <div class='prod-row'>
         <div>{{prod.key.tag}}</div>
         <div class='spacer'></div>
-        <app-product-info-card [productDto]="prod" [instanceGroup]='instanceGroup'></app-product-info-card>
+        <app-product-info-card [productDto]="prod" [instanceGroup]='instanceGroup' [showUsedIn]='showUsedIn'></app-product-info-card>
         <button mat-icon-button *ngIf='exporting !== prod' [disabled]='exporting' (click)="export(prod)" class="icon-button" matTooltip='Download product version as ZIP'><mat-icon>cloud_download</mat-icon></button>
         <mat-spinner *ngIf='exporting === prod' diameter='24' class='progress-spinner'></mat-spinner>
         <div [matTooltip]='deleteTooltip(prod)'>
