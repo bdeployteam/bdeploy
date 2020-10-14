@@ -17,9 +17,17 @@ export class ProductListComponent implements OnChanges {
 
   @Input() public instanceGroup: string;
   @Input() public products: ProductDto[];
-  @Input() public showUsedIn: boolean = true;
-  @Output() public deleted = new EventEmitter();
 
+  @Input() public showUsedIn: boolean = true;
+  @Input() public showDownload: boolean = true;
+  @Input() public showDelete: boolean = true;
+
+  @Input() public selectable: boolean = false;
+
+  @Output() public deleted = new EventEmitter();
+  @Output() public selected = new EventEmitter();
+
+  public selection: ProductDto;
   private usageCounts: Map<ManifestKey, number> = new Map();
   public exporting: ProductDto;
 
@@ -32,6 +40,7 @@ export class ProductListComponent implements OnChanges {
   ngOnChanges() {
     if (this.instanceGroup && this.products && this.products.length > 0) {
       this.usageCounts = new Map();
+      this.selection = undefined;
       from(this.products).pipe(flatMap(p => {
           return this.productService.getProductVersionUsageCount(this.instanceGroup, p.key).pipe(tap(e => {this.usageCounts.set(p.key, parseInt(e, 10));}));
         }, 2),
@@ -56,6 +65,11 @@ export class ProductListComponent implements OnChanges {
     );
   }
 
+  select(selection: ProductDto): void {
+    this.selection = selection;
+    this.selected.emit(selection);
+  }
+
   export(product: ProductDto): void {
     this.exporting = product;
     this.productService
@@ -71,5 +85,12 @@ export class ProductListComponent implements OnChanges {
       return 1;
     }
     return this.usageCounts.get(product.key);
+  }
+
+  getItemClass(product: ProductDto) {
+    if (!this.selectable) {
+      return undefined;
+    }
+    return product === this.selection ? 'prod-row-selected' : 'prod-row-unselected';
   }
 }

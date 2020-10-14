@@ -1,0 +1,13 @@
+@import '~@angular/material/theming';
+
+@mixin product-list-theme($theme) {
+  $accent: map-get($theme, 'accent');
+
+  .prod-row-selected {
+    border-left: mat-color($accent) solid 10px;
+  }
+
+  .prod-row-unselected {
+    margin-left: 10px;
+  }
+}

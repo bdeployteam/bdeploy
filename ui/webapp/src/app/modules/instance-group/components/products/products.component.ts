@@ -9,6 +9,7 @@ import { MinionMode, ProductDto } from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
 import { FileUploadComponent } from '../../../shared/components/file-upload/file-upload.component';
 import { ProductService } from '../../../shared/services/product.service';
+import { ProductsCopyComponent } from '../products-copy/products-copy.component';
 
 @Component({
   selector: 'app-products',
@@ -108,4 +109,23 @@ export class ProductsComponent implements OnInit {
         this.loadProducts();
       });
   }
+
+  openCopyDialog() {
+    const config = new MatDialogConfig();
+    config.width = '70%';
+    config.height = '75%';
+    config.minWidth = '650px';
+    config.minHeight = '550px';
+    config.data = {
+      instanceGroup: this.instanceGroup,
+      existingProducts: this.products,
+    };
+    this.dialog
+      .open(ProductsCopyComponent, config)
+      .afterClosed()
+      .subscribe(e => {
+        this.loadProducts();
+      });
+  }
+
 }

@@ -1,6 +1,6 @@
 @import '~@angular/material/theming';
 
-@mixin product-upload-theme($theme) {
+@mixin file-upload-theme($theme) {
   $dark: map-get($theme, 'is-dark');
 
   $primary: map-get($theme, 'primary');

@@ -1,4 +1,4 @@
-<mat-card class="product-card" (click)='clickIt()'>
+<mat-card class="product-card" [ngClass]="getCardStyle()" (click)='clickIt()'>
   <mat-card-header>
     <mat-card-title class="title">{{latestProductVersion.name}}</mat-card-title>
     <mat-card-subtitle>Product</mat-card-subtitle>

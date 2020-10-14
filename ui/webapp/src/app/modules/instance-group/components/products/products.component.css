@@ -45,14 +45,6 @@
   position: fixed !important;
 }
 
-.sync-button {
-  top: auto !important;
-  right: 40px !important;
-  bottom: 110px !important;
-  left: auto !important;
-  position: fixed !important;
-}
-
 .loading-container {
   flex: 1 0 auto;
   flex-direction: row;

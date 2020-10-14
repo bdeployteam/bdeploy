@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { InstanceUsageDto, ManifestKey, ProductDto } from '../../../models/gen.dtos';
@@ -64,6 +64,13 @@ export class ProductService {
 
   public downloadProduct(token: string): string {
     return this.downloadService.createDownloadUrl(token);
+  }
+
+  public copyProduct(instanceGroupName: string, softwareRepositoryName: string, key: ManifestKey) {
+    const url = this.buildProductUrl(instanceGroupName) + '/copy';
+    this.log.debug('copyProduct: ' + url);
+    const params = new HttpParams().set('repo', softwareRepositoryName).set('name', key.name).set('tag', key.tag);
+    return this.http.get(url, { params: params });
   }
 
   public getProductUploadUrl(instanceGroupName: string): string {

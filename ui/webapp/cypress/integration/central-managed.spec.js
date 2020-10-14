@@ -84,7 +84,7 @@ describe("Central/Managed Basic Test", function() {
     cy.visitBDeploy('/#/instancegroup/products/' + groupName, 'CENTRAL');
     cy.waitUntilContentLoaded();
     cy.screenshot('BDeploy_Product_Sync_Button');
-    cy.contains('button', 'sync_alt').click();
+    cy.contains('mat-toolbar', 'chevron_left').clickContextMenuAction('Sync with Managed Server');
 
     cy.waitUntilContentLoaded();
     cy.contains('mat-label', 'Source').should('be.visible').click({force: true});
