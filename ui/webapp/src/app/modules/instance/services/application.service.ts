@@ -298,9 +298,9 @@ export class ApplicationService {
     }
 
     for (const template of templates) {
-      let para = template.start.parameters.find((p) => p.uid === paraDesc.uid);
+      let para = template?.start?.parameters?.find((p) => p.uid === paraDesc.uid);
       if (!para) {
-        para = template.stop.parameters.find((p) => p.uid === paraDesc.uid);
+        para = template?.stop?.parameters?.find((p) => p.uid === paraDesc.uid);
       }
       if (para) {
         return para.value;
