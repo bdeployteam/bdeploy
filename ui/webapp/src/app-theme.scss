@@ -13,6 +13,9 @@
 @import 'app/modules/core/components/instance-group-logo/instance-group-logo-theme.scss';
 
 @import 'app/modules/shared/components/file-upload/file-upload-theme.scss';
+@import 'app/modules/shared/components/product-card/product-card-theme.scss';
+@import 'app/modules/shared/components/product-list/product-list-theme.scss';
+
 @import 'app/modules/admin/components/hive/hive-theme.scss';
 @import 'app/modules/admin/components/admin-shell/admin-shell.theme.scss';
 @import 'app/modules/admin/components/audit-log/audit-log-theme.scss';
@@ -65,7 +68,7 @@
   @include application-edit-theme($theme);
   @include product-tag-card-theme($theme);
   @include application-configuration-card-theme($theme);
-  @include product-upload-theme($theme);
+  @include file-upload-theme($theme);
   @include instance-group-logo-theme($theme);
   @include instance-group-add-edit-theme($theme);
   @include instance-group-browser-theme($theme);
@@ -77,6 +80,8 @@
   @include client-apps-theme($theme);
   @include attach-central-theme($theme);
   @include managed-server-update-theme($theme);
+  @include product-card-theme($theme);
+  @include product-list-theme($theme);
   @include product-sync-theme($theme);
   @include settings-shell-theme($theme);
   @include instance-browser-theme($theme);

@@ -5,6 +5,18 @@
       <span>Instance Group: <app-instance-group-title [instanceGroup]='instanceGroup'></app-instance-group-title></span>
       <span class="spacer"></span>
       <app-remote-progress [scope]='[instanceGroup, "transfer"]'></app-remote-progress>
+      <mat-menu #appMenu="matMenu" xPosition="before">
+        <button mat-menu-item (click)="openCopyDialog()" [disabled]="!authService.isScopedAdmin(instanceGroup)">
+          <mat-icon>storage</mat-icon>Fetch from Software Repository
+        </button>
+        <button mat-menu-item *ngIf='isCentral()' [routerLink]='["/servers/product-sync", instanceGroup]' [disabled]="!authService.isScopedAdmin(instanceGroup)">
+          <mat-icon>sync_alt</mat-icon>Sync with Managed Server
+        </button>
+      </mat-menu>
+      <button class="option-button" mat-icon-button [matMenuTriggerFor]="appMenu" appClickStopPropagation>
+        <mat-icon>more_vert</mat-icon>
+      </button>
+
     </mat-toolbar-row>
   </mat-toolbar>
 
@@ -30,7 +42,6 @@
         </div>
       </div>
       <button mat-fab class="add-button" (click)="openUploadDialog()" [disabled]="!authService.isScopedAdmin(instanceGroup)" matTooltip="Upload Product" matTooltipShowDelay="1000"><mat-icon>cloud_upload</mat-icon></button>
-      <button mat-fab class="sync-button" *ngIf='isCentral()' [routerLink]='["/servers/product-sync", instanceGroup]' color="primary" [disabled]="!authService.isScopedAdmin(instanceGroup)"><mat-icon>sync_alt</mat-icon></button>
     </mat-drawer-content>
   </mat-drawer-container>
 </div>

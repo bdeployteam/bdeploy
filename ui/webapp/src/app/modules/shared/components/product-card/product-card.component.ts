@@ -11,6 +11,7 @@ export class ProductCardComponent implements OnInit {
   @Input() public instanceGroup: string;
   @Input() public product: string;
   @Input() public productVersions: ProductDto[];
+  @Input() public isSelected: boolean = false;
   @Output() public select = new EventEmitter();
 
   public diskUsage = '(...)';
@@ -31,4 +32,9 @@ export class ProductCardComponent implements OnInit {
   clickIt(): void {
     this.select.emit();
   }
+
+  getCardStyle(): string {
+    return this.isSelected ? 'product-card-selected' : undefined;
+  }
+
 }
