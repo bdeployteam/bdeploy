@@ -241,10 +241,10 @@ export class InstanceAddEditComponent implements OnInit {
       });
     } else {
       forkJoin({
-        configuration: this.instanceService.updateInstance(this.groupParam, this.uuidParam, instance, null, managedServer, this.expectedVersion.key.tag),
-        attributes: this.instanceService.updateInstanceAttributes(this.groupParam, this.uuidParam, this.instanceAttributes),
+        configuration: this.isConfigurationModified() ? this.instanceService.updateInstance(this.groupParam, this.uuidParam, instance, null, managedServer, this.expectedVersion.key.tag) : of(null),
+        attributes: this.isAttributesModified() ? this.instanceService.updateInstanceAttributes(this.groupParam, this.uuidParam, this.instanceAttributes) : of(null),
       }).pipe(finalize(() => this.loading = false))
-        .subscribe(r => {
+        .subscribe(_ => {
           this.clonedInstance = instance;
           this.clonedInstanceAttributes = this.instanceAttributes;
           this.location.back();

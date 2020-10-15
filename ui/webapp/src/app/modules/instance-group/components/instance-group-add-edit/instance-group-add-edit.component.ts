@@ -250,14 +250,12 @@ export class InstanceGroupAddEditComponent implements OnInit {
   }
 
   private doUpdate(instanceGroup: any, instanceGroupAttributes: CustomAttributesRecord) {
-    const og = this.instanceGroupService.updateInstanceGroup(this.nameParam, instanceGroup);
-    const op = this.instanceGroupService.updateInstanceGroupAttributes(this.nameParam, this.instanceGroupAttributes);
-    forkJoin([og, op])
-    .pipe(
-      finalize(() => {this.loading = false;})
-    )
+    forkJoin({
+      configuration: this.isConfigurationModified() ? this.instanceGroupService.updateInstanceGroup(this.nameParam, instanceGroup) : of(null),
+      attributes: this.isAttributesModified() ? this.instanceGroupService.updateInstanceGroupAttributes(this.nameParam, this.instanceGroupAttributes) : of (null),
+    })
+    .pipe(finalize(() => {this.loading = false;}))
     .subscribe(_ => {
-      this.log.info('updated instance group ' + this.nameParam);
       this.clonedInstanceGroup = instanceGroup;
       this.clonedInstanceGroupAttributes = instanceGroupAttributes;
       this.checkImage(this.nameParam);
