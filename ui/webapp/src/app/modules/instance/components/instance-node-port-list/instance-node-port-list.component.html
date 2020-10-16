@@ -4,7 +4,7 @@
 
 <div class="content" [hidden]='loading'>
   <div class='port-list-titlebar'>
-    <h2>Server Ports on {{data.minionName}}</h2>
+    <h2>Server Ports on {{minionName}}</h2>
     <span class='spacer'></span>
     <button mat-icon-button (click)='reload()'><mat-icon>refresh</mat-icon></button>
   </div>
@@ -21,6 +21,11 @@
       <td mat-cell *matCellDef="let element">{{ element.application }}</td>
     </ng-container>
 
+    <ng-container matColumnDef="appState">
+      <th scope="col" mat-header-cell *matHeaderCellDef mat-sort-header>App. State</th>
+      <td mat-cell *matCellDef="let element"><app-process-status [appId]='element.appId' [iconWhenStopped]='true' [instanceTag]='instanceTag' [activatedTag]='instanceActiveTag'></app-process-status></td>
+    </ng-container>
+
     <ng-container matColumnDef="description">
       <th scope="col" mat-header-cell *matHeaderCellDef mat-sort-header>Description</th>
       <td mat-cell *matCellDef="let element">{{ element.description }}</td>
@@ -31,13 +36,20 @@
       <td mat-cell *matCellDef="let element">{{ element.port }}</td>
     </ng-container>
 
-    <ng-container matColumnDef="state">
+    <ng-container matColumnDef="portState">
       <th scope="col" mat-header-cell *matHeaderCellDef>State</th>
+      <td mat-cell *matCellDef="let element">{{states && states[element.port] ? "open" : "closed"}}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="rating">
+      <th scope="col" mat-header-cell *matHeaderCellDef>Rating</th>
       <td mat-cell *matCellDef="let element">
         <span>
-          <mat-icon [ngClass]='states && states[element.port] ? "port-open" : "port-closed"'>
-            {{states && states[element.port] ? 'done' : 'warning'}}
-          </mat-icon>
+          <ng-container *ngFor='let rating of [isRatingOk(element)]'>
+            <mat-icon [ngClass]='rating ? "rating-ok" : "rating-failed"' [matTooltip]='rating ? "The port state matches the application state" : "The port state does not match the application state. Something might be wrong."'>
+              {{rating ? 'done' : 'warning'}}
+            </mat-icon>
+          </ng-container>
         </span>
       </td>
     </ng-container>

@@ -1,11 +1,11 @@
 import {
   AfterViewInit,
   Component,
-  Inject,
+
+  Input,
   OnInit,
   ViewChild
 } from '@angular/core';
-import { MAT_BOTTOM_SHEET_DATA } from '@angular/material/bottom-sheet';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { forkJoin, Observable } from 'rxjs';
@@ -14,23 +14,19 @@ import {
   ApplicationDto,
   InstanceNodeConfiguration,
   InstanceNodeConfigurationDto,
-  ParameterType
+  ParameterType,
+  ProcessState
 } from 'src/app/models/gen.dtos';
 import { ApplicationService } from '../../services/application.service';
 import { InstanceService } from '../../services/instance.service';
+import { ProcessService } from '../../services/process.service';
 
 interface Row {
   instance: string;
+  appId: string;
   application: string;
   description: string;
-  port: number;
-}
-
-interface InstanceNodePortSheetData {
-  instanceGroup: string;
-  instanceId: string;
-  minionName: string;
-  node: InstanceNodeConfigurationDto;
+  port: string;
 }
 
 @Component({
@@ -44,9 +40,11 @@ export class InstanceNodePortListComponent implements OnInit, AfterViewInit {
 
   public displayedColumns: string[] = [
     'application',
+    'appState',
     'description',
     'port',
-    'state',
+    'portState',
+    'rating',
   ];
   public dataSource: MatTableDataSource<Row> = new MatTableDataSource<Row>([]);
 
@@ -56,10 +54,17 @@ export class InstanceNodePortListComponent implements OnInit, AfterViewInit {
   loading = true;
   states: { [key: number]: boolean };
 
+  @Input() instanceGroup: string;
+  @Input() instanceId: string;
+  @Input() instanceTag: string;
+  @Input() instanceActiveTag: string;
+  @Input() minionName: string;
+  @Input() node: InstanceNodeConfigurationDto;
+
   constructor(
-    @Inject(MAT_BOTTOM_SHEET_DATA) public data: InstanceNodePortSheetData,
     private instanceService: InstanceService,
-    private applicationService: ApplicationService
+    private applicationService: ApplicationService,
+    private processService: ProcessService
   ) {}
 
   ngOnInit() {
@@ -69,17 +74,17 @@ export class InstanceNodePortListComponent implements OnInit, AfterViewInit {
   reload() {
     const observables: Observable<Row[]>[] = [];
     // ports of main instance
-    if (this.data.node.nodeConfiguration) {
+    if (this.node.nodeConfiguration) {
       observables.push(
         this.applicationService
           .listApplications(
-            this.data.instanceGroup,
-            this.data.node.nodeConfiguration.product,
+            this.instanceGroup,
+            this.node.nodeConfiguration.product,
             false
           )
           .pipe(
             map((apps) =>
-              this.collectServerPorts(this.data.node.nodeConfiguration, apps)
+              this.collectServerPorts(this.node.nodeConfiguration, apps)
             )
           )
       );
@@ -95,9 +100,9 @@ export class InstanceNodePortListComponent implements OnInit, AfterViewInit {
       const ports = rows.map((row) => row.port);
       this.instanceService
         .getOpenPorts(
-          this.data.instanceGroup,
-          this.data.instanceId,
-          this.data.minionName,
+          this.instanceGroup,
+          this.instanceId,
+          this.minionName,
           ports
         )
         .pipe(
@@ -121,7 +126,7 @@ export class InstanceNodePortListComponent implements OnInit, AfterViewInit {
     instanceNodeConfiguration: InstanceNodeConfiguration,
     applications: ApplicationDto[]
   ): Row[] {
-    const rows = [];
+    const rows: Row[] = [];
     for (const app of instanceNodeConfiguration.applications) {
       const appDesc = applications.find(
         (a) => a.key.name === app.application.name
@@ -131,8 +136,9 @@ export class InstanceNodePortListComponent implements OnInit, AfterViewInit {
           (p) => p.uid === paramCfg.uid
         );
         if (paramDesc && paramDesc.type === ParameterType.SERVER_PORT) {
-          const row = {
+          const row: Row = {
             instance: instanceNodeConfiguration.name,
+            appId: app.uid,
             application: app.name,
             description: paramDesc.name,
             port: paramCfg.value,
@@ -143,4 +149,18 @@ export class InstanceNodePortListComponent implements OnInit, AfterViewInit {
     }
     return rows;
   }
+
+  isRunning(element: Row) {
+    const state = this.processService.getStatusOfApp(element.appId)?.processState;
+    return state === ProcessState.RUNNING || state === ProcessState.RUNNING_UNSTABLE;
+  }
+
+  isRatingOk(element: Row) {
+    if (this.states && this.states[element.port]) {
+      return this.isRunning(element);
+    } else {
+      return !this.isRunning(element);
+    }
+  }
+
 }
