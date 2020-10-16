@@ -976,14 +976,8 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Override
     public InstanceBannerRecord getBanner(String instanceId) {
-        InstanceManifest im = readInstance(instanceId);
-        if (im == null) {
-            throw new WebApplicationException("Cannot load " + instanceId, Status.NOT_FOUND);
-        }
-
-        RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
-        MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
-        return root.getNamedMaster(group).getBanner(instanceId);
+        InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
+        return im.getBanner(hive).read();
     }
 
     @Override
@@ -997,6 +991,7 @@ public class InstanceResourceImpl implements InstanceResource {
         MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
         root.getNamedMaster(group).updateBanner(instanceId, instanceBannerRecord);
         iem.bannerChanged(im.getManifest());
+        syncInstance(minion, rc, group, instanceId);
     }
 
     @Override
