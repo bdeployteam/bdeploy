@@ -1362,6 +1362,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   doTriggerProcessStatusUpdate() {
     this.lastAutoRefresh = Date.now();
     this.processService.refreshStatus(this.groupParam, this.uuidParam);
+    this.loadBanner();
   }
 
   /** Executes the status refresh operation or updates the remaining seconds */
