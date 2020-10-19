@@ -486,7 +486,7 @@ export class InstanceService {
     instanceGroup: string,
     instance: string,
     minion: string,
-    ports: number[]
+    ports: string[]
   ): Observable<{ [key: number]: boolean }> {
     const url =
       this.buildInstanceUrl(instanceGroup, instance) + '/check-ports/' + minion;

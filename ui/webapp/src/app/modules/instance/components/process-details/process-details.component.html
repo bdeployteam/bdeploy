@@ -1,3 +1,17 @@
+<ng-template #portList>
+  <app-process-port-list
+    [instanceGroup]="instanceGroup"
+    [instanceId]="instanceId"
+    [minionName]="portListMinionName"
+    [appName]="appConfig.name"
+    [ports]="portListPorts"
+    [labels]="portListLabels"
+    [appId]='appConfig.uid'
+    [instanceTag]='instanceTag'
+    [instanceActiveTag]='activatedInstanceTag'
+  ></app-process-port-list>
+</ng-template>
+
 <mat-toolbar>
   <mat-toolbar-row>
     <span>{{ appConfig.name }}</span>
@@ -48,11 +62,7 @@
       <mat-icon>report</mat-icon>
       <div>Stopped At:</div>
       <div>{{ getStopTime() }}</div>
-      <mat-progress-spinner
-        [value]="restartProgress"
-        color="primary"
-        [diameter]="24"
-      ></mat-progress-spinner>
+      <mat-progress-spinner [value]="restartProgress" color="primary" [diameter]="24"></mat-progress-spinner>
       <div>Restart In:</div>
       <span title="{{ restartProgressText }}">{{ restartProgressText }}</span>
     </ng-container>
@@ -108,16 +118,8 @@
   <mat-divider></mat-divider>
 
   <div class="icon-toolbar">
-    <button
-      mat-icon-button
-      (click)="showProcessList()"
-      [disabled]="!isRunningOrUnstable()"
-      matTooltip="Show processes"
-    >
-      <mat-icon
-        [matBadge]="getProcessCount()"
-        [matBadgeHidden]="!isRunningOrUnstable()"
-        matBadgeSize="small"
+    <button mat-icon-button (click)="showProcessList()" [disabled]="!isRunningOrUnstable()" matTooltip="Show processes">
+      <mat-icon [matBadge]="getProcessCount()" [matBadgeHidden]="!isRunningOrUnstable()" matBadgeSize="small"
         >settings</mat-icon
       >
     </button>
@@ -135,14 +137,15 @@
         (inputEvent)="onInputEvent($event)"
       ></app-file-viewer>
     </ng-template>
-    <button mat-icon-button (click)="openOutputOverlay(terminal)" [disabled]="!activatedInstanceTag" matTooltip="Show output">
-      <mat-icon>message</mat-icon>
-    </button>
     <button
       mat-icon-button
-      (click)="showPortList()"
-      matTooltip="Show ports"
+      (click)="openOutputOverlay(terminal)"
+      [disabled]="!activatedInstanceTag"
+      matTooltip="Show output"
     >
+      <mat-icon>message</mat-icon>
+    </button>
+    <button mat-icon-button (click)="showPortList(portList)" matTooltip="Show ports">
       <mat-icon>power</mat-icon>
     </button>
   </div>

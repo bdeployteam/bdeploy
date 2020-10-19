@@ -11,4 +11,8 @@
   .rating-failed {
     color: mat-color($warn);
   }
+
+  .dim-link-off {
+    color: if($dark, mat-color($mat-grey, 600), mat-color($mat-grey, 400));
+  }
 }
