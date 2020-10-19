@@ -22,7 +22,6 @@ import { InstanceService } from '../../services/instance.service';
 import { ProcessService } from '../../services/process.service';
 
 interface Row {
-  instance: string;
   appId: string;
   application: string;
   description: string;
@@ -39,11 +38,11 @@ export class InstanceNodePortListComponent implements OnInit, AfterViewInit {
   public INITIAL_SORT_DIRECTION = 'asc';
 
   public displayedColumns: string[] = [
-    'application',
     'appState',
+    'application',
     'description',
-    'port',
     'portState',
+    'port',
     'rating',
   ];
   public dataSource: MatTableDataSource<Row> = new MatTableDataSource<Row>([]);
@@ -137,7 +136,6 @@ export class InstanceNodePortListComponent implements OnInit, AfterViewInit {
         );
         if (paramDesc && paramDesc.type === ParameterType.SERVER_PORT) {
           const row: Row = {
-            instance: instanceNodeConfiguration.name,
             appId: app.uid,
             application: app.name,
             description: paramDesc.name,

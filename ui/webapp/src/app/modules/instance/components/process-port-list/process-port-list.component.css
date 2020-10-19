@@ -1,12 +1,30 @@
-.port-list {
-  display: grid;
-  grid-template-columns: auto 100px 24px;
-  row-gap: 5px;
-  column-gap: 5px;
+.mat-table {
+  width: 100%;
+}
 
-  align-items: center;
+.mat-header-cell {
+  padding-left: 10px;
+  padding-right: 10px;
+}
 
-  margin: 10px;
+.mat-cell {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.icon-cell {
+  top: 2px;
+  position: relative;
+}
+
+.mat-column-port {
+  text-align: right;
+  width: 40px;
+}
+
+.mat-column-portState, .mat-column-rating {
+  text-align: center;
+  width: 40px;
 }
 
 .loading-container {

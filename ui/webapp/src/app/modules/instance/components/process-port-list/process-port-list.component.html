@@ -2,23 +2,43 @@
   <mat-spinner [diameter]='24'></mat-spinner>
 </div>
 
-<ng-container *ngIf='!loading'>
-<div class='port-list-titlebar'>
-  <h2>Server Ports of {{data.appName}} on {{data.minionName}}</h2>
+<div class='port-list-titlebar' [hidden]='loading'>
+  <h2>Server Ports of {{appName}} on {{minionName}}</h2>
   <span class='spacer'></span>
+  <app-process-status class='icon-cell' [appId]='appId' [iconWhenStopped]='true' [instanceTag]='instanceTag' [activatedTag]='instanceActiveTag'></app-process-status>
   <button mat-icon-button (click)='reload()'><mat-icon>refresh</mat-icon></button>
 </div>
-<div *ngIf='!data?.ports?.length'>
+<div *ngIf='!ports?.length' [hidden]='loading'>
   No ports are configured for this application.
 </div>
-<div *ngIf='data?.ports?.length' class='port-list'>
-  <strong>Description</strong>
-  <strong>Port</strong>
-  <strong>State</strong>
-  <ng-container *ngFor='let port of data.ports; let i = index'>
-    <span>{{data.labels[i]}}</span>
-    <span>{{port}}</span>
-    <span><mat-icon [ngClass]='states[port] ? "port-open" : "port-closed"'>{{states[port] ? 'done' : 'warning'}}</mat-icon></span>
+
+<table [hidden]='!dataSource.data.length' mat-table [dataSource]="dataSource" matSort [matSortActive]="INITIAL_SORT_COLUMN" [matSortDirection]="INITIAL_SORT_DIRECTION">
+  <caption style="display: none;">Server Ports</caption>
+
+  <ng-container matColumnDef="description">
+    <th scope="col" mat-header-cell *matHeaderCellDef mat-sort-header>Description</th>
+    <td mat-cell *matCellDef="let element">{{ element.description }}</td>
   </ng-container>
-</div>
-</ng-container>
+
+  <ng-container matColumnDef="port">
+    <th scope="col" mat-header-cell *matHeaderCellDef mat-sort-header>Port</th>
+    <td mat-cell *matCellDef="let element">{{ element.port }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="portState">
+    <th scope="col" mat-header-cell *matHeaderCellDef>State</th>
+    <td mat-cell *matCellDef="let element"><mat-icon class='icon-cell' [ngClass]='element.state ? null : "dim-link-off"'>{{element.state ? 'link' : 'link_off'}}</mat-icon></td>
+  </ng-container>
+
+  <ng-container matColumnDef="rating">
+    <th scope="col" mat-header-cell *matHeaderCellDef>Rating</th>
+    <td mat-cell *matCellDef="let element">
+        <mat-icon class='icon-cell' [ngClass]='element.rating ? "rating-ok" : "rating-failed"' [matTooltip]='element.rating ? "The port state matches the application state" : "The port state does not match the application state. Something might be wrong."'>
+          {{element.rating ? 'done' : 'warning'}}
+        </mat-icon>
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+</table>

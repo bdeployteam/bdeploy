@@ -18,13 +18,19 @@
   padding-right: 10px;
 }
 
+.icon-cell {
+  top: 2px;
+  position: relative;
+}
+
 .mat-column-port {
   text-align: right;
   width: 40px;
 }
 
-.mat-column-state {
+.mat-column-portState, .mat-column-appState, .mat-column-rating {
   text-align: center;
+  width: 40px;
 }
 
 .port-list-titlebar {

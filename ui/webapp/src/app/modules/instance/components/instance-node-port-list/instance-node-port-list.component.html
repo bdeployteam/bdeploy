@@ -13,7 +13,7 @@
     No ports are configured on this node.
   </div>
 
-  <table *ngIf='dataSource.data.length' mat-table [dataSource]="dataSource" matSort [matSortActive]="INITIAL_SORT_COLUMN" [matSortDirection]="INITIAL_SORT_DIRECTION">
+  <table [hidden]='!dataSource.data.length' mat-table [dataSource]="dataSource" matSort [matSortActive]="INITIAL_SORT_COLUMN" [matSortDirection]="INITIAL_SORT_DIRECTION">
     <caption style="display: none;">Server Ports</caption>
 
     <ng-container matColumnDef="application">
@@ -22,8 +22,8 @@
     </ng-container>
 
     <ng-container matColumnDef="appState">
-      <th scope="col" mat-header-cell *matHeaderCellDef mat-sort-header>App. State</th>
-      <td mat-cell *matCellDef="let element"><app-process-status [appId]='element.appId' [iconWhenStopped]='true' [instanceTag]='instanceTag' [activatedTag]='instanceActiveTag'></app-process-status></td>
+      <th scope="col" mat-header-cell *matHeaderCellDef>App. State</th>
+      <td mat-cell *matCellDef="let element"><app-process-status class='icon-cell' [appId]='element.appId' [iconWhenStopped]='true' [instanceTag]='instanceTag' [activatedTag]='instanceActiveTag'></app-process-status></td>
     </ng-container>
 
     <ng-container matColumnDef="description">
@@ -38,19 +38,17 @@
 
     <ng-container matColumnDef="portState">
       <th scope="col" mat-header-cell *matHeaderCellDef>State</th>
-      <td mat-cell *matCellDef="let element">{{states && states[element.port] ? "open" : "closed"}}</td>
+      <td mat-cell *matCellDef="let element"><mat-icon class='icon-cell' [ngClass]='states && states[element.port] ? null : "dim-link-off"'>{{states && states[element.port] ? 'link' : 'link_off'}}</mat-icon></td>
     </ng-container>
 
     <ng-container matColumnDef="rating">
       <th scope="col" mat-header-cell *matHeaderCellDef>Rating</th>
       <td mat-cell *matCellDef="let element">
-        <span>
-          <ng-container *ngFor='let rating of [isRatingOk(element)]'>
-            <mat-icon [ngClass]='rating ? "rating-ok" : "rating-failed"' [matTooltip]='rating ? "The port state matches the application state" : "The port state does not match the application state. Something might be wrong."'>
-              {{rating ? 'done' : 'warning'}}
-            </mat-icon>
-          </ng-container>
-        </span>
+        <ng-container *ngFor='let rating of [isRatingOk(element)]'>
+          <mat-icon class='icon-cell' [ngClass]='rating ? "rating-ok" : "rating-failed"' [matTooltip]='rating ? "The port state matches the application state" : "The port state does not match the application state. Something might be wrong."'>
+            {{rating ? 'done' : 'warning'}}
+          </mat-icon>
+        </ng-container>
       </td>
     </ng-container>
 

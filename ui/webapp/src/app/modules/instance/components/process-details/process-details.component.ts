@@ -12,7 +12,6 @@ import { unsubscribe } from '../../../shared/utils/object.utils';
 import { InstanceService } from '../../services/instance.service';
 import { ProcessService } from '../../services/process.service';
 import { ProcessListComponent } from '../process-list/process-list.component';
-import { ProcessPortListComponent } from '../process-port-list/process-port-list.component';
 import { ProcessStartConfirmComponent } from '../process-start-confirm/process-start-confirm.component';
 
 @Component({
@@ -40,6 +39,10 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
   uptimeCalculateHandle: any;
 
   bottomSheet: MatBottomSheetRef<any>;
+
+  portListMinionName: string;
+  portListPorts: string[];
+  portListLabels: string[];
 
   private overlayRef: OverlayRef;
 
@@ -382,43 +385,33 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
     this.bottomSheet.afterDismissed().subscribe(_ => this.bottomSheet = null);
   }
 
-  showPortList() {
-    let minionName = null;
-    const ports = [];
-    const labels = [];
+  showPortList(template: TemplateRef<any>) {
+    this.portListMinionName = null;
+    this.portListPorts = [];
+    this.portListLabels = [];
 
     for (const node of this.processConfig.nodeList.nodeConfigDtos) {
       for (const app of node.nodeConfiguration.applications) {
         if (app.uid === this.appConfig.uid) {
-          minionName = node.nodeName;
+          this.portListMinionName = node.nodeName;
           for (const paramCfg of this.appConfig.start.parameters) {
             const appDesc = this.processConfig.nodeList.applications[this.appConfig.application.name];
             const paramDesc = appDesc.startCommand.parameters.find(p => p.uid === paramCfg.uid);
             if (paramDesc && paramDesc.type === ParameterType.SERVER_PORT) {
               // we want this one :)
-              ports.push(paramCfg.value);
-              labels.push(paramDesc.name);
+              this.portListPorts.push(paramCfg.value);
+              this.portListLabels.push(paramDesc.name);
             }
           }
           break;
         }
       }
-      if (minionName) {
+      if (this.portListMinionName) {
         break;
       }
     }
 
-    this.bottomSheet = this.bottomSheetSvc.open(ProcessPortListComponent, {
-      panelClass: 'process-sheet',
-      data: {
-        instanceGroup: this.instanceGroup,
-        instanceId: this.instanceId,
-        minionName: minionName,
-        appName: this.appConfig.name,
-        ports: ports,
-        labels: labels
-      },
-    });
+    this.bottomSheet = this.bottomSheetSvc.open(template, { panelClass: 'process-sheet' });
     this.bottomSheet.afterDismissed().subscribe(_ => this.bottomSheet = null);
   }
 

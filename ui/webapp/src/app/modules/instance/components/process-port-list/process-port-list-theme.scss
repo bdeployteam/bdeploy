@@ -4,11 +4,15 @@
   $dark: map-get($theme, is-dark);
   $warn: map-get($theme, 'warn');
 
-  .port-open {
+  .rating-ok {
     color: if($dark, mat-color($mat-green, 400), mat-color($mat-green, 600));
   }
 
-  .port-closed {
+  .rating-failed {
     color: mat-color($warn);
+  }
+
+  .dim-link-off {
+    color: if($dark, mat-color($mat-grey, 600), mat-color($mat-grey, 400));
   }
 }
