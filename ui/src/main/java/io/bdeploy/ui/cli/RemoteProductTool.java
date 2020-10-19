@@ -1,9 +1,11 @@
 package io.bdeploy.ui.cli;
 
+import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolCategory;
+import io.bdeploy.common.cli.data.DataResult;
 import io.bdeploy.common.cli.data.DataTable;
 import io.bdeploy.common.cli.data.DataTableColumn;
 import io.bdeploy.common.cli.data.RenderableResult;
@@ -22,12 +24,21 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
 
     public @interface ProductConfig {
 
-        @Help("Name of the instance group for import into or export from")
+        @Help("Name of the instance group")
         @EnvironmentFallback("REMOTE_BHIVE")
         String instanceGroup();
 
-        @Help(value = "List instance versions on the remote", arg = false)
+        @Help(value = "List products on the remote", arg = false)
         boolean list() default false;
+
+        @Help(value = "Copy a product from a software repository", arg = false)
+        boolean copy() default false;
+
+        @Help(value = "The source software repository for --copy")
+        String repository();
+
+        @Help(value = "The product version to copy")
+        String product();
 
     }
 
@@ -41,6 +52,11 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
 
         if (config.list()) {
             return list(remote, config);
+        } else if (config.copy()) {
+            helpAndFailIfMissing(config.repository(), "Missing --repository");
+            helpAndFailIfMissing(config.product(), "Missing --product");
+            return copy(remote, config);
+
         } else {
             return createNoOp();
         }
@@ -63,6 +79,16 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
         }
 
         return table;
+    }
+
+    private DataResult copy(RemoteService remote, ProductConfig config) {
+
+        ProductResource pr = ResourceProvider.getResource(remote, InstanceGroupResource.class, getLocalContext())
+                .getProductResource(config.instanceGroup());
+        Manifest.Key pkey = Manifest.Key.parse(config.product());
+        pr.copyProduct(config.repository(), pkey.getName() + "/product", pkey.getTag());
+
+        return createSuccess();
     }
 
 }
