@@ -35,12 +35,13 @@ public class DataTableColumn {
     /**
      * @param name the machine readable name of the column
      * @param label the human readable label of the column
-     * @param preferredWidth the preferred width of the colum in characters.
+     * @param preferredWidth the preferred width of the column in characters. The preferredWidth is at least the length of the
+     *            label.
      */
     public DataTableColumn(String name, String label, int preferredWidth) {
         this.name = name;
         this.label = label;
-        this.preferredWidth = preferredWidth;
+        this.preferredWidth = Math.max(this.label.length(), preferredWidth);
     }
 
     /**
