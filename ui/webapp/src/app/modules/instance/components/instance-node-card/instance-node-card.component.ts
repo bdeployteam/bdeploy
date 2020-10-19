@@ -1,5 +1,5 @@
 import { moveItemInArray } from '@angular/cdk/drag-drop';
-import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 import { MatBottomSheet, MatBottomSheetRef } from '@angular/material/bottom-sheet';
 import { MatDialog } from '@angular/material/dialog';
 import { format } from 'date-fns';
@@ -19,7 +19,6 @@ import { EditAppConfigContext, ProcessConfigDto } from '../../../../models/proce
 import { getAppOs, updateAppOs } from '../../../shared/utils/manifest.utils';
 import { ApplicationService } from '../../services/application.service';
 import { ApplicationTemplateVariableDialogComponent, VariableInput } from '../application-template-variable-dialog/application-template-variable-dialog.component';
-import { InstanceNodePortListComponent } from '../instance-node-port-list/instance-node-port-list.component';
 
 
 @Component({
@@ -75,7 +74,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
     private mbService: MessageboxService,
     private loggingService: LoggingService,
     private dialog: MatDialog,
-    private bottomSheetSvc: MatBottomSheet,
+    private bottomSheetSvc: MatBottomSheet
     ) {}
 
   ngOnInit() {
@@ -478,16 +477,8 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
     return 'Start time: ' + startDate + ' | ' + ' Version: ' + versionStr;
   }
 
-  showNodePortList() {
-    this.bottomSheet = this.bottomSheetSvc.open(InstanceNodePortListComponent, {
-      panelClass: 'process-sheet',
-      data: {
-        instanceGroup: this.instanceGroupName,
-        instanceId: this.processConfig.instance.uuid,
-        minionName: this.node.nodeName,
-        node: this.node,
-      },
-    });
+  showNodePortList(template: TemplateRef<any>) {
+    this.bottomSheet = this.bottomSheetSvc.open(template, { panelClass: 'process-sheet' });
     this.bottomSheet.afterDismissed().subscribe(_ => this.bottomSheet = null);
   }
 }

@@ -1,3 +1,7 @@
+<ng-template #nodePortList>
+  <app-instance-node-port-list [instanceGroup]='instanceGroupName' [instanceId]='processConfig.instance.uuid' [instanceTag]='processConfig.version.key.tag' [instanceActiveTag]='activatedInstanceTag' [minionName]='node.nodeName' [node]='node'></app-instance-node-port-list>
+</ng-template>
+
 <mat-card #appNodeCard class="node-card instance-node-card-theme">
 
   <!-- server applications node header -->
@@ -12,7 +16,7 @@
     <mat-card-subtitle class='node-card-subtitle'>Published server applications</mat-card-subtitle>
     <span class="fill-space"></span>
     <ng-container *ngIf="minionState && !manageApplications">
-      <button mat-icon-button *ngIf='isNodeOnline()' (click)="showNodePortList()" matTooltip="Show ports"><mat-icon>power</mat-icon></button>
+      <button mat-icon-button *ngIf='isNodeOnline()' (click)="showNodePortList(nodePortList)" matTooltip="Show ports"><mat-icon>power</mat-icon></button>
       <mat-icon class='instance-node-online' *ngIf='isNodeOnline()' [matTooltip]="getNodeStatusTooltip()">flight_takeoff</mat-icon>
       <mat-icon class='instance-node-offline' *ngIf='!isNodeOnline()' [matTooltip]="getNodeStatusTooltip()">error</mat-icon>
     </ng-container>
