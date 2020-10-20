@@ -17,6 +17,7 @@ import io.bdeploy.common.cli.data.DataTableColumn;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.DateHelper;
+import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessHandleDto;
@@ -28,6 +29,7 @@ import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
 import io.bdeploy.ui.api.ProcessResource;
 import io.bdeploy.ui.cli.RemoteProcessTool.RemoteProcessConfig;
+import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
 
 @Help("Deploy to a remote master minion")
 @ToolCategory(TextUIResources.UI_CATEGORY)
@@ -97,6 +99,9 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
             return createAllProcessesTable(config, svc, ir, status);
         } else {
             ProcessDetailDto appStatus = ir.getProcessResource(instanceId).getDetails(appId);
+            InstanceNodeConfigurationListDto cfg = ir.getNodeConfigurations(appStatus.status.instanceUid,
+                    appStatus.status.instanceTag);
+            Optional<ApplicationConfiguration> app = findAppConfig(appStatus.status, Optional.ofNullable(cfg));
 
             DataResult result = createResultWithMessage(
                     "Details for " + appId + " of instance " + instanceId + " of instance group " + groupName)
@@ -106,6 +111,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                             .addField("Instance Version", appStatus.status.instanceTag).addField("Main PID", appStatus.status.pid)
                             .addField("State", appStatus.status.processState)
                             .addField("Retries", appStatus.retryCount + "/" + appStatus.maxRetryCount)
+                            .addField("Start Type", app.isPresent() ? app.get().processControl.startType : "?")
                             .addField("StdIn attached", (appStatus.hasStdin ? "Yes" : "No"));
 
             if (appStatus.handle != null) {
@@ -114,6 +120,22 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
 
             return result;
         }
+    }
+
+    private Optional<ApplicationConfiguration> findAppConfig(ProcessStatusDto processStatusDto,
+            Optional<InstanceNodeConfigurationListDto> nodes) {
+        Optional<ApplicationConfiguration> app = Optional.empty();
+        if (!nodes.isPresent()) {
+            return app;
+        }
+
+        for (var node : nodes.get().nodeConfigDtos) {
+            app = node.nodeConfiguration.applications.stream().filter(a -> a.uid.equals(processStatusDto.appUid)).findFirst();
+            if (app.isPresent()) {
+                break;
+            }
+        }
+        return app;
     }
 
     private void addProcessDetails(DataResult result, ProcessHandleDto pdd, String indent) {
@@ -135,12 +157,14 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         table.column("Status", 20);
         table.column(new DataTableColumn("Version", "Ver.*", 5));
         table.column("Product Version", 20);
+        table.column("Start Type", 14);
         table.column("Started At", 20);
         table.column("OS User", 20);
         table.column("PID", 6);
         table.column(new DataTableColumn("ExitCode", "Exit", 4));
 
         Map<String, Optional<InstanceConfiguration>> instanceInfos = new TreeMap<>();
+        Map<String, Optional<InstanceNodeConfigurationListDto>> nodeDtos = new TreeMap<>();
         InstanceStateRecord deploymentStates = ir.getDeploymentStates(config.uuid());
 
         for (Entry<String, ProcessStatusDto> processEntry : status.entrySet()) {
@@ -150,12 +174,23 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                     return Optional.of(ir.readVersion(config.uuid(), tag));
                 } catch (NotFoundException nf) {
                     // instance version not found - probably not synced to central.
-                    out().println("WARNING: Cannot read instance version version " + tag
+                    out().println("WARNING: Cannot read instance version " + tag
                             + ". This can happen for instance if the central server is not synchronized.");
                     return Optional.ofNullable(null);
                 }
             });
-            addProcessRows(table, ir.getProcessResource(config.uuid()), processEntry.getValue(), instance, deploymentStates);
+            Optional<InstanceNodeConfigurationListDto> nodes = nodeDtos.computeIfAbsent(tag, k -> {
+                try {
+                    return Optional.of(ir.getNodeConfigurations(config.uuid(), tag));
+                } catch (NotFoundException nf) {
+                    // instance version not found - probably not synced to central.
+                    out().println("WARNING: Cannot read instance nodes for version " + tag
+                            + ". This can happen for instance if the central server is not synchronized.");
+                    return Optional.ofNullable(null);
+                }
+            });
+            Optional<ApplicationConfiguration> cfg = findAppConfig(processEntry.getValue(), nodes);
+            addProcessRows(table, ir.getProcessResource(config.uuid()), processEntry.getValue(), instance, deploymentStates, cfg);
         }
 
         table.addFooter(" * Versions marked with '*' are out-of-sync (not running from the active version)");
@@ -164,7 +199,8 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
     }
 
     private void addProcessRows(DataTable table, ProcessResource pr, ProcessStatusDto process,
-            Optional<InstanceConfiguration> instance, InstanceStateRecord deploymentStates) {
+            Optional<InstanceConfiguration> instance, InstanceStateRecord deploymentStates,
+            Optional<ApplicationConfiguration> cfg) {
         ProcessDetailDto detail = pr.getDetails(process.appUid);
         ProcessHandleDto handle = detail.handle;
 
@@ -173,6 +209,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                 .cell(process.processState.name()) //
                 .cell(process.instanceTag + (process.instanceTag.equals(deploymentStates.activeTag) ? "" : "*")) //
                 .cell(instance.isPresent() ? instance.get().product.getTag() : "?") //
+                .cell(cfg.isPresent() ? cfg.get().processControl.startType : "?") //
                 .cell(handle == null ? "-" : DateHelper.format(handle.startTime)) //
                 .cell(handle == null ? "-" : handle.user) //
                 .cell(handle == null ? "-" : Long.toString(handle.pid)) //

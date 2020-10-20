@@ -39,7 +39,7 @@ public class DataResultText extends DataResultBase {
             }
         } else {
             table.column(new DataTableColumn("Result Field", 25));
-            table.column(new DataTableColumn("Result Value", 60));
+            table.column(new DataTableColumn("Result Value", 95));
 
             if (getMessage() != null) {
                 table.row().cell("Message").cell(getMessage()).build();
