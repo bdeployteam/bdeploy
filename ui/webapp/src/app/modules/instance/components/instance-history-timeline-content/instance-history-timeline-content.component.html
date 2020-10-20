@@ -1,6 +1,6 @@
 <ul class="timeline-card-content" *ngIf="history != null">
   <li *ngFor="let property of history.properties | keyvalue">
-    {{property.key}}: <em>{{property.value[0]}}</em> --> <em>{{property.value[1]}}</em></li>
+    {{property.key}}: <em>{{property.value[0]}}</em> <mat-icon class='change-arrow'>arrow_right_alt</mat-icon> <em>{{property.value[1]}}</em></li>
 
   <li *ngFor="let node of history.nodes | keyvalue">
     <span *ngIf="node.key != '__ClientApplications' else clientApplications">Node <em>{{node.key}}:</em></span>
@@ -14,13 +14,13 @@
         <ul>
 
           <li *ngFor="let property of changed.value.properties|keyvalue">
-            {{property.key}}: <em>{{property.value[0]}}</em> --> <em>{{property.value[1]}}</em>
+            {{property.key}}: <em>{{property.value[0]}}</em> <mat-icon class='change-arrow'>arrow_right_alt</mat-icon> <em>{{property.value[1]}}</em>
           </li>
           <li *ngIf="!isEmpty(changed.value.processControlProperties)">
             Process control:
             <ul>
               <li *ngFor="let property of changed.value.processControlProperties|keyvalue">
-                {{property.key}}: <em>{{property.value[0]}}</em> --> <em>{{property.value[1]}}</em>
+                {{property.key}}: <em>{{property.value[0]}}</em> <mat-icon class='change-arrow'>arrow_right_alt</mat-icon> <em>{{property.value[1]}}</em>
               </li>
             </ul>
           </li>
@@ -29,13 +29,13 @@
             Parameters:
             <ul>
               <li *ngFor="let added of changed.value.parameters.added">
-                Added <em>{{added[0]}}</em>:<em>{{added[1]}}</em>
+                Added <em>{{added[0]}}</em>: <em>{{added[1]}}</em>
               </li>
               <li *ngFor="let deleted of changed.value.parameters.deleted">
-                Deleted <em>{{deleted[0]}}:</em><em>{{deleted[1]}}</em>
+                Deleted <em>{{deleted[0]}}</em>: <em>{{deleted[1]}}</em>
               </li>
               <li *ngFor="let changedParameter of changed.value.parameters.changed | keyvalue">
-                Changed <em>{{changedParameter.key}}: </em> <em>{{changedParameter.value[0]}}</em> --> <em>{{changedParameter.value[1]}}</em>
+                Changed <em>{{changedParameter.key}}: </em> <em>{{changedParameter.value[0]}}</em> <mat-icon class='change-arrow'>arrow_right_alt</mat-icon> <em>{{changedParameter.value[1]}}</em>
               </li>
             </ul>
           </li>
@@ -50,7 +50,7 @@
             Http-endpoint at <em>{{endpoint.key}}</em>:
             <ul>
               <li *ngFor="let property of endpoint.value.changedEndpoints|keyvalue">
-                <span *ngIf="property.value != null else endpointPassword">{{property.key}}: <em>{{property.value[0]}}</em> --> <em>{{property.value[1]}}</em></span>
+                <span *ngIf="property.value != null else endpointPassword">{{property.key}}: <em>{{property.value[0]}}</em> <mat-icon class='change-arrow'>arrow_right_alt</mat-icon> <em>{{property.value[1]}}</em></span>
                 <ng-template #endpointPassword>{{property.key}} changed</ng-template>
               </li>
             </ul>

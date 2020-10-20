@@ -18,3 +18,7 @@ em {
   line-height: 150%;
 }
 
+.change-arrow {
+  position: relative;
+  top: 6px;
+}
