@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -20,9 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.meta.MetaManifest;
-import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
-import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.PruneOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
@@ -41,7 +38,6 @@ import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.minion.MinionDto;
-import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
@@ -51,364 +47,312 @@ import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 
 /**
- * Shared logic for cleanups on the master. Both immediate and two-stage cleanup is supported.
+ * Shared logic for cleanups on the master.
+ * The first stage calculates everything to cleanup, the second stage executes the calculated actions.
  */
 public class CleanupHelper {
 
     private static final Logger log = LoggerFactory.getLogger(CleanupHelper.class);
 
+    private final SecurityContext securityContext;
+    private final Minion minion;
+    private final BHiveRegistry registry;
+    private final MasterProvider provider;
+    private final VersionSorterService vss;
+
     private static Comparator<String> intTagComparator = (a, b) -> Integer.compare(Integer.parseInt(a), Integer.parseInt(b));
 
-    private CleanupHelper() {
-    }
-
     /**
-     * Performs the calculation (and optionally the actual cleanup immediately) of things that require cleaning upon all given
-     * minions.
+     * Constructor.
      *
      * @param context the caller's security context
      * @param minion the minion - required to be the running master.
      * @param registry the BHive registry.
-     * @param immediate whether to immediately perform cleanup. In case this is <code>true</code>, the returned {@link List} is
-     *            always empty.
      * @param provider the {@link MasterProvider} which knows how to obtain a communication channel with an instance's controlling
      *            master.
      * @param vss
-     * @return the {@link List} of {@link CleanupGroup}s per minion. Always empty if the immediate parameter is <code>true</code>.
      */
-    public static List<CleanupGroup> cleanAllMinions(SecurityContext context, Minion minion, BHiveRegistry registry,
-            boolean immediate, MasterProvider provider, VersionSorterService vss) {
+    public CleanupHelper(SecurityContext context, Minion minion, BHiveRegistry registry, MasterProvider provider,
+            VersionSorterService vss) {
+        this.securityContext = context;
+        this.minion = minion;
+        this.registry = registry;
+        this.provider = provider;
+        this.vss = vss;
+    }
 
+    /**
+     * Performs the calculation of things that require cleaning upon all given instance groups and minions.
+     *
+     * @return the {@link List} of {@link CleanupGroup}s per instance group or minion.
+     */
+    public List<CleanupGroup> calculate() {
         List<CleanupGroup> groups = new ArrayList<>();
 
-        // master cleanup
+        // master cleanup (clean instance groups, skip otherwise (software repositories))
         for (String group : registry.getAll().keySet()) {
-            BHive hive = registry.get(group);
-
-            InstanceGroupConfiguration cfg = new InstanceGroupManifest(hive).read();
-            if (cfg != null) {
-                cleanInstanceGroup(minion, context, immediate, provider, groups, group, hive, cfg, vss);
+            CleanupInstanceGroupContext context = new CleanupInstanceGroupContext(group, registry.get(group), vss);
+            if (context.getInstanceGroupConfiguration() != null) {
+                groups.add(calculateInstanceGroup(context));
             }
         }
 
         // no slaves to cleanup on central. actual slave cleanup for managed masters done on each master.
-        if (minion.getMode() == MinionMode.CENTRAL) {
-            return groups;
-        }
+        if (minion.getMode() != MinionMode.CENTRAL) {
+            // minions cleanup
+            SortedSet<Key> instanceNodeManifestsToKeep = collectKnownInstanceNodeManifests();
+            for (Map.Entry<String, MinionDto> slave : minion.getMinions().entrySet()) {
+                log.info("Cleaning on {}, using {} anchors.", slave.getKey(), instanceNodeManifestsToKeep.size());
 
-        // minions cleanup
-        SortedSet<Key> allUniqueKeysToKeep = findAllUniqueKeys(registry);
-        for (Map.Entry<String, MinionDto> slave : minion.getMinions().entrySet()) {
-            log.info("Cleaning on {}, using {} anchors.", slave.getKey(), allUniqueKeysToKeep.size());
-
-            RemoteService remote = slave.getValue().remote;
-            SlaveCleanupResource scr = ResourceProvider.getVersionedResource(remote, SlaveCleanupResource.class, null);
-            try {
-                List<CleanupAction> actions = scr.cleanup(allUniqueKeysToKeep, immediate);
-                if (!immediate) {
+                RemoteService remote = slave.getValue().remote;
+                SlaveCleanupResource scr = ResourceProvider.getVersionedResource(remote, SlaveCleanupResource.class, null);
+                try {
+                    List<CleanupAction> actions = scr.cleanup(instanceNodeManifestsToKeep);
                     groups.add(new CleanupGroup("Perform cleanup on " + slave.getKey(), slave.getKey(), null, actions));
-                }
-            } catch (Exception e) {
-                log.warn("Cannot perform cleanup on minion {}", slave.getKey());
-                if (log.isDebugEnabled()) {
+                } catch (Exception e) {
+                    log.warn("Cannot perform cleanup on minion {}", slave.getKey());
                     log.debug("Error details", e);
-                }
-
-                if (!immediate) {
                     groups.add(new CleanupGroup("Not possible to clean offline minion " + slave.getKey(), slave.getKey(), null,
                             Collections.emptyList()));
                 }
             }
         }
-
         return groups;
     }
 
-    private static void cleanInstanceGroup(Minion minion, SecurityContext context, boolean immediate, MasterProvider provider,
-            List<CleanupGroup> groups, String group, BHive hive, InstanceGroupConfiguration cfg, VersionSorterService vss) {
+    /**
+     * Executes all actions calculated by {@link #calculate()}.
+     *
+     * @param groups the {@link List} of {@link CleanupGroup}s as calculated by {@link #calculate()}.
+     */
+    public void execute(List<CleanupGroup> groups) {
+        for (CleanupGroup group : groups) {
 
+            if (group.instanceGroup != null) {
+                BHive hive = registry.get(group.instanceGroup);
+                if (hive != null) {
+                    for (CleanupAction action : group.actions) {
+                        action.execute(securityContext, provider, hive);
+                    }
+                    if (!group.actions.isEmpty()) {
+                        hive.execute(new PruneOperation());
+                    }
+                } else {
+                    log.warn("Don't know how to run cleanup group {}, instance group not found", group.name);
+                }
+            } else if (group.minion != null) {
+                RemoteService svc = minion.getMinions().getRemote(group.minion);
+                if (svc != null) {
+                    log.info("Performing cleanup group {} on {}", group.name, group.minion);
+                    SlaveCleanupResource scr = ResourceProvider.getVersionedResource(svc, SlaveCleanupResource.class, null);
+                    try {
+                        scr.perform(group.actions);
+                    } catch (Exception e) {
+                        log.warn("Cannot perform cleanup on minion {}", group.minion);
+                        log.debug("Error details", e);
+                    }
+                } else {
+                    log.warn("Minion {} associated with cleanup group {} not found", group.minion, group.name);
+                }
+            } else {
+                log.warn("Don't know how to run cleanup group {}, no instance group or minion associated", group.name);
+            }
+        }
+    }
+
+    /**
+     * Collects {@link InstanceNodeManifest}s to <b>keep</b>.
+     * Given all {@link BHive}s registered in the given {@link BHiveRegistry}, all
+     * {@link InstanceNodeManifest}s that exist (also historic versions) are collected.
+     *
+     * @return the {@link SortedSet} of {@link Key}s which are required to be kept alive on each slave.
+     */
+    private SortedSet<Key> collectKnownInstanceNodeManifests() {
+        SortedSet<Key> result = new TreeSet<>();
+        for (BHive hive : registry.getAll().values()) {
+            InstanceGroupConfiguration ig = new InstanceGroupManifest(hive).read();
+            if (ig != null) {
+                log.info("Gathering information for instance group {} ({})", ig.name, ig.title);
+
+                // instance manifests
+                SortedSet<Key> imfs = InstanceManifest.scan(hive, false);
+
+                // instance node manifests referenced by imfs
+                SortedSet<Key> inmfs = imfs.stream().map(key -> InstanceManifest.of(hive, key))
+                        .flatMap(im -> im.getInstanceNodeManifests().values().stream())
+                        .collect(Collectors.toCollection(TreeSet::new));
+                result.addAll(inmfs);
+
+                log.info("Collected {} instance node manifests", inmfs.size());
+            }
+            // else: not an InstanceGroup (default hive / software repository)
+        }
+        return result;
+    }
+
+    /**
+     * Calculate cleanup actions for a single instance group depending on auto-delete and auto-uninstall
+     * configuration.
+     *
+     * @param context the instance group context with collected data
+     * @return a {@link CleanupGroup} for the given instance group
+     */
+    private CleanupGroup calculateInstanceGroup(CleanupInstanceGroupContext context) {
         List<CleanupAction> instanceGroupActions = new ArrayList<>();
-        Map<String, SortedSet<Key>> instanceVersions4Uninstall = new HashMap<>();
-
-        SortedSet<Manifest.Key> allManifests4deletion = new TreeSet<>(); // collect all keys for meta cleanup
 
         // for central, don't auto-uninstall. only auto-clean products which are not known to be used.
         if (minion.getMode() != MinionMode.CENTRAL) {
             // auto uninstall of old instance version
-            SortedSet<Key> latestImKeys = InstanceManifest.scan(hive, true);
-            for (Key key : latestImKeys) {
-                InstanceManifest im = InstanceManifest.of(hive, key);
+            for (Key key : context.getLatestInstanceManifests()) {
+                InstanceManifest im = InstanceManifest.of(context.getHive(), key);
                 if (im.getConfiguration().autoUninstall) {
-                    SortedSet<Key> keys = findInstanceVersions4Uninstall(context, group, hive, im, provider);
-                    instanceVersions4Uninstall.put(im.getManifest().getName(), keys);
-                    allManifests4deletion.addAll(keys);
-                    instanceGroupActions.addAll(uninstallInstanceVersions(context, hive, keys, immediate, provider));
+                    instanceGroupActions.addAll(calculateInstance(context, im));
                 }
             }
         }
 
         // cleanup of unused products
-        if (cfg.autoDelete) {
-            instanceGroupActions.addAll(deleteUnusedProducts(context, hive, group, minion, instanceVersions4Uninstall,
-                    allManifests4deletion, immediate, provider, vss));
+        if (context.getInstanceGroupConfiguration().autoDelete) {
+            instanceGroupActions.addAll(calculateProducts(context));
         }
 
-        instanceGroupActions.addAll(cleanupMetaManifests(context, hive, allManifests4deletion, immediate, provider));
+        // cleanup of meta manifests
+        instanceGroupActions.addAll(calculateMetaManifests(context));
 
-        if (!immediate) {
-            groups.add(new CleanupGroup("Perform Cleanup on Instance Group " + cfg.name, null, cfg.name, instanceGroupActions));
-        }
+        return new CleanupGroup("Perform Cleanup on Instance Group " + context.getInstanceGroupConfiguration().name, null,
+                context.getInstanceGroupConfiguration().name, instanceGroupActions);
     }
 
     /**
-     * Performs all actions calculated by
-     * {@link #cleanAllMinions(SecurityContext, Minion, BHiveRegistry, boolean, MasterProvider, VersionSorterService)} with
-     * immediate set to <code>false</code>.
+     * Find instance versions for automatic uninstallation.
      *
-     * @param context the caller's security context
-     * @param groups the {@link List} of {@link CleanupGroup} calculated by
-     *            {@link #cleanAllMinions(SecurityContext, Minion, BHiveRegistry, boolean, MasterProvider, VersionSorterService)}.
-     * @param minion the calling minion - required to be the master.
-     * @param registry the BHive registry.
+     * @param context the instance group context with collected data
+     * @param instanceManifest the instance to check
+     * @return a list of {@link CleanupAction}s for the given instance
      */
-    public static void cleanAllMinions(SecurityContext context, List<CleanupGroup> groups, Minion minion, BHiveRegistry registry,
-            MasterProvider provider) {
-        for (CleanupGroup group : groups) {
-            if (group.instanceGroup != null) {
-                BHive hive = registry.get(group.instanceGroup);
-                if (hive == null) {
-                    log.warn("Don't know how to perform cleanup group {}, instance group not found", group.name);
-                    continue;
-                }
-                perform(context, hive, group.actions, provider);
-                continue;
-            }
-            if (group.minion == null) {
-                log.warn("Don't know how to perform cleanup group {}, no minion associated", group.name);
-                continue;
-            }
-
-            RemoteService svc = minion.getMinions().getRemote(group.minion);
-            if (svc == null) {
-                log.warn("Minion {} associated with cleanup group {} not found", group.minion, group.name);
-                continue;
-            }
-
-            log.info("Performing cleanup group {} on {}", group.name, group.minion);
-
-            SlaveCleanupResource scr = ResourceProvider.getVersionedResource(svc, SlaveCleanupResource.class, null);
-            try {
-                scr.perform(group.actions);
-            } catch (Exception e) {
-                log.warn("Cannot perform cleanup on minion {}", group.minion);
-                if (log.isDebugEnabled()) {
-                    log.debug("Error details", e);
-                }
-            }
-        }
-    }
-
-    /**
-     * Identifies things to <b>keep</b>. Given all {@link BHive}s registered in the given {@link BHiveRegistry}, all
-     * {@link InstanceNodeManifest}s that exist (also historic versions) are collected.
-     *
-     * @param registry the {@link BHiveRegistry} containing all relevant {@link BHive}s for the current setup.
-     * @return the {@link SortedSet} of {@link Key}s which are required to be kept alive on each slave.
-     */
-    private static SortedSet<Key> findAllUniqueKeys(BHiveRegistry registry) {
-        SortedSet<Key> allUniqueKeysToKeep = new TreeSet<>();
-        for (Map.Entry<String, BHive> entry : registry.getAll().entrySet()) {
-            BHive toCheck = entry.getValue();
-            InstanceGroupConfiguration ig = new InstanceGroupManifest(toCheck).read();
-            if (ig == null) {
-                // not an instance group, skip.
-                // this is either the default hive (slave hive), or a software repository.
-                continue;
-            }
-            log.info("Gathering information for instance group {} ({})", ig.name, ig.title);
-
-            // instance manifests
-            SortedSet<Key> imfs = InstanceManifest.scan(toCheck, false);
-
-            // instance node manifests
-            SortedSet<Key> inmfs = imfs.stream().map(key -> InstanceManifest.of(toCheck, key))
-                    .flatMap(im -> im.getInstanceNodeManifests().values().stream())
-                    .collect(Collectors.toCollection(TreeSet::new));
-
-            log.info("Collected {} node manifests", inmfs.size());
-
-            allUniqueKeysToKeep.addAll(inmfs);
-        }
-        return allUniqueKeysToKeep;
-    }
-
-    private static SortedSet<Key> findInstanceVersions4Uninstall(SecurityContext context, String group, BHive hive,
-            InstanceManifest instanceManifest, MasterProvider provider) {
-        InstanceStateRecord state = instanceManifest.getState(hive).read();
-
+    private List<CleanupAction> calculateInstance(CleanupInstanceGroupContext context, InstanceManifest instanceManifest) {
+        // find active tags from app status (what's up running)
         MasterRootResource root = ResourceProvider.getVersionedResource(
-                provider.getControllingMaster(hive, instanceManifest.getManifest()), MasterRootResource.class, context);
-        MasterNamedResource namedMaster = root.getNamedMaster(group);
-
+                provider.getControllingMaster(context.getHive(), instanceManifest.getManifest()), MasterRootResource.class,
+                securityContext);
+        MasterNamedResource namedMaster = root.getNamedMaster(context.getGroup());
         Map<String, ProcessStatusDto> appStatus = namedMaster.getStatus(instanceManifest.getConfiguration().uuid).getAppStatus();
-
         Set<String> activeTags = appStatus.values().stream().map(p -> p.instanceTag).collect(Collectors.toSet());
 
-        return InstanceManifest.scan(hive, false).stream()
+        // get instance state (what's configured and installed)
+        InstanceStateRecord state = instanceManifest.getState(context.getHive()).read();
+
+        // find installed instance versions older than "active", not "lastActive", not currently running
+        SortedSet<Key> result = context.getAllInstanceManifests().stream()
                 .filter(im -> im.getName().equals(instanceManifest.getManifest().getName())) //
                 .filter(im -> (state.activeTag != null && intTagComparator.compare(im.getTag(), state.activeTag) < 0)
                         && !im.getTag().equals(state.lastActiveTag)) //
                 .filter(im -> state.installedTags.contains(im.getTag())) //
                 .filter(im -> !activeTags.contains(im.getTag())) //
                 .collect(Collectors.toCollection(TreeSet::new));
-    }
 
-    private static List<CleanupAction> uninstallInstanceVersions(SecurityContext context, BHive hive, Set<Key> imVersionKeys,
-            boolean immediate, MasterProvider provider) {
+        // add to context for later cleanup steps...
+        context.addInstanceVersions(instanceManifest.getManifest().getName(), result);
+
+        // calculate and return actions for calculated instance
         List<CleanupAction> actions = new ArrayList<>();
-
-        for (Key key : imVersionKeys) {
-            InstanceConfiguration imConfig = InstanceManifest.of(hive, key).getConfiguration();
+        for (Key key : result) {
+            InstanceConfiguration imConfig = InstanceManifest.of(context.getHive(), key).getConfiguration();
             actions.add(new CleanupAction(CleanupType.UNINSTALL_INSTANCE_VERSION, key.toString(),
                     "Uninstall instance version \"" + imConfig.name + "\", version \"" + key.getTag() + "\""));
         }
-
-        if (immediate) {
-            perform(context, hive, actions, provider);
-            return Collections.emptyList();
-        }
-
         return actions;
     }
 
-    private static List<CleanupAction> deleteUnusedProducts(SecurityContext context, BHive hive, String group, Minion minion,
-            Map<String, SortedSet<Key>> instanceVersions4Uninstall, SortedSet<Manifest.Key> allManifests4deletion,
-            boolean immediate, MasterProvider provider, VersionSorterService vss) {
+    /**
+     * Find unused products for deletion.
+     *
+     * @param context the instance group context with collected data
+     * @return a list of {@link CleanupActions} for products and their applications
+     */
+    private List<CleanupAction> calculateProducts(CleanupInstanceGroupContext context) {
         List<CleanupAction> actions = new ArrayList<>();
+        Map<String, List<Key>> productsInUseMap = collectProductsInUse(context);
 
-        Map<String, Comparator<Key>> comparators = new TreeMap<>();
+        for (String pName : context.getAllProductNames()) {
+            List<Key> pAll = context.getAllProductVersions(pName);
+            List<Key> pInst = productsInUseMap.get(pName);
+            Key oldestToKeep = pInst != null && pInst.size() > 0 ? pInst.get(0) : pAll.get(pAll.size() - 1); // oldest Installed or newest
 
-        // map of available products grouped by product name
-        Map<String, List<Key>> allProductsMap = ProductManifest.scan(hive).stream().sorted((a, b) -> {
-            Comparator<Manifest.Key> productVersionComparator = comparators.computeIfAbsent(a.getName(),
-                    k -> vss.getKeyComparator(group, a));
-            return productVersionComparator.compare(b, a);
-        }).collect(Collectors.groupingBy(Key::getName, Collectors.toCollection(ArrayList::new)));
-
-        // find the oldest instance version per instance that is "under protection", i.e. the product it uses must not be uninstalled
-        SortedSet<Key> latestInstanceManifests = InstanceManifest.scan(hive, true);
-        Map<String, Set<String>> installedTagsMap = latestInstanceManifests.stream().collect(
-                Collectors.toMap(Key::getName, imKey -> InstanceManifest.of(hive, imKey).getState(hive).read().installedTags));
-        // remove all to-be-uninstalled tags from installedTagsMap
-        latestInstanceManifests.stream().forEach(imKey -> Optional.ofNullable(instanceVersions4Uninstall.get(imKey.getName()))
-                .ifPresent(keys -> keys.stream().forEach(k -> installedTagsMap.get(imKey.getName()).remove(k.getTag()))));
-
-        Map<String, String> oldestTag = new HashMap<>();
-        for (Map.Entry<String, Set<String>> entry : installedTagsMap.entrySet()) {
-            Optional<String> min = entry.getValue().stream().min(intTagComparator);
-            oldestTag.put(entry.getKey(), min.isPresent() ? min.get() : "0");
-        }
-
-        Map<String, SortedSet<Key>> usedProductsMap = InstanceManifest.scan(hive, false).stream()
-                .filter(imKey -> intTagComparator.compare(imKey.getTag(), oldestTag.get(imKey.getName())) >= 0)
-                .map(imKey -> InstanceManifest.of(hive, imKey).getConfiguration().product).collect(Collectors.toSet()).stream()
-                .collect(Collectors.groupingBy(Key::getName, Collectors.toCollection(TreeSet::new)));
-
-        // create actions for unused products (older than the oldest product in use)
-        SortedSet<Manifest.Key> manifests4deletion = new TreeSet<>();
-        createDeleteProductsActions(hive, minion.getPluginManager(), actions, manifests4deletion, allProductsMap, usedProductsMap,
-                comparators);
-
-        if (immediate) {
-            perform(context, hive, actions, provider);
-            return Collections.emptyList();
-        }
-
-        allManifests4deletion.addAll(manifests4deletion);
-        return actions;
-    }
-
-    private static void createDeleteProductsActions(BHive hive, PluginManager pmgr, List<CleanupAction> actions,
-            SortedSet<Manifest.Key> manifests4deletion, Map<String, List<Key>> allProductsMap,
-            Map<String, SortedSet<Key>> usedProductsMap, Map<String, Comparator<Key>> comparators) {
-        for (List<Key> pVersionKeys : allProductsMap.values()) {
-            SortedSet<Key> usedProducts = usedProductsMap.get(pVersionKeys.get(0).getName());
-            // if the product is not used at all, take the newest product version to protect it
-            Key oldestInUse = usedProducts != null && !usedProducts.isEmpty() ? usedProducts.first()
-                    : pVersionKeys.get(pVersionKeys.size() - 1);
-            Comparator<Key> comp = comparators.get(pVersionKeys.get(0).getName());
-            for (Key versionKey : pVersionKeys) {
-                // stop at the oldest product in use)
-                if (comp.compare(versionKey, oldestInUse) <= 0) {
+            for (Key pKey : pAll) {
+                if (pKey.equals(oldestToKeep)) {
                     break;
                 }
-                // If sorting of tags is broken, it should affect both sets (allProductsMap AND usedProducts) and this should
-                // protect all used products in use, but it's still being checked here again ;-)
-                if (usedProducts == null || !usedProducts.contains(versionKey)) {
-                    // if it's unused, we can anyhow unload any plugin loaded from here.
-                    pmgr.unloadProduct(versionKey);
 
-                    // prepare actions for removing the product all together.
-                    ProductManifest pm = ProductManifest.of(hive, versionKey);
-                    manifests4deletion.add(versionKey);
-                    actions.add(new CleanupAction(CleanupType.DELETE_MANIFEST, versionKey.toString(), "Delete product \""
-                            + pm.getProductDescriptor().name + "\", version \"" + pm.getKey().getTag() + "\""));
+                // prepare actions for removing the product all together.
+                ProductManifest pm = ProductManifest.of(context.getHive(), pKey);
+                context.addManifest4deletion(pKey);
+                actions.add(new CleanupAction(CleanupType.DELETE_MANIFEST, pKey.toString(),
+                        "Delete product \"" + pm.getProductDescriptor().name + "\", version \"" + pm.getKey().getTag() + "\""));
 
-                    // delete applications in product: this assumes that no single application version is used in multiple products.
-                    for (Key appKey : pm.getApplications()) {
-                        manifests4deletion.add(appKey);
-                        ApplicationManifest am = ApplicationManifest.of(hive, appKey);
-                        actions.add(new CleanupAction(CleanupType.DELETE_MANIFEST, appKey.toString(), "Delete Application \""
-                                + am.getDescriptor().name + "\", version \"" + am.getKey().getTag() + "\""));
-                    }
+                // delete applications in product: this assumes that no single application version is used in multiple products.
+                for (Key appKey : pm.getApplications()) {
+                    context.addManifest4deletion(appKey);
+                    ApplicationManifest am = ApplicationManifest.of(context.getHive(), appKey);
+                    actions.add(new CleanupAction(CleanupType.DELETE_MANIFEST, appKey.toString(),
+                            "Delete Application \"" + am.getDescriptor().name + "\", version \"" + am.getKey().getTag() + "\""));
                 }
             }
         }
+        return actions;
     }
 
-    private static List<CleanupAction> cleanupMetaManifests(SecurityContext context, BHive hive,
-            SortedSet<Manifest.Key> allManifests4deletion, boolean immediate, MasterProvider provider) {
+    /**
+     * Collect all products that are in use with respect of the instance versions that will be deleted in this run.
+     *
+     * @param context the instance group context with collected data for
+     * @return a Map containing all products in use (productKeyName -> List of productKeys sorted by tag ascending)
+     */
+    private Map<String, List<Key>> collectProductsInUse(CleanupInstanceGroupContext context) {
+        // find the oldest instance version per instance that is "under protection", i.e. the product it uses must not be uninstalled
 
+        // create a map with all installed instance versions (instanceKeyName -> set of tags)
+        Map<String, Set<String>> installedTagsMap = context.getLatestInstanceManifests().stream()
+                .collect(Collectors.toMap(Key::getName,
+                        imKey -> InstanceManifest.of(context.getHive(), imKey).getState(context.getHive()).read().installedTags));
+        // remove all to-be-uninstalled versions
+        context.getLatestInstanceManifests().stream()
+                .forEach(imKey -> Optional.ofNullable(context.getInstanceVersions4Uninstall(imKey.getName()))
+                        .ifPresent(keys -> keys.stream().forEach(k -> installedTagsMap.get(imKey.getName()).remove(k.getTag()))));
+        // create a map with the oldest installed instance version (instanceKeyName -> tag)
+        Map<String, String> oldestTagMap = new HashMap<>();
+        for (Map.Entry<String, Set<String>> entry : installedTagsMap.entrySet()) {
+            Optional<String> min = entry.getValue().stream().min(intTagComparator);
+            oldestTagMap.put(entry.getKey(), min.isPresent() ? min.get() : "0");
+        }
+        // create a map with the corresponding products (productKeyName -> set of productKeys)
+        return context.getAllInstanceManifests().stream()
+                .filter(imKey -> intTagComparator.compare(imKey.getTag(), oldestTagMap.get(imKey.getName())) >= 0)
+                .map(imKey -> InstanceManifest.of(context.getHive(), imKey).getConfiguration().product)
+                .collect(Collectors.toSet()).stream().collect(Collectors.groupingBy(Key::getName,
+                        Collectors.collectingAndThen(Collectors.toCollection(ArrayList::new), l -> {
+                            Collections.sort(l, (a, b) -> context.getComparator(a.getName()).compare(b, a));
+                            return l;
+                        })));
+
+    }
+
+    /**
+     * Calculate actions for all stale {@link MetaManifest}s i.e. for all {@link Manifests} to be deleted.
+     *
+     * @param context the instance group context with collected data for
+     * @return List of {@link CleanupAction}s
+     */
+    private List<CleanupAction> calculateMetaManifests(CleanupInstanceGroupContext context) {
         List<CleanupAction> actions = new ArrayList<>();
-
-        SortedSet<Key> allImKeys = hive.execute(new ManifestListOperation());
+        SortedSet<Key> allImKeys = context.getHive().execute(new ManifestListOperation());
         for (Key key : allImKeys) {
-            if (MetaManifest.isMetaManifest(key) && !MetaManifest.isParentAlive(key, hive, allManifests4deletion)) {
+            if (MetaManifest.isMetaManifest(key)
+                    && !MetaManifest.isParentAlive(key, context.getHive(), context.getAllManifests4deletion())) {
                 actions.add(new CleanupAction(CleanupType.DELETE_MANIFEST, key.toString(), "Delete manifest " + key));
             }
         }
-
-        if (immediate) {
-            perform(context, hive, actions, provider);
-            return Collections.emptyList();
-        }
-
         return actions;
-
-    }
-
-    private static void perform(SecurityContext context, BHive hive, List<CleanupAction> actions, MasterProvider provider) {
-        for (CleanupAction action : actions) {
-            switch (action.type) {
-                case UNINSTALL_INSTANCE_VERSION:
-                    Key imKey = Key.parse(action.what);
-                    InstanceGroupConfiguration igc = new InstanceGroupManifest(hive).read();
-
-                    MasterRootResource root = ResourceProvider.getVersionedResource(provider.getControllingMaster(hive, imKey),
-                            MasterRootResource.class, context);
-                    root.getNamedMaster(igc.name).uninstall(imKey);
-                    break;
-                case DELETE_MANIFEST:
-                    hive.execute(new ManifestDeleteOperation().setToDelete(Key.parse(action.what)));
-                    break;
-                default:
-                    throw new IllegalStateException("CleanupType " + action.type + " not supported here");
-            }
-        }
-
-        if (!actions.isEmpty()) {
-            hive.execute(new PruneOperation());
-        }
     }
 
 }

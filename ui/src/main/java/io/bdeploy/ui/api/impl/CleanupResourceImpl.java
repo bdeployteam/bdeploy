@@ -36,13 +36,15 @@ public class CleanupResourceImpl implements CleanupResource {
     @Override
     public List<CleanupGroup> calculate() {
         checkMaster();
-        return CleanupHelper.cleanAllMinions(context, minion, registry, false, provider, vss);
+        CleanupHelper ch = new CleanupHelper(context, minion, registry, provider, vss);
+        return ch.calculate();
     }
 
     @Override
     public void perform(List<CleanupGroup> groups) {
         checkMaster();
-        CleanupHelper.cleanAllMinions(context, groups, minion, registry, provider);
+        CleanupHelper ch = new CleanupHelper(context, minion, registry, provider, vss);
+        ch.execute(groups);
     }
 
     private void checkMaster() {

@@ -3,7 +3,6 @@ package io.bdeploy.minion.remote.jersey;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
@@ -40,7 +39,7 @@ public class SlaveCleanupResourceImpl implements SlaveCleanupResource {
     private MinionRoot root;
 
     @Override
-    public List<CleanupAction> cleanup(SortedSet<Key> toKeep, boolean immediate) {
+    public List<CleanupAction> cleanup(SortedSet<Key> toKeep) {
         List<CleanupAction> notExecuted = new ArrayList<>();
 
         BHive hive = root.getHive();
@@ -97,11 +96,6 @@ public class SlaveCleanupResourceImpl implements SlaveCleanupResource {
 
         // after manifests, cleanup dist (deployment dir, temp, download, ...).
         notExecuted.addAll(InstanceNodeController.cleanup(hive, root.getDeploymentDir(), toClean));
-
-        if (immediate) {
-            perform(notExecuted);
-            return Collections.emptyList();
-        }
 
         return notExecuted;
     }

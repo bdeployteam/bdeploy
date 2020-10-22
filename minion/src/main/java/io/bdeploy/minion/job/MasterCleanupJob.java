@@ -119,8 +119,9 @@ public class MasterCleanupJob implements Job {
         try (BHiveRegistry registry = new BHiveRegistry(new ActivityReporter.Null(), null)) {
             mr.getStorageLocations().forEach(registry::scanLocation);
 
-            CleanupHelper.cleanAllMinions(null, mr, registry, true, (h, i) -> mr.getSelf(),
+            CleanupHelper ch = new CleanupHelper(null, mr, registry, (h, i) -> mr.getSelf(),
                     new VersionSorterServiceImpl(mr.getPluginManager(), registry));
+            ch.execute(ch.calculate());
 
             mr.modifyState(s -> s.cleanupLastRun = System.currentTimeMillis());
             log.info("Cleanup finished");

@@ -76,7 +76,7 @@ public class MinionCleanupTest {
         toKeep.add(app2key);
 
         // cleanup should find the /not/ mentioned manifest
-        List<CleanupAction> actions = scr.cleanup(toKeep, false);
+        List<CleanupAction> actions = scr.cleanup(toKeep);
 
         assertEquals(1, actions.size());
         assertEquals(CleanupType.DELETE_MANIFEST, actions.get(0).type);
@@ -102,7 +102,7 @@ public class MinionCleanupTest {
         }
 
         // now clean the other app immediately
-        scr.cleanup(new TreeSet<>(), true);
+        scr.perform(scr.cleanup(new TreeSet<>()));
 
         // Check that the hive has nothing in - except the stuff that was in at the beginning
         try (RemoteBHive rbh = RemoteBHive.forService(remote, JerseyRemoteBHive.DEFAULT_NAME, reporter)) {
@@ -119,7 +119,7 @@ public class MinionCleanupTest {
 
         PathHelper.mkdirs(testDir);
 
-        List<CleanupAction> cleanup = scr.cleanup(new TreeSet<>(), false);
+        List<CleanupAction> cleanup = scr.cleanup(new TreeSet<>());
         assertEquals(1, cleanup.size());
         assertEquals(testDir.toString(), cleanup.get(0).what);
         assertEquals("Remove spurious directory (no binary directory found)", cleanup.get(0).description);
@@ -130,7 +130,7 @@ public class MinionCleanupTest {
         Path testPoolDir = dd.resolve("pool/dummy-app");
         PathHelper.mkdirs(testPoolDir);
 
-        cleanup = scr.cleanup(new TreeSet<>(), false);
+        cleanup = scr.cleanup(new TreeSet<>());
         assertEquals(1, cleanup.size());
         assertEquals(testPoolDir.toString(), cleanup.get(0).what);
         assertEquals("Remove stale pooled application", cleanup.get(0).description);
