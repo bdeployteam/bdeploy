@@ -35,3 +35,4 @@ Thumbs.db
 
 # generated models
 gen.*.ts
+/debug.log
