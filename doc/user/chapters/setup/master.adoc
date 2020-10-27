@@ -46,6 +46,9 @@ It is not recommended (<<Migrating between Modes,but possible>>) to change the m
 
 The result of the `init` command is a *root directory* which can be used by the *master* or *slave* commands.
 
+[WARNING]
+Be aware that the user executing the *master* or *slave* later on *must* be the owner of the root directory. Otherwise *BDeploy* will refuse to start. If you configure *BDeploy* as a service make sure to either run the service as the same user who initialized the root directory, or pass ownership of the root directory to the user running the service before starting it.
+
 ==== Launch
 After the initialization - which needs to be done only once - the *master* can be started with the following command:
 
