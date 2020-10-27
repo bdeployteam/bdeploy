@@ -15,6 +15,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -42,7 +43,6 @@ import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestExistsOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ObjectListOperation;
-import io.bdeploy.bhive.op.ObjectSizeOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
@@ -54,6 +54,7 @@ import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.interfaces.plugin.VersionSorterService;
+import io.bdeploy.ui.ProductDiscUsageService;
 import io.bdeploy.ui.api.ApplicationResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.ProductResource;
@@ -68,6 +69,9 @@ public class ProductResourceImpl implements ProductResource {
 
     @Inject
     private BHiveRegistry registry;
+
+    @Inject
+    private ProductDiscUsageService pdus;
 
     @Context
     private ResourceContext rc;
@@ -140,6 +144,9 @@ public class ProductResourceImpl implements ProductResource {
         ProductManifest pmf = ProductManifest.of(hive, key);
         SortedSet<Key> apps = pmf.getApplications();
 
+        // cancel disc usage calculations and clear cache for this product.
+        pdus.invalidateDiscUsageCalculation(group, name);
+
         hive.execute(new ManifestDeleteOperation().setToDelete(key));
         apps.forEach(a -> hive.execute(new ManifestDeleteOperation().setToDelete(a)));
     }
@@ -152,15 +159,12 @@ public class ProductResourceImpl implements ProductResource {
 
     @Override
     public String getProductDiskUsage(String name) {
-        SortedSet<Key> mfs = hive.execute(new ManifestListOperation().setManifestName(name));
-
-        ObjectListOperation olo = new ObjectListOperation();
-        mfs.forEach(olo::addManifest);
-        SortedSet<ObjectId> objs = hive.execute(olo);
-
-        ObjectSizeOperation oso = new ObjectSizeOperation();
-        objs.forEach(oso::addObject);
-        return UnitHelper.formatFileSize(hive.execute(oso));
+        try {
+            return UnitHelper.formatFileSize(pdus.getDiscUsage(group, name).get());
+        } catch (InterruptedException | ExecutionException e) {
+            log.debug("Product disc usage calculation interrupted or failed", e);
+            return "Unknown";
+        }
     }
 
     @Override
@@ -257,14 +261,17 @@ public class ProductResourceImpl implements ProductResource {
                 }
             }
 
+            List<Key> result;
             if (isHive) {
-                return importFromUploadedBHive(targetFile);
+                result = importFromUploadedBHive(targetFile);
             } else if (hasProductInfo) {
-                return importFromUploadedProductInfo(targetFile);
+                result = importFromUploadedProductInfo(targetFile);
             } else {
                 throw new WebApplicationException("Uploaded ZIP is neither a BHive, nor has a product-info.yaml",
                         Status.BAD_REQUEST);
             }
+            result.forEach(k -> pdus.invalidateDiscUsageCalculation(group, k.getName()));
+            return result;
         } catch (IOException e) {
             throw new WebApplicationException("Failed to upload file: " + e.getMessage(), Status.BAD_REQUEST);
         } finally {
@@ -366,6 +373,8 @@ public class ProductResourceImpl implements ProductResource {
         CopyOperation copy = new CopyOperation().setDestinationHive(hive).addManifest(key);
         objectIds.forEach(copy::addObject);
         repoHive.execute(copy);
+
+        pdus.invalidateDiscUsageCalculation(group, productName);
     }
 
 }

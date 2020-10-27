@@ -11,6 +11,7 @@ import io.bdeploy.jersey.RegistrationTarget;
 import io.bdeploy.jersey.ws.BroadcastingAuthenticatedWebSocket;
 import io.bdeploy.jersey.ws.JerseyEventBroadcaster;
 import io.bdeploy.ui.InstanceEntryStreamRequestService;
+import io.bdeploy.ui.ProductDiscUsageService;
 import io.bdeploy.ui.ProductTransferService;
 
 public class UiResources {
@@ -55,6 +56,7 @@ public class UiResources {
                 bind(ProductTransferService.class).in(Singleton.class).to(ProductTransferService.class);
                 bind(InstanceEventManager.class).in(Singleton.class).to(InstanceEventManager.class);
                 bind(InstanceEntryStreamRequestService.class).in(Singleton.class).to(InstanceEntryStreamRequestService.class);
+                bind(ProductDiscUsageService.class).in(Singleton.class).to(ProductDiscUsageService.class);
 
                 bind(instanceUpdateBc).named(InstanceEventManager.INSTANCE_BROADCASTER).to(JerseyEventBroadcaster.class);
                 bind(attachEventBc).named(ManagedServersAttachEventResourceImpl.ATTACH_BROADCASTER)
