@@ -126,6 +126,8 @@ configure(actualSubprojects) {
             entries.unique(true) {
                 (it instanceof org.gradle.plugins.ide.eclipse.model.ProjectDependency) ? it.path : it
             }
+            entries.findAll { it instanceof org.gradle.plugins.ide.eclipse.model.ProjectDependency }
+                .each { it.entryAttributes['without_test_code'] = 'false' }
         }
     }
 
