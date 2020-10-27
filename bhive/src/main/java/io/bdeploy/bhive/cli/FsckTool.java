@@ -11,6 +11,8 @@ import io.bdeploy.bhive.objects.view.ElementView;
 import io.bdeploy.bhive.op.FsckOperation;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
+import io.bdeploy.common.cfg.Configuration.Validator;
+import io.bdeploy.common.cfg.PathOwnershipValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.ToolCategory;
@@ -32,6 +34,7 @@ public class FsckTool extends ConfiguredCliTool<FsckConfig> {
 
         @Help("The local BHive")
         @EnvironmentFallback("BHIVE")
+        @Validator(PathOwnershipValidator.class)
         String hive();
 
         @Help("Manifest(s) to check. May appear multiple times. Format is 'name:tag'. If not present, all manifests are checked.")

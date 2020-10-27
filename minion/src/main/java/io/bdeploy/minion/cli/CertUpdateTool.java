@@ -11,6 +11,7 @@ import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.ExistingPathValidator;
 import io.bdeploy.common.cfg.MinionRootValidator;
+import io.bdeploy.common.cfg.PathOwnershipValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.ToolCategory;
@@ -39,7 +40,7 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
 
         @Help("Root directory to update.")
         @EnvironmentFallback("BDEPLOY_ROOT")
-        @Validator(MinionRootValidator.class)
+        @Validator({ MinionRootValidator.class, PathOwnershipValidator.class })
         String root();
 
         @Help(value = "Override user questions and assume consent", arg = false)

@@ -109,7 +109,7 @@ public class MasterCliTest {
             tools.execute(CertUpdateTool.class, "--root=" + root, "--update=" + pem, "--yes");
         }
 
-        tools.execute(HostnameTool.class, "--root=" + root, "--update=localhost");
+        tools.execute(ConfigTool.class, "--root=" + root, "--update=localhost");
 
         String shutdown = UuidHelper.randomId();
 
@@ -184,9 +184,9 @@ public class MasterCliTest {
             master.join();
         }
 
-        tools.execute(ModeTool.class, "--root=" + root, "--mode=MANAGED");
+        tools.execute(ConfigTool.class, "--root=" + root, "--mode=MANAGED");
         assertThrows(UnsupportedOperationException.class, () -> {
-            tools.execute(ModeTool.class, "--root=" + root, "--mode=CENTRAL");
+            tools.execute(ConfigTool.class, "--root=" + root, "--mode=CENTRAL");
         });
     }
 

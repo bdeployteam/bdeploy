@@ -181,22 +181,16 @@ public class Configuration {
         }
 
         Validator validator = method.getAnnotation(Validator.class);
-        ValidationMessage vmsg = null;
-        Class<? extends ConfigValidator<?>> cv = null;
+        Class<? extends ConfigValidator<?>>[] cvs = null;
         if (validator != null) {
-            cv = validator.value();
-            vmsg = cv.getAnnotation(ValidationMessage.class);
-
-            if (vmsg == null) {
-                throw new IllegalStateException("No validation message set on validator class: " + cv);
-            }
+            cvs = validator.value();
         }
 
         UnaryOperator<Object> mapper = getMapper(method);
 
         Class<?> returnType = method.getReturnType();
         if (object != null && returnType.isAssignableFrom(object.getClass())) {
-            validateOrThrow(object, method, cv, vmsg);
+            validateOrThrow(object, method, cvs);
             Object result = object;
             if (returnType.isAssignableFrom(String.class)) {
                 result = mapper.apply(object);
@@ -208,7 +202,7 @@ public class Configuration {
         if (returnType.isPrimitive() && !(object instanceof String)) {
             // implicit conversion through boxing/unboxing. let's just hope the types match
             // ;)
-            validateOrThrow(object, method, cv, vmsg);
+            validateOrThrow(object, method, cvs);
             conversions.put(method, object);
             return object;
         }
@@ -220,7 +214,7 @@ public class Configuration {
             for (int i = 0; i < list.size(); ++i) {
                 Array.set(targetArray, i, convertType(returnType.getComponentType(), (String) list.get(i), mapper));
             }
-            validateOrThrow(targetArray, method, cv, vmsg);
+            validateOrThrow(targetArray, method, cvs);
             conversions.put(method, targetArray);
             return targetArray;
         }
@@ -234,7 +228,7 @@ public class Configuration {
         // do actual conversion
         conversion = convertType(returnType, (String) object, mapper);
 
-        validateOrThrow(conversion, method, cv, vmsg);
+        validateOrThrow(conversion, method, cvs);
 
         // remember the result in the mapping, so we don't need to convert back and
         // forth all the time.
@@ -257,18 +251,25 @@ public class Configuration {
         return mapper;
     }
 
-    private void validateOrThrow(Object value, Method m, Class<? extends ConfigValidator<?>> validator, ValidationMessage msg) {
-        if (validator == null) {
+    private void validateOrThrow(Object value, Method m, Class<? extends ConfigValidator<?>>[] validators) {
+        if (validators == null) {
             return;
         }
+        for (Class<? extends ConfigValidator<?>> validator : validators) {
+            try {
+                ValidationMessage msg = validator.getAnnotation(ValidationMessage.class);
 
-        try {
-            ConfigValidator<?> v = validator.getDeclaredConstructor().newInstance();
-            if (!v.validate(cast(value))) {
-                throw new IllegalArgumentException("--" + m.getName() + ": " + String.format(msg.value(), value));
+                if (msg == null) {
+                    throw new IllegalStateException("No validation message set on validator class: " + validator);
+                }
+
+                ConfigValidator<?> v = validator.getDeclaredConstructor().newInstance();
+                if (!v.validate(cast(value))) {
+                    throw new IllegalArgumentException("--" + m.getName() + ": " + String.format(msg.value(), value));
+                }
+            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+                throw new IllegalStateException("Cannot validate value: " + value + " using validator: " + validator, e);
             }
-        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            throw new IllegalStateException("Cannot validate value: " + value + " using validator: " + validator, e);
         }
     }
 
@@ -420,7 +421,7 @@ public class Configuration {
     @Target(value = { ElementType.METHOD })
     public @interface Validator {
 
-        Class<? extends ConfigValidator<?>> value();
+        Class<? extends ConfigValidator<?>>[] value();
     }
 
     @Documented

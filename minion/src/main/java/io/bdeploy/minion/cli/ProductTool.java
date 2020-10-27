@@ -17,6 +17,7 @@ import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.ExistingPathValidator;
+import io.bdeploy.common.cfg.PathOwnershipValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataResult;
@@ -42,6 +43,7 @@ public class ProductTool extends RemoteServiceTool<ProductConfig> {
 
         @Help("The hive to operate on.")
         @EnvironmentFallback("BHIVE")
+        @Validator(PathOwnershipValidator.class)
         String hive();
 
         @Help("Creates a product from a product descriptor. Either a path to a YAML file, or a path to a directory containing a 'product-info.yaml' file.")

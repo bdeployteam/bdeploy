@@ -9,6 +9,8 @@ import io.bdeploy.bhive.op.remote.FetchOperation;
 import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
+import io.bdeploy.common.cfg.Configuration.Validator;
+import io.bdeploy.common.cfg.PathOwnershipValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.ToolDefaultVerbose;
@@ -34,6 +36,7 @@ public class FetchTool extends RemoteServiceTool<FetchConfig> {
 
         @Help("The local BHive")
         @EnvironmentFallback("BHIVE")
+        @Validator(PathOwnershipValidator.class)
         String hive();
 
         @Help("The remote hive name if not default")

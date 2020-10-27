@@ -10,6 +10,8 @@ import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.PruneOperation;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
+import io.bdeploy.common.cfg.Configuration.Validator;
+import io.bdeploy.common.cfg.PathOwnershipValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.ToolCategory;
@@ -30,6 +32,7 @@ public class PruneTool extends ConfiguredCliTool<PruneConfig> {
 
         @Help("The BHive to use")
         @EnvironmentFallback("BHIVE")
+        @Validator(PathOwnershipValidator.class)
         String hive();
 
         @Help(value = "List details about removed objects", arg = false)

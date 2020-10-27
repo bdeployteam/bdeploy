@@ -19,10 +19,9 @@ public class MinionServerCli extends ToolBase {
 
         // init and local configuration
         register(InitTool.class);
-        register(ModeTool.class);
         register(CleanupTool.class);
         register(CertUpdateTool.class);
-        register(HostnameTool.class);
+        register(ConfigTool.class);
         register(StorageTool.class);
 
         // local session and scripting

@@ -21,6 +21,7 @@ import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.MinionRootValidator;
+import io.bdeploy.common.cfg.PathOwnershipValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataResult;
@@ -70,7 +71,7 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
 
         @Help("Root directory for the master minion. The minion will put all required things here.")
         @EnvironmentFallback("BDEPLOY_ROOT")
-        @Validator(MinionRootValidator.class)
+        @Validator({ MinionRootValidator.class, PathOwnershipValidator.class })
         String root();
 
         @Help("Specify the directory where any incoming updates should be placed in.")
