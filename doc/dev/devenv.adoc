@@ -88,9 +88,9 @@ You can build distribution packages for other platforms by installing their resp
 
 [source,properties]
 ----
-systemProp.win64jdk=/home/mduft/work/jdks/windows/jdk-11.0.8+10
-systemProp.linux64jdk=/home/mduft/work/jdks/linux/jdk-11.0.8+10
-#systemProp.mac64jdk=/home/mduft/work/jdks/mac/jdk-11.0.8+10/Contents/Home
+systemProp.win64jdk=/path/to/jdks/windows/jdk-11.0.8+10
+systemProp.linux64jdk=/path/to/jdks/linux/jdk-11.0.8+10
+#systemProp.mac64jdk=/path/to/jdks/mac/jdk-11.0.8+10/Contents/Home
 ----
 
 [TIP]
