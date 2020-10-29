@@ -72,7 +72,10 @@ public class ConfigTool extends ConfiguredCliTool<ConfigToolConfig> {
                         oldRemote.getAuthPack());
 
                 mm.update(cfg);
-                r.modifyState(s -> s.officialName = hostname);
+                r.modifyState(s -> {
+                    s.officialName = hostname;
+                    s.port = port;
+                });
             }
             if (config.mode() != null) {
                 r.getAuditor()
