@@ -34,7 +34,7 @@ public class LauncherCli extends ToolBase {
         //          We expect that this is the descriptor of the file to launch
         // Order is important: <tool arguments> <toolName> <appArguments>
         // Sample: -v launcher --launch=MyFile.bdeploy
-        if (noOpt.size() == 1 && Paths.get(noOpt.get(0)).toFile().exists()) {
+        if (noOpt.size() == 1 && Paths.get(noOpt.get(0)).toAbsolutePath().toFile().isFile()) {
             List<String> argumentList = new ArrayList<>();
             argumentList.addAll(toolArgs);
             argumentList.add("launcher");

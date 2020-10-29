@@ -75,8 +75,7 @@ public class MarkerDatabase extends ObjectDatabase {
         boolean infoWritten = false;
         for (int i = 0; i < 100_000; ++i) {
             try {
-                Files.write(lockFile, Collections.singletonList(content), StandardOpenOption.CREATE_NEW,
-                        StandardOpenOption.DELETE_ON_CLOSE);
+                Files.write(lockFile, Collections.singletonList(content), StandardOpenOption.CREATE_NEW).toFile().deleteOnExit();
                 return;
             } catch (FileAlreadyExistsException e) {
                 // validate to find stale lock files
