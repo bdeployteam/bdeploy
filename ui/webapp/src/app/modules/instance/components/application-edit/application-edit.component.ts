@@ -487,16 +487,16 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     const type = descriptor.type;
     control.setValidators([this.fieldValidator(config, descriptor)]);
 
+    // Disable in case of a fixed parameter, passwords are initially disabled as well.
+    if (descriptor.fixed || descriptor.type === ParameterType.PASSWORD) {
+      control.disable();
+    }
+
     // Set default value if we have a configuration
     if (type === ParameterType.BOOLEAN) {
       control.setValue(config.value === 'true');
     } else {
       control.setValue(config.value);
-    }
-
-    // Disable in case of a fixed parameter
-    if (descriptor.fixed) {
-      control.disable();
     }
 
     // Track value changes and update
@@ -548,10 +548,18 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
   /**
    * Disables a control once it's custom editor is loaded.
    */
-  disableForCustomEditor(param: LinkedParameter, editor: CustomEditor) {
+  disableForCustomEditor(param: LinkedParameter, editor: CustomEditor, div: HTMLElement) {
     if (!editor.allowDirectEdit) {
       this.formGroup.controls[param.desc.uid].disable();
+      if (div) {
+        div.hidden = true;
+      }
     }
+  }
+
+  enablePasswordControl(param: LinkedParameter, button: MatButton) {
+    this.formGroup.controls[param.desc.uid].enable();
+    button.disabled = true;
   }
 
   /** Opens the dialog manage custom parameters */
