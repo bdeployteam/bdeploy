@@ -152,6 +152,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /** Path where the launched app is stored */
     private Path appDir;
 
+    /** Path where all apps are stored. Each app is located in a folder with its unique ID */
+    private Path appsDir;
+
     /** Path where the pooled products and artifacts are stored */
     private Path poolDir;
 
@@ -230,7 +233,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 // Cleanup the installation directory and the hive.
                 if (!readOnlyRootDir) {
                     doExecuteLocked(reporter, () -> {
-                        ClientCleanup cleanup = new ClientCleanup(hive, rootDir, appDir, poolDir);
+                        ClientCleanup cleanup = new ClientCleanup(hive, rootDir, appsDir, poolDir);
                         cleanup.run();
                         return null;
                     });
@@ -340,7 +343,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             throw new IllegalStateException("Failed to read " + config.launch(), e);
         }
         bhiveDir = rootDir.resolve("bhive");
-        Path appsDir = rootDir.resolve("apps");
+        appsDir = rootDir.resolve("apps");
         poolDir = appsDir.resolve("pool");
         appDir = appsDir.resolve(descriptor.applicationId);
         readOnlyRootDir = PathHelper.isReadOnly(rootDir);

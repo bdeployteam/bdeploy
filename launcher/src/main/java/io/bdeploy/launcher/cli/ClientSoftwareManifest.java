@@ -27,7 +27,7 @@ import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 
 /**
- * A meta manifest that stores the software that is required for each installed.
+ * A meta manifest that stores the software that is required for each installed application.
  */
 public class ClientSoftwareManifest {
 
@@ -106,7 +106,9 @@ public class ClientSoftwareManifest {
     public Set<Manifest.Key> getRequiredLauncherKeys() {
         Set<Manifest.Key> result = new HashSet<>();
         for (ClientSoftwareConfiguration software : list()) {
-            result.add(software.launcher);
+            if (software.launcher != null) {
+                result.add(software.launcher);
+            }
         }
         return result;
     }

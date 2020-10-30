@@ -1,6 +1,8 @@
 package io.bdeploy.launcher.cli;
 
 import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -61,23 +63,26 @@ public class ClientCleanup {
         ClientSoftwareManifest mf = new ClientSoftwareManifest(hive);
         Set<Key> required = mf.getRequiredLauncherKeys();
 
-        // Collect all available software in the hive
-        Set<Key> available = getAvailableLaunchers();
-        if (available.isEmpty()) {
-            log.info("No launchers are installed.");
-            return;
+        // The currently running launcher is always required
+        Set<Key> installed = getAvailableLaunchers();
+        Iterator<Key> iter = installed.iterator();
+        while (iter.hasNext()) {
+            Key key = iter.next();
+            if (key.getTag().equalsIgnoreCase(VersionHelper.getVersion().toString())) {
+                iter.remove();
+            }
         }
 
         // Remove all the software that is still required
-        available.removeAll(required);
-        if (available.isEmpty()) {
-            log.info("All launchers are still in-use.");
+        installed.removeAll(required);
+        if (installed.isEmpty()) {
+            log.info("All installed launchers are still in-use.");
             return;
         }
 
         // Cleanup hive and launcher
         log.info("Removing stale launchers that are not used any more...");
-        for (Manifest.Key key : available) {
+        for (Manifest.Key key : installed) {
             log.info("Deleting {}", key);
 
             Version version = VersionHelper.parse(key.getTag());
@@ -172,7 +177,7 @@ public class ClientCleanup {
      */
     private Set<Key> getAvailableLaunchers() {
         SortedSet<Key> allKeys = hive.execute(new ManifestListOperation());
-        return allKeys.stream().filter(ClientCleanup::isLauncher).collect(Collectors.toSet());
+        return allKeys.stream().filter(ClientCleanup::isLauncher).collect(Collectors.toCollection(HashSet::new));
     }
 
     /** Returns whether or not the given manifest refers to a launcher */
