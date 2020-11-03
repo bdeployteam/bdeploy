@@ -19,6 +19,7 @@ import io.bdeploy.api.product.v1.ProductDescriptor;
 import io.bdeploy.api.product.v1.ProductVersionDescriptor;
 import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.cli.BHiveCli;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
@@ -53,6 +54,9 @@ public class ProductCliTest {
 
     @RegisterExtension
     TestCliTool tools = new TestCliTool(new MinionServerCli());
+
+    @RegisterExtension
+    TestCliTool hiveTools = new TestCliTool(new BHiveCli());
 
     @Test
     void testProductImportWithExtDep(CommonRootResource master, RemoteService svc, MinionRoot root, @TempDir Path temp,
@@ -115,6 +119,7 @@ public class ProductCliTest {
 
         // now import the product into a new hive, ext dependency should be fetched from remote
         Path impHive = temp.resolve("imp-hive");
+        hiveTools.execute(io.bdeploy.bhive.cli.InitTool.class, "--hive=" + impHive);
         tools.execute(ProductTool.class, "--hive=" + impHive, "--import=" + pdFile, "--remote=" + svc.getUri(),
                 "--token=" + auth);
 

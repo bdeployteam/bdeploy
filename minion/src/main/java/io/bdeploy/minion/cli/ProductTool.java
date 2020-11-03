@@ -43,7 +43,7 @@ public class ProductTool extends RemoteServiceTool<ProductConfig> {
 
         @Help("The hive to operate on.")
         @EnvironmentFallback("BHIVE")
-        @Validator(PathOwnershipValidator.class)
+        @Validator({ ExistingPathValidator.class, PathOwnershipValidator.class })
         String hive();
 
         @Help("Creates a product from a product descriptor. Either a path to a YAML file, or a path to a directory containing a 'product-info.yaml' file.")

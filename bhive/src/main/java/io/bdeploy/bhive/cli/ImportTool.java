@@ -37,7 +37,7 @@ public class ImportTool extends ConfiguredCliTool<ImportConfig> {
 
         @Help("The target BHive to import into")
         @EnvironmentFallback("BHIVE")
-        @Validator(PathOwnershipValidator.class)
+        @Validator({ ExistingPathValidator.class, PathOwnershipValidator.class })
         String hive();
 
         @Help("Manifest(s) to create. Format is 'name:tag'")

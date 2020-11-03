@@ -54,6 +54,7 @@ public class BasicToolTest {
         ContentHelper.genTestTree(srcDir, 1, 1, 1, 2, 0, 0);
 
         // import a test directory
+        tools.execute(InitTool.class, hiveArg);
         tools.execute(ImportTool.class, hiveArg, "--source=" + srcDir, "--manifest=test:v1", "--label=x:y");
 
         // check programmatically whether this looks ok.

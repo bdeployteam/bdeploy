@@ -1,5 +1,6 @@
 package io.bdeploy.bhive.cli;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyStore;
@@ -64,6 +65,11 @@ public class ServeTool extends ConfiguredCliTool<ServeConfig> {
                 String hive = s.substring(index + 1);
 
                 Path hPath = Paths.get(hive);
+
+                if (!Files.isDirectory(hPath)) {
+                    out().println("WARNING: Skipping non-existant: " + hPath);
+                    continue;
+                }
 
                 hives.put(path, new BHive(hPath.toUri(), getActivityReporter()));
             }
