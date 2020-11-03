@@ -315,6 +315,7 @@ public class InstanceProcessController {
         running.values().forEach(toStop::addFirst);
 
         // Set intend that all should be stopped
+        logger.log(l -> l.info("Stopping all running applications."));
         for (ProcessController process : toStop) {
             try {
                 process.prepareStop(user);
@@ -328,7 +329,6 @@ public class InstanceProcessController {
         // Execute shutdown in new thread so that the caller is not blocked
         Instant start = Instant.now();
         Iterator<ProcessController> iter = toStop.iterator();
-        logger.log(l -> l.info("Stopping all running applications."));
         while (iter.hasNext()) {
             ProcessController process = iter.next();
             try {

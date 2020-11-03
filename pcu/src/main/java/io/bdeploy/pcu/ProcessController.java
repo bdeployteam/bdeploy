@@ -434,6 +434,7 @@ public class ProcessController {
             return;
         }
         processState = ProcessState.RUNNING_STOP_PLANNED;
+        logger.log(l -> l.info("Stopping planned for {}", processConfig.name));
     }
 
     /** Stops the application */
@@ -558,6 +559,7 @@ public class ProcessController {
         try {
             runnable.run();
         } catch (Exception ex) {
+            logger.log(l -> l.error("Failed to execute task.", ex));
             throw new PcuRuntimeException("Failed to execute task '" + taskName + "'", ex);
         } finally {
             // Fallback to system if no user is there
@@ -610,7 +612,17 @@ public class ProcessController {
     /** Attaches an exit handle to be notified when the process terminates */
     private void monitorProcess() {
         // Notify when the status changes
-        processExit.thenRunAsync(() -> executeLocked("ExitHook", DEFAULT_USER, this::onTerminated));
+        // DO nothing if the handle changed between scheduling and execution
+        CompletableFuture<ProcessHandle> oldHandle = processExit;
+        oldHandle.thenRun(() -> {
+            executeLocked("ExitHook", DEFAULT_USER, () -> {
+                if (oldHandle != processExit) {
+                    logger.log(l -> l.info("Process handle changed. Skipping exit hook."));
+                    return;
+                }
+                onTerminated();
+            });
+        });
 
         // Set to running if launched from stopped or crashed
         if (processState == ProcessState.STOPPED || processState == ProcessState.CRASHED_PERMANENTLY) {
@@ -639,11 +651,6 @@ public class ProcessController {
 
     /** Callback method that is executed when the process terminates */
     private void onTerminated() {
-        // Callback is also called by the exit-handler
-        if (stopTime != null) {
-            return;
-        }
-
         stopTime = Instant.now();
         Duration uptime = Duration.between(startTime, stopTime);
         String uptimeString = ProcessControllerHelper.formatDuration(uptime);
