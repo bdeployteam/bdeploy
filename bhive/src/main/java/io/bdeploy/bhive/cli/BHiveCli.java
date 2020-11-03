@@ -16,6 +16,8 @@ public class BHiveCli extends ToolBase {
     static final String SERVER_TOOLS = "Server commands";
 
     public BHiveCli() {
+        register(InitTool.class);
+
         register(ImportTool.class);
         register(ExportTool.class);
 

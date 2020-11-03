@@ -10,6 +10,7 @@ import io.bdeploy.bhive.op.ExportOperation;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
+import io.bdeploy.common.cfg.ExistingPathValidator;
 import io.bdeploy.common.cfg.NonExistingPathValidator;
 import io.bdeploy.common.cfg.PathOwnershipValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
@@ -29,7 +30,7 @@ public class ExportTool extends ConfiguredCliTool<ExportConfig> {
 
         @Help("The source BHive to export from")
         @EnvironmentFallback("BHIVE")
-        @Validator(PathOwnershipValidator.class)
+        @Validator({ ExistingPathValidator.class, PathOwnershipValidator.class })
         String hive();
 
         @Help("The target path to export to")

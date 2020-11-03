@@ -25,6 +25,7 @@ public class RemoteLsTest {
         Path smallSrcDir = ContentHelper.genSimpleTestTree(tmp, "src");
         Path hive = tmp.resolve("hive");
 
+        tools.execute(InitTool.class, "--hive=" + hive);
         tools.execute(ImportTool.class, "--hive=" + hive, "--manifest=app:v1", "--source=" + smallSrcDir);
 
         String[] output = tools.execute(ManifestTool.class, "--remote=" + hive.toUri(), "--list");

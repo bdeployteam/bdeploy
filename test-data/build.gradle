@@ -157,6 +157,11 @@ task cleanExternalSoftwareHive(type: Delete) {
     delete "${buildDir}/external-software-hive"
 }
 
+task initExtSoftwareHive(type: JavaExec, dependsOn: cleanExternalSoftwareHive) {
+    setupBDeployJavaExec(it, testServerRoot, testServerPort);
+    args = [ "bhive", "init", "--hive=${buildDir}/external-software-hive" ]
+}
+
 // now define the dynamic tasks for each operating system
 createExternalSoftwareTasks("windows")
 createExternalSoftwareTasks("linux")
@@ -166,8 +171,8 @@ void createExternalSoftwareTasks(String os) {
     def osUpper = os.substring(0,1).toUpperCase() + os.substring(1);
     def hive = "${buildDir}/external-software-hive";
     def source = "${projectDir}/external-software/${os}"
-    
-    task "externalSoftware${osUpper}" (type: JavaExec, dependsOn: cleanExternalSoftwareHive) {
+
+    task "externalSoftware${osUpper}" (type: JavaExec, dependsOn: "initExtSoftwareHive") {
         setupBDeployJavaExec(it, testServerRoot, testServerPort);
         args = [ "bhive", "import", "--hive=${hive}", "--source=${source}", "--manifest=external/software/${os}:v1.0.0" ]
     }
@@ -329,11 +334,17 @@ void setupBinServerTasks(String version) {
             }
         }
 
-        task "binImportProd${prodNum}_${key}" (type: Exec, dependsOn: [ "binCreateInstanceGroup_${key}", "binUnzipProd${prodNum}_${key}" ]) {
-            setupTask(it)
+        // old versions don't have the command, new versions require hive to be init'ed - this is a compromise (use the current version to init).
+        task "binInitProdHive${prodNum}_${key}" (type: JavaExec, dependsOn: [ "binCreateInstanceGroup_${key}", "binUnzipProd${prodNum}_${key}" ]) {
+            setupBDeployJavaExec(it, testServerRoot, testServerPort);
             doFirst {
                 delete "${buildDir}/pushTmp${prodNum}"
             }
+            args = [ "bhive", "init", "--hive=${buildDir}/pushTmp${prodNum}" ]
+        }
+
+        task "binImportProd${prodNum}_${key}" (type: Exec, dependsOn: "binInitProdHive${prodNum}_${key}") {
+            setupTask(it)
             outputs.upToDateWhen { false }
             args = ["product", "--hive=${buildDir}/pushTmp${prodNum}", "--import=${buildDir}/prod-dist-${prodNum}", "--push"]
         }

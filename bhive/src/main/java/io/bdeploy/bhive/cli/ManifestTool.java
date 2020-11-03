@@ -25,6 +25,7 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
+import io.bdeploy.common.cfg.ExistingPathValidator;
 import io.bdeploy.common.cfg.PathOwnershipValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolCategory;
@@ -48,7 +49,7 @@ public class ManifestTool extends RemoteServiceTool<ManifestConfig> {
 
         @Help("The BHive to use. Alternatively use --remote.")
         @EnvironmentFallback("BHIVE")
-        @Validator(PathOwnershipValidator.class)
+        @Validator({ ExistingPathValidator.class, PathOwnershipValidator.class })
         String hive();
 
         @Help(value = "List available manifests", arg = false)
