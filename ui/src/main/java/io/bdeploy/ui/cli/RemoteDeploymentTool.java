@@ -45,26 +45,22 @@ public class RemoteDeploymentTool extends RemoteServiceTool<RemoteDeployConfig> 
 
     @Override
     protected RenderableResult run(RemoteDeployConfig config, RemoteService svc) {
-        try {
-            helpAndFailIfMissing(config.instanceGroup(), "Missing --instanceGroup");
-            helpAndFailIfMissing(config.uuid(), "Missing --uuid");
-            helpAndFailIfMissing(config.version(), "Missing --version");
+        helpAndFailIfMissing(config.instanceGroup(), "Missing --instanceGroup");
+        helpAndFailIfMissing(config.uuid(), "Missing --uuid");
+        helpAndFailIfMissing(config.version(), "Missing --version");
 
-            InstanceResource ir = ResourceProvider.getResource(svc, InstanceGroupResource.class, getLocalContext())
-                    .getInstanceResource(config.instanceGroup());
+        InstanceResource ir = ResourceProvider.getResource(svc, InstanceGroupResource.class, getLocalContext())
+                .getInstanceResource(config.instanceGroup());
 
-            if (config.install()) {
-                ir.install(config.uuid(), config.version());
-            } else if (config.activate()) {
-                ir.activate(config.uuid(), config.version());
-            } else if (config.uninstall()) {
-                ir.uninstall(config.uuid(), config.version());
-            } else {
-                helpAndFail("ERROR: Missing --install, --activate or --uninstall");
-            }
-            return createSuccess();
-        } catch (Exception e) {
-            throw new IllegalStateException("Cannot communicate with remote", e);
+        if (config.install()) {
+            ir.install(config.uuid(), config.version());
+        } else if (config.activate()) {
+            ir.activate(config.uuid(), config.version());
+        } else if (config.uninstall()) {
+            ir.uninstall(config.uuid(), config.version());
+        } else {
+            helpAndFail("ERROR: Missing --install, --activate or --uninstall");
         }
+        return createSuccess();
     }
 }
