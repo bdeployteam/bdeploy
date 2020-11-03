@@ -31,7 +31,7 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.cleanup.CleanupAction;
 import io.bdeploy.interfaces.cleanup.CleanupAction.CleanupType;
-import io.bdeploy.interfaces.remote.SlaveCleanupResource;
+import io.bdeploy.interfaces.remote.NodeCleanupResource;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.pcu.TestAppFactory;
@@ -43,7 +43,7 @@ import io.bdeploy.pcu.TestAppFactory;
 public class MinionCleanupTest {
 
     @Test
-    void mfCleanup(BHive local, SlaveCleanupResource scr, RemoteService remote, ActivityReporter reporter, @TempDir Path tmp) {
+    void mfCleanup(BHive local, NodeCleanupResource scr, RemoteService remote, ActivityReporter reporter, @TempDir Path tmp) {
         // Collect all that is at the beginning of the test in the hive so that we can compare if we
         // the cleanup removes everything that has been created
         SortedMap<Key, ObjectId> inventoryStart = null;
@@ -113,7 +113,7 @@ public class MinionCleanupTest {
     }
 
     @Test
-    void dirCleanup(SlaveCleanupResource scr, MinionRoot root, @TempDir Path tmp) {
+    void dirCleanup(NodeCleanupResource scr, MinionRoot root, @TempDir Path tmp) {
         Path dd = root.getDeploymentDir();
         Path testDir = dd.resolve("123-dummy-abc");
 

@@ -16,7 +16,7 @@ import io.bdeploy.interfaces.manifest.history.runtime.MinionRuntimeHistoryDto;
 @Path("/processes")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public interface SlaveProcessResource {
+public interface NodeProcessResource {
 
     /**
      * Starts all applications of an instance having the start type 'INSTANCE' configured
@@ -89,7 +89,7 @@ public interface SlaveProcessResource {
      * @param tag the tag for which to retrieve the output file entry.
      * @param applicationId the application ID for which to retrieve the output file entry.
      * @return an {@link InstanceDirectoryEntry}, can be used with
-     *         {@link SlaveDeploymentResource#getEntryContent(InstanceDirectoryEntry, long, long)}.
+     *         {@link NodeDeploymentResource#getEntryContent(InstanceDirectoryEntry, long, long)}.
      */
     @GET
     @Path("/output")

@@ -39,7 +39,7 @@ public class UpdatePackagingMigration {
 
     public static void run(MinionRoot root) throws IOException {
         if (!root.isMaster()) {
-            // the minion manifest will include the launcher also on the slave, as the update is pushed to them
+            // the minion manifest will include the launcher also on the node, as the update is pushed to them
             // but we don't need the launchers there.
             return;
         }

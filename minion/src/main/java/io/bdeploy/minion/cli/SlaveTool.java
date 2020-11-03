@@ -51,10 +51,10 @@ import io.bdeploy.minion.cli.SlaveTool.SlaveConfig;
 import io.bdeploy.minion.remote.jersey.JerseyAwareMinionUpdateManager;
 import io.bdeploy.minion.remote.jersey.MinionStatusResourceImpl;
 import io.bdeploy.minion.remote.jersey.MinionUpdateResourceImpl;
-import io.bdeploy.minion.remote.jersey.SlaveCleanupResourceImpl;
-import io.bdeploy.minion.remote.jersey.SlaveDeploymentResourceImpl;
-import io.bdeploy.minion.remote.jersey.SlaveProcessResourceImpl;
-import io.bdeploy.minion.remote.jersey.SlaveProxyResourceImpl;
+import io.bdeploy.minion.remote.jersey.NodeCleanupResourceImpl;
+import io.bdeploy.minion.remote.jersey.NodeDeploymentResourceImpl;
+import io.bdeploy.minion.remote.jersey.NodeProcessResourceImpl;
+import io.bdeploy.minion.remote.jersey.NodeProxyResourceImpl;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
@@ -205,10 +205,10 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
         srv.register(MinionUpdateResourceImpl.class);
 
         if (root.getMode() != MinionMode.CENTRAL) {
-            srv.register(SlaveCleanupResourceImpl.class);
-            srv.register(SlaveProcessResourceImpl.class);
-            srv.register(SlaveDeploymentResourceImpl.class);
-            srv.register(SlaveProxyResourceImpl.class);
+            srv.register(NodeCleanupResourceImpl.class);
+            srv.register(NodeProcessResourceImpl.class);
+            srv.register(NodeDeploymentResourceImpl.class);
+            srv.register(NodeProxyResourceImpl.class);
         }
 
         BroadcastingAuthenticatedWebSocket activityBc = new BroadcastingAuthenticatedWebSocket(StorageHelper::toRawBytes,

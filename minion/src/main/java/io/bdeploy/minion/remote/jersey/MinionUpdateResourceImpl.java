@@ -78,7 +78,7 @@ public class MinionUpdateResourceImpl implements MinionUpdateResource {
 
         h.execute(new ExportOperation().setManifest(key).setTarget(updateTarget));
 
-        // slaves /always/ clean, master might need to keep things (e.g. for web-ui).
+        // nodes /always/ clean, master might need to keep things (e.g. for web-ui).
         if (clean || !root.isMaster()) {
             // clean up any version from the hive which is not the currently running and not the new target version
             SortedSet<String> tagsToKeep = new TreeSet<>();

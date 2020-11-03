@@ -22,7 +22,7 @@ import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 @Path("/deployments")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public interface SlaveDeploymentResource {
+public interface NodeDeploymentResource {
 
     /**
      * @param key the key to be used to read the DeploymentManifest from.
@@ -47,7 +47,7 @@ public interface SlaveDeploymentResource {
     public void deactivate(Manifest.Key key);
 
     /**
-     * @param key the key to be erased from the slave.
+     * @param key the key to be erased from the node.
      */
     @POST
     @Path("/remove")

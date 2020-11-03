@@ -106,14 +106,14 @@ public class MasterCleanupJob implements Job {
 
     /**
      * Calculates all {@link InstanceNodeManifest} present on this master, over all {@link InstanceGroupConfiguration}s found in
-     * all storage locations. Then uses this information to determine on all slaves what can be deleted there.
+     * all storage locations. Then uses this information to determine on all nodes what can be deleted there.
      * <p>
-     * Does NOT clean anything on the master itself directly (but indirectly as the master is always also a slave).
+     * Does NOT clean anything on the master itself directly (but indirectly as the master is always also a node).
      *
      * @param mr the {@link MinionRoot} of the master minion
      */
     private void performCleanup(MinionRoot mr) {
-        log.info("Performing cleanup on all slaves");
+        log.info("Performing cleanup on all nodes");
 
         // no activity reporting on local hives right now (outside request scope, could only use Stream instead).
         try (BHiveRegistry registry = new BHiveRegistry(new ActivityReporter.Null(), null)) {

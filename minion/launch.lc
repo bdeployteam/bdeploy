@@ -5,15 +5,15 @@ abstract java configuration minion-base {
 	argument "-v";
 }
 
-/** Launches the master with a single slave */
-group configuration MasterSlave {
-	adopt member Slave regex ".*Started.*";
+/** Launches the master with a single node */
+group configuration MasterNode {
+	adopt member Node regex ".*Started.*";
 	adopt member Master;
 }
 
-/** Launches the central master with a managed master + slave*/
-group configuration CentralMasterSlave {
-	adopt member Managed-Slave regex ".*Started.*";
+/** Launches the central master with a managed master + node */
+group configuration CentralMasterNode {
+	adopt member Managed-Node regex ".*Started.*";
 	adopt member Managed-Master;
 	adopt member Central-Master;
 }
@@ -34,15 +34,15 @@ java configuration Master-Init : minion-base {
 }
 
 /**
- * Initialize a new slave root.
+ * Initialize a new node root.
  */
-java configuration Slave-Init : minion-base {
+java configuration Node-Init : minion-base {
 	argument "init";
-	argument "--root=${workspace_loc}/runtime/slave";
+	argument "--root=${workspace_loc}/runtime/node";
 	argument "--hostname=localhost";
 	argument "--port=7702";
 	argument "--dist=ignore";
-	argument "--tokenFile=${workspace_loc}/runtime/token-slave.txt";
+	argument "--tokenFile=${workspace_loc}/runtime/token-node.txt";
 	argument "--mode=SLAVE";
 }
 
@@ -75,73 +75,73 @@ java configuration Managed-Init : minion-base {
 }
 
 /**
- * Initialize a new managed slave root.
+ * Initialize a new managed node root.
  */
-java configuration Managed-Slave-Init : minion-base {
+java configuration Managed-Node-Init : minion-base {
 	argument "init";
-	argument "--root=${workspace_loc}/runtime/managed-slave";
+	argument "--root=${workspace_loc}/runtime/managed-node";
 	argument "--hostname=localhost";
 	argument "--port=7707";
 	argument "--dist=ignore";
-	argument "--tokenFile=${workspace_loc}/runtime/token-managed-slave.txt";
+	argument "--tokenFile=${workspace_loc}/runtime/token-managed-node.txt";
 	argument "--mode=SLAVE";
 }
 
 /**
- * Registers the slave with the master root.
+ * Registers the node with the master root.
  */
-java configuration Slave-Register : minion-base {
+java configuration Node-Register : minion-base {
 	argument "slave";
 	argument "--root=${workspace_loc}/runtime/master";
-	argument "--add=slave";
+	argument "--add=node";
 	argument "--remote=https://localhost:7702/api";
-	argument "--tokenFile=${workspace_loc}/runtime/token-slave.txt";
+	argument "--tokenFile=${workspace_loc}/runtime/token-node.txt";
 }
 
 /**
- * Removes the slave from the master root.
+ * Removes the node from the master root.
  */
-java configuration Slave-Remove : minion-base {
+java configuration Node-Remove : minion-base {
 	argument "slave";
 	argument "--root=${workspace_loc}/runtime/master";
-	argument "--remove=slave";
+	argument "--remove=node";
 }
 
 /**
- * Registers the managed slave with the managed root.
+ * Registers the managed node with the managed root.
  */
-java configuration Managed-Slave-Register : minion-base {
+java configuration Managed-Node-Register : minion-base {
 	argument "slave";
 	argument "--root=${workspace_loc}/runtime/managed";
-	argument "--add=slave";
+	argument "--add=node";
 	argument "--remote=https://localhost:7707/api";
-	argument "--tokenFile=${workspace_loc}/runtime/token-managed-slave.txt";
+	argument "--tokenFile=${workspace_loc}/runtime/token-managed-node.txt";
 }
 
 /**
- * Removes the managed slave from the managed root.
+ * Removes the managed node from the managed root.
  */
-java configuration Managed-Slave-Remove : minion-base {
+java configuration Managed-Node-Remove : minion-base {
 	argument "slave";
 	argument "--root=${workspace_loc}/runtime/managed";
-	argument "--remove=slave";
+	argument "--remove=node";
 }
 
 /**
- * Run the slave.
+ * Run the node.
  */
-java configuration Slave : minion-base {
+java configuration Node : minion-base {
 	argument "slave";
-	argument "--root=${workspace_loc}/runtime/slave";
+	argument "--root=${workspace_loc}/runtime/node";
 	memory max=256 MB;
 }
 
 /**
  * Run the managed slave.
  */
-java configuration Managed-Slave : minion-base {
+java configuration Managed-Node : minion-base {
 	argument "slave";
-	argument "--root=${workspace_loc}/runtime/managed-slave";
+	argument "--root=${workspace_loc}/runtime/managed-node";
 	memory max=256 MB;
 }
 

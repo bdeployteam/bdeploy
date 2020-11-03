@@ -13,7 +13,7 @@ import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.jersey.audit.Auditor;
 
 /**
- * Represents a master or a slave.
+ * Represents a node.
  */
 public interface Minion {
 
@@ -39,7 +39,7 @@ public interface Minion {
     public MinionDto getMinionConfig();
 
     /**
-     * Retrieve registered slaves. This makes only sense if the current VM hosts a master, otherwise only 'self' is returned.
+     * Retrieve registered nodes. This makes only sense if the current VM hosts a master, otherwise only 'self' is returned.
      */
     public MinionConfiguration getMinions();
 

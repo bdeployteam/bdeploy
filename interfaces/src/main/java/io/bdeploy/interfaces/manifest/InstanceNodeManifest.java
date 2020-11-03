@@ -70,7 +70,7 @@ public class InstanceNodeManifest {
     /**
      * @param hive the {@link BHiveExecution} to operate on.
      * @return the {@link InstanceState} fot this {@link InstanceNodeManifest}. State needs to be tracked both on the
-     *         {@link InstanceManifest} (master) and the {@link InstanceNodeManifest} (slave).
+     *         {@link InstanceManifest} (master) and the {@link InstanceNodeManifest} (node).
      */
     public InstanceState getState(BHiveExecution hive) {
         return new InstanceState(getKey(), hive);

@@ -20,7 +20,7 @@ import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 
 /**
- * Describes which minions/slaves are known by the master.
+ * Describes which nodes are known by the master (including himself).
  */
 public class MinionManifest {
 

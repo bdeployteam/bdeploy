@@ -41,8 +41,8 @@ import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
+import io.bdeploy.interfaces.remote.NodeCleanupResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
-import io.bdeploy.interfaces.remote.SlaveCleanupResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 
@@ -97,22 +97,22 @@ public class CleanupHelper {
             }
         }
 
-        // no slaves to cleanup on central. actual slave cleanup for managed masters done on each master.
+        // no nodes to cleanup on central. actual node cleanup for managed masters done on each master.
         if (minion.getMode() != MinionMode.CENTRAL) {
             // minions cleanup
             SortedSet<Key> instanceNodeManifestsToKeep = collectKnownInstanceNodeManifests();
-            for (Map.Entry<String, MinionDto> slave : minion.getMinions().entrySet()) {
-                log.info("Cleaning on {}, using {} anchors.", slave.getKey(), instanceNodeManifestsToKeep.size());
+            for (Map.Entry<String, MinionDto> node : minion.getMinions().entrySet()) {
+                log.info("Cleaning on {}, using {} anchors.", node.getKey(), instanceNodeManifestsToKeep.size());
 
-                RemoteService remote = slave.getValue().remote;
-                SlaveCleanupResource scr = ResourceProvider.getVersionedResource(remote, SlaveCleanupResource.class, null);
+                RemoteService remote = node.getValue().remote;
+                NodeCleanupResource scr = ResourceProvider.getVersionedResource(remote, NodeCleanupResource.class, null);
                 try {
                     List<CleanupAction> actions = scr.cleanup(instanceNodeManifestsToKeep);
-                    groups.add(new CleanupGroup("Perform cleanup on " + slave.getKey(), slave.getKey(), null, actions));
+                    groups.add(new CleanupGroup("Perform cleanup on " + node.getKey(), node.getKey(), null, actions));
                 } catch (Exception e) {
-                    log.warn("Cannot perform cleanup on minion {}", slave.getKey());
+                    log.warn("Cannot perform cleanup on minion {}", node.getKey());
                     log.debug("Error details", e);
-                    groups.add(new CleanupGroup("Not possible to clean offline minion " + slave.getKey(), slave.getKey(), null,
+                    groups.add(new CleanupGroup("Not possible to clean offline minion " + node.getKey(), node.getKey(), null,
                             Collections.emptyList()));
                 }
             }
@@ -144,7 +144,7 @@ public class CleanupHelper {
                 RemoteService svc = minion.getMinions().getRemote(group.minion);
                 if (svc != null) {
                     log.info("Performing cleanup group {} on {}", group.name, group.minion);
-                    SlaveCleanupResource scr = ResourceProvider.getVersionedResource(svc, SlaveCleanupResource.class, null);
+                    NodeCleanupResource scr = ResourceProvider.getVersionedResource(svc, NodeCleanupResource.class, null);
                     try {
                         scr.perform(group.actions);
                     } catch (Exception e) {
@@ -165,7 +165,7 @@ public class CleanupHelper {
      * Given all {@link BHive}s registered in the given {@link BHiveRegistry}, all
      * {@link InstanceNodeManifest}s that exist (also historic versions) are collected.
      *
-     * @return the {@link SortedSet} of {@link Key}s which are required to be kept alive on each slave.
+     * @return the {@link SortedSet} of {@link Key}s which are required to be kept alive on each node.
      */
     private SortedSet<Key> collectKnownInstanceNodeManifests() {
         SortedSet<Key> result = new TreeSet<>();

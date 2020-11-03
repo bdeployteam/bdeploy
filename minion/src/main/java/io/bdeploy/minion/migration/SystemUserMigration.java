@@ -36,8 +36,8 @@ public class SystemUserMigration {
             String auth = minion.remote.getAuthPack();
             if (auth != null
                     && !SecurityHelper.getInstance().getSelfVerifiedPayloadFromPack(auth, ApiAccessToken.class).isSystem()) {
-                // the token was issues /before/ we introduced system tokens and contains a system user name, which is no
-                // longer OK on masters... it is OK for slaves, since user names are not verified there, so we only need
+                // the token was issued /before/ we introduced system tokens and contains a system user name, which is no
+                // longer OK on masters... it is OK for nodes, since user names are not verified there, so we only need
                 // to handle masters...
                 ApiAccessToken aat = new ApiAccessToken.Builder().forSystem().addPermission(ApiAccessToken.ADMIN_PERMISSION)
                         .build();
