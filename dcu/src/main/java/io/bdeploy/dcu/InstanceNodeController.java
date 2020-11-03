@@ -8,7 +8,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import io.bdeploy.interfaces.cleanup.CleanupAction.CleanupType;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
+import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor.ApplicationPoolType;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.variables.ApplicationParameterProvider;
@@ -158,8 +161,8 @@ public class InstanceNodeController {
         Path dir = getDeploymentDir();
         if (Files.exists(dir)) {
             // check if all required applications exist
-            long missingApps = getManifest().getConfiguration().applications.stream()
-                    .map(a -> a.application.directoryFriendlyName()).filter(a -> !isPooled(a)).count();
+            long missingApps = getManifest().getConfiguration().applications.stream().filter(a -> !isApplicationInstalled(a))
+                    .count();
             if (missingApps > 0) {
                 return false;
             }
@@ -169,8 +172,15 @@ public class InstanceNodeController {
         return false;
     }
 
-    private boolean isPooled(String appName) {
-        return Files.isDirectory(paths.get(SpecialDirectory.MANIFEST_POOL).resolve(appName));
+    private boolean isApplicationInstalled(ApplicationConfiguration config) {
+        if (config.pooling == ApplicationPoolType.GLOBAL || config.pooling == null) {
+            return Files
+                    .isDirectory(paths.get(SpecialDirectory.MANIFEST_POOL).resolve(config.application.directoryFriendlyName()));
+        } else if (config.pooling == ApplicationPoolType.LOCAL) {
+            return Files.isDirectory(
+                    paths.get(SpecialDirectory.INSTANCE_MANIFEST_POOL).resolve(config.application.directoryFriendlyName()));
+        }
+        return Files.isDirectory(paths.get(SpecialDirectory.BIN).resolve(config.application.directoryFriendlyName()));
     }
 
     /**
@@ -212,14 +222,14 @@ public class InstanceNodeController {
         Path targetDir = paths.get(SpecialDirectory.BIN);
         PathHelper.deleteRecursive(targetDir);
 
-        // write all required applications to the pool
-        SortedMap<Manifest.Key, Path> applications = installPooledApplicationsFor(dc);
-
-        // write all the manifest content to the according target location, but specially handle applications
+        // write all the manifest content (config only) to the according target location
         hive.execute(new ExportOperation().setManifest(manifest.getKey()).setTarget(targetDir));
 
+        // write all required applications to the pool
+        SortedMap<Manifest.Key, Path> exportedPaths = installPooledApplicationsFor(dc);
+
         // create a variable resolver which can expand all supported variables.
-        resolvers.add(new ManifestVariableResolver(new ManifestRefPathProvider(paths, applications)));
+        resolvers.add(new ManifestVariableResolver(new ManifestRefPathProvider(paths, exportedPaths)));
 
         // render configuration files.
         processConfigurationTemplates(paths.get(SpecialDirectory.CONFIG), resolvers);
@@ -239,27 +249,41 @@ public class InstanceNodeController {
 
     private SortedMap<Key, Path> installPooledApplicationsFor(InstanceNodeConfiguration dc) {
         Path poolRoot = paths.getAndCreate(SpecialDirectory.MANIFEST_POOL);
+        Path instancePoolRoot = paths.getAndCreate(SpecialDirectory.INSTANCE_MANIFEST_POOL);
+        Path noPoolRoot = paths.getAndCreate(SpecialDirectory.BIN);
+
         SortedMap<Key, Path> result = new TreeMap<>();
 
         LocalDependencyFetcher localDeps = new LocalDependencyFetcher();
-        List<Manifest.Key> applications = new ArrayList<>();
+        SortedMap<Path, Set<Manifest.Key>> pools = new TreeMap<>();
+
         for (ApplicationConfiguration app : dc.applications) {
-            applications.add(app.application);
+            if (app.pooling == null || app.pooling == ApplicationPoolType.GLOBAL) {
+                pools.computeIfAbsent(poolRoot, k -> new TreeSet<>()).add(app.application);
+            } else if (app.pooling == ApplicationPoolType.LOCAL) {
+                pools.computeIfAbsent(instancePoolRoot, k -> new TreeSet<>()).add(app.application);
+            } else if (app.pooling == ApplicationPoolType.NONE) {
+                pools.computeIfAbsent(noPoolRoot, k -> new TreeSet<>()).add(app.application);
+            }
+
             ApplicationManifest amf = ApplicationManifest.of(hive, app.application);
 
             // applications /must/ follow the ScopedManifestKey rules.
             ScopedManifestKey smk = ScopedManifestKey.parse(app.application);
 
-            // the dependency must be here. it has been pushed here with the configuration.
-            applications.addAll(localDeps.fetch(hive, amf.getDescriptor().runtimeDependencies, smk.getOperatingSystem()));
+            // the dependency must be here. it has been pushed here with the configuration. all dependencies go to the global pool
+            pools.computeIfAbsent(poolRoot, k -> new TreeSet<>())
+                    .addAll(localDeps.fetch(hive, amf.getDescriptor().runtimeDependencies, smk.getOperatingSystem()));
         }
 
-        for (Manifest.Key key : applications) {
-            Path target = poolRoot.resolve(key.directoryFriendlyName());
-            result.put(key, target);
+        for (Map.Entry<Path, Set<Manifest.Key>> entry : pools.entrySet()) {
+            for (Manifest.Key key : entry.getValue()) {
+                Path target = entry.getKey().resolve(key.directoryFriendlyName());
+                result.put(key, target);
 
-            if (!Files.isDirectory(target)) {
-                hive.execute(new ExportOperation().setTarget(target).setManifest(key));
+                if (!Files.isDirectory(target)) {
+                    hive.execute(new ExportOperation().setTarget(target).setManifest(key));
+                }
             }
         }
 
@@ -336,40 +360,61 @@ public class InstanceNodeController {
             throw new IllegalStateException("Cannot scan deployment directories", e);
         }
 
-        cleanupPoolDir(source, root, toRemove, toKeep);
+        cleanupPoolDirs(source, root, toRemove, toKeep);
 
         return toRemove;
     }
 
-    private static void cleanupPoolDir(BHive source, Path root, List<CleanupAction> toRemove,
+    private static void cleanupPoolDirs(BHive source, Path root, List<CleanupAction> toRemove,
             List<InstanceNodeController> toKeep) {
         log.info("Collecting garbage in application pool...");
         OperatingSystem runningOs = OsHelper.getRunningOs();
         TreeSet<String> requiredKeys = new TreeSet<>();
+        SortedMap<String, TreeSet<String>> requiredInstanceKeys = new TreeMap<>();
         for (InstanceNodeController inc : toKeep) {
             // add all applications and all of their dependencies as resolved locally.
-            inc.getManifest().getConfiguration().applications.stream().map(a -> a.application).peek(a -> {
-                SortedSet<String> deps = ApplicationManifest.of(source, a).getDescriptor().runtimeDependencies;
+            inc.getManifest().getConfiguration().applications.stream().peek(a -> {
+                SortedSet<String> deps = ApplicationManifest.of(source, a.application).getDescriptor().runtimeDependencies;
                 if (deps == null) {
                     return;
                 }
                 deps.stream().map(d -> LocalDependencyFetcher.resolveSingleLocal(source, d, runningOs))
                         .map(Manifest.Key::directoryFriendlyName).forEach(requiredKeys::add);
-            }).map(Manifest.Key::directoryFriendlyName).forEach(requiredKeys::add);
+            }).forEach(a -> {
+                if (a.pooling == ApplicationPoolType.GLOBAL || a.pooling == null) {
+                    requiredKeys.add(a.application.directoryFriendlyName());
+                } else if (a.pooling == ApplicationPoolType.LOCAL) {
+                    requiredInstanceKeys.computeIfAbsent(inc.getManifest().getUUID(), k -> new TreeSet<>())
+                            .add(a.application.directoryFriendlyName());
+                } // type NONE is cleaned with the instance bin directory.
+            });
         }
 
+        // clean global pool
         Path poolDir = root.resolve(SpecialDirectory.MANIFEST_POOL.getDirName());
-        if (Files.isDirectory(poolDir)) {
-            try (DirectoryStream<Path> poolStream = Files.newDirectoryStream(poolDir)) {
-                for (Path pooled : poolStream) {
-                    if (!requiredKeys.contains(pooled.getFileName().toString())) {
-                        toRemove.add(new CleanupAction(CleanupType.DELETE_FOLDER, pooled.toAbsolutePath().toString(),
-                                "Remove stale pooled application"));
-                    }
+        cleanPoolDir(toRemove, requiredKeys, poolDir);
+
+        // clean per-instance pool
+        for (Map.Entry<String, TreeSet<String>> entry : requiredInstanceKeys.entrySet()) {
+            Path instancePoolDir = root.resolve(entry.getKey()).resolve(SpecialDirectory.INSTANCE_MANIFEST_POOL.getDirName());
+            cleanPoolDir(toRemove, entry.getValue(), instancePoolDir);
+        }
+    }
+
+    private static void cleanPoolDir(List<CleanupAction> toRemove, TreeSet<String> requiredKeys, Path poolDir) {
+        if (!Files.isDirectory(poolDir)) {
+            return;
+        }
+
+        try (DirectoryStream<Path> poolStream = Files.newDirectoryStream(poolDir)) {
+            for (Path pooled : poolStream) {
+                if (!requiredKeys.contains(pooled.getFileName().toString())) {
+                    toRemove.add(new CleanupAction(CleanupType.DELETE_FOLDER, pooled.toAbsolutePath().toString(),
+                            "Remove stale pooled application"));
                 }
-            } catch (IOException e) {
-                throw new IllegalStateException("Cannot scan pool directory", e);
             }
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot scan pool directory", e);
         }
     }
 

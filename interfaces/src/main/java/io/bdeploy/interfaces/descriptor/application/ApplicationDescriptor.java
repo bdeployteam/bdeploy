@@ -16,10 +16,31 @@ import io.bdeploy.api.product.v1.ApplicationDescriptorApi;
  */
 public class ApplicationDescriptor extends ApplicationDescriptorApi implements Comparable<ApplicationDescriptor> {
 
+    /**
+     * The type of application described.
+     */
     public enum ApplicationType {
         @JsonEnumDefaultValue
         SERVER,
         CLIENT;
+    }
+
+    /**
+     * The type of pooling applicable to this application.
+     * <p>
+     * <ol>
+     * <li>GLOBAL: Application can be installed once for a given version, and be used by multiple instances, and multiple instance
+     * versions therein.</li>
+     * <li>LOCAL: Application can be installed once per instance, and will be reused by multiple versions of this instance
+     * only</li>
+     * <li>NONE: No pooling, the application is reinstalled for every instance version, even for minor configuration changed</li>
+     * </ol>
+     */
+    public enum ApplicationPoolType {
+        @JsonEnumDefaultValue
+        GLOBAL,
+        LOCAL,
+        NONE
     }
 
     /**
@@ -31,6 +52,11 @@ public class ApplicationDescriptor extends ApplicationDescriptorApi implements C
      * Type of application.
      */
     public ApplicationType type = ApplicationType.SERVER;
+
+    /**
+     * The type of pooling applicable.
+     */
+    public ApplicationPoolType pooling = ApplicationPoolType.GLOBAL;
 
     /**
      * Provides information about exit codes of the application.

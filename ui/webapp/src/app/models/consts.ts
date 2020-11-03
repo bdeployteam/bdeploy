@@ -119,6 +119,7 @@ export const EMPTY_APPLICATION_CONFIGURATION: ApplicationConfiguration = {
   uid: null,
   name: null,
   application: null,
+  pooling: null,
   processControl: null,
   start: EMPTY_COMMAND_CONFIGURATION,
   stop: EMPTY_COMMAND_CONFIGURATION,
