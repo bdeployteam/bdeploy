@@ -261,7 +261,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
    * when the user drops a new application group from the sidebar or
    * when a user pastes an application
    */
-  private addProcess(data: any, targetIndex: number) {
+  private async addProcess(data: any, targetIndex: number) {
     if (!this.node.nodeConfiguration) {
       this.createNewNodeConfig();
     }
@@ -270,14 +270,12 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
     if (data instanceof ApplicationGroup) {
       if (this.isClientApplicationsNode()) {
         for (const app of data.applications) {
-          this.appService.createNewAppConfig(this.instanceGroupName, this.processConfig, app).then(cfg => {
-            this.applyApplicationTemplate(data.selectedTemplate, cfg, app).then(r => {
-              if (r) {
-                this.nodeApps.splice(targetIndex, 0, cfg);
-                this.editNodeAppsEvent.emit();
-              }
-            });
-          });
+          const cfg = await this.appService.createNewAppConfig(this.instanceGroupName, this.processConfig, app);
+          const result = await this.applyApplicationTemplate(data.selectedTemplate, cfg, app);
+          if (result) {
+            this.nodeApps.splice(targetIndex, 0, cfg);
+            this.editNodeAppsEvent.emit();
+          }
         }
       } else {
         const nodeOs = this.minionConfig.os;
