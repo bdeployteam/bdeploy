@@ -16,10 +16,9 @@ interface Row {
 @Component({
   selector: 'app-process-port-list',
   templateUrl: './process-port-list.component.html',
-  styleUrls: ['./process-port-list.component.css']
+  styleUrls: ['./process-port-list.component.css'],
 })
 export class ProcessPortListComponent implements OnInit, AfterViewInit {
-
   @Input() instanceGroup: string;
   @Input() instanceId: string;
   @Input() minionName: string;
@@ -33,12 +32,7 @@ export class ProcessPortListComponent implements OnInit, AfterViewInit {
   public INITIAL_SORT_COLUMN = 'port';
   public INITIAL_SORT_DIRECTION = 'asc';
 
-  public displayedColumns: string[] = [
-    'description',
-    'portState',
-    'port',
-    'rating',
-  ];
+  public displayedColumns: string[] = ['description', 'portState', 'port', 'rating'];
   public dataSource: MatTableDataSource<Row> = new MatTableDataSource<Row>([]);
 
   @ViewChild(MatSort)
@@ -46,7 +40,7 @@ export class ProcessPortListComponent implements OnInit, AfterViewInit {
 
   loading = true;
 
-  constructor(private instanceService: InstanceService, private processService: ProcessService) { }
+  constructor(private instanceService: InstanceService, private processService: ProcessService) {}
 
   ngOnInit(): void {
     this.reload();
@@ -58,18 +52,21 @@ export class ProcessPortListComponent implements OnInit, AfterViewInit {
   }
 
   reload() {
-    this.instanceService.getOpenPorts(this.instanceGroup, this.instanceId, this.minionName, this.ports).pipe(finalize(() => this.loading = false)).subscribe(r => {
-      const rows: Row[] = [];
-      for (let i = 0; i < this.ports.length; ++i) {
-        rows.push({
-          port: this.ports[i],
-          description: this.labels[i],
-          state: r[this.ports[i]],
-          rating: this.isRatingOk(r[this.ports[i]])
-        });
-      }
-      this.dataSource.data = rows;
-    });
+    this.instanceService
+      .getOpenPorts(this.instanceGroup, this.instanceId, this.minionName, this.ports)
+      .pipe(finalize(() => (this.loading = false)))
+      .subscribe((r) => {
+        const rows: Row[] = [];
+        for (let i = 0; i < this.ports.length; ++i) {
+          rows.push({
+            port: this.ports[i],
+            description: this.labels[i],
+            state: r[this.ports[i]],
+            rating: this.isRatingOk(r[this.ports[i]]),
+          });
+        }
+        this.dataSource.data = rows;
+      });
   }
 
   isRunning() {

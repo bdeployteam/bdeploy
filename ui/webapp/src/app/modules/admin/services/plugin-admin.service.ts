@@ -6,14 +6,13 @@ import { ConfigService } from '../../core/services/config.service';
 import { Logger, LoggingService } from '../../core/services/logging.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class PluginAdminService {
-
   private static BASEPATH = '/plugin-admin';
   private log: Logger = this.loggingService.getLogger('PluginService');
 
-  constructor(private http: HttpClient, private cfg: ConfigService, private loggingService: LoggingService) { }
+  constructor(private http: HttpClient, private cfg: ConfigService, private loggingService: LoggingService) {}
 
   public getAll(): Observable<PluginInfoDto[]> {
     const url: string = this.cfg.config.api + PluginAdminService.BASEPATH + '/list';
@@ -48,6 +47,4 @@ export class PluginAdminService {
     this.log.debug('deleteGlobalPlugin: ' + url);
     return this.http.post(url, dto.id);
   }
-
-
 }

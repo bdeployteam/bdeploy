@@ -8,7 +8,7 @@ export enum UpdateStatus {
   INSTALL,
   RESTART,
   SUCCESS,
-  FAILED
+  FAILED,
 }
 
 export function areUpdatesAvailable(status: UpdateStatus) {

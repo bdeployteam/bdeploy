@@ -10,8 +10,9 @@
   },
   "workbench.colorCustomizations": {},
   "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
   "prettier.jsxSingleQuote": true,
   "javascript.preferences.quoteStyle": "single",
   "typescript.preferences.quoteStyle": "single",
-  "prettier.useEditorConfig": false,
+  "prettier.useEditorConfig": false
 }

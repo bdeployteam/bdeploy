@@ -7,18 +7,16 @@ import { EMPTY_USER_CHANGE_PASSWORD_DTO } from 'src/app/models/consts';
 @Component({
   selector: 'app-user-password',
   templateUrl: './user-password.component.html',
-  styleUrls: ['./user-password.component.css']
+  styleUrls: ['./user-password.component.css'],
 })
 export class UserPasswordComponent implements OnInit {
-
   public passwordForm = this.fb.group({
-      currentPassword: [''],
-      passwords: this.fb.group({
-        password: ['', [Validators.required]],
-        passwordRepeat: ['', [Validators.required]]
-      })
-    }
-  );
+    currentPassword: [''],
+    passwords: this.fb.group({
+      password: ['', [Validators.required]],
+      passwordRepeat: ['', [Validators.required]],
+    }),
+  });
 
   get currentPasswordControl() {
     return this.passwordForm.get('currentPassword');
@@ -39,7 +37,7 @@ export class UserPasswordComponent implements OnInit {
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any, // provided data: data.isAdmin, data.user (string)
     private fb: FormBuilder
-  ) { }
+  ) {}
 
   ngOnInit() {
     if (!this.data.isAdmin) {
@@ -61,7 +59,7 @@ export class UserPasswordComponent implements OnInit {
       const pw1 = this.passwordControl.value;
       const pw2 = this.passwordRepeatControl.value;
       const ok = pw1 && pw2 && pw1 === pw2;
-      return ok ? null : {'passwordsNotEqual' : true};
+      return ok ? null : { passwordsNotEqual: true };
     };
   }
 
@@ -71,5 +69,4 @@ export class UserPasswordComponent implements OnInit {
     }
     return 'Unknown error';
   }
-
 }

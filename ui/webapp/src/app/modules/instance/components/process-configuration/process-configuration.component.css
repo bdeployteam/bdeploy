@@ -215,7 +215,6 @@
   justify-self: end;
 }
 
-
 .vert-speparator {
   height: 50%;
   border-left: 1px solid;
@@ -245,8 +244,8 @@
 .headerTextSmall {
   font-size: 1.2em;
   margin-left: 15px;
-  margin-top:15px;
-  margin-bottom:12px;
+  margin-top: 15px;
+  margin-bottom: 12px;
   vertical-align: middle;
 }
 
@@ -255,12 +254,12 @@
   vertical-align: middle;
 }
 
-.headerButton{
-  margin-left:5px;
+.headerButton {
+  margin-left: 5px;
 }
 
-.headerButton .mat-icon{
-  margin:0 5px 2px 0;
+.headerButton .mat-icon {
+  margin: 0 5px 2px 0;
 }
 
 .banner {

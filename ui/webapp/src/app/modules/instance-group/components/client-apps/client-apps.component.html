@@ -1,80 +1,100 @@
-  <mat-toolbar class="mat-elevation-z1 header-toolbar">
-    <button mat-icon-button type="button" (click)="routingHistoryService.back('instance/browser/'+instanceGroupName)"><mat-icon>chevron_left</mat-icon></button>
-    <span>Instance Group: <app-instance-group-title [instanceGroup]='instanceGroupName'></app-instance-group-title></span>
-    <span class="fill-space"></span>
-    <ng-container *ngIf="!isLoading()">
-      <span class="toolbar-text">Platform:</span>
-      <div class="toolbar-icons">
-        <ng-container *ngFor="let os of getAllOs()">
-          <button mat-icon-button (click)='switchOs(os)' matTooltip="{{os}}">
-            <mat-icon [ngClass]="['toolbar-icon', os === activeOs ? 'toolbar-icon-active' : 'none']" [svgIcon]='os'></mat-icon>
-          </button>
-        </ng-container>
-      </div>
-    </ng-container>
-  </mat-toolbar>
-
-  <div *ngIf="isLoading()" class="loading-container">
-    <mat-spinner [diameter]="48"></mat-spinner>
-  </div>
+<mat-toolbar class="mat-elevation-z1 header-toolbar">
+  <button mat-icon-button type="button" (click)="routingHistoryService.back('instance/browser/' + instanceGroupName)">
+    <mat-icon>chevron_left</mat-icon>
+  </button>
+  <span>Instance Group: <app-instance-group-title [instanceGroup]="instanceGroupName"></app-instance-group-title></span>
+  <span class="fill-space"></span>
   <ng-container *ngIf="!isLoading()">
-    <p class="banner banner-warn-theme" *ngIf="!hasApps">
-      <span class="material-icons headerIcon">computer</span>
-      <span class="headerText">No client applications are published for your operating system. Please contact the administrator.</span>
-    </p>
-    <p class="banner banner-warn-theme" *ngIf="!launcherService.hasLauncherForOs(activeOs)">
-      <span class="material-icons headerIcon">launch</span>
-      <span class="headerText">Launcher for your operating system is not available. Please contact the administrator.</span>
-    </p>
-    <div class="content-toolbar" *ngIf="launcherService.hasLauncherForOs(activeOs)">
-      <span class="fill-space"></span>
-      <mat-menu #appMenu="matMenu" xPosition="before">
-        <button mat-menu-item (click)="downloadLauncherInstaller()"><mat-icon>cloud_download</mat-icon>Installer</button>
-        <button mat-menu-item (click)="downloadLauncherZip()"><mat-icon>archive</mat-icon>ZIP (Manual Installation)</button>
-      </mat-menu>
-      <button mat-stroked-button color="primary" [matMenuTriggerFor]="appMenu" appClickStopPropagation>
-        <mat-icon>cloud_download</mat-icon>
-        <span>Download Click & Start Launcher</span>
-      </button>
-    </div>
-    <div *ngFor="let purpose of getPurposes()">
-      <p class="list-heading">{{purpose}}</p>
-      <div class="card" *ngFor="let instance of getInstances(purpose)">
-        <mat-card [ngClass]="['instance-card','instance-card-theme', 'instance-card-' + instance.purpose]">
-          <mat-card-header>
-            <app-instance-group-logo mat-card-avatar [instanceGroup]='instanceGroup'></app-instance-group-logo>
-            <mat-card-title class="instance-card-title">{{instance.name}}</mat-card-title>
-            <mat-card-subtitle *ngIf="instance.description" class="instance-card-subtitle">{{instance.description}}</mat-card-subtitle>
-            <span class="fill-space"></span>
-            <div class="instance-card-toolbar">{{instance.product.tag}}</div>
-          </mat-card-header>
-          <mat-card-content>
-            <ng-container *ngFor="let app of getApps(instance); last as isLast">
-              <div class="app-card">
-                <div class="app-card-icon">
-                  <mat-icon [svgIcon]='app.os'></mat-icon>
-                </div>
-                <div class="app-card-description">
-                  <span>{{app.description}}</span>
-                </div>
-                <button mat-button class="app-card-link" (click)="downloadClickAndRun(instance, app)" matTooltip="Download Click & Start">
-                  <mat-icon>play_arrow</mat-icon>
-                  <span>Click & Start</span>
-                </button>
-                <button mat-button class="app-card-link" (click)="downloadInstaller(instance, app)"
-                  matTooltip="Download Installer" [disabled]="!launcherService.hasLauncherForOs(app.os)">
-                  <mat-icon>cloud_download</mat-icon>
-                  <span>Installer</span>
-                </button>
-              </div>
-              <mat-divider *ngIf="!isLast" class="list-divider"></mat-divider>
-            </ng-container>
-          </mat-card-content>
-        </mat-card>
-      </div>
-      <mat-divider class="list-divider"></mat-divider>
+    <span class="toolbar-text">Platform:</span>
+    <div class="toolbar-icons">
+      <ng-container *ngFor="let os of getAllOs()">
+        <button mat-icon-button (click)="switchOs(os)" matTooltip="{{ os }}">
+          <mat-icon
+            [ngClass]="['toolbar-icon', os === activeOs ? 'toolbar-icon-active' : 'none']"
+            [svgIcon]="os"
+          ></mat-icon>
+        </button>
+      </ng-container>
     </div>
   </ng-container>
+</mat-toolbar>
 
-
-
+<div *ngIf="isLoading()" class="loading-container">
+  <mat-spinner [diameter]="48"></mat-spinner>
+</div>
+<ng-container *ngIf="!isLoading()">
+  <p class="banner banner-warn-theme" *ngIf="!hasApps">
+    <span class="material-icons headerIcon">computer</span>
+    <span class="headerText"
+      >No client applications are published for your operating system. Please contact the administrator.</span
+    >
+  </p>
+  <p class="banner banner-warn-theme" *ngIf="!launcherService.hasLauncherForOs(activeOs)">
+    <span class="material-icons headerIcon">launch</span>
+    <span class="headerText"
+      >Launcher for your operating system is not available. Please contact the administrator.</span
+    >
+  </p>
+  <div class="content-toolbar" *ngIf="launcherService.hasLauncherForOs(activeOs)">
+    <span class="fill-space"></span>
+    <mat-menu #appMenu="matMenu" xPosition="before">
+      <button mat-menu-item (click)="downloadLauncherInstaller()"><mat-icon>cloud_download</mat-icon>Installer</button>
+      <button mat-menu-item (click)="downloadLauncherZip()">
+        <mat-icon>archive</mat-icon>ZIP (Manual Installation)
+      </button>
+    </mat-menu>
+    <button mat-stroked-button color="primary" [matMenuTriggerFor]="appMenu" appClickStopPropagation>
+      <mat-icon>cloud_download</mat-icon>
+      <span>Download Click & Start Launcher</span>
+    </button>
+  </div>
+  <div *ngFor="let purpose of getPurposes()">
+    <p class="list-heading">{{ purpose }}</p>
+    <div class="card" *ngFor="let instance of getInstances(purpose)">
+      <mat-card [ngClass]="['instance-card', 'instance-card-theme', 'instance-card-' + instance.purpose]">
+        <mat-card-header>
+          <app-instance-group-logo mat-card-avatar [instanceGroup]="instanceGroup"></app-instance-group-logo>
+          <mat-card-title class="instance-card-title">{{ instance.name }}</mat-card-title>
+          <mat-card-subtitle *ngIf="instance.description" class="instance-card-subtitle">{{
+            instance.description
+          }}</mat-card-subtitle>
+          <span class="fill-space"></span>
+          <div class="instance-card-toolbar">{{ instance.product.tag }}</div>
+        </mat-card-header>
+        <mat-card-content>
+          <ng-container *ngFor="let app of getApps(instance); last as isLast">
+            <div class="app-card">
+              <div class="app-card-icon">
+                <mat-icon [svgIcon]="app.os"></mat-icon>
+              </div>
+              <div class="app-card-description">
+                <span>{{ app.description }}</span>
+              </div>
+              <button
+                mat-button
+                class="app-card-link"
+                (click)="downloadClickAndRun(instance, app)"
+                matTooltip="Download Click & Start"
+              >
+                <mat-icon>play_arrow</mat-icon>
+                <span>Click & Start</span>
+              </button>
+              <button
+                mat-button
+                class="app-card-link"
+                (click)="downloadInstaller(instance, app)"
+                matTooltip="Download Installer"
+                [disabled]="!launcherService.hasLauncherForOs(app.os)"
+              >
+                <mat-icon>cloud_download</mat-icon>
+                <span>Installer</span>
+              </button>
+            </div>
+            <mat-divider *ngIf="!isLast" class="list-divider"></mat-divider>
+          </ng-container>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    <mat-divider class="list-divider"></mat-divider>
+  </div>
+</ng-container>

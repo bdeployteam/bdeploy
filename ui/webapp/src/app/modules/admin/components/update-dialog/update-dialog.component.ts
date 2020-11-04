@@ -47,5 +47,4 @@ export class UpdateDialogComponent implements OnInit {
   getVersionAfterUpdate() {
     return convert2String(this.versionAfterUpdate);
   }
-
 }

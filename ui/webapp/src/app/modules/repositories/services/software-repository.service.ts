@@ -9,16 +9,11 @@ import { Logger, LoggingService } from '../../core/services/logging.service';
   providedIn: 'root',
 })
 export class SoftwareRepositoryService {
-
   public static BASEPATH = '/softwarerepository';
 
   private log: Logger = this.loggingService.getLogger('SoftwareRepositoryService');
 
-  constructor(
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private loggingService: LoggingService
-  ) {}
+  constructor(private cfg: ConfigService, private http: HttpClient, private loggingService: LoggingService) {}
 
   public listSoftwareRepositories(): Observable<SoftwareRepositoryConfiguration[]> {
     const url: string = this.cfg.config.api + SoftwareRepositoryService.BASEPATH;
@@ -61,5 +56,4 @@ export class SoftwareRepositoryService {
     this.log.debug('updateSoftwareRepositoryPermissions: ' + url);
     return this.http.post(url, permissions);
   }
-
 }

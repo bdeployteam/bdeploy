@@ -5,14 +5,12 @@ import { SharedModule } from '../shared/shared.module';
 import { SoftwareCardComponent } from './components/software-card/software-card.component';
 import { SoftwareListComponent } from './components/software-list/software-list.component';
 import { SoftwareRepoAddEditComponent } from './components/software-repo-add-edit/software-repo-add-edit.component';
+import { SoftwareRepoFileUploadComponent } from './components/software-repo-file-upload/software-repo-file-upload.component';
 import { SoftwareRepositoriesBrowserComponent } from './components/software-repositories-browser/software-repositories-browser.component';
 import { SoftwareRepositoryCardComponent } from './components/software-repository-card/software-repository-card.component';
 import { SoftwareRepositoryPermissionsComponent } from './components/software-repository-permissions/software-repository-permissions.component';
 import { SoftwareRepositoryComponent } from './components/software-repository/software-repository.component';
 import { RepositoriesRoutingModule } from './repositories-routing.module';
-import { SoftwareRepoFileUploadComponent } from './components/software-repo-file-upload/software-repo-file-upload.component';
-
-
 
 @NgModule({
   declarations: [
@@ -25,11 +23,6 @@ import { SoftwareRepoFileUploadComponent } from './components/software-repo-file
     SoftwareListComponent,
     SoftwareRepoFileUploadComponent,
   ],
-  imports: [
-    CommonModule,
-    SharedModule,
-    CoreModule,
-    RepositoriesRoutingModule,
-  ]
+  imports: [CommonModule, SharedModule, CoreModule, RepositoriesRoutingModule],
 })
-export class RepositoriesModule { }
+export class RepositoriesModule {}

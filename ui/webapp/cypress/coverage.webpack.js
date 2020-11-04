@@ -7,12 +7,8 @@ module.exports = {
         options: { esModules: true, debug: true },
         enforce: 'post',
         include: require('path').join(__dirname, '..', 'src'),
-        exclude: [
-          /\.(e2e|spec)\.ts$/,
-          /node_modules/,
-          /(ngfactory|ngstyle)\.js/
-        ]
-      }
-    ]
-  }
+        exclude: [/\.(e2e|spec)\.ts$/, /node_modules/, /(ngfactory|ngstyle)\.js/],
+      },
+    ],
+  },
 };

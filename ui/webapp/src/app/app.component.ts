@@ -36,18 +36,18 @@ export class AppComponent implements OnInit {
   ngOnInit() {
     this.subscription = this.router.events
       .pipe(
-        filter(e => e instanceof NavigationEnd),
+        filter((e) => e instanceof NavigationEnd),
         map(() => this.activatedRoute),
-        map(route => {
+        map((route) => {
           while (route.firstChild) {
             route = route.firstChild;
           }
           return route;
         }),
-        filter(route => route.outlet === 'primary'),
-        map(route => route.snapshot)
+        filter((route) => route.outlet === 'primary'),
+        map((route) => route.snapshot)
       )
-      .subscribe(url => {
+      .subscribe((url) => {
         // safety, reduce load count, route is loaded so it cannot be loading anymore :)
         // this can happen if lazy loading is initiated but a guard redirects the router
         // somewhere else.
@@ -71,17 +71,17 @@ export class AppComponent implements OnInit {
         this.titleService.setTitle(title);
       });
 
-    this.subscription.add(this.router.events.pipe(
-      filter(e => e instanceof RouteConfigLoadStart)
-    ).subscribe(e => {
-      this.loadCount++;
-    }));
+    this.subscription.add(
+      this.router.events.pipe(filter((e) => e instanceof RouteConfigLoadStart)).subscribe((e) => {
+        this.loadCount++;
+      })
+    );
 
-    this.subscription.add(this.router.events.pipe(
-      filter(e => e instanceof RouteConfigLoadEnd)
-    ).subscribe(e => {
-      this.decreaseLoadCount();
-    }));
+    this.subscription.add(
+      this.router.events.pipe(filter((e) => e instanceof RouteConfigLoadEnd)).subscribe((e) => {
+        this.decreaseLoadCount();
+      })
+    );
   }
 
   private decreaseLoadCount() {

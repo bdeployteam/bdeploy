@@ -1,87 +1,137 @@
 <form [formGroup]="formGroup" autocomplete="off">
-  <input autocomplete="false" name="hidden" type="text" style="display:none;">
-  <input type="password" style="display:none;">
+  <input autocomplete="false" name="hidden" type="text" style="display: none;" />
+  <input type="password" style="display: none;" />
   <div class="title title-theme">
     <div class="title-header">Endpoint Settings</div>
-    <div class="title-hint info-theme">Configure access to {{appConfigContext.applicationConfiguration.name}} endpoints via BDeploy.</div>
+    <div class="title-hint info-theme">
+      Configure access to {{ appConfigContext.applicationConfiguration.name }} endpoints via BDeploy.
+    </div>
     <div class="title-toolbar" *ngIf="readonly">
       <mat-icon matTooltip="Read-only view. No changes are possible.">lock</mat-icon>
     </div>
   </div>
   <div class="container">
     <div>
-      These settings control how BDeploy is able to contact application endpoints (on demand). This enables authorized third-party applications
-      to command BDeploy to tunnel a request to the actual endpoint.
+      These settings control how BDeploy is able to contact application endpoints (on demand). This enables authorized
+      third-party applications to command BDeploy to tunnel a request to the actual endpoint.
     </div>
 
     <div class="container">
       <mat-accordion>
-        <mat-expansion-panel *ngFor="let ep of appConfigContext.applicationConfiguration.endpoints.http; let i = index" [expanded]='i === 0'>
+        <mat-expansion-panel
+          *ngFor="let ep of appConfigContext.applicationConfiguration.endpoints.http; let i = index"
+          [expanded]="i === 0"
+        >
           <mat-expansion-panel-header>
             <mat-panel-title>
-              <span>{{ep.id}}</span>
+              <span>{{ ep.id }}</span>
             </mat-panel-title>
           </mat-expansion-panel-header>
 
-          <mat-grid-list cols="2" rowHeight="5em" id="ep-group-content-{{i}}">
-            <mat-grid-tile class='allow-overflow'>
+          <mat-grid-list cols="2" rowHeight="5em" id="ep-group-content-{{ i }}">
+            <mat-grid-tile class="allow-overflow">
               <mat-form-field>
-                <input matInput [name]="ep.id + '_path'" placeholder="Path" [formControlName]="ep.id + '_path'" type="text"/>
-                <mat-error *ngIf="!isCtrlValid(ep.id + '_path')">{{getCtrlErrorMessage(ep.id + '_path')}}</mat-error>
+                <input
+                  matInput
+                  [name]="ep.id + '_path'"
+                  placeholder="Path"
+                  [formControlName]="ep.id + '_path'"
+                  type="text"
+                />
+                <mat-error *ngIf="!isCtrlValid(ep.id + '_path')">{{ getCtrlErrorMessage(ep.id + '_path') }}</mat-error>
               </mat-form-field>
             </mat-grid-tile>
 
-            <mat-grid-tile class='allow-overflow'>
+            <mat-grid-tile class="allow-overflow">
               <mat-form-field>
-                <input matInput [name]="ep.id + '_port'" placeholder="Port" [formControlName]="ep.id + '_port'" type="text"/>
-                <mat-error *ngIf="!isCtrlValid(ep.id + '_port')">{{getCtrlErrorMessage(ep.id + '_port')}}</mat-error>
+                <input
+                  matInput
+                  [name]="ep.id + '_port'"
+                  placeholder="Port"
+                  [formControlName]="ep.id + '_port'"
+                  type="text"
+                />
+                <mat-error *ngIf="!isCtrlValid(ep.id + '_port')">{{ getCtrlErrorMessage(ep.id + '_port') }}</mat-error>
               </mat-form-field>
             </mat-grid-tile>
 
-            <mat-grid-tile class='allow-overflow'>
+            <mat-grid-tile class="allow-overflow">
               <mat-form-field>
                 <mat-select placeholder="Authentication" [formControlName]="ep.id + '_authType'">
                   <mat-option value="NONE">NONE</mat-option>
                   <mat-option value="BASIC">BASIC</mat-option>
                   <mat-option value="DIGEST">DIGEST</mat-option>
                 </mat-select>
-                <mat-error *ngIf="!isCtrlValid(ep.id + '_authType')">{{getCtrlErrorMessage(ep.id + '_authType')}}</mat-error>
+                <mat-error *ngIf="!isCtrlValid(ep.id + '_authType')">{{
+                  getCtrlErrorMessage(ep.id + '_authType')
+                }}</mat-error>
               </mat-form-field>
             </mat-grid-tile>
 
-            <mat-grid-tile class='allow-overflow'>
+            <mat-grid-tile class="allow-overflow">
               <mat-form-field>
-                <input matInput [name]="ep.id + '_user'" placeholder="User" [formControlName]="ep.id + '_user'" type="text"/>
-                <mat-error *ngIf="!isCtrlValid(ep.id + '_user')">{{getCtrlErrorMessage(ep.id + '_user')}}</mat-error>
+                <input
+                  matInput
+                  [name]="ep.id + '_user'"
+                  placeholder="User"
+                  [formControlName]="ep.id + '_user'"
+                  type="text"
+                />
+                <mat-error *ngIf="!isCtrlValid(ep.id + '_user')">{{ getCtrlErrorMessage(ep.id + '_user') }}</mat-error>
               </mat-form-field>
               <mat-form-field>
-                <input matInput [name]="ep.id + '_pass'" placeholder="Password" [formControlName]="ep.id + '_pass'" type="password" autocomplete="new-password"/>
-                <mat-error *ngIf="!isCtrlValid(ep.id + '_pass')">{{getCtrlErrorMessage(ep.id + '_pass')}}</mat-error>
+                <input
+                  matInput
+                  [name]="ep.id + '_pass'"
+                  placeholder="Password"
+                  [formControlName]="ep.id + '_pass'"
+                  type="password"
+                  autocomplete="new-password"
+                />
+                <mat-error *ngIf="!isCtrlValid(ep.id + '_pass')">{{ getCtrlErrorMessage(ep.id + '_pass') }}</mat-error>
               </mat-form-field>
             </mat-grid-tile>
 
-            <mat-grid-tile class='allow-overflow'>
+            <mat-grid-tile class="allow-overflow">
               <div class="boolean-param-field">
-                <mat-slide-toggle class="boolean-param-widget" [formControlName]="ep.id + '_secure'"> </mat-slide-toggle>
+                <mat-slide-toggle class="boolean-param-widget" [formControlName]="ep.id + '_secure'">
+                </mat-slide-toggle>
                 <label class="boolean-param-label">Secure (Use HTTPS)</label>
               </div>
               <div class="boolean-param-field">
-                <mat-slide-toggle class="boolean-param-widget" [formControlName]="ep.id + '_trustAll'"> </mat-slide-toggle>
+                <mat-slide-toggle class="boolean-param-widget" [formControlName]="ep.id + '_trustAll'">
+                </mat-slide-toggle>
                 <label class="boolean-param-label">Trust all certificates</label>
               </div>
             </mat-grid-tile>
 
-            <mat-grid-tile class='allow-overflow'>
+            <mat-grid-tile class="allow-overflow">
               <mat-form-field>
-                <input matInput [name]="ep.id + '_trustStore'" placeholder="Trust Store Path" [formControlName]="ep.id + '_trustStore'" type="text"/>
-                <mat-error *ngIf="!isCtrlValid(ep.id + '_trustStore')">{{getCtrlErrorMessage(ep.id + '_trustStore')}}</mat-error>
+                <input
+                  matInput
+                  [name]="ep.id + '_trustStore'"
+                  placeholder="Trust Store Path"
+                  [formControlName]="ep.id + '_trustStore'"
+                  type="text"
+                />
+                <mat-error *ngIf="!isCtrlValid(ep.id + '_trustStore')">{{
+                  getCtrlErrorMessage(ep.id + '_trustStore')
+                }}</mat-error>
               </mat-form-field>
               <mat-form-field>
-                <input matInput [name]="ep.id + '_trustStorePass'" placeholder="Trust Store Password" [formControlName]="ep.id + '_trustStorePass'" type="password" autocomplete="new-password"/>
-                <mat-error *ngIf="!isCtrlValid(ep.id + '_trustStorePass')">{{getCtrlErrorMessage(ep.id + '_trustStorePass')}}</mat-error>
+                <input
+                  matInput
+                  [name]="ep.id + '_trustStorePass'"
+                  placeholder="Trust Store Password"
+                  [formControlName]="ep.id + '_trustStorePass'"
+                  type="password"
+                  autocomplete="new-password"
+                />
+                <mat-error *ngIf="!isCtrlValid(ep.id + '_trustStorePass')">{{
+                  getCtrlErrorMessage(ep.id + '_trustStorePass')
+                }}</mat-error>
               </mat-form-field>
             </mat-grid-tile>
-
           </mat-grid-list>
         </mat-expansion-panel>
       </mat-accordion>

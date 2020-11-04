@@ -13,7 +13,7 @@ export interface SeriesElement {
 @Component({
   selector: 'app-metrics-overview',
   templateUrl: './metrics-overview.component.html',
-  styleUrls: ['./metrics-overview.component.css']
+  styleUrls: ['./metrics-overview.component.css'],
 })
 export class MetricsOverviewComponent implements OnInit {
   private readonly log: Logger = this.loggingService.getLogger('MetricsOverviewComponent');
@@ -39,9 +39,9 @@ export class MetricsOverviewComponent implements OnInit {
   conBytesAbs = [];
 
   colorScheme = {
-    domain: ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA']
+    domain: ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA'],
   };
-  timerSeries: { name: string, series: SeriesElement[] }[];
+  timerSeries: { name: string; series: SeriesElement[] }[];
   referenceLines: SeriesElement[];
 
   @ViewChild('countChart')
@@ -49,10 +49,10 @@ export class MetricsOverviewComponent implements OnInit {
 
   countGraphHeight = 100;
 
-  constructor(private metrics: MetricsService, private loggingService: LoggingService) { }
+  constructor(private metrics: MetricsService, private loggingService: LoggingService) {}
 
   ngOnInit() {
-    this.metrics.getAllMetrics().subscribe(r => {
+    this.metrics.getAllMetrics().subscribe((r) => {
       // result is an object with a property per MetricGroup
       this.allMetrics = new Map<MetricGroup, MetricBundle>();
       for (const prop of Object.keys(r)) {
@@ -82,7 +82,9 @@ export class MetricsOverviewComponent implements OnInit {
   }
 
   selectServer(event: MatOptionSelectionChange) {
-    if (!event.isUserInput) { return; }
+    if (!event.isUserInput) {
+      return;
+    }
 
     this.selectedTimer = null;
     this.timerSeries = null;
@@ -101,7 +103,7 @@ export class MetricsOverviewComponent implements OnInit {
     this.conBytes = [];
     this.conBytesAbs = [];
 
-    this.metrics.getServerMetrics().subscribe(r => {
+    this.metrics.getServerMetrics().subscribe((r) => {
       this.serverStats = r;
 
       // calculate series for monitoring graphs.
@@ -169,90 +171,92 @@ export class MetricsOverviewComponent implements OnInit {
 
         const label = new Date(snap.snapshotTime);
 
-        vmCpuThreadCount.push({name: label, value: snap.vmThreads});
-        vmMemTotal.push({name: label, value: snap.vmTotalMem / (1024 * 1024)});
-        vmMemUsed.push({name: label, value: (snap.vmTotalMem - snap.vmFreeMem) / (1024 * 1024)});
+        vmCpuThreadCount.push({ name: label, value: snap.vmThreads });
+        vmMemTotal.push({ name: label, value: snap.vmTotalMem / (1024 * 1024) });
+        vmMemUsed.push({ name: label, value: (snap.vmTotalMem - snap.vmFreeMem) / (1024 * 1024) });
 
-        reqCompleted.push({name: label, value: (snap.reqCompleted - lastReqCompleted)});
-        reqReceived.push({name: label, value: (snap.reqReceived - lastReqReceived)});
-        reqCancelled.push({name: label, value: (snap.reqCancelled - lastReqCancelled)});
-        reqTimedOut.push({name: label, value: (snap.reqTimedOut - lastReqTimedOut)});
+        reqCompleted.push({ name: label, value: snap.reqCompleted - lastReqCompleted });
+        reqReceived.push({ name: label, value: snap.reqReceived - lastReqReceived });
+        reqCancelled.push({ name: label, value: snap.reqCancelled - lastReqCancelled });
+        reqTimedOut.push({ name: label, value: snap.reqTimedOut - lastReqTimedOut });
 
         lastReqCompleted = snap.reqCompleted;
         lastReqReceived = snap.reqReceived;
         lastReqCancelled = snap.reqCancelled;
         lastReqTimedOut = snap.reqTimedOut;
 
-        reqCompletedAbs.push({name: label, value: (snap.reqCompleted)});
-        reqReceivedAbs.push({name: label, value: (snap.reqReceived)});
-        reqCancelledAbs.push({name: label, value: (snap.reqCancelled + 3)});
-        reqTimedOutAbs.push({name: label, value: (snap.reqTimedOut + 6)});
+        reqCompletedAbs.push({ name: label, value: snap.reqCompleted });
+        reqReceivedAbs.push({ name: label, value: snap.reqReceived });
+        reqCancelledAbs.push({ name: label, value: snap.reqCancelled + 3 });
+        reqTimedOutAbs.push({ name: label, value: snap.reqTimedOut + 6 });
 
         poolCoreSize = snap.poolCoreSize;
         poolMaxSize = snap.poolMaxSize;
-        poolCurrentSize.push({name: label, value: snap.poolCurrentSize});
-        poolExceeded.push({name: label, value: (snap.poolExceeded - lastPoolExceeded)});
+        poolCurrentSize.push({ name: label, value: snap.poolCurrentSize });
+        poolExceeded.push({ name: label, value: snap.poolExceeded - lastPoolExceeded });
         lastPoolExceeded = snap.poolExceeded;
         if (snap.poolCurrentSize > poolHighestCurrent) {
           poolHighestCurrent = snap.poolCurrentSize;
         }
 
-        poolTasksQueued.push({name: label, value: (snap.poolTasksQueued - lastTasksQueued)});
-        poolTasksFinished.push({name: label, value: (snap.poolTasksFinished - lastTasksFinished)});
-        poolTasksCancelled.push({name: label, value: (snap.poolTasksCancelled - lastTasksCancelled)});
+        poolTasksQueued.push({ name: label, value: snap.poolTasksQueued - lastTasksQueued });
+        poolTasksFinished.push({ name: label, value: snap.poolTasksFinished - lastTasksFinished });
+        poolTasksCancelled.push({ name: label, value: snap.poolTasksCancelled - lastTasksCancelled });
 
         lastTasksQueued = snap.poolTasksQueued;
         lastTasksFinished = snap.poolTasksFinished;
         lastTasksCancelled = snap.poolTasksCancelled;
 
-        conBytesRead.push({name: label, value: (snap.conBytesRead - lastBytesRead)});
-        conBytesWritten.push({name: label, value: (snap.conBytesWritten - lastBytesWritten)});
+        conBytesRead.push({ name: label, value: snap.conBytesRead - lastBytesRead });
+        conBytesWritten.push({ name: label, value: snap.conBytesWritten - lastBytesWritten });
 
         lastBytesRead = snap.conBytesRead;
         lastBytesWritten = snap.conBytesWritten;
 
-        conBytesReadAbs.push({name: label, value: (snap.conBytesRead / (1024 * 1024))});
-        conBytesWrittenAbs.push({name: label, value: (snap.conBytesWritten / (1024 * 1024))});
+        conBytesReadAbs.push({ name: label, value: snap.conBytesRead / (1024 * 1024) });
+        conBytesWrittenAbs.push({ name: label, value: snap.conBytesWritten / (1024 * 1024) });
       }
 
-      this.vmCpu.push({name: 'Threads', series: vmCpuThreadCount});
-      this.vmCpuRef.push({name: 'CPU Count', value: vmCpuCount});
+      this.vmCpu.push({ name: 'Threads', series: vmCpuThreadCount });
+      this.vmCpuRef.push({ name: 'CPU Count', value: vmCpuCount });
 
-      this.vmMem.push({name: 'Total Memory MB', series: vmMemTotal});
-      this.vmMem.push({name: 'Used Memory MB', series: vmMemUsed});
-      this.vmMemRef.push({name: 'Max Memory MB', value: vmMemMax / (1024 * 1024)});
+      this.vmMem.push({ name: 'Total Memory MB', series: vmMemTotal });
+      this.vmMem.push({ name: 'Used Memory MB', series: vmMemUsed });
+      this.vmMemRef.push({ name: 'Max Memory MB', value: vmMemMax / (1024 * 1024) });
 
-      this.req.push({name: 'Received', series: reqReceived});
-      this.req.push({name: 'Completed', series: reqCompleted});
-      this.req.push({name: 'Cancelled', series: reqCancelled});
-      this.req.push({name: 'Timed Out', series: reqTimedOut});
+      this.req.push({ name: 'Received', series: reqReceived });
+      this.req.push({ name: 'Completed', series: reqCompleted });
+      this.req.push({ name: 'Cancelled', series: reqCancelled });
+      this.req.push({ name: 'Timed Out', series: reqTimedOut });
 
-      this.reqAbs.push({name: 'Received', series: reqReceivedAbs});
-      this.reqAbs.push({name: 'Completed', series: reqCompletedAbs});
-      this.reqAbs.push({name: 'Cancelled', series: reqCancelledAbs});
-      this.reqAbs.push({name: 'Timed Out', series: reqTimedOutAbs});
+      this.reqAbs.push({ name: 'Received', series: reqReceivedAbs });
+      this.reqAbs.push({ name: 'Completed', series: reqCompletedAbs });
+      this.reqAbs.push({ name: 'Cancelled', series: reqCancelledAbs });
+      this.reqAbs.push({ name: 'Timed Out', series: reqTimedOutAbs });
 
-      this.poolSize.push({name: 'Current Size', series: poolCurrentSize});
-      this.poolSize.push({name: 'Times Limit Exceeded', series: poolExceeded});
-      this.poolSizeRef.push({name: 'Core Size', value: poolCoreSize});
-      if ((poolHighestCurrent * 2) >= poolMaxSize) {
-        this.poolSizeRef.push({name: 'Maximum Pool Size', value: poolMaxSize});
+      this.poolSize.push({ name: 'Current Size', series: poolCurrentSize });
+      this.poolSize.push({ name: 'Times Limit Exceeded', series: poolExceeded });
+      this.poolSizeRef.push({ name: 'Core Size', value: poolCoreSize });
+      if (poolHighestCurrent * 2 >= poolMaxSize) {
+        this.poolSizeRef.push({ name: 'Maximum Pool Size', value: poolMaxSize });
       }
 
-      this.poolTasks.push({name: 'Queued', series: poolTasksQueued});
-      this.poolTasks.push({name: 'Finished', series: poolTasksFinished});
-      this.poolTasks.push({name: 'Cancelled', series: poolTasksCancelled});
+      this.poolTasks.push({ name: 'Queued', series: poolTasksQueued });
+      this.poolTasks.push({ name: 'Finished', series: poolTasksFinished });
+      this.poolTasks.push({ name: 'Cancelled', series: poolTasksCancelled });
 
-      this.conBytes.push({name: 'Read', series: conBytesRead});
-      this.conBytes.push({name: 'Written', series: conBytesWritten});
+      this.conBytes.push({ name: 'Read', series: conBytesRead });
+      this.conBytes.push({ name: 'Written', series: conBytesWritten });
 
-      this.conBytesAbs.push({name: 'Read', series: conBytesReadAbs});
-      this.conBytesAbs.push({name: 'Written', series: conBytesWrittenAbs});
+      this.conBytesAbs.push({ name: 'Read', series: conBytesReadAbs });
+      this.conBytesAbs.push({ name: 'Written', series: conBytesWrittenAbs });
     });
   }
 
   select(event: MatOptionSelectionChange) {
-    if (!event.isUserInput) { return; }
+    if (!event.isUserInput) {
+      return;
+    }
 
     this.serverStats = null;
     this.selectedTimer = null;
@@ -268,11 +272,11 @@ export class MetricsOverviewComponent implements OnInit {
 
       x.push({
         name: t,
-        value: tm.counter.value
+        value: tm.counter.value,
       });
     }
 
-    this.countGraphHeight = (x.length * 25) + 100;
+    this.countGraphHeight = x.length * 25 + 100;
     this.groupCounts = x;
   }
 
@@ -286,12 +290,12 @@ export class MetricsOverviewComponent implements OnInit {
     for (const x of data) {
       points.push({
         name: `${cnt++}`,
-        value: this.toMillis(x)
+        value: this.toMillis(x),
       });
     }
     this.timerSeries.push({
       name: t.name,
-      series: points
+      series: points,
     });
 
     this.referenceLines = [
@@ -306,7 +310,6 @@ export class MetricsOverviewComponent implements OnInit {
 
   toMillis(nanos: number): number {
     // nanos to millis and round to 2 decimal places
-    return Math.round((nanos / 10000)) / 100;
+    return Math.round(nanos / 10000) / 100;
   }
-
 }

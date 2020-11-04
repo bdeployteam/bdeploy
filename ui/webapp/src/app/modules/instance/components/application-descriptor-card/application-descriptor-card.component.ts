@@ -12,5 +12,4 @@ export class ApplicationDescriptorCardComponent implements OnInit {
   constructor() {}
 
   ngOnInit() {}
-
 }

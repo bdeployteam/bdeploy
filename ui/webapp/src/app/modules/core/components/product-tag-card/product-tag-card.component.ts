@@ -21,7 +21,7 @@ export class ProductTagCardComponent implements OnInit {
   constructor() {}
 
   async ngOnInit() {
-    const currentIndex = this.products.findIndex(p => isEqual(this.current, p.key));
+    const currentIndex = this.products.findIndex((p) => isEqual(this.current, p.key));
     const myIndex = this.products.indexOf(this.product);
 
     this.isCurrent = myIndex === currentIndex;

@@ -1,36 +1,54 @@
 <mat-menu #appMenu="matMenu" xPosition="before">
   <div mat-menu-item disabled="true" class="title-box">
-    <app-user-avatar [gravatar]='!settings.isLoading() && settings.getSettings().general.enableGravatar' [mail]='user?.email' hostSize='40' avatarSize='32'></app-user-avatar>
+    <app-user-avatar
+      [gravatar]="!settings.isLoading() && settings.getSettings().general.enableGravatar"
+      [mail]="user?.email"
+      hostSize="40"
+      avatarSize="32"
+    ></app-user-avatar>
     <div class="title-name">{{ getTitleUserName() }}</div>
   </div>
   <button mat-menu-item (click)="edit()" [disabled]="user?.external"><mat-icon>edit</mat-icon>Edit...</button>
-  <button mat-menu-item (click)="changePassword()" [disabled]="user?.external"><mat-icon>fingerprint</mat-icon>Change Password...</button>
+  <button mat-menu-item (click)="changePassword()" [disabled]="user?.external">
+    <mat-icon>fingerprint</mat-icon>Change Password...
+  </button>
   <button mat-menu-item (click)="openDialog(tokenDialog)"><mat-icon>vpn_key</mat-icon>Create Token...</button>
   <button mat-menu-item (click)="logout()"><mat-icon>exit_to_app</mat-icon>Logout</button>
 </mat-menu>
 
-<button mat-icon-button [matMenuTriggerFor]="appMenu"><app-user-avatar [gravatar]='!settings.isLoading() && settings.getSettings().general.enableGravatar' [mail]='user?.email'></app-user-avatar></button>
+<button mat-icon-button [matMenuTriggerFor]="appMenu">
+  <app-user-avatar
+    [gravatar]="!settings.isLoading() && settings.getSettings().general.enableGravatar"
+    [mail]="user?.email"
+  ></app-user-avatar>
+</button>
 
 <ng-template #tokenDialog>
-  <h1 mat-dialog-title>Token for {{user.name}}</h1>
+  <h1 mat-dialog-title>Token for {{ user.name }}</h1>
   <p>
-    Use the following token to remotely access this server in your name, e.g. for pushing products.
-    To do so, copy the complete content to the according tool.
+    Use the following token to remotely access this server in your name, e.g. for pushing products. To do so, copy the
+    complete content to the according tool.
   </p>
   <p>
-    <mat-slide-toggle [(ngModel)]='genFull' (change)='regenPack()'>Generate full token pack including certificate</mat-slide-toggle>
+    <mat-slide-toggle [(ngModel)]="genFull" (change)="regenPack()"
+      >Generate full token pack including certificate</mat-slide-toggle
+    >
   </p>
   <p>
-    A full token pack is typically required by the CLI, build tools, etc. A slim token is required to perform HTTPS communication with the BDeploy server.
+    A full token pack is typically required by the CLI, build tools, etc. A slim token is required to perform HTTPS
+    communication with the BDeploy server.
   </p>
   <p>
-    <strong>Attention:</strong> This token is sensitive information as it allows remote access under your name. Do not pass this token on to others.
+    <strong>Attention:</strong> This token is sensitive information as it allows remote access under your name. Do not
+    pass this token on to others.
   </p>
-  <div class='flex-content'>
-    <textarea #inputTarget readonly class='large-text'>{{pack}}</textarea>
+  <div class="flex-content">
+    <textarea #inputTarget readonly class="large-text">{{ pack }}</textarea>
   </div>
   <div mat-dialog-actions align="end">
-    <button mat-raised-button [ngxClipboard]="inputTarget" (cbOnSuccess)="copied()" color="primary">Copy To Clipboard</button>
+    <button mat-raised-button [ngxClipboard]="inputTarget" (cbOnSuccess)="copied()" color="primary">
+      Copy To Clipboard
+    </button>
     <button mat-raised-button [mat-dialog-close]="true">Close</button>
   </div>
 </ng-template>

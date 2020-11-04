@@ -5,16 +5,10 @@
       <span class="label" (click)="setSlider(0)" [ngClass]="getClass(0)">(none)</span>
       <mat-chip color="primary" class="label" (click)="setSlider(1)" [ngClass]="getClass(1)">READ</mat-chip>
       <mat-chip color="primary" class="label" (click)="setSlider(2)" [ngClass]="getClass(2)">WRITE</mat-chip>
-      <mat-chip color="primary" selected="true" class="label" (click)="setSlider(3)" [ngClass]="getClass(3)">ADMIN</mat-chip>
-      <mat-slider
-        class="slider"
-        min="0"
-        max="3"
-        step="1"
-        tickInterval="1"
-        name="slider"
-        [(ngModel)]="slider"
+      <mat-chip color="primary" selected="true" class="label" (click)="setSlider(3)" [ngClass]="getClass(3)"
+        >ADMIN</mat-chip
       >
+      <mat-slider class="slider" min="0" max="3" step="1" tickInterval="1" name="slider" [(ngModel)]="slider">
       </mat-slider>
     </div>
   </form>

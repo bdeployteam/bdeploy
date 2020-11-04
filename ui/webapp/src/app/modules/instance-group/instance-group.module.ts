@@ -21,15 +21,7 @@ import { InstanceGroupRoutingModule } from './instance-group-routing.module';
     InstanceGroupPermissionsComponent,
     ProductsCopyComponent,
   ],
-  entryComponents: [
-    InstanceGroupDeleteDialogComponent,
-    ProductsCopyComponent,
-  ],
-  imports: [
-    CommonModule,
-    SharedModule,
-    CoreModule,
-    InstanceGroupRoutingModule
-  ],
+  entryComponents: [InstanceGroupDeleteDialogComponent, ProductsCopyComponent],
+  imports: [CommonModule, SharedModule, CoreModule, InstanceGroupRoutingModule],
 })
-export class InstanceGroupModule { }
+export class InstanceGroupModule {}

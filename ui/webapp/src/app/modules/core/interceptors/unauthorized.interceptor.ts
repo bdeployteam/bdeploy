@@ -15,27 +15,27 @@ export class UnauthorizedInterceptor implements HttpInterceptor {
 
   intercept(req: HttpRequest<any>, next: HttpHandler) {
     return next.handle(req).pipe(
-      catchError(err => {
-        if (err.status === 401  && !req.headers.has(NO_ERROR_HANDLING_HDR)) {
+      catchError((err) => {
+        if (err.status === 401 && !req.headers.has(NO_ERROR_HANDLING_HDR)) {
           // API request unauthorized, log out the application
           this.log.debug('unauthorized request: ' + err.url);
           this.logout();
           return of(null);
         }
         return throwError(err);
-      }),
+      })
     );
   }
 
   logout(): void {
     this.router.navigate(['/login']).then(
-      result => {
+      (result) => {
         this.auth.logout();
       },
-      r => {
+      (r) => {
         this.log.info(`Navigation to login rejected: ${r}`);
         this.auth.logout();
-      },
+      }
     );
   }
 }

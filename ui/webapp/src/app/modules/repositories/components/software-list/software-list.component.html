@@ -1,11 +1,22 @@
 <mat-nav-list>
-    <mat-list-item *ngFor='let v of softwarePackageGroup?.osVersions.get(activeOs)'>
-      <div class='software-row'>
-        <div>{{softwarePackageGroup.name}}:{{v.tag}}</div>
-        <div class='spacer'></div>
-        <button mat-icon-button *ngIf='exporting !== v' [disabled]='exporting' (click)="export(v)" class="icon-button" matTooltip='Download software package version as ZIP'><mat-icon>cloud_download</mat-icon></button>
-        <mat-spinner *ngIf='exporting === v' diameter='24' class='progress-spinner'></mat-spinner>
-        <button mat-icon-button (click)="delete(v)" [disabled]="isReadOnly()"class="icon-button"><mat-icon>delete</mat-icon></button>
-      </div>
-    </mat-list-item>
-  </mat-nav-list>
+  <mat-list-item *ngFor="let v of softwarePackageGroup?.osVersions.get(activeOs)">
+    <div class="software-row">
+      <div>{{ softwarePackageGroup.name }}:{{ v.tag }}</div>
+      <div class="spacer"></div>
+      <button
+        mat-icon-button
+        *ngIf="exporting !== v"
+        [disabled]="exporting"
+        (click)="export(v)"
+        class="icon-button"
+        matTooltip="Download software package version as ZIP"
+      >
+        <mat-icon>cloud_download</mat-icon>
+      </button>
+      <mat-spinner *ngIf="exporting === v" diameter="24" class="progress-spinner"></mat-spinner>
+      <button mat-icon-button (click)="delete(v)" [disabled]="isReadOnly()" class="icon-button">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+  </mat-list-item>
+</mat-nav-list>

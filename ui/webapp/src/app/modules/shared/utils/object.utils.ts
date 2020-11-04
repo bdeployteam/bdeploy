@@ -29,7 +29,7 @@ export function indexOf(collection: any, node: any) {
  * Recursively determines the changes between two objects
  */
 function changes(object: any, base: any) {
-  return transform(object, function(result, value, key) {
+  return transform(object, function (result, value, key) {
     if (!isEqual(value, base[key])) {
       result[key] = isObject(value) && isObject(base[key]) ? changes(value, base[key]) : value;
     }
@@ -54,5 +54,5 @@ export function findEntry(input: string[], prefix: string) {
  * Returns a new array containing elements that are present in both arrays.
  */
 export function intersection(a: any[], b: any[]) {
-  return a.filter(value => b.includes(value));
+  return a.filter((value) => b.includes(value));
 }

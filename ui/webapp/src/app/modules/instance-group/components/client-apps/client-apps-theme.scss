@@ -25,7 +25,6 @@
   }
 
   .instance-card-header-theme {
-    background: if($dark, rgba(0, 0, 0, 0.2),rgba(0, 0, 0, 0.03));
+    background: if($dark, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.03));
   }
-
 }

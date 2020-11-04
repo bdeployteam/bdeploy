@@ -1,10 +1,25 @@
 <ng-template #editorPopup>
-  <h3>Edit {{descriptor.name}}</h3>
-  <div #editorPanel class='editorPanel'></div>
+  <h3>Edit {{ descriptor.name }}</h3>
+  <div #editorPanel class="editorPanel"></div>
   <div mat-dialog-actions align="end">
     <button mat-raised-button [mat-dialog-close]="null">Cancel</button>
-    <button mat-raised-button [disabled]='!valid || readonly' [mat-dialog-close]="currentValue" color="primary">Apply</button>
+    <button mat-raised-button [disabled]="!valid || readonly" [mat-dialog-close]="currentValue" color="primary">
+      Apply
+    </button>
   </div>
 </ng-template>
 
-<button mat-icon-button [disabled]='!plugin' (click)='showEditor(editorPopup)'><mat-icon [matTooltip]='!plugin ? (!error ? "Required custom editor not (yet) loaded" : ("Error loading custom editor: " + error.statusText)) : readonly?"Open custom editor to see parameter value":"Open custom editor to modify the parameter value"'>{{readonly?'visibility':'edit'}}</mat-icon></button>
+<button mat-icon-button [disabled]="!plugin" (click)="showEditor(editorPopup)">
+  <mat-icon
+    [matTooltip]="
+      !plugin
+        ? !error
+          ? 'Required custom editor not (yet) loaded'
+          : 'Error loading custom editor: ' + error.statusText
+        : readonly
+        ? 'Open custom editor to see parameter value'
+        : 'Open custom editor to modify the parameter value'
+    "
+    >{{ readonly ? 'visibility' : 'edit' }}</mat-icon
+  >
+</button>

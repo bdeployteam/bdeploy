@@ -1,50 +1,50 @@
-@import "~@angular/material/theming";
+@import '~@angular/material/theming';
 
-@mixin instance-history-theme($theme){
-  $dark: map-get($theme,"is-dark");
+@mixin instance-history-theme($theme) {
+  $dark: map-get($theme, 'is-dark');
 
-  .instance-history-comparison-dialog{
-    background-color: if($dark,rgba(66,66,66),white);
-    box-shadow: 0 4px 8px 0 if($dark,rgba(0,0,0,0.4),rgba(0,0,0,0.2)) !important;
+  .instance-history-comparison-dialog {
+    background-color: if($dark, rgba(66, 66, 66), white);
+    box-shadow: 0 4px 8px 0 if($dark, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.2)) !important;
   }
 
-  .search-history.searchbar{
+  .search-history.searchbar {
     position: relative;
-    display:flex;
+    display: flex;
     align-items: flex-end;
   }
 
-  .search-history .searchbar-line{
-    position:absolute;
+  .search-history .searchbar-line {
+    position: absolute;
     bottom: 1px;
-    left:0;
-    right:10px;
+    left: 0;
+    right: 10px;
     height: 1px;
-    background-color: if($dark,rgb(255, 255, 255),rgba(0, 0, 0, 0.87));
+    background-color: if($dark, rgb(255, 255, 255), rgba(0, 0, 0, 0.87));
   }
 
-  .search-history .searchbar-input{
+  .search-history .searchbar-input {
     background: none;
-    border:none;
+    border: none;
     box-sizing: border-box;
-    font-size:0.8em;
+    font-size: 0.8em;
     margin-bottom: 7px;
     margin-left: 5px;
-    color:inherit;
+    color: inherit;
   }
 
-  .search-history .searchbar-focus-line{
-    position:absolute;
+  .search-history .searchbar-focus-line {
+    position: absolute;
     bottom: 0;
     height: 2px;
-    left:0;
-    right:10px;
-    background-color: if($dark,rgb(255, 255, 255),rgba(0, 0, 0, 0.87));
+    left: 0;
+    right: 10px;
+    background-color: if($dark, rgb(255, 255, 255), rgba(0, 0, 0, 0.87));
     transform: scale(0);
     transition: all 0.05s ease-out;
   }
 
-  .search-history .searchbar-input:focus ~.searchbar-focus-line{
+  .search-history .searchbar-input:focus ~ .searchbar-focus-line {
     transition: all 0.1s ease;
     transform: scale(1);
   }

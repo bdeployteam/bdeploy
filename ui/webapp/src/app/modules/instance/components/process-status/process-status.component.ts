@@ -37,10 +37,7 @@ export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
   public statusClass: string[] = [];
   public statusCount: number;
 
-  constructor(
-    private processService: ProcessService,
-    private configService: ConfigService,
-  ) {
+  constructor(private processService: ProcessService, private configService: ConfigService) {
     this.initIcons();
   }
 
@@ -110,28 +107,28 @@ export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
 
   updateMultiState(status: ProcessStatusDto[]) {
     const runningStates = new Set([ProcessState.RUNNING, ProcessState.RUNNING_UNSTABLE]);
-    this.statusCount = status.filter(app => runningStates.has(app.processState)).length;
+    this.statusCount = status.filter((app) => runningStates.has(app.processState)).length;
 
     // Display if at least one app crashed permanently
-    if (status.find(app => ProcessState.CRASHED_PERMANENTLY === app.processState)) {
+    if (status.find((app) => ProcessState.CRASHED_PERMANENTLY === app.processState)) {
       this.processState = ProcessState.CRASHED_PERMANENTLY;
       return;
     }
 
     // Display if at least one app is waiting
-    if (status.find(app => ProcessState.CRASHED_WAITING === app.processState)) {
+    if (status.find((app) => ProcessState.CRASHED_WAITING === app.processState)) {
       this.processState = ProcessState.CRASHED_WAITING;
       return;
     }
 
     // Display if at least one app is about to be stopped
-    if (status.find(app => ProcessState.RUNNING_STOP_PLANNED === app.processState)) {
+    if (status.find((app) => ProcessState.RUNNING_STOP_PLANNED === app.processState)) {
       this.processState = ProcessState.RUNNING_STOP_PLANNED;
       return;
     }
 
     // Display if at least one app is running
-    if (status.find(app => runningStates.has(app.processState))) {
+    if (status.find((app) => runningStates.has(app.processState))) {
       this.processState = ProcessState.RUNNING;
       return;
     }
@@ -275,5 +272,4 @@ export class ProcessStatusComponent implements OnInit, OnChanges, OnDestroy {
   isCentral() {
     return this.configService.config.mode === MinionMode.CENTRAL;
   }
-
 }

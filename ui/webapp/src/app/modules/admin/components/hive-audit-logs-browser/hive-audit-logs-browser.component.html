@@ -2,7 +2,7 @@
   <div class="filter-container">
     <mat-form-field>
       <mat-select placeholder="Select a Hive" [(value)]="selectedHive">
-        <mat-option *ngFor="let key of hiveKeys" value="{{key}}">{{key}}</mat-option>
+        <mat-option *ngFor="let key of hiveKeys" value="{{ key }}">{{ key }}</mat-option>
       </mat-select>
     </mat-form-field>
     <mat-slide-toggle class="filter-slider" (change)="toggleColumns($event)">Show all Columns</mat-slide-toggle>

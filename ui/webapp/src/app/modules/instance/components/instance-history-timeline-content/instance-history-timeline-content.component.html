@@ -1,26 +1,35 @@
 <ul class="timeline-card-content" *ngIf="history != null">
   <li *ngFor="let property of history.properties | keyvalue">
-    {{property.key}}: <em>{{property.value[0]}}</em> <mat-icon class='change-arrow'>arrow_right_alt</mat-icon> <em>{{property.value[1]}}</em></li>
+    {{ property.key }}: <em>{{ property.value[0] }}</em> <mat-icon class="change-arrow">arrow_right_alt</mat-icon>
+    <em>{{ property.value[1] }}</em>
+  </li>
 
   <li *ngFor="let node of history.nodes | keyvalue">
-    <span *ngIf="node.key != '__ClientApplications' else clientApplications">Node <em>{{node.key}}:</em></span>
+    <span *ngIf="node.key != '__ClientApplications'; else clientApplications"
+      >Node <em>{{ node.key }}:</em></span
+    >
     <ng-template #clientApplications><em>Client Applications:</em></ng-template>
     <ul>
-      <li *ngFor="let added of node.value.added">Added <em>{{added}}</em></li>
-      <li *ngFor="let deleted of node.value.deleted">Deleted <em>{{deleted}}</em></li>
+      <li *ngFor="let added of node.value.added">
+        Added <em>{{ added }}</em>
+      </li>
+      <li *ngFor="let deleted of node.value.deleted">
+        Deleted <em>{{ deleted }}</em>
+      </li>
 
       <li *ngFor="let changed of node.value.changed | keyvalue">
-        Application <em>{{changed.key}}:</em>
+        Application <em>{{ changed.key }}:</em>
         <ul>
-
-          <li *ngFor="let property of changed.value.properties|keyvalue">
-            {{property.key}}: <em>{{property.value[0]}}</em> <mat-icon class='change-arrow'>arrow_right_alt</mat-icon> <em>{{property.value[1]}}</em>
+          <li *ngFor="let property of changed.value.properties | keyvalue">
+            {{ property.key }}: <em>{{ property.value[0] }}</em>
+            <mat-icon class="change-arrow">arrow_right_alt</mat-icon> <em>{{ property.value[1] }}</em>
           </li>
           <li *ngIf="!isEmpty(changed.value.processControlProperties)">
             Process control:
             <ul>
-              <li *ngFor="let property of changed.value.processControlProperties|keyvalue">
-                {{property.key}}: <em>{{property.value[0]}}</em> <mat-icon class='change-arrow'>arrow_right_alt</mat-icon> <em>{{property.value[1]}}</em>
+              <li *ngFor="let property of changed.value.processControlProperties | keyvalue">
+                {{ property.key }}: <em>{{ property.value[0] }}</em>
+                <mat-icon class="change-arrow">arrow_right_alt</mat-icon> <em>{{ property.value[1] }}</em>
               </li>
             </ul>
           </li>
@@ -29,29 +38,36 @@
             Parameters:
             <ul>
               <li *ngFor="let added of changed.value.parameters.added">
-                Added <em>{{added[0]}}</em>: <em>{{added[1]}}</em>
+                Added <em>{{ added[0] }}</em
+                >: <em>{{ added[1] }}</em>
               </li>
               <li *ngFor="let deleted of changed.value.parameters.deleted">
-                Deleted <em>{{deleted[0]}}</em>: <em>{{deleted[1]}}</em>
+                Deleted <em>{{ deleted[0] }}</em
+                >: <em>{{ deleted[1] }}</em>
               </li>
               <li *ngFor="let changedParameter of changed.value.parameters.changed | keyvalue">
-                Changed <em>{{changedParameter.key}}: </em> <em>{{changedParameter.value[0]}}</em> <mat-icon class='change-arrow'>arrow_right_alt</mat-icon> <em>{{changedParameter.value[1]}}</em>
+                Changed <em>{{ changedParameter.key }}: </em> <em>{{ changedParameter.value[0] }}</em>
+                <mat-icon class="change-arrow">arrow_right_alt</mat-icon> <em>{{ changedParameter.value[1] }}</em>
               </li>
             </ul>
           </li>
 
           <li *ngFor="let addedEndpoint of changed.value.addedEndpoints">
-            Added http-endpoint at <em>{{addedEndpoint}}</em>
+            Added http-endpoint at <em>{{ addedEndpoint }}</em>
           </li>
           <li *ngFor="let deletedEndpoint of changed.value.deletedEndpoints">
-            Deleted http-endpoint at <em>{{deletedEndpoint}}</em>
+            Deleted http-endpoint at <em>{{ deletedEndpoint }}</em>
           </li>
-          <li *ngFor="let endpoint of changed.value.endpoints|keyvalue">
-            Http-endpoint at <em>{{endpoint.key}}</em>:
+          <li *ngFor="let endpoint of changed.value.endpoints | keyvalue">
+            Http-endpoint at <em>{{ endpoint.key }}</em
+            >:
             <ul>
-              <li *ngFor="let property of endpoint.value.changedEndpoints|keyvalue">
-                <span *ngIf="property.value != null else endpointPassword">{{property.key}}: <em>{{property.value[0]}}</em> <mat-icon class='change-arrow'>arrow_right_alt</mat-icon> <em>{{property.value[1]}}</em></span>
-                <ng-template #endpointPassword>{{property.key}} changed</ng-template>
+              <li *ngFor="let property of endpoint.value.changedEndpoints | keyvalue">
+                <span *ngIf="property.value != null; else endpointPassword"
+                  >{{ property.key }}: <em>{{ property.value[0] }}</em>
+                  <mat-icon class="change-arrow">arrow_right_alt</mat-icon> <em>{{ property.value[1] }}</em></span
+                >
+                <ng-template #endpointPassword>{{ property.key }} changed</ng-template>
               </li>
             </ul>
           </li>
@@ -64,13 +80,13 @@
     Config files:
     <ul>
       <li *ngFor="let added of history.configFiles.added">
-        Added <em>{{added}}</em>
+        Added <em>{{ added }}</em>
       </li>
       <li *ngFor="let deleted of history.configFiles.deleted">
-        Deleted <em>{{deleted}}</em>
+        Deleted <em>{{ deleted }}</em>
       </li>
       <li *ngFor="let changed of history.configFiles.changed">
-        Changed <em>{{changed}}</em>
+        Changed <em>{{ changed }}</em>
       </li>
     </ul>
   </li>

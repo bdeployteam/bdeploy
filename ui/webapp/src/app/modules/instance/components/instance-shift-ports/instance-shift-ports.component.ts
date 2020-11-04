@@ -1,7 +1,13 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
-import { ApplicationConfiguration, ApplicationDescriptor, ParameterConfiguration, ParameterDescriptor, ParameterType } from 'src/app/models/gen.dtos';
+import {
+  ApplicationConfiguration,
+  ApplicationDescriptor,
+  ParameterConfiguration,
+  ParameterDescriptor,
+  ParameterType
+} from 'src/app/models/gen.dtos';
 
 export interface ShiftableParameter {
   applicationUid: string;
@@ -16,33 +22,32 @@ export interface ShiftableParameter {
 @Component({
   selector: 'app-instance-shift-ports',
   templateUrl: './instance-shift-ports.component.html',
-  styleUrls: ['./instance-shift-ports.component.css']
+  styleUrls: ['./instance-shift-ports.component.css'],
 })
 export class InstanceShiftPortsComponent implements OnInit {
-
   public columnsToDisplay = ['status', 'type', 'application', 'name', 'current', 'target'];
   public dataSource: MatTableDataSource<ShiftableParameter>;
 
-  constructor(@Inject(MAT_DIALOG_DATA) private params: ShiftableParameter[]) { }
+  constructor(@Inject(MAT_DIALOG_DATA) private params: ShiftableParameter[]) {}
 
   ngOnInit(): void {
     this.dataSource = new MatTableDataSource(this.params);
   }
 
   isAtLeastOneSelected() {
-    const numSelected = this.params.filter(lp => lp.selected).length;
+    const numSelected = this.params.filter((lp) => lp.selected).length;
     return numSelected > 0;
   }
 
   isAllSelected() {
-    const numSelected = this.params.filter(lp => lp.selected).length;
+    const numSelected = this.params.filter((lp) => lp.selected).length;
     const numRows = this.dataSource.data.length;
     return numSelected === numRows;
   }
 
   toggleSelection() {
     const targetState = this.isAllSelected() ? false : true;
-    this.params.forEach(lp => (lp.selected = targetState));
+    this.params.forEach((lp) => (lp.selected = targetState));
   }
 
   toggleRowSelection(row: ShiftableParameter) {
@@ -77,5 +82,4 @@ export class InstanceShiftPortsComponent implements OnInit {
       return 'public';
     }
   }
-
 }

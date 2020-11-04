@@ -1,9 +1,4 @@
-import {
-  HttpClient,
-  HttpErrorResponse,
-  HttpHeaders,
-  HttpParams
-} from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { cloneDeep } from 'lodash-es';
 import { Observable, of, throwError } from 'rxjs';
@@ -35,11 +30,7 @@ import {
   StringEntryChunkDto
 } from '../../../models/gen.dtos';
 import { ConfigService } from '../../core/services/config.service';
-import {
-  ErrorMessage,
-  Logger,
-  LoggingService
-} from '../../core/services/logging.service';
+import { ErrorMessage, Logger, LoggingService } from '../../core/services/logging.service';
 import { SystemService } from '../../core/services/system.service';
 import { InstanceGroupService } from '../../instance-group/services/instance-group.service';
 import { MessageBoxMode } from '../../shared/components/messagebox/messagebox.component';
@@ -51,9 +42,7 @@ import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
   providedIn: 'root',
 })
 export class InstanceService {
-  private readonly log: Logger = this.loggingService.getLogger(
-    'InstanceService'
-  );
+  private readonly log: Logger = this.loggingService.getLogger('InstanceService');
 
   constructor(
     private cfg: ConfigService,
@@ -70,11 +59,7 @@ export class InstanceService {
     return this.http.get<InstanceDto[]>(url);
   }
 
-  public createInstance(
-    instanceGroupName: string,
-    instance: InstanceConfiguration,
-    managedServer: string
-  ) {
+  public createInstance(instanceGroupName: string, instance: InstanceConfiguration, managedServer: string) {
     const url: string = this.buildGroupUrl(instanceGroupName);
     this.log.debug('createInstance: ' + url);
     const options = {
@@ -83,10 +68,7 @@ export class InstanceService {
     return this.http.put(url, instance, options);
   }
 
-  public getInstance(
-    instanceGroupName: string,
-    instanceName: string
-  ): Observable<InstanceConfiguration> {
+  public getInstance(instanceGroupName: string, instanceName: string): Observable<InstanceConfiguration> {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceName);
     this.log.debug('getInstance: ' + url);
     return this.http.get<InstanceConfiguration>(url);
@@ -107,9 +89,7 @@ export class InstanceService {
       nodeDtos: nodeList ? nodeList.nodeConfigDtos : null,
     };
     const options = {
-      params: new HttpParams()
-        .set('expect', expectedTag)
-        .set('managedServer', managedServer),
+      params: new HttpParams().set('expect', expectedTag).set('managedServer', managedServer),
       headers: suppressGlobalErrorHandling(new HttpHeaders()),
     };
     return this.http.post(url, dto, options).pipe(
@@ -129,12 +109,7 @@ export class InstanceService {
             this.systemService.backendUnreachable();
           } else {
             const displayPath = new URL(url).pathname;
-            this.log.errorWithGuiMessage(
-              new ErrorMessage(
-                e.status + ': ' + e.statusText + ': ' + displayPath,
-                e
-              )
-            );
+            this.log.errorWithGuiMessage(new ErrorMessage(e.status + ': ' + e.statusText + ': ' + displayPath, e));
           }
           return of(null);
         }
@@ -144,31 +119,19 @@ export class InstanceService {
   }
 
   public deleteInstance(instanceGroupName: string, instanceName: string) {
-    const url: string =
-      this.buildInstanceUrl(instanceGroupName, instanceName) + '/delete';
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/delete';
     this.log.debug('deleteInstance: ' + url);
     return this.http.delete(url);
   }
 
-  public deleteInstanceVersion(
-    instanceGroupName: string,
-    instanceName: string,
-    instanceTag: string
-  ) {
-    const url: string =
-      this.buildInstanceUrl(instanceGroupName, instanceName) +
-      '/deleteVersion/' +
-      instanceTag;
+  public deleteInstanceVersion(instanceGroupName: string, instanceName: string, instanceTag: string) {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/deleteVersion/' + instanceTag;
     this.log.debug('deleteInstanceVersion: ' + url);
     return this.http.delete(url);
   }
 
-  public listInstanceVersions(
-    instanceGroupName: string,
-    instanceName: string
-  ): Observable<InstanceVersionDto[]> {
-    const url: string =
-      this.buildInstanceUrl(instanceGroupName, instanceName) + '/versions';
+  public listInstanceVersions(instanceGroupName: string, instanceName: string): Observable<InstanceVersionDto[]> {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/versions';
     this.log.debug('listInstanceVersions: ' + url);
     return this.http.get<InstanceVersionDto[]>(url);
   }
@@ -178,8 +141,7 @@ export class InstanceService {
     instanceName: string,
     tag: string
   ): Observable<InstanceConfiguration> {
-    const url: string =
-      this.buildInstanceUrl(instanceGroupName, instanceName) + '/' + tag;
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/' + tag;
     this.log.debug('getInstanceVersion: ' + url);
     return this.http.get<InstanceConfiguration>(url);
   }
@@ -189,10 +151,7 @@ export class InstanceService {
     instanceName: string,
     tag: string
   ): Observable<ConfigFileDto[]> {
-    const url: string =
-      this.buildInstanceUrl(instanceGroupName, instanceName) +
-      '/cfgFiles/' +
-      tag;
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/cfgFiles/' + tag;
     this.log.debug('listConfigurationFiles: ' + url);
     return this.http.get<ConfigFileDto[]>(url);
   }
@@ -203,12 +162,7 @@ export class InstanceService {
     tag: string,
     filename: string
   ): Observable<string> {
-    const url: string =
-      this.buildInstanceUrl(instanceGroupName, instanceName) +
-      '/cfgFiles/' +
-      tag +
-      '/' +
-      filename;
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/cfgFiles/' + tag + '/' + filename;
     this.log.debug('getConfigurationFile: ' + url);
     return this.http.get(url, { responseType: 'text' });
   }
@@ -219,8 +173,7 @@ export class InstanceService {
     tag: string,
     configFiles: FileStatusDto[]
   ) {
-    const url: string =
-      this.buildInstanceUrl(instanceGroupName, instanceName) + '/cfgFiles';
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/cfgFiles';
     this.log.debug('updateConfigurationFiles: ' + url);
     const options = {
       params: new HttpParams().set('expect', tag),
@@ -228,13 +181,8 @@ export class InstanceService {
     return this.http.post(url, configFiles, options);
   }
 
-  public listDataDirSnapshot(
-    instanceGroupName: string,
-    instanceName: string
-  ): Observable<InstanceDirectory[]> {
-    const url: string =
-      this.buildInstanceUrl(instanceGroupName, instanceName) +
-      '/processes/dataDirSnapshot';
+  public listDataDirSnapshot(instanceGroupName: string, instanceName: string): Observable<InstanceDirectory[]> {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/processes/dataDirSnapshot';
     this.log.debug('getDataDirSnapshot: ' + url);
     return this.http.get<InstanceDirectory[]>(url);
   }
@@ -249,11 +197,7 @@ export class InstanceService {
     instanceId: string,
     tag: string
   ): Observable<InstanceNodeConfigurationListDto> {
-    const url: string =
-      this.buildInstanceUrl(instanceGroupName, instanceId) +
-      '/' +
-      tag +
-      '/nodeConfiguration';
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceId) + '/' + tag + '/nodeConfiguration';
     this.log.debug('getNodeConfigurationVersion: ' + url);
     return this.http.get<InstanceNodeConfigurationListDto>(url);
   }
@@ -263,11 +207,7 @@ export class InstanceService {
     instanceId: string,
     tag: string
   ): Observable<{ [key: string]: MinionDto }> {
-    const url: string =
-      this.buildInstanceUrl(instanceGroupName, instanceId) +
-      '/' +
-      tag +
-      '/minionConfiguration';
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceId) + '/' + tag + '/minionConfiguration';
     return this.http.get<{ [minionName: string]: MinionDto }>(url);
   }
 
@@ -276,52 +216,24 @@ export class InstanceService {
     instanceId: string,
     tag: string
   ): Observable<{ [key: string]: MinionStatusDto }> {
-    const url: string =
-      this.buildInstanceUrl(instanceGroupName, instanceId) +
-      '/' +
-      tag +
-      '/minionState';
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceId) + '/' + tag + '/minionState';
     return this.http.get<{ [minionName: string]: MinionStatusDto }>(url);
   }
 
-  public install(
-    instanceGroupName: string,
-    instanceName: string,
-    instance: ManifestKey
-  ) {
-    const url: string =
-      this.buildInstanceUrl(instanceGroupName, instanceName) +
-      '/' +
-      instance.tag +
-      '/install';
+  public install(instanceGroupName: string, instanceName: string, instance: ManifestKey) {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/' + instance.tag + '/install';
     this.log.debug('install: ' + url);
     return this.http.get(url);
   }
 
-  public uninstall(
-    instanceGroupName: string,
-    instanceName: string,
-    instance: ManifestKey
-  ) {
-    const url: string =
-      this.buildInstanceUrl(instanceGroupName, instanceName) +
-      '/' +
-      instance.tag +
-      '/uninstall';
+  public uninstall(instanceGroupName: string, instanceName: string, instance: ManifestKey) {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/' + instance.tag + '/uninstall';
     this.log.debug('uninstall: ' + url);
     return this.http.get(url);
   }
 
-  public activate(
-    instanceGroupName: string,
-    instanceName: string,
-    instance: ManifestKey
-  ) {
-    const url: string =
-      this.buildInstanceUrl(instanceGroupName, instanceName) +
-      '/' +
-      instance.tag +
-      '/activate';
+  public activate(instanceGroupName: string, instanceName: string, instance: ManifestKey) {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/' + instance.tag + '/activate';
     this.log.debug('activate: ' + url);
     return this.http.get(url);
   }
@@ -331,21 +243,13 @@ export class InstanceService {
     instanceName: string,
     instance: ManifestKey
   ): Observable<InstanceManifestHistoryDto> {
-    const url: string =
-      this.buildInstanceUrl(instanceGroupName, instanceName) +
-      '/' +
-      instance.tag +
-      '/history';
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/' + instance.tag + '/history';
     this.log.debug('history: ' + url);
     return this.http.get<InstanceManifestHistoryDto>(url);
   }
 
-  public getDeploymentStates(
-    instanceGroupName: string,
-    instanceName: string
-  ): Observable<InstanceStateRecord> {
-    const url: string =
-      this.buildInstanceUrl(instanceGroupName, instanceName) + '/state';
+  public getDeploymentStates(instanceGroupName: string, instanceName: string): Observable<InstanceStateRecord> {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/state';
     this.log.debug('getDeploymentStates: ' + url);
     return this.http.get<InstanceStateRecord>(url);
   }
@@ -358,11 +262,7 @@ export class InstanceService {
     silent: boolean
   ): Observable<InstanceDirectory> {
     const url: string =
-      this.buildInstanceUrl(instanceGroupName, instanceName) +
-      '/output/' +
-      instanceTag +
-      '/' +
-      appUid;
+      this.buildInstanceUrl(instanceGroupName, instanceName) + '/output/' + instanceTag + '/' + appUid;
     this.log.debug('getApplicationOutputEntry: ' + url);
     const options = {
       headers: { ignoreLoadingBar: '' },
@@ -379,16 +279,11 @@ export class InstanceService {
     limit: number,
     silent: boolean
   ): Observable<StringEntryChunkDto> {
-    const url: string =
-      this.buildInstanceUrl(instanceGroupName, instanceName) +
-      '/content/' +
-      id.minion;
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/content/' + id.minion;
     this.log.debug('getContentChunk: ' + url);
     const options = {
       headers: null,
-      params: new HttpParams()
-        .set('offset', offset.toString())
-        .set('limit', limit.toString()),
+      params: new HttpParams().set('offset', offset.toString()).set('limit', limit.toString()),
     };
     if (silent) {
       options.headers = { ignoreLoadingBar: '' };
@@ -402,17 +297,10 @@ export class InstanceService {
     id: InstanceDirectory,
     ide: InstanceDirectoryEntry
   ) {
-    const url: string =
-      this.buildInstanceUrl(instanceGroupName, instanceName) +
-      '/request/' +
-      id.minion;
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/request/' + id.minion;
     this.log.debug('downloadDataFileContent');
     this.http.post(url, ide, { responseType: 'text' }).subscribe((token) => {
-      this.downloadService.download(
-        this.buildInstanceUrl(instanceGroupName, instanceName) +
-          '/stream/' +
-          token
-      );
+      this.downloadService.download(this.buildInstanceUrl(instanceGroupName, instanceName) + '/stream/' + token);
     });
   }
 
@@ -422,10 +310,7 @@ export class InstanceService {
     id: InstanceDirectory,
     ide: InstanceDirectoryEntry
   ) {
-    const url: string =
-      this.buildInstanceUrl(instanceGroupName, instanceName) +
-      '/delete/' +
-      id.minion;
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/delete/' + id.minion;
     this.log.debug('deleteDataFile');
     return this.http.post(url, ide);
   }
@@ -435,25 +320,13 @@ export class InstanceService {
     instanceName: string,
     appId: string
   ): Observable<ClickAndStartDescriptor> {
-    const url =
-      this.buildInstanceUrl(instanceGroupName, instanceName) +
-      '/' +
-      appId +
-      '/clickAndStart';
+    const url = this.buildInstanceUrl(instanceGroupName, instanceName) + '/' + appId + '/clickAndStart';
     this.log.debug('createClickAndStartDescriptor: ' + url);
     return this.http.get<ClickAndStartDescriptor>(url);
   }
 
-  public createClientInstaller(
-    instanceGroupName: string,
-    instanceName: string,
-    appId: string
-  ): Observable<string> {
-    const url =
-      this.buildInstanceUrl(instanceGroupName, instanceName) +
-      '/' +
-      appId +
-      '/installer/zip';
+  public createClientInstaller(instanceGroupName: string, instanceName: string, appId: string): Observable<string> {
+    const url = this.buildInstanceUrl(instanceGroupName, instanceName) + '/' + appId + '/installer/zip';
     this.log.debug('createClientInstaller: ' + url);
     return this.http.get(url, { responseType: 'text' });
   }
@@ -463,14 +336,8 @@ export class InstanceService {
     this.downloadService.download(url);
   }
 
-  public getExportUrl(
-    instanceGroupName: string,
-    instanceName: string,
-    tag: string
-  ) {
-    return (
-      this.buildInstanceUrl(instanceGroupName, instanceName) + '/export/' + tag
-    );
+  public getExportUrl(instanceGroupName: string, instanceName: string, tag: string) {
+    return this.buildInstanceUrl(instanceGroupName, instanceName) + '/export/' + tag;
   }
 
   public getImportUrl(instanceGroupName: string, instanceName: string) {
@@ -488,51 +355,43 @@ export class InstanceService {
     minion: string,
     ports: string[]
   ): Observable<{ [key: number]: boolean }> {
-    const url =
-      this.buildInstanceUrl(instanceGroup, instance) + '/check-ports/' + minion;
+    const url = this.buildInstanceUrl(instanceGroup, instance) + '/check-ports/' + minion;
     return this.http.post<{ [key: number]: boolean }>(url, ports);
   }
 
-  public getInstanceBanner(
-    instanceGroupName: string,
-    instanceName: string
-  ): Observable<InstanceBannerRecord> {
-    const url: string =
-      this.buildInstanceUrl(instanceGroupName, instanceName) + '/banner';
+  public getInstanceBanner(instanceGroupName: string, instanceName: string): Observable<InstanceBannerRecord> {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/banner';
     this.log.debug('getInstanceBanner: ' + url);
     return this.http.get<InstanceBannerRecord>(url);
   }
 
-  public updateInstanceBanner(
-    instanceGroupName: string,
-    instanceName: string,
-    instanceBanner: InstanceBannerRecord
-  ) {
-    const url: string =
-      this.buildInstanceUrl(instanceGroupName, instanceName) + '/banner';
+  public updateInstanceBanner(instanceGroupName: string, instanceName: string, instanceBanner: InstanceBannerRecord) {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/banner';
     this.log.debug('updateInstanceBanner: ' + url);
     return this.http.post(url, instanceBanner);
   }
 
   public buildGroupUrl(instanceGroupName: string): string {
-    return (
-      this.cfg.config.api +
-      InstanceGroupService.BASEPATH +
-      '/' +
-      instanceGroupName +
-      '/instance'
-    );
+    return this.cfg.config.api + InstanceGroupService.BASEPATH + '/' + instanceGroupName + '/instance';
   }
 
-  public buildInstanceUrl(instanceGroupName: string,instanceName: string): string {
+  public buildInstanceUrl(instanceGroupName: string, instanceName: string): string {
     return this.buildGroupUrl(instanceGroupName) + '/' + instanceName;
   }
 
-  public getInstanceHistory(instanceGroupName: string, instanceId: string, maxResults: number, startTag: string, filter: string,
-    showCreate: boolean, showDeployment: boolean, showRuntime: boolean): Observable<HistoryResultDto> {
+  public getInstanceHistory(
+    instanceGroupName: string,
+    instanceId: string,
+    maxResults: number,
+    startTag: string,
+    filter: string,
+    showCreate: boolean,
+    showDeployment: boolean,
+    showRuntime: boolean
+  ): Observable<HistoryResultDto> {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceId) + '/history';
 
-    const filterDto:HistoryFilterDto = cloneDeep(EMPTY_HISTORY_FILTER);
+    const filterDto: HistoryFilterDto = cloneDeep(EMPTY_HISTORY_FILTER);
     filterDto.showCreateEvents = showCreate;
     filterDto.showDeploymentEvents = showDeployment;
     filterDto.showRuntimeEvents = showRuntime;
@@ -542,17 +401,25 @@ export class InstanceService {
     return this.http.post<HistoryResultDto>(url, filterDto);
   }
 
-  public compareVersions(instanceGroupName: string, instanceId: string, versionA: string, versionB: string): Observable<HistoryEntryVersionDto> {
+  public compareVersions(
+    instanceGroupName: string,
+    instanceId: string,
+    versionA: string,
+    versionB: string
+  ): Observable<HistoryEntryVersionDto> {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceId) + '/history-compare-versions';
-    const params = new HttpParams()
-      .set('a', versionA.toString())
-      .set('b', versionB.toString());
+    const params = new HttpParams().set('a', versionA.toString()).set('b', versionB.toString());
     return this.http.get<HistoryEntryVersionDto>(url, { params: params });
   }
 
-  public compareConfigs(instanceGroupName: string, instanceId: string, configA: InstanceConfigurationDto, configB: InstanceConfigurationDto): Observable<HistoryEntryVersionDto> {
+  public compareConfigs(
+    instanceGroupName: string,
+    instanceId: string,
+    configA: InstanceConfigurationDto,
+    configB: InstanceConfigurationDto
+  ): Observable<HistoryEntryVersionDto> {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceId) + '/history-compare-config';
-    const dto:HistoryCompareDto = cloneDeep(EMPTY_HISTORY_COMPARE);
+    const dto: HistoryCompareDto = cloneDeep(EMPTY_HISTORY_COMPARE);
     dto.configA = configA;
     dto.configB = configB;
     return this.http.post<HistoryEntryVersionDto>(url, dto);
@@ -575,5 +442,4 @@ export class InstanceService {
     this.log.debug('updateInstanceAttributes: ' + url);
     return this.http.post(url, attributes);
   }
-
 }

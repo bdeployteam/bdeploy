@@ -1,5 +1,5 @@
-<div class="content" *ngIf='loading'>
-  <mat-spinner [diameter]='48' class="load-spinner"></mat-spinner>
+<div class="content" *ngIf="loading">
+  <mat-spinner [diameter]="48" class="load-spinner"></mat-spinner>
 </div>
 
 <ng-template #fullTextOverlay>
@@ -7,25 +7,26 @@
     <mat-toolbar>
       <mat-toolbar-row>
         <span>Full Text</span>
-        <div class='spacer'></div>
-        <button mat-icon-button (click)='closeOverlay()'><mat-icon>close</mat-icon></button>
+        <div class="spacer"></div>
+        <button mat-icon-button (click)="closeOverlay()"><mat-icon>close</mat-icon></button>
       </mat-toolbar-row>
     </mat-toolbar>
-      <div class="full-text-content" #contentDiv>
-        <pre>{{ fullTextContent }}</pre>
-      </div>
+    <div class="full-text-content" #contentDiv>
+      <pre>{{ fullTextContent }}</pre>
+    </div>
   </mat-card>
 </ng-template>
 
-<div class="content" *ngIf='!loading'>
-
+<div class="content" *ngIf="!loading">
   <table mat-table [dataSource]="data">
-    <caption style="display: none;">Audit Log Entries</caption>
+    <caption style="display: none;">
+      Audit Log Entries
+    </caption>
 
     <ng-container matColumnDef="instant">
       <th scope="col" mat-header-cell *matHeaderCellDef class="no-break">Instant</th>
       <td mat-cell *matCellDef="let element" class="no-break">{{ formatInstant(element.instant) }}</td>
-      <th scope="col" mat-footer-cell *matFooterCellDef class="footer-total">{{data.length}} Records</th>
+      <th scope="col" mat-footer-cell *matFooterCellDef class="footer-total">{{ data.length }} Records</th>
     </ng-container>
 
     <ng-container matColumnDef="endOfBatch">
@@ -56,10 +57,16 @@
       <th scope="col" mat-header-cell *matHeaderCellDef>Level</th>
       <td mat-cell *matCellDef="let element">
         <span class="level-box">
-        <mat-icon *ngIf='(element.level === "ERROR" || element.level === "INVALID")' class='errorIconTheme'>error</mat-icon>
-        <mat-icon *ngIf='element.level === "WARN"' class='warningIconTheme'>warning</mat-icon>
-        <mat-icon *ngIf='element.level !== "ERROR" && element.level !== "WARN" && element.level !== "INVALID"' class='infoIconTheme'>info</mat-icon>
-        <span class="level-text">{{ element.level }}</span>
+          <mat-icon *ngIf="element.level === 'ERROR' || element.level === 'INVALID'" class="errorIconTheme"
+            >error</mat-icon
+          >
+          <mat-icon *ngIf="element.level === 'WARN'" class="warningIconTheme">warning</mat-icon>
+          <mat-icon
+            *ngIf="element.level !== 'ERROR' && element.level !== 'WARN' && element.level !== 'INVALID'"
+            class="infoIconTheme"
+            >info</mat-icon
+          >
+          <span class="level-text">{{ element.level }}</span>
         </span>
       </td>
       <th scope="col" mat-footer-cell *matFooterCellDef></th>
@@ -86,7 +93,10 @@
     <ng-container matColumnDef="message">
       <th scope="col" mat-header-cell *matHeaderCellDef>Message</th>
       <td mat-cell *matCellDef="let element">
-        <span (click)="openOverlay(element.message, fullTextOverlay)">{{ formatLongText(element.message) }}<mat-icon class="full-text-button" *ngIf="isLongText(element.message)">open_in_new</mat-icon></span>
+        <span (click)="openOverlay(element.message, fullTextOverlay)"
+          >{{ formatLongText(element.message)
+          }}<mat-icon class="full-text-button" *ngIf="isLongText(element.message)">open_in_new</mat-icon></span
+        >
       </td>
       <th scope="col" mat-footer-cell *matFooterCellDef></th>
     </ng-container>
@@ -94,13 +104,20 @@
     <ng-container matColumnDef="parameters">
       <th scope="col" mat-header-cell *matHeaderCellDef>Parameters</th>
       <td mat-cell *matCellDef="let element">
-        <span (click)="openOverlay(element.parameters, fullTextOverlay)">{{ formatLongText(element.parameters) }}<mat-icon class="full-text-button" *ngIf="isLongText(element.parameters)">open_in_new</mat-icon></span>
+        <span (click)="openOverlay(element.parameters, fullTextOverlay)"
+          >{{ formatLongText(element.parameters)
+          }}<mat-icon class="full-text-button" *ngIf="isLongText(element.parameters)">open_in_new</mat-icon></span
+        >
       </td>
       <th scope="col" mat-footer-cell *matFooterCellDef class="footer-actions">
         <mat-spinner diameter="24" class="load-more-spinner" *ngIf="loadingMore"></mat-spinner>
         <div class="footer-buttons" *ngIf="!loadingMore">
-        <button mat-raised-button color="primary" (click)="loadMore(10000)" [disabled]="noMoreData">Load More (~10000)...</button>
-        <button mat-raised-button color="primary" (click)="loadMore(1000)" [disabled]="noMoreData">Load More (~1000)...</button>
+          <button mat-raised-button color="primary" (click)="loadMore(10000)" [disabled]="noMoreData">
+            Load More (~10000)...
+          </button>
+          <button mat-raised-button color="primary" (click)="loadMore(1000)" [disabled]="noMoreData">
+            Load More (~1000)...
+          </button>
         </div>
       </th>
     </ng-container>

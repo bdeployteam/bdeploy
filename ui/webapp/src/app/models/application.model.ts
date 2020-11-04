@@ -1,6 +1,14 @@
 import { ApplicationService } from '../modules/instance/services/application.service';
 import { getAppKeyName, getAppOs } from '../modules/shared/utils/manifest.utils';
-import { ApplicationDto, ApplicationTemplateDescriptor, ApplicationType, OperatingSystem, ParameterConfiguration, ParameterDescriptor, ParameterType } from './gen.dtos';
+import {
+  ApplicationDto,
+  ApplicationTemplateDescriptor,
+  ApplicationType,
+  OperatingSystem,
+  ParameterConfiguration,
+  ParameterDescriptor,
+  ParameterType
+} from './gen.dtos';
 
 /**
  * Default group names used in the application
@@ -121,7 +129,7 @@ export class LinkedParameter {
  */
 export function findFirstParameter(params: IterableIterator<LinkedParameter>): LinkedParameter {
   const values = Array.from(params);
-  return values.find(lp => !lp.predecessor);
+  return values.find((lp) => !lp.predecessor);
 }
 
 /**
@@ -129,7 +137,7 @@ export function findFirstParameter(params: IterableIterator<LinkedParameter>): L
  */
 export function findLastParameter(params: IterableIterator<LinkedParameter>): LinkedParameter {
   const values = Array.from(params);
-  return values.find(lp => !lp.successor);
+  return values.find((lp) => !lp.successor);
 }
 
 /**
@@ -211,7 +219,7 @@ export class ApplicationGroup {
    * Returns the application that supports the given OS
    */
   public getAppFor(os: OperatingSystem): ApplicationDto {
-    return this.applications.find(app => {
+    return this.applications.find((app) => {
       const appOs = getAppOs(app.key);
       return appOs === os;
     });
@@ -252,5 +260,4 @@ export class UnknownParameter {
     const value = appService.preRenderParameter(this.descriptor, this.config.value);
     return value.join(' ');
   }
-
 }

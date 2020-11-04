@@ -8,10 +8,9 @@ import { ServerValidators } from 'src/app/modules/shared/validators/server.valid
 @Component({
   selector: 'app-managed-server-edit',
   templateUrl: './managed-server-edit.component.html',
-  styleUrls: ['./managed-server-edit.component.css']
+  styleUrls: ['./managed-server-edit.component.css'],
 })
 export class ManagedServerEditComponent implements OnInit {
-
   public formGroup = this.fb.group({
     description: ['', Validators.required],
     uri: ['', [Validators.required, ServerValidators.serverApiUrl]],
@@ -30,9 +29,7 @@ export class ManagedServerEditComponent implements OnInit {
     return this.formGroup.get('auth');
   }
 
-  constructor(
-    private fb: FormBuilder,
-    @Inject(MAT_DIALOG_DATA) public server: ManagedMasterDto) { }
+  constructor(private fb: FormBuilder, @Inject(MAT_DIALOG_DATA) public server: ManagedMasterDto) {}
 
   ngOnInit(): void {
     this.descriptionControl.setValue(this.server.description);
@@ -62,5 +59,4 @@ export class ManagedServerEditComponent implements OnInit {
     }
     return r;
   }
-
 }

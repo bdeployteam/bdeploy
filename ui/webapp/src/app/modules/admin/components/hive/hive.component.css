@@ -62,22 +62,21 @@ table {
   margin-top: 16px;
 }
 
-.icon-button{
-  cursor:pointer;
+.icon-button {
+  cursor: pointer;
 }
 
-::ng-deep .flex-row mat-chip-list .mat-chip-list-wrapper{
+::ng-deep .flex-row mat-chip-list .mat-chip-list-wrapper {
   overflow: hidden;
   flex-wrap: nowrap;
   margin-right: 5px;
   margin-top: 1px;
 }
 
-.flex-row mat-chip{
+.flex-row mat-chip {
   flex-shrink: 0;
 }
 
-.back-button{
+.back-button {
   margin-right: 5px;
 }
-

@@ -1,5 +1,15 @@
 import { moveItemInArray } from '@angular/cdk/drag-drop';
-import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  TemplateRef,
+  ViewChild
+} from '@angular/core';
 import { MatBottomSheet, MatBottomSheetRef } from '@angular/material/bottom-sheet';
 import { MatDialog } from '@angular/material/dialog';
 import { format } from 'date-fns';
@@ -14,12 +24,23 @@ import { convert2String } from 'src/app/modules/shared/utils/version.utils';
 import { ApplicationGroup } from '../../../../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_INSTANCE_NODE_CONFIGURATION } from '../../../../models/consts';
 import { EventWithCallback } from '../../../../models/event';
-import { ApplicationConfiguration, ApplicationDto, ApplicationTemplateDescriptor, ApplicationType, InstanceNodeConfigurationDto, MinionDto, MinionStatusDto, ProductDto } from '../../../../models/gen.dtos';
+import {
+  ApplicationConfiguration,
+  ApplicationDto,
+  ApplicationTemplateDescriptor,
+  ApplicationType,
+  InstanceNodeConfigurationDto,
+  MinionDto,
+  MinionStatusDto,
+  ProductDto
+} from '../../../../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../../../../models/process.model';
 import { getAppOs, updateAppOs } from '../../../shared/utils/manifest.utils';
 import { ApplicationService } from '../../services/application.service';
-import { ApplicationTemplateVariableDialogComponent, VariableInput } from '../application-template-variable-dialog/application-template-variable-dialog.component';
-
+import {
+  ApplicationTemplateVariableDialogComponent,
+  VariableInput
+} from '../application-template-variable-dialog/application-template-variable-dialog.component';
 
 @Component({
   selector: 'app-instance-node-card',
@@ -75,7 +96,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
     private loggingService: LoggingService,
     private dialog: MatDialog,
     private bottomSheetSvc: MatBottomSheet
-    ) {}
+  ) {}
 
   ngOnInit() {
     this.subscription = new Subscription();
@@ -85,33 +106,33 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
     this.subscription.add(
       this.dragulaService.dropModel().subscribe(({ target, source, item, sourceIndex, targetIndex }) => {
         this.onDrop(target, source, item, sourceIndex, targetIndex);
-      }),
+      })
     );
 
     // Visualize valid targets for dropping elements
     this.subscription.add(
       this.dragulaService.drag().subscribe(({ el }) => {
         this.onDrag(el);
-      }),
+      })
     );
 
     // Remove visualization of valid targets for dropping elements
     this.subscription.add(
-      this.dragulaService.dragend().subscribe(_ => {
+      this.dragulaService.dragend().subscribe((_) => {
         this.onDragEnd();
-      }),
+      })
     );
 
     this.subscription.add(
       this.dragulaService.over().subscribe(({ container }) => {
         this.onDragOver(container);
-      }),
+      })
     );
 
     this.subscription.add(
       this.dragulaService.out().subscribe(({ container }) => {
         this.onDragOut(container);
-      }),
+      })
     );
   }
 
@@ -186,7 +207,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
 
   getProductOfInstance(pcd: ProcessConfigDto): ProductDto {
     return this.productTags.find(
-      p => p.key.name === pcd.instance.product.name && p.key.tag === pcd.instance.product.tag,
+      (p) => p.key.name === pcd.instance.product.name && p.key.tag === pcd.instance.product.tag
     );
   }
 
@@ -195,7 +216,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
     if (!prod) {
       return null;
     }
-    return prod.applicationTemplates.find(t => t.id === id);
+    return prod.applicationTemplates.find((t) => t.id === id);
   }
 
   async applyApplicationTemplate(id: string, cfg: ApplicationConfiguration, app: ApplicationDto): Promise<boolean> {
@@ -205,7 +226,11 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
     const tpl = this.getApplicationTemplate(id, this.processConfig);
 
     if (!tpl) {
-      this.mbService.open({title: 'Cannot apply Template', message: `Cannot find template with id ${id} for application ${cfg.application.name}`, mode: MessageBoxMode.ERROR});
+      this.mbService.open({
+        title: 'Cannot apply Template',
+        message: `Cannot find template with id ${id} for application ${cfg.application.name}`,
+        mode: MessageBoxMode.ERROR,
+      });
       return false; // not found
     }
 
@@ -218,17 +243,24 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
           name: variable.name,
           description: variable.description,
           value: variable.defaultValue,
-          suggestedValues: variable.suggestedValues ? variable.suggestedValues : []
+          suggestedValues: variable.suggestedValues ? variable.suggestedValues : [],
         });
       }
 
-      const result = await this.dialog.open(ApplicationTemplateVariableDialogComponent, {
-        width: '600px',
-        data: vars
-      }).afterClosed().toPromise();
+      const result = await this.dialog
+        .open(ApplicationTemplateVariableDialogComponent, {
+          width: '600px',
+          data: vars,
+        })
+        .afterClosed()
+        .toPromise();
 
       if (!result) {
-        this.mbService.open({title: 'Cannot apply Template', message: `Cannot apply template, missing template variable input.`, mode: MessageBoxMode.ERROR});
+        this.mbService.open({
+          title: 'Cannot apply Template',
+          message: `Cannot apply template, missing template variable input.`,
+          mode: MessageBoxMode.ERROR,
+        });
         return false;
       }
 
@@ -250,7 +282,11 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
       }
     }
     if (errors.length) {
-      this.mbService.open({title: 'Cannot apply Template', message: `There have been ${errors.length} errors. See console for details.`, mode: MessageBoxMode.ERROR});
+      this.mbService.open({
+        title: 'Cannot apply Template',
+        message: `There have been ${errors.length} errors. See console for details.`,
+        mode: MessageBoxMode.ERROR,
+      });
       return false;
     }
     return true; // yay!
@@ -280,8 +316,8 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
       } else {
         const nodeOs = this.minionConfig.os;
         const app = data.getAppFor(nodeOs);
-        this.appService.createNewAppConfig(this.instanceGroupName, this.processConfig, app).then(cfg => {
-          this.applyApplicationTemplate(data.selectedTemplate, cfg, app).then(r => {
+        this.appService.createNewAppConfig(this.instanceGroupName, this.processConfig, app).then((cfg) => {
+          this.applyApplicationTemplate(data.selectedTemplate, cfg, app).then((r) => {
             if (r) {
               this.nodeApps.splice(targetIndex, 0, cfg);
               this.editNodeAppsEvent.emit();
@@ -325,12 +361,17 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
   }
 
   onPaste() {
-    navigator.clipboard.readText().then(data => {
+    navigator.clipboard.readText().then(
+      (data) => {
         let appConfig: ApplicationConfiguration = null;
         try {
           appConfig = JSON.parse(data) as ApplicationConfiguration;
         } catch (e) {
-          this.mbService.open({title: 'Invalid Data', message: 'The data in the clipboard cannot be interpreted as application', mode: MessageBoxMode.WARNING});
+          this.mbService.open({
+            title: 'Invalid Data',
+            message: 'The data in the clipboard cannot be interpreted as application',
+            mode: MessageBoxMode.WARNING,
+          });
           return;
         }
 
@@ -342,15 +383,21 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
         const productKey = this.processConfig.instance.product;
         const appKey = appConfig.application;
 
-        this.appService.getDescriptor(this.instanceGroupName, productKey, appKey).subscribe(desc => {
-          if ((desc.type === ApplicationType.SERVER && this.isClientApplicationsNode()) || (desc.type === ApplicationType.CLIENT && !this.isClientApplicationsNode())) {
-            this.mbService.open({title: 'Wrong Type', message: 'Application cannot be pasted on this node.', mode: MessageBoxMode.INFO});
+        this.appService.getDescriptor(this.instanceGroupName, productKey, appKey).subscribe((desc) => {
+          if (
+            (desc.type === ApplicationType.SERVER && this.isClientApplicationsNode()) ||
+            (desc.type === ApplicationType.CLIENT && !this.isClientApplicationsNode())
+          ) {
+            this.mbService.open({
+              title: 'Wrong Type',
+              message: 'Application cannot be pasted on this node.',
+              mode: MessageBoxMode.INFO,
+            });
             return;
           }
 
           // Generate unique identifier
-          this.appService.createUuid(this.instanceGroupName).subscribe(uid => {
-
+          this.appService.createUuid(this.instanceGroupName).subscribe((uid) => {
             appConfig.application.tag = productKey.tag;
             appConfig.uid = uid;
 
@@ -361,12 +408,13 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
             // Insert at the end
             const targetIndex = this.nodeApps.length;
             this.addProcess(appConfig, targetIndex);
-           });
+          });
         });
       },
-      data => {
+      (data) => {
         this.log.error('Unable to paste from clipboard');
-      });
+      }
+    );
   }
 
   fireEditAppConfigEvent(appConfig: ApplicationConfiguration) {
@@ -374,7 +422,9 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
   }
 
   fireEditEndpointsAppConfigEvent(appConfig: ApplicationConfiguration) {
-    this.editAppEndpointsEvent.emit(new EditAppConfigContext(this.node, appConfig, this.processConfig.instance.product));
+    this.editAppEndpointsEvent.emit(
+      new EditAppConfigContext(this.node, appConfig, this.processConfig.instance.product)
+    );
   }
 
   /** Returns whether or not at least one app has been added to the node */
@@ -477,6 +527,6 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
 
   showNodePortList(template: TemplateRef<any>) {
     this.bottomSheet = this.bottomSheetSvc.open(template, { panelClass: 'process-sheet' });
-    this.bottomSheet.afterDismissed().subscribe(_ => this.bottomSheet = null);
+    this.bottomSheet.afterDismissed().subscribe((_) => (this.bottomSheet = null));
   }
 }

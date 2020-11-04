@@ -1,5 +1,4 @@
 describe('Creates screenshots for the user documentation', () => {
-
   // Capture Login and Main menu
   it('Captures Login', () => {
     // Open app and wait for login page
@@ -20,7 +19,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.get('app-user-info').click();
     cy.contains('[role=menuitem]', 'admin').should('exist');
     cy.screenshot('BDeploy_User_Menu');
-    cy.get('.cdk-overlay-backdrop').click('top', {force:true, multiple: true});
+    cy.get('.cdk-overlay-backdrop').click('top', { force: true, multiple: true });
 
     // Open sidebar and wait for animation to be done
     cy.contains('button', 'menu').click();
@@ -164,12 +163,18 @@ describe('Creates screenshots for the user documentation', () => {
 
     // Configure Applications
     cy.get('button[role=menuitem]').contains('Configure Applications').click();
-    cy.getNodeCard('master').contains('Drop server application here').should('be.visible').then(el => {
-      cy.contains('app-application-descriptor-card', 'Server Application').dragTo(el);
-    })
-    cy.getNodeCard('Client Applications').contains('Drop client application here').should('be.visible').then(el => {
-      cy.contains('app-application-descriptor-card', 'Client Application').dragTo(el);
-    })
+    cy.getNodeCard('master')
+      .contains('Drop server application here')
+      .should('be.visible')
+      .then((el) => {
+        cy.contains('app-application-descriptor-card', 'Server Application').dragTo(el);
+      });
+    cy.getNodeCard('Client Applications')
+      .contains('Drop client application here')
+      .should('be.visible')
+      .then((el) => {
+        cy.contains('app-application-descriptor-card', 'Client Application').dragTo(el);
+      });
 
     cy.getApplicationConfigCard('master', 'Server Application').contains('more_vert').click();
     cy.wait(250);
@@ -196,20 +201,20 @@ describe('Creates screenshots for the user documentation', () => {
     cy.screenshot('BDeploy_Process_Config');
 
     // Optional Parameters
-    cy.contains('mat-expansion-panel', "Sleep Configuration").as('panel');
+    cy.contains('mat-expansion-panel', 'Sleep Configuration').as('panel');
     cy.get('@panel').click();
     cy.get('@panel').contains('button', 'Manage Optional').click();
     cy.wait(250);
     cy.screenshot('BDeploy_Process_Optional_Parameters');
 
-    cy.get('[data-placeholder=Filter').type("Sleep Timeout");
-    cy.get('mat-dialog-container').contains('td', "Sleep Timeout").closest('tr').find('mat-checkbox').click();
+    cy.get('[data-placeholder=Filter').type('Sleep Timeout');
+    cy.get('mat-dialog-container').contains('td', 'Sleep Timeout').closest('tr').find('mat-checkbox').click();
     cy.get('mat-dialog-container').contains('button', 'Save').click();
     cy.get('[data-placeholder="Sleep Timeout"]').clear().type('10');
     cy.screenshot('BDeploy_Process_Optional_Configured');
 
     // Custom Parameters
-    cy.contains('mat-expansion-panel', "Custom Parameters").as('panel');
+    cy.contains('mat-expansion-panel', 'Custom Parameters').as('panel');
     cy.get('@panel').click();
     cy.get('@panel').contains('button', 'Manage Custom').click();
     cy.get('button').contains('Create new parameter').click();
@@ -218,14 +223,14 @@ describe('Creates screenshots for the user documentation', () => {
     cy.get('mat-option').should('not.be.visible');
     cy.screenshot('BDeploy_Process_Custom_Create');
     cy.get('mat-dialog-container').contains('button', 'Apply').click();
-    cy.get('[data-placeholder=custom-param-1]').type("--customValue=Demo");
+    cy.get('[data-placeholder=custom-param-1]').type('--customValue=Demo');
     cy.screenshot('BDeploy_Process_Custom_Value');
 
     // Command Line Preview
     cy.contains('button', 'input').click();
     cy.wait(250);
     cy.screenshot('BDeploy_Process_Custom_Preview');
-    cy.get('.cdk-overlay-backdrop').click('top', {force:true, multiple: true});
+    cy.get('.cdk-overlay-backdrop').click('top', { force: true, multiple: true });
 
     // Save and apply changes to go back to the overview
     cy.get('button').contains('APPLY').click();
@@ -254,7 +259,7 @@ describe('Creates screenshots for the user documentation', () => {
 
     // Change product version (We first need to downgrade and save to get the desired state)
     cy.get('app-instance-group-logo').parent().clickContextMenuAction('Change Product Version');
-    cy.contains('mat-slide-toggle','Show all').click();
+    cy.contains('mat-slide-toggle', 'Show all').click();
     cy.contains('app-product-tag-card', '1.0.0').contains('button', 'arrow_downward').click();
     cy.contains('button', 'SAVE').should('be.enabled').click();
     cy.waitUntilContentLoaded();
@@ -262,11 +267,11 @@ describe('Creates screenshots for the user documentation', () => {
     // Notification about newer product version
     cy.get('app-instance-notifications').click();
     cy.contains('button', 'Show Product Versions').should('exist');
-    cy.screenshot('BDeploy_Product_Notification')
-    cy.get('.cdk-overlay-backdrop').click('top', {force:true, multiple: true});
+    cy.screenshot('BDeploy_Product_Notification');
+    cy.get('.cdk-overlay-backdrop').click('top', { force: true, multiple: true });
 
     cy.get('app-instance-group-logo').parent().clickContextMenuAction('Change Product Version');
-    cy.screenshot('BDeploy_Product_Change')
+    cy.screenshot('BDeploy_Product_Change');
     cy.contains('app-product-tag-card', '2.0.0').contains('button', 'arrow_upward').click();
     cy.screenshot('BDeploy_Product_Upgrade_Local_Changes');
 
@@ -278,13 +283,13 @@ describe('Creates screenshots for the user documentation', () => {
     cy.screenshot('BDeploy_Instance_Version_Menu');
 
     // Install instance version
-    cy.contains('button','Install').click();
+    cy.contains('button', 'Install').click();
     cy.getLatestInstanceVersion().waitUntilContentLoaded();
     cy.screenshot('BDeploy_Instance_Version_Installed');
 
     // Activate instance version
     cy.getLatestInstanceVersion().contains('more_vert').click();
-    cy.contains('button','Activate').click();
+    cy.contains('button', 'Activate').click();
     cy.getLatestInstanceVersion().waitUntilContentLoaded();
     cy.screenshot('BDeploy_Instance_Version_Activated');
   });
@@ -296,110 +301,118 @@ describe('Creates screenshots for the user documentation', () => {
     cy.get('mat-card-subtitle').first().click();
 
     // Start process
-    cy.getApplicationConfigCard('master','Server Application').click();
+    cy.getApplicationConfigCard('master', 'Server Application').click();
     cy.contains('Process Control').should('exist');
-    cy.contains('button','play_arrow').click();
+    cy.contains('button', 'play_arrow').click();
     cy.wait(2000);
-    cy.contains('app-process-status','favorite').should('be.visible');
+    cy.contains('app-process-status', 'favorite').should('be.visible');
     cy.screenshot('BDeploy_Process_Started');
 
     // Tutorial: Application card
-    cy.getApplicationConfigCard('master','Server Application').screenshot('BDeploy_Tutorial_Process_Card', { padding: 20 })
+    cy.getApplicationConfigCard('master', 'Server Application').screenshot('BDeploy_Tutorial_Process_Card', {
+      padding: 20,
+    });
 
     // Tutorial: Process control
-    cy.contains('mat-toolbar','Process Control').parent().as('pcuSidebar');
-    cy.get('@pcuSidebar').screenshot('BDeploy_Tutorial_Process_Control', { padding: 10, clip: { x: 0, y: 0, width: 390, height: 500  }})
+    cy.contains('mat-toolbar', 'Process Control').parent().as('pcuSidebar');
+    cy.get('@pcuSidebar').screenshot('BDeploy_Tutorial_Process_Control', {
+      padding: 10,
+      clip: { x: 0, y: 0, width: 390, height: 500 },
+    });
 
     // Tutorial: Instance versions with process state
-    cy.contains('mat-toolbar','Process Control').contains('button','close').click();
-    cy.contains('mat-slide-toggle','Show all').click();
-    cy.contains('mat-toolbar','Instance Versions').parent().as('versionSidebar');
-    cy.get('@versionSidebar').contains('app-process-status','favorite').should('be.visible');
-    cy.get('@versionSidebar').screenshot('BDeploy_Tutorial_Process_Versions', { padding: 10, clip: { x: 0, y: 0, width: 380, height: 500  }})
-    cy.getApplicationConfigCard('master','Server Application').click();
+    cy.contains('mat-toolbar', 'Process Control').contains('button', 'close').click();
+    cy.contains('mat-slide-toggle', 'Show all').click();
+    cy.contains('mat-toolbar', 'Instance Versions').parent().as('versionSidebar');
+    cy.get('@versionSidebar').contains('app-process-status', 'favorite').should('be.visible');
+    cy.get('@versionSidebar').screenshot('BDeploy_Tutorial_Process_Versions', {
+      padding: 10,
+      clip: { x: 0, y: 0, width: 380, height: 500 },
+    });
+    cy.getApplicationConfigCard('master', 'Server Application').click();
 
     // Wait until the process crashes
-    cy.contains('app-process-status','report_problem', { timeout: 60000 });
+    cy.contains('app-process-status', 'report_problem', { timeout: 60000 });
     cy.screenshot('BDeploy_Process_Crashed');
 
     // Wait until the process crashes permanently
-    cy.contains('app-process-status','error', { timeout: 60000 });
+    cy.contains('app-process-status', 'error', { timeout: 60000 });
     cy.screenshot('BDeploy_Process_Crashed_Repeatedly');
 
     // Switch to another version to capture Outdated process
-    cy.contains('button','play_arrow').click();
-    cy.contains('mat-toolbar','Process Control').contains('button','close').click();
-    cy.contains('mat-slide-toggle','Show all').click();
+    cy.contains('button', 'play_arrow').click();
+    cy.contains('mat-toolbar', 'Process Control').contains('button', 'close').click();
+    cy.contains('mat-slide-toggle', 'Show all').click();
     cy.get('app-instance-version-card').children().eq(1).installAndActivate();
     cy.waitUntilContentLoaded();
-    cy.contains("Outdated").should('be.visible');
-    cy.screenshot('BDeploy_Process_Out_Of_Sync', { clip: { x: 0, y: 175, width: 650, height: 380 }});
-    cy.getApplicationConfigCard('master','Server Application').click();
+    cy.contains('Outdated').should('be.visible');
+    cy.screenshot('BDeploy_Process_Out_Of_Sync', { clip: { x: 0, y: 175, width: 650, height: 380 } });
+    cy.getApplicationConfigCard('master', 'Server Application').click();
     cy.contains('Process Control').should('exist');
-    cy.contains('button','stop').should('be.enabled').click();
-    cy.contains('mat-toolbar','Process Control').contains('button','close').click();
+    cy.contains('button', 'stop').should('be.enabled').click();
+    cy.contains('mat-toolbar', 'Process Control').contains('button', 'close').click();
     cy.get('app-instance-version-card').first().contains('Version').click();
-    cy.getApplicationConfigCard('master','Server Application').click();
+    cy.getApplicationConfigCard('master', 'Server Application').click();
 
     // Change to manual confirmation
-    cy.contains('mat-toolbar','Process Control').contains('button','close').click();
-    cy.getApplicationConfigCard('master','Server Application').clickContextMenuAction("Configure");
-    cy.get('mat-select').contains("MANUAL").click();
+    cy.contains('mat-toolbar', 'Process Control').contains('button', 'close').click();
+    cy.getApplicationConfigCard('master', 'Server Application').clickContextMenuAction('Configure');
+    cy.get('mat-select').contains('MANUAL').click();
     cy.get('mat-option').contains('MANUAL_CONFIRM').click();
 
     // Set Output parameter so that we have a file in the data-files folder
     cy.addAndSetOptionalParameter('Test Parameters', 'Output', '{{P:DATA}}/documentation.txt');
 
     // Apply, Save and activate the changes
-    cy.contains('button','APPLY').click();
-    cy.contains('button','SAVE').click();
+    cy.contains('button', 'APPLY').click();
+    cy.contains('button', 'SAVE').click();
     cy.waitUntilContentLoaded();
     cy.getLatestInstanceVersion().installAndActivate();
 
     // try to downgrade, capture validation problems, discard
     cy.get('app-instance-group-logo').parent().clickContextMenuAction('Change Product Version');
-    cy.contains('mat-slide-toggle','Show all').click();
+    cy.contains('mat-slide-toggle', 'Show all').click();
     cy.contains('app-product-tag-card', '1.0.0').contains('button', 'arrow_downward').click();
     cy.contains('app-instance-notifications', 'error').click();
-    cy.screenshot('BDeploy_Product_Downgrade_Validation')
-    cy.get('.cdk-overlay-backdrop').click('top', {force:true, multiple: true});
+    cy.screenshot('BDeploy_Product_Downgrade_Validation');
+    cy.get('.cdk-overlay-backdrop').click('top', { force: true, multiple: true });
     cy.contains('button', 'DISCARD').should('be.enabled').click();
-    cy.get('mat-dialog-container').within(_ => {
+    cy.get('mat-dialog-container').within((_) => {
       cy.contains('button', 'Yes').should('be.enabled').click();
     });
 
-    cy.get('body').then($body => {
-      if($body.find('button:contains("DISCARD")').length > 0) {
+    cy.get('body').then(($body) => {
+      if ($body.find('button:contains("DISCARD")').length > 0) {
         cy.contains('button', 'DISCARD').should('not.exist');
       }
-    })
+    });
 
     // Start process with manual confirmation
-    cy.getApplicationConfigCard('master','Server Application').click();
+    cy.getApplicationConfigCard('master', 'Server Application').click();
     cy.contains('Process Control').should('exist');
-    cy.contains('button','play_arrow').click();
+    cy.contains('button', 'play_arrow').click();
     cy.wait(250);
     cy.screenshot('BDeploy_Process_Manual_Confirm');
     cy.get('app-process-start-confirm').get('input').type('Server Application');
-    cy.contains('button','Start').click();
+    cy.contains('button', 'Start').click();
 
     // Process Output
     cy.wait(2000); // this is required here to give the process time to start. otherwise the out.txt does not yet exist
-    cy.contains('button','message').click();
+    cy.contains('button', 'message').click();
     cy.contains('Output of').should('be.visible');
     cy.wait(1000); // some time for the terminal to paint the output
     cy.screenshot('BDeploy_Process_Output');
-    cy.get('.cdk-overlay-backdrop').click('top', {force:true, multiple: true});
+    cy.get('.cdk-overlay-backdrop').click('top', { force: true, multiple: true });
 
     // Process Listing
     cy.get('button').contains('settings').click();
     cy.wait(250);
     cy.screenshot('BDeploy_Process_List');
-    cy.get('.cdk-overlay-backdrop').click('top', {force:true, multiple: true});
+    cy.get('.cdk-overlay-backdrop').click('top', { force: true, multiple: true });
 
     // Data Files
     cy.get('app-instance-group-logo').parent().clickContextMenuAction('Data Files');
-    cy.contains('td', 'documentation.txt').should('exist')
+    cy.contains('td', 'documentation.txt').should('exist');
     cy.screenshot('BDeploy_DataFiles_Browser');
 
     // Data File Content
@@ -407,7 +420,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.contains('mat-toolbar', 'documentation.txt').should('be.visible');
     cy.wait(1000); // some time for the terminal to paint the output
     cy.screenshot('BDeploy_DataFiles_Show');
-    cy.get('.cdk-overlay-backdrop').click('top', {force:true, multiple: true});
+    cy.get('.cdk-overlay-backdrop').click('top', { force: true, multiple: true });
   });
 
   // Capture Client Applications
@@ -448,20 +461,20 @@ describe('Creates screenshots for the user documentation', () => {
         filePath: 'external-software-hive.zip',
         mimeType: 'application/zip',
       });
-      cy.get(".hive mat-checkbox").click();
+      cy.get('.hive mat-checkbox').click();
       cy.get('input[type=file]').attachFile({
         filePath: 'external-software-2-raw-direct.zip',
         mimeType: 'application/zip',
       });
-      cy.get('input[data-placeholder="Manifest Name"]').type("external/software-2");
-      cy.get('input[data-placeholder="Version"]').type("1.0.0");
+      cy.get('input[data-placeholder="Manifest Name"]').type('external/software-2');
+      cy.get('input[data-placeholder="Version"]').type('1.0.0');
       cy.get('.package-os mat-icon[ng-reflect-svg-icon="WINDOWS"]').click();
       cy.get('.package-os mat-icon[ng-reflect-svg-icon="LINUX"]').click();
 
       cy.screenshot('BDeploy_SWRepo_Upload');
 
       cy.contains('button', 'Upload').click();
-      cy.contains("Upload successful").should('have.length', 1);
+      cy.contains('Upload successful').should('have.length', 1);
       cy.contains('button', 'Close').click();
     });
 
@@ -471,7 +484,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.screenshot('BDeploy_SWRepo_Ext_Software');
 
     // Capture detail of external software
-    cy.contains('mat-card-title','external/software').click();
+    cy.contains('mat-card-title', 'external/software').click();
     cy.get('mat-drawer').should('have.css', 'transform', 'none');
     cy.screenshot('BDeploy_SWRepo_Ext_Software_Details');
   });
@@ -483,7 +496,7 @@ describe('Creates screenshots for the user documentation', () => {
 
     // Available software
     cy.contains('BDeploy Update').should('exist');
-    cy.get('mat-card-content').should('be.visible').should('have.length', 2)
+    cy.get('mat-card-content').should('be.visible').should('have.length', 2);
     cy.waitUntilContentLoaded();
     cy.screenshot('BDeploy_System_With_Launcher');
   });
@@ -494,29 +507,31 @@ describe('Creates screenshots for the user documentation', () => {
     cy.visit('/#/admin/all/(panel:manualcleanup)');
 
     // Introduction
-    cy.contains('button', 'Calculate Cleanup Action').should('be.visible')
+    cy.contains('button', 'Calculate Cleanup Action').should('be.visible');
     cy.screenshot('BDeploy_Cleanup');
 
     // Perform Actions
     cy.contains('button', 'Calculate Cleanup Action').click();
     cy.waitUntilContentLoaded();
-    cy.contains('Perform Cleanup on Instance Group').should('be.visible')
+    cy.contains('Perform Cleanup on Instance Group').should('be.visible');
     cy.screenshot('BDeploy_Cleanup_Actions');
   });
 
-  it('Cleans Instance Group', function() {
+  it('Cleans Instance Group', function () {
     cy.login();
     cy.visit('/');
     cy.waitUntilContentLoaded();
     cy.deleteInstanceGroup('Demo');
   });
 
-  it('Cleans Software Repository', function() {
+  it('Cleans Software Repository', function () {
     cy.login();
     cy.visit('/#/softwarerepo/browser');
     cy.waitUntilContentLoaded();
-    cy.contains('app-software-repository-card', 'External').clickContextMenuDialog('Delete', 'Delete Software Repository');
+    cy.contains('app-software-repository-card', 'External').clickContextMenuDialog(
+      'Delete',
+      'Delete Software Repository'
+    );
     cy.contains('button', 'OK').click();
   });
-
 });

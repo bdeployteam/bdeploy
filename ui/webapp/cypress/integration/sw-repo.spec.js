@@ -27,7 +27,7 @@ describe('Software Repository Tests', () => {
     cy.contains('mat-card', repoName).should('exist');
   });
 
-  it('Creates user with global permissions', function() {
+  it('Creates user with global permissions', function () {
     cy.visit('/#/admin/all/(panel:users)');
     cy.waitUntilContentLoaded();
 
@@ -47,21 +47,21 @@ describe('Software Repository Tests', () => {
     cy.waitUntilContentLoaded();
 
     cy.createUser(globalNone, 'Account without global permissions', globalNone + mailDomain, 'demo');
-  })
+  });
 
-  it('Checks permissions on the Software Repository', function() {
+  it('Checks permissions on the Software Repository', function () {
     cy.visit('/#/softwarerepo/permissions/' + repoName);
     cy.waitUntilContentLoaded();
 
-    cy.contains('mat-slide-toggle','Global Access').click();
+    cy.contains('mat-slide-toggle', 'Global Access').click();
 
     cy.contains('tr', globalAdmin).should('exist');
     cy.contains('tr', globalWrite).should('exist');
     cy.contains('tr', globalRead).should('not.exist');
     cy.contains('tr', globalNone).should('not.exist');
-  })
+  });
 
-  it('Adds a user', function() {
+  it('Adds a user', function () {
     cy.screenshot('BDeploy_Demo-Repository_Permissions_Global');
 
     cy.contains('button', 'add').click();
@@ -77,9 +77,9 @@ describe('Software Repository Tests', () => {
     cy.contains('tr', globalRead).should('not.exist');
     cy.contains('tr', globalNone).should('exist');
     cy.screenshot('BDeploy_Demo-Repository_Permissions_AddUser2');
-  })
+  });
 
-  it('Un-checks the show-global-user switch', function() {
+  it('Un-checks the show-global-user switch', function () {
     cy.get('mat-toolbar').within(() => {
       cy.get('mat-slide-toggle input').should('be.checked');
     });
@@ -94,16 +94,15 @@ describe('Software Repository Tests', () => {
     cy.contains('tr', globalWrite).should('not.exist');
     cy.contains('tr', globalRead).should('not.exist');
     cy.contains('tr', globalNone).should('exist');
-  })
+  });
 
-  it('Removes a user', function() {
-
+  it('Removes a user', function () {
     cy.contains('tr', globalNone).within(() => {
       cy.contains('mat-icon', 'delete').should('exist');
       cy.contains('mat-icon', 'delete').click();
     });
     cy.contains('tr', globalNone).should('not.exist');
-  })
+  });
 
   it('Deletes the users', () => {
     cy.visit('/#/admin/all/(panel:users)');
@@ -113,18 +112,16 @@ describe('Software Repository Tests', () => {
     cy.deleteUser(globalWrite);
     cy.deleteUser(globalRead);
     cy.deleteUser(globalNone);
-  })
+  });
 
   it('Delete Software Repository', () => {
     cy.visit('/#/softwarerepo/browser');
     cy.waitUntilContentLoaded();
 
-    cy.contains('mat-card', repoName)
-      .should('exist')
-      .clickContextMenuDialog('Delete');
+    cy.contains('mat-card', repoName).should('exist').clickContextMenuDialog('Delete');
     cy.contains('mat-dialog-container', 'Delete Software Repository: ' + repoName)
       .should('exist')
-      .within(dialog => {
+      .within((dialog) => {
         cy.contains('button', 'OK').click();
       });
 

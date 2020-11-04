@@ -3,7 +3,6 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { LoggingService } from '../../../core/services/logging.service';
 import { InstanceService } from '../../../instance/services/instance.service';
 
-
 export interface InstanceGroupDeleteDialogData {
   name: string;
   title: string;
@@ -24,11 +23,11 @@ export class InstanceGroupDeleteDialogComponent implements OnInit {
     public dialogRef: MatDialogRef<InstanceGroupDeleteDialogComponent>,
     private instanceService: InstanceService,
     private loggingService: LoggingService,
-    @Inject(MAT_DIALOG_DATA) public data: InstanceGroupDeleteDialogData,
+    @Inject(MAT_DIALOG_DATA) public data: InstanceGroupDeleteDialogData
   ) {}
 
   ngOnInit(): void {
-    this.instanceService.listInstances(this.data.name).subscribe(list => {
+    this.instanceService.listInstances(this.data.name).subscribe((list) => {
       this.instanceCount = list.length;
     });
   }

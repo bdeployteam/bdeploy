@@ -14,38 +14,38 @@ const routes: Routes = [
   {
     path: 'login',
     component: LoginComponent,
-    data: { title: 'Login', header: 'Login' }
+    data: { title: 'Login', header: 'Login' },
   },
   {
     path: 'instancegroup',
-    loadChildren: () => import('./modules/instance-group/instance-group.module').then(x => x.InstanceGroupModule)
+    loadChildren: () => import('./modules/instance-group/instance-group.module').then((x) => x.InstanceGroupModule),
   },
   {
     path: 'instance',
-    loadChildren: () => import('./modules/instance/instance.module').then(x => x.InstanceModule)
+    loadChildren: () => import('./modules/instance/instance.module').then((x) => x.InstanceModule),
   },
   {
     path: 'admin',
-    loadChildren: () => import('./modules/admin/admin.module').then(x => x.AdminModule),
-    canActivate: [AdminGuard]
+    loadChildren: () => import('./modules/admin/admin.module').then((x) => x.AdminModule),
+    canActivate: [AdminGuard],
   },
   {
     path: 'softwarerepo',
-    loadChildren: () => import('./modules/repositories/repositories.module').then(x => x.RepositoriesModule),
+    loadChildren: () => import('./modules/repositories/repositories.module').then((x) => x.RepositoriesModule),
   },
   {
     path: 'servers',
-    loadChildren: () => import('./modules/servers/servers.module').then(x => x.ServersModule)
+    loadChildren: () => import('./modules/servers/servers.module').then((x) => x.ServersModule),
   },
   {
     path: 'configfiles',
-    loadChildren: () => import('./modules/config-files/config-files.module').then(x => x.ConfigFilesModule)
+    loadChildren: () => import('./modules/config-files/config-files.module').then((x) => x.ConfigFilesModule),
   },
   {
     path: '**',
     component: MessageboxComponent, // This is a DUMMY! the NotFoundGuard will /always/ redirect
-    canActivate: [NotFoundGuard]
-  }
+    canActivate: [NotFoundGuard],
+  },
 ];
 
 @NgModule({

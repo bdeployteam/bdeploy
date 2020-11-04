@@ -9,10 +9,7 @@ import { LDAPSettingsDto, Permission, UserInfo } from 'src/app/models/gen.dtos';
 import { UserEditComponent } from 'src/app/modules/core/components/user-edit/user-edit.component';
 import { UserPasswordComponent } from 'src/app/modules/core/components/user-password/user-password.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
-import {
-  Logger,
-  LoggingService
-} from 'src/app/modules/core/services/logging.service';
+import { Logger, LoggingService } from 'src/app/modules/core/services/logging.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
 import { MessageboxService } from 'src/app/modules/shared/services/messagebox.service';
@@ -31,9 +28,7 @@ export class UsersBrowserComponent implements OnInit, AfterViewInit {
   public INITIAL_SORT_COLUMN = 'name';
   public INITIAL_SORT_DIRECTION = 'asc';
 
-  public dataSource: MatTableDataSource<UserInfo> = new MatTableDataSource<
-    UserInfo
-  >([]);
+  public dataSource: MatTableDataSource<UserInfo> = new MatTableDataSource<UserInfo>([]);
   private filterPredicate: (d, f) => boolean;
 
   public displayedColumns: string[] = [
@@ -128,19 +123,9 @@ export class UsersBrowserComponent implements OnInit, AfterViewInit {
   }
 
   public getGlobalPermission(userInfo: UserInfo): Permission {
-    let p = userInfo.permissions.find(
-      (sc) => sc.scope === null && sc.permission === Permission.ADMIN
-    );
-    p = p
-      ? p
-      : userInfo.permissions.find(
-          (sc) => sc.scope === null && sc.permission === Permission.WRITE
-        );
-    p = p
-      ? p
-      : userInfo.permissions.find(
-          (sc) => sc.scope === null && sc.permission === Permission.READ
-        );
+    let p = userInfo.permissions.find((sc) => sc.scope === null && sc.permission === Permission.ADMIN);
+    p = p ? p : userInfo.permissions.find((sc) => sc.scope === null && sc.permission === Permission.WRITE);
+    p = p ? p : userInfo.permissions.find((sc) => sc.scope === null && sc.permission === Permission.READ);
     return p ? p.permission : null;
   }
 
@@ -263,13 +248,7 @@ export class UsersBrowserComponent implements OnInit, AfterViewInit {
 
   public onSetInactive(userInfo: UserInfo, newValue: boolean): void {
     if (userInfo.inactive === newValue) {
-      this.log.warn(
-        'user ' +
-          userInfo.name +
-          ' is already ' +
-          (newValue ? 'active' : 'inactive') +
-          '!'
-      );
+      this.log.warn('user ' + userInfo.name + ' is already ' + (newValue ? 'active' : 'inactive') + '!');
       this.loadUsers();
       return;
     }

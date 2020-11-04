@@ -3,17 +3,16 @@
   font-family: 'Material Icons';
   font-style: normal;
   font-weight: 400;
-  src: local('Material Icons'),
-       local('MaterialIcons-Regular'),
-       url(assets/flUhRq6tzZclQEJ-Vdg-IuiaDsNa.woff) format('woff'),
-       url(assets/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2) format('woff2');
+  src: local('Material Icons'), local('MaterialIcons-Regular'),
+    url(assets/flUhRq6tzZclQEJ-Vdg-IuiaDsNa.woff) format('woff'),
+    url(assets/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2) format('woff2');
 }
 
 .material-icons {
   font-family: 'Material Icons';
   font-weight: normal;
   font-style: normal;
-  font-size: 24px;  /* Preferred icon size */
+  font-size: 24px; /* Preferred icon size */
   display: inline-block;
   line-height: 1;
   text-transform: none;
@@ -39,25 +38,22 @@
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 300;
-  src: local('Roboto Light'), local('Roboto-Light'),
-       url('assets/roboto-v19-latin-300.woff2') format('woff2'),
-       url('assets/roboto-v19-latin-300.woff') format('woff');
+  src: local('Roboto Light'), local('Roboto-Light'), url('assets/roboto-v19-latin-300.woff2') format('woff2'),
+    url('assets/roboto-v19-latin-300.woff') format('woff');
 }
 /* roboto-regular - latin */
 @font-face {
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 400;
-  src: local('Roboto'), local('Roboto-Regular'),
-       url('assets/roboto-v19-latin-regular.woff2') format('woff2'),
-       url('assets/roboto-v19-latin-regular.woff') format('woff');
+  src: local('Roboto'), local('Roboto-Regular'), url('assets/roboto-v19-latin-regular.woff2') format('woff2'),
+    url('assets/roboto-v19-latin-regular.woff') format('woff');
 }
 /* roboto-500 - latin */
 @font-face {
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 500;
-  src: local('Roboto Medium'), local('Roboto-Medium'),
-       url('assets/roboto-v19-latin-500.woff2') format('woff2'),
-       url('assets/roboto-v19-latin-500.woff') format('woff');
+  src: local('Roboto Medium'), local('Roboto-Medium'), url('assets/roboto-v19-latin-500.woff2') format('woff2'),
+    url('assets/roboto-v19-latin-500.woff') format('woff');
 }

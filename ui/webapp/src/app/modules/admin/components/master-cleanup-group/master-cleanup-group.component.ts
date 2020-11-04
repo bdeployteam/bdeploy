@@ -6,10 +6,9 @@ import { CleanupAction, CleanupGroup } from 'src/app/models/gen.dtos';
 @Component({
   selector: 'app-master-cleanup-group',
   templateUrl: './master-cleanup-group.component.html',
-  styleUrls: ['./master-cleanup-group.component.css']
+  styleUrls: ['./master-cleanup-group.component.css'],
 })
 export class MasterCleanupGroupComponent implements OnInit {
-
   @Input()
   public group: CleanupGroup;
 
@@ -20,11 +19,10 @@ export class MasterCleanupGroupComponent implements OnInit {
 
   columns = ['description', 'type', 'what'];
 
-  constructor() { }
+  constructor() {}
 
   ngOnInit() {
     this.dataSource = new MatTableDataSource(this.group.actions);
     this.dataSource.paginator = this.paginator;
   }
-
 }

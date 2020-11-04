@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { ConfigService } from '../../core/services/config.service';
 
 // defined in index.html directly to be as global as possible.
-declare var downloadLocation: { assign: (url: string) => {}, click: (link: HTMLAnchorElement) => {} };
+declare var downloadLocation: { assign: (url: string) => {}; click: (link: HTMLAnchorElement) => {} };
 
 /**
  * Note: ALWAYS use DownloadService to trigger a download for tests to be able to intercept the action.
@@ -11,7 +11,6 @@ declare var downloadLocation: { assign: (url: string) => {}, click: (link: HTMLA
   providedIn: 'root',
 })
 export class DownloadService {
-
   constructor(private cfg: ConfigService) {}
 
   /**
@@ -55,10 +54,9 @@ export class DownloadService {
   }
 
   /**
-    * Creates a new URL to download a file that has been prepared by another call.
-    */
+   * Creates a new URL to download a file that has been prepared by another call.
+   */
   public createDownloadUrl(token: string) {
     return this.cfg.config.api + '/download/file/' + token;
   }
-
 }

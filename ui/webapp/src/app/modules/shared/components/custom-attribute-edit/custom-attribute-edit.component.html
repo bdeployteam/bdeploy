@@ -1,15 +1,32 @@
 <h1 mat-dialog-title>Configure Custom Attribute</h1>
 <form #f="ngForm">
-  <div mat-dialog-content class='content'>
+  <div mat-dialog-content class="content">
     <mat-form-field>
-      <input matInput type='text' name='name' required [(ngModel)]='attribute.name' placeholder="Name" matTooltip="The Attribute Name">
+      <input
+        matInput
+        type="text"
+        name="name"
+        required
+        [(ngModel)]="attribute.name"
+        placeholder="Name"
+        matTooltip="The Attribute Name"
+      />
     </mat-form-field>
     <mat-form-field>
-      <input matInput type='text' name='description' required [(ngModel)]='attribute.description' placeholder="Description">
+      <input
+        matInput
+        type="text"
+        name="description"
+        required
+        [(ngModel)]="attribute.description"
+        placeholder="Description"
+      />
     </mat-form-field>
   </div>
   <div mat-dialog-actions align="end">
     <button mat-raised-button type="button" [mat-dialog-close]="null">Cancel</button>
-    <button mat-raised-button type="submit" color="primary" [mat-dialog-close]="attribute" [disabled]='f.invalid'>Apply</button>
+    <button mat-raised-button type="submit" color="primary" [mat-dialog-close]="attribute" [disabled]="f.invalid">
+      Apply
+    </button>
   </div>
 </form>

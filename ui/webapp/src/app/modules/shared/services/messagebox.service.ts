@@ -24,12 +24,12 @@ export class MessageboxService {
       })
       .afterClosed()
       .pipe(
-        map(r => {
+        map((r) => {
           if (r === undefined || r === null) {
             return false;
           }
           return r;
-        }),
+        })
       );
   }
 }

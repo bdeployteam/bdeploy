@@ -1,6 +1,5 @@
 package io.bdeploy.api.product.v1.impl;
 
-
 import javax.annotation.Generated;
 
 import io.bdeploy.bhive.model.Manifest;

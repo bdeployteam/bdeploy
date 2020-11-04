@@ -7,15 +7,7 @@ import { ConfigFilesBrowserComponent } from './components/config-files-browser/c
 import { ConfigFilesRoutingModule } from './config-files-routing.module';
 
 @NgModule({
-  declarations: [
-    ConfigFilesBrowserComponent
-  ],
-  imports: [
-    CommonModule,
-    SharedModule,
-    CoreModule,
-    AceEditorModule,
-    ConfigFilesRoutingModule
-  ]
+  declarations: [ConfigFilesBrowserComponent],
+  imports: [CommonModule, SharedModule, CoreModule, AceEditorModule, ConfigFilesRoutingModule],
 })
-export class ConfigFilesModule { }
+export class ConfigFilesModule {}

@@ -7,43 +7,45 @@ import { ApplicationGroup } from 'src/app/models/application.model';
 @Component({
   selector: 'app-application-descriptor-detail',
   templateUrl: './application-descriptor-detail.component.html',
-  styleUrls: ['./application-descriptor-detail.component.css']
+  styleUrls: ['./application-descriptor-detail.component.css'],
 })
 export class ApplicationDescriptorDetailComponent implements OnInit {
-
   @Input()
   applicationGroup: ApplicationGroup;
 
   private overlayRef: OverlayRef;
 
-  constructor(private overlay: Overlay, private viewContainerRef: ViewContainerRef) { }
+  constructor(private overlay: Overlay, private viewContainerRef: ViewContainerRef) {}
 
-  ngOnInit(): void {
-  }
+  ngOnInit(): void {}
 
   openOverlay(relative: MatButton, template: TemplateRef<any>) {
-
     this.closeOverlay();
 
     this.overlayRef = this.overlay.create({
-      positionStrategy: this.overlay.position().flexibleConnectedTo(relative._elementRef)
-        .withPositions([{
+      positionStrategy: this.overlay
+        .position()
+        .flexibleConnectedTo(relative._elementRef)
+        .withPositions([
+          {
             overlayX: 'end',
             overlayY: 'bottom',
             originX: 'center',
             originY: 'top',
             offsetX: 35,
             offsetY: -10,
-            panelClass: 'info-card'
-        }, {
-          overlayX: 'end',
-          overlayY: 'top',
-          originX: 'center',
-          originY: 'bottom',
-          offsetX: 35,
-          offsetY: 10,
-          panelClass: 'info-card-below'
-        }])
+            panelClass: 'info-card',
+          },
+          {
+            overlayX: 'end',
+            overlayY: 'top',
+            originX: 'center',
+            originY: 'bottom',
+            offsetX: 35,
+            offsetY: 10,
+            panelClass: 'info-card-below',
+          },
+        ])
         .withPush(),
       scrollStrategy: this.overlay.scrollStrategies.close(),
       hasBackdrop: true,
@@ -63,5 +65,4 @@ export class ApplicationDescriptorDetailComponent implements OnInit {
       this.overlayRef = null;
     }
   }
-
 }

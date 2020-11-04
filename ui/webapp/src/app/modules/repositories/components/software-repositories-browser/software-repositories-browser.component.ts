@@ -11,10 +11,9 @@ import { SoftwareRepositoryService } from '../../services/software-repository.se
 @Component({
   selector: 'app-software-repositories-browser',
   templateUrl: './software-repositories-browser.component.html',
-  styleUrls: ['./software-repositories-browser.component.css']
+  styleUrls: ['./software-repositories-browser.component.css'],
 })
 export class SoftwareRepositoriesBrowserComponent implements OnInit, OnDestroy {
-
   log: Logger = this.loggingService.getLogger('SoftwareRepositoriesBrowserComponent');
 
   private subscription: Subscription;
@@ -25,7 +24,7 @@ export class SoftwareRepositoriesBrowserComponent implements OnInit, OnDestroy {
     ['sm', 1],
     ['md', 2],
     ['lg', 3],
-    ['xl', 5]
+    ['xl', 5],
   ]);
   // calculated number of columns
   columns = 3;
@@ -36,7 +35,8 @@ export class SoftwareRepositoriesBrowserComponent implements OnInit, OnDestroy {
     private mediaObserver: MediaObserver,
     private softwareRepositoryService: SoftwareRepositoryService,
     private loggingService: LoggingService,
-    private authService: AuthenticationService) { }
+    private authService: AuthenticationService
+  ) {}
 
   ngOnInit(): void {
     this.log.debug('intializing...');
@@ -60,10 +60,13 @@ export class SoftwareRepositoriesBrowserComponent implements OnInit, OnDestroy {
 
   private loadSoftwareRepositories() {
     this.loading = true;
-    this.softwareRepositoryService.listSoftwareRepositories().pipe(finalize(() => this.loading = false)).subscribe(repositories => {
-      this.softwareRepositoryList.addAll(repositories);
-      this.log.debug('got ' + repositories.length + ' repositories');
-    });
+    this.softwareRepositoryService
+      .listSoftwareRepositories()
+      .pipe(finalize(() => (this.loading = false)))
+      .subscribe((repositories) => {
+        this.softwareRepositoryList.addAll(repositories);
+        this.log.debug('got ' + repositories.length + ' repositories');
+      });
   }
 
   ngOnDestroy(): void {
@@ -71,7 +74,7 @@ export class SoftwareRepositoriesBrowserComponent implements OnInit, OnDestroy {
   }
 
   onRemoveRepo(repository: SoftwareRepositoryConfiguration) {
-    this.softwareRepositoryList.remove(c => c === repository);
+    this.softwareRepositoryList.remove((c) => c === repository);
   }
 
   public isReadOnly(): boolean {

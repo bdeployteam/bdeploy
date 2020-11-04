@@ -10,7 +10,6 @@ import { SystemService } from '../services/system.service';
 
 @Injectable()
 export class HttpErrorHandlerInterceptor implements HttpInterceptor {
-
   private log: Logger = this.loggingService.getLogger('HttpErrorHandlerInterceptor');
 
   constructor(
@@ -21,31 +20,36 @@ export class HttpErrorHandlerInterceptor implements HttpInterceptor {
   ) {}
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    return next.handle(request).pipe(catchError(e => {
-      if (e instanceof HttpErrorResponse && e.status === 403) {
-        this.snackbar.open(`Unfortunately, /${e.url} was not found (wrong URL or insufficient rights), we returned you to the safe-zone.`, 'DISMISS', { panelClass: 'error-snackbar' });
-        this.router.navigate(['/instancegroup/browser']);
-        return of(null);
-      } else if (e instanceof HttpErrorResponse && e.status === 499) {
-        // special version mismatch code.
-        this.log.errorWithGuiMessage(new ErrorMessage(e.statusText, e));
-      } else if (e instanceof HttpErrorResponse && e.status !== 401 && !request.headers.has(NO_ERROR_HANDLING_HDR)) {
-        // let 401 pass through for logout redirection in the other interceptor :)
-        if (e.status === 0) {
-          this.systemService.backendUnreachable();
-        } else {
-          let displayPath = request.url;
-          try {
-            displayPath = new URL(request.url).pathname;
-          } catch (error) {
-            this.log.warn(new ErrorMessage('Cannot parse request URL', error));
+    return next.handle(request).pipe(
+      catchError((e) => {
+        if (e instanceof HttpErrorResponse && e.status === 403) {
+          this.snackbar.open(
+            `Unfortunately, /${e.url} was not found (wrong URL or insufficient rights), we returned you to the safe-zone.`,
+            'DISMISS',
+            { panelClass: 'error-snackbar' }
+          );
+          this.router.navigate(['/instancegroup/browser']);
+          return of(null);
+        } else if (e instanceof HttpErrorResponse && e.status === 499) {
+          // special version mismatch code.
+          this.log.errorWithGuiMessage(new ErrorMessage(e.statusText, e));
+        } else if (e instanceof HttpErrorResponse && e.status !== 401 && !request.headers.has(NO_ERROR_HANDLING_HDR)) {
+          // let 401 pass through for logout redirection in the other interceptor :)
+          if (e.status === 0) {
+            this.systemService.backendUnreachable();
+          } else {
+            let displayPath = request.url;
+            try {
+              displayPath = new URL(request.url).pathname;
+            } catch (error) {
+              this.log.warn(new ErrorMessage('Cannot parse request URL', error));
+            }
+            this.log.errorWithGuiMessage(new ErrorMessage(e.status + ': ' + e.statusText + ': ' + displayPath, e));
           }
-          this.log.errorWithGuiMessage(new ErrorMessage(e.status + ': ' + e.statusText + ': ' + displayPath, e));
+          return of(null);
         }
-        return of(null);
-      }
-      return throwError(e);
-    }));
+        return throwError(e);
+      })
+    );
   }
-
 }

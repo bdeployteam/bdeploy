@@ -12,13 +12,10 @@ export interface VariableInput {
 @Component({
   selector: 'app-application-template-variable-dialog',
   templateUrl: './application-template-variable-dialog.component.html',
-  styleUrls: ['./application-template-variable-dialog.component.css']
+  styleUrls: ['./application-template-variable-dialog.component.css'],
 })
 export class ApplicationTemplateVariableDialogComponent implements OnInit {
+  constructor(@Inject(MAT_DIALOG_DATA) public variables: VariableInput[]) {}
 
-  constructor(@Inject(MAT_DIALOG_DATA) public variables: VariableInput[]) { }
-
-  ngOnInit(): void {
-  }
-
+  ngOnInit(): void {}
 }

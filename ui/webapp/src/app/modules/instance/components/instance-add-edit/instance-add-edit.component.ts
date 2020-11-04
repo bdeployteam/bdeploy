@@ -12,7 +12,16 @@ import { finalize } from 'rxjs/operators';
 import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { CustomAttributeValueComponent } from 'src/app/modules/shared/components/custom-attribute-value/custom-attribute-value.component';
 import { EMPTY_ATTRIBUTES_RECORD, EMPTY_INSTANCE } from '../../../../models/consts';
-import { CustomAttributesRecord, InstanceConfiguration, InstanceGroupConfiguration, InstancePurpose, InstanceVersionDto, ManagedMasterDto, MinionMode, ProductDto } from '../../../../models/gen.dtos';
+import {
+  CustomAttributesRecord,
+  InstanceConfiguration,
+  InstanceGroupConfiguration,
+  InstancePurpose,
+  InstanceVersionDto,
+  ManagedMasterDto,
+  MinionMode,
+  ProductDto
+} from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
 import { Logger, LoggingService } from '../../../core/services/logging.service';
 import { InstanceGroupService } from '../../../instance-group/services/instance-group.service';
@@ -84,7 +93,7 @@ export class InstanceAddEditComponent implements OnInit {
     private config: ConfigService,
     private managedServersService: ManagedServersService,
     public routingHistoryService: RoutingHistoryService,
-    private dialog: MatDialog,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit() {
@@ -103,24 +112,29 @@ export class InstanceAddEditComponent implements OnInit {
         purposes: this.instanceService.listPurpose(this.groupParam),
         products: this.productService.getProducts(this.groupParam, null),
         servers: this.isCentral() ? this.managedServersService.getManagedServers(this.groupParam) : of([]),
-      }).pipe(finalize(() => {this.loading = false; }))
-      .subscribe(r => {
-        const instance = cloneDeep(EMPTY_INSTANCE);
-        instance.autoUninstall = true;
-        instance.uuid = r.uuid;
-        this.instanceFormGroup.patchValue(instance);
-        this.clonedInstance = cloneDeep(instance);
-        this.instanceGroup = r.instanceGroup;
-        this.purposes = r.purposes;
-        this.products = r.products;
-        this.instanceAttributes = cloneDeep(EMPTY_ATTRIBUTES_RECORD);
-        this.clonedInstanceAttributes = cloneDeep(EMPTY_ATTRIBUTES_RECORD);
-        this.servers = r.servers.sort((a, b) => a.hostName.localeCompare(b.hostName));
+      })
+        .pipe(
+          finalize(() => {
+            this.loading = false;
+          })
+        )
+        .subscribe((r) => {
+          const instance = cloneDeep(EMPTY_INSTANCE);
+          instance.autoUninstall = true;
+          instance.uuid = r.uuid;
+          this.instanceFormGroup.patchValue(instance);
+          this.clonedInstance = cloneDeep(instance);
+          this.instanceGroup = r.instanceGroup;
+          this.purposes = r.purposes;
+          this.products = r.products;
+          this.instanceAttributes = cloneDeep(EMPTY_ATTRIBUTES_RECORD);
+          this.clonedInstanceAttributes = cloneDeep(EMPTY_ATTRIBUTES_RECORD);
+          this.servers = r.servers.sort((a, b) => a.hostName.localeCompare(b.hostName));
 
-        this.instanceFormGroup.enable();
-        this.formGroup.enable();
-        this.productTagControl.disable();
-      });
+          this.instanceFormGroup.enable();
+          this.formGroup.enable();
+          this.productTagControl.disable();
+        });
     } else {
       this.loadingText = 'Loading...';
       forkJoin({
@@ -132,8 +146,13 @@ export class InstanceAddEditComponent implements OnInit {
         products: this.productService.getProducts(this.groupParam, null),
         attributes: this.instanceService.getInstanceAttributes(this.groupParam, this.uuidParam),
         servers: this.isCentral() ? this.managedServersService.getManagedServers(this.groupParam) : of([]),
-      }).pipe(finalize(() => {this.loading = false; }))
-        .subscribe(r => {
+      })
+        .pipe(
+          finalize(() => {
+            this.loading = false;
+          })
+        )
+        .subscribe((r) => {
           this.instanceGroup = r.instanceGroup;
           this.instanceFormGroup.patchValue(r.instance);
           this.clonedInstance = cloneDeep(r.instance);
@@ -229,22 +248,34 @@ export class InstanceAddEditComponent implements OnInit {
     const managedServer = this.managedServerControl ? this.managedServerControl.value : null;
     if (this.isCreate()) {
       // first create instance, second set attributes on existing instance
-      this.instanceService.createInstance(this.groupParam, instance, managedServer)
-      .subscribe(r => {
+      this.instanceService.createInstance(this.groupParam, instance, managedServer).subscribe((r) => {
         this.clonedInstance = instance;
-        this.instanceService.updateInstanceAttributes(this.groupParam, instance.uuid, this.instanceAttributes)
-        .pipe(finalize(() => this.loading = false))
-        .subscribe(a => {
-          this.clonedInstanceAttributes = this.instanceAttributes;
-          this.location.back();
-        });
+        this.instanceService
+          .updateInstanceAttributes(this.groupParam, instance.uuid, this.instanceAttributes)
+          .pipe(finalize(() => (this.loading = false)))
+          .subscribe((a) => {
+            this.clonedInstanceAttributes = this.instanceAttributes;
+            this.location.back();
+          });
       });
     } else {
       forkJoin({
-        configuration: this.isConfigurationModified() ? this.instanceService.updateInstance(this.groupParam, this.uuidParam, instance, null, managedServer, this.expectedVersion.key.tag) : of(null),
-        attributes: this.isAttributesModified() ? this.instanceService.updateInstanceAttributes(this.groupParam, this.uuidParam, this.instanceAttributes) : of(null),
-      }).pipe(finalize(() => this.loading = false))
-        .subscribe(_ => {
+        configuration: this.isConfigurationModified()
+          ? this.instanceService.updateInstance(
+              this.groupParam,
+              this.uuidParam,
+              instance,
+              null,
+              managedServer,
+              this.expectedVersion.key.tag
+            )
+          : of(null),
+        attributes: this.isAttributesModified()
+          ? this.instanceService.updateInstanceAttributes(this.groupParam, this.uuidParam, this.instanceAttributes)
+          : of(null),
+      })
+        .pipe(finalize(() => (this.loading = false)))
+        .subscribe((_) => {
           this.clonedInstance = instance;
           this.clonedInstanceAttributes = this.instanceAttributes;
           this.location.back();
@@ -320,38 +351,46 @@ export class InstanceAddEditComponent implements OnInit {
   }
 
   addInstanceAttribute() {
-    const possibleDescriptors = this.instanceGroup?.instanceAttributes?.filter(d => !this.instanceAttributes?.attributes[d.name] );
-    this.dialog.open(CustomAttributeValueComponent, {
-      width: '500px',
-      data: {
-        descriptors: possibleDescriptors,
-        attributeName: null,
-        attributeValue: null,
-      },
-    }).afterClosed().subscribe(r => {
-      if (r) {
-        this.instanceAttributes.attributes[r.name] = r.value;
-      }
-    });
+    const possibleDescriptors = this.instanceGroup?.instanceAttributes?.filter(
+      (d) => !this.instanceAttributes?.attributes[d.name]
+    );
+    this.dialog
+      .open(CustomAttributeValueComponent, {
+        width: '500px',
+        data: {
+          descriptors: possibleDescriptors,
+          attributeName: null,
+          attributeValue: null,
+        },
+      })
+      .afterClosed()
+      .subscribe((r) => {
+        if (r) {
+          this.instanceAttributes.attributes[r.name] = r.value;
+        }
+      });
   }
 
   editInstanceAttribute(attributeName: string) {
-    let descriptor = this.instanceGroup?.instanceAttributes?.find(d => d.name === attributeName);
+    let descriptor = this.instanceGroup?.instanceAttributes?.find((d) => d.name === attributeName);
     if (!descriptor) {
-      descriptor = {name: attributeName, description: ''};
+      descriptor = { name: attributeName, description: '' };
     }
-    this.dialog.open(CustomAttributeValueComponent, {
-      width: '500px',
-      data: {
-        descriptors: [descriptor],
-        attributeName: attributeName,
-        attributeValue: cloneDeep(this.instanceAttributes.attributes[attributeName])
-      },
-    }).afterClosed().subscribe(r => {
-      if (r) {
-        this.instanceAttributes.attributes[r.name] = r.value;
-      }
-    });
+    this.dialog
+      .open(CustomAttributeValueComponent, {
+        width: '500px',
+        data: {
+          descriptors: [descriptor],
+          attributeName: attributeName,
+          attributeValue: cloneDeep(this.instanceAttributes.attributes[attributeName]),
+        },
+      })
+      .afterClosed()
+      .subscribe((r) => {
+        if (r) {
+          this.instanceAttributes.attributes[r.name] = r.value;
+        }
+      });
   }
 
   removeInstanceAttribute(attributeName: string) {
@@ -369,5 +408,4 @@ export class InstanceAddEditComponent implements OnInit {
       return [];
     }
   }
-
 }

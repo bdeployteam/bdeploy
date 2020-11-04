@@ -25,7 +25,13 @@ export class ProductsComponent implements OnInit {
   public selectedProductKey: string = null;
   public productsKeys: string[];
 
-  private grid = new Map([['xs', 1], ['sm', 1], ['md', 2], ['lg', 3], ['xl', 5]]);
+  private grid = new Map([
+    ['xs', 1],
+    ['sm', 1],
+    ['md', 2],
+    ['lg', 3],
+    ['xl', 5],
+  ]);
 
   loading = false;
 
@@ -64,7 +70,7 @@ export class ProductsComponent implements OnInit {
       const p = await this.productService.getProducts(this.instanceGroup, null).toPromise();
 
       this.products = new Map();
-      p.forEach(prod => {
+      p.forEach((prod) => {
         this.products.set(prod.key.name, this.products.get(prod.key.name) || []);
         this.products.get(prod.key.name).push(prod);
       });
@@ -98,14 +104,15 @@ export class ProductsComponent implements OnInit {
     config.minHeight = '550px';
     config.data = {
       title: 'Upload Products',
-      headerMessage: 'Upload products into this instance group. The selected archive may either contain a new product or a new version of an existing product.',
+      headerMessage:
+        'Upload products into this instance group. The selected archive may either contain a new product or a new version of an existing product.',
       url: this.productService.getProductUploadUrl(this.instanceGroup),
-      fileTypes: ['.zip']
+      fileTypes: ['.zip'],
     };
     this.dialog
       .open(FileUploadComponent, config)
       .afterClosed()
-      .subscribe(e => {
+      .subscribe((e) => {
         this.loadProducts();
       });
   }
@@ -123,9 +130,8 @@ export class ProductsComponent implements OnInit {
     this.dialog
       .open(ProductsCopyComponent, config)
       .afterClosed()
-      .subscribe(e => {
+      .subscribe((e) => {
         this.loadProducts();
       });
   }
-
 }

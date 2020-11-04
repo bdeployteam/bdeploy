@@ -7,7 +7,6 @@ import { getAppOs } from '../utils/manifest.utils';
 
 @Injectable()
 export class LauncherService {
-
   /** Whether or not the launchers have been loaded from the backend. */
   public loading = true;
 
@@ -19,7 +18,7 @@ export class LauncherService {
    */
   constructor(private updateService: SoftwareUpdateService, private deviceService: DeviceDetectorService) {
     const launcherPromise = this.updateService.getLatestLaunchers();
-    launcherPromise.pipe(finalize(() => (this.loading = false))).subscribe(launchers => {
+    launcherPromise.pipe(finalize(() => (this.loading = false))).subscribe((launchers) => {
       this.launcherDto = launchers;
     });
   }

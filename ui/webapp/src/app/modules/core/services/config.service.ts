@@ -7,13 +7,7 @@ import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/mes
 import { MessageboxService } from 'src/app/modules/shared/services/messagebox.service';
 import { convert2String } from 'src/app/modules/shared/utils/version.utils';
 import { environment } from 'src/environments/environment';
-import {
-  BackendInfoDto,
-  MinionMode,
-  MinionStatusDto,
-  PluginInfoDto,
-  Version
-} from '../../../models/gen.dtos';
+import { BackendInfoDto, MinionMode, MinionStatusDto, PluginInfoDto, Version } from '../../../models/gen.dtos';
 import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
 import { LoggingService, LogLevel } from './logging.service';
 
@@ -38,45 +32,16 @@ export class ConfigService {
     sanitizer: DomSanitizer,
     private mbService: MessageboxService
   ) {
-    iconRegistry.addSvgIcon(
-      'bdeploy',
-      sanitizer.bypassSecurityTrustResourceUrl(
-        'assets/logo-single-path-square.svg'
-      )
-    );
-    iconRegistry.addSvgIcon(
-      'progress',
-      sanitizer.bypassSecurityTrustResourceUrl('assets/progress.svg')
-    );
-    iconRegistry.addSvgIcon(
-      'plus',
-      sanitizer.bypassSecurityTrustResourceUrl('assets/plus.svg')
-    );
-    iconRegistry.addSvgIcon(
-      'star',
-      sanitizer.bypassSecurityTrustResourceUrl('assets/star.svg')
-    );
-    iconRegistry.addSvgIcon(
-      'LINUX',
-      sanitizer.bypassSecurityTrustResourceUrl('assets/linux.svg')
-    );
-    iconRegistry.addSvgIcon(
-      'WINDOWS',
-      sanitizer.bypassSecurityTrustResourceUrl('assets/windows.svg')
-    );
-    iconRegistry.addSvgIcon(
-      'AIX',
-      sanitizer.bypassSecurityTrustResourceUrl('assets/aix.svg')
-    );
-    iconRegistry.addSvgIcon(
-      'MACOS',
-      sanitizer.bypassSecurityTrustResourceUrl('assets/mac.svg')
-    );
+    iconRegistry.addSvgIcon('bdeploy', sanitizer.bypassSecurityTrustResourceUrl('assets/logo-single-path-square.svg'));
+    iconRegistry.addSvgIcon('progress', sanitizer.bypassSecurityTrustResourceUrl('assets/progress.svg'));
+    iconRegistry.addSvgIcon('plus', sanitizer.bypassSecurityTrustResourceUrl('assets/plus.svg'));
+    iconRegistry.addSvgIcon('star', sanitizer.bypassSecurityTrustResourceUrl('assets/star.svg'));
+    iconRegistry.addSvgIcon('LINUX', sanitizer.bypassSecurityTrustResourceUrl('assets/linux.svg'));
+    iconRegistry.addSvgIcon('WINDOWS', sanitizer.bypassSecurityTrustResourceUrl('assets/windows.svg'));
+    iconRegistry.addSvgIcon('AIX', sanitizer.bypassSecurityTrustResourceUrl('assets/aix.svg'));
+    iconRegistry.addSvgIcon('MACOS', sanitizer.bypassSecurityTrustResourceUrl('assets/mac.svg'));
     setInterval(() => this.isNewVersionAvailable(), 60000);
-    this.newVersionInterval = setInterval(
-      () => this.isNewVersionAvailable(),
-      60000
-    );
+    this.newVersionInterval = setInterval(() => this.isNewVersionAvailable(), 60000);
   }
 
   load(): Promise<AppConfig> {
@@ -89,12 +54,8 @@ export class ConfigService {
           mode: bv.mode,
         };
         this.loggingService.getLogger(null).setLogLevel(this.config.logLevel);
-        this.loggingService
-          .getLogger(null)
-          .info('API URL set to ' + this.config.api);
-        this.loggingService
-          .getLogger(null)
-          .info('Remote reports mode ' + this.config.mode);
+        this.loggingService.getLogger(null).info('API URL set to ' + this.config.api);
+        this.loggingService.getLogger(null).info('Remote reports mode ' + this.config.mode);
         resolve(this.config);
       });
     });
@@ -108,12 +69,7 @@ export class ConfigService {
       if (currentVersion !== newVersion) {
         this.loggingService
           .getLogger(null)
-          .info(
-            'A new version is available! old: ' +
-              currentVersion +
-              ' | new: ' +
-              newVersion
-          );
+          .info('A new version is available! old: ' + currentVersion + ' | new: ' + newVersion);
 
         this.mbService
           .open({
@@ -150,16 +106,13 @@ export class ConfigService {
   }
 
   public getBackendInfo(): Observable<BackendInfoDto> {
-    return this.http.get<BackendInfoDto>(
-      environment.apiUrl + '/backend-info/version'
-    );
+    return this.http.get<BackendInfoDto>(environment.apiUrl + '/backend-info/version');
   }
 
   public tryGetBackendInfo(): Observable<BackendInfoDto> {
-    return this.http.get<BackendInfoDto>(
-      environment.apiUrl + '/backend-info/version',
-      { headers: suppressGlobalErrorHandling(new HttpHeaders()) }
-    );
+    return this.http.get<BackendInfoDto>(environment.apiUrl + '/backend-info/version', {
+      headers: suppressGlobalErrorHandling(new HttpHeaders()),
+    });
   }
 
   public getNodeStates() {

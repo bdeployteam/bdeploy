@@ -85,36 +85,36 @@ export class Logger {
     return this.loglevel || (this.parent ? this.parent.getLogLevel() : LogLevel.INFO);
   }
 
-  public errorWithGuiMessage(msg: string|ErrorMessage): void {
+  public errorWithGuiMessage(msg: string | ErrorMessage): void {
     this.appValve.error(msg);
     this.log(LogLevel.ERROR, this, msg);
   }
 
-  public error(msg: string|ErrorMessage): void {
+  public error(msg: string | ErrorMessage): void {
     this.log(LogLevel.ERROR, this, msg);
   }
 
-  public warn(msg: string|ErrorMessage): void {
+  public warn(msg: string | ErrorMessage): void {
     this.log(LogLevel.WARN, this, msg);
   }
 
-  public info(msg: string|ErrorMessage): void {
+  public info(msg: string | ErrorMessage): void {
     this.log(LogLevel.INFO, this, msg);
   }
 
-  public debug(msg: string|ErrorMessage): void {
+  public debug(msg: string | ErrorMessage): void {
     this.log(LogLevel.DEBUG, this, msg);
   }
 
-  public trace(msg: string|ErrorMessage): void {
+  public trace(msg: string | ErrorMessage): void {
     this.log(LogLevel.TRACE, this, msg);
   }
 
-  public message(msg: string|ErrorMessage): void {
+  public message(msg: string | ErrorMessage): void {
     this.appValve.message(msg);
   }
 
-  private log(messageLogLevel: LogLevel, logger: Logger, msg: string|ErrorMessage): void {
+  private log(messageLogLevel: LogLevel, logger: Logger, msg: string | ErrorMessage): void {
     if (messageLogLevel <= logger.getLogLevel() && this.appenders != null) {
       for (let i = 0; i < this.appenders.length; i++) {
         this.appenders[i].log(messageLogLevel, logger, msg);
@@ -158,14 +158,15 @@ export class ConsoleAppender implements Appender {
 
   public log(messageLogLevel: LogLevel, logger: Logger, details: Object): void {
     if (messageLogLevel <= this.loglevel) {
-        const msg = this.fLogLevel(messageLogLevel) + ' ' + this.fNow() + ' ' + this.fLogger(logger) + '  ' + this.fMsg(details);
-        if (messageLogLevel === LogLevel.ERROR) {
-          console.error(msg);
-        } else if (messageLogLevel === LogLevel.WARN) {
-          console.warn(msg);
-        } else {
-          console.log(msg);
-        }
+      const msg =
+        this.fLogLevel(messageLogLevel) + ' ' + this.fNow() + ' ' + this.fLogger(logger) + '  ' + this.fMsg(details);
+      if (messageLogLevel === LogLevel.ERROR) {
+        console.error(msg);
+      } else if (messageLogLevel === LogLevel.WARN) {
+        console.warn(msg);
+      } else {
+        console.log(msg);
+      }
     }
   }
 
@@ -239,11 +240,11 @@ export class ConsoleAppender implements Appender {
 export class AppValve {
   constructor(private _loggingService: LoggingService) {}
 
-  public error(msg: string|ErrorMessage): void {
+  public error(msg: string | ErrorMessage): void {
     this._loggingService.guiError(msg);
   }
 
-  public message(msg: string|ErrorMessage): void {
+  public message(msg: string | ErrorMessage): void {
     this._loggingService.guiMessage(msg);
   }
 }
@@ -261,9 +262,7 @@ export class LoggingService {
   private appender: Appender;
   private rootLogger: Logger;
 
-  constructor(
-    private snackbar: MatSnackBar
-  ) {
+  constructor(private snackbar: MatSnackBar) {
     this.appValve = new AppValve(this);
     this.appender = new ConsoleAppender(LogLevel.TRACE);
     this.rootLogger = new Logger(null, Logger.ROOT_LOGGER_ID, this.appValve, this.appender);
@@ -273,16 +272,19 @@ export class LoggingService {
     return id == null || id.trim().length === 0 ? this.rootLogger : this.rootLogger.findOrCreateLogger(id.trim());
   }
 
-  public guiError(msg: string|ErrorMessage): void {
-    this.snackbar.open('ERROR: ' + (msg instanceof ErrorMessage ? msg.getMessage() : msg), 'DISMISS', { panelClass: 'error-snackbar' });
+  public guiError(msg: string | ErrorMessage): void {
+    this.snackbar.open('ERROR: ' + (msg instanceof ErrorMessage ? msg.getMessage() : msg), 'DISMISS', {
+      panelClass: 'error-snackbar',
+    });
   }
 
-  public guiMessage(msg: string|ErrorMessage): void {
-    this.snackbar.open((msg instanceof ErrorMessage ? msg.getMessage() : msg), 'DISMISS', { panelClass: 'error-snackbar' });
+  public guiMessage(msg: string | ErrorMessage): void {
+    this.snackbar.open(msg instanceof ErrorMessage ? msg.getMessage() : msg, 'DISMISS', {
+      panelClass: 'error-snackbar',
+    });
   }
 
   public dismissOpenMessage(): void {
     this.snackbar.dismiss();
   }
-
 }

@@ -3,7 +3,7 @@ describe('Instance Tests', function () {
 
   beforeEach(function () {
     cy.login();
-  })
+  });
 
   /**
    * Creates a new instance group and uploads a demo product
@@ -12,24 +12,24 @@ describe('Instance Tests', function () {
     cy.createInstanceGroup('Test');
     cy.uploadProductIntoGroup('Test', 'test-product-1-direct.zip');
     cy.uploadProductIntoGroup('Test', 'test-product-2-direct.zip');
-  })
+  });
 
   /**
    * Creates a new instance within the previously created group.
    */
   it('Create a instance', function () {
-    cy.createInstance('Test', 'CreateInstanceTest').then(uuid => {
+    cy.createInstance('Test', 'CreateInstanceTest').then((uuid) => {
       instanceUuid = uuid;
 
       cy.get('body').contains(instanceUuid).should('exist');
-    })
-  })
+    });
+  });
 
   /**
    * Create a configuration for a server process
    */
   it('Create from template', function () {
-    cy.visit('/#/instance/browser/Test')
+    cy.visit('/#/instance/browser/Test');
     cy.waitUntilContentLoaded();
 
     cy.get('mat-card-subtitle').contains(instanceUuid).click();
@@ -66,25 +66,28 @@ describe('Instance Tests', function () {
     cy.screenshot('BDeploy_Instance_Template_Processes');
 
     cy.contains('button', 'DISCARD').click();
-    cy.get('mat-dialog-container').within(_ => {
+    cy.get('mat-dialog-container').within((_) => {
       cy.contains('button', 'Yes').click();
     });
 
     cy.get('app-instance-group-logo').parent().find('button').contains('more_vert').click();
     cy.get('button[role=menuitem]').contains('Configure Applications').click();
 
-    cy.contains('app-application-descriptor-card', 'Server Application').within(_ => {
+    cy.contains('app-application-descriptor-card', 'Server Application').within((_) => {
       cy.contains('mat-select', 'Choose Application Template').click();
     });
 
     cy.screenshot('BDeploy_Application_Template_Choose');
     cy.contains('mat-option', 'Server With Sleep').click();
 
-    cy.getNodeCard('master').contains('Drop server application here').should('be.visible').then(el => {
-      cy.contains('app-application-descriptor-card', 'Server Application').dragTo(el);
-    })
+    cy.getNodeCard('master')
+      .contains('Drop server application here')
+      .should('be.visible')
+      .then((el) => {
+        cy.contains('app-application-descriptor-card', 'Server Application').dragTo(el);
+      });
 
-    cy.get('mat-dialog-container').within(_ => {
+    cy.get('mat-dialog-container').within((_) => {
       cy.get('[data-placeholder="Sleep Timeout"]').clear().type('100');
       cy.screenshot('BDeploy_Application_Template_Variables', { padding: 20 });
       cy.contains('button', 'Apply').click();
@@ -94,7 +97,7 @@ describe('Instance Tests', function () {
     cy.screenshot('BDeploy_Application_Template_Process');
 
     cy.contains('button', 'SAVE').click();
-  })
+  });
 
   /**
    * Delete the instance and the group
@@ -102,5 +105,5 @@ describe('Instance Tests', function () {
   it('Delete the instance', function () {
     cy.deleteInstance('Test', instanceUuid);
     cy.deleteInstanceGroup('Test');
-  })
-})
+  });
+});

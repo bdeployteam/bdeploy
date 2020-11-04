@@ -1,7 +1,6 @@
 @import '~@angular/material/theming';
 
 @mixin instance-group-add-edit-theme($theme) {
-
   $dark: map-get($theme, 'is-dark');
 
   $palette: map-get($theme, 'main-toolbar');
@@ -10,11 +9,10 @@
     background-color: mat-color($palette);
     color: mat-color($palette, default-contrast);
 
-    transition: background-color .4s cubic-bezier(.25,.8,.25,1),color .4s cubic-bezier(.25,.8,.25,1)
+    transition: background-color 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), color 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   }
 
   .logo-container {
     background-color: if($dark, mat-color($mat-grey, 700), mat-color($mat-grey, 200));
   }
-
 }

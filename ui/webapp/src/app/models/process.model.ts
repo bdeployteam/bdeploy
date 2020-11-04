@@ -2,7 +2,17 @@ import { cloneDeep } from 'lodash-es';
 import { getAppKeyName } from '../modules/shared/utils/manifest.utils';
 import { ApplicationGroup } from './application.model';
 import { CLIENT_NODE_NAME, EMPTY_INSTANCE_NODE_CONFIGURATION, EMPTY_INSTANCE_NODE_CONFIGURATION_DTO } from './consts';
-import { ApplicationConfiguration, ApplicationDto, ApplicationType, InstanceConfiguration, InstanceNodeConfigurationDto, InstanceNodeConfigurationListDto, InstanceVersionDto, ManifestKey, MinionDto } from './gen.dtos';
+import {
+  ApplicationConfiguration,
+  ApplicationDto,
+  ApplicationType,
+  InstanceConfiguration,
+  InstanceNodeConfigurationDto,
+  InstanceNodeConfigurationListDto,
+  InstanceVersionDto,
+  ManifestKey,
+  MinionDto
+} from './gen.dtos';
 
 /**
  * Context information for EventEmitter
@@ -11,7 +21,7 @@ export class EditAppConfigContext {
   constructor(
     public instanceNodeConfigurationDto: InstanceNodeConfigurationDto,
     public applicationConfiguration: ApplicationConfiguration,
-    public product: ManifestKey,
+    public product: ManifestKey
   ) {}
 }
 
@@ -88,7 +98,7 @@ export class ProcessConfigDto {
   /**
    * Sets the node configurations of this configuration.
    */
-  public setNodeList(nodeList: InstanceNodeConfigurationListDto, minions: {[minionName: string]: MinionDto}) {
+  public setNodeList(nodeList: InstanceNodeConfigurationListDto, minions: { [minionName: string]: MinionDto }) {
     this.nodeList = nodeList;
     this.initClientApplicationNode();
     this.nodeList.nodeConfigDtos = this.sortNodeConfigs(nodeList.nodeConfigDtos, minions);
@@ -99,7 +109,10 @@ export class ProcessConfigDto {
    * Returns a sorted list of node configurations.
    * Master is always the first entry. Client node is always the last one
    */
-  sortNodeConfigs(configs: InstanceNodeConfigurationDto[], minions: {[minionName: string]: MinionDto}): InstanceNodeConfigurationDto[] {
+  sortNodeConfigs(
+    configs: InstanceNodeConfigurationDto[],
+    minions: { [minionName: string]: MinionDto }
+  ): InstanceNodeConfigurationDto[] {
     configs.sort((a, b) => {
       // Sort clients last
       if (a.nodeName === CLIENT_NODE_NAME) {
@@ -107,13 +120,13 @@ export class ProcessConfigDto {
       } else if (b.nodeName === CLIENT_NODE_NAME) {
         return -1;
       }
-     // Sort by name
+      // Sort by name
       const minionA = minions[a.nodeName];
       const minionB = minions[b.nodeName];
       if (minionA && minionB && minionA.master === minionB.master) {
         return a.nodeName.toLocaleLowerCase().localeCompare(b.nodeName.toLocaleLowerCase());
       }
-      return (minionA && minionA.master) ? -1 : 1;
+      return minionA && minionA.master ? -1 : 1;
     });
     return configs;
   }
@@ -149,7 +162,7 @@ export class ProcessConfigDto {
   }
 
   initClientApplicationNode(): void {
-    let clientApplicationsNode = this.nodeList.nodeConfigDtos.find(dto => dto.nodeName === CLIENT_NODE_NAME);
+    let clientApplicationsNode = this.nodeList.nodeConfigDtos.find((dto) => dto.nodeName === CLIENT_NODE_NAME);
     if (!clientApplicationsNode) {
       clientApplicationsNode = cloneDeep(EMPTY_INSTANCE_NODE_CONFIGURATION_DTO);
       clientApplicationsNode.nodeName = CLIENT_NODE_NAME;

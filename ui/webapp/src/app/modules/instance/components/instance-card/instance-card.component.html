@@ -1,42 +1,74 @@
-<mat-card [ngClass]="['instance-card', 'instance-card-' + instanceDto.instanceConfiguration.purpose]"
-    [routerLink]="['/instance/overview', instanceGroupName, instanceDto.instanceConfiguration.uuid]" attr.data-cy='instance-{{instanceDto.instanceConfiguration.uuid}}'>
+<mat-card
+  [ngClass]="['instance-card', 'instance-card-' + instanceDto.instanceConfiguration.purpose]"
+  [routerLink]="['/instance/overview', instanceGroupName, instanceDto.instanceConfiguration.uuid]"
+  attr.data-cy="instance-{{ instanceDto.instanceConfiguration.uuid }}"
+>
   <mat-card-header>
-    <app-instance-group-logo mat-card-avatar [instanceGroup]='instanceGroup'></app-instance-group-logo>
-    <mat-card-title>{{instanceDto.instanceConfiguration.name}}</mat-card-title>
-    <mat-card-subtitle>Instance ({{instanceDto.instanceConfiguration.uuid}})</mat-card-subtitle>
+    <app-instance-group-logo mat-card-avatar [instanceGroup]="instanceGroup"></app-instance-group-logo>
+    <mat-card-title>{{ instanceDto.instanceConfiguration.name }}</mat-card-title>
+    <mat-card-subtitle>Instance ({{ instanceDto.instanceConfiguration.uuid }})</mat-card-subtitle>
     <span class="fill-space"></span>
     <mat-menu #appMenu="matMenu" xPosition="before">
-      <button mat-menu-item [routerLink]="['/instance/edit', instanceGroupName, instanceDto.instanceConfiguration.uuid]" [disabled]="!authService.isScopedAdmin(instanceGroupName)"><mat-icon>edit</mat-icon>Edit</button>
-      <button mat-menu-item (click)="delete()" [disabled]="!authService.isScopedAdmin(instanceGroupName)"><mat-icon>delete</mat-icon>Delete</button>
+      <button
+        mat-menu-item
+        [routerLink]="['/instance/edit', instanceGroupName, instanceDto.instanceConfiguration.uuid]"
+        [disabled]="!authService.isScopedAdmin(instanceGroupName)"
+      >
+        <mat-icon>edit</mat-icon>Edit
+      </button>
+      <button mat-menu-item (click)="delete()" [disabled]="!authService.isScopedAdmin(instanceGroupName)">
+        <mat-icon>delete</mat-icon>Delete
+      </button>
     </mat-menu>
     <button class="option-button" mat-icon-button [matMenuTriggerFor]="appMenu" appClickStopPropagation>
       <mat-icon>more_vert</mat-icon>
     </button>
   </mat-card-header>
   <mat-card-content>
-    <div class='intance-card-row'>
-    <div class='info-grid'>
-      {{instanceDto.instanceConfiguration.description}}
-      <div class='product-info'>
-        <span *ngIf='instanceDto.productDto'>Product: <strong [matTooltip]='instanceDto.productDto.name'>{{instanceDto.productDto.name}}</strong></span>
-        <span *ngIf='!instanceDto.productDto'>Product: <strong>{{instanceDto.instanceConfiguration.product.name}}</strong></span>
+    <div class="intance-card-row">
+      <div class="info-grid">
+        {{ instanceDto.instanceConfiguration.description }}
+        <div class="product-info">
+          <span *ngIf="instanceDto.productDto"
+            >Product:
+            <strong [matTooltip]="instanceDto.productDto.name">{{ instanceDto.productDto.name }}</strong></span
+          >
+          <span *ngIf="!instanceDto.productDto"
+            >Product: <strong>{{ instanceDto.instanceConfiguration.product.name }}</strong></span
+          >
 
-        <span *ngIf='instanceDto.activeProduct'>&nbsp;
-          Active Product Version: <strong>{{instanceDto.activeProduct.tag}}</strong>&nbsp;
-          <span *ngIf='!instanceDto.activeProductDto' class="product-unavailable" matTooltip="Required product version is not available.">N/A</span>
-        </span>
+          <span *ngIf="instanceDto.activeProduct"
+            >&nbsp; Active Product Version: <strong>{{ instanceDto.activeProduct.tag }}</strong
+            >&nbsp;
+            <span
+              *ngIf="!instanceDto.activeProductDto"
+              class="product-unavailable"
+              matTooltip="Required product version is not available."
+              >N/A</span
+            >
+          </span>
 
-        <span *ngIf='!instanceDto.activeProduct'>&nbsp;
-          Product Version: <strong>{{instanceDto.instanceConfiguration.product.tag}}</strong>&nbsp;
-          <span *ngIf='!instanceDto.productDto' class="product-unavailable" matTooltip="Required product version is not available.">N/A</span>
-        </span>
+          <span *ngIf="!instanceDto.activeProduct"
+            >&nbsp; Product Version: <strong>{{ instanceDto.instanceConfiguration.product.tag }}</strong
+            >&nbsp;
+            <span
+              *ngIf="!instanceDto.productDto"
+              class="product-unavailable"
+              matTooltip="Required product version is not available."
+              >N/A</span
+            >
+          </span>
 
-        <mat-icon *ngIf="instanceDto.newerVersionAvailable" matTooltip='A newer product version is available'>system_update</mat-icon>
-
+          <mat-icon *ngIf="instanceDto.newerVersionAvailable" matTooltip="A newer product version is available"
+            >system_update</mat-icon
+          >
+        </div>
       </div>
+      <div class="fill-space"></div>
+      <app-instance-sync
+        [instanceGroup]="instanceGroupName"
+        [instance]="instanceDto.instanceConfiguration.uuid"
+      ></app-instance-sync>
     </div>
-    <div class='fill-space'></div>
-    <app-instance-sync [instanceGroup]='instanceGroupName' [instance]='instanceDto.instanceConfiguration.uuid'></app-instance-sync>
-  </div>
-</mat-card-content>
+  </mat-card-content>
 </mat-card>

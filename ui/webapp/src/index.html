@@ -1,41 +1,38 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>BDeploy</title>
-  <base href="/">
+  <head>
+    <meta charset="utf-8" />
+    <title>BDeploy</title>
+    <base href="/" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="assets/logo.ico">
-  <script lang="javascript">
-    // used in download.service.ts
-    var downloadLocation = {
-      // used when assigning the target URL to the browser location directly
-      assign: function(loc) {
-        window.location.href = loc;
-      },
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/x-icon" href="assets/logo.ico" />
+    <script lang="javascript">
+      // used in download.service.ts
+      var downloadLocation = {
+        // used when assigning the target URL to the browser location directly
+        assign: function(loc) {
+          window.location.href = loc;
+        },
 
-      // used when clicking a temporary link element to download a blob from browser's memory.
-      click: function(link) {
-        link.click();
-      }
-    };
-  </script>
+        // used when clicking a temporary link element to download a blob from browser's memory.
+        click: function(link) {
+          link.click();
+        }
+      };
+    </script>
 
-  <link rel="stylesheet" type="text/css" href="bootstrap.css">
-  <script src="browsercheck.js"></script>
-
-</head>
-<body>
-  <app-root>
-
+    <link rel="stylesheet" type="text/css" href="bootstrap.css" />
+    <script src="browsercheck.js"></script>
+  </head>
+  <body>
+    <app-root>
       <div class="loader-logo"></div>
       <div class="loader">
         <div class="inner one"></div>
         <div class="inner two"></div>
         <div class="inner three"></div>
       </div>
-
-  </app-root>
-</body>
+    </app-root>
+  </body>
 </html>

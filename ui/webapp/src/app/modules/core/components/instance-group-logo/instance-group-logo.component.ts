@@ -7,10 +7,9 @@ import { Logger, LoggingService } from '../../services/logging.service';
 @Component({
   selector: 'app-instance-group-logo',
   templateUrl: './instance-group-logo.component.html',
-  styleUrls: ['./instance-group-logo.component.css']
+  styleUrls: ['./instance-group-logo.component.css'],
 })
 export class InstanceGroupLogoComponent implements OnChanges {
-
   log: Logger = this.loggingService.getLogger('InstanceGroupLogoComponent');
 
   private LOADING_IMG = this.sanitizer.bypassSecurityTrustStyle('url("/assets/loading.svg")');
@@ -23,7 +22,8 @@ export class InstanceGroupLogoComponent implements OnChanges {
   constructor(
     private loggingService: LoggingService,
     private instanceGroupService: InstanceGroupService,
-    private sanitizer: DomSanitizer) { }
+    private sanitizer: DomSanitizer
+  ) {}
 
   ngOnChanges() {
     if (!this.instanceGroup) {

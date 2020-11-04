@@ -1,36 +1,74 @@
 <mat-toolbar class="mat-elevation-z1 header-toolbar">
-  <button mat-icon-button type="button" (click)="routingHistoryService.back('/instancegroup/browser')"><mat-icon>chevron_left</mat-icon></button>
-  <span>Instance Group: <app-instance-group-title [instanceGroup]='instanceGroupName'></app-instance-group-title></span>
+  <button mat-icon-button type="button" (click)="routingHistoryService.back('/instancegroup/browser')">
+    <mat-icon>chevron_left</mat-icon>
+  </button>
+  <span>Instance Group: <app-instance-group-title [instanceGroup]="instanceGroupName"></app-instance-group-title></span>
   <span class="fill-space"></span>
   <app-custom-attribute-grouping-selector
     [label]="'Group by Attribute'"
     [sessionStorageBaseId]="'InstanceBrowser' + instanceGroupName"
     [possibleAttributes]="instanceGroup?.instanceAttributes"
     [possibleAttributesValuesMap]="instancesAttributes"
-    (attributeSelection)="groupAttribute=$event"
-    (valuesSelection)="groupAttributeValuesSelected= $event"
+    (attributeSelection)="groupAttribute = $event"
+    (valuesSelection)="groupAttributeValuesSelected = $event"
   ></app-custom-attribute-grouping-selector>
   <mat-form-field class="search">
     <mat-label></mat-label>
-    <input matInput type="text" hint="Filter" [(ngModel)]="instanceDtoList.searchString" (ngModelChange)="instanceDtoList.applyFilter()">
+    <input
+      matInput
+      type="text"
+      hint="Filter"
+      [(ngModel)]="instanceDtoList.searchString"
+      (ngModelChange)="instanceDtoList.applyFilter()"
+    />
     <mat-icon matSuffix>search</mat-icon>
   </mat-form-field>
-  <div class='vert-speparator'></div>
-  <app-remote-progress [scope]='[instanceGroupName]'></app-remote-progress>
+  <div class="vert-speparator"></div>
+  <app-remote-progress [scope]="[instanceGroupName]"></app-remote-progress>
   <mat-menu #appMenu="matMenu" xPosition="before">
-    <div [matTooltip]='isManaged() ? "Editing of instance group information must be done on the controlling central server" : ""'>
-      <button mat-menu-item [routerLink]="['/instancegroup/edit', instanceGroupName]" [disabled]='isManaged() || !authService.isScopedAdmin(this.instanceGroupName)'><mat-icon>edit</mat-icon>Edit</button>
+    <div
+      [matTooltip]="
+        isManaged() ? 'Editing of instance group information must be done on the controlling central server' : ''
+      "
+    >
+      <button
+        mat-menu-item
+        [routerLink]="['/instancegroup/edit', instanceGroupName]"
+        [disabled]="isManaged() || !authService.isScopedAdmin(this.instanceGroupName)"
+      >
+        <mat-icon>edit</mat-icon>Edit
+      </button>
       <mat-divider></mat-divider>
     </div>
-    <button mat-menu-item [routerLink]="['/admin/all', {outlets: { panel: ['hive', {hive: instanceGroupName}] } }]" [disabled]="!authService.isGlobalAdmin()"><mat-icon>sd_storage</mat-icon>Hive</button>
-    <button mat-menu-item [routerLink]="['/instancegroup/products', instanceGroupName]"><mat-icon>apps</mat-icon>Products</button>
-    <button mat-menu-item [routerLink]="['/instancegroup/clientapps', instanceGroupName]"><mat-icon>computer</mat-icon>Client Applications</button>
-    <button mat-menu-item [routerLink]="['/instancegroup/permissions', instanceGroupName]" [disabled]="!authService.isScopedAdmin(this.instanceGroupName)">
+    <button
+      mat-menu-item
+      [routerLink]="['/admin/all', { outlets: { panel: ['hive', { hive: instanceGroupName }] } }]"
+      [disabled]="!authService.isGlobalAdmin()"
+    >
+      <mat-icon>sd_storage</mat-icon>Hive
+    </button>
+    <button mat-menu-item [routerLink]="['/instancegroup/products', instanceGroupName]">
+      <mat-icon>apps</mat-icon>Products
+    </button>
+    <button mat-menu-item [routerLink]="['/instancegroup/clientapps', instanceGroupName]">
+      <mat-icon>computer</mat-icon>Client Applications
+    </button>
+    <button
+      mat-menu-item
+      [routerLink]="['/instancegroup/permissions', instanceGroupName]"
+      [disabled]="!authService.isScopedAdmin(this.instanceGroupName)"
+    >
       <mat-icon>security</mat-icon>Permissions
     </button>
-    <ng-container *ngIf='isCentral()'>
-        <mat-divider></mat-divider>
-        <button mat-menu-item [routerLink]="['/servers/browser', instanceGroupName]" [disabled]="!authService.isScopedAdmin(this.instanceGroupName)"><mat-icon>dns</mat-icon>Managed Servers</button>
+    <ng-container *ngIf="isCentral()">
+      <mat-divider></mat-divider>
+      <button
+        mat-menu-item
+        [routerLink]="['/servers/browser', instanceGroupName]"
+        [disabled]="!authService.isScopedAdmin(this.instanceGroupName)"
+      >
+        <mat-icon>dns</mat-icon>Managed Servers
+      </button>
     </ng-container>
   </mat-menu>
   <button class="option-button" mat-icon-button [matMenuTriggerFor]="appMenu" appClickStopPropagation>
@@ -44,10 +82,15 @@
 <ng-container *ngIf="!loading">
   <div *ngIf="!hasProducts && instanceDtoList.isEmpty()" class="list-heading center">
     <p>
-      <span class="headerText">No products are available in this instance group. Start by uploading a new one so that a new instance can be created.</span>
+      <span class="headerText"
+        >No products are available in this instance group. Start by uploading a new one so that a new instance can be
+        created.</span
+      >
     </p>
     <p>
-      <button class="headerText" mat-raised-button [routerLink]="['/instancegroup/products', instanceGroupName]"><mat-icon>apps</mat-icon>Manage Products</button>
+      <button class="headerText" mat-raised-button [routerLink]="['/instancegroup/products', instanceGroupName]">
+        <mat-icon>apps</mat-icon>Manage Products
+      </button>
     </p>
   </div>
   <div *ngIf="hasProducts && instanceDtoList.isEmpty()" class="list-heading center">
@@ -55,17 +98,23 @@
       <span class="headerText">No instances have been defined yet.</span>
     </p>
     <p>
-      <button class="headerButton" mat-raised-button [routerLink]="['/instance/add', instanceGroupName]"><mat-icon>add</mat-icon> Add Instance</button>
+      <button class="headerButton" mat-raised-button [routerLink]="['/instance/add', instanceGroupName]">
+        <mat-icon>add</mat-icon> Add Instance
+      </button>
     </p>
   </div>
 
   <ng-container *ngIf="groupAttribute">
     <div *ngFor="let attrValue of groupAttributeValuesSelected">
-      <div class="list-grouping"> {{attrValue ? attrValue : "(empty)"}} </div>
+      <div class="list-grouping">{{ attrValue ? attrValue : '(empty)' }}</div>
       <div *ngFor="let purpose of getPurposes(attrValue)">
-        <p class="list-heading">{{purpose}}</p>
+        <p class="list-heading">{{ purpose }}</p>
         <div class="card" *ngFor="let instanceDto of getInstanceDtos(attrValue, purpose)">
-          <app-instance-card [instanceDto]='instanceDto' [instanceGroupName]='instanceGroupName' (removeEvent)='remove()'></app-instance-card>
+          <app-instance-card
+            [instanceDto]="instanceDto"
+            [instanceGroupName]="instanceGroupName"
+            (removeEvent)="remove()"
+          ></app-instance-card>
         </div>
       </div>
     </div>
@@ -73,14 +122,25 @@
 
   <ng-container *ngIf="!groupAttribute">
     <div *ngFor="let purpose of purposes">
-      <p class="list-heading">{{purpose}}</p>
-      <div  class="card" *ngFor="let instanceDto of getInstanceDtos(null, purpose)">
-        <app-instance-card [instanceDto]='instanceDto' [instanceGroupName]='instanceGroupName' (removeEvent)='remove()'></app-instance-card>
+      <p class="list-heading">{{ purpose }}</p>
+      <div class="card" *ngFor="let instanceDto of getInstanceDtos(null, purpose)">
+        <app-instance-card
+          [instanceDto]="instanceDto"
+          [instanceGroupName]="instanceGroupName"
+          (removeEvent)="remove()"
+        ></app-instance-card>
       </div>
     </div>
   </ng-container>
 </ng-container>
 
-<button mat-fab class="add-button" [routerLink]="['/instance/add', instanceGroupName]" [disabled]="!authService.isScopedAdmin(instanceGroupName) || !hasProducts" matTooltip="Add Instance" matTooltipShowDelay="1000">
+<button
+  mat-fab
+  class="add-button"
+  [routerLink]="['/instance/add', instanceGroupName]"
+  [disabled]="!authService.isScopedAdmin(instanceGroupName) || !hasProducts"
+  matTooltip="Add Instance"
+  matTooltipShowDelay="1000"
+>
   <mat-icon>add</mat-icon>
 </button>

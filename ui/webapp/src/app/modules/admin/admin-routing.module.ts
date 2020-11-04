@@ -18,7 +18,7 @@ const ADMIN_ROUTES: Route[] = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'all'
+    redirectTo: 'all',
   },
   {
     path: 'all',
@@ -27,8 +27,18 @@ const ADMIN_ROUTES: Route[] = [
       { path: '', pathMatch: 'full', redirectTo: 'general', outlet: 'panel' },
       { path: 'general', component: SettingsGeneralComponent, canDeactivate: [CanDeactivateGuard], outlet: 'panel' },
       { path: 'plugins', component: PluginsBrowserComponent, outlet: 'panel' },
-      { path: 'instancegroup', component: SettingsInstanceGroupComponent, canDeactivate: [CanDeactivateGuard], outlet: 'panel' },
-      { path: 'authentication', component: SettingsAuthComponent, canDeactivate: [CanDeactivateGuard], outlet: 'panel' },
+      {
+        path: 'instancegroup',
+        component: SettingsInstanceGroupComponent,
+        canDeactivate: [CanDeactivateGuard],
+        outlet: 'panel',
+      },
+      {
+        path: 'authentication',
+        component: SettingsAuthComponent,
+        canDeactivate: [CanDeactivateGuard],
+        outlet: 'panel',
+      },
       { path: 'users', component: UsersBrowserComponent, canDeactivate: [CanDeactivateGuard], outlet: 'panel' },
       { path: 'hive', component: HiveBrowserComponent, outlet: 'panel' },
       { path: 'hiveauditlogs', component: HiveAuditLogsBrowserComponent, outlet: 'panel' },
@@ -36,7 +46,7 @@ const ADMIN_ROUTES: Route[] = [
       { path: 'manualcleanup', component: MasterCleanupComponent, outlet: 'panel' },
       { path: 'metrics', component: MetricsOverviewComponent, outlet: 'panel' },
       { path: 'auditlogs', component: AuditLogsBrowserComponent, outlet: 'panel' },
-    ]
+    ],
   },
 ];
 
@@ -44,4 +54,4 @@ const ADMIN_ROUTES: Route[] = [
   imports: [RouterModule.forChild(ADMIN_ROUTES)],
   exports: [RouterModule],
 })
-export class AdminRoutingModule { }
+export class AdminRoutingModule {}

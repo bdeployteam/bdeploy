@@ -1,34 +1,59 @@
 <section class="mat-typography dialog">
   <form [formGroup]="instanceGroupFormGroup" (ngSubmit)="onSubmit()">
     <mat-toolbar class="mat-elevation-z1 header-toolbar">
-      <button mat-icon-button type="button" [disabled]="loading" (click)="routingHistoryService.back('instancegroup/browser')"><mat-icon>chevron_left</mat-icon></button>
-      <span *ngIf="isCreate() == false">Instance Group: <app-instance-group-title [instanceGroup]='nameParam'></app-instance-group-title></span>
+      <button
+        mat-icon-button
+        type="button"
+        [disabled]="loading"
+        (click)="routingHistoryService.back('instancegroup/browser')"
+      >
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <span *ngIf="isCreate() == false"
+        >Instance Group: <app-instance-group-title [instanceGroup]="nameParam"></app-instance-group-title
+      ></span>
       <span class="fill-space"></span>
-      <button mat-raised-button color="primary" type="submit" [disabled]="loading || !isModified() || !instanceGroupFormGroup.valid">SAVE</button>
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        [disabled]="loading || !isModified() || !instanceGroupFormGroup.valid"
+      >
+        SAVE
+      </button>
     </mat-toolbar>
 
     <div class="box margin-container">
       <div class="logo-container">
         <div class="logo-title-container">
           <span class="logo-title">Logo</span>
-          <button mat-icon-button class="logo-button" type="button" [disabled]="loading" (click)="fileInput.click()"><mat-icon>folder_open</mat-icon></button>
-          <button mat-icon-button class="logo-button" type="button" [disabled]="loading" (click)="deleteLogo()"><mat-icon>delete</mat-icon></button>
-          <input type="file" hidden (change)="onLogoChange($event)" #fileInput>
+          <button mat-icon-button class="logo-button" type="button" [disabled]="loading" (click)="fileInput.click()">
+            <mat-icon>folder_open</mat-icon>
+          </button>
+          <button mat-icon-button class="logo-button" type="button" [disabled]="loading" (click)="deleteLogo()">
+            <mat-icon>delete</mat-icon>
+          </button>
+          <input type="file" hidden (change)="onLogoChange($event)" #fileInput />
         </div>
 
         <div class="logo-preview-container">
-          <img class="logo" [src]="getLogoUrl()" alt='logo' *ngIf="getLogoUrl() != null">
-          <img class="logo-dummy" src="/assets/no-image.svg" alt='logo' *ngIf="getLogoUrl() == null">
-          <p *ngIf="getLogoUrl() == null">No logo defined </p>
+          <img class="logo" [src]="getLogoUrl()" alt="logo" *ngIf="getLogoUrl() != null" />
+          <img class="logo-dummy" src="/assets/no-image.svg" alt="logo" *ngIf="getLogoUrl() == null" />
+          <p *ngIf="getLogoUrl() == null">No logo defined</p>
         </div>
       </div>
 
-      <mat-grid-list cols="4" rowHeight="5em" gutterSize='10px' class="fields-container">
+      <mat-grid-list cols="4" rowHeight="5em" gutterSize="10px" class="fields-container">
         <mat-grid-tile colspan="3">
           <mat-form-field>
-            <input class="input-field" matInput [readonly]="!isCreate()"
-              formControlName="name" placeholder="Instance group ID (Cannot be changed after creation!)" />
-            <mat-error *ngIf="nameControl.invalid">{{getErrorMessage(nameControl)}}</mat-error>
+            <input
+              class="input-field"
+              matInput
+              [readonly]="!isCreate()"
+              formControlName="name"
+              placeholder="Instance group ID (Cannot be changed after creation!)"
+            />
+            <mat-error *ngIf="nameControl.invalid">{{ getErrorMessage(nameControl) }}</mat-error>
           </mat-form-field>
         </mat-grid-tile>
 
@@ -37,9 +62,9 @@
             <mat-card class="info-card">
               <div class="mat-title">Automatically cleanup unused product versions</div>
               <mat-card-content>
-                If this option is enabled, old product versions that are no<br>
-                longer in use by instances of this instance group are deleted<br>
-                automatically. To avoid that a product vanishes completely,<br>
+                If this option is enabled, old product versions that are no<br />
+                longer in use by instances of this instance group are deleted<br />
+                automatically. To avoid that a product vanishes completely,<br />
                 the very latest product version always remains.
               </mat-card-content>
             </mat-card>
@@ -57,58 +82,76 @@
 
         <mat-grid-tile colspan="4">
           <mat-form-field>
-            <input class="input-field" matInput
-              formControlName="title" placeholder="Display Title" />
-            <mat-error *ngIf="titleControl.invalid">{{getErrorMessage(titleControl)}}</mat-error>
+            <input class="input-field" matInput formControlName="title" placeholder="Display Title" />
+            <mat-error *ngIf="titleControl.invalid">{{ getErrorMessage(titleControl) }}</mat-error>
           </mat-form-field>
         </mat-grid-tile>
         <mat-grid-tile colspan="4">
           <mat-form-field>
-            <input class="input-field" matInput
-              formControlName="description" placeholder="Description" />
-            <mat-error *ngIf="descriptionControl.invalid">{{getErrorMessage(descriptionControl)}}</mat-error>
+            <input class="input-field" matInput formControlName="description" placeholder="Description" />
+            <mat-error *ngIf="descriptionControl.invalid">{{ getErrorMessage(descriptionControl) }}</mat-error>
           </mat-form-field>
         </mat-grid-tile>
       </mat-grid-list>
     </div>
 
-    <mat-tab-group class='tab-container margin-container' dynamicHeight='true'>
-      <mat-tab label='Instance Group Attributes'>
-        <div class='tab-content'>
+    <mat-tab-group class="tab-container margin-container" dynamicHeight="true">
+      <mat-tab label="Instance Group Attributes">
+        <div class="tab-content">
           <p>
             Attributes as defined on system level.
           </p>
-          <div class='attributes-grid'>
-            <ng-container *ngFor='let a of getSortedInstanceGroupAttributeKeys()'>
-              <div>{{a}}</div>
-              <div>{{instanceGroupAttributes?.attributes[a]}}</div>
-              <div><button mat-icon-button type='button' (click)='editInstanceGroupAttribute(a)'><mat-icon>edit</mat-icon></button></div>
-              <div><button mat-icon-button type='button' (click)='removeInstanceGroupAttribute(a)'><mat-icon>delete</mat-icon></button></div>
+          <div class="attributes-grid">
+            <ng-container *ngFor="let a of getSortedInstanceGroupAttributeKeys()">
+              <div>{{ a }}</div>
+              <div>{{ (instanceGroupAttributes?.attributes)[a] }}</div>
+              <div>
+                <button mat-icon-button type="button" (click)="editInstanceGroupAttribute(a)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
+              <div>
+                <button mat-icon-button type="button" (click)="removeInstanceGroupAttribute(a)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
             </ng-container>
           </div>
-          <div *ngIf='!hasInstanceGroupAttributes()'>
+          <div *ngIf="!hasInstanceGroupAttributes()">
             No Attributes have been configured yet.
           </div>
-          <button mat-mini-fab style='align-self: flex-end;' type='button' (click)='addInstanceGroupAttribute()'><mat-icon>add</mat-icon></button>
+          <button mat-mini-fab style="align-self: flex-end;" type="button" (click)="addInstanceGroupAttribute()">
+            <mat-icon>add</mat-icon>
+          </button>
         </div>
       </mat-tab>
-      <mat-tab label='Instance Attribute Definitions'>
-        <div class='tab-content'>
+      <mat-tab label="Instance Attribute Definitions">
+        <div class="tab-content">
           <p>
             Configure attributes that are available for all Instances of this Instance Group.
           </p>
-          <div class='attributes-grid'>
-            <ng-container *ngFor='let a of instanceAttributesDescriptors; let i = index'>
-              <div>{{a.name}}</div>
-              <div>{{a.description}}</div>
-              <div><button mat-icon-button type='button' (click)='editInstanceAttribute(a, i)'><mat-icon>edit</mat-icon></button></div>
-              <div><button mat-icon-button type='button' (click)='removeInstanceAttribute(i)'><mat-icon>delete</mat-icon></button></div>
+          <div class="attributes-grid">
+            <ng-container *ngFor="let a of instanceAttributesDescriptors; let i = index">
+              <div>{{ a.name }}</div>
+              <div>{{ a.description }}</div>
+              <div>
+                <button mat-icon-button type="button" (click)="editInstanceAttribute(a, i)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
+              <div>
+                <button mat-icon-button type="button" (click)="removeInstanceAttribute(i)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
             </ng-container>
           </div>
-          <div *ngIf='!instanceAttributesDescriptors.length'>
+          <div *ngIf="!instanceAttributesDescriptors.length">
             No Attributes have been configured yet.
           </div>
-          <button mat-mini-fab style='align-self: flex-end;' type='button' (click)='addInstanceAttribute()'><mat-icon>add</mat-icon></button>
+          <button mat-mini-fab style="align-self: flex-end;" type="button" (click)="addInstanceAttribute()">
+            <mat-icon>add</mat-icon>
+          </button>
         </div>
       </mat-tab>
     </mat-tab-group>

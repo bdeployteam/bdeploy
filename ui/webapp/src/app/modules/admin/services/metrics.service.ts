@@ -5,11 +5,10 @@ import { JerseyServerMonitoringDto } from 'src/app/models/gen.dtos';
 import { ConfigService } from '../../core/services/config.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class MetricsService {
-
-  constructor(private http: HttpClient, private config: ConfigService) { }
+  constructor(private http: HttpClient, private config: ConfigService) {}
 
   public getAllMetrics(): Observable<any> {
     return this.http.get<any>(this.config.config.api + '/metrics');
@@ -18,5 +17,4 @@ export class MetricsService {
   public getServerMetrics(): Observable<JerseyServerMonitoringDto> {
     return this.http.get<any>(this.config.config.api + '/server-monitor');
   }
-
 }

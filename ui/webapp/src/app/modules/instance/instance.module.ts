@@ -94,14 +94,6 @@ import { InstanceRoutingModule } from './instance-routing.module';
     ProcessStartConfirmComponent,
     InstanceBannerEditComponent,
   ],
-  imports: [
-    CommonModule,
-    SharedModule,
-    CoreModule,
-    InstanceRoutingModule,
-    PortalModule,
-
-    DragulaModule.forRoot(),
-  ]
+  imports: [CommonModule, SharedModule, CoreModule, InstanceRoutingModule, PortalModule, DragulaModule.forRoot()],
 })
-export class InstanceModule { }
+export class InstanceModule {}

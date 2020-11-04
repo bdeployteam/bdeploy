@@ -1,6 +1,8 @@
 <mat-toolbar class="mat-elevation-z1 header-toolbar">
-  <button mat-icon-button type="button" (click)="routingHistoryService.back('instance/browser/'+instanceGroupName)"><mat-icon>chevron_left</mat-icon></button>
-  <span>Instance Group: <app-instance-group-title [instanceGroup]='instanceGroupName'></app-instance-group-title></span>
+  <button mat-icon-button type="button" (click)="routingHistoryService.back('instance/browser/' + instanceGroupName)">
+    <mat-icon>chevron_left</mat-icon>
+  </button>
+  <span>Instance Group: <app-instance-group-title [instanceGroup]="instanceGroupName"></app-instance-group-title></span>
 </mat-toolbar>
 
 <div *ngIf="loading" class="loading-container">
@@ -12,25 +14,31 @@
     <p>
       <span class="headerText">No managed servers are attached to this instance group.</span>
     </p>
-      <button mat-raised-button [routerLink]="['/servers/attach/managed', instanceGroupName]"><mat-icon>link</mat-icon>Attach Managed Server</button>
+    <button mat-raised-button [routerLink]="['/servers/attach/managed', instanceGroupName]">
+      <mat-icon>link</mat-icon>Attach Managed Server
+    </button>
   </div>
   <div *ngIf="managedServers && managedServers.length > 0" class="content-container">
-    <mat-accordion multi='true'>
-      <mat-expansion-panel *ngFor='let server of managedServers' expanded='true'>
+    <mat-accordion multi="true">
+      <mat-expansion-panel *ngFor="let server of managedServers" expanded="true">
         <mat-expansion-panel-header>
-          <mat-panel-title class='header-title'>
-            {{server.hostName}} - {{server.description}}
-          </mat-panel-title>
-          <mat-panel-description class='header-description'>
-            {{server.uri}}
+          <mat-panel-title class="header-title"> {{ server.hostName }} - {{ server.description }} </mat-panel-title>
+          <mat-panel-description class="header-description">
+            {{ server.uri }}
           </mat-panel-description>
         </mat-expansion-panel-header>
         <ng-template matExpansionPanelContent>
-          <app-managed-server-detail [server]='server' [instanceGroupName]='instanceGroupName' (reload)='load()'></app-managed-server-detail>
+          <app-managed-server-detail
+            [server]="server"
+            [instanceGroupName]="instanceGroupName"
+            (reload)="load()"
+          ></app-managed-server-detail>
         </ng-template>
       </mat-expansion-panel>
     </mat-accordion>
   </div>
 </ng-container>
 
-<button mat-fab class="add-button" [routerLink]="['/servers/attach/managed', instanceGroupName]"><mat-icon>add</mat-icon></button>
+<button mat-fab class="add-button" [routerLink]="['/servers/attach/managed', instanceGroupName]">
+  <mat-icon>add</mat-icon>
+</button>

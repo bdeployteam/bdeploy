@@ -10,15 +10,13 @@ import { CustomAttributeEditComponent } from 'src/app/modules/shared/components/
 import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
 import { MessageboxService } from 'src/app/modules/shared/services/messagebox.service';
 
-
 @Component({
   selector: 'app-settings-instance-group',
   templateUrl: './settings-instance-group.component.html',
   styleUrls: ['./settings-instance-group.component.css'],
-  providers: [SettingsService]
+  providers: [SettingsService],
 })
 export class SettingsInstanceGroupComponent implements OnInit {
-
   private log: Logger = this.loggingService.getLogger('SettingsInstanceGroupComponent');
 
   constructor(
@@ -27,10 +25,9 @@ export class SettingsInstanceGroupComponent implements OnInit {
     private loggingService: LoggingService,
     public settings: SettingsService,
     private config: ConfigService
-  ) { }
+  ) {}
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   isAttributesEditable(): boolean {
     return this.config.config.mode !== MinionMode.MANAGED;
@@ -48,27 +45,33 @@ export class SettingsInstanceGroupComponent implements OnInit {
   }
 
   add() {
-    this.dialog.open(CustomAttributeEditComponent, {
-      width: '500px',
-      data: null,
-    }).afterClosed().subscribe(r => {
-      if (r) {
-        this.getAttributes().push(r);
-        this.sortAttributes();
-      }
-    });
+    this.dialog
+      .open(CustomAttributeEditComponent, {
+        width: '500px',
+        data: null,
+      })
+      .afterClosed()
+      .subscribe((r) => {
+        if (r) {
+          this.getAttributes().push(r);
+          this.sortAttributes();
+        }
+      });
   }
 
   edit(attribute: CustomAttributeDescriptor, index: number) {
-    this.dialog.open(CustomAttributeEditComponent, {
-      width: '500px',
-      data: cloneDeep(attribute),
-    }).afterClosed().subscribe(r => {
-      if (r) {
-        this.getAttributes().splice(index, 1, r);
-        this.sortAttributes();
-      }
-    });
+    this.dialog
+      .open(CustomAttributeEditComponent, {
+        width: '500px',
+        data: cloneDeep(attribute),
+      })
+      .afterClosed()
+      .subscribe((r) => {
+        if (r) {
+          this.getAttributes().splice(index, 1, r);
+          this.sortAttributes();
+        }
+      });
   }
 
   remove(index: number) {
@@ -85,8 +88,9 @@ export class SettingsInstanceGroupComponent implements OnInit {
 
   private sortAttributes() {
     if (this.hasAttributes()) {
-      this.settings.getSettings().instanceGroup.attributes = this.settings.getSettings().instanceGroup.attributes.sort((a, b) => a.name.localeCompare(b.name));
+      this.settings.getSettings().instanceGroup.attributes = this.settings
+        .getSettings()
+        .instanceGroup.attributes.sort((a, b) => a.name.localeCompare(b.name));
     }
   }
-
 }

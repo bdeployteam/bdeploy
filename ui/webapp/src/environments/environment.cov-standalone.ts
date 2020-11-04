@@ -5,7 +5,7 @@
 export const environment = {
   production: false,
   apiUrl: 'https://localhost:7711/api',
-  logLevel: 4
+  logLevel: 4,
 };
 
 /*

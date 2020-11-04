@@ -34,11 +34,7 @@ import { PortValidatorDirective } from './validators/port.validator';
     CustomAttributeEditComponent,
     CustomAttributeValueComponent,
   ],
-  imports: [
-    CommonModule,
-    CoreModule,
-    NgTerminalModule,
-  ],
+  imports: [CommonModule, CoreModule, NgTerminalModule],
   exports: [
     RemoteProgressComponent,
     FileViewerComponent,
@@ -50,6 +46,6 @@ import { PortValidatorDirective } from './validators/port.validator';
     CustomAttributeGroupingSelectorComponent,
     ProductCardComponent,
     ProductListComponent,
-  ]
+  ],
 })
-export class SharedModule { }
+export class SharedModule {}

@@ -8,10 +8,9 @@ import { ErrorMessage, Logger, LoggingService } from '../../services/logging.ser
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
+  styleUrls: ['./login.component.css'],
 })
 export class LoginComponent implements OnInit, OnDestroy {
-
   private log: Logger = this.loggingService.getLogger('LoginComponent');
 
   private tokenSubscription: Subscription;
@@ -26,7 +25,6 @@ export class LoginComponent implements OnInit, OnDestroy {
   public loginFailed = false;
   public loginFailedMessage;
 
-
   constructor(
     private loggingService: LoggingService,
     private route: ActivatedRoute,
@@ -35,15 +33,13 @@ export class LoginComponent implements OnInit, OnDestroy {
   ) {}
 
   getErrorMessage(ctrl: FormControl): string {
-    return ctrl.hasError('required')
-      ? 'You must enter a value'
-      : 'Unknown error';
+    return ctrl.hasError('required') ? 'You must enter a value' : 'Unknown error';
   }
 
   ngOnInit(): void {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
 
-    this.tokenSubscription = this.auth.getTokenSubject().subscribe(token => {
+    this.tokenSubscription = this.auth.getTokenSubject().subscribe((token) => {
       if (token !== null) {
         this.router.navigate([this.returnUrl]);
         this.log.debug('auth.token = ' + this.auth.getToken());
@@ -65,22 +61,20 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     this.loading = true;
     this.auth.authenticate(this.username.value, this.password.value).subscribe(
-      result => {
+      (result) => {
         this.log.info('User "' + this.username.value + '" successfully logged in');
         this.loggingService.dismissOpenMessage(); // close any open "error" popup.
       },
-      error => {
-
+      (error) => {
         if (error.status === 401) {
           this.loginFailedMessage = 'User "' + this.username.value + '" failed to authenticate';
         } else {
-          this.loginFailedMessage = new ErrorMessage('Error authenticating "' + this.username.value + '"', error)
+          this.loginFailedMessage = new ErrorMessage('Error authenticating "' + this.username.value + '"', error);
         }
 
         this.log.error(this.loginFailedMessage);
         this.loginFailed = true;
         this.loading = false;
-
       }
     );
   }

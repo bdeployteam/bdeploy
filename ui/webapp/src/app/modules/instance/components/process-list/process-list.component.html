@@ -1,29 +1,31 @@
 <div class="process-container">
-  <h3>Processes of {{appConfig.name}} </h3>
-  <table mat-table [dataSource]='dataSource' matSort>
-    <caption style="display: none;">Processes</caption>
+  <h3>Processes of {{ appConfig.name }}</h3>
+  <table mat-table [dataSource]="dataSource" matSort>
+    <caption style="display: none;">
+      Processes
+    </caption>
     <ng-container matColumnDef="pid">
       <th scope="col" mat-header-cell *matHeaderCellDef mat-sort-header>PID</th>
-      <td mat-cell *matCellDef="let element">{{element.pid}}</td>
+      <td mat-cell *matCellDef="let element">{{ element.pid }}</td>
     </ng-container>
     <ng-container matColumnDef="user">
       <th scope="col" mat-header-cell *matHeaderCellDef>User</th>
-      <td mat-cell *matCellDef="let element">{{element.user}}</td>
+      <td mat-cell *matCellDef="let element">{{ element.user }}</td>
     </ng-container>
     <ng-container matColumnDef="totalCpuDuration">
       <th scope="col" mat-header-cell *matHeaderCellDef mat-sort-header>CPU time</th>
-      <td mat-cell *matCellDef="let element">{{element.totalCpuDuration}}</td>
+      <td mat-cell *matCellDef="let element">{{ element.totalCpuDuration }}</td>
     </ng-container>
     <ng-container matColumnDef="command">
       <th scope="col" mat-header-cell *matHeaderCellDef>Command</th>
-      <td mat-cell *matCellDef="let element">{{element.command || '(unknown)'}}</td>
+      <td mat-cell *matCellDef="let element">{{ element.command || '(unknown)' }}</td>
     </ng-container>
     <ng-container matColumnDef="arguments">
       <th scope="col" mat-header-cell *matHeaderCellDef>Arguments</th>
-      <td mat-cell *matCellDef="let element">{{element.arguments || '(unknown)'}}</td>
+      <td mat-cell *matCellDef="let element">{{ element.arguments || '(unknown)' }}</td>
     </ng-container>
-    <tr mat-header-row *matHeaderRowDef='displayedColumns; sticky: true'></tr>
-    <tr mat-row *matRowDef='let row; columns: displayedColumns'></tr>
+    <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
   </table>
   <mat-paginator [pageSizeOptions]="[5]" showFirstLastButtons></mat-paginator>
 </div>

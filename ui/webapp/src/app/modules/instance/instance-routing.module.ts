@@ -13,47 +13,47 @@ const INSTANCE_ROUTES: Route[] = [
     path: 'browser/:name',
     component: InstanceBrowserComponent,
     canActivate: [AuthGuard],
-    data: { title: 'Instances (${params["name"]})', header: 'Instances' }
+    data: { title: 'Instances (${params["name"]})', header: 'Instances' },
   },
   {
     path: 'add/:group',
     component: InstanceAddEditComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Add Instance (${params["group"]})', header: 'Add Instance' }
+    data: { title: 'Add Instance (${params["group"]})', header: 'Add Instance' },
   },
   {
     path: 'edit/:group/:uuid',
     component: InstanceAddEditComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Edit Instance (${params["group"]} - ${params["uuid"]})', header: 'Edit Instance' }
+    data: { title: 'Edit Instance (${params["group"]} - ${params["uuid"]})', header: 'Edit Instance' },
   },
   {
     path: 'overview/:group/:uuid',
     component: ProcessConfigurationComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Instance Overview (${params["group"]} - ${params["uuid"]})', header: 'Instance Overview' }
+    data: { title: 'Instance Overview (${params["group"]} - ${params["uuid"]})', header: 'Instance Overview' },
   },
   {
     path: 'datafiles/:group/:uuid/:version',
     component: DataFilesBrowserComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Data Files (${params["group"]} - ${params["uuid"]})', header: 'Data Files' }
+    data: { title: 'Data Files (${params["group"]} - ${params["uuid"]})', header: 'Data Files' },
   },
   {
-    path:'history/:group/:uuid',
-    component:InstanceHistoryComponent,
-    canActivate:[AuthGuard],
-    canDeactivate:[CanDeactivateGuard],
-    data: {title: 'History (${params["group"]} - ${params["uuid"]})', header: "Instance History"}
-  }
+    path: 'history/:group/:uuid',
+    component: InstanceHistoryComponent,
+    canActivate: [AuthGuard],
+    canDeactivate: [CanDeactivateGuard],
+    data: { title: 'History (${params["group"]} - ${params["uuid"]})', header: 'Instance History' },
+  },
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(INSTANCE_ROUTES)],
   exports: [RouterModule],
 })
-export class InstanceRoutingModule { }
+export class InstanceRoutingModule {}

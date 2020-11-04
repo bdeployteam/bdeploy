@@ -1,18 +1,20 @@
 <h1 mat-dialog-title>Edit Custom Attribute</h1>
 <form #f="ngForm">
-  <div mat-dialog-content class='content'>
+  <div mat-dialog-content class="content">
     <mat-form-field>
       <mat-select name="name" required [disabled]="!isCreate" [(ngModel)]="data.attributeName">
-        <mat-option *ngFor="let d of data.descriptors" [value]="d.name">{{d.name}}</mat-option>
+        <mat-option *ngFor="let d of data.descriptors" [value]="d.name">{{ d.name }}</mat-option>
       </mat-select>
     </mat-form-field>
-    <div class="description" *ngIf="getDescription()">{{getDescription()}}</div>
+    <div class="description" *ngIf="getDescription()">{{ getDescription() }}</div>
     <mat-form-field>
-      <input matInput type='text' name='value' required [(ngModel)]='data.attributeValue' placeholder="Value">
+      <input matInput type="text" name="value" required [(ngModel)]="data.attributeValue" placeholder="Value" />
     </mat-form-field>
   </div>
   <div mat-dialog-actions align="end">
     <button mat-raised-button type="button" [mat-dialog-close]="null">Cancel</button>
-    <button mat-raised-button type="submit" color="primary" [mat-dialog-close]="getResult()" [disabled]='!f.valid'>Apply</button>
+    <button mat-raised-button type="submit" color="primary" [mat-dialog-close]="getResult()" [disabled]="!f.valid">
+      Apply
+    </button>
   </div>
 </form>

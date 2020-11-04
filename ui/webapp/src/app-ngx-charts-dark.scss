@@ -14,20 +14,18 @@
   */
   $color-text-dark: #72809b;
   $color-text-med-dark: #919db5;
-  $color-text-med: #A0AABE;
+  $color-text-med: #a0aabe;
   $color-text-med-light: #d9dce1;
   $color-text-light: #f0f1f6;
   $color-text-lighter: #fff;
 
   .ngx-charts {
-
-
     text {
       fill: $color-text-med;
     }
 
     .tooltip-anchor {
-      fill: rgb(255,255,255);
+      fill: rgb(255, 255, 255);
     }
 
     .gridline-path {
@@ -45,7 +43,7 @@
     .grid-panel {
       &.odd {
         rect {
-          fill: rgba(255,255,255,0.05);
+          fill: rgba(255, 255, 255, 0.05);
         }
       }
     }
@@ -63,7 +61,7 @@
     }
 
     .gauge {
-      .background-arc{
+      .background-arc {
         path {
           fill: $color-bg-med;
         }
@@ -93,7 +91,7 @@
 
     .timeline {
       .brush-background {
-        fill: rgba(255,255,255,0.05);
+        fill: rgba(255, 255, 255, 0.05);
       }
 
       .brush {
@@ -107,12 +105,11 @@
     .polar-chart .polar-chart-background {
       fill: rgb(30, 34, 46);
     }
-
   }
 
   .chart-legend {
     .legend-labels {
-      background: rgba(255,255,255,0.05) !important;
+      background: rgba(255, 255, 255, 0.05) !important;
     }
 
     .legend-item {

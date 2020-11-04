@@ -4,21 +4,29 @@
     <p>{{ group.description }}</p>
     <mat-card-content class="process-list">
       <div><strong>Application</strong></div>
-      <div><strong>{{status? "Status" : "Description"}}</strong></div>
+      <div>
+        <strong>{{ status ? 'Status' : 'Description' }}</strong>
+      </div>
       <ng-container *ngFor="let app of group.applications; let i = index">
         <ng-container *ngIf="status">
           <div>
-            <mat-chip-list><mat-chip [color]='getChipColor(app, status[i])' [selected]='getChipColor(app, status[i])'>{{ appNames[i] }}</mat-chip></mat-chip-list>
+            <mat-chip-list
+              ><mat-chip [color]="getChipColor(app, status[i])" [selected]="getChipColor(app, status[i])">{{
+                appNames[i]
+              }}</mat-chip></mat-chip-list
+            >
           </div>
           <div>
-            <div *ngFor='let message of status[i]' class='message-align'>
-              <mat-icon [ngClass]='getClass(message.icon)'>{{message.icon}}</mat-icon>
-              <span>{{message.message}}</span>
+            <div *ngFor="let message of status[i]" class="message-align">
+              <mat-icon [ngClass]="getClass(message.icon)">{{ message.icon }}</mat-icon>
+              <span>{{ message.message }}</span>
             </div>
           </div>
         </ng-container>
         <ng-container *ngIf="!status">
-          <mat-chip-list><mat-chip>{{ appNames[i] }}</mat-chip></mat-chip-list>
+          <mat-chip-list
+            ><mat-chip>{{ appNames[i] }}</mat-chip></mat-chip-list
+          >
           <span>{{ appDescriptions[i] }}</span>
         </ng-container>
       </ng-container>
@@ -26,10 +34,6 @@
   </mat-card>
 </ng-template>
 
-<button
-  mat-icon-button
-  type="button"
-  #infoButton
-  (click)="openOverlay(infoButton, infoPopup)">
-  <mat-icon class="info-icon" [ngClass]='getClass(getTopIcon())'>{{getTopIcon()}}</mat-icon>
+<button mat-icon-button type="button" #infoButton (click)="openOverlay(infoButton, infoPopup)">
+  <mat-icon class="info-icon" [ngClass]="getClass(getTopIcon())">{{ getTopIcon() }}</mat-icon>
 </button>

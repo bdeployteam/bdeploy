@@ -1,5 +1,13 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  ValidationErrors,
+  ValidatorFn,
+  Validators
+} from '@angular/forms';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { cloneDeep } from 'lodash-es';
 import { EMPTY_USER_INFO } from 'src/app/models/consts';
@@ -9,18 +17,17 @@ import { UserValidators } from 'src/app/modules/shared/validators/user.validator
 @Component({
   selector: 'app-user-edit',
   templateUrl: './user-edit.component.html',
-  styleUrls: ['./user-edit.component.css']
+  styleUrls: ['./user-edit.component.css'],
 })
 export class UserEditComponent implements OnInit {
-
   public userFormGroup = this.fb.group({
     name: [''],
     fullName: [''],
     email: [''],
     passwords: this.fb.group({
       password: [''],
-      passwordRepeat: ['']
-    })
+      passwordRepeat: [''],
+    }),
   });
 
   get nameControl() {
@@ -51,10 +58,7 @@ export class UserEditComponent implements OnInit {
   public isExternal = false;
   public knownUser: string[] = null;
 
-  constructor(
-    private fb: FormBuilder,
-    @Inject(MAT_DIALOG_DATA) public data: any) {
-  }
+  constructor(private fb: FormBuilder, @Inject(MAT_DIALOG_DATA) public data: any) {}
 
   ngOnInit() {
     if (this.data) {
@@ -77,8 +81,8 @@ export class UserEditComponent implements OnInit {
 
   public forbiddenNamesValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      const userExists = this.knownUser.find(u => u === control.value);
-      return userExists ? {'forbiddenName' : true} : null;
+      const userExists = this.knownUser.find((u) => u === control.value);
+      return userExists ? { forbiddenName: true } : null;
     };
   }
 
@@ -87,7 +91,7 @@ export class UserEditComponent implements OnInit {
       const pw1 = this.passwordControl.value;
       const pw2 = this.passwordRepeatControl.value;
       const ok = pw1 && pw2 && pw1 === pw2;
-      return ok ? null : {'passwordsNotEqual' : true};
+      return ok ? null : { passwordsNotEqual: true };
     };
   }
 
@@ -114,5 +118,4 @@ export class UserEditComponent implements OnInit {
     }
     return r;
   }
-
 }

@@ -8,7 +8,9 @@
   </mat-form-field>
   <mat-dialog-content fxFlex class="mat-elevation-z2">
     <table mat-table [dataSource]="dataSource">
-      <caption style='display: none;'>Parameters</caption>
+      <caption style="display: none;">
+        Parameters
+      </caption>
 
       <tr mat-header-row *matHeaderRowDef="columnsToDisplay; sticky: true"></tr>
       <tr mat-row *matRowDef="let row; columns: columnsToDisplay"></tr>

@@ -6,8 +6,7 @@ import { AuditService } from '../../services/audit.service';
 import { AuditLogDataProvider } from '../audit-log/audit-log.component';
 
 export class MinionAuditLogDataProvider implements AuditLogDataProvider {
-
-  constructor(private auditService: AuditService, private allColumns: boolean) { }
+  constructor(private auditService: AuditService, private allColumns: boolean) {}
 
   showAllColumns(): boolean {
     return this.allColumns;
@@ -18,21 +17,20 @@ export class MinionAuditLogDataProvider implements AuditLogDataProvider {
   }
 
   loadMore(lastInstant: number, limit: number): Observable<AuditLogDto[]> {
-    return this.auditService.auditLog(lastInstant, limit)
+    return this.auditService.auditLog(lastInstant, limit);
   }
 }
 
 @Component({
   selector: 'app-audit-logs-browser',
   templateUrl: './audit-logs-browser.component.html',
-  styleUrls: ['./audit-logs-browser.component.css']
+  styleUrls: ['./audit-logs-browser.component.css'],
 })
 export class AuditLogsBrowserComponent implements OnInit {
-
   dataProvider: AuditLogDataProvider = null;
   public showAllColumns = false;
 
-  constructor(private auditService: AuditService) { }
+  constructor(private auditService: AuditService) {}
 
   ngOnInit(): void {
     this.refresh();
@@ -46,5 +44,4 @@ export class AuditLogsBrowserComponent implements OnInit {
   public refresh() {
     this.dataProvider = new MinionAuditLogDataProvider(this.auditService, this.showAllColumns);
   }
-
 }

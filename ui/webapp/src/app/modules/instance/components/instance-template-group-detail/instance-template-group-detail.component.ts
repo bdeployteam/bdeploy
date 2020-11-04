@@ -9,10 +9,9 @@ import { ProcessConfigDto } from 'src/app/models/process.model';
 @Component({
   selector: 'app-instance-template-group-detail',
   templateUrl: './instance-template-group-detail.component.html',
-  styleUrls: ['./instance-template-group-detail.component.css']
+  styleUrls: ['./instance-template-group-detail.component.css'],
 })
 export class InstanceTemplateGroupDetailComponent implements OnInit {
-
   @Input()
   group: InstanceTemplateGroup;
 
@@ -30,16 +29,13 @@ export class InstanceTemplateGroupDetailComponent implements OnInit {
 
   private overlayRef: OverlayRef;
 
-  constructor(
-    private overlay: Overlay,
-    private viewContainerRef: ViewContainerRef,
-  ) { }
+  constructor(private overlay: Overlay, private viewContainerRef: ViewContainerRef) {}
 
   ngOnInit(): void {
     for (let i = 0; i < this.group.applications.length; ++i) {
       const app = this.group.applications[i];
       this.appNames[i] = app.name ? app.name : this.calculateName(app, this.group.type);
-      this.appDescriptions[i] = app.description ? app.description : ('A default ' + this.appNames[i]);
+      this.appDescriptions[i] = app.description ? app.description : 'A default ' + this.appNames[i];
     }
   }
 
@@ -105,32 +101,38 @@ export class InstanceTemplateGroupDetailComponent implements OnInit {
   }
 
   private getApplicationGroup(type: ApplicationType, app: TemplateApplication) {
-    return (type === ApplicationType.CLIENT ? this.config.clientApps : this.config.serverApps).find(a => a.appKeyName === this.product.product + '/' + app.application);
+    return (type === ApplicationType.CLIENT ? this.config.clientApps : this.config.serverApps).find(
+      (a) => a.appKeyName === this.product.product + '/' + app.application
+    );
   }
 
   openOverlay(relative: MatButton, template: TemplateRef<any>) {
-
     this.closeOverlay();
 
     this.overlayRef = this.overlay.create({
-      positionStrategy: this.overlay.position().flexibleConnectedTo(relative._elementRef)
-        .withPositions([{
+      positionStrategy: this.overlay
+        .position()
+        .flexibleConnectedTo(relative._elementRef)
+        .withPositions([
+          {
             overlayX: 'end',
             overlayY: 'bottom',
             originX: 'center',
             originY: 'top',
             offsetX: 35,
             offsetY: -10,
-            panelClass: 'info-card'
-        }, {
-          overlayX: 'end',
-          overlayY: 'top',
-          originX: 'center',
-          originY: 'bottom',
-          offsetX: 35,
-          offsetY: 10,
-          panelClass: 'info-card-below'
-        }])
+            panelClass: 'info-card',
+          },
+          {
+            overlayX: 'end',
+            overlayY: 'top',
+            originX: 'center',
+            originY: 'bottom',
+            offsetX: 35,
+            offsetY: 10,
+            panelClass: 'info-card-below',
+          },
+        ])
         .withPush(),
       scrollStrategy: this.overlay.scrollStrategies.close(),
       hasBackdrop: true,
@@ -150,5 +152,4 @@ export class InstanceTemplateGroupDetailComponent implements OnInit {
       this.overlayRef = null;
     }
   }
-
 }

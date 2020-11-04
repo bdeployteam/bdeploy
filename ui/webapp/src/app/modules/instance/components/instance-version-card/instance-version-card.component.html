@@ -1,25 +1,62 @@
-<mat-card [ngClass]="getCardStyle()" matRipple attr.data-cy='{{isActive ? "active" : "" }}'>
+<mat-card [ngClass]="getCardStyle()" matRipple attr.data-cy="{{ isActive ? 'active' : '' }}">
   <div class="flex-row">
-    <div class='header-icon'>
-        <mat-spinner *ngIf="activity && !dirty" diameter="24" color="accent" [matTooltip]='activity'></mat-spinner>
-        <ng-container *ngIf="!activity">
-          <mat-icon class='icon-margin' *ngIf="isActive" matTooltip="Installed and active">check_circle</mat-icon>
-          <mat-icon class='icon-margin' *ngIf="isDeployed && !isAutoUninstall" matTooltip="Installed">check_circle_outline</mat-icon>
-          <mat-icon class='icon-margin icon-uninstall' *ngIf="isDeployed && isAutoUninstall" matTooltip="Will be uninstalled by cleanup">check_circle_outline</mat-icon>
-        </ng-container>
+    <div class="header-icon">
+      <mat-spinner *ngIf="activity && !dirty" diameter="24" color="accent" [matTooltip]="activity"></mat-spinner>
+      <ng-container *ngIf="!activity">
+        <mat-icon class="icon-margin" *ngIf="isActive" matTooltip="Installed and active">check_circle</mat-icon>
+        <mat-icon class="icon-margin" *ngIf="isDeployed && !isAutoUninstall" matTooltip="Installed"
+          >check_circle_outline</mat-icon
+        >
+        <mat-icon
+          class="icon-margin icon-uninstall"
+          *ngIf="isDeployed && isAutoUninstall"
+          matTooltip="Will be uninstalled by cleanup"
+          >check_circle_outline</mat-icon
+        >
+      </ng-container>
     </div>
     <div class="mat-title title">{{ instanceVersionDto.product.tag }}</div>
     <span class="spacer"></span>
-    <span *ngIf="!productAvailable" class="product-unavailable" matTooltip="Required product version is not available.">N/A</span>
+    <span *ngIf="!productAvailable" class="product-unavailable" matTooltip="Required product version is not available."
+      >N/A</span
+    >
     <mat-menu #appMenu="matMenu" xPosition="before">
-      <button mat-menu-item (click)="install.emit(instanceVersionDto.key)" [disabled]='activity || dirty || readOnly || !productAvailable || isDeployed || isActive'><mat-icon>layers</mat-icon>Install</button>
-      <button mat-menu-item (click)="uninstall.emit(instanceVersionDto.key)" [disabled]='activity || dirty || readOnly || !isDeployed || isActive || isRunningOrScheduled'><mat-icon>layers_clear</mat-icon>Uninstall</button>
+      <button
+        mat-menu-item
+        (click)="install.emit(instanceVersionDto.key)"
+        [disabled]="activity || dirty || readOnly || !productAvailable || isDeployed || isActive"
+      >
+        <mat-icon>layers</mat-icon>Install
+      </button>
+      <button
+        mat-menu-item
+        (click)="uninstall.emit(instanceVersionDto.key)"
+        [disabled]="activity || dirty || readOnly || !isDeployed || isActive || isRunningOrScheduled"
+      >
+        <mat-icon>layers_clear</mat-icon>Uninstall
+      </button>
       <mat-divider></mat-divider>
-      <button mat-menu-item (click)="activate.emit(instanceVersionDto.key)" [disabled]='activity || dirty || readOnly || !productAvailable || !isDeployed'><mat-icon>star</mat-icon>Activate</button>
+      <button
+        mat-menu-item
+        (click)="activate.emit(instanceVersionDto.key)"
+        [disabled]="activity || dirty || readOnly || !productAvailable || !isDeployed"
+      >
+        <mat-icon>star</mat-icon>Activate
+      </button>
       <mat-divider></mat-divider>
-      <button mat-menu-item (click)="export.emit(instanceVersionDto.key)"><mat-icon>import_export</mat-icon>Export</button>
-      <div matTooltip='Delete this version. Global administrative rights are required. You should only delete instance versions to remove sensitive data.'>
-        <button mat-menu-item (click)="delete.emit(instanceVersionDto.key)" [disabled]='activity || dirty || readOnly || isDeployed || isActive || !authService.isGlobalAdmin()'><mat-icon>delete</mat-icon>Delete</button>
+      <button mat-menu-item (click)="export.emit(instanceVersionDto.key)">
+        <mat-icon>import_export</mat-icon>Export
+      </button>
+      <div
+        matTooltip="Delete this version. Global administrative rights are required. You should only delete instance versions to remove sensitive data."
+      >
+        <button
+          mat-menu-item
+          (click)="delete.emit(instanceVersionDto.key)"
+          [disabled]="activity || dirty || readOnly || isDeployed || isActive || !authService.isGlobalAdmin()"
+        >
+          <mat-icon>delete</mat-icon>Delete
+        </button>
       </div>
     </mat-menu>
     <button class="option-button" mat-icon-button [matMenuTriggerFor]="appMenu" appClickStopPropagation>
@@ -29,10 +66,21 @@
   <div class="content-row">
     <div class="description" *ngIf="!dirty">[Version {{ instanceVersionDto.key.tag }}]</div>
     <div class="description" *ngIf="dirty">[Locally Modified]</div>
-    <app-instance-version-history-card class='show-on-hover' *ngIf='!dirty' [instanceVersionDto]='instanceVersionDto' [instanceGroup]='instanceGroup' [instanceUuid]='instanceUuid' appClickStopPropagation></app-instance-version-history-card>
+    <app-instance-version-history-card
+      class="show-on-hover"
+      *ngIf="!dirty"
+      [instanceVersionDto]="instanceVersionDto"
+      [instanceGroup]="instanceGroup"
+      [instanceUuid]="instanceUuid"
+      appClickStopPropagation
+    ></app-instance-version-history-card>
     <span class="spacer"></span>
-    <div *ngIf="!dirty" class='icons'>
-      <app-process-status [instanceTag]="instanceVersionDto.key.tag" [activatedTag]="state.activeTag" [outOfSyncIcon]="true"></app-process-status>
+    <div *ngIf="!dirty" class="icons">
+      <app-process-status
+        [instanceTag]="instanceVersionDto.key.tag"
+        [activatedTag]="state.activeTag"
+        [outOfSyncIcon]="true"
+      ></app-process-status>
     </div>
   </div>
 </mat-card>

@@ -1,11 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-
-  Input,
-  OnInit,
-  ViewChild
-} from '@angular/core';
+import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { forkJoin, Observable } from 'rxjs';
@@ -37,14 +30,7 @@ export class InstanceNodePortListComponent implements OnInit, AfterViewInit {
   public INITIAL_SORT_COLUMN = 'port';
   public INITIAL_SORT_DIRECTION = 'asc';
 
-  public displayedColumns: string[] = [
-    'appState',
-    'application',
-    'description',
-    'portState',
-    'port',
-    'rating',
-  ];
+  public displayedColumns: string[] = ['appState', 'application', 'description', 'portState', 'port', 'rating'];
   public dataSource: MatTableDataSource<Row> = new MatTableDataSource<Row>([]);
 
   @ViewChild(MatSort)
@@ -76,16 +62,8 @@ export class InstanceNodePortListComponent implements OnInit, AfterViewInit {
     if (this.node.nodeConfiguration) {
       observables.push(
         this.applicationService
-          .listApplications(
-            this.instanceGroup,
-            this.node.nodeConfiguration.product,
-            false
-          )
-          .pipe(
-            map((apps) =>
-              this.collectServerPorts(this.node.nodeConfiguration, apps)
-            )
-          )
+          .listApplications(this.instanceGroup, this.node.nodeConfiguration.product, false)
+          .pipe(map((apps) => this.collectServerPorts(this.node.nodeConfiguration, apps)))
       );
     }
     if (observables.length === 0) {
@@ -98,12 +76,7 @@ export class InstanceNodePortListComponent implements OnInit, AfterViewInit {
 
       const ports = rows.map((row) => row.port);
       this.instanceService
-        .getOpenPorts(
-          this.instanceGroup,
-          this.instanceId,
-          this.minionName,
-          ports
-        )
+        .getOpenPorts(this.instanceGroup, this.instanceId, this.minionName, ports)
         .pipe(
           finalize(() => {
             this.loading = false;
@@ -127,13 +100,9 @@ export class InstanceNodePortListComponent implements OnInit, AfterViewInit {
   ): Row[] {
     const rows: Row[] = [];
     for (const app of instanceNodeConfiguration.applications) {
-      const appDesc = applications.find(
-        (a) => a.key.name === app.application.name
-      ).descriptor;
+      const appDesc = applications.find((a) => a.key.name === app.application.name).descriptor;
       for (const paramCfg of app.start.parameters) {
-        const paramDesc = appDesc.startCommand.parameters.find(
-          (p) => p.uid === paramCfg.uid
-        );
+        const paramDesc = appDesc.startCommand.parameters.find((p) => p.uid === paramCfg.uid);
         if (paramDesc && paramDesc.type === ParameterType.SERVER_PORT) {
           const row: Row = {
             appId: app.uid,
@@ -160,5 +129,4 @@ export class InstanceNodePortListComponent implements OnInit, AfterViewInit {
       return !this.isRunning(element);
     }
   }
-
 }

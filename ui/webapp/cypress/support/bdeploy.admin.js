@@ -1,17 +1,17 @@
 /**
  * Command: searchUser
  */
-Cypress.Commands.add('searchUser', function(username = null) {
+Cypress.Commands.add('searchUser', function (username = null) {
   cy.get('input[data-placeholder="Search..."').click().clear();
   if (username) {
     cy.get('input[data-placeholder="Search..."').type(username);
   }
-})
+});
 
 /**
  * Command: createUser
  */
-Cypress.Commands.add('createUser', function(username, fullname, email, password, docuScreenshots = false) {
+Cypress.Commands.add('createUser', function (username, fullname, email, password, docuScreenshots = false) {
   cy.get('.add-button').click();
   cy.contains('button', 'Apply').should('exist').and('be.disabled');
 
@@ -28,12 +28,12 @@ Cypress.Commands.add('createUser', function(username, fullname, email, password,
   }
   cy.contains('button', 'Apply').click();
   cy.contains('tr', username).should('exist');
-})
+});
 
 /**
  * Command: deleteUser
  */
-Cypress.Commands.add('deleteUser', function(username) {
+Cypress.Commands.add('deleteUser', function (username) {
   cy.contains('tr', username).should('exist');
   cy.contains('tr', username).clickContextMenuDialog('Delete', 'Delete');
 
@@ -42,12 +42,12 @@ Cypress.Commands.add('deleteUser', function(username) {
   cy.contains('button', 'OK').click();
 
   cy.contains('tr', username).should('not.exist');
-})
+});
 
 /**
  * Command: setGlobalPermission
  */
-Cypress.Commands.add('setGlobalPermission', function(username, permission, docuScreenshots = false) {
+Cypress.Commands.add('setGlobalPermission', function (username, permission, docuScreenshots = false) {
   cy.contains('tr', username).should('exist');
   cy.contains('tr', username).clickContextMenuDialog('Global Permissions', 'Global Permissions for');
 
@@ -61,4 +61,4 @@ Cypress.Commands.add('setGlobalPermission', function(username, permission, docuS
     cy.screenshot('BDeploy_UserAccounts_SetGlobalPermissions');
   }
   cy.contains('button', 'OK').click();
-})
+});

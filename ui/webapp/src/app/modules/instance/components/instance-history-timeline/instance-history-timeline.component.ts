@@ -1,18 +1,5 @@
-import {
-  Component,
-  ElementRef,
-  EventEmitter,
-  HostListener,
-  Input,
-  OnInit,
-  Output,
-  ViewChildren
-} from '@angular/core';
-import {
-  HistoryEntryDto,
-  HistoryEntryType,
-  ProcessState
-} from '../../../../models/gen.dtos';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChildren } from '@angular/core';
+import { HistoryEntryDto, HistoryEntryType, ProcessState } from '../../../../models/gen.dtos';
 import { InstanceHistoryTimelineCardComponent } from '../instance-history-timeline-card/instance-history-timeline-card.component';
 
 @Component({
@@ -74,15 +61,11 @@ export class InstanceHistoryTimelineComponent implements OnInit {
     const date: Date = new Date(time);
     return `${this.toDoubleDigit(date.getDate())}.${this.toDoubleDigit(
       date.getMonth() + 1
-    )}.${date.getFullYear()}  ${date.getHours()}:${this.toDoubleDigit(
-      date.getMinutes()
-    )}`;
+    )}.${date.getFullYear()}  ${date.getHours()}:${this.toDoubleDigit(date.getMinutes())}`;
   }
 
   toDoubleDigit(number: number) {
-    return number.toString().length < 2
-      ? '0' + number.toString()
-      : number.toString();
+    return number.toString().length < 2 ? '0' + number.toString() : number.toString();
   }
 
   addToComparisonEvent(event) {
@@ -91,10 +74,7 @@ export class InstanceHistoryTimelineComponent implements OnInit {
 
   isOverflowing(): boolean {
     if (this.entries.length > 0) {
-      return (
-        this.hostElement.nativeElement.scrollHeight >
-        this.hostElement.nativeElement.clientHeight
-      );
+      return this.hostElement.nativeElement.scrollHeight > this.hostElement.nativeElement.clientHeight;
     } else {
       return false;
     }

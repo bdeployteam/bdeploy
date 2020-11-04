@@ -12,7 +12,6 @@ import { SoftwareRepositoryService } from './software-repository.service';
   providedIn: 'root',
 })
 export class SoftwareService {
-
   private log: Logger = this.loggingService.getLogger('SoftwareRepositoryService');
 
   constructor(
@@ -20,16 +19,20 @@ export class SoftwareService {
     private http: HttpClient,
     private loggingService: LoggingService,
     private downloadService: DownloadService,
-    private deviceService: DeviceDetectorService,
+    private deviceService: DeviceDetectorService
   ) {}
 
-  public listSoftwares(softwareRepositoryName: string, listProducts: boolean, listGeneric: boolean): Observable<ManifestKey[]> {
+  public listSoftwares(
+    softwareRepositoryName: string,
+    listProducts: boolean,
+    listGeneric: boolean
+  ): Observable<ManifestKey[]> {
     const url: string = this.buildSoftwareUrl(softwareRepositoryName);
     let params = new HttpParams();
     params = listProducts ? params.set('products', 'true') : params;
     params = listGeneric ? params.set('generic', 'true') : params;
     this.log.debug('listSoftwares: ' + url);
-    return this.http.get<ManifestKey[]>(url, {params: params});
+    return this.http.get<ManifestKey[]>(url, { params: params });
   }
 
   public getSoftwareDiskUsage(softwareRepositoryName: string, manifestkeyName: string): Observable<string> {
@@ -58,7 +61,7 @@ export class SoftwareService {
     return this.buildSoftwareUrl(softwareRepositoryName) + '/upload';
   }
 
-  public getSoftwareUploadRaw(softwareRepositoryName: string): string{
+  public getSoftwareUploadRaw(softwareRepositoryName: string): string {
     return this.buildSoftwareUrl(softwareRepositoryName) + '/upload-raw-content';
   }
 
@@ -81,5 +84,4 @@ export class SoftwareService {
     }
     return OperatingSystem.UNKNOWN;
   }
-
 }

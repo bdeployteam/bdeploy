@@ -11,10 +11,9 @@ import { MessageboxService } from 'src/app/modules/shared/services/messagebox.se
 @Component({
   selector: 'app-instance-sync',
   templateUrl: './instance-sync.component.html',
-  styleUrls: ['./instance-sync.component.css']
+  styleUrls: ['./instance-sync.component.css'],
 })
 export class InstanceSyncComponent implements OnChanges {
-
   @Input()
   instanceGroup: string;
 
@@ -40,14 +39,21 @@ export class InstanceSyncComponent implements OnChanges {
 
   server: ManagedMasterDto;
 
-  constructor(private config: ConfigService, private managedServers: ManagedServersService, private messageBoxService: MessageboxService, public authService: AuthenticationService) { }
+  constructor(
+    private config: ConfigService,
+    private managedServers: ManagedServersService,
+    private messageBoxService: MessageboxService,
+    public authService: AuthenticationService
+  ) {}
 
   async ngOnChanges() {
     if (this.config.config.mode !== MinionMode.CENTRAL) {
       return; // only on central
     }
     if (this.instanceGroup && this.instance) {
-      this.server = await this.managedServers.getServerForInstance(this.instanceGroup, this.instance, this.tag).toPromise();
+      this.server = await this.managedServers
+        .getServerForInstance(this.instanceGroup, this.instance, this.tag)
+        .toPromise();
     } else {
       this.server = null;
     }
@@ -61,7 +67,7 @@ export class InstanceSyncComponent implements OnChanges {
       return false;
     }
     const currentTime = new Date().getTime();
-    return (currentTime - this.server.lastSync) <= (1_000 * 60 * 15);
+    return currentTime - this.server.lastSync <= 1_000 * 60 * 15;
   }
 
   public getServerName() {
@@ -76,20 +82,24 @@ export class InstanceSyncComponent implements OnChanges {
       return;
     }
 
-    if (this.confirmCallback && !await this.confirmCallback()) {
+    if (this.confirmCallback && !(await this.confirmCallback())) {
       return;
     }
 
     try {
       this.sycnInProgress = true;
-      await this.managedServers.synchronize(this.instanceGroup, this.server.hostName).pipe(finalize(() => this.sycnInProgress = false)).toPromise();
+      await this.managedServers
+        .synchronize(this.instanceGroup, this.server.hostName)
+        .pipe(finalize(() => (this.sycnInProgress = false)))
+        .toPromise();
       await this.ngOnChanges();
       this.syncEvent.emit(null);
     } catch (e) {
       this.messageBoxService.open({
         title: 'Synchronization Error',
         message: `Synchronization failed. The remote master server might be offline.<br/>Error Message: ${e.statusText}`,
-        mode: MessageBoxMode.ERROR});
+        mode: MessageBoxMode.ERROR,
+      });
     }
   }
 

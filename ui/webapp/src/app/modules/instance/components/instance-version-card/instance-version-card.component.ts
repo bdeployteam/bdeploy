@@ -44,8 +44,10 @@ export class InstanceVersionCardComponent implements OnChanges {
       this.isActive = this.state.activeTag === this.instanceVersionDto.key.tag;
       this.isDeployed = this.state.installedTags.findIndex(this.tagPredicate()) !== -1 && !this.isActive;
 
-      this.isAutoUninstall = this.autoUninstallEnabled && //
-        (this.state.activeTag && +this.state.activeTag > +this.instanceVersionDto.key.tag) && //
+      this.isAutoUninstall =
+        this.autoUninstallEnabled && //
+        this.state.activeTag &&
+        +this.state.activeTag > +this.instanceVersionDto.key.tag && //
         (!this.state.lastActiveTag || +this.state.lastActiveTag > +this.instanceVersionDto.key.tag);
     }
   }
@@ -65,6 +67,6 @@ export class InstanceVersionCardComponent implements OnChanges {
   }
 
   tagPredicate(): Predicate<string> {
-    return x => x === this.instanceVersionDto.key.tag;
+    return (x) => x === this.instanceVersionDto.key.tag;
   }
 }

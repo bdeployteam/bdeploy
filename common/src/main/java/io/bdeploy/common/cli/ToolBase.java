@@ -226,7 +226,7 @@ public abstract class ToolBase {
             if (reporter == streamReporter) {
                 streamReporter.beginReporting();
             }
-            
+
             instance.setOutput(output);
             instance.setVerbose(verbose);
             instance.setActivityReporter(reporter);

@@ -18,7 +18,8 @@ export class ProductService {
     private cfg: ConfigService,
     private http: HttpClient,
     private loggingService: LoggingService,
-    private downloadService: DownloadService) {}
+    private downloadService: DownloadService
+  ) {}
 
   public getProducts(instanceGroupName: string, productName: string): Observable<ProductDto[]> {
     const url: string = this.buildProductUrl(instanceGroupName) + '/list';

@@ -24,7 +24,7 @@ export class ProductCardComponent implements OnInit {
 
   ngOnInit() {
     // TODO: what if there are products with the same name but different manifest key name?
-    this.productService.getProductDiskUsage(this.instanceGroup, this.productVersions[0].key).subscribe(r => {
+    this.productService.getProductDiskUsage(this.instanceGroup, this.productVersions[0].key).subscribe((r) => {
       this.diskUsage = r;
     });
   }
@@ -36,5 +36,4 @@ export class ProductCardComponent implements OnInit {
   getCardStyle(): string {
     return this.isSelected ? 'product-card-selected' : undefined;
   }
-
 }

@@ -7,10 +7,9 @@ import { EMPTY_INSTANCE_BANNER_RECORD } from 'src/app/models/consts';
 @Component({
   selector: 'app-instance-banner-edit',
   templateUrl: './instance-banner-edit.component.html',
-  styleUrls: ['./instance-banner-edit.component.css']
+  styleUrls: ['./instance-banner-edit.component.css'],
 })
 export class InstanceBannerEditComponent implements OnInit {
-
   private DEFAULT_FOREGROUND = '#ffffff';
   private DEFAULT_BACKGROUND = '#ff4444';
 
@@ -32,10 +31,7 @@ export class InstanceBannerEditComponent implements OnInit {
     return this.bannerFormGroup.get('text');
   }
 
-  constructor(
-    private fb: FormBuilder,
-    @Inject(MAT_DIALOG_DATA) public data: any) {
-  }
+  constructor(private fb: FormBuilder, @Inject(MAT_DIALOG_DATA) public data: any) {}
 
   ngOnInit() {
     this.bannerFormGroup.setValue(this.data.instanceBanner);
@@ -45,11 +41,11 @@ export class InstanceBannerEditComponent implements OnInit {
     }
   }
 
-  canRemove() : boolean {
+  canRemove(): boolean {
     return this.data.instanceBanner && this.data.instanceBanner.text != null;
   }
 
-  canSet() : boolean {
+  canSet(): boolean {
     const s = this.textControl.value;
     return s != null && s.trim().length > 0;
   }

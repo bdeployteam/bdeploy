@@ -1,14 +1,34 @@
 <mat-nav-list>
-  <mat-list-item *ngFor='let prod of products' [ngClass]='getItemClass(prod)' (click)='select(prod)'>
-    <div class='prod-row'>
-        <div>{{prod.key.tag}}</div>
-        <div class='spacer'></div>
-        <app-product-info-card [productDto]="prod" [instanceGroup]='instanceGroup' [showUsedIn]='showUsedIn'></app-product-info-card>
-        <button mat-icon-button *ngIf='showDownload && exporting !== prod' [disabled]='exporting' (click)="export(prod)" class="icon-button" matTooltip='Download product version as ZIP'><mat-icon>cloud_download</mat-icon></button>
-        <mat-spinner *ngIf='exporting === prod' diameter='24' class='progress-spinner'></mat-spinner>
-        <div *ngIf='showDelete' [matTooltip]='deleteTooltip(prod)'>
-          <button mat-icon-button (click)="delete(prod)" class="icon-button" [disabled]="!authService.isScopedAdmin(instanceGroup) || usageCount(prod) > 0"><mat-icon>delete</mat-icon></button>
-        </div>
+  <mat-list-item *ngFor="let prod of products" [ngClass]="getItemClass(prod)" (click)="select(prod)">
+    <div class="prod-row">
+      <div>{{ prod.key.tag }}</div>
+      <div class="spacer"></div>
+      <app-product-info-card
+        [productDto]="prod"
+        [instanceGroup]="instanceGroup"
+        [showUsedIn]="showUsedIn"
+      ></app-product-info-card>
+      <button
+        mat-icon-button
+        *ngIf="showDownload && exporting !== prod"
+        [disabled]="exporting"
+        (click)="export(prod)"
+        class="icon-button"
+        matTooltip="Download product version as ZIP"
+      >
+        <mat-icon>cloud_download</mat-icon>
+      </button>
+      <mat-spinner *ngIf="exporting === prod" diameter="24" class="progress-spinner"></mat-spinner>
+      <div *ngIf="showDelete" [matTooltip]="deleteTooltip(prod)">
+        <button
+          mat-icon-button
+          (click)="delete(prod)"
+          class="icon-button"
+          [disabled]="!authService.isScopedAdmin(instanceGroup) || usageCount(prod) > 0"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
     </div>
   </mat-list-item>
 </mat-nav-list>

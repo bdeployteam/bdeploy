@@ -15,10 +15,14 @@ export class ActivitySnapshotTreeNode {
   providedIn: 'root',
 })
 export class RemoteEventsService {
-
   private log = this.loggingService.getLogger('RemoteEventService');
 
-  constructor(private cfg: ConfigService, private auth: AuthenticationService, private http: HttpClient, private loggingService: LoggingService) {}
+  constructor(
+    private cfg: ConfigService,
+    private auth: AuthenticationService,
+    private http: HttpClient,
+    private loggingService: LoggingService
+  ) {}
 
   public cancelActivity(uuid: string) {
     return this.http.delete(this.cfg.config.api + '/activities/' + uuid);
@@ -41,7 +45,7 @@ export class RemoteEventsService {
     ws.addEventListener('open', () => {
       const init: WebSocketInitDto = {
         token: this.auth.getToken(),
-        scope: scope
+        scope: scope,
       };
       ws.send(JSON.stringify(init));
     });
@@ -54,10 +58,10 @@ export class RemoteEventsService {
     const rootNodes: ActivitySnapshotTreeNode[] = [];
 
     // create a node for each activity.
-    allActivities.map(a => new ActivitySnapshotTreeNode(a, [])).forEach(n => allTreeNodes.set(n.snapshot.uuid, n));
+    allActivities.map((a) => new ActivitySnapshotTreeNode(a, [])).forEach((n) => allTreeNodes.set(n.snapshot.uuid, n));
 
     // wire up nodes with each other and find root nodes which are interesting.
-    allTreeNodes.forEach(n => {
+    allTreeNodes.forEach((n) => {
       if (n.snapshot.parentUuid) {
         const parentNode = allTreeNodes.get(n.snapshot.parentUuid);
         if (!parentNode) {
@@ -93,4 +97,3 @@ export class RemoteEventsService {
     return rootNodes;
   }
 }
-

@@ -5,10 +5,9 @@ import { HeaderTitleService } from 'src/app/modules/core/services/header-title.s
 @Component({
   selector: 'app-admin-shell',
   templateUrl: './admin-shell.component.html',
-  styleUrls: ['./admin-shell.component.css']
+  styleUrls: ['./admin-shell.component.css'],
 })
 export class AdminShellComponent implements OnInit {
-
   constructor(private header: HeaderTitleService, private title: Title) {}
 
   ngOnInit() {
@@ -16,5 +15,4 @@ export class AdminShellComponent implements OnInit {
     this.header.setHeaderTitle('Administration');
     this.title.setTitle('Administration');
   }
-
 }

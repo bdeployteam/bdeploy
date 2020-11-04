@@ -7,14 +7,13 @@ enum Theme {
   DEFAULT = 'app-light-theme',
   LIGHT_YELLOW = 'app-light-yellow-theme',
   DARK = 'app-dark-theme',
-  DARK_YELLOW = 'app-dark-yellow-theme'
+  DARK_YELLOW = 'app-dark-yellow-theme',
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class ThemeService {
-
   activeTheme$: BehaviorSubject<Theme> = new BehaviorSubject(Theme.DEFAULT);
 
   constructor(@Inject(DOCUMENT) private document: Document) {

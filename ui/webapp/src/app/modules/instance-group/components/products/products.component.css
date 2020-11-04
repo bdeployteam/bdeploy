@@ -74,21 +74,21 @@
   vertical-align: middle;
 }
 
-.headerButton{
+.headerButton {
   font-size: 1.1em;
 }
 
-.headerButton .mat-icon{
-  margin:0 5px 2px 0;
+.headerButton .mat-icon {
+  margin: 0 5px 2px 0;
 }
 
-.products-browser-wrapper{
-  display:flex;
+.products-browser-wrapper {
+  display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  padding:15px;
+  padding: 15px;
 }
 
 app-product-card {
-  margin:15px;
+  margin: 15px;
 }

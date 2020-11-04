@@ -11,7 +11,7 @@ import { InstanceService } from '../../services/instance.service';
 @Component({
   selector: 'app-instance-version-history-card',
   templateUrl: './instance-version-history-card.component.html',
-  styleUrls: ['./instance-version-history-card.component.css']
+  styleUrls: ['./instance-version-history-card.component.css'],
 })
 export class InstanceVersionHistoryCardComponent implements OnInit {
   @ViewChild(MatTable)
@@ -32,16 +32,18 @@ export class InstanceVersionHistoryCardComponent implements OnInit {
     private overlay: Overlay,
     private viewContainerRef: ViewContainerRef,
     private instanceService: InstanceService
-  ) { }
+  ) {}
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   reload() {
     this.loading = true;
-    this.instanceService.getHistory(this.instanceGroup, this.instanceUuid, this.instanceVersionDto.key).pipe(finalize(() => this.loading = false)).subscribe(r => {
-      this.dataSource = new MatTableDataSource<InstanceManifestHistoryRecord>(r.records.reverse());
-    });
+    this.instanceService
+      .getHistory(this.instanceGroup, this.instanceUuid, this.instanceVersionDto.key)
+      .pipe(finalize(() => (this.loading = false)))
+      .subscribe((r) => {
+        this.dataSource = new MatTableDataSource<InstanceManifestHistoryRecord>(r.records.reverse());
+      });
   }
 
   formatTime(time: number): string {
@@ -53,24 +55,29 @@ export class InstanceVersionHistoryCardComponent implements OnInit {
     this.closeOverlay();
 
     this.overlayRef = this.overlay.create({
-      positionStrategy: this.overlay.position().flexibleConnectedTo(relative._elementRef)
-        .withPositions([{
+      positionStrategy: this.overlay
+        .position()
+        .flexibleConnectedTo(relative._elementRef)
+        .withPositions([
+          {
             overlayX: 'end',
             overlayY: 'bottom',
             originX: 'center',
             originY: 'top',
             offsetX: 35,
             offsetY: -10,
-            panelClass: 'info-card'
-        }, {
-          overlayX: 'end',
-          overlayY: 'top',
-          originX: 'center',
-          originY: 'bottom',
-          offsetX: 35,
-          offsetY: 10,
-          panelClass: 'info-card-below'
-        }])
+            panelClass: 'info-card',
+          },
+          {
+            overlayX: 'end',
+            overlayY: 'top',
+            originX: 'center',
+            originY: 'bottom',
+            offsetX: 35,
+            offsetY: 10,
+            panelClass: 'info-card-below',
+          },
+        ])
         .withPush(),
       scrollStrategy: this.overlay.scrollStrategies.close(),
       hasBackdrop: true,
@@ -90,5 +97,4 @@ export class InstanceVersionHistoryCardComponent implements OnInit {
       this.overlayRef = null;
     }
   }
-
 }

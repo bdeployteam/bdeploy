@@ -4,7 +4,14 @@ import { ActivatedRoute } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { SORT_PURPOSE } from '../../../../models/consts';
-import { ClientApplicationDto, InstanceClientAppsDto, InstanceConfiguration, InstanceGroupConfiguration, InstancePurpose, OperatingSystem } from '../../../../models/gen.dtos';
+import {
+  ClientApplicationDto,
+  InstanceClientAppsDto,
+  InstanceConfiguration,
+  InstanceGroupConfiguration,
+  InstancePurpose,
+  OperatingSystem
+} from '../../../../models/gen.dtos';
 import { SoftwareUpdateService } from '../../../admin/services/software-update.service';
 import { InstanceService } from '../../../instance/services/instance.service';
 import { DownloadService } from '../../../shared/services/download.service';
@@ -18,7 +25,6 @@ import { InstanceGroupService } from '../../services/instance-group.service';
   providers: [LauncherService],
 })
 export class ClientAppsComponent implements OnInit {
-
   instanceGroupName: string = this.route.snapshot.paramMap.get('group');
   instanceApps: InstanceClientAppsDto[];
   instanceGroup: InstanceGroupConfiguration;
@@ -35,24 +41,26 @@ export class ClientAppsComponent implements OnInit {
     public downloadService: DownloadService,
     public updateService: SoftwareUpdateService,
     public launcherService: LauncherService,
-    public routingHistoryService: RoutingHistoryService,
+    public routingHistoryService: RoutingHistoryService
   ) {}
 
   ngOnInit() {
-    this.instanceGroupService.getInstanceGroup(this.instanceGroupName).subscribe(r => this.instanceGroup = r);
+    this.instanceGroupService.getInstanceGroup(this.instanceGroupName).subscribe((r) => (this.instanceGroup = r));
     this.activeOs = this.launcherService.getRunningOs();
     this.loadApps();
   }
 
   getAllOs() {
     // TODO: include MACOS once MACOS support is complete
-    return Object.keys(OperatingSystem).filter(x => x !== OperatingSystem.UNKNOWN && x !== OperatingSystem.AIX && x !== OperatingSystem.MACOS);
+    return Object.keys(OperatingSystem).filter(
+      (x) => x !== OperatingSystem.UNKNOWN && x !== OperatingSystem.AIX && x !== OperatingSystem.MACOS
+    );
   }
 
   loadApps() {
     this.loading = true;
     const instancePromise = this.instanceGroupService.listClientApps(this.instanceGroupName, this.activeOs);
-    instancePromise.pipe(finalize(() => (this.loading = false))).subscribe(apps => {
+    instancePromise.pipe(finalize(() => (this.loading = false))).subscribe((apps) => {
       this.onClientAppsLoaded(apps);
     });
   }
@@ -73,7 +81,7 @@ export class ClientAppsComponent implements OnInit {
 
   downloadLauncherInstaller() {
     const promise = this.updateService.createLauncherInstaller(this.activeOs);
-    promise.subscribe(token => {
+    promise.subscribe((token) => {
       const downloadUrl = this.downloadService.createDownloadUrl(token);
       this.downloadService.download(downloadUrl);
     });
@@ -87,13 +95,13 @@ export class ClientAppsComponent implements OnInit {
   downloadClickAndRun(instance: InstanceConfiguration, app: ClientApplicationDto) {
     this.instanceService
       .createClickAndStartDescriptor(this.instanceGroupName, instance.uuid, app.uuid)
-      .subscribe(data => {
+      .subscribe((data) => {
         this.downloadService.downloadJson(app.description + '.bdeploy', data);
       });
   }
 
   downloadInstaller(instance: InstanceConfiguration, app: ClientApplicationDto) {
-    this.instanceService.createClientInstaller(this.instanceGroupName, instance.uuid, app.uuid).subscribe(token => {
+    this.instanceService.createClientInstaller(this.instanceGroupName, instance.uuid, app.uuid).subscribe((token) => {
       this.instanceService.downloadClientInstaller(token);
     });
   }

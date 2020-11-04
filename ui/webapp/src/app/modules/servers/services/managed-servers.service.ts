@@ -1,7 +1,16 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { InstanceConfiguration, ManagedMasterDto, MinionDto, MinionStatusDto, MinionUpdateDto, ProductDto, ProductTransferDto, Version } from '../../../models/gen.dtos';
+import {
+  InstanceConfiguration,
+  ManagedMasterDto,
+  MinionDto,
+  MinionStatusDto,
+  MinionUpdateDto,
+  ProductDto,
+  ProductTransferDto,
+  Version
+} from '../../../models/gen.dtos';
 import { ConfigService } from '../../core/services/config.service';
 import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
 
@@ -48,13 +57,13 @@ export class ManagedServersService {
     }
     return this.http.get<ManagedMasterDto>(
       this.config.config.api + '/managed-servers/controlling-server/' + group + '/' + instance,
-      { params: p, headers: new HttpHeaders({'ignoreLoadingBar': ''}) },
+      { params: p, headers: new HttpHeaders({ ignoreLoadingBar: '' }) }
     );
   }
 
   public getInstancesForManagedServer(group: string, server: string): Observable<InstanceConfiguration[]> {
     return this.http.get<InstanceConfiguration[]>(
-      this.config.config.api + '/managed-servers/controlled-instances/' + group + '/' + server,
+      this.config.config.api + '/managed-servers/controlled-instances/' + group + '/' + server
     );
   }
 
@@ -68,16 +77,16 @@ export class ManagedServersService {
 
   public minionsConfigOfManagedServer(group: string, server: string): Observable<{ [minionName: string]: MinionDto }> {
     return this.http.get<{ [minionName: string]: MinionDto }>(
-      this.config.config.api + '/managed-servers/minion-config/' + group + '/' + server,
+      this.config.config.api + '/managed-servers/minion-config/' + group + '/' + server
     );
   }
 
   public minionsStateOfManagedServer(
     group: string,
-    server: string,
+    server: string
   ): Observable<{ [minionName: string]: MinionStatusDto }> {
     return this.http.get<{ [minionName: string]: MinionStatusDto }>(
-      this.config.config.api + '/managed-servers/minion-state/' + group + '/' + server,
+      this.config.config.api + '/managed-servers/minion-state/' + group + '/' + server
     );
   }
 
@@ -87,13 +96,13 @@ export class ManagedServersService {
       server,
       {
         headers: suppressGlobalErrorHandling(new HttpHeaders()),
-      },
+      }
     );
   }
 
   public productsOfManagedServer(group: string, server: string): Observable<ProductDto[]> {
     return this.http.get<ProductDto[]>(
-      this.config.config.api + '/managed-servers/list-products/' + group + '/' + server,
+      this.config.config.api + '/managed-servers/list-products/' + group + '/' + server
     );
   }
 
@@ -108,19 +117,23 @@ export class ManagedServersService {
   }
 
   public transferUpdate(group: string, server: string, update: MinionUpdateDto): Observable<any> {
-    return this.http.post(this.config.config.api + '/managed-servers/minion-transfer-updates/' + group + '/' + server, update);
+    return this.http.post(
+      this.config.config.api + '/managed-servers/minion-transfer-updates/' + group + '/' + server,
+      update
+    );
   }
 
   public installUpdate(group: string, server: string, update: MinionUpdateDto): Observable<any> {
-    return this.http.post(this.config.config.api + '/managed-servers/minion-install-updates/' + group + '/' + server, update);
+    return this.http.post(
+      this.config.config.api + '/managed-servers/minion-install-updates/' + group + '/' + server,
+      update
+    );
   }
 
   public ping(group: string, server: string): Observable<Version> {
-    return this.http.get<Version>(
-      this.config.config.api + '/managed-servers/minion-ping/' + group + '/' + server, {
-        headers: suppressGlobalErrorHandling(new HttpHeaders()),
-      },
-    );
+    return this.http.get<Version>(this.config.config.api + '/managed-servers/minion-ping/' + group + '/' + server, {
+      headers: suppressGlobalErrorHandling(new HttpHeaders()),
+    });
   }
 
   public isDataMigrationRequired(group: string): Observable<boolean> {

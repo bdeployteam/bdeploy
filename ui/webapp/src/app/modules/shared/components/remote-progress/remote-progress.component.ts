@@ -28,11 +28,16 @@ export class RemoteProgressComponent implements OnInit, OnDestroy {
   @Output()
   public events = new EventEmitter<ActivitySnapshotTreeNode[]>();
 
-  treeControl = new NestedTreeControl<ActivitySnapshotTreeNode>(n => n.children);
+  treeControl = new NestedTreeControl<ActivitySnapshotTreeNode>((n) => n.children);
   treeDataSource = new MatTreeNestedDataSource<ActivitySnapshotTreeNode>();
   hasChild = (_: number, node: ActivitySnapshotTreeNode) => !!node.children && node.children.length > 0;
 
-  constructor(private eventsService: RemoteEventsService, private loggingService: LoggingService, private bottomSheet: MatBottomSheet, private systemService: SystemService) {}
+  constructor(
+    private eventsService: RemoteEventsService,
+    private loggingService: LoggingService,
+    private bottomSheet: MatBottomSheet,
+    private systemService: SystemService
+  ) {}
 
   ngOnInit() {}
 

@@ -4,10 +4,7 @@ import { Router } from '@angular/router';
 import { ManagedServersService } from 'src/app/modules/servers/services/managed-servers.service';
 import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
 import { MessageboxService } from 'src/app/modules/shared/services/messagebox.service';
-import {
-  InstanceGroupConfiguration,
-  MinionMode
-} from '../../../../models/gen.dtos';
+import { InstanceGroupConfiguration, MinionMode } from '../../../../models/gen.dtos';
 import { InstanceGroupDeleteDialogComponent } from '../../../instance-group/components/instance-group-delete-dialog/instance-group-delete-dialog.component';
 import { InstanceGroupService } from '../../../instance-group/services/instance-group.service';
 import { AuthenticationService } from '../../services/authentication.service';
@@ -43,10 +40,8 @@ export class InstanceGroupCardComponent implements OnInit {
 
   isModeOk() {
     return (
-      (this.instanceGroup.managed &&
-        this.config.config.mode !== MinionMode.STANDALONE) ||
-      (!this.instanceGroup.managed &&
-        this.config.config.mode === MinionMode.STANDALONE)
+      (this.instanceGroup.managed && this.config.config.mode !== MinionMode.STANDALONE) ||
+      (!this.instanceGroup.managed && this.config.config.mode === MinionMode.STANDALONE)
     );
   }
 
@@ -68,15 +63,9 @@ export class InstanceGroupCardComponent implements OnInit {
             if (r) {
               this.instanceGroup.managed = false;
               this.instanceGroupService
-                .updateInstanceGroup(
-                  this.instanceGroup.name,
-                  this.instanceGroup
-                )
+                .updateInstanceGroup(this.instanceGroup.name, this.instanceGroup)
                 .subscribe((_) => {
-                  this.router.navigate([
-                    '/instance/browser',
-                    this.instanceGroup.name,
-                  ]);
+                  this.router.navigate(['/instance/browser', this.instanceGroup.name]);
                 });
             }
           });
@@ -100,9 +89,7 @@ export class InstanceGroupCardComponent implements OnInit {
   }
 
   async initiateMigration() {
-    const needMigration = await this.managedServers
-      .isDataMigrationRequired(this.instanceGroup.name)
-      .toPromise();
+    const needMigration = await this.managedServers.isDataMigrationRequired(this.instanceGroup.name).toPromise();
 
     if (needMigration) {
       const r = await this.mb.openAsync({
@@ -111,9 +98,7 @@ export class InstanceGroupCardComponent implements OnInit {
         mode: MessageBoxMode.CONFIRM_WARNING,
       });
       if (r) {
-        await this.managedServers
-          .performDataMigration(this.instanceGroup.name)
-          .toPromise();
+        await this.managedServers.performDataMigration(this.instanceGroup.name).toPromise();
       } else {
         return;
       }

@@ -6,7 +6,14 @@ import { cloneDeep } from 'lodash-es';
 import { catchError } from 'rxjs/operators';
 import { isUpdateFailed, isUpdateInProgress, isUpdateSuccess, UpdateStatus } from 'src/app/models/update.model';
 import { convert2String } from 'src/app/modules/shared/utils/version.utils';
-import { InstanceConfiguration, ManagedMasterDto, MinionDto, MinionStatusDto, MinionUpdateDto, Version } from '../../../../models/gen.dtos';
+import {
+  InstanceConfiguration,
+  ManagedMasterDto,
+  MinionDto,
+  MinionStatusDto,
+  MinionUpdateDto,
+  Version
+} from '../../../../models/gen.dtos';
 import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
 import { MessageboxService } from '../../../shared/services/messagebox.service';
 import { ManagedServersService } from '../../services/managed-servers.service';
@@ -43,14 +50,18 @@ export class ManagedServerDetailComponent implements OnInit {
   columnsToDisplay = ['minion', 'url', 'version', 'os', 'status'];
   dataSource: MatTableDataSource<MinionTableRow>;
 
-  constructor(private messageBoxService: MessageboxService, private managedServers: ManagedServersService, private dialog: MatDialog) {}
+  constructor(
+    private messageBoxService: MessageboxService,
+    private managedServers: ManagedServersService,
+    private dialog: MatDialog
+  ) {}
 
   ngOnInit() {
     this.load();
   }
 
   async load() {
-    this.managedServers.getInstancesForManagedServer(this.instanceGroupName, this.server.hostName).subscribe(r => {
+    this.managedServers.getInstancesForManagedServer(this.instanceGroupName, this.server.hostName).subscribe((r) => {
       this.instances = r;
     });
     const minions = await this.managedServers
@@ -155,11 +166,18 @@ export class ManagedServerDetailComponent implements OnInit {
   async doSynchronize() {
     let error = null;
     try {
-      this.server = await this.managedServers.synchronize(this.instanceGroupName, this.server.hostName).pipe(catchError(e => {
-        error = e;
-        throw e;
-      })).toPromise();
-      this.minionState = await this.managedServers.minionsStateOfManagedServer(this.instanceGroupName, this.server.hostName).toPromise();
+      this.server = await this.managedServers
+        .synchronize(this.instanceGroupName, this.server.hostName)
+        .pipe(
+          catchError((e) => {
+            error = e;
+            throw e;
+          })
+        )
+        .toPromise();
+      this.minionState = await this.managedServers
+        .minionsStateOfManagedServer(this.instanceGroupName, this.server.hostName)
+        .toPromise();
       this.updateDto = this.server?.update;
       this.synchronized = true;
     } catch {
@@ -213,14 +231,18 @@ export class ManagedServerDetailComponent implements OnInit {
   }
 
   edit() {
-    this.dialog.open(ManagedServerEditComponent, {
-      width: '500px',
-      data: cloneDeep(this.server),
-    }).afterClosed().subscribe(r => {
-      if (r) {
-        this.managedServers.updateManagedServer(this.instanceGroupName, this.server.hostName, r).subscribe(_ => { this.reload.emit(); });
-      }
-    });
+    this.dialog
+      .open(ManagedServerEditComponent, {
+        width: '500px',
+        data: cloneDeep(this.server),
+      })
+      .afterClosed()
+      .subscribe((r) => {
+        if (r) {
+          this.managedServers.updateManagedServer(this.instanceGroupName, this.server.hostName, r).subscribe((_) => {
+            this.reload.emit();
+          });
+        }
+      });
   }
-
 }

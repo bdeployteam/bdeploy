@@ -1,11 +1,19 @@
-<mat-card class="product-card" [ngClass]="getCardStyle()" (click)='clickIt()'>
+<mat-card class="product-card" [ngClass]="getCardStyle()" (click)="clickIt()">
   <mat-card-header>
-    <mat-card-title class="title">{{latestProductVersion.name}}</mat-card-title>
+    <mat-card-title class="title">{{ latestProductVersion.name }}</mat-card-title>
     <mat-card-subtitle>Product</mat-card-subtitle>
   </mat-card-header>
   <mat-card-content>
-      <p>Vendor: <strong>{{latestProductVersion.vendor ? latestProductVersion.vendor : '(unknown)'}}</strong></p>
-      <p><strong>{{productVersions.length}}</strong>&nbsp;version{{productVersions.length > 1 ? 's' : ''}} available</p>
-      <p><strong>{{diskUsage}}</strong>&nbsp;total disk usage</p>
+    <p>
+      Vendor: <strong>{{ latestProductVersion.vendor ? latestProductVersion.vendor : '(unknown)' }}</strong>
+    </p>
+    <p>
+      <strong>{{ productVersions.length }}</strong
+      >&nbsp;version{{ productVersions.length > 1 ? 's' : '' }} available
+    </p>
+    <p>
+      <strong>{{ diskUsage }}</strong
+      >&nbsp;total disk usage
+    </p>
   </mat-card-content>
 </mat-card>

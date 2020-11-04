@@ -1,18 +1,34 @@
-<mat-card [ngClass]="getCardStyle()" [matTooltip]='productMissing ? "Product is missing" : "Application is missing in the current product tag"' [matTooltipDisabled]='!isMissing()' matTooltipPosition='above'>
+<mat-card
+  [ngClass]="getCardStyle()"
+  [matTooltip]="productMissing ? 'Product is missing' : 'Application is missing in the current product tag'"
+  [matTooltipDisabled]="!isMissing()"
+  matTooltipPosition="above"
+>
   <div class="title-row">
     <span class="mat-title app-title">{{ appConfig.name }}</span>
     <span class="spacer"></span>
     <mat-menu #appMenu="matMenu" xPosition="before">
-      <button mat-menu-item *ngIf="!isReadonly" (click)="onEdit()" [disabled]="!authService.isScopedWrite(instanceGroupName) || isMissing()"><mat-icon>edit</mat-icon>Configure</button>
-      <button mat-menu-item *ngIf="isReadonly" (click)="onEdit()" [disabled]="isMissing()"><mat-icon>visibility</mat-icon>View</button>
-      <button mat-menu-item *ngIf="hasEndpoints()" (click)='onEndpointEdit()' [disabled]='isMissing()'><mat-icon>settings_ethernet</mat-icon>Endpoints</button>
-      <ng-container *ngIf='isClient'>
+      <button
+        mat-menu-item
+        *ngIf="!isReadonly"
+        (click)="onEdit()"
+        [disabled]="!authService.isScopedWrite(instanceGroupName) || isMissing()"
+      >
+        <mat-icon>edit</mat-icon>Configure
+      </button>
+      <button mat-menu-item *ngIf="isReadonly" (click)="onEdit()" [disabled]="isMissing()">
+        <mat-icon>visibility</mat-icon>View
+      </button>
+      <button mat-menu-item *ngIf="hasEndpoints()" (click)="onEndpointEdit()" [disabled]="isMissing()">
+        <mat-icon>settings_ethernet</mat-icon>Endpoints
+      </button>
+      <ng-container *ngIf="isClient">
         <mat-divider></mat-divider>
-        <button mat-menu-item [disabled]='!isActive()' (click)="downloadClickAndStart()">
+        <button mat-menu-item [disabled]="!isActive()" (click)="downloadClickAndStart()">
           <mat-icon>play_arrow</mat-icon>
           <span>Click & Start</span>
         </button>
-        <button mat-menu-item [disabled]="!isActive() || downloading ||! hasLauncher()" (click)="downloadInstaller()">
+        <button mat-menu-item [disabled]="!isActive() || downloading || !hasLauncher()" (click)="downloadInstaller()">
           <mat-icon>cloud_download</mat-icon>
           <span>Download Installer</span>
         </button>
@@ -20,7 +36,13 @@
       </ng-container>
       <mat-divider></mat-divider>
       <button mat-menu-item (click)="onCopy()"><mat-icon>file_copy</mat-icon>Copy</button>
-      <button mat-menu-item (click)="onDelete()" [disabled]="!authService.isScopedWrite(instanceGroupName) || isReadonly"><mat-icon>delete</mat-icon>Delete</button>
+      <button
+        mat-menu-item
+        (click)="onDelete()"
+        [disabled]="!authService.isScopedWrite(instanceGroupName) || isReadonly"
+      >
+        <mat-icon>delete</mat-icon>Delete
+      </button>
     </mat-menu>
     <button class="option-button" mat-icon-button [matMenuTriggerFor]="appMenu" appClickStopPropagation>
       <mat-icon>more_vert</mat-icon>
@@ -28,14 +50,23 @@
   </div>
   <mat-card-content>
     <div class="content-row">
-      <div *ngIf='!appConfig.start.executable' class="mat-body app-description"><mat-spinner [diameter]='16'></mat-spinner>Initializing...</div>
-      <div *ngIf='appConfig.start.executable' class="mat-body app-description">{{ appConfig.application.tag }}</div>
+      <div *ngIf="!appConfig.start.executable" class="mat-body app-description">
+        <mat-spinner [diameter]="16"></mat-spinner>Initializing...
+      </div>
+      <div *ngIf="appConfig.start.executable" class="mat-body app-description">{{ appConfig.application.tag }}</div>
       <span class="spacer"></span>
       <div class="icons" *ngIf="isClient">
-        <mat-icon class="icon" [svgIcon]='appOs' title="{{appOs}} Client Application"></mat-icon>
+        <mat-icon class="icon" [svgIcon]="appOs" title="{{ appOs }} Client Application"></mat-icon>
       </div>
-      <div class="icons" *ngIf="!isInstanceDirty" >
-        <app-process-status *ngIf="!isClient" [appId]="appConfig.uid" [instanceTag]="instanceVersion.key.tag" [activatedTag]="activatedTag" [outOfSyncIcon]="true" [outOfSyncText]="true"></app-process-status>
+      <div class="icons" *ngIf="!isInstanceDirty">
+        <app-process-status
+          *ngIf="!isClient"
+          [appId]="appConfig.uid"
+          [instanceTag]="instanceVersion.key.tag"
+          [activatedTag]="activatedTag"
+          [outOfSyncIcon]="true"
+          [outOfSyncText]="true"
+        ></app-process-status>
       </div>
     </div>
   </mat-card-content>

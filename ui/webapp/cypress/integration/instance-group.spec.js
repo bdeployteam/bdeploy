@@ -16,20 +16,20 @@ describe('Instance Group Tests', () => {
     cy.createInstanceGroup(groupName);
   });
 
-  it('Upload product to instance group', function() {
+  it('Upload product to instance group', function () {
     cy.uploadProductIntoGroup(groupName, 'test-product-1-direct.zip');
     cy.uploadProductIntoGroup(groupName, 'test-product-2-direct.zip');
-    cy.verifyProductVersion(groupName, "Demo Product", "io.bdeploy/demo", "1.0.0");
-    cy.verifyProductVersion(groupName, "Demo Product", "io.bdeploy/demo", "2.0.0");
+    cy.verifyProductVersion(groupName, 'Demo Product', 'io.bdeploy/demo', '1.0.0');
+    cy.verifyProductVersion(groupName, 'Demo Product', 'io.bdeploy/demo', '2.0.0');
   });
 
   it('Create test instance', () => {
-    cy.createInstance(groupName, 'InstanceUsingTestProduct').then(uuid => {
+    cy.createInstance(groupName, 'InstanceUsingTestProduct').then((uuid) => {
       cy.get('body').contains(uuid).should('exist');
-    })
-  })
+    });
+  });
 
-  it('Creates user with global permissions', function() {
+  it('Creates user with global permissions', function () {
     cy.visit('/#/admin/all/(panel:users)');
     cy.waitUntilContentLoaded();
 
@@ -49,13 +49,13 @@ describe('Instance Group Tests', () => {
     cy.waitUntilContentLoaded();
 
     cy.createUser(globalNone, 'Account without global permissions', globalNone + mailDomain, 'demo');
-  })
+  });
 
-  it('Checks permissions on the instance group', function() {
+  it('Checks permissions on the instance group', function () {
     cy.visit('/#/instancegroup/permissions/' + groupName);
     cy.waitUntilContentLoaded();
 
-    cy.contains('mat-slide-toggle','Global Access').click();
+    cy.contains('mat-slide-toggle', 'Global Access').click();
 
     cy.contains('tr', globalAdmin).within(() => {
       cy.get('mat-icon[data-cy="global-read"]').should('exist');
@@ -74,9 +74,9 @@ describe('Instance Group Tests', () => {
       cy.get('mat-icon[data-cy="grant-write"]').should('exist');
       cy.get('mat-icon[data-cy="grant-admin"]').should('exist');
     });
-  })
+  });
 
-  it('Grants/revokes admin and write permissions to globalRead user', function() {
+  it('Grants/revokes admin and write permissions to globalRead user', function () {
     cy.screenshot('BDeploy_Demo_Permissions_Global');
 
     cy.contains('tr', globalRead).within(() => {
@@ -98,9 +98,9 @@ describe('Instance Group Tests', () => {
       cy.get('mat-icon[data-cy="grant-write"]').should('exist');
       cy.get('mat-icon[data-cy="grant-admin"]').should('exist');
     });
-  })
+  });
 
-  it('Adds a user', function() {
+  it('Adds a user', function () {
     cy.contains('button', 'add').click();
     cy.contains('button', 'OK').should('exist').and('be.disabled');
 
@@ -116,16 +116,15 @@ describe('Instance Group Tests', () => {
       cy.get('mat-icon[data-cy="grant-admin"]').should('exist');
     });
     cy.screenshot('BDeploy_Demo_Permissions_AddUser2');
-  })
+  });
 
-  it('Removes a user', function() {
-
+  it('Removes a user', function () {
     cy.contains('tr', globalNone).within(() => {
       cy.contains('mat-icon', 'delete').should('exist');
       cy.contains('mat-icon', 'delete').click();
     });
     cy.contains('tr', globalNone).should('not.exist');
-  })
+  });
 
   it('Deletes the users', () => {
     cy.visit('/#/admin/all/(panel:users)');
@@ -135,11 +134,10 @@ describe('Instance Group Tests', () => {
     cy.deleteUser(globalWrite);
     cy.deleteUser(globalRead);
     cy.deleteUser(globalNone);
-  })
+  });
 
   it('Delete instance group', () => {
     cy.visit('/');
     cy.deleteInstanceGroup(groupName);
   });
-
 });

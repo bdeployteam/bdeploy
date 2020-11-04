@@ -3,15 +3,15 @@
   <div class="flex-row" *ngIf="isWarning()">
     <div class="warn-icon"><mat-icon>warning</mat-icon></div>
     <div class="warn-text"><strong>WARNING:&nbsp;</strong></div>
-    <div [innerHTML]='data.message'></div>
+    <div [innerHTML]="data.message"></div>
   </div>
   <div class="flex-row" *ngIf="isError()">
     <div class="warn-icon"><mat-icon>error</mat-icon></div>
     <div class="warn-text"><strong>ERROR:&nbsp;</strong></div>
-    <div [innerHTML]='data.message'></div>
+    <div [innerHTML]="data.message"></div>
   </div>
   <div class="flex-row" *ngIf="!isError() && !isWarning()">
-    <div [innerHTML]='data.message'></div>
+    <div [innerHTML]="data.message"></div>
   </div>
 </div>
 <div mat-dialog-actions align="end">

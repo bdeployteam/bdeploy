@@ -7,10 +7,9 @@ import { GroupedKeys } from '../update-browser/update-browser.component';
 @Component({
   selector: 'app-update-card',
   templateUrl: './update-card.component.html',
-  styleUrls: ['./update-card.component.css']
+  styleUrls: ['./update-card.component.css'],
 })
 export class UpdateCardComponent implements OnInit {
-
   @Input() public version: GroupedKeys;
   @Input() public allowUpdate = true;
   @Output() public update = new EventEmitter<GroupedKeys>();
@@ -18,10 +17,9 @@ export class UpdateCardComponent implements OnInit {
 
   public deleteRunning = false;
 
-  constructor(private updService: SoftwareUpdateService, private downloadService: DownloadService) { }
+  constructor(private updService: SoftwareUpdateService, private downloadService: DownloadService) {}
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   getDownload(os: OperatingSystem) {
     // find actual key for os.

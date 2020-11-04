@@ -1,9 +1,9 @@
 <h2 mat-dialog-title>Confirm Start</h2>
 <mat-dialog-content class="mat-typography">
-  <p>Starting of application '{{data.application}}' requires manual confirmation.</p>
+  <p>Starting of application '{{ data.application }}' requires manual confirmation.</p>
   <div class="container">
     <mat-form-field hintLabel="Enter the name of the application as confirmation." (keyup.enter)="onEnter()">
-      <input matInput required autocomplete="off" [(ngModel)]="data.confirmation">
+      <input matInput required autocomplete="off" [(ngModel)]="data.confirmation" />
     </mat-form-field>
   </div>
 </mat-dialog-content>

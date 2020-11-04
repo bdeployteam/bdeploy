@@ -44,7 +44,7 @@ export class HiveComponent implements OnInit {
     private loggingService: LoggingService,
     private snackbarService: MatSnackBar,
     private mbService: MessageboxService,
-    private dlService: DownloadService,
+    private dlService: DownloadService
   ) {}
 
   ngOnInit() {

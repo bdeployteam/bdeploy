@@ -1,22 +1,22 @@
 @import '~@angular/material/theming';
 
 @mixin software-repo-file-upload-theme($theme) {
-  $dark: map-get($theme,"is-dark");
-  app-software-repo-file-upload .file-data{
-    background-color: if($dark,rgb(48,48,48),rgb(245,245,245));
+  $dark: map-get($theme, 'is-dark');
+  app-software-repo-file-upload .file-data {
+    background-color: if($dark, rgb(48, 48, 48), rgb(245, 245, 245));
   }
-  app-software-repo-file-upload .file-info{
-    background-color: if($dark, rgb(61,60,62),rgb(255,255,255));
+  app-software-repo-file-upload .file-info {
+    background-color: if($dark, rgb(61, 60, 62), rgb(255, 255, 255));
   }
-  app-software-repo-file-upload .table-header{
-    background-color: if($dark,rgb(89,89,89),rgb(238,238,238));
-  }
-
-  app-software-repo-file-upload .file-table>div:not(:last-child){
-    border-bottom: 1px solid if($dark,rgb(89,89,89),rgb(200,200,200))
+  app-software-repo-file-upload .table-header {
+    background-color: if($dark, rgb(89, 89, 89), rgb(238, 238, 238));
   }
 
-  app-software-repo-file-upload .mat-button-toggle-checked{
-    background-color: if($dark, rgb(33, 33, 33),rgb(161, 210, 255))
+  app-software-repo-file-upload .file-table > div:not(:last-child) {
+    border-bottom: 1px solid if($dark, rgb(89, 89, 89), rgb(200, 200, 200));
+  }
+
+  app-software-repo-file-upload .mat-button-toggle-checked {
+    background-color: if($dark, rgb(33, 33, 33), rgb(161, 210, 255));
   }
 }

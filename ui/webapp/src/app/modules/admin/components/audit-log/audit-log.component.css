@@ -70,12 +70,12 @@
 
 .full-text-button {
   font-size: 14px;
-  height:14px;
-  width:14px;
+  height: 14px;
+  width: 14px;
 }
 
 .full-text-button::before {
-  content: "...";
+  content: '...';
 }
 
 .full-text-card {

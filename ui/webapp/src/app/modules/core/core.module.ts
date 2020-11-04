@@ -91,12 +91,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     InstanceGroupTitleComponent,
     UserPickerComponent,
   ],
-  entryComponents: [
-    ConnectionLostComponent,
-    UserEditComponent,
-    UserPasswordComponent,
-    UserPickerComponent,
-  ],
+  entryComponents: [ConnectionLostComponent, UserEditComponent, UserPasswordComponent, UserPickerComponent],
   providers: [
     httpInterceptorProviders,
     CookieService,
@@ -204,6 +199,6 @@ export function loadAppConfig(cfgService: ConfigService) {
     ProductInfoCardComponent,
     UserAvatarComponent,
     VersionPipe,
-  ]
+  ],
 })
-export class CoreModule { }
+export class CoreModule {}

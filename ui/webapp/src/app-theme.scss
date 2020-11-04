@@ -99,12 +99,12 @@
   }
 
   $dark: map-get($theme, 'is-dark');
-  a{
+  a {
     color: if($dark, mat-color($mat-blue, 300), mat-color($mat-blue, 800));
   }
 
   * {
-    @include scrollbars(mat-color(map-get($theme, 'primary')), if($dark,#555555, #cccccc));
+    @include scrollbars(mat-color(map-get($theme, 'primary')), if($dark, #555555, #cccccc));
   }
 
   .inline-code {
@@ -121,8 +121,6 @@
   $theme-primary: mat-color(map-get($theme, 'primary'));
   $theme-accent: mat-color(map-get($theme, 'accent'));
   $theme-main-tb: mat-color(map-get($theme, 'main-toolbar'));
-
-
 
   .preview-background {
     cursor: pointer;
@@ -162,19 +160,40 @@
     width: 34px;
     height: 34px;
     border-radius: 25%;
-    background: linear-gradient(to right, $theme-main-tb 0%, $theme-main-tb 50%, $theme-primary 51%, $theme-primary 100%);
+    background: linear-gradient(
+      to right,
+      $theme-main-tb 0%,
+      $theme-main-tb 50%,
+      $theme-primary 51%,
+      $theme-primary 100%
+    );
   }
 }
 
 /* Theme definitions - keep in sync with ThemeService.Theme */
 @function add-toolbar-color($theme, $toolbar-palette) {
-  @return map-merge($theme, ( 'main-toolbar': $toolbar-palette ));
+  @return map-merge(
+    $theme,
+    (
+      'main-toolbar': $toolbar-palette,
+    )
+  );
 }
 
 @function override-theme-background($theme, $key, $value) {
   $bg: map-get($theme, background);
-  $bg: map-merge($bg, ( $key: $value ));
-  @return map-merge($theme, ( background: $bg ));
+  $bg: map-merge(
+    $bg,
+    (
+      $key: $value,
+    )
+  );
+  @return map-merge(
+    $theme,
+    (
+      background: $bg,
+    )
+  );
 }
 
 /* "proper" yellow */
@@ -208,7 +227,7 @@ $app-yellow-def: (
     A200: $dark-primary-text,
     A400: $dark-primary-text,
     A700: $dark-primary-text,
-  )
+  ),
 );
 $app-yellow-palette: mat-palette($app-yellow-def, 700, 50);
 
@@ -216,7 +235,10 @@ $app-yellow-palette: mat-palette($app-yellow-def, 700, 50);
 $app-light-primary: mat-palette($mat-indigo, 500);
 $app-light-accent: mat-palette($mat-pink, A200);
 $app-light-warning: mat-palette($mat-orange, A700);
-$app-light-theme: add-toolbar-color(mat-light-theme($app-light-primary, $app-light-accent, $app-light-warning), $app-light-primary);
+$app-light-theme: add-toolbar-color(
+  mat-light-theme($app-light-primary, $app-light-accent, $app-light-warning),
+  $app-light-primary
+);
 .app-light-theme {
   @include all-themes($app-light-theme);
 }
@@ -228,7 +250,10 @@ $app-light-theme: add-toolbar-color(mat-light-theme($app-light-primary, $app-lig
 $app-light-yellow-primary: mat-palette($mat-grey, 700);
 $app-light-yellow-accent: mat-palette($mat-red);
 $app-light-yellow-warning: mat-palette($mat-orange);
-$app-light-yellow-theme: add-toolbar-color(mat-light-theme($app-light-yellow-primary, $app-light-yellow-accent, $app-light-yellow-warning), $app-yellow-palette);
+$app-light-yellow-theme: add-toolbar-color(
+  mat-light-theme($app-light-yellow-primary, $app-light-yellow-accent, $app-light-yellow-warning),
+  $app-yellow-palette
+);
 .app-light-yellow-theme {
   @include all-themes($app-light-yellow-theme);
 }
@@ -240,7 +265,10 @@ $app-light-yellow-theme: add-toolbar-color(mat-light-theme($app-light-yellow-pri
 $app-dark-primary: mat-palette($mat-indigo, 200);
 $app-dark-accent: $app-yellow-palette;
 $app-dark-warning: mat-palette($mat-deep-orange);
-$app-dark-theme: add-toolbar-color(mat-dark-theme($app-dark-primary, $app-dark-accent, $app-dark-warning), mat-palette($mat-indigo, 500));
+$app-dark-theme: add-toolbar-color(
+  mat-dark-theme($app-dark-primary, $app-dark-accent, $app-dark-warning),
+  mat-palette($mat-indigo, 500)
+);
 $app-dark-theme: override-theme-background($app-dark-theme, app-bar, #3d3c3e);
 .app-dark-theme {
   @include all-themes($app-dark-theme);
@@ -254,7 +282,10 @@ $app-dark-theme: override-theme-background($app-dark-theme, app-bar, #3d3c3e);
 $app-dark-yellow-primary: $app-yellow-palette;
 $app-dark-yellow-accent: mat-palette($mat-blue, 700);
 $app-dark-yellow-warning: mat-palette($mat-deep-orange);
-$app-dark-yellow-theme: add-toolbar-color(mat-dark-theme($app-dark-yellow-primary, $app-dark-yellow-accent, $app-dark-yellow-warning), $app-yellow-palette);
+$app-dark-yellow-theme: add-toolbar-color(
+  mat-dark-theme($app-dark-yellow-primary, $app-dark-yellow-accent, $app-dark-yellow-warning),
+  $app-yellow-palette
+);
 $app-dark-yellow-theme: override-theme-background($app-dark-yellow-theme, app-bar, #3d3c3e);
 .app-dark-yellow-theme {
   @include all-themes($app-dark-yellow-theme);

@@ -19,7 +19,7 @@ export class AuditService {
     if (lastInstant) {
       params = params.set('lastInstant', '' + lastInstant);
     }
-    return this.http.get<AuditLogDto[]>(url, {'params': params});
+    return this.http.get<AuditLogDto[]>(url, { params: params });
   }
 
   public auditLog(lastInstant: number, lineLimit: number): Observable<AuditLogDto[]> {
@@ -28,7 +28,6 @@ export class AuditService {
     if (lastInstant) {
       params = params.set('lastInstant', '' + lastInstant);
     }
-    return this.http.get<AuditLogDto[]>(url, {'params': params});
+    return this.http.get<AuditLogDto[]>(url, { params: params });
   }
-
 }

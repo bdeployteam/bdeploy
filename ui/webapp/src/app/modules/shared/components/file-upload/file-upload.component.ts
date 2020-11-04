@@ -23,10 +23,9 @@ export interface UploadData {
 @Component({
   selector: 'app-file-upload',
   templateUrl: './file-upload.component.html',
-  styleUrls: ['./file-upload.component.css']
+  styleUrls: ['./file-upload.component.css'],
 })
 export class FileUploadComponent implements OnInit, OnDestroy {
-
   private readonly log = this.loggingService.getLogger('FileUploadComponent');
 
   @ViewChild('file', { static: true })
@@ -38,7 +37,7 @@ export class FileUploadComponent implements OnInit, OnDestroy {
   public get columnsToDisplay() {
     const result = ['status', 'fileName'];
     if (this.uploadData.urlParameter) {
-      this.uploadData.urlParameter.forEach(o => result.push(o.id));
+      this.uploadData.urlParameter.forEach((o) => result.push(o.id));
     }
     result.push('progress', 'action');
     return result;
@@ -68,8 +67,8 @@ export class FileUploadComponent implements OnInit, OnDestroy {
     public uploadService: UploadService,
     public messageBoxService: MessageboxService,
     private eventService: RemoteEventsService,
-    private loggingService: LoggingService,
-    ) {}
+    private loggingService: LoggingService
+  ) {}
 
   ngOnInit(): void {
     // default formDataParam to 'file'
@@ -81,7 +80,7 @@ export class FileUploadComponent implements OnInit, OnDestroy {
     this.ws.addEventListener('error', (err) => {
       this.log.errorWithGuiMessage(new ErrorMessage('Error while processing events', err));
     });
-    this.ws.addEventListener('message', e => this.onEventReceived(e));
+    this.ws.addEventListener('message', (e) => this.onEventReceived(e));
   }
 
   ngOnDestroy(): void {
@@ -120,7 +119,7 @@ export class FileUploadComponent implements OnInit, OnDestroy {
   doAddFiles(fileList: FileList) {
     // Clear all finished files when adding a new one
     if (this.uploads !== undefined) {
-      this.uploads.forEach(us => {
+      this.uploads.forEach((us) => {
         if (us.state === UploadState.FINISHED) {
           return;
         }
@@ -138,7 +137,7 @@ export class FileUploadComponent implements OnInit, OnDestroy {
       const file: File = fileList[i];
       this.files.push(file);
       const pclone = cloneDeep(this.getUrlParameter());
-      pclone.forEach(p => {
+      pclone.forEach((p) => {
         if (!p.value) {
           switch (p.type) {
             case 'boolean':
@@ -234,7 +233,7 @@ export class FileUploadComponent implements OnInit, OnDestroy {
       return 'Software version already exists. Nothing to do.';
     }
     const softwares: ManifestKey[] = status.detail;
-    return 'Upload successful. New software package(s): ' + softwares.map(key => key.name + ' ' + key.tag).join(',');
+    return 'Upload successful. New software package(s): ' + softwares.map((key) => key.name + ' ' + key.tag).join(',');
   }
 
   onEventReceived(e: MessageEvent) {
@@ -314,26 +313,31 @@ export class FileUploadComponent implements OnInit, OnDestroy {
     this.showCancelButton = false;
 
     // start the upload and save the progress map
-    this.uploads = this.uploadService.upload(this.uploadData.url, this.files, this.filesParameter, this.uploadData.formDataParam);
+    this.uploads = this.uploadService.upload(
+      this.uploadData.url,
+      this.files,
+      this.filesParameter,
+      this.uploadData.formDataParam
+    );
     const allObservables = [];
-    this.uploads.forEach(e => {
+    this.uploads.forEach((e) => {
       allObservables.push(e.progressObservable);
     });
 
     // Update state when we are finished
     forkJoin(allObservables).subscribe(
-      next => {
+      (next) => {
         this.fileUploaded();
       },
-      error => {},
+      (error) => {},
       () => {
         this.allFilesUploaded();
-      },
+      }
     );
   }
 
   allFilesUploaded() {
-    const oneFailed = Array.from(this.uploads.values()).some(us => us.state === UploadState.FAILED);
+    const oneFailed = Array.from(this.uploads.values()).some((us) => us.state === UploadState.FAILED);
     if (oneFailed) {
       this.buttonText = 'Retry Upload';
       this.uploadFinished = false;
@@ -371,6 +375,4 @@ export class FileUploadComponent implements OnInit, OnDestroy {
     const idx = this.files.indexOf(file);
     return this.filesParameter[idx][paramIdx];
   }
-
 }
-

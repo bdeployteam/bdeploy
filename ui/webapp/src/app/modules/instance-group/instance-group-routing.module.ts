@@ -13,41 +13,41 @@ const IG_ROUTES: Route[] = [
     path: 'browser',
     component: InstanceGroupBrowserComponent,
     canActivate: [AuthGuard],
-    data: { title: 'Instance Groups', header: 'Instance Groups' }
+    data: { title: 'Instance Groups', header: 'Instance Groups' },
   },
   {
     path: 'add',
     component: InstanceGroupAddEditComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Add Instance Group', header: 'Add Instance Group' }
+    data: { title: 'Add Instance Group', header: 'Add Instance Group' },
   },
   {
     path: 'edit/:name',
     component: InstanceGroupAddEditComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Edit Instance Group (${params["name"]})', header: 'Edit Instance Group' }
+    data: { title: 'Edit Instance Group (${params["name"]})', header: 'Edit Instance Group' },
   },
   {
     path: 'products/:group',
     component: ProductsComponent,
     canActivate: [AuthGuard],
-    data: { title: 'Manage Products (${params["group"]})', header: 'Manage Products' }
+    data: { title: 'Manage Products (${params["group"]})', header: 'Manage Products' },
   },
   {
     path: 'permissions/:name',
     component: InstanceGroupPermissionsComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Manage Permissions of Instance Group (${params["name"]})', header: 'Instance Group Permissions' }
+    data: { title: 'Manage Permissions of Instance Group (${params["name"]})', header: 'Instance Group Permissions' },
   },
   {
     path: 'clientapps/:group',
     component: ClientAppsComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Client Applications (${params["group"]})', header: 'Client Applications' }
+    data: { title: 'Client Applications (${params["group"]})', header: 'Client Applications' },
   },
 ];
 
@@ -55,4 +55,4 @@ const IG_ROUTES: Route[] = [
   imports: [RouterModule.forChild(IG_ROUTES)],
   exports: [RouterModule],
 })
-export class InstanceGroupRoutingModule { }
+export class InstanceGroupRoutingModule {}

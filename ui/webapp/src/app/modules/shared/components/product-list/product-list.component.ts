@@ -35,21 +35,29 @@ export class ProductListComponent implements OnChanges {
     private productService: ProductService,
     private loggingService: LoggingService,
     public authService: AuthenticationService,
-    private downloadService: DownloadService) {}
+    private downloadService: DownloadService
+  ) {}
 
   ngOnChanges() {
     if (this.instanceGroup && this.products && this.products.length > 0) {
       this.usageCounts = new Map();
       this.selection = undefined;
-      from(this.products).pipe(flatMap(p => {
-          return this.productService.getProductVersionUsageCount(this.instanceGroup, p.key).pipe(tap(e => {this.usageCounts.set(p.key, parseInt(e, 10));}));
-        }, 2),
-      ).subscribe();
+      from(this.products)
+        .pipe(
+          flatMap((p) => {
+            return this.productService.getProductVersionUsageCount(this.instanceGroup, p.key).pipe(
+              tap((e) => {
+                this.usageCounts.set(p.key, parseInt(e, 10));
+              })
+            );
+          }, 2)
+        )
+        .subscribe();
     }
   }
 
   delete(product: ProductDto): void {
-    this.productService.deleteProductVersion(this.instanceGroup, product.key).subscribe(r => {
+    this.productService.deleteProductVersion(this.instanceGroup, product.key).subscribe((r) => {
       this.log.message('Successfully deleted ' + product.key.name + ':' + product.key.tag);
       this.deleted.emit();
     });
@@ -75,7 +83,7 @@ export class ProductListComponent implements OnChanges {
     this.productService
       .createProductZip(this.instanceGroup, product.key)
       .pipe(finalize(() => (this.exporting = null)))
-      .subscribe(token => {
+      .subscribe((token) => {
         this.downloadService.download(this.productService.downloadProduct(token));
       });
   }

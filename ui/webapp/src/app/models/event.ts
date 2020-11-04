@@ -2,7 +2,6 @@
  * Event object that contains a callback to notify the sender when the event is done.
  */
 export class EventWithCallback<T> {
-
   /**
    * The actual payload to send to the consumer.
    */
@@ -20,5 +19,4 @@ export class EventWithCallback<T> {
     this.data = data;
     this.done = done;
   }
-
 }

@@ -1,7 +1,7 @@
 <div class="login-wrapper">
   <form (ngSubmit)="onSubmit()">
     <mat-card class="login-card">
-      <div class="header"><app-logo class='logo' color="main-toolbar" [size]='128'></app-logo></div>
+      <div class="header"><app-logo class="logo" color="main-toolbar" [size]="128"></app-logo></div>
       <mat-card-content>
         <div>
           <mat-form-field>
@@ -16,7 +16,7 @@
           </mat-form-field>
         </div>
         <div *ngIf="loginFailed">
-          <mat-error class="invalid-login">{{loginFailedMessage}}</mat-error>
+          <mat-error class="invalid-login">{{ loginFailedMessage }}</mat-error>
         </div>
       </mat-card-content>
       <mat-card-actions align="end">

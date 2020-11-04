@@ -15,7 +15,7 @@ export class ThemeChooserComponent implements OnInit {
   constructor(
     private overlay: Overlay,
     private viewContainerRef: ViewContainerRef,
-    public themeService: ThemeService,
+    public themeService: ThemeService
   ) {}
 
   ngOnInit() {}

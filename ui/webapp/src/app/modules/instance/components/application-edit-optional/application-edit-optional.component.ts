@@ -26,7 +26,7 @@ export class ApplicationEditOptionalComponent implements OnInit {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: EditOptionalData,
-    public dialogRef: MatDialogRef<ApplicationEditOptionalComponent>,
+    public dialogRef: MatDialogRef<ApplicationEditOptionalComponent>
   ) {}
 
   ngOnInit() {
@@ -46,19 +46,19 @@ export class ApplicationEditOptionalComponent implements OnInit {
   }
 
   isAllSelected() {
-    const numSelected = this.data.parameters.filter(lp => lp.rendered).length;
+    const numSelected = this.data.parameters.filter((lp) => lp.rendered).length;
     const numRows = this.dataSource.data.length;
     return numSelected === numRows;
   }
 
   isAtLeastOneSelected() {
-    const numSelected = this.data.parameters.filter(lp => lp.rendered).length;
+    const numSelected = this.data.parameters.filter((lp) => lp.rendered).length;
     return numSelected > 0;
   }
 
   toggleSelection() {
     const targetState = this.isAllSelected() ? false : true;
-    this.data.parameters.forEach(lp => (lp.rendered = targetState));
+    this.data.parameters.forEach((lp) => (lp.rendered = targetState));
     this.updateDirtyState();
   }
 

@@ -7,7 +7,7 @@ export enum MessageBoxMode {
   CONFIRM_WARNING,
   INFO,
   WARNING,
-  ERROR
+  ERROR,
 }
 
 export interface MessageBoxData {
@@ -22,17 +22,15 @@ export interface MessageBoxData {
 @Component({
   selector: 'app-messagebox',
   templateUrl: './messagebox.component.html',
-  styleUrls: ['./messagebox.component.css']
+  styleUrls: ['./messagebox.component.css'],
 })
 export class MessageboxComponent implements OnInit {
-
   constructor(
     private dialogRef: MatDialogRef<MessageboxComponent>,
     @Inject(MAT_DIALOG_DATA) public data: MessageBoxData
-  ) { }
+  ) {}
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   public requiresCancel(): boolean {
     return this.data.mode === MessageBoxMode.CONFIRM || this.data.mode === MessageBoxMode.CONFIRM_WARNING;
@@ -53,5 +51,4 @@ export class MessageboxComponent implements OnInit {
   public isError(): boolean {
     return this.data.mode === MessageBoxMode.ERROR;
   }
-
 }

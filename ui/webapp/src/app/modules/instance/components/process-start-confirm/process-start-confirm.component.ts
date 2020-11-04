@@ -9,7 +9,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 export class ProcessStartConfirmComponent implements OnInit {
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
-    public dialogRef: MatDialogRef<ProcessStartConfirmComponent>,
+    public dialogRef: MatDialogRef<ProcessStartConfirmComponent>
   ) {}
 
   ngOnInit() {

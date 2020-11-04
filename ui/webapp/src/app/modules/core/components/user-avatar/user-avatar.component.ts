@@ -3,10 +3,9 @@ import { Component, HostBinding, Input, OnInit } from '@angular/core';
 @Component({
   selector: 'app-user-avatar',
   templateUrl: './user-avatar.component.html',
-  styleUrls: ['./user-avatar.component.css']
+  styleUrls: ['./user-avatar.component.css'],
 })
 export class UserAvatarComponent implements OnInit {
-
   @Input()
   @HostBinding('style.width.px')
   @HostBinding('style.height.px')
@@ -21,10 +20,9 @@ export class UserAvatarComponent implements OnInit {
   @Input()
   public gravatar = false;
 
-  constructor() { }
+  constructor() {}
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   getStyle(s: number) {
     return {
@@ -33,5 +31,4 @@ export class UserAvatarComponent implements OnInit {
       'font-size': `${s}px`,
     };
   }
-
 }

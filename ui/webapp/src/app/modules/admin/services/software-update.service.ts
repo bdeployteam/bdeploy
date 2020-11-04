@@ -6,18 +6,13 @@ import { ConfigService } from '../../core/services/config.service';
 import { Logger, LoggingService } from '../../core/services/logging.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class SoftwareUpdateService {
-
   private static BASEPATH = '/swup';
   private readonly log: Logger = this.loggingService.getLogger('SoftwareUpdateService');
 
-  constructor(
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private loggingService: LoggingService,
-  ) {}
+  constructor(private cfg: ConfigService, private http: HttpClient, private loggingService: LoggingService) {}
 
   public listBDeployVersions(): Observable<ManifestKey[]> {
     const url: string = this.cfg.config.api + SoftwareUpdateService.BASEPATH + '/bdeploy';
@@ -61,8 +56,7 @@ export class SoftwareUpdateService {
     const url = this.cfg.config.api + SoftwareUpdateService.BASEPATH + '/createLauncherInstaller';
     return this.http.get(url, {
       params: new HttpParams().set('os', os.toLowerCase()),
-      responseType: 'text'
+      responseType: 'text',
     });
   }
-
 }

@@ -8,11 +8,7 @@ import { finalize } from 'rxjs/operators';
 import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { EMPTY_SOFTWARE_REPO } from '../../../../models/consts';
 import { SoftwareRepositoryConfiguration } from '../../../../models/gen.dtos';
-import {
-  ErrorMessage,
-  Logger,
-  LoggingService
-} from '../../../core/services/logging.service';
+import { ErrorMessage, Logger, LoggingService } from '../../../core/services/logging.service';
 import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
 import { MessageboxService } from '../../../shared/services/messagebox.service';
 import { InstanceGroupValidators } from '../../../shared/validators/instance-group.validator';
@@ -71,9 +67,7 @@ export class SoftwareRepoAddEditComponent implements OnInit {
           this.clonedSoftwareRepo = cloneDeep(softwareRepo);
         },
         (error) => {
-          this.log.errorWithGuiMessage(
-            new ErrorMessage('reading software repository failed', error)
-          );
+          this.log.errorWithGuiMessage(new ErrorMessage('reading software repository failed', error));
         }
       );
     }

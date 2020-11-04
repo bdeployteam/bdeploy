@@ -5,17 +5,14 @@ import { CustomAttributeDescriptor } from 'src/app/models/gen.dtos';
 @Component({
   selector: 'app-custom-attribute-edit',
   templateUrl: './custom-attribute-edit.component.html',
-  styleUrls: ['./custom-attribute-edit.component.css']
+  styleUrls: ['./custom-attribute-edit.component.css'],
 })
 export class CustomAttributeEditComponent implements OnInit {
-
-  constructor(@Inject(MAT_DIALOG_DATA) public attribute: CustomAttributeDescriptor) {
-  }
+  constructor(@Inject(MAT_DIALOG_DATA) public attribute: CustomAttributeDescriptor) {}
 
   ngOnInit() {
     if (!this.attribute) {
       this.attribute = <CustomAttributeDescriptor>{};
     }
   }
-
 }

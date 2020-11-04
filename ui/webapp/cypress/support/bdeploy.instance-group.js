@@ -1,7 +1,7 @@
 /**
  * Command: createInstanceGroup
  */
-Cypress.Commands.add('createInstanceGroup', function(name, mode = 'STANDALONE') {
+Cypress.Commands.add('createInstanceGroup', function (name, mode = 'STANDALONE') {
   cy.visitBDeploy('/', mode);
   cy.waitUntilContentLoaded();
 
@@ -20,12 +20,12 @@ Cypress.Commands.add('createInstanceGroup', function(name, mode = 'STANDALONE') 
   cy.waitUntilContentLoaded();
 
   cy.get('[data-cy=group-' + name + ']').should('exist');
-})
+});
 
 /**
  * Command: deleteInstanceGroup
  */
-Cypress.Commands.add('deleteInstanceGroup', function(name, mode = 'STANDALONE') {
+Cypress.Commands.add('deleteInstanceGroup', function (name, mode = 'STANDALONE') {
   cy.visitBDeploy('/', mode);
 
   cy.get('[data-cy=group-' + name + ']')
@@ -33,28 +33,27 @@ Cypress.Commands.add('deleteInstanceGroup', function(name, mode = 'STANDALONE') 
     .clickContextMenuDialog('Delete');
   cy.contains('mat-dialog-container', 'Delete Instance Group: ' + name)
     .should('exist')
-    .within(dialog => {
+    .within((dialog) => {
       cy.contains('Deleting an instance group cannot be undone').should('exist');
       cy.contains('button', 'Delete').should('be.disabled');
-      cy.get('input[data-placeholder="Instance Group ID"]')
-        .clear()
-        .type(name);
-      cy.contains('button', 'Delete')
-        .should('be.enabled')
-        .click();
+      cy.get('input[data-placeholder="Instance Group ID"]').clear().type(name);
+      cy.contains('button', 'Delete').should('be.enabled').click();
     });
 
   cy.get('[data-cy=group-' + name + ']').should('not.exist');
-})
+});
 
 /**
  * Command: uploadProductIntoGroup
  */
-Cypress.Commands.add('uploadProductIntoGroup', function(groupName,fileName, mode = 'STANDALONE') {
+Cypress.Commands.add('uploadProductIntoGroup', function (groupName, fileName, mode = 'STANDALONE') {
   cy.visitBDeploy('/', mode);
   cy.waitUntilContentLoaded();
 
-  cy.get('[data-cy=group-' + groupName + ']').first().should('exist').click();
+  cy.get('[data-cy=group-' + groupName + ']')
+    .first()
+    .should('exist')
+    .click();
   cy.waitUntilContentLoaded();
 
   cy.get('mat-toolbar').clickContextMenuAction('Products');
@@ -71,16 +70,25 @@ Cypress.Commands.add('uploadProductIntoGroup', function(groupName,fileName, mode
 
     cy.contains('button', 'Close').should('be.visible').and('be.enabled').click();
   });
-})
+});
 
- /**
+/**
  * Command: verifyProductVersion
  */
-Cypress.Commands.add('verifyProductVersion', function(groupName, productName, productId, productVersion, mode = 'STANDALONE') {
+Cypress.Commands.add('verifyProductVersion', function (
+  groupName,
+  productName,
+  productId,
+  productVersion,
+  mode = 'STANDALONE'
+) {
   cy.visitBDeploy('/', mode);
   cy.waitUntilContentLoaded();
 
-  cy.get('[data-cy=group-' + groupName + ']').first().should('exist').click();
+  cy.get('[data-cy=group-' + groupName + ']')
+    .first()
+    .should('exist')
+    .click();
   cy.waitUntilContentLoaded();
 
   cy.get('mat-toolbar').clickContextMenuAction('Products');
@@ -94,23 +102,23 @@ Cypress.Commands.add('verifyProductVersion', function(groupName, productName, pr
   cy.get('mat-card.info').within(() => {
     cy.contains('mat-chip', 'X-Product').contains(productId).should('exist');
   });
-})
+});
 
-Cypress.Commands.add('attachManaged', function(groupName, screenshot = false) {
+Cypress.Commands.add('attachManaged', function (groupName, screenshot = false) {
   cy.visitBDeploy('/', 'MANAGED');
 
   cy.waitUntilContentLoaded();
-  if(screenshot) {
+  if (screenshot) {
     cy.screenshot('BDeploy_Welcome_Managed');
   }
   cy.contains('button', 'link').should('exist').and('be.enabled').click();
 
   cy.waitUntilContentLoaded();
-  if(screenshot) {
+  if (screenshot) {
     cy.screenshot('BDeploy_Managed_Attach_Intro');
   }
   cy.contains('button', 'Next').should('exist').and('be.enabled').click();
-  if(screenshot) {
+  if (screenshot) {
     cy.wait(100);
     cy.screenshot('BDeploy_Managed_Attach_Waiting');
   }
@@ -124,66 +132,81 @@ Cypress.Commands.add('attachManaged', function(groupName, screenshot = false) {
     .clickContextMenuAction('Managed Servers');
 
   cy.waitUntilContentLoaded();
-  if(screenshot) {
+  if (screenshot) {
     cy.screenshot('BDeploy_Central_Managed_Servers');
   }
 
   cy.contains('button', 'add').should('exist').and('be.enabled').click();
   cy.contains('button', 'Next').should('exist').and('be.enabled').click();
 
-  if(screenshot) {
-    cy.wait(100)
+  if (screenshot) {
+    cy.wait(100);
     cy.screenshot('BDeploy_Central_Attach_Drop');
   }
 
-  cy.contains('mat-step-header', 'Attach Managed Server').parent().within(e => {
-    cy.get('input[data-cy="managed-ident"]').attachFile({
-      filePath: 'managed-ident.txt',
-      mimeType: 'text/plain',
+  cy.contains('mat-step-header', 'Attach Managed Server')
+    .parent()
+    .within((e) => {
+      cy.get('input[data-cy="managed-ident"]').attachFile({
+        filePath: 'managed-ident.txt',
+        mimeType: 'text/plain',
+      });
+
+      cy.contains('Successfully read information for').should('exist').and('be.visible');
+      if (screenshot) {
+        cy.screenshot('BDeploy_Central_Attach_Read_Success');
+      }
+      cy.contains('button', 'Next').should('exist').and('be.visible').and('be.enabled').click();
     });
 
-    cy.contains('Successfully read information for').should('exist').and('be.visible');
-    if(screenshot) {
-      cy.screenshot('BDeploy_Central_Attach_Read_Success')
-    }
-    cy.contains('button', 'Next').should('exist').and('be.visible').and('be.enabled').click();
-  })
-
-  cy.contains('mat-step-header', 'Additional Information').parent().within(e => {
-    cy.get('input[data-placeholder=Description]').should('exist').and('be.visible').and('be.empty').type('Managed Server');
-    if(screenshot) {
-      cy.screenshot('BDeploy_Central_Attach_Info')
-    }
-    cy.contains('button', 'Next').should('exist').and('be.enabled').scrollIntoView().click();
-  });
+  cy.contains('mat-step-header', 'Additional Information')
+    .parent()
+    .within((e) => {
+      cy.get('input[data-placeholder=Description]')
+        .should('exist')
+        .and('be.visible')
+        .and('be.empty')
+        .type('Managed Server');
+      if (screenshot) {
+        cy.screenshot('BDeploy_Central_Attach_Info');
+      }
+      cy.contains('button', 'Next').should('exist').and('be.enabled').scrollIntoView().click();
+    });
 
   // magic happens here in the background :)
 
-  if(screenshot) {
+  if (screenshot) {
     cy.waitUntilContentLoaded();
-    cy.contains('mat-step-header', 'Done').parent().within(e => {
-      cy.contains('button', 'Done').should('exist').and('be.enabled').scrollIntoView();
-    });
+    cy.contains('mat-step-header', 'Done')
+      .parent()
+      .within((e) => {
+        cy.contains('button', 'Done').should('exist').and('be.enabled').scrollIntoView();
+      });
     cy.wait(100); // animation
-    cy.screenshot('BDeploy_Central_Attach_Done')
+    cy.screenshot('BDeploy_Central_Attach_Done');
   }
 
-  cy.contains('mat-step-header', 'Done').parent().within(e => {
-    cy.contains('button', 'Done').should('exist').and('be.enabled').scrollIntoView().click();
-  });
+  cy.contains('mat-step-header', 'Done')
+    .parent()
+    .within((e) => {
+      cy.contains('button', 'Done').should('exist').and('be.enabled').scrollIntoView().click();
+    });
 
   // we're on the managed servers page again now. verify server exists and can be sync'd.
-  cy.contains('mat-expansion-panel', 'Managed Server').should('exist').and('be.visible').within(e => {
-    cy.contains('button', 'Synchronize').should('exist').and('be.enabled').click();
+  cy.contains('mat-expansion-panel', 'Managed Server')
+    .should('exist')
+    .and('be.visible')
+    .within((e) => {
+      cy.contains('button', 'Synchronize').should('exist').and('be.enabled').click();
 
-    // don't use waitUntilContentLoaded as it does not work in within blocks.
-    cy.get('mat-spinner').should('not.exist');
+      // don't use waitUntilContentLoaded as it does not work in within blocks.
+      cy.get('mat-spinner').should('not.exist');
 
-    cy.contains('span', 'Last sync').should('contain.text', new Date().getFullYear());
-    cy.contains('td', 'flight_takeoff').should('exist'); // the aeroplane
-  });
+      cy.contains('span', 'Last sync').should('contain.text', new Date().getFullYear());
+      cy.contains('td', 'flight_takeoff').should('exist'); // the aeroplane
+    });
 
-  if(screenshot) {
-    cy.screenshot('BDeploy_Central_Managed_Servers_Sync')
+  if (screenshot) {
+    cy.screenshot('BDeploy_Central_Managed_Servers_Sync');
   }
-})
+});

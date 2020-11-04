@@ -8,13 +8,11 @@ import { ConfigService } from './config.service';
   providedIn: 'root',
 })
 export class SystemService {
-
   private recovering = false;
 
   constructor(private configService: ConfigService, private dialog: MatDialog) {}
 
   public backendUnreachable(): void {
-
     if (!this.recovering) {
       this.recovering = true;
 
@@ -27,15 +25,13 @@ export class SystemService {
 
       const dialogRef = this.dialog.open(ConnectionLostComponent, config);
 
-      this.configService.tryGetBackendInfo().pipe(
-        retryWhen(errors => errors.pipe(delay(2000)))
-      ).subscribe(
-        r => {
+      this.configService
+        .tryGetBackendInfo()
+        .pipe(retryWhen((errors) => errors.pipe(delay(2000))))
+        .subscribe((r) => {
           dialogRef.close();
           this.recovering = false;
-        }
-      );
-      }
+        });
+    }
   }
 }
-

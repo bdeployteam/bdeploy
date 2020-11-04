@@ -14,10 +14,7 @@ import { FormBuilder } from '@angular/forms';
 import { NgTerminal } from 'ng-terminal';
 import { Observable, Subscription } from 'rxjs';
 import { IDisposable } from 'xterm';
-import {
-  InstanceDirectoryEntry,
-  StringEntryChunkDto
-} from '../../../../models/gen.dtos';
+import { InstanceDirectoryEntry, StringEntryChunkDto } from '../../../../models/gen.dtos';
 import { InstanceService } from '../../../instance/services/instance.service';
 
 const MAX_TAIL = 512 * 1024; // 512KB max initial fetch.
@@ -27,8 +24,7 @@ const MAX_TAIL = 512 * 1024; // 512KB max initial fetch.
   templateUrl: './file-viewer.component.html',
   styleUrls: ['./file-viewer.component.css'],
 })
-export class FileViewerComponent
-  implements OnInit, AfterViewInit, OnChanges, OnDestroy {
+export class FileViewerComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
   // Sequences documentation: https://xtermjs.org/docs/api/vtfeatures/
   static ESC = '\u001b'; // ESC
   static SC: string = FileViewerComponent.ESC + '7'; // Save Cursor
@@ -42,10 +38,7 @@ export class FileViewerComponent
 
   @Input() title: string;
   @Input() initialEntry: () => Observable<InstanceDirectoryEntry>;
-  @Input() contentFetcher: (
-    offset: number,
-    length: number
-  ) => Observable<StringEntryChunkDto>;
+  @Input() contentFetcher: (offset: number, length: number) => Observable<StringEntryChunkDto>;
   @Input() contentDownloader: () => void;
   @Input() follow = false;
 
@@ -60,9 +53,7 @@ export class FileViewerComponent
     return this.term.underlying ? this.term.underlying.cols : undefined;
   }
   get cursorX() {
-    return this.term.underlying
-      ? this.term.underlying.buffer.active.cursorX
-      : undefined;
+    return this.term.underlying ? this.term.underlying.buffer.active.cursorX : undefined;
   }
   content = '';
   private timer;
@@ -75,10 +66,7 @@ export class FileViewerComponent
   initialCursorX: number; // cursor posX after terminal output (input field origin X)
   inputLineHeight_sav: number;
 
-  constructor(
-    private fb: FormBuilder,
-    private instanceService: InstanceService
-  ) {}
+  constructor(private fb: FormBuilder, private instanceService: InstanceService) {}
 
   ngOnInit() {
     this.loadInitial();
@@ -211,8 +199,7 @@ export class FileViewerComponent
             if (this.bufferCursorPos > 0) {
               this.clearInput();
               this.buffer =
-                this.buffer.substring(0, this.bufferCursorPos - 1) +
-                this.buffer.substring(this.bufferCursorPos);
+                this.buffer.substring(0, this.bufferCursorPos - 1) + this.buffer.substring(this.bufferCursorPos);
               this.bufferCursorPos--;
               this.updateInput();
             }
@@ -231,13 +218,10 @@ export class FileViewerComponent
               if (idx < input.length) {
                 switch (input[idx]) {
                   case 'C': // cursor right
-                    this.bufferCursorPos =
-                      this.bufferCursorPos +
-                      (this.buffer.length > this.bufferCursorPos ? 1 : 0);
+                    this.bufferCursorPos = this.bufferCursorPos + (this.buffer.length > this.bufferCursorPos ? 1 : 0);
                     break;
                   case 'D': // cursor left
-                    this.bufferCursorPos =
-                      this.bufferCursorPos - (this.bufferCursorPos > 0 ? 1 : 0);
+                    this.bufferCursorPos = this.bufferCursorPos - (this.bufferCursorPos > 0 ? 1 : 0);
                     break;
                   case 'H': // pos 1
                     this.bufferCursorPos = 0;
@@ -295,16 +279,11 @@ export class FileViewerComponent
     this.term.write(this.buffer);
     this.term.write(FileViewerComponent.RC); // restore cursor
     this.term.write(this.buffer.substr(0, this.bufferCursorPos));
-    this.inputLineHeight_sav = Math.max(
-      this.inputLineHeight_sav,
-      this.getInputLineCount()
-    );
+    this.inputLineHeight_sav = Math.max(this.inputLineHeight_sav, this.getInputLineCount());
   }
 
   public getInputLineCount() {
-    return this.buffer
-      ? Math.ceil((this.initialCursorX + this.buffer.length) / this.termCols)
-      : 1;
+    return this.buffer ? Math.ceil((this.initialCursorX + this.buffer.length) / this.termCols) : 1;
   }
 
   public getLineOfCursor() {

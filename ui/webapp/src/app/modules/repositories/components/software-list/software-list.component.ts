@@ -12,10 +12,9 @@ import { SoftwareService } from '../../services/software.service';
 @Component({
   selector: 'app-software-list',
   templateUrl: './software-list.component.html',
-  styleUrls: ['./software-list.component.css']
+  styleUrls: ['./software-list.component.css'],
 })
 export class SoftwareListComponent implements OnInit {
-
   private log = this.loggingService.getLogger('SoftwareListComponent');
 
   @Input() softwareRepositoryName: string;
@@ -30,23 +29,26 @@ export class SoftwareListComponent implements OnInit {
     private softwareService: SoftwareService,
     private loggingService: LoggingService,
     private downloadService: DownloadService,
-    private authService: AuthenticationService) { }
+    private authService: AuthenticationService
+  ) {}
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   delete(softwareVersion: ManifestKey): void {
-    this.messageBoxService.open({
-      title: 'Delete',
-      message: 'Do you really want to delete the software version ' + softwareVersion.name + ':' + softwareVersion.tag + '?',
-      mode: MessageBoxMode.CONFIRM,
-    }).subscribe(r => {
-      if (r) {
-        this.softwareService.deleteSoftwareVersion(this.softwareRepositoryName, softwareVersion).subscribe(_ => {
-          this.deleted.emit();
-        });
-      }
-    });
+    this.messageBoxService
+      .open({
+        title: 'Delete',
+        message:
+          'Do you really want to delete the software version ' + softwareVersion.name + ':' + softwareVersion.tag + '?',
+        mode: MessageBoxMode.CONFIRM,
+      })
+      .subscribe((r) => {
+        if (r) {
+          this.softwareService.deleteSoftwareVersion(this.softwareRepositoryName, softwareVersion).subscribe((_) => {
+            this.deleted.emit();
+          });
+        }
+      });
   }
 
   export(softwareVersion: ManifestKey): void {
@@ -54,7 +56,7 @@ export class SoftwareListComponent implements OnInit {
     this.softwareService
       .createSoftwareZip(this.softwareRepositoryName, softwareVersion)
       .pipe(finalize(() => (this.exporting = null)))
-      .subscribe(token => {
+      .subscribe((token) => {
         this.downloadService.download(this.softwareService.downloadSoftware(token));
       });
   }

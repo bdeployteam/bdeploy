@@ -12,7 +12,12 @@ import { AuthenticationService } from 'src/app/modules/core/services/authenticat
 import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
 import { MessageboxService } from 'src/app/modules/shared/services/messagebox.service';
-import { InstanceConfiguration, InstanceDirectory, InstanceDirectoryEntry, StringEntryChunkDto } from '../../../../models/gen.dtos';
+import {
+  InstanceConfiguration,
+  InstanceDirectory,
+  InstanceDirectoryEntry,
+  StringEntryChunkDto
+} from '../../../../models/gen.dtos';
 import { DownloadService } from '../../../shared/services/download.service';
 import { InstanceService } from '../../services/instance.service';
 
@@ -64,20 +69,20 @@ export class DataFilesBrowserComponent implements OnInit {
     private dlService: DownloadService,
     public routingHistoryService: RoutingHistoryService,
     public authService: AuthenticationService,
-    private mbService: MessageboxService,
+    private mbService: MessageboxService
   ) {}
 
   public ngOnInit(): void {
     this.instanceService
       .getInstanceVersion(this.groupParam, this.uuidParam, this.versionParam)
-      .subscribe(instanceVersion => {
+      .subscribe((instanceVersion) => {
         this.instanceVersion = instanceVersion;
       });
     this.reload();
   }
 
   public reload() {
-    this.instanceService.listDataDirSnapshot(this.groupParam, this.uuidParam).subscribe(instanceDirectories => {
+    this.instanceService.listDataDirSnapshot(this.groupParam, this.uuidParam).subscribe((instanceDirectories) => {
       this.instanceDirectories = instanceDirectories.sort((a, b) => {
         if (a.minion === 'master') {
           return -1;
@@ -102,17 +107,26 @@ export class DataFilesBrowserComponent implements OnInit {
   }
 
   public download(instanceDirectory: InstanceDirectory, instanceDirectoryEntry: InstanceDirectoryEntry) {
-    this.instanceService
-      .downloadDataFileContent(this.groupParam, this.uuidParam, instanceDirectory, instanceDirectoryEntry);
+    this.instanceService.downloadDataFileContent(
+      this.groupParam,
+      this.uuidParam,
+      instanceDirectory,
+      instanceDirectoryEntry
+    );
   }
 
   public async delete(instanceDirectory: InstanceDirectory, instanceDirectoryEntry: InstanceDirectoryEntry) {
-    const confirm = await this.mbService.openAsync({title: 'Confirm Delete', message: `Really delete ${instanceDirectoryEntry.path}?`, mode: MessageBoxMode.CONFIRM_WARNING});
+    const confirm = await this.mbService.openAsync({
+      title: 'Confirm Delete',
+      message: `Really delete ${instanceDirectoryEntry.path}?`,
+      mode: MessageBoxMode.CONFIRM_WARNING,
+    });
     if (!confirm) {
       return;
     }
     this.instanceService
-      .deleteDataFile(this.groupParam, this.uuidParam, instanceDirectory, instanceDirectoryEntry).subscribe(_ => {
+      .deleteDataFile(this.groupParam, this.uuidParam, instanceDirectory, instanceDirectoryEntry)
+      .subscribe((_) => {
         this.reload();
       });
   }
@@ -172,19 +186,25 @@ export class DataFilesBrowserComponent implements OnInit {
         this.activeInstanceDirectoryEntry,
         offset,
         limit,
-        true,
+        true
       );
     };
   }
 
   getContentDownloader(): () => void {
-    return () => this.instanceService.downloadDataFileContent(this.groupParam, this.uuidParam, this.activeInstanceDirectory, this.activeInstanceDirectoryEntry);
+    return () =>
+      this.instanceService.downloadDataFileContent(
+        this.groupParam,
+        this.uuidParam,
+        this.activeInstanceDirectory,
+        this.activeInstanceDirectoryEntry
+      );
   }
 
   openOutputOverlay(
     instanceDirectory: InstanceDirectory,
     instanceDirectoryEntry: InstanceDirectoryEntry,
-    template: TemplateRef<any>,
+    template: TemplateRef<any>
   ) {
     this.activeInstanceDirectory = instanceDirectory;
     this.activeInstanceDirectoryEntry = instanceDirectoryEntry;
@@ -194,11 +214,7 @@ export class DataFilesBrowserComponent implements OnInit {
     this.overlayRef = this.overlay.create({
       height: '90%',
       width: '90%',
-      positionStrategy: this.overlay
-        .position()
-        .global()
-        .centerHorizontally()
-        .centerVertically(),
+      positionStrategy: this.overlay.position().global().centerHorizontally().centerVertically(),
       hasBackdrop: true,
       disposeOnNavigation: true,
     });

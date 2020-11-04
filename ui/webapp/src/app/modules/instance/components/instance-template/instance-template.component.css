@@ -77,7 +77,7 @@ mat-button-toggle-group {
   flex-direction: column;
 }
 
-::ng-deep .mat-horizontal-stepper-header{
+::ng-deep .mat-horizontal-stepper-header {
   pointer-events: none !important;
 }
 

@@ -2,13 +2,23 @@
   <mat-toolbar>
     <mat-toolbar-row>
       <span>{{ title }}</span>
-      <div class='spacer'></div>
+      <div class="spacer"></div>
       <div *ngIf="supportsStdin && hasStdin && follow" class="connected"><mat-icon>input</mat-icon>STDIN</div>
-      <div *ngIf="supportsStdin && !hasStdin" class="disconnected" matTooltip="You may need to restart the process">STDIN DISCONNECTED</div>
-      <mat-slide-toggle (change)='onToggleFollow($event.checked)' [checked]='follow' class='smaller-toggle' [disabled]='!canFollow()'>Follow</mat-slide-toggle>
-      <button mat-icon-button *ngIf='contentDownloader' (click)='contentDownloader()'><mat-icon>cloud_download</mat-icon></button>
-      <button mat-icon-button (click)='loadInitial()'><mat-icon>refresh</mat-icon></button>
-      <button mat-icon-button (click)='closeEvent.emit()'><mat-icon>close</mat-icon></button>
+      <div *ngIf="supportsStdin && !hasStdin" class="disconnected" matTooltip="You may need to restart the process">
+        STDIN DISCONNECTED
+      </div>
+      <mat-slide-toggle
+        (change)="onToggleFollow($event.checked)"
+        [checked]="follow"
+        class="smaller-toggle"
+        [disabled]="!canFollow()"
+        >Follow</mat-slide-toggle
+      >
+      <button mat-icon-button *ngIf="contentDownloader" (click)="contentDownloader()">
+        <mat-icon>cloud_download</mat-icon>
+      </button>
+      <button mat-icon-button (click)="loadInitial()"><mat-icon>refresh</mat-icon></button>
+      <button mat-icon-button (click)="closeEvent.emit()"><mat-icon>close</mat-icon></button>
     </mat-toolbar-row>
   </mat-toolbar>
   <div class="content" #contentDiv>

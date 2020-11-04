@@ -5,10 +5,7 @@ import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { catchError, finalize } from 'rxjs/operators';
 import { PluginInfoDto } from 'src/app/models/gen.dtos';
-import {
-  Logger,
-  LoggingService
-} from 'src/app/modules/core/services/logging.service';
+import { Logger, LoggingService } from 'src/app/modules/core/services/logging.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { FileUploadComponent } from 'src/app/modules/shared/components/file-upload/file-upload.component';
 import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
@@ -23,26 +20,15 @@ import { PluginAdminService } from '../../services/plugin-admin.service';
   providers: [SettingsService],
 })
 export class PluginsBrowserComponent implements OnInit, AfterViewInit {
-  private log: Logger = this.loggingService.getLogger(
-    'PluginsBrowserComponent'
-  );
+  private log: Logger = this.loggingService.getLogger('PluginsBrowserComponent');
 
   public INITIAL_SORT_COLUMN = 'name';
   public INITIAL_SORT_DIRECTION = 'asc';
 
-  public dataSource: MatTableDataSource<PluginInfoDto> = new MatTableDataSource<
-    PluginInfoDto
-  >([]);
+  public dataSource: MatTableDataSource<PluginInfoDto> = new MatTableDataSource<PluginInfoDto>([]);
   private filterPredicate: (d, f) => boolean;
 
-  public displayedColumns: string[] = [
-    'global',
-    'name',
-    'version',
-    'editors',
-    'loaded',
-    'actions',
-  ];
+  public displayedColumns: string[] = ['global', 'name', 'version', 'editors', 'loaded', 'actions'];
 
   @ViewChild(MatPaginator)
   paginator: MatPaginator;
@@ -156,13 +142,7 @@ export class PluginsBrowserComponent implements OnInit, AfterViewInit {
         if (status.detail == null) {
           return 'Skipping, already loaded from another location!';
         } else {
-          return (
-            'Installed and loaded plugin ' +
-            status.detail.name +
-            ' (' +
-            status.detail.version +
-            ')'
-          );
+          return 'Installed and loaded plugin ' + status.detail.name + ' (' + status.detail.version + ')';
         }
       },
     };

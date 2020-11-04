@@ -32,8 +32,8 @@ export class MasterCleanupComponent implements OnInit, OnDestroy {
     this.cleanupService
       .calculateCleanup()
       .pipe(finalize(() => (this.loadingCleanupModel = false)))
-      .subscribe(r => {
-        this.cleanupModel = r.filter(g => g.actions.length > 0);
+      .subscribe((r) => {
+        this.cleanupModel = r.filter((g) => g.actions.length > 0);
         this.clearCounter = 600;
         this.clearCountDownHandle = setInterval(() => this.clearCountDown(), 1000);
       });
@@ -69,9 +69,9 @@ export class MasterCleanupComponent implements OnInit, OnDestroy {
         finalize(() => {
           this.performingCleanupModel = false;
           this.cleanupModel = null;
-        }),
+        })
       )
-      .subscribe(r => {});
+      .subscribe((r) => {});
   }
 
   hasAction(): boolean {

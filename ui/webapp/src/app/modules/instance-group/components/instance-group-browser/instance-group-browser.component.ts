@@ -14,13 +14,19 @@ import { InstanceGroupService } from '../../services/instance-group.service';
   selector: 'app-instance-group-browser',
   templateUrl: './instance-group-browser.component.html',
   styleUrls: ['./instance-group-browser.component.css'],
-  providers: [SettingsService]
+  providers: [SettingsService],
 })
 export class InstanceGroupBrowserComponent implements OnInit, OnDestroy {
   private readonly log: Logger = this.loggingService.getLogger('InstanceGroupBrowserComponent');
 
   private subscription: Subscription;
-  private grid = new Map([['xs', 1], ['sm', 1], ['md', 2], ['lg', 3], ['xl', 5]]);
+  private grid = new Map([
+    ['xs', 1],
+    ['sm', 1],
+    ['md', 2],
+    ['lg', 3],
+    ['xl', 5],
+  ]);
   // calculated number of columns
   columns = 3;
 
@@ -40,7 +46,8 @@ export class InstanceGroupBrowserComponent implements OnInit, OnDestroy {
     private loggingService: LoggingService,
     public authService: AuthenticationService,
     public settings: SettingsService,
-    private config: ConfigService) { }
+    private config: ConfigService
+  ) {}
 
   ngOnInit(): void {
     this.instanceGroupList = new DataList();
@@ -51,8 +58,11 @@ export class InstanceGroupBrowserComponent implements OnInit, OnDestroy {
       if (group.description.toLowerCase().includes(text)) {
         return true;
       }
-      const attributes: {[index: string]: string } = this.instanceGroupsAttributes[group.name].attributes;
-      if (attributes && Object.keys(attributes).find(a => attributes[a] && attributes[a].toLowerCase().includes(text))) {
+      const attributes: { [index: string]: string } = this.instanceGroupsAttributes[group.name].attributes;
+      if (
+        attributes &&
+        Object.keys(attributes).find((a) => attributes[a] && attributes[a].toLowerCase().includes(text))
+      ) {
         return true;
       }
       return false;
@@ -63,13 +73,13 @@ export class InstanceGroupBrowserComponent implements OnInit, OnDestroy {
       this.columns = this.grid.get(change[0].mqAlias);
     });
     this.subscription.add(
-      this.instanceGroupList.searchChange.subscribe(v => {
+      this.instanceGroupList.searchChange.subscribe((v) => {
         if (v === null || v.length === 0) {
           this.displayRecent.next(this.recent.length !== 0);
         } else {
           this.displayRecent.next(false);
         }
-      }),
+      })
     );
 
     this.loadInstanceGroups();
@@ -81,8 +91,9 @@ export class InstanceGroupBrowserComponent implements OnInit, OnDestroy {
       instanceGroups: this.instanceGroupService.listInstanceGroups(),
       instanceGroupsAttributes: this.instanceGroupService.listInstanceGroupsAttributes(),
       recent: this.authService.getRecentInstanceGroups(),
-    }).pipe(finalize(() => this.loading = false))
-      .subscribe(r => {
+    })
+      .pipe(finalize(() => (this.loading = false)))
+      .subscribe((r) => {
         this.instanceGroupList.addAll(r.instanceGroups);
         this.instanceGroupsAttributes = r.instanceGroupsAttributes;
         this.recent = r.recent;
@@ -96,15 +107,15 @@ export class InstanceGroupBrowserComponent implements OnInit, OnDestroy {
 
   removeGroup(group: InstanceGroupConfiguration) {
     this.log.debug('got remove event');
-    const index = this.recent.findIndex(r => r === group.name);
+    const index = this.recent.findIndex((r) => r === group.name);
     this.recent.splice(index, 1);
-    this.instanceGroupList.remove(g => g.name === group.name);
+    this.instanceGroupList.remove((g) => g.name === group.name);
   }
 
   public filterRecent(groups: string[]): InstanceGroupConfiguration[] {
     const result: InstanceGroupConfiguration[] = [];
     for (const name of groups) {
-      const index = this.instanceGroupList.data.findIndex(v => v.name === name);
+      const index = this.instanceGroupList.data.findIndex((v) => v.name === name);
       if (index >= 0) {
         result.push(this.instanceGroupList.data[index]);
       }
@@ -113,7 +124,7 @@ export class InstanceGroupBrowserComponent implements OnInit, OnDestroy {
   }
 
   isAddAllowed(): boolean {
-    return (this.config.config.mode === MinionMode.CENTRAL || this.config.config.mode === MinionMode.STANDALONE);
+    return this.config.config.mode === MinionMode.CENTRAL || this.config.config.mode === MinionMode.STANDALONE;
   }
 
   isAttachAllowed(): boolean {
@@ -125,7 +136,8 @@ export class InstanceGroupBrowserComponent implements OnInit, OnDestroy {
   }
 
   getGroupsByAttribute(attributeValue: string): InstanceGroupConfiguration[] {
-    return this.instanceGroupList.filtered.filter(g => this.instanceGroupsAttributes[g.name].attributes[this.groupAttribute] == attributeValue);
+    return this.instanceGroupList.filtered.filter(
+      (g) => this.instanceGroupsAttributes[g.name].attributes[this.groupAttribute] == attributeValue
+    );
   }
-
 }

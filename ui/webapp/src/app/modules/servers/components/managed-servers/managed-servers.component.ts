@@ -9,15 +9,19 @@ import { ManagedServersService } from '../../services/managed-servers.service';
 @Component({
   selector: 'app-managed-servers',
   templateUrl: './managed-servers.component.html',
-  styleUrls: ['./managed-servers.component.css']
+  styleUrls: ['./managed-servers.component.css'],
 })
 export class ManagedServersComponent implements OnInit {
-
   instanceGroupName: string = this.route.snapshot.paramMap.get('group');
   managedServers: ManagedMasterDto[];
   loading = true;
 
-  constructor(private route: ActivatedRoute, public location: Location, private managedServersService: ManagedServersService, public routingHistoryService:RoutingHistoryService) { }
+  constructor(
+    private route: ActivatedRoute,
+    public location: Location,
+    private managedServersService: ManagedServersService,
+    public routingHistoryService: RoutingHistoryService
+  ) {}
 
   ngOnInit() {
     this.load();
@@ -25,9 +29,11 @@ export class ManagedServersComponent implements OnInit {
 
   load() {
     this.loading = true;
-    this.managedServersService.getManagedServers(this.instanceGroupName).pipe(finalize(() => this.loading = false)).subscribe(r => {
-      this.managedServers = r.sort((a, b) => a.hostName.localeCompare(b.hostName));
-    });
+    this.managedServersService
+      .getManagedServers(this.instanceGroupName)
+      .pipe(finalize(() => (this.loading = false)))
+      .subscribe((r) => {
+        this.managedServers = r.sort((a, b) => a.hostName.localeCompare(b.hostName));
+      });
   }
-
 }

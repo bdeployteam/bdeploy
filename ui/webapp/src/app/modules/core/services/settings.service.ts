@@ -6,7 +6,6 @@ import { ConfigService } from './config.service';
 
 @Injectable()
 export class SettingsService {
-
   private loading = true;
   private settings: SettingsConfiguration;
   private origSettings: SettingsConfiguration;
@@ -17,7 +16,7 @@ export class SettingsService {
 
   private load() {
     this.loading = true;
-    this.http.get<SettingsConfiguration>(this.config.config.api + '/master/settings').subscribe(r => {
+    this.http.get<SettingsConfiguration>(this.config.config.api + '/master/settings').subscribe((r) => {
       this.settings = r;
       this.origSettings = cloneDeep(this.settings);
       this.loading = false;
@@ -42,7 +41,7 @@ export class SettingsService {
 
   public save() {
     this.loading = true;
-    this.http.post<SettingsConfiguration>(this.config.config.api + '/master/settings', this.settings).subscribe(_ => {
+    this.http.post<SettingsConfiguration>(this.config.config.api + '/master/settings', this.settings).subscribe((_) => {
       this.load();
     });
   }

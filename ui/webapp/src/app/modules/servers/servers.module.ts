@@ -11,8 +11,6 @@ import { ManagedServersComponent } from './components/managed-servers/managed-se
 import { ProductSyncComponent } from './components/product-sync/product-sync.component';
 import { ServersRoutingModule } from './servers-routing.module';
 
-
-
 @NgModule({
   declarations: [
     AttachCentralComponent,
@@ -20,17 +18,9 @@ import { ServersRoutingModule } from './servers-routing.module';
     ManagedServersComponent,
     ManagedServerDetailComponent,
     ProductSyncComponent,
-    ManagedServerEditComponent
+    ManagedServerEditComponent,
   ],
-  entryComponents: [
-    ManagedServerEditComponent
-  ],
-  imports: [
-    CommonModule,
-    SharedModule,
-    CoreModule,
-    ServersRoutingModule,
-    DragulaModule.forRoot(),
-  ]
+  entryComponents: [ManagedServerEditComponent],
+  imports: [CommonModule, SharedModule, CoreModule, ServersRoutingModule, DragulaModule.forRoot()],
 })
-export class ServersModule { }
+export class ServersModule {}

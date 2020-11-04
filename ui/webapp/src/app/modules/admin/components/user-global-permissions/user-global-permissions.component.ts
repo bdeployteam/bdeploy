@@ -5,13 +5,12 @@ import { Permission, UserInfo } from 'src/app/models/gen.dtos';
 @Component({
   selector: 'app-user-global-permissions',
   templateUrl: './user-global-permissions.component.html',
-  styleUrls: ['./user-global-permissions.component.css']
+  styleUrls: ['./user-global-permissions.component.css'],
 })
 export class UserGlobalPermissionsComponent implements OnInit {
-
   public slider = 0;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public userInfo: UserInfo) { }
+  constructor(@Inject(MAT_DIALOG_DATA) public userInfo: UserInfo) {}
 
   public ngOnInit() {
     if (this.hasPermission(Permission.ADMIN)) {
@@ -26,7 +25,7 @@ export class UserGlobalPermissionsComponent implements OnInit {
   }
 
   private hasPermission(permission: Permission): boolean {
-    return this.userInfo.permissions.find(c => !c.scope && c.permission === permission) != null;
+    return this.userInfo.permissions.find((c) => !c.scope && c.permission === permission) != null;
   }
 
   public setSlider(val: number) {
@@ -38,19 +37,18 @@ export class UserGlobalPermissionsComponent implements OnInit {
   }
 
   public getResult(): UserInfo {
-    this.userInfo.permissions = this.userInfo.permissions.filter(c => c.scope);
+    this.userInfo.permissions = this.userInfo.permissions.filter((c) => c.scope);
     switch (this.slider) {
       case 1:
-        this.userInfo.permissions.push({scope: null, permission: Permission.READ});
+        this.userInfo.permissions.push({ scope: null, permission: Permission.READ });
         break;
       case 2:
-        this.userInfo.permissions.push({scope: null, permission: Permission.WRITE});
+        this.userInfo.permissions.push({ scope: null, permission: Permission.WRITE });
         break;
       case 3:
-        this.userInfo.permissions.push({scope: null, permission: Permission.ADMIN});
+        this.userInfo.permissions.push({ scope: null, permission: Permission.ADMIN });
         break;
     }
     return this.userInfo;
   }
-
 }

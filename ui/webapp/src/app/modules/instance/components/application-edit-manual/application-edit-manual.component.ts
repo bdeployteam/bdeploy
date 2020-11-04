@@ -56,7 +56,7 @@ export class ApplicationEditManualComponent implements OnInit {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public context: Context,
-    public dialogRef: MatDialogRef<ApplicationEditManualComponent>,
+    public dialogRef: MatDialogRef<ApplicationEditManualComponent>
   ) {}
 
   ngOnInit() {
@@ -90,7 +90,7 @@ export class ApplicationEditManualComponent implements OnInit {
     this.updatePredecessors();
 
     // Trigger calculation if something changes
-    this.formGroup.valueChanges.subscribe(val => {
+    this.formGroup.valueChanges.subscribe((val) => {
       this.updateDirtyState();
       this.updatePredecessors();
     });
@@ -105,11 +105,11 @@ export class ApplicationEditManualComponent implements OnInit {
     uidCtrl.setValidators([
       Validators.required,
       ParameterValidators.uidPattern,
-      ParameterValidators.unique(validated => {
+      ParameterValidators.unique((validated) => {
         return this.getReservedUids(validated);
       }),
     ]);
-    uidCtrl.valueChanges.subscribe(value => {
+    uidCtrl.valueChanges.subscribe((value) => {
       row.value.uid = value;
     });
 
@@ -117,11 +117,11 @@ export class ApplicationEditManualComponent implements OnInit {
 
     const predecessorCtrl = new FormControl(row.value.predecessorUid);
     predecessorCtrl.setValidators([
-      ParameterValidators.unique(validated => {
+      ParameterValidators.unique((validated) => {
         return this.getReferencedPredecessors(validated);
       }),
     ]);
-    predecessorCtrl.valueChanges.subscribe(value => {
+    predecessorCtrl.valueChanges.subscribe((value) => {
       row.value.predecessorUid = value;
     });
 
@@ -148,7 +148,7 @@ export class ApplicationEditManualComponent implements OnInit {
   }
 
   getParametersOfGroup(groupName: string): NamedParameter[] {
-    return this.availableParameters.filter(np => np.group === groupName);
+    return this.availableParameters.filter((np) => np.group === groupName);
   }
 
   applyFilter(filterValue: string) {
@@ -228,7 +228,7 @@ export class ApplicationEditManualComponent implements OnInit {
 
     // Remove all entries referring to a custom group
     // Required when the user changes an existing ID that is already referenced
-    this.availableParameters = this.availableParameters.filter(np => np.group !== GroupNames.CUSTOM_PARAMETERS);
+    this.availableParameters = this.availableParameters.filter((np) => np.group !== GroupNames.CUSTOM_PARAMETERS);
 
     // Append all elements that are defined in the form
     for (const row of this.dataSource.data) {
@@ -237,7 +237,7 @@ export class ApplicationEditManualComponent implements OnInit {
         continue;
       }
       const uid = ctrl.value;
-      if (this.availableParameters.find(np => np.uid === uid)) {
+      if (this.availableParameters.find((np) => np.uid === uid)) {
         continue;
       }
       this.availableParameters.push(new NamedParameter(uid, uid, GroupNames.CUSTOM_PARAMETERS));

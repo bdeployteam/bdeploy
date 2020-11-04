@@ -1,7 +1,14 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { CustomAttributesRecord, InstanceClientAppsDto, InstanceGroupConfiguration, OperatingSystem, UserInfo, UserPermissionUpdateDto } from '../../../models/gen.dtos';
+import {
+  CustomAttributesRecord,
+  InstanceClientAppsDto,
+  InstanceGroupConfiguration,
+  OperatingSystem,
+  UserInfo,
+  UserPermissionUpdateDto
+} from '../../../models/gen.dtos';
 import { ConfigService } from '../../core/services/config.service';
 import { Logger, LoggingService } from '../../core/services/logging.service';
 import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
@@ -25,7 +32,7 @@ export class InstanceGroupService {
   public listClientApps(name: string, os: OperatingSystem): Observable<InstanceClientAppsDto[]> {
     const url: string = this.cfg.config.api + InstanceGroupService.BASEPATH + '/' + name + '/client-apps';
     const options = {
-      params: new HttpParams().set('os', os.toUpperCase())
+      params: new HttpParams().set('os', os.toUpperCase()),
     };
     this.log.debug('listClientApps: ' + url);
     return this.http.get<InstanceClientAppsDto[]>(url, options);
@@ -74,7 +81,6 @@ export class InstanceGroupService {
     return this.http.post(url, permissions);
   }
 
-
   public createUuid(name: string): Observable<string> {
     const url: string = this.cfg.config.api + InstanceGroupService.BASEPATH + '/' + name + '/new-uuid';
     this.log.debug('createUuid: ' + url);
@@ -116,5 +122,4 @@ export class InstanceGroupService {
     this.log.debug('updateInstanceGroupAttributes: ' + url);
     return this.http.post(url, properties);
   }
-
 }

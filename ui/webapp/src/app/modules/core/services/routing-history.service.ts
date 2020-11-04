@@ -11,16 +11,14 @@ export class RoutingHistoryService {
   private routedBack = false;
 
   constructor(private router: Router, private location: Location) {
-    router.events
-      .pipe(filter((e) => e instanceof NavigationStart))
-      .subscribe((e: NavigationStart) => {
-        if (e.navigationTrigger === 'popstate') {
-          this.routedBack = true;
-          if (this.offset > 0) {
-            this.offset--;
-          }
+    router.events.pipe(filter((e) => e instanceof NavigationStart)).subscribe((e: NavigationStart) => {
+      if (e.navigationTrigger === 'popstate') {
+        this.routedBack = true;
+        if (this.offset > 0) {
+          this.offset--;
         }
-      });
+      }
+    });
     router.events
       .pipe(
         filter((e) => e instanceof RoutesRecognized),

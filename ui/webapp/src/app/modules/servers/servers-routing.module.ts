@@ -13,33 +13,33 @@ const SERVERS_ROUTES: Route[] = [
     component: AttachCentralComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Attach to Central Server', header: 'Attach to Central Server' }
+    data: { title: 'Attach to Central Server', header: 'Attach to Central Server' },
   },
   {
     path: 'attach/managed/:group',
     component: AttachManagedComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Attach Managed Server', header: 'Attach Managed Server' }
+    data: { title: 'Attach Managed Server', header: 'Attach Managed Server' },
   },
   {
     path: 'browser/:group',
     component: ManagedServersComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Managed Servers', header: 'Managed Servers' }
+    data: { title: 'Managed Servers', header: 'Managed Servers' },
   },
   {
     path: 'product-sync/:group',
     component: ProductSyncComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Transfer Product Versions (${params["group"]})', header: 'Transfer Product Versions' }
+    data: { title: 'Transfer Product Versions (${params["group"]})', header: 'Transfer Product Versions' },
   },
-]
+];
 
 @NgModule({
   imports: [RouterModule.forChild(SERVERS_ROUTES)],
   exports: [RouterModule],
 })
-export class ServersRoutingModule { }
+export class ServersRoutingModule {}

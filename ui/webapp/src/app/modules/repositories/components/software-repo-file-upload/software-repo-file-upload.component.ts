@@ -1,28 +1,11 @@
-import {
-  Component,
-  ElementRef,
-  Inject,
-  OnInit,
-  ViewChild
-} from '@angular/core';
+import { Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import { forkJoin } from 'rxjs';
 import { ManifestKey, OperatingSystem } from 'src/app/models/gen.dtos';
-import {
-  ErrorMessage,
-  LoggingService
-} from 'src/app/modules/core/services/logging.service';
-import {
-  ActivitySnapshotTreeNode,
-  RemoteEventsService
-} from 'src/app/modules/shared/services/remote-events.service';
-import {
-  UploadService,
-  UploadState,
-  UploadStatus,
-  UrlParameter
-} from 'src/app/modules/shared/services/upload.service';
+import { ErrorMessage, LoggingService } from 'src/app/modules/core/services/logging.service';
+import { ActivitySnapshotTreeNode, RemoteEventsService } from 'src/app/modules/shared/services/remote-events.service';
+import { UploadService, UploadState, UploadStatus, UrlParameter } from 'src/app/modules/shared/services/upload.service';
 import { SoftwareService } from '../../services/software.service';
 
 const ALL_OS: OperatingSystem[] = [
@@ -86,9 +69,7 @@ export class SoftwareRepoFileUploadComponent implements OnInit {
     // start event source - can't filter by narrow scope as there might be multiple uploads
     this.ws = this.eventService.createActivitiesWebSocket([]);
     this.ws.addEventListener('error', (err) => {
-      this.log.errorWithGuiMessage(
-        new ErrorMessage('Error while processing events', err)
-      );
+      this.log.errorWithGuiMessage(new ErrorMessage('Error while processing events', err));
     });
     this.ws.addEventListener('message', (e) => this.onEventReceived(e));
   }
@@ -103,11 +84,7 @@ export class SoftwareRepoFileUploadComponent implements OnInit {
       // each received event's root scope must match a scope of an UploadStatus object.
       // discard all events where this is not true.
       for (const event of rootEvents) {
-        if (
-          !event.snapshot ||
-          !event.snapshot.scope ||
-          event.snapshot.scope.length < 1
-        ) {
+        if (!event.snapshot || !event.snapshot.scope || event.snapshot.scope.length < 1) {
           continue;
         }
 
@@ -138,9 +115,7 @@ export class SoftwareRepoFileUploadComponent implements OnInit {
   extractMostRelevantMessage(node: ActivitySnapshotTreeNode): string {
     // recurse down, always pick the /last/ child.
     if (node.children && node.children.length > 0) {
-      return this.extractMostRelevantMessage(
-        node.children[node.children.length - 1]
-      );
+      return this.extractMostRelevantMessage(node.children[node.children.length - 1]);
     }
 
     if (!node.snapshot) {
@@ -257,9 +232,7 @@ export class SoftwareRepoFileUploadComponent implements OnInit {
   }
 
   allFilesUploaded() {
-    const oneFailed = Array.from(this.uploads.values()).some(
-      (us) => us.state === UploadState.FAILED
-    );
+    const oneFailed = Array.from(this.uploads.values()).some((us) => us.state === UploadState.FAILED);
     if (oneFailed) {
       this.buttonText = 'Retry Upload';
       this.uploadFinished = false;
@@ -292,10 +265,7 @@ export class SoftwareRepoFileUploadComponent implements OnInit {
     if (!this.getUploadStatus(file)) {
       return false;
     }
-    if (
-      this.hasState(file, this.uploadState.FINISHED) ||
-      this.hasState(file, this.uploadState.FAILED)
-    ) {
+    if (this.hasState(file, this.uploadState.FINISHED) || this.hasState(file, this.uploadState.FAILED)) {
       return false;
     }
     return true;
@@ -336,10 +306,7 @@ export class SoftwareRepoFileUploadComponent implements OnInit {
       return 'Software version already exists. Nothing to do.';
     }
     const softwares: ManifestKey[] = status.detail;
-    return (
-      'Upload successful. New software package(s): ' +
-      softwares.map((key) => key.name + ' ' + key.tag).join(', ')
-    );
+    return 'Upload successful. New software package(s): ' + softwares.map((key) => key.name + ' ' + key.tag).join(', ');
   }
 
   removeFile(file: File) {

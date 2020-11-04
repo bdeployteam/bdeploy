@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
   apiUrl: '/api',
-  logLevel: 2
+  logLevel: 2,
 };

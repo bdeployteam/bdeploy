@@ -3,7 +3,12 @@ import { MAT_BOTTOM_SHEET_DATA } from '@angular/material/bottom-sheet';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
-import { ApplicationConfiguration, OperatingSystem, ProcessDetailDto, ProcessHandleDto } from '../../../../models/gen.dtos';
+import {
+  ApplicationConfiguration,
+  OperatingSystem,
+  ProcessDetailDto,
+  ProcessHandleDto
+} from '../../../../models/gen.dtos';
 import { getAppOs } from '../../../shared/utils/manifest.utils';
 
 @Component({
@@ -51,7 +56,7 @@ export class ProcessListComponent implements OnInit {
 
   initDataSource(parent: ProcessHandleDto) {
     this.dataSource.data.push(parent);
-    parent.children.forEach(child => {
+    parent.children.forEach((child) => {
       this.initDataSource(child);
     });
   }

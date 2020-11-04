@@ -37,7 +37,7 @@ export class ApplicationConfigurationCardComponent implements OnInit {
     public authService: AuthenticationService,
     private mbService: MessageboxService,
     private appService: ApplicationService,
-    private launcherService: LauncherService,
+    private launcherService: LauncherService
   ) {}
 
   ngOnInit() {
@@ -58,11 +58,13 @@ export class ApplicationConfigurationCardComponent implements OnInit {
 
   onCopy() {
     navigator.clipboard.writeText(JSON.stringify(this.appConfig)).then(
-      function() {
+      function () {
         console.log('Copied to clipboard successfully');
-      }, function() {
+      },
+      function () {
         console.error('Unable to write to clipboard.');
-      });
+      }
+    );
   }
 
   onEndpointEdit() {
@@ -75,7 +77,7 @@ export class ApplicationConfigurationCardComponent implements OnInit {
       message: 'Deleting a process <strong>cannot be undone</strong>.',
       mode: MessageBoxMode.CONFIRM_WARNING,
     });
-    resultPromise.subscribe(result => {
+    resultPromise.subscribe((result) => {
       if (result !== true) {
         return;
       }

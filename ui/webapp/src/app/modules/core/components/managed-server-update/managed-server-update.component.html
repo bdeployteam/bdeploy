@@ -5,11 +5,11 @@
     </div>
     <mat-card-title>Software Update</mat-card-title>
     <span class="fill-space"></span>
-    <button *ngIf='showClose' mat-icon-button (click)='closed=true' matTooltip="Close update hint.">
+    <button *ngIf="showClose" mat-icon-button (click)="closed = true" matTooltip="Close update hint.">
       <mat-icon>clear</mat-icon>
     </button>
   </mat-card-header>
-  <mat-card-content class='node-card-content'>
+  <mat-card-content class="node-card-content">
     <div *ngIf="showUpdateHint()">
       <div *ngIf="!updateDto?.forceUpdate">
         A new software update for this server is available and can be installed.
@@ -18,23 +18,32 @@
         A new major software update for this server is available and must be installed to proceed!
       </div>
       <div *ngIf="arePackagesMissing()">
-        The update can either be immediately installed or it can be prepared and installed at a later time.
-        Preparing will only transfer the new version to the target system. It can then be installed at any time.
+        The update can either be immediately installed or it can be prepared and installed at a later time. Preparing
+        will only transfer the new version to the target system. It can then be installed at any time.
       </div>
 
       <div class="version-grid">
         <div>Current Version:</div>
-        <div>{{updateDto.runningVersion | formatVersion}}</div>
+        <div>{{ updateDto.runningVersion | formatVersion }}</div>
         <div></div>
         <div>New Version:</div>
-        <div><strong>{{updateDto.updateVersion | formatVersion }}</strong></div>
-        <div><a *ngIf="!isSnapshot()" href='https://github.com/bdeployteam/bdeploy/releases/tag/v{{updateDto.updateVersion | formatVersion}}' target="_blank">Release Notes (GitHub)</a> </div>
+        <div>
+          <strong>{{ updateDto.updateVersion | formatVersion }}</strong>
+        </div>
+        <div>
+          <a
+            *ngIf="!isSnapshot()"
+            href="https://github.com/bdeployteam/bdeploy/releases/tag/v{{ updateDto.updateVersion | formatVersion }}"
+            target="_blank"
+            >Release Notes (GitHub)</a
+          >
+        </div>
       </div>
     </div>
 
     <div *ngIf="showInProgressHint()">
       <mat-spinner class="update-spinner" diameter="24"></mat-spinner>
-      <span>{{updateStatusText}}</span>
+      <span>{{ updateStatusText }}</span>
     </div>
 
     <div *ngIf="showSuccessHint() || showFailedHint()">
@@ -49,9 +58,12 @@
     </div>
   </mat-card-content>
   <mat-card-actions *ngIf="showUpdateHint()">
-    <button mat-raised-button *ngIf="arePackagesMissing()" (click)='transferUpdates()'>Prepare Update</button>
-    <button mat-raised-button *ngIf="arePackagesMissing()" color="primary" (click)='transferAndInstallUpdates()'>Prepare & Install</button>
-    <button mat-raised-button *ngIf="!arePackagesMissing()" color="primary" (click)='transferAndInstallUpdates()'>Install Update</button>
+    <button mat-raised-button *ngIf="arePackagesMissing()" (click)="transferUpdates()">Prepare Update</button>
+    <button mat-raised-button *ngIf="arePackagesMissing()" color="primary" (click)="transferAndInstallUpdates()">
+      Prepare & Install
+    </button>
+    <button mat-raised-button *ngIf="!arePackagesMissing()" color="primary" (click)="transferAndInstallUpdates()">
+      Install Update
+    </button>
   </mat-card-actions>
 </mat-card>
-

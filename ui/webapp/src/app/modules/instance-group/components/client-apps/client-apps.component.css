@@ -43,7 +43,7 @@
 }
 
 .content-toolbar {
-  display:flex;
+  display: flex;
   flex-direction: row;
   margin-top: 20px;
   margin-right: 65px;

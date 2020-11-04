@@ -31,7 +31,13 @@ declare namespace Cypress {
      * @param version the expected product version
      * @param mode the BDeploy mode to use when navigating
      */
-    verifyProductVersion(group: string, productName: string, productId: string, version: string, mode?: 'STANDALONE' | 'CENTRAL' | 'MANAGED');
+    verifyProductVersion(
+      group: string,
+      productName: string,
+      productId: string,
+      version: string,
+      mode?: 'STANDALONE' | 'CENTRAL' | 'MANAGED'
+    );
 
     /**
      * Delete the instance group with the given name.
@@ -56,7 +62,13 @@ declare namespace Cypress {
      * @returns the UUID of the created instance as string
      * @example cy.createInstance('Test')
      */
-    createInstance(group: string, name: string, mode?: 'STANDALONE' | 'CENTRAL' | 'MANAGED', version?: '1.0.0' | '2.0.0', server?: string): Chainable<string>;
+    createInstance(
+      group: string,
+      name: string,
+      mode?: 'STANDALONE' | 'CENTRAL' | 'MANAGED',
+      version?: '1.0.0' | '2.0.0',
+      server?: string
+    ): Chainable<string>;
 
     /**
      * Delete a previously created instance and verify it is gone.
@@ -82,7 +94,13 @@ declare namespace Cypress {
      * @param applicationName the name of the application to modify (toggle keep-alive)
      * @param mode the BDeploy mode to use when navigating
      */
-    createNewInstanceVersionByDummyChange(instanceGroupName: string, instanceUuid: string, nodeName: string, applicationName: string, mode?: 'STANDALONE' | 'CENTRAL' | 'MANAGED');
+    createNewInstanceVersionByDummyChange(
+      instanceGroupName: string,
+      instanceUuid: string,
+      nodeName: string,
+      applicationName: string,
+      mode?: 'STANDALONE' | 'CENTRAL' | 'MANAGED'
+    );
 
     /**
      * Finds the 'app-instance-node-card' for the given name.
@@ -117,7 +135,7 @@ declare namespace Cypress {
      */
     startProcess(node: string, application: string);
 
-        /**
+    /**
      * Chained off an instance version card, will activate this instance version.
      */
     activate(): Chainable<Subject>;
@@ -148,7 +166,7 @@ declare namespace Cypress {
      * @param target the target to drop onto. Can be a selector or DOM element.
      * @param opts additional options
      */
-    dragTo(target: any, opts?: { delay?: number, steps?: number, smooth?: boolean});
+    dragTo(target: any, opts?: { delay?: number; steps?: number; smooth?: boolean });
 
     /**
      * Chained off any DOM element, will try to find the context menu within this element

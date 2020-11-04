@@ -92,25 +92,25 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
     private messageBoxService: MessageboxService,
     private overlay: Overlay,
     private viewContainerRef: ViewContainerRef,
-    public routingHistoryService:RoutingHistoryService,
+    public routingHistoryService: RoutingHistoryService
   ) {}
 
   public ngOnInit(): void {
     // get instance version
     this.instanceService
       .getInstanceVersion(this.groupParam, this.uuidParam, this.versionParam)
-      .subscribe(instanceVersion => {
+      .subscribe((instanceVersion) => {
         this.instanceVersion = instanceVersion;
       });
 
     // get list of config files
     this.reload();
 
-    this.themeSubscription = this.themeService.getThemeSubject().subscribe(theme => {
+    this.themeSubscription = this.themeService.getThemeSubject().subscribe((theme) => {
       this.editorTheme = this.themeService.getAceTheme();
     });
 
-    this.pathControl.valueChanges.subscribe(e => {
+    this.pathControl.valueChanges.subscribe((e) => {
       const regex = /(?:\.([^.]+))?$/;
       const ext = regex.exec(e)[1];
       if (ext) {
@@ -130,8 +130,8 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
 
     this.instanceService
       .listConfigurationFiles(this.groupParam, this.uuidParam, this.versionParam)
-      .subscribe(configFilePaths => {
-        configFilePaths.forEach(p => {
+      .subscribe((configFilePaths) => {
+        configFilePaths.forEach((p) => {
           this.statusCache.set(p.path, cloneDeep(EMPTY_CONFIG_FILE_STATUS));
           this.typeCache.set(p.path, p.isText);
         });
@@ -183,7 +183,7 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
     } else {
       this.instanceService
         .getConfigurationFile(this.groupParam, this.uuidParam, this.versionParam, path)
-        .subscribe(content => {
+        .subscribe((content) => {
           if (this.typeCache.get(path)) {
             content = Base64.decode(content);
           }
@@ -314,7 +314,7 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
   public isDirty(): boolean {
     const values: ConfigFileStatus[] = Array.from(this.statusCache.values());
     let changeCount = 0;
-    values.forEach(v => {
+    values.forEach((v) => {
       changeCount += v.type ? 1 : 0;
     });
     return changeCount > 0;
@@ -334,7 +334,7 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
   public onSave(): void {
     const result: FileStatusDto[] = [];
     const keys: string[] = Array.from(this.statusCache.keys());
-    keys.forEach(key => {
+    keys.forEach((key) => {
       const value: ConfigFileStatus = this.statusCache.get(key);
       if (!value.type) {
         return; // no update, don't send one.
@@ -357,10 +357,10 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
 
     this.instanceService
       .updateConfigurationFiles(this.groupParam, this.uuidParam, this.versionParam, result)
-      .subscribe(_ => {
+      .subscribe((_) => {
         this.statusCache.clear(); // avoid isDirty
         this.log.info(
-          'stored configuration files for ' + this.groupParam + ', ' + this.uuidParam + ', ' + this.versionParam,
+          'stored configuration files for ' + this.groupParam + ', ' + this.uuidParam + ', ' + this.versionParam
         );
         this.location.back();
       });
@@ -385,11 +385,7 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
     this.closeOverlay();
 
     this.overlayRef = this.overlay.create({
-      positionStrategy: this.overlay
-        .position()
-        .global()
-        .centerHorizontally()
-        .centerVertically(),
+      positionStrategy: this.overlay.position().global().centerHorizontally().centerVertically(),
       hasBackdrop: true,
       disposeOnNavigation: true,
     });
@@ -429,7 +425,7 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
     const name = fileName.value;
 
     const reader = new FileReader();
-    reader.onload = ev => {
+    reader.onload = (ev) => {
       let status = this.statusCache.get(name);
 
       // We need to handle two cases here.

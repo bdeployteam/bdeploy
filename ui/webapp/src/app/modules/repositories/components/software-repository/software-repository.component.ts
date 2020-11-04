@@ -17,10 +17,9 @@ import { SoftwareRepoFileUploadComponent } from '../software-repo-file-upload/so
 @Component({
   selector: 'app-software-repository',
   templateUrl: './software-repository.component.html',
-  styleUrls: ['./software-repository.component.css']
+  styleUrls: ['./software-repository.component.css'],
 })
 export class SoftwareRepositoryComponent implements OnInit {
-
   private log: Logger = this.loggingService.getLogger('SoftwareRepositoryComponent');
 
   @ViewChild('appsidenav', { static: true })
@@ -29,10 +28,14 @@ export class SoftwareRepositoryComponent implements OnInit {
   public softwareRepositoryName: string = this.route.snapshot.paramMap.get('name');
 
   public products: Map<string, ProductDto[]> = new Map();
-  get productsKeys(): string[] {return Array.from(this.products.keys())};
+  get productsKeys(): string[] {
+    return Array.from(this.products.keys());
+  }
 
   public externalPackageGroups: Map<string, SoftwarePackageGroup> = new Map();
-  get externalPackageValues() {return Array.from(this.externalPackageGroups.values())};
+  get externalPackageValues() {
+    return Array.from(this.externalPackageGroups.values());
+  }
 
   public selection: string;
 
@@ -48,8 +51,8 @@ export class SoftwareRepositoryComponent implements OnInit {
     private softwareService: SoftwareService,
     public dialog: MatDialog,
     private authService: AuthenticationService,
-    public routingHistoryService:RoutingHistoryService,
-  ) { }
+    public routingHistoryService: RoutingHistoryService
+  ) {}
 
   ngOnInit() {
     this.load();
@@ -61,10 +64,11 @@ export class SoftwareRepositoryComponent implements OnInit {
     forkJoin({
       products: this.productService.getProducts(this.softwareRepositoryName, null),
       external: this.softwareService.listSoftwares(this.softwareRepositoryName, false, true),
-    }).pipe(finalize(() => this.loading = false))
-      .subscribe(r => {
+    })
+      .pipe(finalize(() => (this.loading = false)))
+      .subscribe((r) => {
         this.products = new Map();
-        r.products.forEach(prod => {
+        r.products.forEach((prod) => {
           this.products.set(prod.key.name, this.products.get(prod.key.name) || []);
           this.products.get(prod.key.name).push(prod);
         });
@@ -77,12 +81,12 @@ export class SoftwareRepositoryComponent implements OnInit {
         if (this.selection === null) {
           this.sidenav.close();
         }
-      })
+      });
   }
 
   private buildExternalPackagesMap(keys: ManifestKey[]): Map<string, SoftwarePackageGroup> {
     const map: Map<string, SoftwarePackageGroup> = new Map();
-    keys.forEach(key => {
+    keys.forEach((key) => {
       const groupName: string = this.getPackageName(key);
       let group: SoftwarePackageGroup = map.get(groupName);
       if (!group) {
@@ -95,7 +99,7 @@ export class SoftwareRepositoryComponent implements OnInit {
         group.osVersions.set(os, group.osVersions.get(os) || []);
         group.osVersions.get(os).push(key);
       }
-    })
+    });
     return map;
   }
 
@@ -106,19 +110,21 @@ export class SoftwareRepositoryComponent implements OnInit {
 
   private getPackageOs(key: ManifestKey): OperatingSystem {
     const idx = key.name.lastIndexOf('/');
-    return this.string2os(idx >= 0 ? key.name.substring(idx + 1).toUpperCase() : "");
+    return this.string2os(idx >= 0 ? key.name.substring(idx + 1).toUpperCase() : '');
   }
 
   private string2os(s: string): OperatingSystem {
     try {
       return OperatingSystem[s];
-    } catch(e) {
+    } catch (e) {
       return undefined;
     }
   }
 
   getAllOs(): OperatingSystem[] {
-    return Object.keys(OperatingSystem).filter(x => x !== OperatingSystem.UNKNOWN && x !== OperatingSystem.AIX && x !== OperatingSystem.MACOS).map(k => OperatingSystem[k]);
+    return Object.keys(OperatingSystem)
+      .filter((x) => x !== OperatingSystem.UNKNOWN && x !== OperatingSystem.AIX && x !== OperatingSystem.MACOS)
+      .map((k) => OperatingSystem[k]);
   }
 
   switchOs(os: OperatingSystem) {
@@ -160,12 +166,14 @@ export class SoftwareRepositoryComponent implements OnInit {
     config.height = '80%';
     config.minWidth = '650px';
     config.minHeight = '550px';
-    config.data = this.softwareRepositoryName
-    this.dialog.open(SoftwareRepoFileUploadComponent,config).afterClosed().subscribe(e=>this.load());
+    config.data = this.softwareRepositoryName;
+    this.dialog
+      .open(SoftwareRepoFileUploadComponent, config)
+      .afterClosed()
+      .subscribe((e) => this.load());
   }
 
   public isReadOnly(): boolean {
     return !this.authService.isScopedWrite(this.softwareRepositoryName);
   }
-
 }

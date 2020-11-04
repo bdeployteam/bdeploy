@@ -1,21 +1,26 @@
 <ng-template #progressDetails>
-  <div class='progress-grid' *ngIf='remoteProgressElements'>
-    <ng-container *ngFor='let element of remoteProgressElements'>
+  <div class="progress-grid" *ngIf="remoteProgressElements">
+    <ng-container *ngFor="let element of remoteProgressElements">
       <!-- TODO: cannot use CSS grid..? -->
-      <app-remote-progress-element [element]='element'></app-remote-progress-element>
+      <app-remote-progress-element [element]="element"></app-remote-progress-element>
     </ng-container>
   </div>
 
-  <div *ngIf='!remoteProgressElements' class='no-progress-info'>
+  <div *ngIf="!remoteProgressElements" class="no-progress-info">
     No progress to display.
   </div>
 </ng-template>
 
 <button
   mat-icon-button
-  (click)="showProgressSheet(progressDetails)" matTooltip="Show Progress" matTooltipShowDelay="500"
+  (click)="showProgressSheet(progressDetails)"
+  matTooltip="Show Progress"
+  matTooltipShowDelay="500"
 >
-  <mat-icon svgIcon="progress" [matBadge]="remoteProgressElements ? remoteProgressElements.length : '0'"
-  [matBadgeHidden]="!remoteProgressElements || remoteProgressElements.length === 0"
-  matBadgeSize="small"></mat-icon>
+  <mat-icon
+    svgIcon="progress"
+    [matBadge]="remoteProgressElements ? remoteProgressElements.length : '0'"
+    [matBadgeHidden]="!remoteProgressElements || remoteProgressElements.length === 0"
+    matBadgeSize="small"
+  ></mat-icon>
 </button>

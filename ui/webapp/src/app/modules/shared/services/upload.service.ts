@@ -1,11 +1,4 @@
-import {
-  HttpClient,
-  HttpEventType,
-  HttpHeaders,
-  HttpParams,
-  HttpRequest,
-  HttpResponse
-} from '@angular/common/http';
+import { HttpClient, HttpEventType, HttpHeaders, HttpParams, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { Logger, LoggingService } from '../../core/services/logging.service';
@@ -62,10 +55,7 @@ export interface UrlParameter {
 export class UploadService {
   private readonly log: Logger = this.loggingService.getLogger('UploadService');
 
-  constructor(
-    private http: HttpClient,
-    private loggingService: LoggingService
-  ) {}
+  constructor(private http: HttpClient, private loggingService: LoggingService) {}
 
   /**
    * Uploads the given files to the given URL and returns an observable result to track the upload status. For
@@ -110,9 +100,7 @@ export class UploadService {
       // Suppress global error handling and enable progress reporting
       const options = {
         reportProgress: true,
-        headers: suppressGlobalErrorHandling(
-          new HttpHeaders({ 'X-Proxy-Activity-Scope': uploadStatus.scope })
-        ),
+        headers: suppressGlobalErrorHandling(new HttpHeaders({ 'X-Proxy-Activity-Scope': uploadStatus.scope })),
       };
 
       // create and set additional HttpParams
@@ -120,10 +108,7 @@ export class UploadService {
         let httpParams = new HttpParams();
         params.forEach((p) => {
           if (p.type === 'boolean') {
-            httpParams = httpParams.set(
-              p.id,
-              p.value === true ? 'true' : 'false'
-            );
+            httpParams = httpParams.set(p.id, p.value === true ? 'true' : 'false');
           } else {
             httpParams = httpParams.set(p.id, p.value);
           }
@@ -151,8 +136,7 @@ export class UploadService {
           }
         },
         (error) => {
-          uploadStatus.detail =
-            error.statusText + ' (Status ' + error.status + ')';
+          uploadStatus.detail = error.statusText + ' (Status ' + error.status + ')';
           stateSubject.next(UploadState.FAILED);
           progressSubject.complete();
           stateSubject.complete();
@@ -163,11 +147,10 @@ export class UploadService {
   }
 
   uuidv4() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (
-      c
-    ) {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
       // tslint:disable-next-line:no-bitwise
-      const r = (Math.random() * 16) | 0, v = c === 'x' ? r : (r & 0x3) | 0x8;
+      const r = (Math.random() * 16) | 0,
+        v = c === 'x' ? r : (r & 0x3) | 0x8;
       return v.toString(16);
     });
   }

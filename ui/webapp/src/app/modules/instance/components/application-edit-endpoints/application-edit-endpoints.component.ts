@@ -10,15 +10,14 @@ import { MessageboxService } from 'src/app/modules/shared/services/messagebox.se
 @Component({
   selector: 'app-application-edit-endpoints',
   templateUrl: './application-edit-endpoints.component.html',
-  styleUrls: ['./application-edit-endpoints.component.css']
+  styleUrls: ['./application-edit-endpoints.component.css'],
 })
 export class ApplicationEditEndpointsComponent implements OnInit {
-
   @Input() instanceGroup: string;
   @Input() processConfig: ProcessConfigDto;
   @Input() appConfigContext: EditAppConfigContext;
   @Input() appDesc: ApplicationDescriptor;
-  @Input() readonly  = false;
+  @Input() readonly = false;
 
   @Output() validationStateChanged = new EventEmitter<boolean>();
 
@@ -28,7 +27,7 @@ export class ApplicationEditEndpointsComponent implements OnInit {
   /** The form holding the current values */
   public formGroup = new FormGroup({});
 
-  constructor(private messageBoxService: MessageboxService) { }
+  constructor(private messageBoxService: MessageboxService) {}
 
   ngOnInit() {
     this.clonedAppConfig = cloneDeep(this.appConfigContext.applicationConfiguration);
@@ -41,7 +40,7 @@ export class ApplicationEditEndpointsComponent implements OnInit {
     }
 
     // Notify if the form changes
-    this.formGroup.statusChanges.subscribe(status => {
+    this.formGroup.statusChanges.subscribe((status) => {
       const isValid = status === 'VALID';
       this.validationStateChanged.emit(isValid);
     });
@@ -60,30 +59,30 @@ export class ApplicationEditEndpointsComponent implements OnInit {
 
       const fcPort = new FormControl();
       fcPort.setValue(ep.port);
-      fcPort.valueChanges.subscribe(v => ep.port = v);
+      fcPort.valueChanges.subscribe((v) => (ep.port = v));
       fcPort.setValidators([Validators.required]);
 
       const fcAuthType = new FormControl();
       fcAuthType.setValue(ep.authType ? ep.authType : HttpAuthenticationType.NONE);
-      fcAuthType.valueChanges.subscribe(v => ep.authType = v);
+      fcAuthType.valueChanges.subscribe((v) => (ep.authType = v));
 
       const fcUser = new FormControl();
       fcUser.setValue(ep.authUser);
-      fcUser.valueChanges.subscribe(v => ep.authUser = v);
+      fcUser.valueChanges.subscribe((v) => (ep.authUser = v));
       fcUser.setValidators([Validators.required]);
 
       const fcPass = new FormControl();
       fcPass.setValue(ep.authPass);
-      fcPass.valueChanges.subscribe(v => ep.authPass = v);
+      fcPass.valueChanges.subscribe((v) => (ep.authPass = v));
       fcPass.setValidators([Validators.required]);
 
-      const updateAuthType: (value: any) => void = v => {
+      const updateAuthType: (value: any) => void = (v) => {
         if (ep.authType === HttpAuthenticationType.BASIC || ep.authType === HttpAuthenticationType.DIGEST) {
-          [fcUser, fcPass].forEach(c => {
+          [fcUser, fcPass].forEach((c) => {
             c.enable();
           });
         } else {
-          [fcUser, fcPass].forEach(c => {
+          [fcUser, fcPass].forEach((c) => {
             c.disable();
           });
         }
@@ -94,21 +93,21 @@ export class ApplicationEditEndpointsComponent implements OnInit {
 
       const fcSecure = new FormControl();
       fcSecure.setValue(ep.secure);
-      fcSecure.valueChanges.subscribe(v => ep.secure = v);
+      fcSecure.valueChanges.subscribe((v) => (ep.secure = v));
 
       const fcTrustAll = new FormControl();
       fcTrustAll.setValue(ep.trustAll);
-      fcTrustAll.valueChanges.subscribe(v => ep.trustAll = v);
+      fcTrustAll.valueChanges.subscribe((v) => (ep.trustAll = v));
 
       const fcKeyStorePass = new FormControl();
       fcKeyStorePass.setValue(ep.trustStorePass);
-      fcKeyStorePass.valueChanges.subscribe(v => ep.trustStorePass = v);
+      fcKeyStorePass.valueChanges.subscribe((v) => (ep.trustStorePass = v));
 
       const fcKeyStore = new FormControl();
       fcKeyStore.setValue(ep.trustStore);
-      fcKeyStore.valueChanges.subscribe(v => ep.trustStore = v);
+      fcKeyStore.valueChanges.subscribe((v) => (ep.trustStore = v));
 
-      const updateSecurityState: (value: boolean) => void = v => {
+      const updateSecurityState: (value: boolean) => void = (v) => {
         if (v) {
           fcTrustAll.enable();
           if (!fcTrustAll.value) {
@@ -123,9 +122,9 @@ export class ApplicationEditEndpointsComponent implements OnInit {
       };
 
       updateSecurityState(ep.secure);
-      fcSecure.valueChanges.subscribe(v => updateSecurityState(v));
+      fcSecure.valueChanges.subscribe((v) => updateSecurityState(v));
 
-      const updateTrustState: (value: boolean) => void = v => {
+      const updateTrustState: (value: boolean) => void = (v) => {
         if (v) {
           fcKeyStore.disable();
           fcKeyStorePass.disable();
@@ -136,7 +135,7 @@ export class ApplicationEditEndpointsComponent implements OnInit {
       };
 
       updateTrustState(ep.trustAll);
-      fcTrustAll.valueChanges.subscribe(v => updateTrustState(v));
+      fcTrustAll.valueChanges.subscribe((v) => updateTrustState(v));
 
       this.formGroup.addControl(ep.id + '_path', fcPath);
       this.formGroup.addControl(ep.id + '_port', fcPort);
@@ -201,5 +200,4 @@ export class ApplicationEditEndpointsComponent implements OnInit {
     }
     return !isEqual(this.clonedAppConfig, this.appConfigContext.applicationConfiguration);
   }
-
 }

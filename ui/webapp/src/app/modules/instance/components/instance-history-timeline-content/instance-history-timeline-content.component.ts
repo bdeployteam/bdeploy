@@ -4,20 +4,17 @@ import { HistoryEntryVersionDto } from 'src/app/models/gen.dtos';
 @Component({
   selector: 'app-instance-history-timeline-content',
   templateUrl: './instance-history-timeline-content.component.html',
-  styleUrls: ['./instance-history-timeline-content.component.css']
+  styleUrls: ['./instance-history-timeline-content.component.css'],
 })
 export class InstanceHistoryTimelineContentComponent implements OnInit {
-
-  @Input("history")
+  @Input('history')
   public history: HistoryEntryVersionDto;
 
-  constructor() { }
+  constructor() {}
 
-  ngOnInit(): void {
-  }
+  ngOnInit(): void {}
 
-  isEmpty(object:object){
+  isEmpty(object: object) {
     return Object.keys(object).length == 0;
   }
-
 }

@@ -8,14 +8,12 @@ import { SettingsService } from '../../../core/services/settings.service';
   selector: 'app-settings-general',
   templateUrl: './settings-general.component.html',
   styleUrls: ['./settings-general.component.css'],
-  providers: [SettingsService]
+  providers: [SettingsService],
 })
 export class SettingsGeneralComponent implements OnInit {
+  constructor(public settings: SettingsService, private messageBoxService: MessageboxService) {}
 
-  constructor(public settings: SettingsService, private messageBoxService: MessageboxService) { }
-
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   canDeactivate(): Observable<boolean> {
     if (!this.settings.isDirty()) {
@@ -27,5 +25,4 @@ export class SettingsGeneralComponent implements OnInit {
       mode: MessageBoxMode.CONFIRM_WARNING,
     });
   }
-
 }

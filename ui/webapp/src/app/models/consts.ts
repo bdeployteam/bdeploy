@@ -1,4 +1,27 @@
-import { ApplicationConfiguration, ApplicationStartType, CommandConfiguration, CustomAttributesRecord, HistoryCompareDto, HistoryFilterDto, InstanceBannerRecord, InstanceConfiguration, InstanceGroupConfiguration, InstanceNodeConfiguration, InstanceNodeConfigurationDto, InstancePurpose, InstanceStateRecord, InstanceVersionDto, ManifestKey, ParameterConfiguration, ParameterDescriptor, ParameterType, ProcessControlConfiguration, SoftwareRepositoryConfiguration, UserChangePasswordDto, UserInfo } from './gen.dtos';
+import {
+  ApplicationConfiguration,
+  ApplicationStartType,
+  CommandConfiguration,
+  CustomAttributesRecord,
+  HistoryCompareDto,
+  HistoryFilterDto,
+  InstanceBannerRecord,
+  InstanceConfiguration,
+  InstanceGroupConfiguration,
+  InstanceNodeConfiguration,
+  InstanceNodeConfigurationDto,
+  InstancePurpose,
+  InstanceStateRecord,
+  InstanceVersionDto,
+  ManifestKey,
+  ParameterConfiguration,
+  ParameterDescriptor,
+  ParameterType,
+  ProcessControlConfiguration,
+  SoftwareRepositoryConfiguration,
+  UserChangePasswordDto,
+  UserInfo
+} from './gen.dtos';
 
 // HTTP header constant used to suppress global error handling
 export const NO_ERROR_HANDLING_HDR = 'X-No-Global-Error-Handling';
@@ -9,8 +32,8 @@ const PURPOSE_ORDER = [InstancePurpose.PRODUCTIVE, InstancePurpose.TEST, Instanc
 // Function to sort a purpose by the internal index
 // Used in the instance browser to determine the order
 export const SORT_PURPOSE = (a: InstancePurpose, b: InstancePurpose) => {
-  const aIdx = PURPOSE_ORDER.findIndex(x => x === a);
-  const bIdx = PURPOSE_ORDER.findIndex(x => x === b);
+  const aIdx = PURPOSE_ORDER.findIndex((x) => x === a);
+  const bIdx = PURPOSE_ORDER.findIndex((x) => x === b);
   if (aIdx < bIdx) {
     return -1;
   }
@@ -38,13 +61,13 @@ export const EMPTY_USER_INFO: UserInfo = {
   inactive: false,
   lastActiveLogin: null,
   permissions: [],
-  recentlyUsedInstanceGroups: []
+  recentlyUsedInstanceGroups: [],
 };
 
-export const EMPTY_USER_CHANGE_PASSWORD_DTO: UserChangePasswordDto  = {
+export const EMPTY_USER_CHANGE_PASSWORD_DTO: UserChangePasswordDto = {
   user: null,
   currentPassword: null,
-  newPassword: null
+  newPassword: null,
 };
 
 export const EMPTY_INSTANCE: InstanceConfiguration = {
@@ -55,13 +78,13 @@ export const EMPTY_INSTANCE: InstanceConfiguration = {
   configTree: null,
   autoStart: false,
   product: EMPTY_MANIFEST_KEY,
-  autoUninstall: null
+  autoUninstall: null,
 };
 
 export const EMPTY_INSTANCE_BANNER_RECORD: InstanceBannerRecord = {
   foregroundColor: null,
   backgroundColor: null,
-  text: null
+  text: null,
 };
 
 export const EMPTY_INSTANCE_GROUP: InstanceGroupConfiguration = {
@@ -71,7 +94,7 @@ export const EMPTY_INSTANCE_GROUP: InstanceGroupConfiguration = {
   logo: null,
   autoDelete: true,
   managed: false,
-  instanceAttributes: []
+  instanceAttributes: [],
 };
 
 export const EMPTY_SOFTWARE_REPO: SoftwareRepositoryConfiguration = {
@@ -106,13 +129,13 @@ export const EMPTY_PARAMETER_DESCRIPTOR: ParameterDescriptor = {
   valueSeparator: null,
   suggestedValues: null,
   customEditor: null,
-  condition: null
+  condition: null,
 };
 
 export const EMPTY_DEPLOYMENT_STATE: InstanceStateRecord = {
   activeTag: null,
   lastActiveTag: null,
-  installedTags: []
+  installedTags: [],
 };
 
 export const EMPTY_APPLICATION_CONFIGURATION: ApplicationConfiguration = {
@@ -123,7 +146,7 @@ export const EMPTY_APPLICATION_CONFIGURATION: ApplicationConfiguration = {
   processControl: null,
   start: EMPTY_COMMAND_CONFIGURATION,
   stop: EMPTY_COMMAND_CONFIGURATION,
-  endpoints: { http: [] }
+  endpoints: { http: [] },
 };
 
 export const EMPTY_INSTANCE_NODE_CONFIGURATION: InstanceNodeConfiguration = {
@@ -137,7 +160,7 @@ export const EMPTY_INSTANCE_NODE_CONFIGURATION: InstanceNodeConfiguration = {
 
 export const EMPTY_INSTANCE_NODE_CONFIGURATION_DTO: InstanceNodeConfigurationDto = {
   nodeName: null,
-  nodeConfiguration: null
+  nodeConfiguration: null,
 };
 
 export const EMPTY_VERSION_DTO: InstanceVersionDto = {
@@ -155,7 +178,7 @@ export const EMPTY_PROCESS_CONTROL_CONFIG: ProcessControlConfiguration = {
 
 export const EMPTY_ATTRIBUTES_RECORD: CustomAttributesRecord = {
   attributes: {},
-}
+};
 
 export const EMPTY_HISTORY_FILTER: HistoryFilterDto = {
   filterText: null,
@@ -164,9 +187,9 @@ export const EMPTY_HISTORY_FILTER: HistoryFilterDto = {
   showDeploymentEvents: false,
   showRuntimeEvents: false,
   startTag: null,
-}
+};
 
 export const EMPTY_HISTORY_COMPARE: HistoryCompareDto = {
   configA: null,
   configB: null,
-}
+};

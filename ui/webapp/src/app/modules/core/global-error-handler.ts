@@ -4,11 +4,9 @@ import { ErrorMessage, Logger, LoggingService } from './services/logging.service
 
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
-
-  constructor(private injector: Injector) { }
+  constructor(private injector: Injector) {}
 
   handleError(error: any): void {
-
     const location: LocationStrategy = this.injector.get(LocationStrategy);
     const log: Logger = this.injector.get(LoggingService).getLogger('GlobalErrorHandler');
 

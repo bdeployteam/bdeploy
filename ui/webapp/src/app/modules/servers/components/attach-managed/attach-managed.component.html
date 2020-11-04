@@ -1,114 +1,131 @@
 <mat-toolbar class="mat-elevation-z1 header-toolbar">
-  <button mat-icon-button type="button" (click)="routingHistoryService.back('servers/browser/'+instanceGroupName)"><mat-icon>chevron_left</mat-icon></button>
-  <span>Attach Managed Server: <app-instance-group-title [instanceGroup]='instanceGroupName'></app-instance-group-title></span>
+  <button mat-icon-button type="button" (click)="routingHistoryService.back('servers/browser/' + instanceGroupName)">
+    <mat-icon>chevron_left</mat-icon>
+  </button>
+  <span
+    >Attach Managed Server: <app-instance-group-title [instanceGroup]="instanceGroupName"></app-instance-group-title
+  ></span>
 </mat-toolbar>
 
-<div class='stepper-container'>
-  <mat-vertical-stepper #stepper class='stepper' linear (selectionChange)='onStepChange($event)'>
+<div class="stepper-container">
+  <mat-vertical-stepper #stepper class="stepper" linear (selectionChange)="onStepChange($event)">
     <ng-template matStepperIcon="edit">
       <mat-icon>done</mat-icon>
     </ng-template>
 
     <mat-step label="Introduction" #introStep>
       <p>
-        This page can be used to attach a BDeploy server running in managed mode to this central server. You will need the counterpart on
-        the managed server which contains the managed server identification as dragable element. This page can be found by clicking the
+        This page can be used to attach a BDeploy server running in managed mode to this central server. You will need
+        the counterpart on the managed server which contains the managed server identification as dragable element. This
+        page can be found by clicking the
         <strong>Attach Instance Group</strong> button on the <strong>Instance Groups</strong> page.
       </p>
-      <div class='button-container'>
+      <div class="button-container">
         <button mat-raised-button matStepperNext>Next</button>
       </div>
     </mat-step>
-    <mat-step label="Attach Managed Server" #attachStep [completed]='attachPayload'>
+    <mat-step label="Attach Managed Server" #attachStep [completed]="attachPayload">
       <p>
-        Drag the managed server information from the managed server's <strong>Attach to Central Server</strong> page and drop it on the zone below.
+        Drag the managed server information from the managed server's <strong>Attach to Central Server</strong> page and
+        drop it on the zone below.
       </p>
-      <div class='drag-container' *ngIf='!attachPayload'>
-        <mat-card class='drag-card drop-card' (drop)='onDrop($event)' (dragover)='onOver($event)'>
+      <div class="drag-container" *ngIf="!attachPayload">
+        <mat-card class="drag-card drop-card" (drop)="onDrop($event)" (dragover)="onOver($event)">
           Drop managed server information here!
         </mat-card>
-        <input type="file" hidden (change)="onUpload($event)" data-cy="managed-ident">
+        <input type="file" hidden (change)="onUpload($event)" data-cy="managed-ident" />
       </div>
-      <p *ngIf='attachPayload'>
-        Successfully read information for <strong>{{attachPayload.hostName}}</strong>.
+      <p *ngIf="attachPayload">
+        Successfully read information for <strong>{{ attachPayload.hostName }}</strong
+        >.
       </p>
-      <div class='button-container'>
-        <button mat-raised-button matStepperPrevious (click)='attachPayload = null'>Back</button>
-        <button mat-raised-button matStepperNext [disabled]='!attachPayload' (click)='updateFormDefaults()'>Next</button>
+      <div class="button-container">
+        <button mat-raised-button matStepperPrevious (click)="attachPayload = null">Back</button>
+        <button mat-raised-button matStepperNext [disabled]="!attachPayload" (click)="updateFormDefaults()">
+          Next
+        </button>
       </div>
     </mat-step>
     <mat-step label="Additional Information">
-      <form [formGroup]='infoGroup'>
-        <div class='form-fields'>
+      <form [formGroup]="infoGroup">
+        <div class="form-fields">
           <mat-form-field>
-            <input matInput placeholder="Name of the Managed Server" formControlName="name" required>
+            <input matInput placeholder="Name of the Managed Server" formControlName="name" required />
           </mat-form-field>
           <mat-form-field>
-            <input matInput placeholder="Description" formControlName="desc" required>
+            <input matInput placeholder="Description" formControlName="desc" required />
           </mat-form-field>
           <mat-form-field>
-            <input matInput placeholder="Remote Server URI (change to match DNS/VPN/NAT configuration)" formControlName="uri" required>
+            <input
+              matInput
+              placeholder="Remote Server URI (change to match DNS/VPN/NAT configuration)"
+              formControlName="uri"
+              required
+            />
           </mat-form-field>
         </div>
       </form>
-      <div class='button-container'>
+      <div class="button-container">
         <button mat-raised-button matStepperPrevious>Back</button>
-        <button mat-raised-button matStepperNext [disabled]='infoGroup.invalid' (click)='autoAddServer()'>Next</button>
+        <button mat-raised-button matStepperNext [disabled]="infoGroup.invalid" (click)="autoAddServer()">Next</button>
       </div>
     </mat-step>
     <mat-step label="Setting up...">
-      <p *ngIf='!attachError'>
+      <p *ngIf="!attachError">
         Please wait while we're trying to set up things automatically...
       </p>
-      <ng-container  *ngIf='attachError'>
+      <ng-container *ngIf="attachError">
         <p>
           Failed to automatically attach to the remote managed server. You can continue to setup manually.
         </p>
         <p>
           Details:
         </p>
-        <div class='error-details' [innerHTML]='getErrorMessage()'></div>
+        <div class="error-details" [innerHTML]="getErrorMessage()"></div>
       </ng-container>
-      <div class='button-container'>
-        <button mat-raised-button matStepperPrevious (click)='attachSuccess = false'>Back</button>
+      <div class="button-container">
+        <button mat-raised-button matStepperPrevious (click)="attachSuccess = false">Back</button>
         <button mat-raised-button matStepperNext>Continue Manually</button>
-        <ng-container *ngIf='!attachError && !attachSuccess'>
-          <div class='spacer'></div>
+        <ng-container *ngIf="!attachError && !attachSuccess">
+          <div class="spacer"></div>
           <span>Contacting Managed Server...</span>
-          <mat-spinner diameter='24'></mat-spinner>
+          <mat-spinner diameter="24"></mat-spinner>
         </ng-container>
       </div>
     </mat-step>
     <mat-step label="Manual Configuration of Managed Server" optional="true" #manualStep>
       <p>
-        Note that this step is only necessary if this server cannot contact the configured managed server (temporarily or permanently).
+        Note that this step is only necessary if this server cannot contact the configured managed server (temporarily
+        or permanently).
       </p>
-      <div class='drag-container' *ngIf='!centralIdent'>
+      <div class="drag-container" *ngIf="!centralIdent">
         <mat-spinner diameter="24"></mat-spinner>
       </div>
-      <div class='drag-container' *ngIf='centralIdent'>
-        <button mat-raised-button (click)='downloadManualJson()'>Download for manual setup</button>
-        <mat-card draggable="true" (dragstart)='onDragStart($event)' class='drag-card'>
+      <div class="drag-container" *ngIf="centralIdent">
+        <button mat-raised-button (click)="downloadManualJson()">Download for manual setup</button>
+        <mat-card draggable="true" (dragstart)="onDragStart($event)" class="drag-card">
           <div>
             Drag me to the managed server!
           </div>
         </mat-card>
       </div>
-      <div class='button-container'>
+      <div class="button-container">
         <button mat-raised-button matStepperPrevious>Back</button>
-        <button mat-raised-button matTooltip="Finish with manually provided information. Connectivity to the target cannot be verified." (click)='manualAddServer()'>Finish</button>
+        <button
+          mat-raised-button
+          matTooltip="Finish with manually provided information. Connectivity to the target cannot be verified."
+          (click)="manualAddServer()"
+        >
+          Finish
+        </button>
       </div>
     </mat-step>
     <mat-step label="Done" #doneStep>
-      <div class='success-icon'>
+      <div class="success-icon">
         <mat-icon>check_circle_outline</mat-icon>
-        <p *ngIf='attachPayload'>
-          This managed server {{serverNameControl.value}} has been attached.
-        </p>
-        <button mat-raised-button [routerLink]='["/servers/browser", instanceGroupName]' replaceUrl>Done</button>
+        <p *ngIf="attachPayload">This managed server {{ serverNameControl.value }} has been attached.</p>
+        <button mat-raised-button [routerLink]="['/servers/browser', instanceGroupName]" replaceUrl>Done</button>
       </div>
     </mat-step>
   </mat-vertical-stepper>
 </div>
-
-

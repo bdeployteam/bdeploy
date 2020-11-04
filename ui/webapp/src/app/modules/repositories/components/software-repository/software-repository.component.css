@@ -89,13 +89,13 @@ mat-drawer {
 }
 
 .software-repo-package-wrapper {
-  display:flex;
+  display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   padding: 10px 20px;
 }
 
-app-software-card, app-product-card {
+app-software-card,
+app-product-card {
   margin: 20px 30px;
 }
-

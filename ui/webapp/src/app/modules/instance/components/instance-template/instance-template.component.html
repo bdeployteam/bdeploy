@@ -1,82 +1,133 @@
 <ng-template #dialog>
   <h1 mat-dialog-title>Configure from Instance Template</h1>
-  <div mat-dialog-content class='flex-content'>
-    <mat-horizontal-stepper #stepper [linear]='true'>
-      <mat-step label='Template Selection' [completed]='selectedTemplate'>
+  <div mat-dialog-content class="flex-content">
+    <mat-horizontal-stepper #stepper [linear]="true">
+      <mat-step label="Template Selection" [completed]="selectedTemplate">
         <div>
-          <div class='center-toggles'>
-            <mat-button-toggle-group (change)='updateSelection($event)'>
-              <mat-button-toggle class='toggle' *ngFor='let tpl of allTemplates; let i = index' [value]='i'>
-                <div class='toggle-content'>
-                  <div><strong>{{tpl.name}}</strong></div>
-                  <div class='description'>{{tpl.description}}</div>
+          <div class="center-toggles">
+            <mat-button-toggle-group (change)="updateSelection($event)">
+              <mat-button-toggle class="toggle" *ngFor="let tpl of allTemplates; let i = index" [value]="i">
+                <div class="toggle-content">
+                  <div>
+                    <strong>{{ tpl.name }}</strong>
+                  </div>
+                  <div class="description">{{ tpl.description }}</div>
                 </div>
               </mat-button-toggle>
             </mat-button-toggle-group>
           </div>
-          <div *ngIf='selectedTemplate'>
-            <div class='hintText'>Please select a mapping from groups defined in the template to nodes available on your system. Applications will be created on the selected nodes. The same node may be selected more than once to create application from multiple template-defined groups on a single available node.</div>
-            <div class='node-mapping-container'>
-              <div *ngFor='let group of selectedTemplate.groups; let groupIndex = index' class='node-mapping'>
-                <span>{{group.name}}</span>
-                <div class='spacer'></div>
-                <app-instance-template-group-detail [group]='group' [product]='product' [config]='config'></app-instance-template-group-detail>
-                <mat-select [(value)]='nodeMappings[groupIndex]' class='node-select'>
-                  <mat-option value='__none'>None (don't create)</mat-option>
-                  <mat-option *ngFor='let physNode of getNodesForType(group)' [value]='physNode'>{{getNiceName(physNode)}}</mat-option>
+          <div *ngIf="selectedTemplate">
+            <div class="hintText">
+              Please select a mapping from groups defined in the template to nodes available on your system.
+              Applications will be created on the selected nodes. The same node may be selected more than once to create
+              application from multiple template-defined groups on a single available node.
+            </div>
+            <div class="node-mapping-container">
+              <div *ngFor="let group of selectedTemplate.groups; let groupIndex = index" class="node-mapping">
+                <span>{{ group.name }}</span>
+                <div class="spacer"></div>
+                <app-instance-template-group-detail
+                  [group]="group"
+                  [product]="product"
+                  [config]="config"
+                ></app-instance-template-group-detail>
+                <mat-select [(value)]="nodeMappings[groupIndex]" class="node-select">
+                  <mat-option value="__none">None (don't create)</mat-option>
+                  <mat-option *ngFor="let physNode of getNodesForType(group)" [value]="physNode">{{
+                    getNiceName(physNode)
+                  }}</mat-option>
                 </mat-select>
               </div>
             </div>
           </div>
         </div>
         <div mat-dialog-actions align="end">
-          <button mat-raised-button type="button" (click)='dialogRef.close()'>Cancel</button>
-          <button mat-raised-button type="button" data-cy='next1' color="primary" (click)='stepper.next()' [disabled]='!selectedTemplate || !isNodeMappingSelected()'>Next</button>
+          <button mat-raised-button type="button" (click)="dialogRef.close()">Cancel</button>
+          <button
+            mat-raised-button
+            type="button"
+            data-cy="next1"
+            color="primary"
+            (click)="stepper.next()"
+            [disabled]="!selectedTemplate || !isNodeMappingSelected()"
+          >
+            Next
+          </button>
         </div>
       </mat-step>
-      <mat-step label='Variables'>
+      <mat-step label="Variables">
         <form #varForm="ngForm">
           <ng-template #noVarHint>
             <div>No variables are required by the template, press <strong>Next</strong> to continue.</div>
           </ng-template>
-          <div *ngIf='selectedTemplate?.variables?.length; else noVarHint' class='variable-fields'>
-            <mat-form-field *ngFor='let variable of selectedTemplate.variables'>
-              <input matInput [matAutocomplete]='auto' type='text' [name]='variable.uid' [id]='variable.uid' required [(ngModel)]='variables[variable.uid]' [placeholder]='variable.name' [matTooltip]='variable.description'>
+          <div *ngIf="selectedTemplate?.variables?.length; else noVarHint" class="variable-fields">
+            <mat-form-field *ngFor="let variable of selectedTemplate.variables">
+              <input
+                matInput
+                [matAutocomplete]="auto"
+                type="text"
+                [name]="variable.uid"
+                [id]="variable.uid"
+                required
+                [(ngModel)]="variables[variable.uid]"
+                [placeholder]="variable.name"
+                [matTooltip]="variable.description"
+              />
               <mat-autocomplete #auto="matAutocomplete">
                 <mat-option *ngFor="let suggestedValue of variable.suggestedValues" [value]="suggestedValue">
-                  {{suggestedValue}}
+                  {{ suggestedValue }}
                 </mat-option>
               </mat-autocomplete>
             </mat-form-field>
           </div>
           <div mat-dialog-actions align="end">
-            <button mat-raised-button type="button" (click)='dialogRef.close()'>Cancel</button>
-            <button mat-raised-button type="button" (click)='stepper.previous()'>Back</button>
-            <button mat-raised-button type="button" data-cy='next2' (click)='stepper.next(); applyTemplate();' color="primary" [disabled]='varForm.invalid'>Next</button>
+            <button mat-raised-button type="button" (click)="dialogRef.close()">Cancel</button>
+            <button mat-raised-button type="button" (click)="stepper.previous()">Back</button>
+            <button
+              mat-raised-button
+              type="button"
+              data-cy="next2"
+              (click)="stepper.next(); applyTemplate()"
+              color="primary"
+              [disabled]="varForm.invalid"
+            >
+              Next
+            </button>
           </div>
         </form>
       </mat-step>
-      <mat-step label='Applying'>
-        <div class='node-mapping-container'>
-          <div *ngFor='let group of selectedTemplate?.groups; let groupIndex = index' class='node-mapping'>
-            <ng-container *ngIf='nodeMappings[groupIndex] !== "__none"'>
-              <ng-container *ngIf='hasStatusForEachProcess(messages[groupIndex], group)'>
-                <mat-icon class='template-message'>check</mat-icon>
+      <mat-step label="Applying">
+        <div class="node-mapping-container">
+          <div *ngFor="let group of selectedTemplate?.groups; let groupIndex = index" class="node-mapping">
+            <ng-container *ngIf="nodeMappings[groupIndex] !== '__none'">
+              <ng-container *ngIf="hasStatusForEachProcess(messages[groupIndex], group)">
+                <mat-icon class="template-message">check</mat-icon>
               </ng-container>
-              <ng-container *ngIf='!hasStatusForEachProcess(messages[groupIndex], group)'>
-                <mat-spinner *ngIf='messages[groupIndex]?.length' style='margin-right: 5px' [diameter]='24'></mat-spinner>
-                <div *ngIf='!messages[groupIndex]?.length' style='width: 24px; height: 24px; margin-right: 5px'></div>
+              <ng-container *ngIf="!hasStatusForEachProcess(messages[groupIndex], group)">
+                <mat-spinner
+                  *ngIf="messages[groupIndex]?.length"
+                  style="margin-right: 5px;"
+                  [diameter]="24"
+                ></mat-spinner>
+                <div *ngIf="!messages[groupIndex]?.length" style="width: 24px; height: 24px; margin-right: 5px;"></div>
               </ng-container>
 
-              <span>{{group.name}}</span>
-              <div class='spacer'></div>
-              <app-instance-template-group-detail [group]='group' [product]='product' [config]='config' [status]='messages[groupIndex]'></app-instance-template-group-detail>
+              <span>{{ group.name }}</span>
+              <div class="spacer"></div>
+              <app-instance-template-group-detail
+                [group]="group"
+                [product]="product"
+                [config]="config"
+                [status]="messages[groupIndex]"
+              ></app-instance-template-group-detail>
             </ng-container>
           </div>
         </div>
         <div mat-dialog-actions align="end">
-          <div *ngIf='!applyDone' class='status'><mat-spinner [diameter]='24'></mat-spinner></div>
-          <button mat-raised-button type="submit" color="primary" (click)='dialogRef.close()' [disabled]='!applyDone'>Close</button>
+          <div *ngIf="!applyDone" class="status"><mat-spinner [diameter]="24"></mat-spinner></div>
+          <button mat-raised-button type="submit" color="primary" (click)="dialogRef.close()" [disabled]="!applyDone">
+            Close
+          </button>
         </div>
       </mat-step>
     </mat-horizontal-stepper>

@@ -4,7 +4,6 @@ import { BehaviorSubject } from 'rxjs';
  * A list that allows to register a custom callback to filter the data.
  */
 export class DataList<T> {
-
   public searchString: string;
   public searchCallback: (item: T, text: string) => boolean;
   public searchChange: BehaviorSubject<string> = new BehaviorSubject(null);
@@ -37,12 +36,11 @@ export class DataList<T> {
   }
 
   public applyFilter(): void {
-    this.filtered = this.data.filter(item => this.searchCallback(item, this.searchString.toLowerCase()));
+    this.filtered = this.data.filter((item) => this.searchCallback(item, this.searchString.toLowerCase()));
     this.searchChange.next(this.searchString);
   }
 
   public isEmpty(): boolean {
     return this.data.length === 0;
   }
-
 }

@@ -4,15 +4,21 @@ import { tap } from 'rxjs/operators';
 import { ManagedServersService } from 'src/app/modules/servers/services/managed-servers.service';
 import { retryWithDelay } from 'src/app/modules/shared/utils/server.utils';
 import { MinionUpdateDto } from '../../../../models/gen.dtos';
-import { areUpdatesAvailable, isTransferDone, isUpdateFailed, isUpdateInProgress, isUpdateSuccess, UpdateStatus } from '../../../../models/update.model';
+import {
+  areUpdatesAvailable,
+  isTransferDone,
+  isUpdateFailed,
+  isUpdateInProgress,
+  isUpdateSuccess,
+  UpdateStatus
+} from '../../../../models/update.model';
 
 @Component({
   selector: 'app-managed-server-update',
   templateUrl: './managed-server-update.component.html',
-  styleUrls: ['./managed-server-update.component.css']
+  styleUrls: ['./managed-server-update.component.css'],
 })
 export class ManagedServerUpdateComponent implements OnInit {
-
   @Input()
   serverName: string;
 
@@ -32,10 +38,9 @@ export class ManagedServerUpdateComponent implements OnInit {
   updateStatus = UpdateStatus.UPDATES_AVAILABLE;
   updateStatusText = '';
 
-  constructor(private managedServers: ManagedServersService) { }
+  constructor(private managedServers: ManagedServersService) {}
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   async transferUpdates() {
     this.doTransferUpdates(true);
@@ -54,12 +59,12 @@ export class ManagedServerUpdateComponent implements OnInit {
     this.setStateAndNotify(UpdateStatus.RESTART);
     this.updateStatusText = 'Waiting for the master to come back online...';
     const version$ = this.managedServers.ping(this.instanceGroupName, this.serverName).pipe(
-      tap(v => {
+      tap((v) => {
         if (!isEqual(v, this.updateDto.updateVersion)) {
           throw new Error('Got unexpected version from server');
         }
       }),
-      retryWithDelay(),
+      retryWithDelay()
     );
     const newVersion = await version$.toPromise();
 
@@ -109,7 +114,6 @@ export class ManagedServerUpdateComponent implements OnInit {
   }
 
   isSnapshot() {
-    return this.updateDto.packagesToInstall.some(key => key.name.includes('snapshot'));
+    return this.updateDto.packagesToInstall.some((key) => key.name.includes('snapshot'));
   }
-
 }

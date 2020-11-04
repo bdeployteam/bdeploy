@@ -12,34 +12,37 @@ const REPO_ROUTES: Route[] = [
     path: 'browser',
     component: SoftwareRepositoriesBrowserComponent,
     canActivate: [AuthGuard],
-    data: { title: 'Software Repositories', header: 'Software Repositories' }
+    data: { title: 'Software Repositories', header: 'Software Repositories' },
   },
   {
     path: 'add',
     component: SoftwareRepoAddEditComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Add Software Repository', header: 'Add Software Repository' }
+    data: { title: 'Add Software Repository', header: 'Add Software Repository' },
   },
   {
     path: 'edit/:name',
     component: SoftwareRepoAddEditComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Edit Software Repository (${params["name"]})', header: 'Edit Software Repository' }
+    data: { title: 'Edit Software Repository (${params["name"]})', header: 'Edit Software Repository' },
   },
   {
     path: 'permissions/:name',
     component: SoftwareRepositoryPermissionsComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Manage Permissions of Software Repository (${params["name"]})', header: 'Software Repository Permissions' }
+    data: {
+      title: 'Manage Permissions of Software Repository (${params["name"]})',
+      header: 'Software Repository Permissions',
+    },
   },
   {
     path: 'packages/:name',
     component: SoftwareRepositoryComponent,
     canActivate: [AuthGuard],
-    data: { title: 'Software Packages (${params["name"]})', header: 'Software Packages' }
+    data: { title: 'Software Packages (${params["name"]})', header: 'Software Packages' },
   },
 ];
 
@@ -47,4 +50,4 @@ const REPO_ROUTES: Route[] = [
   imports: [RouterModule.forChild(REPO_ROUTES)],
   exports: [RouterModule],
 })
-export class RepositoriesRoutingModule { }
+export class RepositoriesRoutingModule {}

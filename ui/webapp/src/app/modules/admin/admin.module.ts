@@ -44,19 +44,9 @@ import { UsersBrowserComponent } from './components/users-browser/users-browser.
     UsersBrowserComponent,
     UserGlobalPermissionsComponent,
     MasterCleanupGroupComponent,
-    PluginsBrowserComponent
+    PluginsBrowserComponent,
   ],
-  entryComponents: [
-    UpdateDialogComponent,
-    SettingsAuthLdapServerComponent,
-    UserGlobalPermissionsComponent
-  ],
-  imports: [
-    CommonModule,
-    CoreModule,
-    SharedModule,
-    AdminRoutingModule,
-    NgxChartsModule,
-  ],
+  entryComponents: [UpdateDialogComponent, SettingsAuthLdapServerComponent, UserGlobalPermissionsComponent],
+  imports: [CommonModule, CoreModule, SharedModule, AdminRoutingModule, NgxChartsModule],
 })
-export class AdminModule { }
+export class AdminModule {}

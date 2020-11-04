@@ -13,10 +13,9 @@ import { ManagedServersService } from '../../services/managed-servers.service';
 @Component({
   selector: 'app-product-sync',
   templateUrl: './product-sync.component.html',
-  styleUrls: ['./product-sync.component.css']
+  styleUrls: ['./product-sync.component.css'],
 })
 export class ProductSyncComponent implements OnInit, OnDestroy {
-
   public OPTION_CENTRAL = '$$CENTRAL$$';
 
   public instanceGroup: string;
@@ -31,7 +30,9 @@ export class ProductSyncComponent implements OnInit, OnDestroy {
   private _selectedSourceProductKey: string;
   set selectedSourceProductKey(key) {
     this._selectedSourceProductKey = key;
-    this.selectableProducts = this.sourceProducts.get(key).filter(p => !this.isAlreadyPresent(p) && !this.isProcessing(p) && !this.isSelected(p));
+    this.selectableProducts = this.sourceProducts
+      .get(key)
+      .filter((p) => !this.isAlreadyPresent(p) && !this.isProcessing(p) && !this.isSelected(p));
   }
 
   targetProducts: ProductDto[];
@@ -61,13 +62,18 @@ export class ProductSyncComponent implements OnInit, OnDestroy {
   public ngOnInit(): void {
     this.instanceGroup = this.route.snapshot.paramMap.get('group');
 
-    this.servers.getManagedServers(this.instanceGroup).pipe(finalize(() => this.loading = false)).subscribe(r => {
-      this.managedServers = r.sort((a, b) => a.hostName.localeCompare(b.hostName));
-    });
+    this.servers
+      .getManagedServers(this.instanceGroup)
+      .pipe(finalize(() => (this.loading = false)))
+      .subscribe((r) => {
+        this.managedServers = r.sort((a, b) => a.hostName.localeCompare(b.hostName));
+      });
 
-    this.subscription.add(this.dragulaService.drop('PROD_VERSIONS').subscribe(({name, el, source}) => {
-      this.selectedSourceProductKey = this._selectedSourceProductKey; // update selectable product versions
-    }));
+    this.subscription.add(
+      this.dragulaService.drop('PROD_VERSIONS').subscribe(({ name, el, source }) => {
+        this.selectedSourceProductKey = this._selectedSourceProductKey; // update selectable product versions
+      })
+    );
   }
 
   public ngOnDestroy(): void {
@@ -93,17 +99,19 @@ export class ProductSyncComponent implements OnInit, OnDestroy {
     const call2 = this.servers.productsInTransfer(this.instanceGroup);
 
     // execute and wait for all of the calls.
-    forkJoin([call0, call1, call2]).pipe(finalize(() => this.loadingProducts = false)).subscribe(results => {
-      this.sourceProducts = new Map();
-      results[0].forEach(prod => {
-        this.sourceProducts.set(prod.name, this.sourceProducts.get(prod.name) || []);
-        this.sourceProducts.get(prod.name).push(prod);
-      });
-      this.sourceProductsKeys = Array.from(this.sourceProducts.keys());
+    forkJoin([call0, call1, call2])
+      .pipe(finalize(() => (this.loadingProducts = false)))
+      .subscribe((results) => {
+        this.sourceProducts = new Map();
+        results[0].forEach((prod) => {
+          this.sourceProducts.set(prod.name, this.sourceProducts.get(prod.name) || []);
+          this.sourceProducts.get(prod.name).push(prod);
+        });
+        this.sourceProductsKeys = Array.from(this.sourceProducts.keys());
 
-      this.targetProducts = results[1];
-      this.processingProducts = results[2];
-    });
+        this.targetProducts = results[1];
+        this.processingProducts = results[2];
+      });
   }
 
   public isSourceAndTargetOK(): boolean {
@@ -146,7 +154,7 @@ export class ProductSyncComponent implements OnInit, OnDestroy {
   }
 
   public deselectProductVersion(productVersion: ProductDto) {
-    this.selectedProducts = this.selectedProducts.filter(p => !isEqual(p.key, productVersion.key));
+    this.selectedProducts = this.selectedProducts.filter((p) => !isEqual(p.key, productVersion.key));
     this.selectedSourceProductKey = this._selectedSourceProductKey; // update selectable product versions
   }
 
@@ -157,7 +165,7 @@ export class ProductSyncComponent implements OnInit, OnDestroy {
   }
 
   private containsProd(arr: ProductDto[], prod: ProductDto): boolean {
-    if (arr.find(x => x.key.name === prod.key.name && x.key.tag === prod.key.tag)) {
+    if (arr.find((x) => x.key.name === prod.key.name && x.key.tag === prod.key.tag)) {
       return true;
     }
     return false;
@@ -179,7 +187,7 @@ export class ProductSyncComponent implements OnInit, OnDestroy {
       sourceServer: this.isCentralOption(this.sourceSelection) ? null : this.sourceSelection,
       targetMode: this.getMinionMode(this.targetSelection),
       targetServer: this.isCentralOption(this.targetSelection) ? null : this.targetSelection,
-      versionsToTransfer: this.selectedProducts
+      versionsToTransfer: this.selectedProducts,
     };
 
     this.transferStarted = true;
@@ -201,5 +209,4 @@ export class ProductSyncComponent implements OnInit, OnDestroy {
       clearInterval(this.transferHandle);
     }
   }
-
 }

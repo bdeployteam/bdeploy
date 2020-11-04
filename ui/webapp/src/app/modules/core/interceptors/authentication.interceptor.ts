@@ -4,7 +4,6 @@ import { AuthenticationService } from '../services/authentication.service';
 
 @Injectable()
 export class AuthenticationInterceptor implements HttpInterceptor {
-
   constructor(private auth: AuthenticationService) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler) {

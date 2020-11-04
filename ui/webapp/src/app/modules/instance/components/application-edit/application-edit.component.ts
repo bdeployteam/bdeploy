@@ -1,15 +1,40 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef, ViewContainerRef } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  TemplateRef,
+  ViewContainerRef
+} from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatButton } from '@angular/material/button';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { cloneDeep, isEqual } from 'lodash-es';
 import { Observable, of } from 'rxjs';
-import { CustomParameter, findFirstParameter, findLastParameter, GroupNames, LinkedParameter, NamedParameter, UnknownParameter } from '../../../../models/application.model';
+import {
+  CustomParameter,
+  findFirstParameter,
+  findLastParameter,
+  GroupNames,
+  LinkedParameter,
+  NamedParameter,
+  UnknownParameter
+} from '../../../../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_PARAMETER_CONFIGURATION, EMPTY_PARAMETER_DESCRIPTOR } from '../../../../models/consts';
-import { ApplicationConfiguration, ApplicationDescriptor, ApplicationStartType, CustomEditor, ParameterConfiguration, ParameterDescriptor, ParameterType } from '../../../../models/gen.dtos';
+import {
+  ApplicationConfiguration,
+  ApplicationDescriptor,
+  ApplicationStartType,
+  CustomEditor,
+  ParameterConfiguration,
+  ParameterDescriptor,
+  ParameterType
+} from '../../../../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../../../../models/process.model';
 import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
 import { MessageboxService } from '../../../shared/services/messagebox.service';
@@ -17,7 +42,10 @@ import { ParameterValidators } from '../../../shared/validators/parameter.valida
 import { ApplicationService } from '../../services/application.service';
 import { ApplicationEditCommandPreviewComponent } from '../application-edit-command-preview/application-edit-command-preview.component';
 import { ApplicationEditManualComponent, Context } from '../application-edit-manual/application-edit-manual.component';
-import { ApplicationEditOptionalComponent, EditOptionalData } from '../application-edit-optional/application-edit-optional.component';
+import {
+  ApplicationEditOptionalComponent,
+  EditOptionalData
+} from '../application-edit-optional/application-edit-optional.component';
 
 @Component({
   selector: 'app-application-edit',
@@ -78,7 +106,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     private overlay: Overlay,
     private viewContainerRef: ViewContainerRef,
     private messageBoxService: MessageboxService,
-    private bottomSheet: MatBottomSheet,
+    private bottomSheet: MatBottomSheet
   ) {}
 
   ngOnInit() {
@@ -106,7 +134,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     }
 
     // Notify if the form changes
-    this.formGroup.statusChanges.subscribe(status => {
+    this.formGroup.statusChanges.subscribe((status) => {
       const isValid = status === 'VALID';
       this.validationStateChanged.emit(isValid);
     });
@@ -238,7 +266,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
   /** Returns a list of all parameters referring to the given group */
   getParametersOfGroup(groupName: string) {
     const params = Array.from(this.linkedDescriptors.values());
-    const filtered = params.filter(lp => lp.rendered).filter(lp => lp.desc.groupName === groupName);
+    const filtered = params.filter((lp) => lp.rendered).filter((lp) => lp.desc.groupName === groupName);
 
     // Globals first, then by parameter name
     return filtered.sort((a, b) => {
@@ -358,7 +386,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
         continue;
       }
       // Skip parameters that have been removed during a product / upgrade downgrade
-      const upIdx = this.unknownParameters.findIndex(up => up.descriptor.uid === paraCfg.uid);
+      const upIdx = this.unknownParameters.findIndex((up) => up.descriptor.uid === paraCfg.uid);
       if (upIdx !== -1) {
         continue;
       }
@@ -416,7 +444,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     const appNameCtrl = new FormControl();
     appNameCtrl.setValidators([Validators.required]);
     appNameCtrl.setValue(this.appConfigContext.applicationConfiguration.name);
-    appNameCtrl.valueChanges.subscribe(v => {
+    appNameCtrl.valueChanges.subscribe((v) => {
       this.appConfigContext.applicationConfiguration.name = v;
     });
     this.formGroup.addControl('$appCfgName', appNameCtrl);
@@ -424,28 +452,28 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     const gracePeriodCtrl = new FormControl();
     gracePeriodCtrl.setValidators([Validators.required, ParameterValidators.numeric]);
     gracePeriodCtrl.setValue(this.appConfigContext.applicationConfiguration.processControl.gracePeriod);
-    gracePeriodCtrl.valueChanges.subscribe(v => {
+    gracePeriodCtrl.valueChanges.subscribe((v) => {
       this.appConfigContext.applicationConfiguration.processControl.gracePeriod = v;
     });
     this.formGroup.addControl('$appGracePeriod', gracePeriodCtrl);
 
     const startType = new FormControl();
     startType.setValue(this.appConfigContext.applicationConfiguration.processControl.startType);
-    startType.valueChanges.subscribe(v => {
+    startType.valueChanges.subscribe((v) => {
       this.appConfigContext.applicationConfiguration.processControl.startType = v;
     });
     this.formGroup.addControl('$appStartType', startType);
 
     const keepAlive = new FormControl();
     keepAlive.setValue(this.appConfigContext.applicationConfiguration.processControl.keepAlive);
-    keepAlive.valueChanges.subscribe(v => {
+    keepAlive.valueChanges.subscribe((v) => {
       this.appConfigContext.applicationConfiguration.processControl.keepAlive = v;
     });
     this.formGroup.addControl('$appKeepAlive', keepAlive);
 
     const attachStdin = new FormControl();
     attachStdin.setValue(this.appConfigContext.applicationConfiguration.processControl.attachStdin);
-    attachStdin.valueChanges.subscribe(v => {
+    attachStdin.valueChanges.subscribe((v) => {
       this.appConfigContext.applicationConfiguration.processControl.attachStdin = v;
     });
     this.formGroup.addControl('$appAttachStdin', attachStdin);
@@ -501,7 +529,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
 
     // Track value changes and update
     const deps = this.dependencies.get(linkedPara.desc.uid);
-    control.valueChanges.subscribe(v => {
+    control.valueChanges.subscribe((v) => {
       linkedPara.preRender(this.appService, v);
 
       // Track dependencies
@@ -536,13 +564,17 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     return (control: AbstractControl): { [key: string]: any } => {
       const err = this.appService.validateParam(String(control.value), paramDesc);
       if (err) {
-        return { 'custom': err };
+        return { custom: err };
       }
     };
   }
 
   meetsCondition(param: LinkedParameter): boolean {
-    return this.appService.meetsCondition(param.desc, this.appDesc.startCommand.parameters, this.appConfigContext.applicationConfiguration.start.parameters);
+    return this.appService.meetsCondition(
+      param.desc,
+      this.appDesc.startCommand.parameters,
+      this.appConfigContext.applicationConfiguration.start.parameters
+    );
   }
 
   /**
@@ -573,7 +605,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
         data: cloneDeep(this.getCustomParameters()),
       })
       .afterClosed()
-      .subscribe(results => {
+      .subscribe((results) => {
         if (!results) {
           return;
         }
@@ -587,12 +619,15 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     config.height = '60%';
     config.minWidth = '470px';
     config.minHeight = '550px';
-    const data: EditOptionalData = { filter: this.searchString, parameters: cloneDeep(this.getConfigurableOptionalParameters(groupName)) };
+    const data: EditOptionalData = {
+      filter: this.searchString,
+      parameters: cloneDeep(this.getConfigurableOptionalParameters(groupName)),
+    };
     config.data = data;
     this.matDialog
       .open(ApplicationEditOptionalComponent, config)
       .afterClosed()
-      .subscribe(results => {
+      .subscribe((results) => {
         if (!results) {
           return;
         }
@@ -625,9 +660,9 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
   /** Updates the visibility state of custom parameters */
   updateCustomParameters(results: CustomParameter[]) {
     const existing = this.getCustomParameters().customParameters;
-    const added = results.filter(a => existing.findIndex(b => a.uid === b.uid) === -1);
-    const removed = existing.filter(a => results.findIndex(b => a.uid === b.uid) === -1);
-    const updated = results.filter(a => existing.findIndex(b => a.uid === b.uid) !== -1);
+    const added = results.filter((a) => existing.findIndex((b) => a.uid === b.uid) === -1);
+    const removed = existing.filter((a) => results.findIndex((b) => a.uid === b.uid) === -1);
+    const updated = results.filter((a) => existing.findIndex((b) => a.uid === b.uid) !== -1);
 
     // Remove elements that are not existing any more
     for (const cp of removed) {
@@ -905,13 +940,13 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
 
   /** Removes the given unknown parameter */
   removeUnknownParameter(paramUid: string) {
-    const idx = this.unknownParameters.findIndex(v => v.config.uid === paramUid);
+    const idx = this.unknownParameters.findIndex((v) => v.config.uid === paramUid);
     this.unknownParameters.splice(idx, 1);
   }
 
   /** Converts the given unknown parameter to a custom parameter */
   covertUnknownToCustomParameter(paramUid: string) {
-    const param = this.unknownParameters.find(up => up.config.uid === paramUid);
+    const param = this.unknownParameters.find((up) => up.config.uid === paramUid);
 
     // New custom will be added as last one
     const newUid = paramUid + '.custom';
@@ -956,7 +991,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     }
 
     // add more on demand.
-    const searchIn = [ param?.desc?.name, param?.desc?.longDescription, param?.desc?.parameter ];
+    const searchIn = [param?.desc?.name, param?.desc?.longDescription, param?.desc?.parameter];
 
     for (const item of searchIn) {
       if (!item) {
@@ -974,17 +1009,17 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
       return -1; // no search - no matches to highlight.
     }
     const params = this.getSearchableParametersOfGroup(group, unrenderenOnly);
-    const matched = params.filter(p => this.matchesSearch(p));
+    const matched = params.filter((p) => this.matchesSearch(p));
     return matched.length;
   }
 
   /** Returns a list of all parameters referring to the given group */
   getSearchableParametersOfGroup(groupName: string, unrenderenOnly: boolean) {
     const params = Array.from(this.linkedDescriptors.values());
-    let filtered = params.filter(lp => lp.desc.groupName === groupName);
+    let filtered = params.filter((lp) => lp.desc.groupName === groupName);
 
     if (unrenderenOnly) {
-      filtered = filtered.filter(lp => !lp.rendered && this.meetsCondition(lp));
+      filtered = filtered.filter((lp) => !lp.rendered && this.meetsCondition(lp));
     }
 
     return filtered;

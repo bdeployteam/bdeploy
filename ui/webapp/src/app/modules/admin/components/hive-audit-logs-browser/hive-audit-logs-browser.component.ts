@@ -9,8 +9,7 @@ import { HiveService } from '../../services/hive.service';
 import { AuditLogDataProvider } from '../audit-log/audit-log.component';
 
 export class HiveAuditLogDataProvider implements AuditLogDataProvider {
-
-  constructor(private auditService: AuditService, private hive: string, private allColumns: boolean) { }
+  constructor(private auditService: AuditService, private hive: string, private allColumns: boolean) {}
 
   showAllColumns(): boolean {
     return this.allColumns;
@@ -21,17 +20,16 @@ export class HiveAuditLogDataProvider implements AuditLogDataProvider {
   }
 
   loadMore(lastInstant: number, limit: number): Observable<AuditLogDto[]> {
-    return this.auditService.hiveAuditLog(this.hive, lastInstant, limit)
+    return this.auditService.hiveAuditLog(this.hive, lastInstant, limit);
   }
 }
 
 @Component({
   selector: 'app-hive-audit-logs-browser',
   templateUrl: './hive-audit-logs-browser.component.html',
-  styleUrls: ['./hive-audit-logs-browser.component.css']
+  styleUrls: ['./hive-audit-logs-browser.component.css'],
 })
 export class HiveAuditLogsBrowserComponent implements OnInit {
-
   private readonly log: Logger = this.loggingService.getLogger('ServerAuditLogsComponent');
 
   hiveKeys: string[] = [];
@@ -48,20 +46,23 @@ export class HiveAuditLogsBrowserComponent implements OnInit {
 
   dataProvider: AuditLogDataProvider = null;
 
-  constructor(private auditService: AuditService, private hiveService: HiveService,
-    private route: ActivatedRoute, private loggingService: LoggingService,
+  constructor(
+    private auditService: AuditService,
+    private hiveService: HiveService,
+    private route: ActivatedRoute,
+    private loggingService: LoggingService
   ) {}
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe(params => {
-    this.selectedHive = params.get('hive');
+    this.route.paramMap.subscribe((params) => {
+      this.selectedHive = params.get('hive');
     });
 
-    this.hiveService.listHives().subscribe(keys => {
-        this.hiveKeys = keys;
-        if (this.selectedHive == null && keys.length > 0) {
-          this.selectedHive = keys[0];
-        }
+    this.hiveService.listHives().subscribe((keys) => {
+      this.hiveKeys = keys;
+      if (this.selectedHive == null && keys.length > 0) {
+        this.selectedHive = keys[0];
+      }
     });
   }
 
@@ -75,5 +76,4 @@ export class HiveAuditLogsBrowserComponent implements OnInit {
       this.dataProvider = new HiveAuditLogDataProvider(this.auditService, this.selectedHive, this.showAllColumns);
     }
   }
-
 }

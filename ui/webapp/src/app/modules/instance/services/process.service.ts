@@ -29,15 +29,22 @@ export class ProcessService {
     }
     this.loading = true;
     const url = this.instanceService.buildInstanceUrl(instanceGroup, instanceId) + '/processes/';
-    const promise = this.http.get<{ [key: string]: ProcessStatusDto }>(url, { headers: suppressGlobalErrorHandling(new HttpHeaders()) });
-    promise.pipe(catchError(r => of(null)), finalize(() => (this.loading = false))).subscribe(result => {
-      if (!result) {
-        return; // error
-      }
-      this.app2Status = result;
-      this.tag2Status = this.groupByTag(Object.values(result));
-      this.processStatusEmitter.next(result);
+    const promise = this.http.get<{ [key: string]: ProcessStatusDto }>(url, {
+      headers: suppressGlobalErrorHandling(new HttpHeaders()),
     });
+    promise
+      .pipe(
+        catchError((r) => of(null)),
+        finalize(() => (this.loading = false))
+      )
+      .subscribe((result) => {
+        if (!result) {
+          return; // error
+        }
+        this.app2Status = result;
+        this.tag2Status = this.groupByTag(Object.values(result));
+        this.processStatusEmitter.next(result);
+      });
   }
 
   /** Registers a new handler that is notified whenever the process status changes */
@@ -104,7 +111,7 @@ export class ProcessService {
       ProcessState.RUNNING_UNSTABLE,
       ProcessState.CRASHED_WAITING,
     ]);
-    const runningApp = apps.find(app => states.has(app.processState));
+    const runningApp = apps.find((app) => states.has(app.processState));
     if (runningApp) {
       return true;
     }

@@ -40,7 +40,7 @@
   max-width: 1000px;
 }
 
-::ng-deep .mat-vertical-stepper-header{
+::ng-deep .mat-vertical-stepper-header {
   pointer-events: none !important;
 }
 

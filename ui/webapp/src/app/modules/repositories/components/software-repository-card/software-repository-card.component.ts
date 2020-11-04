@@ -8,43 +8,38 @@ import { SoftwareRepositoryService } from '../../services/software-repository.se
 @Component({
   selector: 'app-software-repository-card',
   templateUrl: './software-repository-card.component.html',
-  styleUrls: ['./software-repository-card.component.css']
+  styleUrls: ['./software-repository-card.component.css'],
 })
 export class SoftwareRepositoryCardComponent implements OnInit {
-
   @Input() repository: SoftwareRepositoryConfiguration = null;
   @Output() removeEvent = new EventEmitter<boolean>();
 
-  constructor(private repoService: SoftwareRepositoryService,
+  constructor(
+    private repoService: SoftwareRepositoryService,
     private mbService: MessageboxService,
-    private authService: AuthenticationService) { }
+    private authService: AuthenticationService
+  ) {}
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   delete(): void {
     this.mbService
       .open({
         title: 'Delete Software Repository: ' + this.repository.name,
         message: 'Deleting a Software Repository <strong>cannot be undone</strong>.',
-        mode: MessageBoxMode.CONFIRM_WARNING
+        mode: MessageBoxMode.CONFIRM_WARNING,
       })
-      .subscribe(result => {
+      .subscribe((result) => {
         if (result !== true) {
           return;
         }
-        this.repoService
-          .deleteSoftwareRepository(this.repository.name)
-          .subscribe(
-            r => {
-              this.removeEvent.emit(true);
-            }
-          );
+        this.repoService.deleteSoftwareRepository(this.repository.name).subscribe((r) => {
+          this.removeEvent.emit(true);
+        });
       });
   }
 
   public isReadOnly(): boolean {
     return !this.authService.isGlobalAdmin();
   }
-
 }

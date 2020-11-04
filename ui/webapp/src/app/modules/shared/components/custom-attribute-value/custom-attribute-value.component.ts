@@ -4,13 +4,12 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 @Component({
   selector: 'app-custom-attribute-value',
   templateUrl: './custom-attribute-value.component.html',
-  styleUrls: ['./custom-attribute-value.component.css']
+  styleUrls: ['./custom-attribute-value.component.css'],
 })
 export class CustomAttributeValueComponent implements OnInit {
-
   isCreate = false;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: any) { }
+  constructor(@Inject(MAT_DIALOG_DATA) public data: any) {}
 
   ngOnInit() {
     this.isCreate = !this.data.attributeName;
@@ -21,7 +20,7 @@ export class CustomAttributeValueComponent implements OnInit {
   }
 
   getDescription(): string {
-    const descriptor = this.data.descriptors.find(d => d.name === this.data.attributeName);
+    const descriptor = this.data.descriptors.find((d) => d.name === this.data.attributeName);
     return descriptor ? descriptor.description : undefined;
   }
 
@@ -29,6 +28,6 @@ export class CustomAttributeValueComponent implements OnInit {
     return {
       name: this.data.attributeName,
       value: this.data.attributeValue,
-    }
+    };
   }
 }

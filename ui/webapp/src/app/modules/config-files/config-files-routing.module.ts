@@ -10,7 +10,7 @@ const CFG_ROUTES: Route[] = [
     component: ConfigFilesBrowserComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Configuration Files (${params["group"]} - ${params["uuid"]})', header: 'Configuration Files' }
+    data: { title: 'Configuration Files (${params["group"]} - ${params["uuid"]})', header: 'Configuration Files' },
   },
 ];
 
@@ -18,4 +18,4 @@ const CFG_ROUTES: Route[] = [
   imports: [RouterModule.forChild(CFG_ROUTES)],
   exports: [RouterModule],
 })
-export class ConfigFilesRoutingModule { }
+export class ConfigFilesRoutingModule {}

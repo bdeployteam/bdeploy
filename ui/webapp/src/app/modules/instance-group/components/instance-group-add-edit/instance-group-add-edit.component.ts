@@ -15,7 +15,12 @@ import { SettingsService } from 'src/app/modules/core/services/settings.service'
 import { CustomAttributeEditComponent } from 'src/app/modules/shared/components/custom-attribute-edit/custom-attribute-edit.component';
 import { CustomAttributeValueComponent } from 'src/app/modules/shared/components/custom-attribute-value/custom-attribute-value.component';
 import { EMPTY_ATTRIBUTES_RECORD, EMPTY_INSTANCE_GROUP } from '../../../../models/consts';
-import { CustomAttributeDescriptor, CustomAttributesRecord, InstanceGroupConfiguration, MinionMode } from '../../../../models/gen.dtos';
+import {
+  CustomAttributeDescriptor,
+  CustomAttributesRecord,
+  InstanceGroupConfiguration,
+  MinionMode
+} from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
 import { ErrorMessage, Logger, LoggingService } from '../../../core/services/logging.service';
 import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
@@ -27,7 +32,7 @@ import { InstanceGroupService } from '../../services/instance-group.service';
   selector: 'app-instance-group-add-edit',
   templateUrl: './instance-group-add-edit.component.html',
   styleUrls: ['./instance-group-add-edit.component.css'],
-  providers: [SettingsService]
+  providers: [SettingsService],
 })
 export class InstanceGroupAddEditComponent implements OnInit {
   log: Logger = this.loggingService.getLogger('InstanceGroupAddEditComponent');
@@ -59,7 +64,7 @@ export class InstanceGroupAddEditComponent implements OnInit {
     logo: [''],
     autoDelete: [''],
     managed: [''],
-    instanceAttributes: ['']
+    instanceAttributes: [''],
   });
 
   get nameControl() {
@@ -89,7 +94,7 @@ export class InstanceGroupAddEditComponent implements OnInit {
     private config: ConfigService,
     private settings: SettingsService,
     public routingHistoryService: RoutingHistoryService,
-    private dialog: MatDialog,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit() {
@@ -109,7 +114,7 @@ export class InstanceGroupAddEditComponent implements OnInit {
       const og = this.instanceGroupService.getInstanceGroup(this.nameParam);
       const op = this.instanceGroupService.getInstanceGroupAttributes(this.nameParam);
       forkJoin([og, op]).subscribe(
-        result => {
+        (result) => {
           const instanceGroup: InstanceGroupConfiguration = result[0];
 
           if (!instanceGroup.instanceAttributes) {
@@ -120,16 +125,13 @@ export class InstanceGroupAddEditComponent implements OnInit {
           this.instanceAttributesDescriptors = instanceGroup.instanceAttributes;
 
           if (instanceGroup.logo) {
-            this.instanceGroupService.getInstanceGroupImage(this.nameParam)
-              .subscribe(data => {
-                const reader = new FileReader();
-                reader.onload = () => {
-                  this.originalLogoUrl = this.sanitizer.bypassSecurityTrustUrl(
-                    reader.result.toString()
-                  );
-                };
-                reader.readAsDataURL(data);
-              });
+            this.instanceGroupService.getInstanceGroupImage(this.nameParam).subscribe((data) => {
+              const reader = new FileReader();
+              reader.onload = () => {
+                this.originalLogoUrl = this.sanitizer.bypassSecurityTrustUrl(reader.result.toString());
+              };
+              reader.readAsDataURL(data);
+            });
           }
 
           this.instanceGroupAttributes = result[1];
@@ -138,7 +140,7 @@ export class InstanceGroupAddEditComponent implements OnInit {
           }
           this.clonedInstanceGroupAttributes = cloneDeep(this.instanceGroupAttributes);
         },
-        error => {
+        (error) => {
           this.log.errorWithGuiMessage(new ErrorMessage('reading instance group failed', error));
         }
       );
@@ -176,8 +178,7 @@ export class InstanceGroupAddEditComponent implements OnInit {
         } else {
           this.messageBoxService.open({
             title: 'Unsupported Image Type',
-            message:
-              'Please choose a different image. Supported types: jpeg, png, gif or svg',
+            message: 'Please choose a different image. Supported types: jpeg, png, gif or svg',
             mode: MessageBoxMode.ERROR,
           });
         }
@@ -217,26 +218,31 @@ export class InstanceGroupAddEditComponent implements OnInit {
 
     if (this.isCreate()) {
       // first create group, second set attributes third update image on existing group
-      this.instanceGroupService.createInstanceGroup(instanceGroup)
-        .subscribe(_ => {
-          this.log.info('created new instance group ' + instanceGroup.name);
-          this.clonedInstanceGroup = instanceGroup;
-          this.instanceGroupService
-            .updateInstanceGroupAttributes(instanceGroup.name, instanceGroupAttributes)
-            .pipe(finalize(() => { this.loading = false; }))
-            .subscribe(r => {
-                this.clonedInstanceGroupAttributes = cloneDeep(instanceGroupAttributes);
-                this.checkImage(instanceGroup.name);
-              });
-        });
+      this.instanceGroupService.createInstanceGroup(instanceGroup).subscribe((_) => {
+        this.log.info('created new instance group ' + instanceGroup.name);
+        this.clonedInstanceGroup = instanceGroup;
+        this.instanceGroupService
+          .updateInstanceGroupAttributes(instanceGroup.name, instanceGroupAttributes)
+          .pipe(
+            finalize(() => {
+              this.loading = false;
+            })
+          )
+          .subscribe((r) => {
+            this.clonedInstanceGroupAttributes = cloneDeep(instanceGroupAttributes);
+            this.checkImage(instanceGroup.name);
+          });
+      });
     } else {
       if (this.config.config.mode === MinionMode.CENTRAL) {
-        this.messageBoxService.open({
+        this.messageBoxService
+          .open({
             title: 'Updating Managed Servers',
-            message: 'This action will try to contact and synchronize with all managed servers for this instance group.',
+            message:
+              'This action will try to contact and synchronize with all managed servers for this instance group.',
             mode: MessageBoxMode.CONFIRM_WARNING,
           })
-          .subscribe(r => {
+          .subscribe((r) => {
             if (r) {
               this.doUpdate(instanceGroup, instanceGroupAttributes);
             } else {
@@ -251,15 +257,23 @@ export class InstanceGroupAddEditComponent implements OnInit {
 
   private doUpdate(instanceGroup: any, instanceGroupAttributes: CustomAttributesRecord) {
     forkJoin({
-      configuration: this.isConfigurationModified() ? this.instanceGroupService.updateInstanceGroup(this.nameParam, instanceGroup) : of(null),
-      attributes: this.isAttributesModified() ? this.instanceGroupService.updateInstanceGroupAttributes(this.nameParam, this.instanceGroupAttributes) : of (null),
+      configuration: this.isConfigurationModified()
+        ? this.instanceGroupService.updateInstanceGroup(this.nameParam, instanceGroup)
+        : of(null),
+      attributes: this.isAttributesModified()
+        ? this.instanceGroupService.updateInstanceGroupAttributes(this.nameParam, this.instanceGroupAttributes)
+        : of(null),
     })
-    .pipe(finalize(() => {this.loading = false;}))
-    .subscribe(_ => {
-      this.clonedInstanceGroup = instanceGroup;
-      this.clonedInstanceGroupAttributes = instanceGroupAttributes;
-      this.checkImage(this.nameParam);
-    });
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+        })
+      )
+      .subscribe((_) => {
+        this.clonedInstanceGroup = instanceGroup;
+        this.clonedInstanceGroupAttributes = instanceGroupAttributes;
+        this.checkImage(this.nameParam);
+      });
   }
 
   isModified(): boolean {
@@ -268,10 +282,7 @@ export class InstanceGroupAddEditComponent implements OnInit {
 
   isConfigurationModified(): boolean {
     const instanceGroup: InstanceGroupConfiguration = this.instanceGroupFormGroup.getRawValue();
-    return (
-      !isEqual(instanceGroup, this.clonedInstanceGroup) ||
-      this.newLogoFile != null
-    );
+    return !isEqual(instanceGroup, this.clonedInstanceGroup) || this.newLogoFile != null;
   }
 
   isAttributesModified(): boolean {
@@ -291,9 +302,15 @@ export class InstanceGroupAddEditComponent implements OnInit {
 
   private checkImage(group: string): void {
     if (this.newLogoFile != null) {
-      this.instanceGroupService.updateInstanceGroupImage(group, this.newLogoFile)
-        .pipe(finalize(() => {this.clearLogoUpload(); this.loading = false; }))
-        .subscribe(_ => {
+      this.instanceGroupService
+        .updateInstanceGroupImage(group, this.newLogoFile)
+        .pipe(
+          finalize(() => {
+            this.clearLogoUpload();
+            this.loading = false;
+          })
+        )
+        .subscribe((_) => {
           this.router.navigate(['/instancegroup/browser']);
         });
     } else {
@@ -342,27 +359,33 @@ export class InstanceGroupAddEditComponent implements OnInit {
   }
 
   addInstanceAttribute() {
-    this.dialog.open(CustomAttributeEditComponent, {
-      width: '500px',
-      data: null,
-    }).afterClosed().subscribe(r => {
-      if (r) {
-        this.instanceAttributesDescriptors.push(r);
-        this.sortInstanceAttributes();
-      }
-    });
+    this.dialog
+      .open(CustomAttributeEditComponent, {
+        width: '500px',
+        data: null,
+      })
+      .afterClosed()
+      .subscribe((r) => {
+        if (r) {
+          this.instanceAttributesDescriptors.push(r);
+          this.sortInstanceAttributes();
+        }
+      });
   }
 
   editInstanceAttribute(attribute: CustomAttributeDescriptor, index: number) {
-    this.dialog.open(CustomAttributeEditComponent, {
-      width: '500px',
-      data: cloneDeep(attribute),
-    }).afterClosed().subscribe(r => {
-      if (r) {
-        this.instanceAttributesDescriptors.splice(index, 1, r);
-        this.sortInstanceAttributes();
-      }
-    });
+    this.dialog
+      .open(CustomAttributeEditComponent, {
+        width: '500px',
+        data: cloneDeep(attribute),
+      })
+      .afterClosed()
+      .subscribe((r) => {
+        if (r) {
+          this.instanceAttributesDescriptors.splice(index, 1, r);
+          this.sortInstanceAttributes();
+        }
+      });
   }
 
   removeInstanceAttribute(index: number) {
@@ -370,42 +393,52 @@ export class InstanceGroupAddEditComponent implements OnInit {
   }
 
   private sortInstanceAttributes() {
-      this.instanceAttributesDescriptors = this.instanceAttributesDescriptors.sort((a,b) => a.name.localeCompare(b.name));
+    this.instanceAttributesDescriptors = this.instanceAttributesDescriptors.sort((a, b) =>
+      a.name.localeCompare(b.name)
+    );
   }
 
   addInstanceGroupAttribute() {
-    const possibleDescriptors = this.settings.getSettings().instanceGroup.attributes.filter(d => !this.instanceGroupAttributes.attributes[d.name] );
-    this.dialog.open(CustomAttributeValueComponent, {
-      width: '500px',
-      data: {
-        descriptors: possibleDescriptors,
-        attributeName: null,
-        attributeValue: null,
-      },
-    }).afterClosed().subscribe(r => {
-      if (r) {
-        this.instanceGroupAttributes.attributes[r.name] = r.value;
-      }
-    });
+    const possibleDescriptors = this.settings
+      .getSettings()
+      .instanceGroup.attributes.filter((d) => !this.instanceGroupAttributes.attributes[d.name]);
+    this.dialog
+      .open(CustomAttributeValueComponent, {
+        width: '500px',
+        data: {
+          descriptors: possibleDescriptors,
+          attributeName: null,
+          attributeValue: null,
+        },
+      })
+      .afterClosed()
+      .subscribe((r) => {
+        if (r) {
+          this.instanceGroupAttributes.attributes[r.name] = r.value;
+        }
+      });
   }
 
   editInstanceGroupAttribute(attributeName: string) {
-    let descriptor = this.settings.getSettings().instanceGroup.attributes.find(d => d.name === attributeName);
+    let descriptor = this.settings.getSettings().instanceGroup.attributes.find((d) => d.name === attributeName);
     if (!descriptor) {
-      descriptor = {name: attributeName, description: ''};
+      descriptor = { name: attributeName, description: '' };
     }
-    this.dialog.open(CustomAttributeValueComponent, {
-      width: '500px',
-      data: {
-        descriptors: [descriptor],
-        attributeName: attributeName,
-        attributeValue: cloneDeep(this.instanceGroupAttributes.attributes[attributeName])
-      },
-    }).afterClosed().subscribe(r => {
-      if (r) {
-        this.instanceGroupAttributes.attributes[r.name] = r.value;
-      }
-    });
+    this.dialog
+      .open(CustomAttributeValueComponent, {
+        width: '500px',
+        data: {
+          descriptors: [descriptor],
+          attributeName: attributeName,
+          attributeValue: cloneDeep(this.instanceGroupAttributes.attributes[attributeName]),
+        },
+      })
+      .afterClosed()
+      .subscribe((r) => {
+        if (r) {
+          this.instanceGroupAttributes.attributes[r.name] = r.value;
+        }
+      });
   }
 
   removeInstanceGroupAttribute(attributeName: string) {
@@ -423,5 +456,4 @@ export class InstanceGroupAddEditComponent implements OnInit {
       return [];
     }
   }
-
 }

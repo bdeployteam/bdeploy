@@ -14,10 +14,9 @@ import { UserPasswordComponent } from '../user-password/user-password.component'
   selector: 'app-user-info',
   templateUrl: './user-info.component.html',
   styleUrls: ['./user-info.component.css'],
-  providers: [SettingsService]
+  providers: [SettingsService],
 })
 export class UserInfoComponent implements OnInit {
-
   private readonly log: Logger = this.loggingService.getLogger('UserInfoComponent');
 
   public user: UserInfo;
@@ -26,21 +25,23 @@ export class UserInfoComponent implements OnInit {
 
   private dialogRef: MatDialogRef<any>;
 
-  constructor(private loggingService: LoggingService,
+  constructor(
+    private loggingService: LoggingService,
     private router: Router,
     private authService: AuthenticationService,
     public settings: SettingsService,
     private dialog: MatDialog,
-    private snackbarService: MatSnackBar) { }
+    private snackbarService: MatSnackBar
+  ) {}
 
   ngOnInit() {
-    this.authService.getUserInfo().subscribe(r => {
+    this.authService.getUserInfo().subscribe((r) => {
       this.user = r;
     });
   }
 
   logout(): void {
-    this.router.navigate(['/login']).then(result => {
+    this.router.navigate(['/login']).then((result) => {
       if (result) {
         this.authService.logout();
       }
@@ -48,46 +49,52 @@ export class UserInfoComponent implements OnInit {
   }
 
   edit() {
-    this.dialog.open(UserEditComponent, {
-      width: '500px',
-      data: {
-        isCreate: false,
-        user: cloneDeep(this.user)
-      }
-    }).afterClosed().subscribe(r => {
-      if (r) {
-        this.authService.updateUserInfo(r).subscribe(_ => {
-          this.user = r;
-          this.user.password = null;
-        });
-      }
-    });
+    this.dialog
+      .open(UserEditComponent, {
+        width: '500px',
+        data: {
+          isCreate: false,
+          user: cloneDeep(this.user),
+        },
+      })
+      .afterClosed()
+      .subscribe((r) => {
+        if (r) {
+          this.authService.updateUserInfo(r).subscribe((_) => {
+            this.user = r;
+            this.user.password = null;
+          });
+        }
+      });
   }
 
   changePassword() {
-    this.dialog.open(UserPasswordComponent, {
-      width: '500px',
-      data: {
-        isAdmin: false,
-        user: this.user.name
-      },
-    }).afterClosed().subscribe(r => {
-      if (r) {
-        this.authService.changePassword(r).subscribe(
-          result => {
-            this.log.info('user ' + this.user.name + 'successfully changed password');
-          },
-          error => {
-            if (error.status === 401) {
-              this.log.warn('user ' + this.user.name + ': wrong password!');
-              this.changePassword();
-            } else {
-              throw(error);
+    this.dialog
+      .open(UserPasswordComponent, {
+        width: '500px',
+        data: {
+          isAdmin: false,
+          user: this.user.name,
+        },
+      })
+      .afterClosed()
+      .subscribe((r) => {
+        if (r) {
+          this.authService.changePassword(r).subscribe(
+            (result) => {
+              this.log.info('user ' + this.user.name + 'successfully changed password');
+            },
+            (error) => {
+              if (error.status === 401) {
+                this.log.warn('user ' + this.user.name + ': wrong password!');
+                this.changePassword();
+              } else {
+                throw error;
+              }
             }
-          }
-        );
-      }
-    });
+          );
+        }
+      });
   }
 
   copied() {
@@ -98,12 +105,12 @@ export class UserInfoComponent implements OnInit {
   async openDialog(ref: TemplateRef<unknown>) {
     this.regenPack();
     this.dialogRef = this.dialog.open(ref, {
-      width: '600px'
+      width: '600px',
     });
   }
 
   regenPack() {
-    this.authService.getAuthPackForUser(this.genFull).subscribe(r => this.pack = r);
+    this.authService.getAuthPackForUser(this.genFull).subscribe((r) => (this.pack = r));
   }
 
   public getTitleUserName(): string {
@@ -112,5 +119,4 @@ export class UserInfoComponent implements OnInit {
     }
     return '--';
   }
-
 }

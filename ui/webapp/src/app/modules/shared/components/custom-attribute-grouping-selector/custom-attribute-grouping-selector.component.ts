@@ -4,10 +4,9 @@ import { CustomAttributeDescriptor, CustomAttributesRecord } from 'src/app/model
 @Component({
   selector: 'app-custom-attribute-grouping-selector',
   templateUrl: './custom-attribute-grouping-selector.component.html',
-  styleUrls: ['./custom-attribute-grouping-selector.component.css']
+  styleUrls: ['./custom-attribute-grouping-selector.component.css'],
 })
 export class CustomAttributeGroupingSelectorComponent implements OnChanges {
-
   @Input()
   label: string;
 
@@ -30,7 +29,7 @@ export class CustomAttributeGroupingSelectorComponent implements OnChanges {
     return sessionStorage.getItem(this.sessionStorageBaseId + '_attribute');
   }
   set selectedAttribute(attribute: string) {
-    if(attribute && attribute.length > 0) {
+    if (attribute && attribute.length > 0) {
       sessionStorage.setItem(this.sessionStorageBaseId + '_attribute', attribute);
       this.attributeSelection.emit(attribute);
     } else {
@@ -44,46 +43,44 @@ export class CustomAttributeGroupingSelectorComponent implements OnChanges {
     return r ? r : [];
   }
   set possibleValues(values: string[]) {
-    values.sort((a, b) => a ? b ? a.localeCompare(b) : -1 : 1);
+    values.sort((a, b) => (a ? (b ? a.localeCompare(b) : -1) : 1));
     sessionStorage.setItem(this.sessionStorageBaseId + '_values', JSON.stringify(values));
   }
-
-
 
   get selectedValues(): string[] {
     const r = JSON.parse(sessionStorage.getItem(this.sessionStorageBaseId + '_selected'));
     return r ? r : [];
   }
   set selectedValues(values: string[]) {
-    values.sort((a, b) => a ? b ? a.localeCompare(b) : -1 : 1);
+    values.sort((a, b) => (a ? (b ? a.localeCompare(b) : -1) : 1));
     sessionStorage.setItem(this.sessionStorageBaseId + '_selected', JSON.stringify(values));
     this.valuesSelection.emit(values);
   }
 
-  constructor() { }
+  constructor() {}
 
   ngOnChanges(changes: SimpleChanges) {
     const changePA: SimpleChange = changes['possibleAttributes'];
-    if(changePA && !changePA.firstChange) {
+    if (changePA && !changePA.firstChange) {
       // check if stored selected attribute still exists
-      if (this.selectedAttribute && !this.possibleAttributes?.find(a => a.name === this.selectedAttribute)) {
+      if (this.selectedAttribute && !this.possibleAttributes?.find((a) => a.name === this.selectedAttribute)) {
         this.updateAttributeSelection(undefined);
       } else {
         this.attributeSelection.emit(this.selectedAttribute);
       }
     }
     const changePAV: SimpleChange = changes['possibleAttributesValuesMap'];
-    if(changePAV && !changePAV.firstChange) {
+    if (changePAV && !changePAV.firstChange) {
       // update possible values and find newly appeared values
       const curPossible = this.findPossibleValues();
-      const newPossibleValues = curPossible.filter(p => this.possibleValues.find(v => p == v) === undefined);
+      const newPossibleValues = curPossible.filter((p) => this.possibleValues.find((v) => p == v) === undefined);
       this.possibleValues = curPossible;
 
       const selVal = this.selectedValues;
       // add new possible values to selection
       selVal.push(...newPossibleValues);
       // remove disappeared values from selection
-      this.selectedValues = selVal.filter(a => this.possibleValues.find(v => a == v) !== undefined);
+      this.selectedValues = selVal.filter((a) => this.possibleValues.find((v) => a == v) !== undefined);
     }
   }
 
@@ -95,7 +92,7 @@ export class CustomAttributeGroupingSelectorComponent implements OnChanges {
 
   private findPossibleValues(): string[] {
     if (this.selectedAttribute) {
-      const values = Object.values(this.possibleAttributesValuesMap).map(ca => {
+      const values = Object.values(this.possibleAttributesValuesMap).map((ca) => {
         const v = ca.attributes[this.selectedAttribute];
         return v ? v : null; // avoid undefined
       });
@@ -126,5 +123,4 @@ export class CustomAttributeGroupingSelectorComponent implements OnChanges {
     }
     this.selectedValues = arr;
   }
-
 }

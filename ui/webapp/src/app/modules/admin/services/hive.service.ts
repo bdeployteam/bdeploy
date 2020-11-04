@@ -27,10 +27,7 @@ export class HiveService {
   public listManifest(hive: string, name: string, tag: string): Observable<HiveEntryDto[]> {
     const url: string = this.cfg.config.api + '/hive/listManifest';
     const options = {
-      params: new HttpParams()
-        .set('hive', hive)
-        .set('name', name)
-        .set('tag', tag),
+      params: new HttpParams().set('hive', hive).set('name', name).set('tag', tag),
     };
     return this.http.get<HiveEntryDto[]>(url, options);
   }
@@ -46,10 +43,7 @@ export class HiveService {
   public downloadManifest(hive: string, name: string, tag: string) {
     this.log.debug('downloadManifest(' + hive + ', ' + name + ', ' + tag + ')');
     const url: string = this.cfg.config.api + '/hive/downloadManifest';
-    const params: HttpParams = new HttpParams()
-      .set('hive', hive)
-      .set('name', name)
-      .set('tag', tag);
+    const params: HttpParams = new HttpParams().set('hive', hive).set('name', name).set('tag', tag);
     return this.http.get(url, { params: params, responseType: 'blob' });
   }
 
@@ -57,7 +51,7 @@ export class HiveService {
     this.log.debug('download(' + hive + ', ' + id + ')');
     const url: string = this.cfg.config.api + '/hive/download';
     const params: HttpParams = new HttpParams().set('hive', hive).set('id', id);
-    return this.http.get(url, { params: params, responseType: 'text'});
+    return this.http.get(url, { params: params, responseType: 'text' });
   }
 
   public download(hive: string, id: string) {
@@ -80,10 +74,7 @@ export class HiveService {
   public delete(hive: string, name: string, tag: string) {
     this.log.debug(`delete(${hive}, ${name}, ${tag})`);
     const url: string = this.cfg.config.api + '/hive/delete';
-    const params: HttpParams = new HttpParams()
-      .set('hive', hive)
-      .set('name', name)
-      .set('tag', tag);
+    const params: HttpParams = new HttpParams().set('hive', hive).set('name', name).set('tag', tag);
     return this.http.delete(url, { params: params });
   }
 

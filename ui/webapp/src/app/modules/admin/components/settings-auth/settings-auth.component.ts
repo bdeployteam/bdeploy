@@ -13,13 +13,16 @@ import { SettingsAuthLdapServerComponent } from '../settings-auth-ldap-server/se
   selector: 'app-settings-auth',
   templateUrl: './settings-auth.component.html',
   styleUrls: ['./settings-auth.component.css'],
-  providers: [SettingsService]
+  providers: [SettingsService],
 })
 export class SettingsAuthComponent implements OnInit, CanComponentDeactivate {
-  constructor(public settings: SettingsService, private dialog: MatDialog, private messageBoxService: MessageboxService) { }
+  constructor(
+    public settings: SettingsService,
+    private dialog: MatDialog,
+    private messageBoxService: MessageboxService
+  ) {}
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   up(i: number) {
     this.getLdapSettings().splice(i - 1, 0, this.getLdapSettings().splice(i, 1)[0]);
@@ -34,14 +37,17 @@ export class SettingsAuthComponent implements OnInit, CanComponentDeactivate {
   }
 
   add() {
-    this.dialog.open(SettingsAuthLdapServerComponent, {
-      width: '500px',
-      data: null,
-    }).afterClosed().subscribe(r => {
-      if (r) {
-        this.getLdapSettings().push(r);
-      }
-    });
+    this.dialog
+      .open(SettingsAuthLdapServerComponent, {
+        width: '500px',
+        data: null,
+      })
+      .afterClosed()
+      .subscribe((r) => {
+        if (r) {
+          this.getLdapSettings().push(r);
+        }
+      });
   }
 
   remove(i: number) {
@@ -49,14 +55,17 @@ export class SettingsAuthComponent implements OnInit, CanComponentDeactivate {
   }
 
   edit(s: LDAPSettingsDto, i: number) {
-    this.dialog.open(SettingsAuthLdapServerComponent, {
-      width: '500px',
-      data: cloneDeep(s),
-    }).afterClosed().subscribe(r => {
-      if (r) {
-        this.getLdapSettings().splice(i, 1, r);
-      }
-    });
+    this.dialog
+      .open(SettingsAuthLdapServerComponent, {
+        width: '500px',
+        data: cloneDeep(s),
+      })
+      .afterClosed()
+      .subscribe((r) => {
+        if (r) {
+          this.getLdapSettings().splice(i, 1, r);
+        }
+      });
   }
 
   canDeactivate(): Observable<boolean> {
@@ -69,5 +78,4 @@ export class SettingsAuthComponent implements OnInit, CanComponentDeactivate {
       mode: MessageBoxMode.CONFIRM_WARNING,
     });
   }
-
 }

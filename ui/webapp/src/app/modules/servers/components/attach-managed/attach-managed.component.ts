@@ -43,7 +43,7 @@ export class AttachManagedComponent implements OnInit {
     private fb: FormBuilder,
     private dlService: DownloadService,
     private managedServers: ManagedServersService,
-    public routingHistoryService:RoutingHistoryService
+    public routingHistoryService: RoutingHistoryService
   ) {}
 
   ngOnInit() {
@@ -66,7 +66,7 @@ export class AttachManagedComponent implements OnInit {
 
   private readFile(file: File) {
     const reader = new FileReader();
-    reader.onload = e => {
+    reader.onload = (e) => {
       this.attachPayload = JSON.parse(reader.result.toString());
     };
     reader.readAsText(file);
@@ -122,12 +122,12 @@ export class AttachManagedComponent implements OnInit {
     this.managedServers
       .tryAutoAttach(this.instanceGroupName, payload)
       .pipe(
-        catchError(e => {
+        catchError((e) => {
           const error = new ErrorMessage('Cannot automatically attach to managed server', e);
           return of(error);
-        }),
+        })
       )
-      .subscribe(r => {
+      .subscribe((r) => {
         if (r instanceof ErrorMessage) {
           this.attachError = r;
         } else {
@@ -140,7 +140,7 @@ export class AttachManagedComponent implements OnInit {
   manualAddServer() {
     const payload = this.createDto();
 
-    this.managedServers.manualAttach(this.instanceGroupName, payload).subscribe(r => {
+    this.managedServers.manualAttach(this.instanceGroupName, payload).subscribe((r) => {
       this.stepper.selected = this.doneStep;
     });
   }
@@ -151,7 +151,7 @@ export class AttachManagedComponent implements OnInit {
       description: this.serverDescControl.value,
       uri: this.serverUriControl.value,
       auth: this.attachPayload.auth,
-      minions : this.attachPayload.minions,
+      minions: this.attachPayload.minions,
       lastSync: 0,
       update: null,
     };
@@ -176,7 +176,7 @@ export class AttachManagedComponent implements OnInit {
   }
 
   loadCentralIdent() {
-    this.managedServers.getCentralIdent(this.instanceGroupName, this.createDto()).subscribe(r => {
+    this.managedServers.getCentralIdent(this.instanceGroupName, this.createDto()).subscribe((r) => {
       this.centralIdent = r;
     });
   }
@@ -187,6 +187,9 @@ export class AttachManagedComponent implements OnInit {
   }
 
   downloadManualJson() {
-    this.dlService.downloadBlob('central-' + this.serverNameControl.value + '.txt', new Blob([this.centralIdent], {type: 'text/plain'}));
+    this.dlService.downloadBlob(
+      'central-' + this.serverNameControl.value + '.txt',
+      new Blob([this.centralIdent], { type: 'text/plain' })
+    );
   }
 }

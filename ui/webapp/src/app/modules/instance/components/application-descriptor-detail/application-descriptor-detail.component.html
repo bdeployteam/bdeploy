@@ -5,22 +5,17 @@
       <div>Supported on Operating Systems</div>
       <div>
         <ng-container *ngFor="let os of applicationGroup.operatingSystems">
-          <mat-icon class="icon" [svgIcon]='os' title="Available for {{os}}"></mat-icon>
+          <mat-icon class="icon" [svgIcon]="os" title="Available for {{ os }}"></mat-icon>
         </ng-container>
       </div>
       <div>Application Key</div>
-      <div>{{applicationGroup.appKeyName}}</div>
+      <div>{{ applicationGroup.appKeyName }}</div>
       <div>Application Tag</div>
-      <div>{{applicationGroup.appKeyTag}}</div>
+      <div>{{ applicationGroup.appKeyTag }}</div>
     </mat-card-content>
   </mat-card>
 </ng-template>
 
-<button
-  mat-icon-button
-  type="button"
-  #infoButton
-  (click)="openOverlay(infoButton, infoPopup)"
-  appClickStopPropagation>
+<button mat-icon-button type="button" #infoButton (click)="openOverlay(infoButton, infoPopup)" appClickStopPropagation>
   <mat-icon>info</mat-icon>
 </button>

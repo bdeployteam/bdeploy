@@ -10,7 +10,7 @@
 
   .title-theme {
     background-color: $header-color !important;
-    @include mat-elevation-transition(0.3s, ease-in-out)
+    @include mat-elevation-transition(0.3s, ease-in-out);
   }
 
   .mat-expansion-panel-header {
@@ -35,7 +35,7 @@
   }
 
   .unknown-parameter-theme {
-    background-color: if($dark, #984747, #efabab );
+    background-color: if($dark, #984747, #efabab);
   }
 
   .info-theme {

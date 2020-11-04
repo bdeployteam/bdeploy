@@ -39,7 +39,7 @@ h2 {
 }
 
 .products-wrapper {
-  display:flex;
+  display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   overflow-x: hidden;
@@ -52,7 +52,7 @@ h2 {
 }
 
 app-product-card {
-  margin:15px;
+  margin: 15px;
 }
 
 .processing {
@@ -66,4 +66,3 @@ app-product-card {
 .processing mat-spinner {
   margin-right: 8px;
 }
-

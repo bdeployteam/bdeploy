@@ -1,82 +1,93 @@
 <ng-template #infoPopup>
-    <mat-card class="info">
-      <div class="mat-title">{{productDto.name}}</div>
-      <p>Product: <strong>{{productDto.product}}</strong> Version: <strong>{{productDto.key.tag}}</strong></p>
-      <p>Vendor: <strong>{{productDto.vendor ? productDto.vendor : '(unknown)'}}</strong></p>
-      <mat-card-content class="labels-card">
-        <mat-tab-group dynamicHeight (selectedTabChange)='onTabChange($event)'>
-          <mat-tab label='Labels'>
-            <div class='chip-wrapper'>
-              <mat-chip-list>
-                <mat-chip *ngFor="let labelKey of getLabelKeys()"><span class="label-key">{{labelKey}}: </span><span>{{productDto.labels[labelKey]}}</span></mat-chip>
-              </mat-chip-list>
-            </div>
-          </mat-tab>
-          <mat-tab label='Instance Templates' *ngIf='productDto.instanceTemplates?.length'>
-            <div class='instance-template-table'>
-              <strong>Name</strong>
-              <strong># Process</strong>
-              <strong>Description</strong>
-              <ng-container *ngFor='let template of productDto.instanceTemplates'>
-                <span>{{template.name}}</span>
-                <span>{{getApplicationCount(template)}}</span>
-                <span>{{template.description}}</span>
-              </ng-container>
-            </div>
-          </mat-tab>
-          <mat-tab label='Application Templates' *ngIf='productDto.applicationTemplates?.length'>
-            <div class='application-template-table'>
-              <strong>Name</strong>
-              <strong>ID</strong>
-              <strong>Description</strong>
-              <ng-container *ngFor='let template of productDto.applicationTemplates'>
-                <span>{{template.name}}</span>
-                <span>{{template.id}}</span>
-                <span>{{template.description}}</span>
-              </ng-container>
-            </div>
-          </mat-tab>
-          <mat-tab *ngIf="showUsedIn" label='Used In'>
-            <div *ngIf='loadingUsedIn' class='loading-container'>
-              <mat-spinner [diameter]='24'></mat-spinner>
-            </div>
-            <div *ngIf='!loadingUsedIn' style='margin-top: 10px'>The following table shows all instances where at least one <strong>installed</strong> instance version uses this product version.</div>
-            <div *ngIf='!loadingUsedIn' class="used-in-table">
-              <strong>ID</strong>
-              <strong>Version</strong>
-              <strong>Name</strong>
-              <strong>Description</strong>
-              <ng-container *ngFor='let instance of usedIn'>
-                <span>{{instance.uuid}}</span>
-                <span>{{instance.tag}}</span>
-                <span>{{instance.name}}</span>
-                <span>{{instance.description}}</span>
-              </ng-container>
-            </div>
-          </mat-tab>
-          <mat-tab label='Plugins'>
-            <div *ngIf='!plugins' class='loading-container'>
-              <mat-spinner [diameter]='24'></mat-spinner>
-            </div>
-            <div *ngIf='plugins' style='margin-top: 10px'>The following table shows all plugins embedded in the product version.</div>
-            <div *ngIf='plugins' class="plugins-table">
-              <strong>ID</strong>
-              <strong>Name</strong>
-              <strong>Version</strong>
-              <strong>Loaded</strong>
-              <ng-container *ngFor='let plugin of plugins'>
-                <span>{{plugin.id.id}}</span>
-                <span>{{plugin.name}}</span>
-                <span>{{plugin.version}}</span>
-                <span>{{plugin.loaded}}</span>
-              </ng-container>
-            </div>
-          </mat-tab>
-        </mat-tab-group>
-      </mat-card-content>
-    </mat-card>
-  </ng-template>
+  <mat-card class="info">
+    <div class="mat-title">{{ productDto.name }}</div>
+    <p>
+      Product: <strong>{{ productDto.product }}</strong> Version: <strong>{{ productDto.key.tag }}</strong>
+    </p>
+    <p>
+      Vendor: <strong>{{ productDto.vendor ? productDto.vendor : '(unknown)' }}</strong>
+    </p>
+    <mat-card-content class="labels-card">
+      <mat-tab-group dynamicHeight (selectedTabChange)="onTabChange($event)">
+        <mat-tab label="Labels">
+          <div class="chip-wrapper">
+            <mat-chip-list>
+              <mat-chip *ngFor="let labelKey of getLabelKeys()"
+                ><span class="label-key">{{ labelKey }}: </span><span>{{ productDto.labels[labelKey] }}</span></mat-chip
+              >
+            </mat-chip-list>
+          </div>
+        </mat-tab>
+        <mat-tab label="Instance Templates" *ngIf="productDto.instanceTemplates?.length">
+          <div class="instance-template-table">
+            <strong>Name</strong>
+            <strong># Process</strong>
+            <strong>Description</strong>
+            <ng-container *ngFor="let template of productDto.instanceTemplates">
+              <span>{{ template.name }}</span>
+              <span>{{ getApplicationCount(template) }}</span>
+              <span>{{ template.description }}</span>
+            </ng-container>
+          </div>
+        </mat-tab>
+        <mat-tab label="Application Templates" *ngIf="productDto.applicationTemplates?.length">
+          <div class="application-template-table">
+            <strong>Name</strong>
+            <strong>ID</strong>
+            <strong>Description</strong>
+            <ng-container *ngFor="let template of productDto.applicationTemplates">
+              <span>{{ template.name }}</span>
+              <span>{{ template.id }}</span>
+              <span>{{ template.description }}</span>
+            </ng-container>
+          </div>
+        </mat-tab>
+        <mat-tab *ngIf="showUsedIn" label="Used In">
+          <div *ngIf="loadingUsedIn" class="loading-container">
+            <mat-spinner [diameter]="24"></mat-spinner>
+          </div>
+          <div *ngIf="!loadingUsedIn" style="margin-top: 10px;">
+            The following table shows all instances where at least one <strong>installed</strong> instance version uses
+            this product version.
+          </div>
+          <div *ngIf="!loadingUsedIn" class="used-in-table">
+            <strong>ID</strong>
+            <strong>Version</strong>
+            <strong>Name</strong>
+            <strong>Description</strong>
+            <ng-container *ngFor="let instance of usedIn">
+              <span>{{ instance.uuid }}</span>
+              <span>{{ instance.tag }}</span>
+              <span>{{ instance.name }}</span>
+              <span>{{ instance.description }}</span>
+            </ng-container>
+          </div>
+        </mat-tab>
+        <mat-tab label="Plugins">
+          <div *ngIf="!plugins" class="loading-container">
+            <mat-spinner [diameter]="24"></mat-spinner>
+          </div>
+          <div *ngIf="plugins" style="margin-top: 10px;">
+            The following table shows all plugins embedded in the product version.
+          </div>
+          <div *ngIf="plugins" class="plugins-table">
+            <strong>ID</strong>
+            <strong>Name</strong>
+            <strong>Version</strong>
+            <strong>Loaded</strong>
+            <ng-container *ngFor="let plugin of plugins">
+              <span>{{ plugin.id.id }}</span>
+              <span>{{ plugin.name }}</span>
+              <span>{{ plugin.version }}</span>
+              <span>{{ plugin.loaded }}</span>
+            </ng-container>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card-content>
+  </mat-card>
+</ng-template>
 
-  <button mat-icon-button type="button" #infoButton (click)="openOverlay(infoButton, infoPopup)">
-    <mat-icon class="info-icon">info</mat-icon>
-  </button>
+<button mat-icon-button type="button" #infoButton (click)="openOverlay(infoButton, infoPopup)">
+  <mat-icon class="info-icon">info</mat-icon>
+</button>

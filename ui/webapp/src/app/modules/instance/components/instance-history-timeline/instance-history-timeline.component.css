@@ -1,95 +1,93 @@
-:host{
+:host {
   display: block;
-  overflow:auto;
+  overflow: auto;
   scroll-behavior: smooth;
 }
 
-.timeline_list{
-  margin:20px 0;
+.timeline_list {
+  margin: 20px 0;
 }
 
-.timeline_wrapper{
-  position:relative;
+.timeline_wrapper {
+  position: relative;
 }
-.timeline_line{
-  position:absolute;
-  top:20px;
-  bottom:20px;
-  left:50%;
-  width:4px;
-  margin-left:-1.6px;
+.timeline_line {
+  position: absolute;
+  top: 20px;
+  bottom: 20px;
+  left: 50%;
+  width: 4px;
+  margin-left: -1.6px;
   border-radius: 0 0 2px 2px;
 }
 
-.timeline_item{
-  position:relative;
-}
-
-app-instance-history-timeline-card{
-  display:block;
+.timeline_item {
   position: relative;
-  padding:0 30px;
+}
+
+app-instance-history-timeline-card {
+  display: block;
+  position: relative;
+  padding: 0 30px;
   box-sizing: border-box;
-  width:50%;
+  width: 50%;
 }
 
-.timeline_list :nth-child(even) app-instance-history-timeline-card{
-  left:50%;
+.timeline_list :nth-child(even) app-instance-history-timeline-card {
+  left: 50%;
 }
 
-.timeline_list :nth-child(even) app-instance-history-timeline-card ::ng-deep .timeline-card_header div{
+.timeline_list :nth-child(even) app-instance-history-timeline-card ::ng-deep .timeline-card_header div {
   text-align: left;
 }
 
-.timeline_circle{
+.timeline_circle {
   width: 24px;
   height: 24px;
   position: absolute;
-  left:50%;
-  margin-left:-12px;
-  margin-top:15px;
+  left: 50%;
+  margin-left: -12px;
+  margin-top: 15px;
   border-radius: 50%;
 }
 
-.timeline_circle.create{
-  background-color: rgb(63,81,181);
+.timeline_circle.create {
+  background-color: rgb(63, 81, 181);
 }
-.timeline_circle.deployment{
+.timeline_circle.deployment {
   background-color: rgb(0, 160, 200);
 }
-.timeline_circle.runtime{
+.timeline_circle.runtime {
   background-color: rgb(0, 220, 48);
 }
-.timeline_circle.runtime_stop{
+.timeline_circle.runtime_stop {
   background-color: rgb(184, 231, 15);
 }
-.timeline_circle.runtime_warning{
+.timeline_circle.runtime_warning {
   background-color: rgb(236, 168, 20);
 }
-.timeline_circle.runtime_error{
+.timeline_circle.runtime_error {
   background-color: rgb(185, 50, 50);
 }
 
-@media only screen and (max-width: 750px){
-  app-instance-history-timeline-card{
-      left:0 !important;
-      width:100%;
-      padding:0 30px 15px 40px;
+@media only screen and (max-width: 750px) {
+  app-instance-history-timeline-card {
+    left: 0 !important;
+    width: 100%;
+    padding: 0 30px 15px 40px;
   }
 
-  app-instance-history-timeline-card ::ng-deep .timeline-card_header div{
+  app-instance-history-timeline-card ::ng-deep .timeline-card_header div {
     text-align: left !important;
   }
 
-
-  .timeline_circle{
-      left:18px !important;
+  .timeline_circle {
+    left: 18px !important;
   }
 
-  .timeline_line{
-      left:16.5px !important;
-      margin-left:0;
-      bottom:35px;
+  .timeline_line {
+    left: 16.5px !important;
+    margin-left: 0;
+    bottom: 35px;
   }
 }
-

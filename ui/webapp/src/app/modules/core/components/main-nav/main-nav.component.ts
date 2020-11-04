@@ -11,17 +11,15 @@ import { HeaderTitleService } from '../../services/header-title.service';
 import { LoggingService, LogLevel } from '../../services/logging.service';
 import { ThemeService } from '../../services/theme.service';
 
-
 @Component({
   selector: 'app-main-nav',
   templateUrl: './main-nav.component.html',
   styleUrls: ['./main-nav.component.css'],
 })
 export class MainNavComponent implements OnInit {
-
   @ViewChild('mainToolbar', { static: true }) mainTb: MatToolbar;
 
-  isAuth$: Observable<boolean> = this.authService.getTokenSubject().pipe(map(s => s !== null));
+  isAuth$: Observable<boolean> = this.authService.getTokenSubject().pipe(map((s) => s !== null));
 
   constructor(
     public authService: AuthenticationService,
@@ -31,8 +29,7 @@ export class MainNavComponent implements OnInit {
     public logging: LoggingService
   ) {}
 
-  ngOnInit(): void {
-  }
+  ngOnInit(): void {}
 
   needServerTypeHint() {
     return this.cfgService.config && this.cfgService.config.mode !== MinionMode.STANDALONE;
@@ -50,5 +47,4 @@ export class MainNavComponent implements OnInit {
   formatVersion(version: Version) {
     return convert2String(version);
   }
-
 }

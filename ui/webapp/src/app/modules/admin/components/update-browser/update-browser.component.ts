@@ -24,7 +24,6 @@ export class GroupedKeys {
   styleUrls: ['./update-browser.component.css'],
 })
 export class UpdateBrowserComponent implements OnInit {
-
   public systemVersions: GroupedKeys[];
   public launcherVersions: GroupedKeys[];
   public backendInfo: BackendInfoDto;
@@ -32,7 +31,12 @@ export class UpdateBrowserComponent implements OnInit {
   public systemLoading = false;
   public launcherLoading = false;
 
-  constructor(private updService: SoftwareUpdateService, private cfgService: ConfigService, private mbService: MessageboxService, private dialog: MatDialog) {}
+  constructor(
+    private updService: SoftwareUpdateService,
+    private cfgService: ConfigService,
+    private mbService: MessageboxService,
+    private dialog: MatDialog
+  ) {}
 
   ngOnInit() {
     this.systemLoading = true;
@@ -45,11 +49,11 @@ export class UpdateBrowserComponent implements OnInit {
     this.updService
       .listBDeployVersions()
       .pipe(finalize(() => (this.systemLoading = false)))
-      .subscribe(r => (this.systemVersions = this.groupKeysByTag(r)));
+      .subscribe((r) => (this.systemVersions = this.groupKeysByTag(r)));
     this.updService
       .listLauncherVersions()
       .pipe(finalize(() => (this.launcherLoading = false)))
-      .subscribe(r => (this.launcherVersions = this.groupKeysByTag(r)));
+      .subscribe((r) => (this.launcherVersions = this.groupKeysByTag(r)));
   }
 
   private groupKeysByTag(keys: ManifestKey[]) {
@@ -57,7 +61,7 @@ export class UpdateBrowserComponent implements OnInit {
 
     // keys are already sorted by the backend. reverse the order to have the newest version on top.
     const currentVersion = this.backendInfo.version;
-    keys.reverse().forEach(k => {
+    keys.reverse().forEach((k) => {
       if (!(k.tag in tags)) {
         tags[k.tag] = new GroupedKeys();
       }
@@ -101,7 +105,11 @@ export class UpdateBrowserComponent implements OnInit {
   }
 
   async deleteSystemVersion(keys: GroupedKeys) {
-    const doIt = await this.mbService.openAsync({title: 'Delete?', message: `Delete ${keys.keys.length} associated software packages from the server?`, mode: MessageBoxMode.QUESTION});
+    const doIt = await this.mbService.openAsync({
+      title: 'Delete?',
+      message: `Delete ${keys.keys.length} associated software packages from the server?`,
+      mode: MessageBoxMode.QUESTION,
+    });
     if (doIt) {
       await this.updService.deleteVersion(keys.keys).toPromise();
     }
@@ -109,7 +117,11 @@ export class UpdateBrowserComponent implements OnInit {
   }
 
   async deleteLauncherVersion(keys: GroupedKeys) {
-    const doIt = await this.mbService.openAsync({title: 'Delete?', message: `Delete ${keys.keys.length} associated launcher packages from the server?`, mode: MessageBoxMode.QUESTION});
+    const doIt = await this.mbService.openAsync({
+      title: 'Delete?',
+      message: `Delete ${keys.keys.length} associated launcher packages from the server?`,
+      mode: MessageBoxMode.QUESTION,
+    });
     if (doIt) {
       await this.updService.deleteVersion(keys.keys).toPromise();
     }
@@ -133,7 +145,11 @@ export class UpdateBrowserComponent implements OnInit {
     }
 
     if (offline) {
-      const ok = await this.mbService.openAsync({title: 'Node Offline', message: 'At least one registered node is offline and will not be updated, continue anyway?', mode: MessageBoxMode.QUESTION});
+      const ok = await this.mbService.openAsync({
+        title: 'Node Offline',
+        message: 'At least one registered node is offline and will not be updated, continue anyway?',
+        mode: MessageBoxMode.QUESTION,
+      });
       if (!ok) {
         return;
       }
@@ -141,7 +157,11 @@ export class UpdateBrowserComponent implements OnInit {
 
     for (const os of requiredOs) {
       if (!keys.oss.includes(os)) {
-        const ok = await this.mbService.openAsync({title: 'Missing OS package', message: `At least one node requires a ${os} update, which is missing in the selected version, continue anyway?`, mode: MessageBoxMode.QUESTION});
+        const ok = await this.mbService.openAsync({
+          title: 'Missing OS package',
+          message: `At least one node requires a ${os} update, which is missing in the selected version, continue anyway?`,
+          mode: MessageBoxMode.QUESTION,
+        });
         if (!ok) {
           return;
         }
@@ -150,9 +170,14 @@ export class UpdateBrowserComponent implements OnInit {
 
     let text = `Confirm that the system should be updated to version <strong>${keys.tag}</strong>`;
     if (keys.snapshot) {
-      text += '<br/><br/><strong>WARNING:</strong> You are about to install a snapshot version that is not yet released.';
+      text +=
+        '<br/><br/><strong>WARNING:</strong> You are about to install a snapshot version that is not yet released.';
     }
-    const doUpdate = await this.mbService.openAsync({title: 'Confirm Update', message: text , mode: MessageBoxMode.QUESTION});
+    const doUpdate = await this.mbService.openAsync({
+      title: 'Confirm Update',
+      message: text,
+      mode: MessageBoxMode.QUESTION,
+    });
     if (!doUpdate) {
       return;
     }
@@ -160,7 +185,12 @@ export class UpdateBrowserComponent implements OnInit {
     this.cfgService.stopNewVersionInterval();
 
     // perform update call and then wait some seconds for the master to go down.
-    await this.openUpdateDialog(this.updService.updateBdeploy(keys.keys).toPromise().then(() => new Promise(r => setTimeout(r, 5000))));
+    await this.openUpdateDialog(
+      this.updService
+        .updateBdeploy(keys.keys)
+        .toPromise()
+        .then(() => new Promise((r) => setTimeout(r, 5000)))
+    );
 
     // force full reload
     window.location.reload();
@@ -172,9 +202,10 @@ export class UpdateBrowserComponent implements OnInit {
         minWidth: '300px',
         maxWidth: '800px',
         disableClose: true,
-        data: {waitFor: waitFor, oldVersion: this.backendInfo.version },
+        data: { waitFor: waitFor, oldVersion: this.backendInfo.version },
       })
-      .afterClosed().toPromise();
+      .afterClosed()
+      .toPromise();
   }
 
   openUploadDialog() {
@@ -187,12 +218,12 @@ export class UpdateBrowserComponent implements OnInit {
       title: 'Upload Update Packages',
       headerMessage: `Upload update packages for BDeploy or the BDeploy Client Launcher. You can provide multiple packages at once.`,
       url: this.updService.getUploadUrl(),
-      fileTypes: ['.zip']
+      fileTypes: ['.zip'],
     };
     this.dialog
       .open(FileUploadComponent, config)
       .afterClosed()
-      .subscribe(e => {
+      .subscribe((e) => {
         this.reload();
       });
   }

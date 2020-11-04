@@ -28,7 +28,9 @@
   width: 40px;
 }
 
-.mat-column-portState, .mat-column-appState, .mat-column-rating {
+.mat-column-portState,
+.mat-column-appState,
+.mat-column-rating {
   text-align: center;
   width: 40px;
 }

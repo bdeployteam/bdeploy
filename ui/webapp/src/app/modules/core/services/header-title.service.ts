@@ -2,13 +2,12 @@ import { Injectable } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class HeaderTitleService {
-
   private headerTitle: string;
 
-  constructor(private title: Title) { }
+  constructor(private title: Title) {}
 
   public setHeaderTitle(title: string) {
     this.headerTitle = title;

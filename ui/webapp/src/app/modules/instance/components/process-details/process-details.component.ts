@@ -7,7 +7,16 @@ import { format } from 'date-fns';
 import { Observable, Subscription } from 'rxjs';
 import { finalize, map, mergeMap } from 'rxjs/operators';
 import { ProcessConfigDto } from 'src/app/models/process.model';
-import { ApplicationConfiguration, ApplicationStartType, InstanceDirectoryEntry, ParameterType, ProcessDetailDto, ProcessHandleDto, ProcessState, StringEntryChunkDto } from '../../../../models/gen.dtos';
+import {
+  ApplicationConfiguration,
+  ApplicationStartType,
+  InstanceDirectoryEntry,
+  ParameterType,
+  ProcessDetailDto,
+  ProcessHandleDto,
+  ProcessState,
+  StringEntryChunkDto
+} from '../../../../models/gen.dtos';
 import { unsubscribe } from '../../../shared/utils/object.utils';
 import { InstanceService } from '../../services/instance.service';
 import { ProcessService } from '../../services/process.service';
@@ -46,8 +55,14 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
 
   private overlayRef: OverlayRef;
 
-  constructor(private overlay: Overlay,
-    private viewContainerRef: ViewContainerRef, private processService: ProcessService, private instanceService: InstanceService, private bottomSheetSvc: MatBottomSheet, private dialog: MatDialog) {}
+  constructor(
+    private overlay: Overlay,
+    private viewContainerRef: ViewContainerRef,
+    private processService: ProcessService,
+    private instanceService: InstanceService,
+    private bottomSheetSvc: MatBottomSheet,
+    private dialog: MatDialog
+  ) {}
 
   ngOnInit() {
     this.subscription = this.processService.subscribe(() => this.onStatusChanged());
@@ -76,7 +91,7 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
   onStatusChanged() {
     // Fetch detailed status
     var promise = this.processService.getDetailsOfApp(this.instanceGroup, this.instanceId, this.appConfig.uid);
-    promise.pipe(finalize(() => this.loading = false)).subscribe(r => {
+    promise.pipe(finalize(() => (this.loading = false))).subscribe((r) => {
       this.details = r;
 
       // Clear interval handle
@@ -120,7 +135,7 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
     this.processService
       .startProcess(this.instanceGroup, this.instanceId, this.appConfig.uid)
       .pipe(finalize(() => this.reLoadStatus()))
-      .subscribe(r => {});
+      .subscribe((r) => {});
   }
 
   stop() {
@@ -128,7 +143,7 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
     this.processService
       .stopProcess(this.instanceGroup, this.instanceId, this.appConfig.uid)
       .pipe(finalize(() => this.reLoadStatus()))
-      .subscribe(r => {});
+      .subscribe((r) => {});
   }
 
   restart() {
@@ -136,7 +151,7 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
     this.processService
       .restartProcess(this.instanceGroup, this.instanceId, this.appConfig.uid)
       .pipe(finalize(() => this.reLoadStatus()))
-      .subscribe(r => {});
+      .subscribe((r) => {});
   }
 
   /** Asks the user if launching is OK if manual confirmation is required */
@@ -198,7 +213,7 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
 
   /** Returns whether or not the process is running in a not-activated version */
   isRunningOutOfSync() {
-    if(!this.details) {
+    if (!this.details) {
       return false;
     }
     const state = this.details.status.processState;
@@ -228,7 +243,11 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   canStart() {
-    return (this.isStopped() || this.isCrashedPermanently() || this.isCrashedWaiting()) && this.isMyVersion() && this.isActivated();
+    return (
+      (this.isStopped() || this.isCrashedPermanently() || this.isCrashedWaiting()) &&
+      this.isMyVersion() &&
+      this.isActivated()
+    );
   }
 
   canStop() {
@@ -382,7 +401,7 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
         appConfig: this.appConfig,
       },
     });
-    this.bottomSheet.afterDismissed().subscribe(_ => this.bottomSheet = null);
+    this.bottomSheet.afterDismissed().subscribe((_) => (this.bottomSheet = null));
   }
 
   showPortList(template: TemplateRef<any>) {
@@ -396,7 +415,7 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
           this.portListMinionName = node.nodeName;
           for (const paramCfg of this.appConfig.start.parameters) {
             const appDesc = this.processConfig.nodeList.applications[this.appConfig.application.name];
-            const paramDesc = appDesc.startCommand.parameters.find(p => p.uid === paramCfg.uid);
+            const paramDesc = appDesc.startCommand.parameters.find((p) => p.uid === paramCfg.uid);
             if (paramDesc && paramDesc.type === ParameterType.SERVER_PORT) {
               // we want this one :)
               this.portListPorts.push(paramCfg.value);
@@ -412,45 +431,74 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     this.bottomSheet = this.bottomSheetSvc.open(template, { panelClass: 'process-sheet' });
-    this.bottomSheet.afterDismissed().subscribe(_ => this.bottomSheet = null);
+    this.bottomSheet.afterDismissed().subscribe((_) => (this.bottomSheet = null));
   }
 
   countProcessRecursive(parent: ProcessHandleDto): number {
     let number = 1;
-    parent.children.forEach(child => {
+    parent.children.forEach((child) => {
       number += this.countProcessRecursive(child);
     });
     return number;
   }
 
   getCurrentOutputEntryFetcher(): () => Observable<InstanceDirectoryEntry> {
-    const tag: string = this.details ? this.details.status.instanceTag : (this.activatedInstanceTag ? this.activatedInstanceTag : this.instanceTag);
-    return () => this.instanceService.getApplicationOutputEntry(this.instanceGroup, this.instanceId, tag, this.appConfig.uid, false).pipe(
-      map(dir => {
-        if (!dir.entries || !dir.entries.length) {
-          return null;
-        }
+    const tag: string = this.details
+      ? this.details.status.instanceTag
+      : this.activatedInstanceTag
+      ? this.activatedInstanceTag
+      : this.instanceTag;
+    return () =>
+      this.instanceService
+        .getApplicationOutputEntry(this.instanceGroup, this.instanceId, tag, this.appConfig.uid, false)
+        .pipe(
+          map((dir) => {
+            if (!dir.entries || !dir.entries.length) {
+              return null;
+            }
 
-        return dir.entries[0];
-      })
-    );
+            return dir.entries[0];
+          })
+        );
   }
 
   getOutputContentFetcher(): (offset: number, limit: number) => Observable<StringEntryChunkDto> {
     return (offset, limit) => {
-      const tag: string = this.details ? this.details.status.instanceTag : (this.activatedInstanceTag ? this.activatedInstanceTag : this.instanceTag);
-      return this.instanceService.getApplicationOutputEntry(this.instanceGroup, this.instanceId, tag, this.appConfig.uid, true).pipe(
-        mergeMap(dir => this.instanceService.getContentChunk(this.instanceGroup, this.instanceId, dir, dir.entries[0], offset, limit, true))
-      );
+      const tag: string = this.details
+        ? this.details.status.instanceTag
+        : this.activatedInstanceTag
+        ? this.activatedInstanceTag
+        : this.instanceTag;
+      return this.instanceService
+        .getApplicationOutputEntry(this.instanceGroup, this.instanceId, tag, this.appConfig.uid, true)
+        .pipe(
+          mergeMap((dir) =>
+            this.instanceService.getContentChunk(
+              this.instanceGroup,
+              this.instanceId,
+              dir,
+              dir.entries[0],
+              offset,
+              limit,
+              true
+            )
+          )
+        );
     };
   }
 
   getContentDownloader(): () => void {
     return () => {
-      const tag: string = this.details ? this.details.status.instanceTag : (this.activatedInstanceTag ? this.activatedInstanceTag : this.instanceTag);
-      this.instanceService.getApplicationOutputEntry(this.instanceGroup, this.instanceId, tag, this.appConfig.uid, true).subscribe(dir => {
-        this.instanceService.downloadDataFileContent(this.instanceGroup, this.instanceId, dir, dir.entries[0]);
-      });
+      const tag: string = this.details
+        ? this.details.status.instanceTag
+        : this.activatedInstanceTag
+        ? this.activatedInstanceTag
+        : this.instanceTag;
+      this.instanceService
+        .getApplicationOutputEntry(this.instanceGroup, this.instanceId, tag, this.appConfig.uid, true)
+        .subscribe((dir) => {
+          this.instanceService.downloadDataFileContent(this.instanceGroup, this.instanceId, dir, dir.entries[0]);
+        });
     };
   }
 
@@ -481,6 +529,8 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   public onInputEvent(input: string) {
-    this.processService.writeToStdin(this.instanceGroup, this.instanceId, this.appConfig.uid, input).subscribe(r => {});
+    this.processService
+      .writeToStdin(this.instanceGroup, this.instanceId, this.appConfig.uid, input)
+      .subscribe((r) => {});
   }
 }

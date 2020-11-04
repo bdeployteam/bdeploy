@@ -38,17 +38,17 @@ export class AttachCentralComponent implements OnInit, OnDestroy {
     private igService: InstanceGroupService,
     private dlService: DownloadService,
     private managedServers: ManagedServersService,
-    public routingHistoryService:RoutingHistoryService,
+    public routingHistoryService: RoutingHistoryService
   ) {}
 
   ngOnInit() {
-    this.managedServers.getManagedMasterInfo().subscribe(i => (this.attachPayload = i));
+    this.managedServers.getManagedMasterInfo().subscribe((i) => (this.attachPayload = i));
 
     this.ws = this.eventService.createAttachEventsWebSocket();
-    this.ws.addEventListener('error', err => {
+    this.ws.addEventListener('error', (err) => {
       this.log.error(new ErrorMessage('Error waiting for attach events', err));
     });
-    this.ws.addEventListener('message', e => this.onRemoteAttach(e));
+    this.ws.addEventListener('message', (e) => this.onRemoteAttach(e));
   }
 
   ngOnDestroy() {
@@ -63,7 +63,7 @@ export class AttachCentralComponent implements OnInit, OnDestroy {
     const r = new FileReader();
     r.onload = () => {
       const groupName = r.result as string;
-      this.igService.getInstanceGroup(groupName).subscribe(res => {
+      this.igService.getInstanceGroup(groupName).subscribe((res) => {
         this.remoteAttached = res;
         this.stepper.selected = this.doneStep;
       });
@@ -87,7 +87,10 @@ export class AttachCentralComponent implements OnInit, OnDestroy {
     if ($event.dataTransfer.files.length > 0) {
       await new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = (e) => { data = reader.result.toString(); resolve(); };
+        reader.onload = (e) => {
+          data = reader.result.toString();
+          resolve();
+        };
         reader.onerror = (e) => reject();
         reader.readAsText($event.dataTransfer.files[0]);
       });
@@ -97,8 +100,8 @@ export class AttachCentralComponent implements OnInit, OnDestroy {
 
     this.manualLoading = true;
 
-    this.managedServers.manualAttachCentral(data).subscribe(group => {
-      this.igService.getInstanceGroup(group).subscribe(r => {
+    this.managedServers.manualAttachCentral(data).subscribe((group) => {
+      this.igService.getInstanceGroup(group).subscribe((r) => {
         this.remoteAttached = r;
         this.stepper.selected = this.doneStep;
       });

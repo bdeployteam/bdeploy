@@ -9,14 +9,12 @@ import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox
 import { InstanceService } from '../../services/instance.service';
 import { InstanceBannerEditComponent } from '../instance-banner-edit/instance-banner-edit.component';
 
-
 @Component({
   selector: 'app-instance-card',
   templateUrl: './instance-card.component.html',
-  styleUrls: ['./instance-card.component.css']
+  styleUrls: ['./instance-card.component.css'],
 })
 export class InstanceCardComponent implements OnInit {
-
   @Input() instanceDto: InstanceDto;
   @Input() instanceGroupName: string;
   @Output() removeEvent = new EventEmitter<boolean>();
@@ -31,48 +29,53 @@ export class InstanceCardComponent implements OnInit {
     private instanceService: InstanceService,
     private mbService: MessageboxService,
     private instanceGroupService: InstanceGroupService,
-    private dialog: MatDialog,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit() {
-    this.instanceGroupService.getInstanceGroup(this.instanceGroupName).subscribe(r => this.instanceGroup = r);
+    this.instanceGroupService.getInstanceGroup(this.instanceGroupName).subscribe((r) => (this.instanceGroup = r));
   }
 
   onConfigureBanner() {
-    this.instanceService.getInstanceBanner(this.instanceGroupName, this.instanceDto.instanceConfiguration.uuid).subscribe(banner => {
-      this.dialog.open(InstanceBannerEditComponent, {
-        width: '600px',
-        data: {
-          instanceBanner: banner
-        },
-      }).afterClosed().subscribe(r => {
-        if (r) {
-          this.instanceService.updateInstanceBanner(this.instanceGroupName, this.instanceDto.instanceConfiguration.uuid, r).subscribe(
-            // nothing to update
-          );
-        }
+    this.instanceService
+      .getInstanceBanner(this.instanceGroupName, this.instanceDto.instanceConfiguration.uuid)
+      .subscribe((banner) => {
+        this.dialog
+          .open(InstanceBannerEditComponent, {
+            width: '600px',
+            data: {
+              instanceBanner: banner,
+            },
+          })
+          .afterClosed()
+          .subscribe((r) => {
+            if (r) {
+              this.instanceService
+                .updateInstanceBanner(this.instanceGroupName, this.instanceDto.instanceConfiguration.uuid, r)
+                .subscribe
+                // nothing to update
+                ();
+            }
+          });
       });
-    });
-}
+  }
 
   delete(): void {
     this.mbService
       .open({
         title: 'Delete Instance ' + this.instanceDto.instanceConfiguration.name,
         message: 'Deleting an instance <strong>cannot be undone</strong>.',
-        mode: MessageBoxMode.CONFIRM_WARNING
+        mode: MessageBoxMode.CONFIRM_WARNING,
       })
-      .subscribe(result => {
+      .subscribe((result) => {
         if (result !== true) {
           return;
         }
         this.instanceService
           .deleteInstance(this.instanceGroupName, this.instanceDto.instanceConfiguration.uuid)
-          .subscribe(
-            r => {
-              this.removeEvent.emit(true);
-            }
-          );
+          .subscribe((r) => {
+            this.removeEvent.emit(true);
+          });
       });
   }
 }

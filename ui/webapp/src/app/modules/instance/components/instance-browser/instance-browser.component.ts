@@ -9,7 +9,13 @@ import { RoutingHistoryService } from 'src/app/modules/core/services/routing-his
 import { InstanceGroupService } from 'src/app/modules/instance-group/services/instance-group.service';
 import { SORT_PURPOSE } from '../../../../models/consts';
 import { DataList } from '../../../../models/dataList';
-import { CustomAttributesRecord, InstanceDto, InstanceGroupConfiguration, InstancePurpose, MinionMode } from '../../../../models/gen.dtos';
+import {
+  CustomAttributesRecord,
+  InstanceDto,
+  InstanceGroupConfiguration,
+  InstancePurpose,
+  MinionMode
+} from '../../../../models/gen.dtos';
 import { Logger, LoggingService } from '../../../core/services/logging.service';
 import { ProductService } from '../../../shared/services/product.service';
 import { InstanceService } from '../../services/instance.service';
@@ -63,8 +69,12 @@ export class InstanceBrowserComponent implements OnInit {
       if (instanceDto.productDto.key.tag.toLowerCase().startsWith(text)) {
         return true;
       }
-      const attributes: {[index: string]: string } = this.instancesAttributes[instanceDto.instanceConfiguration.uuid].attributes;
-      if (attributes && Object.keys(attributes).find(a => attributes[a] && attributes[a].toLowerCase().includes(text))) {
+      const attributes: { [index: string]: string } = this.instancesAttributes[instanceDto.instanceConfiguration.uuid]
+        .attributes;
+      if (
+        attributes &&
+        Object.keys(attributes).find((a) => attributes[a] && attributes[a].toLowerCase().includes(text))
+      ) {
         return true;
       }
       return false;
@@ -82,27 +92,41 @@ export class InstanceBrowserComponent implements OnInit {
       instances: this.instanceService.listInstances(this.instanceGroupName),
       instancesAttributes: this.instanceService.listInstancesAttributes(this.instanceGroupName),
       productCount: this.productService.getProductCount(this.instanceGroupName),
-    }).pipe(finalize(() => this.loading = false))
-      .subscribe(r => {
+    })
+      .pipe(finalize(() => (this.loading = false)))
+      .subscribe((r) => {
         this.instanceGroup = r.instanceGroup;
         this.instanceDtoList.addAll(r.instances);
-        this.purposes = Array.from(new Set(r.instances.map(i => i.instanceConfiguration.purpose))).sort(SORT_PURPOSE);
+        this.purposes = Array.from(new Set(r.instances.map((i) => i.instanceConfiguration.purpose))).sort(SORT_PURPOSE);
         this.instancesAttributes = r.instancesAttributes;
         this.hasProducts = r.productCount > 0;
-      })
+      });
   }
 
   getPurposes(attributeValue: string) {
-    return Array.from(new Set(this.instanceDtoList.filtered
-      .filter(dto => this.instancesAttributes[dto.instanceConfiguration.uuid]?.attributes?.[this.groupAttribute] == attributeValue)
-      .map(dto => dto.instanceConfiguration.purpose)
-      .sort(SORT_PURPOSE)));
+    return Array.from(
+      new Set(
+        this.instanceDtoList.filtered
+          .filter(
+            (dto) =>
+              this.instancesAttributes[dto.instanceConfiguration.uuid]?.attributes?.[this.groupAttribute] ==
+              attributeValue
+          )
+          .map((dto) => dto.instanceConfiguration.purpose)
+          .sort(SORT_PURPOSE)
+      )
+    );
   }
 
   getInstanceDtos(attributeValue: string, purpose: InstancePurpose): InstanceDto[] {
-    return this.instanceDtoList.filtered.filter(dto => dto.instanceConfiguration.purpose === purpose
-      && (!this.groupAttribute || this.instancesAttributes[dto.instanceConfiguration.uuid]?.attributes[this.groupAttribute] == attributeValue))
-      .sort((a,b) => a.instanceConfiguration.name.localeCompare(b.instanceConfiguration.name));
+    return this.instanceDtoList.filtered
+      .filter(
+        (dto) =>
+          dto.instanceConfiguration.purpose === purpose &&
+          (!this.groupAttribute ||
+            this.instancesAttributes[dto.instanceConfiguration.uuid]?.attributes[this.groupAttribute] == attributeValue)
+      )
+      .sort((a, b) => a.instanceConfiguration.name.localeCompare(b.instanceConfiguration.name));
   }
 
   remove() {

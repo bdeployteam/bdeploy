@@ -1,8 +1,8 @@
 <form [formGroup]="formGroup" class="container" fxLayout="column" fxLayoutAlign="space-evenly stretch">
   <h1 mat-dialog-title>Manage Custom Parameters</h1>
   <p>
-    Manage custom parameters that will be added to the command line arguments of the application. Each parameter
-    must have a unique ID and a predecessor that defines its position.
+    Manage custom parameters that will be added to the command line arguments of the application. Each parameter must
+    have a unique ID and a predecessor that defines its position.
   </p>
   <mat-form-field>
     <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Filter" />
@@ -16,7 +16,9 @@
   </mat-dialog-actions>
   <mat-dialog-content fxFlex class="mat-elevation-z2">
     <table mat-table [dataSource]="dataSource">
-      <caption style="display: none;">Parameters</caption>
+      <caption style="display: none;">
+        Parameters
+      </caption>
 
       <tr mat-header-row *matHeaderRowDef="columnsToDisplay; sticky: true"></tr>
       <tr mat-row *matRowDef="let row; columns: columnsToDisplay"></tr>
@@ -39,7 +41,11 @@
       <ng-container matColumnDef="predecessor">
         <th scope="col" mat-header-cell *matHeaderCellDef>
           <div class="header-with-icon">
-            <mat-icon matTooltip="Defines the position where the parameter is inserted into the command line." [matTooltipPosition]="'above'">info</mat-icon>
+            <mat-icon
+              matTooltip="Defines the position where the parameter is inserted into the command line."
+              [matTooltipPosition]="'above'"
+              >info</mat-icon
+            >
             <div>Predecessor</div>
           </div>
         </th>
@@ -49,7 +55,7 @@
               <mat-option value="">None</mat-option>
               <mat-optgroup *ngFor="let group of parameterGroups" [label]="group">
                 <mat-option *ngFor="let param of getParametersOfGroup(group)" [value]="param.uid">
-                    {{param.name}}
+                  {{ param.name }}
                 </mat-option>
               </mat-optgroup>
             </mat-select>
@@ -74,7 +80,13 @@
   </mat-dialog-content>
   <mat-dialog-actions class="actions">
     <button type="button" mat-raised-button [mat-dialog-close]="false">Cancel</button>
-    <button type="submit" mat-raised-button color="primary" [mat-dialog-close]="getReturnValue()" [disabled]="!isDirty || !formGroup.valid">
+    <button
+      type="submit"
+      mat-raised-button
+      color="primary"
+      [mat-dialog-close]="getReturnValue()"
+      [disabled]="!isDirty || !formGroup.valid"
+    >
       Apply
     </button>
   </mat-dialog-actions>

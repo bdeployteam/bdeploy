@@ -1,78 +1,100 @@
-<div class="container" fxLayout="column" fxLayoutAlign="space-evenly stretch" appFileDrop (filesDropped)="handleDrop($event)" (filesHovered)="dropZoneState($event)" [ngClass]="{'dropZoneActive': dropZoneActive}">
-    <h1 mat-dialog-title>{{uploadData.title}}</h1>
-    <p>{{uploadData.headerMessage}}</p>
-    <div class="dropZone">
-        <mat-icon class="dropZoneIcon">cloud_upload</mat-icon>
-        <span class="dropZoneText">Drop files to upload, or&nbsp;</span>
-        <button [disabled]="uploading" (click)="addFiles()" class="browseButton">browse.</button>
-    </div>
-    <mat-dialog-content fxFlex>
-      <input type="file" #file style="display: none" (change)="onFilesAdded()" [accept]="getAcceptedFileTypes()"  multiple />
-      <table mat-table [dataSource]="files" class="mat-elevation-z8">
-        <caption style="display: none;">Files</caption>
-        <tr mat-header-row *matHeaderRowDef="columnsToDisplay; sticky: true"></tr>
-        <tr mat-row *matRowDef="let row; columns: columnsToDisplay"></tr>
-
-        <ng-container matColumnDef="status">
-          <th scope="col" mat-header-cell *matHeaderCellDef> Status </th>
-          <td mat-cell *matCellDef="let file">
-            <mat-icon *ngIf="isFinished(file)">cloud_done</mat-icon>
-            <mat-icon *ngIf="isFailed(file)">error</mat-icon>
-            <mat-icon *ngIf="isInProgress(file)">cloud_queue</mat-icon>
-            <mat-icon *ngIf="isInQueue(file)">cloud_upload</mat-icon>
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="fileName">
-          <th scope="col" mat-header-cell *matHeaderCellDef> File Name </th>
-          <td mat-cell *matCellDef="let file">
-            {{file.name}}
-          </td>
-        </ng-container>
-        <ng-container *ngFor="let urlParam of getUrlParameter(); let i = index" matColumnDef="{{urlParam.id}}">
-          <th scope="col" mat-header-cell *matHeaderCellDef class='url-param-column'>{{urlParam.name}}</th>
-          <td mat-cell *matCellDef="let file" class='url-param-column'>
-            <mat-checkbox *ngIf="urlParam.type === 'boolean'" [(ngModel)]="getUrlParameter4File(file, i).value"></mat-checkbox>
-            <mat-form-field *ngIf="urlParam.type === 'string'">
-              <input matInput type="text" [(ngModel)]="getUrlParameter4File(file, i).value">
-            </mat-form-field>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="progress">
-          <th scope="col" mat-header-cell *matHeaderCellDef> Progress </th>
-          <td mat-cell *matCellDef="let file">
-            <ng-container *ngIf="isUploading(file)">
-              <span>Uploading...</span>
-              <mat-progress-bar mode="determinate" [value]="getUploadProgress(file) | async"></mat-progress-bar>
-            </ng-container>
-            <ng-container *ngIf="isProcessing(file)">
-              <span *ngIf='!getUploadStatus(file).processingHint'>Processing...</span>
-              <span *ngIf='getUploadStatus(file).processingHint'>{{getUploadStatus(file).processingHint}}</span>
-              <mat-progress-bar *ngIf="(file)" mode="indeterminate"></mat-progress-bar>
-            </ng-container>
-            <div *ngIf="isFinished(file)">
-                <span class="uploadSuccessful"> {{getResultDetails(file)}} </span>
-            </div>
-            <div *ngIf="isFailed(file)">
-                <span class="uploadError"> {{getResultDetails(file)}} </span>
-            </div>
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="action">
-          <th scope="col" mat-header-cell *matHeaderCellDef> Action </th>
-          <td mat-cell *matCellDef="let file">
-            <div *ngIf="!isInProgress(file)">
-              <button mat-icon-button (click)="removeFile(file)">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </div>
-          </td>
-        </ng-container>
-      </table>
-    </mat-dialog-content>
-
-    <mat-dialog-actions class="actions">
-      <button mat-button mat-dialog-close [disabled]="!cancelEnabled">Cancel</button>
-      <button mat-raised-button color="primary" [disabled]="!uploadEnabled" (click)="onOkButtonPressed()">{{buttonText}}</button>
-    </mat-dialog-actions>
+<div
+  class="container"
+  fxLayout="column"
+  fxLayoutAlign="space-evenly stretch"
+  appFileDrop
+  (filesDropped)="handleDrop($event)"
+  (filesHovered)="dropZoneState($event)"
+  [ngClass]="{ dropZoneActive: dropZoneActive }"
+>
+  <h1 mat-dialog-title>{{ uploadData.title }}</h1>
+  <p>{{ uploadData.headerMessage }}</p>
+  <div class="dropZone">
+    <mat-icon class="dropZoneIcon">cloud_upload</mat-icon>
+    <span class="dropZoneText">Drop files to upload, or&nbsp;</span>
+    <button [disabled]="uploading" (click)="addFiles()" class="browseButton">browse.</button>
   </div>
+  <mat-dialog-content fxFlex>
+    <input
+      type="file"
+      #file
+      style="display: none;"
+      (change)="onFilesAdded()"
+      [accept]="getAcceptedFileTypes()"
+      multiple
+    />
+    <table mat-table [dataSource]="files" class="mat-elevation-z8">
+      <caption style="display: none;">
+        Files
+      </caption>
+      <tr mat-header-row *matHeaderRowDef="columnsToDisplay; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: columnsToDisplay"></tr>
+
+      <ng-container matColumnDef="status">
+        <th scope="col" mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let file">
+          <mat-icon *ngIf="isFinished(file)">cloud_done</mat-icon>
+          <mat-icon *ngIf="isFailed(file)">error</mat-icon>
+          <mat-icon *ngIf="isInProgress(file)">cloud_queue</mat-icon>
+          <mat-icon *ngIf="isInQueue(file)">cloud_upload</mat-icon>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="fileName">
+        <th scope="col" mat-header-cell *matHeaderCellDef>File Name</th>
+        <td mat-cell *matCellDef="let file">
+          {{ file.name }}
+        </td>
+      </ng-container>
+      <ng-container *ngFor="let urlParam of getUrlParameter(); let i = index" matColumnDef="{{ urlParam.id }}">
+        <th scope="col" mat-header-cell *matHeaderCellDef class="url-param-column">{{ urlParam.name }}</th>
+        <td mat-cell *matCellDef="let file" class="url-param-column">
+          <mat-checkbox
+            *ngIf="urlParam.type === 'boolean'"
+            [(ngModel)]="getUrlParameter4File(file, i).value"
+          ></mat-checkbox>
+          <mat-form-field *ngIf="urlParam.type === 'string'">
+            <input matInput type="text" [(ngModel)]="getUrlParameter4File(file, i).value" />
+          </mat-form-field>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="progress">
+        <th scope="col" mat-header-cell *matHeaderCellDef>Progress</th>
+        <td mat-cell *matCellDef="let file">
+          <ng-container *ngIf="isUploading(file)">
+            <span>Uploading...</span>
+            <mat-progress-bar mode="determinate" [value]="getUploadProgress(file) | async"></mat-progress-bar>
+          </ng-container>
+          <ng-container *ngIf="isProcessing(file)">
+            <span *ngIf="!getUploadStatus(file).processingHint">Processing...</span>
+            <span *ngIf="getUploadStatus(file).processingHint">{{ getUploadStatus(file).processingHint }}</span>
+            <mat-progress-bar *ngIf="file" mode="indeterminate"></mat-progress-bar>
+          </ng-container>
+          <div *ngIf="isFinished(file)">
+            <span class="uploadSuccessful"> {{ getResultDetails(file) }} </span>
+          </div>
+          <div *ngIf="isFailed(file)">
+            <span class="uploadError"> {{ getResultDetails(file) }} </span>
+          </div>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="action">
+        <th scope="col" mat-header-cell *matHeaderCellDef>Action</th>
+        <td mat-cell *matCellDef="let file">
+          <div *ngIf="!isInProgress(file)">
+            <button mat-icon-button (click)="removeFile(file)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </td>
+      </ng-container>
+    </table>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="actions">
+    <button mat-button mat-dialog-close [disabled]="!cancelEnabled">Cancel</button>
+    <button mat-raised-button color="primary" [disabled]="!uploadEnabled" (click)="onOkButtonPressed()">
+      {{ buttonText }}
+    </button>
+  </mat-dialog-actions>
+</div>

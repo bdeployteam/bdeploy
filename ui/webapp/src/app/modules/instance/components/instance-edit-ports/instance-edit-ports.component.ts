@@ -3,14 +3,25 @@ import { NgForm } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { cloneDeep, isEqual } from 'lodash-es';
 import { Observable, of } from 'rxjs';
-import { ApplicationConfiguration, ApplicationDescriptor, InstanceNodeConfigurationDto, MinionDto, ParameterConfiguration, ParameterDescriptor, ParameterType } from 'src/app/models/gen.dtos';
+import {
+  ApplicationConfiguration,
+  ApplicationDescriptor,
+  InstanceNodeConfigurationDto,
+  MinionDto,
+  ParameterConfiguration,
+  ParameterDescriptor,
+  ParameterType
+} from 'src/app/models/gen.dtos';
 import { ProcessConfigDto } from 'src/app/models/process.model';
 import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
 import { DownloadService } from 'src/app/modules/shared/services/download.service';
 import { MessageboxService } from 'src/app/modules/shared/services/messagebox.service';
 import { getAppOs } from 'src/app/modules/shared/utils/manifest.utils';
 import { ApplicationService } from '../../services/application.service';
-import { InstanceShiftPortsComponent, ShiftableParameter } from '../instance-shift-ports/instance-shift-ports.component';
+import {
+  InstanceShiftPortsComponent,
+  ShiftableParameter
+} from '../instance-shift-ports/instance-shift-ports.component';
 
 interface ServerPortParameter {
   paramCfg: ParameterConfiguration;
@@ -22,25 +33,29 @@ interface ServerPortParameter {
 @Component({
   selector: 'app-instance-edit-ports',
   templateUrl: './instance-edit-ports.component.html',
-  styleUrls: ['./instance-edit-ports.component.css']
+  styleUrls: ['./instance-edit-ports.component.css'],
 })
 export class InstanceEditPortsComponent implements OnInit, AfterViewInit {
-
   @Input() instanceGroup: string;
   @Input() instanceId: string;
   @Input() processConfig: ProcessConfigDto;
-  @Input() minionConfigs: { [ minionName: string ]: MinionDto };
+  @Input() minionConfigs: { [minionName: string]: MinionDto };
 
   @Output() validationStateChanged = new EventEmitter<any>();
 
   @ViewChild('portsForm') portsForm: NgForm;
 
   clonedProcessConfig: ProcessConfigDto;
-  portsPerApp: {[key: string]: ServerPortParameter[] } = {};
-  appConfigs: {[key: string]: ApplicationConfiguration} = {};
+  portsPerApp: { [key: string]: ServerPortParameter[] } = {};
+  appConfigs: { [key: string]: ApplicationConfiguration } = {};
   hasAnyPorts = false;
 
-  constructor(private messageBoxService: MessageboxService, private dlService: DownloadService, private dialog: MatDialog, private appSvc: ApplicationService) { }
+  constructor(
+    private messageBoxService: MessageboxService,
+    private dlService: DownloadService,
+    private dialog: MatDialog,
+    private appSvc: ApplicationService
+  ) {}
 
   ngOnInit(): void {
     this.clonedProcessConfig = cloneDeep(this.processConfig);
@@ -49,13 +64,17 @@ export class InstanceEditPortsComponent implements OnInit, AfterViewInit {
       for (const app of node.nodeConfiguration.applications) {
         for (const param of app.start.parameters) {
           const appDesc = this.processConfig.nodeList.applications[app.application.name];
-          const paramDesc = appDesc.startCommand.parameters.find(p => p.uid === param.uid);
+          const paramDesc = appDesc.startCommand.parameters.find((p) => p.uid === param.uid);
 
           if (!paramDesc) {
             continue; // custom parameter
           }
 
-          if (paramDesc.type === ParameterType.SERVER_PORT || paramDesc.type === ParameterType.CLIENT_PORT || paramDesc.type === ParameterType.URL) {
+          if (
+            paramDesc.type === ParameterType.SERVER_PORT ||
+            paramDesc.type === ParameterType.CLIENT_PORT ||
+            paramDesc.type === ParameterType.URL
+          ) {
             if (paramDesc.type === ParameterType.URL) {
               try {
                 if (!new URL(param.value).port) {
@@ -73,7 +92,7 @@ export class InstanceEditPortsComponent implements OnInit, AfterViewInit {
               paramCfg: param,
               paramDesc: paramDesc,
               appCfg: app,
-              appDesc: appDesc
+              appDesc: appDesc,
             });
             this.hasAnyPorts = true;
           }
@@ -135,44 +154,58 @@ export class InstanceEditPortsComponent implements OnInit, AfterViewInit {
           desc: spp.paramDesc,
           selected: true,
           appCfg: spp.appCfg,
-          appDesc: spp.appDesc
+          appDesc: spp.appDesc,
         });
       }
     }
 
-    this.dialog.open(InstanceShiftPortsComponent, {
-      width: '800px',
-      data: shiftable,
-    }).afterClosed().subscribe(r => {
-      if (r) {
-        const globalsShifted: ShiftableParameter[] = [];
-        for (const shift of shiftable) {
-          if (shift.selected) {
-            if (shift.desc.global) {
-              if (globalsShifted.find(i => i.desc.uid === shift.desc.uid)) {
-                continue;
+    this.dialog
+      .open(InstanceShiftPortsComponent, {
+        width: '800px',
+        data: shiftable,
+      })
+      .afterClosed()
+      .subscribe((r) => {
+        if (r) {
+          const globalsShifted: ShiftableParameter[] = [];
+          for (const shift of shiftable) {
+            if (shift.selected) {
+              if (shift.desc.global) {
+                if (globalsShifted.find((i) => i.desc.uid === shift.desc.uid)) {
+                  continue;
+                }
+                globalsShifted.push(shift);
               }
-              globalsShifted.push(shift);
+              const p = { paramCfg: shift.cfg, paramDesc: shift.desc, appCfg: shift.appCfg, appDesc: shift.appDesc };
+              this.onChange(p, (Number(this.getPortValue(p)) + Number(r)).toString(), false);
+              console.log(shift);
+              this.portsForm.controls[shift.applicationUid + '-' + shift.cfg.uid].markAsTouched();
+              this.portsForm.controls[shift.applicationUid + '-' + shift.cfg.uid].updateValueAndValidity();
             }
-            const p = { paramCfg: shift.cfg, paramDesc: shift.desc, appCfg: shift.appCfg, appDesc: shift.appDesc };
-            this.onChange(p, (Number(this.getPortValue(p)) + Number(r)).toString(), false);
-            console.log(shift);
-            this.portsForm.controls[shift.applicationUid + '-' + shift.cfg.uid].markAsTouched();
-            this.portsForm.controls[shift.applicationUid + '-' + shift.cfg.uid].updateValueAndValidity();
           }
+          this.portsForm.form.updateValueAndValidity();
+          setTimeout(() => this.validationStateChanged.emit(this.portsForm.valid), 0);
         }
-        this.portsForm.form.updateValueAndValidity();
-        setTimeout(() => this.validationStateChanged.emit(this.portsForm.valid), 0);
-      }
-    });
+      });
   }
 
   exportCsv() {
     let csv = 'Application,Name,Description,Port';
     for (const app of Object.keys(this.portsPerApp)) {
-      csv += '\n' + this.portsPerApp[app].filter(spp => spp.paramDesc.type === ParameterType.SERVER_PORT).map(spp => {
-        return [ this.appConfigs[app].name, spp.paramDesc.name, spp.paramDesc.longDescription, this.getPortValue(spp) ];
-      }).map(r => r.map(e => `"${e}"`).join(',')).join('\n');
+      csv +=
+        '\n' +
+        this.portsPerApp[app]
+          .filter((spp) => spp.paramDesc.type === ParameterType.SERVER_PORT)
+          .map((spp) => {
+            return [
+              this.appConfigs[app].name,
+              spp.paramDesc.name,
+              spp.paramDesc.longDescription,
+              this.getPortValue(spp),
+            ];
+          })
+          .map((r) => r.map((e) => `"${e}"`).join(','))
+          .join('\n');
     }
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
@@ -210,5 +243,4 @@ export class InstanceEditPortsComponent implements OnInit, AfterViewInit {
   getAppOsName(app: ApplicationConfiguration) {
     return getAppOs(app.application);
   }
-
 }

@@ -5,16 +5,15 @@ import { InstanceNotification, Severity } from '../instance-notifications/instan
 @Component({
   selector: 'app-instance-notifications-item',
   templateUrl: './instance-notifications-item.component.html',
-  styleUrls: ['./instance-notifications-item.component.css']
+  styleUrls: ['./instance-notifications-item.component.css'],
 })
 export class InstanceNotificationsItemComponent implements OnInit {
-
   @Input()
   notification: InstanceNotification;
 
   templatePortal: TemplatePortal<any>;
 
-  constructor(private viewContainerRef: ViewContainerRef) { }
+  constructor(private viewContainerRef: ViewContainerRef) {}
 
   ngOnInit() {
     this.templatePortal = new TemplatePortal(this.notification.template, this.viewContainerRef);
@@ -31,5 +30,4 @@ export class InstanceNotificationsItemComponent implements OnInit {
   isError() {
     return this.notification.severity === Severity.ERROR;
   }
-
 }

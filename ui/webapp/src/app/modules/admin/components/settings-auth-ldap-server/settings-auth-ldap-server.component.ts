@@ -7,10 +7,9 @@ import { AuthAdminService } from '../../services/auth-admin.service';
 @Component({
   selector: 'app-settings-auth-ldap-server',
   templateUrl: './settings-auth-ldap-server.component.html',
-  styleUrls: ['./settings-auth-ldap-server.component.css']
+  styleUrls: ['./settings-auth-ldap-server.component.css'],
 })
 export class SettingsAuthLdapServerComponent implements OnInit {
-
   loading = false;
 
   constructor(@Inject(MAT_DIALOG_DATA) public server: LDAPSettingsDto, private authAdminService: AuthAdminService) {}
@@ -19,7 +18,10 @@ export class SettingsAuthLdapServerComponent implements OnInit {
     if (!this.server) {
       this.loading = true;
       this.server = <LDAPSettingsDto>{};
-      this.authAdminService.createUuid().pipe(finalize(() => (this.loading = false))).subscribe(uuid => this.server.id = uuid);
+      this.authAdminService
+        .createUuid()
+        .pipe(finalize(() => (this.loading = false)))
+        .subscribe((uuid) => (this.server.id = uuid));
       this.server.server = 'ldaps://';
       this.server.accountPattern = '(objectCategory=person)';
       this.server.accountUserName = 'sAMAccountName';
@@ -27,5 +29,4 @@ export class SettingsAuthLdapServerComponent implements OnInit {
       this.server.accountEmail = 'mail';
     }
   }
-
 }

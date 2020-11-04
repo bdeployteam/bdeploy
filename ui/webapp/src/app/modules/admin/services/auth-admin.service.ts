@@ -6,18 +6,13 @@ import { ConfigService } from '../../core/services/config.service';
 import { Logger, LoggingService } from '../../core/services/logging.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthAdminService {
-
   private static BASEPATH = '/auth/admin';
   private log: Logger = this.loggingService.getLogger('AuthAdminService');
 
-  constructor(
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private loggingService: LoggingService,
-  ) {}
+  constructor(private cfg: ConfigService, private http: HttpClient, private loggingService: LoggingService) {}
 
   public getAll(): Observable<UserInfo[]> {
     const url: string = this.cfg.config.api + AuthAdminService.BASEPATH + '/users';
@@ -30,7 +25,6 @@ export class AuthAdminService {
     this.log.debug('createLocalUser: ' + url);
     return this.http.put(url, userInfo);
   }
-
 
   public updateUser(userInfo: UserInfo) {
     const url: string = this.cfg.config.api + AuthAdminService.BASEPATH;
@@ -57,5 +51,4 @@ export class AuthAdminService {
     this.log.debug('createUuid: ' + url);
     return this.http.get(url, { responseType: 'text' });
   }
-
 }

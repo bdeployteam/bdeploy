@@ -1,11 +1,9 @@
 @import '~@angular/material/theming';
 
 @mixin instance-group-logo-theme($theme) {
-
   $dark: map-get($theme, 'is-dark');
 
   .instance-group-logo {
     background-color: if($dark, mat-color($mat-grey, 700), mat-color($mat-grey, 200));
   }
-
 }

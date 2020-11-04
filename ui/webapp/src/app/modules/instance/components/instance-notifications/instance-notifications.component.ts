@@ -4,7 +4,9 @@ import { Component, Input, OnInit, TemplateRef, ViewContainerRef } from '@angula
 import { MatButton } from '@angular/material/button';
 
 export enum Severity {
-  INFO, WARNING, ERROR
+  INFO,
+  WARNING,
+  ERROR,
 }
 
 export class InstanceNotification {
@@ -16,22 +18,17 @@ export class InstanceNotification {
 @Component({
   selector: 'app-instance-notifications',
   templateUrl: './instance-notifications.component.html',
-  styleUrls: ['./instance-notifications.component.css']
+  styleUrls: ['./instance-notifications.component.css'],
 })
 export class InstanceNotificationsComponent implements OnInit {
-
   @Input()
   notifications: InstanceNotification[];
 
   private overlayRef: OverlayRef;
 
-  constructor(
-    private overlay: Overlay,
-    private viewContainerRef: ViewContainerRef
-  ) { }
+  constructor(private overlay: Overlay, private viewContainerRef: ViewContainerRef) {}
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   getHighestSeverity() {
     let highest;
@@ -66,20 +63,23 @@ export class InstanceNotificationsComponent implements OnInit {
   }
 
   openOverlay(relative: MatButton, template: TemplateRef<any>) {
-
     this.closeOverlay();
 
     this.overlayRef = this.overlay.create({
-      positionStrategy: this.overlay.position().flexibleConnectedTo(relative._elementRef)
-        .withPositions([{
-          overlayX: 'end',
-          overlayY: 'top',
-          originX: 'center',
-          originY: 'bottom',
-          offsetX: 35,
-          offsetY: 10,
-          panelClass: 'info-card-below'
-        }])
+      positionStrategy: this.overlay
+        .position()
+        .flexibleConnectedTo(relative._elementRef)
+        .withPositions([
+          {
+            overlayX: 'end',
+            overlayY: 'top',
+            originX: 'center',
+            originY: 'bottom',
+            offsetX: 35,
+            offsetY: 10,
+            panelClass: 'info-card-below',
+          },
+        ])
         .withPush(),
       scrollStrategy: this.overlay.scrollStrategies.close(),
       hasBackdrop: true,
@@ -99,5 +99,4 @@ export class InstanceNotificationsComponent implements OnInit {
       this.overlayRef = null;
     }
   }
-
 }
