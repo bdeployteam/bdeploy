@@ -9,6 +9,7 @@ import io.bdeploy.common.util.VariableResolver;
 import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
+import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor.ApplicationPoolType;
 import io.bdeploy.interfaces.variables.SkipDelayed;
 import io.bdeploy.interfaces.variables.Variables;
 
@@ -33,6 +34,11 @@ public class ApplicationConfiguration {
      * {@link ApplicationDescriptor}.
      */
     public Manifest.Key application;
+
+    /**
+     * The pooling type for this process. Always the same as the pooling type of the application.
+     */
+    public ApplicationPoolType pooling;
 
     /**
      * Process control information.

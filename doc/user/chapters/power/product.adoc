@@ -17,6 +17,12 @@ On the BDeploy Releases page you will find some zipped sample products for each 
 
 The `app-info.yaml` file is one of the most important parts of *BDeploy*. It describes an *Application*, especially its start command. This *Application* may be _any_ application which contains an _executable_ (whatever kind, script, executable, etc.) and which allows 'installation' by copy to a directory. This is important, as *BDeploy* will 'install' an application by ultimately copying the application to an automatically determined internal directory and launch it from there.
 
+[TIP]
+An *Application* should not modify files in its own installation directory (although it _can_ do it). *BDeploy* tries to aggressively pool applications per version to reduce the footprint on the disc. If this does not work for your application, use the `pooling` configuration to specify different behaviour.
+
+[WARNING]
+`runtimeDependencies` of *Applications* are always considered `GLOBAL` poolable.
+
 Basically, `app-info.yaml` allows you to specify which executable to run, and which parameters could *potentially* be used to configure the *Application*. The `app-info.yaml` does not specify an actual configuration, but describes all possible parameters for an *Application*.
 
 The `app-info.yaml` file should be placed in the root directory of the *Application* it describes.
@@ -25,12 +31,13 @@ The `app-info.yaml` file should be placed in the root directory of the *Applicat
 ----
 name: "My Application" <1>
 type: CLIENT <2>
+pooling: GLOBAL <3>
 
-supportedOperatingSystems: <3>
+supportedOperatingSystems: <4>
   - LINUX
   - WINDOWS
 
-branding: <4>
+branding: <5>
   icon: "branding/my-icon.ico"
   splash:
     image: "branding/my-splash.bmp"
@@ -47,14 +54,14 @@ branding: <4>
       height: 12
       foreground: "#333333"
 
-processControl: <5>
+processControl: <6>
   gracePeriod: 3000
   supportedStartTypes:
    - INSTANCE
   supportsKeepAlive: true
   noOfRetries: 5
 
-startCommand: <6>
+startCommand: <7>
   launcherPath: "{{WINDOWS:launch.bat}}{{LINUX:launch.sh}}"
   parameters:
     - uid: "my.param.1"
@@ -78,37 +85,38 @@ startCommand: <6>
       longDescription: "This is only visible and configurable if my.param.2 has value 'Value 1'"
       parameter: "--conditional"
       mandatory: true
-      condition: <7>
+      condition: <8>
         parameter: "my.param.2"
         must: EQUAL
         value: "Value 1"
 
-stopCommand: <8>
+stopCommand: <9>
   ...
 
-endpoints: <9>
+endpoints: <10>
   http:
-    - id: "my-endpoint" <10>
+    - id: "my-endpoint" <11>
       path: "path/to/the/endpoint"
-      port: "{{V:port-param}}" <11>
+      port: "{{V:port-param}}" <12>
       secure: false
 
-runtimeDependencies: <12>
+runtimeDependencies: <13>
   - "adoptopenjdk/jre:1.8.0_202-b08"
 ----
 
 <1> A human readable name of the *Application*. Will be displayed in the *Configure Application* pane, and is also used as _default_ name for any process _instantiated_ from this *Application*.
 <2> The type of the application, may be `SERVER` or `CLIENT`. `SERVER` applications can be deployed to master or slave *Nodes* and there be started as server processes. `CLIENT` applications in comparison cannot be deployed on a *Node*, but run on a client PC instead.
-<3> List of supported operating systems. This list is solely used to verify during import of the *Product*, that the *Application* actually supports the operating system under which it is listed in the `product-version.yaml`.
-<4> Only relevant for `CLIENT` applications: The `branding` attribute controls the appearance of `CLIENT` type *Applications* when downloaded by the user. It can be used to specify an `icon` (used to decorate desktop links created by the _client installer_), and a `splash` screen. For the `splash`, you can fine tune the exact location used to display progress text and a progress bar while the application is downloaded to the client PC by the <<_launcher_cli,Launcher CLI>>. Paths are interpreted relative to the root folder of the *Application*.
-<5> Only relevant for `SERVER` applications: Process control parameters allow to fine tune how `SERVER` type *Applications* are started and kept alive by *BDeploy*. For details, see the list of <<_supported_processcontrol_attributes, processControl>> attributes.
-<6> The start command of the *Application*. Contains the path to the _executable_ to launch, as well as all known and supported parameters. For details, see the full list of <<_supported_parameters_attributes,parameter>> attributes. To apply e.g. instance-specific values, <<_variable_expansion,Variable Expansion>> is a powerful tool. It can be used for the `launcherPath` and each parameter's `defaultValue`. In the Web UI it can be used for the parameter values.
-<7> A conditional parameter is a parameter with a condition on it. The condition always refers to another parameter on the same application. The parameter with the condition set will only be visible and configurable if the condition on the referenced parameter is met.
-<8> The optional stop command can be specified to provide a mechanism for clean application shutdown once *BDeploy* tries to stop a process. This command may use <<_variable_expansion,Variable Expansion>> to access parameter values of the `startCommand` (e.g. configured 'stop port', etc.). It is *not* configurable through the Web UI though. All parameter values will have their (expanded) default values set when the command is run. If no `stopCommand` is specified, *BDeploy* will try to gracefully quit the process (i.e. `SIGTERM`). Both with and without `stopCommand`, *BDeploy* resorts to a `SIGKILL` after the `<<_supported_parameters_attributes,gracePeriod>>` has expired.
-<9> Optional definition of provided endpoints. Currently only HTTP endpoints are supported. These endpoints can be configured on the application later, including additional information like authentication, certificates, etc. *BDeploy* can later on call these endpoints when instructed to do so by a third-party application.
-<10> The ID of the endpoint can be used to call the endpoint remotely by tunneling through potentially multiple levels of *BDeploy* servers.
-<11> <<Variable Expansion>> can be used on most of the endpoint properties.
-<12> Optional runtime dependencies. These dependencies are included in the *Product* when building it. Dependencies are fetched from *<<Software Repositories>>*. `launcherPath` and parameter `defaultValue` (and of course the final configuration values) can access paths within each of the dependencies by using the `{{M:adoptopenjdk/jre:1.8.0_202-b08}}` <<Variable Expansion>>, e.g. `launcherPath: {{M:adoptopenjdk/jre:1.8.0_202-b08}}/bin/java`. Also note that the declared dependency does not specify an operating system. This will be resolved by *BDeploy* to either an exact match, e.g. `adoptopenjdk/jre/linux:1.8.0_202-b08` on `LINUX`.
+<3> The supported pooling type. Supported values are `GLOBAL`, `LOCAL` and `NONE`. `GLOBAL` means that the application is fully poolable and may be installed once (per application version) and used by multiple instance versions of multiple instances. `LOCAL` means that there is limited pooling support, and the application may only be re-used inside a single instance (by multiple instance versions of that instance, e.g. when changin only configuration). `NONE` means that there is no pooling support and the application will be installed fresh per instance version, even if just configuration values changed. This gives some control on how to deploy applications which write data into their installation directory at runtime - which should be avoided of course for better pool-ability.
+<4> List of supported operating systems. This list is solely used to verify during import of the *Product*, that the *Application* actually supports the operating system under which it is listed in the `product-version.yaml`.
+<5> Only relevant for `CLIENT` applications: The `branding` attribute controls the appearance of `CLIENT` type *Applications* when downloaded by the user. It can be used to specify an `icon` (used to decorate desktop links created by the _client installer_), and a `splash` screen. For the `splash`, you can fine tune the exact location used to display progress text and a progress bar while the application is downloaded to the client PC by the <<_launcher_cli,Launcher CLI>>. Paths are interpreted relative to the root folder of the *Application*.
+<6> Only relevant for `SERVER` applications: Process control parameters allow to fine tune how `SERVER` type *Applications* are started and kept alive by *BDeploy*. For details, see the list of <<_supported_processcontrol_attributes, processControl>> attributes.
+<7> The start command of the *Application*. Contains the path to the _executable_ to launch, as well as all known and supported parameters. For details, see the full list of <<_supported_parameters_attributes,parameter>> attributes. To apply e.g. instance-specific values, <<_variable_expansion,Variable Expansion>> is a powerful tool. It can be used for the `launcherPath` and each parameter's `defaultValue`. In the Web UI it can be used for the parameter values.
+<8> A conditional parameter is a parameter with a condition on it. The condition always refers to another parameter on the same application. The parameter with the condition set will only be visible and configurable if the condition on the referenced parameter is met.
+<9> The optional stop command can be specified to provide a mechanism for clean application shutdown once *BDeploy* tries to stop a process. This command may use <<_variable_expansion,Variable Expansion>> to access parameter values of the `startCommand` (e.g. configured 'stop port', etc.). It is *not* configurable through the Web UI though. All parameter values will have their (expanded) default values set when the command is run. If no `stopCommand` is specified, *BDeploy* will try to gracefully quit the process (i.e. `SIGTERM`). Both with and without `stopCommand`, *BDeploy* resorts to a `SIGKILL` after the `<<_supported_parameters_attributes,gracePeriod>>` has expired.
+<10> Optional definition of provided endpoints. Currently only HTTP endpoints are supported. These endpoints can be configured on the application later, including additional information like authentication, certificates, etc. *BDeploy* can later on call these endpoints when instructed to do so by a third-party application.
+<11> The ID of the endpoint can be used to call the endpoint remotely by tunneling through potentially multiple levels of *BDeploy* servers.
+<12> <<Variable Expansion>> can be used on most of the endpoint properties.
+<13> Optional runtime dependencies. These dependencies are included in the *Product* when building it. Dependencies are fetched from *<<Software Repositories>>*. `launcherPath` and parameter `defaultValue` (and of course the final configuration values) can access paths within each of the dependencies by using the `{{M:adoptopenjdk/jre:1.8.0_202-b08}}` <<Variable Expansion>>, e.g. `launcherPath: {{M:adoptopenjdk/jre:1.8.0_202-b08}}/bin/java`. Also note that the declared dependency does not specify an operating system. This will be resolved by *BDeploy* to either an exact match, e.g. `adoptopenjdk/jre/linux:1.8.0_202-b08` on `LINUX`.
 
 ===== Supported `processControl` attributes
 

@@ -205,6 +205,7 @@ export class ApplicationService {
   ) {
     // Initialize name
     appConfig.name = appDesc.name;
+    appConfig.pooling = appDesc.pooling;
     appConfig.processControl = {
       startType: appDesc.processControl.supportedStartTypes[0],
       keepAlive: appDesc.processControl.supportsKeepAlive,
