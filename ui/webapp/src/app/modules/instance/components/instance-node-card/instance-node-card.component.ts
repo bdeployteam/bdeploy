@@ -8,7 +8,7 @@ import {
   OnInit,
   Output,
   TemplateRef,
-  ViewChild
+  ViewChild,
 } from '@angular/core';
 import { MatBottomSheet, MatBottomSheetRef } from '@angular/material/bottom-sheet';
 import { MatDialog } from '@angular/material/dialog';
@@ -32,14 +32,14 @@ import {
   InstanceNodeConfigurationDto,
   MinionDto,
   MinionStatusDto,
-  ProductDto
+  ProductDto,
 } from '../../../../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../../../../models/process.model';
 import { getAppOs, updateAppOs } from '../../../shared/utils/manifest.utils';
 import { ApplicationService } from '../../services/application.service';
 import {
   ApplicationTemplateVariableDialogComponent,
-  VariableInput
+  VariableInput,
 } from '../application-template-variable-dialog/application-template-variable-dialog.component';
 
 @Component({
@@ -163,7 +163,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
 
   private onDragOver(target: Element) {
     const id = 'dragula-nodeName-' + this.node.nodeName;
-    const isThisNodeTheTarget = target.className.includes(id);
+    const isThisNodeTheTarget = target.className.split(' ').includes(id);
     if (isThisNodeTheTarget) {
       this.appNodeCard.nativeElement.classList.add(this.CURRENT_DRAG_CONTAINER_CLASS);
     }
@@ -171,7 +171,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
 
   private onDragOut(target: Element) {
     const id = 'dragula-nodeName-' + this.node.nodeName;
-    const isThisNodeTheTarget = target.className.includes(id);
+    const isThisNodeTheTarget = target.className.split(' ').includes(id);
     if (isThisNodeTheTarget) {
       this.appNodeCard.nativeElement.classList.remove(this.CURRENT_DRAG_CONTAINER_CLASS);
     }
@@ -180,8 +180,8 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
   /** Called when an application is dropped */
   private onDrop(target: Element, source: Element, item: any, sourceIndex: number, targetIndex: number) {
     const id = 'dragula-nodeName-' + this.node.nodeName;
-    const isThisNodeTheTarget = target.className.includes(id);
-    const isThisNodeTheSource = source.className.includes(id);
+    const isThisNodeTheTarget = target.className.split(' ').includes(id);
+    const isThisNodeTheSource = source.className.split(' ').includes(id);
     if (isThisNodeTheSource && isThisNodeTheTarget) {
       // Re-Arrange within the same node
       this.moveProcess(item, sourceIndex, targetIndex);
