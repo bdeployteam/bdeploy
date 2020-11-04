@@ -18,7 +18,7 @@ import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 @Path("/cleanup")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public interface SlaveCleanupResource {
+public interface NodeCleanupResource {
 
     /**
      * @param toKeep {@link Set} of {@link Key}s to keep. Usually each {@link Key} should reference an

@@ -27,7 +27,7 @@ import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.interfaces.remote.MasterRootResource;
-import io.bdeploy.interfaces.remote.SlaveDeploymentResource;
+import io.bdeploy.interfaces.remote.NodeDeploymentResource;
 import io.bdeploy.jersey.JerseyServer;
 import io.bdeploy.jersey.RegistrationTarget;
 import io.bdeploy.jersey.audit.AuditRecord;
@@ -49,7 +49,7 @@ import io.bdeploy.ui.api.impl.UiResources;
 
 /**
  * Starts a HTTP(S) server which accepts {@link MasterRootResource} and
- * {@link SlaveDeploymentResource} API calls.
+ * {@link NodeDeploymentResource} API calls.
  */
 @Help("Start a Master Minion.")
 @ToolCategory(MinionServerCli.SERVER_TOOLS)

@@ -44,8 +44,8 @@ import io.bdeploy.interfaces.descriptor.application.HttpEndpoint.HttpAuthenticat
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.remote.ProxiedRequestWrapper;
 import io.bdeploy.interfaces.remote.ProxiedResponseWrapper;
-import io.bdeploy.interfaces.remote.SlaveProcessResource;
-import io.bdeploy.interfaces.remote.SlaveProxyResource;
+import io.bdeploy.interfaces.remote.NodeProcessResource;
+import io.bdeploy.interfaces.remote.NodeProxyResource;
 import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
 import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
 import io.bdeploy.interfaces.variables.CompositeResolver;
@@ -54,9 +54,9 @@ import io.bdeploy.interfaces.variables.DeploymentPathResolver;
 import io.bdeploy.jersey.TrustAllServersTrustManager;
 import io.bdeploy.minion.MinionRoot;
 
-public class SlaveProxyResourceImpl implements SlaveProxyResource {
+public class NodeProxyResourceImpl implements NodeProxyResource {
 
-    private static final Logger log = LoggerFactory.getLogger(SlaveProxyResourceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(NodeProxyResourceImpl.class);
 
     @Inject
     private MinionRoot root;
@@ -66,7 +66,7 @@ public class SlaveProxyResourceImpl implements SlaveProxyResource {
 
     @Override
     public ProxiedResponseWrapper forward(ProxiedRequestWrapper wrapper) {
-        SlaveProcessResource spr = rc.initResource(new SlaveProcessResourceImpl());
+        NodeProcessResource spr = rc.initResource(new NodeProcessResourceImpl());
         InstanceNodeStatusDto ins = spr.getStatus(wrapper.instanceId);
         ProcessStatusDto ps = ins.getStatus(wrapper.applicationId);
 

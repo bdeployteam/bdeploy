@@ -50,7 +50,7 @@ import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.state.InstanceState;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
-import io.bdeploy.interfaces.remote.SlaveDeploymentResource;
+import io.bdeploy.interfaces.remote.NodeDeploymentResource;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 import io.bdeploy.jersey.fs.FileSystemSpaceService;
@@ -60,9 +60,9 @@ import io.bdeploy.minion.MinionState;
 import io.bdeploy.pcu.InstanceProcessController;
 import io.bdeploy.pcu.MinionProcessController;
 
-public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
+public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
 
-    private static final Logger log = LoggerFactory.getLogger(SlaveDeploymentResourceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(NodeDeploymentResourceImpl.class);
 
     @Inject
     private MinionRoot root;
@@ -212,7 +212,7 @@ public class SlaveDeploymentResourceImpl implements SlaveDeploymentResource {
     public InstanceStateRecord getInstanceState(String instanceId) {
         InstanceNodeManifest inmf = findInstanceNodeManifest(instanceId);
         if (inmf == null) {
-            // happens if no version of the instance was actually ever pushed to the slave.
+            // happens if no version of the instance was actually ever pushed to the node.
             return new InstanceStateRecord();
         }
         return getState(inmf, root.getHive()).read();

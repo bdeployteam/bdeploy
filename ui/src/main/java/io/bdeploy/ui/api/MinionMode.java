@@ -20,12 +20,12 @@ public enum MinionMode {
     MANAGED,
 
     /**
-     * In central mode, a minion will not host master/slave services, but can only remotely control 'local' minions.
+     * In central mode, a minion will not host node services, but can only remotely control 'managed' master nodes.
      */
     CENTRAL,
 
     /**
-     * The minion is a slave - no remote communication with a master is possible.
+     * The minion is a non-master node - the node must be attached and is controlled by a master node (managed or standalone).
      */
     SLAVE,
 

@@ -49,7 +49,7 @@ import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
-import io.bdeploy.interfaces.remote.SlaveCleanupResource;
+import io.bdeploy.interfaces.remote.NodeCleanupResource;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 import io.bdeploy.launcher.cli.LauncherCli;
 import io.bdeploy.launcher.cli.LauncherTool;
@@ -205,7 +205,7 @@ public class MinionDeployTest {
     }
 
     @Test
-    void testImportedDeploy(BHive local, MasterRootResource master, CommonRootResource common, SlaveCleanupResource scr,
+    void testImportedDeploy(BHive local, MasterRootResource master, CommonRootResource common, NodeCleanupResource scr,
             RemoteService remote, @TempDir Path tmp, ActivityReporter reporter, MinionRoot mr)
             throws IOException, InterruptedException {
         Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true);

@@ -27,10 +27,10 @@ import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.remote.CommonInstanceResource;
 import io.bdeploy.interfaces.remote.CommonProxyResource;
 import io.bdeploy.interfaces.remote.CommonRootResource;
+import io.bdeploy.interfaces.remote.NodeProxyResource;
 import io.bdeploy.interfaces.remote.ProxiedRequestWrapper;
 import io.bdeploy.interfaces.remote.ProxiedResponseWrapper;
 import io.bdeploy.interfaces.remote.ResourceProvider;
-import io.bdeploy.interfaces.remote.SlaveProxyResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 
@@ -113,26 +113,26 @@ public class CommonInstanceResourceImpl implements CommonInstanceResource {
             return ResourceProvider.getResource(remote, CommonRootResource.class, context).getInstanceResource(wrapper.group)
                     .forward(wrapper);
         } else {
-            // forward to slave
-            String minionName = null;
+            // forward to node
+            String nodeName = null;
             for (Map.Entry<String, Manifest.Key> entry : im.getInstanceNodeManifests().entrySet()) {
                 InstanceNodeManifest inm = InstanceNodeManifest.of(hive, entry.getValue());
                 Optional<ApplicationConfiguration> cfg = inm.getConfiguration().applications.stream()
                         .filter(a -> a.uid.equals(wrapper.applicationId)).findFirst();
 
                 if (cfg.isPresent()) {
-                    minionName = entry.getKey();
+                    nodeName = entry.getKey();
                 }
             }
 
-            if (minionName == null) {
+            if (nodeName == null) {
                 throw new WebApplicationException(
                         "Cannot find application " + wrapper.applicationId + " in instance " + wrapper.instanceId,
                         Status.PRECONDITION_FAILED);
             }
 
             return ResourceProvider
-                    .getVersionedResource(minion.getMinions().getRemote(minionName), SlaveProxyResource.class, context)
+                    .getVersionedResource(minion.getMinions().getRemote(nodeName), NodeProxyResource.class, context)
                     .forward(wrapper);
         }
     }

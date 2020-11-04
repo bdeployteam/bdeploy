@@ -18,7 +18,7 @@ import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.history.runtime.MinionRuntimeHistory;
 import io.bdeploy.interfaces.manifest.history.runtime.MinionRuntimeHistoryDto;
-import io.bdeploy.interfaces.remote.SlaveProcessResource;
+import io.bdeploy.interfaces.remote.NodeProcessResource;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 import io.bdeploy.minion.MinionRoot;
@@ -26,7 +26,7 @@ import io.bdeploy.pcu.InstanceProcessController;
 import io.bdeploy.pcu.MinionProcessController;
 import io.bdeploy.pcu.ProcessController;
 
-public class SlaveProcessResourceImpl implements SlaveProcessResource {
+public class NodeProcessResourceImpl implements NodeProcessResource {
 
     @Inject
     private MinionRoot root;

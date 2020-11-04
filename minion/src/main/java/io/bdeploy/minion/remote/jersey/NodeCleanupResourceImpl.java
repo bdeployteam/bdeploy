@@ -30,10 +30,10 @@ import io.bdeploy.interfaces.cleanup.CleanupAction.CleanupType;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
-import io.bdeploy.interfaces.remote.SlaveCleanupResource;
+import io.bdeploy.interfaces.remote.NodeCleanupResource;
 import io.bdeploy.minion.MinionRoot;
 
-public class SlaveCleanupResourceImpl implements SlaveCleanupResource {
+public class NodeCleanupResourceImpl implements NodeCleanupResource {
 
     @Inject
     private MinionRoot root;

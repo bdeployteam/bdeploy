@@ -9,7 +9,7 @@ import javax.ws.rs.core.MediaType;
 @Path("/proxy")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public interface SlaveProxyResource {
+public interface NodeProxyResource {
 
     @POST
     ProxiedResponseWrapper forward(ProxiedRequestWrapper wrapper);

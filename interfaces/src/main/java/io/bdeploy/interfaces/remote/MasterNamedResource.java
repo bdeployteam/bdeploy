@@ -122,7 +122,7 @@ public interface MasterNamedResource {
     /**
      * Delegates to the specified minion to receive a file.
      *
-     * @see SlaveDeploymentResource#getEntryContent(InstanceDirectoryEntry, long, long)
+     * @see NodeDeploymentResource#getEntryContent(InstanceDirectoryEntry, long, long)
      */
     @POST
     @Path("/dataDir/entry")

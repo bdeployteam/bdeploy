@@ -57,7 +57,7 @@ import io.bdeploy.ui.dto.InstanceVersionDto;
 public class InstanceResourceTest {
 
     @BeforeEach
-    void addSlaves(MinionRoot mr) {
+    void addNodes(MinionRoot mr) {
         BHive hive = mr.getHive();
         MinionManifest mf = new MinionManifest(hive);
 

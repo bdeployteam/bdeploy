@@ -50,7 +50,7 @@ public class MinionStateMigration {
             log.info("Setting self name to '{}'", Minion.DEFAULT_NAME);
         }
 
-        // Create an entry for each slave
+        // Create an entry for each node
         minionConfiguration = new MinionConfiguration();
         for (Map.Entry<String, RemoteService> entry : migState.minions.entrySet()) {
             String name = entry.getKey();

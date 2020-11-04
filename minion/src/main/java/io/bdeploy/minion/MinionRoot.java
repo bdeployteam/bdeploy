@@ -479,8 +479,8 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     }
 
     /**
-     * @return The internal minion hive. This hive is used to hold anything which is deployed/deployable on the minion (slave
-     *         side). The master uses named hives (per customer) to store higher level (minion-spanning) deployment information.
+     * @return The internal minion hive. This hive is used to hold anything which is deployed/deployable on the node. The master
+     *         uses named hives (per instance group) to store higher level (node-spanning) deployment information.
      */
     public BHive getHive() {
         return hive;
@@ -536,7 +536,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             if (!inc.isInstalled()) {
                 return;
             }
-            
+
             // Get the deployment configuration and the target directory
             String tag = inm.getKey().getTag();
             ProcessGroupConfiguration pgc = inc.getProcessGroupConfiguration();
@@ -549,7 +549,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             // Create controller and add to the affected instance
             InstanceProcessController instanceController = processController.getOrCreate(hive, inm);
             instanceController.createProcessControllers(inc.getDeploymentPathProvider(), inc.getResolver(), tag, pgc,
-            		inm.getRuntimeHistory(hive));
+                    inm.getRuntimeHistory(hive));
 
             // fetch and remember the active version for this uuid.
             if (!activeVersions.containsKey(inm.getUUID())) {

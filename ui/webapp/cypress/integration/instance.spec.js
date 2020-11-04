@@ -230,7 +230,7 @@ describe('Instance Tests', function () {
     cy.contains('button', 'Execute').as('Execute').should('exist').and('be.visible').and('be.enabled')
 
     // use td:contains to yield all cells which contain the text. .contains() only yields the first.
-    // manifests on the slave are still there - meta (2 versions), node, app
+    // manifests on the node are still there - meta (2 versions), node, app
     cy.get('td:contains(DELETE_MANIFEST)').should('have.length.greaterThan', 3);
 
     cy.get('.mat-paginator-navigation-last').should('exist').and('be.enabled');
