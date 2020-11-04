@@ -9,7 +9,7 @@ import {
   MinionUpdateDto,
   ProductDto,
   ProductTransferDto,
-  Version
+  Version,
 } from '../../../models/gen.dtos';
 import { ConfigService } from '../../core/services/config.service';
 import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';

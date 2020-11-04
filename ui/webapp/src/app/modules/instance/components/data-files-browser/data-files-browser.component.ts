@@ -16,7 +16,7 @@ import {
   InstanceConfiguration,
   InstanceDirectory,
   InstanceDirectoryEntry,
-  StringEntryChunkDto
+  StringEntryChunkDto,
 } from '../../../../models/gen.dtos';
 import { DownloadService } from '../../../shared/services/download.service';
 import { InstanceService } from '../../services/instance.service';

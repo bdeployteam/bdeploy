@@ -10,7 +10,7 @@ import {
   InstanceConfiguration,
   InstanceGroupConfiguration,
   InstancePurpose,
-  OperatingSystem
+  OperatingSystem,
 } from '../../../../models/gen.dtos';
 import { SoftwareUpdateService } from '../../../admin/services/software-update.service';
 import { InstanceService } from '../../../instance/services/instance.service';

@@ -8,7 +8,7 @@ import {
   OnInit,
   Output,
   SimpleChanges,
-  ViewChild
+  ViewChild,
 } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { NgTerminal } from 'ng-terminal';

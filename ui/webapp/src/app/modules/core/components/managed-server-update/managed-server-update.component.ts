@@ -10,7 +10,7 @@ import {
   isUpdateFailed,
   isUpdateInProgress,
   isUpdateSuccess,
-  UpdateStatus
+  UpdateStatus,
 } from '../../../../models/update.model';
 
 @Component({

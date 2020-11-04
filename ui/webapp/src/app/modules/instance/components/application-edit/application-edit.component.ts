@@ -8,7 +8,7 @@ import {
   OnInit,
   Output,
   TemplateRef,
-  ViewContainerRef
+  ViewContainerRef,
 } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
@@ -23,7 +23,7 @@ import {
   GroupNames,
   LinkedParameter,
   NamedParameter,
-  UnknownParameter
+  UnknownParameter,
 } from '../../../../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_PARAMETER_CONFIGURATION, EMPTY_PARAMETER_DESCRIPTOR } from '../../../../models/consts';
 import {
@@ -33,7 +33,7 @@ import {
   CustomEditor,
   ParameterConfiguration,
   ParameterDescriptor,
-  ParameterType
+  ParameterType,
 } from '../../../../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../../../../models/process.model';
 import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
@@ -44,7 +44,7 @@ import { ApplicationEditCommandPreviewComponent } from '../application-edit-comm
 import { ApplicationEditManualComponent, Context } from '../application-edit-manual/application-edit-manual.component';
 import {
   ApplicationEditOptionalComponent,
-  EditOptionalData
+  EditOptionalData,
 } from '../application-edit-optional/application-edit-optional.component';
 
 @Component({

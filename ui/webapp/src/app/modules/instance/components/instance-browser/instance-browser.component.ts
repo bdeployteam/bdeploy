@@ -14,7 +14,7 @@ import {
   InstanceDto,
   InstanceGroupConfiguration,
   InstancePurpose,
-  MinionMode
+  MinionMode,
 } from '../../../../models/gen.dtos';
 import { Logger, LoggingService } from '../../../core/services/logging.service';
 import { ProductService } from '../../../shared/services/product.service';

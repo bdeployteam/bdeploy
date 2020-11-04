@@ -30,7 +30,7 @@ import {
   MinionMode,
   MinionStatusDto,
   MinionUpdateDto,
-  ProductDto
+  ProductDto,
 } from '../../../../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../../../../models/process.model';
 import { ConfigService } from '../../../core/services/config.service';

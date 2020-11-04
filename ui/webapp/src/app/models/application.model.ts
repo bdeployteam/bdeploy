@@ -7,7 +7,7 @@ import {
   OperatingSystem,
   ParameterConfiguration,
   ParameterDescriptor,
-  ParameterType
+  ParameterType,
 } from './gen.dtos';
 
 /**

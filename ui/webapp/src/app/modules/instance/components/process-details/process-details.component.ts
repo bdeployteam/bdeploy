@@ -15,7 +15,7 @@ import {
   ProcessDetailDto,
   ProcessHandleDto,
   ProcessState,
-  StringEntryChunkDto
+  StringEntryChunkDto,
 } from '../../../../models/gen.dtos';
 import { unsubscribe } from '../../../shared/utils/object.utils';
 import { InstanceService } from '../../services/instance.service';

@@ -8,7 +8,7 @@ import {
   SimpleChange,
   TemplateRef,
   ViewChild,
-  ViewContainerRef
+  ViewContainerRef,
 } from '@angular/core';
 import { MatTable } from '@angular/material/table';
 import { format } from 'date-fns';

@@ -8,7 +8,7 @@ import {
   InstanceNodeConfiguration,
   InstanceNodeConfigurationDto,
   ParameterType,
-  ProcessState
+  ProcessState,
 } from 'src/app/models/gen.dtos';
 import { ApplicationService } from '../../services/application.service';
 import { InstanceService } from '../../services/instance.service';

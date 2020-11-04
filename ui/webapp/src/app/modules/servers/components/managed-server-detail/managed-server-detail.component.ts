@@ -12,7 +12,7 @@ import {
   MinionDto,
   MinionStatusDto,
   MinionUpdateDto,
-  Version
+  Version,
 } from '../../../../models/gen.dtos';
 import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
 import { MessageboxService } from '../../../shared/services/messagebox.service';

@@ -27,7 +27,7 @@ import {
   ManifestKey,
   MinionDto,
   MinionStatusDto,
-  StringEntryChunkDto
+  StringEntryChunkDto,
 } from '../../../models/gen.dtos';
 import { ConfigService } from '../../core/services/config.service';
 import { ErrorMessage, Logger, LoggingService } from '../../core/services/logging.service';

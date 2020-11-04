@@ -7,7 +7,7 @@ import {
   ManifestKey,
   ParameterConfiguration,
   ParameterDescriptor,
-  PluginInfoDto
+  PluginInfoDto,
 } from 'src/app/models/gen.dtos';
 import { PluginService } from 'src/app/modules/core/services/plugin.service';
 import { EditorPlugin } from 'src/app/modules/shared/plugins/plugin.editor';

@@ -10,7 +10,7 @@ import {
   MinionDto,
   ParameterConfiguration,
   ParameterDescriptor,
-  ParameterType
+  ParameterType,
 } from 'src/app/models/gen.dtos';
 import { ProcessConfigDto } from 'src/app/models/process.model';
 import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
@@ -20,7 +20,7 @@ import { getAppOs } from 'src/app/modules/shared/utils/manifest.utils';
 import { ApplicationService } from '../../services/application.service';
 import {
   InstanceShiftPortsComponent,
-  ShiftableParameter
+  ShiftableParameter,
 } from '../instance-shift-ports/instance-shift-ports.component';
 
 interface ServerPortParameter {

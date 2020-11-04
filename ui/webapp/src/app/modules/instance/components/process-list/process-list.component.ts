@@ -7,7 +7,7 @@ import {
   ApplicationConfiguration,
   OperatingSystem,
   ProcessDetailDto,
-  ProcessHandleDto
+  ProcessHandleDto,
 } from '../../../../models/gen.dtos';
 import { getAppOs } from '../../../shared/utils/manifest.utils';
 

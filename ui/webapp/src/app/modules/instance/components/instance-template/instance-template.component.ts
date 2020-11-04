@@ -10,7 +10,7 @@ import {
   InstanceTemplateDescriptor,
   InstanceTemplateGroup,
   MinionDto,
-  ProductDto
+  ProductDto,
 } from 'src/app/models/gen.dtos';
 import { ProcessConfigDto } from 'src/app/models/process.model';
 import { ApplicationService } from '../../services/application.service';

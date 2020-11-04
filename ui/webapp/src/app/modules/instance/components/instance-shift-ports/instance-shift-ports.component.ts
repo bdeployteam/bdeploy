@@ -6,7 +6,7 @@ import {
   ApplicationDescriptor,
   ParameterConfiguration,
   ParameterDescriptor,
-  ParameterType
+  ParameterType,
 } from 'src/app/models/gen.dtos';
 
 export interface ShiftableParameter {

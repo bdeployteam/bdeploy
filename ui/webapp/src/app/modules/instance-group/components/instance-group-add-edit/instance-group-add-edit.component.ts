@@ -19,7 +19,7 @@ import {
   CustomAttributeDescriptor,
   CustomAttributesRecord,
   InstanceGroupConfiguration,
-  MinionMode
+  MinionMode,
 } from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
 import { ErrorMessage, Logger, LoggingService } from '../../../core/services/logging.service';

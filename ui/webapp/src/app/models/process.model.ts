@@ -11,7 +11,7 @@ import {
   InstanceNodeConfigurationListDto,
   InstanceVersionDto,
   ManifestKey,
-  MinionDto
+  MinionDto,
 } from './gen.dtos';
 
 /**

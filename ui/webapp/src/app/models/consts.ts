@@ -20,7 +20,7 @@ import {
   ProcessControlConfiguration,
   SoftwareRepositoryConfiguration,
   UserChangePasswordDto,
-  UserInfo
+  UserInfo,
 } from './gen.dtos';
 
 // HTTP header constant used to suppress global error handling

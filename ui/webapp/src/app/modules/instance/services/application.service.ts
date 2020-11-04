@@ -10,7 +10,7 @@ import {
   EMPTY_COMMAND_CONFIGURATION,
   EMPTY_PARAMETER_CONFIGURATION,
   EMPTY_PARAMETER_DESCRIPTOR,
-  EMPTY_PROCESS_CONTROL_CONFIG
+  EMPTY_PROCESS_CONTROL_CONFIG,
 } from '../../../models/consts';
 import {
   ApplicationConfiguration,
@@ -24,7 +24,7 @@ import {
   ParameterDescriptor,
   ParameterType,
   ProcessControlConfiguration,
-  TemplateApplication
+  TemplateApplication,
 } from '../../../models/gen.dtos';
 import { ProcessConfigDto } from '../../../models/process.model';
 import { ConfigService } from '../../core/services/config.service';

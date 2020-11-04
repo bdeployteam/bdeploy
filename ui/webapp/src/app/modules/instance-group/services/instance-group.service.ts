@@ -7,7 +7,7 @@ import {
   InstanceGroupConfiguration,
   OperatingSystem,
   UserInfo,
-  UserPermissionUpdateDto
+  UserPermissionUpdateDto,
 } from '../../../models/gen.dtos';
 import { ConfigService } from '../../core/services/config.service';
 import { Logger, LoggingService } from '../../core/services/logging.service';
