@@ -31,7 +31,6 @@ import {
   ApplicationDescriptor,
   ApplicationStartType,
   CustomEditor,
-  ParameterConfiguration,
   ParameterDescriptor,
   ParameterType,
 } from '../../../../models/gen.dtos';
@@ -506,14 +505,11 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     const config = linkedPara.conf;
     const control = new FormControl();
 
-    // Validation of parameters
-    const validators: ValidatorFn[] = [];
-
     // Mandatory in case of a boolean parameter controls
     // whether or not it is shown by default in the UI
     // NO validation of it's value will be performed.
     const type = descriptor.type;
-    control.setValidators([this.fieldValidator(config, descriptor)]);
+    control.setValidators([this.fieldValidator(descriptor)]);
 
     // Disable in case of a fixed parameter, passwords are initially disabled as well.
     if (descriptor.fixed || descriptor.type === ParameterType.PASSWORD) {
@@ -526,6 +522,10 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     } else {
       control.setValue(config.value);
     }
+
+    // required to properly mark invalid fields before the user focuses them.
+    control.markAsTouched();
+    control.updateValueAndValidity();
 
     // Track value changes and update
     const deps = this.dependencies.get(linkedPara.desc.uid);
@@ -560,9 +560,13 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     return control;
   }
 
-  fieldValidator(paramCfg: ParameterConfiguration, paramDesc: ParameterDescriptor): ValidatorFn {
+  fieldValidator(paramDesc: ParameterDescriptor): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
-      const err = this.appService.validateParam(String(control.value), paramDesc);
+      let value = null;
+      if (control.value !== null && control.value !== undefined) {
+        value = String(control.value);
+      }
+      const err = this.appService.validateParam(value, paramDesc);
       if (err) {
         return { custom: err };
       }

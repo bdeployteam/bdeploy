@@ -33,6 +33,7 @@ import { InstanceGroupService } from '../../instance-group/services/instance-gro
 import { getAppOs } from '../../shared/utils/manifest.utils';
 import { findEntry } from '../../shared/utils/object.utils';
 import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
+import { URLish } from '../../shared/utils/url.utils';
 
 @Injectable({
   providedIn: 'root',
@@ -378,8 +379,8 @@ export class ApplicationService {
       if (desc.stopCommand.launcherPath !== cfg.stop.executable) {
         errors.push('Stop executable command outdated.');
       }
-      for (const paraDef of desc.startCommand.parameters) {
-        const paraCfg = cfg.start.parameters.find((p) => p.uid === paraDef.uid);
+      for (const paraDef of desc.stopCommand.parameters) {
+        const paraCfg = cfg.stop.parameters.find((p) => p.uid === paraDef.uid);
         const paraErrors = this.validateParam(paraCfg?.value, paraDef);
         if (paraErrors) {
           errors.push(paraErrors);
@@ -435,7 +436,7 @@ export class ApplicationService {
       }
       case ParameterType.URL: {
         try {
-          const _ = new URL(value);
+          const _ = new URLish(value);
         } catch (err) {
           return paraDef.name + ': Not a valid URL: ' + value;
         }

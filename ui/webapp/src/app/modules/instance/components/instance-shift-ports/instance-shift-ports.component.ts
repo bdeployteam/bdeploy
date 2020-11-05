@@ -8,6 +8,7 @@ import {
   ParameterDescriptor,
   ParameterType,
 } from 'src/app/models/gen.dtos';
+import { URLish } from 'src/app/modules/shared/utils/url.utils';
 
 export interface ShiftableParameter {
   applicationUid: string;
@@ -61,7 +62,7 @@ export class InstanceShiftPortsComponent implements OnInit {
   getPortValue(row: ShiftableParameter) {
     if (row.desc.type === ParameterType.URL) {
       // the instance-edit-ports component will give us only parameters where this is valid!
-      return new URL(row.cfg.value).port;
+      return new URLish(row.cfg.value).port;
     }
     return row.cfg.value;
   }

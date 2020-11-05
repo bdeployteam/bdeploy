@@ -17,6 +17,7 @@ import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/mes
 import { DownloadService } from 'src/app/modules/shared/services/download.service';
 import { MessageboxService } from 'src/app/modules/shared/services/messagebox.service';
 import { getAppOs } from 'src/app/modules/shared/utils/manifest.utils';
+import { URLish } from 'src/app/modules/shared/utils/url.utils';
 import { ApplicationService } from '../../services/application.service';
 import {
   InstanceShiftPortsComponent,
@@ -77,7 +78,7 @@ export class InstanceEditPortsComponent implements OnInit, AfterViewInit {
           ) {
             if (paramDesc.type === ParameterType.URL) {
               try {
-                if (!new URL(param.value).port) {
+                if (!new URLish(param.value).port) {
                   continue; // no port set
                 }
               } catch (err) {
@@ -108,7 +109,7 @@ export class InstanceEditPortsComponent implements OnInit, AfterViewInit {
 
   onChange(param: ServerPortParameter, value: string, emit: boolean = true) {
     if (param.paramDesc.type === ParameterType.URL) {
-      const url = new URL(param.paramCfg.value);
+      const url = new URLish(param.paramCfg.value);
       if (Number(value) > 65535) {
         value = '65535';
       }
@@ -129,7 +130,7 @@ export class InstanceEditPortsComponent implements OnInit, AfterViewInit {
 
   getPortValue(param: ServerPortParameter) {
     if (param.paramDesc.type === ParameterType.URL) {
-      return new URL(param.paramCfg.value).port;
+      return new URLish(param.paramCfg.value).port;
     }
 
     return param.paramCfg.value;
