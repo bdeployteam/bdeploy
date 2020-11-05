@@ -44,6 +44,7 @@ import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
+import io.bdeploy.common.util.TaskExecutor;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
@@ -115,6 +116,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     public void install(Key key) {
         InstanceManifest imf = InstanceManifest.of(hive, key);
         SortedMap<String, Key> fragmentReferences = imf.getInstanceNodeManifests();
+        fragmentReferences.remove(InstanceManifest.CLIENT_NODE_NAME);
 
         // assure that the product has been pushed to the master (e.g. by central).
         Boolean productExists = hive.execute(new ManifestExistsOperation().setManifest(imf.getConfiguration().product));
@@ -122,56 +124,49 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             throw new WebApplicationException("Cannot find required product " + imf.getConfiguration().product, Status.NOT_FOUND);
         }
 
-        // TODO: Check each minion whether it is online once we have unified version backend resources.
+        TaskExecutor executor = new TaskExecutor(reporter);
+        for (Map.Entry<String, Manifest.Key> entry : fragmentReferences.entrySet()) {
+            String minionName = entry.getKey();
+            Manifest.Key toDeploy = entry.getValue();
+            RemoteService minion = root.getMinions().getRemote(minionName);
 
-        try (Activity deploying = reporter.start("Installing to minions...", fragmentReferences.size())) {
-            for (Map.Entry<String, Manifest.Key> entry : fragmentReferences.entrySet()) {
-                String minionName = entry.getKey();
-                if (InstanceManifest.CLIENT_NODE_NAME.equals(minionName)) {
-                    continue;
-                }
-                Manifest.Key toDeploy = entry.getValue();
-                RemoteService minion = root.getMinions().getRemote(minionName);
+            assertNotNull(minion, "Cannot lookup minion on master: " + minionName);
+            assertNotNull(toDeploy, "Cannot lookup minion manifest on master: " + toDeploy);
 
-                assertNotNull(minion, "Cannot lookup minion on master: " + minionName);
-                assertNotNull(toDeploy, "Cannot lookup minion manifest on master: " + toDeploy);
+            // grab all required manifests from the applications
+            InstanceNodeManifest inm = InstanceNodeManifest.of(hive, toDeploy);
+            LocalDependencyFetcher localDeps = new LocalDependencyFetcher();
+            PushOperation pushOp = new PushOperation().setRemote(minion);
+            for (ApplicationConfiguration app : inm.getConfiguration().applications) {
+                pushOp.addManifest(app.application);
+                ApplicationManifest amf = ApplicationManifest.of(hive, app.application);
 
-                // grab all required manifests from the applications
-                InstanceNodeManifest inm = InstanceNodeManifest.of(hive, toDeploy);
-                LocalDependencyFetcher localDeps = new LocalDependencyFetcher();
-                PushOperation pushOp = new PushOperation().setRemote(minion);
-                for (ApplicationConfiguration app : inm.getConfiguration().applications) {
-                    pushOp.addManifest(app.application);
-                    ApplicationManifest amf = ApplicationManifest.of(hive, app.application);
+                // applications /must/ follow the ScopedManifestKey rules.
+                ScopedManifestKey smk = ScopedManifestKey.parse(app.application);
 
-                    // applications /must/ follow the ScopedManifestKey rules.
-                    ScopedManifestKey smk = ScopedManifestKey.parse(app.application);
-
-                    // the dependency must be here. it has been pushed here with the product,
-                    // since the product /must/ reference all direct dependencies.
-                    localDeps.fetch(hive, amf.getDescriptor().runtimeDependencies, smk.getOperatingSystem())
-                            .forEach(pushOp::addManifest);
-                }
-
-                try {
-                    // make sure the minion has the manifest.
-                    hive.execute(pushOp.addManifest(toDeploy));
-                } catch (Exception e) {
-                    // in case this did not work, the minion is not available or has another problem
-                    // log but don't forward exception to the client
-                    throw new WebApplicationException("Minion " + minionName + " is not available", e, Status.BAD_GATEWAY);
-                }
-
-                NodeDeploymentResource deployment = ResourceProvider.getVersionedResource(minion, NodeDeploymentResource.class,
-                        context);
-                try {
-                    deployment.install(toDeploy);
-                } catch (Exception e) {
-                    throw new WebApplicationException("Cannot install to " + minionName, e, Status.INTERNAL_SERVER_ERROR);
-                }
-
-                deploying.worked(1);
+                // the dependency must be here. it has been pushed here with the product,
+                // since the product /must/ reference all direct dependencies.
+                localDeps.fetch(hive, amf.getDescriptor().runtimeDependencies, smk.getOperatingSystem())
+                        .forEach(pushOp::addManifest);
             }
+
+            // Make sure the node has the manifest
+            pushOp.addManifest(toDeploy);
+
+            // Create the task that pushes all manifests and then installs them on the remote
+            NodeDeploymentResource deployment = ResourceProvider.getVersionedResource(minion, NodeDeploymentResource.class,
+                    context);
+            executor.add(() -> {
+                hive.execute(pushOp);
+                deployment.install(toDeploy);
+            });
+        }
+
+        // Execute all tasks
+        try {
+            executor.run("Installing to minions...");
+        } catch (Exception ex) {
+            throw new WebApplicationException("Installation failed", ex, Status.INTERNAL_SERVER_ERROR);
         }
 
         getState(imf, hive).install(key.getTag());
@@ -298,41 +293,35 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         InstanceManifest imf = InstanceManifest.of(hive, key);
 
         SortedMap<String, Key> fragments = imf.getInstanceNodeManifests();
-        Activity removing = reporter.start("Removing on minions...", fragments.size());
+        fragments.remove(InstanceManifest.CLIENT_NODE_NAME);
 
-        try {
-            for (Map.Entry<String, Manifest.Key> entry : fragments.entrySet()) {
-                String minionName = entry.getKey();
-                if (InstanceManifest.CLIENT_NODE_NAME.equals(minionName)) {
-                    continue;
-                }
-                Manifest.Key toRemove = entry.getValue();
-                assertNotNull(toRemove, "Cannot lookup minion manifest on master: " + toRemove);
+        TaskExecutor executor = new TaskExecutor(reporter);
+        for (Map.Entry<String, Manifest.Key> entry : fragments.entrySet()) {
+            String minionName = entry.getKey();
+            Manifest.Key toRemove = entry.getValue();
+            assertNotNull(toRemove, "Cannot lookup minion manifest on master: " + toRemove);
 
-                if (!root.getMinions().hasMinion(minionName)) {
-                    // minion no longer exists!?
-                    log.warn("Minion no longer existing: {}. Ignoring.", minionName);
-                    continue;
-                }
-
-                RemoteService minion = root.getMinions().getRemote(minionName);
-                NodeDeploymentResource deployment = ResourceProvider.getVersionedResource(minion, NodeDeploymentResource.class,
-                        context);
-                try {
-                    deployment.remove(toRemove);
-                } catch (Exception e) {
-                    throw new WebApplicationException("Cannot remove on " + minionName, e);
-                }
-
-                removing.worked(1);
+            if (!root.getMinions().hasMinion(minionName)) {
+                // minion no longer exists!?
+                log.warn("Minion no longer existing: {}. Ignoring.", minionName);
+                continue;
             }
-            getState(imf, hive).uninstall(key.getTag());
-        } finally {
-            removing.done();
+
+            RemoteService minion = root.getMinions().getRemote(minionName);
+            NodeDeploymentResource deployment = ResourceProvider.getVersionedResource(minion, NodeDeploymentResource.class,
+                    context);
+            executor.add(() -> deployment.remove(toRemove));
         }
 
+        // Execute all tasks
+        try {
+            executor.run("Removing on minions...");
+        } catch (Exception ex) {
+            throw new WebApplicationException("Failed to uninstall.", ex, Status.INTERNAL_SERVER_ERROR);
+        }
+
+        getState(imf, hive).uninstall(key.getTag());
         imf.getHistory(hive).record(Action.UNINSTALL, context.getUserPrincipal().getName(), null);
-        // no need to clean up the hive, this is done elsewhere.
     }
 
     @WriteLock

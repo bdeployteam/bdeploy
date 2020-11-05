@@ -84,14 +84,10 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
     @Override
     public void install(Key key) {
         BHive hive = root.getHive();
-
-        Activity deploying = reporter.start("Deploying " + key);
-        try {
-            if (!fsss.hasFreeSpace(root.getDeploymentDir())) {
-                throw new WebApplicationException("Not enough free space in " + root.getDeploymentDir(),
-                        Status.SERVICE_UNAVAILABLE);
-            }
-
+        if (!fsss.hasFreeSpace(root.getDeploymentDir())) {
+            throw new WebApplicationException("Not enough free space in " + root.getDeploymentDir(), Status.SERVICE_UNAVAILABLE);
+        }
+        try (Activity deploying = reporter.start("Deploying " + key)) {
             InstanceNodeManifest inm = InstanceNodeManifest.of(hive, key);
             InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentDir(), inm);
             inc.addAdditionalVariableResolver(new MinionConfigVariableResolver(root));
@@ -103,8 +99,6 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
             InstanceProcessController controller = processController.getOrCreate(hive, inm);
             controller.createProcessControllers(inc.getDeploymentPathProvider(), inc.getResolver(), inm.getKey().getTag(),
                     inc.getProcessGroupConfiguration(), inm.getRuntimeHistory(hive));
-        } finally {
-            deploying.done();
         }
     }
 

@@ -227,7 +227,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             return changed;
         }
         MinionDto remoteConfig = remoteStatus.config;
-        log.info("Minion successfully contacted. Version={} OS={}", remoteConfig.version, remoteConfig.os);
+        log.info("Minion '{}' successfully contacted. Version={} OS={}", minionName, remoteConfig.version, remoteConfig.os);
 
         // Check if an update is required
         if (!VersionHelper.equals(config.version, remoteConfig.version)) {
