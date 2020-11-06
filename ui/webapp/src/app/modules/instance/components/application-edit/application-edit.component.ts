@@ -16,6 +16,7 @@ import { MatButton } from '@angular/material/button';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { cloneDeep, isEqual } from 'lodash-es';
 import { Observable, of } from 'rxjs';
+import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import {
   CustomParameter,
   findFirstParameter,
@@ -101,6 +102,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
 
   constructor(
     public appService: ApplicationService,
+    public authService: AuthenticationService,
     private matDialog: MatDialog,
     private overlay: Overlay,
     private viewContainerRef: ViewContainerRef,
@@ -253,6 +255,16 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
         return 'password';
     }
     return 'text';
+  }
+
+  getCtrlName(desc: ParameterDescriptor) {
+    return (
+      this.instanceGroup +
+      '-' +
+      this.appConfigContext.instanceNodeConfigurationDto.nodeConfiguration.uuid +
+      '-' +
+      desc.uid
+    );
   }
 
   getCtrlPlaceholderText(desc: ParameterDescriptor) {

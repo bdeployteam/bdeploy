@@ -205,9 +205,7 @@
                         <input
                           matInput
                           [matAutocomplete]="auto"
-                          name="{{ instanceGroup }}-{{
-                            appConfigContext.instanceNodeConfigurationDto.nodeConfiguration.uuid
-                          }}-{{ param.desc.uid }}"
+                          name="{{ getCtrlName(param.desc) }}"
                           placeholder="{{ getCtrlPlaceholderText(param.desc) }}"
                           [formControlName]="param.desc.uid"
                           type="{{ getCtrlInputType(param.desc.type) }}"
@@ -229,9 +227,7 @@
                     <mat-form-field *ngSwitchDefault>
                       <input
                         matInput
-                        name="{{ instanceGroup }}-{{
-                          appConfigContext.instanceNodeConfigurationDto.nodeConfiguration.uuid
-                        }}-{{ param.desc.uid }}"
+                        name="{{ getCtrlName(param.desc) }}"
                         placeholder="{{ getCtrlPlaceholderText(param.desc) }}"
                         [formControlName]="param.desc.uid"
                         type="{{ getCtrlInputType(param.desc.type) }}"
@@ -302,7 +298,7 @@
                         </button>
                       </div>
                       <app-custom-editor
-                        *ngIf="param.desc.customEditor"
+                        *ngIf="param.desc.customEditor && authService.isScopedWrite(instanceGroup)"
                         [readonly]="readonly"
                         (valueConfirmed)="customValueConfirmed(param, $event)"
                         (pluginLoaded)="disableForCustomEditor(param, $event, unlockDiv)"
