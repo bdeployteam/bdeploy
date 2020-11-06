@@ -38,7 +38,7 @@
     A newer product version is available to update this instance to.
     <button
       mat-raised-button
-      *ngIf="authService.isScopedAdmin(groupParam)"
+      *ngIf="authService.isScopedWrite(groupParam)"
       (click)="instanceNotifications.closeOverlay(); onNewerProductVersionAvailable()"
     >
       Show Product Versions
