@@ -26,7 +26,7 @@ image::images/ManifestOverview.png[Special Manifest Types,align=center,width=480
 |The `InstanceManifest` holds information about an instance and keeps track of the all `InstanceNodeManifest` for the *Instance*.
 
 |`InstanceNodeManifest`
-|Keeps track of the *Applications* and their configuration per configured *Node* in the *Instance*. A *Node* always corresponds to a registered *Slave* on the target *Master*.
+|Keeps track of the *Applications* and their configuration per configured *Node* in the *Instance*.
 
 |`ProductManifest`
 |Holds information about a product and keeps track of all the `ApplicationManifest` for the *Product*.
@@ -35,7 +35,7 @@ image::images/ManifestOverview.png[Special Manifest Types,align=center,width=480
 |Holds information about a single application, includes the `app-info.yaml` for the application which holds information about all supported parameters, etc.
 
 |`MinionManifest`
-|Holds information about available slaves on a *master*.
+|Holds information about available nodes on a *master*.
 
 |`UserDatabase`
 |Manages special per-user *Manifests* which hold information about each user.

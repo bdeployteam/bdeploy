@@ -1,14 +1,15 @@
 package io.bdeploy.minion.cli;
 
-import static io.bdeploy.common.util.RuntimeAssert.assertTrue;
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyStore;
-import java.util.Map;
 import java.util.function.Function;
 
+import javax.inject.Singleton;
+
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.remote.jersey.BHiveJacksonModule;
@@ -23,32 +24,36 @@ import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.MinionRootValidator;
 import io.bdeploy.common.cfg.PathOwnershipValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
+import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.ToolCategory;
-import io.bdeploy.common.cli.data.DataResult;
-import io.bdeploy.common.cli.data.DataTable;
 import io.bdeploy.common.cli.data.RenderableResult;
-import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.common.security.SecurityHelper;
-import io.bdeploy.interfaces.manifest.MinionManifest;
+import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
-import io.bdeploy.interfaces.minion.MinionConfiguration;
-import io.bdeploy.interfaces.minion.MinionDto;
-import io.bdeploy.interfaces.minion.MinionStatusDto;
-import io.bdeploy.interfaces.remote.MinionStatusResource;
-import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.interfaces.manifest.managed.MasterProvider;
+import io.bdeploy.interfaces.plugin.PluginManager;
+import io.bdeploy.interfaces.plugin.VersionSorterService;
+import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.jersey.JerseyServer;
 import io.bdeploy.jersey.RegistrationTarget;
 import io.bdeploy.jersey.activity.JerseyBroadcastingActivityReporter;
 import io.bdeploy.jersey.audit.AuditRecord;
 import io.bdeploy.jersey.audit.RollingFileAuditor;
-import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.jersey.ws.BroadcastingAuthenticatedWebSocket;
 import io.bdeploy.jersey.ws.JerseyEventBroadcaster;
+import io.bdeploy.minion.ControllingMasterProvider;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.MinionState;
-import io.bdeploy.minion.cli.SlaveTool.SlaveConfig;
+import io.bdeploy.minion.api.v1.PublicRootResourceImpl;
+import io.bdeploy.minion.cli.StartTool.MasterConfig;
+import io.bdeploy.minion.cli.shutdown.RemoteShutdownImpl;
+import io.bdeploy.minion.plugin.VersionSorterServiceImpl;
+import io.bdeploy.minion.remote.jersey.CentralUpdateResourceImpl;
+import io.bdeploy.minion.remote.jersey.CommonRootResourceImpl;
 import io.bdeploy.minion.remote.jersey.JerseyAwareMinionUpdateManager;
+import io.bdeploy.minion.remote.jersey.MasterRootResourceImpl;
+import io.bdeploy.minion.remote.jersey.MasterSettingsResourceImpl;
 import io.bdeploy.minion.remote.jersey.MinionStatusResourceImpl;
 import io.bdeploy.minion.remote.jersey.MinionUpdateResourceImpl;
 import io.bdeploy.minion.remote.jersey.NodeCleanupResourceImpl;
@@ -58,18 +63,21 @@ import io.bdeploy.minion.remote.jersey.NodeProxyResourceImpl;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
+import io.bdeploy.ui.api.impl.UiResources;
 
 /**
- * Manages slaves.
+ * Starts a HTTPS server which accepts API calls depending on the mode of the given root directory.
  */
-@Help("Manage minions on a master, or start a non-master minion.")
+@Help("Start a node or master node.")
 @ToolCategory(MinionServerCli.SERVER_TOOLS)
-@CliName("slave")
-public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
+@CliName(value = "start", alias = { "master", "slave" })
+public class StartTool extends ConfiguredCliTool<MasterConfig> {
 
-    public @interface SlaveConfig {
+    private static final Logger log = LoggerFactory.getLogger(StartTool.class);
 
-        @Help("Root directory for the master minion. The minion will put all required things here.")
+    public @interface MasterConfig {
+
+        @Help("Root directory for the master minion. Must be initialized using the init command.")
         @EnvironmentFallback("BDEPLOY_ROOT")
         @Validator({ MinionRootValidator.class, PathOwnershipValidator.class })
         String root();
@@ -77,111 +85,119 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
         @Help("Specify the directory where any incoming updates should be placed in.")
         String updateDir();
 
-        @Help("Adds a minions with the given name.")
-        String add();
+        @Help(value = "Publish the web application, defaults to true.", arg = false)
+        boolean publishWebapp() default true;
 
-        @Help("The name of the minions to remove.")
-        String remove();
+        @Help(value = "Allow CORS, allows the web-app to run on a different port than the backend.", arg = false)
+        boolean allowCors() default false;
 
-        @Help(value = "When given, list all known minions.", arg = false)
-        boolean list() default false;
+        @Help("A token which can be used to remotely shutdown the server on /shutdown")
+        String shutdownToken();
     }
 
-    public SlaveTool() {
-        super(SlaveConfig.class);
+    public StartTool() {
+        super(MasterConfig.class);
     }
 
     @Override
-    protected RenderableResult run(SlaveConfig config, @RemoteOptional RemoteService svc) {
+    protected RenderableResult run(MasterConfig config) {
         helpAndFailIfMissing(config.root(), "Missing --root");
+
         ActivityReporter.Delegating delegate = new ActivityReporter.Delegating();
-        delegate.setDelegate(getActivityReporter());
         try (MinionRoot r = new MinionRoot(Paths.get(config.root()), delegate)) {
-            r.getAuditor().audit(AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("slave").build());
+            r.getAuditor().audit(AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("start").build());
+
+            out().println("Starting " + r.getMode() + "...");
+
             if (config.updateDir() != null) {
                 Path upd = Paths.get(config.updateDir());
                 r.setUpdateDir(upd);
             }
-            if (config.list()) {
-                return doListMinions(r);
-            } else if (config.add() != null) {
-                return doAddMinion(r, config.add(), svc);
-            } else if (config.remove() != null) {
-                return doRemoveMinion(r, config.remove());
-            } else {
-                if (r.getMode() != MinionMode.SLAVE) {
-                    throw new IllegalStateException("Not a SLAVE root: " + config.root());
-                }
-                doRunMinion(r, delegate);
-                return null; // usually not reached.
-            }
-        }
-    }
 
-    private void doRunMinion(MinionRoot root, ActivityReporter.Delegating delegate) {
-        MinionState state = root.getState();
-        int port = state.port;
-        try {
-            out().println("Starting slave...");
-
+            MinionState state = r.getState();
             SecurityHelper sh = SecurityHelper.getInstance();
             KeyStore ks = sh.loadPrivateKeyStore(state.keystorePath, state.keystorePass);
-            try (JerseyServer srv = new JerseyServer(port, ks, state.keystorePass)) {
-                srv.setAuditor(new RollingFileAuditor(root.getAuditLogDir()));
-                root.setUpdateManager(new JerseyAwareMinionUpdateManager(srv));
-                root.onStartup();
+            try (JerseyServer srv = new JerseyServer(state.port, ks, state.keystorePass)) {
+                BHiveRegistry reg = setupServerCommon(delegate, r, srv);
 
-                delegate.setDelegate(srv.getRemoteActivityReporter());
-                registerCommonResources(srv, root, srv.getRemoteActivityReporter());
-                root.setupServerTasks(false, null);
+                if (r.getMode() != MinionMode.NODE) {
+                    // MASTER (standalone, managed, central)
+                    setupServerMaster(config, r, srv, reg);
+                }
+
+                if (config.shutdownToken() != null) {
+                    srv.register(new RemoteShutdownImpl(srv, config.shutdownToken()));
+                }
 
                 srv.start();
                 srv.join();
+
+                return createSuccess();
             }
         } catch (Exception e) {
-            throw new IllegalStateException("Cannot run server on " + port, e);
+            throw new IllegalStateException("Cannot start server", e);
         }
     }
 
-    private DataResult doAddMinion(MinionRoot root, String minionName, RemoteService slaveRemote) {
-        helpAndFailIfMissing(root, "Missing --remote");
-        assertTrue(slaveRemote.getUri().getScheme().equalsIgnoreCase("https"), "Only HTTPS slaves supported");
-        try {
-            // Try to contact the slave to get some information
-            MinionStatusResource statusResource = ResourceProvider.getResource(slaveRemote, MinionStatusResource.class,
-                    getLocalContext());
-            MinionStatusDto status = statusResource.getStatus();
+    private void setupServerMaster(MasterConfig config, MinionRoot r, JerseyServer srv, BHiveRegistry reg) {
+        srv.setUserValidator(user -> {
+            UserInfo info = r.getUsers().getUser(user);
+            if (info == null) {
+                // FIXME: REMOVE this. Non-existent users should not be allowed!
+                log.error("User not available: {}. Allowing to support legacy tokens.", user);
+                return true;
+            }
+            return !info.inactive;
+        });
+        srv.setCorsEnabled(config.allowCors());
 
-            // Store information in our hive
-            MinionManifest mf = new MinionManifest(root.getHive());
-            MinionConfiguration minionConfig = mf.read();
-            minionConfig.addMinion(minionName, status.config);
-            mf.update(minionConfig);
-
-            return createSuccess().addField("Minion Name", minionName);
-        } catch (Exception e) {
-            throw new IllegalStateException("Cannot add slave. Check if the slave is online and try again.", e);
-        }
+        registerMasterResources(srv, reg, config.publishWebapp(), r, srv.getRemoteActivityReporter(), r.createPluginManager(srv));
     }
 
-    private DataResult doRemoveMinion(MinionRoot root, String minionName) {
-        MinionManifest mf = new MinionManifest(root.getHive());
-        MinionConfiguration minionConfig = mf.read();
-        minionConfig.removeMinion(minionName);
-        mf.update(minionConfig);
-        return createSuccess().addField("Minion Name", minionName);
+    private BHiveRegistry setupServerCommon(ActivityReporter.Delegating delegate, MinionRoot r, JerseyServer srv) {
+        srv.setAuditor(new RollingFileAuditor(r.getAuditLogDir()));
+
+        r.setUpdateManager(new JerseyAwareMinionUpdateManager(srv));
+        r.onStartup();
+        r.setupServerTasks(r.getMode());
+
+        delegate.setDelegate(srv.getRemoteActivityReporter());
+
+        return registerCommonResources(srv, r, srv.getRemoteActivityReporter());
     }
 
-    private RenderableResult doListMinions(MinionRoot r) {
-        DataTable table = createDataTable();
-        table.column("Name", 20).column("OS", 20).column("URI", 50);
+    public static void registerMasterResources(RegistrationTarget srv, BHiveRegistry reg, boolean webapp, MinionRoot minionRoot,
+            ActivityReporter reporter, PluginManager pluginManager) {
 
-        for (Map.Entry<String, MinionDto> entry : r.getMinions().entrySet()) {
-            String name = entry.getKey();
-            MinionDto details = entry.getValue();
-            table.row().cell(name).cell(details.os != null ? details.os.name() : "Unknown").cell(details.remote.getUri()).build();
+        if (minionRoot.getMode() == MinionMode.CENTRAL) {
+            srv.register(CentralUpdateResourceImpl.class);
+        } else {
+            srv.register(MasterRootResourceImpl.class);
         }
-        return table;
+
+        srv.register(CommonRootResourceImpl.class);
+        srv.register(PublicRootResourceImpl.class);
+        srv.register(MasterSettingsResourceImpl.class);
+        srv.register(new AbstractBinder() {
+
+            @Override
+            protected void configure() {
+                // required for SoftwareUpdateResourceImpl.
+                bind(MasterRootResourceImpl.class).to(MasterRootResource.class);
+                bind(ControllingMasterProvider.class).in(Singleton.class).to(MasterProvider.class);
+                if (pluginManager != null) {
+                    bind(pluginManager).to(PluginManager.class);
+                }
+                bind(new VersionSorterServiceImpl(pluginManager, reg)).to(VersionSorterService.class);
+            }
+        });
+
+        if (webapp) {
+            UiResources.register(srv);
+        }
+
+        // scan storage locations, register hives
+        minionRoot.getStorageLocations().forEach(reg::scanLocation);
     }
 
     public static BHiveRegistry registerCommonResources(RegistrationTarget srv, MinionRoot root, ActivityReporter reporter) {
@@ -195,7 +211,7 @@ public class SlaveTool extends RemoteServiceTool<SlaveConfig> {
 
         BHiveRegistry r = new BHiveRegistry(reporter, hivePermissionClassifier);
 
-        // register the root hive as default for slaves.
+        // register the root hive as default.
         r.register(JerseyRemoteBHive.DEFAULT_NAME, root.getHive());
 
         srv.register(BHiveLocatorImpl.class);

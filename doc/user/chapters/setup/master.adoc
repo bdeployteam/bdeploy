@@ -4,10 +4,10 @@
 
 *BDeploy* may be set up in different modes, makeing a few different overal usage scenarios possible:
 
-* `STANDALONE` mode: A standalone *BDeploy* master which is responsible for itself, its slaves, and every application deployed theron.
+* `STANDALONE` mode: A standalone *BDeploy* master which is responsible for itself, its nodes, and every application deployed theron.
 * `MANAGED` mode: A *BDeploy* master which is controlled by a `CENTRAL` *BDeploy* master. The `MANAGED` master can still be used nearly the same as the `STANDALONE` master, with very few restrictions. A `MANAGED` master can *additionally* be controlled indirectly through the attached `CENTRAL` master
 * `CENTRAL` mode: Allows a central *BDeploy* master to control/manage multiple `MANAGED` masters. The `CENTRAL` master itself has no local deployment capabilities, but _just_ the ability to control other masters. Other than that, from a users perspective, the server handles mostly like a `STANDALONE` or `MANAGED` master directly.
-* `SLAVE` mode: A slave which can be attached to either a `STANDALONE` or `MANAGED` server as additional node to run applications on.
+* `NODE` mode: A *node* which can be attached to either a `STANDALONE` or `MANAGED` server as additional target location to run applications on.
 
 image::images/Scenario_Standalone.svg[STANDALONE Deployment Scenario,align=center,width=480,link="images/Scenario_Standalone.svg"]
 
@@ -39,15 +39,15 @@ Don't use the depicted user and password, these are just samples.
 
 The `init` command will write an administrator access token to a file if given with `--tokenFile`. This tokens main purpose is automation (scripting) and testing.
 
-The `--mode` parameter of the `init` command is used to determine the future purpose of the *BDeploy* root. The mode can be `STANDALONE`, `MANAGED`, `CENTRAL` (or `SLAVE` - see <<Slave>>).
+The `--mode` parameter of the `init` command is used to determine the future purpose of the *BDeploy* root. The mode can be `STANDALONE`, `MANAGED`, `CENTRAL` (or `NODE` - see <<Node>>).
 
 [NOTE]
 It is not recommended (<<Migrating between Modes,but possible>>) to change the mode of an initialized root later, so take care to use the correct mode for the intended use.
 
-The result of the `init` command is a *root directory* which can be used by the *master* or *slave* commands.
+The result of the `init` command is a *root directory* which can be used by the *start* command.
 
 [WARNING]
-Be aware that the user executing the *master* or *slave* later on *must* be the owner of the root directory. Otherwise *BDeploy* will refuse to start. If you configure *BDeploy* as a service make sure to either run the service as the same user who initialized the root directory, or pass ownership of the root directory to the user running the service before starting it.
+Be aware that the user running the *start* command later on *must* be the owner of the root directory. Otherwise *BDeploy* will refuse to start. If you configure *BDeploy* as a service make sure to either run the service as the same user who initialized the root directory, or pass ownership of the root directory to the user running the service before starting it.
 
 ==== Launch
 After the initialization - which needs to be done only once - the *master* can be started with the following command:

@@ -34,7 +34,7 @@ This documentation will assume the path `/work/bdeploy` to be available, if not 
 The `gradle` build will build test and package BDeploy. You can find build artifacts after the build here:
 
 * `./launcher/build/distributions` - Distributable packages of the launcher application which is used to start client applications.
-* `./minion/build/distributions` - Distributable packages of the main BDeploy binaries. They contains the *master* and *slave* server commands as well as all CLI commands available to BDeploy Administrators. The distribution also contains all supported launcher packages as nested ZIP files.
+* `./minion/build/distributions` - Distributable packages of the main BDeploy binaries. They contains the *start* (which runs *BDeploy* *master* and *node* servers) command as well as all CLI commands available to BDeploy Administrators. The distribution also contains all supported launcher packages as nested ZIP files.
 * `./interfaces/build/libs/bdeploy-api-*-all.jar` - The distributable API bundle including all external dependencies. This can be used to create additional integrations for BDeploy.
 
 Additionally, documentation deliverables can be found in the `./doc/build/docs/dev` and `./doc/build/docs/user` directories (developer and end-user documentation respectively).

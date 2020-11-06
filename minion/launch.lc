@@ -43,7 +43,7 @@ java configuration Node-Init : minion-base {
 	argument "--port=7702";
 	argument "--dist=ignore";
 	argument "--tokenFile=${workspace_loc}/runtime/token-node.txt";
-	argument "--mode=SLAVE";
+	argument "--mode=NODE";
 }
 
 /**
@@ -84,14 +84,14 @@ java configuration Managed-Node-Init : minion-base {
 	argument "--port=7707";
 	argument "--dist=ignore";
 	argument "--tokenFile=${workspace_loc}/runtime/token-managed-node.txt";
-	argument "--mode=SLAVE";
+	argument "--mode=NODE";
 }
 
 /**
  * Registers the node with the master root.
  */
 java configuration Node-Register : minion-base {
-	argument "slave";
+	argument "node";
 	argument "--root=${workspace_loc}/runtime/master";
 	argument "--add=node";
 	argument "--remote=https://localhost:7702/api";
@@ -102,7 +102,7 @@ java configuration Node-Register : minion-base {
  * Removes the node from the master root.
  */
 java configuration Node-Remove : minion-base {
-	argument "slave";
+	argument "node";
 	argument "--root=${workspace_loc}/runtime/master";
 	argument "--remove=node";
 }
@@ -111,7 +111,7 @@ java configuration Node-Remove : minion-base {
  * Registers the managed node with the managed root.
  */
 java configuration Managed-Node-Register : minion-base {
-	argument "slave";
+	argument "node";
 	argument "--root=${workspace_loc}/runtime/managed";
 	argument "--add=node";
 	argument "--remote=https://localhost:7707/api";
@@ -122,7 +122,7 @@ java configuration Managed-Node-Register : minion-base {
  * Removes the managed node from the managed root.
  */
 java configuration Managed-Node-Remove : minion-base {
-	argument "slave";
+	argument "node";
 	argument "--root=${workspace_loc}/runtime/managed";
 	argument "--remove=node";
 }
@@ -131,16 +131,16 @@ java configuration Managed-Node-Remove : minion-base {
  * Run the node.
  */
 java configuration Node : minion-base {
-	argument "slave";
+	argument "start";
 	argument "--root=${workspace_loc}/runtime/node";
 	memory max=256 MB;
 }
 
 /**
- * Run the managed slave.
+ * Run the managed node.
  */
 java configuration Managed-Node : minion-base {
-	argument "slave";
+	argument "start";
 	argument "--root=${workspace_loc}/runtime/managed-node";
 	memory max=256 MB;
 }
@@ -156,7 +156,7 @@ java configuration InteractiveShell : minion-base {
  * Runs the master on the previously initialized root.
  */
 java configuration Master : minion-base {
-	argument "master";
+	argument "start";
 	argument "--root=${workspace_loc}/runtime/master";
 	argument "--allowCors";
 	vm-argument "-XX:+HeapDumpOnOutOfMemoryError";
@@ -188,7 +188,7 @@ java configuration Master-AddPlugin : minion-base {
  * Runs the master in central mode on the previously initialized root.
  */
 java configuration Central-Master : minion-base {
-	argument "master";
+	argument "start";
 	argument "--root=${workspace_loc}/runtime/central";
 	argument "--allowCors";
 	vm-argument "-XX:+HeapDumpOnOutOfMemoryError";
@@ -200,7 +200,7 @@ java configuration Central-Master : minion-base {
  * Runs the master in managed mode on the previously initialized root.
  */
 java configuration Managed-Master : minion-base {
-	argument "master";
+	argument "start";
 	argument "--root=${workspace_loc}/runtime/managed";
 	argument "--allowCors";
 	vm-argument "-XX:+HeapDumpOnOutOfMemoryError";

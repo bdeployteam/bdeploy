@@ -42,7 +42,7 @@ The *Product* (and it's *Applications*) describes the _possible_ configuration v
 | A server machine (virtual machine or bare metal) that is used in an *Instance* to run the configured *Processes* on it. *BDeploy* supports Windows and Linux nodes, even mixed in one instance.
 
 | *Minion*
-| Agent process provided by *BDeploy* that has to run on every *Node* used by BDeploy. In a multi-node setup one minion takes the role of a master. All other nodes act as slaves which are managed by the master.
+| Agent process provided by *BDeploy* that has to run on every *physical node* used by BDeploy. In a multi-node setup one minion takes the role of a master. All others act as headless nodes which are managed by the master.
 
 | *Deployment*
 | The whole process of making one *Instance Version* up and running. This includes the major process steps: *Installation*, *Activation*, *Process Control*.

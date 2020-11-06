@@ -2,7 +2,7 @@
 
 *BDeploy* supports proxying (tunnelling) to application endpoints as defined in the <<_app_info_yaml,app-info.yaml>>.
 
-The application hosting the endpoint to call can be hosted on any slave in the system. As long as this slave is attached to a master you can reach (directly in `STANDALONE` or `MANAGED` mode, or indirectly in `CENTRAL` mode), you can tunnel there using *BDeploy*.
+The application hosting the endpoint to call can be hosted on any node in the system. As long as this node is attached to a master you can reach (directly in `STANDALONE` or `MANAGED` mode, or indirectly in `CENTRAL` mode), you can tunnel there using *BDeploy*.
 
 You will need these to be able to call an Endpoint of a remote application through the *BDeploy* public API:
 

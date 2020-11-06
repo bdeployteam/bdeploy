@@ -98,13 +98,13 @@ image::images/BDeploy_UserAccounts_Inactive.png[BDeploy User Accounts,align=cent
 
 ==== BDeploy Update
 
-The *BDeploy Update* page from the *Administration* menu offers a mechanism to upload new *BDeploy* software versions, deploy these versions (_upgrade_ and _downgrade_ possible) to the running *BDeploy* _master_ and attached _slaves_.
+The *BDeploy Update* page from the *Administration* menu offers a mechanism to upload new *BDeploy* software versions, deploy these versions (_upgrade_ and _downgrade_ possible) to the running *BDeploy* _master_ and attached _nodes_.
 
 image::images/BDeploy_System_With_Launcher.png[BDeploy System Software,align=center,width=480,link="images/BDeploy_System_With_Launcher.png"]
 
 It also offers a way to _upload_ and also to _download_ *BDeploy Launcher* binaries. These binaries are required when <<_app_info_yaml,`CLIENT` *Applications*>> are configured. Use the btn:[Upload] button to upload new *BDeploy* versions from the binary distributions (_ZIP_). 
 
-The page can also be used to download the binaries of *BDeploy* (e.g. to setup additional _slaves_) and the *BDeploy Launcher* binaries (e.g. for manual setup of the *BDeploy Launcher* on client PCs, see <<_client_applications,Client Applications>>).
+The page can also be used to download the binaries of *BDeploy* (e.g. to setup additional _nodes_) and the *BDeploy Launcher* binaries (e.g. for manual setup of the *BDeploy Launcher* on client PCs, see <<_client_applications,Client Applications>>).
 
 ==== Manual Cleanup
 
@@ -121,13 +121,13 @@ You can use the *Manual Cleanup* page from the *Administration* menu to trigger 
 | *Instance Groups* with _Automatic Cleanup_ enabled
 | If the option _Auto Cleanup_ is enabled on an *Instance Group*, old *Product Versions* that are no longer in use by *Instances* of this *Instance Group* are deleted automatically. To avoid that a *Product* vanishes completely, the very latest *Product Version* always remains.
 
-| Slave
+| All Nodes
 | Delete *Manifests* that are not known by the master
 
-| Slave
+| All Nodes
 | Keep two *BDeploy Launcher* versions, delete all older versions.
 
-| Slave
+| All Nodes
 | Remove unused directories and files in the deployment (including pooled applications), download and temp directory.
 
 |===
@@ -136,7 +136,7 @@ The dialog can be used to immediately trigger a cleanup and to reviewing of the 
 
 image::images/BDeploy_Cleanup.png[BDeploy Cleanup Page,align=center,width=480,link="images/BDeploy_Cleanup.png"]
 
-Press the btn:[Calculate Cleanup Actions] button to perform cleanup calculation. The result will be groups of actions to be performed on *Instance Groups* or *Slaves*. The result contains only *Instance Groups* and *Slaves* for which actions are actually calculated, i.e. empty lists are hidden. If no action is calculated at all, a corresponding message is displayed.
+Press the btn:[Calculate Cleanup Actions] button to perform cleanup calculation. The result will be groups of actions to be performed on *Instance Groups* or *Nodes* (including the *Master*). The result contains only *Instance Groups* and *Nodes* for which actions are actually calculated, i.e. empty lists are hidden. If no action is calculated at all, a corresponding message is displayed.
 
 image::images/BDeploy_Cleanup_Actions.png[BDeploy Cleanup Actions,align=center,width=480,link="images/BDeploy_Cleanup_Actions.png"]
 

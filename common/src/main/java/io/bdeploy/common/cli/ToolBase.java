@@ -12,6 +12,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -189,8 +190,13 @@ public abstract class ToolBase {
                     table.column("Tool", 20).column("Description", 60);
 
                     group.getValue().stream().forEach(e -> {
-                        Help h = e.getValue().getAnnotation(Help.class);
-                        table.row().cell(e.getKey()).cell(h.value() != null ? h.value() : "").build();
+                        List<String> names = namesOf(e.getValue());
+                        if (names.get(0).equals(e.getKey())) {
+                            Help h = e.getValue().getAnnotation(Help.class);
+                            table.row().cell(e.getKey()).cell(h.value() != null ? h.value() : "").build();
+                        } else {
+                            table.row().cell(e.getKey()).cell("DEPRECATED. Alias for '" + names.get(0) + "'").build();
+                        }
                     });
                     table.render();
 
@@ -310,19 +316,26 @@ public abstract class ToolBase {
     }
 
     /**
-     * For testing only; returns the name under which a certain {@link CliTool} is
-     * registered.
+     * @param tool the tool to inspect
+     * @return all the names the tool should be known under. The 'official' name is the first in the list, the rest are aliases.
      */
-    public static String nameOf(Class<? extends CliTool> tool) {
+    public static List<String> namesOf(Class<? extends CliTool> tool) {
         CliTool.CliName name = tool.getAnnotation(CliTool.CliName.class);
         if (name == null || name.value() == null) {
             throw new IllegalStateException("Cannot find annotation on " + tool);
         }
-        return name.value();
+
+        List<String> result = new ArrayList<>();
+        result.add(name.value());
+
+        if (name.alias().length > 0) {
+            result.addAll(Arrays.asList(name.alias()));
+        }
+        return result;
     }
 
     public void register(Class<? extends CliTool> tool) {
-        tools.put(nameOf(tool), tool);
+        namesOf(tool).forEach(name -> tools.put(name, tool));
     }
 
     /**
@@ -335,6 +348,8 @@ public abstract class ToolBase {
         public @interface CliName {
 
             String value();
+
+            String[] alias() default {};
         }
 
         private ActivityReporter reporter;

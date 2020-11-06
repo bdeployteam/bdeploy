@@ -82,7 +82,7 @@ public class TestCliTool implements ParameterResolver {
     }
 
     private CliTool getTool(ActivityReporter reporter, Class<? extends CliTool> tool, String... args) {
-        String name = ToolBase.nameOf(tool);
+        String name = ToolBase.namesOf(tool).get(0);
         if (name == null) {
             throw new IllegalArgumentException("Unknown tool: " + tool);
         }

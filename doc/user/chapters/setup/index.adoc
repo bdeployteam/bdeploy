@@ -14,7 +14,7 @@ include::master.adoc[]
 
 include::certificate.adoc[]
 
-include::slave.adoc[]
+include::node.adoc[]
 
 include::service.adoc[]
 
