@@ -14,8 +14,8 @@ public class MinionServerCli extends ToolBase {
 
     public MinionServerCli() {
         // server commands
-        register(MasterTool.class);
-        register(SlaveTool.class);
+        register(StartTool.class);
+        register(NodeTool.class);
 
         // init and local configuration
         register(InitTool.class);

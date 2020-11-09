@@ -37,7 +37,7 @@ public class ControllingMasterProvider implements MasterProvider {
                             Status.EXPECTATION_FAILED);
                 }
                 return new RemoteService(UriBuilder.fromUri(controlling.uri).build(), controlling.auth);
-            case SLAVE:
+            case NODE:
                 throw new UnsupportedOperationException("A node may never require remote communication with a master");
             default:
                 return minion.getSelf();

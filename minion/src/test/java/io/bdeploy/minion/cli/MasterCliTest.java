@@ -120,7 +120,7 @@ public class MasterCliTest {
 
         Thread master = new Thread(() -> {
             try {
-                tools.execute(MasterTool.class, "--root=" + root, "--shutdownToken=" + shutdown);
+                tools.execute(StartTool.class, "--root=" + root, "--shutdownToken=" + shutdown);
             } catch (IOException e) {
                 e.printStackTrace();
             }

@@ -27,6 +27,11 @@ public enum MinionMode {
     /**
      * The minion is a non-master node - the node must be attached and is controlled by a master node (managed or standalone).
      */
-    SLAVE,
+    NODE,
+
+    /**
+     * @deprecated no longer supported, use NODE instead
+     */
+    SLAVE
 
 }

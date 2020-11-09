@@ -25,7 +25,7 @@ public class SystemUserMigration {
     public static void run(MinionRoot root) throws GeneralSecurityException, IOException {
         MinionManifest manifest = new MinionManifest(root.getHive());
         MinionConfiguration minionConfiguration = manifest.read();
-        if (minionConfiguration == null || root.getMode() == MinionMode.SLAVE) {
+        if (minionConfiguration == null || root.getMode() == MinionMode.NODE) {
             return;
         }
         log.info("Checking for old system token.");

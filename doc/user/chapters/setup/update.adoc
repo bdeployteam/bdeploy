@@ -12,4 +12,4 @@ To remotely update an existing server, use a command similar to the following:
 Updating a local server is through the command line is done in the same way.
 
 [NOTE]
-Existing slaves don't need a separate update. They need to be online when applying the update to the master. The update is applied to all online slaves as well when applying it to the master.
+Existing *nodes* don't need a separate update. They need to be online when applying the update to the *master*. The update is applied to all online *nodes* as well when applying it to the *master*.

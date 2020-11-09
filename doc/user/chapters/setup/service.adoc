@@ -7,8 +7,7 @@ located in the `etc` directory and named `bdeploy-minion.service`.
 The template itself contains instructions on how to create a valid service from it.
 
 You can copy the service template to a different filename while installing into the systemd service directory. The
-filename will later on be the service name. This allows to install multiple bdeploy master/slave services on a single
-machine.
+filename will later on be the service name. This allows to install multiple *BDeploy* services on a single machine.
 
 [NOTE] 
 To get systemd to recognize the service(s) after copying the service file(s) use the `systemctl daemon-reload` command (as root).
@@ -21,14 +20,14 @@ the `etc` directory and is named `bdeploy-service-install.bat`
 
 The script must be called with administrative privileges and it expects the following arguments:
 
- --master | --slave     Start a master or slave node
+ --master | --node      Start a master or node (only controls the name of the service.)
  <Path-to-minion>       Absolute path of the bdeploy executable
  <Path-to-store-files>  Absolute path of the data directory
 
 By default the service runs as _Local System_ but you can and should change that afterwards by using the services.msc
 application. Simply configure the desired account in the _Log On_ tab of the services management console.
 
-Once installed, you can start the service using services.msc or by calling `net start BDeployMaster | BDeploySlave`.
+Once installed, you can start the service using services.msc or by calling `net start BDeployMaster | BDeployNode`.
 
 [NOTE]
 Use the _Event Viewer_ (Windows Logs->System) to get more information when the service fails to start.

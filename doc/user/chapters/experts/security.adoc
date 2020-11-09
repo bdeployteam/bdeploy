@@ -4,7 +4,7 @@
 
 This mechanism is used for _every_ remote communication, especially for every remote communication which would cause a state change in *BDeploy*. There are some endpoints in the Web UI backend which must be unsecured by design (e.g. the one performing authentication and issuing the _security token_ for all following remote communication).
 
-As a consequence, a _security token_ is required for all CLI commands that communicate with a remote *BDeploy* server, when registering a _slave_ with a _master_ minion (as they communicate), and for all toolings which communicate otherwise with *BDeploy* (e.g. build integrations which fetch dependencies and push *Products* to *BDeploy*).
+As a consequence, a _security token_ is required for all CLI commands that communicate with a remote *BDeploy* server, when registering a _node_ with a _master_ minion (as they communicate), and for all toolings which communicate otherwise with *BDeploy* (e.g. build integrations which fetch dependencies and push *Products* to *BDeploy*).
 
 ==== Certificates
 

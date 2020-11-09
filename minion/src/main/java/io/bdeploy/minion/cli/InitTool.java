@@ -64,7 +64,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         @Help("Path to the ZIP file you extracted this program from. Set to 'ignore' to skip. Be aware that this will cause an immediate update once connected to a remote master.")
         String dist();
 
-        @Help("Write the access token to a token file instead of printing it on the console. Only required for slaves.")
+        @Help("Write the access token to a token file instead of printing it on the console. Only required for nodes.")
         @EnvironmentFallback("BDEPLOY_TOKENFILE")
         @Validator(NonExistingPathValidator.class)
         String tokenFile();
@@ -75,11 +75,11 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         @Help("Port that the master will run on.")
         int port() default 7701;
 
-        @Help("The target mode for the server [CENTRAL,MANAGED,STANDALONE,SLAVE]. A MANAGED server can only work with a central counterpart.")
+        @Help("The target mode for the server [CENTRAL,MANAGED,STANDALONE,NODE]. A MANAGED server can only work with a central counterpart.")
         @ConfigurationValueMapping(ValueMapping.TO_UPPERCASE)
         MinionMode mode();
 
-        @Help("The initial user's name to create. The initial user is always system administrator. Not required for slaves.")
+        @Help("The initial user's name to create. The initial user is always system administrator. Not required for nodes.")
         String initUser();
 
         @Help("The password for the initial user to create.")
@@ -90,15 +90,20 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         super(InitConfig.class);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected RenderableResult run(InitConfig config) {
         helpAndFailIfMissing(config.root(), "Missing --root");
         helpAndFailIfMissing(config.hostname(), "Missing --hostname");
         helpAndFailIfMissing(config.mode(), "Missing --mode");
 
-        if (config.mode() != MinionMode.SLAVE) {
+        if (config.mode() != MinionMode.NODE) {
             helpAndFailIfMissing(config.initUser(), "Missing --initUser");
             helpAndFailIfMissing(config.initPassword(), "Missing --initPassword");
+        }
+
+        if (config.mode() == MinionMode.SLAVE) {
+            helpAndFail("Mode SLAVE no longer supported, use NODE instead.");
         }
 
         Path root = Paths.get(config.root());
@@ -113,12 +118,12 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
                 Files.write(Paths.get(config.tokenFile()), pack.getBytes(StandardCharsets.UTF_8));
                 result.addField("Token File", config.tokenFile());
             } else {
-                if (config.mode() == MinionMode.SLAVE) {
+                if (config.mode() == MinionMode.NODE) {
                     out().println(pack);
                 }
             }
 
-            if (config.mode() != MinionMode.SLAVE) {
+            if (config.mode() != MinionMode.NODE) {
                 mr.getUsers().createLocalUser(config.initUser(), config.initPassword(),
                         Collections.singletonList(ApiAccessToken.ADMIN_PERMISSION));
 
@@ -163,7 +168,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         RemoteService remote = new RemoteService(UriBuilder.fromUri("https://" + hostname + ":" + port + "/api").build(), pack);
 
         MinionConfiguration minionConfiguration = new MinionConfiguration();
-        minionConfiguration.addMinion(Minion.DEFAULT_NAME, MinionDto.create(mode != MinionMode.SLAVE, remote));
+        minionConfiguration.addMinion(Minion.DEFAULT_NAME, MinionDto.create(mode != MinionMode.NODE, remote));
 
         MinionManifest minionMf = new MinionManifest(mr.getHive());
         minionMf.update(minionConfiguration);

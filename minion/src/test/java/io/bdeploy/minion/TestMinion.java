@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.ApiAccessToken.Builder;
@@ -25,7 +26,7 @@ import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.jersey.TestServer;
 import io.bdeploy.jersey.audit.RollingFileAuditor;
 import io.bdeploy.minion.cli.InitTool;
-import io.bdeploy.minion.cli.MasterTool;
+import io.bdeploy.minion.cli.StartTool;
 import io.bdeploy.minion.user.UserDatabase;
 import io.bdeploy.ui.api.MinionMode;
 
@@ -83,7 +84,8 @@ public class TestMinion extends TestServer {
 
         PluginManager pm = cmr.mr
                 .createPluginManager(getExtensionStore(context).get(CloseableServer.class, CloseableServer.class).getServer());
-        MasterTool.registerMasterResources(this, true, cmr.mr, new ActivityReporter.Null(), pm);
+        BHiveRegistry reg = StartTool.registerCommonResources(this, cmr.mr, new ActivityReporter.Null());
+        StartTool.registerMasterResources(this, reg, true, cmr.mr, new ActivityReporter.Null(), pm);
     }
 
     @Override
@@ -126,6 +128,7 @@ public class TestMinion extends TestServer {
                 mr = new MinionRoot(root, new ActivityReporter.Null());
                 InitTool.initMinionRoot(root, mr, "localhost", port, null, mode);
                 mr.onStartup();
+                mr.setupServerTasks(mr.getMode());
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }

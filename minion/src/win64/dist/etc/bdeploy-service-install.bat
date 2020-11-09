@@ -1,7 +1,7 @@
 @if "%DEBUG%" == "" @echo off
 @rem ##########################################################################
 @rem
-@rem  Install minion master | slave as service on Windows
+@rem  Install minion master | node as service on Windows
 @rem
 @rem ##########################################################################
 
@@ -10,14 +10,14 @@ if "%DIRNAME%" == "" set DIRNAME=.\
 
 @rem Customize this property if you want to run multiple services 
 @rem on the same machine. The service prefix must be unique.
-@rem The type of the minion (master | slave) will be added to this prefix.
+@rem The type of the minion (master | node) will be added to this prefix.
 set MINION_SERVICE_PREFIX=BDeploy
 
 @rem Check if we have the required permissions
 whoami /groups | find "S-1-16-12288" > nul
 if ERRORLEVEL 1 goto restricted
 
-@rem Whether the service represents a master or a slave node
+@rem Whether the service represents a master or a node node
 set MINION_TYPE_ARG=%1
 if "%MINION_TYPE_ARG%"=="" goto usage
 if "%MINION_TYPE_ARG%"=="--master" ( 
@@ -25,10 +25,10 @@ if "%MINION_TYPE_ARG%"=="--master" (
 	set MINION_SERVICE_NAME=%MINION_SERVICE_PREFIX%Master
 	set MINION_SERVICE_DISPLAY=%MINION_SERVICE_PREFIX% Master
 )
-if "%MINION_TYPE_ARG%"=="--slave" (
-	 set MINION_TYPE=slave
-	 set MINION_SERVICE_NAME=%MINION_SERVICE_PREFIX%Slave
-	 set MINION_SERVICE_DISPLAY=%MINION_SERVICE_PREFIX% Slave
+if "%MINION_TYPE_ARG%"=="--node" (
+	 set MINION_TYPE=node
+	 set MINION_SERVICE_NAME=%MINION_SERVICE_PREFIX%Node
+	 set MINION_SERVICE_DISPLAY=%MINION_SERVICE_PREFIX% Node
 )
 if "%MINION_TYPE%"=="" goto usage
 
@@ -41,7 +41,7 @@ set MINION_DATA=%~f3
 if "%MINION_DATA%"=="" goto usage
 
 @rem Create the actual service
-%DIRNAME%\nssm.exe install %MINION_SERVICE_NAME% "%MINION_EXE%" %MINION_TYPE% """--root=%MINION_DATA%""" > nul
+%DIRNAME%\nssm.exe install %MINION_SERVICE_NAME% "%MINION_EXE%" start """--root=%MINION_DATA%""" > nul
 if ERRORLEVEL 1 goto serviceFailure
 
 @rem Setup required properties
@@ -56,7 +56,7 @@ goto done
 :usage
 @echo Failed to create service. One or more mandatory parameters are missing
 @echo.
-@echo Usage: bdeploy-service-install.bat ^<--master^|--slave^> ^<Path-to-bdeploy-bat^> ^<Path-where-to-store-files^> 
+@echo Usage: bdeploy-service-install.bat ^<--master^|--node^> ^<Path-to-bdeploy-bat^> ^<Path-where-to-store-files^> 
 exit /B 1
 
 :restricted 

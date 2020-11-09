@@ -84,11 +84,11 @@ public class ConfigTool extends ConfiguredCliTool<ConfigToolConfig> {
                 MinionMode oldMode = r.getMode();
                 MinionMode newMode = config.mode();
 
-                if (oldMode == MinionMode.CENTRAL || oldMode == MinionMode.SLAVE) {
+                if (oldMode == MinionMode.CENTRAL || oldMode == MinionMode.NODE) {
                     throw new UnsupportedOperationException("Cannot convert " + oldMode + " root to anything else");
                 }
 
-                if (newMode == MinionMode.CENTRAL || newMode == MinionMode.SLAVE) {
+                if (newMode == MinionMode.CENTRAL || newMode == MinionMode.NODE) {
                     throw new UnsupportedOperationException("Cannot convert root to " + oldMode + ".");
                 }
 

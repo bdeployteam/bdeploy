@@ -297,18 +297,18 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
      * Setup tasks which should only run when this root is used for serving a
      * minion.
      */
-    public void setupServerTasks(boolean master, MinionMode masterMode) {
+    public void setupServerTasks(MinionMode minionMode) {
         // cleanup any stale things so periodic tasks don't get them wrong.
         PathHelper.deleteRecursive(getTempDir());
         PathHelper.mkdirs(getTempDir());
 
-        if (masterMode != MinionMode.CENTRAL) {
+        if (minionMode != MinionMode.CENTRAL) {
             initProcessController();
         }
 
         createJobScheduler();
 
-        if (master) {
+        if (minionMode != MinionMode.NODE) {
             MasterCleanupJob.create(this, getState().cleanupSchedule);
         }
         CleanupDownloadDirJob.create(scheduler, downloadDir);
