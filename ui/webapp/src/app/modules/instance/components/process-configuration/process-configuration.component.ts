@@ -1249,6 +1249,9 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     if (this.selectedConfig && this.selectedConfig.readonly) {
       return true;
     }
+    if (!this.authService.isScopedWrite(this.instanceGroup.name)) {
+      return true;
+    }
     return false;
   }
 

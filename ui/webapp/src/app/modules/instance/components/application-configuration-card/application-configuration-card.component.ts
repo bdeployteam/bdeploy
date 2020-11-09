@@ -52,6 +52,21 @@ export class ApplicationConfigurationCardComponent implements OnInit {
     return this.activatedTag === this.instanceVersion.key.tag;
   }
 
+  isConfigureVisible() {
+    return !this.isReadonly && this.authService.isScopedWrite(this.instanceGroupName) && !this.isMissing();
+  }
+
+  isViewVisible() {
+    if (this.isConfigureVisible()) {
+      return false;
+    }
+    return !this.isMissing();
+  }
+
+  isEndpointsVisible() {
+    return !this.isMissing() && this.hasEndpoints();
+  }
+
   onEdit() {
     this.editEvent.emit(this.appConfig);
   }

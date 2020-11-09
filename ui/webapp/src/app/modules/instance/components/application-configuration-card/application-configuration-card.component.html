@@ -8,18 +8,9 @@
     <span class="mat-title app-title">{{ appConfig.name }}</span>
     <span class="spacer"></span>
     <mat-menu #appMenu="matMenu" xPosition="before">
-      <button
-        mat-menu-item
-        *ngIf="!isReadonly"
-        (click)="onEdit()"
-        [disabled]="!authService.isScopedWrite(instanceGroupName) || isMissing()"
-      >
-        <mat-icon>edit</mat-icon>Configure
-      </button>
-      <button mat-menu-item *ngIf="isReadonly" (click)="onEdit()" [disabled]="isMissing()">
-        <mat-icon>visibility</mat-icon>View
-      </button>
-      <button mat-menu-item *ngIf="hasEndpoints()" (click)="onEndpointEdit()" [disabled]="isMissing()">
+      <button mat-menu-item *ngIf="isConfigureVisible()" (click)="onEdit()"><mat-icon>edit</mat-icon>Configure</button>
+      <button mat-menu-item *ngIf="isViewVisible()" (click)="onEdit()"><mat-icon>visibility</mat-icon>View</button>
+      <button mat-menu-item *ngIf="isEndpointsVisible()" (click)="onEndpointEdit()">
         <mat-icon>settings_ethernet</mat-icon>Endpoints
       </button>
       <ng-container *ngIf="isClient">
