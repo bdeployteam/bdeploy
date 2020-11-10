@@ -11,7 +11,7 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
-import io.bdeploy.interfaces.directory.InstanceDirectory;
+import io.bdeploy.interfaces.directory.RemoteDirectory;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
@@ -88,7 +88,7 @@ public class ProcessResourceImpl implements ProcessResource {
     }
 
     @Override
-    public List<InstanceDirectory> getDataDirSnapshot() {
+    public List<RemoteDirectory> getDataDirSnapshot() {
         MasterNamedResource master = getMasterResource();
         return master.getDataDirectorySnapshots(instanceId);
     }

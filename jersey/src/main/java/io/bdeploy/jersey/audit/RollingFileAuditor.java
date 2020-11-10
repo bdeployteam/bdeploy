@@ -143,7 +143,7 @@ public class RollingFileAuditor implements Auditor {
         builder.setLayout(PatternLayout.newBuilder().withPattern(LOG_PATTERN).build());
         builder.withStrategy(
                 DefaultRolloverStrategy.newBuilder().withCompressionLevelStr(String.valueOf(Deflater.DEFAULT_COMPRESSION))
-                        .withMax(Integer.toString(LOG_MAX_INDEX)).build());
+                        .withMax(Integer.toString(LOG_MAX_INDEX)).withFileIndex("min").build());
         return builder.build();
     }
 
@@ -166,7 +166,7 @@ public class RollingFileAuditor implements Auditor {
                 .setAdditionalFields(fields.toArray(new KeyValuePair[0])).build());
         builder.withStrategy(
                 DefaultRolloverStrategy.newBuilder().withCompressionLevelStr(String.valueOf(Deflater.DEFAULT_COMPRESSION))
-                        .withMax(Integer.toString(LOG_MAX_INDEX)).build());
+                        .withMax(Integer.toString(LOG_MAX_INDEX)).withFileIndex("min").build());
         return builder.build();
     }
 

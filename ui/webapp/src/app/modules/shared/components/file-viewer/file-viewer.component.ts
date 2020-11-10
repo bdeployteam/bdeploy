@@ -14,7 +14,7 @@ import { FormBuilder } from '@angular/forms';
 import { NgTerminal } from 'ng-terminal';
 import { Observable, Subscription } from 'rxjs';
 import { IDisposable } from 'xterm';
-import { InstanceDirectoryEntry, StringEntryChunkDto } from '../../../../models/gen.dtos';
+import { RemoteDirectoryEntry, StringEntryChunkDto } from '../../../../models/gen.dtos';
 import { InstanceService } from '../../../instance/services/instance.service';
 
 const MAX_TAIL = 512 * 1024; // 512KB max initial fetch.
@@ -37,7 +37,7 @@ export class FileViewerComponent implements OnInit, AfterViewInit, OnChanges, On
   static EL_ALL: string = FileViewerComponent.CSI + '2K'; // clear whole line
 
   @Input() title: string;
-  @Input() initialEntry: () => Observable<InstanceDirectoryEntry>;
+  @Input() initialEntry: () => Observable<RemoteDirectoryEntry>;
   @Input() contentFetcher: (offset: number, length: number) => Observable<StringEntryChunkDto>;
   @Input() contentDownloader: () => void;
   @Input() follow = false;

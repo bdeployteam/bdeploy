@@ -161,7 +161,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
             MasterConfig config) {
         r.onStartup(config.consoleLog());
 
-        srv.setAuditor(new RollingFileAuditor(r.getAuditLogDir()));
+        srv.setAuditor(new RollingFileAuditor(r.getLogDir()));
         r.setUpdateManager(new JerseyAwareMinionUpdateManager(srv));
         r.setupServerTasks(r.getMode());
         delegate.setDelegate(srv.getRemoteActivityReporter());

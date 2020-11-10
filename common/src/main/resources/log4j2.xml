@@ -4,11 +4,13 @@
 		<Routing name="GlobalRoute">
 			<Routes pattern="$${ctx:TARGET_LOG_DIR}">
 				<Route>
-					<RollingFile name="Rolling-Log" filePattern="${ctx:TARGET_LOG_DIR}/server-%d{yyyy-MM-dd}.log" createOnDemand="true">
+					<RollingFile name="Rolling-Log" fileName="${ctx:TARGET_LOG_DIR}/server.log" filePattern="${ctx:TARGET_LOG_DIR}/server-%i.log" createOnDemand="true">
 						<PatternLayout
 							pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} | %25.25t | %-5level | %-35.35MDC{BDEPLOY} | %-80msg - (%F:%L)%n" />
-						<OnStartupTriggeringPolicy/>
-						<DirectWriteRolloverStrategy/>
+
+						<!-- Roll over whenever the file grows larger than 50 MB -->
+						<SizeBasedTriggeringPolicy size="50 MB"/>
+						<DefaultRolloverStrategy max="5" fileIndex="min"/>
 					</RollingFile>
 				</Route>
 				<Route key="$${ctx:TARGET_LOG_DIR}">

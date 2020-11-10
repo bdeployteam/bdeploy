@@ -3,9 +3,9 @@ package io.bdeploy.interfaces.directory;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 
 /**
- * A single entry in an instance {@link SpecialDirectory}.
+ * A single remote directory entry (path).
  */
-public class InstanceDirectoryEntry {
+public class RemoteDirectoryEntry {
 
     /**
      * The path relative to the {@link SpecialDirectory} directory of the hosting instance.
@@ -14,6 +14,8 @@ public class InstanceDirectoryEntry {
 
     /**
      * The source {@link SpecialDirectory}.
+     * <p>
+     * If the root is not given, the path is resolved relative to the minions data root.
      */
     public SpecialDirectory root;
 

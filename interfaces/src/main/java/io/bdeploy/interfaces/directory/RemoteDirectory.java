@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Represents a snapshot of an instances DATA directory on a minion.
  */
-public class InstanceDirectory {
+public class RemoteDirectory {
 
     /**
      * Name of the minion this directory is residing on.
@@ -26,6 +26,6 @@ public class InstanceDirectory {
     /**
      * All directory entries.
      */
-    public List<InstanceDirectoryEntry> entries = new ArrayList<>();
+    public List<RemoteDirectoryEntry> entries = new ArrayList<>();
 
 }

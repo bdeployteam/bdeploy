@@ -15,6 +15,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 
@@ -24,20 +25,29 @@ import org.slf4j.LoggerFactory;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.Version;
+import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
+import io.bdeploy.interfaces.directory.EntryChunk;
+import io.bdeploy.interfaces.directory.RemoteDirectory;
+import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
+import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.remote.CommonInstanceResource;
 import io.bdeploy.interfaces.remote.CommonRootResource;
+import io.bdeploy.interfaces.remote.MinionStatusResource;
+import io.bdeploy.interfaces.remote.NodeDeploymentResource;
+import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseySecurityContext;
+import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.ui.api.AuthService;
-import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 
 public class CommonRootResourceImpl implements CommonRootResource {
@@ -60,7 +70,10 @@ public class CommonRootResourceImpl implements CommonRootResource {
     private ContainerRequestContext context;
 
     @Inject
-    private Minion minion;
+    private MinionRoot minion;
+
+    @Context
+    private SecurityContext security;
 
     @Override
     public Version getVersion() {
@@ -176,6 +189,72 @@ public class CommonRootResourceImpl implements CommonRootResource {
             throw new WebApplicationException("Instance Group '" + name + "' does not exist", Status.NOT_FOUND);
         }
         return rc.initResource(new CommonInstanceResourceImpl(name, bHive));
+    }
+
+    @Override
+    public void setLoggerConfig(Path config) {
+        MinionConfiguration minionConfig = minion.getMinions();
+        try (Activity updating = reporter.start("Updating logging configuration on minions...", minionConfig.size())) {
+            for (var entry : minionConfig.entrySet()) {
+                try {
+                    ResourceProvider.getVersionedResource(entry.getValue().remote, MinionStatusResource.class, security)
+                            .setLoggerConfig(config);
+                } catch (Exception e) {
+                    log.error("Cannot udpate logging configuration on {}", entry.getKey(), e);
+                }
+
+                updating.workAndCancelIfRequested(1);
+            }
+        } finally {
+            PathHelper.deleteRecursive(config);
+        }
+    }
+
+    @Override
+    public List<RemoteDirectory> getLogDirectories() {
+        List<RemoteDirectory> result = new ArrayList<>();
+
+        MinionConfiguration minionConfig = minion.getMinions();
+        try (Activity reading = reporter.start("Reading log file information from minions...", minionConfig.size())) {
+            for (var entry : minionConfig.entrySet()) {
+                RemoteDirectory dir = new RemoteDirectory();
+                dir.minion = entry.getKey();
+
+                try {
+                    dir.entries.addAll(ResourceProvider
+                            .getVersionedResource(entry.getValue().remote, MinionStatusResource.class, security).getLogEntries());
+                } catch (Exception e) {
+                    log.warn("Problem fetching log directory of {}", entry.getKey(), e);
+                    dir.problem = e.toString();
+                }
+
+                result.add(dir);
+                reading.workAndCancelIfRequested(1);
+            }
+        }
+
+        return result;
+
+    }
+
+    @Override
+    public EntryChunk getLogContent(String minionName, RemoteDirectoryEntry entry, long offset, long limit) {
+        RemoteService svc = minion.getMinions().getRemote(minionName);
+        if (svc == null) {
+            throw new WebApplicationException("Cannot find minion " + minionName, Status.NOT_FOUND);
+        }
+        NodeDeploymentResource sdr = ResourceProvider.getVersionedResource(svc, NodeDeploymentResource.class, security);
+        return sdr.getEntryContent(entry, offset, limit);
+    }
+
+    @Override
+    public Response getLogStream(String minionName, RemoteDirectoryEntry entry) {
+        RemoteService svc = minion.getMinions().getRemote(minionName);
+        if (svc == null) {
+            throw new WebApplicationException("Cannot find minion " + minionName, Status.NOT_FOUND);
+        }
+        NodeDeploymentResource sdr = ResourceProvider.getVersionedResource(svc, NodeDeploymentResource.class, security);
+        return sdr.getEntryStream(entry);
     }
 
 }

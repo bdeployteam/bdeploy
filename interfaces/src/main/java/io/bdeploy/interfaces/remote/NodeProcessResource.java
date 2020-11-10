@@ -10,7 +10,7 @@ import javax.ws.rs.core.MediaType;
 
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
-import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
+import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
 import io.bdeploy.interfaces.manifest.history.runtime.MinionRuntimeHistoryDto;
 
 @Path("/processes")
@@ -88,12 +88,12 @@ public interface NodeProcessResource {
      * @param instanceId the instance UUID
      * @param tag the tag for which to retrieve the output file entry.
      * @param applicationId the application ID for which to retrieve the output file entry.
-     * @return an {@link InstanceDirectoryEntry}, can be used with
-     *         {@link NodeDeploymentResource#getEntryContent(InstanceDirectoryEntry, long, long)}.
+     * @return an {@link RemoteDirectoryEntry}, can be used with
+     *         {@link NodeDeploymentResource#getEntryContent(RemoteDirectoryEntry, long, long)}.
      */
     @GET
     @Path("/output")
-    public InstanceDirectoryEntry getOutputEntry(@QueryParam("u") String instanceId, @QueryParam("t") String tag,
+    public RemoteDirectoryEntry getOutputEntry(@QueryParam("u") String instanceId, @QueryParam("t") String tag,
             @QueryParam("a") String applicationId);
 
     /**

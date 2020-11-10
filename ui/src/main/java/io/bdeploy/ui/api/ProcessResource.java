@@ -15,7 +15,7 @@ import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
-import io.bdeploy.interfaces.directory.InstanceDirectory;
+import io.bdeploy.interfaces.directory.RemoteDirectory;
 import io.bdeploy.jersey.ActivityScope;
 
 @Path("/processes")
@@ -63,7 +63,7 @@ public interface ProcessResource {
 
     @GET
     @Path("/dataDirSnapshot")
-    public List<InstanceDirectory> getDataDirSnapshot();
+    public List<RemoteDirectory> getDataDirSnapshot();
 
     @POST
     @Path("/{appId}/stdin")

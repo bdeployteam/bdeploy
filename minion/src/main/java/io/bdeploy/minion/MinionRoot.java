@@ -106,6 +106,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
 
     private Scheduler scheduler;
     private PluginManager pluginManager;
+    private boolean consoleLog;
 
     public MinionRoot(Path root, ActivityReporter reporter) {
         super(root.resolve("etc"));
@@ -172,17 +173,19 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
      * Called once when starting the minion root. Can be used for additional initialization
      */
     public void onStartup(boolean consoleLog) {
+        this.consoleLog = consoleLog;
+
         // as early as possible.
-        updateLoggingConfiguration(consoleLog);
+        updateLoggingConfiguration(this::withBuiltinLogConfig);
 
         doMigrate();
         updateMinionConfiguration();
     }
 
     /** Updates the logging config file if required, and switches to using it */
-    private void updateLoggingConfiguration(boolean consoleLog) {
+    public void updateLoggingConfiguration(Function<Function<InputStream, ObjectId>, ObjectId> log4jContentSupplier) {
         ObjectId lastKnown = getState().logConfigId;
-        ObjectId current = withBuiltinLogConfig(is -> ObjectId.createFromStreamNoCopy(is));
+        ObjectId current = log4jContentSupplier.apply(is -> ObjectId.createFromStreamNoCopy(is));
 
         Path cfgPath = config.resolve("log4j2.xml");
         boolean exists = Files.exists(cfgPath);
@@ -191,19 +194,31 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
 
             // give a warning if the current version has been locally modified, replace it nevertheless
             if (exists && lastKnown != null) {
+                Path backup = null;
                 try (InputStream is = Files.newInputStream(cfgPath)) {
                     ObjectId local = ObjectId.createFromStreamNoCopy(is);
 
                     if (!local.equals(lastKnown)) {
-                        log.warn("Logging configuration has been locally modified - changes will be discarded");
+                        backup = cfgPath.getParent().resolve(cfgPath.getFileName().toString() + ".bak");
+                        log.warn("Logging configuration has been locally modified - changes will be discarded, backup: {}",
+                                backup);
                     }
                 } catch (IOException e) {
                     log.warn("Cannot read existing local logger configuration", e);
                 }
+
+                if (backup != null) {
+                    PathHelper.deleteRecursive(backup);
+                    try {
+                        Files.move(cfgPath, backup);
+                    } catch (IOException e) {
+                        log.warn("Cannot create backup of {} at {}", cfgPath, backup, e);
+                    }
+                }
             }
 
             // file does not exist, or is outdated - update.
-            ObjectId id = withBuiltinLogConfig(is -> {
+            ObjectId id = log4jContentSupplier.apply(is -> {
                 try {
                     return ObjectId.createByCopy(is, cfgPath);
                 } catch (IOException e) {
@@ -227,7 +242,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         }
     }
 
-    private <T> T withBuiltinLogConfig(Function<InputStream, T> function) {
+    private ObjectId withBuiltinLogConfig(Function<InputStream, ObjectId> function) {
         try (InputStream builtin = MinionRoot.class.getResourceAsStream("/log4j2.xml")) {
             return function.apply(builtin);
         } catch (IOException e) {
@@ -484,8 +499,12 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         return create(dir);
     }
 
-    public Path getAuditLogDir() {
+    public Path getLogDir() {
         return logDir;
+    }
+
+    public Path getRootDir() {
+        return root;
     }
 
     /** Creates the given directory */

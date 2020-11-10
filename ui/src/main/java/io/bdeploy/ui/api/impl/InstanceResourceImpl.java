@@ -80,8 +80,8 @@ import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.directory.EntryChunk;
-import io.bdeploy.interfaces.directory.InstanceDirectory;
-import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
+import io.bdeploy.interfaces.directory.RemoteDirectory;
+import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
@@ -105,8 +105,8 @@ import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.JerseyOnBehalfOfFilter;
 import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
-import io.bdeploy.ui.InstanceEntryStreamRequestService;
-import io.bdeploy.ui.InstanceEntryStreamRequestService.EntryRequest;
+import io.bdeploy.ui.RemoteEntryStreamRequestService;
+import io.bdeploy.ui.RemoteEntryStreamRequestService.EntryRequest;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.ConfigFileResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
@@ -161,7 +161,7 @@ public class InstanceResourceImpl implements InstanceResource {
     private InstanceEventManager iem;
 
     @Inject
-    private InstanceEntryStreamRequestService iesrs;
+    private RemoteEntryStreamRequestService resrs;
 
     @Inject
     private VersionSorterService vss;
@@ -904,7 +904,7 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     @Override
-    public InstanceDirectory getOutputEntry(String instanceId, String tag, String app) {
+    public RemoteDirectory getOutputEntry(String instanceId, String tag, String app) {
         InstanceManifest im = readInstance(instanceId, tag);
         if (im == null) {
             throw new WebApplicationException("Cannot load " + instanceId + ":" + tag, Status.NOT_FOUND);
@@ -916,7 +916,7 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     @Override
-    public StringEntryChunkDto getContentChunk(String instanceId, String minion, InstanceDirectoryEntry entry, long offset,
+    public StringEntryChunkDto getContentChunk(String instanceId, String minion, RemoteDirectoryEntry entry, long offset,
             long limit) {
         InstanceManifest im = readInstance(instanceId, entry.tag);
         if (im == null) {
@@ -933,12 +933,12 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     @Override
-    public String getContentStreamRequest(String instanceId, String minion, InstanceDirectoryEntry entry) {
-        return iesrs.createRequest(new EntryRequest(minion, instanceId, entry));
+    public String getContentStreamRequest(String instanceId, String minion, RemoteDirectoryEntry entry) {
+        return resrs.createRequest(new EntryRequest(minion, instanceId, entry));
     }
 
     @Override
-    public void deleteDataFile(String instanceId, String minion, InstanceDirectoryEntry entry) {
+    public void deleteDataFile(String instanceId, String minion, RemoteDirectoryEntry entry) {
         InstanceManifest im = readInstance(instanceId, entry.tag);
         if (im == null) {
             throw new WebApplicationException("Cannot load " + instanceId + ":" + entry.tag, Status.NOT_FOUND);
@@ -951,7 +951,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Override
     public Response getContentStream(String instanceId, String token) {
-        EntryRequest rq = iesrs.consumeRequestToken(token);
+        EntryRequest rq = resrs.consumeRequestToken(token);
 
         InstanceManifest im = readInstance(instanceId, rq.entry.tag);
         if (im == null) {

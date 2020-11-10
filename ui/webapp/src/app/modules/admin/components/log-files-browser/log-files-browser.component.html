@@ -1,16 +1,5 @@
 <div class="box">
   <mat-toolbar class="mat-elevation-z1 header-toolbar">
-    <button
-      mat-icon-button
-      type="button"
-      (click)="routingHistoryService.back('/instance/overview/' + groupParam + '/' + uuidParam)"
-    >
-      <mat-icon>chevron_left</mat-icon>
-    </button>
-    <span
-      >Instance: <app-instance-group-title [instanceGroup]="groupParam"></app-instance-group-title> -
-      {{ instanceVersion?.name }}</span
-    >
     <span class="fill-space"></span>
     <button mat-button (click)="reload()"><mat-icon>refresh</mat-icon></button>
     <div class="datafile-search-header">
@@ -39,7 +28,7 @@
   <mat-card class="datafiles-card">
     <mat-card-content class="datafiles-card-content">
       <mat-tab-group animationDuration="0ms" (selectedTabChange)="onTabChanged($event)">
-        <mat-tab *ngFor="let instanceDirectory of instanceDirectories" label="{{ instanceDirectory.minion }}">
+        <mat-tab *ngFor="let logDirectory of logDirectories" label="{{ logDirectory.minion }}">
           <table
             mat-table
             class="filelist-table"
@@ -49,7 +38,7 @@
             [matSortDirection]="INITIAL_SORT_DIRECTION"
           >
             <caption style="display: none;">
-              Data Files
+              Log Files
             </caption>
 
             <ng-container matColumnDef="icon">
@@ -58,7 +47,7 @@
                 mat-cell
                 *matCellDef="let entry"
                 class="icon-column"
-                (click)="openOutputOverlay(instanceDirectory, entry, terminal)"
+                (click)="openOutputOverlay(logDirectory, entry, terminal)"
               >
                 <mat-icon>subject</mat-icon>
               </td>
@@ -70,7 +59,7 @@
                 mat-cell
                 *matCellDef="let entry"
                 class="wide-column"
-                (click)="openOutputOverlay(instanceDirectory, entry, terminal)"
+                (click)="openOutputOverlay(logDirectory, entry, terminal)"
               >
                 {{ entry.path }}
               </td>
@@ -88,23 +77,10 @@
               </td>
             </ng-container>
 
-            <ng-container matColumnDef="delete">
-              <th scope="col" mat-header-cell *matHeaderCellDef></th>
-              <td mat-cell *matCellDef="let entry" align="right">
-                <button
-                  mat-icon-button
-                  (click)="delete(instanceDirectory, entry)"
-                  [disabled]="!authService.isScopedAdmin(this.groupParam)"
-                >
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </td>
-            </ng-container>
-
             <ng-container matColumnDef="download">
               <th scope="col" mat-header-cell *matHeaderCellDef></th>
               <td mat-cell *matCellDef="let entry" align="right">
-                <button mat-icon-button (click)="download(instanceDirectory, entry)">
+                <button mat-icon-button (click)="download(logDirectory, entry)">
                   <mat-icon>cloud_download</mat-icon>
                 </button>
               </td>
@@ -119,7 +95,7 @@
             [pageSize]="pageSize"
             (page)="pageSize = $event.pageSize"
             [pageIndex]="INITIAL_PAGE_INDEX"
-            [length]="instanceDirectory.entries.length"
+            [length]="logDirectory.entries.length"
           >
           </mat-paginator>
         </mat-tab>

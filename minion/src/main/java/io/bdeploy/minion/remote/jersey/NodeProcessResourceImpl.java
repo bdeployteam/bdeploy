@@ -14,7 +14,7 @@ import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
-import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
+import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.history.runtime.MinionRuntimeHistory;
 import io.bdeploy.interfaces.manifest.history.runtime.MinionRuntimeHistoryDto;
@@ -91,14 +91,14 @@ public class NodeProcessResourceImpl implements NodeProcessResource {
     }
 
     @Override
-    public InstanceDirectoryEntry getOutputEntry(String instanceId, String tag, String applicationId) {
+    public RemoteDirectoryEntry getOutputEntry(String instanceId, String tag, String applicationId) {
         DeploymentPathProvider dpp = new DeploymentPathProvider(root.getDeploymentDir().resolve(instanceId), tag);
         Path runtime = dpp.get(SpecialDirectory.RUNTIME);
         Path out = runtime.resolve(applicationId).resolve(ProcessController.OUT_TXT);
         File file = out.toFile();
 
         if (file.exists()) {
-            InstanceDirectoryEntry ide = new InstanceDirectoryEntry();
+            RemoteDirectoryEntry ide = new RemoteDirectoryEntry();
             ide.path = PathHelper.separatorsToUnix(runtime.relativize(out));
             ide.root = SpecialDirectory.RUNTIME;
             ide.lastModified = file.lastModified();

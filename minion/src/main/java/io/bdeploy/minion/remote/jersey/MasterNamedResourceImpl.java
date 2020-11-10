@@ -61,8 +61,8 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
 import io.bdeploy.interfaces.directory.EntryChunk;
-import io.bdeploy.interfaces.directory.InstanceDirectory;
-import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
+import io.bdeploy.interfaces.directory.RemoteDirectory;
+import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
@@ -606,8 +606,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
-    public List<InstanceDirectory> getDataDirectorySnapshots(String instanceId) {
-        List<InstanceDirectory> result = new ArrayList<>();
+    public List<RemoteDirectory> getDataDirectorySnapshots(String instanceId) {
+        List<RemoteDirectory> result = new ArrayList<>();
 
         String activeTag = getInstanceState(instanceId).activeTag;
         if (activeTag == null) {
@@ -617,7 +617,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         MinionConfiguration minions = root.getMinions();
         InstanceStatusDto status = getStatus(instanceId);
         for (String nodeName : status.getNodesWithApps()) {
-            InstanceDirectory idd = new InstanceDirectory();
+            RemoteDirectory idd = new RemoteDirectory();
             idd.minion = nodeName;
             idd.uuid = instanceId;
 
@@ -626,7 +626,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
                 NodeDeploymentResource sdr = ResourceProvider.getVersionedResource(service, NodeDeploymentResource.class,
                         context);
-                List<InstanceDirectoryEntry> iddes = sdr.getDataDirectoryEntries(instanceId);
+                List<RemoteDirectoryEntry> iddes = sdr.getDataDirectoryEntries(instanceId);
                 idd.entries.addAll(iddes);
             } catch (Exception e) {
                 log.warn("Problem fetching data directory of {}", nodeName, e);
@@ -640,7 +640,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
-    public EntryChunk getEntryContent(String minion, InstanceDirectoryEntry entry, long offset, long limit) {
+    public EntryChunk getEntryContent(String minion, RemoteDirectoryEntry entry, long offset, long limit) {
         RemoteService svc = root.getMinions().getRemote(minion);
         if (svc == null) {
             throw new WebApplicationException("Cannot find minion " + minion, Status.NOT_FOUND);
@@ -650,7 +650,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
-    public Response getEntryStream(String minion, InstanceDirectoryEntry entry) {
+    public Response getEntryStream(String minion, RemoteDirectoryEntry entry) {
         RemoteService svc = root.getMinions().getRemote(minion);
         if (svc == null) {
             throw new WebApplicationException("Cannot find minion " + minion, Status.NOT_FOUND);
@@ -660,7 +660,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
-    public void deleteDataEntry(String minion, InstanceDirectoryEntry entry) {
+    public void deleteDataEntry(String minion, RemoteDirectoryEntry entry) {
         RemoteService svc = root.getMinions().getRemote(minion);
         if (svc == null) {
             throw new WebApplicationException("Cannot find minion " + minion, Status.NOT_FOUND);
@@ -778,7 +778,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
-    public InstanceDirectory getOutputEntry(String instanceId, String tag, String applicationId) {
+    public RemoteDirectory getOutputEntry(String instanceId, String tag, String applicationId) {
         // master has the instance manifest.
         Manifest.Key instanceKey = new Manifest.Key(InstanceManifest.getRootName(instanceId), tag);
         InstanceManifest imf = InstanceManifest.of(hive, instanceKey);
@@ -791,14 +791,14 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 }
 
                 // this is our app
-                InstanceDirectory id = new InstanceDirectory();
+                RemoteDirectory id = new RemoteDirectory();
                 id.minion = entry.getKey();
                 id.uuid = instanceId;
 
                 try {
                     RemoteService svc = root.getMinions().getRemote(entry.getKey());
                     NodeProcessResource spr = ResourceProvider.getVersionedResource(svc, NodeProcessResource.class, context);
-                    InstanceDirectoryEntry oe = spr.getOutputEntry(instanceId, tag, applicationId);
+                    RemoteDirectoryEntry oe = spr.getOutputEntry(instanceId, tag, applicationId);
 
                     if (oe != null) {
                         id.entries.add(oe);

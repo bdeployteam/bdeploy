@@ -64,7 +64,6 @@ public class TestMinion extends TestServer {
         CloseableMinionRoot cmr = getExtensionStore(context).getOrComputeIfAbsent(CloseableMinionRoot.class,
                 (k) -> new CloseableMinionRoot(getServerPort(context), finalMode), CloseableMinionRoot.class);
 
-        InitTool.initMinionRoot(cmr.root, cmr.mr, "localhost", getServerPort(context), null, finalMode);
         MinionState state = cmr.mr.getState();
 
         String userName = "Test";
@@ -77,7 +76,7 @@ public class TestMinion extends TestServer {
         Builder builder = new ApiAccessToken.Builder().setIssuedTo(userName).addPermission(ApiAccessToken.ADMIN_PERMISSION);
         authPack = SecurityHelper.getInstance().createSignaturePack(builder.build(), serverStore, state.keystorePass);
 
-        setAuditor(new RollingFileAuditor(cmr.mr.getAuditLogDir()));
+        setAuditor(new RollingFileAuditor(cmr.mr.getLogDir()));
 
         // create the server.
         super.beforeEach(context);

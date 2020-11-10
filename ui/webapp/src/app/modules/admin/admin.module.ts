@@ -10,6 +10,7 @@ import { AuditLogsBrowserComponent } from './components/audit-logs-browser/audit
 import { HiveAuditLogsBrowserComponent } from './components/hive-audit-logs-browser/hive-audit-logs-browser.component';
 import { HiveBrowserComponent } from './components/hive-browser/hive-browser.component';
 import { HiveComponent } from './components/hive/hive.component';
+import { LogFilesBrowserComponent } from './components/log-files-browser/log-files-browser.component';
 import { MasterCleanupGroupComponent } from './components/master-cleanup-group/master-cleanup-group.component';
 import { MasterCleanupComponent } from './components/master-cleanup/master-cleanup.component';
 import { MetricsOverviewComponent } from './components/metrics-overview/metrics-overview.component';
@@ -31,6 +32,7 @@ import { UsersBrowserComponent } from './components/users-browser/users-browser.
     HiveComponent,
     HiveBrowserComponent,
     HiveAuditLogsBrowserComponent,
+    LogFilesBrowserComponent,
     UpdateBrowserComponent,
     UpdateCardComponent,
     UpdateDialogComponent,
