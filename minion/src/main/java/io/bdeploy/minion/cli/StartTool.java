@@ -93,6 +93,9 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
 
         @Help("A token which can be used to remotely shutdown the server on /shutdown")
         String shutdownToken();
+
+        @Help("Disable logging to file, instead log to console.")
+        boolean consoleLog() default false;
     }
 
     public StartTool() {
@@ -118,7 +121,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
             SecurityHelper sh = SecurityHelper.getInstance();
             KeyStore ks = sh.loadPrivateKeyStore(state.keystorePath, state.keystorePass);
             try (JerseyServer srv = new JerseyServer(state.port, ks, state.keystorePass)) {
-                BHiveRegistry reg = setupServerCommon(delegate, r, srv);
+                BHiveRegistry reg = setupServerCommon(delegate, r, srv, config);
 
                 if (r.getMode() != MinionMode.NODE) {
                     // MASTER (standalone, managed, central)
@@ -154,13 +157,13 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
         registerMasterResources(srv, reg, config.publishWebapp(), r, srv.getRemoteActivityReporter(), r.createPluginManager(srv));
     }
 
-    private BHiveRegistry setupServerCommon(ActivityReporter.Delegating delegate, MinionRoot r, JerseyServer srv) {
+    private BHiveRegistry setupServerCommon(ActivityReporter.Delegating delegate, MinionRoot r, JerseyServer srv,
+            MasterConfig config) {
+        r.onStartup(config.consoleLog());
+
         srv.setAuditor(new RollingFileAuditor(r.getAuditLogDir()));
-
         r.setUpdateManager(new JerseyAwareMinionUpdateManager(srv));
-        r.onStartup();
         r.setupServerTasks(r.getMode());
-
         delegate.setDelegate(srv.getRemoteActivityReporter());
 
         return registerCommonResources(srv, r, srv.getRemoteActivityReporter());

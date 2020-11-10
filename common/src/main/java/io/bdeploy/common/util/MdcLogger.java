@@ -3,9 +3,9 @@ package io.bdeploy.common.util;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
+import org.apache.logging.log4j.CloseableThreadContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 import com.google.common.base.Joiner;
 
@@ -99,11 +99,8 @@ public class MdcLogger {
 
     /** Writes the desired log statement */
     private static void doLog(Logger logger, Consumer<Logger> writer, Object... mdcData) {
-        try {
-            MDC.put(MDC_NAME, Joiner.on(" / ").join(mdcData));
+        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.put(MDC_NAME, Joiner.on(" / ").join(mdcData))) {
             writer.accept(logger);
-        } finally {
-            MDC.clear();
         }
     }
 

@@ -133,6 +133,7 @@ java configuration Managed-Node-Remove : minion-base {
 java configuration Node : minion-base {
 	argument "start";
 	argument "--root=${workspace_loc}/runtime/node";
+	argument "--consoleLog";
 	memory max=256 MB;
 }
 
@@ -142,6 +143,7 @@ java configuration Node : minion-base {
 java configuration Managed-Node : minion-base {
 	argument "start";
 	argument "--root=${workspace_loc}/runtime/managed-node";
+	argument "--consoleLog";
 	memory max=256 MB;
 }
 
@@ -159,6 +161,7 @@ java configuration Master : minion-base {
 	argument "start";
 	argument "--root=${workspace_loc}/runtime/master";
 	argument "--allowCors";
+	argument "--consoleLog";
 	vm-argument "-XX:+HeapDumpOnOutOfMemoryError";
 	memory max=256 MB;
 }
@@ -191,6 +194,7 @@ java configuration Central-Master : minion-base {
 	argument "start";
 	argument "--root=${workspace_loc}/runtime/central";
 	argument "--allowCors";
+	argument "--consoleLog";
 	vm-argument "-XX:+HeapDumpOnOutOfMemoryError";
 //	vm-argument "-Dbdeploy.version.override=2.0.0"; // TESTING
 	memory max=256 MB;
@@ -203,6 +207,7 @@ java configuration Managed-Master : minion-base {
 	argument "start";
 	argument "--root=${workspace_loc}/runtime/managed";
 	argument "--allowCors";
+	argument "--consoleLog";
 	vm-argument "-XX:+HeapDumpOnOutOfMemoryError";
 	memory max=256 MB;
 }

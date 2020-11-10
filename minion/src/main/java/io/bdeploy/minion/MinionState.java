@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.ui.api.MinionMode;
 
 /**
@@ -74,4 +75,9 @@ public class MinionState {
      * The last minion version which was successfully migrated to.
      */
     public String fullyMigratedVersion;
+
+    /**
+     * The last known {@link ObjectId} of the built-in logging configuration.
+     */
+    public ObjectId logConfigId;
 }

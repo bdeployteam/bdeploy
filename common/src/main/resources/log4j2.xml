@@ -1,51 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="warn">
+<Configuration status="warn" monitorInterval="60">
 	<Appenders>
-		<Console name="Console" target="SYSTEM_OUT">
-			<PatternLayout
-				pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} | %25.25t | %-5level | %-80msg - (%F:%L)%n" />
-		</Console>
-
-		<Console name="ConsoleWithMdc" target="SYSTEM_OUT">
-			<PatternLayout
-				pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} | %25.25t | %-5level | %-35.35MDC{BDEPLOY} | %-42msg - (%F:%L)%n" />
-		</Console>
+		<Routing name="GlobalRoute">
+			<Routes pattern="$${ctx:TARGET_LOG_DIR}">
+				<Route>
+					<RollingFile name="Rolling-Log" filePattern="${ctx:TARGET_LOG_DIR}/server-%d{yyyy-MM-dd}.log" createOnDemand="true">
+						<PatternLayout
+							pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} | %25.25t | %-5level | %-35.35MDC{BDEPLOY} | %-80msg - (%F:%L)%n" />
+						<OnStartupTriggeringPolicy/>
+						<DirectWriteRolloverStrategy/>
+					</RollingFile>
+				</Route>
+				<Route key="$${ctx:TARGET_LOG_DIR}">
+					<Console name="Console" target="SYSTEM_OUT">
+						<PatternLayout
+							pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} | %25.25t | %-5level | %-35.35MDC{BDEPLOY} | %-80msg - (%F:%L)%n" />
+					</Console>
+				</Route>
+			</Routes>
+		</Routing>
 	</Appenders>
 	<Loggers>
 		<!-- Disable logging for all unless enabled -->
-		<Root level="OFF">
-			<AppenderRef ref="Console" />
+		<Root level="error">
+			<AppenderRef ref="GlobalRoute" />
 		</Root>
 		
 		<!-- By default we are using INFO for all our classes -->
 		<Logger name="io.bdeploy" level="info" additivity="false">
-			<AppenderRef ref="Console" />
+			<AppenderRef ref="GlobalRoute" />
 		</Logger>
 
 		<!-- JerseyServer's log level also controls Grizzly and Jersey log levels! -->
 		<Logger name="io.bdeploy.jersey.JerseyServer" level="info" additivity="false">
-			<AppenderRef ref="Console" />
+			<AppenderRef ref="GlobalRoute" />
 		</Logger>
 
 		<!-- Always set Grizzly and Jersey levels to maximum, use JerseyServer 
 			above to control actual level -->
 		<Logger name="org.glassfish" additivity="false" level="trace">
-			<AppenderRef ref="Console" />
+			<AppenderRef ref="GlobalRoute" />
 		</Logger>
 
 		<!-- UI Interface -->
 		<Logger name="io.bdeploy.ui" additivity="false" level="info" >
-			<AppenderRef ref="Console" />
+			<AppenderRef ref="GlobalRoute" />
 		</Logger>
 
 		<!-- Poor man's profiling by observing activities in the logs -->
 		<Logger name="io.bdeploy.jersey.JerseySseActivity" additivity="false" level="info">
-			<AppenderRef ref="Console" />
+			<AppenderRef ref="GlobalRoute" />
 		</Logger>
 
 		<!-- PCU -->
 		<Logger name="io.bdeploy.pcu" additivity="false" level="info" >
-			<AppenderRef ref="ConsoleWithMdc" />
+			<AppenderRef ref="GlobalRoute" />
 		</Logger>
 	</Loggers>
 </Configuration>
