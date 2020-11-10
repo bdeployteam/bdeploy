@@ -12,6 +12,8 @@ import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
  */
 public class ClientApplicationConfiguration {
 
+    public String instanceGroupTitle;
+
     public ApplicationConfiguration appConfig;
 
     public ApplicationDescriptor appDesc;

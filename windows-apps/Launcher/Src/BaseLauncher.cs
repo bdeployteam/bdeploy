@@ -1,12 +1,11 @@
 ﻿using Bdeploy.Shared;
 using Serilog;
 using Serilog.Events;
-using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
 
-namespace Bdeploy.Launcher.Models {
+namespace Bdeploy.Launcher {
 
     /// <summary>
     /// Base class for all applications that are starting the Java LauncherCli
@@ -30,63 +29,6 @@ namespace Bdeploy.Launcher.Models {
 
         // The full path to the directory containing the JAR files
         public static readonly string LIB = Path.Combine(LAUNCHER, "lib");
-
-        // The full path of the .bdeploy file to launch
-        protected readonly string clickAndStartFile;
-
-        // The deserialized clickAndStartFile
-        protected ClickAndStartDescriptor descriptor;
-
-        /// <summary>
-        /// Creates a new instance of the launcher.
-        /// </summary>
-        /// <param name="clickAndStartFile">The .bdeploy file</param>
-        protected BaseLauncher(string clickAndStartFile) {
-            this.clickAndStartFile = clickAndStartFile;
-        }
-
-        /// <summary>
-        /// Checks that the embedded JRE is working.
-        /// </summary>
-        public bool ValidateEmbeddedJre() {
-            // JRE must exist 
-            if (!File.Exists(JRE)) {
-                Log.Fatal("Embedded JRE '{0}' not found.", JRE);
-                Log.Information("Exiting application.");
-                return false;
-            }
-
-            // Try to launch it
-            int returnCode = Utils.RunProcessAndWait(JRE, "-version");
-            if (returnCode != 0) {
-                Log.Fatal("Embedded JRE terminated with exit code {0}", returnCode);
-                Log.Fatal("JRE located in {0} is corrupt or missing", JRE);
-                Log.Information("Exiting application.");
-                return false;
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// Checks that the given file point to a valid application descriptor
-        /// </summary>
-        protected bool ValidateDescriptor() {
-            // File must exist 
-            if (!File.Exists(clickAndStartFile)) {
-                Log.Fatal("Application descriptor '{0}' not found.", clickAndStartFile);
-                Log.Information("Exiting application.");
-                return false;
-            }
-
-            // We must be able to deserialize the content
-            descriptor = ClickAndStartDescriptor.FromFile(clickAndStartFile);
-            if (descriptor == null) {
-                Log.Fatal("Cannot deserialize application descriptor.", clickAndStartFile);
-                Log.Information("Exiting application.");
-                return false;
-            }
-            return true;
-        }
 
         /// <summary>
         /// Starts the process using the given arguments and waits for termination.
@@ -146,12 +88,10 @@ namespace Bdeploy.Launcher.Models {
         }
 
         /// <summary>
-        /// Returns the name of the log file used by the launcher.
+        /// Returns the name of the log file where all logs of the launched applications are written to.
         /// </summary>
         /// <returns></returns>
-        private string GetAppLoggerName() {
-            return descriptor.ApplicationId + "-log.txt";
-        }
+        protected abstract string GetAppLoggerName();
 
         /// <summary>
         /// Appends custom JVM arguments defined in the properties file

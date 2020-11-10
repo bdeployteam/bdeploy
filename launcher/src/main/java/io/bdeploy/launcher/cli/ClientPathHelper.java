@@ -1,12 +1,16 @@
 package io.bdeploy.launcher.cli;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.Version;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 
 /**
  * Helper class providing access to common folders.
@@ -63,6 +67,28 @@ public class ClientPathHelper {
         }
         // On Linux and MAC the startup script is in the bin folder
         return launcherHome.resolve("bin").resolve(LINUX_LAUNCHER);
+    }
+
+    /**
+     * Returns the descriptor for the given application
+     */
+    public static Path getOrCreateClickAndStart(Path rootDir, ClickAndStartDescriptor clickAndStart) throws IOException {
+        Path appDir = getAppHomeDir(rootDir, clickAndStart);
+        Path launchFile = appDir.resolve("launch.bdeploy");
+
+        // Create if not existing
+        if (!launchFile.toFile().isFile()) {
+            PathHelper.mkdirs(appDir);
+            Files.write(launchFile, StorageHelper.toRawBytes(clickAndStart));
+        }
+        return launchFile;
+    }
+
+    /**
+     * Returns the home directory for the given application
+     */
+    public static Path getAppHomeDir(Path rootDir, ClickAndStartDescriptor clickAndStart) {
+        return rootDir.resolve("apps").resolve(clickAndStart.applicationId);
     }
 
 }

@@ -52,6 +52,7 @@ import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfigurati
 import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
+import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
@@ -64,6 +65,7 @@ import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.RemoteDirectory;
 import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
+import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
@@ -677,8 +679,11 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         }
 
         InstanceManifest imf = InstanceManifest.load(hive, uuid, activeTag);
+        InstanceGroupConfiguration groupCfg = new InstanceGroupManifest(hive).read();
+
         ClientApplicationConfiguration cfg = new ClientApplicationConfiguration();
         cfg.activeTag = activeTag;
+        cfg.instanceGroupTitle = groupCfg.title;
         cfg.appConfig = imf.getApplicationConfiguration(hive, application);
         if (cfg.appConfig == null) {
             throw new WebApplicationException("Cannot find application " + application + " in instance " + uuid,

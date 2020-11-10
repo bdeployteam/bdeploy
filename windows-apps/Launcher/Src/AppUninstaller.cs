@@ -1,16 +1,15 @@
-﻿using Bdeploy.Launcher.Models;
-using Bdeploy.Shared;
+﻿using Bdeploy.Shared;
 using Serilog;
 using System.CodeDom;
 using System.IO;
 using System.Text;
 
-namespace Bdeploy.Installer.Models {
+namespace Bdeploy.Launcher {
 
     /// <summary>
     /// Removes the application and all created registry entries and shortcuts
     /// </summary>
-    public class AppUninstaller : BaseLauncher {
+    public class AppUninstaller : ClickAndStartLauncher {
 
         /// <summary>
         /// Flag to uninstall the application for all users
@@ -32,11 +31,6 @@ namespace Bdeploy.Installer.Models {
             // Descriptor must be existing and valid
             if (!ValidateDescriptor()) {
                 return -1;
-            }
-
-            // The embedded JRE must be valid
-            if (!ValidateEmbeddedJre()) {
-                return -2;
             }
             Log.Information("Requesting to uninstall application {0} of instance {1}/{2}", descriptor.ApplicationId, descriptor.GroupId, descriptor.InstanceId);
 
@@ -93,5 +87,6 @@ namespace Bdeploy.Installer.Models {
             Log.Information("Uninstallation successfully completed.");
             return 0;
         }
+
     }
 }

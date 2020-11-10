@@ -9,6 +9,7 @@ import io.bdeploy.common.cli.ToolBase;
 public class LauncherCli extends ToolBase {
 
     public LauncherCli() {
+        register(BrowserTool.class);
         register(LauncherTool.class);
         register(UninstallerTool.class);
     }
@@ -39,6 +40,12 @@ public class LauncherCli extends ToolBase {
             argumentList.addAll(toolArgs);
             argumentList.add("launcher");
             argumentList.add("--launch=" + noOpt.get(0));
+            argumentList.addAll(appArgs);
+            args = argumentList.toArray(new String[argumentList.size()]);
+        } else if (noOpt.isEmpty()) {
+            List<String> argumentList = new ArrayList<>();
+            argumentList.addAll(toolArgs);
+            argumentList.add("browser");
             argumentList.addAll(appArgs);
             args = argumentList.toArray(new String[argumentList.size()]);
         }

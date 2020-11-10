@@ -1,6 +1,4 @@
-﻿using Bdeploy.Installer.Models;
-using Bdeploy.Launcher.Models;
-using Bdeploy.Shared;
+﻿using Bdeploy.Shared;
 using Serilog;
 using System;
 using System.IO;
@@ -30,12 +28,14 @@ namespace Bdeploy.Launcher {
             string path = Path.Combine(LogFactory.GetLogsDir(), "launcher-log.txt");
             Log.Logger = LogFactory.CreateGlobalLogger(path);
 
-            // Launch or Uninstall
+            // Launch, Uninstall or Browse
             int exitCode;
             if (Utils.HasArgument(e.Args, "/Uninstall")) {
                 bool forAllUsers = Utils.HasArgument(e.Args, "/ForAllUsers");
                 exitCode = DoUninstall(e.Args, forAllUsers);
-            } else {
+            } else if(e.Args.Length == 0) {
+                exitCode = DoLaunchBrowser();
+            } else { 
                 exitCode = await DoLaunch(e.Args);
             }
             Current.Shutdown(exitCode);
@@ -89,6 +89,14 @@ namespace Bdeploy.Launcher {
             }
             AppUninstaller uninstaller = new AppUninstaller(clickAndStartFile, forAllUsers);
             return uninstaller.Start();
+        }
+
+        /// <summary>
+        /// Launches the browser to view all installed apps
+        /// </summary>
+        private int DoLaunchBrowser() {
+            AppBrowser appBrowser = new AppBrowser();
+            return appBrowser.Start();
         }
 
         /// <summary>

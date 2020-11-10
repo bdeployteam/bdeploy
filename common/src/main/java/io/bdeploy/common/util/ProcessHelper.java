@@ -30,7 +30,7 @@ public class ProcessHelper {
     }
 
     /** Reads the output of the given process and returns it as plain string */
-    private static String readOutput(Process process) throws IOException {
+    public static String readOutput(Process process) throws IOException {
         StringBuilder result = new StringBuilder();
         try (BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
             String line = null;

@@ -185,6 +185,10 @@ namespace Bdeploy.Installer {
                 // Associate bdeploy files with the launcher
                 FileAssociation.CreateAssociation(launcherExe, forAllUsers);
 
+                // Create start menu shortcut for the launcher
+                Shortcut shortcut = new Shortcut(launcherExe, launcherHome, "BDeploy Launcher", null);
+                shortcut.CreateStartMenuLink("BDeploy Launcher", "BDeploy", forAllUsers);
+
                 // Store embedded application information
                 // Not present in case that just the launcher should be installed
                 if (config.CanInstallApp()) {
@@ -209,9 +213,9 @@ namespace Bdeploy.Installer {
         /// Installs the application and creates the shortcut and registry entries
         /// </summary>
         private void InstallApplication() {
-            string instanceGroup = config.InstanceGroupName;
-            string instance = config.InstanceName;
-            string appName = config.ApplicationName;
+            string instanceGroup = FileHelper.GetSafeFilename(config.InstanceGroupName);
+            string instance = FileHelper.GetSafeFilename(config.InstanceName);
+            string appName = FileHelper.GetSafeFilename(config.ApplicationName);
             string appUid = config.ApplicationUid;
             string productVendor = config.ProductVendor ?? "BDeploy";
 
@@ -228,12 +232,16 @@ namespace Bdeploy.Installer {
                 data = new SoftwareEntryData();
             }
 
-            // Only create shortcut if we just have written the descriptor
-            Shortcut shortcut = new Shortcut(instanceGroup, instance, appName, productVendor, appDescriptor, launcherHome, icon);
+            // Only create desktop shortcut if we just have written the descriptor
+            Shortcut shortcut = new Shortcut(appDescriptor, launcherHome, appName, icon);
+            string linkName = appName + " (" + instanceGroup + " - " + instance + ")";
             if (createShortcut) {
-                data.DesktopShortcut = shortcut.CreateDesktopLink(forAllUsers);
-                data.StartMenuShortcut = shortcut.CreateStartMenuLink(forAllUsers);
+                data.DesktopShortcut = shortcut.CreateDesktopLink(linkName, forAllUsers);
             }
+
+            // Ensure that start-menu shortcut is always up-2-date
+            string startMenuPath = Path.Combine(productVendor, instanceGroup, instance);
+            data.StartMenuShortcut = shortcut.CreateStartMenuLink(linkName, startMenuPath, forAllUsers);
 
             // A hint for the uninstaller which registry key should be deleted
             string uninstallHint = forAllUsers ? "/ForAllUsers" : "";

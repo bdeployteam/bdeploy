@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
-
 # Creates a file association and the according desktop entry to the launcher
 
-APP_HOME="$(cd $(dirname $0); pwd)"
+APP_HOME="${BDEPLOY_HOME:-${HOME}/.bdeploy}/launcher/bin"
 LAUNCHER_PATH="${APP_HOME}/launcher"
 
 TMP_MIME_DESC="${TMPDIR:-/tmp}/bdeploy-bdeploy.xml"
@@ -25,6 +24,7 @@ Type=Application
 MimeType=application/x-bdeploy
 Name=BDeploy Click & Start launcher
 Comment=Interpreter for .bdeploy files
+Icon=${APP_HOME}/logo128.png
 TryExec=${LAUNCHER_PATH}
 Exec=${LAUNCHER_PATH} %f
 Terminal=false

@@ -5,62 +5,58 @@ using System.IO;
 namespace Bdeploy.Shared {
     public class Shortcut {
 
-        private readonly string group;
-        private readonly string instance;
-        private readonly string appName;
-        private readonly string productVendor;
         private readonly string targetPath;
         private readonly string workingDir;
-        private readonly string iconFile;
+        private readonly string appName;
+        private readonly string appIcon;
 
-        public Shortcut(string group, string instance, string appName, string productVendor, string targetPath, string workingDir, string iconFile) {
-            this.group = FileHelper.GetSafeFilename(group);
-            this.instance = FileHelper.GetSafeFilename(instance);
-            this.appName = FileHelper.GetSafeFilename(appName);
-            this.productVendor = productVendor;
+        public Shortcut(string targetPath, string workingDir, string appName, string appIcon) {
             this.targetPath = targetPath;
             this.workingDir = workingDir;
-            this.iconFile = iconFile;
+            this.appName = appName;
+            this.appIcon = appIcon;
         }
 
         /// <summary>
-        /// Creates a shortcut for the given application on the desktop.
+        /// Creates a shortcut on the desktop using the given name.
         /// </summary>
-        public string CreateDesktopLink(bool forAllUsers) {
+        public string CreateDesktopLink(string linkName, bool forAllUsers) {
             Environment.SpecialFolder folder = forAllUsers ? Environment.SpecialFolder.CommonDesktopDirectory : Environment.SpecialFolder.DesktopDirectory;
             string desktop = Environment.GetFolderPath(folder);
-            string linkName = appName + " (" + group + " - " + instance + ").lnk";
-            string linkPath = Path.Combine(desktop, linkName);
+            string linkFile = Path.Combine(desktop, linkName + ".lnk");
 
             WshShell shell = new WshShell();
-            IWshShortcut linkFile = (IWshShortcut)shell.CreateShortcut(linkPath);
-            linkFile.TargetPath = targetPath;
-            linkFile.WorkingDirectory = workingDir;
-            linkFile.IconLocation = iconFile;
-            linkFile.Description = appName;
-            linkFile.Save();
-            return linkPath;
+            IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(linkFile);
+            shortcut.TargetPath = targetPath;
+            shortcut.WorkingDirectory = workingDir;
+            if (appIcon != null) {
+                shortcut.IconLocation = appIcon;
+            }
+            shortcut.Description = appName;
+            shortcut.Save();
+            return linkFile;
         }
 
         /// <summary>
-        /// Creates a shortcut for the given application in the start menu.
+        /// Creates a shortcut in the start menu using the given name.
         /// </summary>
-        public string CreateStartMenuLink(bool forAllUsers) {
+        public string CreateStartMenuLink(string linkName, string subDir, bool forAllUsers) {
             Environment.SpecialFolder folder = forAllUsers ? Environment.SpecialFolder.CommonPrograms : Environment.SpecialFolder.Programs;
             string startMenu = Environment.GetFolderPath(folder);
-            string linkDir = Path.Combine(startMenu, productVendor, group, instance);
-            string linkName = appName + " (" + group + " - " + instance + ").lnk";
-            string linkPath = Path.Combine(linkDir, linkName);
+            string linkPath = Path.Combine(startMenu, subDir);
+            string linkFile = Path.Combine(linkPath, linkName + ".lnk");
 
-            Directory.CreateDirectory(linkDir);
+            Directory.CreateDirectory(linkPath);
             WshShell shell = new WshShell();
-            IWshShortcut linkFile = (IWshShortcut)shell.CreateShortcut(linkPath);
-            linkFile.TargetPath = targetPath;
-            linkFile.WorkingDirectory = workingDir;
-            linkFile.IconLocation = iconFile;
-            linkFile.Description = appName;
-            linkFile.Save();
-            return linkPath;
+            IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(linkFile);
+            shortcut.TargetPath = targetPath;
+            shortcut.WorkingDirectory = workingDir;
+            if (appIcon != null) {
+                shortcut.IconLocation = appIcon;
+            }
+            shortcut.Description = appName;
+            shortcut.Save();
+            return linkFile;
         }
     }
 }

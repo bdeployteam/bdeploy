@@ -26,6 +26,7 @@ cd "\$SAVED" >/dev/null
 
 APP_NAME="${applicationName}"
 APP_BASE_NAME=`basename "\$0"`
+HOME_DIR="\${BDEPLOY_HOME:-\${HOME}/.bdeploy}"
 
 # Add default JVM options here. You can also use JAVA_OPTS and ${optsEnvironmentVar} to pass JVM options to this script.
 DEFAULT_JVM_OPTS=${defaultJvmOpts}
@@ -68,9 +69,6 @@ esac
 # Copy this when updating the scripts  #
 ########################################
 # We can NOT use the pre-calculated CP
-# due to future updates to the software
-#CLASSPATH=$classpath
-
 # rather use a wildcard and let java figure out
 CLASSPATH="\$APP_HOME/lib/*"
 
@@ -215,7 +213,7 @@ childTerm() {
 }
 
 state=0
-if [[ \${ORIG_ARGS[0]} == "master" || \${ORIG_ARGS[0]} == "slave" || \${ORIG_ARGS[0] == "start" ]]; then
+if [[ \${ORIG_ARGS[0]} == "master" || \${ORIG_ARGS[0]} == "slave" || \${ORIG_ARGS[0]} == "start" ]]; then
     # minion must run in background.
     trap childTerm INT TERM
 
@@ -225,7 +223,7 @@ if [[ \${ORIG_ARGS[0]} == "master" || \${ORIG_ARGS[0]} == "slave" || \${ORIG_ARG
     state=\$?
 else
     # CLI tools must not run in the background.
-    "\$JAVACMD" "\$@" "--updateDir=\$APP_HOME/update" "--homeDir=\$APP_HOME"
+    "\$JAVACMD" "\$@" "--updateDir=\$APP_HOME/update" "--homeDir=\$HOME_DIR"
     state=\$?
 fi
 

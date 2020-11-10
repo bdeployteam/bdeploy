@@ -80,7 +80,7 @@ fi
 
 # STEP 1: Find the launcher
 B_HOME="${BDEPLOY_HOME:-${HOME}/.bdeploy}"
-L_HOME="${B_HOME}/.launcher"
+L_HOME="${B_HOME}/launcher"
 
 echo "Using BDEPLOY_HOME: ${B_HOME}..."
 mkdir -p "${B_HOME}"
@@ -125,9 +125,9 @@ fi
 
 # STEP 2: Find the icon file or download
 echo "Updating icon..."
-B_ICONS="${B_HOME}/.icons"
-APP_ICON="${B_ICONS}/${BDEPLOY_APP_UID}.ico"
-APP_ICON_PNG="${B_ICONS}/${BDEPLOY_APP_UID}.png"
+B_ICONS="${B_HOME}/apps/${BDEPLOY_APP_UID}"
+APP_ICON="${B_ICONS}/app.ico"
+APP_ICON_PNG="${B_ICONS}/app.png"
 if [[ -n "${BDEPLOY_ICON_URL}" && ${HAVE_XDG_DESKTOP_MENU} == 0 ]]; then
     require_tool convert
     require_tool identify
@@ -145,7 +145,7 @@ if [[ -n "${BDEPLOY_ICON_URL}" && ${HAVE_XDG_DESKTOP_MENU} == 0 ]]; then
     # produced multiple PNG's per ICO frame.
     largest=$(identify -format '%w %i\n' "${T_CONV}/${BDEPLOY_APP_UID}*.png" | sort -n | tail -n 1 | awk '{ print $2; }')
     if [[ ! -f "${largest}" ]]; then
-        echo "oups - cannot find icon for application."
+        echo "Cannot find icon for application."
     else
         cp "${largest}" "${APP_ICON_PNG}"
     fi
@@ -153,15 +153,14 @@ fi
 
 # STEP 3: create application file
 echo "Installing application file..."
-B_LAUNCHES_HOME="${B_HOME}/.launches"
-mkdir -p "${B_LAUNCHES_HOME}"
-cp "${T_BDEPLOY_FILE}" "${B_LAUNCHES_HOME}"
+B_APP_HOME="${B_HOME}/apps/${BDEPLOY_APP_UID}"
+mkdir -p "${B_APP_HOME}"
+cp "${T_BDEPLOY_FILE}" "${B_APP_HOME}"
+mv "${B_APP_HOME}/${BDEPLOY_APP_UID}.bdeploy" "${B_APP_HOME}/launch.bdeploy"
 
 # STEP 4: create uninstaller
 echo "Creating uninstaller..."
-B_UNINSTALL_HOME="${B_HOME}/.uninstall"
-mkdir -p "${B_UNINSTALL_HOME}"
-B_UNINSTALLER="${B_UNINSTALL_HOME}/bdeploy-uninstall-${BDEPLOY_APP_UID}.run"
+B_UNINSTALLER="${B_APP_HOME}/uninstall.run"
 
 echo '#!/usr/bin/env bash' > "${B_UNINSTALLER}"
 # remove menu entry
@@ -177,17 +176,10 @@ fi
 # uninstall application
 echo "${L_HOME}/bin/launcher uninstaller --app=${BDEPLOY_APP_UID}" >> "${B_UNINSTALLER}"
 
-# remove icons
-echo "if [[ -e ${APP_ICON} ]]; then rm ${APP_ICON}; fi" >> "${B_UNINSTALLER}"
-echo "if [[ -e ${APP_ICON_PNG} ]]; then rm ${APP_ICON_PNG}; fi" >> "${B_UNINSTALLER}"
+# Remove application directory
+echo "rm -rf ${B_APP_HOME};" >> "${B_UNINSTALLER}"
 
-# remove .bdeploy file
-BDEPLOY_FILE=${B_LAUNCHES_HOME}/${BDEPLOY_APP_UID}.bdeploy
-echo "if [[ -e ${BDEPLOY_FILE} ]]; then rm ${BDEPLOY_FILE}; fi" >> "${B_UNINSTALLER}"
-
-# remove uninstaller file itself
-echo "if [[ -e ${B_UNINSTALLER} ]]; then rm ${B_UNINSTALLER}; fi" >> "${B_UNINSTALLER}"
-
+# Make uninstaller executable
 chmod +x "${B_UNINSTALLER}"
 
 # STEP 5: create desktop entries
@@ -209,7 +201,7 @@ Version=1.0
 Type=Application
 Name=${BDEPLOY_APP_NAME}
 Comment=BDeploy Application: ${BDEPLOY_APP_NAME} (${BDEPLOY_APP_UID})
-Exec=xdg-open ${B_LAUNCHES_HOME}/${BDEPLOY_APP_UID}.bdeploy
+Exec=xdg-open ${B_APP_HOME}/launch.bdeploy
 Icon=${APP_ICON_PNG}
 Terminal=false
 EOF
@@ -236,5 +228,4 @@ fi
 
 # STEP 6: Launch directly.
 echo "Launching ${BDEPLOY_APP_NAME}"
-${L_HOME}/bin/launcher "${B_LAUNCHES_HOME}/${BDEPLOY_APP_UID}.bdeploy"
-
+${L_HOME}/bin/launcher "${B_APP_HOME}/launch.bdeploy"

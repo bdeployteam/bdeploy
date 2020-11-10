@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 
 /**
- * Stores which software is used by a given application.
+ * Stores software is used by a given application.
  */
 public class ClientSoftwareConfiguration {
 
@@ -17,6 +18,17 @@ public class ClientSoftwareConfiguration {
      * </p>
      */
     public Manifest.Key launcher;
+
+    /**
+     * The descriptor that was used to launch the application.
+     */
+    public ClickAndStartDescriptor clickAndStart;
+
+    /**
+     * Additional human-readable information. Only present if we are able to communicate with the remote server. If the
+     * server runs in a version that is too old then this DTO will be null.
+     */
+    public ClientApplicationDto metadata;
 
     /**
      * The software that is required by the application.

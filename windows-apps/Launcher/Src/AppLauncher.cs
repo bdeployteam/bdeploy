@@ -1,6 +1,4 @@
-﻿
-using Bdeploy.Launcher.Models;
-using Bdeploy.Shared;
+﻿using Bdeploy.Shared;
 using Serilog;
 using System;
 using System.Diagnostics;
@@ -11,7 +9,7 @@ namespace Bdeploy.Launcher {
     /// <summary>
     /// Responsible for starting the Java Launcher as well as for applying updates.
     /// </summary>
-    public class AppLauncher : BaseLauncher {
+    public class AppLauncher : ClickAndStartLauncher {
 
         // The full path to the directory where to store updates and backups
         private static readonly string UPDATES = Path.Combine(LAUNCHER, "updates");
@@ -57,10 +55,6 @@ namespace Bdeploy.Launcher {
                 return -1;
             }
 
-            // The embedded JRE must be valid
-            if (!ValidateEmbeddedJre()) {
-                return -2;
-            }
             Log.Information("Requesting to start application {0} of instance {1}/{2}", descriptor.ApplicationId, descriptor.GroupId, descriptor.InstanceId);
 
             // Build arguments to pass to the application
