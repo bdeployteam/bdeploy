@@ -79,6 +79,8 @@ export class FileViewerComponent implements OnInit, AfterViewInit, OnChanges, On
       return !event.ctrlKey || 'cxv'.indexOf(event.key.toLowerCase()) === -1;
     });
 
+    this.term.underlying.setOption('fontSize', 12);
+
     if (this.supportsStdin) {
       this.setupStdin(this.hasStdin);
     }
