@@ -5,6 +5,7 @@ import { AdminShellComponent } from './components/admin-shell/admin-shell.compon
 import { AuditLogsBrowserComponent } from './components/audit-logs-browser/audit-logs-browser.component';
 import { HiveAuditLogsBrowserComponent } from './components/hive-audit-logs-browser/hive-audit-logs-browser.component';
 import { HiveBrowserComponent } from './components/hive-browser/hive-browser.component';
+import { LogFilesBrowserComponent } from './components/log-files-browser/log-files-browser.component';
 import { MasterCleanupComponent } from './components/master-cleanup/master-cleanup.component';
 import { MetricsOverviewComponent } from './components/metrics-overview/metrics-overview.component';
 import { PluginsBrowserComponent } from './components/plugins-browser/plugins-browser.component';
@@ -46,6 +47,7 @@ const ADMIN_ROUTES: Route[] = [
       { path: 'manualcleanup', component: MasterCleanupComponent, outlet: 'panel' },
       { path: 'metrics', component: MetricsOverviewComponent, outlet: 'panel' },
       { path: 'auditlogs', component: AuditLogsBrowserComponent, outlet: 'panel' },
+      { path: 'logFiles', component: LogFilesBrowserComponent, outlet: 'panel' },
     ],
   },
 ];

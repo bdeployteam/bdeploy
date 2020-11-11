@@ -46,7 +46,7 @@ import io.bdeploy.dcu.InstanceNodeController;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.directory.EntryChunk;
-import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
+import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.state.InstanceState;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
@@ -213,8 +213,8 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
     }
 
     @Override
-    public List<InstanceDirectoryEntry> getDataDirectoryEntries(String instanceId) {
-        List<InstanceDirectoryEntry> result = new ArrayList<>();
+    public List<RemoteDirectoryEntry> getDataDirectoryEntries(String instanceId) {
+        List<RemoteDirectoryEntry> result = new ArrayList<>();
         InstanceNodeManifest newest = findInstanceNodeManifest(instanceId);
         if (newest == null) {
             throw new WebApplicationException("Cannot find instance " + instanceId, Status.NOT_FOUND);
@@ -234,7 +234,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
 
         try (Stream<Path> paths = Files.walk(dataRoot)) {
             paths.filter(Files::isRegularFile).forEach(f -> {
-                InstanceDirectoryEntry entry = new InstanceDirectoryEntry();
+                RemoteDirectoryEntry entry = new RemoteDirectoryEntry();
                 File asFile = f.toFile();
 
                 entry.path = PathHelper.separatorsToUnix(dataRoot.relativize(f));
@@ -254,7 +254,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
     }
 
     @Override
-    public EntryChunk getEntryContent(InstanceDirectoryEntry entry, long offset, long limit) {
+    public EntryChunk getEntryContent(RemoteDirectoryEntry entry, long offset, long limit) {
         // determine file first...
         Path actual = getEntryPath(entry);
 
@@ -291,10 +291,14 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
         return null; // offset == size...
     }
 
-    private Path getEntryPath(InstanceDirectoryEntry entry) {
-        DeploymentPathProvider dpp = new DeploymentPathProvider(root.getDeploymentDir().resolve(entry.uuid), entry.tag);
-
-        Path rootDir = dpp.get(entry.root).toAbsolutePath();
+    private Path getEntryPath(RemoteDirectoryEntry entry) {
+        Path rootDir;
+        if (entry.root != null) {
+            DeploymentPathProvider dpp = new DeploymentPathProvider(root.getDeploymentDir().resolve(entry.uuid), entry.tag);
+            rootDir = dpp.get(entry.root).toAbsolutePath();
+        } else {
+            rootDir = root.getRootDir();
+        }
         Path actual = rootDir.resolve(entry.path);
 
         if (!actual.startsWith(rootDir)) {
@@ -308,7 +312,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
     }
 
     @Override
-    public Response getEntryStream(InstanceDirectoryEntry entry) {
+    public Response getEntryStream(RemoteDirectoryEntry entry) {
         Path actual = getEntryPath(entry);
         String mediaType = MediaType.APPLICATION_OCTET_STREAM;
         try {
@@ -354,7 +358,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
     }
 
     @Override
-    public void deleteDataEntry(InstanceDirectoryEntry entry) {
+    public void deleteDataEntry(RemoteDirectoryEntry entry) {
         Path actual = getEntryPath(entry);
         try {
             Files.delete(actual);

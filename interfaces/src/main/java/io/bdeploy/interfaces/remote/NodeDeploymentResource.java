@@ -16,7 +16,7 @@ import javax.ws.rs.core.Response;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.interfaces.directory.EntryChunk;
-import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
+import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 
 @Path("/deployments")
@@ -68,17 +68,17 @@ public interface NodeDeploymentResource {
      */
     @GET
     @Path("/dataDir")
-    public List<InstanceDirectoryEntry> getDataDirectoryEntries(@QueryParam("u") String instanceId);
+    public List<RemoteDirectoryEntry> getDataDirectoryEntries(@QueryParam("u") String instanceId);
 
     /**
-     * @param entry the {@link InstanceDirectoryEntry} to fetch content from.
+     * @param entry the {@link RemoteDirectoryEntry} to fetch content from.
      * @param offset the offset into the underlying file.
      * @param limit maximum bytes to read. 0 means no limit.
      * @return a chunk of the given entry, starting at offset until the <b>current</b> end of the file.
      */
     @POST
     @Path("/dataDir/entry")
-    public EntryChunk getEntryContent(InstanceDirectoryEntry entry, @QueryParam("o") long offset, @QueryParam("l") long limit);
+    public EntryChunk getEntryContent(RemoteDirectoryEntry entry, @QueryParam("o") long offset, @QueryParam("l") long limit);
 
     /**
      * @param entry the entry to stream. The stream will include the complete content of the file.
@@ -87,14 +87,14 @@ public interface NodeDeploymentResource {
     @POST
     @Path("/dataDir/streamEntry")
     @Produces("*/*")
-    public Response getEntryStream(InstanceDirectoryEntry entry);
+    public Response getEntryStream(RemoteDirectoryEntry entry);
 
     /**
      * @param entry the entry to delete from the data directory.
      */
     @POST
     @Path("/dataDir/deleteEntry")
-    public void deleteDataEntry(InstanceDirectoryEntry entry);
+    public void deleteDataEntry(RemoteDirectoryEntry entry);
 
     /**
      * @param ports the ports to check whether they are open/used or not on the machine

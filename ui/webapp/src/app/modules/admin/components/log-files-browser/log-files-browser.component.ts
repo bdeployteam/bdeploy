@@ -6,34 +6,23 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { MatTabChangeEvent } from '@angular/material/tabs';
-import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
-import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
-import { MessageboxService } from 'src/app/modules/shared/services/messagebox.service';
-import {
-  InstanceConfiguration,
-  RemoteDirectory,
-  RemoteDirectoryEntry,
-  StringEntryChunkDto,
-} from '../../../../models/gen.dtos';
-import { InstanceService } from '../../services/instance.service';
+import { RemoteDirectory, RemoteDirectoryEntry, StringEntryChunkDto } from '../../../../models/gen.dtos';
+import { DownloadService } from '../../../shared/services/download.service';
+import { LoggingAdminService } from '../../services/logging-admin.service';
 
 @Component({
-  selector: 'app-data-files-browser',
-  templateUrl: './data-files-browser.component.html',
-  styleUrls: ['./data-files-browser.component.css'],
+  selector: 'app-log-files-browser',
+  templateUrl: './log-files-browser.component.html',
+  styleUrls: ['./log-files-browser.component.css'],
 })
-export class DataFilesBrowserComponent implements OnInit {
+export class LogFilesBrowserComponent implements OnInit {
   public INITIAL_PAGE_SIZE = 10;
   public INITIAL_PAGE_INDEX = 0;
   public INITIAL_SORT_COLUMN = 'lastModified';
   public INITIAL_SORT_DIRECTION = 'desc';
-
-  groupParam: string = this.route.snapshot.paramMap.get('group');
-  uuidParam: string = this.route.snapshot.paramMap.get('uuid');
-  versionParam: string = this.route.snapshot.paramMap.get('version');
 
   pageSize = this.INITIAL_PAGE_SIZE;
 
@@ -46,10 +35,9 @@ export class DataFilesBrowserComponent implements OnInit {
   @ViewChild(MatSort)
   sort: MatSort;
 
-  public displayedColumns: string[] = ['icon', 'path', 'size', 'lastModified', 'delete', 'download'];
+  public displayedColumns: string[] = ['icon', 'path', 'size', 'lastModified', 'download'];
 
-  public instanceVersion: InstanceConfiguration;
-  public instanceDirectories: RemoteDirectory[];
+  public logDirectories: RemoteDirectory[];
   public dataSource: MatTableDataSource<RemoteDirectoryEntry>;
   public filterRegex: RegExp;
   public activeTabIndex = 0;
@@ -62,26 +50,20 @@ export class DataFilesBrowserComponent implements OnInit {
   constructor(
     private overlay: Overlay,
     private viewContainerRef: ViewContainerRef,
-    private route: ActivatedRoute,
-    private instanceService: InstanceService,
     public location: Location,
+    private dlService: DownloadService,
     public routingHistoryService: RoutingHistoryService,
     public authService: AuthenticationService,
-    private mbService: MessageboxService
+    private loggingAdmin: LoggingAdminService
   ) {}
 
   public ngOnInit(): void {
-    this.instanceService
-      .getInstanceVersion(this.groupParam, this.uuidParam, this.versionParam)
-      .subscribe((instanceVersion) => {
-        this.instanceVersion = instanceVersion;
-      });
     this.reload();
   }
 
   public reload() {
-    this.instanceService.listDataDirSnapshot(this.groupParam, this.uuidParam).subscribe((instanceDirectories) => {
-      this.instanceDirectories = instanceDirectories.sort((a, b) => {
+    this.loggingAdmin.listLogDirs().subscribe((logDirs) => {
+      this.logDirectories = logDirs.sort((a, b) => {
         if (a.minion === 'master') {
           return -1;
         } else if (b.minion === 'master') {
@@ -104,29 +86,8 @@ export class DataFilesBrowserComponent implements OnInit {
     return new Date(lastModified).toLocaleString();
   }
 
-  public download(instanceDirectory: RemoteDirectory, instanceDirectoryEntry: RemoteDirectoryEntry) {
-    this.instanceService.downloadDataFileContent(
-      this.groupParam,
-      this.uuidParam,
-      instanceDirectory,
-      instanceDirectoryEntry
-    );
-  }
-
-  public async delete(instanceDirectory: RemoteDirectory, instanceDirectoryEntry: RemoteDirectoryEntry) {
-    const confirm = await this.mbService.openAsync({
-      title: 'Confirm Delete',
-      message: `Really delete ${instanceDirectoryEntry.path}?`,
-      mode: MessageBoxMode.CONFIRM_WARNING,
-    });
-    if (!confirm) {
-      return;
-    }
-    this.instanceService
-      .deleteDataFile(this.groupParam, this.uuidParam, instanceDirectory, instanceDirectoryEntry)
-      .subscribe((_) => {
-        this.reload();
-      });
+  public download(remoteDirectory: RemoteDirectory, remoteDirectoryEntry: RemoteDirectoryEntry) {
+    this.loggingAdmin.downloadLogFileContent(remoteDirectory, remoteDirectoryEntry);
   }
 
   updateDataSource() {
@@ -148,7 +109,7 @@ export class DataFilesBrowserComponent implements OnInit {
     this.dataSource.paginator = this.paginator;
 
     // Pass list of entires to the table
-    const selectedDir = this.instanceDirectories[this.activeTabIndex];
+    const selectedDir = this.logDirectories[this.activeTabIndex];
     this.dataSource.data = selectedDir.entries;
   }
 
@@ -172,9 +133,7 @@ export class DataFilesBrowserComponent implements OnInit {
 
   getOutputContentFetcher(): (offset: number, limit: number) => Observable<StringEntryChunkDto> {
     return (offset, limit) => {
-      return this.instanceService.getContentChunk(
-        this.groupParam,
-        this.uuidParam,
+      return this.loggingAdmin.getLogContentChunk(
         this.activeRemoteDirectory,
         this.activeRemoteDirectoryEntry,
         offset,
@@ -185,13 +144,7 @@ export class DataFilesBrowserComponent implements OnInit {
   }
 
   getContentDownloader(): () => void {
-    return () =>
-      this.instanceService.downloadDataFileContent(
-        this.groupParam,
-        this.uuidParam,
-        this.activeRemoteDirectory,
-        this.activeRemoteDirectoryEntry
-      );
+    return () => this.loggingAdmin.downloadLogFileContent(this.activeRemoteDirectory, this.activeRemoteDirectoryEntry);
   }
 
   openOutputOverlay(

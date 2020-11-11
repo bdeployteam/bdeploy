@@ -26,8 +26,8 @@ import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.directory.EntryChunk;
-import io.bdeploy.interfaces.directory.InstanceDirectory;
-import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
+import io.bdeploy.interfaces.directory.RemoteDirectory;
+import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
@@ -60,10 +60,10 @@ public class DataFileTest {
 
         Files.write(testFile, "Test".getBytes(StandardCharsets.UTF_8));
 
-        List<InstanceDirectory> dds = master.getNamedMaster("demo").getDataDirectorySnapshots(uuid);
+        List<RemoteDirectory> dds = master.getNamedMaster("demo").getDataDirectorySnapshots(uuid);
 
         assertEquals(1, dds.size()); // only master node
-        InstanceDirectory idd = dds.get(0);
+        RemoteDirectory idd = dds.get(0);
         assertEquals("master", idd.minion);
         assertEquals(uuid, idd.uuid);
         assertEquals(1, idd.entries.size());
@@ -85,7 +85,7 @@ public class DataFileTest {
         assertEquals(uuid, idd.uuid);
         assertEquals(2, idd.entries.size());
 
-        List<InstanceDirectoryEntry> sorted = new ArrayList<>(idd.entries);
+        List<RemoteDirectoryEntry> sorted = new ArrayList<>(idd.entries);
         sorted.sort((a, b) -> a.path.compareTo(b.path));
 
         assertEquals("sub/test.txt", sorted.get(0).path);
@@ -96,7 +96,7 @@ public class DataFileTest {
         assertEquals(4, sorted.get(1).size);
         assertTrue(sorted.get(1).lastModified >= beforeWrite);
 
-        InstanceDirectoryEntry sub = sorted.get(0);
+        RemoteDirectoryEntry sub = sorted.get(0);
 
         EntryChunk chunk = master.getNamedMaster("demo").getEntryContent("master", sub, 0, 0);
         assertArrayEquals("Test".getBytes(StandardCharsets.UTF_8), chunk.content);

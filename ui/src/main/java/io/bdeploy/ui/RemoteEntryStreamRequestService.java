@@ -8,10 +8,10 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
 import io.bdeploy.common.util.UuidHelper;
-import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
+import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
 
 @Service
-public class InstanceEntryStreamRequestService {
+public class RemoteEntryStreamRequestService {
 
     private final Cache<String, EntryRequest> tokens = CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.MINUTES)
             .maximumSize(1_000).build();
@@ -20,9 +20,9 @@ public class InstanceEntryStreamRequestService {
 
         public String minion;
         public String instanceId;
-        public InstanceDirectoryEntry entry;
+        public RemoteDirectoryEntry entry;
 
-        public EntryRequest(String minion, String instanceId, InstanceDirectoryEntry entry) {
+        public EntryRequest(String minion, String instanceId, RemoteDirectoryEntry entry) {
             this.minion = minion;
             this.instanceId = instanceId;
             this.entry = entry;

@@ -22,8 +22,8 @@ import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.directory.EntryChunk;
-import io.bdeploy.interfaces.directory.InstanceDirectory;
-import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
+import io.bdeploy.interfaces.directory.RemoteDirectory;
+import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
 import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.manifest.banner.InstanceBannerRecord;
 import io.bdeploy.interfaces.manifest.history.runtime.MasterRuntimeHistoryDto;
@@ -117,16 +117,16 @@ public interface MasterNamedResource {
      */
     @GET
     @Path("/dataDir")
-    public List<InstanceDirectory> getDataDirectorySnapshots(@QueryParam("u") String instanceId);
+    public List<RemoteDirectory> getDataDirectorySnapshots(@QueryParam("u") String instanceId);
 
     /**
      * Delegates to the specified minion to receive a file.
      *
-     * @see NodeDeploymentResource#getEntryContent(InstanceDirectoryEntry, long, long)
+     * @see NodeDeploymentResource#getEntryContent(RemoteDirectoryEntry, long, long)
      */
     @POST
     @Path("/dataDir/entry")
-    public EntryChunk getEntryContent(@QueryParam("m") String minion, InstanceDirectoryEntry entry, @QueryParam("o") long offset,
+    public EntryChunk getEntryContent(@QueryParam("m") String minion, RemoteDirectoryEntry entry, @QueryParam("o") long offset,
             @QueryParam("l") long limit);
 
     /**
@@ -136,7 +136,7 @@ public interface MasterNamedResource {
      */
     @POST
     @Path("/dataDir/streamEntry")
-    public Response getEntryStream(@QueryParam("m") String minion, InstanceDirectoryEntry entry);
+    public Response getEntryStream(@QueryParam("m") String minion, RemoteDirectoryEntry entry);
 
     /**
      * @param minion the minion the entry refers to.
@@ -144,7 +144,7 @@ public interface MasterNamedResource {
      */
     @POST
     @Path("/deleteDataEntry")
-    public void deleteDataEntry(@QueryParam("m") String minion, InstanceDirectoryEntry entry);
+    public void deleteDataEntry(@QueryParam("m") String minion, RemoteDirectoryEntry entry);
 
     /**
      * @param instanceId the deployment/instance uuid
@@ -214,12 +214,12 @@ public interface MasterNamedResource {
      * @param instanceId the unique id of the instance
      * @param tag the tag of the instance version to fetch for.
      * @param applicationId the unique id of the application to fetch the output entry for.
-     * @return an {@link InstanceDirectory} specifying the minion the entry resides on. The {@link InstanceDirectoryEntry} list
+     * @return an {@link RemoteDirectory} specifying the minion the entry resides on. The {@link RemoteDirectoryEntry} list
      *         might be empty in case no output file exists.
      */
     @GET
     @Path("/output")
-    public InstanceDirectory getOutputEntry(@QueryParam("u") String instanceId, @QueryParam("t") String tag,
+    public RemoteDirectory getOutputEntry(@QueryParam("u") String instanceId, @QueryParam("t") String tag,
             @QueryParam("a") String applicationId);
 
     /**
@@ -321,5 +321,4 @@ public interface MasterNamedResource {
     @POST
     @Path("/attributes")
     public void updateAttributes(@QueryParam("u") String instanceId, CustomAttributesRecord attributes);
-
 }

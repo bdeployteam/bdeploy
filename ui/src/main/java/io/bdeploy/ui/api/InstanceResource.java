@@ -26,8 +26,8 @@ import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
-import io.bdeploy.interfaces.directory.InstanceDirectory;
-import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
+import io.bdeploy.interfaces.directory.RemoteDirectory;
+import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
 import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.manifest.banner.InstanceBannerRecord;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
@@ -182,25 +182,25 @@ public interface InstanceResource {
 
     @GET
     @Path("/{instance}/output/{tag}/{app}")
-    public InstanceDirectory getOutputEntry(@ActivityScope @PathParam("instance") String instanceId,
+    public RemoteDirectory getOutputEntry(@ActivityScope @PathParam("instance") String instanceId,
             @ActivityScope @PathParam("tag") String tag, @PathParam("app") String app);
 
     @POST
     @Path("/{instance}/content/{minion}")
     public StringEntryChunkDto getContentChunk(@ActivityScope @PathParam("instance") String instanceId,
-            @PathParam("minion") String minion, InstanceDirectoryEntry entry, @QueryParam("offset") long offset,
+            @PathParam("minion") String minion, RemoteDirectoryEntry entry, @QueryParam("offset") long offset,
             @QueryParam("limit") long limit);
 
     @POST
     @Path("/{instance}/request/{minion}")
     public String getContentStreamRequest(@ActivityScope @PathParam("instance") String instanceId,
-            @PathParam("minion") String minion, InstanceDirectoryEntry entry);
+            @PathParam("minion") String minion, RemoteDirectoryEntry entry);
 
     @POST
     @Path("/{instance}/delete/{minion}")
     @RequiredPermission(permission = Permission.ADMIN)
     public void deleteDataFile(@ActivityScope @PathParam("instance") String instanceId, @PathParam("minion") String minion,
-            InstanceDirectoryEntry entry);
+            RemoteDirectoryEntry entry);
 
     @GET
     @Unsecured

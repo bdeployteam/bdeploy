@@ -10,11 +10,11 @@ import { ProcessConfigDto } from 'src/app/models/process.model';
 import {
   ApplicationConfiguration,
   ApplicationStartType,
-  InstanceDirectoryEntry,
   ParameterType,
   ProcessDetailDto,
   ProcessHandleDto,
   ProcessState,
+  RemoteDirectoryEntry,
   StringEntryChunkDto,
 } from '../../../../models/gen.dtos';
 import { unsubscribe } from '../../../shared/utils/object.utils';
@@ -442,7 +442,7 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
     return number;
   }
 
-  getCurrentOutputEntryFetcher(): () => Observable<InstanceDirectoryEntry> {
+  getCurrentOutputEntryFetcher(): () => Observable<RemoteDirectoryEntry> {
     const tag: string = this.details
       ? this.details.status.instanceTag
       : this.activatedInstanceTag

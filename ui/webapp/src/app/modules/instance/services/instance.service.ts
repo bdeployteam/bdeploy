@@ -16,8 +16,6 @@ import {
   InstanceBannerRecord,
   InstanceConfiguration,
   InstanceConfigurationDto,
-  InstanceDirectory,
-  InstanceDirectoryEntry,
   InstanceDto,
   InstanceManifestHistoryDto,
   InstanceNodeConfigurationListDto,
@@ -27,6 +25,8 @@ import {
   ManifestKey,
   MinionDto,
   MinionStatusDto,
+  RemoteDirectory,
+  RemoteDirectoryEntry,
   StringEntryChunkDto,
 } from '../../../models/gen.dtos';
 import { ConfigService } from '../../core/services/config.service';
@@ -181,10 +181,10 @@ export class InstanceService {
     return this.http.post(url, configFiles, options);
   }
 
-  public listDataDirSnapshot(instanceGroupName: string, instanceName: string): Observable<InstanceDirectory[]> {
+  public listDataDirSnapshot(instanceGroupName: string, instanceName: string): Observable<RemoteDirectory[]> {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/processes/dataDirSnapshot';
     this.log.debug('getDataDirSnapshot: ' + url);
-    return this.http.get<InstanceDirectory[]>(url);
+    return this.http.get<RemoteDirectory[]>(url);
   }
 
   public listPurpose(instanceGroupName: string): Observable<InstancePurpose[]> {
@@ -260,26 +260,26 @@ export class InstanceService {
     instanceTag: string,
     appUid: string,
     silent: boolean
-  ): Observable<InstanceDirectory> {
+  ): Observable<RemoteDirectory> {
     const url: string =
       this.buildInstanceUrl(instanceGroupName, instanceName) + '/output/' + instanceTag + '/' + appUid;
     this.log.debug('getApplicationOutputEntry: ' + url);
     const options = {
       headers: { ignoreLoadingBar: '' },
     };
-    return this.http.get<InstanceDirectory>(url, silent ? options : {});
+    return this.http.get<RemoteDirectory>(url, silent ? options : {});
   }
 
   public getContentChunk(
     instanceGroupName: string,
     instanceName: string,
-    id: InstanceDirectory,
-    ide: InstanceDirectoryEntry,
+    rd: RemoteDirectory,
+    rde: RemoteDirectoryEntry,
     offset: number,
     limit: number,
     silent: boolean
   ): Observable<StringEntryChunkDto> {
-    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/content/' + id.minion;
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/content/' + rd.minion;
     this.log.debug('getContentChunk: ' + url);
     const options = {
       headers: null,
@@ -288,18 +288,18 @@ export class InstanceService {
     if (silent) {
       options.headers = { ignoreLoadingBar: '' };
     }
-    return this.http.post<StringEntryChunkDto>(url, ide, options);
+    return this.http.post<StringEntryChunkDto>(url, rde, options);
   }
 
   public downloadDataFileContent(
     instanceGroupName: string,
     instanceName: string,
-    id: InstanceDirectory,
-    ide: InstanceDirectoryEntry
+    rd: RemoteDirectory,
+    rde: RemoteDirectoryEntry
   ) {
-    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/request/' + id.minion;
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/request/' + rd.minion;
     this.log.debug('downloadDataFileContent');
-    this.http.post(url, ide, { responseType: 'text' }).subscribe((token) => {
+    this.http.post(url, rde, { responseType: 'text' }).subscribe((token) => {
       this.downloadService.download(this.buildInstanceUrl(instanceGroupName, instanceName) + '/stream/' + token);
     });
   }
@@ -307,12 +307,12 @@ export class InstanceService {
   public deleteDataFile(
     instanceGroupName: string,
     instanceName: string,
-    id: InstanceDirectory,
-    ide: InstanceDirectoryEntry
+    rd: RemoteDirectory,
+    rde: RemoteDirectoryEntry
   ) {
-    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/delete/' + id.minion;
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/delete/' + rd.minion;
     this.log.debug('deleteDataFile');
-    return this.http.post(url, ide);
+    return this.http.post(url, rde);
   }
 
   public createClickAndStartDescriptor(

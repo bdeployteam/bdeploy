@@ -43,8 +43,8 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.directory.EntryChunk;
-import io.bdeploy.interfaces.directory.InstanceDirectory;
-import io.bdeploy.interfaces.directory.InstanceDirectoryEntry;
+import io.bdeploy.interfaces.directory.RemoteDirectory;
+import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.remote.CommonRootResource;
@@ -133,11 +133,11 @@ public class MinionDeployTest {
         InstanceNodeManifest inmf = InstanceNodeManifest.of(local, nodeKey);
         String appId = inmf.getConfiguration().applications.get(0).uid;
 
-        InstanceDirectory id = master.getNamedMaster("demo").getOutputEntry(uuid, instance.getTag(), appId);
+        RemoteDirectory id = master.getNamedMaster("demo").getOutputEntry(uuid, instance.getTag(), appId);
         assertNotNull(id);
         assertEquals(1, id.entries.size());
 
-        InstanceDirectoryEntry ide = id.entries.get(0);
+        RemoteDirectoryEntry ide = id.entries.get(0);
         assertEquals(SpecialDirectory.RUNTIME, ide.root);
         assertEquals(appId + "/" + ProcessController.OUT_TXT, ide.path);
 

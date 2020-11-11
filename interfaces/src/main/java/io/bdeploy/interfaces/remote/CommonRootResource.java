@@ -6,15 +6,20 @@ import java.util.Set;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import io.bdeploy.common.Version;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
+import io.bdeploy.interfaces.directory.EntryChunk;
+import io.bdeploy.interfaces.directory.RemoteDirectory;
+import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
 import io.bdeploy.jersey.ActivityScope;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.WeakTokenAllowed;
 
@@ -96,4 +101,35 @@ public interface CommonRootResource {
     @Path("/common")
     public CommonInstanceResource getInstanceResource(@ActivityScope @QueryParam("BDeploy_group") String group);
 
+    /**
+     * Updates the log configuration on the master and all attached nodes.
+     *
+     * @param config the configuration file.
+     */
+    @POST
+    @Path("/logConfig")
+    @Consumes(MediaType.APPLICATION_OCTET_STREAM)
+    public void setLoggerConfig(java.nio.file.Path config);
+
+    /**
+     * @return the contents of each nodes log directory.
+     */
+    @GET
+    @Path("/logFiles")
+    public List<RemoteDirectory> getLogDirectories();
+
+    /**
+     * Fetches the complete contents of a log file
+     */
+    @POST
+    @Path("/logContent")
+    public EntryChunk getLogContent(@QueryParam("m") String minion, RemoteDirectoryEntry entry, @QueryParam("o") long offset,
+            @QueryParam("l") long limit);
+
+    /**
+     * Fetches the contents of a log file as stream.
+     */
+    @POST
+    @Path("/logStream")
+    public Response getLogStream(@QueryParam("m") String minion, RemoteDirectoryEntry entry);
 }
