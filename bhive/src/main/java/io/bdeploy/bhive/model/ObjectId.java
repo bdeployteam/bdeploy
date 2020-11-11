@@ -97,14 +97,18 @@ public class ObjectId implements Serializable, Comparable<ObjectId> {
      * database use {@link #createByCopy(InputStream, Path)} as this copies the data
      * while hashing.
      */
-    public static ObjectId createFromStreamNoCopy(InputStream source) throws IOException {
-        MessageDigest digest = createDigest();
-        byte[] buf = new byte[4096];
-        int read = 0;
-        while ((read = source.read(buf)) > 0) {
-            digest.update(buf, 0, read);
+    public static ObjectId createFromStreamNoCopy(InputStream source) {
+        try {
+            MessageDigest digest = createDigest();
+            byte[] buf = new byte[4096];
+            int read = 0;
+            while ((read = source.read(buf)) > 0) {
+                digest.update(buf, 0, read);
+            }
+            return new ObjectId(Hex.bytesToHex(digest.digest()));
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot calculate checksum of object from stream", e);
         }
-        return new ObjectId(Hex.bytesToHex(digest.digest()));
     }
 
     @Override

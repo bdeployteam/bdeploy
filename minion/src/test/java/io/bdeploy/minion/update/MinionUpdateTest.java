@@ -72,7 +72,7 @@ public class MinionUpdateTest {
             throws IOException {
         AtomicBoolean updateTriggered = new AtomicBoolean(false);
         root.setUpdateManager((t) -> updateTriggered.set(true));
-        root.onStartup();
+        root.onStartup(true);
 
         Path updateSource = TestAppFactory.createDummyApp("minion", tmp);
         Manifest.Key winUpdateKey = new Manifest.Key("bdeploy/snapshot/windows", "2.0.0");

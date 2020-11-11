@@ -18,11 +18,17 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import javax.crypto.spec.SecretKeySpec;
 import javax.ws.rs.WebApplicationException;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.ConfigurationFactory;
+import org.apache.logging.log4j.core.config.ConfigurationSource;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.impl.DirectSchedulerFactory;
@@ -30,10 +36,12 @@ import org.quartz.simpl.RAMJobStore;
 import org.quartz.simpl.SimpleThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.objects.LockableDatabase;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
@@ -163,9 +171,68 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     /**
      * Called once when starting the minion root. Can be used for additional initialization
      */
-    public void onStartup() {
+    public void onStartup(boolean consoleLog) {
+        // as early as possible.
+        updateLoggingConfiguration(consoleLog);
+
         doMigrate();
         updateMinionConfiguration();
+    }
+
+    /** Updates the logging config file if required, and switches to using it */
+    private void updateLoggingConfiguration(boolean consoleLog) {
+        ObjectId lastKnown = getState().logConfigId;
+        ObjectId current = withBuiltinLogConfig(is -> ObjectId.createFromStreamNoCopy(is));
+
+        Path cfgPath = config.resolve("log4j2.xml");
+        boolean exists = Files.exists(cfgPath);
+        if (!exists || lastKnown == null || !current.equals(lastKnown)) {
+            log.info("Updating logging configuration, lastKnown={}, current={}, exists={}", lastKnown, current, exists);
+
+            // give a warning if the current version has been locally modified, replace it nevertheless
+            if (exists && lastKnown != null) {
+                try (InputStream is = Files.newInputStream(cfgPath)) {
+                    ObjectId local = ObjectId.createFromStreamNoCopy(is);
+
+                    if (!local.equals(lastKnown)) {
+                        log.warn("Logging configuration has been locally modified - changes will be discarded");
+                    }
+                } catch (IOException e) {
+                    log.warn("Cannot read existing local logger configuration", e);
+                }
+            }
+
+            // file does not exist, or is outdated - update.
+            ObjectId id = withBuiltinLogConfig(is -> {
+                try {
+                    return ObjectId.createByCopy(is, cfgPath);
+                } catch (IOException e) {
+                    throw new IllegalStateException("Cannot update logging configuration", e);
+                }
+            });
+
+            // record the current ID, so we only copy if the builtin configuration changes.
+            modifyState(s -> s.logConfigId = id);
+        }
+
+        // in any case, we want to switch to using our copy of the configuration.
+        ConfigurationSource source = ConfigurationSource.fromUri(cfgPath.toUri());
+        Configuration cfg = ConfigurationFactory.getInstance().getConfiguration(LoggerContext.getContext(false), source);
+        Configurator.reconfigure(cfg);
+
+        // set the root's log directory property in the MDC, this is inherited by all threads.
+        if (!consoleLog) {
+            log.info("Logging into " + logDir);
+            MDC.put("TARGET_LOG_DIR", logDir.toAbsolutePath().toString());
+        }
+    }
+
+    private <T> T withBuiltinLogConfig(Function<InputStream, T> function) {
+        try (InputStream builtin = MinionRoot.class.getResourceAsStream("/log4j2.xml")) {
+            return function.apply(builtin);
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot calculate builtin logging config ID", e);
+        }
     }
 
     /** Ensures that the master flag and the version is correctly set in the minion manifest */

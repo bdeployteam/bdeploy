@@ -45,7 +45,7 @@ public class CleanupDownloadDirJob implements Job {
      * @param downloadDir the directory to clean
      */
     public static void create(Scheduler scheduler, Path downloadDir) {
-        JobBuilder jBuilder = JobBuilder.newJob(MasterCleanupJob.class);
+        JobBuilder jBuilder = JobBuilder.newJob(CleanupDownloadDirJob.class);
         jBuilder.withIdentity("Downloads", "Master").withDescription("Cleanup download dir");
         jBuilder.usingJobData(new JobDataMap(Collections.singletonMap(DOWNLOAD_DIR, downloadDir)));
 
