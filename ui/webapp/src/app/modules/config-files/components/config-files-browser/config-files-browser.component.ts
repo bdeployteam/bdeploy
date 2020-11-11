@@ -2,16 +2,7 @@ import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
-import { AbstractControl, FormBuilder, FormControl, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import 'brace/mode/batchfile';
-import 'brace/mode/json';
-import 'brace/mode/sh';
-import 'brace/mode/text';
-import 'brace/mode/xml';
-import 'brace/mode/yaml';
-import 'brace/theme/eclipse';
-import 'brace/theme/twilight';
 import { Base64 } from 'js-base64';
 import { cloneDeep } from 'lodash-es';
 import { Observable, of, Subscription } from 'rxjs';
@@ -55,27 +46,19 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
   public typeCache = new Map<string, boolean>();
 
   // used in edit mode:
+  public editorOptions = {
+    theme: this.themeService.isDarkTheme() ? 'vs-dark' : 'vs',
+    language: 'plaintext',
+  };
+
+  private globalMonaco;
+  private monaco;
   public editMode = false; // switching edit/list mode
   public editText = true; // whether the edited file is text
 
   public editKey: string = null; // original config file name on edit
-  public configFileFormGroup = this.fb.group({
-    path: ['', [Validators.required, this.duplicateNameValidator()]],
-  });
   public editorContent = '';
-  public editorMode = 'text';
-  private editorModeMap = new Map([
-    ['json', 'json'],
-    ['xml', 'xml'],
-    ['bat', 'batchfile'],
-    ['yaml', 'yaml'],
-    ['sh', 'sh'],
-  ]);
-  public editorTheme = '';
-
-  get pathControl() {
-    return this.configFileFormGroup.get('path');
-  }
+  public editorPath = '';
 
   public originalContentCache = new Map<string, string>();
   private overlayRef: OverlayRef;
@@ -83,7 +66,6 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
   public fileUploadChosen = false;
 
   constructor(
-    private fb: FormBuilder,
     private route: ActivatedRoute,
     private instanceService: InstanceService,
     private loggingService: LoggingService,
@@ -107,21 +89,33 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
     this.reload();
 
     this.themeSubscription = this.themeService.getThemeSubject().subscribe((theme) => {
-      this.editorTheme = this.themeService.getAceTheme();
-    });
-
-    this.pathControl.valueChanges.subscribe((e) => {
-      const regex = /(?:\.([^.]+))?$/;
-      const ext = regex.exec(e)[1];
-      if (ext) {
-        const newMode: string = this.editorModeMap.get(ext);
-        if (newMode) {
-          this.editorMode = newMode;
-          return;
-        }
+      if (this.globalMonaco) {
+        this.globalMonaco.editor.setTheme(this.themeService.isDarkTheme() ? 'vs-dark' : 'vs');
       }
-      this.editorMode = 'text';
     });
+  }
+
+  public onMonacoInit(monaco) {
+    this.monaco = monaco;
+    this.globalMonaco = window['monaco'];
+
+    // wait for init to complete, otherwise we leak models.
+    setTimeout(() => this.onPathChange(), 0);
+  }
+
+  public onPathChange() {
+    if (!this.globalMonaco) {
+      return;
+    }
+
+    this.globalMonaco.editor.getModels().forEach((m) => m.dispose());
+
+    const model = this.globalMonaco.editor.createModel(
+      this.editorContent,
+      undefined,
+      this.globalMonaco.Uri.parse(this.editorPath)
+    );
+    this.monaco.setModel(model);
   }
 
   private reload() {
@@ -142,21 +136,9 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
     this.themeSubscription.unsubscribe();
   }
 
-  public duplicateNameValidator(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } | null => {
-      const cached = this.statusCache.get(control.value);
-      const duplicate = cached && control.value !== this.editKey;
-      return duplicate ? { duplicate: { value: control.value } } : null;
-    };
-  }
-
-  public getErrorMessage(ctrl: FormControl): string {
-    if (ctrl.hasError('required')) {
-      return 'Required';
-    } else if (ctrl.hasError('duplicate')) {
-      return 'File already exists';
-    }
-    return 'Unknown error';
+  isNameDuplicateError() {
+    const cached = this.statusCache.get(this.editorPath);
+    return cached && this.editorPath !== this.editKey;
   }
 
   public listConfigFiles(): string[] {
@@ -165,7 +147,7 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
 
   public addFile(): void {
     this.editKey = null;
-    this.configFileFormGroup.setValue({ path: '' });
+    this.editorPath = '';
     this.editorContent = '';
     this.editMode = true;
   }
@@ -178,8 +160,9 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
 
     const initialName = copy ? path + ' (copy)' : path;
     if (cached.content) {
-      this.configFileFormGroup.setValue({ path: initialName });
+      this.editorPath = initialName;
       this.editorContent = cached.content;
+      this.onPathChange();
     } else {
       this.instanceService
         .getConfigurationFile(this.groupParam, this.uuidParam, this.versionParam, path)
@@ -187,25 +170,25 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
           if (this.typeCache.get(path)) {
             content = Base64.decode(content);
           }
-          this.configFileFormGroup.setValue({ path: initialName });
+          this.editorPath = initialName;
           this.editorContent = content;
           this.originalContentCache.set(path, content);
+          this.onPathChange();
         });
     }
   }
 
   public onApplyChanges() {
-    const formValue = this.configFileFormGroup.getRawValue();
     if (this.editKey === null) {
       // new file
       const status = cloneDeep(EMPTY_CONFIG_FILE_STATUS);
       status.type = FileStatusType.ADD;
       status.content = this.editorContent;
-      this.statusCache.set(formValue['path'], status);
-      this.typeCache.set(formValue['path'], this.editText);
+      this.statusCache.set(this.editorPath, status);
+      this.typeCache.set(this.editorPath, this.editText);
     } else {
       const cached = this.statusCache.get(this.editKey);
-      if (this.editKey === formValue['path']) {
+      if (this.editKey === this.editorPath) {
         // file content changed?
         const originalContent = this.originalContentCache.get(this.editKey);
         if (this.editorContent === originalContent) {
@@ -225,7 +208,7 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
         const status = cloneDeep(EMPTY_CONFIG_FILE_STATUS);
         status.type = FileStatusType.ADD;
         status.content = this.editorContent;
-        this.statusCache.set(formValue['path'], status);
+        this.statusCache.set(this.editorPath, status);
       }
     }
     this.resetEdit();
@@ -251,7 +234,7 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
   private resetEdit(): void {
     this.editMode = false;
     this.editKey = null;
-    this.configFileFormGroup.reset();
+    this.editorPath = '';
     this.editorContent = '';
   }
 
@@ -299,8 +282,7 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
       return true;
     }
     // rename? -> dirty
-    const formValue = this.configFileFormGroup.getRawValue();
-    if (this.editKey !== formValue['path']) {
+    if (this.editKey !== this.editorPath) {
       return true;
     }
     // compare content

@@ -56,7 +56,7 @@ describe('Instance Tests', function () {
     cy.get('[data-cy=instance-options]').clickContextMenuAction('Configuration Files');
     cy.contains('button', 'add').click();
     cy.get('input[data-placeholder="Enter path for file"]').clear().type('cypress.cfg');
-    cy.typeInAceEditor('CY-CFG');
+    cy.typeInRichEditor('CY-CFG');
     cy.contains('button', 'APPLY').click();
     cy.contains('td', 'cypress.cfg').should('exist');
     cy.contains('button', 'SAVE').click();

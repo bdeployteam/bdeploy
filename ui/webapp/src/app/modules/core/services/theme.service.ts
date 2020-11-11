@@ -47,11 +47,8 @@ export class ThemeService {
     return this.activeTheme$;
   }
 
-  public getAceTheme(): string {
+  public isDarkTheme(): boolean {
     const theme = this.getCurrentTheme();
-    if (theme === Theme.DARK || theme === Theme.DARK_YELLOW) {
-      return 'twilight';
-    }
-    return 'eclipse';
+    return theme === Theme.DARK || theme === Theme.DARK_YELLOW;
   }
 }

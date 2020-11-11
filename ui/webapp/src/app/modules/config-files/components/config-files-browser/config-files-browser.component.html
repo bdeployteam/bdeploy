@@ -126,7 +126,7 @@
 
   <!-- file editor -->
   <mat-card *ngIf="editMode" class="config-card">
-    <form [formGroup]="configFileFormGroup" (ngSubmit)="onApplyChanges()" class="config-card-form">
+    <form #configForm="ngForm" (ngSubmit)="onApplyChanges()" class="config-card-form">
       <mat-card-header>
         <div mat-card-avatar><mat-icon class="config-title-icon">subject</mat-icon></div>
         <mat-card-title class="edit-card-title">{{ editKey ? editKey : 'New File' }}</mat-card-title>
@@ -137,7 +137,7 @@
             mat-raised-button
             color="primary"
             type="submit"
-            [disabled]="!isEditorDirty() || !configFileFormGroup.valid"
+            [disabled]="!isEditorDirty() || !configForm.valid || isNameDuplicateError()"
           >
             APPLY
           </button>
@@ -145,16 +145,25 @@
       </mat-card-header>
       <mat-card-content class="config-card-content">
         <mat-form-field class="path-field">
-          <input class="input-field" matInput formControlName="path" placeholder="Enter path for file" />
-          <mat-error *ngIf="pathControl.invalid">{{ getErrorMessage(pathControl) }}</mat-error>
+          <input
+            class="input-field"
+            matInput
+            #pathControl
+            name="pathControl"
+            (input)="onPathChange($event)"
+            [(ngModel)]="editorPath"
+            placeholder="Enter path for file"
+          />
         </mat-form-field>
-        <ace-editor
-          class="ace-editor"
+        <mat-error *ngIf="isNameDuplicateError()">Filename already used by another configuration file.</mat-error>
+        <ngx-monaco-editor
+          class="text-editor"
+          name="content"
+          [(ngModel)]="editorContent"
           *ngIf="editText"
-          [(text)]="editorContent"
-          [theme]="editorTheme"
-          [mode]="editorMode"
-        ></ace-editor>
+          [options]="editorOptions"
+          (onInit)="onMonacoInit($event)"
+        ></ngx-monaco-editor>
         <div *ngIf="!editText">Binary (or newly uploaded) files cannot be edited online.</div>
       </mat-card-content>
     </form>

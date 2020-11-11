@@ -217,6 +217,6 @@ declare namespace Cypress {
     /**
      * Types some text into the ACE editor component
      */
-    typeInAceEditor(text: string);
+    typeInRichEditor(text: string);
   }
 }

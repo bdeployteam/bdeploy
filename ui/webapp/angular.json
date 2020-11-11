@@ -44,7 +44,8 @@
               "src/assets",
               "src/bootstrap.css",
               "src/browsercheck.js",
-              "src/badbrowser.html"
+              "src/badbrowser.html",
+              { "glob": "**/*", "input": "node_modules/ngx-monaco-editor/assets/monaco", "output": "./assets/monaco/" }
             ],
             "styles": [
               {
