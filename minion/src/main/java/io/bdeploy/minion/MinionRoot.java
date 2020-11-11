@@ -36,7 +36,6 @@ import org.quartz.simpl.RAMJobStore;
 import org.quartz.simpl.SimpleThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
@@ -238,7 +237,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         // set the root's log directory property in the MDC, this is inherited by all threads.
         if (!consoleLog) {
             log.info("Logging into " + logDir);
-            MDC.put("TARGET_LOG_DIR", logDir.toAbsolutePath().toString());
+            MinionLoggingContextDataProvider.setLogDir(logDir.toAbsolutePath().toString());
         }
     }
 
