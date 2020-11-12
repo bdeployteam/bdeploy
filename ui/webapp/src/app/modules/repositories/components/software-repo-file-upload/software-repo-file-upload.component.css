@@ -1,4 +1,11 @@
+.dialog {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .dropZone {
+  flex: 0 0 auto;
   display: flex;
   height: 100px;
   justify-content: center;
@@ -21,17 +28,24 @@
 }
 
 mat-dialog-content {
-  overflow: visible;
-  height: calc(80vh - 330px);
-  min-height: 225px;
+  overflow: hidden;
+  display: inline-block;
+  height: 100%;
+  padding-top: 16px;
+  padding-bottom: 16px;
 }
 
 .file-table {
-  margin-top: 24px;
   box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14),
     0px 3px 14px 2px rgba(0, 0, 0, 0.12);
   max-height: 100%;
   overflow: auto;
+}
+
+.hintRow {
+  font-size: smaller;
+  margin-bottom: 8px;
+  height: 24px !important;
 }
 
 .flexRow {
@@ -82,7 +96,7 @@ mat-dialog-content {
 .file-name {
   width: 25%;
   min-width: 0;
-  flex-shrink: 1;
+  flex: 1 1 auto;
 }
 
 .file-name span {
@@ -94,7 +108,12 @@ mat-dialog-content {
 }
 
 .progress {
+  font-size: smaller;
   flex-grow: 1;
+}
+
+.hint {
+  margin-right: 16px;
 }
 
 .package-name {
@@ -109,6 +128,8 @@ mat-dialog-content {
 .package-label {
   opacity: 0.6;
   font-size: 0.8em;
+  margin-bottom: 5px;
+  align-self: flex-start;
 }
 
 .file-data span[contenteditable] {
@@ -135,12 +156,16 @@ mat-dialog-content {
   padding-right: 24px !important;
 }
 
-.package-os mat-button-toggle-group {
-  margin-top: 5px;
-}
-
 .package-os mat-icon {
   transform: scale(0.7);
+}
+
+.package-os-buttons {
+  display: flex;
+  flex-direction: row;
+}
+.all-os-button {
+  margin-right: 10px;
 }
 
 ::ng-deep .mat-button-toggle-label-content {
@@ -154,4 +179,9 @@ mat-dialog-actions {
 .inline-form-field {
   margin-bottom: -15px;
   overflow-y: hidden;
+}
+
+.upload-message {
+  flex: 1 1 auto;
+  padding-left: 24px !important;
 }

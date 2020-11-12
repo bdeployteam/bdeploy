@@ -18,6 +18,7 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
+import io.bdeploy.ui.dto.UploadInfoDto;
 
 @Path("/softwarerepository")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -50,7 +51,12 @@ public interface SoftwareResource {
     @Path("/upload-raw-content")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @RequiredPermission(permission = Permission.WRITE, scope = "softwareRepository")
-    public List<Manifest.Key> uploadRawContent(@FormDataParam("file") InputStream inputStream,
-            @QueryParam("name") String manifestName, @QueryParam("tag") String manifestTag, @QueryParam("os") String supportedOS);
+    public UploadInfoDto uploadRawContent(@FormDataParam("file") InputStream inputStream, @QueryParam("name") String manifestName,
+            @QueryParam("tag") String manifestTag, @QueryParam("os") String supportedOS);
+
+    @POST
+    @Path("/import-raw-content")
+    @RequiredPermission(permission = Permission.WRITE, scope = "softwareRepository")
+    public UploadInfoDto importRawContent(UploadInfoDto dto);
 
 }

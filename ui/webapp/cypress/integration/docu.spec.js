@@ -461,20 +461,29 @@ describe('Creates screenshots for the user documentation', () => {
         filePath: 'external-software-hive.zip',
         mimeType: 'application/zip',
       });
-      cy.get('.hive mat-checkbox').click();
+
       cy.get('input[type=file]').attachFile({
         filePath: 'external-software-2-raw-direct.zip',
         mimeType: 'application/zip',
       });
-      cy.get('input[data-placeholder="Manifest Name"]').type('external/software-2');
-      cy.get('input[data-placeholder="Version"]').type('1.0.0');
+
+      cy.contains('button', 'Upload').click();
+      cy.contains("Generic zip file").should('have.length', 1);
+      cy.contains("Hive with").should('have.length', 1);
+
+      cy.get('input[data-placeholder="Manifest Name"]').type("external/software-2");
+      cy.get('input[data-placeholder="Version"]').type("1.0.0");
       cy.get('.package-os mat-icon[ng-reflect-svg-icon="WINDOWS"]').click();
       cy.get('.package-os mat-icon[ng-reflect-svg-icon="LINUX"]').click();
 
       cy.screenshot('BDeploy_SWRepo_Upload');
 
-      cy.contains('button', 'Upload').click();
-      cy.contains('Upload successful').should('have.length', 1);
+      cy.contains('button', 'Import').click();
+      cy.contains("Import of external/software-2:1.0.0 on WINDOWS, LINUX successful").should('have.length', 1);
+      cy.contains("2 Manifests imported").should('have.length', 1);
+
+      cy.screenshot('BDeploy_SWRepo_Import');
+
       cy.contains('button', 'Close').click();
     });
 

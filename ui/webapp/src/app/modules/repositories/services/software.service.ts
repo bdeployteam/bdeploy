@@ -1,12 +1,37 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { DeviceDetectorService } from 'ngx-device-detector';
-import { Observable } from 'rxjs';
-import { ManifestKey, OperatingSystem } from '../../../models/gen.dtos';
+import { Observable, Subject } from 'rxjs';
+import { ManifestKey, OperatingSystem, UploadInfoDto } from '../../../models/gen.dtos';
 import { ConfigService } from '../../core/services/config.service';
 import { Logger, LoggingService } from '../../core/services/logging.service';
 import { DownloadService } from '../../shared/services/download.service';
+import { UploadService } from '../../shared/services/upload.service';
+import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
 import { SoftwareRepositoryService } from './software-repository.service';
+
+export enum ImportState {
+  /** Import in progress */
+  IMPORTING,
+  /** Import finished. No errors reported  */
+  FINISHED,
+  /** Import failed. */
+  FAILED,
+}
+
+/** Status of each file imported */
+export class ImportStatus {
+  filename: string;
+
+  /** Current state */
+  state: ImportState;
+
+  /** Notification when the state changes */
+  stateObservable: Observable<ImportState>;
+
+  /** The error message if failed */
+  detail: any;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -19,6 +44,7 @@ export class SoftwareService {
     private http: HttpClient,
     private loggingService: LoggingService,
     private downloadService: DownloadService,
+    private uploadService: UploadService,
     private deviceService: DeviceDetectorService
   ) {}
 
@@ -57,12 +83,48 @@ export class SoftwareService {
     return this.downloadService.createDownloadUrl(token);
   }
 
-  public getSoftwareUploadUrl(softwareRepositoryName: string): string {
-    return this.buildSoftwareUrl(softwareRepositoryName) + '/upload';
+  public upload(softwareRepositoryName: string, files: File[]) {
+    const url: string = this.buildSoftwareUrl(softwareRepositoryName) + '/upload-raw-content';
+    this.log.debug('upload: ' + url);
+    return this.uploadService.upload(url, files, [], 'file');
   }
 
-  public getSoftwareUploadRaw(softwareRepositoryName: string): string {
-    return this.buildSoftwareUrl(softwareRepositoryName) + '/upload-raw-content';
+  public import(softwareRepositoryName: string, dtos: UploadInfoDto[]): Map<string, ImportStatus> {
+    const result: Map<string, ImportStatus> = new Map();
+
+    const url: string = this.buildSoftwareUrl(softwareRepositoryName) + '/import-raw-content';
+
+    for (let i = 0; i < dtos.length; i++) {
+      const importStatus = new ImportStatus();
+      const stateSubject = new Subject<ImportState>();
+      importStatus.filename = dtos[i].filename;
+      importStatus.stateObservable = stateSubject.asObservable();
+      importStatus.stateObservable.subscribe((state) => {
+        importStatus.state = state;
+      });
+      result.set(dtos[i].filename, importStatus);
+      stateSubject.next(ImportState.IMPORTING);
+
+      this.http
+        .post<UploadInfoDto>(url, dtos[i], { headers: suppressGlobalErrorHandling(new HttpHeaders()) })
+        .subscribe(
+          (dto) => {
+            dtos[i].details = dto.details;
+            stateSubject.next(ImportState.FINISHED);
+            stateSubject.complete();
+          },
+          (error) => {
+            dtos[i].details = error.statusText + ' (Status ' + error.status + ')';
+            stateSubject.next(ImportState.FAILED);
+            stateSubject.complete();
+          }
+        );
+    }
+    return result;
+  }
+
+  public getSoftwareUploadUrl(softwareRepositoryName: string): string {
+    return this.buildSoftwareUrl(softwareRepositoryName) + '/upload';
   }
 
   private buildSoftwareUrl(softwareRepositoryName: string): string {

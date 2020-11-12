@@ -1,13 +1,14 @@
 <div class="dialog" appFileDrop (filesDropped)="addFiles($event)">
   <h1 mat-dialog-title>Upload Software Packages</h1>
   <p>
-    Upload software packages into this software repository. The selected archive may contain any new software package or
-    a new version of an existing software package.
+    Upload software packages into this software repository. The selected archives are first uploaded and checked. In a
+    second step, the dialog asks for missing information before the archives are finally imported to BDeploy. The
+    selected archive may contain any new software package or a new version of an existing software package.
   </p>
-  <div class="dropZone">
+  <div class="dropZone" *ngIf="isStep(steps.FILES)">
     <mat-icon class="dropZoneIcon">cloud_upload</mat-icon>
     <span class="dropZoneText">Drop files to upload, or&nbsp;</span>
-    <button [disabled]="uploading" (click)="file.click()" class="browseButton">browse.</button>
+    <button [disabled]="!isStep(steps.FILES)" (click)="file.click()" class="browseButton">browse.</button>
     <input
       type="file"
       #file
@@ -22,76 +23,91 @@
     <div class="file-table">
       <div class="flexRow table-header">
         <div class="status">Status</div>
-        <div class="hive" matTooltip="This package is already a hive">Hive</div>
         <div class="file-name">File Name</div>
-        <div class="progress">Progress</div>
         <div class="action"></div>
       </div>
 
       <div class="table-item" *ngFor="let file of files; index as i">
-        <div class="flexRow file-info">
+        <!-- main row -->
+        <div class="flexRow">
           <div class="status">
-            <mat-icon *ngIf="hasState(file, uploadState.FINISHED)">cloud_done</mat-icon>
-            <mat-icon *ngIf="hasState(file, uploadState.FAILED)">error</mat-icon>
-            <mat-icon *ngIf="fileInProgress(file)">cloud_queue</mat-icon>
-            <mat-icon *ngIf="fileInQueue(file)">cloud_upload</mat-icon>
+            <mat-icon *ngIf="isFileInQueue(file)">cloud_upload</mat-icon>
+            <mat-icon *ngIf="isFileInProgress(file)">cloud_queue</mat-icon>
+            <mat-icon *ngIf="isFileUploaded(file)">cloud</mat-icon>
+            <mat-icon *ngIf="isFileImported(file)">cloud_done</mat-icon>
+            <mat-icon *ngIf="isFileFailed(file)">error</mat-icon>
           </div>
-
-          <div class="hive">
-            <mat-checkbox [(ngModel)]="fileData[i].hive" [checked]="fileData[i].hive"></mat-checkbox>
-          </div>
-
           <div class="file-name">
             <span>{{ file.name }}</span>
           </div>
-
-          <div class="progress">
-            <ng-container *ngIf="hasState(file, uploadState.UPLOADING)">
-              <span>Uploading...</span>
-              <mat-progress-bar mode="determinate" [value]="getUploadProgress(file) | async"></mat-progress-bar>
-            </ng-container>
-            <ng-container *ngIf="hasState(file, uploadState.PROCESSING)">
-              <span *ngIf="!getUploadStatus(file).processingHint">Processing...</span>
-              <span *ngIf="getUploadStatus(file).processingHint">{{ getUploadStatus(file).processingHint }}</span>
-              <mat-progress-bar *ngIf="file" mode="indeterminate"></mat-progress-bar>
-            </ng-container>
-            <ng-container *ngIf="hasState(file, uploadState.FINISHED)">
-              <span class="uploadSuccessful"> {{ getResultDetails(file) }} </span>
-            </ng-container>
-            <ng-container *ngIf="hasState(file, uploadState.FAILED)">
-              <span class="uploadError"> {{ getResultDetails(file) }} </span>
-            </ng-container>
-          </div>
-
           <div class="action">
-            <div *ngIf="!fileInProgress(file)">
+            <div *ngIf="isStep(steps.FILES) || isStep(steps.DATA)">
               <button mat-icon-button (click)="removeFile(file)">
                 <mat-icon>delete</mat-icon>
               </button>
             </div>
           </div>
         </div>
-        <div class="flexRow file-info" *ngIf="!fileData[i].hive">
+
+        <!-- secondary row -->
+        <div class="flexRow hintRow" *ngIf="!isStep(steps.FILES) || getHint(file)">
+          <div class="status"></div>
+          <div class="progress">
+            <span class="hint">{{ getHint(file) }}</span>
+            <ng-container *ngIf="isUploadState(file, uploadState.UPLOADING)">
+              <mat-progress-bar mode="determinate" [value]="getUploadProgress(file) | async"></mat-progress-bar>
+            </ng-container>
+            <ng-container
+              *ngIf="isUploadState(file, uploadState.PROCESSING) || isImportState(file, importState.IMPORTING)"
+            >
+              <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+            </ng-container>
+          </div>
+        </div>
+
+        <!-- secondary row DATA INPUT -->
+        <div
+          class="flexRow"
+          *ngIf="
+            isStep(steps.DATA) &&
+            !isImportState(file, importState.FINISHED) &&
+            !getUploadInfo(file)?.isHive &&
+            !getUploadInfo(file)?.isProduct
+          "
+        >
+          <div class="status"></div>
           <div class="package-name">
             <mat-form-field class="inline-form-field">
-              <input matInput required placeholder="Manifest Name" [(ngModel)]="fileData[i].name" />
+              <input matInput required placeholder="Manifest Name" [(ngModel)]="getUploadInfo(file).name" />
             </mat-form-field>
           </div>
           <div class="package-tag">
             <mat-form-field class="inline-form-field">
-              <input matInput required placeholder="Version" [(ngModel)]="fileData[i].tag" />
+              <input matInput required placeholder="Version" [(ngModel)]="getUploadInfo(file).tag" />
             </mat-form-field>
           </div>
           <div class="package-os">
             <span class="package-label">Supported OS *</span>
-            <mat-button-toggle-group multiple>
+            <div class="package-os-buttons">
               <mat-button-toggle
-                *ngFor="let os of operatingSystems"
-                [checked]="fileData[i].supportedOS.get(os)"
-                (click)="fileData[i].supportedOS.set(os, !fileData[i].supportedOS.get(os))"
-                ><mat-icon [svgIcon]="os"></mat-icon
-              ></mat-button-toggle>
-            </mat-button-toggle-group>
+                class="all-os-button"
+                [checked]="supportsAllOs(file)"
+                (change)="onToggleAllOs(file)"
+                matTooltip="Operating System Independent"
+              >
+                ALL
+              </mat-button-toggle>
+              <mat-button-toggle-group multiple>
+                <mat-button-toggle
+                  *ngFor="let os of operatingSystems"
+                  [checked]="supportsOs(file, os)"
+                  (change)="onToggleSupportOs(file, os)"
+                  [matTooltip]="os"
+                >
+                  <mat-icon [svgIcon]="os"></mat-icon>
+                </mat-button-toggle>
+              </mat-button-toggle-group>
+            </div>
           </div>
         </div>
       </div>
@@ -99,14 +115,9 @@
   </mat-dialog-content>
 
   <mat-dialog-actions class="actions">
-    <button mat-button mat-dialog-close [disabled]="!cancelEnabled">Cancel</button>
-    <button
-      mat-raised-button
-      color="primary"
-      [disabled]="!isAllInfoFilled() || !uploadEnabled"
-      (click)="onOkButtonPressed()"
-    >
-      {{ buttonText }}
+    <button mat-button mat-dialog-close *ngIf="!isStep(steps.RESULT)" [disabled]="!canCancel()">Cancel</button>
+    <button mat-raised-button color="primary" [disabled]="!canNextStep()" (click)="onNextButtonPressed()">
+      {{ getButtonText() }}
     </button>
   </mat-dialog-actions>
 </div>

@@ -25,19 +25,22 @@ Included runtime dependencies will not show up on the target server's Web UI any
 
 === Software Repositories
 
-The *Software Repositories* page allows maintenance of external software that a specific product requires. A *Software Repository* shares its namespace with *Instance Groups*, which means that the unique name of a *Software Repository* must not collide with any name of a *Software Repository* or *Instance Group*.
+*Software Repositories* are a storage location for any external software required by products. In addition, BDeploy products can be stored and managed in *Software Repositories*, from where they can be transferred (imported) to *Instance Groups*. A *Software Repository* shares its namespace with *Instance Groups*, which means that the unique name of a *Software Repository* must not collide with any name of a *Software Repository* or *Instance Group*.
 
 image::images/BDeploy_SWRepos.png[Software Repositories,align=center,width=480,link="images/BDeploy_SWRepos.png"]
 
 ==== Upload software
 
-To upload external software, open a software repository and click on the upload button on the bottom right. +
-Then click on *browse* or *drop files*. You can only upload zip packages.
+To upload external software, open a software repository and click on the upload button on the bottom right. Then click on *browse* or *drop files*. You can upload zip packages. Once you are finished, click *Upload*.
 
-After selecting files, specify the shown *name* of the software, the *version* and the supported *operating systems*. +
-If you already have a package in a hive structure containing all of this metadata, enable *_hive_*.  
+After uploading files, specify the shown *name* of the software, the *version* and the supported *operating systems*. +
+If you already have a package in a hive structure or a package including a product descriptor containing all of this metadata, these information will be used.  
 
 image::images/BDeploy_SWRepo_Upload.png[External Software Upload,align=center,width=480,link="images/BDeploy_SWRepo_Upload.png"]
+
+After all requested information is entered, click *Import* to finally import the files to the *Software Repository*.
+
+image::images/BDeploy_SWRepo_Import.png[External Software Import,align=center,width=480,link="images/BDeploy_SWRepo_Import.png"]
 
 If the upload was succesful, you can *close* the upload dialog and the software for each operating system will show up.
 

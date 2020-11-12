@@ -301,14 +301,11 @@ public class ProductResourceImpl implements ProductResource {
             Path desc = ProductManifestBuilder.getDescriptorPath(zfs.getPath("/"));
             ProductDescriptor pd = ProductManifestBuilder.readProductDescriptor(desc);
 
-            if (pd.configTemplates != null) {
-                RuntimeAssert.assertFalse(pd.configTemplates.contains("..") || pd.configTemplates.startsWith("/"),
-                        String.format(RELPATH_ERROR, pd.configTemplates));
-            }
-            if (pd.versionFile != null) {
-                RuntimeAssert.assertFalse(pd.versionFile.contains("..") || pd.versionFile.startsWith("/"),
-                        String.format(RELPATH_ERROR, pd.versionFile));
-            }
+            assertNullOrRelativePath(pd.configTemplates);
+            assertNullOrRelativePath(pd.versionFile);
+            pd.instanceTemplates.forEach(t -> assertNullOrRelativePath(t));
+            pd.applicationTemplates.forEach(t -> assertNullOrRelativePath(t));
+            assertNullOrRelativePath(pd.pluginFolder);
 
             Path vDesc = desc.getParent().resolve(pd.versionFile);
             ProductVersionDescriptor pvd = ProductManifestBuilder.readProductVersionDescriptor(desc, vDesc);
@@ -321,6 +318,12 @@ public class ProductResourceImpl implements ProductResource {
             }
 
             return Collections.singletonList(ProductManifestBuilder.importFromDescriptor(desc, hive, fetcher, false));
+        }
+    }
+
+    private void assertNullOrRelativePath(String p) {
+        if (p != null) {
+            RuntimeAssert.assertFalse(p.contains("..") || p.startsWith("/"), String.format(RELPATH_ERROR, p));
         }
     }
 

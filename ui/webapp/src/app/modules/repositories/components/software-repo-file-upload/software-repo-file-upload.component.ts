@@ -1,32 +1,28 @@
-import { Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import { forkJoin } from 'rxjs';
-import { ManifestKey, OperatingSystem } from 'src/app/models/gen.dtos';
+import { finalize } from 'rxjs/operators';
+import { OperatingSystem, UploadInfoDto } from 'src/app/models/gen.dtos';
 import { ErrorMessage, LoggingService } from 'src/app/modules/core/services/logging.service';
 import { ActivitySnapshotTreeNode, RemoteEventsService } from 'src/app/modules/shared/services/remote-events.service';
-import { UploadService, UploadState, UploadStatus, UrlParameter } from 'src/app/modules/shared/services/upload.service';
-import { SoftwareService } from '../../services/software.service';
+import { UploadState, UploadStatus } from 'src/app/modules/shared/services/upload.service';
+import { ImportState, ImportStatus, SoftwareService } from '../../services/software.service';
 
-const ALL_OS: OperatingSystem[] = [
-  OperatingSystem.WINDOWS,
-  OperatingSystem.LINUX,
-  // currently unsupported, or support hidden.
-  // OperatingSystem.MACOS,
-  // OperatingSystem.AIX
-];
-
-class RepositoryUploadData {
-  public hive = false;
-  public name = '';
-  public tag = '';
-  public supportedOS = new Map<OperatingSystem, boolean>();
-  constructor() {
-    for (const os of ALL_OS) {
-      this.supportedOS.set(os, false);
-    }
-  }
+enum STEPS {
+  /** Initial step, drop/browse files to import */
+  FILES = 'FILES',
+  /** Background step, file upload is in progress */
+  UPLOAD = 'UPLOAD',
+  /** Upload done, input of missing data */
+  DATA = 'DATA',
+  /** Background step, import of uploaded files is in progress */
+  IMPORT = 'IMPORT',
+  /** Display import result  and close button */
+  RESULT = 'RESULT',
 }
+
+const ALL_OS: OperatingSystem[] = [OperatingSystem.WINDOWS, OperatingSystem.LINUX];
 
 @Component({
   selector: 'app-software-repo-file-upload',
@@ -35,31 +31,24 @@ class RepositoryUploadData {
 })
 export class SoftwareRepoFileUploadComponent implements OnInit {
   private readonly log = this.loggingService.getLogger('FileUploadComponent');
-
-  public uploading = false;
-  public cancelEnabled = true;
-  public uploadEnabled = false;
-  public uploadFinished = true;
-
-  public buttonText = 'Upload';
-
+  public operatingSystems = ALL_OS;
+  public steps = STEPS;
   public uploadState = UploadState;
+  public importState = ImportState;
   private ws: ReconnectingWebSocket;
 
-  @ViewChild('file', { static: true })
-  public fileRef: ElementRef;
+  /** current wizard step */
+  public step = STEPS.FILES;
 
-  /** Files to be uploaded */
-  public uploads: Map<string, UploadStatus>;
-  public fileData: RepositoryUploadData[] = [];
+  /** dropped files */
   public files: File[] = [];
-
-  public operatingSystems = ALL_OS;
+  /** files upload info */
+  public uploads: Map<string, UploadStatus>;
+  public imports: Map<string, ImportStatus>;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public repositoryName: string,
     public dialogRef: MatDialogRef<SoftwareRepoFileUploadComponent>,
-    public uploadService: UploadService,
     private eventService: RemoteEventsService,
     private softwareService: SoftwareService,
     private loggingService: LoggingService
@@ -72,6 +61,7 @@ export class SoftwareRepoFileUploadComponent implements OnInit {
       this.log.errorWithGuiMessage(new ErrorMessage('Error while processing events', err));
     });
     this.ws.addEventListener('message', (e) => this.onEventReceived(e));
+    this.dialogRef.disableClose = true;
   }
 
   onEventReceived(e: MessageEvent) {
@@ -88,7 +78,9 @@ export class SoftwareRepoFileUploadComponent implements OnInit {
           continue;
         }
 
-        const status = this.getUploadStatusByUUID(event.snapshot.scope[0]);
+        const status: UploadStatus = this.uploads
+          ? Array.from(this.uploads.values()).find((s) => s.scope == event.snapshot.scope[0])
+          : null;
         if (!status) {
           continue; // discard, not ours.
         }
@@ -98,18 +90,6 @@ export class SoftwareRepoFileUploadComponent implements OnInit {
       }
     };
     r.readAsText(blob);
-  }
-
-  getUploadStatusByUUID(uuid: string): UploadStatus {
-    if (this.uploads === undefined) {
-      return null;
-    }
-    for (const s of Array.from(this.uploads.values())) {
-      if (s.scope === uuid) {
-        return s;
-      }
-    }
-    return null;
   }
 
   extractMostRelevantMessage(node: ActivitySnapshotTreeNode): string {
@@ -134,124 +114,28 @@ export class SoftwareRepoFileUploadComponent implements OnInit {
   }
 
   addFiles(fileList: FileList) {
-    // Clear all finished files when adding a new one
-    if (this.uploads) {
-      this.uploads.forEach((us) => {
-        if (us.state === UploadState.FINISHED) {
-          return;
-        }
-        this.files.splice(this.files.indexOf(us.file), 1);
-        this.uploads.delete(us.file.name);
-      });
+    if (this.step !== STEPS.FILES) {
+      return;
     }
-    // Reset internal upload state
-    this.uploads = undefined;
-
     // add files
     for (let i = 0; i < fileList.length; i++) {
       this.files.push(fileList[i]);
-      this.fileData.push(new RepositoryUploadData());
     }
-
-    // Update dialog state
-    this.buttonText = 'Upload';
-    this.uploadFinished = false;
-    this.uploadEnabled = this.files.length > 0;
-    this.dialogRef.disableClose = this.files.length > 0;
   }
 
-  onOkButtonPressed() {
-    // Close dialog if all files are uploaded
-    if (this.uploadFinished) {
-      this.dialogRef.close();
-      return;
+  removeFile(file: File) {
+    const idx = this.files.indexOf(file);
+    this.files.splice(idx, 1);
+    if (this.uploads) {
+      this.uploads.delete(file.name);
     }
-
-    const manifestParameter: UrlParameter[][] = [];
-    const rawPackages: File[] = [];
-    const toUpload: File[] = [];
-
-    // check manifest data and
-    for (let i = 0; i < this.files.length; i++) {
-      const data = this.fileData[i];
-
-      if (data.hive) {
-        toUpload.push(this.files[i]);
-        continue;
-      }
-
-      const os: OperatingSystem[] = [];
-      for (const [key, value] of data.supportedOS.entries()) {
-        if (value) {
-          os.push(key);
-        }
-      }
-
-      rawPackages.push(this.files[i]);
-      manifestParameter.push([
-        { id: 'name', type: 'string', name: 'manifest name', value: data.name },
-        { id: 'tag', type: 'string', name: 'manifest tag', value: data.tag },
-        { id: 'os', type: 'array', name: 'supported os', value: os },
-      ]);
+    if (this.imports) {
+      this.imports.delete(file.name);
     }
-
-    this.uploading = true;
-    this.uploadEnabled = false;
-
-    const allObservables = [];
-
-    // upload
-    const uploadedAndBuilt = this.uploadService.upload(
-      this.softwareService.getSoftwareUploadRaw(this.repositoryName),
-      rawPackages,
-      manifestParameter,
-      'file'
-    );
-    const uploaded = this.uploadService.upload(
-      this.softwareService.getSoftwareUploadUrl(this.repositoryName),
-      toUpload,
-      [],
-      'file'
-    );
-
-    // merge the uploads
-    this.uploads = new Map([...uploadedAndBuilt, ...uploaded]);
-
-    this.uploads.forEach((e) => {
-      allObservables.push(e.progressObservable);
-    });
-
-    // Update state when we are finished
-    forkJoin(allObservables).subscribe(
-      (next) => {},
-      (error) => {},
-      () => {
-        this.allFilesUploaded();
-      }
-    );
-  }
-
-  allFilesUploaded() {
-    const oneFailed = Array.from(this.uploads.values()).some((us) => us.state === UploadState.FAILED);
-    if (oneFailed) {
-      this.buttonText = 'Retry Upload';
-      this.uploadFinished = false;
-      this.dialogRef.disableClose = true;
-    } else {
-      this.buttonText = 'Close';
-      this.uploadFinished = true;
-      this.dialogRef.disableClose = false;
+    // go ahead if all failures are removed now
+    if (this.uploads && this.canNextStep()) {
+      this.onNextButtonPressed();
     }
-    this.uploadEnabled = true;
-    this.uploading = false;
-  }
-
-  hasState(file: File, state: UploadState) {
-    const status = this.getUploadStatus(file);
-    if (!status) {
-      return false;
-    }
-    return status.state === state;
   }
 
   getUploadStatus(file: File): UploadStatus {
@@ -261,79 +145,268 @@ export class SoftwareRepoFileUploadComponent implements OnInit {
     return this.uploads.get(file.name);
   }
 
-  fileInProgress(file: File): boolean {
-    if (!this.getUploadStatus(file)) {
+  isUploadState(file: File, state: UploadState) {
+    const status = this.getUploadStatus(file);
+    if (!status) {
       return false;
     }
-    if (this.hasState(file, this.uploadState.FINISHED) || this.hasState(file, this.uploadState.FAILED)) {
-      return false;
-    }
-    return true;
+    return status.state === state;
   }
 
-  fileInQueue(file: File): boolean {
-    if (this.hasState(file, this.uploadState.FINISHED)) {
+  getImportStatus(file: File): ImportStatus {
+    if (this.imports === undefined) {
+      return null;
+    }
+    return this.imports.get(file.name);
+  }
+
+  isImportState(file: File, state: ImportState) {
+    const status = this.getImportStatus(file);
+    if (!status) {
       return false;
     }
-    if (this.fileInProgress(file)) {
-      return false;
+    return status.state === state;
+  }
+
+  hasUploadFailures(): boolean {
+    return this.uploads ? Array.from(this.uploads.values()).some((us) => us.state === UploadState.FAILED) : false;
+  }
+
+  hasImportFailures(): boolean {
+    return this.imports ? Array.from(this.imports.values()).some((is) => is.state === ImportState.FAILED) : false;
+  }
+
+  isFileInQueue(file: File): boolean {
+    return (
+      !this.isFileInProgress(file) &&
+      !this.isUploadState(file, this.uploadState.FINISHED) &&
+      !this.isUploadState(file, this.uploadState.FAILED)
+    );
+  }
+
+  isFileInProgress(file: File): boolean {
+    if (this.isStep(STEPS.UPLOAD)) {
+      return !(
+        this.isUploadState(file, this.uploadState.FINISHED) || this.isUploadState(file, this.uploadState.FAILED)
+      );
+    } else if (this.isStep(STEPS.IMPORT)) {
+      return !(this.isImportState(file, ImportState.FINISHED) || this.isImportState(file, ImportState.FAILED));
     }
-    if (this.hasState(file, this.uploadState.FAILED)) {
-      return false;
-    }
-    return this.files.indexOf(file) !== -1;
+    return false;
+  }
+
+  isFileUploaded(file: File): boolean {
+    return (
+      !this.isFileFailed(file) &&
+      !this.getImportStatus(file) &&
+      (this.isStep(STEPS.FILES) || this.isStep(STEPS.UPLOAD) || this.isStep(STEPS.DATA)) &&
+      this.isUploadState(file, this.uploadState.FINISHED)
+    );
+  }
+
+  isFileImported(file: File): boolean {
+    return !this.isFileFailed(file) && this.isImportState(file, this.importState.FINISHED);
+  }
+
+  isFileFailed(file: File): boolean {
+    return (
+      (this.isStep(STEPS.FILES) && this.isUploadState(file, this.uploadState.FAILED)) ||
+      (this.isStep(STEPS.DATA) && this.isImportState(file, this.importState.FAILED))
+    );
   }
 
   getUploadProgress(file: File) {
     return this.getUploadStatus(file).progressObservable;
   }
 
-  getResultDetails(file: File): string {
-    const status = this.getUploadStatus(file);
-    if (status === null) {
-      return '';
-    }
-    if (this.hasState(file, UploadState.FAILED)) {
-      return 'Upload failed. ' + status.detail;
-    }
-    if (this.hasState(file, UploadState.FINISHED)) {
-      return this.resultDetailsEvaluation(status);
-    }
+  isStep(step: string): boolean {
+    return this.step === STEPS[step];
   }
 
-  private resultDetailsEvaluation(status: UploadStatus) {
-    if (status.detail.length === 0) {
-      return 'Software version already exists. Nothing to do.';
-    }
-    const softwares: ManifestKey[] = status.detail;
-    return 'Upload successful. New software package(s): ' + softwares.map((key) => key.name + ' ' + key.tag).join(', ');
+  canCancel(): boolean {
+    return this.step !== STEPS.UPLOAD && this.step !== STEPS.IMPORT;
   }
 
-  removeFile(file: File) {
-    const idx = this.files.indexOf(file);
-    this.fileData.splice(idx, 1);
-    this.files.splice(idx, 1);
-    this.uploadEnabled = this.files.length > 0;
-    this.dialogRef.disableClose = this.files.length > 0;
-  }
-
-  isAllInfoFilled(): boolean {
-    for (const data of this.fileData) {
-      if (!data.hive) {
-        if (!data.name?.length || !data.tag?.length) {
-          return false;
-        }
-        const os: OperatingSystem[] = [];
-        for (const [key, value] of data.supportedOS.entries()) {
-          if (value) {
-            os.push(key);
+  canNextStep(): boolean {
+    if (this.step === STEPS.FILES) {
+      return this.files?.length > 0;
+    } else if (this.step === STEPS.DATA) {
+      if (this.hasUploadFailures()) {
+        return false;
+      }
+      const ui: UploadInfoDto[] = Array.from(this.uploads.values()).map((us) => us.detail);
+      for (let i = 0; i < ui.length; i++) {
+        if (!ui[i].isHive && !ui[i].isProduct) {
+          const nameOk = ui[i].name?.trim().length > 0;
+          const tagOk = ui[i].tag?.trim().length > 0;
+          const osOk = ui[i].supportedOperatingSystems == undefined || ui[i].supportedOperatingSystems?.length > 0;
+          if (!nameOk || !tagOk || !osOk) {
+            return false;
           }
         }
-        if (os.length === 0) {
-          return false;
-        }
+      }
+      return true;
+    } else if (this.step === STEPS.RESULT) {
+      return !this.hasImportFailures();
+    }
+    return false;
+  }
+
+  onNextButtonPressed(): void {
+    switch (this.step) {
+      case STEPS.FILES:
+        this.step = STEPS.UPLOAD;
+        this.doUpload();
+        break;
+      case STEPS.DATA:
+        this.step = STEPS.IMPORT;
+        this.doImport();
+        break;
+      case STEPS.RESULT:
+        this.dialogRef.close();
+        break;
+      default:
+        this.log.error('unxpected step!');
+    }
+  }
+
+  doUpload() {
+    if (!this.uploads) {
+      // first upload
+      this.uploads = this.softwareService.upload(this.repositoryName, this.files);
+      forkJoin(Array.from(this.uploads.values()).map((us) => us.stateObservable))
+        .pipe(finalize(() => this.uploadDone()))
+        .subscribe();
+    } else {
+      // retry upload of failed
+      const failedFiles = this.files.filter((f) => {
+        const us: UploadStatus = this.getUploadStatus(f);
+        return us === undefined || us.state === UploadState.FAILED;
+      });
+      const map: Map<string, UploadStatus> = this.softwareService.upload(this.repositoryName, failedFiles);
+      map.forEach((v, k, m) => this.uploads.set(k, v));
+      forkJoin(Array.from(map.values()).map((us) => us.stateObservable))
+        .pipe(finalize(() => this.uploadDone()))
+        .subscribe();
+    }
+  }
+
+  uploadDone() {
+    // transfer original filename to dtos for later reference
+    this.uploads.forEach((v, k, m) => {
+      if (v.state === this.uploadState.FINISHED) {
+        v.detail.filename = k;
+      }
+    });
+
+    if (this.hasUploadFailures()) {
+      this.step = STEPS.FILES;
+    } else {
+      this.step = STEPS.DATA;
+      Array.from(this.uploads.values()).forEach((us) => (us.detail.supportedOperatingSystems = [])); // ensure invalid/empty preset
+    }
+  }
+
+  doImport() {
+    const dtos: UploadInfoDto[] = Array.from(this.uploads.values()).map((us) => us.detail);
+
+    if (!this.imports) {
+      // first import
+      dtos.forEach((dto) => (dto.details = undefined));
+      this.imports = this.softwareService.import(this.repositoryName, dtos);
+      forkJoin(Array.from(this.imports.values()).map((is) => is.stateObservable))
+        .pipe(finalize(() => this.importDone()))
+        .subscribe();
+    } else {
+      // retry import of failed
+      const failedDtos = Array.from(this.imports.values())
+        .filter((im) => im.state === ImportState.FAILED)
+        .map((im) => this.uploads.get(im.filename).detail);
+      if (failedDtos.length === 0) {
+        // user removed all failed import files
+        this.importDone();
+      } else {
+        failedDtos.forEach((dto) => (dto.details = undefined));
+        const map: Map<string, ImportStatus> = this.softwareService.import(this.repositoryName, failedDtos);
+        map.forEach((v, k, m) => this.imports.set(k, v));
+        forkJoin(Array.from(map.values()).map((is) => is.stateObservable))
+          .pipe(finalize(() => this.importDone()))
+          .subscribe();
       }
     }
-    return true;
+  }
+
+  importDone() {
+    if (this.hasImportFailures()) {
+      this.step = STEPS.DATA;
+    } else {
+      this.step = STEPS.RESULT;
+    }
+  }
+
+  getUploadInfo(file: File): UploadInfoDto {
+    return this.uploads?.get(file.name)?.detail;
+  }
+
+  supportsAllOs(file: File) {
+    const dto: UploadInfoDto = this.getUploadInfo(file);
+    return dto && dto.supportedOperatingSystems === undefined;
+  }
+
+  onToggleAllOs(file: File) {
+    const dto: UploadInfoDto = this.getUploadInfo(file);
+    if (dto) {
+      if (dto.supportedOperatingSystems === undefined) {
+        // all OS
+        dto.supportedOperatingSystems = [];
+      } else {
+        dto.supportedOperatingSystems = undefined;
+      }
+    }
+  }
+
+  supportsOs(file: File, os: OperatingSystem): boolean {
+    const dto: UploadInfoDto = this.getUploadInfo(file);
+    return dto && dto.supportedOperatingSystems && dto.supportedOperatingSystems.find((o) => o === os) !== undefined;
+  }
+
+  onToggleSupportOs(file: File, os: OperatingSystem) {
+    const dto: UploadInfoDto = this.getUploadInfo(file);
+    if (this.supportsOs(file, os)) {
+      dto.supportedOperatingSystems = dto.supportedOperatingSystems.filter((o) => o !== os);
+    } else {
+      if (!dto.supportedOperatingSystems) {
+        dto.supportedOperatingSystems = [];
+      }
+      dto.supportedOperatingSystems.push(os);
+    }
+  }
+
+  getButtonText(): string {
+    switch (this.step) {
+      case STEPS.FILES:
+        return this.uploads ? 'Retry Failed Upload(s)' : 'Upload';
+      case STEPS.DATA:
+        return this.imports ? 'Retry Failed Import(s)' : 'Import';
+      case STEPS.RESULT:
+        return 'Close';
+    }
+    return '...';
+  }
+
+  getHint(file: File) {
+    if (this.isUploadState(file, this.uploadState.UPLOADING)) {
+      return 'uploading...';
+    } else if (this.isUploadState(file, this.uploadState.PROCESSING)) {
+      return 'processing...';
+    } else if (this.isImportState(file, this.importState.IMPORTING)) {
+      return 'importing...';
+    } else if (
+      (this.isStep(STEPS.FILES) || this.isStep(STEPS.UPLOAD)) &&
+      this.isUploadState(file, this.uploadState.FAILED)
+    ) {
+      return this.getUploadStatus(file).detail;
+    }
+    return this.getUploadInfo(file)?.details;
   }
 }
