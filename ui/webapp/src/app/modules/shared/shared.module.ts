@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { NgTerminalModule } from 'ng-terminal';
+import { MonacoEditorModule } from 'ngx-monaco-editor';
 import { CoreModule } from '../core/core.module';
 import { CustomAttributeEditComponent } from './components/custom-attribute-edit/custom-attribute-edit.component';
 import { CustomAttributeGroupingSelectorComponent } from './components/custom-attribute-grouping-selector/custom-attribute-grouping-selector.component';
 import { CustomAttributeValueComponent } from './components/custom-attribute-value/custom-attribute-value.component';
+import { FileEditorComponent } from './components/file-editor/file-editor.component';
 import { FileUploadComponent } from './components/file-upload/file-upload.component';
 import { FileViewerComponent } from './components/file-viewer/file-viewer.component';
 import { MessageboxComponent } from './components/messagebox/messagebox.component';
@@ -27,6 +29,7 @@ import { PortValidatorDirective } from './validators/port.validator';
     CustomAttributeGroupingSelectorComponent,
     ProductCardComponent,
     ProductListComponent,
+    FileEditorComponent,
   ],
   entryComponents: [
     MessageboxComponent,
@@ -34,7 +37,7 @@ import { PortValidatorDirective } from './validators/port.validator';
     CustomAttributeEditComponent,
     CustomAttributeValueComponent,
   ],
-  imports: [CommonModule, CoreModule, NgTerminalModule],
+  imports: [CommonModule, CoreModule, NgTerminalModule, MonacoEditorModule.forRoot()],
   exports: [
     RemoteProgressComponent,
     FileViewerComponent,
@@ -46,6 +49,7 @@ import { PortValidatorDirective } from './validators/port.validator';
     CustomAttributeGroupingSelectorComponent,
     ProductCardComponent,
     ProductListComponent,
+    FileEditorComponent,
   ],
 })
 export class SharedModule {}

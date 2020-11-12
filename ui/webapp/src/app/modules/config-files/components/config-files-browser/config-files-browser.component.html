@@ -150,20 +150,12 @@
             matInput
             #pathControl
             name="pathControl"
-            (input)="onPathChange($event)"
             [(ngModel)]="editorPath"
             placeholder="Enter path for file"
           />
         </mat-form-field>
         <mat-error *ngIf="isNameDuplicateError()">Filename already used by another configuration file.</mat-error>
-        <ngx-monaco-editor
-          class="text-editor"
-          name="content"
-          [(ngModel)]="editorContent"
-          *ngIf="editText"
-          [options]="editorOptions"
-          (onInit)="onMonacoInit($event)"
-        ></ngx-monaco-editor>
+        <app-file-editor class="text-editor" [(content)]="editorContent" [path]="editorPath"></app-file-editor>
         <div *ngIf="!editText">Binary (or newly uploaded) files cannot be edited online.</div>
       </mat-card-content>
     </form>

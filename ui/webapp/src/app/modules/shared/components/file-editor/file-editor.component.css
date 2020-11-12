@@ -1,0 +1,8 @@
+:host {
+  display: flex;
+  flex-direction: column;
+}
+
+.text-editor {
+  flex: 1 1 auto;
+}

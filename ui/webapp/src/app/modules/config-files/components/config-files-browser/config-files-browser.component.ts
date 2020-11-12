@@ -1,15 +1,14 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Location } from '@angular/common';
-import { Component, OnDestroy, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Base64 } from 'js-base64';
 import { cloneDeep } from 'lodash-es';
-import { Observable, of, Subscription } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { FileStatusDto, FileStatusType, InstanceConfiguration } from '../../../../models/gen.dtos';
 import { Logger, LoggingService } from '../../../core/services/logging.service';
-import { ThemeService } from '../../../core/services/theme.service';
 import { InstanceService } from '../../../instance/services/instance.service';
 import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
 import { CanComponentDeactivate } from '../../../shared/guards/can-deactivate.guard';
@@ -30,14 +29,12 @@ export const EMPTY_CONFIG_FILE_STATUS: ConfigFileStatus = {
   templateUrl: './config-files-browser.component.html',
   styleUrls: ['./config-files-browser.component.css'],
 })
-export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanComponentDeactivate {
+export class ConfigFilesBrowserComponent implements OnInit, CanComponentDeactivate {
   private log: Logger = this.loggingService.getLogger('ConfigFilesBrowserComponent');
 
   groupParam: string = this.route.snapshot.paramMap.get('group');
   uuidParam: string = this.route.snapshot.paramMap.get('uuid');
   versionParam: string = this.route.snapshot.paramMap.get('version');
-
-  private themeSubscription: Subscription;
 
   public instanceVersion: InstanceConfiguration;
 
@@ -45,14 +42,6 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
   public statusCache = new Map<string, ConfigFileStatus>();
   public typeCache = new Map<string, boolean>();
 
-  // used in edit mode:
-  public editorOptions = {
-    theme: this.themeService.isDarkTheme() ? 'vs-dark' : 'vs',
-    language: 'plaintext',
-  };
-
-  private globalMonaco;
-  private monaco;
   public editMode = false; // switching edit/list mode
   public editText = true; // whether the edited file is text
 
@@ -70,7 +59,6 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
     private instanceService: InstanceService,
     private loggingService: LoggingService,
     public location: Location,
-    private themeService: ThemeService,
     private messageBoxService: MessageboxService,
     private overlay: Overlay,
     private viewContainerRef: ViewContainerRef,
@@ -87,35 +75,6 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
 
     // get list of config files
     this.reload();
-
-    this.themeSubscription = this.themeService.getThemeSubject().subscribe((theme) => {
-      if (this.globalMonaco) {
-        this.globalMonaco.editor.setTheme(this.themeService.isDarkTheme() ? 'vs-dark' : 'vs');
-      }
-    });
-  }
-
-  public onMonacoInit(monaco) {
-    this.monaco = monaco;
-    this.globalMonaco = window['monaco'];
-
-    // wait for init to complete, otherwise we leak models.
-    setTimeout(() => this.onPathChange(), 0);
-  }
-
-  public onPathChange() {
-    if (!this.globalMonaco) {
-      return;
-    }
-
-    this.globalMonaco.editor.getModels().forEach((m) => m.dispose());
-
-    const model = this.globalMonaco.editor.createModel(
-      this.editorContent,
-      undefined,
-      this.globalMonaco.Uri.parse(this.editorPath)
-    );
-    this.monaco.setModel(model);
   }
 
   private reload() {
@@ -130,10 +89,6 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
           this.typeCache.set(p.path, p.isText);
         });
       });
-  }
-
-  public ngOnDestroy(): void {
-    this.themeSubscription.unsubscribe();
   }
 
   isNameDuplicateError() {
@@ -162,7 +117,6 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
     if (cached.content) {
       this.editorPath = initialName;
       this.editorContent = cached.content;
-      this.onPathChange();
     } else {
       this.instanceService
         .getConfigurationFile(this.groupParam, this.uuidParam, this.versionParam, path)
@@ -173,7 +127,6 @@ export class ConfigFilesBrowserComponent implements OnInit, OnDestroy, CanCompon
           this.editorPath = initialName;
           this.editorContent = content;
           this.originalContentCache.set(path, content);
-          this.onPathChange();
         });
     }
   }
