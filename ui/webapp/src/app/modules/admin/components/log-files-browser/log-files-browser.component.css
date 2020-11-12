@@ -8,6 +8,17 @@
   align-items: center;
 }
 
+.flex-content {
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+}
+
+.log-config-editor {
+  flex: 1 0 auto;
+}
+
 .datafiles-card {
   margin: 20px;
   min-width: 90%;
@@ -46,6 +57,10 @@
 
 .datafile-search-header {
   margin-right: 64px;
+}
+
+.datafile-config-button {
+  margin-left: 64px;
 }
 
 .datafile-search-field {

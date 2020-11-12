@@ -175,29 +175,30 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         this.consoleLog = consoleLog;
 
         // as early as possible.
-        updateLoggingConfiguration(this::withBuiltinLogConfig);
+        ObjectId baseline = updateLoggingConfiguration(this::withBuiltinLogConfig);
+        modifyState(s -> s.logConfigId = baseline);
 
         doMigrate();
         updateMinionConfiguration();
     }
 
     /** Updates the logging config file if required, and switches to using it */
-    public void updateLoggingConfiguration(Function<Function<InputStream, ObjectId>, ObjectId> log4jContentSupplier) {
-        ObjectId lastKnown = getState().logConfigId;
+    public ObjectId updateLoggingConfiguration(Function<Function<InputStream, ObjectId>, ObjectId> log4jContentSupplier) {
+        ObjectId baseline = getState().logConfigId;
         ObjectId current = log4jContentSupplier.apply(is -> ObjectId.createFromStreamNoCopy(is));
 
-        Path cfgPath = config.resolve("log4j2.xml");
+        Path cfgPath = getLoggingConfigurationFile();
         boolean exists = Files.exists(cfgPath);
-        if (!exists || lastKnown == null || !current.equals(lastKnown)) {
-            log.info("Updating logging configuration, lastKnown={}, current={}, exists={}", lastKnown, current, exists);
+        if (!exists || baseline == null || !current.equals(baseline)) {
+            log.info("Updating logging configuration, lastKnown={}, current={}, exists={}", baseline, current, exists);
 
             // give a warning if the current version has been locally modified, replace it nevertheless
-            if (exists && lastKnown != null) {
+            if (exists && baseline != null) {
                 Path backup = null;
                 try (InputStream is = Files.newInputStream(cfgPath)) {
                     ObjectId local = ObjectId.createFromStreamNoCopy(is);
 
-                    if (!local.equals(lastKnown)) {
+                    if (!local.equals(baseline)) {
                         backup = cfgPath.getParent().resolve(cfgPath.getFileName().toString() + ".bak");
                         log.warn("Logging configuration has been locally modified - changes will be discarded, backup: {}",
                                 backup);
@@ -226,7 +227,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             });
 
             // record the current ID, so we only copy if the builtin configuration changes.
-            modifyState(s -> s.logConfigId = id);
+            baseline = id;
         }
 
         // in any case, we want to switch to using our copy of the configuration.
@@ -239,6 +240,12 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             log.info("Logging into " + logDir);
             MinionLoggingContextDataProvider.setLogDir(logDir.toAbsolutePath().toString());
         }
+
+        return baseline;
+    }
+
+    public Path getLoggingConfigurationFile() {
+        return config.resolve("log4j2.xml");
     }
 
     private ObjectId withBuiltinLogConfig(Function<InputStream, ObjectId> function) {

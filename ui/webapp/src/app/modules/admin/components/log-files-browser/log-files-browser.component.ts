@@ -2,15 +2,16 @@ import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Location } from '@angular/common';
 import { Component, OnInit, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { MatTabChangeEvent } from '@angular/material/tabs';
+import { Base64 } from 'js-base64';
 import { Observable, of } from 'rxjs';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { RemoteDirectory, RemoteDirectoryEntry, StringEntryChunkDto } from '../../../../models/gen.dtos';
-import { DownloadService } from '../../../shared/services/download.service';
 import { LoggingAdminService } from '../../services/logging-admin.service';
 
 @Component({
@@ -35,6 +36,8 @@ export class LogFilesBrowserComponent implements OnInit {
   @ViewChild(MatSort)
   sort: MatSort;
 
+  public configContent = '';
+
   public displayedColumns: string[] = ['icon', 'path', 'size', 'lastModified', 'download'];
 
   public logDirectories: RemoteDirectory[];
@@ -51,10 +54,10 @@ export class LogFilesBrowserComponent implements OnInit {
     private overlay: Overlay,
     private viewContainerRef: ViewContainerRef,
     public location: Location,
-    private dlService: DownloadService,
     public routingHistoryService: RoutingHistoryService,
     public authService: AuthenticationService,
-    private loggingAdmin: LoggingAdminService
+    private loggingAdmin: LoggingAdminService,
+    private dialog: MatDialog
   ) {}
 
   public ngOnInit(): void {
@@ -178,5 +181,24 @@ export class LogFilesBrowserComponent implements OnInit {
       this.overlayRef.dispose();
       this.overlayRef = null;
     }
+  }
+
+  openConfigEditor(template: TemplateRef<any>) {
+    this.loggingAdmin.getLogConfig().subscribe((cfg) => {
+      this.configContent = Base64.decode(cfg);
+
+      const config = new MatDialogConfig();
+      config.width = '70%';
+      config.minWidth = '650px';
+
+      this.dialog
+        .open(template, config)
+        .afterClosed()
+        .subscribe((apply) => {
+          if (apply) {
+            this.loggingAdmin.setLogConfig(Base64.encode(this.configContent)).subscribe((_) => {});
+          }
+        });
+    });
   }
 }

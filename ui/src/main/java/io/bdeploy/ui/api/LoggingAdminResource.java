@@ -12,6 +12,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import io.bdeploy.common.security.RequiredPermission;
+import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.directory.RemoteDirectory;
 import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
@@ -20,6 +22,7 @@ import io.bdeploy.ui.dto.StringEntryChunkDto;
 @Path("/logging-admin")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+@RequiredPermission(permission = Permission.ADMIN)
 public interface LoggingAdminResource {
 
     @GET
@@ -39,5 +42,20 @@ public interface LoggingAdminResource {
     @Unsecured
     @Path("/stream/{token}")
     public Response getLogContentStream(@PathParam("token") String token);
+
+    /**
+     * @return the base64 encoded contents of the config file
+     */
+    @GET
+    @Path("/config")
+    public String getLogConfig();
+
+    /**
+     * @param config the base64 new contents of the config file
+     */
+    @POST
+    @Path("/config")
+    @Consumes(MediaType.TEXT_PLAIN)
+    public void setLogConfig(String config);
 
 }

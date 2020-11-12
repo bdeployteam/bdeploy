@@ -1,12 +1,21 @@
 package io.bdeploy.ui.api.impl;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
+import org.apache.commons.codec.binary.Base64;
+
+import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.RemoteDirectory;
 import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
@@ -56,6 +65,37 @@ public class LoggingAdminResourceImpl implements LoggingAdminResource {
         EntryRequest rq = resrs.consumeRequestToken(token);
         CommonRootResource root = ResourceProvider.getResource(minion.getSelf(), CommonRootResource.class, context);
         return root.getLogStream(rq.minion, rq.entry);
+    }
+
+    @Override
+    public String getLogConfig() {
+        CommonRootResource root = ResourceProvider.getResource(minion.getSelf(), CommonRootResource.class, context);
+        Path temp = root.getLoggerConfig();
+        try (InputStream is = Files.newInputStream(temp); ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            is.transferTo(baos);
+            return Base64.encodeBase64String(baos.toByteArray());
+        } catch (IOException e) {
+            throw new WebApplicationException("Cannot read logging configuration", e);
+        } finally {
+            PathHelper.deleteRecursive(temp);
+        }
+    }
+
+    @Override
+    public void setLogConfig(String config) {
+        Path temp = null;
+        try {
+            temp = Files.createTempFile(minion.getTempDir(), "log4j2-", ".xml");
+            Files.write(temp, Base64.decodeBase64(config));
+            CommonRootResource root = ResourceProvider.getResource(minion.getSelf(), CommonRootResource.class, context);
+            root.setLoggerConfig(temp);
+        } catch (IOException e) {
+            throw new WebApplicationException("Cannot store new logger config", e);
+        } finally {
+            if (temp != null) {
+                PathHelper.deleteRecursive(temp);
+            }
+        }
     }
 
 }

@@ -55,4 +55,16 @@ export class LoggingAdminService {
     }
     return this.http.post<StringEntryChunkDto>(url, rde, options);
   }
+
+  public getLogConfig(): Observable<string> {
+    const url: string = this.buildLoggingAdminUrl() + '/config';
+    this.log.debug('getLogConfig: ' + url);
+    return this.http.get(url, { responseType: 'text' });
+  }
+
+  public setLogConfig(encoded: string): Observable<any> {
+    const url: string = this.buildLoggingAdminUrl() + '/config';
+    this.log.debug('setLogConfig: ' + url);
+    return this.http.post(url, encoded);
+  }
 }

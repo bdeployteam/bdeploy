@@ -1,5 +1,19 @@
+<ng-template #cfgEditor>
+  <h1 mat-dialog-title>Edit Logging Configuration</h1>
+  <div mat-dialog-content class="flex-content">
+    <app-file-editor class="log-config-editor" [(content)]="configContent" path="log4j2.xml"></app-file-editor>
+  </div>
+  <div mat-dialog-actions align="end">
+    <button mat-raised-button [mat-dialog-close]="false">Cancel</button>
+    <button mat-raised-button color="primary" [mat-dialog-close]="true">Apply</button>
+  </div>
+</ng-template>
+
 <div class="box">
   <mat-toolbar class="mat-elevation-z1 header-toolbar">
+    <button mat-raised-button color="primary" class="datafile-config-button" (click)="openConfigEditor(cfgEditor)">
+      Edit Logging Configuration
+    </button>
     <span class="fill-space"></span>
     <button mat-button (click)="reload()"><mat-icon>refresh</mat-icon></button>
     <div class="datafile-search-header">

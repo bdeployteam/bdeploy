@@ -102,6 +102,16 @@ public interface CommonRootResource {
     public CommonInstanceResource getInstanceResource(@ActivityScope @QueryParam("BDeploy_group") String group);
 
     /**
+     * Retrieves the current logger configuration.
+     *
+     * @return the configuration file.
+     */
+    @GET
+    @Path("/logConfig")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public java.nio.file.Path getLoggerConfig();
+
+    /**
      * Updates the log configuration on the master and all attached nodes.
      *
      * @param config the configuration file.

@@ -192,6 +192,11 @@ public class CommonRootResourceImpl implements CommonRootResource {
     }
 
     @Override
+    public Path getLoggerConfig() {
+        return minion.getLoggingConfigurationFile();
+    }
+
+    @Override
     public void setLoggerConfig(Path config) {
         MinionConfiguration minionConfig = minion.getMinions();
         try (Activity updating = reporter.start("Updating logging configuration on minions...", minionConfig.size())) {
