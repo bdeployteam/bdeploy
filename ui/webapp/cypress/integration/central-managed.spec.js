@@ -164,7 +164,7 @@ describe('Central/Managed Basic Test', function () {
   it('configures instance on managed and sync to central', () => {
     cy.gotoInstance(groupName, managedInstance, 'MANAGED');
 
-    cy.get('app-instance-group-logo').parent().clickContextMenuAction('Configure Applications');
+    cy.get('[data-cy=instance-options]').clickContextMenuAction('Configure Applications');
 
     cy.getNodeCard('master')
       .contains('Drop server application here')
@@ -193,7 +193,7 @@ describe('Central/Managed Basic Test', function () {
     cy.waitUntilContentLoaded();
 
     // create a config file
-    cy.get('app-instance-group-logo').parent().clickContextMenuAction('Configuration Files');
+    cy.get('[data-cy=instance-options]').clickContextMenuAction('Configuration Files');
     cy.contains('button', 'add').click();
     cy.get('input[data-placeholder="Enter path for file"]').clear().type('cypress.cfg');
     cy.typeInAceEditor('CY-CFG');
@@ -218,7 +218,7 @@ describe('Central/Managed Basic Test', function () {
     cy.getApplicationConfigCard('master', 'Server Application').should('exist');
     cy.getApplicationConfigCard('Client Applications', 'Client Application').should('exist');
 
-    cy.get('app-instance-group-logo').parent().clickContextMenuAction('Configuration Files');
+    cy.get('[data-cy=instance-options]').clickContextMenuAction('Configuration Files');
     cy.contains('td', 'cypress.cfg').should('exist');
   });
 

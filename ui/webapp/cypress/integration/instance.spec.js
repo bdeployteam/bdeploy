@@ -34,7 +34,7 @@ describe('Instance Tests', function () {
 
     cy.get('mat-card-subtitle').contains(instanceUuid).click();
 
-    cy.get('app-instance-group-logo').parent().clickContextMenuAction('Configure Applications');
+    cy.get('[data-cy=instance-options]').clickContextMenuAction('Configure Applications');
 
     cy.getNodeCard('master')
       .contains('Drop server application here')
@@ -53,7 +53,7 @@ describe('Instance Tests', function () {
 
   it('Create config file', () => {
     cy.visit('/#/instance/overview/Test/' + instanceUuid);
-    cy.get('app-instance-group-logo').parent().clickContextMenuAction('Configuration Files');
+    cy.get('[data-cy=instance-options]').clickContextMenuAction('Configuration Files');
     cy.contains('button', 'add').click();
     cy.get('input[data-placeholder="Enter path for file"]').clear().type('cypress.cfg');
     cy.typeInAceEditor('CY-CFG');
@@ -134,7 +134,7 @@ describe('Instance Tests', function () {
 
   it('Check data file browser', () => {
     cy.visit('/#/instance/overview/Test/' + instanceUuid);
-    cy.get('app-instance-group-logo').parent().clickContextMenuAction('Data Files');
+    cy.get('[data-cy=instance-options]').clickContextMenuAction('Data Files');
 
     cy.contains('td', 'cypress.txt').click();
 

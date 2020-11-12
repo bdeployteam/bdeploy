@@ -46,7 +46,7 @@ Cypress.Commands.add('clickContextMenuDialog', { prevSubject: true }, function (
 
 Cypress.Commands.add('clickContextMenuAction', { prevSubject: true }, function (subject, item) {
   let wrapped = cy.wrap(subject);
-  wrapped.find('button').contains('more_vert').click();
+  wrapped.contains('more_vert').click();
   cy.get('[role=menuitem]').contains(item).should('be.enabled').click().should('not.exist');
   cy.get('div.cdk-overlay-backdrop').should('not.exist');
   return wrapped;

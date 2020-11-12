@@ -40,7 +40,7 @@ describe('Product Tests', () => {
     cy.visit('/#/instance/browser/' + instanceGroupName);
     cy.get('mat-card-subtitle').contains(instanceUuid).click();
 
-    cy.get('app-instance-group-logo').parent().clickContextMenuAction('Configure Applications');
+    cy.get('[data-cy=instance-options]').clickContextMenuAction('Configure Applications');
 
     cy.getNodeCard('master')
       .contains('Drop server application here')
@@ -104,7 +104,7 @@ describe('Product Tests', () => {
   });
 
   it('Downgrade to version 1.0.0', () => {
-    cy.get('app-instance-group-logo').parent().clickContextMenuAction('Change Product Version');
+    cy.get('[data-cy=instance-options]').clickContextMenuAction('Change Product Version');
     cy.contains('mat-toolbar', 'Change Product Version').should('exist');
 
     cy.contains('app-product-tag-card', '2.0.0').should('exist').contains('button', 'check').and('be.visible');
