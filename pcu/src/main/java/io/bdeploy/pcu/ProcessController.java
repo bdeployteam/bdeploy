@@ -611,10 +611,10 @@ public class ProcessController {
 
     /** Attaches an exit handle to be notified when the process terminates */
     private void monitorProcess() {
-        // Notify when the status changes
-        // DO nothing if the handle changed between scheduling and execution
+        // We are attaching an async-listener so that the hook is not directly called
+        // in case the process already terminated when #monitorProcess is called
         CompletableFuture<ProcessHandle> oldHandle = processExit;
-        oldHandle.thenRun(() -> {
+        oldHandle.thenRunAsync(() -> {
             executeLocked("ExitHook", DEFAULT_USER, () -> {
                 if (oldHandle != processExit) {
                     logger.log(l -> l.info("Process handle changed. Skipping exit hook."));
