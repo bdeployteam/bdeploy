@@ -138,7 +138,7 @@ void createServerTasks(String name, String root, int port) {
         setupBDeployEnv(it, root)
         main = project(":minion").mainClassName
         classpath = project(":minion").sourceSets.main.runtimeClasspath
-        args = [ "start", "--allowCors" ]
+        args = [ "start", "--allowCors", "--consoleLog" ]
         waitForPort = port
         stopAfter = triggerStopBDeploy
     }
@@ -290,7 +290,7 @@ void setupBinServerTasks(String version) {
     task "binStartTestBDeploy_${key}" (type: com.github.psxpaul.task.ExecFork, dependsOn: "binInitTestBDeploy_${key}") {
         executable binFile
         setupBDeployEnv(it, "${buildDir}/bin-root_${key}")
-        args = [ "master" ] // TODO: this should be 'start' but this is only supported by 3.3.0 or newer.
+        args = [ "master", "--consoleLog" ] // TODO: this should be 'start' but this is only supported by 3.3.0 or newer.
         waitForPort = port
         stopAfter = tasks["binTriggerStopBDeploy_${key}"]
         standardOutput = "${buildDir}/out_${key}.txt"
