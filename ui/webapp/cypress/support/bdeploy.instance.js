@@ -209,5 +209,5 @@ Cypress.Commands.add('createNewInstanceVersionByDummyChange', function (
 });
 
 Cypress.Commands.add('typeInRichEditor', function (text) {
-  cy.get('.text-editor textarea:first').type(text);
+  cy.get('.text-editor textarea:first').should('be.visible').and('be.enabled').focus().type(text);
 });
