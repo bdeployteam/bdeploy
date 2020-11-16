@@ -28,7 +28,14 @@ public class PathOwnershipValidator implements ConfigValidator<String> {
             UserPrincipal current = target.getFileSystem().getUserPrincipalLookupService()
                     .lookupPrincipalByName(System.getProperty("user.name"));
             UserPrincipal owner = Files.getOwner(target);
-            return owner.getName().equals(current.getName());
+
+            boolean ok = owner.getName().equals(current.getName());
+
+            if (!ok) {
+                log.warn("Path ownership validation failed: user=" + current + ", owner=" + owner);
+            }
+
+            return ok;
         } catch (UnsupportedOperationException ex) {
             log.debug("Checking directory ownership not possible", ex);
             return true; // OK, we can't check on this filesystem as it does not know the concept of an 'owner'.

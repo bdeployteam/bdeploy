@@ -1,6 +1,10 @@
 package io.bdeploy.bhive.cli;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.UserPrincipal;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.cli.InitTool.InitConfig;
@@ -39,11 +43,24 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
     protected RenderableResult run(InitConfig config) {
         helpAndFailIfMissing(config.hive(), "Missing --hive");
 
-        try (BHive hive = new BHive(Paths.get(config.hive()).toUri(), getActivityReporter())) {
+        Path root = Paths.get(config.hive());
+        try (BHive hive = new BHive(root.toUri(), getActivityReporter())) {
             hive.getAuditor()
                     .audit(AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("init").build());
-            return createSuccess();
         }
+
+        try {
+            UserPrincipal current = root.getFileSystem().getUserPrincipalLookupService()
+                    .lookupPrincipalByName(System.getProperty("user.name"));
+            if (!Files.getOwner(root).getName().equals(current.getName())) {
+                Files.setOwner(root, current);
+            }
+        } catch (IOException e) {
+            return createResultWithMessage(
+                    "Cannot set ownership. The directory is initialized but belonging to the wrong principal.").setException(e);
+        }
+
+        return createSuccess();
     }
 
 }

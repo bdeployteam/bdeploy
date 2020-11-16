@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.UserPrincipal;
 import java.security.GeneralSecurityException;
 import java.util.Collection;
 import java.util.Collections;
@@ -152,6 +153,17 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
             }
         } catch (GeneralSecurityException | IOException e) {
             throw new IllegalStateException("Cannot initialize minion root", e);
+        }
+
+        try {
+            UserPrincipal current = root.getFileSystem().getUserPrincipalLookupService()
+                    .lookupPrincipalByName(System.getProperty("user.name"));
+            if (!Files.getOwner(root).getName().equals(current.getName())) {
+                Files.setOwner(root, current);
+            }
+        } catch (IOException e) {
+            return createResultWithMessage(
+                    "Cannot set ownership. The directory is initialized but belonging to the wrong principal.").setException(e);
         }
 
         return result;

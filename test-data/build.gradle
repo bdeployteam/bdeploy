@@ -279,6 +279,21 @@ void setupBinServerTasks(String version) {
         } else {
             args = [ "init", "--port=${port}", "--dist=ignore", "--mode=standalone" ]
         }
+
+        /* 
+         * Newer BDeploy versions verify the ownership. The init tool sets the ownership. Old BDeploy versions don't.
+         * The problem with this is that e.g. GitHub build machines set strange ownerships on created directories and
+         * the validation will fail if the init was done with an old binary version of BDeploy. So we need to do it here.
+         */
+        doLast {
+            def pth = java.nio.file.Paths.get("${buildDir}/bin-root_${key}");
+            def principal = pth.getFileSystem().getUserPrincipalLookupService().lookupPrincipalByName(System.getProperty("user.name"));
+            println "Checking ownership of " + pth;
+            if (!java.nio.file.Files.getOwner(pth).getName().equals(principal.getName())) {
+                println "Changing ownership of " + pth;
+                java.nio.file.Files.setOwner(pth, principal);
+            }
+        }
     }
 
     task "binTriggerStopBDeploy_${key}"() {
@@ -399,7 +414,7 @@ void setupBinServerTasks(String version) {
     task "binWaitForMigrateToCurrent_${key}" (dependsOn: "binMigrateToCurrent_${key}") {
         doLast {
             // check the output file for the output we expect
-            println "waiting for migration to proceed"
+            println "waiting for migration to proceed: " + System.currentTimeMillis();
             def ok = false;
             def rqFound = false;
             for(int i = 0; i < 1000; ++i) {
@@ -427,10 +442,12 @@ void setupBinServerTasks(String version) {
                         break;
                     }
                 }
-                sleep(1000);
+                println "Waiting... " + System.currentTimeMillis();
+                sleep(2000);
             }
 
             if(!ok) {
+                println "Could not await update: " + System.currentTimeMillis();
                 String check = file("${buildDir}/out_${key}.txt").text
                 throw new RuntimeException("Upgrade to current version failed. Output: " + check);
             }
