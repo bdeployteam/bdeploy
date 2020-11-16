@@ -17,4 +17,14 @@ public class InstanceBannerRecord {
      */
     public String text;
 
+    /**
+     * The user who set this banner
+     */
+    public String user;
+
+    /**
+     * Timestamp when this banner was set
+     */
+    public long timestamp;
+
 }

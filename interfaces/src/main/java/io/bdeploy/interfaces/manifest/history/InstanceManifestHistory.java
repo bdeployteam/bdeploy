@@ -24,6 +24,8 @@ public class InstanceManifestHistory {
         UNINSTALL,
         ACTIVATE,
         DEACTIVATE,
+        BANNER_SET,
+        BANNER_CLEAR,
         @JsonEnumDefaultValue
         UNKNOWN
     }

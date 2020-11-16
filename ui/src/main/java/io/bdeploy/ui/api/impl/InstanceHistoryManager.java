@@ -591,6 +591,10 @@ public class InstanceHistoryManager {
                 return "Version " + tag + ": Activated";
             case DEACTIVATE:
                 return "Version " + tag + ": Deactivated";
+            case BANNER_SET:
+                return "Version " + tag + ": Banner set";
+            case BANNER_CLEAR:
+                return "Version " + tag + ": Banner removed";
             default:
                 return "";
         }
