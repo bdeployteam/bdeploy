@@ -19,6 +19,9 @@ export class CustomAttributeGroupingSelectorComponent implements OnChanges {
   @Input()
   possibleAttributesValuesMap: { [index: string]: CustomAttributesRecord } = {};
 
+  @Input()
+  defaultAttribute: string;
+
   @Output()
   attributeSelection = new EventEmitter();
 
@@ -26,7 +29,8 @@ export class CustomAttributeGroupingSelectorComponent implements OnChanges {
   valuesSelection = new EventEmitter();
 
   get selectedAttribute(): string {
-    return sessionStorage.getItem(this.sessionStorageBaseId + '_attribute');
+    const s = sessionStorage.getItem(this.sessionStorageBaseId + '_attribute');
+    return s ? s : this.defaultAttribute;
   }
   set selectedAttribute(attribute: string) {
     if (attribute && attribute.length > 0) {

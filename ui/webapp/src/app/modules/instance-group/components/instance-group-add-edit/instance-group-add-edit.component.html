@@ -105,6 +105,7 @@
             <ng-container *ngFor="let a of getSortedInstanceGroupAttributeKeys()">
               <div>{{ a }}</div>
               <div>{{ (instanceGroupAttributes?.attributes)[a] }}</div>
+              <div></div>
               <div>
                 <button mat-icon-button type="button" (click)="editInstanceGroupAttribute(a)">
                   <mat-icon>edit</mat-icon>
@@ -128,19 +129,31 @@
       <mat-tab label="Instance Attribute Definitions">
         <div class="tab-content">
           <p>
-            Configure attributes that are available for all Instances of this Instance Group.
+            Configure attributes that are available for all Instances of this Instance Group. If desired, define an
+            attribute by which the instances are grouped by default in the instance overview dialog.
           </p>
           <div class="attributes-grid">
             <ng-container *ngFor="let a of instanceAttributesDescriptors; let i = index">
               <div>{{ a.name }}</div>
               <div>{{ a.description }}</div>
               <div>
+                <button
+                  mat-icon-button
+                  type="button"
+                  (click)="toggleDefaultAttribute(a)"
+                  matTooltip="Select as default grouping attribute"
+                >
+                  <mat-icon *ngIf="isDefaultAttribute(a)">star</mat-icon>
+                  <mat-icon *ngIf="!isDefaultAttribute(a)">star_outline</mat-icon>
+                </button>
+              </div>
+              <div>
                 <button mat-icon-button type="button" (click)="editInstanceAttribute(a, i)">
                   <mat-icon>edit</mat-icon>
                 </button>
               </div>
               <div>
-                <button mat-icon-button type="button" (click)="removeInstanceAttribute(i)">
+                <button mat-icon-button type="button" (click)="removeInstanceAttribute(a, i)">
                   <mat-icon>delete</mat-icon>
                 </button>
               </div>

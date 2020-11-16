@@ -65,6 +65,7 @@ export class InstanceGroupAddEditComponent implements OnInit {
     autoDelete: [''],
     managed: [''],
     instanceAttributes: [''],
+    defaultInstanceGroupingAttribute: [''],
   });
 
   get nameControl() {
@@ -78,6 +79,9 @@ export class InstanceGroupAddEditComponent implements OnInit {
   }
   get logoControl() {
     return this.instanceGroupFormGroup.get('logo');
+  }
+  get defaultInstanceGroupingAttributeControl() {
+    return this.instanceGroupFormGroup.get('defaultInstanceGroupingAttribute');
   }
 
   constructor(
@@ -383,13 +387,31 @@ export class InstanceGroupAddEditComponent implements OnInit {
       .subscribe((r) => {
         if (r) {
           this.instanceAttributesDescriptors.splice(index, 1, r);
+          if (this.isDefaultAttribute(attribute) && attribute.name !== r.name) {
+            this.toggleDefaultAttribute(r);
+          }
           this.sortInstanceAttributes();
         }
       });
   }
 
-  removeInstanceAttribute(index: number) {
+  removeInstanceAttribute(attribute: CustomAttributeDescriptor, index: number) {
+    if (this.isDefaultAttribute(attribute)) {
+      this.defaultInstanceGroupingAttributeControl.setValue(undefined);
+    }
     this.instanceAttributesDescriptors.splice(index, 1);
+  }
+
+  toggleDefaultAttribute(attribute: CustomAttributeDescriptor) {
+    if (this.isDefaultAttribute(attribute)) {
+      this.defaultInstanceGroupingAttributeControl.setValue(undefined);
+    } else {
+      this.defaultInstanceGroupingAttributeControl.setValue(attribute.name);
+    }
+  }
+
+  isDefaultAttribute(attribute: CustomAttributeDescriptor): boolean {
+    return attribute.name === this.defaultInstanceGroupingAttributeControl.value;
   }
 
   private sortInstanceAttributes() {
