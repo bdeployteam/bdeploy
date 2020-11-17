@@ -339,20 +339,6 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     this.instanceService.listInstanceVersions(this.groupParam, this.uuidParam).subscribe((versions) => {
       this.log.debug('got ' + versions.length + ' instance versions');
 
-      if (!versions.length) {
-        this.messageBoxService
-          .open({
-            title: 'Instance no longer available',
-            message: 'The current instance is no longer available on the server',
-            mode: MessageBoxMode.ERROR,
-          })
-          .subscribe((r) => {
-            this.router.navigate(['instance', 'browser', this.groupParam]);
-          });
-
-        return;
-      }
-
       versions.sort((a, b) => {
         return +b.key.tag - +a.key.tag;
       });
