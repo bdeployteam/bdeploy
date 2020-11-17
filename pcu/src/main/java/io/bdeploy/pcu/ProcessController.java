@@ -107,6 +107,9 @@ public class ProcessController {
     /** Time when the process has been started */
     private Instant startTime;
 
+    /** Exit code when the process terminated. NULL in case we do not have one */
+    private Integer exitCode;
+
     /** Time when the process was stopped / crashed */
     private Instant stopTime;
 
@@ -251,8 +254,8 @@ public class ProcessController {
         if (processHandle != null) {
             dto.pid = processHandle.pid();
         }
-        if (process != null && processState.isStopped()) {
-            dto.exitCode = process.exitValue();
+        if (exitCode != null) {
+            dto.exitCode = exitCode;
         }
         return dto;
     }
@@ -395,6 +398,7 @@ public class ProcessController {
         PathHelper.deleteRecursive(infoFile);
 
         // Cancel any pending restart tasks
+        exitCode = null;
         stopTime = null;
         stopRequested = null;
         if (recoverTask != null) {
@@ -458,14 +462,17 @@ public class ProcessController {
         processState = ProcessState.RUNNING_STOP_PLANNED;
 
         // try to gracefully stop the process using it's stop command
-        doInvokeStopCommand(processConfig.stop);
-        if (processExit == null || processExit.isDone()) {
+        doInvokeStopCommand();
+        if (processExit.isDone()) {
             onTerminated();
             return;
         }
 
-        // No stop command defined. Go on with destroying the process via the handle
-        if (!doDestroyProcess()) {
+        // Stop command failed or nothing defined.
+        // Go on with destroying the process via the handle
+        long stopCommandDuration = Duration.between(Instant.now(), stopRequested).toMillis();
+        long gracePeriod = processConfig.processControl.gracePeriod - stopCommandDuration;
+        if (!doDestroyProcess(gracePeriod)) {
             processState = ProcessState.RUNNING;
             logger.log(l -> l.error("Giving up to terminate application. Process does not respond to kill requests."));
             logger.log(l -> l.error("Application state remains {} ", processState));
@@ -545,7 +552,7 @@ public class ProcessController {
         // Wait until we get the lock
         try {
             if (!lock.tryLock()) {
-                logger.log(l -> l.info("Task '{}' is waiting for operation '{}' to finish.", taskName, lockTask));
+                logger.log(l -> l.debug("Task '{}' is waiting for operation '{}' to finish.", taskName, lockTask));
                 lock.lockInterruptibly();
             }
         } catch (InterruptedException ie) {
@@ -617,7 +624,7 @@ public class ProcessController {
         oldHandle.thenRunAsync(() -> {
             executeLocked("ExitHook", DEFAULT_USER, () -> {
                 if (oldHandle != processExit) {
-                    logger.log(l -> l.info("Process handle changed. Skipping exit hook."));
+                    logger.log(l -> l.debug("Process handle changed. Skipping exit hook."));
                     return;
                 }
                 onTerminated();
@@ -656,12 +663,16 @@ public class ProcessController {
         String uptimeString = ProcessControllerHelper.formatDuration(uptime);
 
         // Try to evaluate the exit code
-        Integer exitCode = ProcessControllerHelper.getExitCode(process);
+        exitCode = ProcessControllerHelper.getExitCode(process);
         logger.log(l -> l.info("Application terminated. Exit code: {}; Uptime: {} ", exitCode != null ? exitCode : "N/A",
                 uptimeString));
 
         // Someone requested termination
         if (stopRequested != null || processState == ProcessState.RUNNING_STOP_PLANNED) {
+            if (stopRequested != null) {
+                Duration stopDuration = Duration.between(Instant.now(), stopRequested);
+                logger.log(l -> l.info("Stopping took {}", ProcessControllerHelper.formatDuration(stopDuration)));
+            }
             logger.log(l -> l.info("Application remains stopped as stop was requested."));
             processState = ProcessState.STOPPED;
 
@@ -813,54 +824,59 @@ public class ProcessController {
     }
 
     /** Executes the configured stop command and waits for the termination */
-    private void doInvokeStopCommand(List<String> stopCommand) {
-        if (stopCommand == null || stopCommand.isEmpty()) {
-            logger.log(l -> l.debug("No stop command configured."));
-            return;
-        }
+    private void doInvokeStopCommand() {
         try {
-            logger.log(l -> l.info("Invoking configured stop command {}.", stopCommand));
-            long stopCommandStartTime = System.currentTimeMillis();
-            Process p = launch(stopCommand, true);
-            boolean exited = p.waitFor(processConfig.processControl.gracePeriod, TimeUnit.MILLISECONDS);
-            if (!exited) {
-                // stop command did not complete within allowed time, kill both
-                logger.log(l -> l.warn("Stop command did not finish within configured grace period."));
-                p.destroy();
-                boolean stopExited = p.waitFor(200, TimeUnit.MILLISECONDS);
-                if (!stopExited) {
-                    logger.log(l -> l.warn("Stop command refuses to exit, killing."));
-                    p.destroyForcibly();
-                }
-            } else {
-                // stop command completed within the timeout, check status
-                int exitValue = p.exitValue();
-                if (exitValue != 0) {
-                    logger.log(l -> l.warn("Stop command exited with non-zero code: {}", exitValue));
-                } else {
-                    long remainingGracePeriod = processConfig.processControl.gracePeriod
-                            - (System.currentTimeMillis() - stopCommandStartTime);
-                    logger.log(l -> l.info("Stop command exited with return code 0, remaining grace period: {}",
-                            remainingGracePeriod));
+            List<String> stopCommand = processConfig.stop;
+            if (processConfig.stop == null || processConfig.stop.isEmpty()) {
+                logger.log(l -> l.debug("No stop command configured."));
+                return;
+            }
+            logger.log(l -> l.info("Invoking configured stop command."));
+            logger.log(l -> l.debug("Stop command: {}.", processConfig.stop));
 
-                    // stop command exited, lets give the process a little extra time to exit as well.
-                    try {
-                        processExit.get(remainingGracePeriod, TimeUnit.MILLISECONDS);
-                        logger.log(l -> l.info("Stop command successfullly terminated main process"));
-                    } catch (TimeoutException e) {
-                        logger.log(l -> l.warn("Main process did not exit after stop grace period"));
-                    } catch (Exception e) {
-                        logger.log(l -> l.warn("Exception while waiting for application to terminate.", e));
-                    }
+            Process stopProcess = launch(stopCommand, true);
+
+            // Evaluate exit code of stop command
+            boolean exited = stopProcess.waitFor(processConfig.processControl.gracePeriod, TimeUnit.MILLISECONDS);
+            if (exited) {
+                int exitValue = stopProcess.exitValue();
+                if (exitValue != 0) {
+                    logger.log(l -> l.warn("Stop command exited with non-zero code: {}.", exitValue));
+                    return;
                 }
+                waitForMainProcessAfterStopCommand();
+                return;
+            }
+
+            // Stop command did not complete within allowed time
+            // Kill stop command
+            logger.log(l -> l.warn("Stop command did not finish within configured grace period."));
+            stopProcess.destroy();
+            boolean stopExited = stopProcess.waitFor(200, TimeUnit.MILLISECONDS);
+            if (!stopExited) {
+                logger.log(l -> l.warn("Stop command refuses to exit, killing."));
+                stopProcess.destroyForcibly();
             }
         } catch (Exception e) {
             logger.log(l -> l.error("Failed to execute stop command.", e));
         }
     }
 
+    /** Waits for the main process to terminate after the stop command has been executed */
+    private void waitForMainProcessAfterStopCommand() throws Exception {
+        try {
+            logger.log(l -> l.info("Stop command sucessfully executed. Waiting for termination of main process..."));
+            long stopCommandDuration = Duration.between(Instant.now(), stopRequested).toMillis();
+            long remainingGracePeriod = processConfig.processControl.gracePeriod - stopCommandDuration;
+            processExit.get(remainingGracePeriod, TimeUnit.MILLISECONDS);
+            logger.log(l -> l.info("Stop command successfully terminated main process."));
+        } catch (TimeoutException e) {
+            logger.log(l -> l.warn("Main process did not exit after stop grace period."));
+        }
+    }
+
     /** Signals the process to terminate and waits for the completion */
-    private boolean doDestroyProcess() {
+    private boolean doDestroyProcess(long gracePeriod) {
         int retryCount = 0;
         boolean stopped = false;
         while (!stopped && retryCount < 10) {
@@ -875,16 +891,15 @@ public class ProcessController {
 
             // Wait configured delay to stop
             try {
-                processExit.get(processConfig.processControl.gracePeriod, TimeUnit.MILLISECONDS);
+                processExit.get(gracePeriod, TimeUnit.MILLISECONDS);
             } catch (TimeoutException e) {
-                logger.log(l -> l.warn("Timed-out waiting for application to exit. Timeout: {} ms",
-                        processConfig.processControl.gracePeriod));
+                logger.log(l -> l.warn("Timed-out waiting for application to exit. Timeout: {} ms", gracePeriod));
             } catch (Exception e) {
                 logger.log(l -> l.warn("Exception while waiting for application to terminate.", e));
             }
 
             // Continue when process is still alive.
-            stopped = processExit == null || processExit.isDone();
+            stopped = processExit.isDone();
             if (!stopped) {
                 retryCount++;
             }
@@ -911,7 +926,7 @@ public class ProcessController {
     /** Notifies all listeners about the of the process */
     private void notifyListeners(ProcessStateChangeDto status) {
         try {
-            logger.log(l -> l.info("Notify listeners about new process state {}.", status.newState));
+            logger.log(l -> l.debug("Notify listeners about new process state {}.", status.newState));
             statusListeners.forEach(c -> c.accept(status));
         } catch (Exception ex) {
             logger.log(l -> l.error("Failed to notify listener about current process status.", ex));
