@@ -27,14 +27,6 @@ namespace Bdeploy.Launcher {
         /// Checks that the given file point to a valid application descriptor
         /// </summary>
         protected bool ValidateDescriptor() {
-            // File must exist 
-            if (!File.Exists(clickAndStartFile)) {
-                Log.Fatal("Application descriptor '{0}' not found.", clickAndStartFile);
-                Log.Information("Exiting application.");
-                return false;
-            }
-
-            // We must be able to deserialize the content
             descriptor = ClickAndStartDescriptor.FromFile(clickAndStartFile);
             if (descriptor == null) {
                 Log.Fatal("Cannot deserialize application descriptor.", clickAndStartFile);

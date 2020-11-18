@@ -68,6 +68,7 @@ public class BrowserDialog extends BaseDialog {
     private JButton uninstallButton;
 
     private JMenuItem launchItem;
+    private JMenuItem customizeAndLaunchItem;
     private JMenuItem refreshItem;
     private JMenuItem uninstallItem;
 
@@ -117,21 +118,21 @@ public class BrowserDialog extends BaseDialog {
 
         launchButton = new JButton();
         launchButton.setText("Launch");
-        launchButton.setToolTipText("Launches the selected application");
+        launchButton.setToolTipText("Launches the selected application.");
         launchButton.setIcon(WindowHelper.loadIcon("/launch.png", 24, 24));
         launchButton.addActionListener(this::onLaunchButtonClicked);
         launchButton.setBackground(Color.WHITE);
 
         refreshButton = new JButton();
         refreshButton.setText("Refresh");
-        refreshButton.setToolTipText("Contacts the remote server to refresh the properties of the installed applications");
+        refreshButton.setToolTipText("Contacts the remote server to refresh the selected applications.");
         refreshButton.setIcon(WindowHelper.loadIcon("/refresh.png", 24, 24));
         refreshButton.addActionListener(this::onRefreshButtonClicked);
         refreshButton.setBackground(Color.WHITE);
 
         uninstallButton = new JButton();
         uninstallButton.setText("Uninstall");
-        uninstallButton.setToolTipText("Removes the selected application");
+        uninstallButton.setToolTipText("Removes the selected application.");
         uninstallButton.setIcon(WindowHelper.loadIcon("/delete.png", 24, 24));
         uninstallButton.addActionListener(this::onUninstallButtonClicked);
         uninstallButton.setBackground(Color.WHITE);
@@ -212,19 +213,29 @@ public class BrowserDialog extends BaseDialog {
         // Context menu
         launchItem = new JMenuItem(launchButton.getText());
         launchItem.setIcon(WindowHelper.loadIcon("/launch.png", 16, 16));
+        launchItem.setToolTipText(launchButton.getToolTipText());
         launchItem.addActionListener(this::onLaunchButtonClicked);
+
+        customizeAndLaunchItem = new JMenuItem("Customize & Launch");
+        customizeAndLaunchItem.setToolTipText("Opens a dialog to modify the application arguments before launching.");
+        customizeAndLaunchItem.setIcon(WindowHelper.loadIcon("/build.png", 16, 16));
+        customizeAndLaunchItem.addActionListener(this::onLaunchButtonClicked);
 
         uninstallItem = new JMenuItem(uninstallButton.getText());
         uninstallItem.setIcon(WindowHelper.loadIcon("/delete.png", 16, 16));
+        uninstallItem.setToolTipText(uninstallButton.getToolTipText());
         uninstallItem.addActionListener(this::onUninstallButtonClicked);
 
         refreshItem = new JMenuItem(refreshButton.getText());
         refreshItem.setIcon(WindowHelper.loadIcon("/refresh.png", 16, 16));
+        refreshItem.setToolTipText(refreshButton.getToolTipText());
         refreshItem.addActionListener(this::onRefreshButtonClicked);
 
         JPopupMenu menu = new JPopupMenu();
         menu.add(launchItem);
         menu.add(refreshItem);
+        menu.add(new JSeparator());
+        menu.add(customizeAndLaunchItem);
         menu.add(new JSeparator());
         menu.add(uninstallItem);
         table.setComponentPopupMenu(menu);
@@ -267,7 +278,11 @@ public class BrowserDialog extends BaseDialog {
     /** Notification that the selected app should be launched */
     private void onLaunchButtonClicked(ActionEvent e) {
         ClientSoftwareConfiguration app = getSelectedApps().get(0);
-        doLaunch(app);
+        List<String> args = new ArrayList<>();
+        if (e.getSource() == customizeAndLaunchItem) {
+            args.add("--customizeArgs");
+        }
+        doLaunch(app, args);
     }
 
     /** Notification that the selected app should be removed */
@@ -309,11 +324,11 @@ public class BrowserDialog extends BaseDialog {
     }
 
     /** Launches the given application */
-    private void doLaunch(ClientSoftwareConfiguration app) {
+    private void doLaunch(ClientSoftwareConfiguration app, List<String> args) {
         progressBar.setIndeterminate(true);
         progressBar.setString("Launching '" + app.clickAndStart.applicationId + "'");
 
-        AppLauncher task = new AppLauncher(rootDir, app);
+        AppLauncher task = new AppLauncher(rootDir, app, args);
         task.addPropertyChangeListener(this::doUpdateProgessBar);
         task.execute();
     }
@@ -400,7 +415,7 @@ public class BrowserDialog extends BaseDialog {
             if (apps.size() != 1) {
                 return;
             }
-            doLaunch(apps.get(0));
+            doLaunch(apps.get(0), Collections.emptyList());
         }
 
     }
@@ -415,7 +430,7 @@ public class BrowserDialog extends BaseDialog {
             if (apps.size() != 1) {
                 return;
             }
-            doLaunch(apps.get(0));
+            doLaunch(apps.get(0), Collections.emptyList());
         }
     }
 

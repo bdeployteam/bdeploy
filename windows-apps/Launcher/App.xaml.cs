@@ -2,6 +2,7 @@
 using Serilog;
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -27,15 +28,16 @@ namespace Bdeploy.Launcher {
             // Initialize logging infrastructure
             string path = Path.Combine(LogFactory.GetLogsDir(), "launcher-log.txt");
             Log.Logger = LogFactory.CreateGlobalLogger(path);
+            Log.Information("Launcher started. Arguments {0} ", e.Args);
 
             // Launch, Uninstall or Browse
             int exitCode;
-            if (Utils.HasArgument(e.Args, "/Uninstall")) {
+            if (e.Args.Length == 0) {
+                exitCode = DoLaunchBrowser();
+            } else if (Utils.HasArgument(e.Args, "/Uninstall")) {
                 bool forAllUsers = Utils.HasArgument(e.Args, "/ForAllUsers");
                 exitCode = DoUninstall(e.Args, forAllUsers);
-            } else if(e.Args.Length == 0) {
-                exitCode = DoLaunchBrowser();
-            } else { 
+            } else {
                 exitCode = await DoLaunch(e.Args);
             }
             Current.Shutdown(exitCode);
@@ -46,17 +48,22 @@ namespace Bdeploy.Launcher {
         /// </summary>
         /// <param name="args"></param>
         private async Task<int> DoLaunch(string[] args) {
-            // Bug in Firefox: When using Click & Start then Firefox does not quote the arguments correctly.
-            // Thus an application with a space in the name "My App.bdeploy" is passed as two individual arguments.
-            // instead of a single one. As a workaround we combine all arguments into a single one
-            string clickAndStartFile = string.Join(" ", args);
+            string clickAndStartFile = FindClickAndStart(args);
+            if (clickAndStartFile == null) {
+                Log.Fatal("Unexpected number of arguments. Usage BDeploy.exe myApp.bdeploy");
+                return -1;
+            }
+
+            // Remove click and start from arguments
+            // Pass all others to the application
+            args = args.Where(val => val != clickAndStartFile).ToArray();
 
             // Launch and wait for termination
             AppLauncher launcher = new AppLauncher(clickAndStartFile);
             launcher.UpdateFailed += Launcher_UpdateFailed;
             launcher.UpdateWaiting += Launcher_UpdateWaiting;
             launcher.StartUpdating += Launcher_StartUpdating;
-            int exitCode = launcher.Start();
+            int exitCode = launcher.Start(args);
 
             // Check if another launcher has launched us
             // If so then exit code handling is done by the other launcher
@@ -84,7 +91,7 @@ namespace Bdeploy.Launcher {
         private int DoUninstall(string[] args, bool forAllUsers) {
             string clickAndStartFile = FindClickAndStart(args);
             if (clickAndStartFile == null) {
-                Console.WriteLine("Unexpected number of arguments. Usage BDeploy.exe /Uninstall myApp.bdeploy");
+                Log.Fatal("Unexpected number of arguments. Usage BDeploy.exe /Uninstall myApp.bdeploy");
                 return -1;
             }
             AppUninstaller uninstaller = new AppUninstaller(clickAndStartFile, forAllUsers);
@@ -100,19 +107,16 @@ namespace Bdeploy.Launcher {
         }
 
         /// <summary>
-        /// Evaluates the arguments to find the "/Uninstall <file>" pair.
+        /// Evaluates the arguments to find the "Click&Start" file. 
+        /// NOTE: We cannot rely on the file extension as Firefox will pass a .bdeploy.json file.
         /// </summary>
         /// <param name="args">Arguments pass to the application</param>
-        /// <returns>File argument specified after the /Uninstall option</returns>
+        /// <returns>The argument refering to the "Click&Start" file.</returns>
         private static string FindClickAndStart(string[] args) {
-            for (int i = 0; i < args.Length; i++) {
-                String arg = args[i];
-                if (!arg.Equals("/Uninstall", StringComparison.OrdinalIgnoreCase)) {
-                    continue;
-                }
-                // Next argument must be the clickAndStartFile file
-                if (i < args.Length - 1) {
-                    return args[i + 1];
+            foreach (string arg in args) {
+                ClickAndStartDescriptor descriptor = ClickAndStartDescriptor.FromFile(arg);
+                if (descriptor != null) {
+                    return arg;
                 }
             }
             return null;

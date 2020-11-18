@@ -16,10 +16,12 @@ import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
 public class AppLauncher extends SwingWorker<Object, Void> {
 
     private final Path rootDir;
+    private final List<String> args;
     private final ClientSoftwareConfiguration app;
 
-    public AppLauncher(Path rootDir, ClientSoftwareConfiguration app) {
+    public AppLauncher(Path rootDir, ClientSoftwareConfiguration app, List<String> args) {
         this.rootDir = rootDir;
+        this.args = args;
         this.app = app;
     }
 
@@ -31,6 +33,7 @@ public class AppLauncher extends SwingWorker<Object, Void> {
         List<String> command = new ArrayList<>();
         command.add(launcher.toFile().getAbsolutePath());
         command.add(launchFile.toFile().getAbsolutePath());
+        command.addAll(args);
         ProcessBuilder b = new ProcessBuilder(command);
         Process process = b.start();
 

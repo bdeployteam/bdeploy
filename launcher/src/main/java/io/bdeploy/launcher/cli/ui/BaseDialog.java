@@ -30,6 +30,7 @@ public class BaseDialog extends JFrame {
     }
 
     private final transient Object lock = new Object();
+    private int closeReason = 0;
 
     /**
      * Creates a new centered dialog with the given dimensions
@@ -42,9 +43,8 @@ public class BaseDialog extends JFrame {
 
             @Override
             public void windowClosing(WindowEvent we) {
-                doClose();
+                doClose(-1);
             }
-
         });
         WindowHelper.center(this);
     }
@@ -53,7 +53,7 @@ public class BaseDialog extends JFrame {
      * Blocks the current thread until the main window is closed.
      */
     @SuppressFBWarnings(value = { "UW_UNCOND_WAIT", "WA_NOT_IN_LOOP" })
-    public void waitForExit() {
+    public int waitForExit() {
         synchronized (lock) {
             try {
                 lock.wait();
@@ -62,12 +62,14 @@ public class BaseDialog extends JFrame {
                 log.error("Failed to wait until the application is closed", ie);
             }
         }
+        return closeReason;
     }
 
     /**
      * Invoked when the user closes the dialog.
      */
-    protected void doClose() {
+    protected void doClose(int closeReason) {
+        this.closeReason = closeReason;
         dispose();
         synchronized (lock) {
             lock.notifyAll();

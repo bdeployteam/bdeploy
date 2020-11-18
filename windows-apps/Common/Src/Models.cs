@@ -170,6 +170,9 @@ namespace Bdeploy.Shared {
         /// Deserializes the given JSON that represents the serialized descriptor. 
         /// </summary>
         public static ClickAndStartDescriptor FromFile(string file) {
+            if(!File.Exists(file)) {
+                return null;
+            }
             UTF8Encoding encoding = new UTF8Encoding(false);
             string content = File.ReadAllText(file, encoding);
             return FromString(content);

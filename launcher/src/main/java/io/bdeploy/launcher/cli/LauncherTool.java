@@ -17,6 +17,7 @@ import java.util.NavigableMap;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -85,6 +86,7 @@ import io.bdeploy.launcher.cli.LauncherTool.LauncherConfig;
 import io.bdeploy.launcher.cli.branding.LauncherSplash;
 import io.bdeploy.launcher.cli.branding.LauncherSplashReporter;
 import io.bdeploy.launcher.cli.ui.MessageDialogs;
+import io.bdeploy.launcher.cli.ui.TextAreaDialog;
 
 @CliName("launcher")
 @Help("A tool which launches an application described by a '.bdeploy' file")
@@ -134,6 +136,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         @Help(value = "Terminate the application when an error occurs instead of opening an error dialog.", arg = false)
         boolean exitOnError() default false;
+
+        @Help(value = "Opens a dialog that allows to modify the arguments passed to the application.", arg = false)
+        boolean customizeArgs() default false;
     }
 
     /** The currently running launcher version */
@@ -168,6 +173,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
     /** Indicates whether or not the root is read-only */
     private boolean readOnlyRootDir;
+
+    /** Indicates whether command line arguments should be customized */
+    private boolean customizeArgs;
 
     public LauncherTool() {
         super(LauncherConfig.class);
@@ -214,7 +222,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 Version requiredVersion = requiredLauncher != null ? requiredLauncher.getKey() : runningVersion;
 
                 // Launch the application or delegate launching
-                Process process;
+                Process process = null;
                 if (shouldDelegate(runningVersion, requiredVersion)) {
                     log.info("Application requires an older launcher version. Delegating...");
                     doInstallSideBySide(hive, requiredLauncher);
@@ -265,6 +273,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 }
                 log.info("Application terminated with exit code {}.", exitCode);
             }
+        } catch (CancellationException ex) {
+            log.info("Launching has been canceled by the user.");
+            doExit(-1);
         } catch (SoftwareUpdateException ex) {
             log.error("Software update cannot be installed.", ex);
             if (config.exitOnError()) {
@@ -282,7 +293,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 auditor.close();
             }
         }
-
         return null;
     }
 
@@ -354,6 +364,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         poolDir = appsDir.resolve("pool");
         appDir = appsDir.resolve(clickAndStart.applicationId);
         readOnlyRootDir = PathHelper.isReadOnly(rootDir);
+        customizeArgs = config.customizeArgs();
 
         log.info("Home directory: {}{}", rootDir, readOnlyRootDir ? " (readonly)" : "");
         if (userArea != null) {
@@ -655,6 +666,12 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         // Create the actual start command and replace all defined variables
         ProcessConfiguration pc = appCfg.renderDescriptor(appSpecificResolvers);
         List<String> command = TemplateHelper.process(pc.start, appSpecificResolvers);
+        if (customizeArgs) {
+            TextAreaDialog dialog = new TextAreaDialog();
+            if (!dialog.customize(appCfg.name, command)) {
+                throw new CancellationException();
+            }
+        }
         log.info("Executing {}", command.stream().collect(Collectors.joining(" ")));
         try {
             ProcessBuilder b = new ProcessBuilder(command).redirectError(Redirect.INHERIT).redirectInput(Redirect.INHERIT)
