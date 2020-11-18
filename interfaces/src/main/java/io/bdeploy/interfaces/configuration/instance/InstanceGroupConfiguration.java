@@ -47,4 +47,9 @@ public class InstanceGroupConfiguration {
      * Attribute definitions for instances of this instance group
      */
     public List<CustomAttributeDescriptor> instanceAttributes = new ArrayList<>();
+
+    /**
+     * The name of the default grouping attribute in the instance overview UI.
+     */
+    public String defaultInstanceGroupingAttribute;
 }

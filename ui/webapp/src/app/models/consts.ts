@@ -95,6 +95,7 @@ export const EMPTY_INSTANCE_GROUP: InstanceGroupConfiguration = {
   autoDelete: true,
   managed: false,
   instanceAttributes: [],
+  defaultInstanceGroupingAttribute: null,
 };
 
 export const EMPTY_SOFTWARE_REPO: SoftwareRepositoryConfiguration = {

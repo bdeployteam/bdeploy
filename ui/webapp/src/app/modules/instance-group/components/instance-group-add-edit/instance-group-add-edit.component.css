@@ -96,7 +96,7 @@ mat-form-field {
   margin: 20px;
 
   display: grid;
-  grid-template-columns: auto auto 32px 32px;
+  grid-template-columns: auto auto 32px 32px 32px;
 
   row-gap: 5px;
   column-gap: 10px;
