@@ -22,7 +22,10 @@ export class HttpErrorHandlerInterceptor implements HttpInterceptor {
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(request).pipe(
       catchError((e) => {
-        if (e instanceof HttpErrorResponse && e.status === 403) {
+        if (
+          e instanceof HttpErrorResponse &&
+          (e.status === 403 || (e.status === 404 && !request.headers.has(NO_ERROR_HANDLING_HDR)))
+        ) {
           this.snackbar.open(
             `Unfortunately, /${e.url} was not found (wrong URL or insufficient rights), we returned you to the safe-zone.`,
             'DISMISS',
