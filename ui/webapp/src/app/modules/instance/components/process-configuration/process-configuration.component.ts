@@ -3,6 +3,7 @@ import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/c
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { ActivatedRoute, Params, Router } from '@angular/router';
+import { format } from 'date-fns';
 import { cloneDeep, isEqual } from 'lodash-es';
 import { DragulaService } from 'ng2-dragula';
 import ReconnectingWebSocket from 'reconnecting-websocket';
@@ -1235,7 +1236,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     if (this.selectedConfig && this.selectedConfig.readonly) {
       return true;
     }
-    if (!this.authService.isScopedWrite(this.instanceGroup.name)) {
+    if (!this.authService.isScopedWrite(this.instanceGroup?.name)) {
       return true;
     }
     return false;
@@ -1548,5 +1549,9 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       color: this.instanceBanner.foregroundColor,
       'background-color': this.instanceBanner.backgroundColor,
     };
+  }
+
+  formatTimestamp(timestamp: number): string {
+    return format(new Date(timestamp), 'dd.MM.yyyy HH:mm');
   }
 }

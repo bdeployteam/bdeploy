@@ -85,6 +85,8 @@ export const EMPTY_INSTANCE_BANNER_RECORD: InstanceBannerRecord = {
   foregroundColor: null,
   backgroundColor: null,
   text: null,
+  user: null,
+  timestamp: 0,
 };
 
 export const EMPTY_INSTANCE_GROUP: InstanceGroupConfiguration = {

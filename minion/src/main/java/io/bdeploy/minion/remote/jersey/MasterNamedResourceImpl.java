@@ -928,6 +928,9 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     public void updateBanner(String instanceId, InstanceBannerRecord instanceBannerRecord) {
         InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
         im.getBanner(hive).set(instanceBannerRecord);
+
+        im.getHistory(hive).record(instanceBannerRecord.text != null ? Action.BANNER_SET : Action.BANNER_CLEAR,
+                context.getUserPrincipal().getName(), null);
     }
 
     @Override

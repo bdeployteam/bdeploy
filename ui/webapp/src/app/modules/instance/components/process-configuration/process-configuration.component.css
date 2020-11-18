@@ -266,9 +266,11 @@
   white-space: normal;
   height: auto;
   padding-top: 10px;
-  padding-bottom: 10px;
   flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
   max-height: 30vh;
+  align-items: flex-end;
 }
 
 .banner-div {
@@ -276,4 +278,10 @@
   width: 100%;
   height: 100%;
   overflow: auto;
+}
+
+.banner-info {
+  font-size: small;
+  line-height: normal;
+  padding: 4px 0px;
 }
