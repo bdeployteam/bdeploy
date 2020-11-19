@@ -154,7 +154,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
         });
         srv.setCorsEnabled(config.allowCors());
 
-        registerMasterResources(srv, reg, config.publishWebapp(), r, srv.getRemoteActivityReporter(), r.createPluginManager(srv));
+        registerMasterResources(srv, reg, config.publishWebapp(), r, r.createPluginManager(srv));
     }
 
     private BHiveRegistry setupServerCommon(ActivityReporter.Delegating delegate, MinionRoot r, JerseyServer srv,
@@ -170,7 +170,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
     }
 
     public static void registerMasterResources(RegistrationTarget srv, BHiveRegistry reg, boolean webapp, MinionRoot minionRoot,
-            ActivityReporter reporter, PluginManager pluginManager) {
+            PluginManager pluginManager) {
 
         if (minionRoot.getMode() == MinionMode.CENTRAL) {
             srv.register(CentralUpdateResourceImpl.class);

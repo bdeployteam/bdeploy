@@ -21,7 +21,7 @@ public class UploadInfoDto {
     /** manifest tag for generic zip uploads */
     public String tag;
     /** supported operating systems for generic zip uploads (null == all OS) */
-    public OperatingSystem supportedOperatingSystems[];
+    public OperatingSystem[] supportedOperatingSystems;
 
     /** an upload/import result message for UI interaction */
     public String details;

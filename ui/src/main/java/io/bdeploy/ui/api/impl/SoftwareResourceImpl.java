@@ -211,7 +211,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
         try {
             Files.copy(inputStream, targetFile);
             URI targetUri = UriBuilder.fromUri("jar:" + targetFile.toUri()).build();
-            try (FileSystem fs = FileSystems.newFileSystem(targetUri, new TreeMap<String, Object>())) {
+            try (FileSystem fs = FileSystems.newFileSystem(targetUri, new TreeMap<>())) {
                 if (Files.exists(fs.getPath("/manifests")) && Files.exists(fs.getPath("/objects"))) { // is hive?
                     dto.isHive = true;
                 } else if (Files.exists(fs.getPath("/product-info.yaml"))) { // is product-zip?
@@ -227,7 +227,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
                     SortedSet<Key> pscan = ProductManifest.scan(zipHive);
                     SortedSet<Key> mscan = zipHive.execute(new ManifestListOperation());
                     dto.details = "Hive with " + mscan.size() + " manifest(s) "
-                            + (pscan.size() > 0 ? "(" + pscan.size() + " product(s)) " : "");
+                            + (pscan.isEmpty() ? "" : "(" + pscan.size() + " product(s)) ");
                 } catch (Exception e) {
                     log.error("not a hive", e);
                     dto.isHive = false;
@@ -292,8 +292,8 @@ public class SoftwareResourceImpl implements SoftwareResource {
 
                 assertNullOrRelativePath(pd.configTemplates);
                 assertNullOrRelativePath(pd.versionFile);
-                pd.instanceTemplates.forEach(t -> assertNullOrRelativePath(t));
-                pd.applicationTemplates.forEach(t -> assertNullOrRelativePath(t));
+                pd.instanceTemplates.forEach(this::assertNullOrRelativePath);
+                pd.applicationTemplates.forEach(this::assertNullOrRelativePath);
                 assertNullOrRelativePath(pd.pluginFolder);
 
                 Path vDesc = desc.getParent().resolve(pd.versionFile);

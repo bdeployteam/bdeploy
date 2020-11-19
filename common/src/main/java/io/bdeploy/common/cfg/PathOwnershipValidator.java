@@ -32,7 +32,7 @@ public class PathOwnershipValidator implements ConfigValidator<String> {
             boolean ok = owner.getName().equals(current.getName());
 
             if (!ok) {
-                log.warn("Path ownership validation failed: user=" + current + ", owner=" + owner);
+                log.warn("Path ownership validation failed: user={}, owner={}", current, owner);
             }
 
             return ok;
@@ -40,7 +40,7 @@ public class PathOwnershipValidator implements ConfigValidator<String> {
             log.debug("Checking directory ownership not possible", ex);
             return true; // OK, we can't check on this filesystem as it does not know the concept of an 'owner'.
         } catch (IOException e) {
-            log.warn("Cannot check directory ownership of " + target, e);
+            log.warn("Cannot check directory ownership of {}", target, e);
             return false; // Not OK, something is too wrong to validate.
         }
     }
