@@ -88,7 +88,7 @@
     <mat-slide-toggle name="referrals" [(ngModel)]="server.followReferrals">Follow Referrals</mat-slide-toggle>
   </div>
 </form>
-<div mat-dialog-actions align="end">
+<div mat-dialog-actions>
   <button mat-raised-button [mat-dialog-close]="null">Cancel</button>
   <button mat-raised-button color="primary" [mat-dialog-close]="server" [disabled]="loading || f.invalid">Apply</button>
 </div>

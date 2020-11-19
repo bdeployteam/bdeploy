@@ -66,3 +66,7 @@
 .datafile-search-field {
   min-width: 525px;
 }
+
+.mat-dialog-actions {
+  justify-content: flex-end;
+}

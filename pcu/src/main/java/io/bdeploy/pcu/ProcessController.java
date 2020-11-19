@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -863,7 +864,7 @@ public class ProcessController {
     }
 
     /** Waits for the main process to terminate after the stop command has been executed */
-    private void waitForMainProcessAfterStopCommand() throws Exception {
+    private void waitForMainProcessAfterStopCommand() throws InterruptedException, ExecutionException {
         try {
             logger.log(l -> l.info("Stop command sucessfully executed. Waiting for termination of main process..."));
             long stopCommandDuration = Duration.between(Instant.now(), stopRequested).toMillis();

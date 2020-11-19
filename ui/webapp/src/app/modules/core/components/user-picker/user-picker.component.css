@@ -9,3 +9,7 @@
   justify-content: flex-start;
   align-items: center;
 }
+
+.mat-dialog-actions {
+  justify-content: flex-end;
+}

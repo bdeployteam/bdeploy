@@ -18,14 +18,13 @@ import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.launcher.cli.ClientApplicationDto;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
 import io.bdeploy.launcher.cli.ClientSoftwareManifest;
-import io.bdeploy.launcher.cli.LauncherTool;
 
 /**
  * A worker that refreshes the details of the installed applications.
  */
 public class AppRefresher extends SwingWorker<Void, Object> {
 
-    private static final Logger log = LoggerFactory.getLogger(LauncherTool.class);
+    private static final Logger log = LoggerFactory.getLogger(AppRefresher.class);
 
     private final Path rootDir;
     private final Collection<ClientSoftwareConfiguration> apps;

@@ -15,3 +15,7 @@
 .flex-horiz *:not(:first-child) {
   margin-left: 10px;
 }
+
+.mat-dialog-actions {
+  justify-content: flex-end;
+}

@@ -13,3 +13,7 @@
 .warn-text {
   margin-right: 10px;
 }
+
+.mat-dialog-actions {
+  justify-content: flex-end;
+}

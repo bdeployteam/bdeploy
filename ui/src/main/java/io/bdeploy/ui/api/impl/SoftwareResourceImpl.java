@@ -96,7 +96,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
                 result.add(k);
             }
         }
-        result.removeIf(k -> apps.contains(k)); // remove all manifests that belong to a product
+        result.removeIf(apps::contains); // remove all manifests that belong to a product
         result.sort(vss.getKeyComparator(null, null));
         return result;
     }
@@ -242,131 +242,131 @@ public class SoftwareResourceImpl implements SoftwareResource {
 
     @Override
     public UploadInfoDto importRawContent(UploadInfoDto dto) {
-
-        boolean delete = true;
-        Path targetFile = minion.getDownloadDir().resolve(dto.tmpFilename);
-        if (dto.isHive) {
-            // import full hive
-            URI targetUri = UriBuilder.fromUri("jar:" + targetFile.toUri()).build();
-            try (BHive zipHive = new BHive(targetUri, new ActivityReporter.Null())) {
-                SortedSet<Key> manifestKeys = zipHive.execute(new ManifestListOperation());
-                if (manifestKeys.isEmpty()) {
-                    throw new WebApplicationException("ZIP file does not contain a manifest.", Status.BAD_REQUEST);
-                }
-
-                // Determine required objects
-                CopyOperation copy = new CopyOperation().setDestinationHive(hive);
-                ObjectListOperation scan = new ObjectListOperation();
-                int mcount = 0;
-                for (Key manifestKey : manifestKeys) {
-                    // Ignore existing software
-                    if (Boolean.TRUE.equals(hive.execute(new ManifestExistsOperation().setManifest(manifestKey)))) {
-                        continue;
-                    }
-                    copy.addManifest(manifestKey);
-                    scan.addManifest(manifestKey);
-                    mcount++;
-                }
-
-                // Add all required artifacts
-                SortedSet<ObjectId> objectIds = zipHive.execute(scan);
-                objectIds.forEach(copy::addObject);
-
-                // Execute import only if we have something to do
-                if (mcount > 0) {
-                    zipHive.execute(copy);
-                }
-                dto.details = mcount + " Manifests imported";
-            } finally {
-                PathHelper.deleteRecursive(targetFile);
+        try {
+            Path targetFile = minion.getDownloadDir().resolve(dto.tmpFilename);
+            if (dto.isHive) {
+                doImportHive(dto, targetFile);
+            } else if (dto.isProduct) {
+                doImportProduct(dto, targetFile);
+            } else {
+                doImport(dto, targetFile);
             }
+            PathHelper.deleteRecursive(targetFile);
+            return dto;
+        } catch (IOException e) {
+            throw new WebApplicationException("Failed to import file: " + e.getMessage(), Status.BAD_REQUEST);
+        }
+    }
 
-        } else if (dto.isProduct) {
-            try (FileSystem zfs = PathHelper.openZip(targetFile)) {
-                // If we ever want to resolve dependencies from software repos, we need a master URL here (RemoteService).
-                DependencyFetcher fetcher = new LocalDependencyFetcher();
-
-                // validate paths, etc. neither product-info.yaml, nor product-version.yaml are allowed to use '..' in paths.
-                Path desc = ProductManifestBuilder.getDescriptorPath(zfs.getPath("/"));
-                ProductDescriptor pd = ProductManifestBuilder.readProductDescriptor(desc);
-
-                assertNullOrRelativePath(pd.configTemplates);
-                assertNullOrRelativePath(pd.versionFile);
-                pd.instanceTemplates.forEach(this::assertNullOrRelativePath);
-                pd.applicationTemplates.forEach(this::assertNullOrRelativePath);
-                assertNullOrRelativePath(pd.pluginFolder);
-
-                Path vDesc = desc.getParent().resolve(pd.versionFile);
-                ProductVersionDescriptor pvd = ProductManifestBuilder.readProductVersionDescriptor(desc, vDesc);
-
-                for (Entry<String, Map<OperatingSystem, String>> entry : pvd.appInfo.entrySet()) {
-                    for (Entry<OperatingSystem, String> loc : entry.getValue().entrySet()) {
-                        RuntimeAssert.assertFalse(loc.getValue().contains("..") || loc.getValue().startsWith("/"),
-                                String.format(RELPATH_ERROR, loc.getValue()));
-                    }
-                }
-
-                Manifest.Key prodKey = new Manifest.Key(pd.product + "/product", pvd.version);
+    private void doImport(UploadInfoDto dto, Path targetFile) throws IOException {
+        try (FileSystem zfs = PathHelper.openZip(targetFile)) {
+            Path zroot = zfs.getPath("/");
+            if (dto.supportedOperatingSystems == null) {
+                Manifest.Key key = new Manifest.Key(dto.name, dto.tag);
                 SortedSet<Manifest.Key> existing = hive.execute(new ManifestListOperation());
-                if (!existing.contains(prodKey)) {
-                    ProductManifestBuilder.importFromDescriptor(desc, hive, fetcher, false);
-                    dto.details = "Product (" + pd.name + ", " + pvd.version + ") imported";
+                if (!existing.contains(key)) {
+                    hive.execute(new ImportOperation().setSourcePath(zroot).setManifest(key));
+                    dto.details = "Import of " + key + " successful";
                 } else {
-                    dto.details = "Skipped import of Product (" + pd.name + ", " + pvd.version + "). Product already exists!";
+                    dto.details = "Skipped import of " + dto.name + ":" + dto.tag + ". Software already exists!";
                 }
-            } catch (IOException e) {
-                delete = false;
-                throw new WebApplicationException("Failed to import file: " + e.getMessage(), Status.BAD_REQUEST);
-            } finally {
-                if (delete) {
-                    PathHelper.deleteRecursive(targetFile);
-                }
-            }
-        } else {
-            try (FileSystem zfs = PathHelper.openZip(targetFile)) {
-                Path zroot = zfs.getPath("/");
-                if (dto.supportedOperatingSystems == null) {
-                    Manifest.Key key = new Manifest.Key(dto.name, dto.tag);
-                    SortedSet<Manifest.Key> existing = hive.execute(new ManifestListOperation());
-                    if (!existing.contains(key)) {
-                        hive.execute(new ImportOperation().setSourcePath(zroot).setManifest(key));
-                        dto.details = "Import of " + key + " successful";
-                    } else {
-                        dto.details = "Skipped import of " + dto.name + ":" + dto.tag + ". Software already exists!";
-                    }
-                } else {
-                    String details = "Import of " + dto.name + ":" + dto.tag + " on ";
-                    int count = 0;
-                    for (OperatingSystem os : dto.supportedOperatingSystems) {
-                        ScopedManifestKey key = new ScopedManifestKey(dto.name, os, dto.tag);
+            } else {
+                StringBuilder builder = new StringBuilder();
+                builder.append("Import of " + dto.name + ":" + dto.tag + " on ");
+                int count = 0;
+                for (OperatingSystem os : dto.supportedOperatingSystems) {
+                    ScopedManifestKey key = new ScopedManifestKey(dto.name, os, dto.tag);
 
-                        SortedSet<Manifest.Key> existing = hive.execute(new ManifestListOperation());
-                        if (!existing.contains(key.getKey())) {
-                            hive.execute(new ImportOperation().setSourcePath(zroot).setManifest(key.getKey()));
-                            details += (count++ == 0 ? "" : ", ") + os.name();
-                        }
-                    }
-                    dto.details = details + " successful";
-                    if (count == 0) {
-                        dto.details = "Skipped import of " + dto.name + ":" + dto.tag + ". Software already exists!";
+                    SortedSet<Manifest.Key> existing = hive.execute(new ManifestListOperation());
+                    if (!existing.contains(key.getKey())) {
+                        hive.execute(new ImportOperation().setSourcePath(zroot).setManifest(key.getKey()));
+                        builder.append((count++ == 0 ? "" : ", ") + os.name());
                     }
                 }
-            } catch (IOException e) {
-                delete = false;
-                throw new WebApplicationException("Failed to import file: " + e.getMessage(), Status.BAD_REQUEST);
-            } finally {
-                if (delete) {
-                    PathHelper.deleteRecursive(targetFile);
+                dto.details = builder.toString() + " successful";
+                if (count == 0) {
+                    dto.details = "Skipped import of " + dto.name + ":" + dto.tag + ". Software already exists!";
                 }
             }
         }
-        return dto;
+    }
+
+    private void doImportProduct(UploadInfoDto dto, Path targetFile) throws IOException {
+        try (FileSystem zfs = PathHelper.openZip(targetFile)) {
+            // If we ever want to resolve dependencies from software repos, we need a master URL here (RemoteService).
+            DependencyFetcher fetcher = new LocalDependencyFetcher();
+
+            // validate paths, etc. neither product-info.yaml, nor product-version.yaml are allowed to use '..' in paths.
+            Path desc = ProductManifestBuilder.getDescriptorPath(zfs.getPath("/"));
+            ProductDescriptor pd = ProductManifestBuilder.readProductDescriptor(desc);
+
+            assertNullOrRelativePath(pd.configTemplates);
+            assertNullOrRelativePath(pd.versionFile);
+            pd.instanceTemplates.forEach(this::assertNullOrRelativePath);
+            pd.applicationTemplates.forEach(this::assertNullOrRelativePath);
+            assertNullOrRelativePath(pd.pluginFolder);
+
+            Path vDesc = desc.getParent().resolve(pd.versionFile);
+            ProductVersionDescriptor pvd = ProductManifestBuilder.readProductVersionDescriptor(desc, vDesc);
+
+            for (Entry<String, Map<OperatingSystem, String>> entry : pvd.appInfo.entrySet()) {
+                for (Entry<OperatingSystem, String> loc : entry.getValue().entrySet()) {
+                    RuntimeAssert.assertFalse(loc.getValue().contains("..") || loc.getValue().startsWith("/"),
+                            String.format(RELPATH_ERROR, loc.getValue()));
+                }
+            }
+
+            Manifest.Key prodKey = new Manifest.Key(pd.product + "/product", pvd.version);
+            SortedSet<Manifest.Key> existing = hive.execute(new ManifestListOperation());
+            if (!existing.contains(prodKey)) {
+                ProductManifestBuilder.importFromDescriptor(desc, hive, fetcher, false);
+                dto.details = "Product (" + pd.name + ", " + pvd.version + ") imported";
+            } else {
+                dto.details = "Skipped import of Product (" + pd.name + ", " + pvd.version + "). Product already exists!";
+            }
+        }
+    }
+
+    private void doImportHive(UploadInfoDto dto, Path targetFile) {
+        // import full hive
+        URI targetUri = UriBuilder.fromUri("jar:" + targetFile.toUri()).build();
+        try (BHive zipHive = new BHive(targetUri, new ActivityReporter.Null())) {
+            SortedSet<Key> manifestKeys = zipHive.execute(new ManifestListOperation());
+            if (manifestKeys.isEmpty()) {
+                throw new WebApplicationException("ZIP file does not contain a manifest.", Status.BAD_REQUEST);
+            }
+
+            // Determine required objects
+            CopyOperation copy = new CopyOperation().setDestinationHive(hive);
+            ObjectListOperation scan = new ObjectListOperation();
+            int mcount = 0;
+            for (Key manifestKey : manifestKeys) {
+                // Ignore existing software
+                if (Boolean.TRUE.equals(hive.execute(new ManifestExistsOperation().setManifest(manifestKey)))) {
+                    continue;
+                }
+                copy.addManifest(manifestKey);
+                scan.addManifest(manifestKey);
+                mcount++;
+            }
+
+            // Add all required artifacts
+            SortedSet<ObjectId> objectIds = zipHive.execute(scan);
+            objectIds.forEach(copy::addObject);
+
+            // Execute import only if we have something to do
+            if (mcount > 0) {
+                zipHive.execute(copy);
+            }
+            dto.details = mcount + " Manifests imported";
+        }
     }
 
     private void assertNullOrRelativePath(String p) {
-        if (p != null) {
-            RuntimeAssert.assertFalse(p.contains("..") || p.startsWith("/"), String.format(RELPATH_ERROR, p));
+        if (p == null) {
+            return;
         }
+        RuntimeAssert.assertFalse(p.contains("..") || p.startsWith("/"), String.format(RELPATH_ERROR, p));
     }
 
 }

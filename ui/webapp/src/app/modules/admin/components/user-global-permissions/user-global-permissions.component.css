@@ -34,3 +34,7 @@
   display: grid;
   grid-template-columns: 80px auto;
 }
+
+.mat-dialog-actions {
+  justify-content: flex-end;
+}

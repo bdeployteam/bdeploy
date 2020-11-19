@@ -11,7 +11,7 @@
       <input matInput type="text" name="value" required [(ngModel)]="data.attributeValue" placeholder="Value" />
     </mat-form-field>
   </div>
-  <div mat-dialog-actions align="end">
+  <div mat-dialog-actions>
     <button mat-raised-button type="button" [mat-dialog-close]="null">Cancel</button>
     <button mat-raised-button type="submit" color="primary" [mat-dialog-close]="getResult()" [disabled]="!f.valid">
       Apply

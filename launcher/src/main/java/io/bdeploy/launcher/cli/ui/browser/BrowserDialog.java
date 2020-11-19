@@ -45,6 +45,7 @@ import javax.swing.table.TableRowSorter;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
 import io.bdeploy.launcher.cli.ClientSoftwareManifest;
 import io.bdeploy.launcher.cli.ui.BaseDialog;
@@ -250,13 +251,17 @@ public class BrowserDialog extends BaseDialog {
     /** Creates the widgets shown in the footer */
     private JPanel createFooter() {
         JPanel footer = new JPanel();
-        footer.setBorder(new EmptyBorder(10, 10, 10, 10));
+        footer.setBorder(new EmptyBorder(0, 10, 10, 10));
         footer.setLayout(new BorderLayout(15, 15));
 
         progressBar = new JProgressBar();
         progressBar.setVisible(false);
         progressBar.setStringPainted(true);
-        footer.add(progressBar);
+        footer.add(progressBar, BorderLayout.CENTER);
+
+        JLabel version = new JLabel("Launcher version: " + VersionHelper.getVersion().toString());
+        footer.add(version, BorderLayout.EAST);
+
         return footer;
     }
 

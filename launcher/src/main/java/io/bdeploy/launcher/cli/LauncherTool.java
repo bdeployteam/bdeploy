@@ -144,6 +144,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /** The currently running launcher version */
     private final Version runningVersion = VersionHelper.getVersion();
 
+    /** Configuration passed to the tool */
+    private LauncherConfig config;
+
     /** The home-directory for the hive */
     private Path rootDir;
 
@@ -174,9 +177,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /** Indicates whether or not the root is read-only */
     private boolean readOnlyRootDir;
 
-    /** Indicates whether command line arguments should be customized */
-    private boolean customizeArgs;
-
     public LauncherTool() {
         super(LauncherConfig.class);
     }
@@ -196,83 +196,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 auditor = new RollingFileAuditor(userArea.resolve("logs"));
             }
 
-            // Log details about our current version
-            if (VersionHelper.isRunningUndefined()) {
-                log.info("Launcher version: Undefined.");
-            } else {
-                log.info("Launcher version: {}", runningVersion);
-            }
-
-            // Log details about the server version
-            // NOTE: Not all servers can tell us their version
-            Version serverVersion = getServerVersion(clickAndStart);
-            if (VersionHelper.isUndefined(serverVersion)) {
-                log.info("Server version: Undefined.");
-            } else {
-                log.info("Server version: {}", serverVersion);
-            }
-
-            // Launch application after installing updates
-            LauncherSplashReporter reporter = new LauncherSplashReporter(splash);
-            try (BHive hive = new BHive(bhiveDir.toUri(), auditor, reporter)) {
-                // Check for and install launcher updates
-                // We always try to use the launcher matching the server version
-                // If no launcher is installed we simply use the currently running version
-                Entry<Version, Key> requiredLauncher = doSelfUpdate(hive, reporter, serverVersion);
-                Version requiredVersion = requiredLauncher != null ? requiredLauncher.getKey() : runningVersion;
-
-                // Launch the application or delegate launching
-                Process process = null;
-                if (shouldDelegate(runningVersion, requiredVersion)) {
-                    log.info("Application requires an older launcher version. Delegating...");
-                    doInstallSideBySide(hive, requiredLauncher);
-                    process = doDelegateLaunch(requiredVersion, config.launch());
-                    log.info("Launcher successfully launched. PID={}", process.pid());
-                } else {
-                    process = doLaunch(hive, reporter, splash);
-                    log.info("Application successfully launched. PID={}", process.pid());
-                }
-
-                // Hide progress reporting
-                reporter.stop();
-                splash.dismiss();
-
-                // Cleanup the installation directory and the hive.
-                if (!readOnlyRootDir) {
-                    doExecuteLocked(reporter, () -> {
-                        ClientCleanup cleanup = new ClientCleanup(hive, rootDir, appsDir, poolDir);
-                        cleanup.run();
-                        return null;
-                    });
-                }
-
-                // Wait until the process terminates
-                if (config.dontWait()) {
-                    log.info("Detaching and terminating.");
-                    return null;
-                }
-                int exitCode = doMonitorProcess(process);
-
-                // The delegated launcher launcher has already evaluated the exit
-                // code and translated the application specific exit code
-                // We just need to terminate with the given code
-                if (clientAppCfg == null) {
-                    log.info("Delegated launcher terminated with exit code {}.", exitCode);
-                    doExit(exitCode);
-                    return null;
-                }
-
-                // Application request an update. We will terminate the launcher
-                // so that potential launcher updates are also applied
-                ApplicationDescriptor appDesc = clientAppCfg.appDesc;
-                ApplicationExitCodeDescriptor exitCodes = appDesc.exitCodes;
-                if (exitCodes != null && exitCodes.update != null && exitCodes.update == exitCode) {
-                    log.info("Application signaled that updates should be installed. Restarting...");
-                    doExit(UpdateHelper.CODE_UPDATE);
-                    return null;
-                }
-                log.info("Application terminated with exit code {}.", exitCode);
-            }
+            // Update and launch
+            doLaunch(auditor, splash);
         } catch (CancellationException ex) {
             log.info("Launching has been canceled by the user.");
             doExit(-1);
@@ -294,6 +219,86 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             }
         }
         return null;
+    }
+
+    /**
+     * Launch application after installing updates
+     */
+    private void doLaunch(Auditor auditor, LauncherSplash splash) {
+        // Log details about our current version
+        if (VersionHelper.isRunningUndefined()) {
+            log.info("Launcher version: Undefined.");
+        } else {
+            log.info("Launcher version: {}", runningVersion);
+        }
+
+        // Log details about the server version
+        // NOTE: Not all servers can tell us their version
+        Version serverVersion = getServerVersion(clickAndStart);
+        if (VersionHelper.isUndefined(serverVersion)) {
+            log.info("Server version: Undefined.");
+        } else {
+            log.info("Server version: {}", serverVersion);
+        }
+
+        LauncherSplashReporter reporter = new LauncherSplashReporter(splash);
+        try (BHive hive = new BHive(bhiveDir.toUri(), auditor, reporter)) {
+            // Check for and install launcher updates
+            // We always try to use the launcher matching the server version
+            // If no launcher is installed we simply use the currently running version
+            Entry<Version, Key> requiredLauncher = doSelfUpdate(hive, reporter, serverVersion);
+            Version requiredVersion = requiredLauncher != null ? requiredLauncher.getKey() : runningVersion;
+
+            // Launch the application or delegate launching
+            Process process = null;
+            if (shouldDelegate(runningVersion, requiredVersion)) {
+                log.info("Application requires an older launcher version. Delegating...");
+                doInstallSideBySide(hive, requiredLauncher);
+                process = doDelegateLaunch(requiredVersion, config.launch());
+                log.info("Launcher successfully launched. PID={}", process.pid());
+            } else {
+                process = doLaunch(hive, reporter, splash);
+                log.info("Application successfully launched. PID={}", process.pid());
+            }
+
+            // Hide progress reporting
+            reporter.stop();
+            splash.dismiss();
+
+            // Cleanup the installation directory and the hive.
+            if (!readOnlyRootDir) {
+                doExecuteLocked(reporter, () -> {
+                    ClientCleanup cleanup = new ClientCleanup(hive, rootDir, appsDir, poolDir);
+                    cleanup.run();
+                    return null;
+                });
+            }
+
+            // Wait until the process terminates
+            if (config.dontWait()) {
+                log.info("Detaching and terminating.");
+                return;
+            }
+            int exitCode = doMonitorProcess(process);
+
+            // The delegated launcher launcher has already evaluated the exit
+            // code and translated the application specific exit code
+            // We just need to terminate with the given code
+            if (clientAppCfg == null) {
+                log.info("Delegated launcher terminated with exit code {}.", exitCode);
+                doExit(exitCode);
+            }
+
+            // Application request an update. We will terminate the launcher
+            // so that potential launcher updates are also applied
+            ApplicationDescriptor appDesc = clientAppCfg.appDesc;
+            ApplicationExitCodeDescriptor exitCodes = appDesc.exitCodes;
+            if (exitCodes != null && exitCodes.update != null && exitCodes.update == exitCode) {
+                log.info("Application signaled that updates should be installed. Restarting...");
+                doExit(UpdateHelper.CODE_UPDATE);
+            }
+            log.info("Application terminated with exit code {}.", exitCode);
+        }
     }
 
     /** Returns whether launching should be delegated to another (older) launcher */
@@ -340,6 +345,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         if (config.homeDir() == null) {
             throw new IllegalStateException("Missing --homeDir argument");
         }
+        this.config = config;
 
         // Check where to put local data.
         rootDir = Paths.get(config.homeDir()).toAbsolutePath();
@@ -364,7 +370,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         poolDir = appsDir.resolve("pool");
         appDir = appsDir.resolve(clickAndStart.applicationId);
         readOnlyRootDir = PathHelper.isReadOnly(rootDir);
-        customizeArgs = config.customizeArgs();
 
         log.info("Home directory: {}{}", rootDir, readOnlyRootDir ? " (readonly)" : "");
         if (userArea != null) {
@@ -666,7 +671,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         // Create the actual start command and replace all defined variables
         ProcessConfiguration pc = appCfg.renderDescriptor(appSpecificResolvers);
         List<String> command = TemplateHelper.process(pc.start, appSpecificResolvers);
-        if (customizeArgs) {
+        if (config.customizeArgs()) {
             TextAreaDialog dialog = new TextAreaDialog();
             if (!dialog.customize(appCfg.name, command)) {
                 throw new CancellationException();

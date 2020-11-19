@@ -37,3 +37,7 @@
   width: 24px;
   color: grey;
 }
+
+.mat-dialog-actions {
+  justify-content: flex-end;
+}

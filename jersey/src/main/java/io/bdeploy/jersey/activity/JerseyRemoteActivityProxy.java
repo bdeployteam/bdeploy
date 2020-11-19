@@ -83,11 +83,8 @@ public class JerseyRemoteActivityProxy implements NoThrowAutoCloseable {
 
         for (ActivitySnapshot snap : activities) {
             // only allow acitivities which have the proxy scope set, i.e. created by a remote call with our scope set.
-            if (snap.scope == null || snap.scope.isEmpty()) {
+            if (snap.scope == null || snap.scope.isEmpty() || !snap.scope.get(0).equals(proxyUuid)) {
                 continue; // no scope set, cannot be interesting for us.
-            }
-            if (!snap.scope.get(0).equals(proxyUuid)) {
-                continue;
             }
 
             String mappedUuid = uuidMapping.computeIfAbsent(snap.uuid, s -> UuidHelper.randomId());

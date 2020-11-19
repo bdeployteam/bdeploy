@@ -31,3 +31,8 @@
 .invalid-login {
   margin-top: 10px;
 }
+
+.mat-card-actions {
+  text-align: right;
+  margin: 0px;
+}

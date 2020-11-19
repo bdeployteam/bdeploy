@@ -16,7 +16,6 @@ import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.ProcessHelper;
 import io.bdeploy.launcher.cli.ClientPathHelper;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
-import io.bdeploy.launcher.cli.LauncherTool;
 import io.bdeploy.launcher.cli.ui.MessageDialogs;
 
 /**
@@ -24,7 +23,7 @@ import io.bdeploy.launcher.cli.ui.MessageDialogs;
  */
 public class AppUninstaller extends SwingWorker<Void, Object> {
 
-    private static final Logger log = LoggerFactory.getLogger(LauncherTool.class);
+    private static final Logger log = LoggerFactory.getLogger(AppUninstaller.class);
 
     private final Path rootDir;
     private final ClientSoftwareConfiguration app;
@@ -39,7 +38,10 @@ public class AppUninstaller extends SwingWorker<Void, Object> {
         log.info("Attempting to uninstall application {}", app.clickAndStart.applicationId);
 
         ProcessBuilder builder = new ProcessBuilder(getUninstallCommand()).redirectErrorStream(true);
-        log.info("Executing {}", builder.command().stream().collect(Collectors.joining(" ")));
+        if (log.isInfoEnabled()) {
+            String command = builder.command().stream().collect(Collectors.joining(" "));
+            log.info("Executing {}", command);
+        }
 
         Process process = builder.start();
         String output = ProcessHelper.readOutput(process);

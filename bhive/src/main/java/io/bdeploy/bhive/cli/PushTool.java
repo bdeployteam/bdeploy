@@ -15,11 +15,8 @@ import io.bdeploy.common.cfg.PathOwnershipValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.ToolDefaultVerbose;
-import io.bdeploy.common.cli.data.DataResult;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
-import io.bdeploy.common.util.DurationHelper;
-import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 
 /**
@@ -69,15 +66,7 @@ public class PushTool extends RemoteServiceTool<PushConfig> {
             }
 
             TransferStatistics stats = hive.execute(op);
-
-            DataResult result = createSuccess();
-            result.addField("Number of Manifests", stats.sumManifests);
-            result.addField("Number of reused Trees", stats.sumTrees - stats.sumMissingTrees);
-            result.addField("Number of Objects", stats.sumMissingObjects);
-            result.addField("Transfer size", UnitHelper.formatFileSize(stats.transferSize));
-            result.addField("Duration", DurationHelper.formatDuration(stats.duration));
-
-            return result;
+            return stats.toResult(createSuccess());
         }
     }
 

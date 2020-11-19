@@ -20,6 +20,9 @@ import io.bdeploy.launcher.cli.SoftwareUpdateException;
  */
 public class MessageDialogs {
 
+    private MessageDialogs() {
+    }
+
     /**
      * Opens the dialog to show that a required update is available but cannot be installed.
      */

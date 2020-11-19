@@ -102,3 +102,7 @@ mat-button-toggle-group {
   max-height: 200px;
   overflow-y: auto;
 }
+
+.mat-dialog-actions {
+  justify-content: flex-end;
+}

@@ -18,7 +18,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  */
 public class BaseDialog extends JFrame {
 
-    private static final Logger log = LoggerFactory.getLogger(MessageDialog.class);
+    private static final Logger log = LoggerFactory.getLogger(BaseDialog.class);
     private static final long serialVersionUID = 1L;
 
     static {

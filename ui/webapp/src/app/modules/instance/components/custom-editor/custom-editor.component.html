@@ -1,7 +1,7 @@
 <ng-template #editorPopup>
   <h3>Edit {{ descriptor.name }}</h3>
   <div #editorPanel class="editorPanel"></div>
-  <div mat-dialog-actions align="end">
+  <div mat-dialog-actions>
     <button mat-raised-button [mat-dialog-close]="null">Cancel</button>
     <button mat-raised-button [disabled]="!valid || readonly" [mat-dialog-close]="currentValue" color="primary">
       Apply

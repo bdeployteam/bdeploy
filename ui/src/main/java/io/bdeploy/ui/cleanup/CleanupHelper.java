@@ -127,36 +127,43 @@ public class CleanupHelper {
      */
     public void execute(List<CleanupGroup> groups) {
         for (CleanupGroup group : groups) {
-
             if (group.instanceGroup != null) {
-                BHive hive = registry.get(group.instanceGroup);
-                if (hive != null) {
-                    for (CleanupAction action : group.actions) {
-                        action.execute(securityContext, provider, hive);
-                    }
-                    if (!group.actions.isEmpty()) {
-                        hive.execute(new PruneOperation());
-                    }
-                } else {
-                    log.warn("Don't know how to run cleanup group {}, instance group not found", group.name);
-                }
+                executeForGroup(group);
             } else if (group.minion != null) {
-                RemoteService svc = minion.getMinions().getRemote(group.minion);
-                if (svc != null) {
-                    log.info("Performing cleanup group {} on {}", group.name, group.minion);
-                    NodeCleanupResource scr = ResourceProvider.getVersionedResource(svc, NodeCleanupResource.class, null);
-                    try {
-                        scr.perform(group.actions);
-                    } catch (Exception e) {
-                        log.warn("Cannot perform cleanup on minion {}", group.minion);
-                        log.debug("Error details", e);
-                    }
-                } else {
-                    log.warn("Minion {} associated with cleanup group {} not found", group.minion, group.name);
-                }
+                executeForMinion(group);
             } else {
                 log.warn("Don't know how to run cleanup group {}, no instance group or minion associated", group.name);
             }
+        }
+    }
+
+    private void executeForGroup(CleanupGroup group) {
+        BHive hive = registry.get(group.instanceGroup);
+        if (hive == null) {
+            log.warn("Don't know how to run cleanup group {}, instance group not found", group.name);
+            return;
+        }
+        for (CleanupAction action : group.actions) {
+            action.execute(securityContext, provider, hive);
+        }
+        if (!group.actions.isEmpty()) {
+            hive.execute(new PruneOperation());
+        }
+    }
+
+    private void executeForMinion(CleanupGroup group) {
+        RemoteService svc = minion.getMinions().getRemote(group.minion);
+        if (svc == null) {
+            log.warn("Minion {} associated with cleanup group {} not found", group.minion, group.name);
+            return;
+        }
+        log.info("Performing cleanup group {} on {}", group.name, group.minion);
+        NodeCleanupResource scr = ResourceProvider.getVersionedResource(svc, NodeCleanupResource.class, null);
+        try {
+            scr.perform(group.actions);
+        } catch (Exception e) {
+            log.warn("Cannot perform cleanup on minion {}", group.minion);
+            log.debug("Error details", e);
         }
     }
 
@@ -171,21 +178,23 @@ public class CleanupHelper {
         SortedSet<Key> result = new TreeSet<>();
         for (BHive hive : registry.getAll().values()) {
             InstanceGroupConfiguration ig = new InstanceGroupManifest(hive).read();
-            if (ig != null) {
-                log.info("Gathering information for instance group {} ({})", ig.name, ig.title);
-
-                // instance manifests
-                SortedSet<Key> imfs = InstanceManifest.scan(hive, false);
-
-                // instance node manifests referenced by imfs
-                SortedSet<Key> inmfs = imfs.stream().map(key -> InstanceManifest.of(hive, key))
-                        .flatMap(im -> im.getInstanceNodeManifests().values().stream())
-                        .collect(Collectors.toCollection(TreeSet::new));
-                result.addAll(inmfs);
-
-                log.info("Collected {} instance node manifests", inmfs.size());
+            // not an InstanceGroup (default hive / software repository)
+            if (ig == null) {
+                continue;
             }
-            // else: not an InstanceGroup (default hive / software repository)
+
+            log.info("Gathering information for instance group {} ({})", ig.name, ig.title);
+
+            // instance manifests
+            SortedSet<Key> imfs = InstanceManifest.scan(hive, false);
+
+            // instance node manifests referenced by imfs
+            SortedSet<Key> inmfs = imfs.stream().map(key -> InstanceManifest.of(hive, key))
+                    .flatMap(im -> im.getInstanceNodeManifests().values().stream())
+                    .collect(Collectors.toCollection(TreeSet::new));
+            result.addAll(inmfs);
+
+            log.info("Collected {} instance node manifests", inmfs.size());
         }
         return result;
     }

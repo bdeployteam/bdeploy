@@ -4,7 +4,6 @@ import { InstanceGroupService } from 'src/app/modules/instance-group/services/in
 @Component({
   selector: 'app-instance-group-title',
   templateUrl: './instance-group-title.component.html',
-  styleUrls: ['./instance-group-title.component.css'],
 })
 export class InstanceGroupTitleComponent implements OnInit {
   @Input()

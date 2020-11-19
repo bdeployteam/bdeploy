@@ -14,3 +14,7 @@ mat-form-field {
 .warn-icon {
   margin-right: 5px;
 }
+
+.mat-dialog-actions {
+  justify-content: flex-end;
+}

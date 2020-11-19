@@ -14,7 +14,7 @@
     <div [innerHTML]="data.message"></div>
   </div>
 </div>
-<div mat-dialog-actions align="end">
+<div mat-dialog-actions>
   <button mat-raised-button [mat-dialog-close]="false" *ngIf="requiresCancel()">Cancel</button>
   <button mat-raised-button [mat-dialog-close]="true" *ngIf="requiresOk()">OK</button>
   <button mat-raised-button [mat-dialog-close]="false" *ngIf="requiresYesNo()">No</button>

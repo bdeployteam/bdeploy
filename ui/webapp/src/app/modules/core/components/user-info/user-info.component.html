@@ -45,7 +45,7 @@
   <div class="flex-content">
     <textarea #inputTarget readonly class="large-text">{{ pack }}</textarea>
   </div>
-  <div mat-dialog-actions align="end">
+  <div mat-dialog-actions>
     <button mat-raised-button [ngxClipboard]="inputTarget" (cbOnSuccess)="copied()" color="primary">
       Copy To Clipboard
     </button>

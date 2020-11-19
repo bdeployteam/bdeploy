@@ -41,7 +41,7 @@
             </div>
           </div>
         </div>
-        <div mat-dialog-actions align="end">
+        <div mat-dialog-actions>
           <button mat-raised-button type="button" (click)="dialogRef.close()">Cancel</button>
           <button
             mat-raised-button
@@ -80,7 +80,7 @@
               </mat-autocomplete>
             </mat-form-field>
           </div>
-          <div mat-dialog-actions align="end">
+          <div mat-dialog-actions>
             <button mat-raised-button type="button" (click)="dialogRef.close()">Cancel</button>
             <button mat-raised-button type="button" (click)="stepper.previous()">Back</button>
             <button
@@ -123,7 +123,7 @@
             </ng-container>
           </div>
         </div>
-        <div mat-dialog-actions align="end">
+        <div mat-dialog-actions>
           <div *ngIf="!applyDone" class="status"><mat-spinner [diameter]="24"></mat-spinner></div>
           <button mat-raised-button type="submit" color="primary" (click)="dialogRef.close()" [disabled]="!applyDone">
             Close
