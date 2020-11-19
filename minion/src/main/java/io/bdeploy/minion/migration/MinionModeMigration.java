@@ -5,6 +5,9 @@ import io.bdeploy.ui.api.MinionMode;
 
 public class MinionModeMigration {
 
+    private MinionModeMigration() {
+    }
+
     @SuppressWarnings("deprecation")
     public static void run(MinionRoot root) {
         if (root.getMode() == MinionMode.SLAVE) {

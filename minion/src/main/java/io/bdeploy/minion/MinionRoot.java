@@ -185,7 +185,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     /** Updates the logging config file if required, and switches to using it */
     public ObjectId updateLoggingConfiguration(Function<Function<InputStream, ObjectId>, ObjectId> log4jContentSupplier) {
         ObjectId baseline = getState().logConfigId;
-        ObjectId current = log4jContentSupplier.apply(is -> ObjectId.createFromStreamNoCopy(is));
+        ObjectId current = log4jContentSupplier.apply(ObjectId::createFromStreamNoCopy);
 
         Path cfgPath = getLoggingConfigurationFile();
         boolean exists = Files.exists(cfgPath);
@@ -237,7 +237,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
 
         // set the root's log directory property in the MDC, this is inherited by all threads.
         if (!consoleLog) {
-            log.info("Logging into " + logDir);
+            log.info("Logging into {}", logDir);
             MinionLoggingContextDataProvider.setLogDir(logDir.toAbsolutePath().toString());
         }
 

@@ -15,7 +15,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -161,7 +160,7 @@ public class ProductResourceImpl implements ProductResource {
     public String getProductDiskUsage(String name) {
         try {
             return UnitHelper.formatFileSize(pdus.getDiscUsage(group, name).get());
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (Exception e) {
             log.debug("Product disc usage calculation interrupted or failed", e);
             return "Unknown";
         }
@@ -303,8 +302,8 @@ public class ProductResourceImpl implements ProductResource {
 
             assertNullOrRelativePath(pd.configTemplates);
             assertNullOrRelativePath(pd.versionFile);
-            pd.instanceTemplates.forEach(t -> assertNullOrRelativePath(t));
-            pd.applicationTemplates.forEach(t -> assertNullOrRelativePath(t));
+            pd.instanceTemplates.forEach(this::assertNullOrRelativePath);
+            pd.applicationTemplates.forEach(this::assertNullOrRelativePath);
             assertNullOrRelativePath(pd.pluginFolder);
 
             Path vDesc = desc.getParent().resolve(pd.versionFile);

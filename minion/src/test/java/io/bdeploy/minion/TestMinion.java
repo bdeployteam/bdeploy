@@ -84,7 +84,7 @@ public class TestMinion extends TestServer {
         PluginManager pm = cmr.mr
                 .createPluginManager(getExtensionStore(context).get(CloseableServer.class, CloseableServer.class).getServer());
         BHiveRegistry reg = StartTool.registerCommonResources(this, cmr.mr, new ActivityReporter.Null());
-        StartTool.registerMasterResources(this, reg, true, cmr.mr, new ActivityReporter.Null(), pm);
+        StartTool.registerMasterResources(this, reg, true, cmr.mr, pm);
     }
 
     @Override
