@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.bdeploy.common.cfg.ConfigValidationException;
 import io.bdeploy.common.cli.ToolBase;
 import io.bdeploy.common.cli.ToolBase.CliTool;
 import io.bdeploy.common.cli.data.DataFormat;
@@ -68,9 +69,17 @@ public class TestCliTool implements ParameterResolver {
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             tool.setOutput(new PrintStream(os));
             tool.setDataFormat(DataFormat.JSON);
-            RenderableResult result = tool.run();
-            if (result != null) {
-                result.render();
+            try {
+                RenderableResult result = tool.run();
+                if (result != null) {
+                    result.render();
+                }
+            } catch (ConfigValidationException e) {
+                // need to log issues. build does not output suppressed exceptions.
+                for (Throwable t : e.getSuppressed()) {
+                    t.printStackTrace();
+                }
+                throw e;
             }
 
             String plainOutput = os.toString();
