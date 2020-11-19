@@ -48,8 +48,9 @@ namespace Bdeploy.Launcher {
         /// <summary>
         /// Starts the LauncherCli in order to launch the application described by the ClickAndStart file.
         /// </summary>
+        /// <param name="args">Arguments to pass to the application</param>
         /// <returns> Exit code of the minion.</returns>
-        public int Start() {
+        public int Start(string[] args) {
             // Descriptor must be existing and valid
             if (!ValidateDescriptor()) {
                 return -1;
@@ -68,6 +69,12 @@ namespace Bdeploy.Launcher {
             builder.AppendFormat("\"--launch={0}\" ", clickAndStartFile);
             builder.AppendFormat("\"--homeDir={0}\" ", HOME);
             builder.AppendFormat("\"--updateDir={0}\" ", UPDATES);
+
+            // Append addional arguments from the command line
+            foreach (String arg in args) {
+                builder.AppendFormat("\"{0}\" ", arg);
+            }
+
             return StartLauncher(builder.ToString());
         }
 

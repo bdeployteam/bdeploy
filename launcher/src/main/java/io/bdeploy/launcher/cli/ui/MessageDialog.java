@@ -153,7 +153,7 @@ public class MessageDialog extends BaseDialog {
         footer.add(actionPanel, BorderLayout.WEST);
 
         JButton close = new JButton("Close");
-        close.addActionListener(a -> doClose());
+        close.addActionListener(a -> doClose(0));
         footer.add(close, BorderLayout.EAST);
 
         return footer;
