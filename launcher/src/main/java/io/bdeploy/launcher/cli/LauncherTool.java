@@ -245,9 +245,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         try (BHive hive = new BHive(bhiveDir.toUri(), auditor, reporter)) {
             // Check for and install launcher updates
             // We always try to use the launcher matching the server version
-            // If no launcher is installed we simply use the currently running version
             Entry<Version, Key> requiredLauncher = doSelfUpdate(hive, reporter, serverVersion);
-            Version requiredVersion = requiredLauncher != null ? requiredLauncher.getKey() : runningVersion;
+            Version requiredVersion = requiredLauncher.getKey();
 
             // Launch the application or delegate launching
             Process process = null;
@@ -765,11 +764,11 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         OperatingSystem runningOs = OsHelper.getRunningOs();
 
         // Fetch all versions and filter out the one that corresponds to the server version
+        String launcherKey = UpdateHelper.SW_META_PREFIX + UpdateHelper.SW_LAUNCHER;
         boolean serverIsUndefined = VersionHelper.isUndefined(serverVersion);
         NavigableMap<Version, Key> versions = new TreeMap<>(VersionComparator.NEWEST_LAST);
         try (RemoteBHive rbh = RemoteBHive.forService(clickAndStart.host, null, reporter);
                 Activity check = reporter.start("Fetching launcher versions....")) {
-            String launcherKey = UpdateHelper.SW_META_PREFIX + UpdateHelper.SW_LAUNCHER;
             SortedMap<Key, ObjectId> launchers = rbh.getManifestInventory(launcherKey);
             for (Key launcher : launchers.keySet()) {
                 ScopedManifestKey smk = ScopedManifestKey.parse(launcher);
@@ -791,7 +790,11 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         if (versions.size() > 0) {
             return versions.lastEntry();
         }
-        return null;
+
+        // If no launcher is installed we simply use the currently running version
+        String scopedName = ScopedManifestKey.createScopedName(launcherKey, runningOs);
+        versions.put(runningVersion, new Manifest.Key(scopedName, runningVersion.toString()));
+        return versions.firstEntry();
     }
 
     /**
