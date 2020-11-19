@@ -48,7 +48,7 @@ public class AppUninstaller extends SwingWorker<Void, Object> {
 
         int exitCode = process.waitFor();
         if (exitCode != 0) {
-            throw new RuntimeException("Uninstaller terminated with exit code " + exitCode + ".\n" + output);
+            throw new IllegalStateException("Uninstaller terminated with exit code " + exitCode + ".\n" + output);
         }
         log.info("Uninstallation was successfully.");
         return null;

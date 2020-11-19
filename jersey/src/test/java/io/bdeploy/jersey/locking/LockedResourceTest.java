@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.bdeploy.common.util.Threads;
 import io.bdeploy.jersey.TestServer;
 
 public class LockedResourceTest {
@@ -44,16 +45,12 @@ public class LockedResourceTest {
             es.submit(() -> {
                 for (int i = 0; i < 7; ++i) {
                     log.info(rsrc.getValue());
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
+                    Threads.sleep(100);
                 }
             });
 
             Future<?> locked1 = es.submit(() -> rsrc.setValue("World"));
-            Thread.sleep(100); // make sure the second one is second...
+            Threads.sleep(100);
             Future<?> locked2 = es.submit(() -> rsrc.setValue("Universe"));
 
             locked1.get();

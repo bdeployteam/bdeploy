@@ -15,6 +15,7 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.TempDirectory;
 import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.Threads;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
 import io.bdeploy.interfaces.remote.CommonRootResource;
@@ -38,7 +39,7 @@ public class InstanceManifestHistoryTest {
         assertTrue(history.findMostRecent(Action.INSTALL).timestamp >= old);
         assertEquals("comment1", history.findMostRecent(Action.INSTALL).comment);
 
-        Thread.sleep(10);
+        Threads.sleep(10);
         long now = System.currentTimeMillis();
         history.record(Action.INSTALL, "test", "comment2");
         assertTrue(history.findMostRecent(Action.INSTALL).timestamp >= now);

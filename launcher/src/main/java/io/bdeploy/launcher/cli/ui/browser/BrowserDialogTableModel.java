@@ -97,8 +97,9 @@ class BrowserDialogTableModel extends AbstractTableModel {
                 return "Product";
             case COL_REMOTE:
                 return "Remote";
+            default:
+                return null;
         }
-        return null;
     }
 
     @Override

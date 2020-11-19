@@ -43,7 +43,7 @@ public class TextAreaDialog extends BaseDialog {
         add(content, BorderLayout.CENTER);
 
         // Footer displaying buttons
-        JPanel footer = createFooter(content);
+        JPanel footer = createFooter();
         add(footer, BorderLayout.PAGE_END);
     }
 
@@ -83,7 +83,7 @@ public class TextAreaDialog extends BaseDialog {
     }
 
     /** Creates the widgets shown in the footer */
-    private JPanel createFooter(JPanel content) {
+    private JPanel createFooter() {
         JPanel footer = new JPanel();
         footer.setBorder(new EmptyBorder(10, 10, 10, 10));
         footer.setLayout(new BorderLayout(15, 15));

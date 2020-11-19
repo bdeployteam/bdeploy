@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import javax.swing.AbstractAction;
 import javax.swing.InputMap;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -34,6 +35,7 @@ import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
+import javax.swing.SwingConstants;
 import javax.swing.SwingWorker.StateValue;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
@@ -58,10 +60,11 @@ public class BrowserDialog extends BaseDialog {
 
     private static final long serialVersionUID = 1L;
 
-    private final Path rootDir;
     private final BrowserDialogTableModel model = new BrowserDialogTableModel();
 
-    private final TableRowSorter<BrowserDialogTableModel> sortModel = new TableRowSorter<>(model);
+    private final transient Path rootDir;
+    private final transient TableRowSorter<BrowserDialogTableModel> sortModel = new TableRowSorter<>(model);
+
     private final JTable table = new JTable(model);
 
     private JButton launchButton;
@@ -154,7 +157,7 @@ public class BrowserDialog extends BaseDialog {
         searchPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
         header.add(searchPanel, BorderLayout.EAST);
 
-        JLabel searchLabel = new JLabel("Search:", JLabel.RIGHT);
+        JLabel searchLabel = new JLabel("Search:", SwingConstants.RIGHT);
         searchLabel.setOpaque(true);
         searchLabel.setBackground(Color.WHITE);
         searchPanel.add(searchLabel);
@@ -187,21 +190,19 @@ public class BrowserDialog extends BaseDialog {
 
         // Setup default column properties
         TableColumnModel columnModel = table.getColumnModel();
-        {
-            TableColumn column = columnModel.getColumn(BrowserDialogTableModel.COL_PURPOSE);
-            column.setPreferredWidth(25);
-            column.setCellRenderer(new BrowserDialogPurposeCellRenderer());
-        }
-        {
-            TableColumn column = columnModel.getColumn(BrowserDialogTableModel.COL_REMOTE);
-            column.setPreferredWidth(150);
-        }
+
+        TableColumn columnP = columnModel.getColumn(BrowserDialogTableModel.COL_PURPOSE);
+        columnP.setPreferredWidth(25);
+        columnP.setCellRenderer(new BrowserDialogPurposeCellRenderer());
+
+        TableColumn columnR = columnModel.getColumn(BrowserDialogTableModel.COL_REMOTE);
+        columnR.setPreferredWidth(150);
 
         // Launch on double click
         table.addMouseListener(new DoubleClickListener());
 
         // Launch on enter key
-        InputMap inputMap = table.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        InputMap inputMap = table.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "launch");
         table.getActionMap().put("launch", new EnterAction());
 

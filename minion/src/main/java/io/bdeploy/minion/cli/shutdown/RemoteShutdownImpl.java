@@ -3,6 +3,7 @@ package io.bdeploy.minion.cli.shutdown;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
+import io.bdeploy.common.util.Threads;
 import io.bdeploy.jersey.JerseyServer;
 
 public class RemoteShutdownImpl implements RemoteShutdown {
@@ -23,12 +24,7 @@ public class RemoteShutdownImpl implements RemoteShutdown {
 
         // async to give time to return the call.
         new Thread(() -> {
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                // intentionally not handling, we want the close to proceed normally.
-            }
+            Threads.sleep(200);
             server.close();
         }, "Shutdown Initiator").start();
     }

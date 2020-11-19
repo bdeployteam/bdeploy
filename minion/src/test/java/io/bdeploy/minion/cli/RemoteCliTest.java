@@ -21,6 +21,7 @@ import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.TestCliTool;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.Threads;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.remote.CommonRootResource;
@@ -89,7 +90,7 @@ public class RemoteCliTest {
                 "--uuid=" + uuid, "--list");
 
         // give the script a bit to write output
-        Thread.sleep(200);
+        Threads.sleep(200);
 
         tools.execute(RemoteProcessTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
                 "--uuid=" + uuid, "--application=app", "--stop");

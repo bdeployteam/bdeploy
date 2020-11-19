@@ -57,6 +57,7 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.util.NamedDaemonThreadFactory;
+import io.bdeploy.common.util.Threads;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.JerseyAuthenticationUnprovider;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.JerseyAuthenticationWeakenerProvider;
@@ -396,10 +397,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
 
     public boolean join() {
         while (isRunning()) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+            if (!Threads.sleep(1000)) {
                 return isRunning();
             }
         }

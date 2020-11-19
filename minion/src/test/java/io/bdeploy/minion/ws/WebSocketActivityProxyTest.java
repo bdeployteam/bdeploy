@@ -25,6 +25,7 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.ActivitySnapshot;
 import io.bdeploy.common.NoThrowAutoCloseable;
+import io.bdeploy.common.util.Threads;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.ws.WebSocketTest;
@@ -95,11 +96,7 @@ public class WebSocketActivityProxyTest {
             Activity start = reporter.start("Test", 5);
             for (int i = 0; i < 6; ++i) {
                 start.worked(1);
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                Threads.sleep(1000);
             }
             return "done";
         }

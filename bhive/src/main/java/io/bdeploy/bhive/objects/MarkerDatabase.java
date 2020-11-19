@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.util.Threads;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.StringHelper;
 
@@ -100,10 +101,7 @@ public class MarkerDatabase extends ObjectDatabase {
                     infoWritten = true;
                 }
                 // delay a little...
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
+                if (!Threads.sleep(10)) {
                     break;
                 }
             } catch (Exception e) {
@@ -123,10 +121,7 @@ public class MarkerDatabase extends ObjectDatabase {
         Path lockFile = root.resolve(LOCK_FILE);
         for (int i = 0; i < 100_000; ++i) {
             if (Files.exists(lockFile)) {
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
+                if (!Threads.sleep(10)) {
                     break;
                 }
             } else {

@@ -428,7 +428,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         } catch (RuntimeException rex) {
             throw rex;
         } catch (Exception ex) {
-            throw new RuntimeException("Failed to execute locked operation", ex);
+            throw new IllegalStateException("Failed to execute locked operation", ex);
         } finally {
             if (!readOnlyRootDir) {
                 MarkerDatabase.unlockRoot(rootDir);
@@ -620,12 +620,12 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         // Meta-Manifest about the installation must be there
         // and must refer to what the application actually requires
         ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
-        ClientSoftwareConfiguration config = manifest.readNewest(clientAppCfg.appConfig.uid);
-        if (config == null) {
+        ClientSoftwareConfiguration clientConfig = manifest.readNewest(clientAppCfg.appConfig.uid);
+        if (clientConfig == null) {
             missing.add("Meta-Manifest:" + clientAppCfg.appConfig.uid);
         } else {
             // Check that all required apps are listed
-            applications.removeAll(config.requiredSoftware);
+            applications.removeAll(clientConfig.requiredSoftware);
             if (!applications.isEmpty()) {
                 missing.add("Meta-Manifest-Entry: " + applications);
             }
@@ -712,8 +712,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Write manifest entry that the launcher needs to be retained
         ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
-        ClientSoftwareConfiguration config = manifest.readNewest(clickAndStart.applicationId);
-        if (config != null && config.launcher.equals(launcher)) {
+        ClientSoftwareConfiguration clientConfig = manifest.readNewest(clickAndStart.applicationId);
+        if (clientConfig != null && clientConfig.launcher.equals(launcher)) {
             return;
         }
         // Ensure we have write permissions
@@ -721,10 +721,10 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             throw new SoftwareUpdateException(clickAndStart.applicationId, "Missing artifacts: Software Manifest");
         }
         // Write updated manifest
-        config = new ClientSoftwareConfiguration();
-        config.launcher = launcher;
-        config.clickAndStart = clickAndStart;
-        manifest.update(clickAndStart.applicationId, config);
+        clientConfig = new ClientSoftwareConfiguration();
+        clientConfig.launcher = launcher;
+        clientConfig.clickAndStart = clickAndStart;
+        manifest.update(clickAndStart.applicationId, clientConfig);
     }
 
     /**

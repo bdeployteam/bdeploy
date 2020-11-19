@@ -194,40 +194,18 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
 
             // give a warning if the current version has been locally modified, replace it nevertheless
             if (exists && baseline != null) {
-                Path backup = null;
-                try (InputStream is = Files.newInputStream(cfgPath)) {
-                    ObjectId local = ObjectId.createFromStreamNoCopy(is);
-
-                    if (!local.equals(baseline)) {
-                        backup = cfgPath.getParent().resolve(cfgPath.getFileName().toString() + ".bak");
-                        log.warn("Logging configuration has been locally modified - changes will be discarded, backup: {}",
-                                backup);
-                    }
-                } catch (IOException e) {
-                    log.warn("Cannot read existing local logger configuration", e);
-                }
-
-                if (backup != null) {
-                    PathHelper.deleteRecursive(backup);
-                    try {
-                        Files.move(cfgPath, backup);
-                    } catch (IOException e) {
-                        log.warn("Cannot create backup of {} at {}", cfgPath, backup, e);
-                    }
-                }
+                createLogBackup(baseline, cfgPath);
             }
 
             // file does not exist, or is outdated - update.
-            ObjectId id = log4jContentSupplier.apply(is -> {
+            // record the current ID, so we only copy if the builtin configuration changes.
+            baseline = log4jContentSupplier.apply(is -> {
                 try {
                     return ObjectId.createByCopy(is, cfgPath);
                 } catch (IOException e) {
                     throw new IllegalStateException("Cannot update logging configuration", e);
                 }
             });
-
-            // record the current ID, so we only copy if the builtin configuration changes.
-            baseline = id;
         }
 
         // in any case, we want to switch to using our copy of the configuration.
@@ -242,6 +220,29 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         }
 
         return baseline;
+    }
+
+    private void createLogBackup(ObjectId baseline, Path cfgPath) {
+        Path backup = null;
+        try (InputStream is = Files.newInputStream(cfgPath)) {
+            ObjectId local = ObjectId.createFromStreamNoCopy(is);
+
+            if (!local.equals(baseline)) {
+                backup = cfgPath.getParent().resolve(cfgPath.getFileName().toString() + ".bak");
+                log.warn("Logging configuration has been locally modified - changes will be discarded, backup: {}", backup);
+            }
+        } catch (IOException e) {
+            log.warn("Cannot read existing local logger configuration", e);
+        }
+
+        if (backup != null) {
+            PathHelper.deleteRecursive(backup);
+            try {
+                Files.move(cfgPath, backup);
+            } catch (IOException e) {
+                log.warn("Cannot create backup of {} at {}", cfgPath, backup, e);
+            }
+        }
     }
 
     public Path getLoggingConfigurationFile() {

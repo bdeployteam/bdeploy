@@ -11,6 +11,7 @@ import javax.swing.JTable;
 import javax.swing.RowSorter;
 import javax.swing.RowSorter.SortKey;
 import javax.swing.SortOrder;
+import javax.swing.SwingConstants;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
@@ -24,7 +25,7 @@ public class BrowserDialogTableHeaderRenderer extends JLabel implements TableCel
     public BrowserDialogTableHeaderRenderer() {
         setOpaque(true);
         setFont(getFont().deriveFont(Font.BOLD));
-        setHorizontalAlignment(JLabel.CENTER);
+        setHorizontalAlignment(SwingConstants.CENTER);
         setBorder(BorderFactory.createLineBorder(new Color(128, 128, 128)));
     }
 

@@ -19,6 +19,7 @@ import com.codahale.metrics.Timer;
 
 import io.bdeploy.common.metrics.Metrics;
 import io.bdeploy.common.metrics.Metrics.MetricGroup;
+import io.bdeploy.common.util.Threads;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.TestServer;
 import io.bdeploy.jersey.resources.JerseyMetricsResource;
@@ -48,11 +49,7 @@ public class MetricsTest {
             Metrics.getMetric(MetricGroup.HTTP).histogram(m + "-histo").update(3);
             Metrics.getMetric(MetricGroup.HTTP).meter(m + "-meter").mark();
             try (Timer.Context t = Metrics.getMetric(MetricGroup.HTTP).timer(m + "-timer").time()) {
-                try {
-                    Thread.sleep(15);
-                } catch (InterruptedException e) {
-                    // ignore
-                }
+                Threads.sleep(15);
             }
         }
     }

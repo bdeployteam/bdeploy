@@ -18,6 +18,7 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ContentHelper;
 import io.bdeploy.common.TempDirectory;
 import io.bdeploy.common.TempDirectory.TempDir;
+import io.bdeploy.common.util.Threads;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.TestServer;
 
@@ -47,7 +48,7 @@ public class StreamTest {
 
         Path localFile = rs.download();
 
-        Thread.sleep(200); // might take some time on windows..
+        Threads.sleep(200); // might take some time on windows..
         assertFalse(Files.exists(src)); // deleted after writing.
 
         byte[] targetBytes = Files.readAllBytes(localFile);

@@ -4,10 +4,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.function.Supplier;
 
 import javax.ws.rs.NotFoundException;
-
-import com.google.common.base.Supplier;
 
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
@@ -19,6 +18,7 @@ import io.bdeploy.common.cli.data.DataTableColumn;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.DateHelper;
+import io.bdeploy.common.util.Threads;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
@@ -137,11 +137,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
 
     private void doJoin(long pollIntervalMs, Supplier<ProcessState> stateSupplier) {
         while (!isTerminatedState(stateSupplier.get())) {
-            try {
-                Thread.sleep(pollIntervalMs);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+            Threads.sleep(pollIntervalMs);
         }
     }
 

@@ -24,26 +24,16 @@ public class BrowserDialogTableFilter extends RowFilter<BrowserDialogTableModel,
 
         // Check metadata
         ClientApplicationDto metadata = app.metadata;
-        if (metadata != null) {
-            if (contains(metadata.appName)) {
-                return true;
-            }
-            if (contains(metadata.instanceGroupTitle)) {
-                return true;
-            }
-            if (contains(metadata.instanceName)) {
-                return true;
-            }
-            if (contains(metadata.purpose.toString())) {
-                return true;
-            }
-            if (contains(metadata.product.getTag())) {
-                return true;
-            }
+        if (metadata != null && matches(metadata)) {
+            return true;
         }
 
         // Check ClickAndStartDescriptor
         ClickAndStartDescriptor clickAndStart = app.clickAndStart;
+        return matches(clickAndStart);
+    }
+
+    private boolean matches(ClickAndStartDescriptor clickAndStart) {
         if (contains(clickAndStart.groupId)) {
             return true;
         }
@@ -53,10 +43,23 @@ public class BrowserDialogTableFilter extends RowFilter<BrowserDialogTableModel,
         if (contains(clickAndStart.applicationId)) {
             return true;
         }
-        if (contains(clickAndStart.host.getUri().toString())) {
+        return contains(clickAndStart.host.getUri().toString());
+    }
+
+    private boolean matches(ClientApplicationDto metadata) {
+        if (contains(metadata.appName)) {
             return true;
         }
-        return false;
+        if (contains(metadata.instanceGroupTitle)) {
+            return true;
+        }
+        if (contains(metadata.instanceName)) {
+            return true;
+        }
+        if (contains(metadata.purpose.toString())) {
+            return true;
+        }
+        return contains(metadata.product.getTag());
     }
 
     private boolean contains(String value) {

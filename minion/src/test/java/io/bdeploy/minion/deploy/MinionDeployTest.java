@@ -35,6 +35,7 @@ import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.TestCliTool;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.Threads;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.InstanceImportExportHelper;
 import io.bdeploy.interfaces.cleanup.CleanupGroup;
@@ -120,7 +121,7 @@ public class MinionDeployTest {
         assertEquals(ProcessState.RUNNING, details.status.processState);
 
         // give the script a bit to write output
-        Thread.sleep(200);
+        Threads.sleep(200);
 
         master.getNamedMaster("demo").stop(uuid, "app");
         status = master.getNamedMaster("demo").getStatus(uuid);

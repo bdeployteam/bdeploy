@@ -154,47 +154,47 @@ public class SoftwareResourceImpl implements SoftwareResource {
     public List<Manifest.Key> upload(InputStream inputStream) {
         String tmpHiveName = UuidHelper.randomId() + ".zip";
         Path targetFile = minion.getDownloadDir().resolve(tmpHiveName);
+        List<Manifest.Key> imported = new ArrayList<>();
+
+        // Download the hive to a temporary location
         try {
-            List<Manifest.Key> imported = new ArrayList<>();
-
-            // Download the hive to a temporary location
             Files.copy(inputStream, targetFile);
-
-            // Read all product manifests
-            URI targetUri = UriBuilder.fromUri("jar:" + targetFile.toUri()).build();
-            try (BHive zipHive = new BHive(targetUri, new ActivityReporter.Null())) {
-                SortedSet<Key> manifestKeys = zipHive.execute(new ManifestListOperation());
-                if (manifestKeys.isEmpty()) {
-                    throw new WebApplicationException("ZIP file does not contain a manifest.", Status.BAD_REQUEST);
-                }
-
-                // Determine required objects
-                CopyOperation copy = new CopyOperation().setDestinationHive(hive);
-                ObjectListOperation scan = new ObjectListOperation();
-                for (Key manifestKey : manifestKeys) {
-                    // Ignore existing software
-                    if (Boolean.TRUE.equals(hive.execute(new ManifestExistsOperation().setManifest(manifestKey)))) {
-                        continue;
-                    }
-
-                    imported.add(manifestKey);
-
-                    copy.addManifest(manifestKey);
-                    scan.addManifest(manifestKey);
-                }
-
-                // Add all required artifacts
-                SortedSet<ObjectId> objectIds = zipHive.execute(scan);
-                objectIds.forEach(copy::addObject);
-
-                // Execute import only if we have something to do
-                if (!imported.isEmpty()) {
-                    zipHive.execute(copy);
-                }
-                return imported;
-            }
         } catch (IOException e) {
             throw new WebApplicationException("Failed to upload file: " + e.getMessage(), Status.BAD_REQUEST);
+        }
+
+        // Read all product manifests
+        URI targetUri = UriBuilder.fromUri("jar:" + targetFile.toUri()).build();
+        try (BHive zipHive = new BHive(targetUri, new ActivityReporter.Null())) {
+            SortedSet<Key> manifestKeys = zipHive.execute(new ManifestListOperation());
+            if (manifestKeys.isEmpty()) {
+                throw new WebApplicationException("ZIP file does not contain a manifest.", Status.BAD_REQUEST);
+            }
+
+            // Determine required objects
+            CopyOperation copy = new CopyOperation().setDestinationHive(hive);
+            ObjectListOperation scan = new ObjectListOperation();
+            for (Key manifestKey : manifestKeys) {
+                // Ignore existing software
+                if (Boolean.TRUE.equals(hive.execute(new ManifestExistsOperation().setManifest(manifestKey)))) {
+                    continue;
+                }
+
+                imported.add(manifestKey);
+
+                copy.addManifest(manifestKey);
+                scan.addManifest(manifestKey);
+            }
+
+            // Add all required artifacts
+            SortedSet<ObjectId> objectIds = zipHive.execute(scan);
+            objectIds.forEach(copy::addObject);
+
+            // Execute import only if we have something to do
+            if (!imported.isEmpty()) {
+                zipHive.execute(copy);
+            }
+            return imported;
         } finally {
             PathHelper.deleteRecursive(targetFile);
         }

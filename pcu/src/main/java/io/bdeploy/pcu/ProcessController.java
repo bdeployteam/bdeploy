@@ -26,6 +26,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.util.MdcLogger;
+import io.bdeploy.common.util.Threads;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
@@ -603,7 +604,7 @@ public class ProcessController {
         int retry = 1;
         while (!outFile.renameTo(tmpFile) && retry <= 20) {
             logger.log(l -> l.info("Waiting for file-lock to be released"));
-            doSleep(50, TimeUnit.MILLISECONDS);
+            Threads.sleep(50);
             retry++;
         }
 
@@ -942,17 +943,6 @@ public class ProcessController {
     /** Returns the future that is scheduled to recover a crashed application */
     Future<?> getRecoverTask() {
         return recoverTask;
-    }
-
-    /** Sleeps the given number of seconds */
-    private static boolean doSleep(long value, TimeUnit unit) {
-        try {
-            unit.sleep(value);
-            return true;
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return false;
-        }
     }
 
     /**

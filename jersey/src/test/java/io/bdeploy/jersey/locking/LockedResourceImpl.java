@@ -7,6 +7,7 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.bdeploy.common.util.Threads;
 import io.bdeploy.jersey.JerseyWriteLockService.LockingResource;
 import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
 
@@ -27,20 +28,18 @@ public class LockedResourceImpl implements LockedResource {
     @Override
     @WriteLock
     public void setValue(String value) {
-        try {
-            if (!inChange.compareAndSet(false, true)) {
-                throw new IllegalStateException("Only on thread allowed in update");
-            }
+        if (!inChange.compareAndSet(false, true)) {
+            throw new IllegalStateException("Only on thread allowed in update");
+        }
 
-            log.info("setting value to {}", value);
-            this.value = value;
-            Thread.sleep(500);
+        log.info("setting value to {}", value);
+        this.value = value;
+        if (!Threads.sleep(500)) {
+            return;
+        }
 
-            if (!inChange.compareAndSet(true, false)) {
-                throw new IllegalStateException("Unexpected state in resetting");
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+        if (!inChange.compareAndSet(true, false)) {
+            throw new IllegalStateException("Unexpected state in resetting");
         }
     }
 

@@ -8,17 +8,14 @@ import java.awt.event.WindowEvent;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.bdeploy.common.util.Threads;
 
 /**
  * Base class for all dialogs. Ensures that a common look-and-feel is used.
  */
 public class BaseDialog extends JFrame {
 
-    private static final Logger log = LoggerFactory.getLogger(BaseDialog.class);
     private static final long serialVersionUID = 1L;
 
     static {
@@ -55,11 +52,8 @@ public class BaseDialog extends JFrame {
     @SuppressFBWarnings(value = { "UW_UNCOND_WAIT", "WA_NOT_IN_LOOP" })
     public int waitForExit() {
         synchronized (lock) {
-            try {
-                lock.wait();
-            } catch (InterruptedException ie) {
-                Thread.currentThread().interrupt();
-                log.error("Failed to wait until the application is closed", ie);
+            while (isShowing()) {
+                Threads.wait(lock);
             }
         }
         return closeReason;

@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.bdeploy.common.util.Threads;
 import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.jersey.JerseyServer;
 import io.bdeploy.minion.MinionUpdateManager;
@@ -24,13 +25,7 @@ public class JerseyAwareMinionUpdateManager implements MinionUpdateManager {
     @Override
     public void performUpdate(long timeout) {
         Thread updateThread = new Thread(() -> {
-            try {
-                Thread.sleep(timeout);
-            } catch (InterruptedException e) {
-                // not happening xD
-                Thread.currentThread().interrupt();
-            }
-
+            Threads.sleep(timeout);
             log.info("Exiting to perform update");
 
             server.close();
