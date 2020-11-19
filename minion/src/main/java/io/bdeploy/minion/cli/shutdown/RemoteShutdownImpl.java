@@ -26,6 +26,7 @@ public class RemoteShutdownImpl implements RemoteShutdown {
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 // intentionally not handling, we want the close to proceed normally.
             }
             server.close();
