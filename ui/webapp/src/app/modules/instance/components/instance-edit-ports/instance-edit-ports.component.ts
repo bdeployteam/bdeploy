@@ -62,7 +62,7 @@ export class InstanceEditPortsComponent implements OnInit, AfterViewInit {
     this.clonedProcessConfig = cloneDeep(this.processConfig);
 
     for (const node of this.processConfig.nodeList.nodeConfigDtos) {
-      for (const app of node.nodeConfiguration.applications) {
+      for (const app of node.nodeConfiguration?.applications) {
         for (const param of app.start.parameters) {
           const appDesc = this.processConfig.nodeList.applications[app.application.name];
           const paramDesc = appDesc.startCommand.parameters.find((p) => p.uid === param.uid);

@@ -14,7 +14,7 @@
 
   <form #portsForm="ngForm">
     <ng-container *ngFor="let node of processConfig.nodeList.nodeConfigDtos">
-      <ng-container *ngFor="let app of node.nodeConfiguration.applications">
+      <ng-container *ngFor="let app of node.nodeConfiguration?.applications">
         <mat-card *ngIf="hasPorts(app, node)" class="node-card instance-node-card-theme">
           <mat-card-header class="node-card-header instance-node-card-header-theme">
             <div mat-card-avatar class="instance-node-avatar-container">
