@@ -7,6 +7,8 @@ import java.util.TreeMap;
 
 import javax.ws.rs.NotFoundException;
 
+import com.google.common.base.Supplier;
+
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
@@ -21,6 +23,7 @@ import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessHandleDto;
+import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.remote.ResourceProvider;
@@ -48,6 +51,9 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         @EnvironmentFallback("REMOTE_BHIVE")
         String instanceGroup();
 
+        @Help("Wait till termination of a single started process")
+        boolean join() default false;
+
         @Help(value = "List processes on the remote", arg = false)
         boolean list() default false;
 
@@ -74,6 +80,10 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
             helpAndFailIfMissing(null, "Missing --start or --stop or --list");
         }
 
+        if (config.join() && (!config.start() || config.application() == null || config.application().isEmpty())) {
+            helpAndFail("--join is only possible when starting a single application");
+        }
+
         InstanceResource ir = ResourceProvider.getResource(svc, InstanceGroupResource.class, getLocalContext())
                 .getInstanceResource(groupName);
         String appId = config.application();
@@ -83,6 +93,9 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                     ir.getProcessResource(instanceId).startAll();
                 } else {
                     ir.getProcessResource(instanceId).startProcess(appId);
+                    if (config.join()) {
+                        doJoin(2000, () -> ir.getProcessResource(instanceId).getStatus().get(appId).processState);
+                    }
                 }
             } else if (config.stop()) {
                 if (appId == null || appId.isEmpty()) {
@@ -120,6 +133,20 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
 
             return result;
         }
+    }
+
+    private void doJoin(long pollIntervalMs, Supplier<ProcessState> stateSupplier) {
+        while (!isTerminatedState(stateSupplier.get())) {
+            try {
+                Thread.sleep(pollIntervalMs);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    private boolean isTerminatedState(ProcessState state) {
+        return ProcessState.STOPPED.equals(state) || ProcessState.CRASHED_PERMANENTLY.equals(state);
     }
 
     private Optional<ApplicationConfiguration> findAppConfig(ProcessStatusDto processStatusDto,
