@@ -49,28 +49,32 @@ namespace Bdeploy.Shared {
         public static SoftwareEntryData Read(string appUid, bool forAllUsers) {
             RegistryHive hive = forAllUsers ? RegistryHive.LocalMachine : RegistryHive.CurrentUser;
             using (RegistryKey root = RegistryKey.OpenBaseKey(hive, RegistryView.Registry64))
-            using (RegistryKey key = root.OpenSubKey(UNINSTALL_KEY))
-            using (RegistryKey appKey = key.OpenSubKey("BDeploy-App-" + appUid)) {
-                if (appKey == null) {
+            using (RegistryKey key = root.OpenSubKey(UNINSTALL_KEY)) {
+                if (key == null) {
                     return null;
                 }
-                SoftwareEntryData entry = new SoftwareEntryData();
-                entry.DisplayName = (string)appKey.GetValue("DisplayName");
-                entry.DisplayIcon = (string)appKey.GetValue("DisplayIcon");
-                entry.DisplayVersion = (string)appKey.GetValue("DisplayVersion");
-                entry.Publisher = (string)appKey.GetValue("Publisher");
-                entry.UninstallString = (string)appKey.GetValue("UninstallString");
-                entry.QuietUninstallString = (string)appKey.GetValue("QuietUninstallString");
-                entry.InstallLocation = (string)appKey.GetValue("InstallLocation");
-                entry.InstallDate = (string)appKey.GetValue("InstallDate");
-                entry.DesktopShortcut = (string)appKey.GetValue("DesktopShortcut");
-                entry.StartMenuShortcut = (string)appKey.GetValue("StartMenuShortcut");
-                int noModify = (int)appKey.GetValue("NoModify", 0);
-                int noRepair = (int)appKey.GetValue("NoRepair", 0);
-                if (noModify == 1 && noRepair == 1) {
-                    entry.noModifyAndRepair = true;
+                using (RegistryKey appKey = key.OpenSubKey("BDeploy-App-" + appUid)) {
+                    if (appKey == null) {
+                        return null;
+                    }
+                    SoftwareEntryData entry = new SoftwareEntryData();
+                    entry.DisplayName = (string)appKey.GetValue("DisplayName");
+                    entry.DisplayIcon = (string)appKey.GetValue("DisplayIcon");
+                    entry.DisplayVersion = (string)appKey.GetValue("DisplayVersion");
+                    entry.Publisher = (string)appKey.GetValue("Publisher");
+                    entry.UninstallString = (string)appKey.GetValue("UninstallString");
+                    entry.QuietUninstallString = (string)appKey.GetValue("QuietUninstallString");
+                    entry.InstallLocation = (string)appKey.GetValue("InstallLocation");
+                    entry.InstallDate = (string)appKey.GetValue("InstallDate");
+                    entry.DesktopShortcut = (string)appKey.GetValue("DesktopShortcut");
+                    entry.StartMenuShortcut = (string)appKey.GetValue("StartMenuShortcut");
+                    int noModify = (int)appKey.GetValue("NoModify", 0);
+                    int noRepair = (int)appKey.GetValue("NoRepair", 0);
+                    if (noModify == 1 && noRepair == 1) {
+                        entry.noModifyAndRepair = true;
+                    }
+                    return entry;
                 }
-                return entry;
             }
         }
 
