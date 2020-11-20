@@ -1,5 +1,7 @@
 package io.bdeploy.common.util;
 
+import java.util.function.Supplier;
+
 /**
  * Common helpers for waiting and sleeping.
  */
@@ -9,13 +11,17 @@ public class Threads {
     }
 
     /**
-     * Waits until notified or interrupted. The caller needs to be the owner of the lock.
+     * Waits until notified or interrupted or the condition is met. The caller needs to be the owner of the lock.
      *
      * @return {@code false} if the thread was interrupted while waiting
      */
-    public static boolean wait(Object lock) {
+    public static boolean wait(Object lock, Supplier<Boolean> condition) {
         try {
-            lock.wait();
+            synchronized (lock) {
+                while (condition.get()) {
+                    lock.wait();
+                }
+            }
             return true;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

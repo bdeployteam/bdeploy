@@ -51,11 +51,7 @@ public class BaseDialog extends JFrame {
      */
     @SuppressFBWarnings(value = { "UW_UNCOND_WAIT", "WA_NOT_IN_LOOP" })
     public int waitForExit() {
-        synchronized (lock) {
-            while (isShowing()) {
-                Threads.wait(lock);
-            }
-        }
+        Threads.wait(lock, this::isShowing);
         return closeReason;
     }
 
