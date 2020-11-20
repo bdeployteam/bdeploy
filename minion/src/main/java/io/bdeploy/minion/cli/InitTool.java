@@ -154,13 +154,6 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
             throw new IllegalStateException("Cannot initialize minion root", e);
         }
 
-        try {
-            PathHelper.setOwner(root, System.getProperty("user.name"));
-        } catch (IOException e) {
-            return createResultWithMessage(
-                    "Cannot set ownership. The directory is initialized but belonging to the wrong principal.").setException(e);
-        }
-
         return result;
     }
 
