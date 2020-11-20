@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.cfg.Configuration.ConfigValidator;
 import io.bdeploy.common.cfg.Configuration.ValidationMessage;
+import io.bdeploy.common.util.OsHelper;
+import io.bdeploy.common.util.OsHelper.OperatingSystem;
 
 @ValidationMessage("The given root directory does not belong to the current user: %s")
 public class PathOwnershipValidator implements ConfigValidator<String> {
@@ -19,6 +21,10 @@ public class PathOwnershipValidator implements ConfigValidator<String> {
 
     @Override
     public boolean validate(String value) {
+        if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
+            return true; // Don't check on windows, as windows does not suffer the problem as hard.
+        }
+
         Path target = Paths.get(value);
         if (!Files.exists(target)) {
             return true; // OK, the user may be able to create the directory!

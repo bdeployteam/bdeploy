@@ -13,7 +13,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.UserPrincipal;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -221,16 +220,6 @@ public class PathHelper {
             }
         }
         return hint;
-    }
-
-    /**
-     * Sets the owner of the given path to the given user.
-     */
-    public static void setOwner(Path path, String owner) throws IOException {
-        UserPrincipal current = path.getFileSystem().getUserPrincipalLookupService().lookupPrincipalByName(owner);
-        if (!Files.getOwner(path).getName().equals(current.getName())) {
-            Files.setOwner(path, current);
-        }
     }
 
     public static ContentInfoUtil getContentInfoUtil() {

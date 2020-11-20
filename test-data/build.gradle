@@ -279,21 +279,6 @@ void setupBinServerTasks(String version) {
         } else {
             args = [ "init", "--port=${port}", "--dist=ignore", "--mode=standalone" ]
         }
-
-        /* 
-         * Newer BDeploy versions verify the ownership. The init tool sets the ownership. Old BDeploy versions don't.
-         * The problem with this is that e.g. GitHub build machines set strange ownerships on created directories and
-         * the validation will fail if the init was done with an old binary version of BDeploy. So we need to do it here.
-         */
-        doLast {
-            def pth = java.nio.file.Paths.get("${buildDir}/bin-root_${key}");
-            def principal = pth.getFileSystem().getUserPrincipalLookupService().lookupPrincipalByName(System.getProperty("user.name"));
-            println "Checking ownership of " + pth;
-            if (!java.nio.file.Files.getOwner(pth).getName().equals(principal.getName())) {
-                println "Changing ownership of " + pth;
-                java.nio.file.Files.setOwner(pth, principal);
-            }
-        }
     }
 
     task "binTriggerStopBDeploy_${key}"() {

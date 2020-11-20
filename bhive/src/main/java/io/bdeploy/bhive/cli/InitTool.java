@@ -1,6 +1,5 @@
 package io.bdeploy.bhive.cli;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -15,7 +14,6 @@ import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.RenderableResult;
-import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.jersey.audit.AuditRecord;
 
 /**
@@ -46,13 +44,6 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         try (BHive hive = new BHive(root.toUri(), getActivityReporter())) {
             hive.getAuditor()
                     .audit(AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("init").build());
-        }
-
-        try {
-            PathHelper.setOwner(root, System.getProperty("user.name"));
-        } catch (IOException e) {
-            return createResultWithMessage(
-                    "Cannot set ownership. The directory is initialized but belonging to the wrong principal.").setException(e);
         }
 
         return createSuccess();
