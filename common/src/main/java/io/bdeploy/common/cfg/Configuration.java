@@ -358,7 +358,14 @@ public class Configuration {
                 envFb = String.format(" (Environment variable '%1$s' is used as fallback if not given).", env.value());
             }
 
-            String defVal = m.getDefaultValue() != null && h.arg() ? m.getDefaultValue().toString() : "";
+            String defVal = "";
+            if (m.getDefaultValue() != null && h.arg()) {
+                if (m.getDefaultValue().getClass().isArray()) {
+                    defVal = Arrays.asList((Object[]) m.getDefaultValue()).toString();
+                } else {
+                    defVal = m.getDefaultValue().toString();
+                }
+            }
 
             if (h != null) {
                 target.row().cell(" --" + name + (h.arg() ? "=ARG" : "")).cell(h.value() + envFb).cell(defVal).build();
