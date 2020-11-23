@@ -647,6 +647,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         if (svc == null) {
             throw new WebApplicationException("Cannot find minion " + minion, Status.NOT_FOUND);
         }
+        // TODO: Use CommonDirectoryEntryResource - but not yet, keep compat with servers using old API for a while
         NodeDeploymentResource sdr = ResourceProvider.getVersionedResource(svc, NodeDeploymentResource.class, context);
         return sdr.getEntryContent(entry, offset, limit);
     }
@@ -657,6 +658,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         if (svc == null) {
             throw new WebApplicationException("Cannot find minion " + minion, Status.NOT_FOUND);
         }
+        // TODO: Use CommonDirectoryEntryResource - but not yet, keep compat with servers using old API for a while
         NodeDeploymentResource sdr = ResourceProvider.getVersionedResource(svc, NodeDeploymentResource.class, context);
         return sdr.getEntryStream(entry);
     }

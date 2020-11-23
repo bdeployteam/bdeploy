@@ -75,7 +75,9 @@ public interface NodeDeploymentResource {
      * @param offset the offset into the underlying file.
      * @param limit maximum bytes to read. 0 means no limit.
      * @return a chunk of the given entry, starting at offset until the <b>current</b> end of the file.
+     * @deprecated use {@link CommonDirectoryEntryResource}.
      */
+    @Deprecated
     @POST
     @Path("/dataDir/entry")
     public EntryChunk getEntryContent(RemoteDirectoryEntry entry, @QueryParam("o") long offset, @QueryParam("l") long limit);
@@ -83,7 +85,9 @@ public interface NodeDeploymentResource {
     /**
      * @param entry the entry to stream. The stream will include the complete content of the file.
      * @return an {@link InputStream} that can be used to stream the file.
+     * @deprecated use {@link CommonDirectoryEntryResource}.
      */
+    @Deprecated
     @POST
     @Path("/dataDir/streamEntry")
     @Produces("*/*")

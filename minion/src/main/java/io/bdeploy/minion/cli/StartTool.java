@@ -50,6 +50,7 @@ import io.bdeploy.minion.cli.StartTool.MasterConfig;
 import io.bdeploy.minion.cli.shutdown.RemoteShutdownImpl;
 import io.bdeploy.minion.plugin.VersionSorterServiceImpl;
 import io.bdeploy.minion.remote.jersey.CentralUpdateResourceImpl;
+import io.bdeploy.minion.remote.jersey.CommonDirectoryEntryResourceImpl;
 import io.bdeploy.minion.remote.jersey.CommonRootResourceImpl;
 import io.bdeploy.minion.remote.jersey.JerseyAwareMinionUpdateManager;
 import io.bdeploy.minion.remote.jersey.MasterRootResourceImpl;
@@ -222,6 +223,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
         srv.register(new BHiveJacksonModule().binder());
         srv.register(MinionStatusResourceImpl.class);
         srv.register(MinionUpdateResourceImpl.class);
+        srv.register(CommonDirectoryEntryResourceImpl.class);
 
         if (root.getMode() != MinionMode.CENTRAL) {
             srv.register(NodeCleanupResourceImpl.class);

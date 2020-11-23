@@ -40,10 +40,10 @@ import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
+import io.bdeploy.interfaces.remote.CommonDirectoryEntryResource;
 import io.bdeploy.interfaces.remote.CommonInstanceResource;
 import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.MinionStatusResource;
-import io.bdeploy.interfaces.remote.NodeDeploymentResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseySecurityContext;
 import io.bdeploy.minion.MinionRoot;
@@ -248,7 +248,8 @@ public class CommonRootResourceImpl implements CommonRootResource {
         if (svc == null) {
             throw new WebApplicationException("Cannot find minion " + minionName, Status.NOT_FOUND);
         }
-        NodeDeploymentResource sdr = ResourceProvider.getVersionedResource(svc, NodeDeploymentResource.class, security);
+        CommonDirectoryEntryResource sdr = ResourceProvider.getVersionedResource(svc, CommonDirectoryEntryResource.class,
+                security);
         return sdr.getEntryContent(entry, offset, limit);
     }
 
@@ -258,7 +259,8 @@ public class CommonRootResourceImpl implements CommonRootResource {
         if (svc == null) {
             throw new WebApplicationException("Cannot find minion " + minionName, Status.NOT_FOUND);
         }
-        NodeDeploymentResource sdr = ResourceProvider.getVersionedResource(svc, NodeDeploymentResource.class, security);
+        CommonDirectoryEntryResource sdr = ResourceProvider.getVersionedResource(svc, CommonDirectoryEntryResource.class,
+                security);
         return sdr.getEntryStream(entry);
     }
 
