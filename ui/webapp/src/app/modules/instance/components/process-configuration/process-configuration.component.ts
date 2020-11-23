@@ -1035,7 +1035,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   async updateProduct(product: ProductDto): Promise<void> {
-    let oldProduct = this.processConfigs[0].version.product;
+    let oldProduct: ManifestKey = this.processConfigs[0].version.product;
     if (this.processConfigs[0].dirty && this.processConfigs.length > 1) {
       oldProduct = this.processConfigs[1].version.product; // always use the latest saved product version to compare to.
     }
@@ -1054,6 +1054,26 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     const oldApps = await Promise.resolve(oldAppsPromise);
     this.updateApplications(newApps, oldApps);
     this.productUpdating = false;
+
+    // Check if config files changed between product versions and inform the user
+    const oldIdx: number = this.productTags.findIndex(
+      (p) => p.key.name === oldProduct.name && p.key.tag === oldProduct.tag
+    );
+    if (oldIdx >= 0 && product.configTree?.id !== this.productTags[oldIdx].configTree?.id) {
+      const idx: number = this.productTags.findIndex(
+        (p) => p.key.name === product.name && p.key.tag === product.key.tag
+      );
+      this.messageBoxService.open({
+        title: 'Product ' + (oldIdx < idx ? 'Upgrade' : 'Downgrade'),
+        message:
+          "The product's configuration files changed between versions " +
+          (oldIdx < idx ? this.productTags[oldIdx].key.tag : product.key.tag) +
+          ' and ' +
+          (oldIdx < idx ? product.key.tag : this.productTags[oldIdx].key.tag) +
+          ', please check your configuration files!',
+        mode: MessageBoxMode.WARNING,
+      });
+    }
   }
 
   updateApplications(newApps: ApplicationDto[], oldApps: ApplicationDto[]) {
