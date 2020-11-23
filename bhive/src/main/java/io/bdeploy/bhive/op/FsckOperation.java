@@ -1,7 +1,6 @@
 package io.bdeploy.bhive.op;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -17,14 +16,14 @@ import io.bdeploy.common.ActivityReporter.Activity;
  * <p>
  * The returned set contains all {@link ElementView}s which are problematic (damaged, missing)
  */
-public class FsckOperation extends BHive.Operation<List<ElementView>> {
+public class FsckOperation extends BHive.Operation<Set<ElementView>> {
 
     @AuditWith(AuditStrategy.COLLECTION_PEEK)
     private final SortedSet<Manifest.Key> manifests = new TreeSet<>();
     private boolean repair;
 
     @Override
-    public List<ElementView> call() throws Exception {
+    public Set<ElementView> call() throws Exception {
         getObjectManager().invalidateCaches();
         getManifestDatabase().invalidateCaches();
 
@@ -42,7 +41,7 @@ public class FsckOperation extends BHive.Operation<List<ElementView>> {
                 objCheck.addRoot(k);
             });
 
-            List<ElementView> problematic = new ArrayList<>();
+            Set<ElementView> problematic = new TreeSet<>();
 
             // check whether all manifests are still valid, objects might have been removed.
             problematic.addAll(execute(mfCheck));

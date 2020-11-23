@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -178,7 +179,7 @@ public class HiveResourceImpl implements HiveResource {
         BHive hive = registry.get(hiveParam);
 
         try (Activity fsck = reporter.start("FSCK " + hiveParam)) {
-            List<ElementView> problematic = hive.execute(new FsckOperation().setRepair(fix));
+            Set<ElementView> problematic = hive.execute(new FsckOperation().setRepair(fix));
             Map<String, String> result = new TreeMap<>();
             problematic.forEach(e -> result.put(e.getElementId().getId(), e.getPathString()));
             return result;

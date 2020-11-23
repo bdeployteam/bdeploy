@@ -2,11 +2,12 @@ package io.bdeploy.bhive.cli;
 
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Set;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.cli.FsckTool.FsckConfig;
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.objects.view.DamagedObjectView;
 import io.bdeploy.bhive.objects.view.ElementView;
 import io.bdeploy.bhive.op.FsckOperation;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
@@ -57,7 +58,7 @@ public class FsckTool extends ConfiguredCliTool<FsckConfig> {
             FsckOperation op = new FsckOperation().setRepair(config.repair());
             Arrays.stream(config.manifest()).map(Manifest.Key::parse).forEach(op::addManifest);
 
-            List<ElementView> broken = hive.execute(op);
+            Set<ElementView> broken = hive.execute(op);
 
             if (broken.isEmpty()) {
                 return createSuccess();
@@ -65,7 +66,9 @@ public class FsckTool extends ConfiguredCliTool<FsckConfig> {
 
             DataResult result = createResultWithMessage("Found " + broken.size() + " damaged objects!");
             for (ElementView ele : broken) {
-                result.addField(ele.getElementId().toString(), ele.getPathString());
+                result.addField(ele.getElementId().toString(),
+                        (ele instanceof DamagedObjectView ? (((DamagedObjectView) ele).getType() + " ") : "")
+                                + ele.getPathString());
             }
             return result;
         }
