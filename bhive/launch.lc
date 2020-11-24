@@ -62,7 +62,7 @@ java configuration Hive-Remote-Fetch : Hive-Base {
 
 java configuration Hive-FSCK : Hive-Base {
 	argument "fsck";
-	argument "--hive=${workspace_loc}/runtime-hive";
+	argument "--hive=${folder_prompt:Choose BHive}";
 }
 
 java configuration Hive-Manifest-Delete : Hive-Base {
