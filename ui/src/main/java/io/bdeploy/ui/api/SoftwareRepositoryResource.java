@@ -49,6 +49,9 @@ public interface SoftwareRepositoryResource {
     @Path("/{softwareRepository}/content")
     public SoftwareResource getSoftwareResource(@ActivityScope @PathParam("softwareRepository") String softwareRepository);
 
+    @Path("/{softwareRepository}/product")
+    public ProductResource getProductResource(@ActivityScope @PathParam("softwareRepository") String softwareRepository);
+
     @GET
     @Path("/{repo}/users")
     @RequiredPermission(permission = Permission.ADMIN)

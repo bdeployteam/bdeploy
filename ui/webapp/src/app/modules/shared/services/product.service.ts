@@ -1,16 +1,13 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { InstanceUsageDto, ManifestKey, ProductDto } from '../../../models/gen.dtos';
 import { ProcessConfigDto } from '../../../models/process.model';
 import { ConfigService } from '../../core/services/config.service';
 import { Logger, LoggingService } from '../../core/services/logging.service';
-import { InstanceGroupService } from '../../instance-group/services/instance-group.service';
 import { DownloadService } from './download.service';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable()
 export class ProductService {
   private log: Logger = this.loggingService.getLogger('ProductService');
 
@@ -18,7 +15,8 @@ export class ProductService {
     private cfg: ConfigService,
     private http: HttpClient,
     private loggingService: LoggingService,
-    private downloadService: DownloadService
+    private downloadService: DownloadService,
+    @Inject('ProductBasePath') private productBasePath: string
   ) {}
 
   public getProducts(instanceGroupName: string, productName: string): Observable<ProductDto[]> {
@@ -79,7 +77,7 @@ export class ProductService {
   }
 
   private buildProductUrl(instanceGroupName: string): string {
-    return this.cfg.config.api + InstanceGroupService.BASEPATH + '/' + instanceGroupName + '/product';
+    return this.cfg.config.api + this.productBasePath + '/' + instanceGroupName + '/product';
   }
 
   private buildProductNameUrl(instanceGroupName: string, key: ManifestKey): string {
