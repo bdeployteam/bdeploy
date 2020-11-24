@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { DragulaModule } from 'ng2-dragula';
 import { CoreModule } from '../core/core.module';
+import { InstanceGroupModule } from '../instance-group/instance-group.module';
 import { SharedModule } from '../shared/shared.module';
 import { AttachCentralComponent } from './components/attach-central/attach-central.component';
 import { AttachManagedComponent } from './components/attach-managed/attach-managed.component';
@@ -21,6 +22,6 @@ import { ServersRoutingModule } from './servers-routing.module';
     ManagedServerEditComponent,
   ],
   entryComponents: [ManagedServerEditComponent],
-  imports: [CommonModule, SharedModule, CoreModule, ServersRoutingModule, DragulaModule.forRoot()],
+  imports: [CommonModule, SharedModule, CoreModule, InstanceGroupModule, ServersRoutingModule, DragulaModule.forRoot()],
 })
 export class ServersModule {}

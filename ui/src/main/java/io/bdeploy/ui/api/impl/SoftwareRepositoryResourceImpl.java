@@ -24,6 +24,7 @@ import io.bdeploy.interfaces.UserPermissionUpdateDto;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
 import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
 import io.bdeploy.ui.api.AuthService;
+import io.bdeploy.ui.api.ProductResource;
 import io.bdeploy.ui.api.SoftwareRepositoryResource;
 import io.bdeploy.ui.api.SoftwareResource;
 
@@ -56,6 +57,11 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
     @Override
     public SoftwareResource getSoftwareResource(String softwareRepository) {
         return rc.initResource(new SoftwareResourceImpl(getSoftwareRepositoryHive(softwareRepository)));
+    }
+
+    @Override
+    public ProductResource getProductResource(String softwareRepository) {
+        return rc.initResource(new ProductResourceImpl(getSoftwareRepositoryHive(softwareRepository), softwareRepository));
     }
 
     private BHive getSoftwareRepositoryHive(String softwareRepository) {

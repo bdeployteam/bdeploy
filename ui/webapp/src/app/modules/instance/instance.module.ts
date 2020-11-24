@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { DragulaModule } from 'ng2-dragula';
 import { CoreModule } from '../core/core.module';
+import { InstanceGroupModule } from '../instance-group/instance-group.module';
 import { SharedModule } from '../shared/shared.module';
 import { ApplicationConfigurationCardComponent } from './components/application-configuration-card/application-configuration-card.component';
 import { ApplicationDescriptorCardComponent } from './components/application-descriptor-card/application-descriptor-card.component';
@@ -94,6 +95,14 @@ import { InstanceRoutingModule } from './instance-routing.module';
     ProcessStartConfirmComponent,
     InstanceBannerEditComponent,
   ],
-  imports: [CommonModule, SharedModule, CoreModule, InstanceRoutingModule, PortalModule, DragulaModule.forRoot()],
+  imports: [
+    CommonModule,
+    SharedModule,
+    CoreModule,
+    InstanceGroupModule,
+    InstanceRoutingModule,
+    PortalModule,
+    DragulaModule.forRoot(),
+  ],
 })
 export class InstanceModule {}

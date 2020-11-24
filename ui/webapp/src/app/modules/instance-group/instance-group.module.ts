@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { CoreModule } from '../core/core.module';
+import { ProductService } from '../shared/services/product.service';
 import { SharedModule } from '../shared/shared.module';
 import { ClientAppsComponent } from './components/client-apps/client-apps.component';
 import { InstanceGroupAddEditComponent } from './components/instance-group-add-edit/instance-group-add-edit.component';
@@ -10,6 +11,7 @@ import { InstanceGroupPermissionsComponent } from './components/instance-group-p
 import { ProductsCopyComponent } from './components/products-copy/products-copy.component';
 import { ProductsComponent } from './components/products/products.component';
 import { InstanceGroupRoutingModule } from './instance-group-routing.module';
+import { InstanceGroupService } from './services/instance-group.service';
 
 @NgModule({
   declarations: [
@@ -21,6 +23,7 @@ import { InstanceGroupRoutingModule } from './instance-group-routing.module';
     InstanceGroupPermissionsComponent,
     ProductsCopyComponent,
   ],
+  providers: [ProductService, { provide: 'ProductBasePath', useValue: InstanceGroupService.BASEPATH }],
   entryComponents: [InstanceGroupDeleteDialogComponent, ProductsCopyComponent],
   imports: [CommonModule, SharedModule, CoreModule, InstanceGroupRoutingModule],
 })

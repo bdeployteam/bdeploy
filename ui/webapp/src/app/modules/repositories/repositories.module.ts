@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { CoreModule } from '../core/core.module';
+import { ProductService } from '../shared/services/product.service';
 import { SharedModule } from '../shared/shared.module';
 import { SoftwareCardComponent } from './components/software-card/software-card.component';
 import { SoftwareListComponent } from './components/software-list/software-list.component';
@@ -11,6 +12,7 @@ import { SoftwareRepositoryCardComponent } from './components/software-repositor
 import { SoftwareRepositoryPermissionsComponent } from './components/software-repository-permissions/software-repository-permissions.component';
 import { SoftwareRepositoryComponent } from './components/software-repository/software-repository.component';
 import { RepositoriesRoutingModule } from './repositories-routing.module';
+import { SoftwareRepositoryService } from './services/software-repository.service';
 
 @NgModule({
   declarations: [
@@ -23,6 +25,7 @@ import { RepositoriesRoutingModule } from './repositories-routing.module';
     SoftwareListComponent,
     SoftwareRepoFileUploadComponent,
   ],
+  providers: [ProductService, { provide: 'ProductBasePath', useValue: SoftwareRepositoryService.BASEPATH }],
   imports: [CommonModule, SharedModule, CoreModule, RepositoriesRoutingModule],
 })
 export class RepositoriesModule {}
