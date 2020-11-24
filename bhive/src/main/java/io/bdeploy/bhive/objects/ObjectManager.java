@@ -308,7 +308,7 @@ public class ObjectManager {
         if (db.hasObject(tree)) {
             ev = scan(tree, EntryType.TREE, new ArrayDeque<>(), maxDepth, followReferences);
         } else {
-            ev = new DamagedObjectView(tree, EntryType.TREE, Collections.emptyList());
+            ev = new DamagedObjectView(tree, EntryType.TREE, Collections.singletonList("/"));
         }
 
         if (ev instanceof TreeView) {

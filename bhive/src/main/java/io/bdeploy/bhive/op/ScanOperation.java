@@ -1,10 +1,16 @@
 package io.bdeploy.bhive.op;
 
+import java.util.Collections;
+import java.util.Map.Entry;
+
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.ReadOnlyOperation;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
+import io.bdeploy.bhive.model.Tree.EntryType;
+import io.bdeploy.bhive.objects.view.DamagedObjectView;
+import io.bdeploy.bhive.objects.view.ElementView;
 import io.bdeploy.bhive.objects.view.TreeView;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.util.RuntimeAssert;
@@ -31,7 +37,19 @@ public class ScanOperation extends BHive.Operation<TreeView> {
 
             RuntimeAssert.assertNotNull(treeId, "No tree to scan");
 
-            return getObjectManager().scan(treeId, maxDepth, followReferences);
+            TreeView result = getObjectManager().scan(treeId, maxDepth, followReferences);
+            if (result.getChildren().size() == 1) {
+                Entry<String, ElementView> entry = result.getChildren().entrySet().stream().findFirst().get();
+
+                if (entry.getValue() instanceof DamagedObjectView && entry.getValue().getElementId().equals(treeId)) {
+                    // the root tree is damaged, this is... bad. for better visibility put the manifest ID in there.
+                    result = new TreeView(result.getElementId(), result.getPath());
+                    result.addChild(
+                            new DamagedObjectView(treeId, EntryType.MANIFEST, Collections.singleton(manifest.toString())));
+                }
+            }
+
+            return result;
         }
     }
 
