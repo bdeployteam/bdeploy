@@ -713,7 +713,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         // Write manifest entry that the launcher needs to be retained
         ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
         ClientSoftwareConfiguration clientConfig = manifest.readNewest(clickAndStart.applicationId);
-        if (clientConfig != null && clientConfig.launcher.equals(launcher)) {
+        if (clientConfig != null && clientConfig.launcher != null && clientConfig.launcher.equals(launcher)) {
             return;
         }
         // Ensure we have write permissions
