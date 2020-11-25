@@ -77,9 +77,9 @@ public interface NodeDeploymentResource {
      * @return a chunk of the given entry, starting at offset until the <b>current</b> end of the file.
      * @deprecated use {@link CommonDirectoryEntryResource}.
      */
-    @Deprecated
     @POST
     @Path("/dataDir/entry")
+    @Deprecated(forRemoval = true, since = "3.3.0")
     public EntryChunk getEntryContent(RemoteDirectoryEntry entry, @QueryParam("o") long offset, @QueryParam("l") long limit);
 
     /**
@@ -87,10 +87,10 @@ public interface NodeDeploymentResource {
      * @return an {@link InputStream} that can be used to stream the file.
      * @deprecated use {@link CommonDirectoryEntryResource}.
      */
-    @Deprecated
     @POST
     @Path("/dataDir/streamEntry")
     @Produces("*/*")
+    @Deprecated(forRemoval = true, since = "3.3.0")
     public Response getEntryStream(RemoteDirectoryEntry entry);
 
     /**

@@ -1,6 +1,6 @@
 package io.bdeploy.common.util;
 
-import java.util.function.Supplier;
+import java.util.function.BooleanSupplier;
 
 /**
  * Common helpers for waiting and sleeping.
@@ -15,10 +15,10 @@ public class Threads {
      *
      * @return {@code false} if the thread was interrupted while waiting
      */
-    public static boolean wait(Object lock, Supplier<Boolean> condition) {
+    public static boolean wait(Object lock, BooleanSupplier condition) {
         try {
             synchronized (lock) {
-                while (condition.get()) {
+                while (condition.getAsBoolean()) {
                     lock.wait();
                 }
             }
