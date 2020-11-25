@@ -52,6 +52,7 @@ import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.TemplateHelper;
+import io.bdeploy.common.util.Threads;
 import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.UpdateHelper;
@@ -469,25 +470,15 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
 
         log.info("Updating launcher from {} to {}", runningVersion, latestVersion);
-        Path next = null;
         Path updateMarker = updateDir.resolve(".updating");
-
         try (Activity updating = reporter.start("Updating Launcher")) {
-            if (Files.isRegularFile(updateMarker)) {
-                log.warn("Found existing update marker");
-                if (System.currentTimeMillis() - Files.getLastModifiedTime(updateMarker).toMillis() > 60_000) {
-                    log.warn("Stale update marker found, removing");
-                    Files.delete(updateMarker);
-                } else {
-                    throw new IllegalStateException("Update in progress by another launcher");
-                }
-            }
+            waitForLauncherUpdates(updateMarker);
 
             // found a newer version to install.
             hive.execute(new FetchOperation().addManifest(launcher).setRemote(clickAndStart.host));
 
             // write to target directory
-            next = UpdateHelper.prepareUpdateDirectory(updateDir);
+            Path next = UpdateHelper.prepareUpdateDirectory(updateDir);
             hive.execute(new ExportOperation().setManifest(launcher).setTarget(next));
 
             // create a marker for others which will gain the lock after we exit for restart.
@@ -499,6 +490,43 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         } catch (IOException e) {
             throw new IllegalStateException("Cannot create update marker");
         }
+    }
+
+    /**
+     * Waits for some time until another launcher has finished installing updates for the launcher.
+     */
+    private void waitForLauncherUpdates(Path updateMarker) throws IOException {
+        // No one is installing updates.
+        if (!Files.isRegularFile(updateMarker)) {
+            return;
+        }
+
+        // Check for a stale update marker
+        if (System.currentTimeMillis() - Files.getLastModifiedTime(updateMarker).toMillis() > 60_000) {
+            log.warn("Stale update marker found, removing.");
+            Files.delete(updateMarker);
+            return;
+        }
+
+        // Update marker found -> On Windows we just terminate
+        // The native launcher cannot install updates while we are running
+        if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
+            log.info("Found existing update marker. Exiting to allow updates to be installed.");
+            doExit(UpdateHelper.CODE_UPDATE);
+        }
+
+        // On Linux we wait for some time until the marker disappears
+        // The native shell script will remove the marker when finished
+        int counter = 0;
+        log.info("Waiting while updates are installed.");
+        while (counter < 30 && Files.isRegularFile(updateMarker)) {
+            Threads.sleep(1000);
+            counter++;
+        }
+
+        // Terminate and restart in any case
+        log.info("Exiting to apply updates.");
+        doExit(UpdateHelper.CODE_UPDATE);
     }
 
     /**
@@ -698,21 +726,21 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Install missing launcher
         Key launcher = requiredLauncher.getValue();
-        if (!nativeLauncher.toFile().exists()) {
-            doExecuteLocked(reporter, () -> {
-                log.info("Installing required launcher {}...", version);
-                if (PathHelper.isReadOnly(homeDir)) {
-                    throw new SoftwareUpdateException("launcher",
-                            "Installed=" + runningVersion.toString() + " Required=" + version);
-                }
-                // Fetch and write to target directory
-                hive.execute(new FetchOperation().addManifest(launcher).setRemote(clickAndStart.host));
-                Path launcherHome = homeDir.resolve(ClientPathHelper.LAUNCHER_DIR);
-                hive.execute(new ExportOperation().setManifest(launcher).setTarget(launcherHome));
-                log.info("Launcher successfully installed: {}", version);
+        doExecuteLocked(reporter, () -> {
+            if (nativeLauncher.toFile().exists()) {
                 return null;
-            });
-        }
+            }
+            log.info("Installing required launcher {}...", version);
+            if (PathHelper.isReadOnly(homeDir)) {
+                throw new SoftwareUpdateException("launcher", "Installed=" + runningVersion.toString() + " Required=" + version);
+            }
+            // Fetch and write to target directory
+            hive.execute(new FetchOperation().addManifest(launcher).setRemote(clickAndStart.host));
+            Path launcherHome = homeDir.resolve(ClientPathHelper.LAUNCHER_DIR);
+            hive.execute(new ExportOperation().setManifest(launcher).setTarget(launcherHome));
+            log.info("Launcher successfully installed: {}", version);
+            return null;
+        });
 
         // Write manifest entry that the launcher needs to be retained
         ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
@@ -725,10 +753,13 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             throw new SoftwareUpdateException(clickAndStart.applicationId, "Missing artifacts: Software Manifest");
         }
         // Write updated manifest
-        clientConfig = new ClientSoftwareConfiguration();
-        clientConfig.launcher = launcher;
-        clientConfig.clickAndStart = clickAndStart;
-        manifest.update(clickAndStart.applicationId, clientConfig);
+        doExecuteLocked(reporter, () -> {
+            clientConfig.launcher = launcher;
+            clientConfig.clickAndStart = clickAndStart;
+            clientConfig.requiredSoftware.clear();
+            manifest.update(clickAndStart.applicationId, clientConfig);
+            return null;
+        });
     }
 
     /**

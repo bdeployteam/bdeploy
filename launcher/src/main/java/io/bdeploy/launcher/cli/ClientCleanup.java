@@ -160,7 +160,7 @@ public class ClientCleanup {
         SortedMap<ObjectId, Long> result = hive.execute(new PruneOperation());
         long sum = result.values().stream().collect(Collectors.summarizingLong(x -> x)).getSum();
         if (sum > 0) {
-            log.info("Removed {} objects ({}).", result.size(), UnitHelper.formatFileSize(sum));
+            log.info("Removed {} objects (Size={}).", result.size(), UnitHelper.formatFileSize(sum));
         }
     }
 

@@ -1,9 +1,10 @@
 package io.bdeploy.bhive.objects;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Collections;
@@ -16,9 +17,9 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.util.Threads;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.StringHelper;
+import io.bdeploy.common.util.Threads;
 
 public class MarkerDatabase extends ObjectDatabase {
 
@@ -78,22 +79,10 @@ public class MarkerDatabase extends ObjectDatabase {
             try {
                 Files.write(lockFile, Collections.singletonList(content), StandardOpenOption.CREATE_NEW).toFile().deleteOnExit();
                 return;
-            } catch (FileAlreadyExistsException e) {
+            } catch (IOException e) {
                 // validate to find stale lock files
-                if (lockContentValidator != null) {
-                    try {
-                        List<String> lines = Files.readAllLines(lockFile);
-                        if (!lines.isEmpty() && !StringHelper.isNullOrEmpty(lines.get(0))
-                                && !lockContentValidator.test(lines.get(0))) {
-                            // it is invalid! this means it is a stale lock, we can delete it!
-                            log.warn("Stale lock file detected, forcefully resolving...");
-                            Files.delete(lockFile);
-                            continue;
-                        }
-                    } catch (IOException ve) {
-                        // cannot validate, assume it is still valid.
-                        log.warn("Cannot validate lock file, assuming it is valid: {}: {}", lockFile, ve.toString());
-                    }
+                if (!isLockFileValid(lockFile, lockContentValidator)) {
+                    continue;
                 }
                 // inform the user that we're about to wait...
                 if (!infoWritten) {
@@ -137,6 +126,30 @@ public class MarkerDatabase extends ObjectDatabase {
      */
     public static void unlockRoot(Path root) {
         PathHelper.deleteRecursive(root.resolve(LOCK_FILE));
+    }
+
+    /** Validates whether or not the given lock file is still valid */
+    private static boolean isLockFileValid(Path lockFile, Predicate<String> lockContentValidator) {
+        // No content validator. Assuming the lock is still valid
+        if (lockContentValidator == null) {
+            return true;
+        }
+
+        // Read the lock file to check if the content is still valid
+        try {
+            List<String> lines = Files.readAllLines(lockFile);
+            if (!lines.isEmpty() && !StringHelper.isNullOrEmpty(lines.get(0)) && !lockContentValidator.test(lines.get(0))) {
+                log.warn("Stale lock file detected, forcefully resolving...");
+                Files.delete(lockFile);
+                return false;
+            }
+            return true;
+        } catch (NoSuchFileException | FileNotFoundException fne) {
+            return false;
+        } catch (IOException ve) {
+            log.warn("Cannot validate lock file, assuming it is valid: {}: {}", lockFile, ve.toString());
+            return true;
+        }
     }
 
 }

@@ -17,6 +17,9 @@ namespace Bdeploy.Launcher {
         /// Lock file that is created to avoid that multiple launchers install updates simultaneously
         private static readonly string UPDATE_LOCK = Path.Combine(UPDATES, ".lock");
 
+        /// Marker file that is created by the Java launcher to notify that it is applying updates
+        private static readonly string UPDATE_JAVA_LOCK = Path.Combine(UPDATES, ".updating");
+
         // The full path of the directory where the launcher stores the next version
         private static readonly string UPDATES_NEXT = Path.Combine(UPDATES, "next");
 
@@ -175,6 +178,9 @@ namespace Bdeploy.Launcher {
                 // Cleanup files in update directory
                 Log.Information("Delete update directory.");
                 FileHelper.DeleteDir(UPDATES_NEXT);
+
+                // Cleanup update marker
+                FileHelper.DeleteFile(UPDATE_JAVA_LOCK);
                 return true;
             } catch (Exception ex) {
                 Log.Error(ex, "Failed to apply updates.");
