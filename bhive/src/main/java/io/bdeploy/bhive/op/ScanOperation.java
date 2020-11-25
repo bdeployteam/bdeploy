@@ -39,7 +39,7 @@ public class ScanOperation extends BHive.Operation<TreeView> {
 
             TreeView result = getObjectManager().scan(treeId, maxDepth, followReferences);
             if (result.getChildren().size() == 1) {
-                Entry<String, ElementView> entry = result.getChildren().entrySet().stream().findFirst().get();
+                Entry<String, ElementView> entry = result.getChildren().entrySet().iterator().next();
 
                 if (entry.getValue() instanceof DamagedObjectView && entry.getValue().getElementId().equals(treeId)) {
                     // the root tree is damaged, this is... bad. for better visibility put the manifest ID in there.
