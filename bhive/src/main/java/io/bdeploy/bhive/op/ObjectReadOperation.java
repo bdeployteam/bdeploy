@@ -5,9 +5,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.io.CountingInputStream;
 
@@ -16,6 +20,7 @@ import io.bdeploy.bhive.audit.AuditParameterExtractor.NoAudit;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.objects.MarkerDatabase;
+import io.bdeploy.bhive.objects.view.ElementView;
 import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter.Activity;
@@ -28,6 +33,8 @@ import io.bdeploy.common.util.UuidHelper;
  * Reads one or more objects from a stream and inserts them into the local hive.
  */
 public class ObjectReadOperation extends BHive.Operation<TransferStatistics> {
+
+    private static final Logger log = LoggerFactory.getLogger(ObjectReadOperation.class);
 
     @NoAudit
     private InputStream input;
@@ -47,12 +54,14 @@ public class ObjectReadOperation extends BHive.Operation<TransferStatistics> {
                 SortedSet<Manifest> manifests = new TreeSet<>();
 
                 // Read all manifests from the stream
+                ManifestConsistencyCheckOperation checkOp = new ManifestConsistencyCheckOperation();
                 long counter = dataIn.readLong();
                 for (int i = 0; i < counter; i++) {
                     long size = dataIn.readLong();
                     Manifest mf = StorageHelper.fromStream(new FixedLengthStream(dataIn, size), Manifest.class);
                     manifests.add(mf);
                     activity.worked(1);
+                    checkOp.addRoot(mf.getKey());
                 }
 
                 // Lock during streaming of objects
@@ -78,6 +87,12 @@ public class ObjectReadOperation extends BHive.Operation<TransferStatistics> {
                         result.sumManifests++;
                     }
                 });
+
+                // Check manifests for consistency and remove invalid ones
+                Set<ElementView> damaged = execute(checkOp.setDryRun(false));
+                if (!damaged.isEmpty()) {
+                    log.error("Failed to stream all required objects. Removed {} missing/damaged elements.", damaged.size());
+                }
                 result.transferSize = countingIn.getCount();
             }
         } finally {

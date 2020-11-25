@@ -252,7 +252,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             Process process = null;
             if (shouldDelegate(runningVersion, requiredVersion)) {
                 log.info("Application requires an older launcher version. Delegating...");
-                doInstallSideBySide(hive, requiredLauncher);
+                doInstallSideBySide(hive, reporter, requiredLauncher);
                 process = doDelegateLaunch(requiredVersion, config.launch());
                 log.info("Launcher successfully launched. PID={}", process.pid());
             } else {
@@ -690,7 +690,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
      * Installs the launcher required to launch the application side-by-side to this launcher. If the launcher is already
      * installed then nothing will be done.
      */
-    private void doInstallSideBySide(BHive hive, Entry<Version, Key> requiredLauncher) {
+    private void doInstallSideBySide(BHive hive, LauncherSplashReporter reporter, Entry<Version, Key> requiredLauncher) {
         // Check if the launcher is already installed
         Version version = requiredLauncher.getKey();
         Path homeDir = ClientPathHelper.getHome(rootDir, version);
@@ -699,15 +699,19 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         // Install missing launcher
         Key launcher = requiredLauncher.getValue();
         if (!nativeLauncher.toFile().exists()) {
-            log.info("Installing required launcher {}...", version);
-            if (PathHelper.isReadOnly(homeDir)) {
-                throw new SoftwareUpdateException("launcher", "Installed=" + runningVersion.toString() + " Required=" + version);
-            }
-            // Fetch and write to target directory
-            hive.execute(new FetchOperation().addManifest(launcher).setRemote(clickAndStart.host));
-            Path launcherHome = homeDir.resolve(ClientPathHelper.LAUNCHER_DIR);
-            hive.execute(new ExportOperation().setManifest(launcher).setTarget(launcherHome));
-            log.info("Launcher successfully installed: {}", version);
+            doExecuteLocked(reporter, () -> {
+                log.info("Installing required launcher {}...", version);
+                if (PathHelper.isReadOnly(homeDir)) {
+                    throw new SoftwareUpdateException("launcher",
+                            "Installed=" + runningVersion.toString() + " Required=" + version);
+                }
+                // Fetch and write to target directory
+                hive.execute(new FetchOperation().addManifest(launcher).setRemote(clickAndStart.host));
+                Path launcherHome = homeDir.resolve(ClientPathHelper.LAUNCHER_DIR);
+                hive.execute(new ExportOperation().setManifest(launcher).setTarget(launcherHome));
+                log.info("Launcher successfully installed: {}", version);
+                return null;
+            });
         }
 
         // Write manifest entry that the launcher needs to be retained
