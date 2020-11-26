@@ -221,7 +221,13 @@ public class ObjectManager {
     private void internalExportTree(ObjectId tree, Path topLevel, ObjectId topLevelTree, Path location, Activity exporting,
             ReferenceHandler handler) throws IOException {
         PathHelper.mkdirs(location);
-        Tree t = loadObject(tree, is -> StorageHelper.fromStream(is, Tree.class));
+
+        Tree t;
+        try {
+            t = loadObject(tree, is -> StorageHelper.fromStream(is, Tree.class));
+        } catch (Exception e) {
+            throw new IllegalStateException("Cannot load tree for path " + location);
+        }
 
         List<Future<?>> filesOnLevel = new ArrayList<>();
         for (Map.Entry<Tree.Key, ObjectId> entry : t.getChildren().entrySet()) {
@@ -234,6 +240,8 @@ public class ObjectManager {
                     filesOnLevel.add(fileOps.submit(() -> {
                         try {
                             internalExportBlobByCopy(obj, child);
+                        } catch (Exception e) {
+                            throw new IllegalStateException("Cannot export BLOB to " + child, e);
                         } finally {
                             exporting.workAndCancelIfRequested(1);
                         }
