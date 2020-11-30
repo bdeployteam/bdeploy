@@ -59,6 +59,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
+import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
 import io.bdeploy.interfaces.directory.EntryChunk;
@@ -330,33 +331,34 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     @Override
     public void updateTo(String uuid, String productTag) {
         InstanceManifest latest = InstanceManifest.load(hive, uuid, null);
-        Manifest.Key product = latest.getConfiguration().product;
-        Manifest.Key updateTo = new Manifest.Key(product.getName(), productTag);
+        Manifest.Key pkCurrent = latest.getConfiguration().product;
+        Manifest.Key pkUpdate = new Manifest.Key(pkCurrent.getName(), productTag);
 
         // validate that the product is there.
-        if (!Boolean.TRUE.equals(hive.execute(new ManifestExistsOperation().setManifest(updateTo)))) {
+        if (!Boolean.TRUE.equals(hive.execute(new ManifestExistsOperation().setManifest(pkUpdate)))) {
             throw new WebApplicationException("Cannot find product tag " + productTag, Status.NOT_FOUND);
         }
 
-        ProductManifest pm = ProductManifest.of(hive, updateTo);
-        InstanceConfiguration updatedIc = latest.getConfiguration();
+        ProductManifest pmUpdate = ProductManifest.of(hive, pkUpdate);
+        ProductManifest pmCurrent = ProductManifest.of(hive, pkCurrent);
 
         // update product on manifest
-        updatedIc.product = pm.getKey();
+        InstanceConfiguration icCurrent = latest.getConfiguration();
+        icCurrent.product = pmUpdate.getKey();
 
         SortedMap<String, InstanceNodeConfiguration> incs = new TreeMap<>();
         for (Entry<String, Key> nodeEntry : latest.getInstanceNodeManifests().entrySet()) {
             InstanceNodeManifest inm = InstanceNodeManifest.of(hive, nodeEntry.getValue());
             InstanceNodeConfiguration cfg = inm.getConfiguration();
 
-            updateNodeTo(cfg, pm);
+            updateNodeTo(cfg, pmCurrent, pmUpdate);
 
             incs.put(nodeEntry.getKey(), cfg);
         }
 
         // update config tree if the instance does not yet have a config tree.
-        if (updatedIc.configTree == null) {
-            updatedIc.configTree = pm.getConfigTemplateTreeId();
+        if (icCurrent.configTree == null) {
+            icCurrent.configTree = pmUpdate.getConfigTemplateTreeId();
         }
 
         // actually persist, calculate a new key.
@@ -364,72 +366,80 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         Long next = hive.execute(new ManifestNextIdOperation().setManifestName(name));
         Manifest.Key target = new Manifest.Key(name, next.toString());
 
-        createInstanceVersion(target, updatedIc, incs);
+        createInstanceVersion(target, icCurrent, incs);
     }
 
-    private void updateNodeTo(InstanceNodeConfiguration cfg, ProductManifest pm) {
-        cfg.product = pm.getKey();
+    private void updateNodeTo(InstanceNodeConfiguration cfg, ProductManifest pmCurrent, ProductManifest pmUpdate) {
+        cfg.product = pmUpdate.getKey();
 
         // verify all applications are still there & update their version
         for (ApplicationConfiguration appCfg : cfg.applications) {
             String appName = appCfg.application.getName();
-            Manifest.Key updateAppTo = null;
-            for (Manifest.Key available : pm.getApplications()) {
-                if (available.getName().equals(appName)) {
-                    updateAppTo = available;
-                }
-            }
-            if (updateAppTo == null) {
-                throw new WebApplicationException(
-                        "Application " + appName + " used in instance configuration, but no longer available in " + pm.getKey(),
+            Manifest.Key appKeyCurrent = pmCurrent.getApplication(appName);
+            Manifest.Key appKeyUpdate = pmUpdate.getApplication(appName);
+            if (appKeyUpdate == null) {
+                throw new WebApplicationException("Application " + appName
+                        + " used in instance configuration, but no longer available in " + pmUpdate.getKey(),
                         Status.PRECONDITION_FAILED);
             }
-            ApplicationManifest amf = ApplicationManifest.of(hive, updateAppTo);
+            ApplicationManifest amUpdate = ApplicationManifest.of(hive, appKeyUpdate);
+            ApplicationManifest amCurrent = ApplicationManifest.of(hive, appKeyCurrent);
 
-            updateApplicationTo(appCfg, amf);
+            updateApplicationTo(appCfg, amCurrent, amUpdate);
         }
     }
 
-    private void updateApplicationTo(ApplicationConfiguration appCfg, ApplicationManifest amf) {
-        appCfg.application = amf.getKey();
+    private void updateApplicationTo(ApplicationConfiguration appCfg, ApplicationManifest amCurrent,
+            ApplicationManifest amUpdate) {
+        appCfg.application = amUpdate.getKey();
 
         // verify that all parameters which are currently configured are still there, update fixed parameter values
-        appCfg.start = updateApplicationCommandTo(appCfg, appCfg.start, amf.getDescriptor().startCommand);
-        appCfg.stop = updateApplicationCommandTo(appCfg, appCfg.stop, amf.getDescriptor().stopCommand);
+        ApplicationDescriptor adCurrent = amCurrent.getDescriptor();
+        ApplicationDescriptor adUpdate = amUpdate.getDescriptor();
+        appCfg.start = updateApplicationCommandTo(appCfg, appCfg.start, adCurrent.startCommand, adUpdate.startCommand);
+        appCfg.stop = updateApplicationCommandTo(appCfg, appCfg.stop, adCurrent.stopCommand, adUpdate.stopCommand);
     }
 
     private CommandConfiguration updateApplicationCommandTo(ApplicationConfiguration appCfg, CommandConfiguration command,
-            ExecutableDescriptor desc) {
-        if (desc == null) {
-            // command was removed, remove as well.
+            ExecutableDescriptor descCurrent, ExecutableDescriptor descUpdate) {
+        // command was removed, remove as well.
+        if (descUpdate == null) {
             return null;
         }
-
         if (command == null) {
             throw new WebApplicationException(
                     "Headless update of application (" + appCfg.name + ") not possible, command has been added",
                     Status.PRECONDITION_FAILED);
         }
 
-        command.executable = desc.launcherPath;
+        command.executable = descUpdate.launcherPath;
 
         Map<String, ParameterConfiguration> byUid = new TreeMap<>();
         for (ParameterConfiguration cfg : command.parameters) {
-            // find according description.
-            Optional<ParameterDescriptor> match = desc.parameters.stream().filter(p -> p.uid.equals(cfg.uid)).findAny();
-            if (!match.isPresent()) {
-                throw new WebApplicationException("Headless update of application (" + appCfg.name
-                        + ") not possible, parameter not found (" + cfg.uid + ")", Status.PRECONDITION_FAILED);
+            Optional<ParameterDescriptor> matchUpdate = descUpdate.parameters.stream().filter(p -> p.uid.equals(cfg.uid))
+                    .findAny();
+            Optional<ParameterDescriptor> matchCurrent = descCurrent.parameters.stream().filter(p -> p.uid.equals(cfg.uid))
+                    .findAny();
+
+            // Parameter is not there in current and old version: Custom parameter. Nothing to do
+            if (!matchUpdate.isPresent() && !matchCurrent.isPresent()) {
+                continue;
             }
 
-            if (match.get().fixed) {
-                cfg.value = match.get().defaultValue;
-                cfg.preRender(match.get());
+            // Parameter has been removed
+            if (!matchUpdate.isPresent()) {
+                throw new WebApplicationException("Headless update of application (" + appCfg.name
+                        + ") not possible, parameter has been removed (" + cfg.uid + ")", Status.PRECONDITION_FAILED);
+            }
+
+            if (matchUpdate.get().fixed) {
+                cfg.value = matchUpdate.get().defaultValue;
+                cfg.preRender(matchUpdate.get());
             }
             byUid.put(cfg.uid, cfg);
         }
 
-        for (ParameterDescriptor pd : desc.parameters) {
+        for (ParameterDescriptor pd : descUpdate.parameters) {
             if (pd.mandatory && !byUid.containsKey(pd.uid)) {
                 throw new WebApplicationException("Headless update of application (" + appCfg.name
                         + ") not possible, missing mandatory parameter (" + pd.uid + ")", Status.PRECONDITION_FAILED);
