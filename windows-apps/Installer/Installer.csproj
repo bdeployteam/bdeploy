@@ -154,9 +154,6 @@
     <Resource Include="Resources\error.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\config.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\icon.ico" />
   </ItemGroup>
   <ItemGroup>
@@ -180,7 +177,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetPath)" "$(SolutionDir)\..\launcher\src\win64\dist\bin\$(ProjectName).bin" /Y</PostBuildEvent>
+    <PostBuildEvent>signtool sign /n "BDeploy Development" /fd SHA256  "$(TargetPath)"
+copy "$(TargetPath)" "$(SolutionDir)\..\launcher\src\win64\dist\bin\$(ProjectName).bin" /Y</PostBuildEvent>
   </PropertyGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

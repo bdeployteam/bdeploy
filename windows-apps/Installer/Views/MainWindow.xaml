@@ -45,7 +45,7 @@
                 </Label>
                 <StackPanel Grid.Row="1" Orientation="Vertical" Margin="20, 10">
                     <TextBlock Name="ProgressText" FontSize="14" FontWeight="SemiBold" Margin="0 10">
-                        Progress Text...
+                        Preparing...
                     </TextBlock>
                     <ProgressBar Name="ProgressBar" Height="16"  IsIndeterminate="True" />
                 </StackPanel>

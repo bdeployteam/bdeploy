@@ -6,3 +6,4 @@ rem Currently only Markus Duft's machine has the token and the certificate. It w
 
 signtool sign /n "IT Solutions GmbH" /tr http://rfc3161timestamp.globalsign.com/advanced /td SHA256 src\win64\dist\BDeploy.exe
 signtool sign /n "IT Solutions GmbH" /tr http://rfc3161timestamp.globalsign.com/advanced /td SHA256 src\win64\dist\FileAssoc.exe
+signtool sign /n "IT Solutions GmbH" /tr http://rfc3161timestamp.globalsign.com/advanced /td SHA256 src\win64\dist\bin\Installer.bin

@@ -1,4 +1,4 @@
-package io.bdeploy.ui.branding;
+package io.bdeploy.ui.utils;
 
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
@@ -10,7 +10,7 @@ import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
  * Adding optional fields is not an issue. They are ignored.
  * </p>
  */
-public class BrandingConfig {
+public class WindowsInstallerConfig {
 
     /**
      * The URL as well as the token to access the minion.

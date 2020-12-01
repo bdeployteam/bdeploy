@@ -1,7 +1,6 @@
 package io.bdeploy.ui.api.impl;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -116,8 +115,6 @@ import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.ProcessResource;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
-import io.bdeploy.ui.branding.Branding;
-import io.bdeploy.ui.branding.BrandingConfig;
 import io.bdeploy.ui.dto.HistoryCompareDto;
 import io.bdeploy.ui.dto.HistoryEntryVersionDto;
 import io.bdeploy.ui.dto.HistoryFilterDto;
@@ -128,6 +125,8 @@ import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
 import io.bdeploy.ui.dto.InstanceVersionDto;
 import io.bdeploy.ui.dto.ProductDto;
 import io.bdeploy.ui.dto.StringEntryChunkDto;
+import io.bdeploy.ui.utils.WindowsInstallerConfig;
+import io.bdeploy.ui.utils.WindowsInstaller;
 
 public class InstanceResourceImpl implements InstanceResource {
 
@@ -776,10 +775,9 @@ public class InstanceResourceImpl implements InstanceResource {
         // Load product of instance to set the vendor
         ProductManifest pm = ProductManifest.of(hive, im.getConfiguration().product);
 
-        // Brand the executable and embed the required information
-        File installer = installerPath.toFile();
+        // Embed the configuration into the executable
         try {
-            BrandingConfig config = new BrandingConfig();
+            WindowsInstallerConfig config = new WindowsInstallerConfig();
             config.remoteService = clickAndStart.host;
             config.launcherUrl = launcherLocation.toString();
             config.iconUrl = iconLocation.toString();
@@ -790,16 +788,10 @@ public class InstanceResourceImpl implements InstanceResource {
             config.applicationName = appConfig.name;
             config.applicationJson = new String(StorageHelper.toRawBytes(clickAndStart), StandardCharsets.UTF_8);
             config.productVendor = pm.getProductDescriptor().vendor;
-
-            Branding branding = new Branding(installer);
-            branding.updateConfig(config);
-            branding.write(installer);
+            WindowsInstaller.embedConfig(installerPath, config);
         } catch (Exception ioe) {
-            throw new WebApplicationException("Cannot apply branding to windows installer.", ioe);
+            throw new WebApplicationException("Cannot embed configuration into windows installer.", ioe);
         }
-
-        // Now sign the executable with our certificate
-        minion.signExecutable(installer, appConfig.name, clickAndStart.host.getUri().toString());
     }
 
     @Override

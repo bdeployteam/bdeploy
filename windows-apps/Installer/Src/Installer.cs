@@ -126,7 +126,7 @@ namespace Bdeploy.Installer {
                     builder.Append("Configuration:").AppendLine();
                     builder.Append(config == null ? "<null>" : config.ToString()).AppendLine();
                     builder.Append("Embedded:").AppendLine();
-                    builder.Append(ConfigStorage.ReadEmbeddedConfigFile()).AppendLine();
+                    builder.Append(ConfigStorage.ReadEmbeddedConfig()).AppendLine();
                     OnError(builder.ToString());
                     return -1;
                 }

@@ -55,9 +55,9 @@ import io.bdeploy.common.util.ZipHelper;
 import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
-import io.bdeploy.ui.branding.Branding;
-import io.bdeploy.ui.branding.BrandingConfig;
 import io.bdeploy.ui.dto.LauncherDto;
+import io.bdeploy.ui.utils.WindowsInstallerConfig;
+import io.bdeploy.ui.utils.WindowsInstaller;
 
 public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
 
@@ -271,8 +271,6 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
 
     private void createWindowsInstaller(String installerName, Path installerPath, ScopedManifestKey launcherKey,
             URI launcherLocation) {
-        File installer = installerPath.toFile();
-
         // Try to load the installer stored in the manifest tree
         BHive rootHive = getHive();
         Manifest mf = rootHive.execute(new ManifestLoadOperation().setManifest(launcherKey.getKey()));
@@ -286,19 +284,13 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
 
         // Brand the executable and embed the required information
         try {
-            BrandingConfig config = new BrandingConfig();
+            WindowsInstallerConfig config = new WindowsInstallerConfig();
             config.launcherUrl = launcherLocation.toString();
             config.remoteService = createRemoteService();
-
-            Branding branding = new Branding(installer);
-            branding.updateConfig(config);
-            branding.write(installer);
+            WindowsInstaller.embedConfig(installerPath, config);
         } catch (Exception ioe) {
-            throw new WebApplicationException("Cannot apply branding to windows installer.", ioe);
+            throw new WebApplicationException("Cannot embed configuration into windows installer.", ioe);
         }
-
-        // Now sign the executable with our certificate
-        minion.signExecutable(installer, installerName, info.getBaseUri().toString());
     }
 
     /**

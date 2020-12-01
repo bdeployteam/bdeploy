@@ -156,7 +156,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(TargetPath)" "$(SolutionDir)\..\launcher\src\win64\dist" /F /Y</PostBuildEvent>
+    <PostBuildEvent>signtool sign /n "BDeploy Development" /fd SHA256  "$(TargetPath)"
+xcopy "$(TargetPath)" "$(SolutionDir)\..\launcher\src\win64\dist" /F /Y</PostBuildEvent>
   </PropertyGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
