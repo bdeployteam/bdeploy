@@ -744,8 +744,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Write manifest entry that the launcher needs to be retained
         ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
-        ClientSoftwareConfiguration clientConfig = manifest.readNewest(clickAndStart.applicationId);
-        if (clientConfig != null && clientConfig.launcher != null && clientConfig.launcher.equals(launcher)) {
+        ClientSoftwareConfiguration storedConfig = manifest.readNewest(clickAndStart.applicationId);
+        if (storedConfig != null && storedConfig.launcher != null && storedConfig.launcher.equals(launcher)) {
             return;
         }
         // Ensure we have write permissions
@@ -754,10 +754,13 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
         // Write updated manifest
         doExecuteLocked(reporter, () -> {
-            clientConfig.launcher = launcher;
-            clientConfig.clickAndStart = clickAndStart;
-            clientConfig.requiredSoftware.clear();
-            manifest.update(clickAndStart.applicationId, clientConfig);
+            ClientSoftwareConfiguration newConfig = new ClientSoftwareConfiguration();
+            newConfig.launcher = launcher;
+            newConfig.clickAndStart = clickAndStart;
+            if (storedConfig != null) {
+                newConfig.metadata = storedConfig.metadata;
+            }
+            manifest.update(clickAndStart.applicationId, newConfig);
             return null;
         });
     }
