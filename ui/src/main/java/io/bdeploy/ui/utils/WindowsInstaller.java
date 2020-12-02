@@ -30,7 +30,7 @@ public class WindowsInstaller {
         builder.append(END_BDEPLOY);
 
         // Update the executable
-        PayloadUtils.embed(file, builder.toString().getBytes());
+        WindowsExecutableUtils.embed(file, builder.toString().getBytes());
     }
 
 }

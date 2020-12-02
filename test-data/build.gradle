@@ -99,7 +99,9 @@ void setupBDeployRemoteEnv(ProcessForkOptions options, String root, int port) {
 void setupBDeployJavaExec(JavaExec je, String root, int port) {
     je.main = project(":minion").mainClassName
     je.classpath = project(":minion").sourceSets.main.runtimeClasspath
-    setupBDeployRemoteEnv(je, root, port)
+    if(root != null) {
+        setupBDeployRemoteEnv(je, root, port)
+    }
 }
 
 task triggerStopBDeploy() {
@@ -205,7 +207,28 @@ task releaseTest() {
     }
 }
 
-task release(dependsOn: releaseTest) {
+task verifyBDeployExe(type: JavaExec) {
+    setupBDeployJavaExec(it, null, 0);
+    args = [ "verify-signature", "--executable=" + project(":launcher").projectDir + "/src/win64/dist/BDeploy.exe" ]
+}
+
+task verifyFileAssocExe(type: JavaExec) {
+    setupBDeployJavaExec(it, null, 0);
+    args = [ "verify-signature", "--executable=" + project(":launcher").projectDir + "/src/win64/dist/FileAssoc.exe" ]
+}
+
+task verifyInstallerBin(type: JavaExec) {
+    setupBDeployJavaExec(it, null, 0);
+    args = [ "verify-signature", "--executable=" + project(":launcher").projectDir + "/src/win64/dist/bin/Installer.bin" ]
+}
+
+task verifyBinaries() {
+    dependsOn verifyBDeployExe
+    dependsOn verifyFileAssocExe
+    dependsOn verifyInstallerBin
+}
+
+task release(dependsOn: [releaseTest, verifyBinaries]) {
     doLast {
         println "Release seems to do well with upgrades..."
     }

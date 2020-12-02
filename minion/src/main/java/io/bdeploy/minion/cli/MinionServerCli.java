@@ -34,6 +34,7 @@ public class MinionServerCli extends ToolBase {
         // utilities
         register(BHiveWrapperTool.class);
         register(PayloadTool.class);
+        register(VerifySignatureTool.class);
 
         // remote text UI
         TextUIResources.registerTextUi(this);

@@ -13,7 +13,7 @@ import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.minion.cli.PayloadTool.PayloadConfig;
-import io.bdeploy.ui.utils.PayloadUtils;
+import io.bdeploy.ui.utils.WindowsExecutableUtils;
 
 /**
  * Manages PE executable payloads.
@@ -47,7 +47,7 @@ public class PayloadTool extends ConfiguredCliTool<PayloadConfig> {
         try {
             Path exe = Paths.get(config.executable());
             Path payload = Paths.get(config.payload());
-            PayloadUtils.embed(exe, Files.readAllBytes(payload));
+            WindowsExecutableUtils.embed(exe, Files.readAllBytes(payload));
             return createSuccess();
         } catch (IOException e) {
             return createResultWithMessage("Cannot attach payload").setException(e);

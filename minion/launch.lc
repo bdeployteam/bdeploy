@@ -227,6 +227,12 @@ java configuration Launcher {
 //	vm-argument "-Dsun.awt.fontconfig=/tmp/markus.properties";
 }
 
+java configuration VerifyLauncher : minion-base {
+	argument "verify-launcher";
+	argument "--executable=${file_prompt:binary to check}";
+	memory max=256 MB;
+}
+
 java configuration Uninstaller {
 	project launcher;
 	main-class io.bdeploy.launcher.cli.LauncherCli;
