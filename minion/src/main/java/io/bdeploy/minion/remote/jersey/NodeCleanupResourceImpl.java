@@ -12,6 +12,9 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.bdeploy.api.product.v1.impl.LocalDependencyFetcher;
 import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.BHive;
@@ -34,6 +37,8 @@ import io.bdeploy.interfaces.remote.NodeCleanupResource;
 import io.bdeploy.minion.MinionRoot;
 
 public class NodeCleanupResourceImpl implements NodeCleanupResource {
+
+    private static final Logger log = LoggerFactory.getLogger(NodeCleanupResourceImpl.class);
 
     @Inject
     private MinionRoot root;
@@ -73,15 +78,21 @@ public class NodeCleanupResourceImpl implements NodeCleanupResource {
                 InstanceNodeManifest inm = InstanceNodeManifest.of(hive, keep);
                 LocalDependencyFetcher localDeps = new LocalDependencyFetcher();
                 for (ApplicationConfiguration app : inm.getConfiguration().applications) {
-                    allRefs.add(app.application);
-                    ApplicationManifest amf = ApplicationManifest.of(hive, app.application);
+                    try {
+                        // Try to load. This might fail if the application is no longer present - for whatever reason
+                        ApplicationManifest amf = ApplicationManifest.of(hive, app.application);
 
-                    // applications /must/ follow the ScopedManifestKey rules.
-                    ScopedManifestKey smk = ScopedManifestKey.parse(app.application);
+                        // Add the application if it could be loaded
+                        allRefs.add(app.application);
 
-                    // the dependency must be here. it has been pushed here with the product,
-                    // since the product /must/ reference all direct dependencies.
-                    allRefs.addAll(localDeps.fetch(hive, amf.getDescriptor().runtimeDependencies, smk.getOperatingSystem()));
+                        // Applications /must/ follow the ScopedManifestKey rules.
+                        ScopedManifestKey smk = ScopedManifestKey.parse(app.application);
+
+                        // The dependencies must be local. They have been pushed here together with the application.
+                        allRefs.addAll(localDeps.fetch(hive, amf.getDescriptor().runtimeDependencies, smk.getOperatingSystem()));
+                    } catch (Exception e) {
+                        log.warn("Cannot read application {} while protecting {}", app.application, keep, e);
+                    }
                 }
             }
         }
