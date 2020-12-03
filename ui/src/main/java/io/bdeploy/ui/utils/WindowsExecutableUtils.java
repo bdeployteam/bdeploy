@@ -54,25 +54,26 @@ public class WindowsExecutableUtils {
      * Embeds the given bytes into given signed PE/COFF executable.
      */
     public static void embed(Path executable, byte[] data) throws IOException {
-        PEFile pe = new PEFile(executable.toFile());
+        try (PEFile pe = new PEFile(executable.toFile())) {
 
-        List<CMSSignedData> signatures = pe.getSignatures();
-        if (signatures.isEmpty()) {
-            throw new RuntimeException("Only signed executables can be modified.");
+            List<CMSSignedData> signatures = pe.getSignatures();
+            if (signatures.isEmpty()) {
+                throw new RuntimeException("Only signed executables can be modified.");
+            }
+
+            // we only support a single top level signature.
+            CertificateTableEntry topSignature = new CertificateTableEntry(signatures.get(0));
+            byte[] signature = topSignature.toBytes();
+
+            // append data right after each other
+            // bitwise round up to next multiple of 8
+            byte[] bytes = new byte[(signature.length + data.length + 7) & (-8)];
+            System.arraycopy(signature, 0, bytes, 0, signature.length);
+            System.arraycopy(data, 0, bytes, signature.length, data.length);
+
+            // update the executable, table size, checksum, etc.
+            pe.writeDataDirectory(DataDirectoryType.CERTIFICATE_TABLE, bytes);
         }
-
-        // we only support a single top level signature.
-        CertificateTableEntry topSignature = new CertificateTableEntry(signatures.get(0));
-        byte[] signature = topSignature.toBytes();
-
-        // append data right after each other
-        // bitwise round up to next multiple of 8
-        byte[] bytes = new byte[(signature.length + data.length + 7) & (-8)];
-        System.arraycopy(signature, 0, bytes, 0, signature.length);
-        System.arraycopy(data, 0, bytes, signature.length, data.length);
-
-        // update the executable, table size, checksum, etc.
-        pe.writeDataDirectory(DataDirectoryType.CERTIFICATE_TABLE, bytes);
     }
 
     /**
@@ -87,165 +88,169 @@ public class WindowsExecutableUtils {
      * binary is self-signed and reject the signature if so.
      */
     public static void verify(Path executable) throws IOException {
-        PEFile file = new PEFile(executable.toFile());
+        try (PEFile file = new PEFile(executable.toFile())) {
 
-        MessageDigest md;
-        List<CMSSignedData> signatures = file.getSignatures();
+            MessageDigest md;
+            List<CMSSignedData> signatures = file.getSignatures();
 
-        if (!signatures.isEmpty()) {
+            if (!signatures.isEmpty()) {
 
-            for (CMSSignedData signedData : signatures) {
+                for (CMSSignedData signedData : signatures) {
 
-                DigestAlgorithm signedDataAlgorithm = DigestAlgorithm
-                        .of(signedData.getDigestAlgorithmIDs().iterator().next().getAlgorithm());
-                SignerInformation signerInformation;
+                    DigestAlgorithm signedDataAlgorithm = DigestAlgorithm
+                            .of(signedData.getDigestAlgorithmIDs().iterator().next().getAlgorithm());
+                    SignerInformation signerInformation;
 
-                //get SpcIndirectContent structure from signed data, see pefile documentation
-                ContentInfo contentInfo = signedData.toASN1Structure();
-                SignedData signedData1 = SignedData.getInstance(contentInfo.getContent());
-                ContentInfo contentInfo1 = signedData1.getEncapContentInfo();
+                    //get SpcIndirectContent structure from signed data, see pefile documentation
+                    ContentInfo contentInfo = signedData.toASN1Structure();
+                    SignedData signedData1 = SignedData.getInstance(contentInfo.getContent());
+                    ContentInfo contentInfo1 = signedData1.getEncapContentInfo();
 
-                //Study ASN1Dump.dumpAsString() to implement getSpcIndirectDataContent(...) or any other ASN.1 parser
-                DigestInfo digestInfo = getSpcIndirectDataContent(contentInfo1);
-                DigestAlgorithm spcDigestAlgorithm = DigestAlgorithm.of((digestInfo.getAlgorithmId().getAlgorithm()));
+                    //Study ASN1Dump.dumpAsString() to implement getSpcIndirectDataContent(...) or any other ASN.1 parser
+                    DigestInfo digestInfo = getSpcIndirectDataContent(contentInfo1);
+                    DigestAlgorithm spcDigestAlgorithm = DigestAlgorithm.of((digestInfo.getAlgorithmId().getAlgorithm()));
 
-                //#1 Check that the digest algorithms match
-                if (signedData.getDigestAlgorithmIDs().size() != 1) {
-                    throw new IllegalStateException("Signed Data must contain exactly one DigestAlgorithm");
-                }
-
-                //Check that SpcIndirectContent DigestAlgorithm equals CMSSignedData algorithm
-                if (!(spcDigestAlgorithm.oid.getId()).equals(signedDataAlgorithm.oid.getId())) {
-                    throw new IllegalStateException("Signed Data algorithm doesn't match with spcDigestAlgorithm");
-                }
-
-                //Check that SignerInfo DigestAlgorithm equals CMSSignedData algorithm
-                if (signedData.getSignerInfos().size() != 1) {
-                    throw new IllegalStateException("Signed Data must contain exactly one SignerInfo");
-                }
-
-                signerInformation = signedData.getSignerInfos().iterator().next();
-                if (!(signerInformation.getDigestAlgorithmID().getAlgorithm().getId()).equals(signedDataAlgorithm.oid.getId())) {
-                    throw new IllegalStateException("Signed Data algorithm doesn't match with SignerInformation algorithm");
-                }
-
-                //#2 Check the embedded hash in spcIndirectContent matches with the computed hash of the pefile
-                if (!Arrays.equals(file.computeDigest(signedDataAlgorithm), digestInfo.getDigest())) {
-                    throw new IllegalStateException("The embedded hash in the SignedData is not equal to the computed hash");
-                }
-
-                //#3 The hash of the spc blob should be equal to message digest in authenticated attributes of signed data
-                //Get the message digest from authenticated attributes, see authenticode_pe documentation
-                byte messageDigestInAuthenticatedAttr[];
-                Attribute attribute = (Attribute) signerInformation.getSignedAttributes().toHashtable()
-                        .get(CMSAttributes.messageDigest);
-                Object digestObj = attribute.getAttrValues().iterator().next();
-
-                if (digestObj instanceof ASN1OctetString) {
-                    ASN1OctetString oct = (ASN1OctetString) digestObj;
-                    messageDigestInAuthenticatedAttr = oct.getOctets();
-                } else {
-                    throw new IllegalStateException("No message digest was found in authenticated attributes");
-                }
-
-                //Get the spc blob
-                byte[] spcBlob = getSpcBlob(contentInfo1.getContent().toASN1Primitive());
-
-                //Now calculate the digest of the spcblob
-                try {
-                    md = MessageDigest
-                            .getInstance(signedData.getDigestAlgorithmIDs().iterator().next().getAlgorithm().toString());
-                } catch (NoSuchAlgorithmException e) {
-                    throw new IllegalStateException(e);
-                }
-
-                md.update(spcBlob);
-                byte[] spcDigest = md.digest();
-
-                //Compare both and throw exception if not equal
-                if (!Arrays.equals(messageDigestInAuthenticatedAttr, spcDigest)) {
-                    throw new IllegalStateException(
-                            "The hash of stripped content of SpcInfo does not match digest found in authenticated attributes");
-                }
-
-                //#4 Check the hash in Authenticated Attributes with Encrypted Hash
-                @SuppressWarnings("unchecked")
-                X509CertificateHolder h = (X509CertificateHolder) signedData.getCertificates()
-                        .getMatches(signerInformation.getSID()).iterator().next();
-                JcaX509CertificateConverter converter = new JcaX509CertificateConverter();
-                X509Certificate certificate = null;
-                try {
-                    certificate = converter.getCertificate(h);
-                } catch (CertificateException e) {
-                    throw new IllegalStateException(e);
-                }
-
-                if (isSelfSigned(certificate)) {
-                    throw new IllegalStateException("Certificate is self-signed, the signature is not universally valid.");
-                }
-
-                PublicKey key = certificate.getPublicKey();
-                Signature signature = null;
-                try {
-                    SignerInfo signerInfo = signerInformation.toASN1Structure();
-                    String digestAndEncryptionAlgorithmName = new DefaultCMSSignatureAlgorithmNameGenerator().getSignatureName(
-                            signerInformation.getDigestAlgorithmID(), signerInfo.getDigestEncryptionAlgorithm());
-                    signature = Signature.getInstance(digestAndEncryptionAlgorithmName);
-                } catch (NoSuchAlgorithmException e) {
-                    throw new IllegalStateException(e);
-                }
-                try {
-                    signature.initVerify(key);
-                } catch (InvalidKeyException e) {
-                    throw new IllegalStateException(e);
-                }
-
-                try {
-                    signature.update(signerInformation.getEncodedSignedAttributes());
-                    if (!signature.verify(signerInformation.getSignature())) {
-                        throw new IllegalStateException(
-                                "The hash in the the authenticated attributes doesn't match the encrypted hash(getSignature())");
+                    //#1 Check that the digest algorithms match
+                    if (signedData.getDigestAlgorithmIDs().size() != 1) {
+                        throw new IllegalStateException("Signed Data must contain exactly one DigestAlgorithm");
                     }
-                    //Note that the getSignature() method returns the encrypted hash in the SignerInformation
-                } catch (SignatureException e) {
-                    throw new IllegalStateException(e);
-                }
 
-                //#4 Check the countersigner hash
-                if (signerInformation.getCounterSignatures().size() != 0) {
-                    SignerInformation counterSignerInformation = signerInformation.getCounterSignatures().iterator().next();
+                    //Check that SpcIndirectContent DigestAlgorithm equals CMSSignedData algorithm
+                    if (!(spcDigestAlgorithm.oid.getId()).equals(signedDataAlgorithm.oid.getId())) {
+                        throw new IllegalStateException("Signed Data algorithm doesn't match with spcDigestAlgorithm");
+                    }
+
+                    //Check that SignerInfo DigestAlgorithm equals CMSSignedData algorithm
+                    if (signedData.getSignerInfos().size() != 1) {
+                        throw new IllegalStateException("Signed Data must contain exactly one SignerInfo");
+                    }
+
+                    signerInformation = signedData.getSignerInfos().iterator().next();
+                    if (!(signerInformation.getDigestAlgorithmID().getAlgorithm().getId())
+                            .equals(signedDataAlgorithm.oid.getId())) {
+                        throw new IllegalStateException("Signed Data algorithm doesn't match with SignerInformation algorithm");
+                    }
+
+                    //#2 Check the embedded hash in spcIndirectContent matches with the computed hash of the pefile
+                    if (!Arrays.equals(file.computeDigest(signedDataAlgorithm), digestInfo.getDigest())) {
+                        throw new IllegalStateException("The embedded hash in the SignedData is not equal to the computed hash");
+                    }
+
+                    //#3 The hash of the spc blob should be equal to message digest in authenticated attributes of signed data
+                    //Get the message digest from authenticated attributes, see authenticode_pe documentation
+                    byte messageDigestInAuthenticatedAttr[];
+                    Attribute attribute = (Attribute) signerInformation.getSignedAttributes().toHashtable()
+                            .get(CMSAttributes.messageDigest);
+                    Object digestObj = attribute.getAttrValues().iterator().next();
+
+                    if (digestObj instanceof ASN1OctetString) {
+                        ASN1OctetString oct = (ASN1OctetString) digestObj;
+                        messageDigestInAuthenticatedAttr = oct.getOctets();
+                    } else {
+                        throw new IllegalStateException("No message digest was found in authenticated attributes");
+                    }
+
+                    //Get the spc blob
+                    byte[] spcBlob = getSpcBlob(contentInfo1.getContent().toASN1Primitive());
+
+                    //Now calculate the digest of the spcblob
                     try {
-                        md = MessageDigest.getInstance(counterSignerInformation.getDigestAlgorithmID().getAlgorithm().toString());
+                        md = MessageDigest
+                                .getInstance(signedData.getDigestAlgorithmIDs().iterator().next().getAlgorithm().toString());
                     } catch (NoSuchAlgorithmException e) {
                         throw new IllegalStateException(e);
                     }
-                    md.update(signerInformation.getSignature());
-                    byte[] authAttrHash = md.digest();
 
-                    byte[] messageDigestInCounterSignature;
-                    Attribute attributeOfCounterSignature = (Attribute) counterSignerInformation.getSignedAttributes()
-                            .toHashtable().get(CMSAttributes.messageDigest);
-                    Object digestObjOfCounterSignature = attributeOfCounterSignature.getAttrValues().iterator().next();
-
-                    if (digestObjOfCounterSignature instanceof ASN1OctetString) {
-
-                        ASN1OctetString oct = (ASN1OctetString) digestObjOfCounterSignature;
-
-                        messageDigestInCounterSignature = oct.getOctets();
-                    } else {
-                        throw new IllegalStateException(
-                                "No message digest was found in authenticated attributes of counter signature");
-                    }
+                    md.update(spcBlob);
+                    byte[] spcDigest = md.digest();
 
                     //Compare both and throw exception if not equal
-                    if (!Arrays.equals(messageDigestInCounterSignature, authAttrHash)) {
+                    if (!Arrays.equals(messageDigestInAuthenticatedAttr, spcDigest)) {
                         throw new IllegalStateException(
-                                "The digest of encrypted hash in the signerInformation does not match with digest found in counter signature");
+                                "The hash of stripped content of SpcInfo does not match digest found in authenticated attributes");
+                    }
+
+                    //#4 Check the hash in Authenticated Attributes with Encrypted Hash
+                    @SuppressWarnings("unchecked")
+                    X509CertificateHolder h = (X509CertificateHolder) signedData.getCertificates()
+                            .getMatches(signerInformation.getSID()).iterator().next();
+                    JcaX509CertificateConverter converter = new JcaX509CertificateConverter();
+                    X509Certificate certificate = null;
+                    try {
+                        certificate = converter.getCertificate(h);
+                    } catch (CertificateException e) {
+                        throw new IllegalStateException(e);
+                    }
+
+                    if (isSelfSigned(certificate)) {
+                        throw new IllegalStateException("Certificate is self-signed, the signature is not universally valid.");
+                    }
+
+                    PublicKey key = certificate.getPublicKey();
+                    Signature signature = null;
+                    try {
+                        SignerInfo signerInfo = signerInformation.toASN1Structure();
+                        String digestAndEncryptionAlgorithmName = new DefaultCMSSignatureAlgorithmNameGenerator()
+                                .getSignatureName(signerInformation.getDigestAlgorithmID(),
+                                        signerInfo.getDigestEncryptionAlgorithm());
+                        signature = Signature.getInstance(digestAndEncryptionAlgorithmName);
+                    } catch (NoSuchAlgorithmException e) {
+                        throw new IllegalStateException(e);
+                    }
+                    try {
+                        signature.initVerify(key);
+                    } catch (InvalidKeyException e) {
+                        throw new IllegalStateException(e);
+                    }
+
+                    try {
+                        signature.update(signerInformation.getEncodedSignedAttributes());
+                        if (!signature.verify(signerInformation.getSignature())) {
+                            throw new IllegalStateException(
+                                    "The hash in the the authenticated attributes doesn't match the encrypted hash(getSignature())");
+                        }
+                        //Note that the getSignature() method returns the encrypted hash in the SignerInformation
+                    } catch (SignatureException e) {
+                        throw new IllegalStateException(e);
+                    }
+
+                    //#4 Check the countersigner hash
+                    if (signerInformation.getCounterSignatures().size() != 0) {
+                        SignerInformation counterSignerInformation = signerInformation.getCounterSignatures().iterator().next();
+                        try {
+                            md = MessageDigest
+                                    .getInstance(counterSignerInformation.getDigestAlgorithmID().getAlgorithm().toString());
+                        } catch (NoSuchAlgorithmException e) {
+                            throw new IllegalStateException(e);
+                        }
+                        md.update(signerInformation.getSignature());
+                        byte[] authAttrHash = md.digest();
+
+                        byte[] messageDigestInCounterSignature;
+                        Attribute attributeOfCounterSignature = (Attribute) counterSignerInformation.getSignedAttributes()
+                                .toHashtable().get(CMSAttributes.messageDigest);
+                        Object digestObjOfCounterSignature = attributeOfCounterSignature.getAttrValues().iterator().next();
+
+                        if (digestObjOfCounterSignature instanceof ASN1OctetString) {
+
+                            ASN1OctetString oct = (ASN1OctetString) digestObjOfCounterSignature;
+
+                            messageDigestInCounterSignature = oct.getOctets();
+                        } else {
+                            throw new IllegalStateException(
+                                    "No message digest was found in authenticated attributes of counter signature");
+                        }
+
+                        //Compare both and throw exception if not equal
+                        if (!Arrays.equals(messageDigestInCounterSignature, authAttrHash)) {
+                            throw new IllegalStateException(
+                                    "The digest of encrypted hash in the signerInformation does not match with digest found in counter signature");
+                        }
                     }
                 }
+            } else {
+                throw new IllegalStateException("No Signature Present");
             }
-        } else {
-            throw new IllegalStateException("No Signature Present");
         }
     }
 
