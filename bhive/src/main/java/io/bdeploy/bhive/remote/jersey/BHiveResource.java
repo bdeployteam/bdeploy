@@ -1,8 +1,8 @@
 package io.bdeploy.bhive.remote.jersey;
 
 import java.io.InputStream;
+import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -62,7 +62,7 @@ public interface BHiveResource {
     @POST
     @WeakTokenAllowed
     @Path("/obj_missing")
-    public SortedSet<ObjectId> getMissingObjects(SortedSet<ObjectId> all);
+    public Set<ObjectId> getMissingObjects(Set<ObjectId> all);
 
     /**
      * Retrieve the {@link ObjectId} required to satisfy a given tree.
@@ -70,7 +70,7 @@ public interface BHiveResource {
     @POST
     @WeakTokenAllowed
     @Path("/tree_objects")
-    public SortedSet<ObjectId> getRequiredObjects(ObjectListSpec spec);
+    public Set<ObjectId> getRequiredObjects(ObjectListSpec spec);
 
     /**
      * Retrieve the {@link ObjectId}s of all required {@link Tree} objects recursively in the given tree.
@@ -78,7 +78,7 @@ public interface BHiveResource {
     @POST
     @WeakTokenAllowed
     @Path("/tree_trees")
-    public SortedSet<ObjectId> getRequiredTrees(ObjectId tree);
+    public Set<ObjectId> getRequiredTrees(ObjectId tree);
 
     /**
      * Transfer the ZIPed {@link BHive} to the remote and apply all top-level
@@ -123,14 +123,14 @@ public interface BHiveResource {
 
     public static class FetchSpec {
 
-        SortedSet<ObjectId> requiredObjects;
-        SortedSet<Manifest.Key> manifestsToFetch;
+        Set<ObjectId> requiredObjects;
+        Set<Manifest.Key> manifestsToFetch;
     }
 
     public static class ObjectListSpec {
 
-        SortedSet<ObjectId> trees;
-        SortedSet<ObjectId> excludeTrees;
+        Set<ObjectId> trees;
+        Set<ObjectId> excludeTrees;
     }
 
 }

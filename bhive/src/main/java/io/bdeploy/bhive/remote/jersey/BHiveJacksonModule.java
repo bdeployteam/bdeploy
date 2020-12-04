@@ -1,6 +1,8 @@
 package io.bdeploy.bhive.remote.jersey;
 
 import java.io.IOException;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.glassfish.hk2.utilities.Binder;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
@@ -25,6 +27,9 @@ public class BHiveJacksonModule extends SimpleModule {
     public BHiveJacksonModule() {
         addKeySerializer(Manifest.Key.class, new MKS());
         addKeyDeserializer(Manifest.Key.class, new MKD());
+
+        // We absolutely require ordered Sets even over the wire to maintain object orders.
+        addAbstractTypeMapping(Set.class, LinkedHashSet.class);
     }
 
     public Binder binder() {

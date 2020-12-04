@@ -4,8 +4,8 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
 
 import javax.ws.rs.core.UriBuilder;
 
@@ -119,7 +119,7 @@ public class ManifestTool extends RemoteServiceTool<ManifestConfig> {
         try (BHive hive = new BHive(Paths.get(config.hive()).toUri(), getActivityReporter())) {
 
             if (config.list()) {
-                SortedSet<Manifest.Key> manifests = hive.execute(new ManifestListOperation());
+                Set<Manifest.Key> manifests = hive.execute(new ManifestListOperation());
                 if (manifests.isEmpty()) {
                     return createResultWithMessage("No manifests found");
                 } else {
@@ -158,9 +158,7 @@ public class ManifestTool extends RemoteServiceTool<ManifestConfig> {
             tmpFile = Files.createTempDirectory("bdeploy-");
 
             // Determine required objects
-            ObjectListOperation scan = new ObjectListOperation();
-            scan.addManifest(manifest);
-            SortedSet<ObjectId> objectIds = hive.execute(scan);
+            Set<ObjectId> objectIds = hive.execute(new ObjectListOperation().addManifest(manifest));
 
             // Copy objects into the target hive
             URI targetUri = UriBuilder.fromUri("jar:" + Paths.get(config.saveTo()).toUri()).build();

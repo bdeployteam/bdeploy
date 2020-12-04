@@ -3,8 +3,8 @@ package io.bdeploy.bhive.remote.jersey;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,7 @@ public class BHiveResourceImpl implements BHiveResource {
     }
 
     @Override
-    public SortedSet<ObjectId> getMissingObjects(SortedSet<ObjectId> all) {
+    public Set<ObjectId> getMissingObjects(Set<ObjectId> all) {
         return wrapper.getMissingObjects(all);
     }
 
@@ -48,12 +48,12 @@ public class BHiveResourceImpl implements BHiveResource {
     }
 
     @Override
-    public SortedSet<ObjectId> getRequiredObjects(ObjectListSpec spec) {
+    public Set<ObjectId> getRequiredObjects(ObjectListSpec spec) {
         return wrapper.getRequiredObjects(spec.trees, spec.excludeTrees);
     }
 
     @Override
-    public SortedSet<ObjectId> getRequiredTrees(ObjectId tree) {
+    public Set<ObjectId> getRequiredTrees(ObjectId tree) {
         return wrapper.getRequiredTrees(tree);
     }
 

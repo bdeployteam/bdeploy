@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -72,7 +71,7 @@ public class HiveResourceImpl implements HiveResource {
     public List<HiveEntryDto> listManifests(String hiveParam) {
         log.debug("listManifests(\"{}\")", hiveParam);
         BHive hive = registry.get(hiveParam);
-        SortedSet<Manifest.Key> allManifests = hive.execute(new ManifestListOperation());
+        Set<Manifest.Key> allManifests = hive.execute(new ManifestListOperation());
 
         List<HiveEntryDto> result = new ArrayList<>();
         allManifests.stream().sorted(vss.getKeyComparator(null, null)).forEach(m -> {

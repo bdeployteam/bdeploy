@@ -3,7 +3,7 @@ package io.bdeploy.bhive.op;
 import static io.bdeploy.common.util.RuntimeAssert.assertNotNull;
 
 import java.nio.file.Path;
-import java.util.SortedSet;
+import java.util.Set;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.ReadOnlyOperation;
@@ -28,7 +28,7 @@ public class ExportOperation extends BHive.Operation<Manifest.Key> {
         assertNotNull(target, "Target path not set");
 
         try (Activity activity = getActivityReporter().start("Pushing manifests...", -1)) {
-            SortedSet<Manifest.Key> keys = getManifestDatabase().getAllForName(manifest.getName());
+            Set<Manifest.Key> keys = getManifestDatabase().getAllForName(manifest.getName());
             if (!keys.contains(manifest)) {
                 throw new IllegalArgumentException("Manifest not found: " + manifest);
             }

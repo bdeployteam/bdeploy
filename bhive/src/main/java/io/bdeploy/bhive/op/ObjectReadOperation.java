@@ -10,9 +10,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.io.CountingInputStream;
 
 import io.bdeploy.bhive.BHive;
@@ -33,8 +30,6 @@ import io.bdeploy.common.util.UuidHelper;
  * Reads one or more objects from a stream and inserts them into the local hive.
  */
 public class ObjectReadOperation extends BHive.Operation<TransferStatistics> {
-
-    private static final Logger log = LoggerFactory.getLogger(ObjectReadOperation.class);
 
     @NoAudit
     private InputStream input;
@@ -91,7 +86,8 @@ public class ObjectReadOperation extends BHive.Operation<TransferStatistics> {
                 // Check manifests for consistency and remove invalid ones
                 Set<ElementView> damaged = execute(checkOp.setDryRun(false));
                 if (!damaged.isEmpty()) {
-                    log.error("Failed to stream all required objects. Removed {} missing/damaged elements.", damaged.size());
+                    throw new IllegalStateException(
+                            "Failed to stream all required objects. Removed " + damaged.size() + " missing/damaged elements.");
                 }
                 result.transferSize = countingIn.getCount();
             }

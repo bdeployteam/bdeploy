@@ -98,6 +98,7 @@ configure(actualSubprojects) {
     apply plugin: "net.ossindex.audit"
 
     compileJava.options.encoding = 'UTF-8'
+    compileTestJava.options.encoding = 'UTF-8'
 	
 	eclipse {
 		classpath {
@@ -112,7 +113,6 @@ configure(actualSubprojects) {
 
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
-    compileJava.options.encoding = 'UTF-8'
 
     dependencies {
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0',

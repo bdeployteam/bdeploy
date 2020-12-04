@@ -14,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -57,22 +58,28 @@ public class ObjectManagerTest extends DbTestBase {
             ObjectManager mgr = new ObjectManager(getObjectDatabase(), null, r, s);
             ObjectId tree = mgr.importTree(mySource, false);
 
-            // 2 trees (root, "dir"), 2 blobs (test.txt, file.txt).
-            assertThat(getObjectDatabase().getAllObjects().size(), is(4));
+            // 3 trees (root, dir, subDir), 3 blobs (test.txt, file.txt, child.txt).
+            assertThat(getObjectDatabase().getAllObjects().size(), is(6));
 
             // re-create tree in other directory.
             mgr.exportTree(tree, myTarget, new DefaultReferenceHandler(mgr));
 
             Path t1 = myTarget.resolve("test.txt");
             Path t2 = myTarget.resolve(Paths.get("dir", "file.txt"));
+            Path t3 = myTarget.resolve(Paths.get("dir", "subDir", "child.txt"));
 
             assertTrue(Files.exists(t1));
             assertTrue(Files.exists(t2));
+            assertTrue(Files.exists(t3));
 
             try (InputStream is = mgr.getStreamForRelativePath(tree, "dir", "file.txt")) {
-                try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
-                    assertThat(br.readLine(), is(ContentHelper.T2_L1));
-                    assertThat(br.readLine(), is(ContentHelper.T2_L2));
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+                    assertThat(br.readLine(), is(ContentHelper.TEST2));
+                }
+            }
+            try (InputStream is = mgr.getStreamForRelativePath(tree, "dir", "subDir", "child.txt")) {
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+                    assertThat(br.readLine(), is(ContentHelper.TEST3));
                 }
             }
         } finally {

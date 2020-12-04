@@ -3,6 +3,7 @@ package io.bdeploy.bhive.op;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -28,12 +29,10 @@ public class PruneOperation extends BHive.Operation<SortedMap<ObjectId, Long>> {
         SortedMap<ObjectId, Long> result = new TreeMap<>();
 
         try (Activity activity = getActivityReporter().start("Pruning hive...", -1)) {
-            SortedSet<Manifest.Key> manifests = execute(new ManifestListOperation());
-            SortedSet<ObjectId> referenced;
+            Set<Manifest.Key> manifests = execute(new ManifestListOperation());
+            Set<ObjectId> referenced;
             if (!manifests.isEmpty()) {
-                ObjectListOperation listOp = new ObjectListOperation();
-                manifests.forEach(listOp::addManifest);
-                referenced = execute(listOp);
+                referenced = execute(new ObjectListOperation().addManifest(manifests));
             } else {
                 referenced = new TreeSet<>();
             }

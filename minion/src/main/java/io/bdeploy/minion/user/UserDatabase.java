@@ -226,7 +226,7 @@ public class UserDatabase implements AuthService {
     @Override
     public void deleteUser(String user) {
         user = UserInfo.normalizeName(user);
-        SortedSet<Key> mfs = target.execute(new ManifestListOperation().setManifestName(NAMESPACE + user));
+        Set<Key> mfs = target.execute(new ManifestListOperation().setManifestName(NAMESPACE + user));
         log.info("Deleting {} manifests for user {}", mfs.size(), user);
         mfs.forEach(k -> target.execute(new ManifestDeleteOperation().setToDelete(k)));
         userCache.invalidate(user);
@@ -234,7 +234,7 @@ public class UserDatabase implements AuthService {
 
     @Override
     public SortedSet<String> getAllNames() {
-        SortedSet<Key> keys = target.execute(new ManifestListOperation().setManifestName(NAMESPACE));
+        Set<Key> keys = target.execute(new ManifestListOperation().setManifestName(NAMESPACE));
         return keys.stream().map(k -> k.getName().substring(NAMESPACE.length())).collect(Collectors.toCollection(TreeSet::new));
     }
 

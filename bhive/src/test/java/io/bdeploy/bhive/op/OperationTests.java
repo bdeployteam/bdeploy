@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.SortedSet;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +33,7 @@ public class OperationTests {
 
         assertThat(hive.execute(new ImportOperation().setManifest(key).setSourcePath(src)), is(key));
 
-        SortedSet<Manifest.Key> list = hive.execute(new ManifestListOperation());
+        Set<Manifest.Key> list = hive.execute(new ManifestListOperation());
         assertThat(list.size(), is(1));
         assertTrue(list.contains(key));
 

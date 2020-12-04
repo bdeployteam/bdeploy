@@ -2,8 +2,8 @@ package io.bdeploy.bhive.remote;
 
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
@@ -29,7 +29,7 @@ public interface RemoteBHive extends AutoCloseable {
      * From the given set, filter all remotely known {@link ObjectId}s and return only {@link ObjectId} which are not yet present
      * on the remote.
      */
-    public SortedSet<ObjectId> getMissingObjects(SortedSet<ObjectId> all);
+    public Set<ObjectId> getMissingObjects(Set<ObjectId> all);
 
     /**
      * Retrieve all {@link Key}s along with the root tree {@link ObjectId} available
@@ -53,12 +53,13 @@ public interface RemoteBHive extends AutoCloseable {
     /**
      * Retrieve the {@link ObjectId}s required to satisfy a given tree.
      */
-    public SortedSet<ObjectId> getRequiredObjects(SortedSet<ObjectId> trees, SortedSet<ObjectId> excludeTrees);
+    public Set<ObjectId> getRequiredObjects(Set<ObjectId> trees, Set<ObjectId> excludeTrees);
 
     /**
-     * Retrieve the {@link ObjectId}s of all required {@link Tree} objects recursively in the given tree.
+     * Retrieve the {@link ObjectId}s of all required {@link Tree} objects recursively in the given tree. The returned set is
+     * ordered so that child-trees are first followed by their parents.
      */
-    public SortedSet<ObjectId> getRequiredTrees(ObjectId tree);
+    public Set<ObjectId> getRequiredTrees(ObjectId tree);
 
     /**
      * Transfer the ZIPed {@link BHive} to the remote and apply all top-level
@@ -74,12 +75,12 @@ public interface RemoteBHive extends AutoCloseable {
     /**
      * Fetch manifests from the remote as ZIPed {@link BHive}. Only objects in the given requiredObjects are included.
      */
-    public Path fetch(SortedSet<ObjectId> objects, SortedSet<Manifest.Key> manifests);
+    public Path fetch(Set<ObjectId> objects, Set<Manifest.Key> manifests);
 
     /**
      * Streams the given objects one after each other to the given output stream.
      */
-    public InputStream fetchAsStream(SortedSet<ObjectId> objects, SortedSet<Key> manifests);
+    public InputStream fetchAsStream(Set<ObjectId> objects, Set<Key> manifests);
 
     /**
      * Figures out the type of {@link RemoteBHive} required for the given

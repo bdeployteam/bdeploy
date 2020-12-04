@@ -82,7 +82,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
         List<Manifest.Key> result = new ArrayList<>();
         Set<Manifest.Key> apps = new HashSet<>();
 
-        SortedSet<Key> keySet = hive.execute(new ManifestListOperation());
+        Set<Key> keySet = hive.execute(new ManifestListOperation());
         for (Manifest.Key k : keySet) {
             if (SoftwareRepositoryManifest.isSoftwareRepositoryManifest(k)) {
                 continue;
@@ -103,21 +103,15 @@ public class SoftwareResourceImpl implements SoftwareResource {
 
     @Override
     public String getSoftwareDiskUsage(String name) {
-        SortedSet<Key> mfs = hive.execute(new ManifestListOperation().setManifestName(name));
-
-        ObjectListOperation olo = new ObjectListOperation();
-        mfs.forEach(olo::addManifest);
-        SortedSet<ObjectId> objs = hive.execute(olo);
-
-        ObjectSizeOperation oso = new ObjectSizeOperation();
-        objs.forEach(oso::addObject);
-        return UnitHelper.formatFileSize(hive.execute(oso));
+        Set<Key> mfs = hive.execute(new ManifestListOperation().setManifestName(name));
+        Set<ObjectId> objs = hive.execute(new ObjectListOperation().addManifest(mfs));
+        return UnitHelper.formatFileSize(hive.execute(new ObjectSizeOperation().addObject(objs)));
     }
 
     @Override
     public void delete(String name, String tag) {
         Manifest.Key key = new Manifest.Key(name, tag);
-        SortedSet<Key> existing = hive.execute(new ManifestListOperation().setManifestName(key.toString()));
+        Set<Key> existing = hive.execute(new ManifestListOperation().setManifestName(key.toString()));
         if (existing.size() != 1) {
             log.warn("Cannot uniquely identify {} to delete", key);
             return;
@@ -131,9 +125,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
         Manifest.Key key = new Manifest.Key(name, tag);
 
         // Determine required objects
-        ObjectListOperation scan = new ObjectListOperation();
-        scan.addManifest(key);
-        SortedSet<ObjectId> objectIds = hive.execute(scan);
+        Set<ObjectId> objectIds = hive.execute(new ObjectListOperation().addManifest(key));
 
         // Copy objects into the target hive
         DownloadServiceImpl ds = rc.initResource(new DownloadServiceImpl());
@@ -166,7 +158,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
         // Read all product manifests
         URI targetUri = UriBuilder.fromUri("jar:" + targetFile.toUri()).build();
         try (BHive zipHive = new BHive(targetUri, new ActivityReporter.Null())) {
-            SortedSet<Key> manifestKeys = zipHive.execute(new ManifestListOperation());
+            Set<Key> manifestKeys = zipHive.execute(new ManifestListOperation());
             if (manifestKeys.isEmpty()) {
                 throw new WebApplicationException("ZIP file does not contain a manifest.", Status.BAD_REQUEST);
             }
@@ -187,7 +179,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
             }
 
             // Add all required artifacts
-            SortedSet<ObjectId> objectIds = zipHive.execute(scan);
+            Set<ObjectId> objectIds = zipHive.execute(scan);
             objectIds.forEach(copy::addObject);
 
             // Execute import only if we have something to do
@@ -225,7 +217,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
             if (dto.isHive) {
                 try (BHive zipHive = new BHive(targetUri, new ActivityReporter.Null())) {
                     SortedSet<Key> pscan = ProductManifest.scan(zipHive);
-                    SortedSet<Key> mscan = zipHive.execute(new ManifestListOperation());
+                    Set<Key> mscan = zipHive.execute(new ManifestListOperation());
                     dto.details = "Hive with " + mscan.size() + " manifest(s) "
                             + (pscan.isEmpty() ? "" : "(" + pscan.size() + " product(s)) ");
                 } catch (Exception e) {
@@ -263,7 +255,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
             Path zroot = zfs.getPath("/");
             if (dto.supportedOperatingSystems == null) {
                 Manifest.Key key = new Manifest.Key(dto.name, dto.tag);
-                SortedSet<Manifest.Key> existing = hive.execute(new ManifestListOperation());
+                Set<Manifest.Key> existing = hive.execute(new ManifestListOperation());
                 if (!existing.contains(key)) {
                     hive.execute(new ImportOperation().setSourcePath(zroot).setManifest(key));
                     dto.details = "Import of " + key + " successful";
@@ -277,7 +269,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
                 for (OperatingSystem os : dto.supportedOperatingSystems) {
                     ScopedManifestKey key = new ScopedManifestKey(dto.name, os, dto.tag);
 
-                    SortedSet<Manifest.Key> existing = hive.execute(new ManifestListOperation());
+                    Set<Manifest.Key> existing = hive.execute(new ManifestListOperation());
                     if (!existing.contains(key.getKey())) {
                         hive.execute(new ImportOperation().setSourcePath(zroot).setManifest(key.getKey()));
                         builder.append((count++ == 0 ? "" : ", ") + os.name());
@@ -317,7 +309,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
             }
 
             Manifest.Key prodKey = new Manifest.Key(pd.product + "/product", pvd.version);
-            SortedSet<Manifest.Key> existing = hive.execute(new ManifestListOperation());
+            Set<Manifest.Key> existing = hive.execute(new ManifestListOperation());
             if (!existing.contains(prodKey)) {
                 ProductManifestBuilder.importFromDescriptor(desc, hive, fetcher, false);
                 dto.details = "Product (" + pd.name + ", " + pvd.version + ") imported";
@@ -331,7 +323,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
         // import full hive
         URI targetUri = UriBuilder.fromUri("jar:" + targetFile.toUri()).build();
         try (BHive zipHive = new BHive(targetUri, new ActivityReporter.Null())) {
-            SortedSet<Key> manifestKeys = zipHive.execute(new ManifestListOperation());
+            Set<Key> manifestKeys = zipHive.execute(new ManifestListOperation());
             if (manifestKeys.isEmpty()) {
                 throw new WebApplicationException("ZIP file does not contain a manifest.", Status.BAD_REQUEST);
             }
@@ -351,7 +343,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
             }
 
             // Add all required artifacts
-            SortedSet<ObjectId> objectIds = zipHive.execute(scan);
+            Set<ObjectId> objectIds = zipHive.execute(scan);
             objectIds.forEach(copy::addObject);
 
             // Execute import only if we have something to do

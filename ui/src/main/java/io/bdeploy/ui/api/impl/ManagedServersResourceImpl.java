@@ -8,13 +8,13 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -290,7 +290,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
         // delete all of the instances /LOCALLY/ on the central, but NOT using the remote master (we "just" detach).
         for (InstanceConfiguration cfg : controlled) {
-            SortedSet<Key> allInstanceObjects = hive.execute(new ManifestListOperation().setManifestName(cfg.uuid));
+            Set<Key> allInstanceObjects = hive.execute(new ManifestListOperation().setManifestName(cfg.uuid));
             allInstanceObjects.forEach(x -> hive.execute(new ManifestDeleteOperation().setToDelete(x)));
         }
 
@@ -376,7 +376,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             InstanceGroupManifest igm = new InstanceGroupManifest(hive);
             Manifest.Key igKey = igm.getKey();
             String attributesMetaName = igm.getAttributes(hive).getMetaManifest().getMetaName();
-            SortedSet<Key> metaManifests = hive.execute(new ManifestListOperation().setManifestName(attributesMetaName));
+            Set<Key> metaManifests = hive.execute(new ManifestListOperation().setManifestName(attributesMetaName));
 
             PushOperation push = new PushOperation().addManifest(igKey).setRemote(svc).setHiveName(groupName);
             metaManifests.forEach(push::addManifest);
@@ -390,7 +390,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
             FetchOperation fetchOp = new FetchOperation().setRemote(svc).setHiveName(groupName);
             try (RemoteBHive rbh = RemoteBHive.forService(svc, groupName, reporter)) {
-                SortedSet<Manifest.Key> keysToFetch = new TreeSet<>();
+                Set<Manifest.Key> keysToFetch = new LinkedHashSet<>();
 
                 // maybe we can scope this down a little in the future.
                 rbh.getManifestInventory(instanceIds.toArray(String[]::new)).forEach((k, v) -> keysToFetch.add(k));
@@ -400,7 +400,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                         .forEach((k, v) -> keysToFetch.add(k));
 
                 // set calculated keys to fetch operation.
-                keysToFetch.forEach(fetchOp::addManifest);
+                fetchOp.addManifest(keysToFetch);
             }
 
             hive.execute(fetchOp);
@@ -418,7 +418,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 }
 
                 // Not OK: instance no longer on server.
-                SortedSet<Key> allInstanceObjects = hive
+                Set<Key> allInstanceObjects = hive
                         .execute(new ManifestListOperation().setManifestName(im.getConfiguration().uuid));
                 allInstanceObjects.forEach(x -> hive.execute(new ManifestDeleteOperation().setToDelete(x)));
             }
@@ -571,7 +571,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
         BHive defaultHive = registry.get(JerseyRemoteBHive.DEFAULT_NAME);
         ManifestListOperation operation = new ManifestListOperation().setManifestName(manifestName);
-        SortedSet<Key> result = defaultHive.execute(operation);
+        Set<Key> result = defaultHive.execute(operation);
         return result.stream().map(ScopedManifestKey::parse).filter(smk -> smk.getTag().equals(runningVersion))
                 .collect(Collectors.toSet());
     }
@@ -614,7 +614,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             Key newKey = master.update(update, k.getTag());
 
             // now remove all previous versions of the instance (and it's nodes by matching segments of the manifest name.)
-            SortedSet<Key> keys = hive.execute(new ManifestListOperation().setManifestName(im.getConfiguration().uuid));
+            Set<Key> keys = hive.execute(new ManifestListOperation().setManifestName(im.getConfiguration().uuid));
 
             for (Key any : keys) {
                 if (any.getTag().equals(newKey.getTag())) {

@@ -8,6 +8,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -20,6 +23,7 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.CopyOperation;
 import io.bdeploy.bhive.op.ObjectExistsOperation;
+import io.bdeploy.bhive.op.ObjectExistsOperation.Result;
 import io.bdeploy.bhive.op.ObjectReadOperation;
 import io.bdeploy.bhive.remote.RemoteBHive;
 import io.bdeploy.common.ActivityReporter.Activity;
@@ -38,73 +42,59 @@ public class FetchOperation extends RemoteOperation<TransferStatistics, FetchOpe
         TransferStatistics stats = new TransferStatistics();
         assertNotNull(getRemote(), "Remote not set");
 
-        SortedSet<Manifest.Key> toFetch = new TreeSet<>();
+        SortedSet<Manifest.Key> requiredManifests = new TreeSet<>();
         SortedSet<ObjectId> toFetchRootTrees = new TreeSet<>();
 
         Instant start = Instant.now();
         try (Activity activity = getActivityReporter().start("Fetching manifests...", -1)) {
             try (RemoteBHive rh = RemoteBHive.forService(getRemote(), hiveName, getActivityReporter())) {
                 // is manifests are empty, the array will be empty, returning all manifests on the remote
-                SortedMap<Manifest.Key, ObjectId> remoteManifests = rh
-                        .getManifestInventory(manifests.stream().map(Manifest.Key::toString).toArray(String[]::new));
-
+                String[] manifestsAsArray = manifests.stream().map(Manifest.Key::toString).toArray(String[]::new);
+                SortedMap<Manifest.Key, ObjectId> manifest2Tree = rh.getManifestInventory(manifestsAsArray);
                 if (manifests.isEmpty()) {
-                    manifests.addAll(remoteManifests.keySet());
+                    manifests.addAll(manifest2Tree.keySet());
                 }
 
                 for (Manifest.Key key : manifests) {
-                    if (!remoteManifests.containsKey(key)) {
+                    if (!manifest2Tree.containsKey(key)) {
                         throw new IllegalArgumentException("Manifest not found: " + key);
                     }
                     if (getManifestDatabase().hasManifest(key)) {
                         continue;
                     }
-                    toFetch.add(key);
-                    toFetchRootTrees.add(remoteManifests.get(key));
+                    requiredManifests.add(key);
+                    toFetchRootTrees.add(manifest2Tree.get(key));
                 }
-
-                if (toFetch.isEmpty()) {
+                if (requiredManifests.isEmpty()) {
                     return stats;
                 }
 
-                stats.sumManifests = toFetch.size();
-
                 // STEP 1: Figure out required trees for the roots to fetch
-                SortedSet<ObjectId> requiredTrees = new TreeSet<>();
+                Set<ObjectId> requiredTrees = new LinkedHashSet<>();
                 toFetchRootTrees.forEach(t -> requiredTrees.addAll(rh.getRequiredTrees(t)));
-                stats.sumTrees = requiredTrees.size();
 
                 // STEP 2: Figure out which trees we already have locally.
-                ObjectExistsOperation findExistingTrees = new ObjectExistsOperation();
-                findExistingTrees.addAll(requiredTrees);
-                SortedSet<ObjectId> treesWeAlreadyHave = execute(findExistingTrees);
+                Result treeResult = execute(new ObjectExistsOperation().addAll(requiredTrees));
 
-                // STEP 3: Figure out the trees which we /do/ need to fetch
-                SortedSet<ObjectId> missingTrees = new TreeSet<>(requiredTrees);
-                missingTrees.removeAll(treesWeAlreadyHave);
-                stats.sumMissingTrees = missingTrees.size();
+                // STEP 3: Find objects for all missing objects, filtering trees we have.
+                Set<ObjectId> requiredObjects = new LinkedHashSet<>();
+                if (!treeResult.missing.isEmpty()) {
+                    requiredObjects = rh.getRequiredObjects(treeResult.missing, treeResult.existing);
+                }
 
-                // STEP 4: Find objects for all missing objects, filtering trees we have.
-                SortedSet<ObjectId> requiredObjects = rh.getRequiredObjects(missingTrees, treesWeAlreadyHave);
+                // STEP 4: Check which of the required objects we already have
+                Result objectResult = execute(new ObjectExistsOperation().addAll(requiredObjects));
 
-                // STEP 5: from these objects check which are existing locally
-                ObjectExistsOperation findExistingObjects = new ObjectExistsOperation();
-                findExistingObjects.addAll(requiredObjects);
-                SortedSet<ObjectId> existingObjects = execute(findExistingObjects);
+                // STEP 5: Fetch from the remote all required objects and manifests.
+                TransferStatistics fetchStats = fetch(rh, objectResult.missing, requiredManifests);
 
-                // STEP 6 calculate which objects are missing from the required and existing ones
-                SortedSet<ObjectId> missingObjects = new TreeSet<>(requiredObjects);
-                missingObjects.removeAll(existingObjects);
-                stats.sumMissingObjects = missingObjects.size();
-
-                // STEP 7: fetch from the remote all required objects and manifests.
-                TransferStatistics fs = fetch(rh, missingObjects, toFetch);
-
-                // update statistics with some new knowledge. the fetch call can only know a few numbers,
+                // Update statistics with some new knowledge. the fetch call can only know a few numbers,
                 // as for instance the number of trees is irrelevant during actual operation.
-                stats.transferSize = fs.transferSize;
-                stats.sumManifests = fs.sumManifests;
-                stats.sumMissingObjects = fs.sumMissingObjects;
+                stats.transferSize = fetchStats.transferSize;
+                stats.sumManifests = fetchStats.sumManifests;
+                stats.sumMissingObjects = fetchStats.sumMissingObjects;
+                stats.sumTrees = requiredTrees.size();
+                stats.sumMissingTrees = treeResult.missing.size();
             }
         } finally {
             stats.duration = Duration.between(start, Instant.now()).toMillis();
@@ -117,6 +107,11 @@ public class FetchOperation extends RemoteOperation<TransferStatistics, FetchOpe
         return this;
     }
 
+    public FetchOperation addManifest(Collection<Manifest.Key> keys) {
+        manifests.addAll(keys);
+        return this;
+    }
+
     public FetchOperation setHiveName(String name) {
         hiveName = name;
         return this;
@@ -126,7 +121,7 @@ public class FetchOperation extends RemoteOperation<TransferStatistics, FetchOpe
         return manifests;
     }
 
-    private TransferStatistics fetch(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests) throws IOException {
+    private TransferStatistics fetch(RemoteBHive rh, Set<ObjectId> objects, Set<Key> manifests) throws IOException {
         try {
             return fetchAsStream(rh, objects, manifests);
         } catch (UnsupportedOperationException ex) {
@@ -134,8 +129,7 @@ public class FetchOperation extends RemoteOperation<TransferStatistics, FetchOpe
         }
     }
 
-    private TransferStatistics fetchAsZip(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests)
-            throws IOException {
+    private TransferStatistics fetchAsZip(RemoteBHive rh, Set<ObjectId> objects, Set<Key> manifests) throws IOException {
         Path z = rh.fetch(objects, manifests);
         try (BHive zHive = new BHive(UriBuilder.fromUri("jar:" + z.toUri()).build(), getActivityReporter())) {
             TransferStatistics t = zHive.execute(new CopyOperation().setDestinationHive(this).setPartialAllowed(false));
@@ -146,7 +140,7 @@ public class FetchOperation extends RemoteOperation<TransferStatistics, FetchOpe
         }
     }
 
-    private TransferStatistics fetchAsStream(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests) {
+    private TransferStatistics fetchAsStream(RemoteBHive rh, Set<ObjectId> objects, Set<Key> manifests) {
         InputStream stream = rh.fetchAsStream(objects, manifests);
         return execute(new ObjectReadOperation().stream(stream));
     }

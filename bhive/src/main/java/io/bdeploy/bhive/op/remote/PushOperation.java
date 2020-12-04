@@ -7,10 +7,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -24,6 +28,8 @@ import io.bdeploy.bhive.ReadOnlyOperation;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.bhive.objects.view.BlobView;
+import io.bdeploy.bhive.objects.view.ElementView;
 import io.bdeploy.bhive.objects.view.ManifestRefView;
 import io.bdeploy.bhive.objects.view.TreeView;
 import io.bdeploy.bhive.objects.view.scanner.TreeVisitor;
@@ -44,7 +50,7 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
 
     private static final Logger log = LoggerFactory.getLogger(PushOperation.class);
 
-    private final SortedSet<Manifest.Key> manifests = new TreeSet<>();
+    private final Set<Manifest.Key> manifests = new LinkedHashSet<>();
     private String hiveName;
 
     @Override
@@ -53,59 +59,56 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
 
         Instant start = Instant.now();
         try (Activity activity = getActivityReporter().start("Pushing manifests...", -1)) {
-            if (manifests.isEmpty()) {
-                manifests.addAll(execute(new ManifestListOperation()));
-            }
-
             try (RemoteBHive rh = RemoteBHive.forService(getRemote(), hiveName, getActivityReporter())) {
-
-                // add all referenced manifests
-                manifests.addAll(manifests.parallelStream()
-                        .flatMap(m -> execute(new ManifestRefScanOperation().setManifest(m)).values().stream())
-                        .collect(Collectors.toSet()));
-
-                // read remote inventory
-                SortedMap<Manifest.Key, ObjectId> remoteManifests = rh
-                        .getManifestInventory(manifests.parallelStream().map(Manifest.Key::toString).toArray(String[]::new));
-
-                // remove all manifests that already exist
-                manifests.removeIf(remoteManifests::containsKey);
-
+                // Add all local manifests if nothing is given
                 if (manifests.isEmpty()) {
+                    manifests.addAll(execute(new ManifestListOperation()));
+                }
+
+                // Add all referenced manifests
+                Set<Manifest.Key> allManifests = new LinkedHashSet<>();
+                for (Manifest.Key key : manifests) {
+                    allManifests.addAll(execute(new ManifestRefScanOperation().setManifest(key)).values());
+                    allManifests.add(key);
+                }
+
+                // Read remote inventory
+                String[] manifestsAsArray = allManifests.stream().map(Manifest.Key::toString).toArray(String[]::new);
+                SortedMap<Manifest.Key, ObjectId> manifest2Tree = rh.getManifestInventory(manifestsAsArray);
+
+                // Remove all manifests that already exist
+                allManifests.removeIf(manifest2Tree::containsKey);
+                if (allManifests.isEmpty()) {
                     return stats;
                 }
 
-                stats.sumManifests = manifests.size();
+                // STEP 1: Figure out all trees we want to push - scans without following references
+                Map<ObjectId, TreeView> allTrees = getAllTrees(allManifests);
 
-                // create a view of every manifest on our side. does not follow references as references are scanned above.
-                List<TreeView> snapshots = manifests.stream()
-                        .map(m -> execute(new ScanOperation().setManifest(m).setFollowReferences(false)))
-                        .collect(Collectors.toList());
+                // STEP 2: Ask the remote for missing trees
+                Set<ObjectId> missingTrees = rh.getMissingObjects(new LinkedHashSet<>(allTrees.keySet()));
 
-                // STEP 1: figure out all trees we want to push - scans without following references
-                SortedSet<TreeView> allTreeSnapshots = scanAllTreeSnapshots(snapshots);
-                SortedSet<ObjectId> allTrees = allTreeSnapshots.parallelStream().map(TreeView::getElementId)
-                        .collect(Collectors.toCollection(TreeSet::new));
-                stats.sumTrees = allTrees.size();
+                // STEP 3: Figure out which trees are already present on the remote.
+                //         We reverse the list at the end so that leaves are first followed by their parents
+                List<TreeView> missingTreeViews = allTrees.values().stream().filter(t -> missingTrees.contains(t.getElementId()))
+                        .collect(Collectors.toCollection(ArrayList::new));
+                Collections.reverse(missingTreeViews);
 
-                // STEP 2: ask the remote for missing trees
-                SortedSet<ObjectId> missingTrees = rh.getMissingObjects(allTrees);
-                stats.sumMissingTrees = missingTrees.size();
-
-                // STEP 3: figure out (locally) which trees are already present on the remote.
-                SortedSet<TreeView> missingTreeSnapshots = allTreeSnapshots.parallelStream()
-                        .filter(t -> missingTrees.contains(t.getElementId())).collect(Collectors.toCollection(TreeSet::new));
-
-                // STEP 4: scan all trees, exclude trees already present.
-                //scan objectIds of each missingTree, include missingTree itself
-                SortedSet<ObjectId> requiredObjects = scanAllObjectSnapshots(missingTreeSnapshots);
+                // STEP 4: Figure out which objects are required for the trees
+                Set<ObjectId> requiredObjects = getRequiredObjects(missingTreeViews);
 
                 // STEP 5: filter object to transfer only what is REALLY required
-                SortedSet<ObjectId> missingObjects = rh.getMissingObjects(requiredObjects);
-                stats.sumMissingObjects = missingObjects.size();
+                Set<ObjectId> missingObjects = rh.getMissingObjects(requiredObjects);
 
                 // STEP 6: copy objects and manifests
-                stats.transferSize = push(rh, missingObjects, manifests).transferSize;
+                TransferStatistics pushStats = push(rh, missingObjects, allManifests);
+
+                // Update statistics with some new knowledge.
+                stats.sumTrees = allTrees.size();
+                stats.sumManifests = allManifests.size();
+                stats.sumMissingTrees = missingTrees.size();
+                stats.transferSize = pushStats.transferSize;
+                stats.sumMissingObjects = missingObjects.size();
             }
         } finally {
             stats.duration = Duration.between(start, Instant.now()).toMillis();
@@ -114,37 +117,40 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
     }
 
     /**
-     * Find all Trees within the list of {@link TreeView}s recursively.
+     * Find all trees for the given list of manifests
      */
-    private SortedSet<TreeView> scanAllTreeSnapshots(List<TreeView> toPush) {
-        SortedSet<TreeView> allTrees = new TreeSet<>();
-        TreeVisitor visitor = new TreeVisitor.Builder().onTree(t -> {
-            if (t instanceof ManifestRefView) {
-                return false;
-            }
-            allTrees.add(t);
-            return true;
-        }).build();
-        for (TreeView snapshot : toPush) {
-            snapshot.visit(visitor);
+    private Map<ObjectId, TreeView> getAllTrees(Set<Manifest.Key> manifests) {
+        Map<ObjectId, TreeView> allTrees = new LinkedHashMap<>();
+        for (Manifest.Key manifest : manifests) {
+            TreeView view = execute(new ScanOperation().setManifest(manifest).setFollowReferences(false));
+            view.visit(new TreeVisitor.Builder().onTree(t -> {
+                if (t instanceof ManifestRefView) {
+                    return false;
+                }
+                allTrees.put(t.getElementId(), t);
+                return true;
+            }).build());
         }
         return allTrees;
     }
 
     /**
      * Find all {@link ObjectId}s referenced by the given trees (flat).
-     * <p>
-     * {@link ManifestRefView} is not followed, just the reference (since the reference is a standalone object just like a blob)
-     * is recorded.
      */
-    private SortedSet<ObjectId> scanAllObjectSnapshots(SortedSet<TreeView> missingTreeSnapshots) {
-        return missingTreeSnapshots.parallelStream().map(t -> {
-            SortedSet<ObjectId> objectsOfTree = new TreeSet<>();
-            t.visit(new TreeVisitor.Builder().onTree(t::equals).onBlob(b -> objectsOfTree.add(b.getElementId()))
-                    .onManifestRef(m -> objectsOfTree.add(m.getReferenceId())).build());
-            objectsOfTree.add(t.getElementId());
-            return objectsOfTree;
-        }).flatMap(SortedSet::stream).collect(Collectors.toCollection(TreeSet::new));
+    private Set<ObjectId> getRequiredObjects(List<TreeView> missingTrees) {
+        Set<ObjectId> result = new LinkedHashSet<>();
+        for (TreeView view : missingTrees) {
+            for (ElementView child : view.getChildren().values()) {
+                if (child instanceof BlobView) {
+                    result.add(child.getElementId());
+                } else if (child instanceof ManifestRefView) {
+                    ManifestRefView refView = (ManifestRefView) child;
+                    result.add(refView.getReferenceId());
+                }
+            }
+            result.add(view.getElementId());
+        }
+        return result;
     }
 
     public PushOperation addManifest(Manifest.Key key) {
@@ -157,7 +163,7 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
         return this;
     }
 
-    private TransferStatistics push(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests) throws IOException {
+    private TransferStatistics push(RemoteBHive rh, Set<ObjectId> objects, Set<Key> manifests) throws IOException {
         try {
             return pushAsStream(rh, objects, manifests);
         } catch (UnsupportedOperationException ex) {
@@ -166,8 +172,7 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
         }
     }
 
-    private TransferStatistics pushAsZip(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests)
-            throws IOException {
+    private TransferStatistics pushAsZip(RemoteBHive rh, Set<ObjectId> objects, Set<Key> manifests) throws IOException {
         Path tmpHive = Files.createTempFile("push-", ".zip");
         Files.delete(tmpHive); // need to delete to re-create with ZipFileSystem
 
@@ -189,7 +194,7 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
         }
     }
 
-    private TransferStatistics pushAsStream(RemoteBHive rh, SortedSet<ObjectId> objects, SortedSet<Key> manifests) {
+    private TransferStatistics pushAsStream(RemoteBHive rh, Set<ObjectId> objects, Set<Key> manifests) {
         PipedInputStream input = new PipedInputStream();
         CompletableFuture<Void> barrier = new CompletableFuture<>();
 

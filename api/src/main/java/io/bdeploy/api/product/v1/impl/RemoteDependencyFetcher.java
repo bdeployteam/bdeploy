@@ -99,9 +99,7 @@ public class RemoteDependencyFetcher implements DependencyFetcher {
             return unresolved;
         }
 
-        FetchOperation fop = new FetchOperation().setRemote(svc).setHiveName(group);
-        toFetch.forEach(fop::addManifest);
-        hive.execute(fop);
+        hive.execute(new FetchOperation().setRemote(svc).setHiveName(group).addManifest(toFetch));
 
         return unresolved;
     }

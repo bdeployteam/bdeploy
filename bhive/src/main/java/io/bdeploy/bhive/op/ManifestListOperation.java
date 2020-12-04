@@ -1,6 +1,6 @@
 package io.bdeploy.bhive.op;
 
-import java.util.SortedSet;
+import java.util.Set;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.ReadOnlyOperation;
@@ -11,12 +11,12 @@ import io.bdeploy.common.ActivityReporter.Activity;
  * Lists all {@link Manifest}s available in the {@link BHive}.
  */
 @ReadOnlyOperation
-public class ManifestListOperation extends BHive.Operation<SortedSet<Manifest.Key>> {
+public class ManifestListOperation extends BHive.Operation<Set<Manifest.Key>> {
 
     private String key;
 
     @Override
-    public SortedSet<Manifest.Key> call() throws Exception {
+    public Set<Manifest.Key> call() throws Exception {
         try (Activity activity = getActivityReporter().start("Listing manifests...", -1)) {
             if (key == null) {
                 return getManifestDatabase().getAllManifests();

@@ -2,8 +2,8 @@ package io.bdeploy.bhive.op;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -33,7 +33,7 @@ public class ManifestDeleteOldByIdOperation extends BHive.Operation<Void> {
 
     @Override
     public Void call() throws Exception {
-        SortedSet<Key> execute = execute(new ManifestListOperation().setManifestName(manifestName));
+        Set<Key> execute = execute(new ManifestListOperation().setManifestName(manifestName));
         SortedMap<Long, List<Key>> mfsByKey = execute.stream()
                 .collect(Collectors.groupingBy(k -> Long.valueOf(k.getTag()), TreeMap::new, Collectors.toList()));
 

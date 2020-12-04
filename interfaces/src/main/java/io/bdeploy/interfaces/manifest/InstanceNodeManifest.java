@@ -2,6 +2,7 @@ package io.bdeploy.interfaces.manifest;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -46,7 +47,7 @@ public class InstanceNodeManifest {
      */
     public static SortedSet<Manifest.Key> scan(BHive hive) {
         SortedSet<Manifest.Key> result = new TreeSet<>();
-        SortedSet<Manifest.Key> allKeys = hive.execute(new ManifestListOperation());
+        Set<Manifest.Key> allKeys = hive.execute(new ManifestListOperation());
         for (Manifest.Key key : allKeys) {
             Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(key));
             if (mf.getLabels().containsKey(INSTANCE_NODE_LABEL)) {

@@ -8,8 +8,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -128,7 +128,7 @@ public class ProductCliTest {
 
         // check whether things went well...
         try (BHive hive = new BHive(impHive.toUri(), reporter)) {
-            SortedSet<Key> mfs = hive.execute(new ManifestListOperation());
+            Set<Key> mfs = hive.execute(new ManifestListOperation());
 
             ScopedManifestKey appSmk = new ScopedManifestKey("prod/app", OsHelper.getRunningOs(), "1.0.0");
 

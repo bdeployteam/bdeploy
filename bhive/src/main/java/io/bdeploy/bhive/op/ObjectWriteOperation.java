@@ -5,8 +5,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 
 import com.google.common.io.CountingOutputStream;
@@ -27,8 +27,8 @@ import io.bdeploy.common.util.StreamHelper;
 @ReadOnlyOperation
 public class ObjectWriteOperation extends BHive.Operation<Long> {
 
-    private final SortedSet<ObjectId> objects = new TreeSet<>();
-    private final SortedSet<Manifest.Key> manifests = new TreeSet<>();
+    private final Set<ObjectId> objects = new LinkedHashSet<>();
+    private final Set<Manifest.Key> manifests = new LinkedHashSet<>();
 
     private OutputStream output;
 

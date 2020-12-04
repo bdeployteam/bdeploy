@@ -19,35 +19,37 @@ import io.bdeploy.common.util.PathHelper;
 
 public class ContentHelper {
 
-    public static final String ROOT_TREE_OID = "dc19eaeffb67b1ef808bc4cd9ce7a7c250a2bdd9";
-    public static final String SUB_TREE_OID = "9fbb668dcbca30ca5a069c2f8a53a7d84c534e16";
-    public static final String TEST_TXT_OID = "b45cc3292e85e136c8b63b580c8774861d766304";
-    public static final String FILE_TXT_OID = "84ad17cded26722e0e87855df049aacc6401602e";
+    public static final String ROOT_TREE_OID = "21a696bc0acb8c767b1b454338069288cc1e9bfa";
+    public static final String DIR_TREE_OID = "34c086b59b3f96c954b7a7af9d3cb519f64a733a";
+    public static final String SUBDIR_TREE_OID = "a550fa3c67161554cc44c978f9ae90ea570d73f4";
 
-    public static final String T2_L1 = "test2 line 1 with some more contents";
-    public static final String T2_L2 = "test2 line 2 with even more contents - but different $(&*!\\\\";
+    public static final String TEST_TXT_OID = "b45cc3292e85e136c8b63b580c8774861d766304";
+    public static final String DIR_TXT_OID = "31a4b2a8e38ee22ec80a94fd3ca88f68f6f460c0";
+    public static final String SUBDIR_TXT_OID = "18fd659ea319d37272c37ca122f8af7de85263e0";
 
     public static final String TEST1 = "test file content 1";
-    public static final String TEST2 = T2_L1 + "\n" + T2_L2;
+    public static final String TEST2 = "test file content 2";
+    public static final String TEST3 = "$(&*!/@äö?§x 🤣 \\n $(&*!\\";
 
     private static final int MAX_PATHS = 100;
     private static final String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     private static final Random RND = new Random(1); // reproducible random numbers :)
 
     /**
-     * Generate simple test source tree. Attention: test may hardcode object ids, so
-     * DON'T change the content.
+     * Generate simple test source tree.
      */
     public static Path genSimpleTestTree(Path root, String name) throws IOException {
         Path tmp = root.resolve(name);
 
-        // create some test files.
         Path t1 = tmp.resolve("test.txt");
         Path t2 = tmp.resolve(Paths.get("dir", "file.txt"));
+        Path t3 = tmp.resolve(Paths.get("dir", "subDir", "child.txt"));
 
         PathHelper.mkdirs(t2.getParent());
+        PathHelper.mkdirs(t3.getParent());
         Files.write(t1, TEST1.getBytes(StandardCharsets.UTF_8));
         Files.write(t2, TEST2.getBytes(StandardCharsets.UTF_8));
+        Files.write(t3, TEST3.getBytes(StandardCharsets.UTF_8));
 
         return tmp;
     }

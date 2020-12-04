@@ -8,6 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -54,7 +57,17 @@ public class RemoteHiveTest extends RemoteHiveTestBase {
         // import something
         hive.execute(new ImportOperation().setManifest(key).setSourcePath(src).addLabel("x", "v"));
         Manifest reference = hive.execute(new ManifestLoadOperation().setManifest(key));
-        SortedSet<ObjectId> rq = hive.execute(new ObjectListOperation().addManifest(key));
+        Set<ObjectId> rq = hive.execute(new ObjectListOperation().addManifest(key));
+
+        // Verify that elements are in expected order
+        List<ObjectId> ordered = new ArrayList<>(rq);
+        assertThat(ordered.get(0).getId(), is(ContentHelper.SUBDIR_TXT_OID));
+        assertThat(ordered.get(1).getId(), is(ContentHelper.SUBDIR_TREE_OID));
+        assertThat(ordered.get(2).getId(), is(ContentHelper.DIR_TXT_OID));
+        assertThat(ordered.get(3).getId(), is(ContentHelper.DIR_TREE_OID));
+        assertThat(ordered.get(4).getId(), is(ContentHelper.TEST_TXT_OID));
+        assertThat(ordered.get(5).getId(), is(ContentHelper.ROOT_TREE_OID));
+        assertThat(ordered.size(), is(6));
 
         // request all manifests.
         SortedMap<Key, ObjectId> mfs = getRemote().getManifestInventory();
@@ -67,14 +80,14 @@ public class RemoteHiveTest extends RemoteHiveTestBase {
         testIds.add(reference.getRoot());
         ObjectId randomId = DbTestBase.randomId();
         testIds.add(randomId);
-        SortedSet<ObjectId> existing = getRemote().getMissingObjects(testIds);
+        Set<ObjectId> existing = getRemote().getMissingObjects(testIds);
         assertThat(existing.size(), is(1));
         assertThat(existing.iterator().next(), is(randomId));
 
         // request all objectIds required for the manifest.
         SortedSet<ObjectId> check = new TreeSet<>();
         check.add(mfs.get(key));
-        SortedSet<ObjectId> required = getRemote().getRequiredObjects(check, new TreeSet<>());
+        Set<ObjectId> required = getRemote().getRequiredObjects(check, new TreeSet<>());
         assertThat(required, is(rq));
 
         Path tmpHive = tmp.resolve("tmphive");
@@ -137,7 +150,7 @@ public class RemoteHiveTest extends RemoteHiveTestBase {
         hive.execute(new PushOperation().addManifest(keyD).setRemote(new RemoteService(tmpRemote.toUri())));
 
         try (BHive h = new BHive(tmpRemote.toUri(), r)) {
-            SortedSet<Key> mfs = h.execute(new ManifestListOperation());
+            Set<Key> mfs = h.execute(new ManifestListOperation());
             assertThat(mfs.size(), is(3));
             assertTrue(mfs.contains(keyD));
             assertTrue(mfs.contains(keyN1));
@@ -147,7 +160,7 @@ public class RemoteHiveTest extends RemoteHiveTestBase {
         tmpRemote = tmp.resolve("fetch");
         try (BHive h = new BHive(tmpRemote.toUri(), r)) {
             h.execute(new FetchOperation().addManifest(keyD).setRemote(svc));
-            SortedSet<Key> mfs = h.execute(new ManifestListOperation());
+            Set<Key> mfs = h.execute(new ManifestListOperation());
             assertThat(mfs.size(), is(3));
             assertTrue(mfs.contains(keyD));
             assertTrue(mfs.contains(keyN1));

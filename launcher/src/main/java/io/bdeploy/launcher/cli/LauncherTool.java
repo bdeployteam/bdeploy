@@ -561,11 +561,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         // Fetch the application and all the requirements
         try (Activity info = reporter.start("Downloading...")) {
             log.info("Fetching manifests from server...");
-            FetchOperation fetchOp = new FetchOperation().setHiveName(clickAndStart.groupId).setRemote(clickAndStart.host);
-            fetchOp.addManifest(appKey);
-            clientAppCfg.resolvedRequires.forEach(fetchOp::addManifest);
-
-            TransferStatistics stats = hive.execute(fetchOp);
+            TransferStatistics stats = hive.execute(new FetchOperation().setHiveName(clickAndStart.groupId)
+                    .setRemote(clickAndStart.host).addManifest(appKey).addManifest(clientAppCfg.resolvedRequires));
             if (stats.sumManifests == 0) {
                 log.info("Local hive already contains all required arfifacts. No manifests where fetched.");
             } else {

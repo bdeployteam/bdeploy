@@ -354,7 +354,7 @@ public class CleanupHelper {
      */
     private List<CleanupAction> calculateMetaManifests(CleanupInstanceGroupContext context) {
         List<CleanupAction> actions = new ArrayList<>();
-        SortedSet<Key> allImKeys = context.getHive().execute(new ManifestListOperation());
+        Set<Key> allImKeys = context.getHive().execute(new ManifestListOperation());
         for (Key key : allImKeys) {
             if (MetaManifest.isMetaManifest(key)
                     && !MetaManifest.isParentAlive(key, context.getHive(), context.getAllManifests4deletion())) {

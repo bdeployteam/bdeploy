@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.TreeMap;
 
 import javax.ws.rs.WebApplicationException;
@@ -494,7 +494,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
         InstanceConfiguration instanceConfig = state.config;
         String rootName = InstanceManifest.getRootName(instanceConfig.uuid);
-        SortedSet<Key> existing = hive.execute(new ManifestListOperation().setManifestName(rootName));
+        Set<Key> existing = hive.execute(new ManifestListOperation().setManifestName(rootName));
         InstanceManifest oldConfig = null;
         if (expectedTag == null && !existing.isEmpty()) {
             throw new WebApplicationException("Instance already exists: " + instanceConfig.uuid, Status.CONFLICT);
@@ -608,7 +608,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     @WriteLock
     @Override
     public void delete(String instanceUuid) {
-        SortedSet<Key> allInstanceObjects = hive.execute(new ManifestListOperation().setManifestName(instanceUuid));
+        Set<Key> allInstanceObjects = hive.execute(new ManifestListOperation().setManifestName(instanceUuid));
         allInstanceObjects.forEach(x -> hive.execute(new ManifestDeleteOperation().setToDelete(x)));
     }
 
