@@ -4,5 +4,6 @@ vendor: BDeploy Team
 applications:
 - "server-app"
 - "client-app"
+configTemplates: config
 versionFile: "product-version.yaml"
 

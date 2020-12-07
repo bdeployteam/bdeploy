@@ -69,6 +69,9 @@ describe('Product Tests', () => {
     cy.contains('mat-toolbar', 'Change Product Version').should('exist');
     cy.contains('app-product-tag-card', '2.0.0').should('exist').contains('button', 'arrow_upward').click();
 
+    cy.get('app-messagebox').contains('Product Upgrade').should('exist');
+    cy.contains('button', 'OK').click();
+
     cy.getApplicationConfigCard('master', 'Server Application').find('.app-config-modified').should('exist');
     cy.get('app-instance-version-card').find('.instance-version-modified').should('exist');
 
@@ -77,6 +80,30 @@ describe('Product Tests', () => {
 
     cy.get('app-instance-version-card').find('.instance-version-modified').should('not.exist');
     cy.contains('app-instance-version-card', '2.0.0').should('exist');
+  });
+
+  it('Synchronize configuration files', () => {
+    cy.get('[data-cy=instance-options]').clickContextMenuAction('Configuration Files');
+    cy.contains('button', 'Synchronize with Product').should('exist').click();
+
+    cy.contains('tr', 'dummy3.cfg').then((row) => {
+      cy.wrap(row).contains('button', 'edit').should('exist').and('be.enabled').click();
+    });
+    cy.contains('button', 'ACCEPT PRODUCT FILE').should('exist').click();
+
+    cy.contains('tr', 'binary.cfg').then((row) => {
+      cy.wrap(row).contains('button', 'edit').should('exist').and('be.enabled').click();
+    });
+    cy.contains('button', 'ACCEPT INSTANCE FILE').should('exist').click();
+
+    cy.contains('button', 'Finish Synchronization').should('exist').click();
+    cy.contains('button', 'SAVE').click();
+  });
+
+  it('Install & activate version 2.0.0 with new configuration', () => {
+    cy.closeConfigureApplications();
+    cy.getLatestInstanceVersion().installAndActivate();
+    cy.getActiveInstanceVersion().contains('2.0.0').should('exist');
   });
 
   it('Configure new optional parameter', () => {
@@ -116,6 +143,9 @@ describe('Product Tests', () => {
       .should('be.enabled')
       .and('be.visible')
       .click();
+
+    cy.get('app-messagebox').contains('Product Downgrade').should('exist');
+    cy.contains('button', 'OK').click();
 
     cy.get('.notifications-button').click();
     cy.contains('button', 'Show Product Versions').should('be.visible').and('be.enabled');

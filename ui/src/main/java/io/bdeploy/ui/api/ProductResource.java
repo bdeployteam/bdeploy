@@ -18,6 +18,7 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
+import io.bdeploy.ui.dto.ConfigFileDto;
 import io.bdeploy.ui.dto.InstanceUsageDto;
 import io.bdeploy.ui.dto.ProductDto;
 
@@ -75,5 +76,13 @@ public interface ProductResource {
     @RequiredPermission(permission = Permission.WRITE)
     public void copyProduct(@QueryParam("repo") String softwareRepository, @QueryParam("name") String productName,
             @QueryParam("tag") String productTag);
+
+    @GET
+    @Path("/{name : .+}/{tag}/listConfig")
+    public List<ConfigFileDto> listConfigFiles(@PathParam("name") String name, @PathParam("tag") String tag);
+
+    @GET
+    @Path("/{name : .+}/{tag}/config/{file: .+}")
+    public String loadConfigFile(@PathParam("name") String name, @PathParam("tag") String tag, @PathParam("file") String file);
 
 }

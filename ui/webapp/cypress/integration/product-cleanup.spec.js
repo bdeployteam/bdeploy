@@ -138,6 +138,9 @@ describe('Product Cleanup Test', function () {
     cy.contains('mat-toolbar', 'Change Product Version').should('exist');
     cy.contains('app-product-tag-card', '2.0.0').should('exist').contains('button', 'arrow_upward').click();
 
+    cy.get('app-messagebox').contains('Product Upgrade').should('exist');
+    cy.contains('button', 'OK').click();
+
     cy.getApplicationConfigCard('master', 'Server Application').find('.app-config-modified').should('exist');
     cy.get('app-instance-version-card').find('.instance-version-modified').should('exist');
 

@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { InstanceUsageDto, ManifestKey, ProductDto } from '../../../models/gen.dtos';
+import { ConfigFileDto, InstanceUsageDto, ManifestKey, ProductDto } from '../../../models/gen.dtos';
 import { ProcessConfigDto } from '../../../models/process.model';
 import { ConfigService } from '../../core/services/config.service';
 import { Logger, LoggingService } from '../../core/services/logging.service';
@@ -70,6 +70,18 @@ export class ProductService {
     this.log.debug('copyProduct: ' + url);
     const params = new HttpParams().set('repo', softwareRepositoryName).set('name', key.name).set('tag', key.tag);
     return this.http.get(url, { params: params });
+  }
+
+  public listConfigFiles(instanceGroupName: string, key: ManifestKey): Observable<ConfigFileDto[]> {
+    const url: string = this.buildProductNameTagUrl(instanceGroupName, key) + '/listConfig';
+    this.log.debug('listConfigFiles: ' + url);
+    return this.http.get<ConfigFileDto[]>(url);
+  }
+
+  public getConfigurationFile(instanceGroupName: string, key: ManifestKey, filename: string): Observable<string> {
+    const url: string = this.buildProductNameTagUrl(instanceGroupName, key) + '/config/' + filename;
+    this.log.debug('getConfigurationFile: ' + url);
+    return this.http.get(url, { responseType: 'text' });
   }
 
   public getProductUploadUrl(instanceGroupName: string): string {

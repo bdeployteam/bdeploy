@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
@@ -31,6 +33,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
+import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
@@ -127,6 +130,40 @@ public class ConfigFileResourceImpl implements ConfigFileResource {
         InstanceResourceImpl.syncInstance(minion, rc, groupId, instanceId);
 
         iem.create(rootKey);
+    }
+
+    @Override
+    public List<ConfigFileDto> syncConfigFiles(String iTag, String pName, String pTag) {
+        // list instance config files
+        InstanceManifest instanceManifest = InstanceManifest.load(hive, instanceId, iTag);
+        InstanceConfiguration instanceConfiguration = instanceManifest.getConfiguration();
+        ObjectId iCfgTree = instanceConfiguration.configTree;
+
+        // build a map path->ObjectId
+        Map<String, ObjectId> iFilesMap = new HashMap<>();
+        if (iCfgTree != null) {
+            TreeView view = hive.execute(new ScanOperation().setTree(iCfgTree));
+            view.visit(new TreeVisitor.Builder().onBlob(b -> iFilesMap.put(b.getPathString(), b.getElementId())).build());
+        }
+
+        // list product config files
+        Manifest.Key key = new Manifest.Key(pName, pTag);
+        ProductManifest productManifest = ProductManifest.of(hive, key);
+        ObjectId pCfgTree = productManifest.getConfigTemplateTreeId();
+
+        List<ConfigFileDto> cfgFilePaths = new ArrayList<>();
+        // collect all blobs from the product's config tree
+        if (pCfgTree != null) {
+            TreeView view = hive.execute(new ScanOperation().setTree(pCfgTree));
+            view.visit(new TreeVisitor.Builder().onBlob(b -> {
+                ObjectId iId = iFilesMap.get(b.getPathString());
+                if (iId == null || !iId.equals(b.getElementId())) {
+                    cfgFilePaths.add(new ConfigFileDto(b.getPathString(), isTextFile(b)));
+                }
+            }).build());
+        }
+
+        return cfgFilePaths;
     }
 
 }
