@@ -58,11 +58,25 @@
     </div>
   </mat-card-content>
   <mat-card-actions *ngIf="showUpdateHint()">
-    <button mat-raised-button *ngIf="arePackagesMissing()" (click)="transferUpdates()">Prepare Update</button>
-    <button mat-raised-button *ngIf="arePackagesMissing()" color="primary" (click)="transferAndInstallUpdates()">
+    <button mat-raised-button *ngIf="arePackagesMissing()" (click)="transferUpdates()" [disabled]="!canApply()">
+      Prepare Update
+    </button>
+    <button
+      mat-raised-button
+      *ngIf="arePackagesMissing()"
+      color="primary"
+      (click)="transferAndInstallUpdates()"
+      [disabled]="!canApply()"
+    >
       Prepare & Install
     </button>
-    <button mat-raised-button *ngIf="!arePackagesMissing()" color="primary" (click)="transferAndInstallUpdates()">
+    <button
+      mat-raised-button
+      *ngIf="!arePackagesMissing()"
+      color="primary"
+      (click)="transferAndInstallUpdates()"
+      [disabled]="!canApply()"
+    >
       Install Update
     </button>
   </mat-card-actions>

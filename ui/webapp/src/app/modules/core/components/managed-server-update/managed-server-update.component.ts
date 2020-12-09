@@ -12,6 +12,7 @@ import {
   isUpdateSuccess,
   UpdateStatus,
 } from '../../../../models/update.model';
+import { AuthenticationService } from '../../services/authentication.service';
 
 @Component({
   selector: 'app-managed-server-update',
@@ -38,7 +39,7 @@ export class ManagedServerUpdateComponent implements OnInit {
   updateStatus = UpdateStatus.UPDATES_AVAILABLE;
   updateStatusText = '';
 
-  constructor(private managedServers: ManagedServersService) {}
+  constructor(public authService: AuthenticationService, private managedServers: ManagedServersService) {}
 
   ngOnInit() {}
 
@@ -115,5 +116,9 @@ export class ManagedServerUpdateComponent implements OnInit {
 
   isSnapshot() {
     return this.updateDto.packagesToInstall.some((key) => key.name.includes('snapshot'));
+  }
+
+  canApply() {
+    return this.authService.isScopedAdmin(this.instanceGroupName);
   }
 }
