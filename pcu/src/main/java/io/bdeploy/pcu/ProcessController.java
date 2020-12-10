@@ -26,11 +26,11 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.util.MdcLogger;
-import io.bdeploy.common.util.Threads;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.TemplateHelper;
+import io.bdeploy.common.util.Threads;
 import io.bdeploy.common.util.VariableResolver;
 import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlConfiguration;
@@ -421,7 +421,7 @@ public class ProcessController {
             // Persist the process that we just started to recover it if required
             ProcessControllerDto dto = new ProcessControllerDto();
             dto.pid = processHandle.pid();
-            dto.startTime = ProcessControllerHelper.getProcessStartTimestampCorrected(logger, dto.pid, startTime);
+            dto.startTime = ProcessControllerHelper.getProcessStartTimestampCorrected(logger, processHandle, startTime);
             Files.write(infoFile, StorageHelper.toRawBytes(dto));
             logger.log(l -> l.info("Successfully started application. PID = {}.", dto.pid));
 
@@ -508,7 +508,7 @@ public class ProcessController {
             return Instant.now();
         });
 
-        long correctedStart = ProcessControllerHelper.getProcessStartTimestampCorrected(logger, dto.pid, startTime);
+        long correctedStart = ProcessControllerHelper.getProcessStartTimestampCorrected(logger, processHandle, startTime);
         if (Long.compare(correctedStart, dto.startTime) == 0) {
             logger.log(l -> l.info("Successfully attached to application. PID = {}.", dto.pid));
             monitorProcess();

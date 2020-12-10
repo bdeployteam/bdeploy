@@ -1,8 +1,8 @@
 package io.bdeploy.pcu;
 
 import java.lang.ProcessHandle.Info;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
@@ -139,19 +139,31 @@ class ProcessControllerHelper {
      * The read value is not absolute though, but relative to the kernel boot time (which is sufficient for what we want). We just
      * omit addition of real time and boot time offsets as done in the linux kernel when querying the boottime of the kernel.
      */
-    public static long getProcessStartTimestampCorrected(MdcLogger logger, long pid, Instant startTime) {
+    public static long getProcessStartTimestampCorrected(MdcLogger logger, ProcessHandle handle, Instant startTime) {
         // we (for now) trust the OS to deliver a stable absolute timestamp.
         if (OsHelper.getRunningOs() != OperatingSystem.LINUX) {
             return startTime.toEpochMilli();
         }
 
         try {
+            if (!handle.isAlive()) {
+                logger.log(l -> l.warn("Cannot read corrected start time, process no longer alive, PID = {}", handle.pid()));
+                return startTime.toEpochMilli();
+            }
+
             // read the single line from /proc/[pid]/stat, field no 22 is the start time.
-            String line = new String(Files.readAllBytes(Paths.get("/proc", String.valueOf(pid), "stat")), StandardCharsets.UTF_8);
+            Path path = Paths.get("/proc", String.valueOf(handle.pid()), "stat");
+
+            if (!Files.exists(path)) {
+                logger.log(l -> l.warn("Cannot read corrected start time, stat file does not exist, PID = {}", handle.pid()));
+                return startTime.toEpochMilli();
+            }
+
+            String line = Files.readString(path);
             String[] split = line.split(" ");
             return Long.parseLong(split[21]);
         } catch (Exception e) {
-            logger.log(l -> l.warn("Cannot read corrected start time of process, PID = {}.", pid, e));
+            logger.log(l -> l.warn("Cannot read corrected start time of process, PID = {}.", handle.pid(), e));
             return startTime.toEpochMilli();
         }
     }
