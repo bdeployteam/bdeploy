@@ -1,8 +1,6 @@
 ﻿using Bdeploy.Shared;
-using System;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -72,9 +70,8 @@ namespace Bdeploy.Installer.Models {
                 return null;
             }
             string value = match.Groups[1].Value.Trim();
-            UTF8Encoding encoding = new UTF8Encoding(false);
             DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(Config));
-            Config config = (Config)ser.ReadObject(new MemoryStream(encoding.GetBytes(value)));
+            Config config = (Config)ser.ReadObject(new MemoryStream(Encoding.UTF8.GetBytes(value)));
             return config;
         }
 
@@ -82,8 +79,7 @@ namespace Bdeploy.Installer.Models {
         /// Serializes the configururation to the given file. 
         /// </summary>
         public static void WriteConfiguration(string file, Config config) {
-            var encoding = new UTF8Encoding(false);
-            using (StreamWriter writer = new StreamWriter(new FileStream(file, FileMode.Create), encoding)) {
+            using (StreamWriter writer = new StreamWriter(new FileStream(file, FileMode.Create), Encoding.UTF8)) {
                 // Write header of file
                 writer.Write(START_MARKER);
 
@@ -114,7 +110,7 @@ namespace Bdeploy.Installer.Models {
 
             string config = "";
             bool markerDetected = false;
-            foreach (string line in File.ReadLines(fileName)) {
+            foreach (string line in File.ReadLines(fileName, Encoding.UTF8)) {
                 if (line.Contains(START_MARKER)) {
                     markerDetected = true;
                 }
