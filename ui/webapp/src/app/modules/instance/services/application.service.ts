@@ -153,14 +153,16 @@ export class ApplicationService {
 
       // Update stop command. Update all values not only global ones
       // Stop command is not yet configurable
-      for (const param of app.stop.parameters) {
-        const paraDef = paraDescMap.get(param.uid);
-        const globalValue = paraValues.get(param.uid);
-        if (!globalValue) {
-          continue;
+      if (app.stop) {
+        for (const param of app.stop.parameters) {
+          const paraDef = paraDescMap.get(param.uid);
+          const globalValue = paraValues.get(param.uid);
+          if (!globalValue) {
+            continue;
+          }
+          param.value = globalValue;
+          param.preRendered = this.preRenderParameter(paraDef, param.value);
         }
-        param.value = globalValue;
-        param.preRendered = this.preRenderParameter(paraDef, param.value);
       }
     }
   }
