@@ -6,6 +6,7 @@ import { CoreModule } from '../core/core.module';
 import { CustomAttributeEditComponent } from './components/custom-attribute-edit/custom-attribute-edit.component';
 import { CustomAttributeGroupingSelectorComponent } from './components/custom-attribute-grouping-selector/custom-attribute-grouping-selector.component';
 import { CustomAttributeValueComponent } from './components/custom-attribute-value/custom-attribute-value.component';
+import { DiffEditorComponent } from './components/diff-editor/diff-editor.component';
 import { FileEditorComponent } from './components/file-editor/file-editor.component';
 import { FileUploadComponent } from './components/file-upload/file-upload.component';
 import { FileViewerComponent } from './components/file-viewer/file-viewer.component';
@@ -30,6 +31,7 @@ import { PortValidatorDirective } from './validators/port.validator';
     ProductCardComponent,
     ProductListComponent,
     FileEditorComponent,
+    DiffEditorComponent,
   ],
   entryComponents: [
     MessageboxComponent,
@@ -50,6 +52,7 @@ import { PortValidatorDirective } from './validators/port.validator';
     ProductCardComponent,
     ProductListComponent,
     FileEditorComponent,
+    DiffEditorComponent,
   ],
 })
 export class SharedModule {}

@@ -6,6 +6,8 @@
 @import 'app-ngx-charts-dark.scss';
 @import 'app-scrollbars.scss';
 
+@import 'app/modules/config-files/components/config-files-browser/config-files-browser-theme.scss';
+
 @import 'app/modules/core/components/main-nav/main-nav-theme.scss';
 @import 'app/modules/core/components/logo/logo-theme.scss';
 @import 'app/modules/core/components/managed-server-update/managed-server-update-theme.scss';
@@ -92,6 +94,7 @@
   @include instance-history-timeline-theme($theme);
   @include instance-history-theme($theme);
   @include software-repo-file-upload-theme($theme);
+  @include config-files-browser-theme($theme);
 
   .mat-badge-content {
     background-color: rgb(194, 194, 194);

@@ -254,6 +254,9 @@ describe('Central/Managed Basic Test', function () {
     cy.contains('app-product-tag-card', '2.0.0').should('exist').contains('button', 'arrow_upward').click();
     cy.waitUntilContentLoaded();
 
+    cy.get('app-messagebox').contains('Product Upgrade').should('exist');
+    cy.contains('button', 'OK').click();
+
     cy.getApplicationConfigCard('master', 'Server Application').clickContextMenuAction('Configure');
 
     // set sleep parameter

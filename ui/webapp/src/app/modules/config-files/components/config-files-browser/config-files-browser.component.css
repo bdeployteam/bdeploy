@@ -167,3 +167,32 @@
 .mat-dialog-actions {
   justify-content: flex-end;
 }
+
+.sync-card {
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.sync-message {
+  line-height: 36px;
+  margin-left: -24px;
+  font-weight: 500;
+}
+
+.diff-header-container {
+  display: flex;
+  flex-direction: row;
+  margin-top: 16px !important;
+  border-top: 1px solid;
+  border-bottom: 1px solid;
+  padding: 8px;
+}
+
+.diff-header {
+  flex: 1 1 auto;
+  text-align: center;
+}
+
+.diff-button {
+  margin-left: 8px;
+}

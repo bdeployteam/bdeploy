@@ -73,6 +73,8 @@ The *Configuration Files* of all *Processes* of an *Instance* are maintained tog
 
 image::images/BDeploy_CfgFiles_Browser.png[Configuration File Browser,align=center,width=480,link="images/BDeploy_CfgFiles_Browser.png"]
 
+The *Configuration Files* of an *Instance* can be compared with the original *Configuration Files* of the *Product* at any time. The btn:[Synchronize with Product] button starts the comparison, whereupon the files in the table are marked as new, original, changed or unknown. Changed files have to be synchronized via the edit dialog. There the original product file or the changed file can be adopted. After all changed files are processed, the btn:[Finish Synchronization] button finishes the synchronization.
+
 New configuration files can be be created using the btn:[+] button. This will open the integrated editor. 
 Additionally to that existing files can be uploaded using the provided btn:[Upload] button.
 
@@ -138,6 +140,9 @@ All *Applications* are marked as modified as they are now based on a different *
 Changing the *Product Version* can result in validation issues and automated adjustment of parameters. *Product Versions* can contain different *Applications*, so that with the change of the *Product Version* e.g. a previously configured *Application* must be deleted because it has been removed from the product. If parameters definitions are changed, validation errors may occur which must be corrected before saving (e.g. new mandatory parameters, parameters no longer supported, etc.). These errors will cause a visual indicator on affected applications, as well as a textual description of the problem in the notifications area.
 
 image::images/BDeploy_Product_Downgrade_Validation.png[Validation Issues After Product Version Change,align=center,width=480,link="images/BDeploy_Product_Downgrade_Validation.png"]
+
+[NOTE]
+Changing the *Product Version* will never change the *Configuration Files* of the *Instance*. It just opens a popup dialog to tell the user if there are changes between the source and target product version configuration files. In order to align the *Instance* configuration with the shipped *Product* configuration files, the configuration files dialog can assist, see chapter <<Configuration Files>>
 
 ==== Banner Message
 

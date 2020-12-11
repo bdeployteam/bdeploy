@@ -156,6 +156,25 @@ export class InstanceService {
     return this.http.get<ConfigFileDto[]>(url);
   }
 
+  public syncConfigurationFiles(
+    instanceGroupName: string,
+    instanceName: string,
+    tag: string,
+    pKey: ManifestKey
+  ): Observable<ConfigFileDto[]> {
+    const url: string =
+      this.buildInstanceUrl(instanceGroupName, instanceName) +
+      '/cfgFiles/' +
+      tag +
+      '/' +
+      pKey.name +
+      '/' +
+      pKey.tag +
+      '/syncConfig';
+    this.log.debug('syncConfigurationFiles: ' + url);
+    return this.http.get<ConfigFileDto[]>(url);
+  }
+
   public getConfigurationFile(
     instanceGroupName: string,
     instanceName: string,

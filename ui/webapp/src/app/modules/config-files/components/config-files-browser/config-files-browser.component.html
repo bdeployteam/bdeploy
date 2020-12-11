@@ -13,14 +13,42 @@
     >
     <span class="fill-space"></span>
     <app-remote-progress [scope]="[groupParam]"></app-remote-progress>
-    <button mat-button (click)="onDiscardChanges()" [disabled]="!isDirty() || editMode">DISCARD</button>
-    <button mat-raised-button color="primary" type="submit" [disabled]="!isDirty() || editMode" (click)="onSave()">
+    <button mat-button (click)="location.back()" [disabled]="!isDirty() || editMode">DISCARD</button>
+    <button
+      mat-raised-button
+      color="primary"
+      type="submit"
+      [disabled]="!isDirty() || editMode || syncMode"
+      (click)="onSave()"
+    >
       SAVE
     </button>
   </mat-toolbar>
 
   <!-- file listing -->
   <mat-card *ngIf="!editMode" class="config-card">
+    <mat-card-header *ngIf="!syncMode">
+      <span class="fill-space"></span>
+      <span>
+        <div [matTooltip]="isDirty() ? 'Disabled because of unsaved modifications' : ''">
+          <button mat-button [disabled]="isDirty()" type="button" (click)="onSynchronize()">
+            <mat-icon>sync_alt</mat-icon> Synchronize with Product
+          </button>
+        </div>
+      </span>
+    </mat-card-header>
+    <mat-card-header *ngIf="syncMode" class="sync-card">
+      <span *ngIf="hasConflicts()" class="sync-message">Please solve all conflicts!</span>
+      <span class="fill-space"></span>
+      <span>
+        <div *ngIf="syncMode" [matTooltip]="hasConflicts() ? 'Disabled till all conflicts are solved' : ''">
+          <button mat-button [disabled]="hasConflicts()" type="button" (click)="onFinishSynchronization()">
+            <mat-icon>sync_alt</mat-icon> Finish Synchronization
+          </button>
+        </div>
+      </span>
+    </mat-card-header>
+
     <mat-card-content class="config-card-content">
       <table mat-table class="filelist-table" [dataSource]="listConfigFiles()" #filetable>
         <caption style="display: none;">
@@ -56,7 +84,7 @@
               >
 
               <mat-icon class="icon-stack-overlay" *ngIf="isNew(path)" svgIcon="plus"></mat-icon>
-              <mat-icon class="icon-stack-overlay" *ngIf="isModified(path)" svgIcon="star">subject</mat-icon>
+              <mat-icon class="icon-stack-overlay" *ngIf="isModified(path)" svgIcon="star"></mat-icon>
             </div>
           </td>
         </ng-container>
@@ -68,12 +96,20 @@
           </td>
         </ng-container>
 
+        <ng-container matColumnDef="sync">
+          <th scope="col" mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let path">
+            <mat-icon matTooltip="{{ getSyncTooltip(path) }}">{{ getSyncIcon(path) }}</mat-icon>
+          </td>
+        </ng-container>
+
         <ng-container matColumnDef="delete">
           <th scope="col" mat-header-cell *matHeaderCellDef>Del.</th>
           <td mat-cell *matCellDef="let path" class="icon-column">
             <button
               mat-icon-button
               *ngIf="!isDeleted(path)"
+              [disabled]="isDeleteButtonDisabled(path)"
               (click)="deleteFile(path); filetable.renderRows()"
               matTooltip="Delete File"
             >
@@ -81,6 +117,7 @@
             </button>
             <button
               mat-icon-button
+              [disabled]="isDeleteButtonDisabled(path)"
               *ngIf="isDeleted(path)"
               (click)="restoreFile(path); filetable.renderRows()"
               matTooltip="Restore File"
@@ -109,6 +146,7 @@
           <td mat-cell *matCellDef="let path" class="icon-column">
             <button
               mat-icon-button
+              [disabled]="isEditButtonDisabled(path)"
               *ngIf="!isDeleted(path)"
               (click)="editFile(path, false); filetable.renderRows()"
               matTooltip="Edit File"
@@ -124,38 +162,77 @@
     </mat-card-content>
   </mat-card>
 
-  <!-- file editor -->
+  <!-- file/diff editor -->
   <mat-card *ngIf="editMode" class="config-card">
     <form #configForm="ngForm" (ngSubmit)="onApplyChanges()" class="config-card-form">
       <mat-card-header>
         <div mat-card-avatar><mat-icon class="config-title-icon">subject</mat-icon></div>
         <mat-card-title class="edit-card-title">{{ editKey ? editKey : 'New File' }}</mat-card-title>
         <span class="fill-space"></span>
-        <span>
-          <button mat-button type="button" (click)="onCancelChanges()">CANCEL</button>
-          <button
-            mat-raised-button
-            color="primary"
-            type="submit"
-            [disabled]="!isEditorDirty() || !configForm.valid || isNameDuplicateError()"
-          >
-            APPLY
-          </button>
-        </span>
+        <button mat-button type="button" (click)="onCancelChanges()">CANCEL</button>
+        <button
+          *ngIf="!hasConflict(editorPath)"
+          mat-raised-button
+          color="primary"
+          type="submit"
+          [disabled]="!isEditorDirty() || !configForm.valid || isNameDuplicateError()"
+        >
+          APPLY
+        </button>
+        <button
+          *ngIf="hasConflict(editorPath)"
+          mat-raised-button
+          type="button"
+          color="primary"
+          class="diff-button"
+          (click)="acceptProductFile(editorPath)"
+        >
+          ACCEPT PRODUCT FILE
+        </button>
+        <button
+          *ngIf="hasConflict(editorPath)"
+          mat-raised-button
+          type="button"
+          color="primary"
+          class="diff-button"
+          (click)="acceptInstanceFile(editorPath)"
+        >
+          ACCEPT INSTANCE FILE
+        </button>
       </mat-card-header>
       <mat-card-content class="config-card-content">
-        <mat-form-field class="path-field">
-          <input
-            class="input-field"
-            matInput
-            #pathControl
-            name="pathControl"
-            [(ngModel)]="editorPath"
-            placeholder="Enter path for file"
-          />
-        </mat-form-field>
-        <mat-error *ngIf="isNameDuplicateError()">Filename already used by another configuration file.</mat-error>
-        <app-file-editor class="text-editor" [(content)]="editorContent" [path]="editorPath"></app-file-editor>
+        <ng-container *ngIf="!hasConflict(editorPath)">
+          <mat-form-field class="path-field">
+            <input
+              class="input-field"
+              matInput
+              #pathControl
+              name="pathControl"
+              [(ngModel)]="editorPath"
+              placeholder="Enter path for file"
+            />
+          </mat-form-field>
+          <mat-error *ngIf="isNameDuplicateError()">Filename already used by another configuration file.</mat-error>
+          <app-file-editor
+            *ngIf="editText"
+            class="text-editor"
+            [(content)]="editorContent"
+            [path]="editorPath"
+          ></app-file-editor>
+        </ng-container>
+        <ng-container *ngIf="hasConflict(editorPath)">
+          <div class="diff-header-container">
+            <div class="diff-header">Product File</div>
+            <div class="diff-header">Instance File (editable)</div>
+          </div>
+          <app-diff-editor
+            *ngIf="editText"
+            class="text-editor"
+            [originalContent]="conflictStatusCache.get(editorPath)"
+            [(modifiedContent)]="editorContent"
+            [path]="editorPath"
+          ></app-diff-editor>
+        </ng-container>
         <div *ngIf="!editText">Binary (or newly uploaded) files cannot be edited online.</div>
       </mat-card-content>
     </form>
@@ -163,6 +240,7 @@
 
   <button
     mat-fab
+    [disabled]="syncMode"
     class="add-button"
     matTooltip="Create a config file"
     matTooltipShowDelay="1000"
@@ -173,6 +251,7 @@
   </button>
   <button
     mat-fab
+    [disabled]="syncMode"
     class="upload-button"
     matTooltip="Upload a config file"
     matTooltipShowDelay="1000"

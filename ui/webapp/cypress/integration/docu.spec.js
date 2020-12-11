@@ -261,6 +261,10 @@ describe('Creates screenshots for the user documentation', () => {
     cy.get('[data-cy=instance-options]').clickContextMenuAction('Change Product Version');
     cy.contains('mat-slide-toggle', 'Show all').click();
     cy.contains('app-product-tag-card', '1.0.0').contains('button', 'arrow_downward').click();
+
+    cy.get('app-messagebox').contains('Product Downgrade').should('exist');
+    cy.contains('button', 'OK').click();
+
     cy.contains('button', 'SAVE').should('be.enabled').click();
     cy.waitUntilContentLoaded();
 
@@ -274,6 +278,9 @@ describe('Creates screenshots for the user documentation', () => {
     cy.screenshot('BDeploy_Product_Change');
     cy.contains('app-product-tag-card', '2.0.0').contains('button', 'arrow_upward').click();
     cy.screenshot('BDeploy_Product_Upgrade_Local_Changes');
+
+    cy.get('app-messagebox').contains('Product Upgrade').should('exist');
+    cy.contains('button', 'OK').click();
 
     // Instance version menu
     cy.get('button').contains('SAVE').click();
@@ -373,6 +380,10 @@ describe('Creates screenshots for the user documentation', () => {
     cy.get('[data-cy=instance-options]').clickContextMenuAction('Change Product Version');
     cy.contains('mat-slide-toggle', 'Show all').click();
     cy.contains('app-product-tag-card', '1.0.0').contains('button', 'arrow_downward').click();
+
+    cy.get('app-messagebox').contains('Product Downgrade').should('exist');
+    cy.contains('button', 'OK').click();
+
     cy.contains('app-instance-notifications', 'error').click();
     cy.screenshot('BDeploy_Product_Downgrade_Validation');
     cy.get('.cdk-overlay-backdrop').click('top', { force: true, multiple: true });

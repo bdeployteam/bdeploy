@@ -36,4 +36,9 @@ public interface ConfigFileResource {
     @RequiredPermission(permission = Permission.WRITE)
     public void updateConfigFiles(List<FileStatusDto> updates, @QueryParam("expect") String expectedTag);
 
+    @GET
+    @Path("/{iTag}/{pName : .+}/{pTag}/syncConfig")
+    public List<ConfigFileDto> syncConfigFiles(@PathParam("iTag") String iTag, @PathParam("pName") String pName,
+            @PathParam("pTag") String pTag);
+
 }

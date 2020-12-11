@@ -1061,15 +1061,15 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     );
     if (oldIdx >= 0 && product.configTree?.id !== this.productTags[oldIdx].configTree?.id) {
       const idx: number = this.productTags.findIndex(
-        (p) => p.key.name === product.name && p.key.tag === product.key.tag
+        (p) => p.key.name === product.key.name && p.key.tag === product.key.tag
       );
       this.messageBoxService.open({
-        title: 'Product ' + (oldIdx < idx ? 'Upgrade' : 'Downgrade'),
+        title: 'Product ' + (idx < oldIdx ? 'Upgrade' : 'Downgrade'),
         message:
           "The product's configuration files changed between versions " +
-          (oldIdx < idx ? this.productTags[oldIdx].key.tag : product.key.tag) +
+          (oldIdx > idx ? this.productTags[oldIdx].key.tag : product.key.tag) +
           ' and ' +
-          (oldIdx < idx ? product.key.tag : this.productTags[oldIdx].key.tag) +
+          (oldIdx > idx ? product.key.tag : this.productTags[oldIdx].key.tag) +
           ', please check your configuration files!',
         mode: MessageBoxMode.WARNING,
       });
