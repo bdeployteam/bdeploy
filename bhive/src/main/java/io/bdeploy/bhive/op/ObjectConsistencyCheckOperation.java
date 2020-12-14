@@ -35,7 +35,7 @@ public class ObjectConsistencyCheckOperation extends BHive.Operation<Set<Element
     @Override
     public Set<ElementView> call() throws Exception {
         if (roots.isEmpty()) {
-            SortedSet<Manifest.Key> localManifests = execute(new ManifestListOperation());
+            Set<Manifest.Key> localManifests = execute(new ManifestListOperation());
             roots.addAll(localManifests);
         }
 

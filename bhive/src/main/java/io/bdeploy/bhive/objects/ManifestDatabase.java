@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
@@ -113,13 +114,13 @@ public class ManifestDatabase extends LockableDatabase {
     /**
      * @return all {@link Key}s found in the database's filesystem.
      */
-    public SortedSet<Manifest.Key> getAllManifests() {
+    public Set<Manifest.Key> getAllManifests() {
         // structure is dir:root/dir:name/dir:name/file:tag
         return collectManifests(root);
     }
 
-    private SortedSet<Manifest.Key> collectManifests(Path scanRoot) {
-        SortedSet<Manifest.Key> result = new TreeSet<>();
+    private Set<Manifest.Key> collectManifests(Path scanRoot) {
+        Set<Manifest.Key> result = new TreeSet<>();
         try {
             if (!Files.isDirectory(scanRoot)) {
                 // none exist in the given namespace.
@@ -158,7 +159,7 @@ public class ManifestDatabase extends LockableDatabase {
      *            If the name includes a ':', it is treated as a fully qualified manifest key.
      * @return the list of manifests which matched the name.
      */
-    public SortedSet<Manifest.Key> getAllForName(String name) {
+    public Set<Manifest.Key> getAllForName(String name) {
         if (name.contains(":")) {
             // if the name is fully qualified, it is either there or not.
             SortedSet<Manifest.Key> result = new TreeSet<>();

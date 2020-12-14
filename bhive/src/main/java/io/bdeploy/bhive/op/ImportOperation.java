@@ -4,7 +4,7 @@ import static io.bdeploy.common.util.RuntimeAssert.assertNotNull;
 
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.SortedSet;
+import java.util.Set;
 import java.util.TreeMap;
 
 import io.bdeploy.bhive.BHive;
@@ -31,7 +31,7 @@ public class ImportOperation extends BHive.Operation<Manifest.Key> {
         assertNotNull(manifest, "Manifest not set");
 
         try (Activity activity = getActivityReporter().start("Importing manifest...", -1)) {
-            SortedSet<Manifest.Key> existing = execute(new ManifestListOperation());
+            Set<Manifest.Key> existing = execute(new ManifestListOperation());
             if (existing.contains(manifest)) {
                 throw new IllegalArgumentException("Manifest " + manifest + " already present");
             }

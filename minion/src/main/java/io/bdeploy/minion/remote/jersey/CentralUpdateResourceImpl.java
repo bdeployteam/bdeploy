@@ -1,6 +1,6 @@
 package io.bdeploy.minion.remote.jersey;
 
-import java.util.SortedSet;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
@@ -42,7 +42,7 @@ public class CentralUpdateResourceImpl implements CommonUpdateResource {
     public void updateV1(Key version, boolean clean) {
         BHive bhive = registry.get(JerseyRemoteBHive.DEFAULT_NAME);
 
-        SortedSet<Key> keys = bhive.execute(new ManifestListOperation().setManifestName(version.toString()));
+        Set<Key> keys = bhive.execute(new ManifestListOperation().setManifestName(version.toString()));
         if (!keys.contains(version)) {
             throw new WebApplicationException("Key not found: + " + version, Status.NOT_FOUND);
         }

@@ -122,7 +122,7 @@ public class SnapshotAndDiffTest {
             @Override
             public Void call() throws Exception {
                 DbCallable<Void> db = x -> {
-                    Path tf = x.getObjectFile(ObjectId.parse(ContentHelper.SUB_TREE_OID));
+                    Path tf = x.getObjectFile(ObjectId.parse(ContentHelper.DIR_TREE_OID));
                     Files.write(tf, Arrays.asList("Bullshit"));
                     return null;
                 };

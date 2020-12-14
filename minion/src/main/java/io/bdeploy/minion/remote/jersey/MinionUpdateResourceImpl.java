@@ -6,6 +6,7 @@ import java.nio.file.FileStore;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -63,7 +64,7 @@ public class MinionUpdateResourceImpl implements MinionUpdateResource {
 
         BHive h = root.getHive();
 
-        SortedSet<Key> mfs = h.execute(new ManifestListOperation().setManifestName(key.toString()));
+        Set<Key> mfs = h.execute(new ManifestListOperation().setManifestName(key.toString()));
         if (!mfs.contains(key)) {
             throw new WebApplicationException("Cannot find version to update to: " + key, Status.NOT_FOUND);
         }
@@ -98,7 +99,7 @@ public class MinionUpdateResourceImpl implements MinionUpdateResource {
                 toList = smk.getName();
             }
 
-            SortedSet<Key> allVersions = h.execute(new ManifestListOperation().setManifestName(toList));
+            Set<Key> allVersions = h.execute(new ManifestListOperation().setManifestName(toList));
             allVersions.stream().filter(k -> !tagsToKeep.contains(k.getTag()))
                     .forEach(k -> h.execute(new ManifestDeleteOperation().setToDelete(k)));
         }
@@ -111,7 +112,7 @@ public class MinionUpdateResourceImpl implements MinionUpdateResource {
             FileStore store = Files.getFileStore(root.getUpdateDir());
             long space = store.getUsableSpace();
 
-            SortedSet<ObjectId> objects = h.execute(new ObjectListOperation().addManifest(key));
+            Set<ObjectId> objects = h.execute(new ObjectListOperation().addManifest(key));
             ObjectSizeOperation sop = new ObjectSizeOperation();
             objects.forEach(sop::addObject);
             long required = h.execute(sop);

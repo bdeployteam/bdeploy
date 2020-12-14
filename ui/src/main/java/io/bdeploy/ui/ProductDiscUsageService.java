@@ -1,7 +1,7 @@
 package io.bdeploy.ui;
 
 import java.util.Map;
-import java.util.SortedSet;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.TimeUnit;
@@ -72,15 +72,9 @@ public class ProductDiscUsageService {
 
     private Long doCalculateUsage(String group, String name) {
         BHive hive = registry.get(group);
-        SortedSet<Key> mfs = hive.execute(new ManifestListOperation().setManifestName(name));
-
-        ObjectListOperation olo = new ObjectListOperation();
-        mfs.forEach(olo::addManifest);
-        SortedSet<ObjectId> objs = hive.execute(olo);
-
-        ObjectSizeOperation oso = new ObjectSizeOperation();
-        objs.forEach(oso::addObject);
-        return hive.execute(oso);
+        Set<Key> mfs = hive.execute(new ManifestListOperation().setManifestName(name));
+        Set<ObjectId> objs = hive.execute(new ObjectListOperation().addManifest(mfs));
+        return hive.execute(new ObjectSizeOperation().addObject(objs));
     }
 
 }

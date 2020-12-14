@@ -1,5 +1,6 @@
 package io.bdeploy.bhive.op;
 
+import java.util.Collection;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -26,6 +27,14 @@ public class ObjectSizeOperation extends BHive.Operation<Long> {
         try (Activity activity = getActivityReporter().start("Listing object sizes...", -1)) {
             return objects.stream().mapToLong(id -> getObjectManager().db(x -> x.getObjectSize(id))).sum();
         }
+    }
+
+    /**
+     * Add an object to measure
+     */
+    public ObjectSizeOperation addObject(Collection<ObjectId> object) {
+        this.objects.addAll(object);
+        return this;
     }
 
     /**

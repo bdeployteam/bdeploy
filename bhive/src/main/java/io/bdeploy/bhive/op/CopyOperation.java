@@ -51,7 +51,7 @@ public class CopyOperation extends BHive.Operation<TransferStatistics> {
                 // copy all from the local hive; don't check which are reachable from manifests,
                 // as manifest may not be consistent in the source hive (delta transfer).
                 execute(new ManifestListOperation()).forEach(manifests::add);
-                execute(new ObjectListOperation()).forEach(objects::add);
+                execute(new ObjectListOperation().addManifest(manifests)).forEach(objects::add);
             }
 
             result.sumManifests = manifests.size();

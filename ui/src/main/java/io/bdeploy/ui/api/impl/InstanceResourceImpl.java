@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 
@@ -125,8 +126,8 @@ import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
 import io.bdeploy.ui.dto.InstanceVersionDto;
 import io.bdeploy.ui.dto.ProductDto;
 import io.bdeploy.ui.dto.StringEntryChunkDto;
-import io.bdeploy.ui.utils.WindowsInstallerConfig;
 import io.bdeploy.ui.utils.WindowsInstaller;
+import io.bdeploy.ui.utils.WindowsInstallerConfig;
 
 public class InstanceResourceImpl implements InstanceResource {
 
@@ -239,7 +240,7 @@ public class InstanceResourceImpl implements InstanceResource {
     @Override
     public List<InstanceVersionDto> listVersions(String instanceId) {
         String rootName = InstanceManifest.getRootName(instanceId);
-        SortedSet<Manifest.Key> all = hive.execute(new ManifestListOperation().setManifestName(rootName));
+        Set<Manifest.Key> all = hive.execute(new ManifestListOperation().setManifestName(rootName));
         if (all.isEmpty()) {
             return Collections.emptyList();
         }

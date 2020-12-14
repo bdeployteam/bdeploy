@@ -29,7 +29,7 @@ public class FsckOperation extends BHive.Operation<Set<ElementView>> {
 
         try (Activity activity = getActivityReporter().start("Checking manifests...", -1)) {
             if (manifests.isEmpty()) {
-                SortedSet<Manifest.Key> localManifests = execute(new ManifestListOperation());
+                Set<Manifest.Key> localManifests = execute(new ManifestListOperation());
                 manifests.addAll(localManifests);
             }
 

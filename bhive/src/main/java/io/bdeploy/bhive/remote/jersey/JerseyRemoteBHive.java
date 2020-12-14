@@ -2,8 +2,8 @@ package io.bdeploy.bhive.remote.jersey;
 
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
 
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.client.ResponseProcessingException;
@@ -38,7 +38,7 @@ public class JerseyRemoteBHive implements RemoteBHive {
     }
 
     @Override
-    public SortedSet<ObjectId> getMissingObjects(SortedSet<ObjectId> all) {
+    public Set<ObjectId> getMissingObjects(Set<ObjectId> all) {
         return client.getMissingObjects(all);
     }
 
@@ -58,7 +58,7 @@ public class JerseyRemoteBHive implements RemoteBHive {
     }
 
     @Override
-    public SortedSet<ObjectId> getRequiredObjects(SortedSet<ObjectId> trees, SortedSet<ObjectId> excludeTrees) {
+    public Set<ObjectId> getRequiredObjects(Set<ObjectId> trees, Set<ObjectId> excludeTrees) {
         ObjectListSpec spec = new ObjectListSpec();
         spec.trees = trees;
         spec.excludeTrees = excludeTrees;
@@ -66,7 +66,7 @@ public class JerseyRemoteBHive implements RemoteBHive {
     }
 
     @Override
-    public SortedSet<ObjectId> getRequiredTrees(ObjectId tree) {
+    public Set<ObjectId> getRequiredTrees(ObjectId tree) {
         return client.getRequiredTrees(tree);
     }
 
@@ -85,7 +85,7 @@ public class JerseyRemoteBHive implements RemoteBHive {
     }
 
     @Override
-    public Path fetch(SortedSet<ObjectId> objects, SortedSet<Key> manifests) {
+    public Path fetch(Set<ObjectId> objects, Set<Key> manifests) {
         FetchSpec spec = new FetchSpec();
         spec.requiredObjects = objects;
         spec.manifestsToFetch = manifests;
@@ -93,7 +93,7 @@ public class JerseyRemoteBHive implements RemoteBHive {
     }
 
     @Override
-    public InputStream fetchAsStream(SortedSet<ObjectId> objects, SortedSet<Key> manifests) {
+    public InputStream fetchAsStream(Set<ObjectId> objects, Set<Key> manifests) {
         try {
             FetchSpec spec = new FetchSpec();
             spec.requiredObjects = objects;

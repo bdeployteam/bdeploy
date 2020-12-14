@@ -6,6 +6,8 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -57,31 +59,23 @@ public class LocalBHiveAdapter implements RemoteBHive {
     }
 
     @Override
-    public SortedSet<ObjectId> getMissingObjects(SortedSet<ObjectId> all) {
+    public Set<ObjectId> getMissingObjects(Set<ObjectId> all) {
         try (Activity activity = reporter.start("Scanning for missing objects...")) {
-            ObjectExistsOperation findExisting = new ObjectExistsOperation();
-            all.forEach(findExisting::addObject);
-            SortedSet<ObjectId> known = hive.execute(findExisting);
-            SortedSet<ObjectId> result = new TreeSet<>(all);
-            result.removeAll(known);
-            return result;
+            return hive.execute(new ObjectExistsOperation().addAll(all)).missing;
         }
     }
 
     @Override
-    public SortedSet<ObjectId> getRequiredObjects(SortedSet<ObjectId> trees, SortedSet<ObjectId> excludeTrees) {
-        ObjectListOperation objectListOperation = new ObjectListOperation();
-        trees.forEach(objectListOperation::addTree);
-        excludeTrees.forEach(objectListOperation::excludeTree);
-        return hive.execute(objectListOperation);
+    public Set<ObjectId> getRequiredObjects(Set<ObjectId> trees, Set<ObjectId> excludeTrees) {
+        return hive.execute(new ObjectListOperation().addTree(trees).excludeTree(excludeTrees));
     }
 
     @Override
-    public SortedSet<ObjectId> getRequiredTrees(ObjectId tree) {
+    public Set<ObjectId> getRequiredTrees(ObjectId tree) {
         TreeView snapshot = hive.execute(new ScanOperation().setTree(tree));
-        SortedSet<ObjectId> treeIds = new TreeSet<>();
+        Set<ObjectId> treeIds = new LinkedHashSet<>();
 
-        snapshot.visit(new TreeVisitor.Builder().onTree(x -> treeIds.add(x.getElementId())).build());
+        snapshot.visitDfs(new TreeVisitor.Builder().onTree(x -> treeIds.add(x.getElementId())).build());
 
         return treeIds;
     }
@@ -134,7 +128,7 @@ public class LocalBHiveAdapter implements RemoteBHive {
     }
 
     @Override
-    public Path fetch(SortedSet<ObjectId> requiredObjects, SortedSet<Manifest.Key> manifestsToFetch) {
+    public Path fetch(Set<ObjectId> requiredObjects, Set<Manifest.Key> manifestsToFetch) {
         try {
             // assume no manifests are present in the target. filtering must happen before
             // calling fetch.
@@ -156,7 +150,7 @@ public class LocalBHiveAdapter implements RemoteBHive {
     }
 
     @Override
-    public InputStream fetchAsStream(SortedSet<ObjectId> objects, SortedSet<Manifest.Key> manifests) {
+    public InputStream fetchAsStream(Set<ObjectId> objects, Set<Manifest.Key> manifests) {
         PipedInputStream input = new PipedInputStream();
         CompletableFuture<Void> barrier = new CompletableFuture<>();
 

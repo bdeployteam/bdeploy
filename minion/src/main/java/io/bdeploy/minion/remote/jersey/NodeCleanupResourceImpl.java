@@ -54,7 +54,7 @@ public class NodeCleanupResourceImpl implements NodeCleanupResource {
                 .collect(Collectors.toCollection(() -> new TreeSet<>((a, b) -> VersionHelper.compare(b, a)))) // reverse order
                 .stream().limit(2).collect(Collectors.toSet());
 
-        SortedSet<Key> allMfs = hive.execute(new ManifestListOperation()); // list ALL
+        Set<Key> allMfs = hive.execute(new ManifestListOperation()); // list ALL
 
         // filter some well-known things.
         SortedSet<Key> toClean = allMfs.stream() //

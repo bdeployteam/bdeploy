@@ -58,4 +58,21 @@ public class TreeView extends ElementView {
         }
     }
 
+    /**
+     * Visit all children of this tree recursively in a DFS manner.
+     *
+     * @param scanner the scanner to call for each element.
+     */
+    public void visitDfs(TreeVisitor scanner) {
+        for (Entry<String, ElementView> entry : children.entrySet()) {
+            ElementView element = entry.getValue();
+            if (element instanceof TreeView) {
+                ((TreeView) element).visitDfs(scanner);
+            } else {
+                scanner.accept(element);
+            }
+        }
+        scanner.accept(this);
+    }
+
 }

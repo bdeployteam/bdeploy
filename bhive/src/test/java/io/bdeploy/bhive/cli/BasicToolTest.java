@@ -11,7 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.SortedSet;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,7 +59,7 @@ public class BasicToolTest {
 
         // check programmatically whether this looks ok.
         try (BHive h = new BHive(hiveDir.toUri(), reporter)) {
-            SortedSet<Manifest.Key> manifests = h.execute(new ManifestListOperation());
+            Set<Manifest.Key> manifests = h.execute(new ManifestListOperation());
             assertThat(manifests.size(), is(1));
             assertTrue(manifests.contains(Manifest.Key.parse("test:v1")));
 
@@ -91,11 +91,10 @@ public class BasicToolTest {
         tools.execute(ImportTool.class, hiveArg, "--source=" + smallSrc2Dir, "--manifest=" + anotherKey2);
 
         output = tools.execute(TreeTool.class, hiveArg, "--list=" + anotherKey);
-        assertEquals(7, output.length);
+        assertEquals(9, output.length);
 
         output = tools.execute(TreeTool.class, hiveArg, "--diff=" + anotherKey, "--diff=" + anotherKey2);
-        // one content diff (root), one only left (test.txt), one only right
-        // (another.txt).
+        // one content diff (root), one only left (test.txt), one only right (another.txt).
         assertEquals(7, output.length);
 
         tools.execute(ManifestTool.class, hiveArg, "--delete", "--manifest=test:v1");
@@ -103,7 +102,7 @@ public class BasicToolTest {
 
         // check programmatically whether this looks ok.
         try (BHive h = new BHive(hiveDir.toUri(), reporter)) {
-            SortedSet<Manifest.Key> manifests = h.execute(new ManifestListOperation());
+            Set<Manifest.Key> manifests = h.execute(new ManifestListOperation());
             assertThat(manifests.size(), is(1));
             assertTrue(manifests.contains(Manifest.Key.parse("another:v1")));
 
@@ -114,11 +113,11 @@ public class BasicToolTest {
 
         tools.execute(PruneTool.class, hiveArg);
 
-        // remaining objects of the simple manifest. 2 files, 2 trees, 1 manifest
-        // plus remaining hive management objects. 1 .dblock, 1 manifest.db, audit.log
+        // remaining objects of the simple manifest. 3 files, 3 trees, 1 manifest
+        // plus remaining hive management objects: 1 database lock, 1 manifest lock
         SkipSubTreeVisitor visitor = new SkipSubTreeVisitor(hiveDir.resolve("logs"));
         Files.walkFileTree(hiveDir, visitor);
-        assertThat(visitor.getFileCount(), is(7L));
+        assertThat(visitor.getFileCount(), is(9L));
     }
 
     @Test

@@ -3,6 +3,7 @@ package io.bdeploy.bhive.meta;
 import java.io.InputStream;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.SortedSet;
 
 import org.slf4j.Logger;
@@ -78,7 +79,7 @@ public class MetaManifest<T> {
 
         if (meta.getName().endsWith(META_DEFTAG)) {
             // last segment of name is the deftag, strip and find newest of manifest.
-            SortedSet<Key> allKeys = hive.execute(new ManifestListOperation().setManifestName(mfName));
+            Set<Key> allKeys = hive.execute(new ManifestListOperation().setManifestName(mfName));
             return allKeys.stream().filter(x -> !ignore.contains(x)).count() > 0;
         } else {
             String tag = meta.getName().substring(meta.getName().lastIndexOf('/') + 1);

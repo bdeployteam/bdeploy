@@ -136,7 +136,7 @@ public class ProductResourceImpl implements ProductResource {
     @Override
     public void delete(String name, String tag) {
         Manifest.Key key = new Manifest.Key(name, tag);
-        SortedSet<Key> existing = hive.execute(new ManifestListOperation().setManifestName(key.toString()));
+        Set<Key> existing = hive.execute(new ManifestListOperation().setManifestName(key.toString()));
         if (existing.size() != 1) {
             log.warn("Cannot uniquely identify {} to delete", key);
             return;
@@ -230,9 +230,7 @@ public class ProductResourceImpl implements ProductResource {
         Manifest.Key key = new Manifest.Key(name, tag);
 
         // Determine required objects
-        ObjectListOperation scan = new ObjectListOperation();
-        scan.addManifest(key);
-        SortedSet<ObjectId> objectIds = hive.execute(scan);
+        Set<ObjectId> objectIds = hive.execute(new ObjectListOperation().addManifest(key));
 
         // Copy objects into the target hive
         DownloadServiceImpl ds = rc.initResource(new DownloadServiceImpl());
@@ -362,7 +360,7 @@ public class ProductResourceImpl implements ProductResource {
             }
 
             // Add all required artifacts
-            SortedSet<ObjectId> objectIds = zipHive.execute(scan);
+            Set<ObjectId> objectIds = zipHive.execute(scan);
             objectIds.forEach(copy::addObject);
 
             // Execute import only if we have something to do
@@ -381,7 +379,7 @@ public class ProductResourceImpl implements ProductResource {
         }
         Manifest.Key key = new Manifest.Key(productName, productTag);
 
-        SortedSet<ObjectId> objectIds = repoHive.execute(new ObjectListOperation().addManifest(key));
+        Set<ObjectId> objectIds = repoHive.execute(new ObjectListOperation().addManifest(key));
         CopyOperation copy = new CopyOperation().setDestinationHive(hive).addManifest(key);
         objectIds.forEach(copy::addObject);
         repoHive.execute(copy);

@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,8 +49,8 @@ public class FetchPushTest extends RemoteHiveTestBase {
             // STEP 1: push the manifest to the remote.
             TransferStatistics s = local.execute(new PushOperation().setRemote(svc).addManifest(key));
             assertEquals(1, s.sumManifests);
-            assertEquals(2, s.sumTrees);
-            assertEquals(2, s.sumMissingTrees);
+            assertEquals(3, s.sumTrees);
+            assertEquals(3, s.sumMissingTrees);
 
             // STEP 2: remove manifest remotely, but don't prune -> root tree still exists in the remote
             getRemote().removeManifest(key);
@@ -58,8 +58,9 @@ public class FetchPushTest extends RemoteHiveTestBase {
             // STEP 3: push once more.
             s = local.execute(new PushOperation().setRemote(svc).addManifest(key));
             assertEquals(1, s.sumManifests);
-            assertEquals(2, s.sumTrees);
+            assertEquals(3, s.sumTrees);
             assertEquals(0, s.sumMissingTrees);
+            assertEquals(0, s.sumMissingObjects);
 
             SortedMap<Key, ObjectId> remoteMfs = getRemote().getManifestInventory();
             assertEquals(1, remoteMfs.size());
@@ -81,17 +82,18 @@ public class FetchPushTest extends RemoteHiveTestBase {
             // STEP 2: fetch from remote to another hive
             TransferStatistics s = fetchHive.execute(new FetchOperation().setRemote(svc).addManifest(key));
             assertEquals(1, s.sumManifests);
-            assertEquals(2, s.sumTrees);
-            assertEquals(2, s.sumMissingTrees);
+            assertEquals(3, s.sumTrees);
+            assertEquals(3, s.sumMissingTrees);
 
             // STEP 3: fetch remote manifest again with existing root tree in local
             fetchHive.execute(new ManifestDeleteOperation().setToDelete(key));
             s = fetchHive.execute(new FetchOperation().setRemote(svc).addManifest(key));
             assertEquals(1, s.sumManifests);
-            assertEquals(2, s.sumTrees);
+            assertEquals(3, s.sumTrees);
             assertEquals(0, s.sumMissingTrees);
+            assertEquals(0, s.sumMissingObjects);
 
-            SortedSet<Key> localMfs = fetchHive.execute(new ManifestListOperation());
+            Set<Key> localMfs = fetchHive.execute(new ManifestListOperation());
             assertEquals(1, localMfs.size());
             assertEquals(key, localMfs.iterator().next());
         }
@@ -111,8 +113,8 @@ public class FetchPushTest extends RemoteHiveTestBase {
             // STEP 1: push the manifest to the remote.
             TransferStatistics s = local.execute(new PushOperation().setRemote(svc).addManifest(subKey));
             assertEquals(1, s.sumManifests);
-            assertEquals(1, s.sumTrees);
-            assertEquals(1, s.sumMissingTrees);
+            assertEquals(2, s.sumTrees);
+            assertEquals(2, s.sumMissingTrees);
 
             // STEP 2: remove manifest remotely, but don't prune -> root tree still exists in the remote
             getRemote().removeManifest(subKey);
@@ -120,7 +122,7 @@ public class FetchPushTest extends RemoteHiveTestBase {
             // STEP 3: push a manifest which has the previous tree as leaf tree
             s = local.execute(new PushOperation().setRemote(svc).addManifest(key));
             assertEquals(1, s.sumManifests);
-            assertEquals(2, s.sumTrees);
+            assertEquals(3, s.sumTrees);
             assertEquals(1, s.sumMissingTrees);
         }
     }
@@ -143,8 +145,8 @@ public class FetchPushTest extends RemoteHiveTestBase {
             // STEP 2: fetch locally
             TransferStatistics s = fetchHive.execute(new FetchOperation().setRemote(svc).addManifest(subKey));
             assertEquals(1, s.sumManifests);
-            assertEquals(1, s.sumTrees);
-            assertEquals(1, s.sumMissingTrees);
+            assertEquals(2, s.sumTrees);
+            assertEquals(2, s.sumMissingTrees);
 
             // STEP 3: remove manifest locally, but don't prune -> root tree still exists in the hive
             fetchHive.execute(new ManifestDeleteOperation().setToDelete(subKey));
@@ -152,7 +154,7 @@ public class FetchPushTest extends RemoteHiveTestBase {
             // STEP 4: fetch manifest which has subKeys root as leaf tree
             s = fetchHive.execute(new FetchOperation().setRemote(svc).addManifest(key));
             assertEquals(1, s.sumManifests);
-            assertEquals(2, s.sumTrees);
+            assertEquals(3, s.sumTrees);
             assertEquals(1, s.sumMissingTrees);
         }
     }
@@ -171,8 +173,8 @@ public class FetchPushTest extends RemoteHiveTestBase {
             // STEP 1: push the manifest to the remote.
             TransferStatistics s = local.execute(new PushOperation().setRemote(svc).addManifest(subKey));
             assertEquals(1, s.sumManifests);
-            assertEquals(1, s.sumTrees);
-            assertEquals(1, s.sumMissingTrees);
+            assertEquals(2, s.sumTrees);
+            assertEquals(2, s.sumMissingTrees);
 
             // STEP 2: remove manifest remotely, but don't prune -> root tree still exists in the remote
             getRemote().removeManifest(subKey);
@@ -181,8 +183,8 @@ public class FetchPushTest extends RemoteHiveTestBase {
             // STEP 3: push a manifest which has the previous tree as leaf tree
             s = local.execute(new PushOperation().setRemote(svc).addManifest(key));
             assertEquals(1, s.sumManifests);
-            assertEquals(2, s.sumTrees);
-            assertEquals(2, s.sumMissingTrees);
+            assertEquals(3, s.sumTrees);
+            assertEquals(3, s.sumMissingTrees);
         }
     }
 

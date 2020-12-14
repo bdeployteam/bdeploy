@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -168,7 +167,7 @@ public class ClientCleanup {
      * Returns a list of all applications available in the hive
      */
     private Set<Key> getAvailableApps() {
-        SortedSet<Key> allKeys = hive.execute(new ManifestListOperation());
+        Set<Key> allKeys = hive.execute(new ManifestListOperation());
         return allKeys.stream().filter(ClientCleanup::isApp).collect(Collectors.toSet());
     }
 
@@ -176,7 +175,7 @@ public class ClientCleanup {
      * Returns a list of all launchers available in the hive
      */
     private Set<Key> getAvailableLaunchers() {
-        SortedSet<Key> allKeys = hive.execute(new ManifestListOperation());
+        Set<Key> allKeys = hive.execute(new ManifestListOperation());
         return allKeys.stream().filter(ClientCleanup::isLauncher).collect(Collectors.toCollection(HashSet::new));
     }
 

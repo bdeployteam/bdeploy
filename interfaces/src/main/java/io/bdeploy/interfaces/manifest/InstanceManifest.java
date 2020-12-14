@@ -246,7 +246,7 @@ public class InstanceManifest {
      */
     public static SortedSet<Manifest.Key> scan(BHive hive, boolean onlyLatest) {
         SortedSet<Manifest.Key> result = new TreeSet<>();
-        SortedSet<Manifest.Key> allKeys = hive.execute(new ManifestListOperation());
+        Set<Manifest.Key> allKeys = hive.execute(new ManifestListOperation());
 
         // for each manifest key find only the newest...
         Set<String> names = allKeys.stream().map(Manifest.Key::getName).distinct().collect(Collectors.toSet());

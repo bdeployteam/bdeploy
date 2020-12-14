@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.SortedSet;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
@@ -80,7 +79,7 @@ public class ClientSoftwareManifest {
      */
     public Collection<ClientSoftwareConfiguration> list() {
         Collection<ClientSoftwareConfiguration> result = new ArrayList<>();
-        SortedSet<Key> keys = hive.execute(new ManifestListOperation().setManifestName(MANIFEST_PREFIX));
+        Set<Key> keys = hive.execute(new ManifestListOperation().setManifestName(MANIFEST_PREFIX));
         for (Key key : keys) {
             result.add(read(key));
         }
@@ -135,7 +134,7 @@ public class ClientSoftwareManifest {
      */
     public boolean remove(String appUid) {
         String manifestName = MANIFEST_PREFIX + appUid;
-        SortedSet<Key> keys = hive.execute(new ManifestListOperation().setManifestName(manifestName));
+        Set<Key> keys = hive.execute(new ManifestListOperation().setManifestName(manifestName));
         if (keys.isEmpty()) {
             return false;
         }
