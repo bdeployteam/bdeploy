@@ -5,7 +5,7 @@ package io.bdeploy.tea.plugin;
 
 import java.io.File;
 import java.net.URI;
-import java.util.SortedSet;
+import java.util.Set;
 
 import javax.inject.Named;
 import javax.ws.rs.core.UriBuilder;
@@ -41,7 +41,7 @@ public class BDeployPackageProductTask {
             log.info("Creating product ZIP at " + targetFile);
             ObjectListOperation listOp = new ObjectListOperation();
             listOp.addManifest(build.getKey());
-            SortedSet<ObjectId> objectIds = bhive.execute(listOp);
+            Set<ObjectId> objectIds = bhive.execute(listOp);
 
             // Copy objects into the target hive
             FileUtils.delete(targetFile);

@@ -5,7 +5,7 @@ package io.bdeploy.tea.plugin;
 
 import java.io.File;
 import java.util.List;
-import java.util.SortedSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -144,7 +144,7 @@ public class BDeployChooseProductToPushDialog extends TitleAreaDialog {
 
         ActivityReporter reporter = new ActivityReporter.Null();
         try (BHive bhive = new BHive(hive.toURI(), reporter)) {
-            SortedSet<Key> keys = bhive.execute(new ManifestListOperation());
+            Set<Key> keys = bhive.execute(new ManifestListOperation());
             List<Manifest> pms = keys.stream().map(x -> bhive.execute(new ManifestLoadOperation().setManifest(x)))
                     .filter(x -> x.getLabels().containsKey(ProductManifestBuilder.PRODUCT_LABEL)).collect(Collectors.toList());
             tv.setInput(pms);
