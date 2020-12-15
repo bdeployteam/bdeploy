@@ -94,6 +94,10 @@ public class JerseyClientFactory {
         }
     }
 
+    public static void invalidateCached(RemoteService srv) {
+        factoryCache.invalidate(srv);
+    }
+
     public synchronized void register(com.fasterxml.jackson.databind.Module o) {
         if (additionalModules.contains(o)) {
             return;

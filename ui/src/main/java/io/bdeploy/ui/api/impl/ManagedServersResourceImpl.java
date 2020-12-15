@@ -75,6 +75,7 @@ import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.MasterSettingsResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.JerseyOnBehalfOfFilter;
 import io.bdeploy.ui.ProductTransferService;
 import io.bdeploy.ui.api.BackendInfoResource;
@@ -363,7 +364,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         ManagedMasterDto attached = mm.read().getManagedMaster(serverName);
 
         // 1. Fetch information about updates, possibly required
-        attached.update = getUpdates(groupName, serverName);
+        attached.update = getUpdates(svc);
 
         // don't continue actual data sync if update MUST be installed.
         if (!attached.update.forceUpdate) {
@@ -469,16 +470,10 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         return transfers.getActiveTransfers(groupName);
     }
 
-    private MinionUpdateDto getUpdates(String groupName, String serverName) {
-        // Determine OS of the master
-        Optional<MinionDto> masterDto = getMinionsOfManagedServer(groupName, serverName).values().stream()
-                .filter(dto -> dto.master).findFirst();
-        if (!masterDto.isPresent()) {
-            throw new WebApplicationException("Cannot determine master node");
-        }
-
+    private MinionUpdateDto getUpdates(RemoteService svc) {
+        CommonRootResource root = ResourceProvider.getResource(svc, CommonRootResource.class, context);
+        Version managedVersion = root.getVersion();
         Version runningVersion = VersionHelper.getVersion();
-        Version managedVersion = masterDto.get().version;
 
         // Determine whether or not an update must be installed
         MinionUpdateDto updateDto = new MinionUpdateDto();
@@ -488,7 +483,6 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         updateDto.forceUpdate = runningVersion.getMajor() > managedVersion.getMajor();
 
         // Contact the remote service to find out all installed versions
-        RemoteService svc = getConfiguredRemote(groupName, serverName);
         Set<ScopedManifestKey> remoteVersions = new HashSet<>();
         try (RemoteBHive rbh = RemoteBHive.forService(svc, null, reporter)) {
             SortedMap<Key, ObjectId> inventory = rbh.getManifestInventory(SoftwareUpdateResource.BDEPLOY_MF_NAME,
@@ -530,7 +524,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         BHive hive = getInstanceGroupHive(groupName);
         ManagedMasters mm = new ManagedMasters(hive);
         ManagedMasterDto attached = mm.read().getManagedMaster(serverName);
-        attached.update = getUpdates(groupName, serverName);
+        attached.update = getUpdates(svc);
         mm.attach(attached, true);
     }
 
@@ -555,8 +549,11 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         BHive hive = getInstanceGroupHive(groupName);
         ManagedMasters mm = new ManagedMasters(hive);
         ManagedMasterDto attached = mm.read().getManagedMaster(serverName);
-        attached.update = getUpdates(groupName, serverName);
+        attached.update = getUpdates(svc);
         mm.attach(attached, true);
+
+        // force a new RemoteService instance on next call
+        JerseyClientFactory.invalidateCached(svc);
     }
 
     @Override
