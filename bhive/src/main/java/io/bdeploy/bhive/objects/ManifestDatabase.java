@@ -85,13 +85,20 @@ public class ManifestDatabase extends LockableDatabase {
             }
             Path pathForKey = getPathForKey(manifest.getKey());
             PathHelper.mkdirs(pathForKey.getParent());
-            Path tmpFile = Files.createTempFile(tmp, "mf-", ".tmp");
-            try {
-                Files.write(tmpFile, StorageHelper.toRawBytes(manifest));
-                Files.move(tmpFile, pathForKey, StandardCopyOption.ATOMIC_MOVE);
-            } catch (Throwable t) {
-                PathHelper.deleteRecursive(tmpFile);
-                throw t;
+
+            // unfortunately there is no better way to detect a 'ZipPath' as the class is not accessible directly.
+            if (pathForKey.getClass().getSimpleName().contains("Zip")) {
+                // in case of ZIP files we cannot move afterwards, so we need to write directly
+                Files.write(pathForKey, StorageHelper.toRawBytes(manifest));
+            } else {
+                Path tmpFile = Files.createTempFile(tmp, "mf-", ".tmp");
+                try {
+                    Files.write(tmpFile, StorageHelper.toRawBytes(manifest));
+                    Files.move(tmpFile, pathForKey, StandardCopyOption.ATOMIC_MOVE);
+                } catch (Throwable t) {
+                    PathHelper.deleteRecursive(tmpFile);
+                    throw t;
+                }
             }
             manifestCache.put(manifest.getKey(), manifest);
         });
