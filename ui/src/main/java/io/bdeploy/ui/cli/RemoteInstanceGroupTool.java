@@ -1,8 +1,24 @@
 package io.bdeploy.ui.cli;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status.Family;
+
+import org.glassfish.jersey.media.multipart.MultiPart;
+import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
+
 import io.bdeploy.common.cfg.Configuration.Help;
+import io.bdeploy.common.cfg.Configuration.Validator;
+import io.bdeploy.common.cfg.ExistingPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataTable;
@@ -11,6 +27,8 @@ import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.jersey.JerseyClientFactory;
+import io.bdeploy.jersey.JerseyOnBehalfOfFilter;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.cli.RemoteInstanceGroupTool.RemoteInstanceGroupConfig;
@@ -32,6 +50,10 @@ public class RemoteInstanceGroupTool extends RemoteServiceTool<RemoteInstanceGro
         @Help("Description of the customer")
         String description();
 
+        @Help("Path to an icon file.")
+        @Validator(ExistingPathValidator.class)
+        String icon();
+
         @Help("Delete the given instance group (and associated BHive). This CANNOT BE UNDONE.")
         String delete();
 
@@ -50,12 +72,41 @@ public class RemoteInstanceGroupTool extends RemoteServiceTool<RemoteInstanceGro
         if (config.create() != null) {
             helpAndFailIfMissing(config.description(), "Missing description");
 
+            Path iconPath = null;
+            if (config.icon() != null && !config.icon().isBlank()) {
+                iconPath = Paths.get(config.icon());
+                if (!Files.isRegularFile(iconPath)) {
+                    helpAndFail("--icon is not a regular file");
+                }
+            }
+
             InstanceGroupConfiguration desc = new InstanceGroupConfiguration();
             desc.name = config.create();
             desc.description = config.description();
             desc.title = config.title();
-
             client.create(desc);
+
+            if (iconPath != null) {
+                try (InputStream is = Files.newInputStream(iconPath)) {
+                    try (MultiPart mp = new MultiPart()) {
+                        StreamDataBodyPart bp = new StreamDataBodyPart("image", is);
+                        bp.setMediaType(MediaType.APPLICATION_OCTET_STREAM_TYPE);
+                        mp.bodyPart(bp);
+
+                        WebTarget target = JerseyClientFactory.get(svc)
+                                .getBaseTarget(new JerseyOnBehalfOfFilter(getLocalContext()))
+                                .path("/group/" + config.create() + "/image");
+                        Response response = target.request().post(Entity.entity(mp, MediaType.MULTIPART_FORM_DATA_TYPE));
+
+                        if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
+                            throw new IllegalStateException("Image upload failed: " + response.getStatusInfo().getStatusCode()
+                                    + ": " + response.getStatusInfo().getReasonPhrase());
+                        }
+                    }
+                } catch (IOException e) {
+                    throw new IllegalStateException("Cannot upload image", e);
+                }
+            }
             return createSuccess();
         } else if (config.list()) {
             DataTable table = createDataTable();
