@@ -198,7 +198,6 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
     }
 
     private DataResult doCreate(RemoteService remote, InstanceResource ir, InstanceConfig config) {
-        helpAndFailIfMissing(config.description(), "Missing --description");
         helpAndFailIfMissing(config.purpose(), "Missing --purpose");
         helpAndFailIfMissing(config.product(), "Missing --product");
         helpAndFailIfMissing(config.productVersion(), "Missing --productVersion");
