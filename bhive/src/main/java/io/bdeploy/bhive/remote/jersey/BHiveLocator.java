@@ -1,7 +1,7 @@
 package io.bdeploy.bhive.remote.jersey;
 
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.common.security.RequiredPermission;

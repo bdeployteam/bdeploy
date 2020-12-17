@@ -5,7 +5,7 @@ import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.util.function.Function;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.slf4j.Logger;

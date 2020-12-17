@@ -3,9 +3,9 @@ package io.bdeploy.ui.api.impl;
 import java.util.Collections;
 import java.util.Map;
 
-import javax.inject.Inject;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.UriInfo;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.UriInfo;
 
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.VersionHelper;

@@ -71,16 +71,10 @@
       </div>
     </mat-step>
     <mat-step label="Setting up...">
-      <p *ngIf="!attachError">
-        Please wait while we're trying to set up things automatically...
-      </p>
+      <p *ngIf="!attachError">Please wait while we're trying to set up things automatically...</p>
       <ng-container *ngIf="attachError">
-        <p>
-          Failed to automatically attach to the remote managed server. You can continue to setup manually.
-        </p>
-        <p>
-          Details:
-        </p>
+        <p>Failed to automatically attach to the remote managed server. You can continue to setup manually.</p>
+        <p>Details:</p>
         <div class="error-details" [innerHTML]="getErrorMessage()"></div>
       </ng-container>
       <div class="button-container">
@@ -89,7 +83,7 @@
         <ng-container *ngIf="!attachError && !attachSuccess">
           <div class="spacer"></div>
           <span>Contacting Managed Server...</span>
-          <mat-spinner diameter="24"></mat-spinner>
+          <mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner>
         </ng-container>
       </div>
     </mat-step>
@@ -99,14 +93,12 @@
         or permanently).
       </p>
       <div class="drag-container" *ngIf="!centralIdent">
-        <mat-spinner diameter="24"></mat-spinner>
+        <mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner>
       </div>
       <div class="drag-container" *ngIf="centralIdent">
         <button mat-raised-button (click)="downloadManualJson()">Download for manual setup</button>
         <mat-card draggable="true" (dragstart)="onDragStart($event)" class="drag-card">
-          <div>
-            Drag me to the managed server!
-          </div>
+          <div>Drag me to the managed server!</div>
         </mat-card>
       </div>
       <div class="button-container">

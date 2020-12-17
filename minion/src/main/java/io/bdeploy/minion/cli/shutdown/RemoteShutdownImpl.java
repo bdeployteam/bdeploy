@@ -1,7 +1,7 @@
 package io.bdeploy.minion.cli.shutdown;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response.Status;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response.Status;
 
 import io.bdeploy.common.util.Threads;
 import io.bdeploy.jersey.JerseyServer;

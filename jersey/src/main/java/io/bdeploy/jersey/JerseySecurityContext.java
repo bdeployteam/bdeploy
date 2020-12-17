@@ -4,7 +4,7 @@ import java.security.Principal;
 import java.util.Collection;
 import java.util.Collections;
 
-import javax.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.SecurityContext;
 
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.ScopedPermission;

@@ -1,8 +1,8 @@
 package io.bdeploy.ui.api.impl;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.POST;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.ws.rs.POST;
 
 import io.bdeploy.jersey.JerseyScopeService;
 import io.bdeploy.jersey.ws.JerseyEventBroadcaster;

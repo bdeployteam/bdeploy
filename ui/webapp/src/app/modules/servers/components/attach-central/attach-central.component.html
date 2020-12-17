@@ -24,14 +24,10 @@
       </div>
     </mat-step>
     <mat-step label="Publish Managed Server" #attachStep>
-      <p>
-        Drag the below card to the drop zone on the central server.
-      </p>
+      <p>Drag the below card to the drop zone on the central server.</p>
       <div class="drag-container">
         <mat-card draggable="true" (dragstart)="onDragStart($event)" class="drag-card">
-          <div>
-            Drag me to the central server!
-          </div>
+          <div>Drag me to the central server!</div>
         </mat-card>
       </div>
       <p>
@@ -44,7 +40,7 @@
         <button mat-raised-button matStepperNext>Continue Manually</button>
         <div class="spacer"></div>
         <span>Waiting for incoming connection...</span>
-        <mat-spinner diameter="24"></mat-spinner>
+        <mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner>
       </div>
     </mat-step>
     <mat-step label="Manual Configuration of Central Server" optional="true" #manualStep>
@@ -64,7 +60,7 @@
         <ng-container *ngIf="manualLoading">
           <div class="spacer"></div>
           <span>Waiting for incoming connection...</span>
-          <mat-spinner diameter="24"></mat-spinner>
+          <mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner>
         </ng-container>
       </div>
     </mat-step>

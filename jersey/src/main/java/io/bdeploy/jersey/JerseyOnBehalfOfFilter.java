@@ -2,9 +2,9 @@ package io.bdeploy.jersey;
 
 import java.io.IOException;
 
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientRequestFilter;
-import javax.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.client.ClientRequestContext;
+import jakarta.ws.rs.client.ClientRequestFilter;
+import jakarta.ws.rs.core.SecurityContext;
 
 public class JerseyOnBehalfOfFilter implements ClientRequestFilter {
 

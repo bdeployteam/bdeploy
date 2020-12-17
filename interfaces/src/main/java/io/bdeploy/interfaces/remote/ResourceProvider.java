@@ -1,6 +1,6 @@
 package io.bdeploy.interfaces.remote;
 
-import javax.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.SecurityContext;
 
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
 import io.bdeploy.common.security.RemoteService;

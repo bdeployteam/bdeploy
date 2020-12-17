@@ -1,7 +1,7 @@
 package io.bdeploy.ui.api.impl;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import org.jvnet.hk2.annotations.Service;
 

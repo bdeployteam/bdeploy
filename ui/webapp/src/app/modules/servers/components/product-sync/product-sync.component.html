@@ -79,11 +79,9 @@
           </mat-form-field>
         </div>
         <div *ngIf="loadingProducts">
-          <mat-spinner [diameter]="24"></mat-spinner>
+          <mat-progress-spinner mode="indeterminate" [diameter]="24"></mat-progress-spinner>
         </div>
-        <div *ngIf="!loadingProducts && sourceProducts.size === 0">
-          No Products available on the source server.
-        </div>
+        <div *ngIf="!loadingProducts && sourceProducts.size === 0">No Products available on the source server.</div>
 
         <div *ngIf="!loadingProducts && sourceProducts.size > 0" class="hflex">
           <mat-form-field class="column">
@@ -142,7 +140,7 @@
       <mat-step label="Transfer">
         <div class="intro" *ngIf="transferStarted && !transferDone">
           <div>
-            <mat-spinner diameter="24" class="transfer-spinner"></mat-spinner>
+            <mat-progress-spinner mode="indeterminate" diameter="24" class="transfer-spinner"></mat-progress-spinner>
             Product transfer has been initiated and is running in the background.
           </div>
           <br />

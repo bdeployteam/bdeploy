@@ -5,8 +5,8 @@ import java.nio.file.Path;
 import java.util.Set;
 import java.util.SortedMap;
 
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.client.ResponseProcessingException;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.client.ResponseProcessingException;
 
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;

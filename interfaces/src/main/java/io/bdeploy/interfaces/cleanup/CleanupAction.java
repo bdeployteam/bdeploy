@@ -2,7 +2,7 @@ package io.bdeploy.interfaces.cleanup;
 
 import java.nio.file.Path;
 
-import javax.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.SecurityContext;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

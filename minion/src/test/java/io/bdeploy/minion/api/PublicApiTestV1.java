@@ -10,7 +10,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.SortedMap;
 
-import javax.ws.rs.NotFoundException;
+import jakarta.ws.rs.NotFoundException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

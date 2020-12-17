@@ -1,6 +1,6 @@
 package io.bdeploy.jersey.dyn;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public class DynamicInjectionTestResourceLocatorImpl implements DynamicInjectionTestResourceLocator {
 

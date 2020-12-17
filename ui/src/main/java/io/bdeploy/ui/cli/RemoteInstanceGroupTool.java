@@ -7,12 +7,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status.Family;
-
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
 
@@ -33,6 +27,11 @@ import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.cli.RemoteInstanceGroupTool.RemoteInstanceGroupConfig;
 import io.bdeploy.ui.dto.InstanceDto;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status.Family;
 
 @Help("Create instance group/hive on the remote")
 @ToolCategory(TextUIResources.UI_CATEGORY)

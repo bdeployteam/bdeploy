@@ -2,23 +2,24 @@ apply plugin: 'java-library'
 
 dependencies {
     implementation(
-        'org.glassfish.jersey.ext:jersey-proxy-client:2.32',
+        'org.glassfish.jersey.ext:jersey-proxy-client:3.0.0',
         'javax.xml.bind:jaxb-api:2.3.1',
-        'org.glassfish.jaxb:jaxb-runtime:2.3.3',
+        'org.glassfish.jaxb:jaxb-runtime:3.0.0',
         'javax.activation:activation:1.1.1',
-        'jakarta.servlet:jakarta.servlet-api:4.0.4',
+        'jakarta.servlet:jakarta.servlet-api:5.0.0',
+        'jakarta.ws.rs:jakarta.ws.rs-api:3.0.0',
         'org.slf4j:jul-to-slf4j:1.7.30',
-        'org.glassfish.grizzly:grizzly-http-servlet:2.4.4',
+        'org.glassfish.grizzly:grizzly-http-servlet:3.0.0',
         project(":common"),
     )
 
     testCompile    project(path: ":common", configuration: 'testRuntime')
 
     api(
-        'org.glassfish.jersey.inject:jersey-hk2:2.32',
-        'org.glassfish.jersey.containers:jersey-container-grizzly2-http:2.32',
-        'org.glassfish.jersey.media:jersey-media-multipart:2.32',
-        'org.glassfish.grizzly:grizzly-websockets:2.4.4',
+        'org.glassfish.jersey.inject:jersey-hk2:3.0.0',
+        'org.glassfish.jersey.containers:jersey-container-grizzly2-http:3.0.0',
+        'org.glassfish.jersey.media:jersey-media-multipart:3.0.0',
+        'org.glassfish.grizzly:grizzly-websockets:3.0.0',
         'org.glassfish.grizzly:grizzly-http-client:1.16',
     )
 }

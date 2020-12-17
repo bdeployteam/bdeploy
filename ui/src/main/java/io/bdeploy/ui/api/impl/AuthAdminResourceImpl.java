@@ -3,7 +3,7 @@ package io.bdeploy.ui.api.impl;
 import java.util.List;
 import java.util.SortedSet;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.UserInfo;

@@ -3,9 +3,9 @@ package io.bdeploy.ui.api.impl;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.SecurityContext;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.SecurityContext;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;

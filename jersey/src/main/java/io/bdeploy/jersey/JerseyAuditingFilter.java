@@ -2,24 +2,23 @@ package io.bdeploy.jersey;
 
 import java.io.IOException;
 
-import javax.inject.Inject;
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerResponseContext;
-import javax.ws.rs.container.ContainerResponseFilter;
-import javax.ws.rs.core.Response.Status.Family;
-import javax.ws.rs.core.Response.StatusType;
-
 import io.bdeploy.jersey.audit.AuditRecord;
 import io.bdeploy.jersey.audit.AuditRecord.Severity;
 import io.bdeploy.jersey.audit.Auditor;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ContainerResponseContext;
+import jakarta.ws.rs.container.ContainerResponseFilter;
+import jakarta.ws.rs.core.Response.Status.Family;
+import jakarta.ws.rs.core.Response.StatusType;
 
 /**
  * A {@link ContainerResponseFilter} which audit's requests and their results.
  * <p>
  * IMPORTANT: The auditing happens on <b>return</b> of a request. Pay attention when reading log files.
  */
-@javax.ws.rs.ext.Provider
+@jakarta.ws.rs.ext.Provider
 public class JerseyAuditingFilter implements ContainerResponseFilter {
 
     @Inject

@@ -2,7 +2,7 @@ package io.bdeploy.minion.cli;
 
 import java.nio.file.Paths;
 
-import javax.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriBuilder;
 
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;

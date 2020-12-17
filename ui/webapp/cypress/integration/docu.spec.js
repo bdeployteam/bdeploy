@@ -138,7 +138,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.get('mat-option').contains('Demo Product').click();
     cy.get('[placeholder=Version]').click();
     cy.get('mat-option').contains('2.0.0').click();
-    cy.get('mat-option').should('not.be.visible');
+    cy.get('mat-option').should('not.exist');
     cy.wait(250);
     cy.screenshot('BDeploy_Instance_Create');
 
@@ -220,7 +220,7 @@ describe('Creates screenshots for the user documentation', () => {
     cy.get('button').contains('Create new parameter').click();
     cy.get('[placeholder=Predecessor]').click();
     cy.get('mat-option').contains('Sleep Timeout').click();
-    cy.get('mat-option').should('not.be.visible');
+    cy.get('mat-option').should('not.exist');
     cy.screenshot('BDeploy_Process_Custom_Create');
     cy.get('mat-dialog-container').contains('button', 'Apply').click();
     cy.get('[data-placeholder=custom-param-1]').type('--customValue=Demo');
@@ -479,19 +479,19 @@ describe('Creates screenshots for the user documentation', () => {
       });
 
       cy.contains('button', 'Upload').click();
-      cy.contains("Generic zip file").should('have.length', 1);
-      cy.contains("Hive with").should('have.length', 1);
+      cy.contains('Generic zip file').should('have.length', 1);
+      cy.contains('Hive with').should('have.length', 1);
 
-      cy.get('input[data-placeholder="Manifest Name"]').type("external/software-2");
-      cy.get('input[data-placeholder="Version"]').type("1.0.0");
+      cy.get('input[data-placeholder="Manifest Name"]').type('external/software-2');
+      cy.get('input[data-placeholder="Version"]').type('1.0.0');
       cy.get('.package-os mat-icon[ng-reflect-svg-icon="WINDOWS"]').click();
       cy.get('.package-os mat-icon[ng-reflect-svg-icon="LINUX"]').click();
 
       cy.screenshot('BDeploy_SWRepo_Upload');
 
       cy.contains('button', 'Import').click();
-      cy.contains("Import of external/software-2:1.0.0 on WINDOWS, LINUX successful").should('have.length', 1);
-      cy.contains("2 Manifests imported").should('have.length', 1);
+      cy.contains('Import of external/software-2:1.0.0 on WINDOWS, LINUX successful').should('have.length', 1);
+      cy.contains('2 Manifests imported').should('have.length', 1);
 
       cy.screenshot('BDeploy_SWRepo_Import');
 

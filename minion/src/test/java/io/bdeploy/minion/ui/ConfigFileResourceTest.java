@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.ClientErrorException;
+import jakarta.ws.rs.InternalServerErrorException;
 
 import org.apache.commons.codec.binary.Base64;
 import org.junit.jupiter.api.Test;

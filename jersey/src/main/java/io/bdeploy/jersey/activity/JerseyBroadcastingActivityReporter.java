@@ -14,8 +14,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.LongSupplier;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import org.jvnet.hk2.annotations.Optional;
 import org.jvnet.hk2.annotations.Service;

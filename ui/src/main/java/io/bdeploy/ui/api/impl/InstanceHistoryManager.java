@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.SecurityContext;
 
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;

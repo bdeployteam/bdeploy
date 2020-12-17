@@ -1,9 +1,9 @@
 package io.bdeploy.jersey.inject;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-import javax.ws.rs.core.SecurityContext;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Provider;
+import jakarta.ws.rs.core.SecurityContext;
 
 public class InjectionTestResourceImpl implements InjectionTestResource {
 

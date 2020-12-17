@@ -9,7 +9,7 @@ import java.security.GeneralSecurityException;
 import java.util.Collection;
 import java.util.Collections;
 
-import javax.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriBuilder;
 
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.cfg.Configuration.ConfigurationValueMapping;

@@ -7,7 +7,7 @@ import java.nio.file.Paths;
 import java.util.Set;
 import java.util.SortedMap;
 
-import javax.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriBuilder;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.cli.ManifestTool.ManifestConfig;

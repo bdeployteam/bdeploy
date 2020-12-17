@@ -2,11 +2,11 @@ package io.bdeploy.ui.api.impl;
 
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.SecurityContext;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.SecurityContext;
 
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.interfaces.cleanup.CleanupGroup;

@@ -5,14 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.ext.Provider;
-
 import org.glassfish.jersey.model.Parameter.Source;
 import org.glassfish.jersey.server.ExtendedUriInfo;
 import org.glassfish.jersey.server.internal.inject.MultivaluedParameterExtractorProvider;
@@ -23,12 +15,19 @@ import com.google.common.base.Splitter;
 
 import io.bdeploy.jersey.ActivityScope;
 import io.bdeploy.jersey.JerseyScopeService;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ContainerRequestFilter;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.ext.Provider;
 
 @Provider
 public class JerseyRemoteActivityScopeServerFilter implements ContainerRequestFilter {
 
     @Inject
-    private javax.inject.Provider<MultivaluedParameterExtractorProvider> mpep;
+    private jakarta.inject.Provider<MultivaluedParameterExtractorProvider> mpep;
 
     @Inject
     private JerseyScopeService scopeService;

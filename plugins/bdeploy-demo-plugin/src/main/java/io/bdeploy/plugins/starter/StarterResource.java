@@ -2,8 +2,8 @@ package io.bdeploy.plugins.starter;
 
 import java.util.Base64;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.QueryParam;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.QueryParam;
 
 /**
  * This simple resource has the capability to Base64 encode and decode a string.
