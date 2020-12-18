@@ -12,8 +12,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import jakarta.ws.rs.core.SecurityContext;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +43,7 @@ import io.bdeploy.interfaces.remote.NodeCleanupResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
+import jakarta.ws.rs.core.SecurityContext;
 
 /**
  * Shared logic for cleanups on the master.
@@ -240,6 +239,9 @@ public class CleanupHelper {
      * @return a list of {@link CleanupAction}s for the given instance
      */
     private List<CleanupAction> calculateInstance(CleanupInstanceGroupContext context, InstanceManifest instanceManifest) {
+        log.debug("Cleaning instance {} in group {}", instanceManifest.getManifest(),
+                context.getInstanceGroupConfiguration().name);
+
         // find active tags from app status (what's up running)
         MasterRootResource root = ResourceProvider.getVersionedResource(
                 provider.getControllingMaster(context.getHive(), instanceManifest.getManifest()), MasterRootResource.class,
@@ -280,6 +282,8 @@ public class CleanupHelper {
      * @return a list of {@link CleanupActions} for products and their applications
      */
     private List<CleanupAction> calculateProducts(CleanupInstanceGroupContext context) {
+        log.info("Collecting products to clean in group {}", context.getInstanceGroupConfiguration().name);
+
         List<CleanupAction> actions = new ArrayList<>();
         Map<String, List<Key>> productsInUseMap = collectProductsInUse(context);
 
@@ -353,6 +357,8 @@ public class CleanupHelper {
      * @return List of {@link CleanupAction}s
      */
     private List<CleanupAction> calculateMetaManifests(CleanupInstanceGroupContext context) {
+        log.info("Collecting stale meta-manifests in group {}", context.getInstanceGroupConfiguration().name);
+
         List<CleanupAction> actions = new ArrayList<>();
         Set<Key> allImKeys = context.getHive().execute(new ManifestListOperation());
         for (Key key : allImKeys) {
