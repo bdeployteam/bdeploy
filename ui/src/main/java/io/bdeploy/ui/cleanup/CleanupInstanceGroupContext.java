@@ -67,7 +67,7 @@ class CleanupInstanceGroupContext {
         if (allProductsMap == null) {
             allProductsMap = getAllProductManifests().stream().collect(Collectors.groupingBy(Key::getName,
                     Collectors.collectingAndThen(Collectors.toCollection(ArrayList::new), l -> {
-                        Collections.sort(l, (a, b) -> getComparators().get(a.getName()).compare(b, a));
+                        Collections.sort(l, (a, b) -> getComparator(a).compare(b, a));
                         return l;
                     })));
         }
@@ -96,16 +96,11 @@ class CleanupInstanceGroupContext {
         return latestInstanceManifests;
     }
 
-    private Map<String, Comparator<Key>> getComparators() {
+    public Comparator<Key> getComparator(Key product) {
         if (comparators == null) {
             comparators = new TreeMap<>();
-            getAllProductManifests().forEach(p -> comparators.computeIfAbsent(p.getName(), k -> vss.getKeyComparator(group, p)));
         }
-        return comparators;
-    }
-
-    public Comparator<Key> getComparator(String productName) {
-        return getComparators().get(productName);
+        return comparators.computeIfAbsent(product.getName(), k -> vss.getKeyComparator(group, product));
     }
 
     public void addInstanceVersions(String name, SortedSet<Key> keys) {

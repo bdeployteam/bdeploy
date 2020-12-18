@@ -344,7 +344,7 @@ public class CleanupHelper {
                 .map(imKey -> InstanceManifest.of(context.getHive(), imKey).getConfiguration().product)
                 .collect(Collectors.toSet()).stream().collect(Collectors.groupingBy(Key::getName,
                         Collectors.collectingAndThen(Collectors.toCollection(ArrayList::new), l -> {
-                            Collections.sort(l, (a, b) -> context.getComparator(a.getName()).compare(b, a));
+                            Collections.sort(l, (a, b) -> context.getComparator(a).compare(b, a));
                             return l;
                         })));
 
