@@ -18,6 +18,13 @@ public interface AuthService {
     public UserInfo authenticate(String user, String pw);
 
     /**
+     * @param user the user to trace
+     * @param pw the password or empty
+     * @return List of tracing messages.
+     */
+    public List<String> traceAuthentication(String user, String pw);
+
+    /**
      * @param info the updated user information.
      */
     public void updateUserInfo(UserInfo info);

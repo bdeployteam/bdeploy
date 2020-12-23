@@ -8,6 +8,7 @@ import { CanComponentDeactivate } from 'src/app/modules/shared/guards/can-deacti
 import { MessageboxService } from 'src/app/modules/shared/services/messagebox.service';
 import { SettingsService } from '../../../core/services/settings.service';
 import { SettingsAuthLdapServerComponent } from '../settings-auth-ldap-server/settings-auth-ldap-server.component';
+import { SettingsAuthTestUserComponent } from '../settings-auth-test-user/settings-auth-test-user.component';
 
 @Component({
   selector: 'app-settings-auth',
@@ -76,6 +77,12 @@ export class SettingsAuthComponent implements OnInit, CanComponentDeactivate {
       title: 'Unsaved changes',
       message: 'Settings were modified. Close without saving?',
       mode: MessageBoxMode.CONFIRM_WARNING,
+    });
+  }
+
+  testUser() {
+    this.dialog.open(SettingsAuthTestUserComponent, {
+      width: '800px',
     });
   }
 }

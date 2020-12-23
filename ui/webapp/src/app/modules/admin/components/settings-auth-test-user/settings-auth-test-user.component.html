@@ -1,0 +1,20 @@
+<h1 mat-dialog-title>Test User Authentication</h1>
+<div mat-dialog-content class="flex-content">
+  <form (ngSubmit)="runTest()" #f="ngForm">
+    <div class="flex-horiz">
+      <mat-form-field>
+        <input matInput type="text" required [(ngModel)]="model.name" name="name" placeholder="Name" />
+      </mat-form-field>
+      <mat-form-field>
+        <input matInput type="password" [(ngModel)]="model.password" name="password" placeholder="Password" />
+      </mat-form-field>
+      <button mat-raised-button [disabled]="!f.valid" type="submit">Test</button>
+    </div>
+  </form>
+  <div class="flex-content">
+    <textarea readonly class="output">{{ output }}</textarea>
+  </div>
+</div>
+<div mat-dialog-actions>
+  <button mat-raised-button [mat-dialog-close]="">Close</button>
+</div>

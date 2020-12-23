@@ -95,15 +95,18 @@ final class PasswordAuthentication implements Authenticator {
     }
 
     @Override
-    public UserInfo authenticate(UserInfo user, char[] password, AuthenticationSettingsDto settings) {
+    public UserInfo authenticate(UserInfo user, char[] password, AuthenticationSettingsDto settings, AuthTrace trace) {
         if (verify(password, user.password)) {
+            trace.log("password successfully verified");
             return user;
         }
+        trace.log("password verification failed");
         return null;
     }
 
     @Override
-    public UserInfo getInitialInfo(String username, char[] password, AuthenticationSettingsDto settings) {
+    public UserInfo getInitialInfo(String username, char[] password, AuthenticationSettingsDto settings, AuthTrace trace) {
+        trace.log("  query not supported");
         return null; // not supported
     }
 

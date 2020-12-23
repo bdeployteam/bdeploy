@@ -1,9 +1,10 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { UserInfo } from '../../../models/gen.dtos';
+import { CredentialsApi, UserInfo } from '../../../models/gen.dtos';
 import { ConfigService } from '../../core/services/config.service';
 import { Logger, LoggingService } from '../../core/services/logging.service';
+import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
 
 @Injectable({
   providedIn: 'root',
@@ -50,5 +51,13 @@ export class AuthAdminService {
     const url: string = this.cfg.config.api + AuthAdminService.BASEPATH + '/new-uuid';
     this.log.debug('createUuid: ' + url);
     return this.http.get(url, { responseType: 'text' });
+  }
+
+  public traceAuthentication(username: string, password: string): Observable<any> {
+    const url: string = this.cfg.config.api + AuthAdminService.BASEPATH + '/traceAuthentication';
+    this.log.debug('traceAuthentication("' + username + '", <...>)');
+    return this.http.post(url, { user: username, password: password } as CredentialsApi, {
+      headers: suppressGlobalErrorHandling(new HttpHeaders()),
+    });
   }
 }

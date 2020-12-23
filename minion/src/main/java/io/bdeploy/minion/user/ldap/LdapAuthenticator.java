@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.settings.AuthenticationSettingsDto;
 import io.bdeploy.interfaces.settings.LDAPSettingsDto;
+import io.bdeploy.minion.user.AuthTrace;
 import io.bdeploy.minion.user.Authenticator;
 
 public class LdapAuthenticator implements Authenticator {
@@ -39,23 +40,29 @@ public class LdapAuthenticator implements Authenticator {
     }
 
     @Override
-    public UserInfo getInitialInfo(String username, char[] password, AuthenticationSettingsDto settings) {
-        return findAuthenticateUpdate(new UserInfo(username), password, settings.ldapSettings);
+    public UserInfo getInitialInfo(String username, char[] password, AuthenticationSettingsDto settings, AuthTrace trace) {
+        return findAuthenticateUpdate(new UserInfo(username), password, settings.ldapSettings, trace);
     }
 
     @Override
-    public UserInfo authenticate(UserInfo user, char[] password, AuthenticationSettingsDto settings) {
+    public UserInfo authenticate(UserInfo user, char[] password, AuthenticationSettingsDto settings, AuthTrace trace) {
         if (!isResponsible(user, settings)) {
             return null;
         }
 
         Optional<LDAPSettingsDto> server = settings.ldapSettings.stream().filter(s -> s.id.equals(user.externalTag)).findAny();
+        trace.log("User is associated to server " + (server.isPresent() ? server.get().server : user.externalTag));
+        if (!server.isPresent()) {
+            trace.log("LDAP server " + user.externalTag + " is no longer available, will try all servers");
+        }
+
         if (!server.isPresent()) {
             log.warn("LDAP server {} associated with user {} no longer available, will try all servers.", user.externalTag,
                     user.name);
         }
 
-        return findAuthenticateUpdate(user, password, server.map(Collections::singletonList).orElse(settings.ldapSettings));
+        return findAuthenticateUpdate(user, password, server.map(Collections::singletonList).orElse(settings.ldapSettings),
+                trace);
     }
 
     /**
@@ -64,17 +71,20 @@ public class LdapAuthenticator implements Authenticator {
      * @param user the user to check, will be updated with additional info on success.
      * @param password the password to check
      * @param servers the servers to query
+     * @param trace collector for tracing information
      * @return the successfully authenticated user, or <code>null</code> if not successful.
      */
-    private UserInfo findAuthenticateUpdate(UserInfo user, char[] password, List<LDAPSettingsDto> servers) {
+    private UserInfo findAuthenticateUpdate(UserInfo user, char[] password, List<LDAPSettingsDto> servers, AuthTrace trace) {
         for (LDAPSettingsDto server : servers) {
+            trace.log("  query server " + server.server);
             try {
                 LdapContext ctx = createServerContext(server);
                 if (ctx == null) {
+                    trace.log("    server " + server.server + ": connection failed");
                     return null;
                 }
                 try {
-                    UserInfo found = performUserSearch(user, password, server, ctx);
+                    UserInfo found = performUserSearch(user, password, server, ctx, trace);
                     if (found != null) {
                         return found;
                     }
@@ -82,6 +92,7 @@ public class LdapAuthenticator implements Authenticator {
                     closeServerContext(ctx);
                 }
             } catch (NamingException e) {
+                trace.log("    server " + server.server + " failed: " + e.getMessage());
                 log.debug("Cannot authenticate {} on server {}", user.name, server.server);
                 if (log.isTraceEnabled()) {
                     log.trace("Exception", e);
@@ -91,7 +102,7 @@ public class LdapAuthenticator implements Authenticator {
         return null;
     }
 
-    private UserInfo performUserSearch(UserInfo user, char[] password, LDAPSettingsDto server, LdapContext ctx)
+    private UserInfo performUserSearch(UserInfo user, char[] password, LDAPSettingsDto server, LdapContext ctx, AuthTrace trace)
             throws NamingException {
         SearchControls sc = new SearchControls();
         sc.setSearchScope(SearchControls.SUBTREE_SCOPE); // TODO: make configurable
@@ -99,10 +110,12 @@ public class LdapAuthenticator implements Authenticator {
 
         String filter = "(&" + server.accountPattern + "(" + server.accountUserName + "={0}))";
 
+        trace.log("    filter = " + filter.replace("{0}", user.name));
         NamingEnumeration<SearchResult> res = ctx.search(server.accountBase, filter, new Object[] { user.name }, sc);
 
         for (SearchResult sr : toIterable(res.asIterator())) {
             try {
+                trace.log("    found: " + String.valueOf(sr.getAttributes().get(LDAP_DN).get(0)));
                 return verifyAndUpdateSearchResult(user, password, server, ctx, sr);
             } catch (NamingException e) {
                 log.warn("Cannot authenticate {} on server {}", user.name, server.server, e);

@@ -250,33 +250,53 @@ public class UserDatabase implements AuthService {
 
     @Override
     public UserInfo authenticate(String user, String pw) {
+        return authenticateInternal(user, pw, new AuthTrace(false));
+    }
+
+    @Override
+    public List<String> traceAuthentication(String user, String pw) {
+        AuthTrace trace = new AuthTrace(true);
+        authenticateInternal(user, pw, trace);
+        return trace.getMessages();
+    }
+
+    private UserInfo authenticateInternal(String user, String pw, AuthTrace trace) {
         user = UserInfo.normalizeName(user);
+        trace.log("normalized Username: \"" + user + "\"");
         AuthenticationSettingsDto settings = SettingsManifest.read(target, root.getEncryptionKey(), false).auth;
 
         UserInfo u = getUser(user);
         if (u == null) {
+            trace.log("user unknown -> query all authenticators");
             for (Authenticator auth : authenticators) {
-                u = auth.getInitialInfo(user, pw.toCharArray(), settings);
+                trace.log("Authenticator: " + auth.getClass().getSimpleName());
+                u = auth.getInitialInfo(user, pw.toCharArray(), settings, trace);
                 if (u != null) {
                     u.lastActiveLogin = System.currentTimeMillis();
                     internalUpdate(user, u);
+                    trace.log("SUCCESS");
                     return u; // already successfully authenticated using the given password.
                 }
             }
+            trace.log("FAILURE");
             return null;
         }
 
         for (Authenticator auth : authenticators) {
-            if (auth.isResponsible(u, settings)) {
-                UserInfo authenticated = auth.authenticate(u, pw.toCharArray(), settings);
+            boolean isResponsible = auth.isResponsible(u, settings);
+            trace.log("Authenticator: " + auth.getClass().getSimpleName() + ", responsible: " + isResponsible);
+            if (isResponsible) {
+                UserInfo authenticated = auth.authenticate(u, pw.toCharArray(), settings, trace);
                 if (authenticated != null) {
                     authenticated.lastActiveLogin = System.currentTimeMillis();
                     internalUpdate(user, authenticated);
+                    trace.log("SUCCESS");
                     return authenticated;
                 }
             }
         }
 
+        trace.log("FAILURE");
         return null;
     }
 

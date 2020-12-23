@@ -58,11 +58,13 @@
             </div>
           </ng-container>
         </div>
-        <div *ngIf="!settings.getSettings().auth.ldapSettings.length">
-          No Servers have been configured yet.
-        </div>
-        <button mat-mini-fab style="align-self: flex-end;" (click)="add()"><mat-icon>add</mat-icon></button>
+        <div *ngIf="!settings.getSettings().auth.ldapSettings.length">No Servers have been configured yet.</div>
+        <button mat-mini-fab style="align-self: flex-end" (click)="add()"><mat-icon>add</mat-icon></button>
       </div>
     </mat-tab>
   </mat-tab-group>
+
+  <div class="tab-container">
+    <button mat-raised-button (click)="testUser()" [disabled]="settings.isDirty()">Test User</button>
+  </div>
 </div>

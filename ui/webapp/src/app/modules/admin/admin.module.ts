@@ -16,6 +16,7 @@ import { MasterCleanupComponent } from './components/master-cleanup/master-clean
 import { MetricsOverviewComponent } from './components/metrics-overview/metrics-overview.component';
 import { PluginsBrowserComponent } from './components/plugins-browser/plugins-browser.component';
 import { SettingsAuthLdapServerComponent } from './components/settings-auth-ldap-server/settings-auth-ldap-server.component';
+import { SettingsAuthTestUserComponent } from './components/settings-auth-test-user/settings-auth-test-user.component';
 import { SettingsAuthComponent } from './components/settings-auth/settings-auth.component';
 import { SettingsGeneralComponent } from './components/settings-general/settings-general.component';
 import { SettingsInstanceGroupComponent } from './components/settings-instance-group/settings-instance-group.component';
@@ -41,6 +42,7 @@ import { UsersBrowserComponent } from './components/users-browser/users-browser.
     AdminShellComponent,
     SettingsAuthComponent,
     SettingsAuthLdapServerComponent,
+    SettingsAuthTestUserComponent,
     SettingsGeneralComponent,
     SettingsInstanceGroupComponent,
     UsersBrowserComponent,
@@ -48,7 +50,12 @@ import { UsersBrowserComponent } from './components/users-browser/users-browser.
     MasterCleanupGroupComponent,
     PluginsBrowserComponent,
   ],
-  entryComponents: [UpdateDialogComponent, SettingsAuthLdapServerComponent, UserGlobalPermissionsComponent],
+  entryComponents: [
+    UpdateDialogComponent,
+    SettingsAuthLdapServerComponent,
+    SettingsAuthTestUserComponent,
+    UserGlobalPermissionsComponent,
+  ],
   imports: [CommonModule, CoreModule, SharedModule, AdminRoutingModule, NgxChartsModule],
 })
 export class AdminModule {}

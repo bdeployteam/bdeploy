@@ -5,6 +5,7 @@ import java.util.SortedSet;
 
 import jakarta.inject.Inject;
 
+import io.bdeploy.api.remote.v1.dto.CredentialsApi;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.ui.api.AuthAdminResource;
@@ -59,5 +60,10 @@ public class AuthAdminResourceImpl implements AuthAdminResource {
     @Override
     public String createUuid() {
         return UuidHelper.randomId();
+    }
+
+    @Override
+    public List<String> traceAuthentication(CredentialsApi credentials) {
+        return auth.traceAuthentication(credentials.user, credentials.password);
     }
 }

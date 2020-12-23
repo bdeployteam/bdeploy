@@ -14,16 +14,18 @@ public interface Authenticator {
     /**
      * @param username the username
      * @param password the password
+     * @param trace collector for tracing information
      * @return a {@link UserInfo} object prefilled with required information for persisting if this {@link Authenticator} supports
      *         automatic creation of authenticated users.
      */
-    UserInfo getInitialInfo(String username, char[] password, AuthenticationSettingsDto settings);
+    UserInfo getInitialInfo(String username, char[] password, AuthenticationSettingsDto settings, AuthTrace trace);
 
     /**
      * @param user the user to authenticate
      * @param password the password given by the user.
+     * @param trace collector for tracing information
      * @return a user if authentication was successfull. The object may contain updated user information.
      */
-    UserInfo authenticate(UserInfo user, char[] password, AuthenticationSettingsDto settings);
+    UserInfo authenticate(UserInfo user, char[] password, AuthenticationSettingsDto settings, AuthTrace trace);
 
 }

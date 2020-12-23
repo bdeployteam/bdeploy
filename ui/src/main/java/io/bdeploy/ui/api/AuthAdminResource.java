@@ -13,6 +13,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
+import io.bdeploy.api.remote.v1.dto.CredentialsApi;
 import io.bdeploy.interfaces.UserInfo;
 
 @Consumes(MediaType.APPLICATION_JSON)
@@ -77,5 +78,9 @@ public interface AuthAdminResource {
     @GET
     @Path("/new-uuid")
     public String createUuid();
+
+    @POST
+    @Path("/traceAuthentication")
+    public List<String> traceAuthentication(CredentialsApi credentials);
 
 }
