@@ -72,7 +72,7 @@ export class ApplicationConfigurationCardComponent implements OnInit {
   }
 
   onCopy() {
-    navigator.clipboard.writeText(JSON.stringify(this.appConfig)).then(
+    navigator.clipboard.writeText(JSON.stringify(this.appConfig, null, '\t')).then(
       function () {
         console.log('Copied to clipboard successfully');
       },
