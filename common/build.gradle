@@ -4,7 +4,7 @@ dependencies {
     api (
         'commons-codec:commons-codec:1.15',
         'com.google.guava:guava:30.1-jre',
-        'io.dropwizard.metrics:metrics-core:4.1.16',
+        'io.dropwizard.metrics:metrics-core:4.1.17',
         'org.slf4j:slf4j-api:1.7.30',
         'org.glassfish.jersey.media:jersey-media-json-jackson:3.0.0',
         'com.j256.simplemagic:simplemagic:1.16',
@@ -15,9 +15,9 @@ dependencies {
     )
 
     implementation (
-        'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.12.0',
-        'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.0',
-        'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.0',
+        'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.12.1',
+        'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.1',
+        'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.1',
         'org.apache.commons:commons-compress:1.20',
     )
 }

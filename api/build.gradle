@@ -16,6 +16,14 @@ dependencies {
     api(
         'io.swagger.core.v3:swagger-annotations:2.1.6',
     )
+    swaggerDeps(
+        'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.12.1',
+        'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.1',
+        'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.1',
+        'org.apache.commons:commons-lang3:3.7',
+        'io.swagger.core.v3:swagger-jaxrs2:2.1.6',
+        'javax.ws.rs:javax.ws.rs-api:2.1',
+    )
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8
