@@ -15,6 +15,7 @@ import { ProductCardComponent } from './components/product-card/product-card.com
 import { ProductListComponent } from './components/product-list/product-list.component';
 import { RemoteProgressElementComponent } from './components/remote-progress-element/remote-progress-element.component';
 import { RemoteProgressComponent } from './components/remote-progress/remote-progress.component';
+import { TextboxComponent } from './components/textbox/textbox.component';
 import { PortValidatorDirective } from './validators/port.validator';
 
 @NgModule({
@@ -32,6 +33,7 @@ import { PortValidatorDirective } from './validators/port.validator';
     ProductListComponent,
     FileEditorComponent,
     DiffEditorComponent,
+    TextboxComponent,
   ],
   entryComponents: [
     MessageboxComponent,
@@ -53,6 +55,7 @@ import { PortValidatorDirective } from './validators/port.validator';
     ProductListComponent,
     FileEditorComponent,
     DiffEditorComponent,
+    TextboxComponent,
   ],
 })
 export class SharedModule {}

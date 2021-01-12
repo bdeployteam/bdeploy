@@ -1,5 +1,8 @@
 package io.bdeploy.minion.user.ldap;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -8,6 +11,7 @@ import java.util.Optional;
 import java.util.Properties;
 
 import javax.naming.Context;
+import javax.naming.NameNotFoundException;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
@@ -78,11 +82,15 @@ public class LdapAuthenticator implements Authenticator {
         for (LDAPSettingsDto server : servers) {
             trace.log("  query server " + server.server);
             try {
-                LdapContext ctx = createServerContext(server);
-                if (ctx == null) {
+                LdapContext ctx = null;
+                try {
+                    ctx = createServerContext(server);
+                } catch (Exception e) {
+                    log.error("Cannot create initial connection to {} as {}", server.server, server.user, e);
                     trace.log("    server " + server.server + ": connection failed");
                     return null;
                 }
+
                 try {
                     UserInfo found = performUserSearch(user, password, server, ctx, trace);
                     if (found != null) {
@@ -173,24 +181,55 @@ public class LdapAuthenticator implements Authenticator {
         env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
         env.put(Context.PROVIDER_URL, server.server);
         env.put(Context.REFERRAL, server.followReferrals ? "follow" : "ignore");
-
         // TODO: test pooling: env.put("com.sun.jndi.ldap.connect.pool", "true");
 
-        try {
-            LdapContext ctx = new InitialLdapContext(env, null);
-
-            ctx.addToEnvironment(Context.SECURITY_PRINCIPAL, server.user);
-            ctx.addToEnvironment(Context.SECURITY_CREDENTIALS, server.pass);
-            ctx.reconnect(null);
-            return ctx;
-        } catch (Exception e) {
-            log.error("Cannot create initial connection to {} as {}", server.server, server.user, e);
-            return null;
-        }
-
+        LdapContext ctx = new InitialLdapContext(env, null);
+        ctx.addToEnvironment(Context.SECURITY_PRINCIPAL, server.user);
+        ctx.addToEnvironment(Context.SECURITY_CREDENTIALS, server.pass);
+        ctx.reconnect(null);
+        return ctx;
     }
 
     private void closeServerContext(DirContext ctx) throws NamingException {
         ctx.close();
+    }
+
+    public String testLdapServer(LDAPSettingsDto dto) {
+        LdapContext ctx = null;
+        try {
+            ctx = createServerContext(dto);
+
+            try {
+                // dummy search: lookup bind user, no need to process result
+                SearchControls sc = new SearchControls();
+                sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
+                String filter = "(" + dto.accountUserName + "={0})";
+                ctx.search(dto.accountBase, filter, new Object[] { dto.user }, sc);
+                return "OK";
+            } catch (NameNotFoundException e) {
+                return exception2String(dto.server + ": base context not found: ", e);
+            } catch (NamingException e) {
+                return exception2String(dto.server + ": query failed: ", e);
+            } finally {
+                try {
+                    if (ctx != null) {
+                        closeServerContext(ctx);
+                    }
+                } catch (Exception e) {
+                    return exception2String(dto.server + ": close failed: ", e);
+                }
+            }
+        } catch (Exception e) {
+            return exception2String(dto.server + ": connection failed: ", e);
+        }
+    }
+
+    private String exception2String(String message, Exception exception) {
+        try (StringWriter sw = new StringWriter(); PrintWriter pw = new PrintWriter(sw)) {
+            exception.printStackTrace(pw);
+            return message + '\n' + sw.toString();
+        } catch (IOException ioe) {
+            return "\nInternal Error: Can't close streams";
+        }
     }
 }

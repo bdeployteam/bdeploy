@@ -3,6 +3,9 @@ package io.bdeploy.ui.api;
 import java.util.List;
 import java.util.SortedSet;
 
+import io.bdeploy.api.remote.v1.dto.CredentialsApi;
+import io.bdeploy.interfaces.UserInfo;
+import io.bdeploy.interfaces.settings.LDAPSettingsDto;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -12,9 +15,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-
-import io.bdeploy.api.remote.v1.dto.CredentialsApi;
-import io.bdeploy.interfaces.UserInfo;
 
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -82,5 +82,9 @@ public interface AuthAdminResource {
     @POST
     @Path("/traceAuthentication")
     public List<String> traceAuthentication(CredentialsApi credentials);
+
+    @POST
+    @Path("/testLdapServer")
+    public String testLdapServer(LDAPSettingsDto dto);
 
 }

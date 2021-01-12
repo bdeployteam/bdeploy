@@ -7,6 +7,7 @@ import java.util.SortedSet;
 import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.UserPermissionUpdateDto;
+import io.bdeploy.interfaces.settings.LDAPSettingsDto;
 
 public interface AuthService {
 
@@ -23,6 +24,12 @@ public interface AuthService {
      * @return List of tracing messages.
      */
     public List<String> traceAuthentication(String user, String pw);
+
+    /**
+     * @param dto the LDAP settings
+     * @return "OK" or error output
+     */
+    public String testLdapServer(LDAPSettingsDto dto);
 
     /**
      * @param info the updated user information.

@@ -45,6 +45,11 @@
             <div>{{ s.server }}</div>
             <div>{{ s.description }}</div>
             <div>
+              <button mat-icon-button [disabled]="testRunning" (click)="testServer(i)" matTooltip="Test Connection">
+                <mat-icon>offline_bolt</mat-icon>
+              </button>
+            </div>
+            <div>
               <button mat-icon-button [disabled]="f" (click)="up(i)"><mat-icon>keyboard_arrow_up</mat-icon></button>
             </div>
             <div>
