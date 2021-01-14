@@ -1,6 +1,6 @@
 package io.bdeploy.gradle;
 
-import jakarta.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriBuilder;
 
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
