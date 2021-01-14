@@ -16,6 +16,6 @@
   margin-left: 10px;
 }
 
-.mat-dialog-actions {
-  justify-content: flex-end;
+.actions-spacer {
+  flex: 1 1 auto;
 }

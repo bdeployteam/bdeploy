@@ -89,6 +89,8 @@
   </div>
 </form>
 <div mat-dialog-actions>
-  <button mat-raised-button [mat-dialog-close]="null">Cancel</button>
+  <button mat-raised-button [disabled]="loading || f.invalid" (click)="testServer()">Test Connection</button>
+  <div class="actions-spacer"></div>
+  <button mat-raised-button [disabled]="loading" [mat-dialog-close]="null">Cancel</button>
   <button mat-raised-button color="primary" [mat-dialog-close]="server" [disabled]="loading || f.invalid">Apply</button>
 </div>

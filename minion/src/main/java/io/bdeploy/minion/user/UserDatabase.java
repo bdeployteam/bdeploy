@@ -41,6 +41,7 @@ import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.UserPermissionUpdateDto;
 import io.bdeploy.interfaces.manifest.SettingsManifest;
 import io.bdeploy.interfaces.settings.AuthenticationSettingsDto;
+import io.bdeploy.interfaces.settings.LDAPSettingsDto;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.user.ldap.LdapAuthenticator;
 import io.bdeploy.ui.api.AuthService;
@@ -63,13 +64,14 @@ public class UserDatabase implements AuthService {
     private final BHive target;
 
     private final List<Authenticator> authenticators = new ArrayList<>();
+    private final LdapAuthenticator ldapAuthenticator = new LdapAuthenticator();
 
     public UserDatabase(MinionRoot root) {
         this.root = root;
         this.target = root.getHive();
 
         this.authenticators.add(new PasswordAuthentication());
-        this.authenticators.add(new LdapAuthenticator());
+        this.authenticators.add(ldapAuthenticator);
     }
 
     @Override
@@ -258,6 +260,19 @@ public class UserDatabase implements AuthService {
         AuthTrace trace = new AuthTrace(true);
         authenticateInternal(user, pw, trace);
         return trace.getMessages();
+    }
+
+    @Override
+    public String testLdapServer(LDAPSettingsDto dto) {
+        // if there's no password in the dto, check if it is an existing setting and take the password from there, if not, proceed with an empty password
+        if (dto.pass == null) {
+            AuthenticationSettingsDto settings = SettingsManifest.read(target, root.getEncryptionKey(), false).auth;
+            Optional<LDAPSettingsDto> storedDto = settings.ldapSettings.stream().filter(l -> l.id.equals(dto.id)).findFirst();
+            if (storedDto.isPresent()) {
+                dto.pass = storedDto.get().pass;
+            }
+        }
+        return ldapAuthenticator.testLdapServer(dto);
     }
 
     private UserInfo authenticateInternal(String user, String pw, AuthTrace trace) {

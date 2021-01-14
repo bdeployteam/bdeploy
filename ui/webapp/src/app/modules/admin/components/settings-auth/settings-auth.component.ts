@@ -4,9 +4,11 @@ import { cloneDeep } from 'lodash-es';
 import { Observable, of } from 'rxjs';
 import { LDAPSettingsDto } from 'src/app/models/gen.dtos';
 import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
+import { TextboxComponent } from 'src/app/modules/shared/components/textbox/textbox.component';
 import { CanComponentDeactivate } from 'src/app/modules/shared/guards/can-deactivate.guard';
 import { MessageboxService } from 'src/app/modules/shared/services/messagebox.service';
 import { SettingsService } from '../../../core/services/settings.service';
+import { AuthAdminService } from '../../services/auth-admin.service';
 import { SettingsAuthLdapServerComponent } from '../settings-auth-ldap-server/settings-auth-ldap-server.component';
 import { SettingsAuthTestUserComponent } from '../settings-auth-test-user/settings-auth-test-user.component';
 
@@ -17,8 +19,11 @@ import { SettingsAuthTestUserComponent } from '../settings-auth-test-user/settin
   providers: [SettingsService],
 })
 export class SettingsAuthComponent implements OnInit, CanComponentDeactivate {
+  testRunning = false;
+
   constructor(
     public settings: SettingsService,
+    private authAdminService: AuthAdminService,
     private dialog: MatDialog,
     private messageBoxService: MessageboxService
   ) {}
@@ -41,6 +46,7 @@ export class SettingsAuthComponent implements OnInit, CanComponentDeactivate {
     this.dialog
       .open(SettingsAuthLdapServerComponent, {
         width: '500px',
+        disableClose: true,
         data: null,
       })
       .afterClosed()
@@ -59,6 +65,7 @@ export class SettingsAuthComponent implements OnInit, CanComponentDeactivate {
     this.dialog
       .open(SettingsAuthLdapServerComponent, {
         width: '500px',
+        disableClose: true,
         data: cloneDeep(s),
       })
       .afterClosed()
@@ -83,6 +90,36 @@ export class SettingsAuthComponent implements OnInit, CanComponentDeactivate {
   testUser() {
     this.dialog.open(SettingsAuthTestUserComponent, {
       width: '800px',
+    });
+  }
+
+  testServer(i: number) {
+    this.testRunning = true;
+    const dto: LDAPSettingsDto = this.getLdapSettings()[i];
+    this.authAdminService.testLdapServer(dto).subscribe((r) => {
+      if (r === 'OK') {
+        this.messageBoxService
+          .open({
+            title: 'Connection Test',
+            message: 'Server ' + dto.server + ' responded as expected.',
+            mode: MessageBoxMode.INFO,
+          })
+          .subscribe((_) => {
+            this.testRunning = false;
+          });
+      } else {
+        this.dialog
+          .open(TextboxComponent, {
+            width: '80%',
+            height: '600px',
+            data: { title: 'Connection Test Failure', text: r },
+            closeOnNavigation: true,
+          })
+          .afterClosed()
+          .subscribe((e) => {
+            this.testRunning = false;
+          });
+      }
     });
   }
 }

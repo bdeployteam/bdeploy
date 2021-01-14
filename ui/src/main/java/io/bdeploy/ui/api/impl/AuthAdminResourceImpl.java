@@ -3,13 +3,13 @@ package io.bdeploy.ui.api.impl;
 import java.util.List;
 import java.util.SortedSet;
 
-import jakarta.inject.Inject;
-
 import io.bdeploy.api.remote.v1.dto.CredentialsApi;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.UserInfo;
+import io.bdeploy.interfaces.settings.LDAPSettingsDto;
 import io.bdeploy.ui.api.AuthAdminResource;
 import io.bdeploy.ui.api.AuthService;
+import jakarta.inject.Inject;
 
 public class AuthAdminResourceImpl implements AuthAdminResource {
 
@@ -65,5 +65,10 @@ public class AuthAdminResourceImpl implements AuthAdminResource {
     @Override
     public List<String> traceAuthentication(CredentialsApi credentials) {
         return auth.traceAuthentication(credentials.user, credentials.password);
+    }
+
+    @Override
+    public String testLdapServer(LDAPSettingsDto dto) {
+        return auth.testLdapServer(dto);
     }
 }
