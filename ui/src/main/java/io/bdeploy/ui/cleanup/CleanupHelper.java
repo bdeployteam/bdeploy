@@ -26,12 +26,9 @@ import io.bdeploy.interfaces.cleanup.CleanupAction;
 import io.bdeploy.interfaces.cleanup.CleanupAction.CleanupType;
 import io.bdeploy.interfaces.cleanup.CleanupGroup;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
-import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
-import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
-import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
@@ -86,22 +83,26 @@ public class CleanupHelper {
      * @return the {@link List} of {@link CleanupGroup}s per instance group or minion.
      */
     public List<CleanupGroup> calculate() {
+        log.info("Cleanup start");
         List<CleanupGroup> groups = new ArrayList<>();
+
+        SortedSet<Key> instanceNodeManifestsToKeep = new TreeSet<>();
 
         // master cleanup (clean instance groups, skip otherwise (software repositories))
         for (String group : registry.getAll().keySet()) {
             CleanupInstanceGroupContext context = new CleanupInstanceGroupContext(group, registry.get(group), vss);
             if (context.getInstanceGroupConfiguration() != null) {
-                groups.add(calculateInstanceGroup(context));
+                CleanupGroup cleanupGroup = calculateInstanceGroup(context);
+                groups.add(cleanupGroup);
+                instanceNodeManifestsToKeep.addAll(context.getAllInstanceNodeManifestsToKeep());
             }
         }
 
         // no nodes to cleanup on central. actual node cleanup for managed masters done on each master.
         if (minion.getMode() != MinionMode.CENTRAL) {
             // minions cleanup
-            SortedSet<Key> instanceNodeManifestsToKeep = collectKnownInstanceNodeManifests();
             for (Map.Entry<String, MinionDto> node : minion.getMinions().entrySet()) {
-                log.info("Cleaning on {}, using {} anchors.", node.getKey(), instanceNodeManifestsToKeep.size());
+                log.info("Calculate node {}, using {} anchors.", node.getKey(), instanceNodeManifestsToKeep.size());
 
                 RemoteService remote = node.getValue().remote;
                 NodeCleanupResource scr = ResourceProvider.getVersionedResource(remote, NodeCleanupResource.class, null);
@@ -116,6 +117,7 @@ public class CleanupHelper {
                 }
             }
         }
+        log.info("Cleanup done.");
         return groups;
     }
 
@@ -167,38 +169,6 @@ public class CleanupHelper {
     }
 
     /**
-     * Collects {@link InstanceNodeManifest}s to <b>keep</b>.
-     * Given all {@link BHive}s registered in the given {@link BHiveRegistry}, all
-     * {@link InstanceNodeManifest}s that exist (also historic versions) are collected.
-     *
-     * @return the {@link SortedSet} of {@link Key}s which are required to be kept alive on each node.
-     */
-    private SortedSet<Key> collectKnownInstanceNodeManifests() {
-        SortedSet<Key> result = new TreeSet<>();
-        for (BHive hive : registry.getAll().values()) {
-            InstanceGroupConfiguration ig = new InstanceGroupManifest(hive).read();
-            // not an InstanceGroup (default hive / software repository)
-            if (ig == null) {
-                continue;
-            }
-
-            log.info("Gathering information for instance group {} ({})", ig.name, ig.title);
-
-            // instance manifests
-            SortedSet<Key> imfs = InstanceManifest.scan(hive, false);
-
-            // instance node manifests referenced by imfs
-            SortedSet<Key> inmfs = imfs.stream().map(key -> InstanceManifest.of(hive, key))
-                    .flatMap(im -> im.getInstanceNodeManifests().values().stream())
-                    .collect(Collectors.toCollection(TreeSet::new));
-            result.addAll(inmfs);
-
-            log.info("Collected {} instance node manifests", inmfs.size());
-        }
-        return result;
-    }
-
-    /**
      * Calculate cleanup actions for a single instance group depending on auto-delete and auto-uninstall
      * configuration.
      *
@@ -206,16 +176,14 @@ public class CleanupHelper {
      * @return a {@link CleanupGroup} for the given instance group
      */
     private CleanupGroup calculateInstanceGroup(CleanupInstanceGroupContext context) {
+        log.info("Calculate instance group {}", context.getInstanceGroupConfiguration().name);
         List<CleanupAction> instanceGroupActions = new ArrayList<>();
 
         // for central, don't auto-uninstall. only auto-clean products which are not known to be used.
         if (minion.getMode() != MinionMode.CENTRAL) {
             // auto uninstall of old instance version
             for (Key key : context.getLatestInstanceManifests()) {
-                InstanceManifest im = InstanceManifest.of(context.getHive(), key);
-                if (im.getConfiguration().autoUninstall) {
-                    instanceGroupActions.addAll(calculateInstance(context, im));
-                }
+                instanceGroupActions.addAll(calculateInstance(context, key));
             }
         }
 
@@ -238,39 +206,61 @@ public class CleanupHelper {
      * @param instanceManifest the instance to check
      * @return a list of {@link CleanupAction}s for the given instance
      */
-    private List<CleanupAction> calculateInstance(CleanupInstanceGroupContext context, InstanceManifest instanceManifest) {
-        log.debug("Cleaning instance {} in group {}", instanceManifest.getManifest(),
-                context.getInstanceGroupConfiguration().name);
-
-        // find active tags from app status (what's up running)
-        MasterRootResource root = ResourceProvider.getVersionedResource(
-                provider.getControllingMaster(context.getHive(), instanceManifest.getManifest()), MasterRootResource.class,
-                securityContext);
-        MasterNamedResource namedMaster = root.getNamedMaster(context.getGroup());
-        Map<String, ProcessStatusDto> appStatus = namedMaster.getStatus(instanceManifest.getConfiguration().uuid).getAppStatus();
-        Set<String> activeTags = appStatus.values().stream().map(p -> p.instanceTag).collect(Collectors.toSet());
-
-        // get instance state (what's configured and installed)
-        InstanceStateRecord state = instanceManifest.getState(context.getHive()).read();
-
-        // find installed instance versions older than "active", not "lastActive", not currently running
-        SortedSet<Key> result = context.getAllInstanceManifests().stream()
-                .filter(im -> im.getName().equals(instanceManifest.getManifest().getName())) //
-                .filter(im -> (state.activeTag != null && intTagComparator.compare(im.getTag(), state.activeTag) < 0)
-                        && !im.getTag().equals(state.lastActiveTag)) //
-                .filter(im -> state.installedTags.contains(im.getTag())) //
-                .filter(im -> !activeTags.contains(im.getTag())) //
-                .collect(Collectors.toCollection(TreeSet::new));
-
-        // add to context for later cleanup steps...
-        context.addInstanceVersions(instanceManifest.getManifest().getName(), result);
-
-        // calculate and return actions for calculated instance
+    private List<CleanupAction> calculateInstance(CleanupInstanceGroupContext context, Key imKey) {
+        log.info("Calculate instance {} in group {}", imKey, context.getInstanceGroupConfiguration().name);
         List<CleanupAction> actions = new ArrayList<>();
-        for (Key key : result) {
-            InstanceConfiguration imConfig = InstanceManifest.of(context.getHive(), key).getConfiguration();
-            actions.add(new CleanupAction(CleanupType.UNINSTALL_INSTANCE_VERSION, key.toString(),
-                    "Uninstall instance version \"" + imConfig.name + "\", version \"" + key.getTag() + "\""));
+
+        InstanceManifest instanceManifest = InstanceManifest.of(context.getHive(), imKey);
+
+        if (instanceManifest.getConfiguration().autoUninstall) {
+            // find active tags from app status (what's up running)
+            MasterRootResource root = ResourceProvider.getVersionedResource(
+                    provider.getControllingMaster(context.getHive(), imKey), MasterRootResource.class, securityContext);
+            MasterNamedResource namedMaster = root.getNamedMaster(context.getGroup());
+            Map<String, ProcessStatusDto> appStatus = namedMaster.getStatus(instanceManifest.getConfiguration().uuid)
+                    .getAppStatus();
+            Set<String> activeTags = appStatus.values().stream().map(p -> p.instanceTag).collect(Collectors.toSet());
+
+            // get instance state (what's configured and installed)
+            InstanceStateRecord state = instanceManifest.getState(context.getHive()).read();
+
+            // find installed instance versions older than "active", not "lastActive", not currently running
+            SortedSet<Key> result = context.getAllInstanceManifests().stream().filter(im -> im.getName().equals(imKey.getName())) //
+                    .filter(im -> (state.activeTag != null && intTagComparator.compare(im.getTag(), state.activeTag) < 0)
+                            && !im.getTag().equals(state.lastActiveTag)) //
+                    .filter(im -> state.installedTags.contains(im.getTag())) //
+                    .filter(im -> !activeTags.contains(im.getTag())) //
+                    .collect(Collectors.toCollection(TreeSet::new));
+
+            // add to context for later cleanup steps...
+            context.addInstanceVersions(imKey.getName(), result);
+
+            // calculate the instance node manifests to keep during minion cleanup
+            // (it's calculated here because required information is available at this point)
+            SortedSet<Key> inmfs = context.getAllInstanceManifests().stream() //
+                    .filter(im -> im.getName().equals(imKey.getName())) //
+                    .map(key -> InstanceManifest.of(context.getHive(), key)) //
+                    .flatMap(im -> im.getInstanceNodeManifests().values().stream()) //
+                    .filter(inm -> (state.activeTag != null && intTagComparator.compare(inm.getTag(), state.activeTag) >= 0)
+                            || inm.getTag().equals(state.lastActiveTag) //
+                            || activeTags.contains(inm.getTag())) //
+                    .collect(Collectors.toCollection(TreeSet::new));
+            context.addInstanceNodeManifestsToKeep(inmfs);
+
+            // calculate actions for calculated instance
+            for (Key key : result) {
+                InstanceConfiguration imConfig = InstanceManifest.of(context.getHive(), key).getConfiguration();
+                actions.add(new CleanupAction(CleanupType.UNINSTALL_INSTANCE_VERSION, key.toString(),
+                        "Uninstall instance version \"" + imConfig.name + "\", version \"" + key.getTag() + "\""));
+            }
+        } else {
+            // keep all InstanceNodeManifests on minion
+            SortedSet<Key> inmfs = context.getAllInstanceManifests().stream() //
+                    .filter(im -> im.getName().equals(imKey.getName())) // 
+                    .map(key -> InstanceManifest.of(context.getHive(), key))
+                    .flatMap(im -> im.getInstanceNodeManifests().values().stream())
+                    .collect(Collectors.toCollection(TreeSet::new));
+            context.addInstanceNodeManifestsToKeep(inmfs);
         }
         return actions;
     }
@@ -282,7 +272,7 @@ public class CleanupHelper {
      * @return a list of {@link CleanupActions} for products and their applications
      */
     private List<CleanupAction> calculateProducts(CleanupInstanceGroupContext context) {
-        log.info("Collecting products to clean in group {}", context.getInstanceGroupConfiguration().name);
+        log.info("Calculate products to clean in group {}", context.getInstanceGroupConfiguration().name);
 
         List<CleanupAction> actions = new ArrayList<>();
         Map<String, List<Key>> productsInUseMap = collectProductsInUse(context);
@@ -357,7 +347,7 @@ public class CleanupHelper {
      * @return List of {@link CleanupAction}s
      */
     private List<CleanupAction> calculateMetaManifests(CleanupInstanceGroupContext context) {
-        log.info("Collecting stale meta-manifests in group {}", context.getInstanceGroupConfiguration().name);
+        log.info("Calculate stale meta-manifests in group {}", context.getInstanceGroupConfiguration().name);
 
         List<CleanupAction> actions = new ArrayList<>();
         Set<Key> allImKeys = context.getHive().execute(new ManifestListOperation());

@@ -16,14 +16,6 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
-import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.ResponseBuilder;
-import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.core.StreamingOutput;
-
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +29,7 @@ import io.bdeploy.api.remote.v1.dto.InstanceConfigurationApi.InstancePurposeApi;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestExistsOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
@@ -59,6 +52,13 @@ import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.MinionState;
 import io.bdeploy.pcu.InstanceProcessController;
 import io.bdeploy.pcu.MinionProcessController;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.StreamingOutput;
 
 public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
 
@@ -188,6 +188,9 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
 
         // cleanup the deployment directory.
         inc.uninstall();
+
+        // Remove the InstanceNodeManifest
+        hive.execute(new ManifestDeleteOperation().setToDelete(key));
     }
 
     private InstanceNodeManifest findInstanceNodeManifest(String instanceId) {
