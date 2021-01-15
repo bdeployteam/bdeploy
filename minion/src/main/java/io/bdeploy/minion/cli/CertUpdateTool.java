@@ -101,7 +101,7 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
         try {
             BCX509Helper.updatePrivateCertificate(ks, ksp, cert);
         } catch (Exception e) {
-            throw new IllegalStateException("Cannot update certificate from " + cert);
+            throw new IllegalStateException("Cannot update certificate from " + cert, e);
         }
 
         // now update the own access token.
