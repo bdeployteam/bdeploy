@@ -37,6 +37,8 @@ class CleanupInstanceGroupContext {
     private final Map<String, SortedSet<Key>> instanceVersions4Uninstall = new HashMap<>();
     private final SortedSet<Manifest.Key> allManifests4deletion = new TreeSet<>();
 
+    private final SortedSet<Manifest.Key> allInstanceNodeManifestsToKeep = new TreeSet<>();
+
     public CleanupInstanceGroupContext(String group, BHive hive, VersionSorterService vss) {
         this.group = group;
         this.hive = hive;
@@ -120,4 +122,11 @@ class CleanupInstanceGroupContext {
         this.allManifests4deletion.add(key);
     }
 
+    public void addInstanceNodeManifestsToKeep(SortedSet<Key> keys) {
+        this.allInstanceNodeManifestsToKeep.addAll(keys);
+    }
+
+    public SortedSet<Key> getAllInstanceNodeManifestsToKeep() {
+        return allInstanceNodeManifestsToKeep;
+    }
 }
