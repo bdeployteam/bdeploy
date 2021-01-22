@@ -4,17 +4,6 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
@@ -29,6 +18,16 @@ import io.bdeploy.interfaces.manifest.banner.InstanceBannerRecord;
 import io.bdeploy.interfaces.manifest.history.runtime.MasterRuntimeHistoryDto;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.WeakTokenAllowed;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 /**
  * Manages a certain hive on the master
@@ -46,9 +45,8 @@ public interface MasterNamedResource {
      *            {@link Manifest} references. Each Entries name is the name of the
      *            node as known to the master to install to, the {@link Manifest}
      *            reference references a {@link Manifest} suitable for the DCU.
-     *            <li>Have a label with the key 'X-Instance'. The
-     *            value must be the UUID of the deployment this {@link Manifest}
-     *            belongs to.
+     *            <li>Have a label with the key 'X-Instance'. The value must be the
+     *            UUID of the deployment this {@link Manifest} belongs to.
      *            </ul>
      */
     @PUT
@@ -71,7 +69,8 @@ public interface MasterNamedResource {
 
     /**
      * @param update the state of the instance to write
-     * @param expectedTag the expected "current" tag of the instance to avoid conflicts
+     * @param expectedTag the expected "current" tag of the instance to avoid
+     *            conflicts
      */
     @POST
     @Path("/update")
@@ -92,7 +91,8 @@ public interface MasterNamedResource {
     public void deleteVersion(@QueryParam("u") String instanceUuid, @QueryParam("t") String tag);
 
     /**
-     * Create a new instance version by updating the underlying product to the given tag.
+     * Create a new instance version by updating the underlying product to the given
+     * tag.
      *
      * @param uuid the UUID of the instance to update
      * @param productTag the tag of the product to update to.
@@ -113,7 +113,8 @@ public interface MasterNamedResource {
 
     /**
      * @param instanceId the instance UUID to fetch directory content for
-     * @return a snapshot of the DATA directory for the given instance for each minion.
+     * @return a snapshot of the DATA directory for the given instance for each
+     *         minion.
      */
     @GET
     @Path("/dataDir")
@@ -131,7 +132,8 @@ public interface MasterNamedResource {
 
     /**
      * @param minion the minion the entry refers to.
-     * @param entry the entry to stream. The stream will include the complete content of the file.
+     * @param entry the entry to stream. The stream will include the complete
+     *            content of the file.
      * @return an {@link InputStream} that can be used to stream the file.
      */
     @POST
@@ -158,8 +160,19 @@ public interface MasterNamedResource {
             @QueryParam("a") String application);
 
     /**
+     * @param instanceId the deployment/instance uuid
+     * @param application the application id
+     */
+    @GET
+    @WeakTokenAllowed
+    @Path("/client-start")
+    public void logClientStart(@QueryParam("u") String instanceId, @QueryParam("a") String application,
+            @QueryParam("h") String hostname);
+
+    /**
      * @param instanceId the instance id to retrieve configuration data for
-     * @return a ZIPed version of the configuration tree associated with the instance
+     * @return a ZIPed version of the configuration tree associated with the
+     *         instance
      */
     @POST
     @WeakTokenAllowed
@@ -168,7 +181,8 @@ public interface MasterNamedResource {
     public java.nio.file.Path getClientInstanceConfiguration(Manifest.Key instanceId);
 
     /**
-     * Starts all applications of the given instance having the start type 'INSTANCE' configured.
+     * Starts all applications of the given instance having the start type
+     * 'INSTANCE' configured.
      *
      * @param instanceId
      */
@@ -179,10 +193,8 @@ public interface MasterNamedResource {
     /**
      * Starts a single application of an instance.
      *
-     * @param instanceId
-     *            the unique id of the instance.
-     * @param applicationId
-     *            the unique ID of the application.
+     * @param instanceId the unique id of the instance.
+     * @param applicationId the unique ID of the application.
      */
     @POST
     @Path("/startApp")
@@ -191,10 +203,8 @@ public interface MasterNamedResource {
     /**
      * Stops a single application of an instance.
      *
-     * @param instanceId
-     *            the unique id of the instance.
-     * @param applicationId
-     *            the unique ID of the application.
+     * @param instanceId the unique id of the instance.
+     * @param applicationId the unique ID of the application.
      */
     @POST
     @Path("/stopApp")
@@ -203,8 +213,7 @@ public interface MasterNamedResource {
     /**
      * Stops all applications of an instance.
      *
-     * @param instanceId
-     *            the unique id of the instance.
+     * @param instanceId the unique id of the instance.
      */
     @POST
     @Path("/stopAll")
@@ -213,9 +222,11 @@ public interface MasterNamedResource {
     /**
      * @param instanceId the unique id of the instance
      * @param tag the tag of the instance version to fetch for.
-     * @param applicationId the unique id of the application to fetch the output entry for.
-     * @return an {@link RemoteDirectory} specifying the minion the entry resides on. The {@link RemoteDirectoryEntry} list
-     *         might be empty in case no output file exists.
+     * @param applicationId the unique id of the application to fetch the output
+     *            entry for.
+     * @return an {@link RemoteDirectory} specifying the minion the entry resides
+     *         on. The {@link RemoteDirectoryEntry} list might be empty in case no
+     *         output file exists.
      */
     @GET
     @Path("/output")
@@ -225,8 +236,7 @@ public interface MasterNamedResource {
     /**
      * Returns status information about applications running in this instance.
      *
-     * @param instanceId
-     *            the unique id of the instance.
+     * @param instanceId the unique id of the instance.
      * @return the running applications
      */
     @GET
@@ -246,7 +256,8 @@ public interface MasterNamedResource {
 
     /**
      * @param principal the principal name to issue the token to.
-     * @return a "weak" token only suitable for fetching by launcher-like applications.
+     * @return a "weak" token only suitable for fetching by launcher-like
+     *         applications.
      */
     @POST
     @Path("/weak-token")
@@ -255,12 +266,9 @@ public interface MasterNamedResource {
     /**
      * Writes data to the stdin stream of an application.
      *
-     * @param instanceId
-     *            the unique id of the instance.
-     * @param applicationId
-     *            the unique ID of the application.
-     * @param data
-     *            the data to write to stdin of the application.
+     * @param instanceId the unique id of the instance.
+     * @param applicationId the unique ID of the application.
+     * @param data the data to write to stdin of the application.
      */
     @POST
     @Path("/stdin")
@@ -268,7 +276,8 @@ public interface MasterNamedResource {
 
     /**
      * @param minion the minion to check port availability on.
-     * @param ports the ports to check whether they are open/used or not on the machine
+     * @param ports the ports to check whether they are open/used or not on the
+     *            machine
      * @return a state for each port, true for 'used', false for 'free'.
      */
     @POST

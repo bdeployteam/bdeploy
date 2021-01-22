@@ -12,9 +12,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response.Status;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +42,9 @@ import io.bdeploy.interfaces.manifest.attributes.CustomAttributes;
 import io.bdeploy.interfaces.manifest.banner.InstanceBanner;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory;
 import io.bdeploy.interfaces.manifest.state.InstanceState;
+import io.bdeploy.interfaces.manifest.statistics.ClientUsage;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response.Status;
 
 /**
  * Stores and reads instances from/to manifests.
@@ -76,12 +76,9 @@ public class InstanceManifest {
     /**
      * Loads the manifest for the given instance from the given hive.
      *
-     * @param hive
-     *            hive containing the instance
-     * @param instance
-     *            ID of the instance
-     * @param versionTag
-     *            optional version tag. {@code null} for the latest version
+     * @param hive hive containing the instance
+     * @param instance ID of the instance
+     * @param versionTag optional version tag. {@code null} for the latest version
      * @return the loaded manifest
      */
     public static InstanceManifest load(BHive hive, String instance, String versionTag) {
@@ -120,7 +117,8 @@ public class InstanceManifest {
         }
 
         // don't actually load the product - it's optional on the minions.
-        // this is to not force ALL of a product suite to the remote. minions may receive
+        // this is to not force ALL of a product suite to the remote. minions may
+        // receive
         // only a subset of a product to deploy.
         InstanceManifest result = new InstanceManifest(key, ic);
 
@@ -148,7 +146,8 @@ public class InstanceManifest {
 
     /**
      * @param hive the {@link BHive}
-     * @param instanceVersion the version to delete, including instance node manifests.
+     * @param instanceVersion the version to delete, including instance node
+     *            manifests.
      */
     public static void delete(BHive hive, Manifest.Key instanceVersion) {
         InstanceManifest im = of(hive, instanceVersion);
@@ -210,16 +209,19 @@ public class InstanceManifest {
     }
 
     /**
-     * @return the {@link io.bdeploy.bhive.model.Manifest.Key key} of the underlying {@link Manifest}.
+     * @return the {@link io.bdeploy.bhive.model.Manifest.Key key} of the underlying
+     *         {@link Manifest}.
      */
     public Manifest.Key getManifest() {
         return key;
     }
 
     /**
-     * Returns the name of the node along with a reference to the actual {@linkplain InstanceNodeManifest manifest}.
+     * Returns the name of the node along with a reference to the actual
+     * {@linkplain InstanceNodeManifest manifest}.
      *
-     * @return a set containing the name of the node (=key) and its manifest reference (=value)
+     * @return a set containing the name of the node (=key) and its manifest
+     *         reference (=value)
      */
     public SortedMap<String, Manifest.Key> getInstanceNodeManifests() {
         return nodes;
@@ -229,7 +231,8 @@ public class InstanceManifest {
      * Returns the name of the node along with the actual node configuration.
      *
      * @param hive the hive where the manifest is stored
-     * @return a set containing the name of the node (=key) and its manifest reference (=value)
+     * @return a set containing the name of the node (=key) and its manifest
+     *         reference (=value)
      */
     public Map<String, InstanceNodeConfiguration> getInstanceNodeConfiguration(BHive hive) {
         Map<String, InstanceNodeConfiguration> result = new TreeMap<>();
@@ -241,7 +244,8 @@ public class InstanceManifest {
     }
 
     /**
-     * @param hive the {@link BHive} to scan for available {@link InstanceManifest}s.
+     * @param hive the {@link BHive} to scan for available
+     *            {@link InstanceManifest}s.
      * @return a {@link SortedSet} with all available {@link InstanceManifest}s.
      */
     public static SortedSet<Manifest.Key> scan(BHive hive, boolean onlyLatest) {
@@ -275,27 +279,43 @@ public class InstanceManifest {
     /**
      * Retrieve the history of this {@link InstanceManifest}.
      *
-     * @param bhive the {@link BHiveExecution} used to perform operations on the history.
-     * @return the {@link InstanceManifestHistory} which can be used to manipulate and query history.
+     * @param bhive the {@link BHiveExecution} used to perform operations on the
+     *            history.
+     * @return the {@link InstanceManifestHistory} which can be used to manipulate
+     *         and query history.
      */
     public InstanceManifestHistory getHistory(BHiveExecution bhive) {
         return new InstanceManifestHistory(getManifest(), bhive);
     }
 
     /**
-     * @param bhive the {@link BHiveExecution} used to perform operations on the state.
-     * @return the {@link InstanceState} which can be use to manipulate and query state.
+     * @param bhive the {@link BHiveExecution} used to perform operations on the
+     *            state.
+     * @return the {@link InstanceState} which can be use to manipulate and query
+     *         state.
      */
     public InstanceState getState(BHiveExecution bhive) {
         return new InstanceState(getManifest(), bhive);
     }
 
     /**
-     * @param bhive the {@link BHiveExecution} used to perform operations on the state.
-     * @return the {@link InstanceBanner} which can be use to set or remove the banner.
+     * @param bhive the {@link BHiveExecution} used to perform operations on the
+     *            banner.
+     * @return the {@link InstanceBanner} which can be use to set or remove the
+     *         banner.
      */
     public InstanceBanner getBanner(BHiveExecution bhive) {
         return new InstanceBanner(getManifest(), bhive);
+    }
+
+    /**
+     * @param bhive the {@link BHiveExecution} used to perform operations on the
+     *            usage statistics.
+     * @return the {@link ClientUsage} which can be use to set or remove the client
+     *         usage statistics.
+     */
+    public ClientUsage getClientUsage(BHiveExecution bhive) {
+        return new ClientUsage(getManifest(), bhive);
     }
 
     public static class Builder {

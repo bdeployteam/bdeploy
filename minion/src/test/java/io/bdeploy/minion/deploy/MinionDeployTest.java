@@ -178,7 +178,7 @@ public class MinionDeployTest {
         List<CleanupGroup> groups = cr.calculate();
         assertEquals(2, groups.size());
         assertEquals("demo", groups.get(0).instanceGroup);
-        assertEquals(4, groups.get(0).actions.size());
+        assertEquals(5, groups.get(0).actions.size());
 
         assertEquals("master", groups.get(1).minion);
         // 1 instance node manifest, 1 application manifest, 1 dependent manifest

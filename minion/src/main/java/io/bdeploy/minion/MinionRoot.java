@@ -21,7 +21,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.crypto.spec.SecretKeySpec;
-import jakarta.ws.rs.WebApplicationException;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -66,6 +65,7 @@ import io.bdeploy.jersey.audit.Auditor;
 import io.bdeploy.jersey.audit.RollingFileAuditor;
 import io.bdeploy.minion.job.CleanupDownloadDirJob;
 import io.bdeploy.minion.job.MasterCleanupJob;
+import io.bdeploy.minion.job.NodeMonitorJob;
 import io.bdeploy.minion.migration.MinionStateMigration;
 import io.bdeploy.minion.migration.SettingsConfigurationMigration;
 import io.bdeploy.minion.migration.SystemUserMigration;
@@ -76,6 +76,7 @@ import io.bdeploy.pcu.InstanceProcessController;
 import io.bdeploy.pcu.MinionProcessController;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
+import jakarta.ws.rs.WebApplicationException;
 import net.jsign.AuthenticodeSigner;
 import net.jsign.pe.PEFile;
 
@@ -401,6 +402,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             MasterCleanupJob.create(this, getState().cleanupSchedule);
         }
         CleanupDownloadDirJob.create(scheduler, downloadDir);
+        NodeMonitorJob.create(this);
     }
 
     private void createJobScheduler() {
