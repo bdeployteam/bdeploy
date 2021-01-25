@@ -1,6 +1,8 @@
 package io.bdeploy.common.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.Future;
 
 /**
@@ -12,13 +14,21 @@ public class FutureHelper {
     }
 
     public static void awaitAll(Collection<Future<?>> futures) {
+        List<Throwable> exceptions = new ArrayList<>();
+
         futures.forEach(t -> {
             try {
                 t.get();
             } catch (Exception e) {
-                throw new IllegalStateException("asynchronous operation failed", e);
+                exceptions.add(e);
             }
         });
+
+        if (!exceptions.isEmpty()) {
+            IllegalStateException ise = new IllegalStateException("Asynchronous operation(s) failed");
+            exceptions.forEach(ise::addSuppressed);
+            throw ise;
+        }
     }
 
 }
