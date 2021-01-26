@@ -2,10 +2,10 @@
 
 <app-main-nav>
   <router-outlet></router-outlet>
-
-  <div *ngIf="showLoadIndicator()" class="router-load-backdrop"></div>
-  <div *ngIf="showLoadIndicator()" class="router-load-indicator">
-    <span>Loading Module...</span>
-    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-  </div>
 </app-main-nav>
+
+<div *ngIf="showLoadIndicator()" class="router-load-backdrop"></div>
+<div *ngIf="showLoadIndicator()" class="router-load-indicator">
+  <span>Loading Module...</span>
+  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+</div>

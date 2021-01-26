@@ -1,9 +1,15 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .add-button {
   top: auto !important;
   right: 40px !important;
   bottom: 40px !important;
   left: auto !important;
-  position: fixed !important;
+  position: absolute;
 }
 
 .center {
@@ -40,6 +46,7 @@
   flex-direction: row;
   flex-wrap: wrap;
   padding: 10px 10px 10px 55px;
+  overflow: auto;
 }
 
 .software-repository-card {

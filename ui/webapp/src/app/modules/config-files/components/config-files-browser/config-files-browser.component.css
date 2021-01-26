@@ -66,7 +66,7 @@
   right: 40px !important;
   bottom: 40px !important;
   left: auto !important;
-  position: fixed !important;
+  position: absolute;
   z-index: 10;
 }
 
@@ -75,7 +75,7 @@
   right: 40px !important;
   bottom: 110px !important;
   left: auto !important;
-  position: fixed !important;
+  position: absolute;
   z-index: 10;
 }
 

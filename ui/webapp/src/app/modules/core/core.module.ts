@@ -43,16 +43,22 @@ import { ClipboardModule } from 'ngx-clipboard';
 import { CookieService } from 'ngx-cookie-service';
 import { GravatarModule } from 'ngx-gravatar';
 import { GlobalErrorHandler } from 'src/app/modules/core/global-error-handler';
+import { BdButtonComponent } from './components/bd-button/bd-button.component';
 import { ConnectionLostComponent } from './components/connection-lost/connection-lost.component';
 import { InstanceGroupCardComponent } from './components/instance-group-card/instance-group-card.component';
 import { InstanceGroupLogoComponent } from './components/instance-group-logo/instance-group-logo.component';
 import { InstanceGroupTitleComponent } from './components/instance-group-title/instance-group-title.component';
 import { LoginComponent } from './components/login/login.component';
 import { LogoComponent } from './components/logo/logo.component';
+import { MainNavContentComponent } from './components/main-nav-content/main-nav-content.component';
+import { MainNavFlyinComponent } from './components/main-nav-flyin/main-nav-flyin.component';
+import { MainNavMenuComponent } from './components/main-nav-menu/main-nav-menu.component';
+import { MainNavTopComponent } from './components/main-nav-top/main-nav-top.component';
 import { MainNavComponent } from './components/main-nav/main-nav.component';
 import { ManagedServerUpdateComponent } from './components/managed-server-update/managed-server-update.component';
 import { ProductInfoCardComponent } from './components/product-info-card/product-info-card.component';
 import { ProductTagCardComponent } from './components/product-tag-card/product-tag-card.component';
+import { SearchFieldComponent } from './components/search-field/search-field.component';
 import { ThemeChooserComponent } from './components/theme-chooser/theme-chooser.component';
 import { UserAvatarComponent } from './components/user-avatar/user-avatar.component';
 import { UserEditComponent } from './components/user-edit/user-edit.component';
@@ -90,6 +96,12 @@ export function loadAppConfig(cfgService: ConfigService) {
     VersionPipe,
     InstanceGroupTitleComponent,
     UserPickerComponent,
+    MainNavTopComponent,
+    MainNavFlyinComponent,
+    MainNavMenuComponent,
+    MainNavContentComponent,
+    SearchFieldComponent,
+    BdButtonComponent,
   ],
   entryComponents: [ConnectionLostComponent, UserEditComponent, UserPasswordComponent, UserPickerComponent],
   providers: [

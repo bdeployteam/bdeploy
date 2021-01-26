@@ -21,6 +21,12 @@ const routes: Routes = [
     loadChildren: () => import('./modules/instance-group/instance-group.module').then((x) => x.InstanceGroupModule),
   },
   {
+    // TESTING
+    path: 'ig-side',
+    outlet: 'panel',
+    loadChildren: () => import('./modules/instance-group/instance-group.module').then((x) => x.InstanceGroupModule),
+  },
+  {
     path: 'instance',
     loadChildren: () => import('./modules/instance/instance.module').then((x) => x.InstanceModule),
   },
@@ -49,7 +55,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes, { useHash: true, relativeLinkResolution: 'legacy' })],
+  imports: [RouterModule.forRoot(routes, { useHash: true, relativeLinkResolution: 'corrected' })],
   exports: [RouterModule],
 })
 export class AppRoutingModule {}

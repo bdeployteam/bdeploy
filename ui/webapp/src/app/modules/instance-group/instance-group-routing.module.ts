@@ -20,7 +20,7 @@ const IG_ROUTES: Route[] = [
     component: InstanceGroupAddEditComponent,
     canActivate: [AuthGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { title: 'Add Instance Group', header: 'Add Instance Group' },
+    data: { title: 'Add Instance Group', header: 'Add Instance Group', max: false },
   },
   {
     path: 'edit/:name',

@@ -3,7 +3,7 @@
   right: 40px !important;
   bottom: 40px !important;
   left: auto !important;
-  position: fixed !important;
+  position: absolute;
 }
 
 .products-button {
@@ -11,7 +11,7 @@
   right: 40px !important;
   bottom: 110px !important;
   left: auto !important;
-  position: fixed !important;
+  position: absolute;
 }
 
 .clientApps-button {
@@ -19,7 +19,7 @@
   right: 40px !important;
   bottom: 180px !important;
   left: auto !important;
-  position: fixed !important;
+  position: absolute;
 }
 
 .permissions-button {
@@ -27,7 +27,7 @@
   right: 40px !important;
   bottom: 250px !important;
   left: auto !important;
-  position: fixed !important;
+  position: absolute;
 }
 
 .servers-button {
@@ -35,7 +35,7 @@
   right: 40px !important;
   bottom: 320px !important;
   left: auto !important;
-  position: fixed !important;
+  position: absolute;
 }
 
 .card {

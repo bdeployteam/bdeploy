@@ -1,3 +1,9 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .fill-space {
   flex: 1 1 auto;
 }
@@ -35,10 +41,6 @@ mat-drawer {
   min-width: 25%;
 }
 
-.drawer-container {
-  flex: 1 0 auto;
-}
-
 .drawer-wrapper {
   display: flex;
   overflow: hidden;
@@ -56,7 +58,7 @@ mat-drawer {
   right: 40px !important;
   bottom: 40px !important;
   left: auto !important;
-  position: fixed !important;
+  position: absolute;
 }
 
 .loading-container {

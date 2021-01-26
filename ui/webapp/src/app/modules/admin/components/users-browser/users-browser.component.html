@@ -1,10 +1,4 @@
-<mat-toolbar class="mat-elevation-z1">
-  <span class="fill-space"></span>
-  <mat-form-field class="search datafile-search-field" [floatLabel]="'never'">
-    <mat-icon matSuffix>search</mat-icon>
-    <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Search..." />
-  </mat-form-field>
-</mat-toolbar>
+<mat-toolbar class="mat-elevation-z1"> </mat-toolbar>
 
 <div class="content centered" *ngIf="isLoading()">
   <mat-spinner [diameter]="48"></mat-spinner>
@@ -18,7 +12,7 @@
     [matSortActive]="INITIAL_SORT_COLUMN"
     [matSortDirection]="INITIAL_SORT_DIRECTION"
   >
-    <caption style="display: none;">
+    <caption style="display: none">
       Users
     </caption>
 

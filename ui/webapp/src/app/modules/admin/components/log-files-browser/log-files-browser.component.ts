@@ -1,16 +1,17 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Location } from '@angular/common';
-import { Component, OnInit, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { MatTabChangeEvent } from '@angular/material/tabs';
 import { Base64 } from 'js-base64';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
+import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
 import { RemoteDirectory, RemoteDirectoryEntry, StringEntryChunkDto } from '../../../../models/gen.dtos';
 import { LoggingAdminService } from '../../services/logging-admin.service';
 
@@ -19,7 +20,7 @@ import { LoggingAdminService } from '../../services/logging-admin.service';
   templateUrl: './log-files-browser.component.html',
   styleUrls: ['./log-files-browser.component.css'],
 })
-export class LogFilesBrowserComponent implements OnInit {
+export class LogFilesBrowserComponent implements OnInit, OnDestroy, BdSearchable {
   public INITIAL_PAGE_SIZE = 10;
   public INITIAL_PAGE_INDEX = 0;
   public INITIAL_SORT_COLUMN = 'lastModified';
@@ -49,6 +50,7 @@ export class LogFilesBrowserComponent implements OnInit {
   public activeRemoteDirectoryEntry: RemoteDirectoryEntry = null;
 
   private overlayRef: OverlayRef;
+  private subscription: Subscription;
 
   constructor(
     private overlay: Overlay,
@@ -57,11 +59,17 @@ export class LogFilesBrowserComponent implements OnInit {
     public routingHistoryService: RoutingHistoryService,
     public authService: AuthenticationService,
     private loggingAdmin: LoggingAdminService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private search: SearchService
   ) {}
 
   public ngOnInit(): void {
     this.reload();
+    this.subscription = this.search.register(this);
+  }
+
+  public ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 
   public reload() {
@@ -121,7 +129,7 @@ export class LogFilesBrowserComponent implements OnInit {
     this.updateDataSource();
   }
 
-  applyFilter(filterValue: string) {
+  bdOnSearch(filterValue: string) {
     try {
       this.filterRegex = new RegExp(filterValue.toLowerCase());
     } catch (e) {

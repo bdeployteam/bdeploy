@@ -1,19 +1,13 @@
-.large-text {
-  flex: 1 0 auto;
+.local-info-button {
+  height: 36px;
+}
 
+.local-large-text {
   height: 200px;
 }
 
-.flex-content {
-  display: flex;
-  flex-direction: column;
-}
-
-.title-box {
+.local-title-box {
   border-bottom: 1px solid;
-  display: flex;
-  flex-direction: row;
-  padding-bottom: 8px;
 }
 
 textarea {

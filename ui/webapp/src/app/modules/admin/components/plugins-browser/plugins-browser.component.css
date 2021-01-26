@@ -3,7 +3,7 @@
   right: 40px !important;
   bottom: 40px !important;
   left: auto !important;
-  position: fixed !important;
+  position: absolute;
 }
 
 .mat-header-cell {

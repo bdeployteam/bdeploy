@@ -1,0 +1,41 @@
+@import '~@angular/material/theming';
+
+@mixin common-classes($theme) {
+  $toolbar: map-get($theme, 'main-toolbar');
+
+  /* A rectangular "card". This is different from mat-card in that it does not have rouded corners, *and* it does not have any spacing, margin or else associated. */
+  .bd-rect-card {
+    $background: map-get($theme, background);
+    $foreground: map-get($theme, foreground);
+
+    background: mat-color($background, card);
+    color: mat-color($foreground, text);
+
+    @include _mat-theme-overridable-elevation(2, $theme);
+  }
+
+  .bd-toggle-highlight {
+    background-color: mat-color($toolbar, 'darker');
+    color: mat-color($toolbar, default-contrast);
+  }
+
+  .bd-inverted-color {
+    background-color: mat-color($toolbar);
+    color: mat-color($toolbar, default-contrast);
+  }
+
+  /* Use when wrapping a button in an <a> tag - will remove underlines on button contents */
+  .bd-button-link {
+    text-decoration: none;
+  }
+
+  /* A scrolling container, which means that content to large for the current size will be reachable with scrollbars */
+  .bd-scroll-container {
+    overflow: auto;
+  }
+
+  /* needs to be global for overlays (menus, etc.) */
+  .bd-offset-top5px {
+    margin-top: 5px;
+  }
+}

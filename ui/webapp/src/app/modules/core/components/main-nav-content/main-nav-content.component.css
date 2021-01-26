@@ -1,0 +1,51 @@
+:host {
+  height: 100%;
+  max-width: 100%;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.local-sizing-common {
+  position: relative;
+  flex: 1 0 auto;
+
+  overflow: hidden;
+
+  top: -32px;
+  height: 100%;
+
+  z-index: 10;
+}
+
+@media screen and (min-width: 1280px) {
+  .local-sizing {
+    margin-left: 110px;
+    margin-right: 110px;
+
+    transition: margin-right 0.2s ease;
+  }
+
+  .local-sizing-flyout {
+    margin-left: 110px;
+    margin-right: 310px;
+
+    transition: margin-right 0.2s ease;
+  }
+}
+
+@media screen and (max-width: 1280px) {
+  .local-sizing {
+    margin-left: 10px;
+    margin-right: 10px;
+
+    transition: margin-right 0.2s ease;
+  }
+
+  .local-sizing-flyout {
+    margin-left: 10px;
+    margin-right: 310px;
+
+    transition: margin-right 0.2s ease;
+  }
+}

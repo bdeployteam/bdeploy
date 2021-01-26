@@ -1,28 +1,28 @@
-<section class="mat-typography dialog">
-  <form [formGroup]="instanceGroupFormGroup" (ngSubmit)="onSubmit()">
-    <mat-toolbar class="mat-elevation-z1 header-toolbar">
-      <button
-        mat-icon-button
-        type="button"
-        [disabled]="loading"
-        (click)="routingHistoryService.back('instancegroup/browser')"
-      >
-        <mat-icon>chevron_left</mat-icon>
-      </button>
-      <span *ngIf="isCreate() == false"
-        >Instance Group: <app-instance-group-title [instanceGroup]="nameParam"></app-instance-group-title
-      ></span>
-      <span class="fill-space"></span>
-      <button
-        mat-raised-button
-        color="primary"
-        type="submit"
-        [disabled]="loading || !isModified() || !instanceGroupFormGroup.valid"
-      >
-        SAVE
-      </button>
-    </mat-toolbar>
+<form [formGroup]="instanceGroupFormGroup" (ngSubmit)="onSubmit()" fxLayout="column" [style.height]="'100%'">
+  <mat-toolbar class="mat-elevation-z1 header-toolbar">
+    <button
+      mat-icon-button
+      type="button"
+      [disabled]="loading"
+      (click)="routingHistoryService.back('instancegroup/browser')"
+    >
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+    <span *ngIf="isCreate() == false"
+      >Instance Group: <app-instance-group-title [instanceGroup]="nameParam"></app-instance-group-title
+    ></span>
+    <span class="fill-space"></span>
+    <button
+      mat-raised-button
+      color="primary"
+      type="submit"
+      [disabled]="loading || !isModified() || !instanceGroupFormGroup.valid"
+    >
+      SAVE
+    </button>
+  </mat-toolbar>
 
+  <div class="mat-typography dialog bd-scroll-container">
     <div class="box margin-container">
       <div class="logo-container">
         <div class="logo-title-container">
@@ -98,9 +98,7 @@
     <mat-tab-group class="tab-container margin-container" dynamicHeight="true">
       <mat-tab label="Instance Group Attributes">
         <div class="tab-content">
-          <p>
-            Attributes as defined on system level.
-          </p>
+          <p>Attributes as defined on system level.</p>
           <div class="attributes-grid">
             <ng-container *ngFor="let a of getSortedInstanceGroupAttributeKeys()">
               <div>{{ a }}</div>
@@ -118,10 +116,8 @@
               </div>
             </ng-container>
           </div>
-          <div *ngIf="!hasInstanceGroupAttributes()">
-            No Attributes have been configured yet.
-          </div>
-          <button mat-mini-fab style="align-self: flex-end;" type="button" (click)="addInstanceGroupAttribute()">
+          <div *ngIf="!hasInstanceGroupAttributes()">No Attributes have been configured yet.</div>
+          <button mat-mini-fab style="align-self: flex-end" type="button" (click)="addInstanceGroupAttribute()">
             <mat-icon>add</mat-icon>
           </button>
         </div>
@@ -159,14 +155,12 @@
               </div>
             </ng-container>
           </div>
-          <div *ngIf="!instanceAttributesDescriptors.length">
-            No Attributes have been configured yet.
-          </div>
-          <button mat-mini-fab style="align-self: flex-end;" type="button" (click)="addInstanceAttribute()">
+          <div *ngIf="!instanceAttributesDescriptors.length">No Attributes have been configured yet.</div>
+          <button mat-mini-fab style="align-self: flex-end" type="button" (click)="addInstanceAttribute()">
             <mat-icon>add</mat-icon>
           </button>
         </div>
       </mat-tab>
     </mat-tab-group>
-  </form>
-</section>
+  </div>
+</form>

@@ -1,3 +1,9 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .loading-container {
   flex: 1 0 auto;
   flex-direction: row;

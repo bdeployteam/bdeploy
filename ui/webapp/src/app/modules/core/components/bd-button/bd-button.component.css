@@ -1,0 +1,19 @@
+.local-button-collapsed {
+  padding: 0 6px;
+  min-height: 36px;
+  min-width: 36px;
+}
+
+.local-button-expanded {
+  padding: 0 6px;
+}
+
+.local-wrapper-collapsed {
+  max-width: 24px;
+  align-items: center;
+  justify-content: center;
+}
+
+.local-wrapper-expanded {
+  align-items: center;
+}

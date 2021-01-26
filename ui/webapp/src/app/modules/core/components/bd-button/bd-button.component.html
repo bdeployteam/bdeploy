@@ -1,0 +1,27 @@
+<button
+  mat-raised-button
+  fxFlex="1 0 auto"
+  [class.local-button-expanded]="!collapsed"
+  [class.local-button-collapsed]="collapsed"
+  [class.bd-inverted-color]="!(isToggle && toggle) && inverseColor"
+  [class.bd-toggle-highlight]="isToggle && toggle"
+  (click)="onClick($event)"
+  [matTooltip]="tooltip ? text : ''"
+  [matTooltipPosition]="tooltip"
+>
+  <div
+    fxLayout="row"
+    fxLayoutGap="5px"
+    [class.local-wrapper-expanded]="!collapsed"
+    [class.local-wrapper-collapsed]="collapsed"
+  >
+    <mat-icon *ngIf="icon">{{ icon }}</mat-icon>
+    <span
+      *ngIf="text && !collapsed"
+      [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
+      [@scaleWidthFromZero]
+      >{{ text }}</span
+    >
+    <ng-content></ng-content>
+  </div>
+</button>

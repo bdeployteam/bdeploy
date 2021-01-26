@@ -55,16 +55,8 @@
   min-width: 100%;
 }
 
-.datafile-search-header {
-  margin-right: 64px;
-}
-
 .datafile-config-button {
   margin-left: 64px;
-}
-
-.datafile-search-field {
-  min-width: 525px;
 }
 
 .mat-dialog-actions {

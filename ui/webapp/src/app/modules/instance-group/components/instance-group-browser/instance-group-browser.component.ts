@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MediaChange, MediaObserver } from '@angular/flex-layout';
 import { BehaviorSubject, forkJoin, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
+import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { DataList } from '../../../../models/dataList';
 import { CustomAttributesRecord, InstanceGroupConfiguration, MinionMode } from '../../../../models/gen.dtos';
@@ -16,7 +17,7 @@ import { InstanceGroupService } from '../../services/instance-group.service';
   styleUrls: ['./instance-group-browser.component.css'],
   providers: [SettingsService],
 })
-export class InstanceGroupBrowserComponent implements OnInit, OnDestroy {
+export class InstanceGroupBrowserComponent implements OnInit, OnDestroy, BdSearchable {
   private readonly log: Logger = this.loggingService.getLogger('InstanceGroupBrowserComponent');
 
   private subscription: Subscription;
@@ -46,7 +47,8 @@ export class InstanceGroupBrowserComponent implements OnInit, OnDestroy {
     private loggingService: LoggingService,
     public authService: AuthenticationService,
     public settings: SettingsService,
-    private config: ConfigService
+    private config: ConfigService,
+    private search: SearchService
   ) {}
 
   ngOnInit(): void {
@@ -82,6 +84,8 @@ export class InstanceGroupBrowserComponent implements OnInit, OnDestroy {
       })
     );
 
+    this.subscription.add(this.search.register(this));
+
     this.loadInstanceGroups();
   }
 
@@ -103,6 +107,11 @@ export class InstanceGroupBrowserComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+  }
+
+  bdOnSearch(search: string) {
+    this.instanceGroupList.searchString = search;
+    this.instanceGroupList.applyFilter();
   }
 
   removeGroup(group: InstanceGroupConfiguration) {

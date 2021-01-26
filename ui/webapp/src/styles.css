@@ -3,6 +3,7 @@
 html,
 body {
   height: 100%;
+  overflow: hidden;
 }
 
 body {
@@ -31,12 +32,6 @@ body {
   top: 0;
   z-index: 10;
   min-height: 48px;
-}
-
-.search {
-  padding-top: 8px;
-  font-size: 14px; /* default */
-  line-height: 1;
 }
 
 .vert-speparator {

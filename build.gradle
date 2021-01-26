@@ -589,7 +589,7 @@ task jacocoFullReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
 task test {
     dependsOn actualSubprojects*.test
     finalizedBy testReport
-    finalizedBy jacocoFullReport
+    //finalizedBy jacocoFullReport // FIXME deactivated for the UI/UX rework (requires runCypressHeadless)
 }
 
 sonarqube {

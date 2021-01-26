@@ -16,13 +16,6 @@
     </button>
     <span class="fill-space"></span>
     <button mat-button (click)="reload()"><mat-icon>refresh</mat-icon></button>
-    <div class="datafile-search-header">
-      <mat-form-field class="search datafile-search-field" [floatLabel]="'never'">
-        <mat-icon matSuffix>search</mat-icon>
-        <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Find files..." />
-        <mat-hint>Use regular expressions (.*log) or parts of the path to find files.</mat-hint>
-      </mat-form-field>
-    </div>
   </mat-toolbar>
 
   <ng-template #terminal>
@@ -51,7 +44,7 @@
             [matSortActive]="INITIAL_SORT_COLUMN"
             [matSortDirection]="INITIAL_SORT_DIRECTION"
           >
-            <caption style="display: none;">
+            <caption style="display: none">
               Log Files
             </caption>
 

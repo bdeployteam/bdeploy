@@ -1,0 +1,16 @@
+<div class="local-sizing main-nav-top-primary-background mat-elevation-z1">
+  <div class="local-item-bar" fxLayout="row" fxLayoutGap="8px">
+    <div class="local-side-sizing"></div>
+    <app-search-field
+      fxFlex="1 0 auto"
+      [(value)]="search.search"
+      [disabled]="!(search.registration() | async)"
+    ></app-search-field>
+    <div class="local-side-sizing" fxLayout="row" fxLayoutGap="8px" fxLayoutAlign="center center">
+      <app-theme-chooser></app-theme-chooser>
+      <ng-container>
+        <app-user-info></app-user-info>
+      </ng-container>
+    </div>
+  </div>
+</div>

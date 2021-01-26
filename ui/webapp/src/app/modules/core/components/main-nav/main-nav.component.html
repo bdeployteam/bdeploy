@@ -1,69 +1,18 @@
-<mat-sidenav-container class="sidenav-container">
-  <mat-sidenav #drawer class="sidenav mat-elevation-z3" fixedInViewport="true" attr.role="dialog" mode="over">
-    <mat-toolbar class="main-toolbar main-toolbar-height">
-      <app-logo class="logo" [size]="48"></app-logo>
-      BDeploy
-      <div class="spacer"></div>
-      <a mat-icon-button href="/assets/doc/index.html" matTooltip="Help" matTooltipShowDelay="1000" target="_blank"
-        ><mat-icon>help</mat-icon></a
-      >
-    </mat-toolbar>
-    <mat-nav-list>
-      <a mat-list-item (click)="drawer.close()" [routerLink]="['/instancegroup/browser']"
-        ><mat-icon class="nav-icon">view_carousel</mat-icon>Instance Groups</a
-      >
-      <a mat-list-item (click)="drawer.close()" [routerLink]="['/softwarerepo/browser']"
-        ><mat-icon class="nav-icon">storage</mat-icon>Software Repositories</a
-      >
-    </mat-nav-list>
-
-    <mat-nav-list class="at-bottom" *ngIf="authService.isGlobalAdmin()">
-      <a mat-list-item (click)="drawer.close()" [routerLink]="['/admin/']"
-        ><mat-icon class="nav-icon">settings</mat-icon>Administration</a
-      >
-    </mat-nav-list>
-    <footer class="footer-container">
-      <mat-divider></mat-divider>
-      <div class="footer-content">
-        <span>Version:</span>
-        <span>{{ formatVersion(cfgService?.config?.version) }}</span>
-
-        <span>Mode:</span>
-        <span>{{ cfgService?.config?.mode }}</span>
-
-        <span>Log Level:</span>
-        <mat-select [value]="getLogLevel()" (selectionChange)="setLogLevel($event)">
-          <mat-option value="0">Error</mat-option>
-          <mat-option value="1">Warning</mat-option>
-          <mat-option value="2">Info</mat-option>
-          <mat-option value="3">Debug</mat-option>
-          <mat-option value="4">Trace</mat-option>
-        </mat-select>
-      </div>
-    </footer>
-  </mat-sidenav>
-  <mat-sidenav-content class="sidenav-content">
-    <mat-toolbar class="mat-elevation-z3 sidenav-toolbar main-toolbar main-toolbar-height" #mainToolbar>
-      <button
-        type="button"
-        class="menu-button"
-        aria-label="Toggle sidenav"
-        mat-icon-button
-        (click)="drawer.toggle()"
-        *ngIf="isAuth$ | async"
-      >
-        <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
-      </button>
-      <app-logo class="logo" [size]="48"></app-logo>{{ title.getHeaderTitle() }}
-      <span class="spacer"></span>
-      <span *ngIf="needServerTypeHint()" class="server-type-hint">{{ cfgService?.config?.mode }}</span>
-      <app-theme-chooser></app-theme-chooser>
-      <ng-container *ngIf="isAuth$ | async">
-        <app-user-info></app-user-info>
-      </ng-container>
-    </mat-toolbar>
-    <div id="app-content" class="sidenav-margin">
-      <ng-content></ng-content>
+<div class="local-sizing" fxLayout="row">
+  <app-main-nav-menu fxFlex="0 0 auto" *ngIf="isAuth$ | async"></app-main-nav-menu>
+  <div fxLayout="column" fxFlex="1 1 auto">
+    <app-main-nav-top fxFlex="0 0 auto" *ngIf="isAuth$ | async"></app-main-nav-top>
+    <div
+      class="main-nav-top-primary-background"
+      [style.width]="'100%'"
+      [style.height]="'114px'"
+      *ngIf="!(isAuth$ | async)"
+    ></div>
+    <div fxLayout="row" fxFlex="1 1 auto" class="local-content-sizing">
+      <app-main-nav-content fxFlex="1 0 auto">
+        <ng-content></ng-content>
+      </app-main-nav-content>
+      <app-main-nav-flyin fxFlex="0 0 auto" *ngIf="isAuth$ | async"></app-main-nav-flyin>
     </div>
-  </mat-sidenav-content>
-</mat-sidenav-container>
+  </div>
+</div>

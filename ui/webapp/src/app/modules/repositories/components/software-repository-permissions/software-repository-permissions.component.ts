@@ -1,17 +1,18 @@
 import { Location } from '@angular/common';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { ActivatedRoute } from '@angular/router';
 import { cloneDeep } from 'lodash-es';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { Permission, ScopedPermission, UserInfo } from 'src/app/models/gen.dtos';
 import { UserPickerComponent } from 'src/app/modules/core/components/user-picker/user-picker.component';
 import { Logger, LoggingService } from 'src/app/modules/core/services/logging.service';
 import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
+import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
 import { MessageboxService } from 'src/app/modules/shared/services/messagebox.service';
@@ -23,7 +24,7 @@ import { SoftwareRepositoryService } from '../../services/software-repository.se
   styleUrls: ['./software-repository-permissions.component.css'],
   providers: [SettingsService],
 })
-export class SoftwareRepositoryPermissionsComponent implements OnInit {
+export class SoftwareRepositoryPermissionsComponent implements OnInit, OnDestroy, BdSearchable {
   log: Logger = this.loggingService.getLogger('SoftwareRepositoryPermissionsComponent');
 
   nameParam: string;
@@ -39,13 +40,7 @@ export class SoftwareRepositoryPermissionsComponent implements OnInit {
   private userTableOri: UserInfo[]; // --> dirty detection
 
   private _filterValue = '';
-  get filterValue() {
-    return this._filterValue;
-  }
-  set filterValue(filterValue: string) {
-    this._filterValue = filterValue.trim().toLowerCase();
-    this.updateFilter();
-  }
+  private subscription: Subscription;
 
   private _showGlobal = false;
   get showGlobal(): boolean {
@@ -72,12 +67,24 @@ export class SoftwareRepositoryPermissionsComponent implements OnInit {
     private loggingService: LoggingService,
     public location: Location,
     private route: ActivatedRoute,
-    public routingHistoryService: RoutingHistoryService
+    public routingHistoryService: RoutingHistoryService,
+    private search: SearchService
   ) {}
 
   ngOnInit() {
     this.nameParam = this.route.snapshot.paramMap.get('name');
     this.prepareUsers();
+
+    this.subscription = this.search.register(this);
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
+
+  bdOnSearch(filterValue: string) {
+    this._filterValue = filterValue.trim().toLowerCase();
+    this.updateFilter();
   }
 
   private prepareUsers(): void {
@@ -107,9 +114,9 @@ export class SoftwareRepositoryPermissionsComponent implements OnInit {
       this.dataSource.filterPredicate = (data, filter) => {
         return (
           (this.showGlobal || this.hasScoped(data)) &&
-          (this.filterPredicate(data.name, this.filterValue) ||
-            this.filterPredicate(data.fullName, this.filterValue) ||
-            this.filterPredicate(data.email, this.filterValue))
+          (this.filterPredicate(data.name, this._filterValue) ||
+            this.filterPredicate(data.fullName, this._filterValue) ||
+            this.filterPredicate(data.email, this._filterValue))
         );
       };
       this.updateFilter();

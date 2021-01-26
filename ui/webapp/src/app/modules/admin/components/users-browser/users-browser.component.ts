@@ -1,15 +1,17 @@
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { cloneDeep } from 'lodash-es';
+import { Subscription } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { LDAPSettingsDto, Permission, UserInfo } from 'src/app/models/gen.dtos';
 import { UserEditComponent } from 'src/app/modules/core/components/user-edit/user-edit.component';
 import { UserPasswordComponent } from 'src/app/modules/core/components/user-password/user-password.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { Logger, LoggingService } from 'src/app/modules/core/services/logging.service';
+import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
 import { MessageboxService } from 'src/app/modules/shared/services/messagebox.service';
@@ -22,8 +24,9 @@ import { UserGlobalPermissionsComponent } from '../user-global-permissions/user-
   styleUrls: ['./users-browser.component.css'],
   providers: [SettingsService],
 })
-export class UsersBrowserComponent implements OnInit, AfterViewInit {
+export class UsersBrowserComponent implements OnInit, OnDestroy, BdSearchable, AfterViewInit {
   private log: Logger = this.loggingService.getLogger('UsersBrowserComponent');
+  private subscription: Subscription;
 
   public INITIAL_SORT_COLUMN = 'name';
   public INITIAL_SORT_DIRECTION = 'asc';
@@ -59,10 +62,17 @@ export class UsersBrowserComponent implements OnInit, AfterViewInit {
     private loggingService: LoggingService,
     private authService: AuthenticationService,
     private authAdminService: AuthAdminService,
-    public settings: SettingsService
+    public settings: SettingsService,
+    private search: SearchService
   ) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.subscription = this.search.register(this);
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
 
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
@@ -93,7 +103,7 @@ export class UsersBrowserComponent implements OnInit, AfterViewInit {
       });
   }
 
-  public applyFilter(filterValue: string): void {
+  public bdOnSearch(filterValue: string): void {
     try {
       new RegExp(filterValue.trim().toLowerCase()).compile();
       this.filterPredicate = (d, f) => d && d.toLowerCase().match(f);

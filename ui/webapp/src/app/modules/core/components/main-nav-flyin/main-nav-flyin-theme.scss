@@ -1,0 +1,35 @@
+@import '~@angular/material/theming';
+
+@mixin main-nav-flyin-theme($theme) {
+  @media screen and (min-width: 1280px) {
+    .main-nav-flyin-maximized {
+      transform: translateX(0%);
+      width: calc(100% - 174px);
+
+      transition: transform 0.2s ease, width 0.2s ease;
+    }
+
+    .main-nav-flyin-maximized-menu-maximized {
+      transform: translateX(0%);
+      width: calc(100% - 320px);
+
+      transition: transform 0.2s ease, width 0.2s ease;
+    }
+  }
+
+  @media screen and (max-width: 1280px) {
+    .main-nav-flyin-maximized {
+      transform: translateX(0%);
+      width: calc(100% - 74px);
+
+      transition: transform 0.2s ease, width 0.2s ease;
+    }
+
+    .main-nav-flyin-maximized-menu-maximized {
+      transform: translateX(0%);
+      width: calc(100% - 220px);
+
+      transition: transform 0.2s ease, width 0.2s ease;
+    }
+  }
+}

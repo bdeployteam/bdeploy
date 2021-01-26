@@ -1,12 +1,19 @@
-<mat-menu #appMenu="matMenu" xPosition="before">
-  <div mat-menu-item disabled="true" class="title-box">
+<mat-menu #appMenu="matMenu" xPosition="before" class="bd-offset-top5px">
+  <div
+    mat-menu-item
+    disabled="true"
+    class="local-title-box"
+    fxLayout="row"
+    fxLayoutAlign="flex-start center"
+    fxLayoutGap="16px"
+  >
     <app-user-avatar
       [gravatar]="!settings.isLoading() && settings.getSettings().general.enableGravatar"
       [mail]="user?.email"
-      hostSize="40"
-      avatarSize="32"
+      hostSize="24"
+      avatarSize="24"
     ></app-user-avatar>
-    <div class="title-name">{{ getTitleUserName() }}</div>
+    <div>{{ getTitleUserName() }}</div>
   </div>
   <button mat-menu-item (click)="edit()" [disabled]="user?.external"><mat-icon>edit</mat-icon>Edit...</button>
   <button mat-menu-item (click)="changePassword()" [disabled]="user?.external">
@@ -16,12 +23,13 @@
   <button mat-menu-item (click)="logout()"><mat-icon>exit_to_app</mat-icon>Logout</button>
 </mat-menu>
 
-<button mat-icon-button [matMenuTriggerFor]="appMenu">
+<app-bd-button class="local-info-button" [matMenuTriggerFor]="appMenu" [inverseColor]="true">
   <app-user-avatar
     [gravatar]="!settings.isLoading() && settings.getSettings().general.enableGravatar"
     [mail]="user?.email"
+    [hostSize]="36"
   ></app-user-avatar>
-</button>
+</app-bd-button>
 
 <ng-template #tokenDialog>
   <h1 mat-dialog-title>Token for {{ user.name }}</h1>
@@ -42,8 +50,8 @@
     <strong>Attention:</strong> This token is sensitive information as it allows remote access under your name. Do not
     pass this token on to others.
   </p>
-  <div class="flex-content">
-    <textarea #inputTarget readonly class="large-text">{{ pack }}</textarea>
+  <div fxLayout="column">
+    <textarea #inputTarget readonly class="local-large-text" fxFlex="1 0 auto">{{ pack }}</textarea>
   </div>
   <div mat-dialog-actions>
     <button mat-raised-button [ngxClipboard]="inputTarget" (cbOnSuccess)="copied()" color="primary">

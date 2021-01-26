@@ -1,0 +1,21 @@
+:host {
+  z-index: 11;
+
+  position: absolute;
+
+  right: 0px;
+  height: calc(100% - 114px);
+
+  display: flex;
+  flex-direction: column;
+
+  width: 300px;
+}
+
+.local-sizing {
+  position: relative;
+  overflow: hidden;
+
+  flex: 1 0 auto;
+  top: -32px;
+}

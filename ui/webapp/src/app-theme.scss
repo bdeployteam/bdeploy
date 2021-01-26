@@ -1,6 +1,7 @@
 @import '~@angular/material/theming';
 @include mat-core();
 
+@import 'app-common.scss';
 @import 'app-externals.scss';
 @import 'dragular.scss';
 @import 'app-ngx-charts-dark.scss';
@@ -8,7 +9,9 @@
 
 @import 'app/modules/config-files/components/config-files-browser/config-files-browser-theme.scss';
 
-@import 'app/modules/core/components/main-nav/main-nav-theme.scss';
+@import 'app/modules/core/components/main-nav-top/main-nav-top-theme.scss';
+@import 'app/modules/core/components/main-nav-menu/main-nav-menu-theme.scss';
+@import 'app/modules/core/components/main-nav-flyin/main-nav-flyin-theme.scss';
 @import 'app/modules/core/components/logo/logo-theme.scss';
 @import 'app/modules/core/components/managed-server-update/managed-server-update-theme.scss';
 @import 'app/modules/core/components/product-tag-card/product-tag-card-theme.scss';
@@ -54,9 +57,12 @@
 @mixin all-themes($theme) {
   // general angular material theme
   @include angular-material-theme($theme);
+  @include common-classes($theme);
 
   // basic application framework themes
-  @include main-nav-theme($theme);
+  @include main-nav-top-theme($theme);
+  @include main-nav-menu-theme($theme);
+  @include main-nav-flyin-theme($theme);
   @include logo-theme($theme);
 
   // application component themes
@@ -208,9 +214,9 @@ $app-yellow-def: (
   400: #fbf315,
   500: #fbf315,
   600: #fbf315,
-  700: #fbf315,
-  800: #fbf315,
-  900: #fbf315,
+  700: #cfc912,
+  800: #cfc912,
+  900: #cfc912,
   A100: #fbf315,
   A200: #fbf315,
   A400: #fbf315,
@@ -232,7 +238,7 @@ $app-yellow-def: (
     A700: $dark-primary-text,
   ),
 );
-$app-yellow-palette: mat-palette($app-yellow-def, 700, 50);
+$app-yellow-palette: mat-palette($app-yellow-def);
 
 /* light theme - default */
 $app-light-primary: mat-palette($mat-indigo, 500);

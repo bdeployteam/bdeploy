@@ -221,7 +221,7 @@ project(':test-data').tasks['triggerStopBDeploy'].mustRunAfter runCypressHeadles
 triggerStopCoverageStandalone.mustRunAfter runCypressHeadless
 triggerStopCoverageCentral.mustRunAfter runCypressHeadless
 triggerStopCoverageManaged.mustRunAfter runCypressHeadless
-test.dependsOn doneWithCypressHeadless
+//test.dependsOn doneWithCypressHeadless // FIXME deactivated for the UI/UX rework
 
 task release(type: Copy, dependsOn: runCypressHeadless) {
     from "${webappDir}/cypress/fixtures/export-test.zip"

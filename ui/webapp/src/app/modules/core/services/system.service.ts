@@ -31,6 +31,10 @@ export class SystemService {
         .subscribe((r) => {
           dialogRef.close();
           this.recovering = false;
+
+          if (!this.configService.config) {
+            window.location.reload();
+          }
         });
     }
   }

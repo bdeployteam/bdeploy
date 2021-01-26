@@ -1,11 +1,13 @@
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
+import { Subscription } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { PluginInfoDto } from 'src/app/models/gen.dtos';
 import { Logger, LoggingService } from 'src/app/modules/core/services/logging.service';
+import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { FileUploadComponent } from 'src/app/modules/shared/components/file-upload/file-upload.component';
 import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
@@ -19,7 +21,7 @@ import { PluginAdminService } from '../../services/plugin-admin.service';
   styleUrls: ['./plugins-browser.component.css'],
   providers: [SettingsService],
 })
-export class PluginsBrowserComponent implements OnInit, AfterViewInit {
+export class PluginsBrowserComponent implements OnInit, OnDestroy, BdSearchable, AfterViewInit {
   private log: Logger = this.loggingService.getLogger('PluginsBrowserComponent');
 
   public INITIAL_SORT_COLUMN = 'name';
@@ -27,6 +29,7 @@ export class PluginsBrowserComponent implements OnInit, AfterViewInit {
 
   public dataSource: MatTableDataSource<PluginInfoDto> = new MatTableDataSource<PluginInfoDto>([]);
   private filterPredicate: (d, f) => boolean;
+  private subscription: Subscription;
 
   public displayedColumns: string[] = ['global', 'name', 'version', 'editors', 'loaded', 'actions'];
 
@@ -43,10 +46,17 @@ export class PluginsBrowserComponent implements OnInit, AfterViewInit {
     private messageBoxService: MessageboxService,
     private loggingService: LoggingService,
     private pluginAdminService: PluginAdminService,
-    public settings: SettingsService
+    public settings: SettingsService,
+    private search: SearchService
   ) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.subscription = this.search.register(this);
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
 
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
@@ -72,7 +82,7 @@ export class PluginsBrowserComponent implements OnInit, AfterViewInit {
       });
   }
 
-  public applyFilter(filterValue: string): void {
+  public bdOnSearch(filterValue: string): void {
     try {
       new RegExp(filterValue.trim().toLowerCase()).compile();
       this.filterPredicate = (d, f) => d && d.toLowerCase().match(f);

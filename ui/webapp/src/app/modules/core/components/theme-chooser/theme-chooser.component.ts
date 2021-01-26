@@ -1,7 +1,6 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
-import { MatButton } from '@angular/material/button';
 import { ThemeService } from '../../services/theme.service';
 
 @Component({
@@ -21,23 +20,22 @@ export class ThemeChooserComponent implements OnInit {
   ngOnInit() {}
 
   /** Opens a modal overlay popup showing the given template */
-  openOverlay(relative: MatButton, template: TemplateRef<any>) {
+  openOverlay(relative: HTMLElement, template: TemplateRef<any>) {
     this.closeOverlay();
 
     this.overlayRef = this.overlay.create({
       positionStrategy: this.overlay
         .position()
-        .flexibleConnectedTo(relative._elementRef)
+        .flexibleConnectedTo(relative)
         .withPositions([
           {
             overlayX: 'end',
             overlayY: 'top',
             originX: 'end',
             originY: 'bottom',
+            offsetY: 5,
           },
-        ])
-        .withPush()
-        .withViewportMargin(30),
+        ]),
       scrollStrategy: this.overlay.scrollStrategies.close(),
       hasBackdrop: true,
       backdropClass: 'chooser-backdrop',

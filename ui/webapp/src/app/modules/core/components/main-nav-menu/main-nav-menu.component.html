@@ -1,0 +1,99 @@
+<div class="bd-rect-card local-sizing" fxLayout="column" fxLayoutGap="5px">
+  <!-- Logo & Expand Button -->
+  <button
+    mat-raised-button
+    [class.main-nav-menu-logo-expanded]="expanded"
+    [class.main-nav-menu-logo-collapsed]="!expanded"
+    class="bd-inverted-color mat-elevation-z2 local-logo"
+    (click)="expanded = !expanded"
+  >
+    <div fxLayout="row" fxLayoutAlign="flex-start center">
+      <app-logo [size]="56" class="local-logo-img"></app-logo>
+      <div
+        *ngIf="expanded"
+        class="local-logo-text"
+        [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
+        [@delayedFadeOut]="{ value: 'dummy', params: { delay: '0s' } }"
+        [@scaleWidthFromZero]
+        [@scaleWidthToZero]
+      >
+        BDeploy
+      </div>
+      <div
+        *ngIf="!expanded"
+        class="local-logo-hint"
+        [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
+        [@delayedFadeOut]="{ value: 'dummy', params: { delay: '0s' } }"
+      >
+        &#xBB;
+      </div>
+    </div>
+  </button>
+
+  <!-- Menu Buttons -->
+  <app-bd-button
+    fxFlexAlign="center center"
+    icon="view_carousel"
+    text="Instance Groups"
+    inverseColor="true"
+    [collapsed]="!expanded"
+    tooltip="right"
+    [routerLink]="['/instancegroup/browser']"
+  ></app-bd-button>
+
+  <app-bd-button
+    fxFlexAlign="center center"
+    icon="storage"
+    text="Software Repositories"
+    inverseColor="true"
+    [collapsed]="!expanded"
+    tooltip="right"
+    [routerLink]="['/softwarerepo/browser']"
+  ></app-bd-button>
+
+  <!-- Footer -->
+  <div fxFlex="1 0 auto"></div>
+  <div
+    fxLayout="column"
+    fxLayoutGap="5px"
+    *ngIf="expanded"
+    class="local-footer"
+    [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
+  >
+    <app-bd-button
+      *ngIf="authService.isGlobalAdmin()"
+      fxFlexAlign="center center"
+      icon="settings"
+      text="Administration"
+      inverseColor="true"
+      [collapsed]="!expanded"
+      [routerLink]="['/admin/']"
+    ></app-bd-button>
+    <a href="/assets/doc/index.html" target="_blank" class="bd-button-link">
+      <app-bd-button
+        fxFlexAlign="center center"
+        icon="help_outline"
+        text="Help"
+        inverseColor="true"
+        [collapsed]="!expanded"
+      ></app-bd-button>
+    </a>
+    <mat-divider class="local-footer-divider"></mat-divider>
+    <div gdColumns="auto auto" gdGap="5px">
+      <span>Version:</span>
+      <span>{{ formatVersion(cfgService?.config?.version) }}</span>
+
+      <span>Mode:</span>
+      <span>{{ cfgService?.config?.mode }}</span>
+
+      <span>Log Level:</span>
+      <mat-select [value]="getLogLevel()" (selectionChange)="setLogLevel($event)">
+        <mat-option value="0">Error</mat-option>
+        <mat-option value="1">Warning</mat-option>
+        <mat-option value="2">Info</mat-option>
+        <mat-option value="3">Debug</mat-option>
+        <mat-option value="4">Trace</mat-option>
+      </mat-select>
+    </div>
+  </div>
+</div>

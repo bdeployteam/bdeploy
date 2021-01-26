@@ -1,0 +1,27 @@
+@import '~@angular/material/theming';
+
+@mixin main-nav-menu-theme($theme) {
+  .main-nav-menu-collapsed {
+    width: 64px;
+    transition: width 0.2s ease;
+  }
+
+  .main-nav-menu-expanded {
+    width: 210px;
+    transition: width 0.2s ease;
+  }
+
+  .main-nav-menu-logo-collapsed {
+    width: 104px;
+    height: 71px;
+
+    transition: width 0.2s ease;
+  }
+
+  .main-nav-menu-logo-expanded {
+    width: 182px;
+    height: 71px;
+
+    transition: width 0.2s ease;
+  }
+}

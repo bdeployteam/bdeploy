@@ -1,0 +1,21 @@
+.local-sizing {
+  position: relative;
+
+  top: 0px;
+  left: 0px;
+
+  width: 100%;
+  height: 114px;
+
+  z-index: 0;
+}
+
+.local-item-bar {
+  position: relative;
+  width: 100%;
+  top: 22px;
+}
+
+.local-side-sizing {
+  width: min(110px, max(90px, 8%));
+}

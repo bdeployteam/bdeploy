@@ -8,17 +8,6 @@
     (attributeSelection)="groupAttribute = $event"
     (valuesSelection)="groupAttributeValuesSelected = $event"
   ></app-custom-attribute-grouping-selector>
-  <mat-form-field class="search">
-    <mat-label>Search</mat-label>
-    <input
-      matInput
-      type="text"
-      hint="Filter"
-      [(ngModel)]="instanceGroupList.searchString"
-      (ngModelChange)="instanceGroupList.applyFilter()"
-    />
-    <mat-icon matSuffix>search</mat-icon>
-  </mat-form-field>
 </mat-toolbar>
 
 <div *ngIf="loading" class="loading-container">
@@ -70,49 +59,51 @@
   </div>
 </ng-container>
 
-<div *ngIf="!instanceGroupList.isEmpty() && !groupAttribute && (displayRecent | async)">
-  <p class="list-heading">RECENTLY USED:</p>
-  <div class="recentGroup-Wrapper">
-    <app-instance-group-card
-      class="group-card"
-      *ngFor="let recentGroup of filterRecent(recent)"
-      [instanceGroup]="recentGroup"
-      (removeEvent)="removeGroup(recentGroup)"
-      [isAttachAllowed]="isAttachManagedAllowed()"
-    ></app-instance-group-card>
-  </div>
-  <p class="list-heading">ALL INSTANCE GROUPS:</p>
-</div>
-<div class="instanceGroup-Wrapper" *ngIf="!groupAttribute">
-  <app-instance-group-card
-    class="group-card"
-    *ngFor="let group of instanceGroupList.filtered"
-    [instanceGroup]="group"
-    (removeEvent)="removeGroup(group)"
-    [isAttachAllowed]="isAttachManagedAllowed()"
-  ></app-instance-group-card>
-</div>
-
-<ng-container *ngIf="groupAttribute">
-  <ng-container *ngFor="let attrValue of groupAttributeValuesSelected">
-    <p class="list-grouping">{{ attrValue ? attrValue : '(empty)' }}:</p>
-    <div class="instanceGroup-Wrapper">
+<div class="bd-scroll-container">
+  <div *ngIf="!instanceGroupList.isEmpty() && !groupAttribute && (displayRecent | async)">
+    <p class="list-heading">RECENTLY USED:</p>
+    <div class="recentGroup-Wrapper">
       <app-instance-group-card
         class="group-card"
-        *ngFor="let group of getGroupsByAttribute(attrValue)"
-        [instanceGroup]="group"
-        (removeEvent)="removeGroup(group)"
+        *ngFor="let recentGroup of filterRecent(recent)"
+        [instanceGroup]="recentGroup"
+        (removeEvent)="removeGroup(recentGroup)"
         [isAttachAllowed]="isAttachManagedAllowed()"
       ></app-instance-group-card>
     </div>
+    <p class="list-heading">ALL INSTANCE GROUPS:</p>
+  </div>
+  <div class="instanceGroup-Wrapper" *ngIf="!groupAttribute">
+    <app-instance-group-card
+      class="group-card"
+      *ngFor="let group of instanceGroupList.filtered"
+      [instanceGroup]="group"
+      (removeEvent)="removeGroup(group)"
+      [isAttachAllowed]="isAttachManagedAllowed()"
+    ></app-instance-group-card>
+  </div>
+
+  <ng-container *ngIf="groupAttribute">
+    <ng-container *ngFor="let attrValue of groupAttributeValuesSelected">
+      <p class="list-grouping">{{ attrValue ? attrValue : '(empty)' }}:</p>
+      <div class="instanceGroup-Wrapper">
+        <app-instance-group-card
+          class="group-card"
+          *ngFor="let group of getGroupsByAttribute(attrValue)"
+          [instanceGroup]="group"
+          (removeEvent)="removeGroup(group)"
+          [isAttachAllowed]="isAttachManagedAllowed()"
+        ></app-instance-group-card>
+      </div>
+    </ng-container>
   </ng-container>
-</ng-container>
+</div>
 
 <button
   mat-fab
   class="add-button"
   *ngIf="isAddAllowed()"
-  [routerLink]="['/instancegroup/add']"
+  [routerLink]="['', { outlets: { panel: ['ig-side', 'add'] } }]"
   matTooltip="Add Instance Group"
   matTooltipShowDelay="1000"
   [disabled]="!authService.isGlobalAdmin()"
