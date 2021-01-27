@@ -282,23 +282,30 @@ public class CleanupHelper {
             List<Key> pInst = productsInUseMap.get(pName);
             Key oldestToKeep = pInst != null && pInst.size() > 0 ? pInst.get(0) : pAll.get(pAll.size() - 1); // oldest Installed or newest
 
+            Comparator<Key> comparator = context.getComparator(pAll.get(0));
             for (Key pKey : pAll) {
-                if (pKey.equals(oldestToKeep)) {
+                // oldestToKeep can be a version that doesn't exist any more and therefore is not in pAll!
+                // note: comparison here works "name asc"/"tag desc"!
+                if (oldestToKeep != null && comparator.compare(oldestToKeep, pKey) >= 0) {
                     break;
                 }
 
-                // prepare actions for removing the product all together.
-                ProductManifest pm = ProductManifest.of(context.getHive(), pKey);
-                context.addManifest4deletion(pKey);
-                actions.add(new CleanupAction(CleanupType.DELETE_MANIFEST, pKey.toString(),
-                        "Delete product \"" + pm.getProductDescriptor().name + "\", version \"" + pm.getKey().getTag() + "\""));
+                // Check if the version isn't installed. Should never be true at this point but in cases where the product sort order isn't correct,
+                // this check will at least protect installed versions
+                if (pInst == null || !pInst.contains(pKey)) {
+                    // prepare actions for removing the product all together.
+                    ProductManifest pm = ProductManifest.of(context.getHive(), pKey);
+                    context.addManifest4deletion(pKey);
+                    actions.add(new CleanupAction(CleanupType.DELETE_MANIFEST, pKey.toString(), "Delete product \""
+                            + pm.getProductDescriptor().name + "\", version \"" + pm.getKey().getTag() + "\""));
 
-                // delete applications in product: this assumes that no single application version is used in multiple products.
-                for (Key appKey : pm.getApplications()) {
-                    context.addManifest4deletion(appKey);
-                    ApplicationManifest am = ApplicationManifest.of(context.getHive(), appKey);
-                    actions.add(new CleanupAction(CleanupType.DELETE_MANIFEST, appKey.toString(),
-                            "Delete Application \"" + am.getDescriptor().name + "\", version \"" + am.getKey().getTag() + "\""));
+                    // delete applications in product: this assumes that no single application version is used in multiple products.
+                    for (Key appKey : pm.getApplications()) {
+                        context.addManifest4deletion(appKey);
+                        ApplicationManifest am = ApplicationManifest.of(context.getHive(), appKey);
+                        actions.add(new CleanupAction(CleanupType.DELETE_MANIFEST, appKey.toString(), "Delete Application \""
+                                + am.getDescriptor().name + "\", version \"" + am.getKey().getTag() + "\""));
+                    }
                 }
             }
         }
