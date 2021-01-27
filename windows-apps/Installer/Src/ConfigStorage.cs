@@ -69,36 +69,12 @@ namespace Bdeploy.Installer.Models {
             if (!match.Success) {
                 return null;
             }
-            string value = match.Groups[1].Value.Trim();
+            string encodedValue = match.Groups[1].Value.Trim();
+            byte[] decodedValue = System.Convert.FromBase64String(encodedValue);
+
             DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(Config));
-            Config config = (Config)ser.ReadObject(new MemoryStream(Encoding.UTF8.GetBytes(value)));
+            Config config = (Config)ser.ReadObject(new MemoryStream(decodedValue));
             return config;
-        }
-
-        /// <summary>
-        /// Serializes the configururation to the given file. 
-        /// </summary>
-        public static void WriteConfiguration(string file, Config config) {
-            using (StreamWriter writer = new StreamWriter(new FileStream(file, FileMode.Create), Encoding.UTF8)) {
-                // Write header of file
-                writer.Write(START_MARKER);
-
-                // Write JSON 
-                writer.Write(START_CONFIG);
-                writer.Flush();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(Config));
-                ser.WriteObject(writer.BaseStream, config);
-                writer.Flush();
-                writer.Write(END_CONFIG);
-
-                // Write dummy-data at the end until the desired size is reached
-                writer.Flush();
-                long remaingBytes = writer.BaseStream.Length - END_MARKER.Length;
-                for (long i = 0; i < remaingBytes; i++) {
-                    writer.Write('0');
-                }
-                writer.Write(END_MARKER);
-            }
         }
 
         /// <summary>

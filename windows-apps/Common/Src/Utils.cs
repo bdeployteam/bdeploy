@@ -35,27 +35,6 @@ namespace Bdeploy.Shared {
         }
 
         /// <summary>
-        /// Starts a new process and waits for termination
-        /// </summary>
-        /// <param name="fileName"></param>
-        /// <param name="arguments"></param>
-        /// <returns></returns>
-        public static int RunProcessAndWait(string fileName, string arguments) {
-            try {
-                using (Process process = new Process()) {
-                    process.StartInfo.FileName = fileName;
-                    process.StartInfo.Arguments = arguments;
-                    process.StartInfo.ErrorDialog = false;
-                    process.Start();
-                    process.WaitForExit();
-                    return process.ExitCode;
-                }
-            } catch (Exception) {
-                return -1;
-            }
-        }
-
-        /// <summary>
         /// Starts a new process. Does not wait for termination
         /// </summary>
         /// <param name="fileName"></param>
@@ -80,7 +59,6 @@ namespace Bdeploy.Shared {
                 return principal.IsInRole(WindowsBuiltInRole.Administrator);
             }
         }
-
 
         /// <summary>
         /// Launches the current application again with admin privileges. Waits for the termination

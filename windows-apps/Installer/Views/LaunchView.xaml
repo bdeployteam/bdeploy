@@ -1,0 +1,42 @@
+﻿<UserControl x:Class="Bdeploy.Installer.Views.LaunchView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" d:DesignHeight="350" d:DesignWidth="650">
+    <UserControl.Resources>
+        <BitmapImage x:Key="Info" UriSource="/Resources/info.png" />
+    </UserControl.Resources>
+    <Grid Name="LauncherGrid" Grid.Row="1" Background="White">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="128" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="48" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+            <Image Source="{StaticResource Info}" Width="32" Height="32" Margin="0 0 15 0"  />
+            <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="#FF2FA801" VerticalAlignment="Center">
+                        <Run Text="BDeploy Click &amp; Start Launcher successfully installed" />
+            </TextBlock>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Orientation="Vertical" Margin="20, 10">
+            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Center" FontSize="14" FontWeight="SemiBold">
+                <Run Text="Applications can now be started using the" /> 
+                <Run FontStyle="Italic" Text="Click &amp; Start" /> 
+                <Run Text="links in the web application." />
+            </TextBlock>
+        </StackPanel>
+        <Grid Grid.Row="2" Background="#F0F0F0">
+            <Grid.ColumnDefinitions >
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="3" Margin="10" Padding="15 0" Click="CloseButton_Click" FontWeight="SemiBold">
+                Close
+            </Button>
+        </Grid>
+    </Grid>
+</UserControl>
