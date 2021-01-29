@@ -182,7 +182,7 @@ public class ObjectManager {
                 }
             }
 
-            Path tempLocation = location.getParent().resolve(location.getFileName().toString() + ".xtmp");
+            Path tempLocation = location.toAbsolutePath().getParent().resolve(location.getFileName().toString() + ".xtmp");
 
             // unfortunately there is no better way to detect a 'ZipPath' as the class is not accessible directly.
             if (tempLocation.getClass().getSimpleName().contains("Zip")) {
@@ -197,7 +197,7 @@ public class ObjectManager {
             Activity exporting = reporter.start("Writing objects...", 0);
             try {
                 internalExportTree(tree, tempLocation, tree, tempLocation, exporting, handler);
-                Files.move(tempLocation, location, StandardCopyOption.ATOMIC_MOVE);
+                internalMoveRetrying(location, tempLocation);
             } catch (Throwable t) {
                 try {
                     if (Files.exists(tempLocation)) {
@@ -212,6 +212,27 @@ public class ObjectManager {
             }
         } catch (IOException e) {
             throw new IllegalStateException("Cannot export to " + location, e);
+        }
+    }
+
+    private void internalMoveRetrying(Path location, Path tempLocation) throws IOException {
+        int retries = 1;
+        while (true) {
+            try {
+                Files.move(tempLocation, location, StandardCopyOption.ATOMIC_MOVE);
+                break;
+            } catch (Throwable t) {
+                log.warn("Retry {}: Cannot move: {}", retries, t.toString());
+                if (retries++ > 40) {
+                    throw t;
+                }
+                try {
+                    Thread.sleep(250);
+                } catch (InterruptedException e) {
+                    Thread.interrupted();
+                    throw new IllegalStateException("Cannot export: ", e);
+                }
+            }
         }
     }
 
