@@ -6,8 +6,6 @@ import java.util.Optional;
 import java.util.TreeMap;
 import java.util.function.Supplier;
 
-import jakarta.ws.rs.NotFoundException;
-
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
@@ -33,6 +31,7 @@ import io.bdeploy.ui.api.InstanceResource;
 import io.bdeploy.ui.api.ProcessResource;
 import io.bdeploy.ui.cli.RemoteProcessTool.RemoteProcessConfig;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
+import jakarta.ws.rs.NotFoundException;
 
 @Help("Deploy to a remote master minion")
 @ToolCategory(TextUIResources.UI_CATEGORY)
@@ -51,7 +50,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         @EnvironmentFallback("REMOTE_BHIVE")
         String instanceGroup();
 
-        @Help("Wait till termination of a single started process")
+        @Help(value = "Wait till termination of a single started process", arg = false)
         boolean join() default false;
 
         @Help(value = "List processes on the remote", arg = false)
