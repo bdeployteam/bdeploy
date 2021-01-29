@@ -61,7 +61,7 @@ public class ObjectListOperation extends BHive.Operation<Set<ObjectId>> {
 
             // Collect all (sub)-trees based on he provided root trees
             // The result is ordered: First the parent tree then it's children
-            Map<ObjectId, TreeView> object2Tree = new LinkedHashMap<>();
+            Map<ObjectId, List<ObjectId>> object2Tree = new LinkedHashMap<>();
             for (ObjectId tree : trees) {
                 TreeView treeView = execute(new ScanOperation().setTree(tree));
                 if (treeView.getElementId() == null) {
@@ -75,32 +75,38 @@ public class ObjectListOperation extends BHive.Operation<Set<ObjectId>> {
                         return false;
                     }
                     // Collect and continue
-                    object2Tree.put(treeId, t);
+                    object2Tree.put(treeId, flattenTree(t));
                     return true;
                 }).build());
             }
 
             // Reverse the list so that sub-trees are first
-            List<TreeView> allTrees = new ArrayList<>(object2Tree.values());
+            List<List<ObjectId>> allTrees = new ArrayList<>(object2Tree.values());
             Collections.reverse(allTrees);
 
             // Collect all objects referring to the tree
             // First we add the children then we add the parent tree
             // We intentionally do not use a visitor here as we just need the direct children
             Set<ObjectId> result = new LinkedHashSet<>();
-            for (TreeView treeView : allTrees) {
-                for (ElementView child : treeView.getChildren().values()) {
-                    if (child instanceof BlobView) {
-                        result.add(child.getElementId());
-                    } else if (child instanceof ManifestRefView) {
-                        ManifestRefView refView = (ManifestRefView) child;
-                        result.add(refView.getReferenceId());
-                    }
-                }
-                result.add(treeView.getElementId());
+            for (List<ObjectId> flatTree : allTrees) {
+                result.addAll(flatTree);
             }
             return result;
         }
+    }
+
+    private List<ObjectId> flattenTree(TreeView tv) {
+        List<ObjectId> result = new ArrayList<>();
+        for (ElementView child : tv.getChildren().values()) {
+            if (child instanceof BlobView) {
+                result.add(child.getElementId());
+            } else if (child instanceof ManifestRefView) {
+                ManifestRefView refView = (ManifestRefView) child;
+                result.add(refView.getReferenceId());
+            }
+        }
+        result.add(tv.getElementId());
+        return result;
     }
 
     /**
