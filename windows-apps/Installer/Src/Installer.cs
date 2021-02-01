@@ -22,7 +22,7 @@ namespace Bdeploy.Installer {
         /// <summary>
         /// Directory where BDeploy stores all files 
         /// </summary>
-        private readonly string bdeployHome;
+        public readonly string bdeployHome;
 
         /// <summary>
         /// Directory where the launcher is stored. (HOME_DIR\launcher) 
@@ -70,9 +70,14 @@ namespace Bdeploy.Installer {
         public event EventHandler<MessageEventArgs> Error;
 
         /// <summary>
-        /// Event that is raised when the launcher has been installed.
+        /// Event that is raised when the installation is about to begin.
         /// </summary>
-        public event EventHandler<EventArgs> LauncherInstalled;
+        public event EventHandler<EventArgs> Begin;
+
+        /// <summary>
+        /// Event that is raised when the application was successfully installed.
+        /// </summary>
+        public event EventHandler<EventArgs> Success;
 
         /// <summary>
         /// Event that is raised when the icon has been loaded
@@ -88,6 +93,11 @@ namespace Bdeploy.Installer {
         /// Embedded configuration object
         /// </summary>
         public readonly Config config;
+
+        /// <summary>
+        /// Flag indicating whether desktop and start menu shortcuts should be created
+        /// </summary>
+        public bool createShortcuts = true;
 
         /// <summary>
         /// Creates a new installer instance.
@@ -114,19 +124,27 @@ namespace Bdeploy.Installer {
         }
 
         /// <summary>
+        /// Returns whether the embedded configuration is valid.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsConfigValid() {
+            return config != null && config.CanInstallLauncher();
+        }
+
+        /// <summary>
         /// Executes the installer and performs all tasks.
         /// </summary>
-        public async Task<int> Setup() {
+        public async Task<int> SetupAsync() {
             FileStream lockStream = null;
             try {
+                Begin?.Invoke(this, new EventArgs());
+
                 // Show error message if configuration is invalid
-                if (config == null || !config.CanInstallLauncher()) {
+                if (!IsConfigValid()) {
                     StringBuilder builder = new StringBuilder();
                     builder.Append("Configuration is invalid or corrupt.").AppendLine().AppendLine();
                     builder.Append("Configuration:").AppendLine();
                     builder.Append(config == null ? "<null>" : config.ToString()).AppendLine();
-                    builder.Append("Embedded:").AppendLine();
-                    builder.Append(ConfigStorage.ReadEmbeddedConfig()).AppendLine();
                     OnError(builder.ToString());
                     return -1;
                 }
@@ -186,16 +204,17 @@ namespace Bdeploy.Installer {
                 FileAssociation.CreateAssociation(launcherExe, forAllUsers);
 
                 // Create start menu shortcut for the launcher
-                Shortcut shortcut = new Shortcut(launcherExe, launcherHome, "BDeploy Launcher", null);
-                shortcut.CreateStartMenuLink("BDeploy Launcher", "BDeploy", forAllUsers);
+                if (createShortcuts) {
+                    Shortcut shortcut = new Shortcut(launcherExe, launcherHome, "BDeploy Launcher", null);
+                    shortcut.CreateStartMenuLink("BDeploy Launcher", "BDeploy", forAllUsers);
+                }
 
                 // Store embedded application information
                 // Not present in case that just the launcher should be installed
                 if (config.CanInstallApp()) {
                     InstallApplication();
-                } else {
-                    LauncherInstalled?.Invoke(this, new EventArgs());
                 }
+                Success?.Invoke(this, new EventArgs());
                 return 0;
             } catch (Exception ex) {
                 OnError(ex.ToString());
@@ -223,7 +242,7 @@ namespace Bdeploy.Installer {
             string icon = Path.Combine(appsHome, appUid, "icon.ico");
 
             // Always write file as it might be outdated
-            bool createShortcut = !File.Exists(appDescriptor);
+            bool createDesktopShortcut = !File.Exists(appDescriptor) && createShortcuts;
             File.WriteAllText(appDescriptor, config.ClickAndStartDescriptor);
 
             // Read existing registry entry
@@ -235,13 +254,15 @@ namespace Bdeploy.Installer {
             // Only create desktop shortcut if we just have written the descriptor
             Shortcut shortcut = new Shortcut(appDescriptor, launcherHome, appName, icon);
             string linkName = appName + " (" + instanceGroup + " - " + instance + ")";
-            if (createShortcut) {
+            if (createDesktopShortcut) {
                 data.DesktopShortcut = shortcut.CreateDesktopLink(linkName, forAllUsers);
             }
 
             // Ensure that start-menu shortcut is always up-2-date
-            string startMenuPath = Path.Combine(productVendor, instanceGroup, instance);
-            data.StartMenuShortcut = shortcut.CreateStartMenuLink(linkName, startMenuPath, forAllUsers);
+            if (createShortcuts) {
+                string startMenuPath = Path.Combine(productVendor, instanceGroup, instance);
+                data.StartMenuShortcut = shortcut.CreateStartMenuLink(linkName, startMenuPath, forAllUsers);
+            }
 
             // A hint for the uninstaller which registry key should be deleted
             string uninstallHint = forAllUsers ? "/ForAllUsers" : "";
