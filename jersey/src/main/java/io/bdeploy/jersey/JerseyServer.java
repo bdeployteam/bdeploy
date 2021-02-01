@@ -17,13 +17,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import jakarta.ws.rs.core.UriBuilder;
-import jakarta.ws.rs.ext.ContextResolver;
-import jakarta.ws.rs.ext.Provider;
 
 import org.glassfish.grizzly.http.CompressionConfig;
 import org.glassfish.grizzly.http.CompressionConfig.CompressionMode;
@@ -72,6 +67,11 @@ import io.bdeploy.jersey.monitoring.JerseyServerMonitor;
 import io.bdeploy.jersey.monitoring.JerseyServerMonitoringResourceImpl;
 import io.bdeploy.jersey.monitoring.JerseyServerMonitoringSamplerService;
 import io.bdeploy.jersey.resources.JerseyMetricsResourceImpl;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.ext.ContextResolver;
+import jakarta.ws.rs.ext.Provider;
 
 /**
  * Encapsulates required functionality from the Grizzly HttpServer with the
@@ -286,7 +286,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             ctx.init(kmfactory.getKeyManagers(), null, null);
 
             SSLEngineConfigurator sslEngine = new SSLEngineConfigurator(ctx, false, false, false);
-            sslEngine.setEnabledProtocols(new String[] { "TLSv1", "TLSv1.1", "TLSv1.2" });
+            sslEngine.setEnabledProtocols(new String[] { "TLSv1.2", "TLSv1.3" });
 
             // default features
             registerDefaultResources(rc);
