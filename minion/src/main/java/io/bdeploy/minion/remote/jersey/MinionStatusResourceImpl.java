@@ -3,6 +3,8 @@ package io.bdeploy.minion.remote.jersey;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -10,19 +12,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
-import jakarta.inject.Singleton;
+import javax.management.MBeanServerConnection;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.bdeploy.bhive.op.ManifestDeleteOldByIdOperation;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
+import io.bdeploy.interfaces.manifest.MinionManifest;
+import io.bdeploy.interfaces.minion.MinionConfiguration;
+import io.bdeploy.interfaces.minion.MinionDto;
+import io.bdeploy.interfaces.minion.MinionMonitoringDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.MinionStatusResource;
 import io.bdeploy.jersey.JerseyServer;
 import io.bdeploy.minion.MinionRoot;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class MinionStatusResourceImpl implements MinionStatusResource {
@@ -78,6 +86,47 @@ public class MinionStatusResourceImpl implements MinionStatusResource {
             log.warn("Cannot read log files", e);
         }
         return entries;
+    }
+
+    @Override
+    public MinionMonitoringDto getMonitoring(boolean update) {
+        try {
+            MBeanServerConnection mbsc = ManagementFactory.getPlatformMBeanServer();
+            OperatingSystemMXBean osMBean = ManagementFactory.newPlatformMXBeanProxy(mbsc,
+                    ManagementFactory.OPERATING_SYSTEM_MXBEAN_NAME, OperatingSystemMXBean.class);
+
+            MinionManifest minionManifest = new MinionManifest(root.getHive());
+            MinionConfiguration configuration = minionManifest.read();
+            MinionDto minion = configuration.getMinion(root.getState().self);
+            if (minion != null) {
+                long now = System.currentTimeMillis();
+                if (minion.monitoring == null) {
+                    minion.monitoring = new MinionMonitoringDto();
+                }
+                // if existing data is older than 5min, assume that it's old data and start a new list
+                if ((now - minion.monitoring.timestamp > 1000 * 60 * 5) || minion.monitoring.loadAvg == null) {
+                    minion.monitoring.loadAvg = new ArrayList<>();
+                }
+                minion.monitoring.timestamp = now;
+                minion.monitoring.availableProcessors = osMBean.getAvailableProcessors();
+                minion.monitoring.loadAvg.add(0, osMBean.getSystemLoadAverage());
+
+                // keep values for 15min
+                while (minion.monitoring.loadAvg.size() > 15) {
+                    minion.monitoring.loadAvg.remove(minion.monitoring.loadAvg.size() - 1);
+                }
+                if (update) {
+                    minionManifest.update(configuration);
+                    root.getHive().execute(new ManifestDeleteOldByIdOperation().setToDelete(minionManifest.getKey().getName()));
+                }
+                return minion.monitoring;
+            } else {
+                log.error("minion {} not found in MinionManifest", root.getState().self);
+            }
+        } catch (IOException e) {
+            log.error("can't get OperationSystemMXBean", e);
+        }
+        return null;
     }
 
 }

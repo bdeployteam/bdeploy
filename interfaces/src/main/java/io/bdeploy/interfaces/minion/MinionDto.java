@@ -32,11 +32,15 @@ public class MinionDto {
     public RemoteService remote;
 
     /**
-     * Creates and returns a new minion DTO using the given remote.
-     * The OS and the version is taken from the currently running VM.
+     * Monitoring data
+     */
+    public MinionMonitoringDto monitoring;
+
+    /**
+     * Creates and returns a new minion DTO using the given remote. The OS and the
+     * version is taken from the currently running VM.
      *
-     * @param isMaster
-     *            whether or not this is a master minion
+     * @param isMaster whether or not this is a master minion
      * @param remote the remote service
      */
     public static MinionDto create(boolean isMaster, RemoteService remote) {
@@ -45,6 +49,7 @@ public class MinionDto {
         dto.remote = remote;
         dto.version = VersionHelper.getVersion();
         dto.os = OsHelper.getRunningOs();
+        dto.monitoring = new MinionMonitoringDto();
         return dto;
     }
 

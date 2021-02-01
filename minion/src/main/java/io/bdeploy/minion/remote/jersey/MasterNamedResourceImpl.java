@@ -16,12 +16,6 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.core.SecurityContext;
-
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,6 +70,8 @@ import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
 import io.bdeploy.interfaces.manifest.history.runtime.MasterRuntimeHistoryDto;
 import io.bdeploy.interfaces.manifest.state.InstanceState;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
+import io.bdeploy.interfaces.manifest.statistics.ClientUsage;
+import io.bdeploy.interfaces.manifest.statistics.ClientUsageData;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
@@ -86,6 +82,11 @@ import io.bdeploy.jersey.JerseyPathWriter.DeleteAfterWrite;
 import io.bdeploy.jersey.JerseyWriteLockService.LockingResource;
 import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
 import io.bdeploy.minion.MinionRoot;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.SecurityContext;
 
 @LockingResource
 public class MasterNamedResourceImpl implements MasterNamedResource {
@@ -716,6 +717,16 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         cfg.clientImageIcon = amf.readBrandingIcon(hive);
 
         return cfg;
+    }
+
+    @Override
+    public void logClientStart(String instanceId, String applicationId, String hostname) {
+        log.info("client start for " + instanceId + ", application " + applicationId + " on host " + hostname);
+        InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
+        ClientUsage clientUsage = im.getClientUsage(hive);
+        ClientUsageData data = clientUsage.read();
+        data.increment(applicationId, hostname);
+        clientUsage.set(data);
     }
 
     @Override

@@ -3,6 +3,7 @@ package io.bdeploy.launcher.cli;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ProcessBuilder.Redirect;
+import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,6 +25,11 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.sun.jna.Library;
+import com.sun.jna.Native;
+import com.sun.jna.Platform;
+import com.sun.jna.platform.win32.Kernel32Util;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
@@ -410,8 +416,22 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Launch the application
         try (Activity info = reporter.start("Launching...")) {
+            namedMaster.logClientStart(clickAndStart.instanceId, clickAndStart.applicationId, getHostname("unknown"));
             return launchApplication(clientAppCfg);
         }
+    }
+
+    private String getHostname(String fallback) {
+        String hostname = null;
+        try {
+            hostname = InetAddress.getLocalHost().getCanonicalHostName();
+        } catch (Exception e) {
+            // continue
+        }
+        if (hostname == null || hostname.equalsIgnoreCase("localhost")) {
+            hostname = NativeHostnameResolver.getHostname();
+        }
+        return hostname != null ? hostname : fallback;
     }
 
     /**
@@ -844,6 +864,39 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 log.debug("Cannot determine server version.", ex);
             }
             return VersionHelper.UNDEFINED;
+        }
+    }
+
+    /**
+     * Native hostname lookup
+     */
+    private static final class NativeHostnameResolver {
+
+        /**
+         * Native Interface to: http://man7.org/linux/man-pages/man2/gethostname.2.html
+         */
+        private interface UnixCLibrary extends Library {
+
+            UnixCLibrary INSTANCE = Native.load("c", UnixCLibrary.class);
+
+            public int gethostname(byte[] hostname, int bufferSize);
+        }
+
+        /**
+         * @return the hostname the of the current machine
+         */
+        public static String getHostname() {
+            if (Platform.isWindows()) { /** perform windows "computername" lookup */
+                return Kernel32Util.getComputerName();
+            } else { /** try to call linux native library function */
+                byte[] hostnameBuffer = new byte[4097];
+                int result = UnixCLibrary.INSTANCE.gethostname(hostnameBuffer, hostnameBuffer.length);
+                if (result != 0) {
+                    log.error("Native Method call failed: gethostname");
+                    return null;
+                }
+                return Native.toString(hostnameBuffer);
+            }
         }
     }
 
