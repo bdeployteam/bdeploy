@@ -92,32 +92,32 @@ public interface ManagedServersResource {
      * Find all instances controlled by the given server.
      */
     @GET
-    @Path("/controlled-instances/{group}/{server}")
+    @Path("/controlled-instances/{group}/{server:.+}")
     @RequiredPermission(scope = "group", permission = Permission.READ)
     public List<InstanceConfiguration> getInstancesControlledBy(@ActivityScope @PathParam("group") String groupName,
             @PathParam("server") String serverName);
 
     @POST
-    @Path("/delete-server/{group}/{server}")
+    @Path("/delete-server/{group}/{server:.+}")
     @Consumes(MediaType.TEXT_PLAIN)
     @RequiredPermission(scope = "group", permission = Permission.ADMIN)
     public void deleteManagedServer(@ActivityScope @PathParam("group") String groupName, @PathParam("server") String serverName);
 
     @POST
-    @Path("/update-server/{group}/{server}")
+    @Path("/update-server/{group}/{server:.+}")
     @RequiredPermission(scope = "group", permission = Permission.ADMIN)
     public void updateManagedServer(@ActivityScope @PathParam("group") String groupName, @PathParam("server") String serverName,
             ManagedMasterDto update);
 
     @GET
-    @Path("/minion-config/{group}/{server}")
+    @Path("/minion-config/{group}/{server:.+}")
     @Consumes(MediaType.TEXT_PLAIN)
     @RequiredPermission(scope = "group", permission = Permission.ADMIN)
     public Map<String, MinionDto> getMinionsOfManagedServer(@ActivityScope @PathParam("group") String groupName,
             @PathParam("server") String serverName);
 
     @GET
-    @Path("/minion-state/{group}/{server}")
+    @Path("/minion-state/{group}/{server:.+}")
     @Consumes(MediaType.TEXT_PLAIN)
     @RequiredPermission(scope = "group", permission = Permission.ADMIN)
     public Map<String, MinionStatusDto> getMinionStateOfManagedServer(@ActivityScope @PathParam("group") String groupName,
@@ -125,13 +125,13 @@ public interface ManagedServersResource {
 
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
-    @Path("/synchronize/{group}/{server}")
+    @Path("/synchronize/{group}/{server:.+}")
     @RequiredPermission(scope = "group", permission = Permission.WRITE)
     public ManagedMasterDto synchronize(@ActivityScope @PathParam("group") String groupName,
             @PathParam("server") String serverName);
 
     @GET
-    @Path("/list-products/{group}/{server}")
+    @Path("/list-products/{group}/{server:.+}")
     @RequiredPermission(scope = "group", permission = Permission.ADMIN)
     public List<ProductDto> listProducts(@ActivityScope @PathParam("group") String groupName,
             @PathParam("server") String serverName);
@@ -147,20 +147,20 @@ public interface ManagedServersResource {
     public SortedSet<ProductDto> getActiveTransfers(@ActivityScope @PathParam("group") String groupName);
 
     @POST
-    @Path("/minion-transfer-updates/{group}/{server}")
+    @Path("/minion-transfer-updates/{group}/{server:.+}")
     @RequiredPermission(scope = "group", permission = Permission.ADMIN)
     public void transferUpdate(@ActivityScope @PathParam("group") String groupName, @PathParam("server") String serverName,
             MinionUpdateDto dto);
 
     @POST
-    @Path("/minion-install-updates/{group}/{server}")
+    @Path("/minion-install-updates/{group}/{server:.+}")
     @RequiredPermission(scope = "group", permission = Permission.ADMIN)
     public void installUpdate(@ActivityScope @PathParam("group") String groupName, @PathParam("server") String serverName,
             MinionUpdateDto dto);
 
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
-    @Path("/minion-ping/{group}/{server}")
+    @Path("/minion-ping/{group}/{server:.+}")
     @RequiredPermission(scope = "group", permission = Permission.ADMIN)
     public Version pingServer(@ActivityScope @PathParam("group") String groupName, @PathParam("server") String serverName);
 
