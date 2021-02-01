@@ -7,10 +7,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response.Status;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +26,9 @@ import io.bdeploy.interfaces.plugin.PluginInfoDto;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.interfaces.plugin.PluginManifest;
 import io.bdeploy.ui.api.PluginResource;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response.Status;
 
 public class PluginResourceImpl implements PluginResource {
 
@@ -105,7 +104,7 @@ public class PluginResourceImpl implements PluginResource {
                 if (info.editors.stream().anyMatch(e -> e.getTypeName().equals(type))) {
                     return info;
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 log.warn("Cannot load plugin from {}: {}: {}", product, plugin, e.toString());
                 if (log.isDebugEnabled()) {
                     log.debug("Exception", e);
