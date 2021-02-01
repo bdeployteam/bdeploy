@@ -3,9 +3,6 @@ package io.bdeploy.minion.plugin;
 import java.util.Comparator;
 import java.util.SortedSet;
 
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response.Status;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +17,8 @@ import io.bdeploy.interfaces.plugin.PluginHeader;
 import io.bdeploy.interfaces.plugin.PluginInfoDto;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.interfaces.plugin.VersionSorterService;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response.Status;
 
 /**
  * Provides {@link Comparator}s to sort {@link Key}s interpreted as version. Products can contribute specific plugins which allow
@@ -76,7 +75,12 @@ public class VersionSorterServiceImpl implements VersionSorterService {
         }
 
         if (sorterPluginId != null) {
-            return manager.load(hive, sorterPluginId, sorterPluginProduct);
+            try {
+                return manager.load(hive, sorterPluginId, sorterPluginProduct);
+            } catch (Throwable t) {
+                log.warn("Cannot load plugin {}: {}", sorterPluginId, t);
+                return null;
+            }
         }
 
         return null;
