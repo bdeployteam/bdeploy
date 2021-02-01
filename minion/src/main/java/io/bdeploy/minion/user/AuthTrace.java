@@ -13,7 +13,7 @@ public class AuthTrace {
 
     public static class Message {
 
-        static SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSS");
+        private final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSS");
         public long timestamp;
         public String text;
 
