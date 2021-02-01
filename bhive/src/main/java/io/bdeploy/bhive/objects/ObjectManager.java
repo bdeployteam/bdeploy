@@ -229,8 +229,8 @@ public class ObjectManager {
                 try {
                     Thread.sleep(250);
                 } catch (InterruptedException e) {
-                    Thread.interrupted();
-                    throw new IllegalStateException("Cannot export: ", e);
+                    log.warn("Retrying rename operation has been interrupted", e);
+                    Thread.currentThread().interrupt();
                 }
             }
         }

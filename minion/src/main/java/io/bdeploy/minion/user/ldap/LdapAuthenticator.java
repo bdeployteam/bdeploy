@@ -196,6 +196,8 @@ public class LdapAuthenticator implements Authenticator {
 
     public String testLdapServer(LDAPSettingsDto dto) {
         LdapContext ctx = null;
+        String result = "OK";
+
         try {
             ctx = createServerContext(dto);
 
@@ -205,23 +207,23 @@ public class LdapAuthenticator implements Authenticator {
                 sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
                 String filter = "(" + dto.accountUserName + "={0})";
                 ctx.search(dto.accountBase, filter, new Object[] { dto.user }, sc);
-                return "OK";
             } catch (NameNotFoundException e) {
-                return exception2String(dto.server + ": base context not found: ", e);
+                result = exception2String(dto.server + ": base context not found: ", e);
             } catch (NamingException e) {
-                return exception2String(dto.server + ": query failed: ", e);
+                result = exception2String(dto.server + ": query failed: ", e);
             } finally {
                 try {
                     if (ctx != null) {
                         closeServerContext(ctx);
                     }
                 } catch (Exception e) {
-                    return exception2String(dto.server + ": close failed: ", e);
+                    result = exception2String(dto.server + ": close failed: ", e);
                 }
             }
         } catch (Exception e) {
-            return exception2String(dto.server + ": connection failed: ", e);
+            result = exception2String(dto.server + ": connection failed: ", e);
         }
+        return result;
     }
 
     private String exception2String(String message, Exception exception) {
