@@ -2,8 +2,6 @@ package io.bdeploy.gradle;
 
 import java.net.URI;
 
-import javax.ws.rs.core.UriBuilder;
-
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
@@ -18,6 +16,7 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.RemoteService;
+import jakarta.ws.rs.core.UriBuilder;
 
 /**
  * Packages a product as a ZIP file.

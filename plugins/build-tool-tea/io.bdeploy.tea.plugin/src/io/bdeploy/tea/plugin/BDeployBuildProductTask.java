@@ -18,8 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 
-import javax.ws.rs.core.UriBuilder;
-
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -48,6 +46,7 @@ import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.tea.plugin.server.BDeployTargetSpec;
 import io.bdeploy.tea.plugin.services.BDeployApplicationBuild;
+import jakarta.ws.rs.core.UriBuilder;
 
 @SuppressWarnings("restriction")
 public class BDeployBuildProductTask {

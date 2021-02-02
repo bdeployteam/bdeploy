@@ -6,8 +6,6 @@ package io.bdeploy.tea.plugin;
 import java.io.File;
 import java.util.function.Supplier;
 
-import javax.ws.rs.core.UriBuilder;
-
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.tea.core.services.TaskingLog;
 import org.eclipse.tea.library.build.config.BuildDirectories;
@@ -20,6 +18,7 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.tea.plugin.server.BDeployTargetSpec;
+import jakarta.ws.rs.core.UriBuilder;
 
 public class BDeployProductPushTask {
 

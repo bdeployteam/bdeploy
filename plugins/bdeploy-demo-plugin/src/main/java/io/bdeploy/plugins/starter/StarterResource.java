@@ -3,6 +3,7 @@ package io.bdeploy.plugins.starter;
 import java.util.Base64;
 
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 
 /**
@@ -10,17 +11,17 @@ import jakarta.ws.rs.QueryParam;
  * <p>
  * The starter frontend module uses this APIs to demonstrate an editor with backend data binding.
  */
-@javax.ws.rs.Path("/starter")
+@Path("/starter")
 public class StarterResource {
 
     @GET
-    @javax.ws.rs.Path("/encode")
+    @Path("/encode")
     public String enc(@QueryParam("v") String value) {
     	return Base64.getEncoder().encodeToString(value.getBytes());
     }
 
     @GET
-    @javax.ws.rs.Path("/decode")
+    @Path("/decode")
     public String dec(@QueryParam("v") String value) {
         return new String(Base64.getDecoder().decode(value));
     }

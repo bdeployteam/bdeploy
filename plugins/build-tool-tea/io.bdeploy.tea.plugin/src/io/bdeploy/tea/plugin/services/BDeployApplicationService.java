@@ -10,11 +10,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.List;
 
-import javax.inject.Qualifier;
-
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.tea.core.TaskExecutionContext;
 import org.eclipse.tea.core.annotations.TaskChainContextInit;
+
+import jakarta.inject.Qualifier;
 
 /**
  * Service which provides logic to enrich a {@link TaskExecutionContext} with logic to build a certain application configured in a

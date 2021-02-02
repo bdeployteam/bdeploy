@@ -10,8 +10,6 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.ws.rs.core.UriBuilder;
-
 import org.gradle.api.Action;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
@@ -39,6 +37,7 @@ import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.gradle.config.BDeployRepositoryServerConfig;
 import io.bdeploy.gradle.extensions.ApplicationExtension;
 import io.bdeploy.gradle.extensions.BDeployProductExtension;
+import jakarta.ws.rs.core.UriBuilder;
 
 /**
  * Builds a product into a local BHive. Requires the applications with an

@@ -6,8 +6,6 @@ package io.bdeploy.tea.plugin.server;
 import java.util.List;
 import java.util.Optional;
 
-import javax.ws.rs.core.UriBuilder;
-
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -31,6 +29,7 @@ import io.bdeploy.api.remote.v1.PublicRootResource;
 import io.bdeploy.api.remote.v1.dto.InstanceGroupConfigurationApi;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.jersey.JerseyClientFactory;
+import jakarta.ws.rs.core.UriBuilder;
 
 public class BDeployServerEditDialog extends TitleAreaDialog {
 

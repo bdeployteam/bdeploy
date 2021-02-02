@@ -1,7 +1,5 @@
 package io.bdeploy.gradle;
 
-import javax.ws.rs.core.UriBuilder;
-
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.Property;
@@ -16,6 +14,7 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.gradle.extensions.BDeployServerExtension;
 import io.bdeploy.gradle.extensions.ServerExtension;
+import jakarta.ws.rs.core.UriBuilder;
 
 /**
  * Pushes a previously built product to a specified server.

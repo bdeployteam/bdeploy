@@ -17,9 +17,6 @@ import java.util.SortedMap;
 import java.util.stream.Collectors;
 
 import javax.net.ssl.SSLHandshakeException;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.UriBuilder;
 
 import org.eclipse.core.internal.variables.StringVariableManager;
 import org.eclipse.core.runtime.CoreException;
@@ -69,6 +66,9 @@ import io.bdeploy.tea.plugin.services.BDeployApplicationBuild;
 import io.bdeploy.tea.plugin.services.BDeployApplicationDescriptor;
 import io.bdeploy.tea.plugin.services.BDeployApplicationService;
 import io.bdeploy.tea.plugin.services.BDeployApplicationService.CreateApplicationTasks;
+import jakarta.ws.rs.ProcessingException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.UriBuilder;
 
 @SuppressWarnings("restriction")
 @Component

@@ -7,9 +7,6 @@ import java.io.File;
 import java.net.URI;
 import java.util.Set;
 
-import javax.inject.Named;
-import javax.ws.rs.core.UriBuilder;
-
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.tea.core.services.TaskingLog;
 import org.eclipse.tea.library.build.config.BuildDirectories;
@@ -20,6 +17,8 @@ import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.CopyOperation;
 import io.bdeploy.bhive.op.ObjectListOperation;
 import io.bdeploy.common.ActivityReporter;
+import jakarta.inject.Named;
+import jakarta.ws.rs.core.UriBuilder;
 
 @Named("BDeploy Product Packaging")
 public class BDeployPackageProductTask {

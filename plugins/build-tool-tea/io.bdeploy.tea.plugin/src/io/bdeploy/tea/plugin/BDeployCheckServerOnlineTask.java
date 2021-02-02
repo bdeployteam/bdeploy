@@ -3,14 +3,13 @@
  */
 package io.bdeploy.tea.plugin;
 
-import javax.ws.rs.core.UriBuilder;
-
 import org.eclipse.e4.core.di.annotations.Execute;
 
 import io.bdeploy.api.remote.v1.PublicRootResource;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.tea.plugin.server.BDeployTargetSpec;
+import jakarta.ws.rs.core.UriBuilder;
 
 public class BDeployCheckServerOnlineTask {
 
