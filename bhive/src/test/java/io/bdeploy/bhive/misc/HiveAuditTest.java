@@ -31,8 +31,7 @@ import io.bdeploy.jersey.audit.RollingFileAuditor;
 public class HiveAuditTest {
 
     @Test
-    public void testAudit(BHive hive, @TempDir
-    Path tmp) throws IOException {
+    public void testAudit(BHive hive, @TempDir Path tmp) throws IOException {
         Path src = ContentHelper.genSimpleTestTree(tmp, "src");
         Manifest.Key key = new Manifest.Key("test", "v1");
 

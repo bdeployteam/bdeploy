@@ -23,47 +23,49 @@ import io.bdeploy.common.security.RemoteService;
  * Packages a product as a ZIP file.
  */
 public class BDeployZipTask extends DefaultTask {
-	
+
 	private BDeployProductTask productTask;
 	private DirectoryProperty localBHive;
 	private Property<Key> key;
 	private RegularFileProperty output;
-	
+
 	public BDeployZipTask() {
 		localBHive = getProject().getObjects().directoryProperty();
 		key = getProject().getObjects().property(Key.class);
 		output = getProject().getObjects().fileProperty();
-		
+
 		getProject().afterEvaluate(prj -> {
-			if(productTask != null) {
-				if(!localBHive.isPresent()) {
+			if (productTask != null) {
+				if (!localBHive.isPresent()) {
 					localBHive.set(productTask.getLocalBHive());
 				}
-				if(!key.isPresent()) {
+				if (!key.isPresent()) {
 					key.set(prj.provider(() -> productTask.getKey()));
 				}
 			}
 		});
 	}
-	
+
 	@TaskAction
 	public void perform() {
 		System.out.println(" >> Zip'ing " + key.get());
 
-		ActivityReporter reporter = getProject().hasProperty("verbose") ? new ActivityReporter.Stream(System.out) : new ActivityReporter.Null();
+		ActivityReporter reporter = getProject().hasProperty("verbose") ? new ActivityReporter.Stream(System.out)
+				: new ActivityReporter.Null();
 		URI targetUri = UriBuilder.fromUri("jar:" + output.getAsFile().get().toURI()).build();
-    	try(BHive local = new BHive(localBHive.getAsFile().get().toURI(), reporter)) {
-    		local.execute(new PushOperation().setRemote(new RemoteService(targetUri)).addManifest(key.get()));
-    	}
+		try (BHive local = new BHive(localBHive.getAsFile().get().toURI(), reporter)) {
+			local.execute(new PushOperation().setRemote(new RemoteService(targetUri)).addManifest(key.get()));
+		}
 	}
-	
+
 	/**
-	 * @param task the {@link BDeployProductTask} to grab configuration from (local BHive path, key to push).
+	 * @param task the {@link BDeployProductTask} to grab configuration from (local
+	 *             BHive path, key to push).
 	 */
 	public void of(BDeployProductTask task) {
 		productTask = task;
 	}
-	
+
 	/**
 	 * @return the local BHive containing the specified product.
 	 */
@@ -71,7 +73,7 @@ public class BDeployZipTask extends DefaultTask {
 	public DirectoryProperty getLocalBHive() {
 		return localBHive;
 	}
-	
+
 	/**
 	 * @return the product to package.
 	 */
@@ -79,7 +81,7 @@ public class BDeployZipTask extends DefaultTask {
 	public Property<Key> getKey() {
 		return key;
 	}
-	
+
 	/**
 	 * @return the target ZIP file.
 	 */
@@ -87,5 +89,5 @@ public class BDeployZipTask extends DefaultTask {
 	public RegularFileProperty getOutput() {
 		return output;
 	}
-	
+
 }

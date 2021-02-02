@@ -16,19 +16,19 @@ public class BDeployRepositoryServerConfig {
 	public String getUri() {
 		return uri;
 	}
-	
+
 	public void setUri(String uri) {
 		this.uri = uri;
 	}
-	
+
 	@Optional
 	@Input
 	public String getToken() {
 		return token;
 	}
-	
+
 	public void setToken(String token) {
 		this.token = token;
 	}
-	
+
 }

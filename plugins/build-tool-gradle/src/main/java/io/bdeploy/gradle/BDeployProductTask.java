@@ -41,145 +41,150 @@ import io.bdeploy.gradle.extensions.ApplicationExtension;
 import io.bdeploy.gradle.extensions.BDeployProductExtension;
 
 /**
- * Builds a product into a local BHive. Requires the applications with an 'app-info.yaml' file,
- * as well as the 'product-info.yaml' along with all referenced directories and files.
+ * Builds a product into a local BHive. Requires the applications with an
+ * 'app-info.yaml' file, as well as the 'product-info.yaml' along with all
+ * referenced directories and files.
  */
 public class BDeployProductTask extends DefaultTask {
 
 	private static final Logger log = LoggerFactory.getLogger(BDeployProductTask.class);
-	
+
 	private BDeployRepositoryServerConfig repositoryServer = new BDeployRepositoryServerConfig();
 	private final DirectoryProperty localBHive;
 	private boolean dryRun = false;
 	private Key key;
-	
+
 	public BDeployProductTask() {
 		this.localBHive = getProject().getObjects().directoryProperty();
 		this.getExtensions().create("product", BDeployProductExtension.class, getProject().getObjects());
-		
+
 		getProject().afterEvaluate(prj -> {
-			if(!localBHive.isPresent()) {
+			if (!localBHive.isPresent()) {
 				localBHive.set(prj.getLayout().getBuildDirectory().dir("productBHive"));
 			}
 		});
-		
+
 		// never up to date.
 		getOutputs().upToDateWhen(e -> false);
 	}
-	
+
 	@TaskAction
 	public void perform() throws IOException {
-		ActivityReporter reporter = getProject().hasProperty("verbose") ? new ActivityReporter.Stream(System.out) : new ActivityReporter.Null();
+		ActivityReporter reporter = getProject().hasProperty("verbose") ? new ActivityReporter.Stream(System.out)
+				: new ActivityReporter.Null();
 		DependencyFetcher fetcher = new LocalDependencyFetcher();
-		
+
 		// apply from extension if set, but prefer local configuration.
 		BDeployProductExtension ext = getExtensions().getByType(BDeployProductExtension.class);
 		File prodInfoYaml = ext.getProductInfo().getAsFile().getOrNull();
 		String version = ext.getVersion().getOrElse(getProject().getVersion().toString());
 		File hive = localBHive.getAsFile().get();
-		
-		if(repositoryServer.getUri() != null && repositoryServer.getToken() != null) {
-			RemoteService sourceServer = new RemoteService(UriBuilder.fromUri(repositoryServer.getUri()).build(), repositoryServer.getToken());
+
+		if (repositoryServer.getUri() != null && repositoryServer.getToken() != null) {
+			RemoteService sourceServer = new RemoteService(UriBuilder.fromUri(repositoryServer.getUri()).build(),
+					repositoryServer.getToken());
 			fetcher = new RemoteDependencyFetcher(sourceServer, null, reporter);
 		}
-		
-		if(prodInfoYaml == null || !prodInfoYaml.exists()) {
+
+		if (prodInfoYaml == null || !prodInfoYaml.exists()) {
 			throw new IllegalArgumentException("product-info.yaml is not set or does not exist: " + prodInfoYaml);
 		}
-		
+
 		Path prodInfoLocation = prodInfoYaml.getParentFile().toPath();
-		
+
 		ProductVersionDescriptor pvd = new ProductVersionDescriptor();
 		pvd.version = version;
-		for(ApplicationExtension app : ext.getApplications()) {
+		for (ApplicationExtension app : ext.getApplications()) {
 			File desc = app.getYaml().getAsFile().get();
 			Path relPath = prodInfoLocation.relativize(desc.toPath());
-			
-			if(!desc.isFile()) {
+
+			if (!desc.isFile()) {
 				throw new IllegalArgumentException("Cannot find application descriptor at " + desc);
 			}
-			
+
 			Map<OperatingSystem, String> oss = new TreeMap<>();
-			if(!app.getOs().isPresent() || app.getOs().get().isEmpty()) {
+			if (!app.getOs().isPresent() || app.getOs().get().isEmpty()) {
 				// infer from YAML
 				ApplicationDescriptorApi appDesc = readYaml(desc, ApplicationDescriptorApi.class);
-				for(OperatingSystem os : appDesc.supportedOperatingSystems) {
+				for (OperatingSystem os : appDesc.supportedOperatingSystems) {
 					oss.put(os, relPath.toString());
 				}
 			} else {
-				for(String os : app.getOs().get()) {
+				for (String os : app.getOs().get()) {
 					OperatingSystem target = OperatingSystem.valueOf(os);
 					oss.put(target, relPath.toString());
 				}
 			}
-			
+
 			pvd.appInfo.put(app.getName(), oss);
 		}
-		for(Map.Entry<String, String> label : ext.getLabels().get().entrySet()) {
+		for (Map.Entry<String, String> label : ext.getLabels().get().entrySet()) {
 			pvd.labels.put(label.getKey(), label.getValue());
 		}
-		
+
 		ProductDescriptor pd = readYaml(prodInfoYaml, ProductDescriptor.class);
-		if(pd.versionFile == null) {
-			throw new IllegalStateException("The " + prodInfoYaml + " must specify a 'versionFile' (which will be generated if it does not exist)");
+		if (pd.versionFile == null) {
+			throw new IllegalStateException("The " + prodInfoYaml
+					+ " must specify a 'versionFile' (which will be generated if it does not exist)");
 		}
-		
+
 		File pvdFile = new File(prodInfoYaml.getParentFile(), pd.versionFile);
-		
+
 		log.info(" :: Repository Server: {}", repositoryServer.getUri());
 		log.info(" :: Product: {}", pd.product);
 		log.info(" :: Product Version: {}", version);
 		log.info(" :: Local BHive: {}", hive);
-		
-		if(dryRun) {
+
+		if (dryRun) {
 			System.out.println(" >> DRY-RUN - Aborting");
 			return;
 		}
-		
+
 		boolean delete = false;
 		try {
-			if(pvdFile.exists()) {
+			if (pvdFile.exists()) {
 				System.out.println("Using existing version descriptor " + pd.versionFile);
 			} else {
 				pvdFile.getParentFile().mkdirs();
-				
+
 				delete = true;
-				try(OutputStream os = new FileOutputStream(pvdFile)) {
+				try (OutputStream os = new FileOutputStream(pvdFile)) {
 					os.write(StorageHelper.toRawYamlBytes(pvd));
 				}
 			}
-			
-			try(BHive localHive = new BHive(hive.toURI(), reporter)) {
+
+			try (BHive localHive = new BHive(hive.toURI(), reporter)) {
 				key = ProductManifestBuilder.importFromDescriptor(prodInfoYaml.toPath(), localHive, fetcher, true);
 				System.out.println(" >> Imported " + key);
 			}
 		} finally {
-			if(delete) {
+			if (delete) {
 				pvdFile.delete();
 			}
 		}
 	}
-	
+
 	private static <T> T readYaml(File file, Class<T> type) {
-		try(InputStream is = new FileInputStream(file)) {
+		try (InputStream is = new FileInputStream(file)) {
 			return StorageHelper.fromYamlStream(is, type);
-		} catch(IOException ioe) {
+		} catch (IOException ioe) {
 			throw new IllegalStateException("Cannot read " + file, ioe);
 		}
 	}
-	
+
 	/**
-	 * @return the serve which is used to resolve runtimeDependencies of the product.
+	 * @return the serve which is used to resolve runtimeDependencies of the
+	 *         product.
 	 */
 	@Nested
 	public BDeployRepositoryServerConfig getRepositoryServer() {
 		return repositoryServer;
 	}
-	
+
 	public void repositoryServer(Action<? super BDeployRepositoryServerConfig> action) {
 		action.execute(repositoryServer);
 	}
-	
+
 	/**
 	 * @return the directory where the local BHive is created at.
 	 */
@@ -187,7 +192,7 @@ public class BDeployProductTask extends DefaultTask {
 	public DirectoryProperty getLocalBHive() {
 		return localBHive;
 	}
-	
+
 	/**
 	 * @return whether to actually build or just test the configuration.
 	 */
@@ -195,17 +200,18 @@ public class BDeployProductTask extends DefaultTask {
 	public boolean isDryRun() {
 		return dryRun;
 	}
-	
+
 	public void setDryRun(boolean dryRun) {
 		this.dryRun = dryRun;
 	}
-	
+
 	/**
-	 * @return after the product has been created, retrieves the key of the product created in the local BHive.
+	 * @return after the product has been created, retrieves the key of the product
+	 *         created in the local BHive.
 	 */
 	@Internal
 	public Key getKey() {
 		return key;
 	}
-	
+
 }

@@ -9,12 +9,13 @@ import org.gradle.api.Project;
 /**
  * The BDeploy Gradle Plugin.
  * <p>
- * The Plugin provides Tasks to build, package and push products from arbitrary applications. No tasks are created by default.
+ * The Plugin provides Tasks to build, package and push products from arbitrary
+ * applications. No tasks are created by default.
  */
 public class BDeployGradlePlugin implements Plugin<Project> {
-    public static final String PLUGIN_ID = "io.bdeploy.gradle.plugin";
+	public static final String PLUGIN_ID = "io.bdeploy.gradle.plugin";
 
 	public void apply(Project project) {
 		// nothing to do when applying the plugin.
-    }
+	}
 }
