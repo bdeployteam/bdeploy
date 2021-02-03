@@ -15,13 +15,13 @@ import io.bdeploy.common.ActivityReporter.Activity;
  * Import a single blob from existing data in memory into the {@link ObjectDatabase}. Useful mainly
  * when building artificial {@link Tree}.
  */
-public class ImportObjectOperation extends BHive.Operation<ObjectId> {
+public class ImportObjectOperation extends BHive.TransactedOperation<ObjectId> {
 
     @NoAudit
     private byte[] data;
 
     @Override
-    public ObjectId call() throws Exception {
+    public ObjectId callTransacted() throws Exception {
         try (Activity activity = getActivityReporter().start("Importing data...", -1)) {
             assertNotNull(data, "Data to import not set");
             return getObjectManager().db(x -> x.addObject(data));

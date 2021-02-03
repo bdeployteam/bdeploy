@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.BHiveExecution;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditStrategy;
 import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditWith;
 import io.bdeploy.bhive.audit.AuditParameterExtractor.NoAudit;
@@ -45,8 +46,8 @@ public class CopyOperation extends BHive.Operation<TransferStatistics> {
 
         assertNotNull(destinationHive, "Destination Hive not set");
 
-        String markerUuid = null;
-        try (Activity activity = getActivityReporter().start("Copying objects...")) {
+        try (Activity activity = getActivityReporter().start("Copying objects...");
+                Transaction t = destinationHive.getTransactions().begin()) {
             if (objects.isEmpty() && manifests.isEmpty()) {
                 // copy all from the local hive; don't check which are reachable from manifests,
                 // as manifest may not be consistent in the source hive (delta transfer).
@@ -56,9 +57,6 @@ public class CopyOperation extends BHive.Operation<TransferStatistics> {
 
             result.sumManifests = manifests.size();
             result.sumMissingObjects = objects.size();
-
-            // Create markers in the destination hive
-            markerUuid = destinationHive.execute(new CreateObjectMarkersOperation().setObjectIds(objects));
 
             // Scan for referenced manifests. Referenced manifests are found transitively.
             SortedSet<Manifest.Key> additional = new TreeSet<>();
@@ -88,9 +86,6 @@ public class CopyOperation extends BHive.Operation<TransferStatistics> {
                 }
             }
         } finally {
-            if (markerUuid != null) {
-                destinationHive.execute(new ClearObjectMarkersOperation().setMarkersUuuid(markerUuid));
-            }
             result.duration = Duration.between(start, Instant.now()).toMillis();
         }
 

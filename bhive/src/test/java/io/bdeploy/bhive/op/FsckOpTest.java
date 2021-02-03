@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
@@ -31,7 +32,9 @@ public class FsckOpTest {
         Path src = ContentHelper.genSimpleTestTree(tmp, "src");
         Manifest.Key key = new Manifest.Key("test", "v1");
 
-        assertThat(hive.execute(new ImportOperation().setManifest(key).setSourcePath(src)), is(key));
+        try (Transaction t = hive.getTransactions().begin()) {
+            assertThat(hive.execute(new ImportOperation().setManifest(key).setSourcePath(src)), is(key));
+        }
 
         Path fileToMessWith = hive.execute(new BHive.Operation<Path>() {
 

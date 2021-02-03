@@ -16,34 +16,31 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.audit.AuditParameterExtractor.NoAudit;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
-import io.bdeploy.bhive.objects.MarkerDatabase;
 import io.bdeploy.bhive.objects.view.ElementView;
 import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter.Activity;
-import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.common.util.StreamHelper;
-import io.bdeploy.common.util.UuidHelper;
 
 /**
  * Reads one or more objects from a stream and inserts them into the local hive.
  */
-public class ObjectReadOperation extends BHive.Operation<TransferStatistics> {
+public class ObjectReadOperation extends BHive.TransactedOperation<TransferStatistics> {
 
     @NoAudit
     private InputStream input;
 
     @Override
-    public TransferStatistics call() throws Exception {
+    public TransferStatistics callTransacted() throws Exception {
         TransferStatistics result = new TransferStatistics();
         Instant start = Instant.now();
         RuntimeAssert.assertNotNull(input);
-        String markerUuid = null;
         try (CountingInputStream countingIn = new CountingInputStream(input);
                 GZIPInputStream zipIn = new GZIPInputStream(countingIn);
                 DataInputStream dataIn = new DataInputStream(zipIn)) {
             long maxWork = dataIn.readLong();
+
             try (Activity activity = getActivityReporter().start("Reading objects...", maxWork)) {
                 SortedSet<ObjectId> objects = new TreeSet<>();
                 SortedSet<Manifest> manifests = new TreeSet<>();
@@ -59,17 +56,11 @@ public class ObjectReadOperation extends BHive.Operation<TransferStatistics> {
                     checkOp.addRoot(mf.getKey());
                 }
 
-                // Lock during streaming of objects
-                markerUuid = UuidHelper.randomId();
-                MarkerDatabase.waitRootLock(getMarkerRoot());
-                MarkerDatabase mdb = new MarkerDatabase(getMarkerRoot().resolve(markerUuid), getActivityReporter());
-
                 // Read all objects from the stream
                 counter = dataIn.readLong();
                 for (int i = 0; i < counter; i++) {
                     long size = dataIn.readLong();
                     ObjectId insertedId = getObjectManager().db(db -> db.addObject(new FixedLengthStream(dataIn, size)));
-                    mdb.addMarker(insertedId);
                     objects.add(insertedId);
                     activity.worked(1);
                 }
@@ -92,11 +83,6 @@ public class ObjectReadOperation extends BHive.Operation<TransferStatistics> {
                 result.transferSize = countingIn.getCount();
             }
         } finally {
-            // In any case release all locks, so even if things went wrong, a FSCK and prune can fix the hive.
-            if (markerUuid != null) {
-                MarkerDatabase.waitRootLock(getMarkerRoot());
-                PathHelper.deleteRecursive(getMarkerRoot().resolve(markerUuid));
-            }
             StreamHelper.close(input);
             result.duration = Duration.between(start, Instant.now()).toMillis();
         }

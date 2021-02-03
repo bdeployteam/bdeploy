@@ -28,14 +28,14 @@ import io.bdeploy.common.util.FutureHelper;
  * This operation is used internally when transferring {@link Manifest}s and
  * objects from one {@link BHive} to another {@link BHive}.
  */
-public class InsertExistingObjectsOperation extends BHive.Operation<Long> {
+public class InsertExistingObjectsOperation extends BHive.TransactedOperation<Long> {
 
     @AuditWith(AuditStrategy.COLLECTION_SIZE)
     private final SortedSet<ObjectId> objects = new TreeSet<>();
     private ObjectManager sourceMgr;
 
     @Override
-    public Long call() throws Exception {
+    public Long callTransacted() throws Exception {
         assertFalse(objects.isEmpty(), "Nothing to insert");
         assertNotNull(sourceMgr, "No source object manager");
 

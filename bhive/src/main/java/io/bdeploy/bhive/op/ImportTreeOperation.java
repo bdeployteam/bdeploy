@@ -13,13 +13,13 @@ import io.bdeploy.common.ActivityReporter.Activity;
  * Import a {@link Path} recursively into the local hive and return the
  * {@link Tree} {@link ObjectId}.
  */
-public class ImportTreeOperation extends BHive.Operation<ObjectId> {
+public class ImportTreeOperation extends BHive.TransactedOperation<ObjectId> {
 
     private Path toImport;
     private boolean skipEmpty = false;
 
     @Override
-    public ObjectId call() throws Exception {
+    public ObjectId callTransacted() throws Exception {
         assertNotNull(toImport, "Source path not set");
 
         try (Activity activity = getActivityReporter().start("Importing tree...", -1)) {

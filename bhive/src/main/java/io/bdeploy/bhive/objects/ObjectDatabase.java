@@ -15,6 +15,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.bdeploy.bhive.BHiveTransactions;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
@@ -26,7 +27,7 @@ import io.bdeploy.common.util.PathHelper;
  * identifier will be stored once. Additional metadata like the name or type of the added object is not stored.
  * <p>
  * Each object is stored internally as single file named with the {@linkplain ObjectId object identifier}. Files are placed in
- * subdirectories to keep the overall amount of files per directory small. The first four characters of the identifier are used
+ * sub-directories to keep the overall amount of files per directory small. The first four characters of the identifier are used
  * to determine the target directory. Two levels of directories are used. The first level is based on the first two characters and
  * the second level on the next two characters.
  * </p>
@@ -43,6 +44,7 @@ public class ObjectDatabase extends LockableDatabase {
     private final Path root;
     private final Path tmp;
     private final ActivityReporter reporter;
+    private final BHiveTransactions transactions;
 
     /**
      * Create a new {@link ObjectDatabase} at the given root. The database is not
@@ -53,11 +55,12 @@ public class ObjectDatabase extends LockableDatabase {
      * @param reporter an {@link ActivityReporter} used to report possibly long
      *            running operations.
      */
-    public ObjectDatabase(Path root, Path tmp, ActivityReporter reporter) {
+    public ObjectDatabase(Path root, Path tmp, ActivityReporter reporter, BHiveTransactions transactions) {
         super(root);
         this.root = root;
         this.tmp = tmp;
         this.reporter = reporter;
+        this.transactions = transactions;
 
         if (!Files.exists(root)) {
             PathHelper.mkdirs(root);
@@ -164,10 +167,19 @@ public class ObjectDatabase extends LockableDatabase {
             ObjectId id = writer.write(tmpFile);
             Path target = getObjectFile(id);
 
+            // Done outside the lock and before the existence check. This is to make sure
+            // that we touch an object even though another transaction might have inserted
+            // it already. If the other transaction would fail, we would still protect the
+            // object by marking it for this transaction as well.
+            if (transactions != null) {
+                transactions.touchObject(id);
+            }
+
             locked(() -> {
                 if (hasObject(id)) {
                     return;
                 }
+
                 PathHelper.mkdirs(target.getParent());
                 Files.move(tmpFile, target);
             });

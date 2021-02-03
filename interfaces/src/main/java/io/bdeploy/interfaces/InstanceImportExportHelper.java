@@ -12,13 +12,12 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import jakarta.ws.rs.core.SecurityContext;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
@@ -38,6 +37,7 @@ import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
+import jakarta.ws.rs.core.SecurityContext;
 
 /**
  * Helps with importing and exporting instance configurations
@@ -112,13 +112,15 @@ public class InstanceImportExportHelper {
             InstanceCompleteConfigDto cfg = StorageHelper.fromRawBytes(Files.readAllBytes(zroot.resolve(INSTANCE_JSON)),
                     InstanceCompleteConfigDto.class);
 
-            ObjectId cfgId = null;
-            Path cfgDir = zroot.resolve(CONFIG_DIR);
-            if (Files.exists(cfgDir)) {
-                cfgId = target.execute(new ImportTreeOperation().setSkipEmpty(true).setSourcePath(cfgDir));
-            }
+            try (Transaction t = target.getTransactions().begin()) {
+                ObjectId cfgId = null;
+                Path cfgDir = zroot.resolve(CONFIG_DIR);
+                if (Files.exists(cfgDir)) {
+                    cfgId = target.execute(new ImportTreeOperation().setSkipEmpty(true).setSourcePath(cfgDir));
+                }
 
-            return importFromData(target, cfg, cfgId, uuid, minions, context);
+                return importFromData(target, cfg, cfgId, uuid, minions, context);
+            }
         } catch (IOException e) {
             throw new IllegalStateException("Cannot read ZIP: " + zipFilePath, e);
         }

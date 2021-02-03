@@ -9,14 +9,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import jakarta.inject.Inject;
-import jakarta.ws.rs.core.UriBuilder;
-
 import org.jvnet.hk2.annotations.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.op.remote.FetchOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.common.ActivityReporter;
@@ -28,6 +26,8 @@ import io.bdeploy.jersey.JerseyScopeService;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.dto.ProductDto;
 import io.bdeploy.ui.dto.ProductTransferDto;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.UriBuilder;
 
 @Service
 public class ProductTransferService {
@@ -103,7 +103,9 @@ public class ProductTransferService {
 
         // always first fetch, then push
         if (fetch != null) {
-            instanceGroupHive.execute(fetch);
+            try (Transaction t = instanceGroupHive.getTransactions().begin()) {
+                instanceGroupHive.execute(fetch);
+            }
         }
         if (push != null) {
             instanceGroupHive.execute(push);

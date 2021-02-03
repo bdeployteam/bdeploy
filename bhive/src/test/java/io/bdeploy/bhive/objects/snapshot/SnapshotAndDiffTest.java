@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
@@ -53,11 +54,13 @@ public class SnapshotAndDiffTest {
         Manifest.Key keyCh = new Manifest.Key("k", "4");
         Manifest.Key keyF2d = new Manifest.Key("k", "5");
 
-        hive.execute(new ImportOperation().setManifest(keyPlain).setSourcePath(plain));
-        hive.execute(new ImportOperation().setManifest(keyNew).setSourcePath(newFile));
-        hive.execute(new ImportOperation().setManifest(keyRm).setSourcePath(rmFile));
-        hive.execute(new ImportOperation().setManifest(keyCh).setSourcePath(chFile));
-        hive.execute(new ImportOperation().setManifest(keyF2d).setSourcePath(file2Dir));
+        try (Transaction t = hive.getTransactions().begin()) {
+            hive.execute(new ImportOperation().setManifest(keyPlain).setSourcePath(plain));
+            hive.execute(new ImportOperation().setManifest(keyNew).setSourcePath(newFile));
+            hive.execute(new ImportOperation().setManifest(keyRm).setSourcePath(rmFile));
+            hive.execute(new ImportOperation().setManifest(keyCh).setSourcePath(chFile));
+            hive.execute(new ImportOperation().setManifest(keyF2d).setSourcePath(file2Dir));
+        }
 
         TreeView snPlain = hive.execute(new ScanOperation().setManifest(keyPlain));
         TreeView snNew = hive.execute(new ScanOperation().setManifest(keyNew));
@@ -84,7 +87,9 @@ public class SnapshotAndDiffTest {
         Path src = ContentHelper.genSimpleTestTree(tmp, "s1");
         Manifest.Key key = new Manifest.Key("k", "1");
 
-        hive.execute(new ImportOperation().setManifest(key).setSourcePath(src));
+        try (Transaction t = hive.getTransactions().begin()) {
+            hive.execute(new ImportOperation().setManifest(key).setSourcePath(src));
+        }
         // remove a blob
         hive.execute(new BHive.Operation<Void>() {
 
@@ -115,7 +120,9 @@ public class SnapshotAndDiffTest {
         Path src = ContentHelper.genSimpleTestTree(tmp, "s1");
         Manifest.Key key = new Manifest.Key("k", "1");
 
-        hive.execute(new ImportOperation().setManifest(key).setSourcePath(src));
+        try (Transaction t = hive.getTransactions().begin()) {
+            hive.execute(new ImportOperation().setManifest(key).setSourcePath(src));
+        }
         // remove a tree
         hive.execute(new BHive.Operation<Void>() {
 
@@ -147,7 +154,9 @@ public class SnapshotAndDiffTest {
         Path src = ContentHelper.genSimpleTestTree(tmp, "s1");
         Manifest.Key key = new Manifest.Key("k", "1");
 
-        hive.execute(new ImportOperation().setManifest(key).setSourcePath(src));
+        try (Transaction t = hive.getTransactions().begin()) {
+            hive.execute(new ImportOperation().setManifest(key).setSourcePath(src));
+        }
         TreeView snap = hive.execute(new ScanOperation().setManifest(key).setMaxDepth(1));
 
         LongAdder skipCount = new LongAdder();

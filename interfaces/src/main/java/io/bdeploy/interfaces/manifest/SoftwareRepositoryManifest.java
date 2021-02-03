@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.Optional;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
@@ -57,15 +58,17 @@ public class SoftwareRepositoryManifest {
      * @param desc updated customer metadata to write.
      */
     public void update(SoftwareRepositoryConfiguration desc) {
-        Long newId = hive.execute(new ManifestNextIdOperation().setManifestName(MANIFEST_NAME));
-        Manifest.Builder mfb = new Manifest.Builder(new Manifest.Key(MANIFEST_NAME, newId.toString()));
+        try (Transaction t = hive.getTransactions().begin()) {
+            Long newId = hive.execute(new ManifestNextIdOperation().setManifestName(MANIFEST_NAME));
+            Manifest.Builder mfb = new Manifest.Builder(new Manifest.Key(MANIFEST_NAME, newId.toString()));
 
-        ObjectId descOid = hive.execute(new ImportObjectOperation().setData(StorageHelper.toRawBytes(desc)));
-        Tree.Builder tb = new Tree.Builder().add(new Tree.Key(SoftwareRepositoryConfiguration.FILE_NAME, Tree.EntryType.BLOB),
-                descOid);
+            ObjectId descOid = hive.execute(new ImportObjectOperation().setData(StorageHelper.toRawBytes(desc)));
+            Tree.Builder tb = new Tree.Builder().add(new Tree.Key(SoftwareRepositoryConfiguration.FILE_NAME, Tree.EntryType.BLOB),
+                    descOid);
 
-        mfb.setRoot(hive.execute(new InsertArtificialTreeOperation().setTree(tb)));
-        hive.execute(new InsertManifestOperation().addManifest(mfb.build(hive)));
+            mfb.setRoot(hive.execute(new InsertArtificialTreeOperation().setTree(tb)));
+            hive.execute(new InsertManifestOperation().addManifest(mfb.build(hive)));
+        }
     }
 
 }

@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.model.Tree.EntryType;
@@ -51,17 +52,19 @@ public class SettingsManifest {
     }
 
     public static void write(BHive hive, SettingsConfiguration config, SecretKeySpec key) {
-        Long tag = hive.execute(new ManifestMaxIdOperation().setManifestName(SETTINGS_MANIFEST)).orElse(1l);
-        Manifest.Builder builder = new Manifest.Builder(new Manifest.Key(SETTINGS_MANIFEST, Long.toString(tag + 1)));
-        Tree.Builder tree = new Tree.Builder();
+        try (Transaction t = hive.getTransactions().begin()) {
+            Long tag = hive.execute(new ManifestMaxIdOperation().setManifestName(SETTINGS_MANIFEST)).orElse(1l);
+            Manifest.Builder builder = new Manifest.Builder(new Manifest.Key(SETTINGS_MANIFEST, Long.toString(tag + 1)));
+            Tree.Builder tree = new Tree.Builder();
 
-        tree.add(new Tree.Key(CONFIG_FILE, EntryType.BLOB),
-                hive.execute(new ImportObjectOperation().setData(StorageHelper.toRawBytes(encryptPasswords(hive, config, key)))));
+            tree.add(new Tree.Key(CONFIG_FILE, EntryType.BLOB), hive
+                    .execute(new ImportObjectOperation().setData(StorageHelper.toRawBytes(encryptPasswords(hive, config, key)))));
 
-        hive.execute(new InsertManifestOperation()
-                .addManifest(builder.setRoot(hive.execute(new InsertArtificialTreeOperation().setTree(tree))).build(hive)));
+            hive.execute(new InsertManifestOperation()
+                    .addManifest(builder.setRoot(hive.execute(new InsertArtificialTreeOperation().setTree(tree))).build(hive)));
 
-        hive.execute(new ManifestDeleteOldByIdOperation().setAmountToKeep(10).setToDelete(SETTINGS_MANIFEST));
+            hive.execute(new ManifestDeleteOldByIdOperation().setAmountToKeep(10).setToDelete(SETTINGS_MANIFEST));
+        }
     }
 
     private static SettingsConfiguration decryptOrClearPasswords(SettingsConfiguration config, SecretKeySpec key,

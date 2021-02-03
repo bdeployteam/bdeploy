@@ -15,12 +15,12 @@ import io.bdeploy.common.ActivityReporter.Activity;
  * Import a single {@link Path} into the {@link ObjectDatabase}. Useful mainly
  * when building artificial {@link Tree}.
  */
-public class ImportFileOperation extends BHive.Operation<ObjectId> {
+public class ImportFileOperation extends BHive.TransactedOperation<ObjectId> {
 
     private Path file;
 
     @Override
-    public ObjectId call() throws Exception {
+    public ObjectId callTransacted() throws Exception {
         try (Activity activity = getActivityReporter().start("Importing file...", -1)) {
             assertNotNull(file, "File to import not set");
             return getObjectManager().db(x -> x.addObject(file));

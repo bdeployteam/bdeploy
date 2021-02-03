@@ -60,7 +60,7 @@ public class ObjectDatabaseTest extends DbTestBase {
         id = getObjectDatabase().addObject(fileToAdd);
         assertTrue(getObjectDatabase().hasObject(id));
 
-        ObjectDatabase other = new ObjectDatabase(getObjectDatabasePath(), getObjectDatabasePath(), r);
+        ObjectDatabase other = new ObjectDatabase(getObjectDatabasePath(), getObjectDatabasePath(), r, null);
         assertTrue(other.hasObject(id));
 
         Path expFile = tmp.resolve("obj2.tmp");

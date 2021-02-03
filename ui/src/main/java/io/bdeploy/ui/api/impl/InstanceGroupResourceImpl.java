@@ -14,13 +14,6 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.SortedSet;
 
-import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.container.ResourceContext;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.core.SecurityContext;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +21,7 @@ import com.google.common.io.ByteStreams;
 
 import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
@@ -62,6 +56,12 @@ import io.bdeploy.ui.api.ProductResource;
 import io.bdeploy.ui.dto.ClientApplicationDto;
 import io.bdeploy.ui.dto.InstanceClientAppsDto;
 import io.bdeploy.ui.dto.InstanceDto;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ResourceContext;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.SecurityContext;
 
 public class InstanceGroupResourceImpl implements InstanceGroupResource {
 
@@ -203,7 +203,8 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
     @Override
     public void updateImage(String group, InputStream imageData) {
         InstanceGroupConfiguration config = read(group);
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                Transaction t = getGroupHive(group).getTransactions().begin()) {
             ByteStreams.copy(imageData, baos);
             ObjectId id = getGroupHive(group).execute(new ImportObjectOperation().setData(baos.toByteArray()));
             config.logo = id;

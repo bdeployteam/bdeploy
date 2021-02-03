@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -106,19 +107,23 @@ public class NestedManifestTest extends DbTestBase {
         Manifest.Key nb = new Manifest.Key("nested-b", "v1");
         Manifest.Key root = new Manifest.Key("root", "v1");
 
-        hive.execute(new ImportOperation().setManifest(na).setSourcePath(tmp));
-        hive.execute(new ImportOperation().setManifest(nb).setSourcePath(tmp));
+        Manifest builtMf;
+        try (Transaction t = hive.getTransactions().begin()) {
+            hive.execute(new ImportOperation().setManifest(na).setSourcePath(tmp));
+            hive.execute(new ImportOperation().setManifest(nb).setSourcePath(tmp));
 
-        Tree.Builder rootTree = new Tree.Builder()
-                .add(new Tree.Key("nested-a", EntryType.MANIFEST), hive.execute(new InsertManifestRefOperation().setManifest(na)))
-                .add(new Tree.Key("nested-b", EntryType.MANIFEST),
-                        hive.execute(new InsertManifestRefOperation().setManifest(nb)));
+            Tree.Builder rootTree = new Tree.Builder()
+                    .add(new Tree.Key("nested-a", EntryType.MANIFEST),
+                            hive.execute(new InsertManifestRefOperation().setManifest(na)))
+                    .add(new Tree.Key("nested-b", EntryType.MANIFEST),
+                            hive.execute(new InsertManifestRefOperation().setManifest(nb)));
 
-        Manifest.Builder mbr = new Manifest.Builder(root);
-        mbr.setRoot(hive.execute(new InsertArtificialTreeOperation().setTree(rootTree)));
+            Manifest.Builder mbr = new Manifest.Builder(root);
+            mbr.setRoot(hive.execute(new InsertArtificialTreeOperation().setTree(rootTree)));
 
-        Manifest builtMf = mbr.build(hive);
-        hive.execute(new InsertManifestOperation().addManifest(builtMf));
+            builtMf = mbr.build(hive);
+            hive.execute(new InsertManifestOperation().addManifest(builtMf));
+        }
 
         SortedMap<String, Manifest.Key> refKeys = new TreeMap<>();
         TreeVisitor visitor = new TreeVisitor.Builder()
@@ -138,14 +143,16 @@ public class NestedManifestTest extends DbTestBase {
         SortedMap<String, Key> cachedRefs = rootMf.getCachedReferences(hive, Integer.MAX_VALUE, false);
         assertTrue(refKeys.equals(cachedRefs));
 
-        // now add another level and check again the same
         Manifest.Key outerKey = new Manifest.Key("outer", "v1");
-        Tree.Builder outerTree = new Tree.Builder().add(new Tree.Key("nested-root", EntryType.MANIFEST),
-                hive.execute(new InsertManifestRefOperation().setManifest(root)));
+        try (Transaction t = hive.getTransactions().begin()) {
+            // now add another level and check again the same
+            Tree.Builder outerTree = new Tree.Builder().add(new Tree.Key("nested-root", EntryType.MANIFEST),
+                    hive.execute(new InsertManifestRefOperation().setManifest(root)));
 
-        Manifest.Builder outerBuilder = new Manifest.Builder(outerKey);
-        outerBuilder.setRoot(hive.execute(new InsertArtificialTreeOperation().setTree(outerTree)));
-        hive.execute(new InsertManifestOperation().addManifest(outerBuilder.build(hive)));
+            Manifest.Builder outerBuilder = new Manifest.Builder(outerKey);
+            outerBuilder.setRoot(hive.execute(new InsertArtificialTreeOperation().setTree(outerTree)));
+            hive.execute(new InsertManifestOperation().addManifest(outerBuilder.build(hive)));
+        }
 
         refKeys.clear();
         hive.execute(new ScanOperation().setManifest(outerKey)).visit(visitor);

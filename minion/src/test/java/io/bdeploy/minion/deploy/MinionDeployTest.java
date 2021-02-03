@@ -78,7 +78,7 @@ public class MinionDeployTest {
             throws IOException, InterruptedException {
         SortedMap<Key, ObjectId> inventoryStart = null;
         try (RemoteBHive rbh = RemoteBHive.forService(remote, JerseyRemoteBHive.DEFAULT_NAME, reporter)) {
-            inventoryStart = rbh.getManifestInventory();
+            inventoryStart = TestFactory.getFilteredManifests(rbh.getManifestInventory());
         }
 
         Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true);
@@ -192,7 +192,7 @@ public class MinionDeployTest {
 
         // All created manifests should be deleted
         try (RemoteBHive rbh = RemoteBHive.forService(remote, JerseyRemoteBHive.DEFAULT_NAME, reporter)) {
-            SortedMap<Key, ObjectId> inventory = rbh.getManifestInventory();
+            SortedMap<Key, ObjectId> inventory = TestFactory.getFilteredManifests(rbh.getManifestInventory());
             inventory.keySet().removeAll(inventoryStart.keySet());
             assertTrue(inventory.isEmpty());
         }

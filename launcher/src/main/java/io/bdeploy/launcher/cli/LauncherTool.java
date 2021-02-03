@@ -34,6 +34,7 @@ import com.sun.jna.platform.win32.Kernel32Util;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
@@ -494,8 +495,10 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         try (Activity updating = reporter.start("Updating Launcher")) {
             waitForLauncherUpdates(updateMarker);
 
-            // found a newer version to install.
-            hive.execute(new FetchOperation().addManifest(launcher).setRemote(clickAndStart.host));
+            try (Transaction t = hive.getTransactions().begin()) {
+                // found a newer version to install.
+                hive.execute(new FetchOperation().addManifest(launcher).setRemote(clickAndStart.host));
+            }
 
             // write to target directory
             Path next = UpdateHelper.prepareUpdateDirectory(updateDir);
@@ -579,7 +582,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         log.info("Starting installation of application {}", appKey);
 
         // Fetch the application and all the requirements
-        try (Activity info = reporter.start("Downloading...")) {
+        try (Activity info = reporter.start("Downloading..."); Transaction t = hive.getTransactions().begin()) {
             log.info("Fetching manifests from server...");
             TransferStatistics stats = hive.execute(new FetchOperation().setHiveName(clickAndStart.groupId)
                     .setRemote(clickAndStart.host).addManifest(appKey).addManifest(clientAppCfg.resolvedRequires));
@@ -752,7 +755,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 throw new SoftwareUpdateException("launcher", "Installed=" + runningVersion.toString() + " Required=" + version);
             }
             // Fetch and write to target directory
-            hive.execute(new FetchOperation().addManifest(launcher).setRemote(clickAndStart.host));
+            try (Transaction t = hive.getTransactions().begin()) {
+                hive.execute(new FetchOperation().addManifest(launcher).setRemote(clickAndStart.host));
+            }
             Path launcherHome = homeDir.resolve(ClientPathHelper.LAUNCHER_DIR);
             hive.execute(new ExportOperation().setManifest(launcher).setTarget(launcherHome));
             log.info("Launcher successfully installed: {}", version);

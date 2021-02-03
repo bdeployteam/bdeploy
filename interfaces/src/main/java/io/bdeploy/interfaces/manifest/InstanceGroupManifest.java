@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.BHiveExecution;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
@@ -68,20 +69,22 @@ public class InstanceGroupManifest {
      * @param desc updated customer metadata to write.
      */
     public void update(InstanceGroupConfiguration desc) {
-        Long newId = hive.execute(new ManifestNextIdOperation().setManifestName(MANIFEST_NAME));
-        Manifest.Builder mfb = new Manifest.Builder(new Manifest.Key(MANIFEST_NAME, newId.toString()));
+        try (Transaction t = hive.getTransactions().begin()) {
+            Long newId = hive.execute(new ManifestNextIdOperation().setManifestName(MANIFEST_NAME));
+            Manifest.Builder mfb = new Manifest.Builder(new Manifest.Key(MANIFEST_NAME, newId.toString()));
 
-        ObjectId descOid = hive.execute(new ImportObjectOperation().setData(StorageHelper.toRawBytes(desc)));
-        Tree.Builder tb = new Tree.Builder().add(new Tree.Key(InstanceGroupConfiguration.FILE_NAME, Tree.EntryType.BLOB),
-                descOid);
+            ObjectId descOid = hive.execute(new ImportObjectOperation().setData(StorageHelper.toRawBytes(desc)));
+            Tree.Builder tb = new Tree.Builder().add(new Tree.Key(InstanceGroupConfiguration.FILE_NAME, Tree.EntryType.BLOB),
+                    descOid);
 
-        if (desc.logo != null) {
-            // create a dummy reference to keep the object safe from garbage collection
-            tb.add(new Tree.Key("logo", EntryType.BLOB), desc.logo);
+            if (desc.logo != null) {
+                // create a dummy reference to keep the object safe from garbage collection
+                tb.add(new Tree.Key("logo", EntryType.BLOB), desc.logo);
+            }
+
+            mfb.setRoot(hive.execute(new InsertArtificialTreeOperation().setTree(tb)));
+            hive.execute(new InsertManifestOperation().addManifest(mfb.build(hive)));
         }
-
-        mfb.setRoot(hive.execute(new InsertArtificialTreeOperation().setTree(tb)));
-        hive.execute(new InsertManifestOperation().addManifest(mfb.build(hive)));
     }
 
     public CustomAttributes getAttributes(BHiveExecution bhive) {

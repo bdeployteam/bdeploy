@@ -10,6 +10,7 @@ import io.bdeploy.api.product.v1.DependencyFetcher;
 import io.bdeploy.api.remote.v1.PublicRootResource;
 import io.bdeploy.api.remote.v1.dto.SoftwareRepositoryConfigurationApi;
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
@@ -99,7 +100,9 @@ public class RemoteDependencyFetcher implements DependencyFetcher {
             return unresolved;
         }
 
-        hive.execute(new FetchOperation().setRemote(svc).setHiveName(group).addManifest(toFetch));
+        try (Transaction t = hive.getTransactions().begin()) {
+            hive.execute(new FetchOperation().setRemote(svc).setHiveName(group).addManifest(toFetch));
+        }
 
         return unresolved;
     }

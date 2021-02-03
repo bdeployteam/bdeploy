@@ -14,12 +14,11 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.CompletableFuture;
 
-import jakarta.ws.rs.core.UriBuilder;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
@@ -38,6 +37,7 @@ import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
+import jakarta.ws.rs.core.UriBuilder;
 
 /**
  * Adapts a local {@link BHive} to a {@link RemoteBHive}. This makes it possible
@@ -124,7 +124,9 @@ public class LocalBHiveAdapter implements RemoteBHive {
 
     @Override
     public TransferStatistics pushAsStream(InputStream in) {
-        return hive.execute(new ObjectReadOperation().stream(in));
+        try (Transaction t = hive.getTransactions().begin()) {
+            return hive.execute(new ObjectReadOperation().stream(in));
+        }
     }
 
     @Override

@@ -20,6 +20,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.Tree;
@@ -207,22 +208,24 @@ public class UserDatabase implements AuthService {
     }
 
     private synchronized void internalUpdate(String user, UserInfo info) {
-        user = UserInfo.normalizeName(user);
+        String normUser = UserInfo.normalizeName(user);
 
-        Long id = target.execute(new ManifestNextIdOperation().setManifestName(NAMESPACE + user));
-        Manifest.Key key = new Manifest.Key(NAMESPACE + user, String.valueOf(id));
+        try (Transaction t = target.getTransactions().begin()) {
+            Long id = target.execute(new ManifestNextIdOperation().setManifestName(NAMESPACE + normUser));
+            Manifest.Key key = new Manifest.Key(NAMESPACE + normUser, String.valueOf(id));
 
-        Tree.Builder tree = new Tree.Builder();
-        tree.add(new Tree.Key(FILE_NAME, Tree.EntryType.BLOB),
-                target.execute(new ImportObjectOperation().setData(StorageHelper.toRawBytes(info))));
+            Tree.Builder tree = new Tree.Builder();
+            tree.add(new Tree.Key(FILE_NAME, Tree.EntryType.BLOB),
+                    target.execute(new ImportObjectOperation().setData(StorageHelper.toRawBytes(info))));
 
-        target.execute(new InsertManifestOperation().addManifest(new Manifest.Builder(key)
-                .setRoot(target.execute(new InsertArtificialTreeOperation().setTree(tree))).build(null)));
+            target.execute(new InsertManifestOperation().addManifest(new Manifest.Builder(key)
+                    .setRoot(target.execute(new InsertArtificialTreeOperation().setTree(tree))).build(null)));
 
-        target.execute(new ManifestDeleteOldByIdOperation().setAmountToKeep(10).setToDelete(NAMESPACE + user));
+            target.execute(new ManifestDeleteOldByIdOperation().setAmountToKeep(10).setToDelete(NAMESPACE + normUser));
 
-        // update the cache.
-        userCache.put(user, info);
+            // update the cache.
+            userCache.put(normUser, info);
+        }
     }
 
     @Override

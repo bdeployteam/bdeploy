@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -53,8 +54,10 @@ public class MetaManifestTest {
 
         Path tree = ContentHelper.genSimpleTestTree(temp, "test");
 
-        hive.execute(new ImportOperation().setSourcePath(tree).setManifest(testMf1));
-        hive.execute(new ImportOperation().setSourcePath(tree).setManifest(testMf2));
+        try (Transaction t = hive.getTransactions().begin()) {
+            hive.execute(new ImportOperation().setSourcePath(tree).setManifest(testMf1));
+            hive.execute(new ImportOperation().setSourcePath(tree).setManifest(testMf2));
+        }
 
         MetaManifest<MyMeta> sharedMM = new MetaManifest<>(testMf2, false, MyMeta.class);
         assertNull(sharedMM.read(hive));

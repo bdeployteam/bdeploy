@@ -19,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ImportOperation;
@@ -79,9 +80,11 @@ public class MinionUpdateTest {
         Manifest.Key linuxUpdateKey = new Manifest.Key("bdeploy/snapshot/linux", "2.0.0");
         Manifest.Key macUpdateKey = new Manifest.Key("bdeploy/snapshot/macos", "2.0.0");
 
-        local.execute(new ImportOperation().setManifest(winUpdateKey).setSourcePath(updateSource));
-        local.execute(new ImportOperation().setManifest(linuxUpdateKey).setSourcePath(updateSource));
-        local.execute(new ImportOperation().setManifest(macUpdateKey).setSourcePath(updateSource));
+        try (Transaction t = local.getTransactions().begin()) {
+            local.execute(new ImportOperation().setManifest(winUpdateKey).setSourcePath(updateSource));
+            local.execute(new ImportOperation().setManifest(linuxUpdateKey).setSourcePath(updateSource));
+            local.execute(new ImportOperation().setManifest(macUpdateKey).setSourcePath(updateSource));
+        }
 
         local.execute(new PushOperation().addManifest(winUpdateKey).setRemote(remote));
         local.execute(new PushOperation().addManifest(linuxUpdateKey).setRemote(remote));

@@ -17,7 +17,7 @@ import io.bdeploy.common.ActivityReporter.Activity;
 /**
  * Import a {@link Path} recursively into the local hive.
  */
-public class ImportOperation extends BHive.Operation<Manifest.Key> {
+public class ImportOperation extends BHive.TransactedOperation<Manifest.Key> {
 
     private Path toImport;
     private Manifest.Key manifest;
@@ -26,7 +26,7 @@ public class ImportOperation extends BHive.Operation<Manifest.Key> {
     private final Map<String, String> labels = new TreeMap<>();
 
     @Override
-    public Manifest.Key call() throws Exception {
+    public Manifest.Key callTransacted() throws Exception {
         assertNotNull(toImport, "Source path not set");
         assertNotNull(manifest, "Manifest not set");
 

@@ -19,6 +19,7 @@ import io.bdeploy.api.product.v1.ProductDescriptor;
 import io.bdeploy.api.product.v1.ProductVersionDescriptor;
 import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.cli.BHiveCli;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -75,7 +76,9 @@ public class ProductCliTest {
 
             Files.writeString(src.resolve("ext.txt"), "This is demo content");
 
-            tmpHive.execute(new ImportOperation().setManifest(smk.getKey()).setSourcePath(src));
+            try (Transaction t = tmpHive.getTransactions().begin()) {
+                tmpHive.execute(new ImportOperation().setManifest(smk.getKey()).setSourcePath(src));
+            }
             tmpHive.execute(new PushOperation().addManifest(smk.getKey()).setRemote(svc).setHiveName("ext"));
         }
 

@@ -15,8 +15,6 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import jakarta.ws.rs.core.UriBuilder;
-
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -27,18 +25,19 @@ import io.bdeploy.bhive.op.ObjectExistsOperation.Result;
 import io.bdeploy.bhive.op.ObjectReadOperation;
 import io.bdeploy.bhive.remote.RemoteBHive;
 import io.bdeploy.common.ActivityReporter.Activity;
+import jakarta.ws.rs.core.UriBuilder;
 
 /**
  * Fetches manifests from a remote {@link BHive} to the local {@link BHive}. If no
  * manifests are given, all remotely available manifests are fetched.
  */
-public class FetchOperation extends RemoteOperation<TransferStatistics, FetchOperation> {
+public class FetchOperation extends TransactedRemoteOperation<TransferStatistics, FetchOperation> {
 
     private final SortedSet<Manifest.Key> manifests = new TreeSet<>();
     private String hiveName;
 
     @Override
-    public TransferStatistics call() throws Exception {
+    public TransferStatistics callTransacted() throws Exception {
         TransferStatistics stats = new TransferStatistics();
         assertNotNull(getRemote(), "Remote not set");
 

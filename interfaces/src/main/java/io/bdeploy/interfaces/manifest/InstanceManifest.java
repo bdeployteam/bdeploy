@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.BHiveExecution;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
@@ -340,6 +341,12 @@ public class InstanceManifest {
         }
 
         public Manifest.Key insert(BHive hive) {
+            try (Transaction t = hive.getTransactions().begin()) {
+                return doInsertLocked(hive);
+            }
+        }
+
+        private Manifest.Key doInsertLocked(BHive hive) {
             RuntimeAssert.assertNotNull(config.name, "Missing description");
             RuntimeAssert.assertNotNull(config.uuid, "Missing uuid");
             RuntimeAssert.assertNotNull(config.product, "Missing product");

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.ExportTreeOperation;
 import io.bdeploy.bhive.op.ImportTreeOperation;
@@ -26,7 +27,7 @@ public class BareTreeTest {
         Path mySource = ContentHelper.genSimpleTestTree(tmp, "source");
         Path myTarget = tmp.resolve("target");
 
-        try (BHive hive = new BHive(hiveDir.toUri(), reporter)) {
+        try (BHive hive = new BHive(hiveDir.toUri(), reporter); Transaction t = hive.getTransactions().begin()) {
             ObjectId oid = hive.execute(new ImportTreeOperation().setSourcePath(mySource));
             hive.execute(new ExportTreeOperation().setSourceTree(oid).setTargetPath(myTarget));
         }

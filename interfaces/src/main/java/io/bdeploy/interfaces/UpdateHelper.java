@@ -12,13 +12,12 @@ import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import jakarta.ws.rs.core.SecurityContext;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.ImportOperation;
@@ -32,6 +31,7 @@ import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.common.util.ZipHelper;
 import io.bdeploy.interfaces.remote.CommonUpdateResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
+import jakarta.ws.rs.core.SecurityContext;
 
 /**
  * Provides shared functionality for dealing with updates.
@@ -178,7 +178,7 @@ public class UpdateHelper {
             // avoid launchers being part of the actual bdeploy manifest, temporarily move them.
         }
 
-        try {
+        try (Transaction t = hive.getTransactions().begin()) {
             hive.execute(new ImportOperation().setSourcePath(updContent).setManifest(key));
             result.add(key);
         } finally {

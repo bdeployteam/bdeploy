@@ -12,18 +12,13 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ExportOperation;
 import io.bdeploy.bhive.op.ImportOperation;
@@ -40,6 +35,11 @@ import io.bdeploy.minion.TestMinion;
 import io.bdeploy.ui.api.DownloadService;
 import io.bdeploy.ui.api.SoftwareRepositoryResource;
 import io.bdeploy.ui.api.SoftwareResource;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 @ExtendWith(TestMinion.class)
 @ExtendWith(TempDirectory.class)
@@ -104,7 +104,7 @@ public class RepoResourceTest {
 
         // create zipped hive
         Path zip = tmp.resolve("tmp.zip");
-        try (BHive hive = new BHive(zip.toUri(), reporter)) {
+        try (BHive hive = new BHive(zip.toUri(), reporter); Transaction t = hive.getTransactions().begin()) {
             hive.execute(new ImportOperation().setSourcePath(sw).setManifest(swKey));
         }
 

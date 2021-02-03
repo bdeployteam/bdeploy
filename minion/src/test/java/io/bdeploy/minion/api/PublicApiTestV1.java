@@ -10,8 +10,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.SortedMap;
 
-import jakarta.ws.rs.NotFoundException;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -27,6 +25,7 @@ import io.bdeploy.api.remote.v1.dto.InstanceConfigurationApi.InstancePurposeApi;
 import io.bdeploy.api.remote.v1.dto.InstanceGroupConfigurationApi;
 import io.bdeploy.api.remote.v1.dto.SoftwareRepositoryConfigurationApi;
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -50,6 +49,7 @@ import io.bdeploy.pcu.TestAppFactory;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.ProductResource;
 import io.bdeploy.ui.dto.ProductDto;
+import jakarta.ws.rs.NotFoundException;
 
 /**
  * Tests V1 public API
@@ -118,7 +118,9 @@ public class PublicApiTestV1 {
 
         ScopedManifestKey jdkKey = new ScopedManifestKey("jdk", OsHelper.getRunningOs(), "1.8.0");
 
-        local.execute(new ImportOperation().setSourcePath(jdk).setManifest(jdkKey.getKey()));
+        try (Transaction t = local.getTransactions().begin()) {
+            local.execute(new ImportOperation().setSourcePath(jdk).setManifest(jdkKey.getKey()));
+        }
 
         SoftwareRepositoryConfiguration src = new SoftwareRepositoryConfiguration();
         src.name = "SW";

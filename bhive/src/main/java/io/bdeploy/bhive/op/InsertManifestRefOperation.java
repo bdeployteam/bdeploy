@@ -10,12 +10,12 @@ import io.bdeploy.common.ActivityReporter.Activity;
  * Create a {@link Manifest} reference in the {@link ObjectDatabase} and returns
  * its {@link ObjectId}.
  */
-public class InsertManifestRefOperation extends BHive.Operation<ObjectId> {
+public class InsertManifestRefOperation extends BHive.TransactedOperation<ObjectId> {
 
     private Manifest.Key manifest;
 
     @Override
-    public ObjectId call() throws Exception {
+    public ObjectId callTransacted() throws Exception {
         try (Activity activity = getActivityReporter().start("Inserting manifest reference...", -1)) {
             return getObjectManager().insertManifestReference(manifest);
         }

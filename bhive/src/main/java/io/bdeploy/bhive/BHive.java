@@ -53,6 +53,7 @@ public class BHive implements AutoCloseable, BHiveExecution {
     private final FileSystem zipFs;
     private final Path objTmp;
     private final Path markerTmp;
+    private final BHiveTransactions transactions;
     private final ObjectDatabase objects;
     private final ManifestDatabase manifests;
     private final ActivityReporter reporter;
@@ -108,7 +109,8 @@ public class BHive implements AutoCloseable, BHiveExecution {
         } catch (IOException e) {
             throw new IllegalStateException("Cannot create temporary directory for zipped BHive", e);
         }
-        this.objects = new ObjectDatabase(objRoot, objTmp, reporter);
+        this.transactions = new BHiveTransactions(markerTmp, reporter);
+        this.objects = new ObjectDatabase(objRoot, objTmp, reporter, transactions);
         this.manifests = new ManifestDatabase(relRoot.resolve("manifests"));
         this.reporter = reporter;
     }
@@ -153,6 +155,14 @@ public class BHive implements AutoCloseable, BHiveExecution {
         }
     }
 
+    /**
+     * @return the {@link BHiveTransactions} tracker.
+     */
+    @Override
+    public BHiveTransactions getTransactions() {
+        return transactions;
+    }
+
     @Override
     public void close() {
         if (zipFs != null) {
@@ -180,7 +190,7 @@ public class BHive implements AutoCloseable, BHiveExecution {
         /**
          * Used internally to associate the operation with the executing hive
          */
-        private final void initOperation(BHive hive) {
+        void initOperation(BHive hive) {
             this.hive = hive;
             this.fileOps = Executors.newFixedThreadPool(hive.parallelism,
                     new NamedDaemonThreadFactory(() -> "File-OPS-" + fileOpNum.incrementAndGet()));
@@ -225,6 +235,11 @@ public class BHive implements AutoCloseable, BHiveExecution {
             return hive.reporter;
         }
 
+        @Override
+        public BHiveTransactions getTransactions() {
+            return hive.getTransactions();
+        }
+
         /**
          * Submit a {@link Runnable} performing a file operation to the pool managing
          * those operations.
@@ -245,6 +260,27 @@ public class BHive implements AutoCloseable, BHiveExecution {
         public <X> X execute(BHive.Operation<X> other) {
             return hive.execute(other);
         }
+
+    }
+
+    /**
+     * Base class for operations which require an open transaction, set up by the caller.
+     */
+    public abstract static class TransactedOperation<T> extends Operation<T> {
+
+        @Override
+        public final T call() throws Exception {
+            if (!getTransactions().hasTransaction()) {
+                throw new IllegalStateException("Operation requires active transaction: " + getClass().getSimpleName());
+            }
+
+            return callTransacted();
+        }
+
+        /**
+         * Executes the operation. The current thread is guaranteed to be associated with a transaction.
+         */
+        protected abstract T callTransacted() throws Exception;
 
     }
 

@@ -10,12 +10,12 @@ import io.bdeploy.common.ActivityReporter.Activity;
  * Create a {@link Tree} in the {@link ObjectDatabase} and return its
  * {@link ObjectId}.
  */
-public class InsertArtificialTreeOperation extends BHive.Operation<ObjectId> {
+public class InsertArtificialTreeOperation extends BHive.TransactedOperation<ObjectId> {
 
     private Tree.Builder builder;
 
     @Override
-    public ObjectId call() throws Exception {
+    public ObjectId callTransacted() throws Exception {
         try (Activity activity = getActivityReporter().start("Inserting tree...", -1)) {
             return getObjectManager().insertTree(builder.build());
         }

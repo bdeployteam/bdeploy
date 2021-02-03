@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ImportOperation;
@@ -68,7 +69,9 @@ public class TestTwoHivesServer {
             Manifest.Key key = new Manifest.Key("app", "v1");
 
             Path src = ContentHelper.genSimpleTestTree(tmp, "src");
-            hive.execute(new ImportOperation().setSourcePath(src).setManifest(key));
+            try (Transaction t = hive.getTransactions().begin()) {
+                hive.execute(new ImportOperation().setSourcePath(src).setManifest(key));
+            }
 
             assertThat(r1.getManifestInventory().size(), is(0));
             assertThat(r2.getManifestInventory().size(), is(0));
@@ -84,7 +87,7 @@ public class TestTwoHivesServer {
             assertThat(r2.getManifestInventory().size(), is(1));
 
             Path testHiveDir = tmp.resolve("hive");
-            try (BHive testHive = new BHive(testHiveDir.toUri(), r)) {
+            try (BHive testHive = new BHive(testHiveDir.toUri(), r); Transaction t = testHive.getTransactions().begin()) {
                 testHive.execute(new FetchOperation().setRemote(svc).setHiveName("h1").addManifest(key));
                 assertThat(testHive.execute(new ManifestListOperation()).size(), is(1));
             }

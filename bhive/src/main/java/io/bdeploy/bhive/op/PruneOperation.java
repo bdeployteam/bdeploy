@@ -29,14 +29,6 @@ public class PruneOperation extends BHive.Operation<SortedMap<ObjectId, Long>> {
         SortedMap<ObjectId, Long> result = new TreeMap<>();
 
         try (Activity activity = getActivityReporter().start("Pruning hive...", -1)) {
-            Set<Manifest.Key> manifests = execute(new ManifestListOperation());
-            Set<ObjectId> referenced;
-            if (!manifests.isEmpty()) {
-                referenced = execute(new ObjectListOperation().addManifest(manifests));
-            } else {
-                referenced = new TreeSet<>();
-            }
-
             // Wait for other operations locking the marker root (e.g. another prune).
             // The CreateObjectMarkersOperation and ClearObjectMarkersOperation will hold
             // off until the root is unlocked again, so:
@@ -45,24 +37,37 @@ public class PruneOperation extends BHive.Operation<SortedMap<ObjectId, Long>> {
             //  3) Upon completion, existing trasactions will block removal of the markers until the root is unlocked.
             MarkerDatabase.lockRoot(getMarkerRoot(), null, null);
 
-            SortedSet<ObjectId> orig = getObjectManager().db(ObjectDatabase::getAllObjects);
-            SortedSet<ObjectId> all = new TreeSet<>(orig);
-            all.removeAll(referenced);
-
-            // read all existing marker databases and regard any existing object as referenced.
-            try (DirectoryStream<Path> markerDbs = Files.newDirectoryStream(getMarkerRoot())) {
-                for (Path markerDb : markerDbs) {
-                    if (Files.isDirectory(markerDb)) {
-                        MarkerDatabase mdb = new MarkerDatabase(markerDb, getActivityReporter());
-                        all.removeAll(mdb.getAllObjects());
-                    }
-                }
+            // read existing manifests also inside the lock, so we are sure that the existing
+            // manifests and objects are in a consistent state.
+            Set<Manifest.Key> manifests = execute(new ManifestListOperation());
+            Set<ObjectId> referenced;
+            if (!manifests.isEmpty()) {
+                referenced = execute(new ObjectListOperation().addManifest(manifests));
+            } else {
+                referenced = new TreeSet<>();
             }
 
-            // Unlocking the root will allow:
-            //  1) Ongoing operations to continue clearing their markers
-            //  2) Other operations locking the root (e.g. another prune operation).
-            MarkerDatabase.unlockRoot(getMarkerRoot());
+            SortedSet<ObjectId> all;
+            try {
+                SortedSet<ObjectId> orig = getObjectManager().db(ObjectDatabase::getAllObjects);
+                all = new TreeSet<>(orig);
+                all.removeAll(referenced);
+
+                // read all existing marker databases and regard any existing object as referenced.
+                try (DirectoryStream<Path> markerDbs = Files.newDirectoryStream(getMarkerRoot())) {
+                    for (Path markerDb : markerDbs) {
+                        if (Files.isDirectory(markerDb)) {
+                            MarkerDatabase mdb = new MarkerDatabase(markerDb, getActivityReporter());
+                            all.removeAll(mdb.getAllObjects());
+                        }
+                    }
+                }
+            } finally {
+                // Unlocking the root will allow:
+                //  1) Ongoing operations to continue clearing their markers
+                //  2) Other operations locking the root (e.g. another prune operation).
+                MarkerDatabase.unlockRoot(getMarkerRoot());
+            }
 
             for (ObjectId unreferenced : all) {
                 result.put(unreferenced, getObjectManager().db(x -> {

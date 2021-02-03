@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -44,7 +45,9 @@ public class FetchPushTest extends RemoteHiveTestBase {
         try (BHive local = new BHive(tmp.resolve("h1").toUri(), r); BHive fetchHive = new BHive(tmp.resolve("h2").toUri(), r)) {
             Path src = ContentHelper.genSimpleTestTree(tmp, "app");
             Manifest.Key key = new Manifest.Key("app", "v1");
-            local.execute(new ImportOperation().setManifest(key).setSourcePath(src));
+            try (Transaction t = local.getTransactions().begin()) {
+                local.execute(new ImportOperation().setManifest(key).setSourcePath(src));
+            }
 
             // STEP 1: push the manifest to the remote.
             TransferStatistics s = local.execute(new PushOperation().setRemote(svc).addManifest(key));
@@ -74,24 +77,30 @@ public class FetchPushTest extends RemoteHiveTestBase {
         try (BHive local = new BHive(tmp.resolve("h1").toUri(), r); BHive fetchHive = new BHive(tmp.resolve("h2").toUri(), r)) {
             Path src = ContentHelper.genSimpleTestTree(tmp, "app");
             Manifest.Key key = new Manifest.Key("app", "v1");
-            local.execute(new ImportOperation().setManifest(key).setSourcePath(src));
+            try (Transaction t = local.getTransactions().begin()) {
+                local.execute(new ImportOperation().setManifest(key).setSourcePath(src));
+            }
 
             // STEP 1: push the manifest to the remote.
             local.execute(new PushOperation().setRemote(svc).addManifest(key));
 
             // STEP 2: fetch from remote to another hive
-            TransferStatistics s = fetchHive.execute(new FetchOperation().setRemote(svc).addManifest(key));
-            assertEquals(1, s.sumManifests);
-            assertEquals(3, s.sumTrees);
-            assertEquals(3, s.sumMissingTrees);
+            try (Transaction t = fetchHive.getTransactions().begin()) {
+                TransferStatistics s = fetchHive.execute(new FetchOperation().setRemote(svc).addManifest(key));
+                assertEquals(1, s.sumManifests);
+                assertEquals(3, s.sumTrees);
+                assertEquals(3, s.sumMissingTrees);
+            }
 
             // STEP 3: fetch remote manifest again with existing root tree in local
             fetchHive.execute(new ManifestDeleteOperation().setToDelete(key));
-            s = fetchHive.execute(new FetchOperation().setRemote(svc).addManifest(key));
-            assertEquals(1, s.sumManifests);
-            assertEquals(3, s.sumTrees);
-            assertEquals(0, s.sumMissingTrees);
-            assertEquals(0, s.sumMissingObjects);
+            try (Transaction t = fetchHive.getTransactions().begin()) {
+                TransferStatistics s = fetchHive.execute(new FetchOperation().setRemote(svc).addManifest(key));
+                assertEquals(1, s.sumManifests);
+                assertEquals(3, s.sumTrees);
+                assertEquals(0, s.sumMissingTrees);
+                assertEquals(0, s.sumMissingObjects);
+            }
 
             Set<Key> localMfs = fetchHive.execute(new ManifestListOperation());
             assertEquals(1, localMfs.size());
@@ -105,10 +114,14 @@ public class FetchPushTest extends RemoteHiveTestBase {
         try (BHive local = new BHive(tmp.resolve("h1").toUri(), r); BHive fetchHive = new BHive(tmp.resolve("h2").toUri(), r)) {
             Path src = ContentHelper.genSimpleTestTree(tmp, "app");
             Manifest.Key key = new Manifest.Key("app", "v1");
-            local.execute(new ImportOperation().setManifest(key).setSourcePath(src));
+            try (Transaction t = local.getTransactions().begin()) {
+                local.execute(new ImportOperation().setManifest(key).setSourcePath(src));
+            }
 
             Manifest.Key subKey = new Manifest.Key("sub", "v1");
-            local.execute(new ImportOperation().setManifest(subKey).setSourcePath(src.resolve("dir")));
+            try (Transaction t = local.getTransactions().begin()) {
+                local.execute(new ImportOperation().setManifest(subKey).setSourcePath(src.resolve("dir")));
+            }
 
             // STEP 1: push the manifest to the remote.
             TransferStatistics s = local.execute(new PushOperation().setRemote(svc).addManifest(subKey));
@@ -133,29 +146,37 @@ public class FetchPushTest extends RemoteHiveTestBase {
         try (BHive local = new BHive(tmp.resolve("h1").toUri(), r); BHive fetchHive = new BHive(tmp.resolve("h2").toUri(), r)) {
             Path src = ContentHelper.genSimpleTestTree(tmp, "app");
             Manifest.Key key = new Manifest.Key("app", "v1");
-            local.execute(new ImportOperation().setManifest(key).setSourcePath(src));
+            try (Transaction t = local.getTransactions().begin()) {
+                local.execute(new ImportOperation().setManifest(key).setSourcePath(src));
+            }
 
             Manifest.Key subKey = new Manifest.Key("sub", "v1");
-            local.execute(new ImportOperation().setManifest(subKey).setSourcePath(src.resolve("dir")));
+            try (Transaction t = local.getTransactions().begin()) {
+                local.execute(new ImportOperation().setManifest(subKey).setSourcePath(src.resolve("dir")));
+            }
 
             // STEP 1: push the manifest(s) to the remote.
             local.execute(new PushOperation().setRemote(svc).addManifest(subKey));
             local.execute(new PushOperation().setRemote(svc).addManifest(key));
 
             // STEP 2: fetch locally
-            TransferStatistics s = fetchHive.execute(new FetchOperation().setRemote(svc).addManifest(subKey));
-            assertEquals(1, s.sumManifests);
-            assertEquals(2, s.sumTrees);
-            assertEquals(2, s.sumMissingTrees);
+            try (Transaction t = fetchHive.getTransactions().begin()) {
+                TransferStatistics s = fetchHive.execute(new FetchOperation().setRemote(svc).addManifest(subKey));
+                assertEquals(1, s.sumManifests);
+                assertEquals(2, s.sumTrees);
+                assertEquals(2, s.sumMissingTrees);
+            }
 
             // STEP 3: remove manifest locally, but don't prune -> root tree still exists in the hive
             fetchHive.execute(new ManifestDeleteOperation().setToDelete(subKey));
 
             // STEP 4: fetch manifest which has subKeys root as leaf tree
-            s = fetchHive.execute(new FetchOperation().setRemote(svc).addManifest(key));
-            assertEquals(1, s.sumManifests);
-            assertEquals(3, s.sumTrees);
-            assertEquals(1, s.sumMissingTrees);
+            try (Transaction t = fetchHive.getTransactions().begin()) {
+                TransferStatistics s = fetchHive.execute(new FetchOperation().setRemote(svc).addManifest(key));
+                assertEquals(1, s.sumManifests);
+                assertEquals(3, s.sumTrees);
+                assertEquals(1, s.sumMissingTrees);
+            }
         }
     }
 
@@ -165,10 +186,14 @@ public class FetchPushTest extends RemoteHiveTestBase {
         try (BHive local = new BHive(tmp.resolve("h1").toUri(), r)) {
             Path src = ContentHelper.genSimpleTestTree(tmp, "app");
             Manifest.Key key = new Manifest.Key("app", "v1");
-            local.execute(new ImportOperation().setManifest(key).setSourcePath(src));
+            try (Transaction t = local.getTransactions().begin()) {
+                local.execute(new ImportOperation().setManifest(key).setSourcePath(src));
+            }
 
             Manifest.Key subKey = new Manifest.Key("sub", "v1");
-            local.execute(new ImportOperation().setManifest(subKey).setSourcePath(src.resolve("dir")));
+            try (Transaction t = local.getTransactions().begin()) {
+                local.execute(new ImportOperation().setManifest(subKey).setSourcePath(src.resolve("dir")));
+            }
 
             // STEP 1: push the manifest to the remote.
             TransferStatistics s = local.execute(new PushOperation().setRemote(svc).addManifest(subKey));
@@ -203,8 +228,10 @@ public class FetchPushTest extends RemoteHiveTestBase {
             assertEquals(1, target.execute(new ManifestListOperation().setManifestName("nested-b")).size());
 
             // fetch the manifest to the second local hive.
-            TransferStatistics fs = fetchHive.execute(new FetchOperation().setRemote(svc).addManifest(root));
-            assertEquals(3, fs.sumManifests);
+            try (Transaction t = fetchHive.getTransactions().begin()) {
+                TransferStatistics fs = fetchHive.execute(new FetchOperation().setRemote(svc).addManifest(root));
+                assertEquals(3, fs.sumManifests);
+            }
 
             // Check if all manifests arrived correctly.
             assertEquals(1, fetchHive.execute(new ManifestListOperation().setManifestName("root")).size());
@@ -220,20 +247,22 @@ public class FetchPushTest extends RemoteHiveTestBase {
         Manifest.Key nb = new Manifest.Key("nested-b", "v1");
         Manifest.Key root = new Manifest.Key("root", "v1");
 
-        local.execute(new ImportOperation().setManifest(na).setSourcePath(source));
-        local.execute(new ImportOperation().setManifest(nb).setSourcePath(source));
+        try (Transaction t = local.getTransactions().begin()) {
+            local.execute(new ImportOperation().setManifest(na).setSourcePath(source));
+            local.execute(new ImportOperation().setManifest(nb).setSourcePath(source));
 
-        Tree.Builder rootTree = new Tree.Builder()
-                .add(new Tree.Key("nested-a", EntryType.MANIFEST),
-                        local.execute(new InsertManifestRefOperation().setManifest(na)))
-                .add(new Tree.Key("nested-b", EntryType.MANIFEST),
-                        local.execute(new InsertManifestRefOperation().setManifest(nb)));
+            Tree.Builder rootTree = new Tree.Builder()
+                    .add(new Tree.Key("nested-a", EntryType.MANIFEST),
+                            local.execute(new InsertManifestRefOperation().setManifest(na)))
+                    .add(new Tree.Key("nested-b", EntryType.MANIFEST),
+                            local.execute(new InsertManifestRefOperation().setManifest(nb)));
 
-        Manifest.Builder mbr = new Manifest.Builder(root);
-        mbr.setRoot(local.execute(new InsertArtificialTreeOperation().setTree(rootTree)));
+            Manifest.Builder mbr = new Manifest.Builder(root);
+            mbr.setRoot(local.execute(new InsertArtificialTreeOperation().setTree(rootTree)));
 
-        Manifest builtMf = mbr.build(local);
-        local.execute(new InsertManifestOperation().addManifest(builtMf));
+            Manifest builtMf = mbr.build(local);
+            local.execute(new InsertManifestOperation().addManifest(builtMf));
+        }
         return root;
     }
 
@@ -257,12 +286,16 @@ public class FetchPushTest extends RemoteHiveTestBase {
             assertEquals(1, target.execute(new ManifestListOperation().setManifestName("nested-b")).size());
 
             // now fetch one of the leaves
-            TransferStatistics pfs = fetchHive.execute(new FetchOperation().setRemote(svc).addManifest(leaf));
-            assertEquals(1, pfs.sumManifests);
+            try (Transaction t = fetchHive.getTransactions().begin()) {
+                TransferStatistics pfs = fetchHive.execute(new FetchOperation().setRemote(svc).addManifest(leaf));
+                assertEquals(1, pfs.sumManifests);
+            }
 
             // fetch the manifest to the second local hive.
-            TransferStatistics fs = fetchHive.execute(new FetchOperation().setRemote(svc).addManifest(root));
-            assertEquals(2, fs.sumManifests);
+            try (Transaction t = fetchHive.getTransactions().begin()) {
+                TransferStatistics fs = fetchHive.execute(new FetchOperation().setRemote(svc).addManifest(root));
+                assertEquals(2, fs.sumManifests);
+            }
 
             // Check if all manifests arrived correctly.
             assertEquals(1, fetchHive.execute(new ManifestListOperation().setManifestName("root")).size());

@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
@@ -121,11 +122,14 @@ public class ClientSoftwareManifest {
         Long newId = hive.execute(new ManifestNextIdOperation().setManifestName(manifestName));
         Manifest.Builder mfb = new Manifest.Builder(new Manifest.Key(manifestName, newId.toString()));
 
-        ObjectId descOid = hive.execute(new ImportObjectOperation().setData(StorageHelper.toRawBytes(config)));
-        Tree.Builder tb = new Tree.Builder().add(new Tree.Key(FILE_NAME, Tree.EntryType.BLOB), descOid);
-        mfb.setRoot(hive.execute(new InsertArtificialTreeOperation().setTree(tb)));
+        try (Transaction t = hive.getTransactions().begin()) {
+            ObjectId descOid = hive.execute(new ImportObjectOperation().setData(StorageHelper.toRawBytes(config)));
+            Tree.Builder tb = new Tree.Builder().add(new Tree.Key(FILE_NAME, Tree.EntryType.BLOB), descOid);
+            mfb.setRoot(hive.execute(new InsertArtificialTreeOperation().setTree(tb)));
 
-        hive.execute(new InsertManifestOperation().addManifest(mfb.build(hive)));
+            hive.execute(new InsertManifestOperation().addManifest(mfb.build(hive)));
+        }
+
         hive.execute(new ManifestDeleteOldByIdOperation().setToDelete(manifestName).setAmountToKeep(1));
     }
 

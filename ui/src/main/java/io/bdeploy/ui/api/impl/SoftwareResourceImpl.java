@@ -16,13 +16,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 
-import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.container.ResourceContext;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.core.UriBuilder;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +26,7 @@ import io.bdeploy.api.product.v1.ProductVersionDescriptor;
 import io.bdeploy.api.product.v1.impl.LocalDependencyFetcher;
 import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
@@ -56,6 +50,12 @@ import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.SoftwareResource;
 import io.bdeploy.ui.dto.UploadInfoDto;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ResourceContext;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.UriBuilder;
 
 public class SoftwareResourceImpl implements SoftwareResource {
 
@@ -257,7 +257,9 @@ public class SoftwareResourceImpl implements SoftwareResource {
                 Manifest.Key key = new Manifest.Key(dto.name, dto.tag);
                 Set<Manifest.Key> existing = hive.execute(new ManifestListOperation());
                 if (!existing.contains(key)) {
-                    hive.execute(new ImportOperation().setSourcePath(zroot).setManifest(key));
+                    try (Transaction t = hive.getTransactions().begin()) {
+                        hive.execute(new ImportOperation().setSourcePath(zroot).setManifest(key));
+                    }
                     dto.details = "Import of " + key + " successful";
                 } else {
                     dto.details = "Skipped import of " + dto.name + ":" + dto.tag + ". Software already exists!";
@@ -271,7 +273,9 @@ public class SoftwareResourceImpl implements SoftwareResource {
 
                     Set<Manifest.Key> existing = hive.execute(new ManifestListOperation());
                     if (!existing.contains(key.getKey())) {
-                        hive.execute(new ImportOperation().setSourcePath(zroot).setManifest(key.getKey()));
+                        try (Transaction t = hive.getTransactions().begin()) {
+                            hive.execute(new ImportOperation().setSourcePath(zroot).setManifest(key.getKey()));
+                        }
                         builder.append((count++ == 0 ? "" : ", ") + os.name());
                     }
                 }

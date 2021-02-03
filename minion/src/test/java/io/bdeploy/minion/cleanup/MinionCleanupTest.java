@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -33,6 +34,7 @@ import io.bdeploy.interfaces.cleanup.CleanupAction;
 import io.bdeploy.interfaces.cleanup.CleanupAction.CleanupType;
 import io.bdeploy.interfaces.remote.NodeCleanupResource;
 import io.bdeploy.minion.MinionRoot;
+import io.bdeploy.minion.TestFactory;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.pcu.TestAppFactory;
 
@@ -48,7 +50,7 @@ public class MinionCleanupTest {
         // the cleanup removes everything that has been created
         SortedMap<Key, ObjectId> inventoryStart = null;
         try (RemoteBHive rbh = RemoteBHive.forService(remote, JerseyRemoteBHive.DEFAULT_NAME, reporter)) {
-            inventoryStart = rbh.getManifestInventory();
+            inventoryStart = TestFactory.getFilteredManifests(rbh.getManifestInventory());
         }
 
         Path app1 = TestAppFactory.createDummyApp("test1", tmp);
@@ -57,8 +59,10 @@ public class MinionCleanupTest {
         Manifest.Key app1key = new Manifest.Key("test1", "1.0");
         Manifest.Key app2key = new Manifest.Key("test2", "1.0");
 
-        local.execute(new ImportOperation().setSourcePath(app1).setManifest(app1key));
-        local.execute(new ImportOperation().setSourcePath(app2).setManifest(app2key));
+        try (Transaction t = local.getTransactions().begin()) {
+            local.execute(new ImportOperation().setSourcePath(app1).setManifest(app1key));
+            local.execute(new ImportOperation().setSourcePath(app2).setManifest(app2key));
+        }
 
         // shortcut to default hive
         local.execute(new PushOperation().addManifest(app1key).addManifest(app2key).setRemote(remote)
@@ -66,7 +70,7 @@ public class MinionCleanupTest {
 
         // remote should have both manifests now
         try (RemoteBHive rbh = RemoteBHive.forService(remote, JerseyRemoteBHive.DEFAULT_NAME, reporter)) {
-            SortedMap<Key, ObjectId> mfs = rbh.getManifestInventory();
+            SortedMap<Key, ObjectId> mfs = TestFactory.getFilteredManifests(rbh.getManifestInventory());
 
             assertTrue(mfs.containsKey(app1key));
             assertTrue(mfs.containsKey(app2key));
@@ -84,7 +88,7 @@ public class MinionCleanupTest {
 
         // non-immediate cleanup should deliver only the planned actions, so both should still be there.
         try (RemoteBHive rbh = RemoteBHive.forService(remote, JerseyRemoteBHive.DEFAULT_NAME, reporter)) {
-            SortedMap<Key, ObjectId> mfs = rbh.getManifestInventory();
+            SortedMap<Key, ObjectId> mfs = TestFactory.getFilteredManifests(rbh.getManifestInventory());
 
             assertTrue(mfs.containsKey(app1key));
             assertTrue(mfs.containsKey(app2key));
@@ -95,7 +99,7 @@ public class MinionCleanupTest {
 
         // now app1 should be gone
         try (RemoteBHive rbh = RemoteBHive.forService(remote, JerseyRemoteBHive.DEFAULT_NAME, reporter)) {
-            SortedMap<Key, ObjectId> mfs = rbh.getManifestInventory();
+            SortedMap<Key, ObjectId> mfs = TestFactory.getFilteredManifests(rbh.getManifestInventory());
 
             assertFalse(mfs.containsKey(app1key));
             assertTrue(mfs.containsKey(app2key));
@@ -106,7 +110,7 @@ public class MinionCleanupTest {
 
         // Check that the hive has nothing in - except the stuff that was in at the beginning
         try (RemoteBHive rbh = RemoteBHive.forService(remote, JerseyRemoteBHive.DEFAULT_NAME, reporter)) {
-            SortedMap<Key, ObjectId> mfs = rbh.getManifestInventory();
+            SortedMap<Key, ObjectId> mfs = TestFactory.getFilteredManifests(rbh.getManifestInventory());
             mfs.keySet().removeAll(inventoryStart.keySet());
             assertTrue(mfs.isEmpty());
         }

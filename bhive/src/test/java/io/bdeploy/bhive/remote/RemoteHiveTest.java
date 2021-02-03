@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -55,7 +56,9 @@ public class RemoteHiveTest extends RemoteHiveTestBase {
         Manifest.Key key = new Manifest.Key("app", "v1");
 
         // import something
-        hive.execute(new ImportOperation().setManifest(key).setSourcePath(src).addLabel("x", "v"));
+        try (Transaction t = hive.getTransactions().begin()) {
+            hive.execute(new ImportOperation().setManifest(key).setSourcePath(src).addLabel("x", "v"));
+        }
         Manifest reference = hive.execute(new ManifestLoadOperation().setManifest(key));
         Set<ObjectId> rq = hive.execute(new ObjectListOperation().addManifest(key));
 
@@ -96,7 +99,9 @@ public class RemoteHiveTest extends RemoteHiveTestBase {
             ContentHelper.genTestFile(tmpSrc, 1024 * 1024 * 40);
 
             Manifest.Key tmpKey = new Manifest.Key("other", "v1");
-            other.execute(new ImportOperation().setSourcePath(tmpSrc).setManifest(tmpKey));
+            try (Transaction t = other.getTransactions().begin()) {
+                other.execute(new ImportOperation().setSourcePath(tmpSrc).setManifest(tmpKey));
+            }
             other.execute(new PushOperation().setRemote(svc).addManifest(tmpKey));
 
             SortedMap<Key, ObjectId> newMfs = getRemote().getManifestInventory();
@@ -124,20 +129,22 @@ public class RemoteHiveTest extends RemoteHiveTestBase {
         Manifest.Key keyD = new Manifest.Key("deployment", "v1");
 
         // import something
-        hive.execute(new ImportOperation().setManifest(keyN1).setSourcePath(src1).addLabel("n1", "v"));
-        hive.execute(new ImportOperation().setManifest(keyN2).setSourcePath(src2).addLabel("n2", "z"));
+        try (Transaction t = hive.getTransactions().begin()) {
+            hive.execute(new ImportOperation().setManifest(keyN1).setSourcePath(src1).addLabel("n1", "v"));
+            hive.execute(new ImportOperation().setManifest(keyN2).setSourcePath(src2).addLabel("n2", "z"));
 
-        Manifest.Builder rmb = new Manifest.Builder(keyD).addLabel("r", "y");
+            Manifest.Builder rmb = new Manifest.Builder(keyD).addLabel("r", "y");
 
-        Tree.Builder builder = new Tree.Builder();
-        builder.add(new Tree.Key("app-install-1", EntryType.MANIFEST),
-                hive.execute(new InsertManifestRefOperation().setManifest(keyN1)));
-        builder.add(new Tree.Key("app-install-2", EntryType.MANIFEST),
-                hive.execute(new InsertManifestRefOperation().setManifest(keyN2)));
-        builder.add(new Tree.Key("top-lvl", EntryType.BLOB), hive.execute(new ImportFileOperation().setFile(topLvlFile)));
+            Tree.Builder builder = new Tree.Builder();
+            builder.add(new Tree.Key("app-install-1", EntryType.MANIFEST),
+                    hive.execute(new InsertManifestRefOperation().setManifest(keyN1)));
+            builder.add(new Tree.Key("app-install-2", EntryType.MANIFEST),
+                    hive.execute(new InsertManifestRefOperation().setManifest(keyN2)));
+            builder.add(new Tree.Key("top-lvl", EntryType.BLOB), hive.execute(new ImportFileOperation().setFile(topLvlFile)));
 
-        ObjectId root = hive.execute(new InsertArtificialTreeOperation().setTree(builder));
-        hive.execute(new InsertManifestOperation().addManifest(rmb.setRoot(root).build(hive)));
+            ObjectId root = hive.execute(new InsertArtificialTreeOperation().setTree(builder));
+            hive.execute(new InsertManifestOperation().addManifest(rmb.setRoot(root).build(hive)));
+        }
 
         Path exp = tmp.resolve("exp");
         hive.execute(new ExportOperation().setTarget(exp).setManifest(keyD));
@@ -158,7 +165,7 @@ public class RemoteHiveTest extends RemoteHiveTestBase {
         }
 
         tmpRemote = tmp.resolve("fetch");
-        try (BHive h = new BHive(tmpRemote.toUri(), r)) {
+        try (BHive h = new BHive(tmpRemote.toUri(), r); Transaction t = h.getTransactions().begin()) {
             h.execute(new FetchOperation().addManifest(keyD).setRemote(svc));
             Set<Key> mfs = h.execute(new ManifestListOperation());
             assertThat(mfs.size(), is(3));

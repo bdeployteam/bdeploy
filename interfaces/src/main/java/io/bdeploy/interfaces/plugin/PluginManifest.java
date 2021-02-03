@@ -5,6 +5,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
@@ -84,20 +85,21 @@ public class PluginManifest {
         public Manifest.Key insert(BHive hive) {
             RuntimeAssert.assertNotNull(data, "No plugin data set");
 
-            ObjectId plugin = hive.execute(new ImportObjectOperation().setData(data));
+            try (Transaction t = hive.getTransactions().begin()) {
+                ObjectId plugin = hive.execute(new ImportObjectOperation().setData(data));
 
-            Tree.Builder builder = new Tree.Builder();
-            builder.add(new Tree.Key(PLUGIN_FILE, EntryType.BLOB), plugin);
+                Tree.Builder builder = new Tree.Builder();
+                builder.add(new Tree.Key(PLUGIN_FILE, EntryType.BLOB), plugin);
 
-            Manifest.Key key = new Manifest.Key(PLUGIN_NS + plugin, "0");
+                Manifest.Key key = new Manifest.Key(PLUGIN_NS + plugin, "0");
 
-            Manifest.Builder mf = new Manifest.Builder(key);
-            mf.setRoot(hive.execute(new InsertArtificialTreeOperation().setTree(builder)));
-            mf.addLabel(PLUGIN_LABEL, "yes");
+                Manifest.Builder mf = new Manifest.Builder(key);
+                mf.setRoot(hive.execute(new InsertArtificialTreeOperation().setTree(builder)));
+                mf.addLabel(PLUGIN_LABEL, "yes");
 
-            hive.execute(new InsertManifestOperation().addManifest(mf.build(hive)));
-
-            return key;
+                hive.execute(new InsertManifestOperation().addManifest(mf.build(hive)));
+                return key;
+            }
         }
 
     }

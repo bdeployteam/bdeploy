@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import io.bdeploy.api.product.v1.impl.LocalDependencyFetcher;
 import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
@@ -507,29 +508,31 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             }
         }
 
-        if (configUpdates != null && !configUpdates.isEmpty()) {
-            // export existing tree and apply updates.
-            // set/reset config tree ID on instanceConfig.
-            instanceConfig.configTree = applyConfigUpdates(instanceConfig.configTree, configUpdates);
+        try (Transaction t = hive.getTransactions().begin()) {
+            if (configUpdates != null && !configUpdates.isEmpty()) {
+                // export existing tree and apply updates.
+                // set/reset config tree ID on instanceConfig.
+                instanceConfig.configTree = applyConfigUpdates(instanceConfig.configTree, configUpdates);
+            }
+
+            // calculate target key.
+            String rootTag = hive.execute(new ManifestNextIdOperation().setManifestName(rootName)).toString();
+            Manifest.Key rootKey = new Manifest.Key(rootName, rootTag);
+
+            if ((state.nodeDtos == null || state.nodeDtos.isEmpty()) && oldConfig != null) {
+                // no new node config - re-apply existing one with new tag, align redundant fields.
+                state.nodeDtos = readExistingNodeConfigs(oldConfig);
+            }
+
+            // does NOT validate that the product exists, as it might still reside on the central server, not this one.
+
+            SortedMap<String, InstanceNodeConfiguration> nodes = new TreeMap<>();
+            if (state.nodeDtos != null) {
+                state.nodeDtos.forEach(n -> nodes.put(n.nodeName, n.nodeConfiguration));
+            }
+
+            return createInstanceVersion(rootKey, state.config, nodes);
         }
-
-        // calculate target key.
-        String rootTag = hive.execute(new ManifestNextIdOperation().setManifestName(rootName)).toString();
-        Manifest.Key rootKey = new Manifest.Key(rootName, rootTag);
-
-        if ((state.nodeDtos == null || state.nodeDtos.isEmpty()) && oldConfig != null) {
-            // no new node config - re-apply existing one with new tag, align redundant fields.
-            state.nodeDtos = readExistingNodeConfigs(oldConfig);
-        }
-
-        // does NOT validate that the product exists, as it might still reside on the central server, not this one.
-
-        SortedMap<String, InstanceNodeConfiguration> nodes = new TreeMap<>();
-        if (state.nodeDtos != null) {
-            state.nodeDtos.forEach(n -> nodes.put(n.nodeName, n.nodeConfiguration));
-        }
-
-        return createInstanceVersion(rootKey, state.config, nodes);
     }
 
     private ObjectId applyConfigUpdates(ObjectId configTree, List<FileStatusDto> updates) {

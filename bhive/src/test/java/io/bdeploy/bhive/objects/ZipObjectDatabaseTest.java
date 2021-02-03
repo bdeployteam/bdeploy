@@ -35,7 +35,7 @@ public class ZipObjectDatabaseTest extends ObjectDatabaseTest {
         zfs = PathHelper.openZip(zipPath);
 
         dbRoot = zfs.getPath("/");
-        zipDb = new ObjectDatabase(dbRoot, tmp.resolve("objtmp"), r);
+        zipDb = new ObjectDatabase(dbRoot, tmp.resolve("objtmp"), r, null);
     }
 
     @AfterEach

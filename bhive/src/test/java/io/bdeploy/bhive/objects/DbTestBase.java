@@ -26,7 +26,7 @@ public class DbTestBase {
     @BeforeEach
     private void initDb(@TempDir Path tmp, ActivityReporter reporter) throws IOException {
         dbPath = tmp.resolve("objdb");
-        db = new ObjectDatabase(dbPath, tmp.resolve("objtmp"), reporter);
+        db = new ObjectDatabase(dbPath, tmp.resolve("objtmp"), reporter, null);
     }
 
     protected ObjectDatabase getObjectDatabase() {

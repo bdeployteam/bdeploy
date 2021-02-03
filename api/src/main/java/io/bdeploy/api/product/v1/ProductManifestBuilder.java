@@ -17,6 +17,7 @@ import java.util.jar.JarInputStream;
 import io.bdeploy.api.plugin.v1.Plugin;
 import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
@@ -91,6 +92,12 @@ public class ProductManifestBuilder {
     }
 
     public synchronized void insert(BHive hive, Manifest.Key manifest, String productName) {
+        try (Transaction t = hive.getTransactions().begin()) {
+            doInsertLocked(hive, manifest, productName);
+        }
+    }
+
+    private void doInsertLocked(BHive hive, Manifest.Key manifest, String productName) {
         Tree.Builder tree = new Tree.Builder();
 
         // add application references
@@ -336,8 +343,10 @@ public class ProductManifestBuilder {
 
         fetcher.fetch(hive, appDesc.runtimeDependencies, os).forEach(builder::add);
 
-        builder.add(hive.execute(new ImportOperation().setSourcePath(appPath.getParent())
-                .setManifest(new ScopedManifestKey(baseName + appName, os, versions.version).getKey())));
+        try (Transaction t = hive.getTransactions().begin()) {
+            builder.add(hive.execute(new ImportOperation().setSourcePath(appPath.getParent())
+                    .setManifest(new ScopedManifestKey(baseName + appName, os, versions.version).getKey())));
+        }
 
         return appDesc;
     }

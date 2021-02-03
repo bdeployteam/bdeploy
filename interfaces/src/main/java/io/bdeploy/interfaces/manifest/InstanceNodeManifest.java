@@ -8,6 +8,7 @@ import java.util.TreeSet;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.BHiveExecution;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
@@ -131,6 +132,12 @@ public class InstanceNodeManifest {
         }
 
         public Manifest.Key insert(BHive hive) {
+            try (Transaction t = hive.getTransactions().begin()) {
+                return doInsertLocked(hive);
+            }
+        }
+
+        private Manifest.Key doInsertLocked(BHive hive) {
             RuntimeAssert.assertNotNull(name, "Name not set");
             RuntimeAssert.assertNotNull(cfg, "Configuration not set");
 

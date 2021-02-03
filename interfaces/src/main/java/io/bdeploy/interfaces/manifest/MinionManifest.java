@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.Optional;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
@@ -24,7 +25,7 @@ import io.bdeploy.interfaces.minion.MinionConfiguration;
  */
 public class MinionManifest {
 
-    private static final String MANIFEST_NAME = "meta/minions";
+    public static final String MANIFEST_NAME = "meta/minions";
     private static final String FILE_NAME = "minion.json";
 
     private final BHive hive;
@@ -72,13 +73,15 @@ public class MinionManifest {
      * @param config the configuration to write.
      */
     public void update(MinionConfiguration config) {
-        Long newId = hive.execute(new ManifestNextIdOperation().setManifestName(MANIFEST_NAME));
-        Manifest.Builder mfb = new Manifest.Builder(new Manifest.Key(MANIFEST_NAME, newId.toString()));
+        try (Transaction t = hive.getTransactions().begin()) {
+            Long newId = hive.execute(new ManifestNextIdOperation().setManifestName(MANIFEST_NAME));
+            Manifest.Builder mfb = new Manifest.Builder(new Manifest.Key(MANIFEST_NAME, newId.toString()));
 
-        ObjectId descOid = hive.execute(new ImportObjectOperation().setData(StorageHelper.toRawBytes(config)));
-        Tree.Builder tb = new Tree.Builder().add(new Tree.Key(FILE_NAME, Tree.EntryType.BLOB), descOid);
-        mfb.setRoot(hive.execute(new InsertArtificialTreeOperation().setTree(tb)));
-        hive.execute(new InsertManifestOperation().addManifest(mfb.build(hive)));
+            ObjectId descOid = hive.execute(new ImportObjectOperation().setData(StorageHelper.toRawBytes(config)));
+            Tree.Builder tb = new Tree.Builder().add(new Tree.Key(FILE_NAME, Tree.EntryType.BLOB), descOid);
+            mfb.setRoot(hive.execute(new InsertArtificialTreeOperation().setTree(tb)));
+            hive.execute(new InsertManifestOperation().addManifest(mfb.build(hive)));
+        }
     }
 
 }

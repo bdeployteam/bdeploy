@@ -17,18 +17,6 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.stream.Collectors;
 
-import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.core.Response.Status.Family;
-import jakarta.ws.rs.core.SecurityContext;
-import jakarta.ws.rs.core.UriBuilder;
-
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
 import org.slf4j.Logger;
@@ -36,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.meta.MetaManifest;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -88,6 +77,17 @@ import io.bdeploy.ui.api.SoftwareUpdateResource;
 import io.bdeploy.ui.dto.CentralIdentDto;
 import io.bdeploy.ui.dto.ProductDto;
 import io.bdeploy.ui.dto.ProductTransferDto;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.Response.Status.Family;
+import jakarta.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.UriBuilder;
 
 public class ManagedServersResourceImpl implements ManagedServersResource {
 
@@ -353,6 +353,12 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             return null;
         }
         BHive hive = getInstanceGroupHive(groupName);
+        try (Transaction t = hive.getTransactions().begin()) {
+            return synchronizeTransacted(hive, groupName, serverName);
+        }
+    }
+
+    private ManagedMasterDto synchronizeTransacted(BHive hive, String groupName, String serverName) {
         RemoteService svc = getConfiguredRemote(groupName, serverName);
 
         BackendInfoResource backendInfo = ResourceProvider.getVersionedResource(svc, BackendInfoResource.class, context);

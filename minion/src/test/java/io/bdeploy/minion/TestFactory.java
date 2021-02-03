@@ -4,12 +4,17 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import io.bdeploy.api.product.v1.ProductDescriptor;
 import io.bdeploy.api.product.v1.ProductManifestBuilder;
 import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.ImportOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.common.ActivityReporter;
@@ -31,6 +36,7 @@ import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
+import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.pcu.TestAppFactory;
@@ -59,9 +65,11 @@ public class TestFactory {
                 "1.0.0.1234");
         Manifest.Key jdkKey = new Manifest.Key(ScopedManifestKey.createScopedName("jdk", OsHelper.getRunningOs()), "1.8.0");
 
-        local.execute(new ImportOperation().setManifest(appKey).setSourcePath(app));
-        local.execute(new ImportOperation().setManifest(clientKey).setSourcePath(client));
-        local.execute(new ImportOperation().setManifest(jdkKey).setSourcePath(jdk));
+        try (Transaction t = local.getTransactions().begin()) {
+            local.execute(new ImportOperation().setManifest(appKey).setSourcePath(app));
+            local.execute(new ImportOperation().setManifest(clientKey).setSourcePath(client));
+            local.execute(new ImportOperation().setManifest(jdkKey).setSourcePath(jdk));
+        }
 
         Path cfgs = tmp.resolve("config-templates");
         PathHelper.mkdirs(cfgs);
@@ -84,7 +92,10 @@ public class TestFactory {
         /* (this test creates the named hive only on the target "remote" server - see below) */
 
         /* STEP 3a: Configuration created (normally via Web UI) */
-        Manifest.Key instance = createDemoInstance(local, prodKey, tmp, appKey, clientKey);
+        Manifest.Key instance;
+        try (Transaction t = local.getTransactions().begin()) {
+            instance = createDemoInstance(local, prodKey, tmp, appKey, clientKey);
+        }
 
         if (push) {
             /* STEP 3b: Establish sync with designated remote master */
@@ -202,7 +213,9 @@ public class TestFactory {
                 JacksonHelper.createObjectMapper(MapperType.YAML).writeValueAsBytes(cfg));
 
         try (BHive hive = new BHive(tmp.resolve("hive").toUri(), new ActivityReporter.Null())) {
-            hive.execute(new ImportOperation().setManifest(appKey).setSourcePath(appPath));
+            try (Transaction t = hive.getTransactions().begin()) {
+                hive.execute(new ImportOperation().setManifest(appKey).setSourcePath(appPath));
+            }
 
             Path cfgs = tmp.resolve("config-templates");
             PathHelper.mkdirs(cfgs);
@@ -281,4 +294,18 @@ public class TestFactory {
         return repo;
     }
 
+    /**
+     * Filter a given set of manifest keys for some volatile manifest which can change due to background jobs etc. - they would
+     * influence tests in a bad way.
+     */
+    public static SortedMap<Key, ObjectId> getFilteredManifests(SortedMap<Key, ObjectId> sortedMap) {
+        var result = new TreeMap<Key, ObjectId>();
+        for (var entry : sortedMap.entrySet()) {
+            if (entry.getKey().getName().equals(MinionManifest.MANIFEST_NAME)) {
+                continue;
+            }
+            result.put(entry.getKey(), entry.getValue());
+        }
+        return result;
+    }
 }

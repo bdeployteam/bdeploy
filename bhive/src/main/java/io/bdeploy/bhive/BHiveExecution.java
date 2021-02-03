@@ -15,4 +15,9 @@ public interface BHiveExecution {
      */
     public <X> X execute(BHive.Operation<X> op);
 
+    /**
+     * @return the transactions manager for this {@link BHiveExecution}
+     */
+    public BHiveTransactions getTransactions();
+
 }

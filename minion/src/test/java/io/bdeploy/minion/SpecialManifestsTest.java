@@ -16,6 +16,7 @@ import io.bdeploy.api.product.v1.ProductDescriptor;
 import io.bdeploy.api.product.v1.ProductManifestBuilder;
 import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ImportOperation;
@@ -76,7 +77,9 @@ public class SpecialManifestsTest {
         Path app = TestAppFactory.createDummyApp("dummy", tmp);
         Manifest.Key appKey = new Manifest.Key(ScopedManifestKey.createScopedName("app", OsHelper.getRunningOs()), "1.0");
 
-        hive.execute(new ImportOperation().setSourcePath(app).setManifest(appKey));
+        try (Transaction t = hive.getTransactions().begin()) {
+            hive.execute(new ImportOperation().setSourcePath(app).setManifest(appKey));
+        }
 
         Manifest.Key prodKey = new Manifest.Key("prod", "1.0");
         ProductDescriptor pd = new ProductDescriptor();
@@ -108,8 +111,10 @@ public class SpecialManifestsTest {
         Path jdk = TestAppFactory.createDummyAppNoDescriptor("jdk", tmp);
 
         { // prepare test data
-            hive.execute(new ImportOperation().setSourcePath(app).setManifest(appKey));
-            hive.execute(new ImportOperation().setSourcePath(jdk).setManifest(jdkKey));
+            try (Transaction t = hive.getTransactions().begin()) {
+                hive.execute(new ImportOperation().setSourcePath(app).setManifest(appKey));
+                hive.execute(new ImportOperation().setSourcePath(jdk).setManifest(jdkKey));
+            }
             ApplicationDescriptor desc = ApplicationManifest.of(hive, appKey).getDescriptor();
 
             Path cfgs = tmp.resolve("config-templates");

@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.cli.ImportTool.ImportConfig;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ImportOperation;
@@ -79,7 +80,7 @@ public class ImportTool extends ConfiguredCliTool<ImportConfig> {
             labels.put(k, v);
         }
 
-        try (BHive hive = new BHive(target.toUri(), getActivityReporter())) {
+        try (BHive hive = new BHive(target.toUri(), getActivityReporter()); Transaction t = hive.getTransactions().begin()) {
             hive.setParallelism(config.jobs());
 
             ImportOperation op = new ImportOperation().setSourcePath(source).setManifest(Manifest.Key.parse(config.manifest()));

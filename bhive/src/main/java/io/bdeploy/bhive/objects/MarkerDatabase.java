@@ -15,21 +15,35 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.bdeploy.bhive.BHiveTransactions;
 import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.bhive.op.PruneOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.common.util.Threads;
 
+/**
+ * A marker database acts as temporary synchronization and locking over threads and even JVMs.
+ * <p>
+ * An example are {@link BHiveTransactions}. They use a {@link MarkerDatabase} to "mark" each object written. As long as there is
+ * not manifest inserted in the BHive, these objects would be dangling, and subject to removal by prune. The
+ * {@link PruneOperation} takes into account any marked object by any transaction and does not touch them.
+ */
 public class MarkerDatabase extends ObjectDatabase {
 
     private static final Logger log = LoggerFactory.getLogger(MarkerDatabase.class);
     private static final String LOCK_FILE = ".lock";
 
     public MarkerDatabase(Path root, ActivityReporter reporter) {
-        super(root, root.resolve("tmp"), reporter);
+        super(root, root.resolve("tmp"), reporter, null);
     }
 
+    /**
+     * Marks the given {@link ObjectId}. The operation is thread-safe, but only if called with different {@link ObjectId}.
+     * <p>
+     * The caller(s) must make sure to call this method only once with any given {@link ObjectId}.
+     */
     public void addMarker(ObjectId id) {
         Path markerFile = getObjectFile(id);
         PathHelper.mkdirs(markerFile.getParent());
