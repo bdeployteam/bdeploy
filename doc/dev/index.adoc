@@ -41,3 +41,5 @@ include::ui.adoc[]
 include::devenv.adoc[]
 
 include::plugins.adoc[]
+
+include::release.adoc[]
