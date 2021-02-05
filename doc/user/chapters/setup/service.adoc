@@ -24,8 +24,8 @@ The script must be called with administrative privileges and it expects the foll
  <Path-to-minion>       Absolute path of the bdeploy executable
  <Path-to-store-files>  Absolute path of the data directory
 
-By default the service runs as _Local System_ but you can and should change that afterwards by using the services.msc
-application. Simply configure the desired account in the _Log On_ tab of the services management console.
+[WARNING]
+By default the service runs as _Local System_ but you can and should change that afterwards by using the services.msc application. Simply configure the desired account in the _Log On_ tab of the services management console. We *strongly* recommend to use a non-priviledged user to run the *BDeploy* service.
 
 Once installed, you can start the service using services.msc or by calling `net start BDeployMaster | BDeployNode`.
 
