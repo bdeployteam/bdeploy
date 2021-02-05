@@ -7,7 +7,7 @@ import java.util.TreeMap;
 
 public class ClientUsageData {
 
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    private transient final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
     // day -> applicationId -> hostname -> count
     SortedMap<String, SortedMap<String, SortedMap<String, Integer>>> clientUsage = new TreeMap<>();
