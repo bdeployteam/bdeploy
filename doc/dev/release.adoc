@@ -1,5 +1,15 @@
 == Release Procedure
 
+=== Preparation
+
+Make sure to run a manual test and check at least this before releasing:
+
+ * Setup a fresh server.
+ * Create an instance with a client application.
+ * Download the installer for the client and check if it is working as intended.
+
+The rest is covered pretty well by automated tests already.
+
 === Branches, Tags & GitHub Release
 
 [NOTE]
@@ -111,3 +121,13 @@ Once this is available, `cd` into each of the directories and run `gradle-upgrad
 In `gradle-plugin-test-project` you will not see a *BDeploy* API jar update, as this project uses *BDeploy* only indirectly through the `build-tool-gradle` project - this is OK.
 
 Now build each of the projects, and confirm that everything is OK with the new *BDeploy* release. Finally commit the changes, and you're done.
+
+==== Publish Gradle Plugin
+
+You will need to have a gradle account and the permission to publish in the `io.bdeploy` namespace.
+
+Make sure to setup gradle.properties in your home directory according to the instructions on the gradle manuals (i.e. set the `gradle.publish.key` and `gradle.publish.secret` properties).
+
+Execute `./gradlew publishPlugins` in the `plugins/build-tool-gradle` folder.
+
+Make sure to check on the plugin portal if the new version was published.
