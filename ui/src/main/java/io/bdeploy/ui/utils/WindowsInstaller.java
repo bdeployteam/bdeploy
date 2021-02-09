@@ -24,7 +24,7 @@ public class WindowsInstaller {
      */
     public static void embedConfig(Path file, WindowsInstallerConfig config) throws IOException {
         String configAsString = new String(StorageHelper.toRawBytes(config), StandardCharsets.UTF_8);
-        String encodedConfig = Base64.encodeBase64String(configAsString.getBytes());
+        String encodedConfig = Base64.encodeBase64String(configAsString.getBytes(StandardCharsets.UTF_8));
 
         // Wrap the configuration with start / end tags
         StringBuilder builder = new StringBuilder();
