@@ -15,7 +15,7 @@ export class LogoComponent implements OnInit {
 
   toolbarClass(): string {
     if (this.color === 'main-toolbar') {
-      return 'logo-toolbar-color';
+      return 'local-toolbar-color';
     }
   }
 }

@@ -4,9 +4,12 @@
       mat-icon-button
       type="button"
       [disabled]="loading"
-      (click)="routingHistoryService.back('instancegroup/browser')"
+      (click)="routingHistoryService.back('l/instancegroup/browser')"
     >
       <mat-icon>chevron_left</mat-icon>
+    </button>
+    <button mat-icon-button type="button" [disabled]="loading" (click)="toggleWide()">
+      <mat-icon>expand</mat-icon>
     </button>
     <span *ngIf="isCreate() == false"
       >Instance Group: <app-instance-group-title [instanceGroup]="nameParam"></app-instance-group-title

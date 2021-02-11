@@ -31,11 +31,11 @@ export class HttpErrorHandlerInterceptor implements HttpInterceptor {
               // let 401 pass through for logout redirection in the other interceptor :)
               break;
             case 403:
-              // no break
+            // no break
             case 404:
               const msg = `Unfortunately, /${e.url} was not found (wrong URL or insufficient rights), we returned you to the safe-zone.`;
               this.snackbar.open(msg, 'DISMISS', { panelClass: 'error-snackbar' });
-              this.router.navigate(['/instancegroup/browser']);
+              this.router.navigate(['/l/instancegroup/browser']);
               return of(null);
             case 499:
               // special version mismatch code.

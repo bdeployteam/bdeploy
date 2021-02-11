@@ -6,7 +6,7 @@
           mat-icon-button
           type="button"
           [disabled]="loading"
-          (click)="routingHistoryService.back('/instance/browser/' + groupParam)"
+          (click)="routingHistoryService.back('l//instance/browser/' + groupParam)"
         >
           <mat-icon>chevron_left</mat-icon>
         </button>
@@ -159,12 +159,10 @@
           </div>
         </ng-container>
       </div>
-      <div *ngIf="!hasInstanceAttributes()">
-        No Attributes have been configured yet.
-      </div>
+      <div *ngIf="!hasInstanceAttributes()">No Attributes have been configured yet.</div>
       <button
         mat-mini-fab
-        style="align-self: flex-end;"
+        style="align-self: flex-end"
         type="button"
         (click)="addInstanceAttribute()"
         [disabled]="loading"

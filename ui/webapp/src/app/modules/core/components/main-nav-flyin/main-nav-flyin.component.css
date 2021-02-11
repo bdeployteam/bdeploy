@@ -8,13 +8,13 @@
 
   display: flex;
   flex-direction: column;
-
-  width: 300px;
 }
 
 .local-sizing {
   position: relative;
   overflow: hidden;
+
+  height: calc(100% - 114px);
 
   flex: 1 0 auto;
   top: -32px;

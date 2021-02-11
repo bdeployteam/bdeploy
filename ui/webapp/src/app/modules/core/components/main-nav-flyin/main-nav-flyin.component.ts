@@ -1,4 +1,5 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, HostBinding, OnInit } from '@angular/core';
 import { NavAreasService } from '../../services/nav-areas.service';
 
@@ -12,25 +13,34 @@ import { NavAreasService } from '../../services/nav-areas.service';
       state('closed', style({ transform: 'translateX(100%)' })),
       transition('open <=> closed', [animate('0.2s ease')]),
     ]),
+    trigger('flyInWidth', [
+      state('normal', style({ width: '300px' })),
+      state('max-lg', style({ width: 'calc(100% - 174px)' })),
+      state('max-lg-menu', style({ width: 'calc(100% - 320px)' })),
+      state('max-sm', style({ width: 'calc(100% - 74px)' })),
+      state('max-sm-menu', style({ width: 'calc(100% - 220px)' })),
+      transition('* => *', [animate('0.2s ease')]),
+    ]),
   ],
 })
 export class MainNavFlyinComponent implements OnInit {
-  constructor(private areas: NavAreasService) {}
+  constructor(private areas: NavAreasService, private media: BreakpointObserver) {}
 
   @HostBinding('@openClose') get animationState() {
     return this.areas.panelVisible.value ? 'open' : 'closed';
   }
 
-  @HostBinding('class') get hostClasses() {
+  @HostBinding('@flyInWidth') get widthAnimationState() {
     if (!this.areas.panelMaximized.value) {
-      return [];
+      return 'normal';
     }
 
-    if (!this.areas.menuMaximized.value) {
-      return ['main-nav-flyin-maximized'];
+    const large = this.media.isMatched('(min-width: 1280px)');
+    if (this.areas.menuMaximized.value) {
+      return large ? 'max-lg-menu' : 'max-sm-menu';
     }
 
-    return ['main-nav-flyin-maximized-menu-maximized'];
+    return large ? 'max-lg' : 'max-sm';
   }
 
   ngOnInit(): void {}

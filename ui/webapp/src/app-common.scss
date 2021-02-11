@@ -15,13 +15,14 @@
   }
 
   .bd-toggle-highlight {
-    background-color: mat-color($toolbar, 'darker');
-    color: mat-color($toolbar, default-contrast);
+    background-color: var(--bd-main-bar-darker);
+    color: var(--bd-main-bar-contrast);
   }
 
-  .bd-inverted-color {
-    background-color: mat-color($toolbar);
-    color: mat-color($toolbar, default-contrast);
+  .bd-inverted-color,
+  .bd-main-toolbar {
+    background-color: var(--bd-main-bar);
+    color: var(--bd-main-bar-contrast);
   }
 
   /* Use when wrapping a button in an <a> tag - will remove underlines on button contents */

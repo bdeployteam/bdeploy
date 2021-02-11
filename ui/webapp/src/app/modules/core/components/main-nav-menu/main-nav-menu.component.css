@@ -13,6 +13,9 @@
   margin-top: 8px;
   margin-bottom: 30px !important;
   padding: 6px;
+
+  min-width: 104px;
+  height: 71px;
 }
 
 .local-logo-img {

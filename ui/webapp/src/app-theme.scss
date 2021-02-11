@@ -7,11 +7,6 @@
 @import 'app-ngx-charts-dark.scss';
 @import 'app-scrollbars.scss';
 
-@import 'app/modules/core/components/main-nav-top/main-nav-top-theme.scss';
-@import 'app/modules/core/components/main-nav-menu/main-nav-menu-theme.scss';
-@import 'app/modules/core/components/main-nav-flyin/main-nav-flyin-theme.scss';
-@import 'app/modules/core/components/logo/logo-theme.scss';
-
 @import 'app/modules/admin/components/hive/hive-theme.scss';
 @import 'app/modules/admin/components/admin-shell/admin-shell.theme.scss';
 @import 'app/modules/admin/components/audit-log/audit-log-theme.scss';
@@ -54,13 +49,7 @@
   @include angular-material-theme($theme);
   @include common-classes($theme);
 
-  // basic application framework themes
-  @include main-nav-top-theme($theme);
-  @include main-nav-menu-theme($theme);
-  @include main-nav-flyin-theme($theme);
-  @include logo-theme($theme);
-
-  // application component themes
+  // application component themes // FIXME: those are all legacy and should be removed. Use CSS3 variables instead, see --bd- vars.
   @include instance-group-delete-dialog-theme($theme);
   @include hive-theme($theme);
   @include audit-log-theme($theme);
@@ -107,8 +96,37 @@
     color: if($dark, mat-color($mat-blue, 300), mat-color($mat-blue, 800));
   }
 
+  // Define scrollbar style on each element as it is not inherited in some cases.
   * {
     @include scrollbars(mat-color(map-get($theme, 'primary')), if($dark, #555555, #cccccc));
+  }
+
+  // Pseudo selector to define variables on the main theme class.
+  & {
+    $primary: map-get($theme, 'primary');
+    $accent: map-get($theme, 'accent');
+    $warn: map-get($theme, 'warn');
+    $bg: map-get($theme, 'background');
+    $fg: map-get($theme, 'foreground');
+    $maintb: map-get($theme, 'main-toolbar');
+
+    --bd-primary: #{mat-color($primary)};
+    --bd-accent: #{mat-color($accent)};
+    --bd-warn: #{mat-color($warn)};
+    --bd-main-bar: #{mat-color($maintb)};
+
+    --bd-background: #{mat-color($bg)};
+    --bd-foreground: #{mat-color($fg)};
+
+    --bd-primary-darker: #{mat-color($primary, 'darker')};
+    --bd-accent-darker: #{mat-color($accent, 'darker')};
+    --bd-warn-darker: #{mat-color($warn, 'darker')};
+    --bd-main-bar-darker: #{mat-color($maintb, 'darker')};
+
+    --bd-primary-contrast: #{mat-color($primary, 'default-contrast')};
+    --bd-accent-contrast: #{mat-color($accent, 'default-contrast')};
+    --bd-warn-contrast: #{mat-color($warn, 'default-contrast')};
+    --bd-main-bar-contrast: #{mat-color($maintb, 'default-contrast')};
   }
 
   .inline-code {

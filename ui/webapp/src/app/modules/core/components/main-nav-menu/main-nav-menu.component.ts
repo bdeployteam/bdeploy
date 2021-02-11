@@ -1,3 +1,4 @@
+import { animate, animateChild, group, query, state, style, transition, trigger } from '@angular/animations';
 import { Component, HostBinding, Input, OnInit } from '@angular/core';
 import { MatSelectChange } from '@angular/material/select';
 import { delayedFadeIn, delayedFadeOut } from '../../animations/fades';
@@ -12,7 +13,27 @@ import { NavAreasService } from '../../services/nav-areas.service';
   selector: 'app-main-nav-menu',
   templateUrl: './main-nav-menu.component.html',
   styleUrls: ['./main-nav-menu.component.css'],
-  animations: [delayedFadeIn, delayedFadeOut, easeX, scaleWidthFromZero, scaleWidthToZero],
+  animations: [
+    delayedFadeIn,
+    delayedFadeOut,
+    easeX,
+    scaleWidthFromZero,
+    scaleWidthToZero,
+    trigger('menuOpenClose', [
+      state('closed', style({ width: '64px' })),
+      state('open', style({ width: '210px' })),
+      transition('open => closed', [animate('0.2s ease', style({ width: '64px' }))]),
+      transition('closed => open', [
+        group([animate('0.2s ease', style({ width: '210px' })), query('@*', [animateChild()])]),
+      ]),
+    ]),
+    trigger('headerOpenClose', [
+      state('closed', style({ width: '104px' })),
+      state('open', style({ width: '182px' })),
+      transition('open => closed', [animate('0.2s ease')]),
+      transition('closed => open', [animate('0.2s ease')]),
+    ]),
+  ],
 })
 export class MainNavMenuComponent implements OnInit {
   @Input() set expanded(val: boolean) {
@@ -32,8 +53,8 @@ export class MainNavMenuComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  @HostBinding('class') get hostClasses() {
-    return this.expanded ? 'main-nav-menu-expanded' : 'main-nav-menu-collapsed';
+  @HostBinding('@menuOpenClose') get animationState() {
+    return this.expanded ? 'open' : 'closed';
   }
 
   getLogLevel() {

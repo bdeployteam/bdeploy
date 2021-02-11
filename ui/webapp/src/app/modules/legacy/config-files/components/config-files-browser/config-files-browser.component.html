@@ -3,7 +3,7 @@
     <button
       mat-icon-button
       type="button"
-      (click)="routingHistoryService.back('instance/overview/' + groupParam + '/' + uuidParam)"
+      (click)="routingHistoryService.back('l/instance/overview/' + groupParam + '/' + uuidParam)"
     >
       <mat-icon>chevron_left</mat-icon>
     </button>
@@ -51,7 +51,7 @@
 
     <mat-card-content class="config-card-content">
       <table mat-table class="filelist-table" [dataSource]="listConfigFiles()" #filetable>
-        <caption style="display: none;">
+        <caption style="display: none">
           Config Files
         </caption>
 
@@ -290,7 +290,7 @@
         #file
         type="file"
         (change)="handleChange(filePath, file)"
-        style="display: none;"
+        style="display: none"
         placeholder="File to upload"
       />
     </mat-card-content>

@@ -1,8 +1,3 @@
-<div
-  class="bd-rect-card local-sizing-common"
-  [class.local-sizing]="!(areas.panelVisible | async)"
-  [class.local-sizing-flyout]="areas.panelVisible | async"
-  [@routerAnimation]="animationState"
->
+<div class="bd-rect-card local-sizing-common" [@routerAnimation]="animationState">
   <ng-content></ng-content>
 </div>

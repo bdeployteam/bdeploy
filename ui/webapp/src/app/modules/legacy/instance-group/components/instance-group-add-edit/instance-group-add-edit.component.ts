@@ -10,6 +10,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { cloneDeep, isEqual } from 'lodash-es';
 import { forkJoin, Observable, of } from 'rxjs';
 import { finalize } from 'rxjs/operators';
+import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { RoutingHistoryService } from 'src/app/modules/legacy/core/services/routing-history.service';
 import { CustomAttributeEditComponent } from 'src/app/modules/legacy/shared/components/custom-attribute-edit/custom-attribute-edit.component';
@@ -98,7 +99,8 @@ export class InstanceGroupAddEditComponent implements OnInit {
     private config: ConfigService,
     private settings: SettingsService,
     public routingHistoryService: RoutingHistoryService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private nav: NavAreasService // FIXME: TESTING
   ) {}
 
   ngOnInit() {
@@ -149,6 +151,11 @@ export class InstanceGroupAddEditComponent implements OnInit {
         }
       );
     }
+  }
+
+  // FIXME: TESTING
+  toggleWide() {
+    this.nav.panelMaximized.next(!this.nav.panelMaximized.value);
   }
 
   public getErrorMessage(ctrl: FormControl): string {

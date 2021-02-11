@@ -1,9 +1,8 @@
 <div class="bd-rect-card local-sizing" fxLayout="column" fxLayoutGap="5px">
   <!-- Logo & Expand Button -->
   <button
+    [@headerOpenClose]="animationState"
     mat-raised-button
-    [class.main-nav-menu-logo-expanded]="expanded"
-    [class.main-nav-menu-logo-collapsed]="!expanded"
     class="bd-inverted-color mat-elevation-z2 local-logo"
     (click)="expanded = !expanded"
   >
@@ -44,7 +43,7 @@
   <app-bd-button
     fxFlexAlign="center center"
     icon="storage"
-    text="Software Repositories"
+    text="Software Repos"
     inverseColor="true"
     [collapsed]="!expanded"
     tooltip="right"

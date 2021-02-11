@@ -1,9 +1,0 @@
-@import '~@angular/material/theming';
-
-@mixin logo-theme($theme) {
-  $palette: map-get($theme, 'main-toolbar');
-
-  .logo-toolbar-color {
-    color: mat-color($palette);
-  }
-}
