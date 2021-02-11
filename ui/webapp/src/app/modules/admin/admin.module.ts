@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { CoreModule } from '../core/core.module';
-import { SharedModule } from '../shared/shared.module';
+import { SharedModule } from '../legacy/shared/shared.module';
 import { AdminRoutingModule } from './admin-routing.module';
 import { AdminShellComponent } from './components/admin-shell/admin-shell.component';
 import { AuditLogComponent } from './components/audit-log/audit-log.component';

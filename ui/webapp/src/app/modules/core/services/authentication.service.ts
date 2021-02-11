@@ -4,7 +4,7 @@ import { CookieService } from 'ngx-cookie-service';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { CredentialsApi, Permission, UserChangePasswordDto, UserInfo } from '../../../models/gen.dtos';
-import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
+import { suppressGlobalErrorHandling } from '../../legacy/shared/utils/server.utils';
 import { ConfigService } from './config.service';
 import { Logger, LoggingService } from './logging.service';
 

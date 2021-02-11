@@ -12,7 +12,7 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { cloneDeep } from 'lodash-es';
 import { EMPTY_USER_INFO } from 'src/app/models/consts';
 import { UserInfo } from 'src/app/models/gen.dtos';
-import { UserValidators } from 'src/app/modules/shared/validators/user.validator';
+import { UserValidators } from 'src/app/modules/legacy/shared/validators/user.validator';
 
 @Component({
   selector: 'app-user-edit',

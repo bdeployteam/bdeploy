@@ -38,7 +38,7 @@
     inverseColor="true"
     [collapsed]="!expanded"
     tooltip="right"
-    [routerLink]="['/instancegroup/browser']"
+    [routerLink]="['/l/instancegroup/browser']"
   ></app-bd-button>
 
   <app-bd-button
@@ -48,7 +48,7 @@
     inverseColor="true"
     [collapsed]="!expanded"
     tooltip="right"
-    [routerLink]="['/softwarerepo/browser']"
+    [routerLink]="['/l/softwarerepo/browser']"
   ></app-bd-button>
 
   <!-- Footer -->
@@ -81,7 +81,7 @@
     <mat-divider class="local-footer-divider"></mat-divider>
     <div gdColumns="auto auto" gdGap="5px">
       <span>Version:</span>
-      <span>{{ formatVersion(cfgService?.config?.version) }}</span>
+      <span>{{ cfgService?.config?.version | formatVersion }}</span>
 
       <span>Mode:</span>
       <span>{{ cfgService?.config?.mode }}</span>

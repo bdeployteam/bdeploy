@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Route, RouterModule } from '@angular/router';
-import { CanDeactivateGuard } from '../shared/guards/can-deactivate.guard';
+import { CanDeactivateGuard } from '../core/guards/can-deactivate.guard';
 import { AdminShellComponent } from './components/admin-shell/admin-shell.component';
 import { AuditLogsBrowserComponent } from './components/audit-logs-browser/audit-logs-browser.component';
 import { HiveAuditLogsBrowserComponent } from './components/hive-audit-logs-browser/hive-audit-logs-browser.component';

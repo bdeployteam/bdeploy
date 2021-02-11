@@ -3,10 +3,10 @@ import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { finalize } from 'rxjs/operators';
 import { HiveEntryDto, TreeEntryType } from '../../../../models/gen.dtos';
+import { MessageBoxMode } from '../../../core/components/messagebox/messagebox.component';
+import { DownloadService } from '../../../core/services/download.service';
 import { Logger, LoggingService } from '../../../core/services/logging.service';
-import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
-import { DownloadService } from '../../../shared/services/download.service';
-import { MessageboxService } from '../../../shared/services/messagebox.service';
+import { MessageboxService } from '../../../core/services/messagebox.service';
 import { HiveService } from '../../services/hive.service';
 
 @Component({

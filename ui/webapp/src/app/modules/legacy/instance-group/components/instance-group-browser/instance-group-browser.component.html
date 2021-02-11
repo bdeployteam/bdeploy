@@ -1,0 +1,122 @@
+<mat-toolbar class="mat-elevation-z1 header-toolbar">
+  <span class="fill-space"></span>
+  <app-custom-attribute-grouping-selector
+    [label]="'Group by Attribute'"
+    [sessionStorageBaseId]="'InstanceGroupBrowser'"
+    [possibleAttributes]="settings?.getSettings()?.instanceGroup?.attributes"
+    [possibleAttributesValuesMap]="instanceGroupsAttributes"
+    (attributeSelection)="groupAttribute = $event"
+    (valuesSelection)="groupAttributeValuesSelected = $event"
+  ></app-custom-attribute-grouping-selector>
+</mat-toolbar>
+
+<div *ngIf="loading" class="loading-container">
+  <mat-spinner [diameter]="48"></mat-spinner>
+</div>
+
+<ng-container *ngIf="!loading && instanceGroupList.isEmpty()">
+  <div class="center">
+    <app-logo [size]="128"></app-logo>
+    <p>
+      <span class="welcomeText">Welcome to BDeploy!</span>
+    </p>
+    <p>
+      <span class="headerText" *ngIf="authService.isGlobalAdmin()"
+        >To get you started quickly, consider reading our
+        <a rel="noopener noreferrer" href="https://bdeploy.io/user/index.html#_getting_started" target="_blank"
+          >documentation</a
+        >!</span
+      >
+    </p>
+    <mat-divider></mat-divider>
+    <ng-container *ngIf="authService.isGlobalAdmin() && isAddAllowed()">
+      <p>
+        <span class="headerText">No instance groups have been created yet. Start by creating a new one.</span>
+      </p>
+      <p>
+        <button mat-raised-button class="headerButton" [routerLink]="['/l/instancegroup/add']">
+          <mat-icon>add</mat-icon> Instance Group
+        </button>
+      </p>
+    </ng-container>
+    <ng-container *ngIf="authService.isGlobalAdmin() && isAttachAllowed()">
+      <p>
+        <span class="headerText"
+          >No instance groups have been attached yet. Start by attaching one from the central server.</span
+        >
+      </p>
+      <p>
+        <button mat-raised-button class="headerButton" [routerLink]="['/l/servers/attach/central']">
+          <mat-icon>link</mat-icon>Attach Instance Group
+        </button>
+      </p>
+    </ng-container>
+    <ng-container *ngIf="!authService.isGlobalAdmin()">
+      <p>
+        <span class="headerText">No instance groups found.</span>
+      </p>
+    </ng-container>
+  </div>
+</ng-container>
+
+<div class="bd-scroll-container">
+  <div *ngIf="!instanceGroupList.isEmpty() && !groupAttribute && (displayRecent | async)">
+    <p class="list-heading">RECENTLY USED:</p>
+    <div class="recentGroup-Wrapper">
+      <app-instance-group-card
+        class="group-card"
+        *ngFor="let recentGroup of filterRecent(recent)"
+        [instanceGroup]="recentGroup"
+        (removeEvent)="removeGroup(recentGroup)"
+        [isAttachAllowed]="isAttachManagedAllowed()"
+      ></app-instance-group-card>
+    </div>
+    <p class="list-heading">ALL INSTANCE GROUPS:</p>
+  </div>
+  <div class="instanceGroup-Wrapper" *ngIf="!groupAttribute">
+    <app-instance-group-card
+      class="group-card"
+      *ngFor="let group of instanceGroupList.filtered"
+      [instanceGroup]="group"
+      (removeEvent)="removeGroup(group)"
+      [isAttachAllowed]="isAttachManagedAllowed()"
+    ></app-instance-group-card>
+  </div>
+
+  <ng-container *ngIf="groupAttribute">
+    <ng-container *ngFor="let attrValue of groupAttributeValuesSelected">
+      <p class="list-grouping">{{ attrValue ? attrValue : '(empty)' }}:</p>
+      <div class="instanceGroup-Wrapper">
+        <app-instance-group-card
+          class="group-card"
+          *ngFor="let group of getGroupsByAttribute(attrValue)"
+          [instanceGroup]="group"
+          (removeEvent)="removeGroup(group)"
+          [isAttachAllowed]="isAttachManagedAllowed()"
+        ></app-instance-group-card>
+      </div>
+    </ng-container>
+  </ng-container>
+</div>
+
+<button
+  mat-fab
+  class="add-button"
+  *ngIf="isAddAllowed()"
+  [routerLink]="['', { outlets: { panel: ['ig-side', 'add'] } }]"
+  matTooltip="Add Instance Group"
+  matTooltipShowDelay="1000"
+  [disabled]="!authService.isGlobalAdmin()"
+>
+  <mat-icon>add</mat-icon>
+</button>
+<button
+  mat-fab
+  class="add-button"
+  *ngIf="isAttachAllowed()"
+  [routerLink]="['/l/servers/attach/central']"
+  [disabled]="!authService.isGlobalAdmin()"
+  matTooltip="Attach Instance Group from Central Server"
+>
+  <mat-icon>link</mat-icon>
+</button>

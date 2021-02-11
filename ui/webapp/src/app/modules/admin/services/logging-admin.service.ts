@@ -3,8 +3,8 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { RemoteDirectory, RemoteDirectoryEntry, StringEntryChunkDto } from 'src/app/models/gen.dtos';
 import { ConfigService } from '../../core/services/config.service';
+import { DownloadService } from '../../core/services/download.service';
 import { Logger, LoggingService } from '../../core/services/logging.service';
-import { DownloadService } from '../../shared/services/download.service';
 
 @Injectable({
   providedIn: 'root',

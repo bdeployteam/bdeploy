@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { OperatingSystem } from '../../../../models/gen.dtos';
-import { DownloadService } from '../../../shared/services/download.service';
+import { DownloadService } from '../../../core/services/download.service';
 import { SoftwareUpdateService } from '../../services/software-update.service';
 import { GroupedKeys } from '../update-browser/update-browser.component';
 

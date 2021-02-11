@@ -6,13 +6,13 @@ import { MatTableDataSource } from '@angular/material/table';
 import { Subscription } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { PluginInfoDto } from 'src/app/models/gen.dtos';
+import { MessageBoxMode } from 'src/app/modules/core/components/messagebox/messagebox.component';
 import { Logger, LoggingService } from 'src/app/modules/core/services/logging.service';
+import { MessageboxService } from 'src/app/modules/core/services/messagebox.service';
 import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
-import { FileUploadComponent } from 'src/app/modules/shared/components/file-upload/file-upload.component';
-import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
-import { MessageboxService } from 'src/app/modules/shared/services/messagebox.service';
-import { UploadStatus } from 'src/app/modules/shared/services/upload.service';
+import { FileUploadComponent } from 'src/app/modules/legacy/shared/components/file-upload/file-upload.component';
+import { UploadStatus } from 'src/app/modules/legacy/shared/services/upload.service';
 import { PluginAdminService } from '../../services/plugin-admin.service';
 
 @Component({

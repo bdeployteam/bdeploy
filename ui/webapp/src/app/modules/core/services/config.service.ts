@@ -3,12 +3,12 @@ import { Injectable } from '@angular/core';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Observable } from 'rxjs';
-import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
-import { MessageboxService } from 'src/app/modules/shared/services/messagebox.service';
-import { convert2String } from 'src/app/modules/shared/utils/version.utils';
+import { MessageBoxMode } from 'src/app/modules/core/components/messagebox/messagebox.component';
+import { MessageboxService } from 'src/app/modules/core/services/messagebox.service';
+import { convert2String } from 'src/app/modules/legacy/shared/utils/version.utils';
 import { environment } from 'src/environments/environment';
 import { BackendInfoDto, MinionMode, MinionStatusDto, PluginInfoDto, Version } from '../../../models/gen.dtos';
-import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
+import { suppressGlobalErrorHandling } from '../../legacy/shared/utils/server.utils';
 import { LoggingService, LogLevel } from './logging.service';
 
 export interface AppConfig {

@@ -10,8 +10,8 @@ import { MatTabChangeEvent } from '@angular/material/tabs';
 import { Base64 } from 'js-base64';
 import { Observable, of, Subscription } from 'rxjs';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
-import { RoutingHistoryService } from 'src/app/modules/core/services/routing-history.service';
 import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
+import { RoutingHistoryService } from 'src/app/modules/legacy/core/services/routing-history.service';
 import { RemoteDirectory, RemoteDirectoryEntry, StringEntryChunkDto } from '../../../../models/gen.dtos';
 import { LoggingAdminService } from '../../services/logging-admin.service';
 

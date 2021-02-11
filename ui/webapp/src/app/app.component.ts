@@ -3,9 +3,9 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, NavigationEnd, RouteConfigLoadEnd, RouteConfigLoadStart, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { HeaderTitleService } from './modules/core/services/header-title.service';
 import { Logger, LoggingService } from './modules/core/services/logging.service';
-import { RoutingHistoryService } from './modules/core/services/routing-history.service';
+import { HeaderTitleService } from './modules/legacy/core/services/header-title.service';
+import { RoutingHistoryService } from './modules/legacy/core/services/routing-history.service';
 
 @Component({
   selector: 'app-root',

@@ -1,5 +1,5 @@
-import { ApplicationService } from '../modules/instance/services/application.service';
-import { getAppKeyName, getAppOs } from '../modules/shared/utils/manifest.utils';
+import { ApplicationService } from '../modules/legacy/instance/services/application.service';
+import { getAppKeyName, getAppOs } from '../modules/legacy/shared/utils/manifest.utils';
 import {
   ApplicationDto,
   ApplicationTemplateDescriptor,

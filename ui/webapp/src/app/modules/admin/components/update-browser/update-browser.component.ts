@@ -2,11 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { finalize } from 'rxjs/operators';
 import { BackendInfoDto, ManifestKey, OperatingSystem } from 'src/app/models/gen.dtos';
+import { MessageBoxMode } from 'src/app/modules/core/components/messagebox/messagebox.component';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
-import { FileUploadComponent } from 'src/app/modules/shared/components/file-upload/file-upload.component';
-import { MessageBoxMode } from 'src/app/modules/shared/components/messagebox/messagebox.component';
-import { MessageboxService } from 'src/app/modules/shared/services/messagebox.service';
-import { convert2String } from 'src/app/modules/shared/utils/version.utils';
+import { MessageboxService } from 'src/app/modules/core/services/messagebox.service';
+import { FileUploadComponent } from 'src/app/modules/legacy/shared/components/file-upload/file-upload.component';
+import { convert2String } from 'src/app/modules/legacy/shared/utils/version.utils';
 import { SoftwareUpdateService } from '../../services/software-update.service';
 import { UpdateDialogComponent } from '../update-dialog/update-dialog.component';
 

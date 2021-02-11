@@ -1,7 +1,5 @@
 import { Component, HostBinding, Input, OnInit } from '@angular/core';
 import { MatSelectChange } from '@angular/material/select';
-import { Version } from 'src/app/models/gen.dtos';
-import { convert2String } from 'src/app/modules/shared/utils/version.utils';
 import { delayedFadeIn, delayedFadeOut } from '../../animations/fades';
 import { easeX } from '../../animations/positions';
 import { scaleWidthFromZero, scaleWidthToZero } from '../../animations/sizes';
@@ -45,9 +43,5 @@ export class MainNavMenuComponent implements OnInit {
   setLogLevel(event: MatSelectChange) {
     const lvl = +event.value as LogLevel;
     this.logging.getLogger(null).setLogLevel(lvl);
-  }
-
-  formatVersion(version: Version) {
-    return convert2String(version);
   }
 }

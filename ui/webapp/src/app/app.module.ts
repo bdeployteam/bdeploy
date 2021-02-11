@@ -6,7 +6,8 @@ import { LoadingBarRouterModule } from '@ngx-loading-bar/router';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CoreModule } from './modules/core/core.module';
-import { SharedModule } from './modules/shared/shared.module';
+import { CoreLegacyModule } from './modules/legacy/core/core-legacy.module';
+import { SharedModule } from './modules/legacy/shared/shared.module';
 
 @NgModule({
   declarations: [AppComponent],
@@ -14,6 +15,7 @@ import { SharedModule } from './modules/shared/shared.module';
     BrowserModule,
     BrowserAnimationsModule,
     CoreModule,
+    CoreLegacyModule,
     SharedModule,
     AppRoutingModule,
     LoadingBarHttpClientModule,

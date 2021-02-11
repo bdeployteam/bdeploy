@@ -2,8 +2,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ManifestKey, PluginInfoDto } from 'src/app/models/gen.dtos';
-import { Api } from '../../shared/plugins/plugin.api';
-import { suppressGlobalErrorHandling } from '../../shared/utils/server.utils';
+import { suppressGlobalErrorHandling } from '../../legacy/shared/utils/server.utils';
+import { Api } from '../plugins/plugin.api';
 import { ConfigService } from './config.service';
 
 @Injectable({

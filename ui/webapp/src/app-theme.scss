@@ -7,52 +7,47 @@
 @import 'app-ngx-charts-dark.scss';
 @import 'app-scrollbars.scss';
 
-@import 'app/modules/config-files/components/config-files-browser/config-files-browser-theme.scss';
-
 @import 'app/modules/core/components/main-nav-top/main-nav-top-theme.scss';
 @import 'app/modules/core/components/main-nav-menu/main-nav-menu-theme.scss';
 @import 'app/modules/core/components/main-nav-flyin/main-nav-flyin-theme.scss';
 @import 'app/modules/core/components/logo/logo-theme.scss';
-@import 'app/modules/core/components/managed-server-update/managed-server-update-theme.scss';
-@import 'app/modules/core/components/product-tag-card/product-tag-card-theme.scss';
-@import 'app/modules/core/components/instance-group-logo/instance-group-logo-theme.scss';
-
-@import 'app/modules/shared/components/file-upload/file-upload-theme.scss';
-@import 'app/modules/shared/components/product-card/product-card-theme.scss';
-@import 'app/modules/shared/components/product-list/product-list-theme.scss';
 
 @import 'app/modules/admin/components/hive/hive-theme.scss';
 @import 'app/modules/admin/components/admin-shell/admin-shell.theme.scss';
 @import 'app/modules/admin/components/audit-log/audit-log-theme.scss';
 
-@import 'app/modules/servers/components/attach-central/attach-central-theme.scss';
-@import 'app/modules/servers/components/product-sync/product-sync-theme.scss';
-
-@import 'app/modules/instance-group/components/instance-group-delete-dialog/instance-group-delete-dialog-theme.scss';
-@import 'app/modules/instance-group/components/client-apps/client-apps-theme.scss';
-@import 'app/modules/instance-group/components/instance-group-add-edit/instance-group-add-edit-theme.scss';
-@import 'app/modules/instance-group/components/instance-group-browser/instance-group-browser-theme.scss';
-
-@import 'app/modules/instance/components/instance-card/instance-card-theme.scss';
-@import 'app/modules/instance/components/instance-node-card/instance-node-card-theme.scss';
-@import 'app/modules/instance/components/instance-node-port-list/instance-node-port-list-theme.scss';
-@import 'app/modules/instance/components/instance-version-card/instance-version-card-theme.scss';
-@import 'app/modules/instance/components/application-edit/application-edit-theme.scss';
-@import 'app/modules/instance/components/application-configuration-card/application-configuration-card-theme.scss';
-@import 'app/modules/instance/components/process-configuration/process-configuration-theme.scss';
-@import 'app/modules/instance/components/process-details/process-details-theme.scss';
-@import 'app/modules/instance/components/process-port-list/process-port-list-theme.scss';
-@import 'app/modules/instance/components/process-status/process-status-theme.scss';
-@import 'app/modules/instance/components/client-info/client-info-theme.scss';
-@import 'app/modules/instance/components/instance-browser/instance-browser-theme.scss';
-@import 'app/modules/instance/components/instance-notifications/instance-notifications-theme.scss';
-@import 'app/modules/instance/components/instance-sync/instance-sync-theme.scss';
-@import 'app/modules/instance/components/instance-template/instance-template-theme.scss';
-@import 'app/modules/instance/components/instance-shift-ports/instance-shift-ports-theme.scss';
-@import 'app/modules/instance/components/instance-history-timeline/instance-history-timeline-theme.scss';
-@import 'app/modules/instance/components/instance-history/instance-history-theme.scss';
-
-@import 'app/modules/repositories/components/software-repo-file-upload/software-repo-file-upload-theme.scss';
+@import 'app/modules/legacy/shared/components/file-upload/file-upload-theme.scss';
+@import 'app/modules/legacy/shared/components/product-card/product-card-theme.scss';
+@import 'app/modules/legacy/shared/components/product-list/product-list-theme.scss';
+@import 'app/modules/legacy/core/components/managed-server-update/managed-server-update-theme.scss';
+@import 'app/modules/legacy/core/components/product-tag-card/product-tag-card-theme.scss';
+@import 'app/modules/legacy/core/components/instance-group-logo/instance-group-logo-theme.scss';
+@import 'app/modules/legacy/config-files/components/config-files-browser/config-files-browser-theme.scss';
+@import 'app/modules/legacy/servers/components/attach-central/attach-central-theme.scss';
+@import 'app/modules/legacy/servers/components/product-sync/product-sync-theme.scss';
+@import 'app/modules/legacy/instance-group/components/instance-group-delete-dialog/instance-group-delete-dialog-theme.scss';
+@import 'app/modules/legacy/instance-group/components/client-apps/client-apps-theme.scss';
+@import 'app/modules/legacy/instance-group/components/instance-group-add-edit/instance-group-add-edit-theme.scss';
+@import 'app/modules/legacy/instance-group/components/instance-group-browser/instance-group-browser-theme.scss';
+@import 'app/modules/legacy/instance/components/instance-card/instance-card-theme.scss';
+@import 'app/modules/legacy/instance/components/instance-node-card/instance-node-card-theme.scss';
+@import 'app/modules/legacy/instance/components/instance-node-port-list/instance-node-port-list-theme.scss';
+@import 'app/modules/legacy/instance/components/instance-version-card/instance-version-card-theme.scss';
+@import 'app/modules/legacy/instance/components/application-edit/application-edit-theme.scss';
+@import 'app/modules/legacy/instance/components/application-configuration-card/application-configuration-card-theme.scss';
+@import 'app/modules/legacy/instance/components/process-configuration/process-configuration-theme.scss';
+@import 'app/modules/legacy/instance/components/process-details/process-details-theme.scss';
+@import 'app/modules/legacy/instance/components/process-port-list/process-port-list-theme.scss';
+@import 'app/modules/legacy/instance/components/process-status/process-status-theme.scss';
+@import 'app/modules/legacy/instance/components/client-info/client-info-theme.scss';
+@import 'app/modules/legacy/instance/components/instance-browser/instance-browser-theme.scss';
+@import 'app/modules/legacy/instance/components/instance-notifications/instance-notifications-theme.scss';
+@import 'app/modules/legacy/instance/components/instance-sync/instance-sync-theme.scss';
+@import 'app/modules/legacy/instance/components/instance-template/instance-template-theme.scss';
+@import 'app/modules/legacy/instance/components/instance-shift-ports/instance-shift-ports-theme.scss';
+@import 'app/modules/legacy/instance/components/instance-history-timeline/instance-history-timeline-theme.scss';
+@import 'app/modules/legacy/instance/components/instance-history/instance-history-theme.scss';
+@import 'app/modules/legacy/repositories/components/software-repo-file-upload/software-repo-file-upload-theme.scss';
 
 @mixin all-themes($theme) {
   // general angular material theme

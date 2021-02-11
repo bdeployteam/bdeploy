@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { HeaderTitleService } from 'src/app/modules/core/services/header-title.service';
+import { HeaderTitleService } from 'src/app/modules/legacy/core/services/header-title.service';
 
 @Component({
   selector: 'app-admin-shell',

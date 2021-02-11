@@ -1,15 +1,15 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { LoginComponent } from './modules/core/components/login/login.component';
-import { MessageboxComponent } from './modules/shared/components/messagebox/messagebox.component';
-import { AdminGuard } from './modules/shared/guards/admin.guard';
-import { NotFoundGuard } from './modules/shared/guards/not-found.guard';
+import { MessageboxComponent } from './modules/core/components/messagebox/messagebox.component';
+import { AdminGuard } from './modules/core/guards/admin.guard';
+import { NotFoundGuard } from './modules/core/guards/not-found.guard';
 
 const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'instancegroup/browser',
+    redirectTo: 'l/instancegroup/browser',
   },
   {
     path: 'login',
@@ -17,36 +17,42 @@ const routes: Routes = [
     data: { title: 'Login', header: 'Login' },
   },
   {
-    path: 'instancegroup',
-    loadChildren: () => import('./modules/instance-group/instance-group.module').then((x) => x.InstanceGroupModule),
+    path: 'admin',
+    loadChildren: () => import('./modules/admin/admin.module').then((x) => x.AdminModule),
+    canActivate: [AdminGuard],
+  },
+
+  // LEGACY ROUTES
+  {
+    path: 'l/instancegroup',
+    loadChildren: () =>
+      import('./modules/legacy/instance-group/instance-group.module').then((x) => x.InstanceGroupModule),
   },
   {
     // TESTING
     path: 'ig-side',
     outlet: 'panel',
-    loadChildren: () => import('./modules/instance-group/instance-group.module').then((x) => x.InstanceGroupModule),
+    loadChildren: () =>
+      import('./modules/legacy/instance-group/instance-group.module').then((x) => x.InstanceGroupModule),
   },
   {
-    path: 'instance',
-    loadChildren: () => import('./modules/instance/instance.module').then((x) => x.InstanceModule),
+    path: 'l/instance',
+    loadChildren: () => import('./modules/legacy/instance/instance.module').then((x) => x.InstanceModule),
   },
   {
-    path: 'admin',
-    loadChildren: () => import('./modules/admin/admin.module').then((x) => x.AdminModule),
-    canActivate: [AdminGuard],
+    path: 'l/softwarerepo',
+    loadChildren: () => import('./modules/legacy/repositories/repositories.module').then((x) => x.RepositoriesModule),
   },
   {
-    path: 'softwarerepo',
-    loadChildren: () => import('./modules/repositories/repositories.module').then((x) => x.RepositoriesModule),
+    path: 'l/servers',
+    loadChildren: () => import('./modules/legacy/servers/servers.module').then((x) => x.ServersModule),
   },
   {
-    path: 'servers',
-    loadChildren: () => import('./modules/servers/servers.module').then((x) => x.ServersModule),
+    path: 'l/configfiles',
+    loadChildren: () => import('./modules/legacy/config-files/config-files.module').then((x) => x.ConfigFilesModule),
   },
-  {
-    path: 'configfiles',
-    loadChildren: () => import('./modules/config-files/config-files.module').then((x) => x.ConfigFilesModule),
-  },
+  // END LEGACY ROUTES
+
   {
     path: '**',
     component: MessageboxComponent, // This is a DUMMY! the NotFoundGuard will /always/ redirect
