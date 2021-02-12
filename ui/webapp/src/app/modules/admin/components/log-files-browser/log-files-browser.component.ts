@@ -4,7 +4,7 @@ import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
+import { MatSort, SortDirection } from '@angular/material/sort';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { MatTabChangeEvent } from '@angular/material/tabs';
 import { Base64 } from 'js-base64';
@@ -24,7 +24,7 @@ export class LogFilesBrowserComponent implements OnInit, OnDestroy, BdSearchable
   public INITIAL_PAGE_SIZE = 10;
   public INITIAL_PAGE_INDEX = 0;
   public INITIAL_SORT_COLUMN = 'lastModified';
-  public INITIAL_SORT_DIRECTION = 'desc';
+  public INITIAL_SORT_DIRECTION: SortDirection = 'desc';
 
   pageSize = this.INITIAL_PAGE_SIZE;
 

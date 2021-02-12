@@ -44,6 +44,10 @@ import { CookieService } from 'ngx-cookie-service';
 import { GravatarModule } from 'ngx-gravatar';
 import { GlobalErrorHandler } from 'src/app/modules/core/global-error-handler';
 import { BdButtonComponent } from './components/bd-button/bd-button.component';
+import { BdDataCardComponent } from './components/bd-data-card/bd-data-card.component';
+import { BdDataDisplayComponent } from './components/bd-data-display/bd-data-display.component';
+import { BdDataGridComponent } from './components/bd-data-grid/bd-data-grid.component';
+import { BdDataTableComponent } from './components/bd-data-table/bd-data-table.component';
 import { ConnectionLostComponent } from './components/connection-lost/connection-lost.component';
 import { LoginComponent } from './components/login/login.component';
 import { LogoComponent } from './components/logo/logo.component';
@@ -92,6 +96,10 @@ export function loadAppConfig(cfgService: ConfigService) {
     SearchFieldComponent,
     BdButtonComponent,
     MessageboxComponent,
+    BdDataTableComponent,
+    BdDataGridComponent,
+    BdDataCardComponent,
+    BdDataDisplayComponent,
   ],
   entryComponents: [
     ConnectionLostComponent,
@@ -202,6 +210,10 @@ export function loadAppConfig(cfgService: ConfigService) {
     UserAvatarComponent,
     VersionPipe,
     MessageboxComponent,
+    BdButtonComponent,
+    BdDataTableComponent,
+    BdDataGridComponent,
+    BdDataDisplayComponent,
   ],
 })
 export class CoreModule {}

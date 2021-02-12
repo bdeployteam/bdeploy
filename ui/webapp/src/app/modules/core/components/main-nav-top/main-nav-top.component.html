@@ -4,7 +4,7 @@
     <app-search-field
       fxFlex="1 0 auto"
       [(value)]="search.search"
-      [disabled]="!(search.registration() | async)"
+      [disabled]="!(search.enabled() | async)"
     ></app-search-field>
     <div class="local-side-sizing" fxLayout="row" fxLayoutGap="8px" fxLayoutAlign="center center">
       <app-theme-chooser></app-theme-chooser>

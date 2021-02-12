@@ -102,7 +102,7 @@ export class InstanceHistoryComponent implements OnInit {
     this.loadHistory();
   }
 
-  compareInputKeydown(event: InputEvent, index: number): void {
+  compareInputKeydown(event: Event, index: number): void {
     const input = event.target as HTMLInputElement;
     const value = input.value.trim();
     if (this.isNumeric(value)) {

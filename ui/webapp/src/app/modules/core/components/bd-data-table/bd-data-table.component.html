@@ -1,0 +1,118 @@
+<div fxFlex="1 0 auto" fxLayout="column">
+  <table mat-table [dataSource]="dataSource" matSort fxFlex="1 0 auto" [style.width]="'100%'">
+    <caption style="display: none">
+      {{
+        caption
+      }}
+    </caption>
+
+    <tr mat-header-row *matHeaderRowDef="getColumnsToDisplay(); sticky: true"></tr>
+    <tr
+      mat-row
+      *matRowDef="let row; columns: getColumnsToDisplay()"
+      (click)="!checkMode && row.node.item ? recordClick.emit(row.node.item) : undefined"
+      [style.cursor]="!checkMode && !!row.node.item ? 'pointer' : 'auto'"
+    ></tr>
+
+    <!-- In case no data is available (empty data, filter, etc.)-->
+    <tr class="mat-row" *matNoDataRow>
+      <td class="mat-cell" [attr.colspan]="getColumnsToDisplay().length" class="bd-hint-text">No data to show.</td>
+    </tr>
+
+    <ng-container *ngFor="let col of _columns; let i = index" [matColumnDef]="col.id">
+      <!-- Column headers -->
+      <th
+        mat-header-cell
+        *matHeaderCellDef
+        [style.width]="col.width ? col.width : null"
+        [matTooltip]="col.description"
+        mat-sort-header
+        [disabled]="!sortData"
+      >
+        <div [style.marginLeft.px]="i === 0 && !!grouping?.length ? '40' : null">{{ col.name }}</div>
+      </th>
+
+      <!-- First column, can not be an action. -->
+      <ng-container *ngIf="i === 0">
+        <td
+          class="bd-text-ellipsis"
+          mat-cell
+          *matCellDef="let row"
+          [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []"
+          [style.maxWidth]="col.width ? col.width : null"
+        >
+          <!-- Button to expand or collapse a group -->
+          <button
+            *ngIf="row.expandable"
+            mat-icon-button
+            [style.marginLeft.px]="row.level * 24"
+            (click)="treeControl.toggle(row)"
+            appClickStopPropagation
+          >
+            <mat-icon class="mat-icon-rtl-mirror">
+              {{ treeControl.isExpanded(row) ? 'expand_more' : 'chevron_right' }}
+            </mat-icon>
+          </button>
+
+          <!-- Text for the first column, either group name or item text -->
+          <span
+            class="local-first-column"
+            [style.marginLeft.px]="row.expandable ? 0 : getNoExpandIndent(row.level)"
+            [style.fontWeight]="row.expandable ? 'bold' : 'normal'"
+            [matBadge]="row.node.children.length"
+            [matBadgeHidden]="!row.expandable"
+            matBadgeSize="small"
+            matBadgeOverlap="false"
+          >
+            <!-- Either simple label or check box in check mode -->
+            <ng-container *ngIf="!checkMode">{{ row.node.groupOrFirstColumn }}</ng-container>
+            <mat-checkbox
+              *ngIf="checkMode"
+              [checked]="isChecked(row)"
+              [indeterminate]="isPartiallyChecked(row)"
+              (change)="toggleCheck(row)"
+              >{{ row.node.groupOrFirstColumn }}</mat-checkbox
+            >
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Columns after the first one -->
+      <ng-container *ngIf="i !== 0 && !col.action">
+        <td
+          class="bd-text-ellipsis"
+          mat-cell
+          *matCellDef="let row"
+          [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []"
+          [style.maxWidth]="col.width ? col.width : null"
+        >
+          <ng-container *ngIf="!row.expandable">
+            <ng-container *ngIf="!isImageColumn(col)">{{ col.data(row.node.item) }}</ng-container>
+            <ng-container *ngIf="isImageColumn(col)">
+              <div fxLayout="row" fxLayoutAlign="start center">
+                <img class="local-row-image" [src]="getImageUrl(col, row.node.item)" />
+              </div>
+            </ng-container>
+          </ng-container>
+        </td>
+      </ng-container>
+
+      <!-- Items with an action (collapsed button), this may not occur on the first column -->
+      <ng-container *ngIf="col.action">
+        <td mat-cell *matCellDef="let row" [style.maxWidth]="col.width ? col.width : null">
+          <div fxLayout="row" fxLayoutAlign="start center">
+            <app-bd-button
+              *ngIf="row.node.item"
+              [ngClass]="col.classes ? col.classes(row) : []"
+              [text]="col.data(row.node.item)"
+              tooltip="below"
+              [icon]="col.icon ? col.icon(row.node.item) : getUnknownIcon(col)"
+              (click)="col.action(row.node.item)"
+              appClickStopPropagation
+            ></app-bd-button>
+          </div>
+        </td>
+      </ng-container>
+    </ng-container>
+  </table>
+</div>

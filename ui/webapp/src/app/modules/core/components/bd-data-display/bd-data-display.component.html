@@ -1,0 +1,24 @@
+<app-bd-data-table
+  *ngIf="!_grid"
+  [caption]="caption"
+  [columns]="columns"
+  [sortData]="sortData"
+  [searchData]="searchData"
+  [searchable]="searchable"
+  [grouping]="grouping"
+  [records]="records"
+  [checkMode]="checkMode"
+  [checked]="checked"
+  (checkedChange)="checkedChange.emit($event)"
+  (recordClick)="recordClick.emit($event)"
+></app-bd-data-table>
+
+<app-bd-data-grid
+  *ngIf="_grid"
+  [columns]="columns"
+  [searchData]="searchData"
+  [searchable]="searchable"
+  [grouping]="!!grouping && !!grouping.length ? grouping[0] : null"
+  [records]="records"
+  (recordClick)="recordClick.emit($event)"
+></app-bd-data-grid>

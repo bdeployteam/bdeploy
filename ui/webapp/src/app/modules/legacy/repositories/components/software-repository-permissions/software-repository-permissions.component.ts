@@ -2,7 +2,7 @@ import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
+import { MatSort, SortDirection } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { ActivatedRoute } from '@angular/router';
 import { cloneDeep } from 'lodash-es';
@@ -30,7 +30,7 @@ export class SoftwareRepositoryPermissionsComponent implements OnInit, OnDestroy
   nameParam: string;
 
   public INITIAL_SORT_COLUMN = 'name';
-  public INITIAL_SORT_DIRECTION = 'asc';
+  public INITIAL_SORT_DIRECTION: SortDirection = 'asc';
 
   public loading = true;
 

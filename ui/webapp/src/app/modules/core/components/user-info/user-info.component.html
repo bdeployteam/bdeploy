@@ -10,8 +10,8 @@
     <app-user-avatar
       [gravatar]="!settings.isLoading() && settings.getSettings().general.enableGravatar"
       [mail]="user?.email"
-      hostSize="24"
-      avatarSize="24"
+      [hostSize]="24"
+      [avatarSize]="24"
     ></app-user-avatar>
     <div>{{ getTitleUserName() }}</div>
   </div>

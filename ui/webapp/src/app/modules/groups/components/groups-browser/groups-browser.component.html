@@ -1,0 +1,40 @@
+<div class="bd-page-root" fxLayout="column">
+  <mat-toolbar class="bd-page-toolbar">
+    <mat-toolbar-row fxLayoutGap="5px">
+      <div fxFlex="1 0 auto"></div>
+      <app-bd-button
+        [isToggle]="true"
+        icon="expand"
+        text="Toggle Card Mode"
+        [(toggle)]="dataTable.grid"
+      ></app-bd-button>
+      <app-bd-button
+        [isToggle]="true"
+        icon="toggle_on"
+        text="Toggle grouping"
+        (toggleChange)="toggleGrouping($event)"
+      ></app-bd-button>
+      <app-bd-button
+        [isToggle]="true"
+        icon="check_box"
+        text="Toggle Check mode"
+        [(toggle)]="dataTable.checkMode"
+      ></app-bd-button>
+      <app-bd-button icon="add" text="Add Rows" (click)="addRows()" [badge]="rows.value.length"></app-bd-button>
+    </mat-toolbar-row>
+  </mat-toolbar>
+
+  <div class="bd-scroll-container bd-default-margin">
+    <app-bd-data-display
+      #dataTable
+      [columns]="columns"
+      [records]="rows | async"
+      [sortData]="sort"
+      [grouping]="grouping"
+      [(checked)]="checked"
+      (checkedChange)="onCheckChange()"
+      (recordClick)="onRecordClick($event)"
+      [searchable]="true"
+    ></app-bd-data-display>
+  </div>
+</div>

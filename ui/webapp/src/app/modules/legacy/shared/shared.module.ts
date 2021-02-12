@@ -10,8 +10,6 @@ import { DiffEditorComponent } from './components/diff-editor/diff-editor.compon
 import { FileEditorComponent } from './components/file-editor/file-editor.component';
 import { FileUploadComponent } from './components/file-upload/file-upload.component';
 import { FileViewerComponent } from './components/file-viewer/file-viewer.component';
-import { ProductCardComponent } from './components/product-card/product-card.component';
-import { ProductListComponent } from './components/product-list/product-list.component';
 import { RemoteProgressElementComponent } from './components/remote-progress-element/remote-progress-element.component';
 import { RemoteProgressComponent } from './components/remote-progress/remote-progress.component';
 import { TextboxComponent } from './components/textbox/textbox.component';
@@ -27,8 +25,6 @@ import { PortValidatorDirective } from './validators/port.validator';
     CustomAttributeEditComponent,
     CustomAttributeValueComponent,
     CustomAttributeGroupingSelectorComponent,
-    ProductCardComponent,
-    ProductListComponent,
     FileEditorComponent,
     DiffEditorComponent,
     TextboxComponent,
@@ -43,8 +39,6 @@ import { PortValidatorDirective } from './validators/port.validator';
     CustomAttributeEditComponent,
     CustomAttributeValueComponent,
     CustomAttributeGroupingSelectorComponent,
-    ProductCardComponent,
-    ProductListComponent,
     FileEditorComponent,
     DiffEditorComponent,
     TextboxComponent,

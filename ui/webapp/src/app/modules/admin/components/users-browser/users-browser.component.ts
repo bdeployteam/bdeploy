@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
+import { MatSort, SortDirection } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { cloneDeep } from 'lodash-es';
 import { Subscription } from 'rxjs';
@@ -29,7 +29,7 @@ export class UsersBrowserComponent implements OnInit, OnDestroy, BdSearchable, A
   private subscription: Subscription;
 
   public INITIAL_SORT_COLUMN = 'name';
-  public INITIAL_SORT_DIRECTION = 'asc';
+  public INITIAL_SORT_DIRECTION: SortDirection = 'asc';
 
   public dataSource: MatTableDataSource<UserInfo> = new MatTableDataSource<UserInfo>([]);
   private filterPredicate: (d, f) => boolean;

@@ -29,43 +29,34 @@
       "webRoot": "${workspaceFolder}"
     },
     {
-      "type": "chrome",
+      "type": "pwa-chrome",
       "request": "launch",
       "name": "Chrome (Standalone)",
       "url": "http://localhost:4200",
       "webRoot": "${workspaceFolder}",
-      "runtimeArgs": [
-        "--allow-insecure-localhost"
-      ]
+      "runtimeArgs": ["--allow-insecure-localhost"]
     },
     {
-      "type": "chrome",
+      "type": "pwa-chrome",
       "request": "launch",
       "name": "Chrome (Central)",
       "url": "http://localhost:4201",
       "webRoot": "${workspaceFolder}",
-      "runtimeArgs": [
-        "--allow-insecure-localhost"
-      ]
+      "runtimeArgs": ["--allow-insecure-localhost"]
     },
     {
-      "type": "chrome",
+      "type": "pwa-chrome",
       "request": "launch",
       "name": "Chrome (Managed)",
       "url": "http://localhost:4202",
       "webRoot": "${workspaceFolder}",
-      "runtimeArgs": [
-        "--allow-insecure-localhost"
-      ]
+      "runtimeArgs": ["--allow-insecure-localhost"]
     }
   ],
   "compounds": [
     {
       "name": "Central Chrome & Managed Firefox",
-      "configurations": [
-        "Chrome (Central)",
-        "Firefox (Managed)"
-      ]
+      "configurations": ["Chrome (Central)", "Firefox (Managed)"]
     }
   ]
 }

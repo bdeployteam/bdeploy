@@ -12,8 +12,8 @@
 @import 'app/modules/admin/components/audit-log/audit-log-theme.scss';
 
 @import 'app/modules/legacy/shared/components/file-upload/file-upload-theme.scss';
-@import 'app/modules/legacy/shared/components/product-card/product-card-theme.scss';
-@import 'app/modules/legacy/shared/components/product-list/product-list-theme.scss';
+@import 'app/modules/legacy/core/components/product-card/product-card-theme.scss';
+@import 'app/modules/legacy/core/components/product-list/product-list-theme.scss';
 @import 'app/modules/legacy/core/components/managed-server-update/managed-server-update-theme.scss';
 @import 'app/modules/legacy/core/components/product-tag-card/product-tag-card-theme.scss';
 @import 'app/modules/legacy/core/components/instance-group-logo/instance-group-logo-theme.scss';
@@ -86,12 +86,18 @@
   @include software-repo-file-upload-theme($theme);
   @include config-files-browser-theme($theme);
 
+  $dark: map-get($theme, 'is-dark');
+
+  // general element themings
   .mat-badge-content {
     background-color: rgb(194, 194, 194);
     color: black;
   }
+  .mat-row:hover,
+  .mat-card:hover {
+    background-color: if($dark, #3e3e3e, #fafafa);
+  }
 
-  $dark: map-get($theme, 'is-dark');
   a {
     color: if($dark, mat-color($mat-blue, 300), mat-color($mat-blue, 800));
   }
@@ -115,8 +121,10 @@
     --bd-warn: #{mat-color($warn)};
     --bd-main-bar: #{mat-color($maintb)};
 
-    --bd-background: #{mat-color($bg)};
-    --bd-foreground: #{mat-color($fg)};
+    --bd-text: #{mat-color($fg, 'text')};
+    --bd-text-secondary: #{mat-color($fg, 'secondary-text')};
+
+    --bd-bg-toolbar: #{mat-color($bg, 'app-bar')};
 
     --bd-primary-darker: #{mat-color($primary, 'darker')};
     --bd-accent-darker: #{mat-color($accent, 'darker')};

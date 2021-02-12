@@ -1,0 +1,7 @@
+:host {
+  overflow: hidden;
+}
+
+.local-sizing {
+  max-width: 100%;
+}

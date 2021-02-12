@@ -1,13 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import {
-  AbstractControl,
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  ValidationErrors,
-  ValidatorFn,
-  Validators,
-} from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { cloneDeep } from 'lodash-es';
 import { EMPTY_USER_INFO } from 'src/app/models/consts';
@@ -95,7 +87,7 @@ export class UserEditComponent implements OnInit {
     };
   }
 
-  public getErrorMessage(ctrl: FormControl): string {
+  public getErrorMessage(ctrl: AbstractControl): string {
     if (ctrl.hasError('required')) {
       return 'Required';
     } else if (ctrl.hasError('namePattern')) {

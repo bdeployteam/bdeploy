@@ -16,7 +16,7 @@
     <div class="datafile-search-header">
       <mat-form-field class="search datafile-search-field" [floatLabel]="'never'">
         <mat-icon matSuffix>search</mat-icon>
-        <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Find files..." />
+        <input matInput #searchInput (keyup)="applyFilter(searchInput.value)" placeholder="Find files..." />
         <mat-hint>Use regular expressions (.*log) or parts of the path to find files.</mat-hint>
       </mat-form-field>
     </div>

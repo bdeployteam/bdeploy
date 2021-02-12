@@ -34,7 +34,7 @@
     fxFlexAlign="center center"
     icon="view_carousel"
     text="Instance Groups"
-    inverseColor="true"
+    [inverseColor]="true"
     [collapsed]="!expanded"
     tooltip="right"
     [routerLink]="['/l/instancegroup/browser']"
@@ -44,7 +44,7 @@
     fxFlexAlign="center center"
     icon="storage"
     text="Software Repos"
-    inverseColor="true"
+    [inverseColor]="true"
     [collapsed]="!expanded"
     tooltip="right"
     [routerLink]="['/l/softwarerepo/browser']"
@@ -64,7 +64,7 @@
       fxFlexAlign="center center"
       icon="settings"
       text="Administration"
-      inverseColor="true"
+      [inverseColor]="true"
       [collapsed]="!expanded"
       [routerLink]="['/admin/']"
     ></app-bd-button>
@@ -73,7 +73,7 @@
         fxFlexAlign="center center"
         icon="help_outline"
         text="Help"
-        inverseColor="true"
+        [inverseColor]="true"
         [collapsed]="!expanded"
       ></app-bd-button>
     </a>

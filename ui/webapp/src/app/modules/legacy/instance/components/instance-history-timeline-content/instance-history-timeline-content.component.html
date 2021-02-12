@@ -58,11 +58,11 @@
           <li *ngFor="let deletedEndpoint of changed.value.deletedEndpoints">
             Deleted http-endpoint at <em>{{ deletedEndpoint }}</em>
           </li>
-          <li *ngFor="let endpoint of changed.value.endpoints | keyvalue">
+          <li *ngFor="let endpoint of changed.value.changedEndpoints | keyvalue">
             Http-endpoint at <em>{{ endpoint.key }}</em
             >:
             <ul>
-              <li *ngFor="let property of endpoint.value.changedEndpoints | keyvalue">
+              <li *ngFor="let property of endpoint.value.properties | keyvalue">
                 <span *ngIf="property.value != null; else endpointPassword"
                   >{{ property.key }}: <em>{{ property.value[0] }}</em>
                   <mat-icon class="change-arrow">arrow_right_alt</mat-icon> <em>{{ property.value[1] }}</em></span

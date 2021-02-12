@@ -3,7 +3,7 @@ import { TemplatePortal } from '@angular/cdk/portal';
 import { Location } from '@angular/common';
 import { Component, OnInit, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
+import { MatSort, SortDirection } from '@angular/material/sort';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { MatTabChangeEvent } from '@angular/material/tabs';
 import { ActivatedRoute } from '@angular/router';
@@ -29,7 +29,7 @@ export class DataFilesBrowserComponent implements OnInit {
   public INITIAL_PAGE_SIZE = 10;
   public INITIAL_PAGE_INDEX = 0;
   public INITIAL_SORT_COLUMN = 'lastModified';
-  public INITIAL_SORT_DIRECTION = 'desc';
+  public INITIAL_SORT_DIRECTION: SortDirection = 'desc';
 
   groupParam: string = this.route.snapshot.paramMap.get('group');
   uuidParam: string = this.route.snapshot.paramMap.get('uuid');

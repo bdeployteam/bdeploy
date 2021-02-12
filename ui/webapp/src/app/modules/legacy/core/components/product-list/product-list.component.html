@@ -11,7 +11,7 @@
       <button
         mat-icon-button
         *ngIf="showDownload && exporting !== prod"
-        [disabled]="exporting"
+        [disabled]="!!exporting"
         (click)="export(prod)"
         class="icon-button"
         matTooltip="Download product version as ZIP"

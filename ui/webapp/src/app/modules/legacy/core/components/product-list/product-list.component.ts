@@ -5,7 +5,7 @@ import { AuthenticationService } from 'src/app/modules/core/services/authenticat
 import { ManifestKey, ProductDto } from '../../../../../models/gen.dtos';
 import { DownloadService } from '../../../../core/services/download.service';
 import { LoggingService } from '../../../../core/services/logging.service';
-import { ProductService } from '../../services/product.service';
+import { ProductService } from '../../../shared/services/product.service';
 
 @Component({
   selector: 'app-product-list',

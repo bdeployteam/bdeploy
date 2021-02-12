@@ -190,7 +190,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
       this.addProcess(item, targetIndex);
     } else if (isThisNodeTheSource) {
       // Remove process if we are the source
-      this.removeProcess(item, sourceIndex);
+      this.removeProcess(item);
     }
   }
 
@@ -337,7 +337,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
   /**
    * Called when the user drags the application from one node to another node.
    */
-  removeProcess(application: ApplicationConfiguration, sourceIndex: number) {
+  removeProcess(application: ApplicationConfiguration) {
     const index = this.nodeApps.indexOf(application);
     if (index === -1) {
       return;

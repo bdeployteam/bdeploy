@@ -2,7 +2,7 @@
   <h1 mat-dialog-title>Configure from Instance Template</h1>
   <div mat-dialog-content class="flex-content">
     <mat-horizontal-stepper #stepper [linear]="true">
-      <mat-step label="Template Selection" [completed]="selectedTemplate">
+      <mat-step label="Template Selection" [completed]="!!selectedTemplate">
         <div>
           <div class="center-toggles">
             <mat-button-toggle-group (change)="updateSelection($event)">
@@ -106,10 +106,10 @@
               <ng-container *ngIf="!hasStatusForEachProcess(messages[groupIndex], group)">
                 <mat-spinner
                   *ngIf="messages[groupIndex]?.length"
-                  style="margin-right: 5px;"
+                  style="margin-right: 5px"
                   [diameter]="24"
                 ></mat-spinner>
-                <div *ngIf="!messages[groupIndex]?.length" style="width: 24px; height: 24px; margin-right: 5px;"></div>
+                <div *ngIf="!messages[groupIndex]?.length" style="width: 24px; height: 24px; margin-right: 5px"></div>
               </ng-container>
 
               <span>{{ group.name }}</span>

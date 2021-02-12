@@ -1,14 +1,12 @@
 <div class="container" fxLayout="column" fxLayoutAlign="space-evenly stretch">
   <h1 mat-dialog-title>Manage Optional Parameters</h1>
-  <p>
-    Select the optional parameters that should be added to the command line arguments of the application.
-  </p>
+  <p>Select the optional parameters that should be added to the command line arguments of the application.</p>
   <mat-form-field>
-    <input #searchField matInput (keyup)="applyFilter($event.target.value)" placeholder="Filter" />
+    <input #searchField matInput (keyup)="applyFilter(searchField.value)" placeholder="Filter" />
   </mat-form-field>
   <mat-dialog-content fxFlex class="mat-elevation-z2">
     <table mat-table [dataSource]="dataSource">
-      <caption style="display: none;">
+      <caption style="display: none">
         Parameters
       </caption>
 

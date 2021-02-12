@@ -1,6 +1,6 @@
 import { Location } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { cloneDeep, isEqual } from 'lodash-es';
 import { Observable, of } from 'rxjs';
@@ -73,7 +73,7 @@ export class SoftwareRepoAddEditComponent implements OnInit {
     }
   }
 
-  public getErrorMessage(ctrl: FormControl): string {
+  public getErrorMessage(ctrl: AbstractControl): string {
     if (ctrl.hasError('required')) {
       return 'Required';
     } else if (ctrl.hasError('namePattern')) {

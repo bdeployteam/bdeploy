@@ -15,7 +15,14 @@
     [class.local-wrapper-expanded]="!collapsed"
     [class.local-wrapper-collapsed]="collapsed"
   >
-    <mat-icon *ngIf="icon">{{ icon }}</mat-icon>
+    <mat-icon
+      *ngIf="icon"
+      [matBadge]="badge"
+      [matBadgeHidden]="!badge"
+      matBadgeSize="small"
+      [matBadgeColor]="badgeColor"
+      >{{ icon }}</mat-icon
+    >
     <span
       *ngIf="text && !collapsed"
       [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"

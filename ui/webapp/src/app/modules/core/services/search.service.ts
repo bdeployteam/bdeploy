@@ -11,16 +11,14 @@ export interface BdSearchable {
 })
 export class SearchService {
   private currentSearch = '';
-  private registration$ = new BehaviorSubject<BdSearchable>(null);
   private registrations: BdSearchable[] = [];
+  private enableSearch$ = new BehaviorSubject<boolean>(false);
   private log = this.logging.getLogger('SearchService');
 
   constructor(private logging: LoggingService) {}
 
   set search(value: string) {
-    if (this.registration$.value) {
-      this.registration$.value.bdOnSearch(value);
-    }
+    this.registrations.forEach((r) => r.bdOnSearch(value));
     this.currentSearch = value;
   }
 
@@ -28,28 +26,24 @@ export class SearchService {
     return this.currentSearch;
   }
 
-  registration(): BehaviorSubject<BdSearchable> {
-    return this.registration$;
+  enabled() {
+    return this.enableSearch$;
   }
 
   register(searchable: BdSearchable): Subscription {
     this.registrations.push(searchable);
-    this.registration$.next(searchable);
+    this.enableSearch$.next(true);
     return new Subscription(() => {
       this.deregister(searchable);
     });
   }
 
   private deregister(searchable: BdSearchable) {
-    const top = this.registrations.pop();
-    if (top !== searchable) {
-      this.log.warn(`Registered search consumer different from given`);
-    }
-    if (!this.registrations.length) {
-      this.registration$.next(null);
-    } else {
-      this.registration$.next(this.registrations[this.registrations.length - 1]);
-    }
+    this.registrations = this.registrations.filter((x) => x !== searchable);
+
+    // WHENEVER some searchable deregisters, clear the search since that must be some kind of navigation.
     this.currentSearch = '';
+
+    this.enableSearch$.next(this.registrations.length > 0);
   }
 }

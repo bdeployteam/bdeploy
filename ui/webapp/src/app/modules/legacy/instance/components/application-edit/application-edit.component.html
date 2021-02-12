@@ -1,6 +1,6 @@
 <form [formGroup]="formGroup" autocomplete="off">
-  <input autocomplete="false" name="hidden" type="text" style="display: none;" />
-  <input type="password" style="display: none;" />
+  <input autocomplete="false" name="hidden" type="text" style="display: none" />
+  <input type="password" style="display: none" />
   <div class="title title-theme">
     <div class="title-header">Process Settings</div>
     <div class="title-hint info-theme">{{ appDesc.name }}</div>
@@ -78,7 +78,7 @@
           matInput
           type="text"
           placeholder="Type to filter parameters"
-          (input)="searchString = $event.target.value"
+          (input)="searchString = searchField.value"
         />
         <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
@@ -312,7 +312,7 @@
                         mat-icon-button
                         type="button"
                         #globalButton
-                        (click)="openOverlay(param, globalButton, globalPopup)"
+                        (click)="openOverlay(param.desc, globalButton, globalPopup)"
                         *ngIf="param.desc.global"
                       >
                         <mat-icon class="icons">public</mat-icon>
@@ -321,7 +321,7 @@
                         mat-icon-button
                         type="button"
                         #infoButton
-                        (click)="openOverlay(param, infoButton, infoPopup)"
+                        (click)="openOverlay(param.desc, infoButton, infoPopup)"
                       >
                         <mat-icon class="info-icon">info</mat-icon>
                       </button>

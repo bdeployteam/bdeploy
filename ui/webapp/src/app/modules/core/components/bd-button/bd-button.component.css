@@ -1,10 +1,12 @@
 .local-button-collapsed {
+  cursor: auto;
   padding: 0 6px;
   min-height: 36px;
   min-width: 36px;
 }
 
 .local-button-expanded {
+  cursor: auto;
   padding: 0 6px;
 }
 

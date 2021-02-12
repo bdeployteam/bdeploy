@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { CoreModule } from '../../core/core.module';
 import { ProductService } from '../../legacy/shared/services/product.service';
 import { SharedModule } from '../../legacy/shared/shared.module';
+import { CoreLegacyModule } from '../core/core-legacy.module';
 import { SoftwareCardComponent } from './components/software-card/software-card.component';
 import { SoftwareListComponent } from './components/software-list/software-list.component';
 import { SoftwareRepoAddEditComponent } from './components/software-repo-add-edit/software-repo-add-edit.component';
@@ -26,6 +27,6 @@ import { SoftwareRepositoryService } from './services/software-repository.servic
     SoftwareRepoFileUploadComponent,
   ],
   providers: [ProductService, { provide: 'ProductBasePath', useValue: SoftwareRepositoryService.BASEPATH }],
-  imports: [CommonModule, SharedModule, CoreModule, RepositoriesRoutingModule],
+  imports: [CommonModule, SharedModule, CoreModule, CoreLegacyModule, RepositoriesRoutingModule],
 })
 export class RepositoriesModule {}

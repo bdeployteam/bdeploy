@@ -1,8 +1,53 @@
 @import '~@angular/material/theming';
 
-@mixin common-classes($theme) {
-  $toolbar: map-get($theme, 'main-toolbar');
+/**
+ * Classes required for every page's layout. A typical page should be built of three main divs as
+ * follows to create a properly scrolling layout (toolbar not scrolling, content scrolling):
+ *  +-------------------------------------------+
+ *  | class='bd-page-root'                      |
+ *  | +---------------------------------------+ |
+ *  | | class='bd-page-toolbar'               | |
+ *  | +---------------------------------------+ |
+ *  | +---------------------------------------| |
+ *  | | class='bd-scroll-container'           | |
+ *  | |                                       | |
+ *  | +---------------------------------------+ |
+ *  +-------------------------------------------+
+ */
+@mixin root-layout-classes($theme) {
+  /* class for the top level <div> in each route-target component */
+  .bd-page-root {
+    position: absolute;
 
+    height: 100%;
+    width: 100%;
+
+    overflow: hidden;
+  }
+
+  /* a typical toolbar on top of each page */
+  .bd-page-toolbar {
+    margin-bottom: 3px;
+    @include _mat-theme-overridable-elevation(1, $theme);
+  }
+
+  /* A scrolling container, which means that content to large for the current size will be reachable with scrollbars */
+  .bd-scroll-container {
+    overflow: auto;
+  }
+
+  /* Text in the given element will not wrap and be ellipsized when overflowing */
+  .bd-text-ellipsis {
+    overflow: hidden; // ellipsis only works if overflow is hidden
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+/**
+ * The root style classes provide commonly used styling like highlights, non-theme coloring, shadows, etc.
+ */
+@mixin root-style-classes($theme) {
   /* A rectangular "card". This is different from mat-card in that it does not have rouded corners, *and* it does not have any spacing, margin or else associated. */
   .bd-rect-card {
     $background: map-get($theme, background);
@@ -30,13 +75,38 @@
     text-decoration: none;
   }
 
-  /* A scrolling container, which means that content to large for the current size will be reachable with scrollbars */
-  .bd-scroll-container {
-    overflow: auto;
+  .bd-hint-text {
+    font-size: smaller;
+    font-style: italic;
+    text-align: center;
   }
 
-  /* needs to be global for overlays (menus, etc.) */
+  .bd-description-text {
+    font-size: smaller;
+    color: var(--bd-text-secondary);
+  }
+}
+
+/**
+ * The root spacing classes provide generic spacing, margin, padding classes to be used for all spacing...
+ * The need to be global for overlays (menus, etc.).
+ */
+@mixin root-spacing-classes($theme) {
   .bd-offset-top5px {
     margin-top: 5px;
   }
+
+  .bd-offset-bottom5px {
+    margin-bottom: 5px;
+  }
+
+  .bd-default-margin {
+    margin: 10px;
+  }
+}
+
+@mixin common-classes($theme) {
+  @include root-layout-classes($theme);
+  @include root-style-classes($theme);
+  @include root-spacing-classes($theme);
 }

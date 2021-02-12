@@ -7,7 +7,9 @@ import { InstanceGroupCardComponent } from './components/instance-group-card/ins
 import { InstanceGroupLogoComponent } from './components/instance-group-logo/instance-group-logo.component';
 import { InstanceGroupTitleComponent } from './components/instance-group-title/instance-group-title.component';
 import { ManagedServerUpdateComponent } from './components/managed-server-update/managed-server-update.component';
+import { ProductCardComponent } from './components/product-card/product-card.component';
 import { ProductInfoCardComponent } from './components/product-info-card/product-info-card.component';
+import { ProductListComponent } from './components/product-list/product-list.component';
 import { ProductTagCardComponent } from './components/product-tag-card/product-tag-card.component';
 
 @NgModule({
@@ -18,6 +20,8 @@ import { ProductTagCardComponent } from './components/product-tag-card/product-t
     ProductTagCardComponent,
     ProductInfoCardComponent,
     InstanceGroupTitleComponent,
+    ProductCardComponent,
+    ProductListComponent,
   ],
   imports: [CommonModule, CoreModule, SharedModule, RouterModule],
   exports: [
@@ -27,6 +31,8 @@ import { ProductTagCardComponent } from './components/product-tag-card/product-t
     InstanceGroupTitleComponent,
     ProductTagCardComponent,
     ProductInfoCardComponent,
+    ProductCardComponent,
+    ProductListComponent,
   ],
 })
 export class CoreLegacyModule {}

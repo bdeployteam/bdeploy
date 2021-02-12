@@ -154,7 +154,9 @@
           <mat-icon class="icon-and-text">done</mat-icon> Product transfer successfully done.
         </div>
         <div class="button-container">
-          <button mat-raised-button [routerLink]="['/l/instancegroup/products', instanceGroup]" replaceUrl>Done</button>
+          <button mat-raised-button [routerLink]="['/l/instancegroup/products', instanceGroup]" [replaceUrl]="true">
+            Done
+          </button>
         </div>
       </mat-step>
     </mat-horizontal-stepper>

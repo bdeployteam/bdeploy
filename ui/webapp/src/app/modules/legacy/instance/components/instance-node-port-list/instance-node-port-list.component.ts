@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
-import { MatSort } from '@angular/material/sort';
+import { MatSort, SortDirection } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { forkJoin, Observable } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
@@ -28,7 +28,7 @@ interface Row {
 })
 export class InstanceNodePortListComponent implements OnInit, AfterViewInit {
   public INITIAL_SORT_COLUMN = 'port';
-  public INITIAL_SORT_DIRECTION = 'asc';
+  public INITIAL_SORT_DIRECTION: SortDirection = 'asc';
 
   public displayedColumns: string[] = ['appState', 'application', 'description', 'portState', 'port', 'rating'];
   public dataSource: MatTableDataSource<Row> = new MatTableDataSource<Row>([]);

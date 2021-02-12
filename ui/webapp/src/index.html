@@ -5,7 +5,7 @@
     <title>BDeploy</title>
     <base href="/" />
 
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=0.86, minimum-scale=0.86" />
     <link rel="icon" type="image/x-icon" href="assets/logo.ico" />
     <script lang="javascript">
       // used in download.service.ts
@@ -26,13 +26,15 @@
     <script src="browsercheck.js"></script>
   </head>
   <body>
-    <app-root>
-      <div class="loader-logo"></div>
-      <div class="loader">
-        <div class="inner one"></div>
-        <div class="inner two"></div>
-        <div class="inner three"></div>
-      </div>
-    </app-root>
+    <div class="index-wrapper">
+      <app-root>
+        <div class="loader-logo"></div>
+        <div class="loader">
+          <div class="inner one"></div>
+          <div class="inner two"></div>
+          <div class="inner three"></div>
+        </div>
+      </app-root>
+    </div>
   </body>
 </html>

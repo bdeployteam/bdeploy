@@ -21,6 +21,15 @@ const routes: Routes = [
     loadChildren: () => import('./modules/admin/admin.module').then((x) => x.AdminModule),
     canActivate: [AdminGuard],
   },
+  {
+    path: 'groups',
+    loadChildren: () => import('./modules/groups/groups.module').then((x) => x.GroupsModule),
+  },
+  {
+    path: 'panel/groups',
+    outlet: 'panel',
+    loadChildren: () => import('./modules/panels/groups/groups.module').then((x) => x.GroupsModule),
+  },
 
   // LEGACY ROUTES
   {

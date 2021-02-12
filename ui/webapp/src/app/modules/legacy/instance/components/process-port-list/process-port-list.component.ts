@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
-import { MatSort } from '@angular/material/sort';
+import { MatSort, SortDirection } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { finalize } from 'rxjs/operators';
 import { ProcessState } from 'src/app/models/gen.dtos';
@@ -30,7 +30,7 @@ export class ProcessPortListComponent implements OnInit, AfterViewInit {
   @Input() instanceActiveTag: string;
 
   public INITIAL_SORT_COLUMN = 'port';
-  public INITIAL_SORT_DIRECTION = 'asc';
+  public INITIAL_SORT_DIRECTION: SortDirection = 'asc';
 
   public displayedColumns: string[] = ['description', 'portState', 'port', 'rating'];
   public dataSource: MatTableDataSource<Row> = new MatTableDataSource<Row>([]);

@@ -5,7 +5,7 @@
     have a unique ID and a predecessor that defines its position.
   </p>
   <mat-form-field>
-    <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Filter" />
+    <input matInput #searchField (keyup)="applyFilter(searchField.value)" placeholder="Filter" />
   </mat-form-field>
 
   <mat-dialog-actions class="actions">
@@ -16,7 +16,7 @@
   </mat-dialog-actions>
   <mat-dialog-content fxFlex class="mat-elevation-z2">
     <table mat-table [dataSource]="dataSource">
-      <caption style="display: none;">
+      <caption style="display: none">
         Parameters
       </caption>
 

@@ -1,0 +1,395 @@
+import { SelectionModel } from '@angular/cdk/collections';
+import { BreakpointObserver } from '@angular/cdk/layout';
+import { FlatTreeControl } from '@angular/cdk/tree';
+import {
+  AfterViewInit,
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  SimpleChanges,
+  ViewChild,
+} from '@angular/core';
+import { MatSort, Sort } from '@angular/material/sort';
+import { MatTreeFlatDataSource, MatTreeFlattener } from '@angular/material/tree';
+import { DomSanitizer } from '@angular/platform-browser';
+import { Subscription } from 'rxjs';
+import {
+  BdDataColumn,
+  BdDataColumnDisplay,
+  BdDataColumnTypeHint,
+  bdDataDefaultSearch,
+  BdDataGrouping,
+} from 'src/app/models/data';
+import { ErrorMessage, LoggingService } from '../../services/logging.service';
+import { BdSearchable, SearchService } from '../../services/search.service';
+
+/** The group used if a record does not match any group when grouping. */
+const UNMATCHED_GROUP = 'No Group';
+
+/** Represents the firarchical presentation of the records after grouping/sorting/searching is applied. */
+interface Node<T> {
+  item: T;
+  groupOrFirstColumn: any;
+  children: Node<T>[];
+}
+
+/** Represents a flattened presentation of Node<T> which is used by the underlying control to render rows */
+interface FlatNode<T> {
+  node: Node<T>;
+  expandable: boolean;
+  level: number;
+}
+
+/**
+ * A table which renders generic data based on column descriptions. Supports:
+ *  * Sorting
+ *  * Grouping (multi-level)
+ *  * Checkbox (multi-) selection
+ *  * Dynamic column display (based on media queries)
+ *  * Cell content data (string, number, etc.) or action (bd-button)
+ *  * Single click row selection
+ *  * Filtering (Searching, BdSearchable) with automatic SearchService registration
+ */
+@Component({
+  selector: 'app-bd-data-table',
+  templateUrl: './bd-data-table.component.html',
+  styleUrls: ['./bd-data-table.component.css'],
+})
+export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit, OnChanges, BdSearchable {
+  private log = this.logging.getLogger('BdDataTableComponent');
+
+  /**
+   * Aria caption for the table, mainly for screen readers.
+   */
+  @Input() caption = 'Data Table';
+
+  /**
+   * The columns to display
+   */
+  /* template */ _columns: BdDataColumn<T>[];
+  @Input() set columns(val: BdDataColumn<T>[]) {
+    // either unset or CARD is OK, only TABLE is not OK.
+    this._columns = val.filter((c) => c.display !== BdDataColumnDisplay.CARD);
+  }
+
+  /**
+   * A callback for sorting data by a certain column in a given direction.
+   * This callback may be called multiple times for subsets of the data depending on the
+   * current grouping of the view.
+   *
+   * Sorting through header click is disabled all together if this callback is not given.
+   */
+  @Input() sortData: (data: T[], column: BdDataColumn<T>, direction: string) => T[];
+
+  /**
+   * A callback which provides enhanced searching in the table. The default search will
+   * concatenate each value in each row object, regardless of whether it is displayed or not.
+   * Then the search string is applied to this single string in a case insensitive manner.
+   */
+  @Input() searchData: (search: string, data: T[]) => T[] = bdDataDefaultSearch;
+
+  /**
+   * Whether the data-table should register itself as a BdSearchable with the global SearchService.
+   */
+  @Input() searchable = true;
+
+  /**
+   * A set of grouping definitions. The data will be grouped, each given definition represents a
+   * level of grouping. Definitions are applied one after another, recursively.
+   */
+  @Input() grouping: BdDataGrouping<T>[];
+
+  /**
+   * The actual data. Arbitrary data which can be handled by the column definitions.
+   */
+  @Input() records: T[];
+
+  /**
+   * Whether the table should operate in checkbox-selection mode. Click events are not sent in this case.
+   */
+  @Input() checkMode = false;
+
+  /**
+   * Elements which should be checked.
+   */
+  @Input() checked: T[] = [];
+
+  /**
+   * Fires when the user changes the checked elements
+   */
+  @Output() checkedChange = new EventEmitter<T[]>();
+
+  /**
+   * Event fired if a record is clicked.
+   */
+  @Output() recordClick = new EventEmitter<T>();
+
+  /** The sort associated with the column headers */
+  @ViewChild(MatSort)
+  private sortHeader: MatSort;
+
+  /** The current sort dicdated by the sortHeader */
+  private sort: Sort;
+
+  /** The current search/filter string given by onBdSearch */
+  private search: string;
+
+  /** The treeControl provides the hierarchy and flattened nodes rendered by the table */
+  treeControl = new FlatTreeControl<FlatNode<T>>(
+    (node) => node.level,
+    (node) => node.expandable
+  );
+
+  /** The transformer bound to 'this', so we can use this in the transformer function */
+  private boundTransformer: (node: Node<T>, level: number) => FlatNode<T> = this.transformer.bind(this);
+  private treeFlattener = new MatTreeFlattener(
+    this.boundTransformer,
+    (n) => n.level,
+    (n) => n.expandable,
+    (n) => n.children
+  );
+  private subscription: Subscription;
+
+  /** The model holding the current checkbox selection state */
+  checkSelection = new SelectionModel<FlatNode<T>>(true);
+
+  /** The data source used by the table - using the flattened hierarchy given by the treeControl */
+  dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
+
+  constructor(
+    private logging: LoggingService,
+    private searchService: SearchService,
+    private media: BreakpointObserver,
+    private sanitizer: DomSanitizer
+  ) {}
+
+  ngOnInit(): void {
+    if (this.searchable) {
+      // register this table as "searchable" in the global search service if requested.
+      this.subscription = this.searchService.register(this);
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (!!this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // make sure that we update only if something changed which requires us to update :)
+    // an update will re-create all content, so we want to avoid this as far as possible.
+    if (!!changes['records'] || !!changes['grouping']) {
+      this.update();
+    }
+  }
+
+  ngAfterViewInit(): void {
+    this.sortHeader.sortChange.subscribe((s) => {
+      this.sort = s;
+      this.update();
+    });
+
+    setTimeout(() => this.update());
+  }
+
+  bdOnSearch(value: string): void {
+    this.search = value;
+    if (!this.checkSelection.isEmpty()) {
+      // Whenever we performa a search/filter we clear all check selection.
+      // This is to avoid having a check selection on a non-visible row.
+      this.checkSelection.clear();
+      this.checkedChange.emit([]);
+    }
+    this.update();
+  }
+
+  private update() {
+    // the check selection will be restored based on this.checked during generateModel
+    this.checkSelection.clear();
+
+    // recreate the dataSource, applying sorting, filtering, grouping, etc.
+    // benchmarks show that this method is quite fast, event with a lot of data.
+    // it takes roughly 100 (76 - 110) ms to generate a model for ~1000 records.
+    this.dataSource.data = this.generateModel(
+      this.searchData(this.search, [...this.records]),
+      this.grouping,
+      this.sort
+    );
+
+    // TODO: Saving of expansion state on update. To achieve this, every BdDataGrouping must
+    // have a unique ID. This ID, along with the group name (which is shown in the first column)
+    // can be used to remember the expansion state, using a SelectionModel just like check selection.
+    this.treeControl.expandAll();
+  }
+
+  /**
+   * Transforms a Node<T> (which is created by generateModel from the input data) into a
+   * FlatNode<T> which is used for displaying in the actual underlying table.
+   *
+   * Transformation is controlled by the treeControl.
+   *
+   * WARNING: This method has to be bound to 'this' before using.
+   */
+  private transformer(node: Node<T>, level: number): FlatNode<T> {
+    const expandable = !!node.children && node.children.length > 0;
+
+    const flatNode = {
+      node: node,
+      expandable: expandable,
+      level: level,
+    };
+
+    if (!!node.item && !!this.checked && !!this.checked.find((c) => c === node.item)) {
+      this.checkSelection.select(flatNode);
+    }
+
+    return flatNode;
+  }
+
+  /**
+   * Generates the actual model displayed by the widget from the raw data given.
+   * This method is called recursively to apply groupings at various levels.
+   */
+  private generateModel(data: T[], grouping: BdDataGrouping<T>[], sort: Sort): Node<T>[] {
+    // if there is grouping to be applied, apply the top-most level now, and recurse.
+    if (!!grouping && grouping.length > 0) {
+      const grp = grouping[0]; // apply the first grouping. later recurse and skip first level.
+
+      // do grouping by identifying the "group" of each record through the BdDataGrouping.
+      const byGroup = new Map<string, T[]>();
+      for (const row of data) {
+        let group = grouping[0].group(row);
+        const show = grouping[0].show(group);
+
+        if (!group) {
+          group = UNMATCHED_GROUP;
+        }
+
+        if (show && group) {
+          const list = byGroup.has(group) ? byGroup.get(group) : byGroup.set(group, []).get(group);
+          list.push(row);
+        }
+      }
+
+      // sort groups - sorting is dicdated by the BdDataGrouping, or (if grouping does not specify) is natural.
+      const byGroupSorted = new Map(
+        [...byGroup.entries()].sort((a, b) => {
+          // handle UNMATCHED_GROUP - this should never reach the contributed sorter.
+          if (a[0] === UNMATCHED_GROUP && b[0] === UNMATCHED_GROUP) {
+            return 0;
+          } else if (a[0] === UNMATCHED_GROUP) {
+            return 1;
+          } else if (b[0] === UNMATCHED_GROUP) {
+            return -1;
+          }
+
+          if (grouping[0].sort) {
+            return grouping[0].sort(a[0], b[0]);
+          }
+          return a[0].localeCompare(b[0]);
+        })
+      );
+
+      // create nodes for groups, recurse grouping.
+      const result: Node<T>[] = [];
+      for (const [key, value] of byGroupSorted) {
+        result.push({
+          item: null,
+          groupOrFirstColumn: key,
+          children: this.generateModel(value, grouping.slice(1), sort),
+        });
+      }
+      return result;
+    }
+
+    // There is no grouping left, so we can now create the nodes for the actual data records.
+    // The only thing left to do here is to apply the current sorting if given. Otherwise
+    // data is presented in the given order.
+    let sortedData = data;
+    if (!!this.sortData && !!sort && !!sort.active && !!sort.direction) {
+      const col = this._columns.find((c) => c.id === sort.active);
+      if (!col) {
+        this.log.error('Cannot find active sort column ' + sort.active);
+      } else {
+        sortedData = this.sortData(data, col, sort.direction);
+      }
+    }
+
+    // last step is to transform the raw input data into Node<T> which is then further processed
+    // by the transformer callback of treeControl.
+    return sortedData.map((i) => ({ item: i, groupOrFirstColumn: this._columns[0].data(i), children: [] }));
+  }
+
+  /* template */ getNoExpandIndent(level: number) {
+    if (level === 0) {
+      return 0;
+    }
+    return (level - 1) * 24 + 40;
+  }
+
+  /* template */ getColumnsToDisplay() {
+    return this._columns
+      .filter((c) => {
+        if (!!c.showWhen) {
+          if (!this.media.isMatched(c.showWhen)) {
+            return false;
+          }
+        }
+        return true;
+      })
+      .map((c) => c.id);
+  }
+
+  /* template */ getUnknownIcon(col: BdDataColumn<T>) {
+    this.log.warn(new ErrorMessage('No icon callback registered for column definition with action', col));
+    return 'help'; // default fallback.
+  }
+
+  /* template */ toggleCheck(node: FlatNode<T>) {
+    if (!node.expandable) {
+      this.checkSelection.toggle(node);
+    } else {
+      const isChecked = this.isChecked(node);
+
+      // if ALL are checked, we deselect all, otherwise we "upgrade" to all selected
+      isChecked ? this.checkSelection.deselect(node) : this.checkSelection.select(node);
+
+      const children = this.treeControl.getDescendants(node);
+      this.checkSelection.isSelected(node)
+        ? this.checkSelection.select(...children)
+        : this.checkSelection.deselect(...children);
+    }
+    this.checkedChange.emit(this.checkSelection.selected.filter((s) => !!s.node.item).map((s) => s.node.item));
+  }
+
+  /* template */ isChecked(node: FlatNode<T>) {
+    if (!node.expandable) {
+      return this.checkSelection.isSelected(node);
+    }
+
+    const children = this.treeControl.getDescendants(node);
+    return children.every((child) => this.checkSelection.isSelected(child));
+  }
+
+  /* template */ isPartiallyChecked(node: FlatNode<T>) {
+    const children = this.treeControl.getDescendants(node);
+    const selected = children.filter((child) => this.checkSelection.isSelected(child));
+    return selected.length > 0 && selected.length < children.length; // at least one but not all.
+  }
+
+  /* template */ isImageColumn(col: BdDataColumn<T>) {
+    return col.hint === BdDataColumnTypeHint.AVATAR;
+  }
+
+  /* template */ getImageUrl(col: BdDataColumn<T>, record: T) {
+    const url = col.data(record);
+    if (!!url) {
+      return this.sanitizer.bypassSecurityTrustUrl(url);
+    }
+  }
+}

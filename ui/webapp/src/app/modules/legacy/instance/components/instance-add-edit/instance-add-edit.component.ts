@@ -2,7 +2,7 @@ import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Location } from '@angular/common';
 import { Component, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
-import { FormBuilder, FormControl, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, Validators } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
@@ -208,7 +208,7 @@ export class InstanceAddEditComponent implements OnInit {
     });
   }
 
-  public getErrorMessage(ctrl: FormControl): string {
+  public getErrorMessage(ctrl: AbstractControl): string {
     if (ctrl.hasError('required')) {
       return 'Required';
     }

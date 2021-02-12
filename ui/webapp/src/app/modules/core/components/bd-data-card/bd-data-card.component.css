@@ -1,0 +1,49 @@
+mat-card {
+  padding: 10px;
+}
+
+.local-card-type {
+  text-transform: uppercase;
+  font-size: smaller;
+  color: var(--bd-text-secondary);
+}
+
+.local-card-title {
+  font-weight: bold;
+  height: 19px;
+}
+
+.local-card-description {
+  height: 16px;
+}
+
+.local-card-detail-icon {
+  font-size: 16px;
+
+  width: 16px;
+  height: 16px;
+}
+
+.local-card-detail-text {
+  font-size: 0.75em;
+}
+
+.local-card-actions {
+  min-height: 62px;
+
+  background-color: var(--bd-bg-toolbar);
+
+  /* for avatar image */
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  /* negative margin to account for padding on card */
+  margin: 10px -10px 10px -10px;
+
+  padding: 5px 10px;
+}
+
+.local-card-footer {
+  font-size: smaller;
+}

@@ -1,0 +1,15 @@
+<div fxLayout="row wrap" fxFlex="1 0 auto" class="local-sizing" fxLayoutAlign="start">
+  <app-bd-data-card
+    [style.padding.px]="5"
+    *ngFor="let record of records"
+    fxFlex.lt-sm="0 0 100%"
+    fxFlex.sm="0 0 50%"
+    fxFlex.md="0 0 33.33%"
+    fxFlex.lg="0 0 25%"
+    fxFlex.gt-lg="0 0 20%"
+    [record]="record"
+    [columns]="_columns"
+    (recordClick)="recordClick.emit($event)"
+  >
+  </app-bd-data-card>
+</div>

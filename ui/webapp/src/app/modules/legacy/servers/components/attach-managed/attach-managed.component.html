@@ -24,7 +24,7 @@
         <button mat-raised-button matStepperNext>Next</button>
       </div>
     </mat-step>
-    <mat-step label="Attach Managed Server" #attachStep [completed]="attachPayload">
+    <mat-step label="Attach Managed Server" #attachStep [completed]="!!attachPayload">
       <p>
         Drag the managed server information from the managed server's <strong>Attach to Central Server</strong> page and
         drop it on the zone below.
@@ -116,7 +116,9 @@
       <div class="success-icon">
         <mat-icon>check_circle_outline</mat-icon>
         <p *ngIf="attachPayload">This managed server {{ serverNameControl.value }} has been attached.</p>
-        <button mat-raised-button [routerLink]="['/l/servers/browser', instanceGroupName]" replaceUrl>Done</button>
+        <button mat-raised-button [routerLink]="['/l/servers/browser', instanceGroupName]" [replaceUrl]="true">
+          Done
+        </button>
       </div>
     </mat-step>
   </mat-vertical-stepper>
