@@ -10,7 +10,7 @@
   position: relative;
   flex: 1 0 auto;
 
-  overflow: hidden;
+  overflow: auto;
 
   top: -32px;
   height: 100%;

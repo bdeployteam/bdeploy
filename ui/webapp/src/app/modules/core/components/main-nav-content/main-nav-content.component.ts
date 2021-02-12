@@ -14,10 +14,22 @@ import { NavAreasService } from '../../services/nav-areas.service';
   animations: [
     routerAnimation,
     trigger('marginForPanel', [
-      state('panelVisible-sm', style({ 'margin-left': '10px', 'margin-right': '310px' })),
-      state('panelVisible-lg', style({ 'margin-left': '110px', 'margin-right': '310px' })),
-      state('panelHidden-sm', style({ 'margin-left': '10px', 'margin-right': '10px' })),
-      state('panelHidden-lg', style({ 'margin-left': '110px', 'margin-right': '110px' })),
+      state(
+        'panelVisible-sm',
+        style({ 'margin-left': '10px', 'margin-right': '310px', 'max-width': 'calc(100% - 10px - 310px)' })
+      ),
+      state(
+        'panelVisible-lg',
+        style({ 'margin-left': '110px', 'margin-right': '310px', 'max-width': 'calc(100% - 110px - 310px)' })
+      ),
+      state(
+        'panelHidden-sm',
+        style({ 'margin-left': '10px', 'margin-right': '10px', 'max-width': 'calc(100% - 10px - 10px)' })
+      ),
+      state(
+        'panelHidden-lg',
+        style({ 'margin-left': '110px', 'margin-right': '110px', 'max-width': 'calc(100% - 110px - 110px)' })
+      ),
       transition('* => *', animate('0.2s ease')),
     ]),
   ],
