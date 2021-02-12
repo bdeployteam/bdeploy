@@ -12,6 +12,7 @@ export interface BdSearchable {
 export class SearchService {
   private currentSearch = '';
   private registration$ = new BehaviorSubject<BdSearchable>(null);
+  private registrations: BdSearchable[] = [];
   private log = this.logging.getLogger('SearchService');
 
   constructor(private logging: LoggingService) {}
@@ -32,9 +33,7 @@ export class SearchService {
   }
 
   register(searchable: BdSearchable): Subscription {
-    if (this.registration$.value) {
-      this.log.warn(`Search consumer already registered: ${JSON.stringify(this.registration$.value)}`);
-    }
+    this.registrations.push(searchable);
     this.registration$.next(searchable);
     return new Subscription(() => {
       this.deregister(searchable);
@@ -42,14 +41,15 @@ export class SearchService {
   }
 
   private deregister(searchable: BdSearchable) {
-    if (this.registration$.value !== searchable) {
-      this.log.warn(
-        `Registered search consumer different from given: ${JSON.stringify(
-          this.registration$.value
-        )} != ${JSON.stringify(searchable)}`
-      );
+    const top = this.registrations.pop();
+    if (top !== searchable) {
+      this.log.warn(`Registered search consumer different from given`);
     }
-    this.registration$.next(null);
+    if (!this.registrations.length) {
+      this.registration$.next(null);
+    } else {
+      this.registration$.next(this.registrations[this.registrations.length - 1]);
+    }
     this.currentSearch = '';
   }
 }
