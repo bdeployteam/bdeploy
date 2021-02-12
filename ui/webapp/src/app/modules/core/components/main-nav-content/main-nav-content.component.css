@@ -10,10 +10,17 @@
   position: relative;
   flex: 1 0 auto;
 
-  overflow: auto;
+  overflow: hidden;
 
   top: -32px;
   height: 100%;
 
   z-index: 10;
+}
+
+.local-sizing-inner {
+  overflow: auto;
+
+  width: 100%;
+  height: 100%;
 }

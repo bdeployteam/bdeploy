@@ -1,6 +1,9 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, HostBinding, OnInit } from '@angular/core';
+import { isString } from 'lodash-es';
+import { Subscription } from 'rxjs';
+import { panelRouterAnimation } from '../../animations/special';
 import { NavAreasService } from '../../services/nav-areas.service';
 
 @Component({
@@ -8,10 +11,11 @@ import { NavAreasService } from '../../services/nav-areas.service';
   templateUrl: './main-nav-flyin.component.html',
   styleUrls: ['./main-nav-flyin.component.css'],
   animations: [
+    panelRouterAnimation,
     trigger('openClose', [
       state('open', style({ transform: 'translateX(0%)' })),
       state('closed', style({ transform: 'translateX(100%)' })),
-      transition('open <=> closed', [animate('0.2s ease')]),
+      transition('open <=> closed', animate('0.2s ease')),
     ]),
     trigger('flyInWidth', [
       state('normal', style({ width: '300px' })),
@@ -19,7 +23,7 @@ import { NavAreasService } from '../../services/nav-areas.service';
       state('max-lg-menu', style({ width: 'calc(100% - 320px)' })),
       state('max-sm', style({ width: 'calc(100% - 74px)' })),
       state('max-sm-menu', style({ width: 'calc(100% - 220px)' })),
-      transition('* => *', [animate('0.2s ease')]),
+      transition('* => *', animate('0.2s ease')),
     ]),
   ],
 })
@@ -43,5 +47,16 @@ export class MainNavFlyinComponent implements OnInit {
     return large ? 'max-lg' : 'max-sm';
   }
 
-  ngOnInit(): void {}
+  panelContent = '';
+  subscription: Subscription;
+
+  ngOnInit(): void {
+    this.subscription = this.areas.panelRoute.subscribe((route) => {
+      if (!route) {
+        this.panelContent = '';
+      } else {
+        this.panelContent = isString(route.component) ? route.component : route.component.name;
+      }
+    });
+  }
 }

@@ -1,9 +1,7 @@
-import { animate, state, style, transition, trigger } from '@angular/animations';
+import { animate, animateChild, group, state, style, transition, trigger } from '@angular/animations';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, HostBinding, OnInit } from '@angular/core';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { isString } from 'lodash-es';
-import { filter, map } from 'rxjs/operators';
 import { routerAnimation } from '../../animations/special';
 import { NavAreasService } from '../../services/nav-areas.service';
 
@@ -30,17 +28,12 @@ import { NavAreasService } from '../../services/nav-areas.service';
         'panelHidden-lg',
         style({ 'margin-left': '110px', 'margin-right': '110px', 'max-width': 'calc(100% - 110px - 110px)' })
       ),
-      transition('* => *', animate('0.2s ease')),
+      transition('* => *', group([animate('0.2s ease'), animateChild()])),
     ]),
   ],
 })
 export class MainNavContentComponent implements OnInit {
-  constructor(
-    private router: Router,
-    private activatedRoute: ActivatedRoute,
-    public areas: NavAreasService,
-    private media: BreakpointObserver
-  ) {}
+  constructor(public areas: NavAreasService, private media: BreakpointObserver) {}
 
   @HostBinding('@marginForPanel') get marginAnimation() {
     if (this.media.isMatched('(min-width: 1280px)')) {
@@ -53,21 +46,12 @@ export class MainNavContentComponent implements OnInit {
   animationState: string;
 
   ngOnInit(): void {
-    this.router.events
-      .pipe(
-        filter((e) => e instanceof NavigationEnd),
-        map(() => this.activatedRoute),
-        map((route) => {
-          while (route.firstChild && route.firstChild.outlet === 'primary') {
-            route = route.firstChild;
-          }
-          return route;
-        }),
-        filter((route) => route.outlet === 'primary'),
-        map((route) => route.snapshot)
-      )
-      .subscribe((route) => {
+    this.areas.primaryRoute.subscribe((route) => {
+      if (!route) {
+        this.animationState = '';
+      } else {
         this.animationState = isString(route.component) ? route.component : route.component.name;
-      });
+      }
+    });
   }
 }

@@ -1,23 +1,78 @@
-import { animate, query, style, transition, trigger } from '@angular/animations';
+import { animate, animateChild, group, query, style, transition, trigger } from '@angular/animations';
 
 export const routerAnimation = trigger('routerAnimation', [
   transition('* <=> *', [
     // Set a default  style for enter and leave
-    query(
-      ':enter, :leave',
-      [
-        style({
-          position: 'absolute',
-          left: 0,
-          width: '100%',
-          height: '100%',
-          opacity: 0,
-          transform: 'scale(1.05)',
-        }),
-      ],
-      { optional: true }
-    ),
-    // Animate the new page in
-    query(':enter', [animate('200ms ease', style({ opacity: 1, transform: 'scale(1)' }))], { optional: true }),
+    group([
+      query(
+        ':enter',
+        [
+          style({
+            position: 'absolute',
+            left: 0,
+            width: '100%',
+            height: '100%',
+            opacity: 0,
+            transform: 'scale(1.05)',
+          }),
+          group([animate('200ms ease', style({ opacity: 1, transform: 'scale(1)' })), animateChild()]),
+        ],
+        { optional: true }
+      ),
+      query(
+        ':leave',
+        [
+          style({
+            position: 'absolute',
+            left: 0,
+            width: '100%',
+            height: '100%',
+            opacity: 1,
+            transform: 'scale(1)',
+          }),
+          group([animate('150ms ease', style({ opacity: 0, transform: 'scale(0.95)' })), animateChild()]),
+        ],
+        { optional: true }
+      ),
+    ]),
+  ]),
+]);
+
+export const panelRouterAnimation = trigger('panelRouterAnimation', [
+  transition('* <=> *', [
+    group([
+      query(
+        ':enter',
+        [
+          style({
+            position: 'absolute',
+            left: '30%',
+            width: '100%',
+            height: '100%',
+            opacity: 0,
+            transform: 'scale(1.02)',
+          }),
+          group([animate('200ms ease', style({ opacity: 1, transform: 'scale(1)', left: '0px' })), animateChild()]),
+        ],
+        { optional: true }
+      ),
+      query(
+        ':leave',
+        [
+          style({
+            position: 'absolute',
+            left: '0px',
+            width: '100%',
+            height: '100%',
+            opacity: 1,
+            transform: 'scale(1)',
+          }),
+          group([animate('200ms ease', style({ opacity: 0, transform: 'scale(0.98)', left: '-30%' })), animateChild()]),
+        ],
+        {
+          optional: true,
+        }
+      ),
+    ]),
   ]),
 ]);

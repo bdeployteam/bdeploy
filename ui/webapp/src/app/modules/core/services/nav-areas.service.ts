@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Router } from '@angular/router';
 import { isString } from 'lodash-es';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
@@ -11,6 +11,9 @@ export class NavAreasService {
   panelVisible = new BehaviorSubject<boolean>(false);
   panelMaximized = new BehaviorSubject<boolean>(false);
   menuMaximized = new BehaviorSubject<boolean>(false);
+
+  primaryRoute = new BehaviorSubject<ActivatedRouteSnapshot>(null);
+  panelRoute = new BehaviorSubject<ActivatedRouteSnapshot>(null);
 
   private primaryState: string;
 
@@ -45,12 +48,21 @@ export class NavAreasService {
           ? primarySnapshot.component
           : primarySnapshot.component.name;
 
+        // trigger updates of component names for those interested.
+        this.primaryRoute.next(primarySnapshot);
+        this.panelRoute.next(panelSnapshot);
+
         // primaryState may not be set in case we are just navigating from the void, i.e. somebody opened a link
         // which includes a panel navigation.
         if (this.primaryState && newPrimaryState !== this.primaryState) {
-          this.router.navigate(['', { outlets: { panel: null } }]);
+          this.router.navigate(['', { outlets: { panel: null } }], { replaceUrl: true });
         }
-        this.primaryState = newPrimaryState;
+
+        // we need the primary state to detect whether it changes to clear the panel routing. however
+        // we set it to null whenever there is *no* panel route active, to allow to go back/forward to
+        // such states through the browser back/forward buttons - it will we treated just like any external
+        // (e.g. pasted) links.
+        this.primaryState = panelSnapshot ? newPrimaryState : null;
       });
 
     if (localStorage.getItem('menu') === null) {
