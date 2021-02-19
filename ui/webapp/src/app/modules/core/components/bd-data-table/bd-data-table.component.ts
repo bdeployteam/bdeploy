@@ -23,14 +23,13 @@ import {
   BdDataColumnTypeHint,
   bdDataDefaultSearch,
   BdDataGrouping,
+  bdSortGroups,
+  UNMATCHED_GROUP,
 } from 'src/app/models/data';
 import { ErrorMessage, LoggingService } from '../../services/logging.service';
 import { BdSearchable, SearchService } from '../../services/search.service';
 
-/** The group used if a record does not match any group when grouping. */
-const UNMATCHED_GROUP = 'No Group';
-
-/** Represents the firarchical presentation of the records after grouping/sorting/searching is applied. */
+/** Represents the hirarchical presentation of the records after grouping/sorting/searching is applied. */
 interface Node<T> {
   item: T;
   groupOrFirstColumn: any;
@@ -263,13 +262,13 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
       // do grouping by identifying the "group" of each record through the BdDataGrouping.
       const byGroup = new Map<string, T[]>();
       for (const row of data) {
-        let group = grouping[0].group(row);
-        const show = grouping[0].show(group);
+        let group = grouping[0].definition.group(row);
 
         if (!group) {
           group = UNMATCHED_GROUP;
         }
 
+        const show = !grouping[0].selected?.length || grouping[0].selected.includes(group);
         if (show && group) {
           const list = byGroup.has(group) ? byGroup.get(group) : byGroup.set(group, []).get(group);
           list.push(row);
@@ -279,30 +278,24 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
       // sort groups - sorting is dicdated by the BdDataGrouping, or (if grouping does not specify) is natural.
       const byGroupSorted = new Map(
         [...byGroup.entries()].sort((a, b) => {
-          // handle UNMATCHED_GROUP - this should never reach the contributed sorter.
-          if (a[0] === UNMATCHED_GROUP && b[0] === UNMATCHED_GROUP) {
-            return 0;
-          } else if (a[0] === UNMATCHED_GROUP) {
-            return 1;
-          } else if (b[0] === UNMATCHED_GROUP) {
-            return -1;
+          if (!!grouping[0].definition.sort) {
+            return grouping[0].definition.sort(a[0], b[0]);
           }
-
-          if (grouping[0].sort) {
-            return grouping[0].sort(a[0], b[0]);
-          }
-          return a[0].localeCompare(b[0]);
+          return bdSortGroups(a[0], b[0]);
         })
       );
 
       // create nodes for groups, recurse grouping.
       const result: Node<T>[] = [];
       for (const [key, value] of byGroupSorted) {
-        result.push({
-          item: null,
-          groupOrFirstColumn: key,
-          children: this.generateModel(value, grouping.slice(1), sort),
-        });
+        const children = this.generateModel(value, grouping.slice(1), sort);
+        if (!!children?.length) {
+          result.push({
+            item: null,
+            groupOrFirstColumn: key,
+            children: children,
+          });
+        }
       }
       return result;
     }

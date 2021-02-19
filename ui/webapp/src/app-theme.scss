@@ -7,6 +7,8 @@
 @import 'app-ngx-charts-dark.scss';
 @import 'app-scrollbars.scss';
 
+@import 'app/modules/core/components/bd-button-popup/bd-button-popup-theme.scss';
+
 @import 'app/modules/admin/components/hive/hive-theme.scss';
 @import 'app/modules/admin/components/admin-shell/admin-shell.theme.scss';
 @import 'app/modules/admin/components/audit-log/audit-log-theme.scss';
@@ -45,9 +47,9 @@
 @import 'app/modules/legacy/repositories/components/software-repo-file-upload/software-repo-file-upload-theme.scss';
 
 @mixin all-themes($theme) {
-  // general angular material theme
   @include angular-material-theme($theme);
   @include common-classes($theme);
+  @include bd-button-popup-theme($theme);
 
   // application component themes // FIXME: those are all legacy and should be removed. Use CSS3 variables instead, see --bd- vars.
   @include instance-group-delete-dialog-theme($theme);

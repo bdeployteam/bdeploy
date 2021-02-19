@@ -43,10 +43,12 @@ import { ClipboardModule } from 'ngx-clipboard';
 import { CookieService } from 'ngx-cookie-service';
 import { GravatarModule } from 'ngx-gravatar';
 import { GlobalErrorHandler } from 'src/app/modules/core/global-error-handler';
+import { BdButtonPopupComponent } from './components/bd-button-popup/bd-button-popup.component';
 import { BdButtonComponent } from './components/bd-button/bd-button.component';
 import { BdDataCardComponent } from './components/bd-data-card/bd-data-card.component';
 import { BdDataDisplayComponent } from './components/bd-data-display/bd-data-display.component';
 import { BdDataGridComponent } from './components/bd-data-grid/bd-data-grid.component';
+import { BdDataGroupingComponent } from './components/bd-data-grouping/bd-data-grouping.component';
 import { BdDataTableComponent } from './components/bd-data-table/bd-data-table.component';
 import { ConnectionLostComponent } from './components/connection-lost/connection-lost.component';
 import { LoginComponent } from './components/login/login.component';
@@ -69,6 +71,7 @@ import { FileDropDirective } from './directives/file-drop.directive';
 import { httpInterceptorProviders } from './interceptors';
 import { VersionPipe } from './pipes/version.pipe';
 import { ConfigService } from './services/config.service';
+import { BdDataGroupingPanelComponent } from './components/bd-data-grouping-panel/bd-data-grouping-panel.component';
 
 export function loadAppConfig(cfgService: ConfigService) {
   return () => cfgService.load();
@@ -100,6 +103,9 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdDataGridComponent,
     BdDataCardComponent,
     BdDataDisplayComponent,
+    BdButtonPopupComponent,
+    BdDataGroupingComponent,
+    BdDataGroupingPanelComponent,
   ],
   entryComponents: [
     ConnectionLostComponent,
@@ -214,6 +220,8 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdDataTableComponent,
     BdDataGridComponent,
     BdDataDisplayComponent,
+    BdButtonPopupComponent,
+    BdDataGroupingComponent,
   ],
 })
 export class CoreModule {}

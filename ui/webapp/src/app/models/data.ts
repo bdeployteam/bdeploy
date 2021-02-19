@@ -63,15 +63,52 @@ export interface BdDataColumn<T> {
   display?: BdDataColumnDisplay;
 }
 
-export interface BdDataGrouping<T> {
+/** The group used if a record does not match any group when grouping. */
+export const UNMATCHED_GROUP = 'No Group';
+
+export interface BdDataGroupingDefinition<T> {
+  /** The name of the grouping, selectable by the user */
+  name: string;
+
   /** determines the name of the group this grouping would put the record in. */
   group: (row: T) => string;
 
-  /** determines wether the given group should be shown with the current grouping settings */
-  show: (group: string) => boolean;
+  /** provides sorting for the selected groups. the callback must be able to handle null, which is used for "No Group" */
+  sort?: (a: string, b: string) => number;
+}
 
-  /** provides sorting for the selected groups */
-  sort: (a: string, b: string) => number;
+export interface BdDataGrouping<T> {
+  /** The definition of the grouping */
+  definition: BdDataGroupingDefinition<T>;
+
+  /** The selected groups to show. If not set, show all groups */
+  selected: string[];
+}
+
+/**
+ * Find all possible group values from the given data set.
+ *
+ * Note that null is a possible value returned, which will be translated to "No Group" by the filter panel.
+ */
+export function bdExtractGroups<T>(grouping: BdDataGroupingDefinition<T>, records: T[]): string[] {
+  const allGroups = records.map((r) => grouping.group(r)).map((r) => (!!r ? r : UNMATCHED_GROUP));
+  return [...new Set(allGroups)]; // unique.
+}
+
+/**
+ * Default null-capable group sorting. Nulls come last.
+ */
+export function bdSortGroups(a: string, b: string) {
+  if (a === b) {
+    return 0;
+  }
+  if (a === UNMATCHED_GROUP) {
+    return 1;
+  }
+  if (b === UNMATCHED_GROUP) {
+    return -1;
+  }
+  return a.localeCompare(b);
 }
 
 /** The default search which uses case insensitive search in all fields of the record. */

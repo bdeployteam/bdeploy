@@ -1,6 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { BdDataColumn, BdDataColumnDisplay, BdDataColumnTypeHint, BdDataGrouping } from 'src/app/models/data';
+import {
+  BdDataColumn,
+  BdDataColumnDisplay,
+  BdDataColumnTypeHint,
+  BdDataGroupingDefinition,
+  bdExtractGroups,
+} from 'src/app/models/data';
 
 interface TestRow {
   type: string;
@@ -128,11 +134,26 @@ export class GroupsBrowserComponent implements OnInit {
     },
   ]);
 
-  grouping: BdDataGrouping<TestRow>[] = [
-    { group: (r) => r.first, sort: (a, b) => b.localeCompare(a), show: (g) => true },
+  definitions: BdDataGroupingDefinition<TestRow>[] = [
+    { name: 'First Column', group: (r) => r.first },
+    { name: 'Second Column', group: (r) => r.second },
+    { name: 'Server Column', group: (r) => r.server },
   ];
 
+  boundGetGroupingValues = this.getGroupingValues.bind(this);
+
   checked: TestRow[] = [this.rows.value[1]];
+
+  testValues = [
+    'below-left',
+    'below-right',
+    'above-left',
+    'above-right',
+    'left-above',
+    'left-below',
+    'right-above',
+    'right-below',
+  ];
 
   sort(data: TestRow[], column: BdDataColumn<TestRow>, direction: 'asc' | 'desc') {
     if (direction === 'asc') {
@@ -166,20 +187,15 @@ export class GroupsBrowserComponent implements OnInit {
     this.rows.next(r);
   }
 
-  toggleGrouping(val: boolean) {
-    if (val) {
-      this.grouping.push({ group: (r) => r.second, sort: (a, b) => a.localeCompare(b), show: (g) => g !== 'Row1' });
-    } else {
-      this.grouping.pop();
-    }
-    this.grouping = [...this.grouping];
-  }
-
   onRecordClick(row: TestRow) {
     console.log('CLICK: ', row);
   }
 
   onCheckChange() {
     console.log('CHECKED', this.checked);
+  }
+
+  getGroupingValues(def: BdDataGroupingDefinition<TestRow>): string[] {
+    return bdExtractGroups(def, this.rows.value);
   }
 }

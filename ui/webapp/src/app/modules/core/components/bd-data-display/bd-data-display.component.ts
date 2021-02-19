@@ -22,6 +22,9 @@ export class BdDataDisplayComponent<T> implements OnInit {
       this.checkMode = false;
     }
   }
+  get grid() {
+    return this._grid;
+  }
 
   /**
    * Aria caption for the table, mainly for screen readers.

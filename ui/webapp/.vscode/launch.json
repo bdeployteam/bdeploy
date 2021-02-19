@@ -34,6 +34,7 @@
       "name": "Chrome (Standalone)",
       "url": "http://localhost:4200",
       "webRoot": "${workspaceFolder}",
+      "outFiles": ["${workspaceFolder}/**/*.js", "!**/node_modules/**"],
       "runtimeArgs": ["--allow-insecure-localhost"]
     },
     {

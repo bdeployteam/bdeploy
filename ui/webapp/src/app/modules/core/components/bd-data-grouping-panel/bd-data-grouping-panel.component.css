@@ -1,0 +1,4 @@
+.local-grouping-header > .mat-badge-content {
+  top: calc(50% - 9px);
+  right: -20px;
+}

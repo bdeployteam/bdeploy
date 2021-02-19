@@ -1,0 +1,14 @@
+<ng-template #popup>
+  <ng-content></ng-content>
+</ng-template>
+
+<app-bd-button
+  #button
+  [text]="text"
+  [icon]="icon"
+  [badge]="badge"
+  [collapsed]="true"
+  [tooltip]="tooltip"
+  (click)="openOverlay(button, popup)"
+>
+</app-bd-button>

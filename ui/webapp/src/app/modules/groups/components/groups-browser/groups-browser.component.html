@@ -2,17 +2,22 @@
   <mat-toolbar class="bd-page-toolbar">
     <mat-toolbar-row fxLayoutGap="5px">
       <div fxFlex="1 0 auto"></div>
+      <mat-select [(value)]="popTest.preferredPosition" [style.font-size]="'smaller'">
+        <mat-option *ngFor="let opt of testValues" [value]="opt">{{ opt }}</mat-option>
+      </mat-select>
+      <app-bd-button-popup #popTest icon="help"><mat-card>This is the popup</mat-card></app-bd-button-popup>
+      <app-bd-data-grouping
+        [multiple]="!dataTable.grid"
+        (groupingChange)="dataTable.grouping = $event"
+        [definitions]="definitions"
+        [values]="boundGetGroupingValues"
+        presetKey="instanceGroups"
+      ></app-bd-data-grouping>
       <app-bd-button
         [isToggle]="true"
-        icon="expand"
+        icon="dashboard"
         text="Toggle Card Mode"
         [(toggle)]="dataTable.grid"
-      ></app-bd-button>
-      <app-bd-button
-        [isToggle]="true"
-        icon="toggle_on"
-        text="Toggle grouping"
-        (toggleChange)="toggleGrouping($event)"
       ></app-bd-button>
       <app-bd-button
         [isToggle]="true"
@@ -30,7 +35,6 @@
       [columns]="columns"
       [records]="rows | async"
       [sortData]="sort"
-      [grouping]="grouping"
       [(checked)]="checked"
       (checkedChange)="onCheckChange()"
       (recordClick)="onRecordClick($event)"

@@ -1,5 +1,12 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { BdDataColumn, BdDataColumnDisplay, bdDataDefaultSearch, BdDataGrouping } from 'src/app/models/data';
+import {
+  BdDataColumn,
+  BdDataColumnDisplay,
+  bdDataDefaultSearch,
+  BdDataGrouping,
+  bdExtractGroups,
+  UNMATCHED_GROUP,
+} from 'src/app/models/data';
 import { LoggingService } from '../../services/logging.service';
 
 @Component({
@@ -53,4 +60,18 @@ export class BdDataGridComponent<T> implements OnInit {
   constructor(private logging: LoggingService) {}
 
   ngOnInit(): void {}
+
+  /* template */ getGroupValues() {
+    return bdExtractGroups(this.grouping.definition, this.records);
+  }
+
+  /* template */ getGroupRecords(group) {
+    return this.records.filter((r) => {
+      const grp = this.grouping.definition.group(r);
+      if (!grp && group === UNMATCHED_GROUP) {
+        return true;
+      }
+      return grp === group;
+    });
+  }
 }

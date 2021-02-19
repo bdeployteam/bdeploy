@@ -5,9 +5,9 @@
   [class.local-button-collapsed]="collapsed"
   [class.bd-inverted-color]="!(isToggle && toggle) && inverseColor"
   [class.bd-toggle-highlight]="isToggle && toggle"
-  (click)="onClick($event)"
   [matTooltip]="tooltip ? text : ''"
   [matTooltipPosition]="tooltip"
+  [disabled]="disabled"
 >
   <div
     fxLayout="row"

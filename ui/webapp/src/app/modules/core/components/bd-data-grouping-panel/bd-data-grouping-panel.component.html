@@ -1,0 +1,42 @@
+<div fxLayout="row" fxLayoutGap="5px" [style.height]="'100%'">
+  <div fxLayout="column" fxLayoutGap="5px" [style.minWidth.px]="180">
+    <div>
+      <span
+        class="local-grouping-header bd-description-text"
+        [matBadge]="index + 1"
+        matBadgePosition="after"
+        matBadgeSize="small"
+        [matBadgeOverlap]="false"
+      >
+        Grouping Level
+      </span>
+    </div>
+    <mat-divider [style.position]="'relative'" [style.top.px]="5" [style.padding-bottom.px]="10"></mat-divider>
+    <mat-select [value]="grouping?.definition" (valueChange)="setGrouping($event)" placeholder="Select Grouping">
+      <mat-option>--</mat-option>
+      <mat-option *ngFor="let def of definitions" [value]="def">{{ def.name }}</mat-option>
+    </mat-select>
+    <mat-divider [style.position]="'relative'" [style.top.px]="5" [style.padding-bottom.px]="10"></mat-divider>
+
+    <div *ngIf="!grouping?.definition" class="bd-hint-text" [style.paddingBottom.px]="10">
+      Choose an available grouping<br />
+      from the dropdown.
+    </div>
+
+    <div
+      *ngIf="!!groupingValues?.length"
+      fxLayout="column"
+      fxLayoutGap="5px"
+      [style.paddingLeft.px]="10"
+      [style.paddingBottom.px]="10"
+    >
+      <mat-checkbox
+        *ngFor="let group of groupingValues"
+        [checked]="!grouping?.selected?.length || grouping.selected.includes(group)"
+        (change)="groupCheckChanged(group, $event)"
+        >{{ !!group ? group : noGroup }}</mat-checkbox
+      >
+    </div>
+  </div>
+  <mat-divider [vertical]="true"></mat-divider>
+</div>
