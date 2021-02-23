@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import {
   BdDataColumn,
   BdDataColumnDisplay,
@@ -7,6 +7,8 @@ import {
   BdDataGroupingDefinition,
   bdExtractGroups,
 } from 'src/app/models/data';
+import { ObjectChangeType } from 'src/app/models/gen.dtos';
+import { EMPTY_SCOPE, ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
 
 interface TestRow {
   type: string;
@@ -23,7 +25,7 @@ interface TestRow {
   templateUrl: './groups-browser.component.html',
   styleUrls: ['./groups-browser.component.css'],
 })
-export class GroupsBrowserComponent implements OnInit {
+export class GroupsBrowserComponent implements OnInit, OnDestroy {
   columns: BdDataColumn<TestRow>[] = [
     {
       id: 'type',
@@ -155,6 +157,8 @@ export class GroupsBrowserComponent implements OnInit {
     'right-below',
   ];
 
+  private subscription: Subscription;
+
   sort(data: TestRow[], column: BdDataColumn<TestRow>, direction: 'asc' | 'desc') {
     if (direction === 'asc') {
       return data.sort((a, b) => String(column.data(a)).localeCompare(column.data(b)));
@@ -163,9 +167,17 @@ export class GroupsBrowserComponent implements OnInit {
     }
   }
 
-  constructor() {}
+  constructor(private changes: ObjectChangesService) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.subscription = this.changes.subscribe(ObjectChangeType.INSTANCE_GROUP, EMPTY_SCOPE, (change) => {
+      console.log(change);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
 
   addRows() {
     const r = [...this.rows.value];

@@ -35,17 +35,23 @@ public class SoftwareRepositoryManifest {
         return key.getName().equals(MANIFEST_NAME);
     }
 
-    /**
-     * @return the current version of the {@link SoftwareRepositoryConfiguration}, or <code>null</code> if not present
-     */
-    public SoftwareRepositoryConfiguration read() {
+    public Manifest.Key getKey() {
         Optional<Long> max = hive.execute(new ManifestMaxIdOperation().setManifestName(MANIFEST_NAME));
         if (!max.isPresent()) {
             return null;
         }
+        return new Manifest.Key(MANIFEST_NAME, max.get().toString());
+    }
 
-        Manifest mf = hive
-                .execute(new ManifestLoadOperation().setManifest(new Manifest.Key(MANIFEST_NAME, max.get().toString())));
+    /**
+     * @return the current version of the {@link SoftwareRepositoryConfiguration}, or <code>null</code> if not present
+     */
+    public SoftwareRepositoryConfiguration read() {
+        Manifest.Key key = getKey();
+        if (key == null) {
+            return null;
+        }
+        Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(key));
         try (InputStream is = hive.execute(new TreeEntryLoadOperation().setRootTree(mf.getRoot())
                 .setRelativePath(SoftwareRepositoryConfiguration.FILE_NAME))) {
             return StorageHelper.fromStream(is, SoftwareRepositoryConfiguration.class);
@@ -57,7 +63,7 @@ public class SoftwareRepositoryManifest {
     /**
      * @param desc updated customer metadata to write.
      */
-    public void update(SoftwareRepositoryConfiguration desc) {
+    public Manifest.Key update(SoftwareRepositoryConfiguration desc) {
         try (Transaction t = hive.getTransactions().begin()) {
             Long newId = hive.execute(new ManifestNextIdOperation().setManifestName(MANIFEST_NAME));
             Manifest.Builder mfb = new Manifest.Builder(new Manifest.Key(MANIFEST_NAME, newId.toString()));
@@ -68,6 +74,7 @@ public class SoftwareRepositoryManifest {
 
             mfb.setRoot(hive.execute(new InsertArtificialTreeOperation().setTree(tb)));
             hive.execute(new InsertManifestOperation().addManifest(mfb.build(hive)));
+            return mfb.getKey();
         }
     }
 

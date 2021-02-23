@@ -21,13 +21,9 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.bdeploy.common.cli.data.DataFormat;
 import io.bdeploy.common.cli.data.DataTable;
 import io.bdeploy.common.security.RemoteService;
-import io.bdeploy.common.util.JacksonHelper;
-import io.bdeploy.common.util.JacksonHelper.MapperType;
 import io.bdeploy.common.util.NamedDaemonThreadFactory;
 
 /**
@@ -128,7 +124,7 @@ public interface ActivityReporter {
         private ScheduledExecutorService updater;
         private ScheduledFuture<?> scheduled;
         private boolean verbose;
-        private BiFunction<RemoteService, Consumer<byte[]>, NoThrowAutoCloseable> proxyConnector;
+        private BiFunction<RemoteService, Consumer<List<ActivitySnapshot>>, NoThrowAutoCloseable> proxyConnector;
 
         private final Deque<AsyncActivity> activities = new ArrayDeque<>();
         private final List<AsyncActivity> allActivities = new ArrayList<>();
@@ -328,7 +324,8 @@ public interface ActivityReporter {
 
         }
 
-        public void setProxyConnector(BiFunction<RemoteService, Consumer<byte[]>, NoThrowAutoCloseable> proxyConnector) {
+        public void setProxyConnector(
+                BiFunction<RemoteService, Consumer<List<ActivitySnapshot>>, NoThrowAutoCloseable> proxyConnector) {
             this.proxyConnector = proxyConnector;
         }
 
@@ -348,11 +345,9 @@ public interface ActivityReporter {
                 }
             }
 
-            private void onMessage(byte[] event) {
+            private void onMessage(List<ActivitySnapshot> message) {
                 try {
-                    ObjectMapper mapper = JacksonHelper.createObjectMapper(MapperType.JSON);
-                    List<ActivitySnapshot> activityList = mapper.readValue(event, ActivitySnapshot.LIST_TYPE);
-                    for (ActivitySnapshot act : activityList) {
+                    for (ActivitySnapshot act : message) {
                         output.println("SRV: " + act);
                     }
                 } catch (Exception e) {

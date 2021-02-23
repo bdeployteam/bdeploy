@@ -12,18 +12,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
-import jakarta.ws.rs.core.SecurityContext;
-import jakarta.ws.rs.core.UriBuilder;
-
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.ws.WebSocket;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.ActivitySnapshot;
 import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
@@ -35,7 +30,14 @@ import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.OnDiscKeyStore;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.JacksonHelper;
+import io.bdeploy.common.util.JacksonHelper.MapperType;
 import io.bdeploy.jersey.JerseyClientFactory;
+import io.bdeploy.jersey.activity.JerseyBroadcastingActivityReporter;
+import io.bdeploy.jersey.ws.change.client.ObjectChangeClientWebSocket;
+import io.bdeploy.jersey.ws.change.msg.ObjectScope;
+import jakarta.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.UriBuilder;
 
 /**
  * Base class for all CLI tools which need to access a remote service. Figuring
@@ -77,6 +79,8 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
     @Target(ElementType.PARAMETER)
     protected @interface RemoteOptional {
     }
+
+    private final ObjectMapper serializer = JacksonHelper.createObjectMapper(MapperType.JSON);
 
     public RemoteServiceTool(Class<T> configClass) {
         super(configClass);
@@ -164,22 +168,24 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
         return svc;
     }
 
-    private NoThrowAutoCloseable connectProxy(RemoteService remote, Consumer<byte[]> onMessage) {
+    private NoThrowAutoCloseable connectProxy(RemoteService remote, Consumer<List<ActivitySnapshot>> onMessage) {
         return new NoThrowAutoCloseable() {
 
-            private AsyncHttpClient client;
-            private WebSocket ws;
+            private ObjectChangeClientWebSocket ws;
 
             {
                 try {
-                    this.client = JerseyClientFactory.get(remote).getWebSocketClient();
-                    // cannot filter by proxy scope as the scope is set later in the process whenever a call is made.
-                    this.ws = JerseyClientFactory.get(remote)
-                            .getAuthenticatedWebSocket(client, Collections.emptyList(), "/activities", onMessage, e -> {
-                                out().println("WebSocket error: ");
-                                e.printStackTrace(out());
-                            }, s -> out().println("Activities WebSocket disconnected")).get();
-                } catch (InterruptedException | ExecutionException e) {
+                    this.ws = JerseyClientFactory.get(remote).getObjectChangeWebSocket(c -> {
+                        String serialized = c.details.get(JerseyBroadcastingActivityReporter.OCT_ACTIVIES);
+                        try {
+                            onMessage.accept(serializer.readValue(serialized, ActivitySnapshot.LIST_TYPE));
+                        } catch (Exception e) {
+                            out().println("Cannot read remote activities");
+                            e.printStackTrace(out());
+                        }
+                    });
+                    this.ws.subscribe(JerseyBroadcastingActivityReporter.OCT_ACTIVIES, ObjectScope.EMPTY);
+                } catch (Exception e) {
                     out().println("Cannot initialize Acitivities WebSocket");
                     e.printStackTrace(out());
                     Thread.currentThread().interrupt();
@@ -190,9 +196,6 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
             public void close() {
                 if (ws != null) {
                     ws.close();
-                }
-                if (client != null) {
-                    client.close();
                 }
             }
         };

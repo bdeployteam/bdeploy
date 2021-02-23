@@ -5,8 +5,6 @@ import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.util.function.Function;
 
-import jakarta.inject.Singleton;
-
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +14,6 @@ import io.bdeploy.bhive.remote.jersey.BHiveJacksonModule;
 import io.bdeploy.bhive.remote.jersey.BHiveLocatorImpl;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
-import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
@@ -37,11 +34,10 @@ import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.jersey.JerseyServer;
 import io.bdeploy.jersey.RegistrationTarget;
-import io.bdeploy.jersey.activity.JerseyBroadcastingActivityReporter;
 import io.bdeploy.jersey.audit.AuditRecord;
 import io.bdeploy.jersey.audit.RollingFileAuditor;
-import io.bdeploy.jersey.ws.BroadcastingAuthenticatedWebSocket;
-import io.bdeploy.jersey.ws.JerseyEventBroadcaster;
+import io.bdeploy.jersey.ws.change.ObjectChangeBroadcaster;
+import io.bdeploy.jersey.ws.change.ObjectChangeWebSocket;
 import io.bdeploy.minion.ControllingMasterProvider;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.MinionState;
@@ -65,6 +61,7 @@ import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.impl.UiResources;
+import jakarta.inject.Singleton;
 
 /**
  * Starts a HTTPS server which accepts API calls depending on the mode of the given root directory.
@@ -182,6 +179,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
         srv.register(CommonRootResourceImpl.class);
         srv.register(PublicRootResourceImpl.class);
         srv.register(MasterSettingsResourceImpl.class);
+
         srv.register(new AbstractBinder() {
 
             @Override
@@ -232,11 +230,10 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
             srv.register(NodeProxyResourceImpl.class);
         }
 
-        BroadcastingAuthenticatedWebSocket activityBc = new BroadcastingAuthenticatedWebSocket(StorageHelper::toRawBytes,
-                srv.getKeyStore());
-        srv.registerWebsocketApplication("/activities", activityBc);
+        ObjectChangeWebSocket ocws = new ObjectChangeWebSocket(srv.getKeyStore());
+        srv.registerWebsocketApplication(ObjectChangeWebSocket.OCWS_PATH, ocws);
 
-        srv.register(new MinionCommonBinder(root, activityBc));
+        srv.register(new MinionCommonBinder(root, ocws));
         srv.registerResource(r);
 
         return r;
@@ -245,11 +242,11 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
     private static class MinionCommonBinder extends AbstractBinder {
 
         private final MinionRoot root;
-        private final BroadcastingAuthenticatedWebSocket activityBc;
+        private final ObjectChangeWebSocket ocws;
 
-        public MinionCommonBinder(MinionRoot root, BroadcastingAuthenticatedWebSocket activityBc) {
+        public MinionCommonBinder(MinionRoot root, ObjectChangeWebSocket ocws) {
             this.root = root;
-            this.activityBc = activityBc;
+            this.ocws = ocws;
         }
 
         @Override
@@ -258,7 +255,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
             bind(root).to(Minion.class);
             bind(root.getUsers()).to(AuthService.class);
             bind(root.getState().storageMinFree).named(JerseyServer.FILE_SYSTEM_MIN_SPACE).to(Long.class);
-            bind(activityBc).named(JerseyBroadcastingActivityReporter.ACTIVITY_BROADCASTER).to(JerseyEventBroadcaster.class);
+            bind(ocws).to(ObjectChangeBroadcaster.class);
         }
     }
 

@@ -1,8 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { isEqual } from 'lodash-es';
-import ReconnectingWebSocket from 'reconnecting-websocket';
-import { ActivitySnapshot, WebSocketInitDto } from '../../../../models/gen.dtos';
+import { ActivitySnapshot } from '../../../../models/gen.dtos';
 import { AuthenticationService } from '../../../core/services/authentication.service';
 import { ConfigService } from '../../../core/services/config.service';
 import { LoggingService } from '../../../core/services/logging.service';
@@ -26,30 +25,6 @@ export class RemoteEventsService {
 
   public cancelActivity(uuid: string) {
     return this.http.delete(this.cfg.config.api + '/activities/' + uuid);
-  }
-
-  public createActivitiesWebSocket(scope: string[]) {
-    return this.createAuthenticatedWebSocket('/activities', scope);
-  }
-
-  public createInstanceUpdatesWebSocket(scope: string[]) {
-    return this.createAuthenticatedWebSocket('/instance-updates', scope);
-  }
-
-  public createAttachEventsWebSocket() {
-    return this.createAuthenticatedWebSocket('/attach-events', []);
-  }
-
-  private createAuthenticatedWebSocket(path: string, scope: string[]) {
-    const ws = new ReconnectingWebSocket(this.cfg.getWsUrl() + path);
-    ws.addEventListener('open', () => {
-      const init: WebSocketInitDto = {
-        token: this.auth.getToken(),
-        scope: scope,
-      };
-      ws.send(JSON.stringify(init));
-    });
-    return ws;
   }
 
   public parseEvent(data: any, scope: string[]): ActivitySnapshotTreeNode[] {

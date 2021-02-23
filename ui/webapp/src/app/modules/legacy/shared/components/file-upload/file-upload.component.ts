@@ -2,10 +2,10 @@ import { Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild } from '@an
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatTable } from '@angular/material/table';
 import { cloneDeep } from 'lodash-es';
-import ReconnectingWebSocket from 'reconnecting-websocket';
-import { forkJoin } from 'rxjs';
-import { ManifestKey } from '../../../../../models/gen.dtos';
-import { ErrorMessage, LoggingService } from '../../../../core/services/logging.service';
+import { forkJoin, Subscription } from 'rxjs';
+import { EMPTY_SCOPE, ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
+import { ManifestKey, ObjectChangeDetails, ObjectChangeType } from '../../../../../models/gen.dtos';
+import { LoggingService } from '../../../../core/services/logging.service';
 import { MessageboxService } from '../../../../core/services/messagebox.service';
 import { ActivitySnapshotTreeNode, RemoteEventsService } from '../../services/remote-events.service';
 import { UploadService, UploadState, UploadStatus, UrlParameter } from '../../services/upload.service';
@@ -58,8 +58,7 @@ export class FileUploadComponent implements OnInit, OnDestroy {
   public uploading = false;
   public dropZoneActive = false;
   public uploadFinished = true;
-
-  private ws: ReconnectingWebSocket;
+  private subscription: Subscription;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public uploadData: UploadData,
@@ -67,7 +66,8 @@ export class FileUploadComponent implements OnInit, OnDestroy {
     public uploadService: UploadService,
     public messageBoxService: MessageboxService,
     private eventService: RemoteEventsService,
-    private loggingService: LoggingService
+    private loggingService: LoggingService,
+    private changes: ObjectChangesService
   ) {}
 
   ngOnInit(): void {
@@ -76,18 +76,13 @@ export class FileUploadComponent implements OnInit, OnDestroy {
       this.uploadData.formDataParam = 'file';
     }
     // start event source - can't filter by narrow scope as there might be multiple uploads
-    this.ws = this.eventService.createActivitiesWebSocket([]);
-    this.ws.addEventListener('error', (err) => {
-      this.log.errorWithGuiMessage(new ErrorMessage('Error while processing events', err));
-    });
-    this.ws.addEventListener('message', (e) => this.onEventReceived(e));
+    this.subscription = this.changes.subscribe(ObjectChangeType.ACTIVITIES, EMPTY_SCOPE, (e) =>
+      this.onEventReceived(e.details[ObjectChangeDetails.ACTIVITIES])
+    );
   }
 
   ngOnDestroy(): void {
-    if (this.ws) {
-      this.ws.close();
-      this.ws = null;
-    }
+    this.subscription.unsubscribe();
   }
 
   addFiles() {
@@ -236,36 +231,31 @@ export class FileUploadComponent implements OnInit, OnDestroy {
     return 'Upload successful. New software package(s): ' + softwares.map((key) => key.name + ' ' + key.tag).join(',');
   }
 
-  onEventReceived(e: MessageEvent) {
-    const blob = e.data as Blob;
-    const r = new FileReader();
-    r.onload = () => {
-      // we accept all events as we don't know the scope we're looking for beforehand.
-      const rootEvents = this.eventService.parseEvent(r.result, []);
+  onEventReceived(e: string) {
+    // we accept all events as we don't know the scope we're looking for beforehand.
+    const rootEvents = this.eventService.parseEvent(e, []);
 
-      // each received event's root scope must match a scope of an UploadStatus object.
-      // discard all events where this is not true.
-      let needUpdate = false;
-      for (const event of rootEvents) {
-        if (!event.snapshot || !event.snapshot.scope || event.snapshot.scope.length < 1) {
-          continue;
-        }
-
-        const status = this.getUploadStatusByUUID(event.snapshot.scope[0]);
-        if (!status) {
-          continue; // discard, not ours.
-        }
-
-        // if we do have a match, extract the most relevant message, set it, and then flag a table repaint.
-        status.processingHint = this.extractMostRelevantMessage(event);
-        needUpdate = true;
+    // each received event's root scope must match a scope of an UploadStatus object.
+    // discard all events where this is not true.
+    let needUpdate = false;
+    for (const event of rootEvents) {
+      if (!event.snapshot || !event.snapshot.scope || event.snapshot.scope.length < 1) {
+        continue;
       }
 
-      if (needUpdate) {
-        this.table.renderRows();
+      const status = this.getUploadStatusByUUID(event.snapshot.scope[0]);
+      if (!status) {
+        continue; // discard, not ours.
       }
-    };
-    r.readAsText(blob);
+
+      // if we do have a match, extract the most relevant message, set it, and then flag a table repaint.
+      status.processingHint = this.extractMostRelevantMessage(event);
+      needUpdate = true;
+    }
+
+    if (needUpdate) {
+      this.table.renderRows();
+    }
   }
 
   extractMostRelevantMessage(node: ActivitySnapshotTreeNode): string {

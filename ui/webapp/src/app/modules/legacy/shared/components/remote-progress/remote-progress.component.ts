@@ -2,7 +2,9 @@ import { NestedTreeControl } from '@angular/cdk/tree';
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef } from '@angular/core';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
-import ReconnectingWebSocket from 'reconnecting-websocket';
+import { Subscription } from 'rxjs';
+import { ObjectChangeDetails, ObjectChangeType } from 'src/app/models/gen.dtos';
+import { ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
 import { LoggingService } from '../../../../core/services/logging.service';
 import { SystemService } from '../../../../core/services/system.service';
 import { ActivitySnapshotTreeNode, RemoteEventsService } from '../../services/remote-events.service';
@@ -16,8 +18,8 @@ export class RemoteProgressComponent implements OnInit, OnDestroy {
   private log = this.loggingService.getLogger('RemoteProgressComponent');
 
   public remoteProgressElements: ActivitySnapshotTreeNode[];
-  private ws: ReconnectingWebSocket;
   private _scope: string[];
+  private subscription: Subscription;
 
   @Input() set scope(v: string[]) {
     this._scope = v;
@@ -36,7 +38,8 @@ export class RemoteProgressComponent implements OnInit, OnDestroy {
     private eventsService: RemoteEventsService,
     private loggingService: LoggingService,
     private bottomSheet: MatBottomSheet,
-    private systemService: SystemService
+    private systemService: SystemService,
+    private changes: ObjectChangesService
   ) {}
 
   ngOnInit() {}
@@ -45,38 +48,33 @@ export class RemoteProgressComponent implements OnInit, OnDestroy {
     this.stopEventListener();
   }
 
-  private updateRemoteEvents(message: MessageEvent, scope: string[]) {
-    const blob = message.data as Blob;
-    const r = new FileReader();
-    r.onload = () => {
-      const list = this.eventsService.parseEvent(r.result, scope);
-      if (list && list.length === 0) {
-        this.remoteProgressElements = null;
-        this.events.emit([]); // explicit "reset".
-      } else {
-        this.remoteProgressElements = list;
-        this.events.emit(list);
-      }
-      this.treeDataSource.data = this.remoteProgressElements;
-    };
-    r.readAsText(blob);
+  private updateRemoteEvents(e: string) {
+    const list = this.eventsService.parseEvent(e, this._scope);
+    if (list && list.length === 0) {
+      this.remoteProgressElements = null;
+      this.events.emit([]); // explicit "reset".
+    } else {
+      this.remoteProgressElements = list;
+      this.events.emit(list);
+    }
+    this.treeDataSource.data = this.remoteProgressElements;
   }
 
   private startEventListener() {
-    this.ws = this.eventsService.createActivitiesWebSocket(this._scope);
-    this.ws.addEventListener('error', () => {
-      this.systemService.backendUnreachable();
-      this.remoteProgressElements = null;
-    });
-    this.ws.addEventListener('message', (e) => {
-      this.updateRemoteEvents(e, this._scope);
-    });
+    this.subscription = this.changes.subscribe(
+      ObjectChangeType.ACTIVITIES,
+      { scope: this._scope },
+      (e) => this.updateRemoteEvents(e.details[ObjectChangeDetails.ACTIVITIES]),
+      (_) => {
+        this.systemService.backendUnreachable();
+        this.remoteProgressElements = null;
+      }
+    );
   }
 
   private stopEventListener() {
-    if (this.ws) {
-      this.ws.close();
-      this.ws = null;
+    if (!!this.subscription) {
+      this.subscription.unsubscribe();
     }
   }
 

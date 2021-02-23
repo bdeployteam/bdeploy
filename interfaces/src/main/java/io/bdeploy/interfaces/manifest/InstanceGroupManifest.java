@@ -68,7 +68,7 @@ public class InstanceGroupManifest {
     /**
      * @param desc updated customer metadata to write.
      */
-    public void update(InstanceGroupConfiguration desc) {
+    public Manifest.Key update(InstanceGroupConfiguration desc) {
         try (Transaction t = hive.getTransactions().begin()) {
             Long newId = hive.execute(new ManifestNextIdOperation().setManifestName(MANIFEST_NAME));
             Manifest.Builder mfb = new Manifest.Builder(new Manifest.Key(MANIFEST_NAME, newId.toString()));
@@ -84,6 +84,7 @@ public class InstanceGroupManifest {
 
             mfb.setRoot(hive.execute(new InsertArtificialTreeOperation().setTree(tb)));
             hive.execute(new InsertManifestOperation().addManifest(mfb.build(hive)));
+            return mfb.getKey();
         }
     }
 

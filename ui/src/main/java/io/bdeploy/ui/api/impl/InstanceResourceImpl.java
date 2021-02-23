@@ -21,20 +21,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 
-import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.container.ResourceContext;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.GenericType;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.core.Response.Status.Family;
-import jakarta.ws.rs.core.SecurityContext;
-import jakarta.ws.rs.core.UriBuilder;
-
 import org.apache.commons.codec.binary.Base64;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
@@ -124,10 +110,26 @@ import io.bdeploy.ui.dto.InstanceDto;
 import io.bdeploy.ui.dto.InstanceManifestHistoryDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
 import io.bdeploy.ui.dto.InstanceVersionDto;
+import io.bdeploy.ui.dto.ObjectChangeDetails;
+import io.bdeploy.ui.dto.ObjectChangeHint;
+import io.bdeploy.ui.dto.ObjectChangeType;
 import io.bdeploy.ui.dto.ProductDto;
 import io.bdeploy.ui.dto.StringEntryChunkDto;
 import io.bdeploy.ui.utils.WindowsInstaller;
 import io.bdeploy.ui.utils.WindowsInstallerConfig;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.container.ResourceContext;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.GenericType;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.Response.Status.Family;
+import jakarta.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.UriBuilder;
 
 public class InstanceResourceImpl implements InstanceResource {
 
@@ -158,7 +160,7 @@ public class InstanceResourceImpl implements InstanceResource {
     private ResourceContext rc;
 
     @Inject
-    private InstanceEventManager iem;
+    private ChangeEventManager changes;
 
     @Inject
     private RemoteEntryStreamRequestService resrs;
@@ -273,13 +275,15 @@ public class InstanceResourceImpl implements InstanceResource {
 
         MasterRootResource root = getManagingRootResource(managedServer);
 
-        root.getNamedMaster(group)
+        Manifest.Key key = root.getNamedMaster(group)
                 .update(new InstanceUpdateDto(new InstanceConfigurationDto(instanceConfig, Collections.emptyList()),
                         getUpdatesFromTree("", new ArrayList<>(), product.getConfigTemplateTreeId())), null);
 
         // immediately fetch back so we have it to create the association. don't use #syncInstance here,
         // it requires the association to already exist.
         rc.initResource(new ManagedServersResourceImpl()).synchronize(group, managedServer);
+
+        changes.create(ObjectChangeType.INSTANCE, key);
     }
 
     private MasterRootResource getManagingRootResource(String managedServer) {
@@ -383,7 +387,7 @@ public class InstanceResourceImpl implements InstanceResource {
         // immediately fetch back so we have it to create the association
         syncInstance(minion, rc, group, instance);
 
-        iem.create(key);
+        changes.create(ObjectChangeType.INSTANCE, key);
     }
 
     @Override
@@ -556,7 +560,8 @@ public class InstanceResourceImpl implements InstanceResource {
         }
 
         syncInstance(minion, rc, group, instanceId);
-        iem.stateChanged(instance.getManifest());
+        changes.change(ObjectChangeType.INSTANCE, instance.getManifest(),
+                Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE));
     }
 
     @Override
@@ -583,7 +588,8 @@ public class InstanceResourceImpl implements InstanceResource {
         }
 
         syncInstance(minion, rc, group, instanceId);
-        iem.stateChanged(instance.getManifest());
+        changes.change(ObjectChangeType.INSTANCE, instance.getManifest(),
+                Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE));
     }
 
     @Override
@@ -597,7 +603,8 @@ public class InstanceResourceImpl implements InstanceResource {
         }
 
         syncInstance(minion, rc, group, instanceId);
-        iem.stateChanged(instance.getManifest());
+        changes.change(ObjectChangeType.INSTANCE, instance.getManifest(),
+                Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE));
     }
 
     @Override
@@ -609,7 +616,8 @@ public class InstanceResourceImpl implements InstanceResource {
         master.getNamedMaster(group).updateTo(instanceId, productTag);
 
         syncInstance(minion, rc, group, instanceId);
-        iem.stateChanged(instance.getManifest());
+        changes.change(ObjectChangeType.INSTANCE, instance.getManifest(),
+                Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE));
     }
 
     @Override
@@ -887,7 +895,7 @@ public class InstanceResourceImpl implements InstanceResource {
             nodes.forEach(config::addMinion);
 
             Key newKey = InstanceImportExportHelper.importFrom(zip, hive, instanceId, config, context);
-            iem.create(newKey);
+            changes.create(ObjectChangeType.INSTANCE, newKey);
             return Collections.singletonList(newKey);
         } catch (IOException e) {
             throw new WebApplicationException("Cannot import from uploaded ZIP", e);
@@ -985,7 +993,8 @@ public class InstanceResourceImpl implements InstanceResource {
         instanceBannerRecord.user = context.getUserPrincipal().getName();
         instanceBannerRecord.timestamp = System.currentTimeMillis();
         root.getNamedMaster(group).updateBanner(instanceId, instanceBannerRecord);
-        iem.bannerChanged(im.getManifest());
+        changes.change(ObjectChangeType.INSTANCE, im.getManifest(),
+                Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.BANNER));
         syncInstance(minion, rc, group, instanceId);
     }
 

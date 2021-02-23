@@ -1,13 +1,11 @@
 package io.bdeploy.jersey.activity;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -15,8 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.ws.WebSocket;
 
 import io.bdeploy.common.ActivitySnapshot;
 import io.bdeploy.common.NoThrowAutoCloseable;
@@ -25,6 +21,9 @@ import io.bdeploy.common.util.JacksonHelper;
 import io.bdeploy.common.util.JacksonHelper.MapperType;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.jersey.JerseyClientFactory;
+import io.bdeploy.jersey.ws.change.client.ObjectChangeClientWebSocket;
+import io.bdeploy.jersey.ws.change.msg.ObjectChangeDto;
+import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 
 public class JerseyRemoteActivityProxy implements NoThrowAutoCloseable {
 
@@ -35,11 +34,11 @@ public class JerseyRemoteActivityProxy implements NoThrowAutoCloseable {
     private final JerseyBroadcastingActivityReporter reporter;
     private final RemoteService remote;
     private final JerseyRemoteActivity parent;
-    private WebSocket ws;
-    private AsyncHttpClient client;
 
     private final Map<String, ActivityNode> proxiedActivities = new TreeMap<>();
     private final Map<String, String> uuidMapping = new TreeMap<>();
+    private final ObjectMapper serializer = JacksonHelper.createObjectMapper(MapperType.JSON);
+    private final ObjectChangeClientWebSocket ws;
 
     public JerseyRemoteActivityProxy(RemoteService service, JerseyBroadcastingActivityReporter reporter) {
         if (service.getKeyStore() == null) {
@@ -50,29 +49,18 @@ public class JerseyRemoteActivityProxy implements NoThrowAutoCloseable {
         parent = reporter.getCurrentActivity();
         remote = service;
 
-        createWebSocket(service);
+        ws = JerseyClientFactory.get(service).getObjectChangeWebSocket(this::onMessage);
+        ws.subscribe(JerseyBroadcastingActivityReporter.OCT_ACTIVIES, new ObjectScope(proxyUuid));
 
         JerseyClientFactory.setProxyUuid(proxyUuid);
     }
 
-    private void createWebSocket(RemoteService service) {
-        client = JerseyClientFactory.get(service).getWebSocketClient();
-        try {
-            ws = JerseyClientFactory.get(service).getAuthenticatedWebSocket(client, Collections.singletonList(proxyUuid),
-                    "/activities", this::onMessage, e -> log.error("WebSocket Error", e), w -> log.warn("WebSocket closed"))
-                    .get();
-        } catch (InterruptedException | ExecutionException e) {
-            log.error("Cannot create WebSocket", e);
-            Thread.currentThread().interrupt();
-        }
-    }
-
-    private synchronized void onMessage(byte[] message) {
+    private synchronized void onMessage(ObjectChangeDto change) {
         // cannot use StorageHelper -> dependency not allowed.
-        ObjectMapper om = JacksonHelper.createObjectMapper(MapperType.JSON);
         List<ActivitySnapshot> activities;
         try {
-            activities = om.readValue(message, ActivitySnapshot.LIST_TYPE);
+            String serialized = change.details.get(JerseyBroadcastingActivityReporter.OCT_ACTIVIES);
+            activities = serializer.readValue(serialized, ActivitySnapshot.LIST_TYPE);
         } catch (IOException e) {
             log.error("Cannot read activities");
             if (log.isDebugEnabled()) {
@@ -82,7 +70,6 @@ public class JerseyRemoteActivityProxy implements NoThrowAutoCloseable {
         }
 
         for (ActivitySnapshot snap : activities) {
-            // only allow acitivities which have the proxy scope set, i.e. created by a remote call with our scope set.
             if (snap.scope == null || snap.scope.isEmpty() || !snap.scope.get(0).equals(proxyUuid)) {
                 continue; // no scope set, cannot be interesting for us.
             }
@@ -175,9 +162,6 @@ public class JerseyRemoteActivityProxy implements NoThrowAutoCloseable {
 
         if (ws != null) {
             ws.close();
-        }
-        if (client != null) {
-            client.close();
         }
     }
 

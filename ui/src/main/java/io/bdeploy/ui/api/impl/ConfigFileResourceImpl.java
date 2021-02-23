@@ -9,13 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.container.ResourceContext;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.core.SecurityContext;
-
 import org.apache.commons.codec.binary.Base64;
 
 import io.bdeploy.bhive.BHive;
@@ -41,6 +34,13 @@ import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.ui.api.ConfigFileResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.dto.ConfigFileDto;
+import io.bdeploy.ui.dto.ObjectChangeType;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ResourceContext;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.SecurityContext;
 
 public class ConfigFileResourceImpl implements ConfigFileResource {
 
@@ -58,7 +58,7 @@ public class ConfigFileResourceImpl implements ConfigFileResource {
     private MasterProvider mp;
 
     @Inject
-    private InstanceEventManager iem;
+    private ChangeEventManager changes;
 
     @Inject
     private Minion minion;
@@ -129,7 +129,7 @@ public class ConfigFileResourceImpl implements ConfigFileResource {
 
         InstanceResourceImpl.syncInstance(minion, rc, groupId, instanceId);
 
-        iem.create(rootKey);
+        changes.change(ObjectChangeType.INSTANCE, rootKey);
     }
 
     @Override

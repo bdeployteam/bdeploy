@@ -3,7 +3,6 @@ package io.bdeploy.jersey;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -12,13 +11,6 @@ import java.util.function.Consumer;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.client.ClientRequestContext;
-import jakarta.ws.rs.client.ClientRequestFilter;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.ext.ContextResolver;
-import jakarta.ws.rs.ext.Provider;
 
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.RequestEntityProcessing;
@@ -41,7 +33,17 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.jersey.activity.JerseyRemoteActivityScopeClientFilter;
-import io.bdeploy.jersey.ws.WebSocketAuthenticatingMessageListener;
+import io.bdeploy.jersey.ws.change.ObjectChangeWebSocket;
+import io.bdeploy.jersey.ws.change.client.ObjectChangeClientListener;
+import io.bdeploy.jersey.ws.change.client.ObjectChangeClientWebSocket;
+import io.bdeploy.jersey.ws.change.msg.ObjectChangeDto;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.ClientRequestContext;
+import jakarta.ws.rs.client.ClientRequestFilter;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.ext.ContextResolver;
+import jakarta.ws.rs.ext.Provider;
 
 /**
  * A factory for Jersey based JAX-RS clients.
@@ -217,19 +219,21 @@ public class JerseyClientFactory {
     }
 
     /**
-     * @param client the client to use, obtain from {@link #getWebSocketClient()}
-     * @param scope the scope to filter messages with on the server side.
-     * @param path the path on the server under the '/ws' context
-     * @param onMessage callback for received messaged
-     * @param onError callback for received errors
-     * @return a {@link ListenableFuture} which can be used to retrieve the {@link WebSocket}.
+     * Create a {@link ObjectChangeClientWebSocket} which allows to subscribe to object changes, and notifies about them.
      */
-    public ListenableFuture<WebSocket> getAuthenticatedWebSocket(AsyncHttpClient client, List<String> scope, String path,
-            Consumer<byte[]> onMessage, Consumer<Throwable> onError, Consumer<WebSocket> onClose) {
-        return client.prepareGet(svc.getWebSocketUri(path).toString())
-                .execute(new WebSocketUpgradeHandler.Builder().addWebSocketListener(new WebSocketAuthenticatingMessageListener(
-                        SecurityHelper.getInstance().getTokenFromPack(svc.getAuthPack()), scope, onMessage, onError, onClose))
-                        .build());
+    public ObjectChangeClientWebSocket getObjectChangeWebSocket(Consumer<ObjectChangeDto> onChanges) {
+        AsyncHttpClient client = getWebSocketClient();
+        ListenableFuture<WebSocket> ws = client
+                .prepareGet(
+                        svc.getWebSocketUri(ObjectChangeWebSocket.OCWS_PATH).toString())
+                .execute(new WebSocketUpgradeHandler.Builder().addWebSocketListener(new ObjectChangeClientListener(
+                        SecurityHelper.getInstance().getTokenFromPack(svc.getAuthPack()), onChanges)).build());
+
+        try {
+            return new ObjectChangeClientWebSocket(client, ws.get());
+        } catch (Exception e) {
+            throw new IllegalStateException("Cannot open WebSocket", e);
+        }
     }
 
     @Provider

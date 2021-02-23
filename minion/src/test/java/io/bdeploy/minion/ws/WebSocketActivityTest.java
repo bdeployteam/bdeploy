@@ -2,14 +2,9 @@ package io.bdeploy.minion.ws;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.LongAdder;
-
-import jakarta.inject.Inject;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,22 +12,29 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.ws.WebSocket;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.ActivitySnapshot;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.JacksonHelper;
+import io.bdeploy.common.util.JacksonHelper.MapperType;
 import io.bdeploy.common.util.Threads;
 import io.bdeploy.jersey.JerseyClientFactory;
+import io.bdeploy.jersey.activity.JerseyBroadcastingActivityReporter;
 import io.bdeploy.jersey.ws.WebSocketTest;
+import io.bdeploy.jersey.ws.change.client.ObjectChangeClientWebSocket;
+import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 import io.bdeploy.minion.TestMinion;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
 
 public class WebSocketActivityTest {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocketTest.class);
+    private final ObjectMapper serializer = JacksonHelper.createObjectMapper(MapperType.JSON);
 
     @RegisterExtension
     TestMinion ext = new TestMinion();
@@ -45,19 +47,18 @@ public class WebSocketActivityTest {
     @Test
     void testWebSocket(RemoteService service, Producer producer) throws InterruptedException, ExecutionException {
         LongAdder count = new LongAdder();
-        try (AsyncHttpClient client = JerseyClientFactory.get(service).getWebSocketClient()) {
-            WebSocket ws = JerseyClientFactory.get(service)
-                    .getAuthenticatedWebSocket(client, Collections.emptyList(), "/activities", m -> {
-                        List<ActivitySnapshot> acts = StorageHelper.fromRawBytes(m, ActivitySnapshot.LIST_TYPE);
-
-                        if (acts.get(0).name.equals("Test")) {
-                            count.increment();
-                        }
-                    }, t -> {
-                        log.error("Error", t);
-                    }, s -> {
-                        log.info("Close!");
-                    }).get();
+        try (ObjectChangeClientWebSocket ws = JerseyClientFactory.get(ext.getRemoteService()).getObjectChangeWebSocket(c -> {
+            String serialized = c.details.get(JerseyBroadcastingActivityReporter.OCT_ACTIVIES);
+            try {
+                List<ActivitySnapshot> acts = serializer.readValue(serialized, ActivitySnapshot.LIST_TYPE);
+                if (acts.stream().filter(a -> a.name.equals("Test")).findFirst().isPresent()) {
+                    count.increment();
+                }
+            } catch (Exception e) {
+                log.error("Exception while reading activities", e);
+            }
+        })) {
+            ws.subscribe(JerseyBroadcastingActivityReporter.OCT_ACTIVIES, ObjectScope.EMPTY);
 
             producer.produce();
 

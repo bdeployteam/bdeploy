@@ -14,22 +14,29 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.LongSupplier;
 import java.util.stream.Collectors;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
-
 import org.jvnet.hk2.annotations.Optional;
 import org.jvnet.hk2.annotations.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivitySnapshot;
 import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.JacksonHelper;
+import io.bdeploy.common.util.JacksonHelper.MapperType;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.jersey.JerseyScopeService;
 import io.bdeploy.jersey.JerseyServer;
-import io.bdeploy.jersey.ws.JerseyEventBroadcaster;
+import io.bdeploy.jersey.ws.change.ObjectChangeBroadcaster;
+import io.bdeploy.jersey.ws.change.msg.ObjectChangeDto;
+import io.bdeploy.jersey.ws.change.msg.ObjectEvent;
+import io.bdeploy.jersey.ws.change.msg.ObjectScope;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 /**
  * An activity reporter which exposes currently running activities to be broadcasted via SSE
@@ -37,7 +44,8 @@ import io.bdeploy.jersey.ws.JerseyEventBroadcaster;
 @Service
 public class JerseyBroadcastingActivityReporter implements ActivityReporter {
 
-    public static final String ACTIVITY_BROADCASTER = "JerseyActivityBroadcaster";
+    /** Needs to be in line with ObjectChangeType for the Web UI */
+    public static final String OCT_ACTIVIES = "ACTIVITIES";
 
     private static final Logger log = LoggerFactory.getLogger(JerseyBroadcastingActivityReporter.class);
 
@@ -50,13 +58,14 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
     private static final ThreadLocal<JerseyRemoteActivity> currentActivity = new ThreadLocal<>();
     private static final Set<List<String>> activeScopes = new TreeSet<>(JerseyBroadcastingActivityReporter::compareScopes);
 
+    private final ObjectMapper serializer = JacksonHelper.createObjectMapper(MapperType.JSON);
+
     @Inject
     private JerseyScopeService jss;
 
     @Inject
-    @Named(ACTIVITY_BROADCASTER)
     @Optional
-    private JerseyEventBroadcaster bc;
+    private ObjectChangeBroadcaster bc;
 
     private static int compareScopes(List<String> a, List<String> b) {
         if (a.size() > b.size()) {
@@ -102,7 +111,8 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
             activeScopes.addAll(perScope.keySet());
 
             for (Map.Entry<List<String>, List<ActivitySnapshot>> e : perScope.entrySet()) {
-                bc.send(e.getValue(), e.getKey());
+                bc.send(new ObjectChangeDto(OCT_ACTIVIES, new ObjectScope(e.getKey()), ObjectEvent.CHANGED,
+                        Collections.singletonMap(OCT_ACTIVIES, serialize(e.getValue()))));
             }
 
             List<List<String>> scopesToRemove = new ArrayList<>();
@@ -114,10 +124,19 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
 
             for (List<String> toRemove : scopesToRemove) {
                 activeScopes.remove(toRemove);
-                bc.send(Collections.emptyList(), toRemove);
+                bc.send(new ObjectChangeDto(OCT_ACTIVIES, new ObjectScope(toRemove), ObjectEvent.CHANGED,
+                        Collections.singletonMap(OCT_ACTIVIES, "[]")));
             }
         } catch (Exception e) {
             log.error("Error while broadcasting activities", e);
+        }
+    }
+
+    private String serialize(List<ActivitySnapshot> snap) {
+        try {
+            return serializer.writeValueAsString(snap);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Cannot serialize activities", e);
         }
     }
 

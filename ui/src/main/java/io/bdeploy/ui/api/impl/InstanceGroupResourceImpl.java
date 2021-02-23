@@ -46,6 +46,7 @@ import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.plugin.PluginManager;
+import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
@@ -56,6 +57,9 @@ import io.bdeploy.ui.api.ProductResource;
 import io.bdeploy.ui.dto.ClientApplicationDto;
 import io.bdeploy.ui.dto.InstanceClientAppsDto;
 import io.bdeploy.ui.dto.InstanceDto;
+import io.bdeploy.ui.dto.ObjectChangeDetails;
+import io.bdeploy.ui.dto.ObjectChangeHint;
+import io.bdeploy.ui.dto.ObjectChangeType;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceContext;
@@ -87,6 +91,9 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
 
     @Inject
     private Minion minion;
+
+    @Inject
+    private ChangeEventManager changes;
 
     @Override
     public List<InstanceGroupConfiguration> list() {
@@ -125,10 +132,12 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
 
         try {
             BHive h = new BHive(hive.toUri(), reporter);
-            new InstanceGroupManifest(h).update(config);
+            InstanceGroupManifest igm = new InstanceGroupManifest(h);
+            Manifest.Key key = igm.update(config);
             registry.register(config.name, h);
 
             auth.addRecentlyUsedInstanceGroup(context.getUserPrincipal().getName(), config.name);
+            changes.create(ObjectChangeType.INSTANCE_GROUP, key, new ObjectScope(config.name));
         } catch (Exception e) {
             PathHelper.deleteRecursive(hive);
             throw e;
@@ -152,7 +161,9 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
     public void update(String group, InstanceGroupConfiguration config) {
         auth.addRecentlyUsedInstanceGroup(context.getUserPrincipal().getName(), group);
         RuntimeAssert.assertEquals(group, config.name, "Group update changes group name");
-        new InstanceGroupManifest(getGroupHive(group)).update(config);
+        InstanceGroupManifest igm = new InstanceGroupManifest(getGroupHive(group));
+        Manifest.Key key = igm.update(config);
+        changes.change(ObjectChangeType.INSTANCE_GROUP, key);
 
         if (minion.getMode() == MinionMode.CENTRAL) {
             // update all managed servers, user had to confirm this in web UI.
@@ -172,6 +183,9 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
     @Override
     public void updatePermissions(String group, UserPermissionUpdateDto[] permissions) {
         auth.updatePermissions(group, permissions);
+        Manifest.Key key = new InstanceGroupManifest(registry.get(group)).getKey();
+        changes.change(ObjectChangeType.SOFTWARE_REPO, key,
+                Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.PERMISSIONS));
     }
 
     @Override
@@ -186,9 +200,13 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
             pm.unloadProduct(key);
         }
 
+        InstanceGroupManifest igm = new InstanceGroupManifest(bHive);
+        Manifest.Key latestKey = igm.getKey();
+
         auth.removePermissions(group);
         registry.unregister(group);
         PathHelper.deleteRecursive(Paths.get(bHive.getUri()));
+        changes.remove(ObjectChangeType.INSTANCE_GROUP, latestKey);
     }
 
     @Override
@@ -339,9 +357,12 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
     public void updateAttributes(String group, CustomAttributesRecord attributes) {
         BHive groupHive = getGroupHive(group);
         InstanceGroupManifest manifest = new InstanceGroupManifest(groupHive);
-        if (manifest.getKey() == null) {
+        Key key = manifest.getKey();
+        if (key == null) {
             throw new WebApplicationException("Cannot load " + group, Status.NOT_FOUND);
         }
         manifest.getAttributes(groupHive).set(attributes);
+        changes.change(ObjectChangeType.INSTANCE_GROUP, key,
+                Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.ATTRIBUTES));
     }
 }

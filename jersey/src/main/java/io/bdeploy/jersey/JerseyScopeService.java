@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.jvnet.hk2.annotations.Service;
 
+import io.bdeploy.jersey.ws.change.msg.ObjectScope;
+
 @Service
 public class JerseyScopeService {
 
@@ -17,6 +19,10 @@ public class JerseyScopeService {
 
     public List<String> getScope() {
         return this.scopes.get();
+    }
+
+    public ObjectScope getObjectScope() {
+        return new ObjectScope(this.scopes.get());
     }
 
     public String getUser() {

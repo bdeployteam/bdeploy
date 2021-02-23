@@ -1,12 +1,17 @@
 import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatStep, MatStepper } from '@angular/material/stepper';
-import ReconnectingWebSocket from 'reconnecting-websocket';
+import { Subscription } from 'rxjs';
+import { EMPTY_SCOPE, ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
 import { RoutingHistoryService } from 'src/app/modules/legacy/core/services/routing-history.service';
-import { InstanceGroupConfiguration, ManagedMasterDto } from '../../../../../models/gen.dtos';
+import {
+  InstanceGroupConfiguration,
+  ManagedMasterDto,
+  ObjectChangeDetails,
+  ObjectChangeType,
+} from '../../../../../models/gen.dtos';
 import { DownloadService } from '../../../../core/services/download.service';
-import { ErrorMessage, LoggingService } from '../../../../core/services/logging.service';
-import { RemoteEventsService } from '../../../../legacy/shared/services/remote-events.service';
+import { LoggingService } from '../../../../core/services/logging.service';
 import { InstanceGroupService } from '../../../instance-group/services/instance-group.service';
 import { ManagedServersService } from '../../services/managed-servers.service';
 
@@ -21,7 +26,6 @@ export class AttachCentralComponent implements OnInit, OnDestroy {
 
   private log = this.logging.getLogger('AttachCentralComponent');
   attachPayload: ManagedMasterDto;
-  ws: ReconnectingWebSocket;
   remoteAttached: InstanceGroupConfiguration;
   manualLoading = false;
 
@@ -31,44 +35,35 @@ export class AttachCentralComponent implements OnInit, OnDestroy {
   @ViewChild('doneStep', { static: true })
   doneStep: MatStep;
 
+  subscription: Subscription;
+
   constructor(
     public location: Location,
-    private eventService: RemoteEventsService,
     private logging: LoggingService,
     private igService: InstanceGroupService,
     private dlService: DownloadService,
     private managedServers: ManagedServersService,
-    public routingHistoryService: RoutingHistoryService
+    public routingHistoryService: RoutingHistoryService,
+    private changes: ObjectChangesService
   ) {}
 
   ngOnInit() {
     this.managedServers.getManagedMasterInfo().subscribe((i) => (this.attachPayload = i));
 
-    this.ws = this.eventService.createAttachEventsWebSocket();
-    this.ws.addEventListener('error', (err) => {
-      this.log.error(new ErrorMessage('Error waiting for attach events', err));
-    });
-    this.ws.addEventListener('message', (e) => this.onRemoteAttach(e));
+    this.subscription = this.changes.subscribe(ObjectChangeType.MANAGED_MASTER_ATTACH, EMPTY_SCOPE, (c) =>
+      this.onRemoteAttach(c.details[ObjectChangeDetails.CHANGE_HINT])
+    );
   }
 
   ngOnDestroy() {
-    if (this.ws) {
-      this.ws.close();
-      this.ws = null;
-    }
+    this.subscription.unsubscribe();
   }
 
-  onRemoteAttach(e: MessageEvent) {
-    const blob = e.data as Blob;
-    const r = new FileReader();
-    r.onload = () => {
-      const groupName = r.result as string;
-      this.igService.getInstanceGroup(groupName).subscribe((res) => {
-        this.remoteAttached = res;
-        this.stepper.selected = this.doneStep;
-      });
-    };
-    r.readAsText(blob);
+  onRemoteAttach(groupName: string) {
+    this.igService.getInstanceGroup(groupName).subscribe((res) => {
+      this.remoteAttached = res;
+      this.stepper.selected = this.doneStep;
+    });
   }
 
   onDragStart($event) {
@@ -89,7 +84,7 @@ export class AttachCentralComponent implements OnInit, OnDestroy {
         const reader = new FileReader();
         reader.onload = (e) => {
           data = reader.result.toString();
-          resolve();
+          resolve(data);
         };
         reader.onerror = (e) => reject();
         reader.readAsText($event.dataTransfer.files[0]);

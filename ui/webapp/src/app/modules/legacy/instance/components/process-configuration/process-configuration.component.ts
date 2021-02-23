@@ -11,6 +11,7 @@ import { forkJoin, Observable, of, Subscription } from 'rxjs';
 import { catchError, finalize, mergeMap } from 'rxjs/operators';
 import { isUpdateFailed, isUpdateInProgress, isUpdateSuccess, UpdateStatus } from 'src/app/models/update.model';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
+import { ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
 import { InstanceGroupService } from 'src/app/modules/legacy/instance-group/services/instance-group.service';
 import { ApplicationGroup } from '../../../../../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_DEPLOYMENT_STATE } from '../../../../../models/consts';
@@ -24,13 +25,16 @@ import {
   InstanceNodeConfiguration,
   InstanceNodeConfigurationDto,
   InstanceStateRecord,
-  InstanceUpdateEventDto,
-  InstanceUpdateEventType,
   ManifestKey,
   MinionDto,
   MinionMode,
   MinionStatusDto,
   MinionUpdateDto,
+  ObjectChangeDetails,
+  ObjectChangeDto,
+  ObjectChangeHint,
+  ObjectChangeType,
+  ObjectEvent,
   ProductDto,
 } from '../../../../../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../../../../../models/process.model';
@@ -181,7 +185,8 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     private dragulaService: DragulaService,
     private configService: ConfigService,
     private router: Router,
-    public routingHistoryService: RoutingHistoryService
+    public routingHistoryService: RoutingHistoryService,
+    private changes: ObjectChangesService
   ) {}
 
   ngOnInit() {
@@ -209,11 +214,11 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
           this.doTriggerProcessStatusUpdate();
         }
 
-        this.ws = this.eventService.createInstanceUpdatesWebSocket([this.groupParam, this.uuidParam]);
-        this.ws.addEventListener('error', (err) => {
-          this.systemService.backendUnreachable();
-        });
-        this.ws.addEventListener('message', (e) => this.onRemoteInstanceUpdate(e));
+        this.subscriptions.add(
+          this.changes.subscribe(ObjectChangeType.INSTANCE, { scope: [this.groupParam, this.uuidParam] }, (ch) =>
+            this.onRemoteInstanceUpdate(ch)
+          )
+        );
       })
     );
     this.subscriptions.add(this.processService.subscribe(() => this.onProcessStatusChanged()));
@@ -265,35 +270,41 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     this.instanceService.getInstanceBanner(this.groupParam, this.uuidParam).subscribe((r) => (this.instanceBanner = r));
   }
 
-  private onRemoteInstanceUpdate(event: MessageEvent) {
-    const blob = event.data as Blob;
-    const r = new FileReader();
-    r.onload = () => {
-      const dto = JSON.parse(r.result as string) as InstanceUpdateEventDto;
+  private onRemoteInstanceUpdate(change: ObjectChangeDto) {
+    // check if the instance ID is the correct one
+    if (!change.details[ObjectChangeDetails.KEY_NAME]?.startsWith(this.uuidParam)) {
+      return;
+    }
 
-      // check if the instance ID is the correct one
-      if (!dto.key.name.startsWith(this.uuidParam)) {
-        return;
-      }
-
-      // we need to wait a little here before checking as the event may be fired even before we
-      // finished our remote call in case /we/ are updating the instance, let along the loading
-      // of the new instance version after updating. So the timeout is generous.
-      if (dto.type === InstanceUpdateEventType.CREATE) {
-        setTimeout(() => this.onRemoteInstanceUpdateDirect(dto.key), 500);
-      } else if (dto.type === InstanceUpdateEventType.STATE_CHANGE) {
-        setTimeout(() => {
-          // avoid reload if we did it ourselves. still delay a little as the event may arrive
-          // before the actual call returned and a reload was initiated by the instance version card.
-          if (new Date().getTime() - this.lastStateReload >= 150) {
-            this.loadDeploymentStates();
-          }
-        }, 100);
-      } else if (dto.type === InstanceUpdateEventType.BANNER_CHANGE) {
-        this.loadBanner();
-      }
-    };
-    r.readAsText(blob);
+    // we need to wait a little here before checking as the event may be fired even before we
+    // finished our remote call in case /we/ are updating the instance, let along the loading
+    // of the new instance version after updating. So the timeout is generous.
+    if (change.event === ObjectEvent.CREATED) {
+      setTimeout(
+        () =>
+          this.onRemoteInstanceUpdateDirect({
+            name: change.details[ObjectChangeDetails.KEY_NAME],
+            tag: change.details[ObjectChangeDetails.KEY_TAG],
+          }),
+        500
+      );
+    } else if (
+      change.event === ObjectEvent.CHANGED &&
+      change.details[ObjectChangeDetails.CHANGE_HINT] === ObjectChangeHint.STATE
+    ) {
+      setTimeout(() => {
+        // avoid reload if we did it ourselves. still delay a little as the event may arrive
+        // before the actual call returned and a reload was initiated by the instance version card.
+        if (new Date().getTime() - this.lastStateReload >= 150) {
+          this.loadDeploymentStates();
+        }
+      }, 100);
+    } else if (
+      change.event === ObjectEvent.CHANGED &&
+      change.details[ObjectChangeDetails.CHANGE_HINT] === ObjectChangeHint.BANNER
+    ) {
+      this.loadBanner();
+    }
   }
 
   private onRemoteInstanceUpdateDirect(newKey: ManifestKey) {

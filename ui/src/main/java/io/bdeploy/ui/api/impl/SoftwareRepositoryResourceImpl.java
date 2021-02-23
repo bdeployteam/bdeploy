@@ -8,13 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 
-import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.container.ResourceContext;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response.Status;
-
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.util.PathHelper;
@@ -27,6 +22,14 @@ import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.ProductResource;
 import io.bdeploy.ui.api.SoftwareRepositoryResource;
 import io.bdeploy.ui.api.SoftwareResource;
+import io.bdeploy.ui.dto.ObjectChangeDetails;
+import io.bdeploy.ui.dto.ObjectChangeHint;
+import io.bdeploy.ui.dto.ObjectChangeType;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ResourceContext;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response.Status;
 
 public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResource {
 
@@ -41,6 +44,9 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
 
     @Inject
     private AuthService auth;
+
+    @Inject
+    private ChangeEventManager changes;
 
     @Override
     public List<SoftwareRepositoryConfiguration> list() {
@@ -83,8 +89,11 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
         }
 
         BHive h = new BHive(hive.toUri(), reporter);
-        new SoftwareRepositoryManifest(h).update(config);
+        SoftwareRepositoryManifest srm = new SoftwareRepositoryManifest(h);
+        Manifest.Key key = srm.update(config);
         registry.register(config.name, h);
+
+        changes.create(ObjectChangeType.SOFTWARE_REPO, key, null);
     }
 
     private BHive getRepoHive(String repo) {
@@ -103,7 +112,8 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
     @Override
     public void update(String repo, SoftwareRepositoryConfiguration config) {
         RuntimeAssert.assertEquals(repo, config.name, "Repository update changes repository name");
-        new SoftwareRepositoryManifest(getRepoHive(repo)).update(config);
+        Manifest.Key key = new SoftwareRepositoryManifest(getRepoHive(repo)).update(config);
+        changes.change(ObjectChangeType.SOFTWARE_REPO, key);
     }
 
     @Override
@@ -112,8 +122,10 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
         if (bHive == null) {
             throw new WebApplicationException("Repository '" + repo + "' does not exist");
         }
+        Manifest.Key key = new SoftwareRepositoryManifest(bHive).getKey();
         registry.unregister(repo);
         PathHelper.deleteRecursive(Paths.get(bHive.getUri()));
+        changes.remove(ObjectChangeType.SOFTWARE_REPO, key);
     }
 
     @Override
@@ -128,6 +140,9 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
     @Override
     public void updatePermissions(String group, UserPermissionUpdateDto[] permissions) {
         auth.updatePermissions(group, permissions);
+        Manifest.Key key = new SoftwareRepositoryManifest(registry.get(group)).getKey();
+        changes.change(ObjectChangeType.SOFTWARE_REPO, key,
+                Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.PERMISSIONS));
     }
 
 }

@@ -1,10 +1,10 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import ReconnectingWebSocket from 'reconnecting-websocket';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { OperatingSystem, UploadInfoDto } from 'src/app/models/gen.dtos';
-import { ErrorMessage, LoggingService } from 'src/app/modules/core/services/logging.service';
+import { ObjectChangeDetails, ObjectChangeType, OperatingSystem, UploadInfoDto } from 'src/app/models/gen.dtos';
+import { LoggingService } from 'src/app/modules/core/services/logging.service';
+import { EMPTY_SCOPE, ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
 import {
   ActivitySnapshotTreeNode,
   RemoteEventsService,
@@ -32,13 +32,13 @@ const ALL_OS: OperatingSystem[] = [OperatingSystem.WINDOWS, OperatingSystem.LINU
   templateUrl: './software-repo-file-upload.component.html',
   styleUrls: ['./software-repo-file-upload.component.css'],
 })
-export class SoftwareRepoFileUploadComponent implements OnInit {
+export class SoftwareRepoFileUploadComponent implements OnInit, OnDestroy {
   private readonly log = this.loggingService.getLogger('FileUploadComponent');
   public operatingSystems = ALL_OS;
   public steps = STEPS;
   public uploadState = UploadState;
   public importState = ImportState;
-  private ws: ReconnectingWebSocket;
+  private subscription: Subscription;
 
   /** current wizard step */
   public step = STEPS.FILES;
@@ -54,45 +54,43 @@ export class SoftwareRepoFileUploadComponent implements OnInit {
     public dialogRef: MatDialogRef<SoftwareRepoFileUploadComponent>,
     private eventService: RemoteEventsService,
     private softwareService: SoftwareService,
-    private loggingService: LoggingService
+    private loggingService: LoggingService,
+    private changes: ObjectChangesService
   ) {}
 
   ngOnInit(): void {
     // start event source - can't filter by narrow scope as there might be multiple uploads
-    this.ws = this.eventService.createActivitiesWebSocket([]);
-    this.ws.addEventListener('error', (err) => {
-      this.log.errorWithGuiMessage(new ErrorMessage('Error while processing events', err));
-    });
-    this.ws.addEventListener('message', (e) => this.onEventReceived(e));
+    this.subscription = this.changes.subscribe(ObjectChangeType.ACTIVITIES, EMPTY_SCOPE, (e) =>
+      this.onEventReceived(e.details[ObjectChangeDetails.ACTIVITIES])
+    );
     this.dialogRef.disableClose = true;
   }
 
-  onEventReceived(e: MessageEvent) {
-    const blob = e.data as Blob;
-    const r = new FileReader();
-    r.onload = () => {
-      // we accept all events as we don't know the scope we're looking for beforehand.
-      const rootEvents = this.eventService.parseEvent(r.result, []);
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
 
-      // each received event's root scope must match a scope of an UploadStatus object.
-      // discard all events where this is not true.
-      for (const event of rootEvents) {
-        if (!event.snapshot || !event.snapshot.scope || event.snapshot.scope.length < 1) {
-          continue;
-        }
+  onEventReceived(e: string) {
+    // we accept all events as we don't know the scope we're looking for beforehand.
+    const rootEvents = this.eventService.parseEvent(e, []);
 
-        const status: UploadStatus = this.uploads
-          ? Array.from(this.uploads.values()).find((s) => s.scope == event.snapshot.scope[0])
-          : null;
-        if (!status) {
-          continue; // discard, not ours.
-        }
-
-        // if we do have a match, extract the most relevant message, set it, and then flag a table repaint.
-        status.processingHint = this.extractMostRelevantMessage(event);
+    // each received event's root scope must match a scope of an UploadStatus object.
+    // discard all events where this is not true.
+    for (const event of rootEvents) {
+      if (!event.snapshot || !event.snapshot.scope || event.snapshot.scope.length < 1) {
+        continue;
       }
-    };
-    r.readAsText(blob);
+
+      const status: UploadStatus = this.uploads
+        ? Array.from(this.uploads.values()).find((s) => s.scope == event.snapshot.scope[0])
+        : null;
+      if (!status) {
+        continue; // discard, not ours.
+      }
+
+      // if we do have a match, extract the most relevant message, set it, and then flag a table repaint.
+      status.processingHint = this.extractMostRelevantMessage(event);
+    }
   }
 
   extractMostRelevantMessage(node: ActivitySnapshotTreeNode): string {

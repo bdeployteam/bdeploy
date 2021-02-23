@@ -291,7 +291,6 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
         'io.bdeploy.ui.dto.StringEntryChunkDto',
         'io.bdeploy.ui.dto.LauncherDto',
         'io.bdeploy.ui.dto.InstanceManifestHistoryDto',
-        'io.bdeploy.ui.dto.InstanceUpdateEventDto',
         'io.bdeploy.ui.dto.ConfigFileDto',
         'io.bdeploy.ui.dto.BackendInfoDto',
         'io.bdeploy.ui.dto.ProductTransferDto',
@@ -301,6 +300,9 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
         'io.bdeploy.ui.dto.HistoryFilterDto',
         'io.bdeploy.ui.dto.HistoryCompareDto',
         'io.bdeploy.ui.dto.UploadInfoDto',
+        'io.bdeploy.ui.dto.ObjectChangeType',
+        'io.bdeploy.ui.dto.ObjectChangeHint',
+        'io.bdeploy.ui.dto.ObjectChangeDetails',
         // Other, generic
         'io.bdeploy.common.Version',
         'io.bdeploy.common.ActivitySnapshot',
@@ -317,6 +319,9 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
         'io.bdeploy.interfaces.plugin.PluginInfoDto',
         'io.bdeploy.jersey.ws.WebSocketInitDto',
         'io.bdeploy.api.remote.v1.dto.CredentialsApi',
+        'io.bdeploy.jersey.ws.change.msg.ObjectChangeDto',
+        'io.bdeploy.jersey.ws.change.msg.ObjectChangeInitDto',
+        'io.bdeploy.jersey.ws.change.msg.ObjectChangeRegistrationDto',
         // Metrics
         'io.bdeploy.jersey.resources.JerseyMetricsResource$MetricBundle',
         'io.bdeploy.common.metrics.Metrics$MetricGroup',
