@@ -48,11 +48,18 @@ import { BdButtonComponent } from './components/bd-button/bd-button.component';
 import { BdDataCardComponent } from './components/bd-data-card/bd-data-card.component';
 import { BdDataDisplayComponent } from './components/bd-data-display/bd-data-display.component';
 import { BdDataGridComponent } from './components/bd-data-grid/bd-data-grid.component';
+import { BdDataGroupingPanelComponent } from './components/bd-data-grouping-panel/bd-data-grouping-panel.component';
 import { BdDataGroupingComponent } from './components/bd-data-grouping/bd-data-grouping.component';
 import { BdDataTableComponent } from './components/bd-data-table/bd-data-table.component';
+import { BdDialogContentComponent } from './components/bd-dialog-content/bd-dialog-content.component';
+import { BdDialogToolbarComponent } from './components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { BdDialogComponent } from './components/bd-dialog/bd-dialog.component';
+import { BdLoadingOverlayComponent } from './components/bd-loading-overlay/bd-loading-overlay.component';
+import { BdNoDataComponent } from './components/bd-no-data/bd-no-data.component';
 import { ConnectionLostComponent } from './components/connection-lost/connection-lost.component';
 import { LoginComponent } from './components/login/login.component';
 import { LogoComponent } from './components/logo/logo.component';
+import { MainNavButtonComponent } from './components/main-nav-button/main-nav-button.component';
 import { MainNavContentComponent } from './components/main-nav-content/main-nav-content.component';
 import { MainNavFlyinComponent } from './components/main-nav-flyin/main-nav-flyin.component';
 import { MainNavMenuComponent } from './components/main-nav-menu/main-nav-menu.component';
@@ -71,7 +78,6 @@ import { FileDropDirective } from './directives/file-drop.directive';
 import { httpInterceptorProviders } from './interceptors';
 import { VersionPipe } from './pipes/version.pipe';
 import { ConfigService } from './services/config.service';
-import { BdDataGroupingPanelComponent } from './components/bd-data-grouping-panel/bd-data-grouping-panel.component';
 
 export function loadAppConfig(cfgService: ConfigService) {
   return () => cfgService.load();
@@ -106,6 +112,12 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdButtonPopupComponent,
     BdDataGroupingComponent,
     BdDataGroupingPanelComponent,
+    BdLoadingOverlayComponent,
+    BdDialogComponent,
+    BdDialogToolbarComponent,
+    BdDialogContentComponent,
+    MainNavButtonComponent,
+    BdNoDataComponent,
   ],
   entryComponents: [
     ConnectionLostComponent,
@@ -206,22 +218,28 @@ export function loadAppConfig(cfgService: ConfigService) {
     FlexLayoutModule,
     LayoutModule,
 
-    // our own core components
+    // our own exported components - names need to be aligned.
     MainNavComponent,
-    LogoComponent,
-    ThemeChooserComponent,
+    LogoComponent, // FIXME: Remove
     FileDropDirective,
     ClickStopPropagationDirective,
     LoginComponent,
     UserAvatarComponent,
     VersionPipe,
     MessageboxComponent,
+
+    // framework components to be used by others
     BdButtonComponent,
     BdDataTableComponent,
     BdDataGridComponent,
     BdDataDisplayComponent,
     BdButtonPopupComponent,
     BdDataGroupingComponent,
+    BdLoadingOverlayComponent,
+    BdDialogComponent,
+    BdDialogToolbarComponent,
+    BdDialogContentComponent,
+    BdNoDataComponent,
   ],
 })
 export class CoreModule {}

@@ -22,7 +22,6 @@ import { InstanceGroupService } from '../../services/instance-group.service';
   selector: 'app-instance-group-permissions',
   templateUrl: './instance-group-permissions.component.html',
   styleUrls: ['./instance-group-permissions.component.css'],
-  providers: [SettingsService],
 })
 export class InstanceGroupPermissionsComponent implements OnInit, OnDestroy, BdSearchable {
   log: Logger = this.loggingService.getLogger('InstanceGroupPermissionsComponent');

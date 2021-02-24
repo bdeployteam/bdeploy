@@ -30,25 +30,19 @@
   </button>
 
   <!-- Menu Buttons -->
-  <app-bd-button
-    fxFlexAlign="center center"
+  <app-main-nav-button
     icon="view_carousel"
     text="Instance Groups"
-    [inverseColor]="true"
     [collapsed]="!expanded"
-    tooltip="right"
-    [routerLink]="['/l/instancegroup/browser']"
-  ></app-bd-button>
+    [routerLink]="['/groups/browser']"
+  ></app-main-nav-button>
 
-  <app-bd-button
-    fxFlexAlign="center center"
+  <app-main-nav-button
     icon="storage"
-    text="Software Repos"
-    [inverseColor]="true"
+    text="Software Repositories"
     [collapsed]="!expanded"
-    tooltip="right"
     [routerLink]="['/l/softwarerepo/browser']"
-  ></app-bd-button>
+  ></app-main-nav-button>
 
   <!-- Footer -->
   <div fxFlex="1 0 auto"></div>

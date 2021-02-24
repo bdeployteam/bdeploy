@@ -15,7 +15,6 @@ import { InstanceGroupService } from '../../services/instance-group.service';
   selector: 'app-instance-group-browser',
   templateUrl: './instance-group-browser.component.html',
   styleUrls: ['./instance-group-browser.component.css'],
-  providers: [SettingsService],
 })
 export class InstanceGroupBrowserComponent implements OnInit, OnDestroy, BdSearchable {
   private readonly log: Logger = this.loggingService.getLogger('InstanceGroupBrowserComponent');

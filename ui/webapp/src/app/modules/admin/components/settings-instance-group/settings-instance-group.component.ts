@@ -14,7 +14,6 @@ import { CustomAttributeEditComponent } from 'src/app/modules/legacy/shared/comp
   selector: 'app-settings-instance-group',
   templateUrl: './settings-instance-group.component.html',
   styleUrls: ['./settings-instance-group.component.css'],
-  providers: [SettingsService],
 })
 export class SettingsInstanceGroupComponent implements OnInit {
   private log: Logger = this.loggingService.getLogger('SettingsInstanceGroupComponent');

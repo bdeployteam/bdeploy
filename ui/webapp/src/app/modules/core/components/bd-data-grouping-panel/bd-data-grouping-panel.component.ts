@@ -1,7 +1,13 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { Subscription } from 'rxjs';
-import { BdDataGrouping, BdDataGroupingDefinition, bdSortGroups, UNMATCHED_GROUP } from 'src/app/models/data';
+import {
+  BdDataGrouping,
+  BdDataGroupingDefinition,
+  bdExtractGroups,
+  bdSortGroups,
+  UNMATCHED_GROUP,
+} from 'src/app/models/data';
 
 /**
  * A single grouping panel, providing a drop dow to choose the definition,
@@ -15,8 +21,8 @@ import { BdDataGrouping, BdDataGroupingDefinition, bdSortGroups, UNMATCHED_GROUP
 export class BdDataGroupingPanelComponent<T> implements OnInit, OnDestroy {
   /** The available grouping definitions */
   @Input() definitions: BdDataGroupingDefinition<T>[];
-  /** A callback to fetch all possible distinct values for a grouping */
-  @Input() values: (def: BdDataGroupingDefinition<T>) => string[];
+  /** The records currently available for grouping */
+  @Input() records: T[];
   /** Binds the emitter for the popup-open event, so this panel can refresh values */
   @Input() popupEmitter: EventEmitter<any>;
   /** The panel's index, this is used to show a hint to the user. */
@@ -49,7 +55,7 @@ export class BdDataGroupingPanelComponent<T> implements OnInit, OnDestroy {
   updateGroupingValues() {
     // calculate possible values for the grouping.
     if (!!this.grouping?.definition) {
-      this.groupingValues = this.values(this.grouping.definition).sort(
+      this.groupingValues = bdExtractGroups(this.grouping.definition, this.records).sort(
         !!this.grouping.definition.sort ? this.grouping.definition.sort : bdSortGroups
       );
 

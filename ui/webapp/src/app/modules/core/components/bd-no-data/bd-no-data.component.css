@@ -1,0 +1,9 @@
+.local-sizing {
+  padding: 30px;
+}
+
+.local-header {
+  font-size: larger;
+  font-weight: bold;
+  margin-bottom: 15px;
+}

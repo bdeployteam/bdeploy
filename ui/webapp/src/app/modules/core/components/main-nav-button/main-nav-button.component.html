@@ -1,0 +1,11 @@
+<app-bd-button
+  fxFlexAlign="center center"
+  [icon]="icon"
+  [text]="text"
+  [inverseColor]="true"
+  [collapsed]="collapsed"
+  tooltip="right"
+  [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.05s' } }"
+  [@delayedFadeOut]="{ value: 'dummy', params: { delay: '0.05s' } }"
+  [@easeX]="{ value: 'dummy', params: { delayEnter: '0s', delayLeave: '0s', transEnter: '-20px', transLeave: '20px' } }"
+></app-bd-button>

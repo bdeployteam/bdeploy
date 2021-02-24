@@ -14,7 +14,6 @@ import { UserPasswordComponent } from '../user-password/user-password.component'
   selector: 'app-user-info',
   templateUrl: './user-info.component.html',
   styleUrls: ['./user-info.component.css'],
-  providers: [SettingsService],
 })
 export class UserInfoComponent implements OnInit {
   private readonly log: Logger = this.loggingService.getLogger('UserInfoComponent');

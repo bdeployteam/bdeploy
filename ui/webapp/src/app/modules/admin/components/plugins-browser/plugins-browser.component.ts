@@ -19,7 +19,6 @@ import { PluginAdminService } from '../../services/plugin-admin.service';
   selector: 'app-plugins-browser',
   templateUrl: './plugins-browser.component.html',
   styleUrls: ['./plugins-browser.component.css'],
-  providers: [SettingsService],
 })
 export class PluginsBrowserComponent implements OnInit, OnDestroy, BdSearchable, AfterViewInit {
   private log: Logger = this.loggingService.getLogger('PluginsBrowserComponent');

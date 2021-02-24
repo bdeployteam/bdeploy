@@ -12,7 +12,7 @@
         <app-bd-data-grouping-panel
           *ngFor="let grp of groupings; let i = index"
           [definitions]="definitions"
-          [values]="values"
+          [records]="records"
           [index]="i"
           [(grouping)]="groupings[i]"
           (groupingChange)="fireUpdate()"

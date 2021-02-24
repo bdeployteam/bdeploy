@@ -1,5 +1,5 @@
 <app-bd-data-table
-  *ngIf="!_grid"
+  *ngIf="!_grid && !!records?.length"
   [caption]="caption"
   [columns]="columns"
   [sortData]="sortData"
@@ -14,7 +14,7 @@
 ></app-bd-data-table>
 
 <app-bd-data-grid
-  *ngIf="_grid"
+  *ngIf="_grid && !!records?.length"
   [columns]="columns"
   [searchData]="searchData"
   [searchable]="searchable"
@@ -22,3 +22,5 @@
   [records]="records"
   (recordClick)="recordClick.emit($event)"
 ></app-bd-data-grid>
+
+<ng-content *ngIf="!records?.length"></ng-content>

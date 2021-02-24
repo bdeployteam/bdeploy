@@ -1,7 +1,13 @@
-<div fxLayout="row wrap" fxFlex="1 0 auto" class="local-sizing" fxLayoutAlign="start" *ngIf="!grouping">
+<div
+  fxLayout="row wrap"
+  fxFlex="1 0 auto"
+  class="local-sizing"
+  fxLayoutAlign="start"
+  *ngIf="!grouping && !isEmpty(null)"
+>
   <app-bd-data-card
     [style.padding.px]="5"
-    *ngFor="let record of records"
+    *ngFor="let record of recordsToDisplay$ | async"
     fxFlex.lt-sm="0 0 100%"
     fxFlex.sm="0 0 50%"
     fxFlex.md="0 0 33.33%"
@@ -12,6 +18,15 @@
     (recordClick)="recordClick.emit($event)"
   >
   </app-bd-data-card>
+</div>
+<div
+  *ngIf="!grouping && isEmpty(null)"
+  fxFlex="1 0 auto"
+  class="bd-hint-text local-hint-text"
+  fxLayout="column"
+  fxLayoutAlign="center center"
+>
+  No data to show.
 </div>
 
 <mat-tab-group *ngIf="grouping" [style.width]="'100%'">
@@ -31,6 +46,9 @@
           (recordClick)="recordClick.emit($event)"
         >
         </app-bd-data-card>
+      </div>
+      <div *ngIf="isEmpty(group)" class="bd-hint-text local-hint-text" fxLayout="column" fxLayoutAlign="center center">
+        No data to show.
       </div>
     </mat-tab>
   </ng-container>

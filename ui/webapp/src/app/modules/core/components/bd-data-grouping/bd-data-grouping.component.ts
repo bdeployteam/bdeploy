@@ -26,7 +26,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
   @Input() definitions: BdDataGroupingDefinition<T>[];
 
   /** A callback providing the possible values for a grouping definition, which is likely very dependent on the actual data displayed in another component. */
-  @Input() values: (def: BdDataGroupingDefinition<T>) => string[];
+  @Input() records: T[];
 
   /** Emitted when the grouping changes. This may be emitted once after creating the component if a preset is loaded. */
   @Output() groupingChange = new EventEmitter<BdDataGrouping<T>[]>();

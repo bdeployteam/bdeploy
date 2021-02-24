@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { BdDataColumn, bdDataDefaultSearch, BdDataGrouping } from 'src/app/models/data';
+import { SortDirection } from '@angular/material/sort';
+import { BdDataColumn, bdDataDefaultSearch, bdDataDefaultSort, BdDataGrouping } from 'src/app/models/data';
 
 @Component({
   selector: 'app-bd-data-display',
@@ -43,7 +44,7 @@ export class BdDataDisplayComponent<T> implements OnInit {
    *
    * Sorting through header click is disabled all together if this callback is not given.
    */
-  @Input() sortData: (data: T[], column: BdDataColumn<T>, direction: string) => T[];
+  @Input() sortData: (data: T[], column: BdDataColumn<T>, direction: SortDirection) => T[] = bdDataDefaultSort;
 
   /**
    * A callback which provides enhanced searching in the table. The default search will

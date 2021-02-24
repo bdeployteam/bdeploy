@@ -8,7 +8,6 @@ import { SettingsService } from '../../../core/services/settings.service';
   selector: 'app-settings-general',
   templateUrl: './settings-general.component.html',
   styleUrls: ['./settings-general.component.css'],
-  providers: [SettingsService],
 })
 export class SettingsGeneralComponent implements OnInit {
   constructor(public settings: SettingsService, private messageBoxService: MessageboxService) {}

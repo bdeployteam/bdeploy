@@ -1,0 +1,12 @@
+<ng-content></ng-content>
+
+<div
+  *ngIf="showWhen$ | async"
+  [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0s' } }"
+  [@delayedFadeOut]="{ value: 'dummy', params: { delay: '0s' } }"
+  class="local-sizing bd-normal-backdrop"
+  fxLayout="column"
+  fxLayoutAlign="center center"
+>
+  <mat-spinner></mat-spinner>
+</div>

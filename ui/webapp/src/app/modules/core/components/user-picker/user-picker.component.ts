@@ -10,7 +10,6 @@ import { SettingsService } from 'src/app/modules/core/services/settings.service'
   selector: 'app-user-picker',
   templateUrl: './user-picker.component.html',
   styleUrls: ['./user-picker.component.css'],
-  providers: [SettingsService],
 })
 export class UserPickerComponent implements OnInit {
   private static MAX_OPTIONS = 100;

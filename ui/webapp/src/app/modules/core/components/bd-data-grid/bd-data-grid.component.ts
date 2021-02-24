@@ -1,20 +1,21 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import {
   BdDataColumn,
   BdDataColumnDisplay,
-  bdDataDefaultSearch,
   BdDataGrouping,
   bdExtractGroups,
   UNMATCHED_GROUP,
 } from 'src/app/models/data';
 import { LoggingService } from '../../services/logging.service';
+import { BdSearchable, SearchService } from '../../services/search.service';
 
 @Component({
   selector: 'app-bd-data-grid',
   templateUrl: './bd-data-grid.component.html',
   styleUrls: ['./bd-data-grid.component.css'],
 })
-export class BdDataGridComponent<T> implements OnInit {
+export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable {
   private log = this.logging.getLogger('BdDataTableComponent');
 
   /**
@@ -27,14 +28,14 @@ export class BdDataGridComponent<T> implements OnInit {
   }
 
   /**
-   * A callback which provides enhanced searching in the table. The default search will
+   * A callback which provides enhanced searching in the grid. The default search will
    * concatenate each value in each row object, regardless of whether it is displayed or not.
    * Then the search string is applied to this single string in a case insensitive manner.
    */
-  @Input() searchData: (search: string, data: T[]) => T[] = bdDataDefaultSearch;
+  @Input() searchData: (search: string, data: T[]) => T[];
 
   /**
-   * Whether the data-table should register itself as a BdSearchable with the global SearchService.
+   * Whether the data-grid should register itself as a BdSearchable with the global SearchService.
    */
   @Input() searchable = true;
 
@@ -54,24 +55,55 @@ export class BdDataGridComponent<T> implements OnInit {
    */
   @Output() recordClick = new EventEmitter<T>();
 
-  // TODO: Grouping
-  // TODO: Search/Filter
+  /*template*/ recordsToDisplay$ = new BehaviorSubject<T[]>([]);
 
-  constructor(private logging: LoggingService) {}
+  private subscription: Subscription;
 
-  ngOnInit(): void {}
+  constructor(private logging: LoggingService, private searchService: SearchService) {}
+
+  ngOnInit(): void {
+    if (this.searchable) {
+      // register this table as "searchable" in the global search service if requested.
+      this.subscription = this.searchService.register(this);
+    }
+
+    // populate records to display with empty search by default.
+    this.bdOnSearch(null);
+  }
+
+  ngOnDestroy(): void {
+    if (!!this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  bdOnSearch(search: string) {
+    this.recordsToDisplay$.next(this.searchData(search, this.records));
+  }
 
   /* template */ getGroupValues() {
     return bdExtractGroups(this.grouping.definition, this.records);
   }
 
   /* template */ getGroupRecords(group) {
-    return this.records.filter((r) => {
+    return this.recordsToDisplay$.value.filter((r) => {
       const grp = this.grouping.definition.group(r);
       if (!grp && group === UNMATCHED_GROUP) {
         return true;
       }
       return grp === group;
     });
+  }
+
+  /* template */ isEmpty(group) {
+    if (!this.recordsToDisplay$.value?.length) {
+      return true;
+    }
+
+    if (!!this.grouping && !this.getGroupRecords(group)?.length) {
+      return true;
+    }
+
+    return false;
   }
 }

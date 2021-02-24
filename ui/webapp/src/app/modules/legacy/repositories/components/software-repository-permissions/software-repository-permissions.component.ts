@@ -22,7 +22,6 @@ import { SoftwareRepositoryService } from '../../services/software-repository.se
   selector: 'app-software-repository-permissions',
   templateUrl: './software-repository-permissions.component.html',
   styleUrls: ['./software-repository-permissions.component.css'],
-  providers: [SettingsService],
 })
 export class SoftwareRepositoryPermissionsComponent implements OnInit, OnDestroy, BdSearchable {
   log: Logger = this.loggingService.getLogger('SoftwareRepositoryPermissionsComponent');

@@ -16,7 +16,6 @@ import { SettingsAuthTestUserComponent } from '../settings-auth-test-user/settin
   selector: 'app-settings-auth',
   templateUrl: './settings-auth.component.html',
   styleUrls: ['./settings-auth.component.css'],
-  providers: [SettingsService],
 })
 export class SettingsAuthComponent implements OnInit, CanComponentDeactivate {
   testRunning = false;

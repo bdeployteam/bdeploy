@@ -5,3 +5,7 @@
 .local-sizing {
   max-width: 100%;
 }
+
+.local-hint-text {
+  margin-top: 20px;
+}

@@ -33,7 +33,6 @@ import { InstanceGroupService } from '../../services/instance-group.service';
   selector: 'app-instance-group-add-edit',
   templateUrl: './instance-group-add-edit.component.html',
   styleUrls: ['./instance-group-add-edit.component.css'],
-  providers: [SettingsService],
 })
 export class InstanceGroupAddEditComponent implements OnInit {
   log: Logger = this.loggingService.getLogger('InstanceGroupAddEditComponent');

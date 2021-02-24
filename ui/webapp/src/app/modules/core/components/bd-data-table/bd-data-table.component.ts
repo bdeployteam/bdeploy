@@ -13,7 +13,7 @@ import {
   SimpleChanges,
   ViewChild,
 } from '@angular/core';
-import { MatSort, Sort } from '@angular/material/sort';
+import { MatSort, Sort, SortDirection } from '@angular/material/sort';
 import { MatTreeFlatDataSource, MatTreeFlattener } from '@angular/material/tree';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Subscription } from 'rxjs';
@@ -21,7 +21,6 @@ import {
   BdDataColumn,
   BdDataColumnDisplay,
   BdDataColumnTypeHint,
-  bdDataDefaultSearch,
   BdDataGrouping,
   bdSortGroups,
   UNMATCHED_GROUP,
@@ -70,9 +69,11 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
    * The columns to display
    */
   /* template */ _columns: BdDataColumn<T>[];
+  /* template */ _visibleColumns: string[];
   @Input() set columns(val: BdDataColumn<T>[]) {
     // either unset or CARD is OK, only TABLE is not OK.
     this._columns = val.filter((c) => c.display !== BdDataColumnDisplay.CARD);
+    this.updateMediaSubscriptions();
   }
 
   /**
@@ -82,14 +83,14 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
    *
    * Sorting through header click is disabled all together if this callback is not given.
    */
-  @Input() sortData: (data: T[], column: BdDataColumn<T>, direction: string) => T[];
+  @Input() sortData: (data: T[], column: BdDataColumn<T>, direction: SortDirection) => T[];
 
   /**
    * A callback which provides enhanced searching in the table. The default search will
    * concatenate each value in each row object, regardless of whether it is displayed or not.
    * Then the search string is applied to this single string in a case insensitive manner.
    */
-  @Input() searchData: (search: string, data: T[]) => T[] = bdDataDefaultSearch;
+  @Input() searchData: (search: string, data: T[]) => T[];
 
   /**
    * Whether the data-table should register itself as a BdSearchable with the global SearchService.
@@ -152,6 +153,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     (n) => n.children
   );
   private subscription: Subscription;
+  private mediaSubscription: Subscription;
 
   /** The model holding the current checkbox selection state */
   checkSelection = new SelectionModel<FlatNode<T>>(true);
@@ -177,6 +179,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     if (!!this.subscription) {
       this.subscription.unsubscribe();
     }
+    this.closeMediaSubscriptions();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -194,6 +197,35 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     });
 
     setTimeout(() => this.update());
+  }
+
+  private updateMediaSubscriptions() {
+    this.closeMediaSubscriptions();
+    this.mediaSubscription = new Subscription();
+    this._columns
+      .filter((c) => !!c.showWhen)
+      .forEach((c) =>
+        this.mediaSubscription.add(this.media.observe(c.showWhen).subscribe((bs) => this.updateColumnsToDisplay()))
+      );
+  }
+
+  private closeMediaSubscriptions() {
+    if (!!this.mediaSubscription) {
+      this.mediaSubscription.unsubscribe();
+    }
+  }
+
+  private updateColumnsToDisplay() {
+    this._visibleColumns = this._columns
+      .filter((c) => {
+        if (!!c.showWhen) {
+          if (!this.media.isMatched(c.showWhen)) {
+            return false;
+          }
+        }
+        return true;
+      })
+      .map((c) => c.id);
   }
 
   bdOnSearch(value: string): void {
@@ -215,7 +247,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     // benchmarks show that this method is quite fast, event with a lot of data.
     // it takes roughly 100 (76 - 110) ms to generate a model for ~1000 records.
     this.dataSource.data = this.generateModel(
-      this.searchData(this.search, [...this.records]),
+      this.searchData(this.search, !!this.records ? [...this.records] : []),
       this.grouping,
       this.sort
     );
@@ -323,19 +355,6 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
       return 0;
     }
     return (level - 1) * 24 + 40;
-  }
-
-  /* template */ getColumnsToDisplay() {
-    return this._columns
-      .filter((c) => {
-        if (!!c.showWhen) {
-          if (!this.media.isMatched(c.showWhen)) {
-            return false;
-          }
-        }
-        return true;
-      })
-      .map((c) => c.id);
   }
 
   /* template */ getUnknownIcon(col: BdDataColumn<T>) {

@@ -6,17 +6,17 @@
       }}
     </caption>
 
-    <tr mat-header-row *matHeaderRowDef="getColumnsToDisplay(); sticky: true"></tr>
+    <tr mat-header-row *matHeaderRowDef="_visibleColumns; sticky: true"></tr>
     <tr
       mat-row
-      *matRowDef="let row; columns: getColumnsToDisplay()"
+      *matRowDef="let row; columns: _visibleColumns"
       (click)="!checkMode && row.node.item ? recordClick.emit(row.node.item) : undefined"
       [style.cursor]="!checkMode && !!row.node.item ? 'pointer' : 'auto'"
     ></tr>
 
     <!-- In case no data is available (empty data, filter, etc.)-->
     <tr class="mat-row" *matNoDataRow>
-      <td class="mat-cell" [attr.colspan]="getColumnsToDisplay().length" class="bd-hint-text">No data to show.</td>
+      <td class="mat-cell" [attr.colspan]="_visibleColumns.length" class="bd-hint-text">No data to show.</td>
     </tr>
 
     <ng-container *ngFor="let col of _columns; let i = index" [matColumnDef]="col.id">

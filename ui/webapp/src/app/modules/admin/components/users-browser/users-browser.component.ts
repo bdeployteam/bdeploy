@@ -22,7 +22,6 @@ import { UserGlobalPermissionsComponent } from '../user-global-permissions/user-
   selector: 'app-users-browser',
   templateUrl: './users-browser.component.html',
   styleUrls: ['./users-browser.component.css'],
-  providers: [SettingsService],
 })
 export class UsersBrowserComponent implements OnInit, OnDestroy, BdSearchable, AfterViewInit {
   private log: Logger = this.loggingService.getLogger('UsersBrowserComponent');

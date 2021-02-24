@@ -1,3 +1,5 @@
+import { SortDirection } from '@angular/material/sort';
+
 /**
  * A type hint for the colum which may (mostly in card mode) have influence on where and how information is rendered.
  */
@@ -111,6 +113,33 @@ export function bdSortGroups(a: string, b: string) {
   return a.localeCompare(b);
 }
 
+/** The default sorting algorithm which should be fine for almost all cases */
+export function bdDataDefaultSort<T>(data: T[], column: BdDataColumn<T>, direction: SortDirection) {
+  return data.sort((a, b) => {
+    const dir = direction === 'asc' ? 1 : -1;
+
+    const da = column.data(a);
+    const db = column.data(b);
+
+    if (da === db) {
+      return 0;
+    }
+    if (!da) {
+      return -1 * dir;
+    }
+    if (!db) {
+      return 1 * dir;
+    }
+
+    if (da < db) {
+      return -1 * dir;
+    }
+    if (da > db) {
+      return 1 * dir;
+    }
+  });
+}
+
 /** The default search which uses case insensitive search in all fields of the record. */
 export function bdDataDefaultSearch<T>(search: string, records: T[]): T[] {
   if (!search) {
@@ -127,6 +156,9 @@ export function bdDataDefaultSearch<T>(search: string, records: T[]): T[] {
 /** Takes any object and produces a "searchable" string by joining all field values into a space separated string */
 function createSearchString(val: any): string {
   let result = '';
+  if (!val) {
+    return result;
+  }
   for (const field of Object.values(val)) {
     if (typeof field === 'object') {
       result += createSearchString(field);
