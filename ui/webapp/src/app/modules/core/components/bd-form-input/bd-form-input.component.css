@@ -1,0 +1,18 @@
+.local-form-field .mat-form-field-flex {
+  padding: 0.25em 0.6em 0 0.6em !important;
+}
+
+.local-form-field .mat-form-field-subscript-wrapper {
+  padding: 0 0.75em !important;
+  margin-top: 0.33em !important;
+}
+
+.local-form-field .mat-form-field-label-wrapper {
+  top: -0.6em !important;
+  padding-top: 0.6em !important;
+}
+
+.local-form-field .mat-input-element {
+  position: relative;
+  top: 0.33em;
+}

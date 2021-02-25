@@ -1,5 +1,5 @@
 <app-bd-dialog [loadingWhen$]="groups.loading$">
-  <app-bd-dialog-toolbar title="Instance Groups">
+  <app-bd-dialog-toolbar header="Instance Groups">
     <div fxFlex="1 0 auto"></div>
     <app-bd-data-grouping
       [multiple]="!dataTable.grid"
@@ -10,10 +10,16 @@
     ></app-bd-data-grouping>
     <app-bd-button
       [isToggle]="true"
-      icon="dashboard"
+      icon="grid_view"
       text="Toggle Card Mode"
       [(toggle)]="dataTable.grid"
     ></app-bd-button>
+    <mat-divider [vertical]="true"></mat-divider>
+    <app-bd-panel-toggle-button
+      icon="add"
+      text="Add Instance Group"
+      [route]="['panels', 'groups', 'add']"
+    ></app-bd-panel-toggle-button>
   </app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>

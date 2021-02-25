@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { LoginComponent } from './modules/core/components/login/login.component';
 import { MessageboxComponent } from './modules/core/components/messagebox/messagebox.component';
 import { AdminGuard } from './modules/core/guards/admin.guard';
+import { AuthGuard } from './modules/core/guards/authentication.guard';
 import { NotFoundGuard } from './modules/core/guards/not-found.guard';
 
 const routes: Routes = [
@@ -24,11 +25,13 @@ const routes: Routes = [
   {
     path: 'groups',
     loadChildren: () => import('./modules/groups/groups.module').then((x) => x.GroupsModule),
+    canActivate: [AuthGuard],
   },
   {
-    path: 'panel/groups',
+    path: 'panels/groups',
     outlet: 'panel',
     loadChildren: () => import('./modules/panels/groups/groups.module').then((x) => x.GroupsModule),
+    canActivate: [AuthGuard],
   },
 
   // LEGACY ROUTES

@@ -4,6 +4,8 @@
     <ng-content select="app-bd-dialog-toolbar"></ng-content>
 
     <!-- main content -->
-    <ng-content *ngIf="!(loadingWhen$ | async)" select="app-bd-dialog-content"></ng-content>
+    <div class="bd-scroll-container bd-default-padding mat-typography">
+      <ng-content *ngIf="!(loadingWhen$ | async)" select="app-bd-dialog-content"></ng-content>
+    </div>
   </div>
 </app-bd-loading-overlay>

@@ -20,6 +20,7 @@ export class BdButtonComponent implements OnInit, AfterViewInit {
   @Input() collapsed = true;
   @Input() inverseColor = false;
   @Input() disabled = false;
+  @Input() isSubmit = true; // default in HTML *is* submit.
 
   @Input() isToggle = false;
   @Input() toggle = false;
@@ -37,8 +38,11 @@ export class BdButtonComponent implements OnInit, AfterViewInit {
     fromEvent<MouseEvent>(this._elementRef.nativeElement, 'click', { capture: true }).subscribe((event) => {
       if (this.isToggle) {
         this.toggle = !this.toggle;
-        this.toggleChange.emit(this.toggle);
-        event.stopPropagation();
+
+        // the toggle change needs to be fired *after* the click event.
+        setTimeout(() => this.toggleChange.emit(this.toggle));
+
+        // we will not inhibit the click event here, as routerLink (etc.) will need it.
       } else {
         if (this.disabled) {
           event.stopPropagation();

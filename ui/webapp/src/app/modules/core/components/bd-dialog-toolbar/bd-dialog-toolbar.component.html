@@ -1,6 +1,14 @@
 <mat-toolbar class="bd-page-toolbar">
   <mat-toolbar-row fxLayoutGap="5px">
-    {{ title }}
-    <ng-content></ng-content>
+    {{ header }}
+    <div fxLayout="row" fxLayoutGap="5px" fxFlex="1 0 auto">
+      <ng-content></ng-content>
+    </div>
+    <app-bd-button
+      *ngIf="closeablePanel"
+      text="Close"
+      icon="close"
+      [routerLink]="['', { outlets: { panel: null } }]"
+    ></app-bd-button>
   </mat-toolbar-row>
 </mat-toolbar>

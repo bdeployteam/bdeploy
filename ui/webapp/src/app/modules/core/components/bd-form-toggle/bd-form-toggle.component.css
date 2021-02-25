@@ -1,0 +1,11 @@
+.local-form-field-wrapper {
+  padding: 0.86em 0.86em 0.86em 0.6em;
+}
+
+.bd-form-toggle-flex {
+  border-radius: 4px 4px 0 0;
+}
+
+.bd-form-toggle-appearance-fill {
+  position: relative;
+}

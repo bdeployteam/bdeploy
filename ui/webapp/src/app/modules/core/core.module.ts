@@ -43,6 +43,7 @@ import { ClipboardModule } from 'ngx-clipboard';
 import { CookieService } from 'ngx-cookie-service';
 import { GravatarModule } from 'ngx-gravatar';
 import { GlobalErrorHandler } from 'src/app/modules/core/global-error-handler';
+import { BdActionRowComponent } from './components/bd-action-row/bd-action-row.component';
 import { BdButtonPopupComponent } from './components/bd-button-popup/bd-button-popup.component';
 import { BdButtonComponent } from './components/bd-button/bd-button.component';
 import { BdDataCardComponent } from './components/bd-data-card/bd-data-card.component';
@@ -54,8 +55,12 @@ import { BdDataTableComponent } from './components/bd-data-table/bd-data-table.c
 import { BdDialogContentComponent } from './components/bd-dialog-content/bd-dialog-content.component';
 import { BdDialogToolbarComponent } from './components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from './components/bd-dialog/bd-dialog.component';
+import { BdFormInputComponent } from './components/bd-form-input/bd-form-input.component';
+import { BdFormToggleComponent } from './components/bd-form-toggle/bd-form-toggle.component';
+import { BdImageUploadComponent } from './components/bd-image-upload/bd-image-upload.component';
 import { BdLoadingOverlayComponent } from './components/bd-loading-overlay/bd-loading-overlay.component';
 import { BdNoDataComponent } from './components/bd-no-data/bd-no-data.component';
+import { BdPanelToggleButtonComponent } from './components/bd-panel-toggle-button/bd-panel-toggle-button.component';
 import { ConnectionLostComponent } from './components/connection-lost/connection-lost.component';
 import { LoginComponent } from './components/login/login.component';
 import { LogoComponent } from './components/logo/logo.component';
@@ -78,6 +83,7 @@ import { FileDropDirective } from './directives/file-drop.directive';
 import { httpInterceptorProviders } from './interceptors';
 import { VersionPipe } from './pipes/version.pipe';
 import { ConfigService } from './services/config.service';
+import { GroupIdValidator } from './validators/group-id';
 
 export function loadAppConfig(cfgService: ConfigService) {
   return () => cfgService.load();
@@ -118,6 +124,12 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdDialogContentComponent,
     MainNavButtonComponent,
     BdNoDataComponent,
+    BdPanelToggleButtonComponent,
+    BdImageUploadComponent,
+    BdActionRowComponent,
+    BdFormInputComponent,
+    GroupIdValidator,
+    BdFormToggleComponent,
   ],
   entryComponents: [
     ConnectionLostComponent,
@@ -240,6 +252,14 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdDialogToolbarComponent,
     BdDialogContentComponent,
     BdNoDataComponent,
+    BdPanelToggleButtonComponent,
+    BdImageUploadComponent,
+    BdActionRowComponent,
+    BdFormInputComponent,
+    BdFormToggleComponent,
+
+    // validators
+    GroupIdValidator,
   ],
 })
 export class CoreModule {}

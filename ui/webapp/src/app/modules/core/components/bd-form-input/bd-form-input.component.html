@@ -1,0 +1,17 @@
+<div fxLayout="column">
+  <mat-form-field appearance="fill" class="local-form-field">
+    <mat-label>{{ label }}</mat-label>
+    <input
+      matInput
+      [(ngModel)]="value"
+      (blur)="onBlur()"
+      [id]="name"
+      [name]="name"
+      autocomplete="off"
+      [required]="required"
+      [disabled]="disabled"
+      [errorStateMatcher]="this"
+    />
+    <mat-error *ngIf="isInvalid()">{{ getErrorMessage() }}</mat-error>
+  </mat-form-field>
+</div>

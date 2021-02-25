@@ -1,15 +1,8 @@
 import { NgModule } from '@angular/core';
 import { Route, RouterModule } from '@angular/router';
-import { AuthGuard } from '../core/guards/authentication.guard';
 import { GroupsBrowserComponent } from './components/groups-browser/groups-browser.component';
 
-const GROUPS_ROUTES: Route[] = [
-  {
-    path: 'browser',
-    component: GroupsBrowserComponent,
-    canActivate: [AuthGuard],
-  },
-];
+const GROUPS_ROUTES: Route[] = [{ path: 'browser', component: GroupsBrowserComponent }];
 
 @NgModule({
   imports: [RouterModule.forChild(GROUPS_ROUTES)],

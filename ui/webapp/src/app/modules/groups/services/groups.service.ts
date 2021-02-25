@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, forkJoin } from 'rxjs';
+import { BehaviorSubject, forkJoin, Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import {
   CustomAttributeDescriptor,
@@ -18,7 +18,7 @@ import { SettingsService } from '../../core/services/settings.service';
   providedIn: 'root',
 })
 export class GroupsService {
-  private apiPath = this.cfg.config.api + '/group';
+  private apiPath = `${this.cfg.config.api}/group`;
 
   loading$ = new BehaviorSubject<boolean>(true);
   groups$ = new BehaviorSubject<InstanceGroupConfiguration[]>([]);
@@ -43,11 +43,21 @@ export class GroupsService {
     return `${this.apiPath}/${group}/image?logo=${id.id}`;
   }
 
+  public create(group: Partial<InstanceGroupConfiguration>): Observable<any> {
+    return this.http.put(this.apiPath, group);
+  }
+
+  public updateImage(group: string, file: File) {
+    const formData = new FormData();
+    formData.append('image', file, file.name);
+    return this.http.post<Response>(`${this.apiPath}/${group}/image`, formData);
+  }
+
   private reload() {
     this.loading$.next(true);
     forkJoin({
       groups: this.http.get<InstanceGroupConfiguration[]>(this.apiPath),
-      attributes: this.http.get<{ [index: string]: CustomAttributesRecord }>(this.apiPath + '/list-attributes'),
+      attributes: this.http.get<{ [index: string]: CustomAttributesRecord }>(`${this.apiPath}/list-attributes`),
       settings: this.settings.waitUntilLoaded(),
     })
       .pipe(finalize(() => this.loading$.next(false)))
@@ -64,6 +74,8 @@ export class GroupsService {
 
   private onChange(change: ObjectChangeDto) {
     // TODO: better single record updating...?
-    this.reload();
+    if (!this.loading$.value) {
+      this.reload();
+    }
   }
 }

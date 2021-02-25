@@ -6,7 +6,8 @@ import { Component, Input, OnInit } from '@angular/core';
   styleUrls: ['./bd-dialog-toolbar.component.css'],
 })
 export class BdDialogToolbarComponent implements OnInit {
-  @Input() title: string;
+  @Input() header: string;
+  @Input() closeablePanel = false;
 
   constructor() {}
 

@@ -8,6 +8,8 @@
 @import 'app-scrollbars.scss';
 
 @import 'app/modules/core/components/bd-button-popup/bd-button-popup-theme.scss';
+@import 'app/modules/core/components/bd-image-upload/bd-image-upload-theme.scss';
+@import 'app/modules/core/components/bd-form-toggle/bd-form-toggle-theme.scss';
 
 @import 'app/modules/admin/components/hive/hive-theme.scss';
 @import 'app/modules/admin/components/admin-shell/admin-shell.theme.scss';
@@ -50,6 +52,8 @@
   @include angular-material-theme($theme);
   @include common-classes($theme);
   @include bd-button-popup-theme($theme);
+  @include bd-image-upload-theme($theme);
+  @include bd-form-toggle-theme($theme);
 
   // application component themes // FIXME: those are all legacy and should be removed. Use CSS3 variables instead, see --bd- vars.
   @include instance-group-delete-dialog-theme($theme);

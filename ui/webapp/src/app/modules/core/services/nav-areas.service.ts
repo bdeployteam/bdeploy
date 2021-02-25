@@ -55,7 +55,7 @@ export class NavAreasService {
         // primaryState may not be set in case we are just navigating from the void, i.e. somebody opened a link
         // which includes a panel navigation.
         if (this.primaryState && newPrimaryState !== this.primaryState) {
-          this.router.navigate(['', { outlets: { panel: null } }], { replaceUrl: true });
+          this.closePanel();
         }
 
         // we need the primary state to detect whether it changes to clear the panel routing. however
@@ -75,6 +75,10 @@ export class NavAreasService {
       // store the current value in the local storage, so it persist across reloads.
       localStorage.setItem('menu', v ? 'true' : 'false');
     });
+  }
+
+  public closePanel() {
+    this.router.navigate(['', { outlets: { panel: null } }], { replaceUrl: true });
   }
 
   private findRouteLeaf(route: ActivatedRoute): ActivatedRoute {

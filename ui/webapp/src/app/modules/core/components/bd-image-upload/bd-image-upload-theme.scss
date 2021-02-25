@@ -1,0 +1,16 @@
+@import '~@angular/material/theming';
+
+@mixin bd-image-upload-theme($theme) {
+  $dark: map-get($theme, 'is-dark');
+
+  $palette: map-get($theme, 'main-toolbar');
+
+  .bd-image-upload-title-container {
+    background-color: mat-color($palette);
+    color: mat-color($palette, default-contrast);
+  }
+
+  .bd-image-upload-container {
+    background-color: if($dark, mat-color($mat-grey, 700), mat-color($mat-grey, 200));
+  }
+}
