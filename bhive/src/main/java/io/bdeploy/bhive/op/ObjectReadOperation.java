@@ -128,8 +128,8 @@ public class ObjectReadOperation extends BHive.TransactedOperation<TransferStati
             }
 
             // Read up-to the remaining size
-            int bytesToRead = Math.min(len, (int) remaining);
-            int numRead = in.read(b, off, bytesToRead);
+            long bytesToRead = Math.min(len, remaining);
+            int numRead = in.read(b, off, (int) bytesToRead);
             if (numRead == -1) {
                 throw new IOException("Unexpected end of stream. Expecting '" + remaining + "' bytes.");
             }
