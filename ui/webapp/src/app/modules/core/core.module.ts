@@ -56,6 +56,7 @@ import { BdDialogContentComponent } from './components/bd-dialog-content/bd-dial
 import { BdDialogToolbarComponent } from './components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from './components/bd-dialog/bd-dialog.component';
 import { BdFormInputComponent } from './components/bd-form-input/bd-form-input.component';
+import { BdFormSelectComponent } from './components/bd-form-select/bd-form-select.component';
 import { BdFormToggleComponent } from './components/bd-form-toggle/bd-form-toggle.component';
 import { BdImageUploadComponent } from './components/bd-image-upload/bd-image-upload.component';
 import { BdLoadingOverlayComponent } from './components/bd-loading-overlay/bd-loading-overlay.component';
@@ -130,6 +131,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdFormInputComponent,
     GroupIdValidator,
     BdFormToggleComponent,
+    BdFormSelectComponent,
   ],
   entryComponents: [
     ConnectionLostComponent,
@@ -257,6 +259,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdActionRowComponent,
     BdFormInputComponent,
     BdFormToggleComponent,
+    BdFormSelectComponent,
 
     // validators
     GroupIdValidator,

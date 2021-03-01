@@ -2,6 +2,12 @@
   padding: 0.86em 0.86em 0.86em 0.6em;
 }
 
+.local-slide-toggle {
+  position: relative;
+  top: -2px;
+  margin-bottom: -4px;
+}
+
 .bd-form-toggle-flex {
   border-radius: 4px 4px 0 0;
 }

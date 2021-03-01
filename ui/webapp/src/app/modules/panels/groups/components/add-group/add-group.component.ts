@@ -43,4 +43,8 @@ export class AddGroupComponent implements OnInit {
       }
     });
   }
+
+  test() {
+    console.log(this.group);
+  }
 }

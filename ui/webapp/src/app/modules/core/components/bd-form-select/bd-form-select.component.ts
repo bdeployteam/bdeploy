@@ -4,16 +4,19 @@ import { ErrorStateMatcher } from '@angular/material/core';
 import { bdValidationMessage } from '../../validators/messages';
 
 @Component({
-  selector: 'app-bd-form-input',
-  templateUrl: './bd-form-input.component.html',
-  styleUrls: ['./bd-form-input.component.css'],
+  selector: 'app-bd-form-select',
+  templateUrl: './bd-form-select.component.html',
+  styleUrls: ['./bd-form-select.component.css'],
   encapsulation: ViewEncapsulation.None,
 })
-export class BdFormInputComponent implements OnInit, ControlValueAccessor, ErrorStateMatcher {
+export class BdFormSelectComponent implements OnInit, ControlValueAccessor, ErrorStateMatcher {
   @Input() label: string;
   @Input() name: string;
+  @Input() values: string[] = [];
+  @Input() labels: string[];
   @Input() required: any;
   @Input() disabled: any;
+  @Input() allowNone = false;
   @Input() errorDisplay: 'touched' | 'immediate' = 'touched';
 
   /* template */ get value() {
@@ -22,6 +25,7 @@ export class BdFormInputComponent implements OnInit, ControlValueAccessor, Error
   /* template */ set value(v) {
     if (v !== this.internalValue) {
       this.internalValue = v;
+      this.onTouchedCb();
       this.onChangedCb(v);
     }
   }
@@ -37,10 +41,6 @@ export class BdFormInputComponent implements OnInit, ControlValueAccessor, Error
   }
 
   ngOnInit(): void {}
-
-  onBlur() {
-    this.onTouchedCb();
-  }
 
   writeValue(v: any): void {
     if (v !== this.internalValue) {
