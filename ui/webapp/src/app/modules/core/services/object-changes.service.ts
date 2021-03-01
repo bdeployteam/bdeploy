@@ -12,6 +12,7 @@ import {
 import { AuthenticationService } from './authentication.service';
 import { ConfigService } from './config.service';
 import { ErrorMessage, LoggingService } from './logging.service';
+import { SystemService } from './system.service';
 
 export const EMPTY_SCOPE: ObjectScope = { scope: [] };
 
@@ -32,7 +33,12 @@ export class ObjectChangesService {
   private _open$ = new BehaviorSubject<boolean>(false);
   private _refs: { [index: string]: RemoteRegistration } = {};
 
-  constructor(private cfg: ConfigService, private auth: AuthenticationService, private logging: LoggingService) {
+  constructor(
+    private cfg: ConfigService,
+    private auth: AuthenticationService,
+    private logging: LoggingService,
+    private systemService: SystemService
+  ) {
     this.ws = this.createWebSocket();
   }
 
@@ -59,6 +65,7 @@ export class ObjectChangesService {
     });
     _socket.addEventListener('error', (err) => {
       this.log.error(new ErrorMessage('Error on WebSocket', err));
+      this.systemService.backendUnreachable();
       this._error$.next(err);
     });
     _socket.addEventListener('message', (e) => this.onMessage(e));
