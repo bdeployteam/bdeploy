@@ -154,7 +154,7 @@ export class InstanceGroupAddEditComponent implements OnInit {
 
   // FIXME: TESTING
   toggleWide() {
-    this.nav.panelMaximized.next(!this.nav.panelMaximized.value);
+    this.nav.panelMaximized$.next(!this.nav.panelMaximized$.value);
   }
 
   public getErrorMessage(ctrl: AbstractControl): string {

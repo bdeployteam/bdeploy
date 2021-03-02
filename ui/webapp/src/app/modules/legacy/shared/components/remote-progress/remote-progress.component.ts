@@ -5,9 +5,9 @@ import { MatTreeNestedDataSource } from '@angular/material/tree';
 import { Subscription } from 'rxjs';
 import { ObjectChangeDetails, ObjectChangeType } from 'src/app/models/gen.dtos';
 import { ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
+import { ActivitiesService, ActivitySnapshotTreeNode } from '../../../../core/services/activities.service';
 import { LoggingService } from '../../../../core/services/logging.service';
 import { SystemService } from '../../../../core/services/system.service';
-import { ActivitySnapshotTreeNode, RemoteEventsService } from '../../services/remote-events.service';
 
 @Component({
   selector: 'app-remote-progress',
@@ -35,7 +35,7 @@ export class RemoteProgressComponent implements OnInit, OnDestroy {
   hasChild = (_: number, node: ActivitySnapshotTreeNode) => !!node.children && node.children.length > 0;
 
   constructor(
-    private eventsService: RemoteEventsService,
+    private eventsService: ActivitiesService,
     private loggingService: LoggingService,
     private bottomSheet: MatBottomSheet,
     private systemService: SystemService,
@@ -49,7 +49,7 @@ export class RemoteProgressComponent implements OnInit, OnDestroy {
   }
 
   private updateRemoteEvents(e: string) {
-    const list = this.eventsService.parseEvent(e, this._scope);
+    const list = this.eventsService.getActivitiesFromEvent(e, this._scope);
     if (list && list.length === 0) {
       this.remoteProgressElements = null;
       this.events.emit([]); // explicit "reset".

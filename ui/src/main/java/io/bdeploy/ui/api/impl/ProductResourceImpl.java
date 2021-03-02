@@ -55,12 +55,14 @@ import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.interfaces.plugin.VersionSorterService;
+import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 import io.bdeploy.ui.ProductDiscUsageService;
 import io.bdeploy.ui.api.ApplicationResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.ProductResource;
 import io.bdeploy.ui.dto.ConfigFileDto;
 import io.bdeploy.ui.dto.InstanceUsageDto;
+import io.bdeploy.ui.dto.ObjectChangeType;
 import io.bdeploy.ui.dto.ProductDto;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
@@ -92,6 +94,9 @@ public class ProductResourceImpl implements ProductResource {
 
     @Inject
     private VersionSorterService vss;
+
+    @Inject
+    private ChangeEventManager changes;
 
     private final BHive hive;
 
@@ -157,6 +162,8 @@ public class ProductResourceImpl implements ProductResource {
 
         hive.execute(new ManifestDeleteOperation().setToDelete(key));
         apps.forEach(a -> hive.execute(new ManifestDeleteOperation().setToDelete(a)));
+
+        changes.remove(ObjectChangeType.PRODUCT, key);
     }
 
     @Override
@@ -277,6 +284,9 @@ public class ProductResourceImpl implements ProductResource {
                         Status.BAD_REQUEST);
             }
             result.forEach(k -> pdus.invalidateDiscUsageCalculation(group, k.getName()));
+
+            // careful about scope, as uploading induces an extra scope...
+            result.forEach(k -> changes.create(ObjectChangeType.PRODUCT, k, new ObjectScope(this.group)));
             return result;
         } catch (IOException e) {
             throw new WebApplicationException("Failed to upload file: " + e.getMessage(), Status.BAD_REQUEST);
@@ -358,6 +368,11 @@ public class ProductResourceImpl implements ProductResource {
                 scan.addManifest(productKey);
             }
 
+            if (imported.isEmpty()) {
+                throw new WebApplicationException("All contained products are already present in the target.",
+                        Status.BAD_REQUEST);
+            }
+
             // Add all required artifacts
             Set<ObjectId> objectIds = zipHive.execute(scan);
             objectIds.forEach(copy::addObject);
@@ -384,6 +399,7 @@ public class ProductResourceImpl implements ProductResource {
         repoHive.execute(copy);
 
         pdus.invalidateDiscUsageCalculation(group, productName);
+        changes.create(ObjectChangeType.PRODUCT, key);
     }
 
     @Override

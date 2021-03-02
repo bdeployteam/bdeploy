@@ -19,6 +19,11 @@ export class BdDataCardComponent<T> implements OnInit, OnChanges {
   @Input() record: T;
 
   /**
+   * A callback which can provide a route for each row. If given, each row will behave like a router link
+   */
+  @Input() recordRoute: (r: T) => any[];
+
+  /**
    * Event fired if a record is clicked.
    */
   @Output() recordClick = new EventEmitter<T>();

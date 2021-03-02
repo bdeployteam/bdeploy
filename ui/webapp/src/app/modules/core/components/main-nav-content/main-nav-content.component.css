@@ -12,7 +12,8 @@
 
   overflow: hidden;
 
-  top: -32px;
+  /* see main-nav-top which is 114px high - we want to overlap that a little */
+  top: 84px;
   height: 100%;
 
   z-index: 10;

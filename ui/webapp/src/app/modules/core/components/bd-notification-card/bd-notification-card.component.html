@@ -1,0 +1,17 @@
+<div class="local-sizing" fxLayout="row" fxFlex="1 0 auto">
+  <div class="bd-glow-bg local-icon-area" fxFlex="0 0 auto" fxLayout="column" fxLayoutAlign="center center">
+    <mat-icon [ngClass]="warning ? 'bd-text-warn' : []">{{ icon }}</mat-icon>
+  </div>
+  <div fxFlex="2 0 auto" fxLayout="column" fxLayoutGap="5px" fxLayoutAlign="center stretch" class="local-content">
+    <div fxLayout="row" fxLayoutGap="5px" fxLayoutAlign="start center">
+      <div class="bd-text-ellipsis">
+        <strong>{{ header }}</strong>
+      </div>
+      <div fxFlex="1 0 auto" fxLayout="row" fxLayoutGap="5px" *ngIf="dismissable">
+        <div fxFlex="1 0 auto"></div>
+        <app-bd-micro-icon-button (click)="dismiss.emit(null)" [disabled]="disabled">close</app-bd-micro-icon-button>
+      </div>
+    </div>
+    <ng-content></ng-content>
+  </div>
+</div>

@@ -35,7 +35,7 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.subscription = this.areas.primaryRoute.subscribe((url) => {
+    this.subscription = this.areas.primaryRoute$.subscribe((url) => {
       if (!url) {
         return;
       }

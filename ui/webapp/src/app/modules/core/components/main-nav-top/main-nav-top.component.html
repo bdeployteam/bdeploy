@@ -1,13 +1,20 @@
-<div class="local-sizing bd-main-toolbar mat-elevation-z1">
+<div class="local-sizing local-main-toolbar mat-elevation-z1">
   <div class="local-item-bar" fxLayout="row" fxLayoutGap="8px">
-    <div class="local-side-sizing"></div>
-    <app-search-field
+    <div class="local-side-sizing" fxLayout="column" fxLayoutAlign="center center">
+      <app-bd-logo [size]="logoSize" class="local-logo-position"></app-bd-logo>
+    </div>
+    <app-bd-search-field
       fxFlex="1 0 auto"
       [(value)]="search.search"
       [disabled]="!(search.enabled() | async)"
-    ></app-search-field>
+    ></app-bd-search-field>
     <div class="local-side-sizing" fxLayout="row" fxLayoutGap="8px" fxLayoutAlign="center center">
-      <app-theme-chooser></app-theme-chooser>
+      <app-bd-panel-button
+        icon="format_color_fill"
+        text="Select Theme"
+        [inverseColor]="true"
+        [route]="['panels', 'user', 'themes']"
+      ></app-bd-panel-button>
       <ng-container>
         <app-user-info></app-user-info>
       </ng-container>

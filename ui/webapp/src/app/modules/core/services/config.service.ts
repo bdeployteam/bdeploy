@@ -10,6 +10,7 @@ import { environment } from 'src/environments/environment';
 import { BackendInfoDto, MinionMode, MinionStatusDto, PluginInfoDto, Version } from '../../../models/gen.dtos';
 import { suppressGlobalErrorHandling } from '../../legacy/shared/utils/server.utils';
 import { LoggingService, LogLevel } from './logging.service';
+import { ThemeService } from './theme.service';
 
 export interface AppConfig {
   version: Version;
@@ -26,6 +27,7 @@ export class ConfigService {
   newVersionInterval;
 
   constructor(
+    private themes: ThemeService /* dummy: required to bootstrap theming early! */,
     private http: HttpClient,
     private loggingService: LoggingService,
     iconRegistry: MatIconRegistry,

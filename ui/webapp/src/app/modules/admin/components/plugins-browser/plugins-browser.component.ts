@@ -11,8 +11,8 @@ import { Logger, LoggingService } from 'src/app/modules/core/services/logging.se
 import { MessageboxService } from 'src/app/modules/core/services/messagebox.service';
 import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
+import { UploadStatus } from 'src/app/modules/core/services/upload.service';
 import { FileUploadComponent } from 'src/app/modules/legacy/shared/components/file-upload/file-upload.component';
-import { UploadStatus } from 'src/app/modules/legacy/shared/services/upload.service';
 import { PluginAdminService } from '../../services/plugin-admin.service';
 
 @Component({

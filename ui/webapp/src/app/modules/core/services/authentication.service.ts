@@ -7,6 +7,7 @@ import { CredentialsApi, Permission, UserChangePasswordDto, UserInfo } from '../
 import { suppressGlobalErrorHandling } from '../../legacy/shared/utils/server.utils';
 import { ConfigService } from './config.service';
 import { Logger, LoggingService } from './logging.service';
+import { NavAreasService } from './nav-areas.service';
 
 @Injectable({
   providedIn: 'root',
@@ -14,9 +15,7 @@ import { Logger, LoggingService } from './logging.service';
 export class AuthenticationService {
   private log: Logger = this.loggingService.getLogger('AuthenticationService');
 
-  private tokenSubject: BehaviorSubject<string> = new BehaviorSubject(
-    this.cookies.check('st') ? this.cookies.get('st') : null
-  );
+  private tokenSubject: BehaviorSubject<string> = new BehaviorSubject(this.cookies.check('st') ? this.cookies.get('st') : null);
 
   public userInfoSubject: BehaviorSubject<UserInfo> = new BehaviorSubject(null);
 
@@ -24,7 +23,8 @@ export class AuthenticationService {
     private cfg: ConfigService,
     private http: HttpClient,
     private loggingService: LoggingService,
-    private cookies: CookieService
+    private cookies: CookieService,
+    private areas: NavAreasService
   ) {}
 
   authenticate(username: string, password: string): Observable<any> {
@@ -51,9 +51,7 @@ export class AuthenticationService {
         map(
           (result) => {
             this.log.debug('Fetching current user info...');
-            this.http
-              .get<UserInfo>(this.cfg.config.api + '/auth/user')
-              .pipe(tap((userInfo) => this.userInfoSubject.next(userInfo)));
+            this.http.get<UserInfo>(this.cfg.config.api + '/auth/user').pipe(tap((userInfo) => this.userInfoSubject.next(userInfo)));
           },
           (error) => {
             this.userInfoSubject.next(null);
@@ -75,8 +73,7 @@ export class AuthenticationService {
   }
 
   private getTokenPayload(): any {
-    const payload: any =
-      this.tokenSubject && this.tokenSubject.value ? JSON.parse(atob(this.tokenSubject.value)).p : null;
+    const payload: any = this.tokenSubject && this.tokenSubject.value ? JSON.parse(atob(this.tokenSubject.value)).p : null;
     return payload ? JSON.parse(atob(payload)) : null;
   }
 
@@ -92,6 +89,7 @@ export class AuthenticationService {
     this.log.info('destroying session for user "' + this.getUsername() + '"');
     this.tokenSubject.next(null);
     this.cookies.delete('st', '/');
+    window.location.reload();
   }
 
   getRecentInstanceGroups(): Observable<string[]> {
@@ -123,52 +121,55 @@ export class AuthenticationService {
     return false;
   }
 
+  isCurrentScopeAdmin(): boolean {
+    if (!this.areas.groupContext$.value) {
+      throw new Error('No scope currently active');
+    }
+    return this.isScopedAdmin(this.areas.groupContext$.value);
+  }
+
+  isCurrentScopeWrite(): boolean {
+    if (!this.areas.groupContext$.value) {
+      throw new Error('No scope currently active');
+    }
+    return this.isScopedWrite(this.areas.groupContext$.value);
+  }
+
+  isCurrentScopeRead(): boolean {
+    if (!this.areas.groupContext$.value) {
+      throw new Error('No scope currently active');
+    }
+    return this.isScopedRead(this.areas.groupContext$.value);
+  }
+
   isScopedAdmin(scope: string): boolean {
     if (this.userInfoSubject.value && this.userInfoSubject.value.permissions) {
-      return (
-        this.userInfoSubject.value.permissions.find(
-          (sc) => (sc.scope === null || sc.scope === scope) && this.ge(sc.permission, Permission.ADMIN)
-        ) != null
-      );
+      return this.userInfoSubject.value.permissions.find((sc) => (sc.scope === null || sc.scope === scope) && this.ge(sc.permission, Permission.ADMIN)) != null;
     }
     return false;
   }
 
   isScopedWrite(scope: string): boolean {
     if (this.userInfoSubject.value && this.userInfoSubject.value.permissions) {
-      return (
-        this.userInfoSubject.value.permissions.find(
-          (sc) => (sc.scope === null || sc.scope === scope) && this.ge(sc.permission, Permission.WRITE)
-        ) != null
-      );
+      return this.userInfoSubject.value.permissions.find((sc) => (sc.scope === null || sc.scope === scope) && this.ge(sc.permission, Permission.WRITE)) != null;
     }
     return false;
   }
 
   isScopedRead(scope: string): boolean {
     if (this.userInfoSubject.value && this.userInfoSubject.value.permissions) {
-      return (
-        this.userInfoSubject.value.permissions.find(
-          (sc) => (sc.scope === null || sc.scope === scope) && this.ge(sc.permission, Permission.READ)
-        ) != null
-      );
+      return this.userInfoSubject.value.permissions.find((sc) => (sc.scope === null || sc.scope === scope) && this.ge(sc.permission, Permission.READ)) != null;
     }
     return false;
   }
 
   private ge(c1: Permission, c2: Permission): boolean {
-    return (
-      c2 === Permission.READ ||
-      (c1 !== Permission.READ && c2 === Permission.WRITE) ||
-      (c1 === Permission.ADMIN && c2 === Permission.ADMIN)
-    );
+    return c2 === Permission.READ || (c1 !== Permission.READ && c2 === Permission.WRITE) || (c1 === Permission.ADMIN && c2 === Permission.ADMIN);
   }
 
   getUserInfo(): Observable<UserInfo> {
     this.log.debug('Fetching current user info...');
-    this.http
-      .get<UserInfo>(this.cfg.config.api + '/auth/user')
-      .subscribe((userInfo) => this.userInfoSubject.next(userInfo));
+    this.http.get<UserInfo>(this.cfg.config.api + '/auth/user').subscribe((userInfo) => this.userInfoSubject.next(userInfo));
     return this.userInfoSubject.asObservable();
   }
 

@@ -18,7 +18,7 @@ export class AdminGuard implements CanActivate {
         'DISMISS',
         { panelClass: 'error-snackbar' }
       );
-      this.router.navigate(['/l/instancegroup/browser']);
+      this.router.navigate(['/groups/browser']);
       return false;
     }
     return true;

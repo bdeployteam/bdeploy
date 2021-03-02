@@ -4,7 +4,7 @@ plugins {
   id 'maven-publish'
   id 'signing'
   id 'com.github.johnrengelman.shadow' version '6.1.0'
-  id "io.swagger.core.v3.swagger-gradle-plugin" version "2.1.6"
+  id "io.swagger.core.v3.swagger-gradle-plugin" version "2.1.7"
 }
 
 dependencies {
@@ -14,15 +14,13 @@ dependencies {
         project(":bhive"),
     )
     api(
-        'io.swagger.core.v3:swagger-annotations:2.1.6',
+        'io.swagger.core.v3:swagger-annotations:2.1.7',
     )
     swaggerDeps(
-        'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.12.1',
-        'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.1',
-        'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.1',
-        'org.apache.commons:commons-lang3:3.11',
-        'io.swagger.core.v3:swagger-jaxrs2:2.1.6',
-        'javax.ws.rs:javax.ws.rs-api:2.1.1',
+        'org.apache.commons:commons-lang3:3.7',
+        'io.swagger.core.v3:swagger-jaxrs2-jakarta:2.1.7',
+        'jakarta.ws.rs:jakarta.ws.rs-api:3.0.0',
+        'jakarta.servlet:jakarta.servlet-api:5.0.0'
     )
 }
 

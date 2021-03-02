@@ -1,0 +1,17 @@
+:host {
+  max-width: 24px;
+  max-height: 24px;
+}
+
+.local-button {
+  border: none;
+  outline: none;
+  padding: 0px;
+  margin: 0px;
+  background-color: inherit;
+
+  max-width: 24px;
+  max-height: 24px;
+
+  border-radius: 3px;
+}

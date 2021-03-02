@@ -1,0 +1,66 @@
+<app-bd-dialog [loadingWhen$]="loading$" [resetWhen$]="singleProduct.product$">
+  <app-bd-dialog-toolbar header="Details" [closeablePanel]="true"></app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px" *ngIf="singleProduct.product$ | async as prod">
+      <div><strong>ID:</strong>&nbsp;{{ prod.product }}</div>
+      <div><strong>Name:</strong>&nbsp;{{ prod.name }}</div>
+      <div><strong>Version:</strong>&nbsp;{{ prod.key.tag }}</div>
+      <div><strong>Vendor:</strong>&nbsp;{{ prod.vendor }}</div>
+      <div><strong>Used in:</strong></div>
+      <app-bd-data-display [records]="singleProduct.getUsedIn() | async" [columns]="columns">
+        <app-bd-no-data>
+          <strong>This version is not used in any instance.</strong>
+        </app-bd-no-data>
+      </app-bd-data-display>
+      <app-bd-panel-button [collapsed]="false" text="Labels" icon="label" [toggle]="false" [route]="['labels']" [relative]="true"></app-bd-panel-button>
+      <app-bd-panel-button
+        [collapsed]="false"
+        text="Application Templates"
+        icon="bookmark"
+        [toggle]="false"
+        [route]="['templates', 'application']"
+        [relative]="true"
+      ></app-bd-panel-button>
+      <app-bd-panel-button
+        [collapsed]="false"
+        text="Instance Templates"
+        icon="bookmarks"
+        [toggle]="false"
+        [route]="['templates', 'instance']"
+        [relative]="true"
+      ></app-bd-panel-button>
+      <app-bd-panel-button [collapsed]="false" text="Plugins" icon="extension" [toggle]="false" [route]="['plugins']" [relative]="true"></app-bd-panel-button>
+      <app-bd-button
+        [collapsed]="false"
+        text="Download"
+        icon="cloud_download"
+        (click)="doDownload()"
+        [loadingWhen$]="preparing$"
+        [disabled]="preparing$ | async"
+      ></app-bd-button>
+      <app-bd-button
+        [collapsed]="false"
+        text="Create new Instance"
+        icon="settings_system_daydream"
+        (click)="
+          areas.navigateBoth(
+            ['instances', 'browser', areas.groupContext$.value],
+            ['panels', 'instances', 'add'],
+            {},
+            { queryParams: { productKey: prod.key.name, productTag: prod.key.tag } }
+          )
+        "
+        [disabled]="!auth.isCurrentScopeAdmin()"
+      ></app-bd-button>
+      <app-bd-button
+        [collapsed]="false"
+        text="Delete"
+        icon="delete"
+        [inverseColor]="true"
+        (click)="doDelete(prod)"
+        [disabled]="!auth.isCurrentScopeAdmin() || (singleProduct.usedInLoading$ | async) || !!(singleProduct.getUsedIn() | async).length"
+      ></app-bd-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

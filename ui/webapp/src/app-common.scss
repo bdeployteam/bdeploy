@@ -28,7 +28,7 @@
   /* a typical toolbar on top of each page */
   .bd-page-toolbar {
     margin-bottom: 3px;
-    @include _mat-theme-overridable-elevation(1, $theme);
+    @include mat-overridable-elevation(1);
   }
 
   /* A scrolling container, which means that content to large for the current size will be reachable with scrollbars */
@@ -41,6 +41,16 @@
     overflow: hidden; // ellipsis only works if overflow is hidden
     white-space: nowrap;
     text-overflow: ellipsis;
+  }
+
+  /* Layout helper for small icons displayed in table cells and card's detail section */
+  .bd-small-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+
+    position: relative;
+    top: -1px;
   }
 }
 
@@ -56,7 +66,7 @@
     background: mat-color($background, card);
     color: mat-color($foreground, text);
 
-    @include _mat-theme-overridable-elevation(2, $theme);
+    @include mat-overridable-elevation(2);
   }
 
   .bd-toggle-highlight {
@@ -64,8 +74,7 @@
     color: var(--bd-main-bar-contrast);
   }
 
-  .bd-inverted-color,
-  .bd-main-toolbar {
+  .bd-inverted-color {
     background-color: var(--bd-main-bar);
     color: var(--bd-main-bar-contrast);
   }
@@ -96,6 +105,15 @@
 
   .bd-normal-backdrop {
     background-color: rgba($color: #000000, $alpha: 0.32);
+  }
+
+  .bd-text-warn {
+    color: var(--bd-warn);
+  }
+
+  .bd-glow-bg {
+    background: radial-gradient(circle, var(--bd-main-bar) 0%, var(--bd-main-bar-darker) 100%);
+    color: var(--bd-main-bar-contrast);
   }
 }
 

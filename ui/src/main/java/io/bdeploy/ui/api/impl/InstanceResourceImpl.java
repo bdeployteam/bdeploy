@@ -233,8 +233,15 @@ public class InstanceResourceImpl implements InstanceResource {
                 }
             }
 
+            ManagedMasterDto managedMaster = null;
+            if (minion.getMode() == MinionMode.CENTRAL) {
+                ManagedServersResource ms = rc.initResource(new ManagedServersResourceImpl());
+                managedMaster = ms.getServerForInstance(group, config.uuid, imKey.getTag());
+            }
+
             // Clear security token before sending via REST
-            result.add(InstanceDto.create(config, productDto, activeProduct, activeProductDto, newerVersionAvailable));
+            result.add(InstanceDto.create(config, productDto, activeProduct, activeProductDto, newerVersionAvailable,
+                    managedMaster));
         }
         return result;
     }

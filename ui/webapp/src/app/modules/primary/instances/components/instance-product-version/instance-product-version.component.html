@@ -1,0 +1,9 @@
+<div fxLayout="row" fxLayoutAlign="start center">
+  {{ record.instanceConfiguration.product.tag
+  }}<mat-icon
+    *ngIf="record.newerVersionAvailable"
+    class="bd-small-icon"
+    matTooltip="A newer product version is available"
+    >system_update</mat-icon
+  >
+</div>

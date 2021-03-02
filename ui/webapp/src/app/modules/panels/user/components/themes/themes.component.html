@@ -1,0 +1,31 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="Theme" [closeablePanel]="true"> </app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px">
+      <div class="bd-description-text">The selected theme is stored in the browser's local storage.</div>
+      <div
+        *ngFor="let t of themeService.getThemes()"
+        fxLayout="row"
+        fxLayoutGap="10px"
+        fxLayoutAlign="start center"
+        class="local-theme-item"
+        (click)="themeService.updateTheme(t)"
+        [style.cursor]="'pointer'"
+      >
+        <div [ngClass]="t + '-chooser'" fxFlex="56px">
+          <div class="preview-background">
+            <div class="preview-circle"></div>
+            <div class="preview-accent"></div>
+          </div>
+        </div>
+        <div fxFlex="1 0 auto">{{ themeService.getThemeDescription(t) }}</div>
+        <div [style.width.px]="36" fxLayout="column" fxLayoutAlign="center center">
+          <div class="preview-selected" *ngIf="t === themeService.getCurrentTheme()">
+            <mat-icon>check_circle_outline</mat-icon>
+          </div>
+        </div>
+      </div>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

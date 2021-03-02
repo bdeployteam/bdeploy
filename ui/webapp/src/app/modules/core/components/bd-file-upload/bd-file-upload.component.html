@@ -1,0 +1,19 @@
+<app-bd-notification-card
+  [header]="getHeader()"
+  [icon]="getIcon()"
+  [disabled]="isProcessing()"
+  [warning]="isFailed()"
+  (dismiss)="onDismiss()"
+>
+  <mat-progress-bar
+    *ngIf="isProcessing() || isUploading()"
+    [mode]="isUploading() ? 'determinate' : 'indeterminate'"
+    [value]="status.progressObservable | async"
+  ></mat-progress-bar>
+  <div *ngIf="isUploading() || isProcessing()" class="local-hint-text bd-description-text">
+    {{ processingHint$ | async }}
+  </div>
+  <div *ngIf="isFailed() || isFinished()" class="local-hint-text bd-description-text">
+    {{ isFailed() ? status.detail : this.resultEvaluator(status) }}
+  </div>
+</app-bd-notification-card>

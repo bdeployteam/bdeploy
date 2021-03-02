@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { LoginComponent } from './modules/core/components/login/login.component';
 import { MessageboxComponent } from './modules/core/components/messagebox/messagebox.component';
 import { AdminGuard } from './modules/core/guards/admin.guard';
@@ -10,7 +10,7 @@ const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'l/instancegroup/browser',
+    redirectTo: 'groups/browser',
   },
   {
     path: 'login',
@@ -24,13 +24,42 @@ const routes: Routes = [
   },
   {
     path: 'groups',
-    loadChildren: () => import('./modules/groups/groups.module').then((x) => x.GroupsModule),
+    loadChildren: () => import('./modules/primary/groups/groups.module').then((x) => x.GroupsModule),
     canActivate: [AuthGuard],
   },
   {
     path: 'panels/groups',
     outlet: 'panel',
     loadChildren: () => import('./modules/panels/groups/groups.module').then((x) => x.GroupsModule),
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'instances',
+    loadChildren: () => import('./modules/primary/instances/instances.module').then((x) => x.InstancesModule),
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'panels/instances',
+    outlet: 'panel',
+    loadChildren: () => import('./modules/panels/instances/instances.module').then((x) => x.InstancesModule),
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'products',
+    loadChildren: () => import('./modules/primary/products/products.module').then((x) => x.ProductsModule),
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'panels/products',
+    outlet: 'panel',
+    loadChildren: () => import('./modules/panels/products/products.module').then((x) => x.ProductsModule),
+    canActivate: [AuthGuard],
+  },
+
+  {
+    path: 'panels/user',
+    outlet: 'panel',
+    loadChildren: () => import('./modules/panels/user/user.module').then((x) => x.UserModule),
     canActivate: [AuthGuard],
   },
 
@@ -73,7 +102,13 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes, { useHash: true, relativeLinkResolution: 'corrected' })],
+  imports: [
+    RouterModule.forRoot(routes, {
+      useHash: true,
+      relativeLinkResolution: 'corrected',
+      preloadingStrategy: PreloadAllModules,
+    }),
+  ],
   exports: [RouterModule],
 })
 export class AppRoutingModule {}

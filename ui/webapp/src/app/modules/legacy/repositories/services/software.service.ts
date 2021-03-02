@@ -6,7 +6,7 @@ import { ManifestKey, OperatingSystem, UploadInfoDto } from '../../../../models/
 import { ConfigService } from '../../../core/services/config.service';
 import { DownloadService } from '../../../core/services/download.service';
 import { Logger, LoggingService } from '../../../core/services/logging.service';
-import { UploadService } from '../../../legacy/shared/services/upload.service';
+import { UploadService } from '../../../core/services/upload.service';
 import { suppressGlobalErrorHandling } from '../../../legacy/shared/utils/server.utils';
 import { SoftwareRepositoryService } from './software-repository.service';
 

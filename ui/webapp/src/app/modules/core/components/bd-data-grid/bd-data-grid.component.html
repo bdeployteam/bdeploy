@@ -8,13 +8,14 @@
   <app-bd-data-card
     [style.padding.px]="5"
     *ngFor="let record of recordsToDisplay$ | async"
-    fxFlex.lt-sm="0 0 100%"
-    fxFlex.sm="0 0 50%"
-    fxFlex.md="0 0 33.33%"
-    fxFlex.lg="0 0 25%"
-    fxFlex.gt-lg="0 0 20%"
+    [fxFlex.lt-sm]="getFlexAmount(1)"
+    [fxFlex.sm]="getFlexAmount(2)"
+    [fxFlex.md]="getFlexAmount(3)"
+    [fxFlex.lg]="getFlexAmount(4)"
+    [fxFlex.gt-lg]="getFlexAmount(5)"
     [record]="record"
     [columns]="_columns"
+    [recordRoute]="recordRoute"
     (recordClick)="recordClick.emit($event)"
   >
   </app-bd-data-card>
@@ -43,6 +44,7 @@
           fxFlex.gt-lg="0 0 20%"
           [record]="record"
           [columns]="_columns"
+          [recordRoute]="recordRoute"
           (recordClick)="recordClick.emit($event)"
         >
         </app-bd-data-card>

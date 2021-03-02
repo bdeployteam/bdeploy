@@ -3,13 +3,10 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { forkJoin, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { ObjectChangeDetails, ObjectChangeType, OperatingSystem, UploadInfoDto } from 'src/app/models/gen.dtos';
+import { ActivitiesService, ActivitySnapshotTreeNode } from 'src/app/modules/core/services/activities.service';
 import { LoggingService } from 'src/app/modules/core/services/logging.service';
 import { EMPTY_SCOPE, ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
-import {
-  ActivitySnapshotTreeNode,
-  RemoteEventsService,
-} from 'src/app/modules/legacy/shared/services/remote-events.service';
-import { UploadState, UploadStatus } from 'src/app/modules/legacy/shared/services/upload.service';
+import { UploadState, UploadStatus } from 'src/app/modules/core/services/upload.service';
 import { ImportState, ImportStatus, SoftwareService } from '../../services/software.service';
 
 enum STEPS {
@@ -52,7 +49,7 @@ export class SoftwareRepoFileUploadComponent implements OnInit, OnDestroy {
   constructor(
     @Inject(MAT_DIALOG_DATA) public repositoryName: string,
     public dialogRef: MatDialogRef<SoftwareRepoFileUploadComponent>,
-    private eventService: RemoteEventsService,
+    private eventService: ActivitiesService,
     private softwareService: SoftwareService,
     private loggingService: LoggingService,
     private changes: ObjectChangesService
@@ -72,7 +69,7 @@ export class SoftwareRepoFileUploadComponent implements OnInit, OnDestroy {
 
   onEventReceived(e: string) {
     // we accept all events as we don't know the scope we're looking for beforehand.
-    const rootEvents = this.eventService.parseEvent(e, []);
+    const rootEvents = this.eventService.getActivitiesFromEvent(e, []);
 
     // each received event's root scope must match a scope of an UploadStatus object.
     // discard all events where this is not true.

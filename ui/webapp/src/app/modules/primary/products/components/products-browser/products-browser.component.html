@@ -1,0 +1,37 @@
+<app-bd-dialog [loadingWhen$]="products.loading$">
+  <app-bd-dialog-toolbar header="Products of {{ (groups.current$ | async)?.title }}">
+    <div fxFlex="1 0 auto"></div>
+    <app-bd-data-grouping
+      [multiple]="!dataTable.grid"
+      (groupingChange)="dataTable.grouping = $event"
+      [definitions]="grouping"
+      [records]="products.products$ | async"
+      [defaultGrouping]="defaultGrouping"
+      presetKey="products"
+    ></app-bd-data-grouping>
+    <app-bd-button [isToggle]="true" icon="grid_view" text="Toggle Card Mode" [(toggle)]="dataTable.grid"></app-bd-button>
+    <mat-divider [vertical]="true"></mat-divider>
+    <app-bd-panel-button
+      icon="cloud_upload"
+      text="Upload Product"
+      [route]="['panels', 'products', 'upload']"
+      [disabled]="!auth.isCurrentScopeWrite()"
+    ></app-bd-panel-button>
+  </app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <app-bd-data-display
+      #dataTable
+      [columns]="productColumns.defaultProductsColumns"
+      [records]="products.products$ | async"
+      [recordRoute]="getRecordRoute"
+      [searchable]="true"
+    >
+      <app-bd-no-data>
+        <p>No products have been uploaded yet.</p>
+        <p>Start by uploading a new one.</p>
+        <app-bd-panel-button icon="cloud_upload" text="Upload Product" [collapsed]="false" [route]="['panels', 'products', 'upload']"></app-bd-panel-button>
+      </app-bd-no-data>
+    </app-bd-data-display>
+  </app-bd-dialog-content>
+</app-bd-dialog>

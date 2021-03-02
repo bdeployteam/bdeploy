@@ -10,6 +10,7 @@
       autocomplete="off"
       [required]="required"
       [disabled]="disabled"
+      [type]="type"
       [errorStateMatcher]="this"
     />
     <mat-error *ngIf="isInvalid()">{{ getErrorMessage() }}</mat-error>

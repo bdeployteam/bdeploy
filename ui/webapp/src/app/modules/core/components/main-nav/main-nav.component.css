@@ -5,5 +5,20 @@
 }
 
 .local-content-sizing {
+  /* see main-nav-top which is 114px high */
   max-height: calc(100% - 114px);
+}
+
+.local-unauth-content {
+  /* adjust to compensate empty space since no header visible */
+  position: absolute;
+
+  width: 80%;
+  left: 10%;
+
+  height: 75%;
+  top: calc(12.5% - 90px);
+
+  padding: 0px !important;
+  margin: 0px !important;
 }

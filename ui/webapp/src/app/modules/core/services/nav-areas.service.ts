@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Router } from '@angular/router';
+import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, NavigationExtras, Router } from '@angular/router';
 import { isString } from 'lodash-es';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
@@ -8,12 +8,15 @@ import { filter, map } from 'rxjs/operators';
   providedIn: 'root',
 })
 export class NavAreasService {
-  panelVisible = new BehaviorSubject<boolean>(false);
-  panelMaximized = new BehaviorSubject<boolean>(false);
-  menuMaximized = new BehaviorSubject<boolean>(false);
+  panelVisible$ = new BehaviorSubject<boolean>(false);
+  panelMaximized$ = new BehaviorSubject<boolean>(false);
+  menuMaximized$ = new BehaviorSubject<boolean>(false);
 
-  primaryRoute = new BehaviorSubject<ActivatedRouteSnapshot>(null);
-  panelRoute = new BehaviorSubject<ActivatedRouteSnapshot>(null);
+  primaryRoute$ = new BehaviorSubject<ActivatedRouteSnapshot>(null);
+  panelRoute$ = new BehaviorSubject<ActivatedRouteSnapshot>(null);
+
+  groupContext$ = new BehaviorSubject<string>(null);
+  instanceContext$ = new BehaviorSubject<string>(null);
 
   private primaryState: string;
 
@@ -40,17 +43,15 @@ export class NavAreasService {
         const panelSnapshot = this.findRouteLeaf(panel)?.snapshot;
 
         // update the states visible to the flyin part of the main nav.
-        this.panelVisible.next(panelSnapshot ? true : false);
-        this.panelMaximized.next(panelSnapshot && panelSnapshot.data && panelSnapshot.data['max']);
+        this.panelVisible$.next(panelSnapshot ? true : false);
+        this.panelMaximized$.next(panelSnapshot && panelSnapshot.data && panelSnapshot.data['max']);
 
         // if the component (name) in the primary outlet changed, we want to leave the panel navigation.
-        const newPrimaryState = isString(primarySnapshot.component)
-          ? primarySnapshot.component
-          : primarySnapshot.component.name;
+        const newPrimaryState = isString(primarySnapshot.component) ? primarySnapshot.component : primarySnapshot.component.name;
 
         // trigger updates of component names for those interested.
-        this.primaryRoute.next(primarySnapshot);
-        this.panelRoute.next(panelSnapshot);
+        this.primaryRoute$.next(primarySnapshot);
+        this.panelRoute$.next(panelSnapshot);
 
         // primaryState may not be set in case we are just navigating from the void, i.e. somebody opened a link
         // which includes a panel navigation.
@@ -63,22 +64,32 @@ export class NavAreasService {
         // such states through the browser back/forward buttons - it will we treated just like any external
         // (e.g. pasted) links.
         this.primaryState = panelSnapshot ? newPrimaryState : null;
+
+        // as a last step, we determine the current route context. this is done by extracting router parameterx
+        // with special names.
+        const group = primarySnapshot.paramMap.get('group');
+        if (this.groupContext$.value !== group) {
+          this.groupContext$.next(group);
+          this.instanceContext$.next(null);
+        }
+        const instance = primarySnapshot.paramMap.get('instance');
+        if (this.instanceContext$.value !== instance) {
+          this.instanceContext$.next(instance);
+        }
       });
-
-    if (localStorage.getItem('menu') === null) {
-      localStorage.setItem('menu', 'false');
-    }
-
-    const expand = localStorage.getItem('menu') === 'true';
-    this.menuMaximized.next(expand);
-    this.menuMaximized.subscribe((v) => {
-      // store the current value in the local storage, so it persist across reloads.
-      localStorage.setItem('menu', v ? 'true' : 'false');
-    });
   }
 
   public closePanel() {
     this.router.navigate(['', { outlets: { panel: null } }], { replaceUrl: true });
+  }
+
+  public navigateBoth(primary: any[], panel: any[], primaryExtra?: NavigationExtras, panelExtra?: NavigationExtras) {
+    this.router.navigate(primary, primaryExtra).then((nav) => {
+      if (nav) {
+        // need to perform a panel navigation separately to avoid closing the panel and to separate query params.
+        this.router.navigate(['', { outlets: { panel } }], panelExtra);
+      }
+    });
   }
 
   private findRouteLeaf(route: ActivatedRoute): ActivatedRoute {

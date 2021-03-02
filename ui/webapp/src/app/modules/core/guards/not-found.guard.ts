@@ -14,7 +14,7 @@ export class NotFoundGuard implements CanActivate {
       'DISMISS',
       { panelClass: 'error-snackbar' }
     );
-    this.router.navigate(['/l/instancegroup/browser']);
+    this.router.navigate(['/groups/browser']);
 
     return false; // never allow, we redirected right away above.
   }

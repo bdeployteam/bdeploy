@@ -1,29 +1,29 @@
-<div class="login-wrapper">
-  <form (ngSubmit)="onSubmit()">
-    <mat-card class="login-card">
-      <div class="header"><app-logo class="logo" color="main-toolbar" [size]="128"></app-logo></div>
-      <mat-card-content>
-        <div>
-          <mat-form-field>
-            <input matInput [formControl]="username" placeholder="Username" required />
-            <mat-error *ngIf="username.invalid" class="invalid-feedback">{{ getErrorMessage(username) }}</mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field>
-            <input matInput type="password" [formControl]="password" placeholder="Password" required />
-            <mat-error *ngIf="password.invalid" class="invalid-feedback">{{ getErrorMessage(password) }}</mat-error>
-          </mat-form-field>
-        </div>
-        <div *ngIf="loginFailed">
-          <mat-error class="invalid-login">{{ loginFailedMessage }}</mat-error>
-        </div>
-      </mat-card-content>
-      <mat-card-actions>
-        <button mat-raised-button [disabled]="loading" type="submit" color="accent" class="login-button">
-          Login
-        </button>
-      </mat-card-actions>
-    </mat-card>
-  </form>
-</div>
+<app-bd-dialog [loadingWhen$]="loading$" [hideContentWhenLoading]="false">
+  <app-bd-dialog-content>
+    <div class="local-sizing" fxLayout.gt-sm="row" fxLayout.lt-md="column" fxFlex="1 0 auto">
+      <div fxFlex="1 0 auto" class="local-logo-area bd-glow-bg" fxLayout="column" fxLayoutAlign="center center">
+        <app-bd-logo [size]="256" [ngClass]="logoClass" (click)="onLogoClick()"></app-bd-logo>
+      </div>
+      <div fxFlex="2 0 auto" fxLayout="column" fxLayoutAlign="center center">
+        <form #loginForm="ngForm" (ngSubmit)="onSubmit()" class="local-login-area" fxLayout="column" fxLayoutGap="10px">
+          <div class="local-header">BDeploy Login</div>
+          <app-bd-form-input [(ngModel)]="user" name="user" label="Username" required></app-bd-form-input>
+          <app-bd-form-input
+            [(ngModel)]="pass"
+            name="pass"
+            label="Password"
+            type="password"
+            required
+          ></app-bd-form-input>
+          <div fxLayout="row" fxLayoutAlign="start center">
+            <div *ngIf="loginFailed">
+              <mat-error>{{ loginFailedMessage }}</mat-error>
+            </div>
+            <div fxFlex="1 0 auto"></div>
+            <button mat-raised-button [disabled]="loginForm.invalid" type="submit" color="accent">Login</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

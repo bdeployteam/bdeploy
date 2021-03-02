@@ -1,0 +1,30 @@
+.local-drop-zone {
+  height: 100px;
+  border: 1px dashed #ccc;
+  box-sizing: border-box;
+}
+
+.local-drop-icon {
+  margin-right: 10px;
+}
+
+.local-drop-browse {
+  position: relative;
+  top: -1px;
+  cursor: pointer;
+  background: transparent;
+  padding: 0;
+  border: 0;
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--bd-primary);
+}
+
+.local-drop-zone-active {
+  border: 2px dashed var(--bd-primary) !important;
+}
+
+.local-error {
+  color: var(--bd-warn);
+  font-size: smaller;
+}

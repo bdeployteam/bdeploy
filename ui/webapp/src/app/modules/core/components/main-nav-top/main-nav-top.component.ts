@@ -1,3 +1,4 @@
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, OnInit } from '@angular/core';
 import { ConfigService } from '../../services/config.service';
 import { SearchService } from '../../services/search.service';
@@ -8,7 +9,13 @@ import { SearchService } from '../../services/search.service';
   styleUrls: ['./main-nav-top.component.css'],
 })
 export class MainNavTopComponent implements OnInit {
-  constructor(public cfgService: ConfigService, public search: SearchService) {}
+  /* template */ logoSize = 64;
+
+  constructor(public cfgService: ConfigService, public search: SearchService, private media: BreakpointObserver) {
+    this.media.observe('(max-width:1280px)').subscribe((bs) => {
+      this.logoSize = bs.matches ? 48 : 64;
+    });
+  }
 
   ngOnInit(): void {}
 }

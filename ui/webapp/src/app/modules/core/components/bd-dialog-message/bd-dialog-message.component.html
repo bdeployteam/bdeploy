@@ -1,0 +1,25 @@
+<div
+  *ngIf="message$ | async as msg"
+  class="local-sizing bd-normal-backdrop"
+  fxLayout="column"
+  fxLayoutAlign="center center"
+  [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0s' } }"
+>
+  <app-bd-notification-card class="mat-typography mat-elevation-z3" [dismissable]="false" [header]="msg.header" [icon]="msg.icon ? msg.icon : 'info'">
+    <div fxLayout="column" fxLayoutGap="10px">
+      <app-bd-dynamic [html]="msg.message"></app-bd-dynamic>
+      <ng-container *ngIf="!!msg.confirmation">
+        <app-bd-form-input [label]="msg.confirmationHint ? msg.confirmationHint : 'Enter confirmation'" [(ngModel)]="userConfirmation"></app-bd-form-input>
+      </ng-container>
+      <app-bd-action-row>
+        <app-bd-button
+          *ngFor="let action of msg.actions"
+          [text]="action.name"
+          [collapsed]="false"
+          (click)="complete(action.result)"
+          [disabled]="action.confirm && !(confirmed$ | async)"
+        ></app-bd-button>
+      </app-bd-action-row>
+    </div>
+  </app-bd-notification-card>
+</div>

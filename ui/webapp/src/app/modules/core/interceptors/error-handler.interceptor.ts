@@ -35,7 +35,7 @@ export class HttpErrorHandlerInterceptor implements HttpInterceptor {
             case 404:
               const msg = `Unfortunately, /${e.url} was not found (wrong URL or insufficient rights), we returned you to the safe-zone.`;
               this.snackbar.open(msg, 'DISMISS', { panelClass: 'error-snackbar' });
-              this.router.navigate(['/l/instancegroup/browser']);
+              this.router.navigate(['/groups/browser']);
               return of(null);
             case 499:
               // special version mismatch code.

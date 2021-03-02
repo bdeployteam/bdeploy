@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { delayedFadeIn, delayedFadeOut } from '../../animations/fades';
 
 @Component({
@@ -9,7 +9,7 @@ import { delayedFadeIn, delayedFadeOut } from '../../animations/fades';
   animations: [delayedFadeIn, delayedFadeOut],
 })
 export class BdLoadingOverlayComponent implements OnInit {
-  @Input() showWhen$: BehaviorSubject<boolean>;
+  @Input() showWhen$: Observable<boolean>;
 
   constructor() {}
 

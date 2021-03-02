@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ThemePalette } from '@angular/material/core';
 import { TooltipPosition } from '@angular/material/tooltip';
-import { fromEvent } from 'rxjs';
+import { BehaviorSubject, fromEvent, Observable } from 'rxjs';
 import { delayedFadeIn } from '../../animations/fades';
 import { scaleWidthFromZero } from '../../animations/sizes';
 
@@ -21,8 +21,10 @@ export class BdButtonComponent implements OnInit, AfterViewInit {
   @Input() inverseColor = false;
   @Input() disabled = false;
   @Input() isSubmit = true; // default in HTML *is* submit.
+  @Input() loadingWhen$: Observable<boolean> = new BehaviorSubject<boolean>(false);
 
   @Input() isToggle = false;
+  @Input() toggleOnClick = true;
   @Input() toggle = false;
   @Output() toggleChange = new EventEmitter<boolean>();
 
@@ -36,17 +38,18 @@ export class BdButtonComponent implements OnInit, AfterViewInit {
      * as otherwise events will still be generated even if the button is disabled.
      */
     fromEvent<MouseEvent>(this._elementRef.nativeElement, 'click', { capture: true }).subscribe((event) => {
-      if (this.isToggle) {
+      if (this.disabled) {
+        event.stopPropagation();
+        return;
+      }
+
+      if (this.isToggle && this.toggleOnClick) {
         this.toggle = !this.toggle;
 
         // the toggle change needs to be fired *after* the click event.
         setTimeout(() => this.toggleChange.emit(this.toggle));
 
         // we will not inhibit the click event here, as routerLink (etc.) will need it.
-      } else {
-        if (this.disabled) {
-          event.stopPropagation();
-        }
       }
     });
   }

@@ -31,6 +31,7 @@ import io.bdeploy.bhive.op.ImportTreeOperation;
 import io.bdeploy.bhive.op.InsertArtificialTreeOperation;
 import io.bdeploy.bhive.op.InsertManifestOperation;
 import io.bdeploy.bhive.op.InsertManifestRefOperation;
+import io.bdeploy.bhive.op.ManifestExistsOperation;
 import io.bdeploy.bhive.op.ObjectLoadOperation;
 import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.bhive.util.StorageHelper;
@@ -203,6 +204,11 @@ public class ProductManifestBuilder {
         String baseName = prod.product + '/';
         Manifest.Key prodKey = new Manifest.Key(baseName + "product", versions.version);
         ProductManifestBuilder builder = new ProductManifestBuilder(prod);
+
+        // 4a. check if product is already present
+        if (hive.execute(new ManifestExistsOperation().setManifest(prodKey))) {
+            throw new IllegalStateException("Product " + prodKey + " is already present.");
+        }
 
         // 5. find and import all applications to import.
         Path impBasePath = descriptorPath.getParent();

@@ -8,6 +8,7 @@ import io.bdeploy.jersey.ws.change.msg.ObjectChangeDto;
 public enum ObjectChangeType {
     ACTIVITIES,
     INSTANCE_GROUP,
+    PRODUCT,
     SOFTWARE_REPO,
     INSTANCE,
     MANAGED_MASTER_ATTACH

@@ -51,7 +51,7 @@ export class BdDataDisplayComponent<T> implements OnInit {
    * concatenate each value in each row object, regardless of whether it is displayed or not.
    * Then the search string is applied to this single string in a case insensitive manner.
    */
-  @Input() searchData: (search: string, data: T[]) => T[] = bdDataDefaultSearch;
+  @Input() searchData: (search: string, data: T[], columns: BdDataColumn<T>[]) => T[] = bdDataDefaultSearch;
 
   /**
    * Whether the data-table should register itself as a BdSearchable with the global SearchService.
@@ -78,6 +78,11 @@ export class BdDataDisplayComponent<T> implements OnInit {
    * Elements which should be checked.
    */
   @Input() checked: T[] = [];
+
+  /**
+   * A callback which can provide a route for each row. If given, each row will behave like a router link
+   */
+  @Input() recordRoute: (r: T) => any[];
 
   /**
    * Fires when the user changes the checked elements

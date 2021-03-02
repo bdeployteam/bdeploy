@@ -1,0 +1,12 @@
+<app-bd-button
+  [text]="text"
+  [icon]="icon"
+  [isToggle]="toggle"
+  [toggle]="!!rla?.isActive"
+  (toggleChange)="toggleRoute($event)"
+  [collapsed]="collapsed"
+  [inverseColor]="inverseColor"
+  [disabled]="disabled"
+  [routerLink]="['', { outlets: { panel: getRoute() } }]"
+  routerLinkActive
+></app-bd-button>

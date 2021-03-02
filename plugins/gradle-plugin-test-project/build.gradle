@@ -16,7 +16,7 @@ plugins {
 
     id 'io.bdeploy.gradle.plugin'
 
-    id "com.github.ben-manes.versions" version "0.36.0"
+    id "com.github.ben-manes.versions" version "0.38.0"
 }
 
 repositories {
@@ -37,10 +37,10 @@ dependencies {
     implementation 'com.google.guava:guava:30.1-jre'
 
     // Use JUnit Jupiter API for testing.
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'
 
     // Use JUnit Jupiter Engine for testing.
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.1'
 }
 
 application {

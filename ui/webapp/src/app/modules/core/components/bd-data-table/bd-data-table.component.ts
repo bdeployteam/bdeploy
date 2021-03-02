@@ -72,7 +72,10 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   /* template */ _visibleColumns: string[];
   @Input() set columns(val: BdDataColumn<T>[]) {
     // either unset or CARD is OK, only TABLE is not OK.
-    this._columns = val.filter((c) => c.display !== BdDataColumnDisplay.CARD);
+    this._columns = val.filter(
+      (c) => !c.display || c.display === BdDataColumnDisplay.TABLE || c.display === BdDataColumnDisplay.BOTH
+    );
+    this.updateColumnsToDisplay();
     this.updateMediaSubscriptions();
   }
 
@@ -90,7 +93,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
    * concatenate each value in each row object, regardless of whether it is displayed or not.
    * Then the search string is applied to this single string in a case insensitive manner.
    */
-  @Input() searchData: (search: string, data: T[]) => T[];
+  @Input() searchData: (search: string, data: T[], columns: BdDataColumn<T>[]) => T[];
 
   /**
    * Whether the data-table should register itself as a BdSearchable with the global SearchService.
@@ -117,6 +120,11 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
    * Elements which should be checked.
    */
   @Input() checked: T[] = [];
+
+  /**
+   * A callback which can provide a route for each row. If given, each row will behave like a router link
+   */
+  @Input() recordRoute: (r: T) => any[];
 
   /**
    * Fires when the user changes the checked elements
@@ -247,7 +255,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     // benchmarks show that this method is quite fast, event with a lot of data.
     // it takes roughly 100 (76 - 110) ms to generate a model for ~1000 records.
     this.dataSource.data = this.generateModel(
-      this.searchData(this.search, !!this.records ? [...this.records] : []),
+      this.searchData(this.search, !!this.records ? [...this.records] : [], this._columns),
       this.grouping,
       this.sort
     );

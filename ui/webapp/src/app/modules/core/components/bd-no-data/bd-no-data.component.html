@@ -1,5 +1,5 @@
 <div class="local-sizing" fxFlex="1 0 auto" fxLayout="column" fxLayoutAlign="center center">
-  <app-logo [size]="128"></app-logo>
+  <app-bd-logo *ngIf="header" [size]="128"></app-bd-logo>
   <div class="local-header" *ngIf="header">{{ header }}</div>
   <ng-content></ng-content>
 </div>

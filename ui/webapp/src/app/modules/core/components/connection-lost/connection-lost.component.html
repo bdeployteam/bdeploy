@@ -1,9 +1,10 @@
-<h1 mat-dialog-title>BDeploy Server Connection</h1>
-<div mat-dialog-content>
-  <div fxLayout="row" fxLayoutAlign="center center">
-    <div class="local-icon"><mat-icon>hourglass_empty</mat-icon></div>
+<div class="local-dialog" fxFlex="1 0 auto">
+  <div fxFlex="1 0 auto" class="local-logo-area bd-glow-bg" fxLayout="column" fxLayoutAlign="center center">
+    <app-bd-logo [size]="64" class="local-logo-pulse"></app-bd-logo>
   </div>
-  <div fxLayout="row" fxLayoutAlign="center center">
-    <div>Connection to server lost...</div>
+  <div fxFlex="2 0 auto" fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="30px">
+    <div class="local-header">Server Connection lost</div>
+    <mat-spinner [diameter]="24"></mat-spinner>
+    <div>Trying to re-establish connection...</div>
   </div>
 </div>

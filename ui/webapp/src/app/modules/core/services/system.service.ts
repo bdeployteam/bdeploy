@@ -1,5 +1,6 @@
+import { Overlay, OverlayRef } from '@angular/cdk/overlay';
+import { ComponentPortal } from '@angular/cdk/portal';
 import { Injectable } from '@angular/core';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { delay, retryWhen } from 'rxjs/operators';
 import { ConnectionLostComponent } from '../components/connection-lost/connection-lost.component';
 import { ConfigService } from './config.service';
@@ -9,33 +10,42 @@ import { ConfigService } from './config.service';
 })
 export class SystemService {
   private recovering = false;
+  private overlayRef: OverlayRef;
 
-  constructor(private configService: ConfigService, private dialog: MatDialog) {}
+  constructor(private configService: ConfigService, private overlay: Overlay) {}
 
   public backendUnreachable(): void {
     if (!this.recovering) {
       this.recovering = true;
 
-      const config: MatDialogConfig = {
-        minWidth: '300px',
-        maxWidth: '800px',
-        disableClose: true,
-        data: {},
-      };
+      this.overlayRef = this.overlay.create({
+        positionStrategy: this.overlay.position().global().centerHorizontally().centerVertically(),
+        hasBackdrop: true,
+      });
 
-      const dialogRef = this.dialog.open(ConnectionLostComponent, config);
+      const portal = new ComponentPortal(ConnectionLostComponent);
+      this.overlayRef.attach(portal);
 
       this.configService
         .tryGetBackendInfo()
         .pipe(retryWhen((errors) => errors.pipe(delay(2000))))
         .subscribe((r) => {
-          dialogRef.close();
+          this.closeOverlay();
           this.recovering = false;
 
           if (!this.configService.config) {
             window.location.reload();
           }
         });
+    }
+  }
+
+  /** Closes the overlay if present */
+  closeOverlay() {
+    if (this.overlayRef) {
+      this.overlayRef.detach();
+      this.overlayRef.dispose();
+      this.overlayRef = null;
     }
   }
 }

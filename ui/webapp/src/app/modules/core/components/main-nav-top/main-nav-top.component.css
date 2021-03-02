@@ -1,10 +1,10 @@
 .local-sizing {
-  position: relative;
+  position: absolute;
 
   top: 0px;
-  left: 0px;
+  left: 64px;
 
-  width: 100%;
+  width: calc(100% - 64px);
   height: 114px;
 
   z-index: 0;
@@ -14,8 +14,37 @@
   position: relative;
   width: 100%;
   top: 22px;
+  transition: top 0.2s ease;
 }
 
 .local-side-sizing {
-  width: min(110px, max(90px, 8%));
+  width: 110px;
+}
+
+.local-main-toolbar {
+  color: var(--bd-main-bar-contrast);
+  background: radial-gradient(circle at 60px 60px, var(--bd-main-bar) 0%, var(--bd-main-bar-darker) 256px);
+
+  /** this is not yet working on anything but edge */
+  transition: background 0.2s ease;
+}
+
+.local-logo-position {
+  padding-left: 10px;
+  padding-top: 0px;
+  transition: padding 0.2s ease;
+}
+
+@media only screen and (max-width: 1280px) {
+  .local-item-bar {
+    top: 16px;
+  }
+
+  .local-logo-position {
+    padding-top: 2px;
+  }
+
+  .local-main-toolbar {
+    background: radial-gradient(circle at 60px 44px, var(--bd-main-bar) 0%, var(--bd-main-bar-darker) 128px);
+  }
 }

@@ -5,10 +5,10 @@ import { cloneDeep } from 'lodash-es';
 import { forkJoin, Subscription } from 'rxjs';
 import { EMPTY_SCOPE, ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
 import { ManifestKey, ObjectChangeDetails, ObjectChangeType } from '../../../../../models/gen.dtos';
+import { ActivitiesService, ActivitySnapshotTreeNode } from '../../../../core/services/activities.service';
 import { LoggingService } from '../../../../core/services/logging.service';
 import { MessageboxService } from '../../../../core/services/messagebox.service';
-import { ActivitySnapshotTreeNode, RemoteEventsService } from '../../services/remote-events.service';
-import { UploadService, UploadState, UploadStatus, UrlParameter } from '../../services/upload.service';
+import { UploadService, UploadState, UploadStatus, UrlParameter } from '../../../../core/services/upload.service';
 
 export interface UploadData {
   title: string;
@@ -65,7 +65,7 @@ export class FileUploadComponent implements OnInit, OnDestroy {
     public dialogRef: MatDialogRef<FileUploadComponent>,
     public uploadService: UploadService,
     public messageBoxService: MessageboxService,
-    private eventService: RemoteEventsService,
+    private eventService: ActivitiesService,
     private loggingService: LoggingService,
     private changes: ObjectChangesService
   ) {}
@@ -233,7 +233,7 @@ export class FileUploadComponent implements OnInit, OnDestroy {
 
   onEventReceived(e: string) {
     // we accept all events as we don't know the scope we're looking for beforehand.
-    const rootEvents = this.eventService.parseEvent(e, []);
+    const rootEvents = this.eventService.getActivitiesFromEvent(e, []);
 
     // each received event's root scope must match a scope of an UploadStatus object.
     // discard all events where this is not true.

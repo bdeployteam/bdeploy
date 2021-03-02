@@ -1,0 +1,36 @@
+<app-bd-dialog [loadingWhen$]="groups.loading$">
+  <app-bd-dialog-toolbar header="Instance Groups">
+    <div fxFlex="1 0 auto"></div>
+    <app-bd-data-grouping
+      [multiple]="!dataTable.grid"
+      (groupingChange)="dataTable.grouping = $event"
+      [definitions]="grouping"
+      [records]="groups.groups$ | async"
+      presetKey="instanceGroups"
+    ></app-bd-data-grouping>
+    <app-bd-button [isToggle]="true" icon="grid_view" text="Toggle Card Mode" [(toggle)]="dataTable.grid"></app-bd-button>
+    <mat-divider [vertical]="true"></mat-divider>
+    <app-bd-panel-button icon="add" text="Add Instance Group" [route]="['panels', 'groups', 'add']" [disabled]="!isAddAllowed()"></app-bd-panel-button>
+  </app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <app-bd-data-display
+      #dataTable
+      [columns]="groupColumns.defaultGroupColumns"
+      [records]="groups.groups$ | async"
+      [recordRoute]="getRecordRoute"
+      [searchable]="true"
+    >
+      <app-bd-no-data header="Welcome to BDeploy!">
+        <p>
+          To get you started quickly, consider reading our
+          <a rel="noopener noreferrer" href="https://bdeploy.io/user/index.html#_getting_started" target="_blank">documentation</a>!
+        </p>
+        <ng-container *ngIf="isAddAllowed()">
+          <p>No instance groups have been created yet. Start by creating a new one.</p>
+          <app-bd-panel-button icon="add" text="Add Instance Group" [collapsed]="false" [route]="['panels', 'groups', 'add']"></app-bd-panel-button>
+        </ng-container>
+      </app-bd-no-data>
+    </app-bd-data-display>
+  </app-bd-dialog-content>
+</app-bd-dialog>

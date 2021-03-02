@@ -3,7 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { InstanceGroupConfiguration } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import { GroupsService } from 'src/app/modules/groups/services/groups.service';
+import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 
 @Component({
   selector: 'app-add-group',

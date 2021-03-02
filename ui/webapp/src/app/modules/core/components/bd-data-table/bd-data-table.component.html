@@ -7,12 +7,28 @@
     </caption>
 
     <tr mat-header-row *matHeaderRowDef="_visibleColumns; sticky: true"></tr>
-    <tr
-      mat-row
-      *matRowDef="let row; columns: _visibleColumns"
-      (click)="!checkMode && row.node.item ? recordClick.emit(row.node.item) : undefined"
-      [style.cursor]="!checkMode && !!row.node.item ? 'pointer' : 'auto'"
-    ></tr>
+
+    <!-- each record is a router link -->
+    <ng-container *ngIf="!!recordRoute">
+      <tr
+        mat-row
+        *matRowDef="let row; columns: _visibleColumns"
+        [routerLink]="!!row.node.item ? recordRoute(row.node.item) : []"
+        [routerLinkActive]="!!row.node.item ? 'mat-row-route-active' : []"
+        [style.cursor]="!checkMode && !!row.node.item ? 'pointer' : 'auto'"
+        class="local-row"
+      ></tr>
+    </ng-container>
+
+    <!-- no router links, delegate clicking to outside -->
+    <ng-container *ngIf="!recordRoute">
+      <tr
+        mat-row
+        *matRowDef="let row; columns: _visibleColumns"
+        (click)="!checkMode && row.node.item ? recordClick.emit(row.node.item) : undefined"
+        [style.cursor]="!checkMode && !!row.node.item ? 'pointer' : 'auto'"
+      ></tr>
+    </ng-container>
 
     <!-- In case no data is available (empty data, filter, etc.)-->
     <tr class="mat-row" *matNoDataRow>
@@ -21,15 +37,10 @@
 
     <ng-container *ngFor="let col of _columns; let i = index" [matColumnDef]="col.id">
       <!-- Column headers -->
-      <th
-        mat-header-cell
-        *matHeaderCellDef
-        [style.width]="col.width ? col.width : null"
-        [matTooltip]="col.description"
-        mat-sort-header
-        [disabled]="!sortData"
-      >
-        <div [style.marginLeft.px]="i === 0 && !!grouping?.length ? '40' : null">{{ col.name }}</div>
+      <th mat-header-cell *matHeaderCellDef [style.width]="col.width ? col.width : null" [matTooltip]="col.description" mat-sort-header [disabled]="!sortData">
+        <div [style.marginLeft.px]="i === 0 && !!grouping?.length ? '40' : null" class="bd-text-ellipsis">
+          {{ col.name }}
+        </div>
       </th>
 
       <!-- First column, can not be an action. -->
@@ -42,13 +53,7 @@
           [style.maxWidth]="col.width ? col.width : null"
         >
           <!-- Button to expand or collapse a group -->
-          <button
-            *ngIf="row.expandable"
-            mat-icon-button
-            [style.marginLeft.px]="row.level * 24"
-            (click)="treeControl.toggle(row)"
-            appClickStopPropagation
-          >
+          <button *ngIf="row.expandable" mat-icon-button [style.marginLeft.px]="row.level * 24" (click)="treeControl.toggle(row)" appClickStopPropagation>
             <mat-icon class="mat-icon-rtl-mirror">
               {{ treeControl.isExpanded(row) ? 'expand_more' : 'chevron_right' }}
             </mat-icon>
@@ -63,16 +68,14 @@
             [matBadgeHidden]="!row.expandable"
             matBadgeSize="small"
             matBadgeOverlap="false"
+            [matTooltip]="!row.expandable ? row.node.groupOrFirstColumn : null"
+            [matTooltipShowDelay]="1000"
           >
             <!-- Either simple label or check box in check mode -->
             <ng-container *ngIf="!checkMode">{{ row.node.groupOrFirstColumn }}</ng-container>
-            <mat-checkbox
-              *ngIf="checkMode"
-              [checked]="isChecked(row)"
-              [indeterminate]="isPartiallyChecked(row)"
-              (change)="toggleCheck(row)"
-              >{{ row.node.groupOrFirstColumn }}</mat-checkbox
-            >
+            <mat-checkbox *ngIf="checkMode" [checked]="isChecked(row)" [indeterminate]="isPartiallyChecked(row)" (change)="toggleCheck(row)">{{
+              row.node.groupOrFirstColumn
+            }}</mat-checkbox>
           </span>
         </td>
       </ng-container>
@@ -80,14 +83,18 @@
       <!-- Columns after the first one -->
       <ng-container *ngIf="i !== 0 && !col.action">
         <td
-          class="bd-text-ellipsis"
           mat-cell
           *matCellDef="let row"
           [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []"
           [style.maxWidth]="col.width ? col.width : null"
         >
           <ng-container *ngIf="!row.expandable">
-            <ng-container *ngIf="!isImageColumn(col)">{{ col.data(row.node.item) }}</ng-container>
+            <ng-container *ngIf="!isImageColumn(col)">
+              <div *ngIf="!col.component" class="bd-text-ellipsis" [matTooltip]="col.data(row.node.item)" [matTooltipShowDelay]="1000">
+                {{ col.data(row.node.item) }}
+              </div>
+              <app-bd-data-component-cell *ngIf="!!col.component" [componentType]="col.component" [record]="row.node.item"></app-bd-data-component-cell>
+            </ng-container>
             <ng-container *ngIf="isImageColumn(col)">
               <div fxLayout="row" fxLayoutAlign="start center">
                 <img class="local-row-image" [src]="getImageUrl(col, row.node.item)" />
@@ -103,7 +110,7 @@
           <div fxLayout="row" fxLayoutAlign="start center">
             <app-bd-button
               *ngIf="row.node.item"
-              [ngClass]="col.classes ? col.classes(row) : []"
+              [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []"
               [text]="col.data(row.node.item)"
               tooltip="below"
               [icon]="col.icon ? col.icon(row.node.item) : getUnknownIcon(col)"

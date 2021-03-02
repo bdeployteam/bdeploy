@@ -1,9 +1,0 @@
-<app-bd-button
-  [text]="text"
-  [icon]="icon"
-  [isToggle]="true"
-  [toggle]="!!rla?.isActive"
-  (toggleChange)="toggleRoute($event)"
-  [routerLink]="['', { outlets: { panel: route } }]"
-  routerLinkActive
-></app-bd-button>

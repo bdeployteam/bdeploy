@@ -14,6 +14,7 @@ export class BdFormInputComponent implements OnInit, ControlValueAccessor, Error
   @Input() name: string;
   @Input() required: any;
   @Input() disabled: any;
+  @Input() type: string;
   @Input() errorDisplay: 'touched' | 'immediate' = 'touched';
 
   /* template */ get value() {

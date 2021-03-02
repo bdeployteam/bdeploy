@@ -10,6 +10,12 @@ enum Theme {
   DARK_YELLOW = 'app-dark-yellow-theme',
 }
 
+const THEME_DESC = [];
+THEME_DESC[Theme.DEFAULT] = 'Light / Blue (default)';
+THEME_DESC[Theme.LIGHT_YELLOW] = 'Light / Yellow';
+THEME_DESC[Theme.DARK] = 'Dark / Blue';
+THEME_DESC[Theme.DARK_YELLOW] = 'Dark / Yellow';
+
 @Injectable({
   providedIn: 'root',
 })
@@ -25,6 +31,10 @@ export class ThemeService {
 
   public getThemes(): Theme[] {
     return Object.values(Theme);
+  }
+
+  public getThemeDescription(theme: Theme): string {
+    return THEME_DESC[theme];
   }
 
   public getCurrentTheme(): Theme {

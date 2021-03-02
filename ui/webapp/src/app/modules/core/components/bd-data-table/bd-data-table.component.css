@@ -6,3 +6,7 @@
 .local-row-image {
   max-height: 32px;
 }
+
+.local-row:focus {
+  outline: none;
+}

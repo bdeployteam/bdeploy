@@ -1,3 +1,7 @@
+.local-button-color {
+  color: inherit !important;
+}
+
 .local-button-collapsed {
   cursor: auto;
   padding: 0 6px;

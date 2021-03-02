@@ -2,7 +2,6 @@ import { animate, animateChild, group, query, state, style, transition, trigger 
 import { Component, HostBinding, Input, OnInit } from '@angular/core';
 import { MatSelectChange } from '@angular/material/select';
 import { delayedFadeIn, delayedFadeOut } from '../../animations/fades';
-import { easeX } from '../../animations/positions';
 import { scaleWidthFromZero, scaleWidthToZero } from '../../animations/sizes';
 import { AuthenticationService } from '../../services/authentication.service';
 import { ConfigService } from '../../services/config.service';
@@ -12,11 +11,10 @@ import { NavAreasService } from '../../services/nav-areas.service';
 @Component({
   selector: 'app-main-nav-menu',
   templateUrl: './main-nav-menu.component.html',
-  styleUrls: ['./main-nav-menu.component.css'],
+  styleUrls: ['./main-nav-menu.component.css', './main-nav-menu-hamburger.scss'],
   animations: [
     delayedFadeIn,
     delayedFadeOut,
-    easeX,
     scaleWidthFromZero,
     scaleWidthToZero,
     trigger('menuOpenClose', [
@@ -37,11 +35,11 @@ import { NavAreasService } from '../../services/nav-areas.service';
 })
 export class MainNavMenuComponent implements OnInit {
   @Input() set expanded(val: boolean) {
-    this.areas.menuMaximized.next(!this.areas.menuMaximized.value);
+    this.areas.menuMaximized$.next(!this.areas.menuMaximized$.value);
   }
 
   get expanded() {
-    return this.areas.menuMaximized.value;
+    return this.areas.menuMaximized$.value;
   }
 
   constructor(

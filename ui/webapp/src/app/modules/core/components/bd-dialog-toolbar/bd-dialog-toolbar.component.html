@@ -1,6 +1,6 @@
 <mat-toolbar class="bd-page-toolbar">
   <mat-toolbar-row fxLayoutGap="5px">
-    {{ header }}
+    <span [matTooltip]="header" [matTooltipShowDelay]="1000" class="bd-text-ellipsis">{{ header }}</span>
     <div fxLayout="row" fxLayoutGap="5px" fxFlex="1 0 auto">
       <ng-content></ng-content>
     </div>

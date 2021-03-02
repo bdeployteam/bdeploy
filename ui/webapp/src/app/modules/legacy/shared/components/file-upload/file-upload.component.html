@@ -13,18 +13,18 @@
     <mat-icon class="dropZoneIcon">cloud_upload</mat-icon>
     <span class="dropZoneText">Drop files to upload, or&nbsp;</span>
     <button [disabled]="uploading" (click)="addFiles()" class="browseButton">browse.</button>
-  </div>
-  <mat-dialog-content fxFlex>
     <input
       type="file"
       #file
-      style="display: none;"
+      style="display: none"
       (change)="onFilesAdded()"
       [accept]="getAcceptedFileTypes()"
       multiple
     />
+  </div>
+  <mat-dialog-content fxFlex>
     <table mat-table [dataSource]="files" class="mat-elevation-z8">
-      <caption style="display: none;">
+      <caption style="display: none">
         Files
       </caption>
       <tr mat-header-row *matHeaderRowDef="columnsToDisplay; sticky: true"></tr>

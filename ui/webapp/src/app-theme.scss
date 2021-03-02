@@ -102,6 +102,17 @@
   .mat-row:hover,
   .mat-card:hover {
     background-color: if($dark, #3e3e3e, #fafafa);
+    transition: background-color 0.2s ease;
+  }
+
+  .mat-row-route-active,
+  .mat-card-route-active {
+    background-color: if($dark, #525252, #dfdfdf);
+  }
+
+  .mat-row-route-active:hover,
+  .mat-card-route-active:hover {
+    background-color: if($dark, #575757, #d8d8d8);
   }
 
   a {
@@ -130,12 +141,13 @@
     --bd-text: #{mat-color($fg, 'text')};
     --bd-text-secondary: #{mat-color($fg, 'secondary-text')};
 
+    --bd-bg-dialog: #{mat-color($bg, 'dialog')};
     --bd-bg-toolbar: #{mat-color($bg, 'app-bar')};
 
     --bd-primary-darker: #{mat-color($primary, 'darker')};
     --bd-accent-darker: #{mat-color($accent, 'darker')};
     --bd-warn-darker: #{mat-color($warn, 'darker')};
-    --bd-main-bar-darker: #{mat-color($maintb, 'darker')};
+    --bd-main-bar-darker: #{mat-color($maintb, 900)};
 
     --bd-primary-contrast: #{mat-color($primary, 'default-contrast')};
     --bd-accent-contrast: #{mat-color($accent, 'default-contrast')};

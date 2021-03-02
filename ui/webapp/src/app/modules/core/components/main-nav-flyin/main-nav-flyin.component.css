@@ -2,20 +2,19 @@
   z-index: 11;
 
   position: absolute;
+  overflow: hidden;
 
   right: 0px;
   height: calc(100% - 114px);
+
+  top: 84px;
 
   display: flex;
   flex-direction: column;
 }
 
 .local-sizing {
-  position: relative;
-  overflow: hidden;
-
   height: calc(100% - 114px);
 
   flex: 1 0 auto;
-  top: -32px;
 }

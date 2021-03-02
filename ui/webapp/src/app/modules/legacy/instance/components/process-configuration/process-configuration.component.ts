@@ -39,6 +39,7 @@ import {
 } from '../../../../../models/gen.dtos';
 import { EditAppConfigContext, ProcessConfigDto } from '../../../../../models/process.model';
 import { MessageBoxMode } from '../../../../core/components/messagebox/messagebox.component';
+import { ActivitiesService, ActivitySnapshotTreeNode } from '../../../../core/services/activities.service';
 import { ConfigService } from '../../../../core/services/config.service';
 import { DownloadService } from '../../../../core/services/download.service';
 import { Logger, LoggingService } from '../../../../core/services/logging.service';
@@ -47,10 +48,6 @@ import { SystemService } from '../../../../core/services/system.service';
 import { FileUploadComponent } from '../../../../legacy/shared/components/file-upload/file-upload.component';
 import { LauncherService } from '../../../../legacy/shared/services/launcher.service';
 import { ProductService } from '../../../../legacy/shared/services/product.service';
-import {
-  ActivitySnapshotTreeNode,
-  RemoteEventsService,
-} from '../../../../legacy/shared/services/remote-events.service';
 import { HeaderTitleService } from '../../../core/services/header-title.service';
 import { RoutingHistoryService } from '../../../core/services/routing-history.service';
 import { ApplicationService } from '../../services/application.service';
@@ -180,7 +177,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     public downloadService: DownloadService,
     private dialog: MatDialog,
     private titleService: HeaderTitleService,
-    private eventService: RemoteEventsService,
+    private eventService: ActivitiesService,
     private systemService: SystemService,
     private dragulaService: DragulaService,
     private configService: ConfigService,

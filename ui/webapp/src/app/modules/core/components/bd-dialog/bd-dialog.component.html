@@ -5,7 +5,9 @@
 
     <!-- main content -->
     <div class="bd-scroll-container bd-default-padding mat-typography">
-      <ng-content *ngIf="!(loadingWhen$ | async)" select="app-bd-dialog-content"></ng-content>
+      <ng-content *ngIf="(showContent$ | async)" select="app-bd-dialog-content"></ng-content>
     </div>
   </div>
+
+  <app-bd-dialog-message></app-bd-dialog-message>
 </app-bd-loading-overlay>

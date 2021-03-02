@@ -47,6 +47,7 @@ import { BdActionRowComponent } from './components/bd-action-row/bd-action-row.c
 import { BdButtonPopupComponent } from './components/bd-button-popup/bd-button-popup.component';
 import { BdButtonComponent } from './components/bd-button/bd-button.component';
 import { BdDataCardComponent } from './components/bd-data-card/bd-data-card.component';
+import { BdDataComponentCellComponent } from './components/bd-data-component-cell/bd-data-component-cell.component';
 import { BdDataDisplayComponent } from './components/bd-data-display/bd-data-display.component';
 import { BdDataGridComponent } from './components/bd-data-grid/bd-data-grid.component';
 import { BdDataGroupingPanelComponent } from './components/bd-data-grouping-panel/bd-data-grouping-panel.component';
@@ -55,16 +56,25 @@ import { BdDataTableComponent } from './components/bd-data-table/bd-data-table.c
 import { BdDialogContentComponent } from './components/bd-dialog-content/bd-dialog-content.component';
 import { BdDialogToolbarComponent } from './components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from './components/bd-dialog/bd-dialog.component';
+import {
+  BdDynamicComponent,
+  DYNAMIC_BASE_MODULES as DYNAMIC_BASE_MODULES,
+} from './components/bd-dynamic/bd-dynamic.component';
+import { BdFileDropComponent } from './components/bd-file-drop/bd-file-drop.component';
+import { BdFileUploadComponent } from './components/bd-file-upload/bd-file-upload.component';
 import { BdFormInputComponent } from './components/bd-form-input/bd-form-input.component';
 import { BdFormSelectComponent } from './components/bd-form-select/bd-form-select.component';
 import { BdFormToggleComponent } from './components/bd-form-toggle/bd-form-toggle.component';
 import { BdImageUploadComponent } from './components/bd-image-upload/bd-image-upload.component';
 import { BdLoadingOverlayComponent } from './components/bd-loading-overlay/bd-loading-overlay.component';
+import { BdLogoComponent } from './components/bd-logo/bd-logo.component';
+import { BdMicroIconButtonComponent } from './components/bd-micro-icon-button/bd-micro-icon-button.component';
 import { BdNoDataComponent } from './components/bd-no-data/bd-no-data.component';
-import { BdPanelToggleButtonComponent } from './components/bd-panel-toggle-button/bd-panel-toggle-button.component';
+import { BdNotificationCardComponent } from './components/bd-notification-card/bd-notification-card.component';
+import { BdPanelToggleButtonComponent } from './components/bd-panel-button/bd-panel-button.component';
+import { BdSearchFieldComponent } from './components/bd-search-field/bd-search-field.component';
 import { ConnectionLostComponent } from './components/connection-lost/connection-lost.component';
 import { LoginComponent } from './components/login/login.component';
-import { LogoComponent } from './components/logo/logo.component';
 import { MainNavButtonComponent } from './components/main-nav-button/main-nav-button.component';
 import { MainNavContentComponent } from './components/main-nav-content/main-nav-content.component';
 import { MainNavFlyinComponent } from './components/main-nav-flyin/main-nav-flyin.component';
@@ -72,8 +82,6 @@ import { MainNavMenuComponent } from './components/main-nav-menu/main-nav-menu.c
 import { MainNavTopComponent } from './components/main-nav-top/main-nav-top.component';
 import { MainNavComponent } from './components/main-nav/main-nav.component';
 import { MessageboxComponent } from './components/messagebox/messagebox.component';
-import { SearchFieldComponent } from './components/search-field/search-field.component';
-import { ThemeChooserComponent } from './components/theme-chooser/theme-chooser.component';
 import { UserAvatarComponent } from './components/user-avatar/user-avatar.component';
 import { UserEditComponent } from './components/user-edit/user-edit.component';
 import { UserInfoComponent } from './components/user-info/user-info.component';
@@ -82,9 +90,11 @@ import { UserPickerComponent } from './components/user-picker/user-picker.compon
 import { ClickStopPropagationDirective } from './directives/click-stop-propagation.directive';
 import { FileDropDirective } from './directives/file-drop.directive';
 import { httpInterceptorProviders } from './interceptors';
+import { SafeHtmlPipe } from './pipes/safeHtml.pipe';
 import { VersionPipe } from './pipes/version.pipe';
 import { ConfigService } from './services/config.service';
 import { GroupIdValidator } from './validators/group-id';
+import { BdDialogMessageComponent } from './components/bd-dialog-message/bd-dialog-message.component';
 
 export function loadAppConfig(cfgService: ConfigService) {
   return () => cfgService.load();
@@ -93,8 +103,7 @@ export function loadAppConfig(cfgService: ConfigService) {
 @NgModule({
   declarations: [
     MainNavComponent,
-    LogoComponent,
-    ThemeChooserComponent,
+    BdLogoComponent,
     FileDropDirective,
     ClickStopPropagationDirective,
     ConnectionLostComponent,
@@ -104,12 +113,13 @@ export function loadAppConfig(cfgService: ConfigService) {
     UserEditComponent,
     UserPasswordComponent,
     VersionPipe,
+    SafeHtmlPipe,
     UserPickerComponent,
     MainNavTopComponent,
     MainNavFlyinComponent,
     MainNavMenuComponent,
     MainNavContentComponent,
-    SearchFieldComponent,
+    BdSearchFieldComponent,
     BdButtonComponent,
     MessageboxComponent,
     BdDataTableComponent,
@@ -132,6 +142,13 @@ export function loadAppConfig(cfgService: ConfigService) {
     GroupIdValidator,
     BdFormToggleComponent,
     BdFormSelectComponent,
+    BdDataComponentCellComponent,
+    BdDynamicComponent,
+    BdFileDropComponent,
+    BdFileUploadComponent,
+    BdMicroIconButtonComponent,
+    BdNotificationCardComponent,
+    BdDialogMessageComponent,
   ],
   entryComponents: [
     ConnectionLostComponent,
@@ -146,6 +163,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     /* make sure that ConfigService and HistoryService are initialize always on startup */
     { provide: APP_INITIALIZER, useFactory: loadAppConfig, deps: [ConfigService], multi: true },
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
+    { provide: DYNAMIC_BASE_MODULES, useValue: [CoreModule] },
   ],
   imports: [
     CommonModule,
@@ -192,6 +210,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     ClipboardModule,
   ],
   exports: [
+    // FIXME: go through and remove not required exports - other modules should MOSTLY use BD framework now.
     MatButtonModule,
     MatButtonToggleModule,
     MatToolbarModule,
@@ -234,13 +253,14 @@ export function loadAppConfig(cfgService: ConfigService) {
 
     // our own exported components - names need to be aligned.
     MainNavComponent,
-    LogoComponent, // FIXME: Remove
+    BdLogoComponent, // FIXME: Remove
     FileDropDirective,
     ClickStopPropagationDirective,
     LoginComponent,
     UserAvatarComponent,
     VersionPipe,
     MessageboxComponent,
+    BdDynamicComponent,
 
     // framework components to be used by others
     BdButtonComponent,
@@ -260,6 +280,10 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdFormInputComponent,
     BdFormToggleComponent,
     BdFormSelectComponent,
+    BdFileDropComponent,
+    BdFileUploadComponent,
+    BdMicroIconButtonComponent,
+    BdNotificationCardComponent,
 
     // validators
     GroupIdValidator,

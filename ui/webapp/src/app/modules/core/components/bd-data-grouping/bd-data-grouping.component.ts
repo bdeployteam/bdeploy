@@ -28,6 +28,9 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
   /** A callback providing the possible values for a grouping definition, which is likely very dependent on the actual data displayed in another component. */
   @Input() records: T[];
 
+  /** The initial grouping which should be used if nothing has been saved. */
+  @Input() defaultGrouping: BdDataGrouping<T>[];
+
   /** Emitted when the grouping changes. This may be emitted once after creating the component if a preset is loaded. */
   @Output() groupingChange = new EventEmitter<BdDataGrouping<T>[]>();
 
@@ -55,7 +58,11 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
 
   private loadPreset() {
     // always start with a single entry with no grouping selected.
-    this.groupings = [{ definition: null, selected: [] }];
+    if (!!this.defaultGrouping?.length) {
+      this.groupings = this.defaultGrouping;
+    } else {
+      this.groupings = [{ definition: null, selected: [] }];
+    }
 
     if (!this.presetKey) {
       return;

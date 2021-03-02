@@ -1,51 +1,68 @@
 <div class="bd-rect-card local-sizing" fxLayout="column" fxLayoutGap="5px">
   <!-- Logo & Expand Button -->
-  <button
-    [@headerOpenClose]="animationState"
-    mat-raised-button
-    class="bd-inverted-color mat-elevation-z2 local-logo"
-    (click)="expanded = !expanded"
-  >
-    <div fxLayout="row" fxLayoutAlign="flex-start center">
-      <app-logo [size]="56" class="local-logo-img"></app-logo>
-      <div
-        *ngIf="expanded"
-        class="local-logo-text"
-        [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
-        [@delayedFadeOut]="{ value: 'dummy', params: { delay: '0s' } }"
-        [@scaleWidthFromZero]
-        [@scaleWidthToZero]
-      >
-        BDeploy
-      </div>
-      <div
-        *ngIf="!expanded"
-        class="local-logo-hint"
-        [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
-        [@delayedFadeOut]="{ value: 'dummy', params: { delay: '0s' } }"
-      >
-        &#xBB;
+  <div fxLayout="row" [style.height.px]="100" [style.padding-bottom.px]="14" fxLayoutAlign="center center">
+    <div class="local-hamburger-button">
+      <div class="hamburger hamburger--arrow" [ngClass]="{ 'is-active': expanded }" (click)="expanded = !expanded">
+        <span class="hamburger-box">
+          <span class="hamburger-inner"></span>
+        </span>
       </div>
     </div>
-  </button>
+    <h2
+      *ngIf="expanded"
+      class="local-header"
+      [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
+      [@delayedFadeOut]="{ value: 'dummy', params: { delay: '0s' } }"
+    >
+      BDeploy
+    </h2>
+  </div>
 
   <!-- Menu Buttons -->
   <app-main-nav-button
     icon="view_carousel"
     text="Instance Groups"
     [collapsed]="!expanded"
-    [routerLink]="['/groups/browser']"
+    [route]="['/groups/browser']"
   ></app-main-nav-button>
 
   <app-main-nav-button
     icon="storage"
     text="Software Repositories"
     [collapsed]="!expanded"
-    [routerLink]="['/l/softwarerepo/browser']"
+    [route]="['/l/softwarerepo/browser']"
   ></app-main-nav-button>
+
+  <mat-divider [style.position]="'relative'"></mat-divider>
+
+  <app-main-nav-button
+    [visible]="!!(areas.groupContext$ | async)"
+    icon="settings_system_daydream"
+    text="Instances"
+    [collapsed]="!expanded"
+    [route]="['/instances', 'browser', areas.groupContext$.value]"
+  ></app-main-nav-button>
+
+  <app-main-nav-button
+    [visible]="!!(areas.groupContext$ | async)"
+    icon="apps"
+    text="Products"
+    [collapsed]="!expanded"
+    [route]="['/products', 'browser', areas.groupContext$.value]"
+  ></app-main-nav-button>
+
+  <mat-divider
+    *ngIf="areas.groupContext$ | async"
+    [style.position]="'relative'"
+    [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0s' } }"
+    [@delayedFadeOut]="{ value: 'dummy', params: { delay: '0s' } }"
+  ></mat-divider>
 
   <!-- Footer -->
   <div fxFlex="1 0 auto"></div>
+  <div *ngIf="!expanded" class="local-server-type" [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.5s' } }">
+    {{ cfgService.config.mode }}
+  </div>
   <div
     fxLayout="column"
     fxLayoutGap="5px"

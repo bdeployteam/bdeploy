@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ActivitySnapshot } from '../../../../../models/gen.dtos';
+import { ActivitiesService, ActivitySnapshotTreeNode } from '../../../../core/services/activities.service';
 import { AuthenticationService } from '../../../../core/services/authentication.service';
-import { ActivitySnapshotTreeNode, RemoteEventsService } from '../../services/remote-events.service';
 
 @Component({
   selector: 'app-remote-progress-element',
@@ -9,7 +9,7 @@ import { ActivitySnapshotTreeNode, RemoteEventsService } from '../../services/re
   styleUrls: ['./remote-progress-element.component.css'],
 })
 export class RemoteProgressElementComponent implements OnInit {
-  constructor(private events: RemoteEventsService, private authService: AuthenticationService) {}
+  constructor(private events: ActivitiesService, private authService: AuthenticationService) {}
 
   @Input() element: ActivitySnapshotTreeNode;
 

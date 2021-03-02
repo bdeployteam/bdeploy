@@ -1,0 +1,13 @@
+.local-sizing {
+  min-height: 100px;
+  background-color: var(--bd-bg-toolbar);
+}
+
+.local-icon-area {
+  width: 64px;
+}
+
+.local-content {
+  padding: 10px;
+  width: 266px;
+}
