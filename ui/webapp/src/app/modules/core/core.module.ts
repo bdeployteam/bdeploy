@@ -70,7 +70,7 @@ import { BdLogoComponent } from './components/bd-logo/bd-logo.component';
 import { BdMicroIconButtonComponent } from './components/bd-micro-icon-button/bd-micro-icon-button.component';
 import { BdNoDataComponent } from './components/bd-no-data/bd-no-data.component';
 import { BdNotificationCardComponent } from './components/bd-notification-card/bd-notification-card.component';
-import { BdPanelToggleButtonComponent } from './components/bd-panel-button/bd-panel-button.component';
+import { BdPanelButtonComponent } from './components/bd-panel-button/bd-panel-button.component';
 import { BdSearchFieldComponent } from './components/bd-search-field/bd-search-field.component';
 import { ConnectionLostComponent } from './components/connection-lost/connection-lost.component';
 import { LoginComponent } from './components/login/login.component';
@@ -82,9 +82,6 @@ import { MainNavTopComponent } from './components/main-nav-top/main-nav-top.comp
 import { MainNavComponent } from './components/main-nav/main-nav.component';
 import { MessageboxComponent } from './components/messagebox/messagebox.component';
 import { UserAvatarComponent } from './components/user-avatar/user-avatar.component';
-import { UserEditComponent } from './components/user-edit/user-edit.component';
-import { UserInfoComponent } from './components/user-info/user-info.component';
-import { UserPasswordComponent } from './components/user-password/user-password.component';
 import { UserPickerComponent } from './components/user-picker/user-picker.component';
 import { ClickStopPropagationDirective } from './directives/click-stop-propagation.directive';
 import { FileDropDirective } from './directives/file-drop.directive';
@@ -93,6 +90,7 @@ import { SafeHtmlPipe } from './pipes/safeHtml.pipe';
 import { VersionPipe } from './pipes/version.pipe';
 import { ConfigService } from './services/config.service';
 import { GroupIdValidator } from './validators/group-id';
+import { PasswordVerificationValidator } from './validators/password-verification';
 
 export function loadAppConfig(cfgService: ConfigService) {
   return () => cfgService.load();
@@ -106,10 +104,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     ClickStopPropagationDirective,
     ConnectionLostComponent,
     LoginComponent,
-    UserInfoComponent,
     UserAvatarComponent,
-    UserEditComponent,
-    UserPasswordComponent,
     VersionPipe,
     SafeHtmlPipe,
     UserPickerComponent,
@@ -133,7 +128,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdDialogContentComponent,
     MainNavButtonComponent,
     BdNoDataComponent,
-    BdPanelToggleButtonComponent,
+    BdPanelButtonComponent,
     BdImageUploadComponent,
     BdActionRowComponent,
     BdFormInputComponent,
@@ -148,8 +143,8 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdNotificationCardComponent,
     BdDialogMessageComponent,
     BdGuideComponent,
+    PasswordVerificationValidator,
   ],
-  entryComponents: [ConnectionLostComponent, UserEditComponent, UserPasswordComponent, UserPickerComponent, MessageboxComponent],
   providers: [
     httpInterceptorProviders,
     CookieService,
@@ -243,6 +238,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     ReactiveFormsModule,
     FlexLayoutModule,
     LayoutModule,
+    ClipboardModule,
 
     // our own exported components - names need to be aligned.
     MainNavComponent,
@@ -267,7 +263,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdDialogToolbarComponent,
     BdDialogContentComponent,
     BdNoDataComponent,
-    BdPanelToggleButtonComponent,
+    BdPanelButtonComponent,
     BdImageUploadComponent,
     BdActionRowComponent,
     BdFormInputComponent,
@@ -281,6 +277,7 @@ export function loadAppConfig(cfgService: ConfigService) {
 
     // validators
     GroupIdValidator,
+    PasswordVerificationValidator,
   ],
 })
 export class CoreModule {}

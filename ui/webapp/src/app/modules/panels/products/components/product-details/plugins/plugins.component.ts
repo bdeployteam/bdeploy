@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
 import { PluginInfoDto } from 'src/app/models/gen.dtos';
-import { ProductDetailsService } from '../../services/product-details.service';
+import { ProductDetailsService } from '../../../services/product-details.service';
 
 const pluginNameColumn: BdDataColumn<PluginInfoDto> = {
   id: 'name',
@@ -25,12 +25,12 @@ const pluginOIDColumn: BdDataColumn<PluginInfoDto> = {
 };
 
 @Component({
-  selector: 'app-product-details-plugins',
-  templateUrl: './product-details-plugins.component.html',
-  styleUrls: ['./product-details-plugins.component.css'],
+  selector: 'app-plugins',
+  templateUrl: './plugins.component.html',
+  styleUrls: ['./plugins.component.css'],
   providers: [ProductDetailsService],
 })
-export class ProductDetailsPluginsComponent implements OnInit {
+export class PluginsComponent implements OnInit {
   /* template */ columns: BdDataColumn<PluginInfoDto>[] = [pluginNameColumn, pluginVersionColumn, pluginOIDColumn];
 
   constructor(public singleProduct: ProductDetailsService) {}

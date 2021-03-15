@@ -57,7 +57,6 @@ export class BdDialogMessageComponent implements OnInit, OnDestroy {
 
   private _userConfirmation;
   set userConfirmation(val: string) {
-    console.log(val);
     if (val === this.message$.value.confirmation) {
       this.confirmed$.next(true);
     }
@@ -92,7 +91,6 @@ export class BdDialogMessageComponent implements OnInit, OnDestroy {
   }
 
   /* template */ onConfirmationUpdate(value) {
-    console.log(value);
     if (this.message$.value.confirmation === value) {
       this.confirmed$.next(true);
     }

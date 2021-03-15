@@ -25,7 +25,6 @@ import { InstanceGroupService } from './services/instance-group.service';
     ProductsCopyComponent,
   ],
   providers: [ProductService, { provide: 'ProductBasePath', useValue: InstanceGroupService.BASEPATH }],
-  entryComponents: [InstanceGroupDeleteDialogComponent, ProductsCopyComponent],
   imports: [CommonModule, SharedModule, CoreModule, CoreLegacyModule, InstanceGroupRoutingModule],
 })
 export class InstanceGroupModule {}

@@ -1,0 +1,31 @@
+<app-bd-dialog [loadingWhen$]="loading$">
+  <app-bd-dialog-toolbar header="Edit User" [closeablePanel]="true"></app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px">
+      <div fxLayout="row" fxLayoutAlign="center center">
+        <app-user-avatar
+          [gravatar]="!settings.isLoading() && settings.getSettings().general.enableGravatar"
+          [avatarSize]="64"
+          [hostSize]="64"
+          [mail]="mail$ | async"
+        ></app-user-avatar>
+      </div>
+      <form fxLayout="column" *ngIf="!!user && !user.external" fxLayoutGap="10px" #editForm="ngForm" (ngSubmit)="onSave()">
+        <app-bd-form-input [(ngModel)]="user.name" name="name" label="Username" [disabled]="true"></app-bd-form-input>
+        <app-bd-form-input [(ngModel)]="user.fullName" name="fullName" label="Full Name"></app-bd-form-input>
+        <app-bd-form-input [(ngModel)]="user.email" (ngModelChange)="updateMail()" name="email" label="E-Mail Address"></app-bd-form-input>
+        <app-bd-button [inverseColor]="true" type="submit" text="SAVE" [disabled]="editForm.invalid" [collapsed]="false"></app-bd-button>
+      </form>
+      <app-bd-panel-button
+        #backButton
+        [collapsed]="false"
+        text="Back to overview"
+        icon="arrow_back"
+        [toggle]="false"
+        [route]="['..']"
+        [relative]="true"
+      ></app-bd-panel-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

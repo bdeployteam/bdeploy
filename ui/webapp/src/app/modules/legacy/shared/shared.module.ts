@@ -29,7 +29,6 @@ import { PortValidatorDirective } from './validators/port.validator';
     DiffEditorComponent,
     TextboxComponent,
   ],
-  entryComponents: [FileUploadComponent, CustomAttributeEditComponent, CustomAttributeValueComponent],
   imports: [CommonModule, CoreModule, NgTerminalModule, MonacoEditorModule.forRoot()],
   exports: [
     RemoteProgressComponent,

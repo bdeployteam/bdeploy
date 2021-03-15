@@ -22,15 +22,6 @@ import { ServersRoutingModule } from './servers-routing.module';
     ProductSyncComponent,
     ManagedServerEditComponent,
   ],
-  entryComponents: [ManagedServerEditComponent],
-  imports: [
-    CommonModule,
-    SharedModule,
-    CoreModule,
-    CoreLegacyModule,
-    InstanceGroupModule,
-    ServersRoutingModule,
-    DragulaModule.forRoot(),
-  ],
+  imports: [CommonModule, SharedModule, CoreModule, CoreLegacyModule, InstanceGroupModule, ServersRoutingModule, DragulaModule.forRoot()],
 })
 export class ServersModule {}

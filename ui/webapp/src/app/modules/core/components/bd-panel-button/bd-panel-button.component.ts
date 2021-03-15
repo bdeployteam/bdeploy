@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRouteSnapshot, RouterLinkActive } from '@angular/router';
+import { ActivatedRouteSnapshot, RouterLink, RouterLinkActive } from '@angular/router';
 import { NavAreasService } from '../../services/nav-areas.service';
 
 @Component({
@@ -7,7 +7,7 @@ import { NavAreasService } from '../../services/nav-areas.service';
   templateUrl: './bd-panel-button.component.html',
   styleUrls: ['./bd-panel-button.component.css'],
 })
-export class BdPanelToggleButtonComponent implements OnInit {
+export class BdPanelButtonComponent implements OnInit {
   @Input() icon: string;
   @Input() text: string;
   @Input() route: any[] = ['.'];
@@ -17,6 +17,7 @@ export class BdPanelToggleButtonComponent implements OnInit {
   @Input() inverseColor = false;
   @Input() disabled = false;
 
+  @ViewChild(RouterLink) private rl: RouterLink;
   @ViewChild(RouterLinkActive) /* template */ rla: RouterLinkActive;
 
   constructor(public areas: NavAreasService) {}
@@ -48,5 +49,10 @@ export class BdPanelToggleButtonComponent implements OnInit {
     if (!on) {
       this.areas.closePanel();
     }
+  }
+
+  /** Manually trigger the configured navigation */
+  public onClick(): boolean {
+    return this.rl.onClick();
   }
 }

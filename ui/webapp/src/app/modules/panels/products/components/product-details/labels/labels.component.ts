@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
 import { ProductDto } from 'src/app/models/gen.dtos';
-import { ProductDetailsService } from '../../services/product-details.service';
+import { ProductDetailsService } from '../../../services/product-details.service';
 
 interface LabelRecord {
   key: string;
@@ -23,12 +23,12 @@ const labelValueColumn: BdDataColumn<LabelRecord> = {
 };
 
 @Component({
-  selector: 'app-product-details-labels',
-  templateUrl: './product-details-labels.component.html',
-  styleUrls: ['./product-details-labels.component.css'],
+  selector: 'app-labels',
+  templateUrl: './labels.component.html',
+  styleUrls: ['./labels.component.css'],
   providers: [ProductDetailsService],
 })
-export class ProductDetailsLabelsComponent implements OnInit {
+export class LabelsComponent implements OnInit {
   constructor(public singleProduct: ProductDetailsService) {}
 
   /* template */ columns: BdDataColumn<LabelRecord>[] = [labelKeyColumn, labelValueColumn];

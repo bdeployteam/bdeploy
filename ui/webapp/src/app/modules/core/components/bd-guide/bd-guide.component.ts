@@ -77,7 +77,6 @@ export class BdGuideComponent implements OnInit, AfterViewInit {
     this.closeOverlay();
 
     const toHighlight = this.element.element.element;
-    console.log(toHighlight);
 
     if (!!toHighlight) {
       const clientRect = toHighlight.nativeElement.getBoundingClientRect();

@@ -42,7 +42,7 @@ export class GuideService {
   private state: GuidedElementRef = null;
 
   private guides: Guide[] = [];
-  private requestedType: GuideType;
+  public currentType: GuideType;
 
   constructor(private authService: AuthenticationService) {
     this.loadType();
@@ -54,14 +54,14 @@ export class GuideService {
   }
 
   private loadType() {
-    this.requestedType = localStorage.getItem('guideType') as GuideType;
-    if (!this.requestedType) {
-      this.requestedType = GuideType.USER;
+    this.currentType = localStorage.getItem('guideType') as GuideType;
+    if (!this.currentType) {
+      this.currentType = GuideType.USER;
     }
   }
 
-  private saveType(val: GuideType) {
-    this.requestedType = val;
+  public saveType(val: GuideType) {
+    this.currentType = val;
     localStorage.setItem('guideType', val);
   }
 
@@ -88,7 +88,7 @@ export class GuideService {
   }
 
   public next(): void {
-    if (this.requestedType === GuideType.NONE || !this.authService.isAuthenticated()) {
+    if (this.currentType === GuideType.NONE || !this.authService.isAuthenticated()) {
       if (!!this.state) {
         this.state = null;
         this.element$.next(this.state);
@@ -120,7 +120,7 @@ export class GuideService {
       index = 0;
       do {
         guide = this.guides.shift();
-      } while (!!guide && (guide.type !== this.requestedType || !!visited.find((p) => p === guide.id)));
+      } while (!!guide && (guide.type !== this.currentType || !!visited.find((p) => p === guide.id)));
     } else if (guide.elements.length > index + 1) {
       index++;
     }

@@ -3,21 +3,16 @@
     <div class="local-side-sizing" fxLayout="column" fxLayoutAlign="center center">
       <app-bd-logo [size]="logoSize" class="local-logo-position"></app-bd-logo>
     </div>
-    <app-bd-search-field
-      fxFlex="1 0 auto"
-      [(value)]="search.search"
-      [disabled]="!(search.enabled() | async)"
-    ></app-bd-search-field>
+    <app-bd-search-field fxFlex="1 0 auto" [(value)]="search.search" [disabled]="!(search.enabled() | async)"></app-bd-search-field>
     <div class="local-side-sizing" fxLayout="row" fxLayoutGap="8px" fxLayoutAlign="center center">
-      <app-bd-panel-button
-        icon="format_color_fill"
-        text="Select Theme"
-        [inverseColor]="true"
-        [route]="['panels', 'user', 'themes']"
-      ></app-bd-panel-button>
-      <ng-container>
-        <app-user-info></app-user-info>
-      </ng-container>
+      <app-bd-panel-button icon="format_color_fill" text="Select Theme" [inverseColor]="true" [route]="['panels', 'user', 'themes']"></app-bd-panel-button>
+      <app-bd-panel-button class="local-info-button" [inverseColor]="true" [route]="['panels', 'user', 'settings']">
+        <app-user-avatar
+          [gravatar]="!settings.isLoading() && settings.getSettings().general.enableGravatar"
+          [mail]="user?.email"
+          [hostSize]="36"
+        ></app-user-avatar>
+      </app-bd-panel-button>
     </div>
   </div>
 </div>

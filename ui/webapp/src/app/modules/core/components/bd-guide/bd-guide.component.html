@@ -1,6 +1,6 @@
 <!-- The backdrop is fully transparent and "just" consumes all pointer events. -->
 <ng-template #guide>
-  <app-bd-notification-card *ngIf="!!element" [header]="element.element.header" icon="notifications" (dismiss)="onNext()" class="mat-elevation-z3">
+  <app-bd-notification-card *ngIf="!!element" [header]="element.element.header" icon="lightbulb" (dismiss)="onNext()" class="mat-elevation-z3">
     <div fxLayout="column" fxLayoutGap="10px">
       <app-bd-dynamic [html]="element.element.content"></app-bd-dynamic>
       <app-bd-action-row>

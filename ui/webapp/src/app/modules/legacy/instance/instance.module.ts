@@ -88,23 +88,6 @@ import { InstanceRoutingModule } from './instance-routing.module';
     InstanceHistoryTimelineContentComponent,
     InstanceBannerEditComponent,
   ],
-  entryComponents: [
-    ApplicationEditManualComponent,
-    ApplicationEditOptionalComponent,
-    ApplicationEditCommandPreviewComponent,
-    ProcessListComponent,
-    ProcessStartConfirmComponent,
-    InstanceBannerEditComponent,
-  ],
-  imports: [
-    CommonModule,
-    SharedModule,
-    CoreModule,
-    CoreLegacyModule,
-    InstanceGroupModule,
-    InstanceRoutingModule,
-    PortalModule,
-    DragulaModule.forRoot(),
-  ],
+  imports: [CommonModule, SharedModule, CoreModule, CoreLegacyModule, InstanceGroupModule, InstanceRoutingModule, PortalModule, DragulaModule.forRoot()],
 })
 export class InstanceModule {}

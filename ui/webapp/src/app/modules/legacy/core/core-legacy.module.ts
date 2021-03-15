@@ -11,6 +11,8 @@ import { ProductCardComponent } from './components/product-card/product-card.com
 import { ProductInfoCardComponent } from './components/product-info-card/product-info-card.component';
 import { ProductListComponent } from './components/product-list/product-list.component';
 import { ProductTagCardComponent } from './components/product-tag-card/product-tag-card.component';
+import { UserEditComponent } from './components/user-edit/user-edit.component';
+import { UserPasswordComponent } from './components/user-password/user-password.component';
 
 @NgModule({
   declarations: [
@@ -22,6 +24,8 @@ import { ProductTagCardComponent } from './components/product-tag-card/product-t
     InstanceGroupTitleComponent,
     ProductCardComponent,
     ProductListComponent,
+    UserEditComponent,
+    UserPasswordComponent,
   ],
   imports: [CommonModule, CoreModule, SharedModule, RouterModule],
   exports: [

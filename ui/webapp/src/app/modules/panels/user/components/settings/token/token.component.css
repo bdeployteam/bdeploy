@@ -1,0 +1,15 @@
+.local-large-text {
+  height: 200px;
+}
+
+.local-title-box {
+  border-bottom: 1px solid;
+}
+
+textarea {
+  resize: none;
+}
+
+.mat-dialog-actions {
+  justify-content: flex-end;
+}

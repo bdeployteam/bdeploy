@@ -1,0 +1,25 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="Guided Tours" [closeablePanel]="true"></app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px">
+      <div>
+        In case you skiped or disabled guided tours, you can reset them here. There are two different modes for guided tours: one which gives users information
+        about how to use BDeploy, and one which gives developers information and insights about how the user interface is structured and composed.
+      </div>
+      <div>
+        The currently selected guide type is: <strong>{{ guides.currentType }}</strong>
+      </div>
+      <app-bd-button [collapsed]="false" text="Enable User Guided Tour" icon="lightbulb" (click)="enableUser()"></app-bd-button>
+      <app-bd-button [collapsed]="false" text="Enable Developer Guided Tour" icon="lightbulb" (click)="enableDeveloper()"></app-bd-button>
+      <app-bd-panel-button
+        [collapsed]="false"
+        text="Back to overview"
+        icon="arrow_back"
+        [toggle]="false"
+        [route]="['..']"
+        [relative]="true"
+      ></app-bd-panel-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

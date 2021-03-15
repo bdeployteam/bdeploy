@@ -9,4 +9,6 @@
   [disabled]="disabled"
   [routerLink]="['', { outlets: { panel: getRoute() } }]"
   routerLinkActive
-></app-bd-button>
+>
+  <ng-content></ng-content>
+</app-bd-button>

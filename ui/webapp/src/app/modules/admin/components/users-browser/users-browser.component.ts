@@ -8,13 +8,13 @@ import { Subscription } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { LDAPSettingsDto, Permission, UserInfo } from 'src/app/models/gen.dtos';
 import { MessageBoxMode } from 'src/app/modules/core/components/messagebox/messagebox.component';
-import { UserEditComponent } from 'src/app/modules/core/components/user-edit/user-edit.component';
-import { UserPasswordComponent } from 'src/app/modules/core/components/user-password/user-password.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { Logger, LoggingService } from 'src/app/modules/core/services/logging.service';
 import { MessageboxService } from 'src/app/modules/core/services/messagebox.service';
 import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
+import { UserEditComponent } from 'src/app/modules/legacy/core/components/user-edit/user-edit.component';
+import { UserPasswordComponent } from 'src/app/modules/legacy/core/components/user-password/user-password.component';
 import { AuthAdminService } from '../../services/auth-admin.service';
 import { UserGlobalPermissionsComponent } from '../user-global-permissions/user-global-permissions.component';
 
@@ -119,9 +119,7 @@ export class UsersBrowserComponent implements OnInit, OnDestroy, BdSearchable, A
   public getAuthenticatedBy(userInfo: UserInfo): string {
     if (userInfo.externalSystem) {
       if (userInfo.externalSystem === 'LDAP') {
-        const dto: LDAPSettingsDto = this.settings
-          .getSettings()
-          .auth.ldapSettings.find((s) => s.id === userInfo.externalTag);
+        const dto: LDAPSettingsDto = this.settings.getSettings().auth.ldapSettings.find((s) => s.id === userInfo.externalTag);
         return dto ? dto.description : userInfo.externalTag + ' (not found)';
       } else {
         return userInfo.externalTag; // should not happen

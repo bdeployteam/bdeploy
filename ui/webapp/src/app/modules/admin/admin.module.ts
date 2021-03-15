@@ -50,12 +50,6 @@ import { UsersBrowserComponent } from './components/users-browser/users-browser.
     MasterCleanupGroupComponent,
     PluginsBrowserComponent,
   ],
-  entryComponents: [
-    UpdateDialogComponent,
-    SettingsAuthLdapServerComponent,
-    SettingsAuthTestUserComponent,
-    UserGlobalPermissionsComponent,
-  ],
   imports: [CommonModule, CoreModule, SharedModule, AdminRoutingModule, NgxChartsModule],
 })
 export class AdminModule {}

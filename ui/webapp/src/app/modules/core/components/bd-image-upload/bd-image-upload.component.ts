@@ -30,10 +30,8 @@ export class BdImageUploadComponent implements OnInit {
     const reader = new FileReader();
     if (event.target.files && event.target.files.length > 0) {
       const selLogoFile: File = event.target.files[0];
-      console.log('INIT ', selLogoFile);
       reader.onload = () => {
         const selLogoUrl: string = reader.result.toString();
-        console.log('READ ', selLogoFile);
         if (
           selLogoUrl.startsWith('data:image/jpeg') ||
           selLogoUrl.startsWith('data:image/png') ||
