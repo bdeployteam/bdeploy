@@ -1,0 +1,20 @@
+<!-- The backdrop is fully transparent and "just" consumes all pointer events. -->
+<ng-template #guide>
+  <app-bd-notification-card *ngIf="!!element" [header]="element.element.header" icon="notifications" (dismiss)="onNext()" class="mat-elevation-z3">
+    <div fxLayout="column" fxLayoutGap="10px">
+      <app-bd-dynamic [html]="element.element.content"></app-bd-dynamic>
+      <app-bd-action-row>
+        <app-bd-button
+          tooltip="below"
+          icon="notifications_off"
+          text="Disable Guides - You can enable them again in your user settings"
+          (click)="onDisable()"
+        ></app-bd-button>
+        <app-bd-button tooltip="below" icon="chevron_right" text="Next Guide Step" (click)="onNext()"></app-bd-button>
+        <app-bd-button tooltip="below" icon="skip_next" text="Skip this Guide" (click)="onSkip()"></app-bd-button>
+      </app-bd-action-row>
+    </div>
+  </app-bd-notification-card>
+</ng-template>
+
+<div #highlight class="local-guide-backdrop" *ngIf="element"></div>

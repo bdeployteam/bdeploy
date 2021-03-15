@@ -1,7 +1,9 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
+import { GuideService } from '../../services/guide.service';
 import { ErrorMessage, LoggingService } from '../../services/logging.service';
+import { BdDataGroupingGuideComponent } from './bd-data-grouping-guide';
 
 interface BdDataGroupingStorage {
   name: string;
@@ -13,7 +15,7 @@ interface BdDataGroupingStorage {
   templateUrl: './bd-data-grouping.component.html',
   styleUrls: ['./bd-data-grouping.component.css'],
 })
-export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
+export class BdDataGroupingComponent<T> extends BdDataGroupingGuideComponent implements OnInit, OnChanges {
   private log = this.logging.getLogger('BdDataGroupingComponent');
 
   /** whether mutiple groupings are supported */
@@ -36,7 +38,9 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
 
   groupings: BdDataGrouping<T>[] = [];
 
-  constructor(private logging: LoggingService, private snackBar: MatSnackBar) {}
+  constructor(private logging: LoggingService, private snackBar: MatSnackBar, guides: GuideService) {
+    super(guides);
+  }
 
   ngOnInit(): void {
     this.loadPreset();
@@ -100,11 +104,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
   /* template */ savePreset() {
     localStorage.setItem(
       this.getStorageKey(),
-      JSON.stringify(
-        this.groupings
-          .filter((g) => !!g.definition)
-          .map((g) => ({ name: g.definition.name, selected: g.selected } as BdDataGroupingStorage))
-      )
+      JSON.stringify(this.groupings.filter((g) => !!g.definition).map((g) => ({ name: g.definition.name, selected: g.selected } as BdDataGroupingStorage)))
     );
 
     this.snackBar.open('Preset saved in local browser.', null, { duration: 1500 });

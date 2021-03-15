@@ -1,4 +1,8 @@
 :host {
+  /* see main-nav-top which is 114px high - we want to overlap that a little */
+  position: relative;
+  top: 84px;
+
   height: 100%;
   max-width: 100%;
 
@@ -7,15 +11,10 @@
 }
 
 .local-sizing-common {
-  position: relative;
   flex: 1 0 auto;
-
   overflow: hidden;
 
-  /* see main-nav-top which is 114px high - we want to overlap that a little */
-  top: 84px;
   height: 100%;
-
   z-index: 10;
 }
 

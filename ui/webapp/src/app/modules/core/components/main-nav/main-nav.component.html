@@ -1,4 +1,4 @@
-<div class="local-sizing" fxLayout="row">
+<div #navRoot class="local-sizing" fxLayout="row">
   <app-main-nav-menu fxFlex="0 0 auto" *ngIf="isAuth$ | async"></app-main-nav-menu>
   <div fxLayout="column" fxFlex="1 1 auto">
     <app-main-nav-top fxFlex="0 0 auto" *ngIf="isAuth$ | async"></app-main-nav-top>

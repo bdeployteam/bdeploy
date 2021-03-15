@@ -54,17 +54,16 @@ import { BdDataGroupingPanelComponent } from './components/bd-data-grouping-pane
 import { BdDataGroupingComponent } from './components/bd-data-grouping/bd-data-grouping.component';
 import { BdDataTableComponent } from './components/bd-data-table/bd-data-table.component';
 import { BdDialogContentComponent } from './components/bd-dialog-content/bd-dialog-content.component';
+import { BdDialogMessageComponent } from './components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogToolbarComponent } from './components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from './components/bd-dialog/bd-dialog.component';
-import {
-  BdDynamicComponent,
-  DYNAMIC_BASE_MODULES as DYNAMIC_BASE_MODULES,
-} from './components/bd-dynamic/bd-dynamic.component';
+import { BdDynamicComponent, DYNAMIC_BASE_MODULES as DYNAMIC_BASE_MODULES } from './components/bd-dynamic/bd-dynamic.component';
 import { BdFileDropComponent } from './components/bd-file-drop/bd-file-drop.component';
 import { BdFileUploadComponent } from './components/bd-file-upload/bd-file-upload.component';
 import { BdFormInputComponent } from './components/bd-form-input/bd-form-input.component';
 import { BdFormSelectComponent } from './components/bd-form-select/bd-form-select.component';
 import { BdFormToggleComponent } from './components/bd-form-toggle/bd-form-toggle.component';
+import { BdGuideComponent } from './components/bd-guide/bd-guide.component';
 import { BdImageUploadComponent } from './components/bd-image-upload/bd-image-upload.component';
 import { BdLoadingOverlayComponent } from './components/bd-loading-overlay/bd-loading-overlay.component';
 import { BdLogoComponent } from './components/bd-logo/bd-logo.component';
@@ -94,7 +93,6 @@ import { SafeHtmlPipe } from './pipes/safeHtml.pipe';
 import { VersionPipe } from './pipes/version.pipe';
 import { ConfigService } from './services/config.service';
 import { GroupIdValidator } from './validators/group-id';
-import { BdDialogMessageComponent } from './components/bd-dialog-message/bd-dialog-message.component';
 
 export function loadAppConfig(cfgService: ConfigService) {
   return () => cfgService.load();
@@ -149,14 +147,9 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdMicroIconButtonComponent,
     BdNotificationCardComponent,
     BdDialogMessageComponent,
+    BdGuideComponent,
   ],
-  entryComponents: [
-    ConnectionLostComponent,
-    UserEditComponent,
-    UserPasswordComponent,
-    UserPickerComponent,
-    MessageboxComponent,
-  ],
+  entryComponents: [ConnectionLostComponent, UserEditComponent, UserPasswordComponent, UserPickerComponent, MessageboxComponent],
   providers: [
     httpInterceptorProviders,
     CookieService,
@@ -284,6 +277,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdFileUploadComponent,
     BdMicroIconButtonComponent,
     BdNotificationCardComponent,
+    BdGuideComponent,
 
     // validators
     GroupIdValidator,

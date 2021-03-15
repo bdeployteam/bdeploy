@@ -1,6 +1,6 @@
 import { ConnectedPosition, Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, EventEmitter, Input, OnInit, Output, TemplateRef, ViewContainerRef } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
 import { TooltipPosition } from '@angular/material/tooltip';
 import { BdButtonComponent } from '../bd-button/bd-button.component';
 
@@ -14,15 +14,7 @@ import { BdButtonComponent } from '../bd-button/bd-button.component';
  * Example: 'below-left' will place the popup below the button, _then_ align its right side
  * to the right side of the button, so that the popup will *extend* to the left.
  */
-export type PopupPosition =
-  | 'below-left'
-  | 'below-right'
-  | 'above-left'
-  | 'above-right'
-  | 'left-above'
-  | 'left-below'
-  | 'right-above'
-  | 'right-below';
+export type PopupPosition = 'below-left' | 'below-right' | 'above-left' | 'above-right' | 'left-above' | 'left-below' | 'right-above' | 'right-below';
 
 /**
  * minimum distance to the edge of the viewport in any direction.
@@ -113,6 +105,9 @@ export class BdButtonPopupComponent implements OnInit {
 
   @Output() popupOpened = new EventEmitter<BdButtonPopupComponent>();
 
+  @ViewChild('popup') popupTemplate: TemplateRef<any>;
+  @ViewChild('button') button: BdButtonComponent;
+
   private overlayRef: OverlayRef;
 
   constructor(private overlay: Overlay, private viewContainerRef: ViewContainerRef) {}
@@ -120,13 +115,13 @@ export class BdButtonPopupComponent implements OnInit {
   ngOnInit(): void {}
 
   /** Opens a modal overlay popup showing the given template */
-  openOverlay(relative: BdButtonComponent, template: TemplateRef<any>) {
+  openOverlay() {
     this.closeOverlay();
 
     this.overlayRef = this.overlay.create({
       positionStrategy: this.overlay
         .position()
-        .flexibleConnectedTo(relative._elementRef)
+        .flexibleConnectedTo(this.button._elementRef)
         .withPositions(this.getPositions())
         .withPush(false)
         .withViewportMargin(VIEWPORT_MARGIN),
@@ -137,7 +132,7 @@ export class BdButtonPopupComponent implements OnInit {
     });
     this.overlayRef.backdropClick().subscribe(() => this.closeOverlay());
 
-    const portal = new TemplatePortal(template, this.viewContainerRef);
+    const portal = new TemplatePortal(this.popupTemplate, this.viewContainerRef);
     this.overlayRef.attach(portal);
 
     this.popupOpened.emit(this);
