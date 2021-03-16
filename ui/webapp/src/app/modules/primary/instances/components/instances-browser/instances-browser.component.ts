@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import { BdDataGroupingDefinition } from 'src/app/models/data';
+import { BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
 import { InstanceDto } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -15,7 +15,9 @@ import { InstancesService } from '../../services/instances.service';
   styleUrls: ['./instances-browser.component.css'],
 })
 export class InstancesBrowserComponent implements OnInit, OnDestroy {
-  grouping: BdDataGroupingDefinition<InstanceDto>[] = [];
+  initGrouping: BdDataGroupingDefinition<InstanceDto>[] = [{ name: 'Instance Purpose', group: (r) => r.instanceConfiguration.purpose }];
+  grouping: BdDataGroupingDefinition<InstanceDto>[] = [...this.initGrouping];
+  defaultGrouping: BdDataGrouping<InstanceDto> = { definition: this.grouping[0], selected: [] };
   hasProducts$ = new BehaviorSubject<boolean>(false);
 
   private subscription: Subscription;
@@ -35,6 +37,17 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscription = this.products.products$.subscribe((p) => this.hasProducts$.next(!!p && !!p.length));
+    this.subscription.add(
+      this.groups.current$.subscribe((g) => {
+        if (!g) {
+          return;
+        }
+        this.grouping = [...this.initGrouping];
+        for (const attr of g.instanceAttributes) {
+          this.grouping.push({ name: attr.description, group: (r) => r.attributes.attributes[attr.name] });
+        }
+      })
+    );
   }
 
   ngOnDestroy(): void {

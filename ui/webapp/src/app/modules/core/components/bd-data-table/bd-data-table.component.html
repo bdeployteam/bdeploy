@@ -50,7 +50,7 @@
           mat-cell
           *matCellDef="let row"
           [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []"
-          [style.maxWidth]="col.width ? col.width : null"
+          [style.maxWidth]="col.width ? col.width : 0"
         >
           <!-- Button to expand or collapse a group -->
           <button *ngIf="row.expandable" mat-icon-button [style.marginLeft.px]="row.level * 24" (click)="treeControl.toggle(row)" appClickStopPropagation>
@@ -86,11 +86,11 @@
           mat-cell
           *matCellDef="let row"
           [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []"
-          [style.maxWidth]="col.width ? col.width : null"
+          [style.maxWidth]="col.width ? col.width : 0"
         >
           <ng-container *ngIf="!row.expandable">
             <ng-container *ngIf="!isImageColumn(col)">
-              <div *ngIf="!col.component" class="bd-text-ellipsis" [matTooltip]="col.data(row.node.item)" [matTooltipShowDelay]="1000">
+              <div *ngIf="!col.component" class="bd-text-ellipsis" [matTooltip]="!!row.node.item ? col.data(row.node.item) : null" [matTooltipShowDelay]="1000">
                 {{ col.data(row.node.item) }}
               </div>
               <app-bd-data-component-cell *ngIf="!!col.component" [componentType]="col.component" [record]="row.node.item"></app-bd-data-component-cell>

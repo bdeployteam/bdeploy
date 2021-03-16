@@ -1,5 +1,34 @@
-<app-bd-dialog>
+<app-bd-dialog [loadingWhen$]="loading$">
   <app-bd-dialog-toolbar header="Add Instance" [closeablePanel]="true"></app-bd-dialog-toolbar>
 
-  <app-bd-dialog-content> </app-bd-dialog-content>
+  <app-bd-dialog-content>
+    <form fxLayout="column" fxLayoutGap="10px" #form="ngForm" (ngSubmit)="onSave()">
+      <div>
+        Creating instance: <strong>{{ config.uuid }}</strong>
+      </div>
+      <app-bd-form-input label="Name" name="name" [(ngModel)]="config.name" required></app-bd-form-input>
+      <app-bd-form-input label="Description" name="description" [(ngModel)]="config.description" required></app-bd-form-input>
+      <app-bd-form-select label="Purpose" name="purpose" [(ngModel)]="config.purpose" [values]="getPurposes()" required></app-bd-form-select>
+      <app-bd-form-toggle label="Automatic Startup" name="autoStart" [(ngModel)]="config.autoStart"></app-bd-form-toggle>
+      <app-bd-form-toggle label="Automatic Uninstallation" name="autoUninstall" [(ngModel)]="config.autoUninstall"></app-bd-form-toggle>
+      <app-bd-form-select
+        label="Product"
+        name="product"
+        [(ngModel)]="selectedProduct"
+        (ngModelChange)="updateProduct()"
+        [values]="prodList"
+        [labels]="getProductNames()"
+        required
+      ></app-bd-form-select>
+      <app-bd-form-select
+        label="Version"
+        name="version"
+        [(ngModel)]="config.product.tag"
+        [disabled]="!selectedProduct"
+        [values]="selectedProduct?.versions"
+        required
+      ></app-bd-form-select>
+      <app-bd-button type="submit" text="SAVE" [collapsed]="false" [inverseColor]="true" [disabled]="form.invalid"></app-bd-button>
+    </form>
+  </app-bd-dialog-content>
 </app-bd-dialog>

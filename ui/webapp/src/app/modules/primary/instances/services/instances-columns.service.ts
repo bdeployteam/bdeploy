@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { BdDataColumn, BdDataColumnDisplay, BdDataColumnTypeHint } from 'src/app/models/data';
 import { InstanceDto, MinionMode } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
-import { InstanceProductVersionComponent } from '../components/instance-product-version/instance-product-version.component';
+import { InstanceBannerHintComponent } from '../components/instances-browser/instance-banner-hint/instance-banner-hint.component';
+import { InstanceProductVersionComponent } from '../components/instances-browser/instance-product-version/instance-product-version.component';
 import { InstancesService } from './instances.service';
 
 @Injectable({
@@ -14,7 +15,6 @@ export class InstancesColumnsService {
     name: 'Type',
     hint: BdDataColumnTypeHint.TYPE,
     data: (r) => r.instanceConfiguration.purpose,
-    width: '150px',
     showWhen: '(min-width: 1000px)',
   };
 
@@ -31,7 +31,7 @@ export class InstancesColumnsService {
     hint: BdDataColumnTypeHint.DESCRIPTION,
     data: (r) => r.instanceConfiguration.uuid,
     width: '110px',
-    showWhen: '(min-width: 1280px)',
+    showWhen: '(min-width: 1900px)',
   };
 
   instanceDescriptionColumn: BdDataColumn<InstanceDto> = {
@@ -39,7 +39,7 @@ export class InstancesColumnsService {
     name: 'Description',
     hint: BdDataColumnTypeHint.FOOTER,
     data: (r) => r.instanceConfiguration.description,
-    showWhen: '(min-width: 1280px)',
+    showWhen: '(min-width: 1400px)',
   };
 
   instanceProductColumn: BdDataColumn<InstanceDto> = {
@@ -65,10 +65,19 @@ export class InstancesColumnsService {
     id: 'activeProductVersion',
     name: 'Active Version',
     hint: BdDataColumnTypeHint.DETAILS,
+    display: BdDataColumnDisplay.TABLE,
     data: (r) => (!!r.activeProductDto ? r.activeProductDto.key.tag : null),
     icon: (r) => 'security_update_good',
     showWhen: '(min-width: 750px)',
     width: '150px',
+  };
+
+  instanceBannerColumn: BdDataColumn<InstanceDto> = {
+    id: 'bannerHint',
+    name: 'Banner',
+    data: (r) => r.banner?.text,
+    component: InstanceBannerHintComponent,
+    width: '24px',
   };
 
   instanceServerColumn: BdDataColumn<InstanceDto> = {
@@ -99,6 +108,7 @@ export class InstancesColumnsService {
     this.instanceProductColumn,
     this.instanceProductVersionColumn,
     this.instanceProductActiveColumn,
+    this.instanceBannerColumn,
     this.instanceServerColumn,
     this.instanceSyncColumn,
   ];

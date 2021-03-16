@@ -239,9 +239,12 @@ public class InstanceResourceImpl implements InstanceResource {
                 managedMaster = ms.getServerForInstance(group, config.uuid, imKey.getTag());
             }
 
+            CustomAttributesRecord attributes = im.getAttributes(hive).read();
+            InstanceBannerRecord banner = im.getBanner(hive).read();
+
             // Clear security token before sending via REST
             result.add(InstanceDto.create(config, productDto, activeProduct, activeProductDto, newerVersionAvailable,
-                    managedMaster));
+                    managedMaster, attributes, banner));
         }
         return result;
     }
@@ -1042,9 +1045,7 @@ public class InstanceResourceImpl implements InstanceResource {
         if (im == null) {
             throw new WebApplicationException("Cannot load " + instanceId, Status.NOT_FOUND);
         }
-        RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
-        MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
-        return root.getNamedMaster(group).getAttributes(instanceId);
+        return im.getAttributes(hive).read();
     }
 
     @Override
@@ -1056,6 +1057,10 @@ public class InstanceResourceImpl implements InstanceResource {
         RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
         MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
         root.getNamedMaster(group).updateAttributes(instanceId, attributes);
+        syncInstance(minion, rc, group, instanceId);
+
+        changes.change(ObjectChangeType.INSTANCE, im.getManifest(),
+                Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.ATTRIBUTES));
     }
 
 }

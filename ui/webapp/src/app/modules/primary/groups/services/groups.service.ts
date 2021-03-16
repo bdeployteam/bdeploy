@@ -51,6 +51,20 @@ export class GroupsService {
     return this.http.put(this.apiPath, group);
   }
 
+  public newUuid(): Observable<string> {
+    return new Observable<string>((s) => {
+      const sub = this.current$.subscribe((r) => {
+        if (!!r) {
+          this.http.get(`${this.apiPath}/${r.name}/new-uuid`, { responseType: 'text' }).subscribe((uuid) => {
+            s.next(uuid);
+            s.complete();
+            sub.unsubscribe();
+          });
+        }
+      });
+    });
+  }
+
   public updateImage(group: string, file: File) {
     const formData = new FormData();
     formData.append('image', file, file.name);

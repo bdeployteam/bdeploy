@@ -20,6 +20,7 @@ export class GroupsColumnsService {
     name: 'Name (Key)',
     hint: BdDataColumnTypeHint.DESCRIPTION,
     data: (r) => r.name,
+    width: '200px',
     showWhen: '(min-width: 700px)',
   };
 

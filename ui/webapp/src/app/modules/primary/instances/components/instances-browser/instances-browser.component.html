@@ -5,6 +5,7 @@
       [multiple]="!dataTable.grid"
       (groupingChange)="dataTable.grouping = $event"
       [definitions]="grouping"
+      [defaultGrouping]="[defaultGrouping]"
       [records]="instances.instances$ | async"
       presetKey="instances"
     ></app-bd-data-grouping>

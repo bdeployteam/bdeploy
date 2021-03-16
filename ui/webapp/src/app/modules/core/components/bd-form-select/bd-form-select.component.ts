@@ -12,7 +12,7 @@ import { bdValidationMessage } from '../../validators/messages';
 export class BdFormSelectComponent implements OnInit, ControlValueAccessor, ErrorStateMatcher {
   @Input() label: string;
   @Input() name: string;
-  @Input() values: string[] = [];
+  @Input() values: any[] = [];
   @Input() labels: string[];
   @Input() required: any;
   @Input() disabled: any;
@@ -30,7 +30,7 @@ export class BdFormSelectComponent implements OnInit, ControlValueAccessor, Erro
     }
   }
 
-  private internalValue: any = '';
+  private internalValue: any = null;
   private onTouchedCb: () => void = () => {};
   private onChangedCb: (_: any) => void = () => {};
 

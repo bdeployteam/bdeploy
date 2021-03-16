@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { InstanceDto, MinionMode, ObjectChangeType } from 'src/app/models/gen.dtos';
+import { InstanceConfiguration, InstanceDto, MinionMode, ObjectChangeType } from 'src/app/models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
 import { NavAreasService } from '../../../core/services/nav-areas.service';
 import { ObjectChangesService } from '../../../core/services/object-changes.service';
@@ -19,13 +19,12 @@ export class InstancesService {
 
   private apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
 
-  constructor(
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private changes: ObjectChangesService,
-    areas: NavAreasService
-  ) {
+  constructor(private cfg: ConfigService, private http: HttpClient, private changes: ObjectChangesService, areas: NavAreasService) {
     areas.groupContext$.subscribe((group) => this.reload(group));
+  }
+
+  public create(instance: Partial<InstanceConfiguration>, managedServer: string) {
+    return this.http.put(`${this.apiPath(this.group)}`, instance, { params: { managedServer } });
   }
 
   public synchronize(instance: string) {
