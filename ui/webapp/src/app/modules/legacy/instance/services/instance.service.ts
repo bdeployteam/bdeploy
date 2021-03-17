@@ -35,7 +35,7 @@ import { DownloadService } from '../../../core/services/download.service';
 import { ErrorMessage, Logger, LoggingService } from '../../../core/services/logging.service';
 import { MessageboxService } from '../../../core/services/messagebox.service';
 import { SystemService } from '../../../core/services/system.service';
-import { suppressGlobalErrorHandling } from '../../../legacy/shared/utils/server.utils';
+import { suppressGlobalErrorHandling } from '../../../core/utils/server.utils';
 import { InstanceGroupService } from '../../instance-group/services/instance-group.service';
 
 @Injectable({
@@ -100,8 +100,7 @@ export class InstanceService {
               .open({
                 title: 'Conflict',
                 mode: MessageBoxMode.ERROR,
-                message:
-                  'There has been a conflict while saving. Another session has modified the instance, and your changes cannot be saved.',
+                message: 'There has been a conflict while saving. Another session has modified the instance, and your changes cannot be saved.',
               })
               .subscribe((_) => {});
             return throwError(e);
@@ -136,62 +135,31 @@ export class InstanceService {
     return this.http.get<InstanceVersionDto[]>(url);
   }
 
-  public getInstanceVersion(
-    instanceGroupName: string,
-    instanceName: string,
-    tag: string
-  ): Observable<InstanceConfiguration> {
+  public getInstanceVersion(instanceGroupName: string, instanceName: string, tag: string): Observable<InstanceConfiguration> {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/' + tag;
     this.log.debug('getInstanceVersion: ' + url);
     return this.http.get<InstanceConfiguration>(url);
   }
 
-  public listConfigurationFiles(
-    instanceGroupName: string,
-    instanceName: string,
-    tag: string
-  ): Observable<ConfigFileDto[]> {
+  public listConfigurationFiles(instanceGroupName: string, instanceName: string, tag: string): Observable<ConfigFileDto[]> {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/cfgFiles/' + tag;
     this.log.debug('listConfigurationFiles: ' + url);
     return this.http.get<ConfigFileDto[]>(url);
   }
 
-  public syncConfigurationFiles(
-    instanceGroupName: string,
-    instanceName: string,
-    tag: string,
-    pKey: ManifestKey
-  ): Observable<ConfigFileDto[]> {
-    const url: string =
-      this.buildInstanceUrl(instanceGroupName, instanceName) +
-      '/cfgFiles/' +
-      tag +
-      '/' +
-      pKey.name +
-      '/' +
-      pKey.tag +
-      '/syncConfig';
+  public syncConfigurationFiles(instanceGroupName: string, instanceName: string, tag: string, pKey: ManifestKey): Observable<ConfigFileDto[]> {
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/cfgFiles/' + tag + '/' + pKey.name + '/' + pKey.tag + '/syncConfig';
     this.log.debug('syncConfigurationFiles: ' + url);
     return this.http.get<ConfigFileDto[]>(url);
   }
 
-  public getConfigurationFile(
-    instanceGroupName: string,
-    instanceName: string,
-    tag: string,
-    filename: string
-  ): Observable<string> {
+  public getConfigurationFile(instanceGroupName: string, instanceName: string, tag: string, filename: string): Observable<string> {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/cfgFiles/' + tag + '/' + filename;
     this.log.debug('getConfigurationFile: ' + url);
     return this.http.get(url, { responseType: 'text' });
   }
 
-  public updateConfigurationFiles(
-    instanceGroupName: string,
-    instanceName: string,
-    tag: string,
-    configFiles: FileStatusDto[]
-  ) {
+  public updateConfigurationFiles(instanceGroupName: string, instanceName: string, tag: string, configFiles: FileStatusDto[]) {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/cfgFiles';
     this.log.debug('updateConfigurationFiles: ' + url);
     const options = {
@@ -211,30 +179,18 @@ export class InstanceService {
     return this.http.get<InstancePurpose[]>(url);
   }
 
-  public getNodeConfiguration(
-    instanceGroupName: string,
-    instanceId: string,
-    tag: string
-  ): Observable<InstanceNodeConfigurationListDto> {
+  public getNodeConfiguration(instanceGroupName: string, instanceId: string, tag: string): Observable<InstanceNodeConfigurationListDto> {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceId) + '/' + tag + '/nodeConfiguration';
     this.log.debug('getNodeConfigurationVersion: ' + url);
     return this.http.get<InstanceNodeConfigurationListDto>(url);
   }
 
-  public getMinionConfiguration(
-    instanceGroupName: string,
-    instanceId: string,
-    tag: string
-  ): Observable<{ [key: string]: MinionDto }> {
+  public getMinionConfiguration(instanceGroupName: string, instanceId: string, tag: string): Observable<{ [key: string]: MinionDto }> {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceId) + '/' + tag + '/minionConfiguration';
     return this.http.get<{ [minionName: string]: MinionDto }>(url);
   }
 
-  public getMinionState(
-    instanceGroupName: string,
-    instanceId: string,
-    tag: string
-  ): Observable<{ [key: string]: MinionStatusDto }> {
+  public getMinionState(instanceGroupName: string, instanceId: string, tag: string): Observable<{ [key: string]: MinionStatusDto }> {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceId) + '/' + tag + '/minionState';
     return this.http.get<{ [minionName: string]: MinionStatusDto }>(url);
   }
@@ -257,11 +213,7 @@ export class InstanceService {
     return this.http.get(url);
   }
 
-  public getHistory(
-    instanceGroupName: string,
-    instanceName: string,
-    instance: ManifestKey
-  ): Observable<InstanceManifestHistoryDto> {
+  public getHistory(instanceGroupName: string, instanceName: string, instance: ManifestKey): Observable<InstanceManifestHistoryDto> {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/' + instance.tag + '/history';
     this.log.debug('history: ' + url);
     return this.http.get<InstanceManifestHistoryDto>(url);
@@ -280,8 +232,7 @@ export class InstanceService {
     appUid: string,
     silent: boolean
   ): Observable<RemoteDirectory> {
-    const url: string =
-      this.buildInstanceUrl(instanceGroupName, instanceName) + '/output/' + instanceTag + '/' + appUid;
+    const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/output/' + instanceTag + '/' + appUid;
     this.log.debug('getApplicationOutputEntry: ' + url);
     const options = {
       headers: { ignoreLoadingBar: '' },
@@ -310,12 +261,7 @@ export class InstanceService {
     return this.http.post<StringEntryChunkDto>(url, rde, options);
   }
 
-  public downloadDataFileContent(
-    instanceGroupName: string,
-    instanceName: string,
-    rd: RemoteDirectory,
-    rde: RemoteDirectoryEntry
-  ) {
+  public downloadDataFileContent(instanceGroupName: string, instanceName: string, rd: RemoteDirectory, rde: RemoteDirectoryEntry) {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/request/' + rd.minion;
     this.log.debug('downloadDataFileContent');
     this.http.post(url, rde, { responseType: 'text' }).subscribe((token) => {
@@ -323,22 +269,13 @@ export class InstanceService {
     });
   }
 
-  public deleteDataFile(
-    instanceGroupName: string,
-    instanceName: string,
-    rd: RemoteDirectory,
-    rde: RemoteDirectoryEntry
-  ) {
+  public deleteDataFile(instanceGroupName: string, instanceName: string, rd: RemoteDirectory, rde: RemoteDirectoryEntry) {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceName) + '/delete/' + rd.minion;
     this.log.debug('deleteDataFile');
     return this.http.post(url, rde);
   }
 
-  public createClickAndStartDescriptor(
-    instanceGroupName: string,
-    instanceName: string,
-    appId: string
-  ): Observable<ClickAndStartDescriptor> {
+  public createClickAndStartDescriptor(instanceGroupName: string, instanceName: string, appId: string): Observable<ClickAndStartDescriptor> {
     const url = this.buildInstanceUrl(instanceGroupName, instanceName) + '/' + appId + '/clickAndStart';
     this.log.debug('createClickAndStartDescriptor: ' + url);
     return this.http.get<ClickAndStartDescriptor>(url);
@@ -368,12 +305,7 @@ export class InstanceService {
    * <p>
    * The result is grouped by application (UUID) and contains a state per port (true/false).
    */
-  public getOpenPorts(
-    instanceGroup: string,
-    instance: string,
-    minion: string,
-    ports: string[]
-  ): Observable<{ [key: number]: boolean }> {
+  public getOpenPorts(instanceGroup: string, instance: string, minion: string, ports: string[]): Observable<{ [key: number]: boolean }> {
     const url = this.buildInstanceUrl(instanceGroup, instance) + '/check-ports/' + minion;
     return this.http.post<{ [key: number]: boolean }>(url, ports);
   }
@@ -420,12 +352,7 @@ export class InstanceService {
     return this.http.post<HistoryResultDto>(url, filterDto);
   }
 
-  public compareVersions(
-    instanceGroupName: string,
-    instanceId: string,
-    versionA: string,
-    versionB: string
-  ): Observable<HistoryEntryVersionDto> {
+  public compareVersions(instanceGroupName: string, instanceId: string, versionA: string, versionB: string): Observable<HistoryEntryVersionDto> {
     const url: string = this.buildInstanceUrl(instanceGroupName, instanceId) + '/history-compare-versions';
     const params = new HttpParams().set('a', versionA.toString()).set('b', versionB.toString());
     return this.http.get<HistoryEntryVersionDto>(url, { params: params });

@@ -12,9 +12,7 @@ export class AdminGuard implements CanActivate {
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
     if (!this.authService.isGlobalAdmin()) {
       this.snackbar.open(
-        `Unfortunately, /${route.url.join(
-          '/'
-        )} was not found (wrong URL or insufficient rights), we returned you to the safe-zone.`,
+        `Unfortunately, ${route.url.join('/')} was not found (wrong URL or insufficient rights), we returned you to the safe-zone.`,
         'DISMISS',
         { panelClass: 'error-snackbar' }
       );

@@ -12,7 +12,7 @@ import {
   Version,
 } from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
-import { suppressGlobalErrorHandling } from '../../../legacy/shared/utils/server.utils';
+import { suppressGlobalErrorHandling } from '../../../core/utils/server.utils';
 
 @Injectable({
   providedIn: 'root',
@@ -25,9 +25,7 @@ export class ManagedServersService {
   }
 
   public tryAutoAttach(group: string, ident: ManagedMasterDto): Observable<any> {
-    return this.http.put(this.config.config.api + '/managed-servers/auto-attach/' + group, ident, {
-      headers: suppressGlobalErrorHandling(new HttpHeaders()),
-    });
+    return this.http.put(this.config.config.api + '/managed-servers/auto-attach/' + group, ident);
   }
 
   public manualAttach(group: string, ident: ManagedMasterDto): Observable<any> {
@@ -55,20 +53,18 @@ export class ManagedServersService {
     if (tag) {
       p.set('instanceTag', tag);
     }
-    return this.http.get<ManagedMasterDto>(
-      this.config.config.api + '/managed-servers/controlling-server/' + group + '/' + instance,
-      { params: p, headers: new HttpHeaders({ ignoreLoadingBar: '' }) }
-    );
+    return this.http.get<ManagedMasterDto>(this.config.config.api + '/managed-servers/controlling-server/' + group + '/' + instance, {
+      params: p,
+      headers: new HttpHeaders({ ignoreLoadingBar: '' }),
+    });
   }
 
   public getInstancesForManagedServer(group: string, server: string): Observable<InstanceConfiguration[]> {
-    return this.http.get<InstanceConfiguration[]>(
-      this.config.config.api + '/managed-servers/controlled-instances/' + group + '/' + server
-    );
+    return this.http.get<InstanceConfiguration[]>(this.config.config.api + '/managed-servers/controlled-instances/' + group + '/' + server);
   }
 
   public deleteManagedServer(group: string, server: string): Observable<any> {
-    return this.http.post(this.config.config.api + '/managed-servers/delete-server/' + group + '/' + server, server);
+    return this.http.delete(this.config.config.api + '/managed-servers/delete-server/' + group + '/' + server);
   }
 
   public updateManagedServer(group: string, server: string, dto: ManagedMasterDto): Observable<any> {
@@ -76,34 +72,21 @@ export class ManagedServersService {
   }
 
   public minionsConfigOfManagedServer(group: string, server: string): Observable<{ [minionName: string]: MinionDto }> {
-    return this.http.get<{ [minionName: string]: MinionDto }>(
-      this.config.config.api + '/managed-servers/minion-config/' + group + '/' + server
-    );
+    return this.http.get<{ [minionName: string]: MinionDto }>(this.config.config.api + '/managed-servers/minion-config/' + group + '/' + server);
   }
 
-  public minionsStateOfManagedServer(
-    group: string,
-    server: string
-  ): Observable<{ [minionName: string]: MinionStatusDto }> {
-    return this.http.get<{ [minionName: string]: MinionStatusDto }>(
-      this.config.config.api + '/managed-servers/minion-state/' + group + '/' + server
-    );
+  public minionsStateOfManagedServer(group: string, server: string): Observable<{ [minionName: string]: MinionStatusDto }> {
+    return this.http.get<{ [minionName: string]: MinionStatusDto }>(this.config.config.api + '/managed-servers/minion-state/' + group + '/' + server);
   }
 
   public synchronize(group: string, server: string): Observable<ManagedMasterDto> {
-    return this.http.post<ManagedMasterDto>(
-      this.config.config.api + '/managed-servers/synchronize/' + group + '/' + server,
-      server,
-      {
-        headers: suppressGlobalErrorHandling(new HttpHeaders()),
-      }
-    );
+    return this.http.get<ManagedMasterDto>(this.config.config.api + '/managed-servers/synchronize/' + group + '/' + server, {
+      headers: suppressGlobalErrorHandling(new HttpHeaders()),
+    });
   }
 
   public productsOfManagedServer(group: string, server: string): Observable<ProductDto[]> {
-    return this.http.get<ProductDto[]>(
-      this.config.config.api + '/managed-servers/list-products/' + group + '/' + server
-    );
+    return this.http.get<ProductDto[]>(this.config.config.api + '/managed-servers/list-products/' + group + '/' + server);
   }
 
   public productsInTransfer(group: string): Observable<ProductDto[]> {
@@ -117,17 +100,11 @@ export class ManagedServersService {
   }
 
   public transferUpdate(group: string, server: string, update: MinionUpdateDto): Observable<any> {
-    return this.http.post(
-      this.config.config.api + '/managed-servers/minion-transfer-updates/' + group + '/' + server,
-      update
-    );
+    return this.http.post(this.config.config.api + '/managed-servers/minion-transfer-updates/' + group + '/' + server, update);
   }
 
   public installUpdate(group: string, server: string, update: MinionUpdateDto): Observable<any> {
-    return this.http.post(
-      this.config.config.api + '/managed-servers/minion-install-updates/' + group + '/' + server,
-      update
-    );
+    return this.http.post(this.config.config.api + '/managed-servers/minion-install-updates/' + group + '/' + server, update);
   }
 
   public ping(group: string, server: string): Observable<Version> {

@@ -21,9 +21,7 @@ import { NavAreasService } from '../../services/nav-areas.service';
       state('closed', style({ width: '64px' })),
       state('open', style({ width: '210px' })),
       transition('open => closed', [animate('0.2s ease', style({ width: '64px' }))]),
-      transition('closed => open', [
-        group([animate('0.2s ease', style({ width: '210px' })), query('@*', [animateChild()])]),
-      ]),
+      transition('closed => open', [group([animate('0.2s ease', style({ width: '210px' })), query('@*', [animateChild()])])]),
     ]),
     trigger('headerOpenClose', [
       state('closed', style({ width: '104px' })),
@@ -42,12 +40,7 @@ export class MainNavMenuComponent implements OnInit {
     return this.areas.menuMaximized$.value;
   }
 
-  constructor(
-    public cfgService: ConfigService,
-    public logging: LoggingService,
-    public authService: AuthenticationService,
-    public areas: NavAreasService
-  ) {}
+  constructor(public cfgService: ConfigService, public logging: LoggingService, public authService: AuthenticationService, public areas: NavAreasService) {}
 
   ngOnInit(): void {}
 

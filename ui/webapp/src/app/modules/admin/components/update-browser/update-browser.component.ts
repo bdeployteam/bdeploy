@@ -5,8 +5,8 @@ import { BackendInfoDto, ManifestKey, OperatingSystem } from 'src/app/models/gen
 import { MessageBoxMode } from 'src/app/modules/core/components/messagebox/messagebox.component';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { MessageboxService } from 'src/app/modules/core/services/messagebox.service';
+import { convert2String } from 'src/app/modules/core/utils/version.utils';
 import { FileUploadComponent } from 'src/app/modules/legacy/shared/components/file-upload/file-upload.component';
-import { convert2String } from 'src/app/modules/legacy/shared/utils/version.utils';
 import { SoftwareUpdateService } from '../../services/software-update.service';
 import { UpdateDialogComponent } from '../update-dialog/update-dialog.component';
 
@@ -31,12 +31,7 @@ export class UpdateBrowserComponent implements OnInit {
   public systemLoading = false;
   public launcherLoading = false;
 
-  constructor(
-    private updService: SoftwareUpdateService,
-    private cfgService: ConfigService,
-    private mbService: MessageboxService,
-    private dialog: MatDialog
-  ) {}
+  constructor(private updService: SoftwareUpdateService, private cfgService: ConfigService, private mbService: MessageboxService, private dialog: MatDialog) {}
 
   ngOnInit() {
     this.systemLoading = true;
@@ -170,8 +165,7 @@ export class UpdateBrowserComponent implements OnInit {
 
     let text = `Confirm that the system should be updated to version <strong>${keys.tag}</strong>`;
     if (keys.snapshot) {
-      text +=
-        '<br/><br/><strong>WARNING:</strong> You are about to install a snapshot version that is not yet released.';
+      text += '<br/><br/><strong>WARNING:</strong> You are about to install a snapshot version that is not yet released.';
     }
     const doUpdate = await this.mbService.openAsync({
       title: 'Confirm Update',

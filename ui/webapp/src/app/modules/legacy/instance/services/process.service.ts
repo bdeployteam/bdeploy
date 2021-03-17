@@ -3,7 +3,7 @@ import { EventEmitter, Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { ProcessDetailDto, ProcessState, ProcessStatusDto } from '../../../../models/gen.dtos';
-import { suppressGlobalErrorHandling } from '../../../legacy/shared/utils/server.utils';
+import { suppressGlobalErrorHandling } from '../../../core/utils/server.utils';
 import { InstanceService } from './instance.service';
 
 @Injectable()
@@ -82,11 +82,7 @@ export class ProcessService {
    * Returns whether or not at least one app is running or waiting in a version NOT equal to the given one.
    */
   public isRunningOutOfSync(instanceTag: string): boolean {
-    const states = new Set<ProcessState>([
-      ProcessState.RUNNING,
-      ProcessState.RUNNING_UNSTABLE,
-      ProcessState.CRASHED_WAITING,
-    ]);
+    const states = new Set<ProcessState>([ProcessState.RUNNING, ProcessState.RUNNING_UNSTABLE, ProcessState.CRASHED_WAITING]);
     for (const status of Object.values(this.app2Status)) {
       if (!states.has(status.processState)) {
         continue;
@@ -106,11 +102,7 @@ export class ProcessService {
     if (!apps) {
       return false;
     }
-    const states = new Set<ProcessState>([
-      ProcessState.RUNNING,
-      ProcessState.RUNNING_UNSTABLE,
-      ProcessState.CRASHED_WAITING,
-    ]);
+    const states = new Set<ProcessState>([ProcessState.RUNNING, ProcessState.RUNNING_UNSTABLE, ProcessState.CRASHED_WAITING]);
     const runningApp = apps.find((app) => states.has(app.processState));
     if (runningApp) {
       return true;

@@ -3,6 +3,7 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
 import { InstanceDto } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
+import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
 import { GroupsService } from '../../../groups/services/groups.service';
@@ -16,8 +17,8 @@ import { InstancesService } from '../../services/instances.service';
 })
 export class InstancesBrowserComponent implements OnInit, OnDestroy {
   initGrouping: BdDataGroupingDefinition<InstanceDto>[] = [{ name: 'Instance Purpose', group: (r) => r.instanceConfiguration.purpose }];
-  grouping: BdDataGroupingDefinition<InstanceDto>[] = [...this.initGrouping];
-  defaultGrouping: BdDataGrouping<InstanceDto> = { definition: this.grouping[0], selected: [] };
+  grouping: BdDataGroupingDefinition<InstanceDto>[];
+  defaultGrouping: BdDataGrouping<InstanceDto> = { definition: this.initGrouping[0], selected: [] };
   hasProducts$ = new BehaviorSubject<boolean>(false);
 
   private subscription: Subscription;
@@ -32,8 +33,14 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
     public products: ProductsService,
     public groups: GroupsService,
     public areas: NavAreasService,
-    private authService: AuthenticationService
-  ) {}
+    private authService: AuthenticationService,
+    config: ConfigService
+  ) {
+    if (config.isCentral()) {
+      this.initGrouping.push({ name: 'Managed Server', group: (r) => r.managedServer.hostName });
+    }
+    this.grouping = [...this.initGrouping];
+  }
 
   ngOnInit(): void {
     this.subscription = this.products.products$.subscribe((p) => this.hasProducts$.next(!!p && !!p.length));

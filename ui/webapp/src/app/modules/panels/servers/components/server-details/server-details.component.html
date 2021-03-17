@@ -1,0 +1,36 @@
+<app-bd-dialog [loadingWhen$]="loading$" [resetWhen$]="serverDetails.server$">
+  <app-bd-dialog-toolbar header="Details" [closeablePanel]="true"></app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px" *ngIf="serverDetails.server$ | async as server">
+      <div><strong>Name:</strong>&nbsp;{{ server.hostName }}</div>
+      <div><strong>Description:</strong>&nbsp;{{ server.description }}</div>
+      <div><strong>URI:</strong>&nbsp;{{ server.uri }}</div>
+      <div><strong>Last Sync.:</strong>&nbsp;{{ formatDate(server.lastSync) }}</div>
+      <div><strong>Used in:</strong></div>
+      <app-bd-data-display [records]="getMinionRecords(server)" [columns]="columns">
+        <app-bd-no-data>
+          <strong>This version is not used in any instance.</strong>
+        </app-bd-no-data>
+      </app-bd-data-display>
+      <app-bd-button
+        [collapsed]="false"
+        text="Synchronize"
+        icon="history"
+        (click)="doSynchronize(server)"
+        [loadingWhen$]="synchronizing$"
+        [disabled]="synchronizing$ | async"
+        [matTooltip]="!servers.isSynchronized(server) ? 'The server is not synchronized. Click to synchronize now' : null"
+        [ngClass]="!servers.isSynchronized(server) ? 'bd-text-warn' : []"
+      ></app-bd-button>
+      <app-bd-button
+        [collapsed]="false"
+        text="Delete"
+        icon="delete"
+        [inverseColor]="true"
+        (click)="doDelete(server)"
+        [disabled]="!auth.isCurrentScopeAdmin() || (loading$ | async)"
+      ></app-bd-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

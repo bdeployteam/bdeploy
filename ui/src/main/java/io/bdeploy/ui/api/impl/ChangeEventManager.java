@@ -46,18 +46,30 @@ public class ChangeEventManager {
     }
 
     public void change(ObjectChangeType type, Manifest.Key key) {
-        bc.send(new ObjectChangeDto(type.name(), scope.getObjectScope(), ObjectEvent.CHANGED, detailsFromKey(key)));
+        change(type, key, scope.getObjectScope());
+    }
+
+    public void change(ObjectChangeType type, Manifest.Key key, ObjectScope s) {
+        bc.send(new ObjectChangeDto(type.name(), s, ObjectEvent.CHANGED, detailsFromKey(key)));
     }
 
     public void change(ObjectChangeType type, Manifest.Key key, Map<ObjectChangeDetails, ?> details) {
+        change(type, key, scope.getObjectScope(), details);
+    }
+
+    public void change(ObjectChangeType type, Manifest.Key key, ObjectScope s, Map<ObjectChangeDetails, ?> details) {
         Map<String, String> merged = new TreeMap<>();
         merged.putAll(detailsFromKey(key));
         details.forEach((dk, dv) -> merged.put(dk.name(), dv.toString()));
-        bc.send(new ObjectChangeDto(type.name(), scope.getObjectScope(), ObjectEvent.CHANGED, merged));
+        bc.send(new ObjectChangeDto(type.name(), s, ObjectEvent.CHANGED, merged));
     }
 
     public void remove(ObjectChangeType type, Manifest.Key key) {
-        bc.send(new ObjectChangeDto(type.name(), scope.getObjectScope(), ObjectEvent.REMOVED, detailsFromKey(key)));
+        remove(type, key, scope.getObjectScope());
+    }
+
+    public void remove(ObjectChangeType type, Manifest.Key key, ObjectScope s) {
+        bc.send(new ObjectChangeDto(type.name(), s, ObjectEvent.REMOVED, detailsFromKey(key)));
     }
 
 }

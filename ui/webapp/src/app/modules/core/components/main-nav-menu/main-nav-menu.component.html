@@ -19,19 +19,9 @@
   </div>
 
   <!-- Menu Buttons -->
-  <app-main-nav-button
-    icon="view_carousel"
-    text="Instance Groups"
-    [collapsed]="!expanded"
-    [route]="['/groups/browser']"
-  ></app-main-nav-button>
+  <app-main-nav-button icon="view_carousel" text="Instance Groups" [collapsed]="!expanded" [route]="['/groups/browser']"></app-main-nav-button>
 
-  <app-main-nav-button
-    icon="storage"
-    text="Software Repositories"
-    [collapsed]="!expanded"
-    [route]="['/l/softwarerepo/browser']"
-  ></app-main-nav-button>
+  <app-main-nav-button icon="storage" text="Software Repositories" [collapsed]="!expanded" [route]="['/l/softwarerepo/browser']"></app-main-nav-button>
 
   <mat-divider [style.position]="'relative'"></mat-divider>
 
@@ -51,6 +41,15 @@
     [route]="['/products', 'browser', areas.groupContext$.value]"
   ></app-main-nav-button>
 
+  <app-main-nav-button
+    *ngIf="cfgService.isCentral()"
+    [visible]="!!(areas.groupContext$ | async)"
+    icon="dns"
+    text="Managed Servers"
+    [collapsed]="!expanded"
+    [route]="['/servers', 'browser', areas.groupContext$.value]"
+  ></app-main-nav-button>
+
   <mat-divider
     *ngIf="areas.groupContext$ | async"
     [style.position]="'relative'"
@@ -63,13 +62,7 @@
   <div *ngIf="!expanded" class="local-server-type" [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.5s' } }">
     {{ cfgService.config.mode }}
   </div>
-  <div
-    fxLayout="column"
-    fxLayoutGap="5px"
-    *ngIf="expanded"
-    class="local-footer"
-    [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
-  >
+  <div fxLayout="column" fxLayoutGap="5px" *ngIf="expanded" class="local-footer" [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }">
     <app-bd-button
       *ngIf="authService.isGlobalAdmin()"
       fxFlexAlign="center center"
@@ -80,13 +73,7 @@
       [routerLink]="['/admin/']"
     ></app-bd-button>
     <a href="/assets/doc/index.html" target="_blank" class="bd-button-link">
-      <app-bd-button
-        fxFlexAlign="center center"
-        icon="help_outline"
-        text="Help"
-        [inverseColor]="true"
-        [collapsed]="!expanded"
-      ></app-bd-button>
+      <app-bd-button fxFlexAlign="center center" icon="help_outline" text="Help" [inverseColor]="true" [collapsed]="!expanded"></app-bd-button>
     </a>
     <mat-divider class="local-footer-divider"></mat-divider>
     <div gdColumns="auto auto" gdGap="5px">

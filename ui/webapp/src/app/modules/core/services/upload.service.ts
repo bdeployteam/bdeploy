@@ -1,7 +1,7 @@
 import { HttpClient, HttpEventType, HttpHeaders, HttpParams, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { suppressGlobalErrorHandling } from '../../legacy/shared/utils/server.utils';
+import { suppressGlobalErrorHandling } from '../utils/server.utils';
 import { Logger, LoggingService } from './logging.service';
 
 /** Enumeration of the possible states of an upload */
@@ -73,12 +73,7 @@ export class UploadService {
    *  @param formDataParam the FormData's property name that holds the file
    *  @returns a map containing the upload status for each file
    */
-  public upload(
-    url: string,
-    files: File[],
-    urlParameter: UrlParameter[][],
-    formDataParam: string
-  ): Map<string, UploadStatus> {
+  public upload(url: string, files: File[], urlParameter: UrlParameter[][], formDataParam: string): Map<string, UploadStatus> {
     const result: Map<string, UploadStatus> = new Map();
 
     for (let i = 0; i < files.length; ++i) {

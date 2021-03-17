@@ -11,7 +11,7 @@ import {
 } from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
 import { Logger, LoggingService } from '../../../core/services/logging.service';
-import { suppressGlobalErrorHandling } from '../../../legacy/shared/utils/server.utils';
+import { suppressGlobalErrorHandling } from '../../../core/utils/server.utils';
 
 @Injectable({
   providedIn: 'root',

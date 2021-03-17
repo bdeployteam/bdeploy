@@ -5,10 +5,10 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { Observable } from 'rxjs';
 import { MessageBoxMode } from 'src/app/modules/core/components/messagebox/messagebox.component';
 import { MessageboxService } from 'src/app/modules/core/services/messagebox.service';
-import { convert2String } from 'src/app/modules/legacy/shared/utils/version.utils';
+import { convert2String } from 'src/app/modules/core/utils/version.utils';
 import { environment } from 'src/environments/environment';
 import { BackendInfoDto, MinionMode, MinionStatusDto, PluginInfoDto, Version } from '../../../models/gen.dtos';
-import { suppressGlobalErrorHandling } from '../../legacy/shared/utils/server.utils';
+import { suppressGlobalErrorHandling } from '../utils/server.utils';
 import { LoggingService, LogLevel } from './logging.service';
 import { ThemeService } from './theme.service';
 
@@ -69,15 +69,12 @@ export class ConfigService {
       const newVersion = convert2String(bv.version);
 
       if (currentVersion !== newVersion) {
-        this.loggingService
-          .getLogger(null)
-          .info('A new version is available! old: ' + currentVersion + ' | new: ' + newVersion);
+        this.loggingService.getLogger(null).info('A new version is available! old: ' + currentVersion + ' | new: ' + newVersion);
 
         this.mbService
           .open({
             title: 'New Version',
-            message:
-              'A software update has been installed on the server. The page needs to be re-loaded to continue working.',
+            message: 'A software update has been installed on the server. The page needs to be re-loaded to continue working.',
             mode: MessageBoxMode.INFO,
           })
           .subscribe((r) => {
@@ -118,8 +115,18 @@ export class ConfigService {
   }
 
   public getNodeStates() {
-    return this.http.get<{ [minionName: string]: MinionStatusDto }[]>(
-      environment.apiUrl + '/backend-info/minion-status'
-    );
+    return this.http.get<{ [minionName: string]: MinionStatusDto }[]>(environment.apiUrl + '/backend-info/minion-status');
+  }
+
+  public isCentral(): boolean {
+    return this.config.mode === MinionMode.CENTRAL;
+  }
+
+  public isManaged(): boolean {
+    return this.config.mode === MinionMode.MANAGED;
+  }
+
+  public isStandalone(): boolean {
+    return this.config.mode === MinionMode.STANDALONE;
   }
 }

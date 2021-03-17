@@ -29,9 +29,9 @@ import {
 import { ProcessConfigDto } from '../../../../models/process.model';
 import { ConfigService } from '../../../core/services/config.service';
 import { Logger, LoggingService } from '../../../core/services/logging.service';
+import { suppressGlobalErrorHandling } from '../../../core/utils/server.utils';
 import { getAppOs } from '../../../legacy/shared/utils/manifest.utils';
 import { findEntry } from '../../../legacy/shared/utils/object.utils';
-import { suppressGlobalErrorHandling } from '../../../legacy/shared/utils/server.utils';
 import { URLish } from '../../../legacy/shared/utils/url.utils';
 import { InstanceGroupService } from '../../instance-group/services/instance-group.service';
 
@@ -59,18 +59,9 @@ export class ApplicationService {
   /** Keeps track of application names to prevent duplicate server application names */
   private readonly serverAppNames: string[] = [];
 
-  constructor(
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private loggingService: LoggingService,
-    private groupService: InstanceGroupService
-  ) {}
+  constructor(private cfg: ConfigService, private http: HttpClient, private loggingService: LoggingService, private groupService: InstanceGroupService) {}
 
-  public listApplications(
-    instanceGroupName: string,
-    product: ManifestKey,
-    customErrorHandling: boolean
-  ): Observable<ApplicationDto[]> {
+  public listApplications(instanceGroupName: string, product: ManifestKey, customErrorHandling: boolean): Observable<ApplicationDto[]> {
     const url: string = this.buildAppUrl(instanceGroupName, product);
     this.log.debug('listApplications: ' + url);
 
@@ -82,11 +73,7 @@ export class ApplicationService {
     return this.http.get<ApplicationDto[]>(url, { headers: headers });
   }
 
-  public getDescriptor(
-    instanceGroupName: string,
-    productKey: ManifestKey,
-    appKey: ManifestKey
-  ): Observable<ApplicationDescriptor> {
+  public getDescriptor(instanceGroupName: string, productKey: ManifestKey, appKey: ManifestKey): Observable<ApplicationDescriptor> {
     const url = this.buildAppNameTagUrl(instanceGroupName, productKey, appKey) + '/descriptor';
     this.log.debug('getDescriptor: ' + url);
     return this.http.get<ApplicationDescriptor>(url);
@@ -115,11 +102,7 @@ export class ApplicationService {
   /**
    * Updates the global parameters of all applications according to the given template.
    */
-  public updateGlobalParameters(
-    appDesc: ApplicationDescriptor,
-    template: ApplicationConfiguration,
-    apps: ApplicationConfiguration[]
-  ) {
+  public updateGlobalParameters(appDesc: ApplicationDescriptor, template: ApplicationConfiguration, apps: ApplicationConfiguration[]) {
     // Build index for quick parameter lookup
     const paraDescMap = new Map<string, ParameterDescriptor>();
     for (const paraDesc of appDesc.startCommand.parameters) {
@@ -170,11 +153,7 @@ export class ApplicationService {
   /**
    * Initializes the given configuration according to the given descriptor and template.
    */
-  public initAppConfig(
-    appConfig: ApplicationConfiguration,
-    appDesc: ApplicationDescriptor,
-    templates: ApplicationConfiguration[]
-  ) {
+  public initAppConfig(appConfig: ApplicationConfiguration, appDesc: ApplicationDescriptor, templates: ApplicationConfiguration[]) {
     // Initialize name
     appConfig.name = appDesc.name;
     appConfig.pooling = appDesc.pooling;
@@ -205,11 +184,7 @@ export class ApplicationService {
   }
 
   /** Creates and returns an array of parameters based on the given descriptors */
-  createParameters(
-    appConfig: ApplicationConfiguration,
-    descs: ParameterDescriptor[],
-    templates: ApplicationConfiguration[]
-  ): ParameterConfiguration[] {
+  createParameters(appConfig: ApplicationConfiguration, descs: ParameterDescriptor[], templates: ApplicationConfiguration[]): ParameterConfiguration[] {
     const configs: ParameterConfiguration[] = [];
 
     // Prepare all mandatory parameters
@@ -237,11 +212,7 @@ export class ApplicationService {
    * Updates the value of the given paramter based on the given descriptor.
    * Takes the global value if the parameter is defined as global and otherwise the default value.
    */
-  updateParameterValue(
-    config: ParameterConfiguration,
-    paraDesc: ParameterDescriptor,
-    templates: ApplicationConfiguration[]
-  ) {
+  updateParameterValue(config: ParameterConfiguration, paraDesc: ParameterDescriptor, templates: ApplicationConfiguration[]) {
     config.value = this.getParameterValue(paraDesc, templates);
     config.preRendered = this.preRenderParameter(paraDesc, config.value);
   }
@@ -337,9 +308,7 @@ export class ApplicationService {
         this.log.debug('Application ' + appCfg.uid + ' is valid. Resetting error flag.');
       } else {
         this.validationStates.set(appCfg.uid, errors);
-        this.log.debug(
-          'Application ' + appCfg.uid + ' is invalid. Setting error flag. Errors: \n\t' + errors.join('\n')
-        );
+        this.log.debug('Application ' + appCfg.uid + ' is invalid. Setting error flag. Errors: \n\t' + errors.join('\n'));
       }
     }
   }
@@ -392,9 +361,7 @@ export class ApplicationService {
 
     if (!isClientApp) {
       const appName = cfg.name;
-      this.serverAppNames.includes(appName)
-        ? errors.push('Server process name already used by another application')
-        : this.serverAppNames.push(appName);
+      this.serverAppNames.includes(appName) ? errors.push('Server process name already used by another application') : this.serverAppNames.push(appName);
     }
 
     return errors;
@@ -701,12 +668,7 @@ export class ApplicationService {
   /**
    * Updates the parameters of the given application according to the given descriptor.
    */
-  updateApplicationParams(
-    app: ApplicationConfiguration,
-    desc: ApplicationDescriptor,
-    oldDesc: ApplicationDescriptor,
-    templates: ApplicationConfiguration[]
-  ) {
+  updateApplicationParams(app: ApplicationConfiguration, desc: ApplicationDescriptor, oldDesc: ApplicationDescriptor, templates: ApplicationConfiguration[]) {
     if (desc.startCommand) {
       app.start.executable = desc.startCommand.launcherPath;
       this.updateParameter(
@@ -826,11 +788,7 @@ export class ApplicationService {
   /**
    * Creates missing parameters and ensures that all defined ones are still valid.
    */
-  updateApplicationParamsForPastedApplication(
-    app: ApplicationConfiguration,
-    desc: ApplicationDescriptor,
-    templates: ApplicationConfiguration[]
-  ) {
+  updateApplicationParamsForPastedApplication(app: ApplicationConfiguration, desc: ApplicationDescriptor, templates: ApplicationConfiguration[]) {
     if (desc.startCommand) {
       app.start.executable = desc.startCommand.launcherPath;
       this.updateParametersForPastedApplication(app.uid, app.start.parameters, desc.startCommand.parameters, templates);
@@ -849,11 +807,7 @@ export class ApplicationService {
     }
   }
 
-  correctParameterConfigurations(
-    configs: ParameterConfiguration[],
-    descs: ParameterDescriptor[],
-    templates: ApplicationConfiguration[]
-  ) {
+  correctParameterConfigurations(configs: ParameterConfiguration[], descs: ParameterDescriptor[], templates: ApplicationConfiguration[]) {
     // Order of parameters is important. Thus we need to insert a missing parameter
     // at the correct index in the config array.
     let lastRenderedIndex = 0;
@@ -881,12 +835,7 @@ export class ApplicationService {
     }
   }
 
-  updateParametersForPastedApplication(
-    appUid: string,
-    configs: ParameterConfiguration[],
-    descs: ParameterDescriptor[],
-    templates: ApplicationConfiguration[]
-  ) {
+  updateParametersForPastedApplication(appUid: string, configs: ParameterConfiguration[], descs: ParameterDescriptor[], templates: ApplicationConfiguration[]) {
     this.correctParameterConfigurations(configs, descs, templates);
 
     // Verify that all parameters are still defined in the current version
@@ -943,11 +892,7 @@ export class ApplicationService {
   }
 
   /** Creates a new application configuration and initializes it with default values */
-  createNewAppConfig(
-    instanceGroupName: string,
-    config: ProcessConfigDto,
-    app: ApplicationDto
-  ): Promise<ApplicationConfiguration> {
+  createNewAppConfig(instanceGroupName: string, config: ProcessConfigDto, app: ApplicationDto): Promise<ApplicationConfiguration> {
     const appConfig = cloneDeep(EMPTY_APPLICATION_CONFIGURATION);
     appConfig.processControl = cloneDeep(EMPTY_PROCESS_CONTROL_CONFIG);
     appConfig.application = app.key;
@@ -1104,11 +1049,7 @@ export class ApplicationService {
     });
   }
 
-  meetsCondition(
-    param: ParameterDescriptor,
-    allDescriptors: ParameterDescriptor[],
-    allConfigs: ParameterConfiguration[]
-  ): boolean {
+  meetsCondition(param: ParameterDescriptor, allDescriptors: ParameterDescriptor[], allConfigs: ParameterConfiguration[]): boolean {
     if (!param.condition || !param.condition.parameter) {
       return true; // no condition, all OK :)
     }

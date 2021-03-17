@@ -1,7 +1,7 @@
 import { HttpHeaders } from '@angular/common/http';
 import { of, OperatorFunction } from 'rxjs';
 import { catchError, delay, retryWhen, scan, takeWhile } from 'rxjs/operators';
-import { NO_ERROR_HANDLING_HDR } from '../../../../models/consts';
+import { NO_ERROR_HANDLING_HDR } from '../../../models/consts';
 
 export function suppressGlobalErrorHandling(p: HttpHeaders): HttpHeaders {
   return p.append(NO_ERROR_HANDLING_HDR, 'true');

@@ -1,0 +1,35 @@
+<app-bd-dialog [loadingWhen$]="servers.loading$">
+  <app-bd-dialog-toolbar header="Managed Servers of {{ (groups.current$ | async)?.title }}">
+    <div fxFlex="1 0 auto"></div>
+    <app-bd-data-grouping
+      [multiple]="!dataTable.grid"
+      (groupingChange)="dataTable.grouping = $event"
+      [definitions]="grouping"
+      [records]="servers.servers$ | async"
+      presetKey="instanceGroups"
+    ></app-bd-data-grouping>
+    <app-bd-button [isToggle]="true" icon="grid_view" text="Toggle Card Mode" [(toggle)]="dataTable.grid"></app-bd-button>
+    <mat-divider [vertical]="true"></mat-divider>
+    <app-bd-panel-button icon="link" text="Link Managed Server" [route]="['panels', 'servers', 'link', 'managed']"></app-bd-panel-button>
+  </app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <app-bd-data-display
+      #dataTable
+      [columns]="columns.defaultServerColumns"
+      [records]="servers.servers$ | async"
+      [recordRoute]="getRecordRoute"
+      [searchable]="true"
+    >
+      <app-bd-no-data>
+        <p>No managed servers have been linked to this instance group yet.</p>
+        <app-bd-panel-button
+          icon="link"
+          text="Link Managed Server"
+          [collapsed]="false"
+          [route]="['panels', 'servers', 'link', 'managed']"
+        ></app-bd-panel-button>
+      </app-bd-no-data>
+    </app-bd-data-display>
+  </app-bd-dialog-content>
+</app-bd-dialog>

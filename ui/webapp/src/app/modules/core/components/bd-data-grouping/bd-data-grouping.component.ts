@@ -63,7 +63,7 @@ export class BdDataGroupingComponent<T> extends BdDataGroupingGuideComponent imp
   private loadPreset() {
     // always start with a single entry with no grouping selected.
     if (!!this.defaultGrouping?.length) {
-      this.groupings = this.defaultGrouping;
+      this.groupings = [...this.defaultGrouping];
     } else {
       this.groupings = [{ definition: null, selected: [] }];
     }

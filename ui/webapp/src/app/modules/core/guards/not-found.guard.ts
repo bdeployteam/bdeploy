@@ -9,11 +9,7 @@ export class NotFoundGuard implements CanActivate {
   constructor(private snackbar: MatSnackBar, private router: Router) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
-    this.snackbar.open(
-      `Unfortunately, /${route.url.join('/')} was not found, we returned you to the safe-zone.`,
-      'DISMISS',
-      { panelClass: 'error-snackbar' }
-    );
+    this.snackbar.open(`Unfortunately, ${route.url.join('/')} was not found, we returned you to the safe-zone.`, 'DISMISS', { panelClass: 'error-snackbar' });
     this.router.navigate(['/groups/browser']);
 
     return false; // never allow, we redirected right away above.

@@ -5,6 +5,7 @@ import { MessageboxComponent } from './modules/core/components/messagebox/messag
 import { AdminGuard } from './modules/core/guards/admin.guard';
 import { AuthGuard } from './modules/core/guards/authentication.guard';
 import { NotFoundGuard } from './modules/core/guards/not-found.guard';
+import { ServerCentralGuard } from './modules/core/guards/server-central.guard';
 
 const routes: Routes = [
   {
@@ -55,6 +56,17 @@ const routes: Routes = [
     loadChildren: () => import('./modules/panels/products/products.module').then((x) => x.ProductsModule),
     canActivate: [AuthGuard],
   },
+  {
+    path: 'servers',
+    loadChildren: () => import('./modules/primary/servers/servers.module').then((x) => x.ServersModule),
+    canActivate: [AuthGuard, ServerCentralGuard],
+  },
+  {
+    path: 'panels/servers',
+    outlet: 'panel',
+    loadChildren: () => import('./modules/panels/servers/servers.module').then((x) => x.ServersModule),
+    canActivate: [AuthGuard],
+  },
 
   {
     path: 'panels/user',
@@ -66,15 +78,13 @@ const routes: Routes = [
   // LEGACY ROUTES
   {
     path: 'l/instancegroup',
-    loadChildren: () =>
-      import('./modules/legacy/instance-group/instance-group.module').then((x) => x.InstanceGroupModule),
+    loadChildren: () => import('./modules/legacy/instance-group/instance-group.module').then((x) => x.InstanceGroupModule),
   },
   {
     // TESTING
     path: 'ig-side',
     outlet: 'panel',
-    loadChildren: () =>
-      import('./modules/legacy/instance-group/instance-group.module').then((x) => x.InstanceGroupModule),
+    loadChildren: () => import('./modules/legacy/instance-group/instance-group.module').then((x) => x.InstanceGroupModule),
   },
   {
     path: 'l/instance',

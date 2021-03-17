@@ -7,7 +7,7 @@ import { ConfigService } from '../../../core/services/config.service';
 import { DownloadService } from '../../../core/services/download.service';
 import { Logger, LoggingService } from '../../../core/services/logging.service';
 import { UploadService } from '../../../core/services/upload.service';
-import { suppressGlobalErrorHandling } from '../../../legacy/shared/utils/server.utils';
+import { suppressGlobalErrorHandling } from '../../../core/utils/server.utils';
 import { SoftwareRepositoryService } from './software-repository.service';
 
 export enum ImportState {
@@ -48,11 +48,7 @@ export class SoftwareService {
     private deviceService: DeviceDetectorService
   ) {}
 
-  public listSoftwares(
-    softwareRepositoryName: string,
-    listProducts: boolean,
-    listGeneric: boolean
-  ): Observable<ManifestKey[]> {
+  public listSoftwares(softwareRepositoryName: string, listProducts: boolean, listGeneric: boolean): Observable<ManifestKey[]> {
     const url: string = this.buildSoftwareUrl(softwareRepositoryName);
     let params = new HttpParams();
     params = listProducts ? params.set('products', 'true') : params;

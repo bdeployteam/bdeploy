@@ -5,15 +5,8 @@ import { format } from 'date-fns';
 import { cloneDeep } from 'lodash-es';
 import { catchError } from 'rxjs/operators';
 import { isUpdateFailed, isUpdateInProgress, isUpdateSuccess, UpdateStatus } from 'src/app/models/update.model';
-import { convert2String } from 'src/app/modules/legacy/shared/utils/version.utils';
-import {
-  InstanceConfiguration,
-  ManagedMasterDto,
-  MinionDto,
-  MinionStatusDto,
-  MinionUpdateDto,
-  Version,
-} from '../../../../../models/gen.dtos';
+import { convert2String } from 'src/app/modules/core/utils/version.utils';
+import { InstanceConfiguration, ManagedMasterDto, MinionDto, MinionStatusDto, MinionUpdateDto, Version } from '../../../../../models/gen.dtos';
 import { MessageBoxMode } from '../../../../core/components/messagebox/messagebox.component';
 import { MessageboxService } from '../../../../core/services/messagebox.service';
 import { ManagedServersService } from '../../services/managed-servers.service';
@@ -50,11 +43,7 @@ export class ManagedServerDetailComponent implements OnInit {
   columnsToDisplay = ['minion', 'url', 'version', 'os', 'status'];
   dataSource: MatTableDataSource<MinionTableRow>;
 
-  constructor(
-    private messageBoxService: MessageboxService,
-    private managedServers: ManagedServersService,
-    private dialog: MatDialog
-  ) {}
+  constructor(private messageBoxService: MessageboxService, private managedServers: ManagedServersService, private dialog: MatDialog) {}
 
   ngOnInit() {
     this.load();
@@ -64,9 +53,7 @@ export class ManagedServerDetailComponent implements OnInit {
     this.managedServers.getInstancesForManagedServer(this.instanceGroupName, this.server.hostName).subscribe((r) => {
       this.instances = r;
     });
-    const minions = await this.managedServers
-      .minionsConfigOfManagedServer(this.instanceGroupName, this.server.hostName)
-      .toPromise();
+    const minions = await this.managedServers.minionsConfigOfManagedServer(this.instanceGroupName, this.server.hostName).toPromise();
 
     const arr: MinionTableRow[] = [];
     for (const key of Object.keys(minions)) {
@@ -175,9 +162,7 @@ export class ManagedServerDetailComponent implements OnInit {
           })
         )
         .toPromise();
-      this.minionState = await this.managedServers
-        .minionsStateOfManagedServer(this.instanceGroupName, this.server.hostName)
-        .toPromise();
+      this.minionState = await this.managedServers.minionsStateOfManagedServer(this.instanceGroupName, this.server.hostName).toPromise();
       this.updateDto = this.server?.update;
       this.synchronized = true;
     } catch {

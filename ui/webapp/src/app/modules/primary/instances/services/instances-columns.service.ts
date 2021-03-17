@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BdDataColumn, BdDataColumnDisplay, BdDataColumnTypeHint } from 'src/app/models/data';
 import { InstanceDto, MinionMode } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
+import { ServersService } from '../../servers/services/servers.service';
 import { InstanceBannerHintComponent } from '../components/instances-browser/instance-banner-hint/instance-banner-hint.component';
 import { InstanceProductVersionComponent } from '../components/instances-browser/instance-product-version/instance-product-version.component';
 import { InstancesService } from './instances.service';
@@ -58,7 +59,6 @@ export class InstancesColumnsService {
     data: (r) => r.instanceConfiguration.product.tag,
     component: InstanceProductVersionComponent,
     icon: (r) => 'security_update_good',
-    width: '150px',
   };
 
   instanceProductActiveColumn: BdDataColumn<InstanceDto> = {
@@ -69,7 +69,6 @@ export class InstancesColumnsService {
     data: (r) => (!!r.activeProductDto ? r.activeProductDto.key.tag : null),
     icon: (r) => 'security_update_good',
     showWhen: '(min-width: 750px)',
-    width: '150px',
   };
 
   instanceBannerColumn: BdDataColumn<InstanceDto> = {
@@ -84,7 +83,7 @@ export class InstancesColumnsService {
     id: 'managedServer',
     name: 'Managed Server',
     hint: BdDataColumnTypeHint.DETAILS,
-    data: (r) => (!!r.managedServer ? r.managedServer.description : null),
+    data: (r) => (!!r.managedServer ? `${r.managedServer.hostName} - ${r.managedServer.description}` : null),
     icon: (r) => 'dns',
     showWhen: '(min-width: 650px)',
   };
@@ -94,8 +93,8 @@ export class InstancesColumnsService {
     name: 'Sync.',
     hint: BdDataColumnTypeHint.ACTIONS,
     data: (r) => `Synchronize ${r.instanceConfiguration.name}`,
-    action: (r) => this.instances.synchronize(r.instanceConfiguration.uuid),
-    classes: (r) => (this.instances.isSynchronized(r.instanceConfiguration.uuid) ? [] : ['bd-text-warn']),
+    action: (r) => this.servers.synchronize(r.managedServer).subscribe(),
+    classes: (r) => (this.servers.isSynchronized(r.managedServer) ? [] : ['bd-text-warn']),
     icon: (r) => 'history',
     width: '50px',
   };
@@ -113,7 +112,7 @@ export class InstancesColumnsService {
     this.instanceSyncColumn,
   ];
 
-  constructor(private cfg: ConfigService, private instances: InstancesService) {
+  constructor(private cfg: ConfigService, private instances: InstancesService, private servers: ServersService) {
     if (cfg.config.mode !== MinionMode.CENTRAL) {
       this.instanceSyncColumn.display = BdDataColumnDisplay.NONE;
       this.instanceServerColumn.display = BdDataColumnDisplay.NONE;

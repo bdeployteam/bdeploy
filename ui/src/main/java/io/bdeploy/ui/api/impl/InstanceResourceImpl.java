@@ -404,6 +404,7 @@ public class InstanceResourceImpl implements InstanceResource {
     public void delete(String instance) {
         // prevent delete if processes are running.
         InstanceManifest im = readInstance(instance);
+        List<InstanceVersionDto> versions = listVersions(instance);
         RemoteService master = mp.getControllingMaster(hive, im.getManifest());
         try (Activity deploy = reporter.start("Deleting " + instance + "...");
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(master)) {
@@ -417,7 +418,6 @@ public class InstanceResourceImpl implements InstanceResource {
             }
 
             // cleanup is done periodically in background, still uninstall installed versions to prevent re-start of processes later
-            List<InstanceVersionDto> versions = listVersions(instance);
             for (InstanceVersionDto dto : versions) {
                 root.getNamedMaster(group).uninstall(dto.key);
             }
@@ -426,12 +426,15 @@ public class InstanceResourceImpl implements InstanceResource {
         }
 
         syncInstance(minion, rc, group, instance);
+
+        versions.forEach(v -> changes.remove(ObjectChangeType.INSTANCE, v.key));
     }
 
     @Override
     public void deleteVersion(String instanceId, String tag) {
         // prevent delete if processes are running.
         InstanceManifest im = readInstance(instanceId);
+        Manifest.Key key = new Manifest.Key(InstanceManifest.getRootName(instanceId), tag);
         RemoteService master = mp.getControllingMaster(hive, im.getManifest());
         try (Activity deploy = reporter.start("Deleting " + instanceId + ":" + tag + "...");
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(master)) {
@@ -445,11 +448,12 @@ public class InstanceResourceImpl implements InstanceResource {
 
             // now delete also on the central...
             if (minion.getMode() == MinionMode.CENTRAL) {
-                InstanceManifest.delete(hive, new Manifest.Key(InstanceManifest.getRootName(instanceId), tag));
+                InstanceManifest.delete(hive, key);
             }
         }
 
         syncInstance(minion, rc, group, instanceId);
+        changes.remove(ObjectChangeType.INSTANCE, key);
     }
 
     @Override
@@ -889,8 +893,9 @@ public class InstanceResourceImpl implements InstanceResource {
                 }
                 syncInstance(minion, rc, group, instanceId);
 
-                return response.readEntity(new GenericType<List<Key>>() {
+                List<Key> keys = response.readEntity(new GenericType<List<Key>>() {
                 });
+                keys.forEach(k -> changes.create(ObjectChangeType.INSTANCE, k));
             } catch (IOException e) {
                 throw new WebApplicationException("Cannot delegate import to managed server", e);
             }
@@ -1003,9 +1008,9 @@ public class InstanceResourceImpl implements InstanceResource {
         instanceBannerRecord.user = context.getUserPrincipal().getName();
         instanceBannerRecord.timestamp = System.currentTimeMillis();
         root.getNamedMaster(group).updateBanner(instanceId, instanceBannerRecord);
+        syncInstance(minion, rc, group, instanceId);
         changes.change(ObjectChangeType.INSTANCE, im.getManifest(),
                 Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.BANNER));
-        syncInstance(minion, rc, group, instanceId);
     }
 
     @Override

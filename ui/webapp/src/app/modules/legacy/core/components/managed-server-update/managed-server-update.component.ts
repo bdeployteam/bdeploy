@@ -1,17 +1,10 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { isEqual } from 'lodash-es';
 import { tap } from 'rxjs/operators';
+import { retryWithDelay } from 'src/app/modules/core/utils/server.utils';
 import { ManagedServersService } from 'src/app/modules/legacy/servers/services/managed-servers.service';
-import { retryWithDelay } from 'src/app/modules/legacy/shared/utils/server.utils';
 import { MinionUpdateDto } from '../../../../../models/gen.dtos';
-import {
-  areUpdatesAvailable,
-  isTransferDone,
-  isUpdateFailed,
-  isUpdateInProgress,
-  isUpdateSuccess,
-  UpdateStatus,
-} from '../../../../../models/update.model';
+import { areUpdatesAvailable, isTransferDone, isUpdateFailed, isUpdateInProgress, isUpdateSuccess, UpdateStatus } from '../../../../../models/update.model';
 import { AuthenticationService } from '../../../../core/services/authentication.service';
 
 @Component({

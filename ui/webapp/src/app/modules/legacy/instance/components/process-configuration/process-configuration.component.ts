@@ -48,7 +48,6 @@ import { SystemService } from '../../../../core/services/system.service';
 import { FileUploadComponent } from '../../../../legacy/shared/components/file-upload/file-upload.component';
 import { LauncherService } from '../../../../legacy/shared/services/launcher.service';
 import { ProductService } from '../../../../legacy/shared/services/product.service';
-import { HeaderTitleService } from '../../../core/services/header-title.service';
 import { RoutingHistoryService } from '../../../core/services/routing-history.service';
 import { ApplicationService } from '../../services/application.service';
 import { InstanceService } from '../../services/instance.service';
@@ -176,7 +175,6 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     public location: Location,
     public downloadService: DownloadService,
     private dialog: MatDialog,
-    private titleService: HeaderTitleService,
     private eventService: ActivitiesService,
     private systemService: SystemService,
     private dragulaService: DragulaService,
@@ -212,9 +210,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
         }
 
         this.subscriptions.add(
-          this.changes.subscribe(ObjectChangeType.INSTANCE, { scope: [this.groupParam, this.uuidParam] }, (ch) =>
-            this.onRemoteInstanceUpdate(ch)
-          )
+          this.changes.subscribe(ObjectChangeType.INSTANCE, { scope: [this.groupParam, this.uuidParam] }, (ch) => this.onRemoteInstanceUpdate(ch))
         );
       })
     );
@@ -285,10 +281,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
           }),
         500
       );
-    } else if (
-      change.event === ObjectEvent.CHANGED &&
-      change.details[ObjectChangeDetails.CHANGE_HINT] === ObjectChangeHint.STATE
-    ) {
+    } else if (change.event === ObjectEvent.CHANGED && change.details[ObjectChangeDetails.CHANGE_HINT] === ObjectChangeHint.STATE) {
       setTimeout(() => {
         // avoid reload if we did it ourselves. still delay a little as the event may arrive
         // before the actual call returned and a reload was initiated by the instance version card.
@@ -296,10 +289,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
           this.loadDeploymentStates();
         }
       }, 100);
-    } else if (
-      change.event === ObjectEvent.CHANGED &&
-      change.details[ObjectChangeDetails.CHANGE_HINT] === ObjectChangeHint.BANNER
-    ) {
+    } else if (change.event === ObjectEvent.CHANGED && change.details[ObjectChangeDetails.CHANGE_HINT] === ObjectChangeHint.BANNER) {
       this.loadBanner();
     }
   }
@@ -314,9 +304,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     for (const cfg of this.processConfigs) {
       const key = cfg.version.key;
       if (key.name !== newKey.name) {
-        this.log.warn(
-          `Received update event for wrong version, or wrong version loaded in dialog: loaded: ${key}, received: ${newKey}`
-        );
+        this.log.warn(`Received update event for wrong version, or wrong version loaded in dialog: loaded: ${key}, received: ${newKey}`);
         continue;
       }
       if (key.tag === newKey.tag) {
@@ -376,9 +364,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
             return;
           } else if (this.deploymentState.activeTag) {
             // look for activated version
-            const initialConfig = this.processConfigs.find(
-              (cfg) => cfg.version.key.tag === this.deploymentState.activeTag
-            );
+            const initialConfig = this.processConfigs.find((cfg) => cfg.version.key.tag === this.deploymentState.activeTag);
             if (initialConfig) {
               this.loadInstance(initialConfig);
               return;
@@ -405,16 +391,12 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
     const selectedVersion = newSelectedConfig.version;
 
-    const call1 = this.instanceService
-      .getInstanceVersion(this.groupParam, this.uuidParam, selectedVersion.key.tag)
-      .pipe(
-        mergeMap((instance) => {
-          newSelectedConfig.setInstance(instance);
-          return this.applicationService
-            .listApplications(this.groupParam, newSelectedConfig.instance.product, true)
-            .pipe(catchError((e) => of([]))); // => results[0]
-        })
-      );
+    const call1 = this.instanceService.getInstanceVersion(this.groupParam, this.uuidParam, selectedVersion.key.tag).pipe(
+      mergeMap((instance) => {
+        newSelectedConfig.setInstance(instance);
+        return this.applicationService.listApplications(this.groupParam, newSelectedConfig.instance.product, true).pipe(catchError((e) => of([]))); // => results[0]
+      })
+    );
     const call2 = this.instanceService.getNodeConfiguration(this.groupParam, this.uuidParam, selectedVersion.key.tag); // => results[1]
 
     // Gather node state only in managed / standalone mode
@@ -476,9 +458,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   getProductOfInstance(pcd: ProcessConfigDto): ProductDto {
-    return this.productTags.find(
-      (p) => p.key.name === pcd.instance.product.name && p.key.tag === pcd.instance.product.tag
-    );
+    return this.productTags.find((p) => p.key.name === pcd.instance.product.name && p.key.tag === pcd.instance.product.tag);
   }
 
   loadDeploymentStates() {
@@ -559,10 +539,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
 
   onDownloadClickAndStart(app: ApplicationConfiguration) {
     this.instanceService.createClickAndStartDescriptor(this.groupParam, this.uuidParam, app.uid).subscribe((data) => {
-      this.downloadService.downloadJson(
-        app.name + ' (' + this.groupParam + ' - ' + this.selectedConfig.instance.name + ')' + '.bdeploy',
-        data
-      );
+      this.downloadService.downloadJson(app.name + ' (' + this.groupParam + ' - ' + this.selectedConfig.instance.name + ')' + '.bdeploy', data);
     });
   }
 
@@ -699,12 +676,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       config: this.processConfigs[0].instance,
       nodeDtos: this.processConfigs[0].nodeList.nodeConfigDtos,
     };
-    const promise = this.instanceService.compareConfigs(
-      this.groupParam,
-      this.uuidParam,
-      compareVersionA,
-      compareVersionB
-    );
+    const promise = this.instanceService.compareConfigs(this.groupParam, this.uuidParam, compareVersionA, compareVersionB);
     const data = [promise, 'Unsaved Changes'];
     this.dialog.open(InstanceHistoryCompareComponent, {
       minWidth: '300px',
@@ -821,8 +793,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     const isClientNode = node.nodeName === CLIENT_NODE_NAME;
     const productHasClientApps = this.hasClientApplications();
     const productHasServerApps = this.hasServerApplications();
-    const hasConfiguredClientApp =
-      node.nodeConfiguration && node.nodeConfiguration.applications && node.nodeConfiguration.applications.length > 0;
+    const hasConfiguredClientApp = node.nodeConfiguration && node.nodeConfiguration.applications && node.nodeConfiguration.applications.length > 0;
     return (!isClientNode && productHasServerApps) || (isClientNode && productHasClientApps) || hasConfiguredClientApp;
   }
 
@@ -1050,13 +1021,9 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     this.productUpdating = false;
 
     // Check if config files changed between product versions and inform the user
-    const oldIdx: number = this.productTags.findIndex(
-      (p) => p.key.name === oldProduct.name && p.key.tag === oldProduct.tag
-    );
+    const oldIdx: number = this.productTags.findIndex((p) => p.key.name === oldProduct.name && p.key.tag === oldProduct.tag);
     if (oldIdx >= 0 && product.configTree?.id !== this.productTags[oldIdx].configTree?.id) {
-      const idx: number = this.productTags.findIndex(
-        (p) => p.key.name === product.key.name && p.key.tag === product.key.tag
-      );
+      const idx: number = this.productTags.findIndex((p) => p.key.name === product.key.name && p.key.tag === product.key.tag);
       this.messageBoxService.open({
         title: 'Product ' + (idx < oldIdx ? 'Upgrade' : 'Downgrade'),
         message:
@@ -1152,11 +1119,9 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     this.editEndpointsMode = endpoints;
     this.editPortsMode = ports;
     if (editMode) {
-      this.pageTitle = this.titleService.getHeaderTitle();
-      this.titleService.setHeaderTitle('Process Settings');
+      this.pageTitle = 'Edit';
     } else {
       this.updateDirtyStateAndValidate();
-      this.titleService.setHeaderTitle(this.pageTitle);
     }
   }
 
@@ -1237,11 +1202,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   isReadonly() {
-    if (
-      this.isCentral() &&
-      (!this.syncComponent.isInSync() ||
-        (this.syncComponent.isInSync() && this.updateDto && this.updateDto.forceUpdate))
-    ) {
+    if (this.isCentral() && (!this.syncComponent.isInSync() || (this.syncComponent.isInSync() && this.updateDto && this.updateDto.forceUpdate))) {
       return true;
     }
     if (this.isUpdateInProgress() || this.isUpdateFailed()) {
@@ -1261,11 +1222,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   }
 
   public isActiveVersionSelected(): boolean {
-    return (
-      this.isInstanceActivated() &&
-      this.selectedConfig != null &&
-      this.selectedConfig.version.key.tag === this.deploymentState.activeTag
-    );
+    return this.isInstanceActivated() && this.selectedConfig != null && this.selectedConfig.version.key.tag === this.deploymentState.activeTag;
   }
 
   async onSyncManaged() {
@@ -1405,11 +1362,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     }
 
     if (this.showUpdateComponent()) {
-      this.addNotification(
-        this.notificationUpdate,
-        this.updateDto && this.updateDto.forceUpdate ? Severity.ERROR : Severity.WARNING,
-        4
-      );
+      this.addNotification(this.notificationUpdate, this.updateDto && this.updateDto.forceUpdate ? Severity.ERROR : Severity.WARNING, 4);
     } else {
       this.removeNotification(this.notificationUpdate);
     }
@@ -1474,10 +1427,7 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
       return null;
     }
 
-    const matches = this.getActivitiesWithScopeRecursive(
-      [this.groupParam, this.uuidParam, config.version.key.tag],
-      this.currentEvents
-    );
+    const matches = this.getActivitiesWithScopeRecursive([this.groupParam, this.uuidParam, config.version.key.tag], this.currentEvents);
     if (!matches || !matches.length) {
       return null;
     }

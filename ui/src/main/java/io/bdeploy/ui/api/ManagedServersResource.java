@@ -4,16 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.MediaType;
-
 import io.bdeploy.common.Version;
 import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
@@ -25,6 +15,16 @@ import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.jersey.ActivityScope;
 import io.bdeploy.ui.dto.ProductDto;
 import io.bdeploy.ui.dto.ProductTransferDto;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
 
 @Path("/managed-servers")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -97,7 +97,7 @@ public interface ManagedServersResource {
     public List<InstanceConfiguration> getInstancesControlledBy(@ActivityScope @PathParam("group") String groupName,
             @PathParam("server") String serverName);
 
-    @POST
+    @DELETE
     @Path("/delete-server/{group}/{server:.+}")
     @Consumes(MediaType.TEXT_PLAIN)
     @RequiredPermission(scope = "group", permission = Permission.ADMIN)
@@ -123,7 +123,7 @@ public interface ManagedServersResource {
     public Map<String, MinionStatusDto> getMinionStateOfManagedServer(@ActivityScope @PathParam("group") String groupName,
             @PathParam("server") String serverName);
 
-    @POST
+    @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Path("/synchronize/{group}/{server:.+}")
     @RequiredPermission(scope = "group", permission = Permission.WRITE)

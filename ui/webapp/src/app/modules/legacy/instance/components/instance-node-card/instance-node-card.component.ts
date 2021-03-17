@@ -1,15 +1,5 @@
 import { moveItemInArray } from '@angular/cdk/drag-drop';
-import {
-  Component,
-  ElementRef,
-  EventEmitter,
-  Input,
-  OnDestroy,
-  OnInit,
-  Output,
-  TemplateRef,
-  ViewChild,
-} from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 import { MatBottomSheet, MatBottomSheetRef } from '@angular/material/bottom-sheet';
 import { MatDialog } from '@angular/material/dialog';
 import { format } from 'date-fns';
@@ -20,7 +10,7 @@ import { StatusMessage } from 'src/app/models/config.model';
 import { MessageBoxMode } from 'src/app/modules/core/components/messagebox/messagebox.component';
 import { Logger, LoggingService } from 'src/app/modules/core/services/logging.service';
 import { MessageboxService } from 'src/app/modules/core/services/messagebox.service';
-import { convert2String } from 'src/app/modules/legacy/shared/utils/version.utils';
+import { convert2String } from 'src/app/modules/core/utils/version.utils';
 import { ApplicationGroup } from '../../../../../models/application.model';
 import { CLIENT_NODE_NAME, EMPTY_INSTANCE_NODE_CONFIGURATION } from '../../../../../models/consts';
 import { EventWithCallback } from '../../../../../models/event';
@@ -206,9 +196,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
   }
 
   getProductOfInstance(pcd: ProcessConfigDto): ProductDto {
-    return this.productTags.find(
-      (p) => p.key.name === pcd.instance.product.name && p.key.tag === pcd.instance.product.tag
-    );
+    return this.productTags.find((p) => p.key.name === pcd.instance.product.name && p.key.tag === pcd.instance.product.tag);
   }
 
   getApplicationTemplate(id: string, pcd: ProcessConfigDto): ApplicationTemplateDescriptor {
@@ -422,9 +410,7 @@ export class InstanceNodeCardComponent implements OnInit, OnDestroy {
   }
 
   fireEditEndpointsAppConfigEvent(appConfig: ApplicationConfiguration) {
-    this.editAppEndpointsEvent.emit(
-      new EditAppConfigContext(this.node, appConfig, this.processConfig.instance.product)
-    );
+    this.editAppEndpointsEvent.emit(new EditAppConfigContext(this.node, appConfig, this.processConfig.instance.product));
   }
 
   /** Returns whether or not at least one app has been added to the node */

@@ -2,8 +2,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ManifestKey, PluginInfoDto } from 'src/app/models/gen.dtos';
-import { suppressGlobalErrorHandling } from '../../legacy/shared/utils/server.utils';
 import { Api } from '../plugins/plugin.api';
+import { suppressGlobalErrorHandling } from '../utils/server.utils';
 import { ConfigService } from './config.service';
 
 @Injectable({
@@ -30,24 +30,16 @@ export class PluginService {
     const delegate = this;
     return {
       get(path, params?) {
-        return delegate.http
-          .get(delegate.buildPluginUrl(plugin, path), { params: params, responseType: 'text' })
-          .toPromise();
+        return delegate.http.get(delegate.buildPluginUrl(plugin, path), { params: params, responseType: 'text' }).toPromise();
       },
       put(path, body, params?) {
-        return delegate.http
-          .put(delegate.buildPluginUrl(plugin, path), body, { params: params, responseType: 'text' })
-          .toPromise();
+        return delegate.http.put(delegate.buildPluginUrl(plugin, path), body, { params: params, responseType: 'text' }).toPromise();
       },
       post(path, body, params?) {
-        return delegate.http
-          .post(delegate.buildPluginUrl(plugin, path), body, { params: params, responseType: 'text' })
-          .toPromise();
+        return delegate.http.post(delegate.buildPluginUrl(plugin, path), body, { params: params, responseType: 'text' }).toPromise();
       },
       delete(path, params?) {
-        return delegate.http
-          .delete(delegate.buildPluginUrl(plugin, path), { params: params, responseType: 'text' })
-          .toPromise();
+        return delegate.http.delete(delegate.buildPluginUrl(plugin, path), { params: params, responseType: 'text' }).toPromise();
       },
       getResourceUrl() {
         return delegate.config.getPluginUrl(plugin);

@@ -4,8 +4,8 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { ObjectChangeType, ProductDto } from 'src/app/models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
-import { NavAreasService } from '../../../core/services/nav-areas.service';
 import { ObjectChangesService } from '../../../core/services/object-changes.service';
+import { GroupsService } from '../../groups/services/groups.service';
 
 @Injectable({
   providedIn: 'root',
@@ -19,13 +19,8 @@ export class ProductsService {
 
   private apiPath = (g) => `${this.cfg.config.api}/group/${g}/product`;
 
-  constructor(
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private changes: ObjectChangesService,
-    areas: NavAreasService
-  ) {
-    areas.groupContext$.subscribe((group) => this.reload(group));
+  constructor(private cfg: ConfigService, private http: HttpClient, private changes: ObjectChangesService, groups: GroupsService) {
+    groups.current$.subscribe((group) => this.reload(group?.name));
   }
 
   public getUploadURL() {
@@ -34,6 +29,7 @@ export class ProductsService {
 
   private reload(group: string) {
     if (!group) {
+      this.products$.next([]);
       return;
     }
 

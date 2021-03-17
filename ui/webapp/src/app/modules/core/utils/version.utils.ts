@@ -1,4 +1,4 @@
-import { Version } from '../../../../models/gen.dtos';
+import { Version } from '../../../models/gen.dtos';
 
 /**
  * Returns a human readable string of the given version

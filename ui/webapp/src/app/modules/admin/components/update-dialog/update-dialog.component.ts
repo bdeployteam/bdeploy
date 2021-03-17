@@ -1,8 +1,8 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Version } from 'src/app/models/gen.dtos';
-import { retryWithDelay } from 'src/app/modules/legacy/shared/utils/server.utils';
-import { convert2String } from 'src/app/modules/legacy/shared/utils/version.utils';
+import { retryWithDelay } from 'src/app/modules/core/utils/server.utils';
+import { convert2String } from 'src/app/modules/core/utils/version.utils';
 import { ConfigService } from '../../../core/services/config.service';
 
 export class UpdateDialogData {

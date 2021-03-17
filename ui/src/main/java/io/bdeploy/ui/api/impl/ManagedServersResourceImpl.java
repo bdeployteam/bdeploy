@@ -66,6 +66,7 @@ import io.bdeploy.interfaces.remote.MasterSettingsResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.JerseyOnBehalfOfFilter;
+import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 import io.bdeploy.ui.ProductTransferService;
 import io.bdeploy.ui.api.BackendInfoResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
@@ -75,6 +76,9 @@ import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
 import io.bdeploy.ui.dto.CentralIdentDto;
+import io.bdeploy.ui.dto.ObjectChangeDetails;
+import io.bdeploy.ui.dto.ObjectChangeHint;
+import io.bdeploy.ui.dto.ObjectChangeType;
 import io.bdeploy.ui.dto.ProductDto;
 import io.bdeploy.ui.dto.ProductTransferDto;
 import jakarta.inject.Inject;
@@ -107,6 +111,9 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
     @Inject
     private ProductTransferService transfers;
+
+    @Inject
+    private ChangeEventManager changes;
 
     @Override
     public void tryAutoAttach(String groupName, ManagedMasterDto target) {
@@ -147,6 +154,9 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
             ResourceProvider.getVersionedResource(svc, ManagedServersAttachEventResource.class, context)
                     .setLocalAttached(groupName);
+
+            changes.change(ObjectChangeType.INSTANCE_GROUP, igm.getKey(),
+                    Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.SERVERS));
         } catch (Exception e) {
             throw new WebApplicationException("Cannot automatically attach managed server " + target.hostName, e);
         }
@@ -163,6 +173,10 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
         // store the attachment locally
         mm.attach(target, false);
+
+        InstanceGroupManifest igm = new InstanceGroupManifest(hive);
+        changes.change(ObjectChangeType.INSTANCE_GROUP, igm.getKey(),
+                Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.SERVERS));
     }
 
     @Override
@@ -201,10 +215,6 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
     @Override
     public String getCentralIdent(String groupName, ManagedMasterDto target) {
         BHive hive = getInstanceGroupHive(groupName);
-
-        if (new ManagedMasters(hive).read().getManagedMasters().containsKey(target.hostName)) {
-            throw new WebApplicationException("Server with name " + target.hostName + " already exists!", Status.CONFLICT);
-        }
 
         InstanceGroupManifest igm = new InstanceGroupManifest(hive);
 
@@ -296,6 +306,10 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         }
 
         new ManagedMasters(hive).detach(serverName);
+
+        InstanceGroupManifest igm = new InstanceGroupManifest(hive);
+        changes.change(ObjectChangeType.INSTANCE_GROUP, igm.getKey(),
+                Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.SERVERS));
     }
 
     @Override
@@ -317,6 +331,11 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         }
 
         mm.attach(update, true);
+
+        BHive hive = getInstanceGroupHive(groupName);
+        InstanceGroupManifest igm = new InstanceGroupManifest(hive);
+        changes.change(ObjectChangeType.INSTANCE_GROUP, igm.getKey(),
+                Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.SERVERS));
     }
 
     @Override
@@ -368,6 +387,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
         ManagedMasters mm = new ManagedMasters(hive);
         ManagedMasterDto attached = mm.read().getManagedMaster(serverName);
+        InstanceGroupManifest igm = new InstanceGroupManifest(hive);
 
         // 1. Fetch information about updates, possibly required
         attached.update = getUpdates(svc);
@@ -380,7 +400,6 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 throw new WebApplicationException("Instance group (no longer?) found on the managed server", Status.NOT_FOUND);
             }
 
-            InstanceGroupManifest igm = new InstanceGroupManifest(hive);
             Manifest.Key igKey = igm.getKey();
             String attributesMetaName = igm.getAttributes(hive).getMetaManifest().getMetaName();
             Set<Key> metaManifests = hive.execute(new ManifestListOperation().setManifestName(attributesMetaName));
@@ -417,6 +436,10 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             for (Key key : keysOnCentral) {
                 InstanceManifest im = InstanceManifest.of(hive, key);
                 if (instanceIds.contains(im.getConfiguration().uuid)) {
+                    // MAYBE has been updated by the sync.
+                    changes.change(ObjectChangeType.INSTANCE, im.getManifest(),
+                            new ObjectScope(groupName, im.getConfiguration().uuid));
+
                     continue; // OK. instance exists
                 }
 
@@ -428,9 +451,12 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 Set<Key> allInstanceObjects = hive
                         .execute(new ManifestListOperation().setManifestName(im.getConfiguration().uuid));
                 allInstanceObjects.forEach(x -> hive.execute(new ManifestDeleteOperation().setToDelete(x)));
+
+                changes.remove(ObjectChangeType.INSTANCE, im.getManifest(),
+                        new ObjectScope(groupName, im.getConfiguration().uuid));
             }
 
-            // 5. for all the fetched manifests, if they are instances, associate the server with it
+            // 5. for all the fetched manifests, if they are instances, associate the server with it, and send out a change
             for (Manifest.Key instance : instances.keySet()) {
                 new ControllingMaster(hive, instance).associate(serverName);
             }
@@ -455,6 +481,9 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
         // 8. update current information in the hive.
         mm.attach(attached, true);
+
+        changes.change(ObjectChangeType.INSTANCE_GROUP, igm.getKey(),
+                Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.SERVERS));
 
         return attached;
     }

@@ -7,5 +7,6 @@ public enum ObjectChangeHint {
     ATTRIBUTES,
     PERMISSIONS,
     STATE,
-    BANNER
+    BANNER,
+    SERVERS
 }

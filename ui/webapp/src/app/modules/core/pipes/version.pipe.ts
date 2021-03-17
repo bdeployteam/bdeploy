@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { Version } from 'src/app/models/gen.dtos';
-import { convert2String } from '../../legacy/shared/utils/version.utils';
+import { convert2String } from '../utils/version.utils';
 
 @Pipe({
   name: 'formatVersion',

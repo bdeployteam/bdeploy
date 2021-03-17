@@ -15,7 +15,10 @@ export class NavAreasService {
   primaryRoute$ = new BehaviorSubject<ActivatedRouteSnapshot>(null);
   panelRoute$ = new BehaviorSubject<ActivatedRouteSnapshot>(null);
 
+  /** should ONLY be used by GroupsService. Subscribe to GroupsService.current$ instead */
   groupContext$ = new BehaviorSubject<string>(null);
+
+  /** should ONLY be used by InstancesService. Subscribe to InstancesService.current$ instead */
   instanceContext$ = new BehaviorSubject<string>(null);
 
   private primaryState: string;

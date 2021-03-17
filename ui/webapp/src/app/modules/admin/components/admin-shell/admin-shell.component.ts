@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { HeaderTitleService } from 'src/app/modules/legacy/core/services/header-title.service';
 
 @Component({
   selector: 'app-admin-shell',
@@ -8,11 +7,10 @@ import { HeaderTitleService } from 'src/app/modules/legacy/core/services/header-
   styleUrls: ['./admin-shell.component.css'],
 })
 export class AdminShellComponent implements OnInit {
-  constructor(private header: HeaderTitleService, private title: Title) {}
+  constructor(private title: Title) {}
 
   ngOnInit() {
     // need to do manual, due to sub-routes, etc.
-    this.header.setHeaderTitle('Administration');
     this.title.setTitle('Administration');
   }
 }

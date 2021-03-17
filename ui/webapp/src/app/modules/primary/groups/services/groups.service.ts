@@ -1,12 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, forkJoin, Observable } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+import { debounceTime, finalize } from 'rxjs/operators';
 import {
   CustomAttributeDescriptor,
   CustomAttributesRecord,
   InstanceGroupConfiguration,
-  ObjectChangeDto,
+  ObjectChangeDetails,
+  ObjectChangeHint,
   ObjectChangeType,
   ObjectId,
 } from 'src/app/models/gen.dtos';
@@ -20,6 +21,7 @@ import { SettingsService } from '../../../core/services/settings.service';
 })
 export class GroupsService {
   private apiPath = `${this.cfg.config.api}/group`;
+  private update$ = new BehaviorSubject<any>(null);
 
   loading$ = new BehaviorSubject<boolean>(true);
   groups$ = new BehaviorSubject<InstanceGroupConfiguration[]>([]);
@@ -34,9 +36,15 @@ export class GroupsService {
     private areas: NavAreasService,
     public settings: SettingsService
   ) {
-    this.reload();
-    this.changes.subscribe(ObjectChangeType.INSTANCE_GROUP, EMPTY_SCOPE, (change) => this.onChange(change));
     this.areas.groupContext$.subscribe((r) => this.current$.next(this.groups$.value?.find((g) => g.name === r)));
+    this.update$.pipe(debounceTime(100)).subscribe((_) => this.reload());
+    this.changes.subscribe(ObjectChangeType.INSTANCE_GROUP, EMPTY_SCOPE, (change) => {
+      if (change.details[ObjectChangeDetails.CHANGE_HINT] === ObjectChangeHint.SERVERS) {
+        // ignore changes in managed servers, those as handled in ServersService.
+        return;
+      }
+      this.update$.next(change);
+    });
   }
 
   public getLogoUrlOrDefault(group: string, id: ObjectId, def: string) {
@@ -93,12 +101,5 @@ export class GroupsService {
           this.current$.next(this.groups$.value.find((g) => g.name === this.areas.groupContext$.value));
         }
       });
-  }
-
-  private onChange(change: ObjectChangeDto) {
-    // TODO: better single record updating...?
-    if (!this.loading$.value) {
-      this.reload();
-    }
   }
 }
