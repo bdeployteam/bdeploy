@@ -389,6 +389,9 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         ManagedMasterDto attached = mm.read().getManagedMaster(serverName);
         InstanceGroupManifest igm = new InstanceGroupManifest(hive);
 
+        List<InstanceManifest> updatedInstances = new ArrayList<>();
+        List<InstanceManifest> removedInstances = new ArrayList<>();
+
         // 1. Fetch information about updates, possibly required
         attached.update = getUpdates(svc);
 
@@ -437,9 +440,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 InstanceManifest im = InstanceManifest.of(hive, key);
                 if (instanceIds.contains(im.getConfiguration().uuid)) {
                     // MAYBE has been updated by the sync.
-                    changes.change(ObjectChangeType.INSTANCE, im.getManifest(),
-                            new ObjectScope(groupName, im.getConfiguration().uuid));
-
+                    updatedInstances.add(im);
                     continue; // OK. instance exists
                 }
 
@@ -452,8 +453,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                         .execute(new ManifestListOperation().setManifestName(im.getConfiguration().uuid));
                 allInstanceObjects.forEach(x -> hive.execute(new ManifestDeleteOperation().setToDelete(x)));
 
-                changes.remove(ObjectChangeType.INSTANCE, im.getManifest(),
-                        new ObjectScope(groupName, im.getConfiguration().uuid));
+                removedInstances.add(im);
             }
 
             // 5. for all the fetched manifests, if they are instances, associate the server with it, and send out a change
@@ -481,6 +481,15 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
         // 8. update current information in the hive.
         mm.attach(attached, true);
+
+        // 9. send out notifications after *all* is done.
+        for (var im : updatedInstances) {
+            changes.change(ObjectChangeType.INSTANCE, im.getManifest(), new ObjectScope(groupName, im.getConfiguration().uuid));
+        }
+
+        for (var im : removedInstances) {
+            changes.remove(ObjectChangeType.INSTANCE, im.getManifest(), new ObjectScope(groupName, im.getConfiguration().uuid));
+        }
 
         changes.change(ObjectChangeType.INSTANCE_GROUP, igm.getKey(),
                 Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.SERVERS));

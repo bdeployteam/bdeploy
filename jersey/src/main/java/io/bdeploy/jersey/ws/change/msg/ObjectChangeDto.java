@@ -40,4 +40,9 @@ public class ObjectChangeDto {
         this.details = details == null ? Collections.emptyMap() : details;
     }
 
+    @Override
+    public String toString() {
+        return "ObjectChange { type=" + type + ", event=" + event + ", scope=" + scope + ", details=" + details + " }";
+    }
+
 }

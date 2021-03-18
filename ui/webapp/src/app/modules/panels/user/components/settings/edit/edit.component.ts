@@ -1,9 +1,11 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { cloneDeep } from 'lodash-es';
+import { cloneDeep, isEqual } from 'lodash-es';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { debounceTime, finalize } from 'rxjs/operators';
 import { UserInfo } from 'src/app/models/gen.dtos';
+import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { BdPanelButtonComponent } from 'src/app/modules/core/components/bd-panel-button/bd-panel-button.component';
+import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 
@@ -12,12 +14,14 @@ import { SettingsService } from 'src/app/modules/core/services/settings.service'
   templateUrl: './edit.component.html',
   styleUrls: ['./edit.component.css'],
 })
-export class EditComponent implements OnInit, OnDestroy {
+export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
   /* template */ loading$ = new BehaviorSubject<boolean>(true);
   /* template */ mail$ = new BehaviorSubject<string>(null);
   /* template */ user: UserInfo;
+  /* template */ orig: UserInfo;
 
-  @ViewChild('backButton') back: BdPanelButtonComponent;
+  @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
+  @ViewChild('backButton') private back: BdPanelButtonComponent;
   private subscription: Subscription;
   private mailChanged = new Subject<string>();
 
@@ -30,6 +34,7 @@ export class EditComponent implements OnInit, OnDestroy {
       if (!!u) {
         this.loading$.next(false);
         this.user = cloneDeep(u);
+        this.orig = cloneDeep(u);
         this.mail$.next(this.user.email);
       }
     });
@@ -39,11 +44,15 @@ export class EditComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  updateMail(): void {
+  /* template */ isDirty(): boolean {
+    return !isEqual(this.user, this.orig);
+  }
+
+  /* template */ updateMail(): void {
     this.mailChanged.next(this.user.email);
   }
 
-  onSave(): void {
+  /* template */ onSave(): void {
     this.loading$.next(true);
     this.auth
       .updateUserInfo(this.user)

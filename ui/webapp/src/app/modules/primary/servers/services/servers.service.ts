@@ -101,7 +101,16 @@ export class ServersService {
     });
   }
 
+  public manualAttachCentral(ident: string): Observable<string> {
+    return this.http.put(`${this.apiPath}/manual-attach-central`, ident, { responseType: 'text' });
+  }
+
   public getCentralIdent(server: ManagedMasterDto): Observable<string> {
     return this.http.post(`${this.apiPath}/central-ident/${this.group}`, server, { responseType: 'text' });
+  }
+
+  public getManagedIdent(): Observable<ManagedMasterDto> {
+    // TODO: why is this method in the wrong service on the server?
+    return this.http.get<ManagedMasterDto>(`${this.cfg.config.api}/backend-info/managed-master`);
   }
 }

@@ -58,6 +58,8 @@
  * The root style classes provide commonly used styling like highlights, non-theme coloring, shadows, etc.
  */
 @mixin root-style-classes($theme) {
+  $dark: map-get($theme, 'is-dark');
+
   /* A rectangular "card". This is different from mat-card in that it does not have rouded corners, *and* it does not have any spacing, margin or else associated. */
   .bd-rect-card {
     $background: map-get($theme, background);
@@ -118,6 +120,16 @@
   .bd-glow-bg {
     background: radial-gradient(circle, var(--bd-main-bar) 0%, var(--bd-main-bar-darker) 100%);
     color: var(--bd-main-bar-contrast);
+  }
+
+  $drag-color: if($dark, mat-color($mat-grey, 800), mat-color($mat-yellow, 200));
+  $border-color: if($dark, mat-color($mat-grey, 300), mat-color($mat-grey, 700));
+  .bd-drag-card {
+    background-color: $drag-color !important;
+  }
+
+  .bd-drop-card {
+    border: dashed 2px $border-color;
   }
 }
 

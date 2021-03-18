@@ -1,0 +1,25 @@
+<app-bd-dialog [loadingWhen$]="loading$">
+  <app-bd-dialog-toolbar header="Edit Details" [closeablePanel]="true"></app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px" *ngIf="server">
+      <form fxLayout="column" fxLayoutGap="10px" #form="ngForm" (ngSubmit)="onSave()">
+        <app-bd-form-input name="description" label="Description" [(ngModel)]="server.description"></app-bd-form-input>
+        <app-bd-form-input name="uri" label="URI" [(ngModel)]="server.uri"></app-bd-form-input>
+        <div><strong>Advanced Users Only:</strong> Replace authorization token with a new one. Handle with care!</div>
+        <app-bd-form-input name="token" label="Authorization Token" [(ngModel)]="server.auth"></app-bd-form-input>
+
+        <app-bd-button text="SAVE" [collapsed]="false" [inverseColor]="true" [disabled]="!isDirty() || form.invalid"></app-bd-button>
+      </form>
+
+      <app-bd-panel-button
+        [collapsed]="false"
+        text="Back to overview"
+        icon="arrow_back"
+        [toggle]="false"
+        [route]="['..']"
+        [relative]="true"
+      ></app-bd-panel-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

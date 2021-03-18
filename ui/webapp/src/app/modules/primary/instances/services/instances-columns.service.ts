@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { format } from 'date-fns';
 import { BdDataColumn, BdDataColumnDisplay, BdDataColumnTypeHint } from 'src/app/models/data';
 import { InstanceDto, MinionMode } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
@@ -58,14 +59,13 @@ export class InstancesColumnsService {
     hint: BdDataColumnTypeHint.DETAILS,
     data: (r) => r.instanceConfiguration.product.tag,
     component: InstanceProductVersionComponent,
-    icon: (r) => 'security_update_good',
+    icon: (r) => 'smartphone',
   };
 
   instanceProductActiveColumn: BdDataColumn<InstanceDto> = {
     id: 'activeProductVersion',
     name: 'Active Version',
     hint: BdDataColumnTypeHint.DETAILS,
-    display: BdDataColumnDisplay.TABLE,
     data: (r) => (!!r.activeProductDto ? r.activeProductDto.key.tag : null),
     icon: (r) => 'security_update_good',
     showWhen: '(min-width: 750px)',
@@ -92,7 +92,7 @@ export class InstancesColumnsService {
     id: 'sync',
     name: 'Sync.',
     hint: BdDataColumnTypeHint.ACTIONS,
-    data: (r) => `Synchronize ${r.instanceConfiguration.name}`,
+    data: (r) => `Synchronize ${r.instanceConfiguration.name} - last synchronization ${format(new Date(r.managedServer.lastSync), 'dd.MM.yyyy HH:mm')}`,
     action: (r) => this.servers.synchronize(r.managedServer).subscribe(),
     classes: (r) => (this.servers.isSynchronized(r.managedServer) ? [] : ['bd-text-warn']),
     icon: (r) => 'history',

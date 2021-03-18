@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Route, RouterModule } from '@angular/router';
+import { DirtyDialogGuard } from '../../core/guards/dirty-dialog.guard';
 import { EditComponent } from './components/settings/edit/edit.component';
 import { GuideComponent } from './components/settings/guide/guide.component';
 import { PasswordComponent } from './components/settings/password/password.component';
@@ -10,7 +11,7 @@ import { ThemesComponent } from './components/themes/themes.component';
 const USER_ROUTES: Route[] = [
   { path: 'themes', component: ThemesComponent },
   { path: 'settings', component: SettingsComponent },
-  { path: 'settings/edit', component: EditComponent },
+  { path: 'settings/edit', component: EditComponent, canDeactivate: [DirtyDialogGuard] },
   { path: 'settings/password', component: PasswordComponent },
   { path: 'settings/token', component: TokenComponent },
   { path: 'settings/guide', component: GuideComponent },

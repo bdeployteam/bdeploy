@@ -1,1 +1,39 @@
-<p>link-central works!</p>
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="Link Instance Group" [closeablePanel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px">
+      <div>
+        Visit the central server you want to link from in a separate window now, and drag the <em>link information card</em> below to the
+        <strong>Link Managed Server</strong> panel in the other browser windows.
+      </div>
+      <mat-card fxLayout="column" fxLayoutAlign="center center" draggable="true" (dragstart)="onDragStart($event)" class="bd-drag-card">
+        <div>Drag me to the central server!</div>
+      </mat-card>
+      <div>This panel will automatically close once the central server has established a connection to this server.</div>
+      <mat-expansion-panel fxFlex="1 0 auto">
+        <mat-expansion-panel-header>
+          <mat-panel-title>Manual and Offline Linking</mat-panel-title>
+        </mat-expansion-panel-header>
+        <div fxLayout="column" fxLayoutGap="10px" [style.padding-top.px]="10">
+          <div>
+            In case you do not have the possibility to drag the card to the central server now, you can download the information as a file, and drop the file to
+            the central servers <strong>Link Managed Server</strong> panel instead.
+          </div>
+          <app-bd-button
+            text="Download Link Information"
+            icon="cloud_download"
+            [collapsed]="false"
+            (click)="downloads.downloadJson('managed-' + payload.hostName + '.json', payload)"
+          ></app-bd-button>
+          <div>
+            Once either the card above or the <strong>link information file</strong> was dropped to the central server, you will receive a
+            <strong>link authorization file</strong> in return. Drop it below to complete the process.
+          </div>
+          <mat-card fxLayout="column" fxLayoutAlign="center center" class="bd-drag-card bd-drop-card" (drop)="onDrop($event)" (dragover)="onOver($event)">
+            Drop managed server information here!
+          </mat-card>
+        </div>
+      </mat-expansion-panel>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

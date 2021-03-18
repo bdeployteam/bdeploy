@@ -10,7 +10,20 @@
     ></app-bd-data-grouping>
     <app-bd-button [isToggle]="true" icon="grid_view" text="Toggle Card Mode" [(toggle)]="dataTable.grid"></app-bd-button>
     <mat-divider [vertical]="true"></mat-divider>
-    <app-bd-panel-button icon="add" text="Add Instance Group" [route]="['panels', 'groups', 'add']" [disabled]="!isAddAllowed()"></app-bd-panel-button>
+    <app-bd-panel-button
+      *ngIf="!config.isManaged()"
+      icon="add"
+      text="Add Instance Group"
+      [route]="['panels', 'groups', 'add']"
+      [disabled]="!isAddAllowed()"
+    ></app-bd-panel-button>
+    <app-bd-panel-button
+      *ngIf="config.isManaged()"
+      icon="link"
+      text="Link Instance Group"
+      [route]="['panels', 'servers', 'link', 'central']"
+      [disabled]="!isAttachAllowed()"
+    ></app-bd-panel-button>
   </app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
@@ -29,6 +42,15 @@
         <ng-container *ngIf="isAddAllowed()">
           <p>No instance groups have been created yet. Start by creating a new one.</p>
           <app-bd-panel-button icon="add" text="Add Instance Group" [collapsed]="false" [route]="['panels', 'groups', 'add']"></app-bd-panel-button>
+        </ng-container>
+        <ng-container *ngIf="isAttachAllowed()">
+          <p>No instance groups have been linked yet. Start by linking one from a central server.</p>
+          <app-bd-panel-button
+            icon="link"
+            text="Link Instance Group"
+            [collapsed]="false"
+            [route]="['panels', 'servers', 'link', 'central']"
+          ></app-bd-panel-button>
         </ng-container>
       </app-bd-no-data>
     </app-bd-data-display>

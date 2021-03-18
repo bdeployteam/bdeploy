@@ -1,15 +1,7 @@
 <ng-template #cardContents>
-  <div
-    *ngIf="!!colType"
-    class="local-card-type bd-text-ellipsis"
-    [ngClass]="colType.classes ? colType.classes(record) : []"
-  >
+  <div *ngIf="!!colType" class="local-card-type bd-text-ellipsis" [ngClass]="colType.classes ? colType.classes(record) : []">
     <ng-container *ngIf="!colType.component" class="bd-text-ellipsis">{{ colType.data(record) }}</ng-container>
-    <app-bd-data-component-cell
-      *ngIf="!!colType.component"
-      [componentType]="colType.component"
-      [record]="record"
-    ></app-bd-data-component-cell>
+    <app-bd-data-component-cell *ngIf="!!colType.component" [componentType]="colType.component" [record]="record"></app-bd-data-component-cell>
   </div>
   <div
     *ngIf="!!colTitle"
@@ -19,11 +11,7 @@
     [matTooltipShowDelay]="1000"
   >
     <ng-container *ngIf="!colTitle.component" class="bd-text-ellipsis">{{ colTitle.data(record) }}</ng-container>
-    <app-bd-data-component-cell
-      *ngIf="!!colTitle.component"
-      [componentType]="colTitle.component"
-      [record]="record"
-    ></app-bd-data-component-cell>
+    <app-bd-data-component-cell *ngIf="!!colTitle.component" [componentType]="colTitle.component" [record]="record"></app-bd-data-component-cell>
   </div>
   <div
     *ngIf="!!colDescription"
@@ -32,42 +20,26 @@
     [matTooltip]="colDescription.data(record)"
     [matTooltipShowDelay]="1000"
   >
-    <ng-container *ngIf="!colDescription.component" class="bd-text-ellipsis">{{
-      colDescription.data(record)
-    }}</ng-container>
-    <app-bd-data-component-cell
-      *ngIf="!!colDescription.component"
-      [componentType]="colDescription.component"
-      [record]="record"
-    ></app-bd-data-component-cell>
+    <ng-container *ngIf="!colDescription.component" class="bd-text-ellipsis">{{ colDescription.data(record) }}</ng-container>
+    <app-bd-data-component-cell *ngIf="!!colDescription.component" [componentType]="colDescription.component" [record]="record"></app-bd-data-component-cell>
   </div>
   <div
     class="local-card-actions"
     fxLayout="row"
     fxLayoutGap="5px"
+    fxFlex="1 0 auto"
     *ngIf="!!colActions?.length || !!colDetails?.length || !!colAvatar"
     [style.backgroundImage]="getImageUrl()"
     [style.backgroundBlendMode]="!!colActions?.length || !!colDetails?.length ? 'overlay' : undefined"
   >
     <div fxFlex="1 0 auto" fxLayout="column" fxLayoutAlign="center start">
-      <div
-        *ngIf="!!colDetails?.length"
-        gdColumns="16px auto"
-        gdGap="2px"
-        gdAlignColumns="center center"
-        class="local-card-detail-text"
-      >
+      <div *ngIf="!!colDetails?.length" gdColumns="16px auto" gdGap="2px" gdAlignColumns="center center" class="local-card-detail-text">
         <ng-container *ngFor="let detail of colDetails">
           <ng-container *ngIf="detail.component || !!detail.data(record)">
-            <mat-icon class="bd-small-icon" [matTooltip]="detail.name" [matTooltipShowDelay]="1000">{{
-              detail.icon(record)
-            }}</mat-icon>
+            <mat-icon class="bd-small-icon" [matTooltip]="detail.name" [matTooltipShowDelay]="1000">{{ detail.icon(record) }}</mat-icon>
             <span *ngIf="!detail.component" class="bd-text-ellipsis">{{ detail.data(record) }}</span>
             <div *ngIf="!!detail.component">
-              <app-bd-data-component-cell
-                [componentType]="detail.component"
-                [record]="record"
-              ></app-bd-data-component-cell>
+              <app-bd-data-component-cell [componentType]="detail.component" [record]="record"></app-bd-data-component-cell>
             </div>
           </ng-container>
         </ng-container>
@@ -96,19 +68,17 @@
     [matTooltipShowDelay]="1000"
   >
     <ng-container *ngIf="!colFooter.component" class="bd-text-ellipsis">{{ colFooter.data(record) }}</ng-container>
-    <app-bd-data-component-cell
-      *ngIf="!!colFooter.component"
-      [componentType]="colFooter.component"
-      [record]="record"
-    ></app-bd-data-component-cell>
+    <app-bd-data-component-cell *ngIf="!!colFooter.component" [componentType]="colFooter.component" [record]="record"></app-bd-data-component-cell>
   </div>
 </ng-template>
 
-<mat-card (click)="recordClick.emit(record)" *ngIf="!recordRoute" [style.cursor]="'pointer'">
+<mat-card fxFlex="1 0 auto" fxLayout="column" (click)="recordClick.emit(record)" *ngIf="!recordRoute" [style.cursor]="'pointer'">
   <ng-container *ngTemplateOutlet="cardContents"></ng-container>
 </mat-card>
 
 <mat-card
+  fxFlex="1 0 auto"
+  fxLayout="column"
   *ngIf="!!recordRoute"
   [routerLink]="recordRoute(record)"
   routerLinkActive="mat-card-route-active"

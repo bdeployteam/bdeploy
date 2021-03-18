@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { BdDataGroupingDefinition } from 'src/app/models/data';
-import { InstanceGroupConfiguration, MinionMode } from 'src/app/models/gen.dtos';
+import { InstanceGroupConfiguration } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { GroupsColumnsService } from '../../services/groups-columns.service';
@@ -44,14 +44,10 @@ export class GroupsBrowserComponent implements OnInit, OnDestroy {
   }
 
   /* template */ isAddAllowed(): boolean {
-    return this.authService.isGlobalAdmin() && (this.config.config.mode === MinionMode.CENTRAL || this.config.config.mode === MinionMode.STANDALONE);
+    return this.authService.isGlobalAdmin() && (this.config.isCentral() || this.config.isStandalone());
   }
 
   /* template */ isAttachAllowed(): boolean {
-    return !this.isAddAllowed();
-  }
-
-  /* template */ isAttachManagedAllowed(): boolean {
-    return this.config.config.mode === MinionMode.CENTRAL;
+    return this.authService.isGlobalAdmin() && this.config.isManaged();
   }
 }

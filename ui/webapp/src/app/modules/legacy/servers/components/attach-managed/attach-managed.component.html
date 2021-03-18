@@ -2,9 +2,7 @@
   <button mat-icon-button type="button" (click)="routingHistoryService.back('l/servers/browser/' + instanceGroupName)">
     <mat-icon>chevron_left</mat-icon>
   </button>
-  <span
-    >Attach Managed Server: <app-instance-group-title [instanceGroup]="instanceGroupName"></app-instance-group-title
-  ></span>
+  <span>Attach Managed Server: <app-instance-group-title [instanceGroup]="instanceGroupName"></app-instance-group-title></span>
 </mat-toolbar>
 
 <div class="stepper-container">
@@ -15,9 +13,8 @@
 
     <mat-step label="Introduction" #introStep>
       <p>
-        This page can be used to attach a BDeploy server running in managed mode to this central server. You will need
-        the counterpart on the managed server which contains the managed server identification as dragable element. This
-        page can be found by clicking the
+        This page can be used to attach a BDeploy server running in managed mode to this central server. You will need the counterpart on the managed server
+        which contains the managed server identification as dragable element. This page can be found by clicking the
         <strong>Attach Instance Group</strong> button on the <strong>Instance Groups</strong> page.
       </p>
       <div class="button-container">
@@ -25,14 +22,9 @@
       </div>
     </mat-step>
     <mat-step label="Attach Managed Server" #attachStep [completed]="!!attachPayload">
-      <p>
-        Drag the managed server information from the managed server's <strong>Attach to Central Server</strong> page and
-        drop it on the zone below.
-      </p>
+      <p>Drag the managed server information from the managed server's <strong>Attach to Central Server</strong> page and drop it on the zone below.</p>
       <div class="drag-container" *ngIf="!attachPayload">
-        <mat-card class="drag-card drop-card" (drop)="onDrop($event)" (dragover)="onOver($event)">
-          Drop managed server information here!
-        </mat-card>
+        <mat-card class="bd-drag-card bd-drop-card" (drop)="onDrop($event)" (dragover)="onOver($event)"> Drop managed server information here! </mat-card>
         <input type="file" hidden (change)="onUpload($event)" data-cy="managed-ident" />
       </div>
       <p *ngIf="attachPayload">
@@ -41,9 +33,7 @@
       </p>
       <div class="button-container">
         <button mat-raised-button matStepperPrevious (click)="attachPayload = null">Back</button>
-        <button mat-raised-button matStepperNext [disabled]="!attachPayload" (click)="updateFormDefaults()">
-          Next
-        </button>
+        <button mat-raised-button matStepperNext [disabled]="!attachPayload" (click)="updateFormDefaults()">Next</button>
       </div>
     </mat-step>
     <mat-step label="Additional Information">
@@ -56,12 +46,7 @@
             <input matInput placeholder="Description" formControlName="desc" required />
           </mat-form-field>
           <mat-form-field>
-            <input
-              matInput
-              placeholder="Remote Server URI (change to match DNS/VPN/NAT configuration)"
-              formControlName="uri"
-              required
-            />
+            <input matInput placeholder="Remote Server URI (change to match DNS/VPN/NAT configuration)" formControlName="uri" required />
           </mat-form-field>
         </div>
       </form>
@@ -88,16 +73,13 @@
       </div>
     </mat-step>
     <mat-step label="Manual Configuration of Managed Server" optional="true" #manualStep>
-      <p>
-        Note that this step is only necessary if this server cannot contact the configured managed server (temporarily
-        or permanently).
-      </p>
+      <p>Note that this step is only necessary if this server cannot contact the configured managed server (temporarily or permanently).</p>
       <div class="drag-container" *ngIf="!centralIdent">
         <mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner>
       </div>
       <div class="drag-container" *ngIf="centralIdent">
         <button mat-raised-button (click)="downloadManualJson()">Download for manual setup</button>
-        <mat-card draggable="true" (dragstart)="onDragStart($event)" class="drag-card">
+        <mat-card draggable="true" (dragstart)="onDragStart($event)" class="bd-drag-card">
           <div>Drag me to the managed server!</div>
         </mat-card>
       </div>
@@ -116,9 +98,7 @@
       <div class="success-icon">
         <mat-icon>check_circle_outline</mat-icon>
         <p *ngIf="attachPayload">This managed server {{ serverNameControl.value }} has been attached.</p>
-        <button mat-raised-button [routerLink]="['/l/servers/browser', instanceGroupName]" [replaceUrl]="true">
-          Done
-        </button>
+        <button mat-raised-button [routerLink]="['/l/servers/browser', instanceGroupName]" [replaceUrl]="true">Done</button>
       </div>
     </mat-step>
   </mat-vertical-stepper>

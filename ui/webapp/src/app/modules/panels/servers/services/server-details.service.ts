@@ -57,4 +57,8 @@ export class ServerDetailsService implements OnDestroy {
   public delete(server: ManagedMasterDto) {
     return this.http.delete(`${this.apiPath}/delete-server/${this.areas.groupContext$.value}/${server.hostName}`);
   }
+
+  public update(server: ManagedMasterDto) {
+    return this.http.post(`${this.apiPath}/update-server/${this.areas.groupContext$.value}/${server.hostName}`, server);
+  }
 }

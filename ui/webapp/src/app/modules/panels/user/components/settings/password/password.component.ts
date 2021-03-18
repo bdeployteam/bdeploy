@@ -17,7 +17,7 @@ export class PasswordComponent implements OnInit {
   /* template */ passVerify = '';
   /* template */ remoteError: string = null;
 
-  @ViewChild('backButton') back: BdPanelButtonComponent;
+  @ViewChild('backButton') private back: BdPanelButtonComponent;
 
   constructor(private auth: AuthenticationService) {}
 
