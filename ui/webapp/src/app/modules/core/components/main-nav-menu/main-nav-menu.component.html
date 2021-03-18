@@ -42,6 +42,14 @@
   ></app-main-nav-button>
 
   <app-main-nav-button
+    [visible]="!!(areas.groupContext$ | async)"
+    icon="computer"
+    text="Client Applications"
+    [collapsed]="!expanded"
+    [route]="['/groups', 'clients', areas.groupContext$.value]"
+  ></app-main-nav-button>
+
+  <app-main-nav-button
     *ngIf="cfgService.isCentral()"
     [visible]="!!(areas.groupContext$ | async)"
     icon="dns"

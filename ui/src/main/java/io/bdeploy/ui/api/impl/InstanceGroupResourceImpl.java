@@ -136,7 +136,6 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
             Manifest.Key key = igm.update(config);
             registry.register(config.name, h);
 
-            auth.addRecentlyUsedInstanceGroup(context.getUserPrincipal().getName(), config.name);
             changes.create(ObjectChangeType.INSTANCE_GROUP, key, new ObjectScope(config.name));
         } catch (Exception e) {
             PathHelper.deleteRecursive(hive);
@@ -159,7 +158,6 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
 
     @Override
     public void update(String group, InstanceGroupConfiguration config) {
-        auth.addRecentlyUsedInstanceGroup(context.getUserPrincipal().getName(), group);
         RuntimeAssert.assertEquals(group, config.name, "Group update changes group name");
         InstanceGroupManifest igm = new InstanceGroupManifest(getGroupHive(group));
         Manifest.Key key = igm.update(config);

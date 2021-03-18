@@ -1,15 +1,12 @@
 package io.bdeploy.minion.user;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,20 +49,6 @@ public class UserDatabaseTest {
 
         assertEquals("JunitTest User", updated.fullName);
         assertEquals("JunitTest.user@example.com", updated.email);
-    }
-
-    @Test
-    void userRecentlyUsed(MinionRoot root) {
-        UserDatabase db = root.getUsers();
-
-        List<String> recently1 = Arrays.asList(new String[] { "a", "b", "c" });
-
-        db.createLocalUser("JunitTest", "JunitTest", null);
-
-        db.addRecentlyUsedInstanceGroup("JunitTest", "a");
-        db.addRecentlyUsedInstanceGroup("JunitTest", "b");
-        db.addRecentlyUsedInstanceGroup("JunitTest", "c");
-        assertIterableEquals(recently1, db.getRecentlyUsedInstanceGroups("JunitTest"));
     }
 
     @Test
@@ -136,10 +119,6 @@ public class UserDatabaseTest {
 
         // Try to get with different case
         assertNotNull(db.getUser("Junit"));
-
-        // Query groups using different case
-        db.addRecentlyUsedInstanceGroup("JUNIT", "a");
-        assertEquals(Arrays.asList("a"), db.getRecentlyUsedInstanceGroups("juNIT"));
 
         // Query permissions
         assertTrue(db.isAuthorized("JUNit", permission));

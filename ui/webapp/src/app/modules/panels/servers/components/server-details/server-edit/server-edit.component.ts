@@ -1,11 +1,12 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { cloneDeep, isEqual } from 'lodash-es';
+import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
 import { ManagedMasterDto } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { BdPanelButtonComponent } from 'src/app/modules/core/components/bd-panel-button/bd-panel-button.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
+import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { ServerDetailsService } from '../../../services/server-details.service';
 
@@ -42,7 +43,7 @@ export class ServerEditComponent implements OnInit, OnDestroy, DirtyableDialog {
   }
 
   /* template */ isDirty() {
-    return !isEqual(this.server, this.orig);
+    return isDirty(this.server, this.orig);
   }
 
   /* template */ onSave() {

@@ -8,7 +8,7 @@
       [records]="groups.groups$ | async"
       presetKey="instanceGroups"
     ></app-bd-data-grouping>
-    <app-bd-button [isToggle]="true" icon="grid_view" text="Toggle Card Mode" [(toggle)]="dataTable.grid"></app-bd-button>
+    <app-bd-button [isToggle]="true" icon="grid_view" text="Toggle Card Mode" [(toggle)]="dataTable.grid" tooltip="below"></app-bd-button>
     <mat-divider [vertical]="true"></mat-divider>
     <app-bd-panel-button
       *ngIf="!config.isManaged()"
@@ -16,6 +16,7 @@
       text="Add Instance Group"
       [route]="['panels', 'groups', 'add']"
       [disabled]="!isAddAllowed()"
+      tooltip="below"
     ></app-bd-panel-button>
     <app-bd-panel-button
       *ngIf="config.isManaged()"
@@ -23,6 +24,7 @@
       text="Link Instance Group"
       [route]="['panels', 'servers', 'link', 'central']"
       [disabled]="!isAttachAllowed()"
+      tooltip="below"
     ></app-bd-panel-button>
   </app-bd-dialog-toolbar>
 

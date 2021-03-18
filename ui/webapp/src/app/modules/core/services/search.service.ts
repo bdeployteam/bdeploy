@@ -32,7 +32,10 @@ export class SearchService {
 
   register(searchable: BdSearchable): Subscription {
     this.registrations.push(searchable);
-    this.enableSearch$.next(true);
+
+    // enable async to avoid errors while components are still being created.
+    setTimeout(() => this.enableSearch$.next(true));
+
     return new Subscription(() => {
       this.deregister(searchable);
     });

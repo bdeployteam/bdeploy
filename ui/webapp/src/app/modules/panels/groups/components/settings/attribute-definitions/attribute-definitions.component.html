@@ -1,0 +1,29 @@
+<ng-template #addTemplate>
+  <div>Provide an ID and a description for the new definition.</div>
+  <app-bd-form-input [(ngModel)]="newId" label="Definition ID" required></app-bd-form-input>
+  <app-bd-form-input [(ngModel)]="newDesc" label="Definition Description" required></app-bd-form-input>
+</ng-template>
+
+<app-bd-dialog [loadingWhen$]="loading$">
+  <app-bd-dialog-toolbar header="Instance Attribute Definitions" [closeablePanel]="true"> </app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px" *ngIf="groups.current$ | async as group">
+      <app-bd-data-display [columns]="columns" [records]="group.instanceAttributes">
+        <app-bd-no-data>
+          <div>No attribute definitions</div>
+        </app-bd-no-data>
+      </app-bd-data-display>
+      <app-bd-button text="Add Definition" icon="add" [collapsed]="false" (click)="showAddDialog(group, addTemplate)"></app-bd-button>
+      <app-bd-panel-button
+        #backButton
+        [collapsed]="false"
+        text="Back to overview"
+        icon="arrow_back"
+        [toggle]="false"
+        [route]="['..', '..']"
+        [relative]="true"
+      ></app-bd-panel-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

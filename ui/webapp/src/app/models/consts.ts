@@ -61,7 +61,6 @@ export const EMPTY_USER_INFO: UserInfo = {
   inactive: false,
   lastActiveLogin: null,
   permissions: [],
-  recentlyUsedInstanceGroups: [],
 };
 
 export const EMPTY_USER_CHANGE_PASSWORD_DTO: UserChangePasswordDto = {

@@ -1,4 +1,4 @@
-<app-bd-button-popup #popup text="Data Grouping" icon="filter_alt" [collapsed]="false" [badge]="getFilteredGroups().length">
+<app-bd-button-popup #popup text="Data Grouping" icon="filter_alt" tooltip="below" [collapsed]="true" [badge]="getFilteredGroups().length">
   <mat-card [style.padding.px]="10" class="mat-typography" fxLayout="column" fxLayoutGap="5px">
     <div fxLayout="row" fxLayoutGap="5px">
       <!-- a grouping panel per grouping -->

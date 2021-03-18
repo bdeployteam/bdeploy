@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { ObjectChangeType, ProductDto } from 'src/app/models/gen.dtos';
+import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { ConfigService } from '../../../core/services/config.service';
 import { ObjectChangesService } from '../../../core/services/object-changes.service';
 import { GroupsService } from '../../groups/services/groups.service';
@@ -41,7 +42,10 @@ export class ProductsService {
     this.loading$.next(true);
     this.http
       .get<ProductDto[]>(`${this.apiPath(group)}/list`)
-      .pipe(finalize(() => this.loading$.next(false)))
+      .pipe(
+        finalize(() => this.loading$.next(false)),
+        measure('Product Load')
+      )
       .subscribe((prods) => {
         this.products$.next(prods);
       });

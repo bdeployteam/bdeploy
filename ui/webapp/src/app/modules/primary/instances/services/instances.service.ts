@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { debounceTime, finalize } from 'rxjs/operators';
 import { InstanceConfiguration, InstanceDto, ObjectChangeType } from 'src/app/models/gen.dtos';
+import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { ConfigService } from '../../../core/services/config.service';
 import { ObjectChangesService } from '../../../core/services/object-changes.service';
 import { GroupsService } from '../../groups/services/groups.service';
@@ -43,7 +44,10 @@ export class InstancesService {
     this.loading$.next(true);
     this.http
       .get<InstanceDto[]>(`${this.apiPath(group)}`)
-      .pipe(finalize(() => this.loading$.next(false)))
+      .pipe(
+        finalize(() => this.loading$.next(false)),
+        measure('Instance Load')
+      )
       .subscribe((instances) => this.instances$.next(instances));
   }
 

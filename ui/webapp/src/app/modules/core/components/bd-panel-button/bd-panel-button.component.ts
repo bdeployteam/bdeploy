@@ -1,4 +1,5 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { TooltipPosition } from '@angular/material/tooltip';
 import { ActivatedRouteSnapshot, RouterLink, RouterLinkActive } from '@angular/router';
 import { NavAreasService } from '../../services/nav-areas.service';
 
@@ -16,6 +17,7 @@ export class BdPanelButtonComponent implements OnInit {
   @Input() collapsed = true;
   @Input() inverseColor = false;
   @Input() disabled = false;
+  @Input() tooltip: TooltipPosition;
 
   @ViewChild(RouterLink) private rl: RouterLink;
   @ViewChild(RouterLinkActive) /* template */ rla: RouterLinkActive;

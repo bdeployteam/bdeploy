@@ -1,9 +1,7 @@
 package io.bdeploy.interfaces;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -39,7 +37,6 @@ public class UserInfo implements Comparable<UserInfo> {
 
     @JsonAlias("capabilities") // renamed to permissions
     public Set<ScopedPermission> permissions = new HashSet<>();
-    public List<String> recentlyUsedInstanceGroups = new ArrayList<>();
 
     @JsonCreator
     public UserInfo(@JsonProperty("name") String name) {

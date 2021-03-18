@@ -90,18 +90,6 @@ public interface AuthService {
     public SortedSet<UserInfo> getAll();
 
     /**
-     * @param user the user to get recently used for
-     * @return the list of recently used items (instance groups). The latest one added is the last in the list.
-     */
-    public List<String> getRecentlyUsedInstanceGroups(String user);
-
-    /**
-     * @param user the user to add a recently used item to
-     * @param group the instance group to add.
-     */
-    public void addRecentlyUsedInstanceGroup(String user, String group);
-
-    /**
      * @param user the user's name
      * @param required the required permission
      * @return whether the user with the given name has the given permission.

@@ -1,7 +1,11 @@
 package io.bdeploy.ui.api;
 
-import java.util.List;
-
+import io.bdeploy.api.remote.v1.dto.CredentialsApi;
+import io.bdeploy.common.security.RequiredPermission;
+import io.bdeploy.common.security.ScopedPermission.Permission;
+import io.bdeploy.interfaces.UserChangePasswordDto;
+import io.bdeploy.interfaces.UserInfo;
+import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -10,13 +14,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
-import io.bdeploy.api.remote.v1.dto.CredentialsApi;
-import io.bdeploy.common.security.RequiredPermission;
-import io.bdeploy.common.security.ScopedPermission.Permission;
-import io.bdeploy.interfaces.UserChangePasswordDto;
-import io.bdeploy.interfaces.UserInfo;
-import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 
 @Path("/auth")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -38,19 +35,6 @@ public interface AuthResource {
     @Path("/packed")
     @Unsecured
     public Response authenticatePacked(CredentialsApi credentials);
-
-    /**
-     * Return a list of recently used instance groups.
-     * <p>
-     * NOTE: since the list is maintained per user, there is no way to remove recently used entries efficiently when deleting an
-     * instance group, thus the list may contain instance groups which are no longer available.
-     *
-     * @return the recently used instance groups. An instance group is recently used once the current user requested the list of
-     *         instances in an instance group. The list is ordered to have the most recently used item first.
-     */
-    @GET
-    @Path("/recent-groups")
-    public List<String> getRecentlyUsedInstanceGroups();
 
     /**
      * Retrieve the current user.

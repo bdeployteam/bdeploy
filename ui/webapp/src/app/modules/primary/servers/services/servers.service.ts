@@ -5,6 +5,7 @@ import { debounceTime, finalize } from 'rxjs/operators';
 import { ManagedMasterDto, ObjectChangeType } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
+import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { suppressGlobalErrorHandling } from 'src/app/modules/core/utils/server.utils';
 import { GroupsService } from '../../groups/services/groups.service';
 
@@ -55,7 +56,10 @@ export class ServersService {
     this.loading$.next(true);
     this.http
       .get<ManagedMasterDto[]>(`${this.apiPath}/list/${group}`)
-      .pipe(finalize(() => this.loading$.next(false)))
+      .pipe(
+        finalize(() => this.loading$.next(false)),
+        measure('Managed Server Load')
+      )
       .subscribe((s) => this.servers$.next(s));
   }
 

@@ -9,13 +9,14 @@
       [defaultGrouping]="defaultGrouping"
       presetKey="products"
     ></app-bd-data-grouping>
-    <app-bd-button [isToggle]="true" icon="grid_view" text="Toggle Card Mode" [(toggle)]="dataTable.grid"></app-bd-button>
+    <app-bd-button [isToggle]="true" icon="grid_view" text="Toggle Card Mode" [(toggle)]="dataTable.grid" tooltip="below"></app-bd-button>
     <mat-divider [vertical]="true"></mat-divider>
     <app-bd-panel-button
       icon="cloud_upload"
       text="Upload Product"
       [route]="['panels', 'products', 'upload']"
       [disabled]="!auth.isCurrentScopeWrite()"
+      tooltip="below"
     ></app-bd-panel-button>
   </app-bd-dialog-toolbar>
 

@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { CookieService } from 'ngx-cookie-service';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { CredentialsApi, Permission, UserChangePasswordDto, UserInfo } from '../../../models/gen.dtos';
 import { suppressGlobalErrorHandling } from '../utils/server.utils';
@@ -93,8 +93,7 @@ export class AuthenticationService {
   }
 
   getRecentInstanceGroups(): Observable<string[]> {
-    this.log.debug('Fetching recent groups...');
-    return this.http.get<string[]>(this.cfg.config.api + '/auth/recent-groups');
+    return of([]);
   }
 
   isGlobalAdmin(): boolean {

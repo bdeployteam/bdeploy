@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef } from '@angular/core';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { delayedFadeIn } from '../../animations/fades';
@@ -19,7 +19,10 @@ export interface BdDialogMessage<T> {
   header: string;
 
   /** Descriptive message */
-  message: string;
+  message?: string;
+
+  /** Template for the message used *instead* of the message. */
+  template?: TemplateRef<any>;
 
   /** Icon shown in the message, defaults to 'info' */
   icon?: string;
@@ -30,11 +33,15 @@ export interface BdDialogMessage<T> {
   /** A hint which tells the user which confirmation value needs to be matched. */
   confirmationHint?: string;
 
+  /** A custom call */
+  validation?: () => boolean;
+
   /** The actions which should be shown on the message */
   actions: BdDialogMessageAction<T>[];
 }
 
 export const ACTION_CONFIRM: BdDialogMessageAction<boolean> = { name: 'CONFIRM', result: true, confirm: true };
+export const ACTION_APPLY: BdDialogMessageAction<boolean> = { name: 'APPLY', result: true, confirm: true };
 
 export const ACTION_OK: BdDialogMessageAction<boolean> = { name: 'OK', result: true, confirm: true };
 export const ACTION_CANCEL: BdDialogMessageAction<boolean> = { name: 'CANCEL', result: false, confirm: false };
@@ -59,6 +66,8 @@ export class BdDialogMessageComponent implements OnInit, OnDestroy {
   set userConfirmation(val: string) {
     if (val === this.message$.value.confirmation) {
       this.confirmed$.next(true);
+    } else {
+      this.confirmed$.next(false);
     }
     this._userConfirmation = val;
   }

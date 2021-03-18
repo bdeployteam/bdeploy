@@ -3,7 +3,6 @@ package io.bdeploy.minion.user;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -166,45 +165,6 @@ public class UserDatabase implements AuthService {
         }
 
         internalUpdate(user, info);
-    }
-
-    @Override
-    public List<String> getRecentlyUsedInstanceGroups(String user) {
-        user = UserInfo.normalizeName(user);
-        UserInfo info = getUser(user);
-        if (info == null) {
-            return Collections.emptyList();
-        }
-
-        return info.recentlyUsedInstanceGroups;
-    }
-
-    @Override
-    public void addRecentlyUsedInstanceGroup(String user, String group) {
-        user = UserInfo.normalizeName(user);
-        UserInfo info = getUser(user);
-        if (info == null) {
-            return;
-        }
-        List<String> recentlyUsed = info.recentlyUsedInstanceGroups;
-
-        // Check if the current group is already the latest one
-        int index = recentlyUsed.indexOf(group);
-        if (index != -1 && index == recentlyUsed.size() - 1) {
-            return;
-        }
-
-        // force group to be last in the list.
-        recentlyUsed.remove(group);
-        while (recentlyUsed.size() >= 10) {
-            recentlyUsed.remove(0);
-        }
-
-        recentlyUsed.add(group);
-
-        // rebuild the list, evict duplicates (even though they SHOULD not exist, they do).
-        info.recentlyUsedInstanceGroups = recentlyUsed.stream().distinct().collect(Collectors.toList());
-        updateUserInfo(info);
     }
 
     private synchronized void internalUpdate(String user, UserInfo info) {

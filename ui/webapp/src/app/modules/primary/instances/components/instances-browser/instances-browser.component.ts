@@ -33,7 +33,7 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
     public products: ProductsService,
     public groups: GroupsService,
     public areas: NavAreasService,
-    private authService: AuthenticationService,
+    public authService: AuthenticationService,
     config: ConfigService
   ) {
     if (config.isCentral()) {

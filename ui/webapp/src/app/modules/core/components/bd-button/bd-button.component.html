@@ -15,7 +15,7 @@
     <mat-icon *ngIf="icon && !(loadingWhen$ | async)" [matBadge]="badge" [matBadgeHidden]="!badge" matBadgeSize="small" [matBadgeColor]="badgeColor">{{
       icon
     }}</mat-icon>
-    <mat-spinner *ngIf="loadingWhen$ | async" [diameter]="24"></mat-spinner>
+    <mat-spinner *ngIf="loadingWhen$ | async" [diameter]="24" [ngClass]="inverseColor ? 'bd-white-spinner' : []"></mat-spinner>
     <span
       *ngIf="text && !collapsed"
       [fxFlex]="!icon ? '1 0 auto' : '0 0 auto'"

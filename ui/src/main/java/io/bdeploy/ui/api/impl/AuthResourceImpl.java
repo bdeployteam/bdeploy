@@ -1,17 +1,5 @@
 package io.bdeploy.ui.api.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.container.ResourceContext;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.core.SecurityContext;
-
 import io.bdeploy.api.remote.v1.dto.CredentialsApi;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.interfaces.UserChangePasswordDto;
@@ -20,6 +8,13 @@ import io.bdeploy.ui.api.AuthAdminResource;
 import io.bdeploy.ui.api.AuthResource;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.Minion;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ResourceContext;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.SecurityContext;
 
 public class AuthResourceImpl implements AuthResource {
 
@@ -57,14 +52,6 @@ public class AuthResourceImpl implements AuthResource {
         } else {
             throw new WebApplicationException("Invalid credentials", Status.UNAUTHORIZED);
         }
-    }
-
-    @Override
-    public List<String> getRecentlyUsedInstanceGroups() {
-        String user = context.getUserPrincipal().getName();
-        List<String> reversed = new ArrayList<>(auth.getRecentlyUsedInstanceGroups(user));
-        Collections.reverse(reversed);
-        return reversed;
     }
 
     @Override

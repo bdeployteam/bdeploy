@@ -176,7 +176,6 @@ public class InstanceResourceImpl implements InstanceResource {
     @Override
     public List<InstanceDto> list() {
         List<InstanceDto> result = new ArrayList<>();
-        auth.addRecentlyUsedInstanceGroup(context.getUserPrincipal().getName(), group);
 
         Map<String, Comparator<String>> comparators = new TreeMap<>();
 

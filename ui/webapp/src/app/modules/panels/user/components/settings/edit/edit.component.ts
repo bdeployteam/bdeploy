@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { cloneDeep, isEqual } from 'lodash-es';
+import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { debounceTime, finalize } from 'rxjs/operators';
 import { UserInfo } from 'src/app/models/gen.dtos';
@@ -8,6 +8,7 @@ import { BdPanelButtonComponent } from 'src/app/modules/core/components/bd-panel
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
+import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 
 @Component({
   selector: 'app-edit',
@@ -45,7 +46,7 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
   }
 
   /* template */ isDirty(): boolean {
-    return !isEqual(this.user, this.orig);
+    return isDirty(this.user, this.orig);
   }
 
   /* template */ updateMail(): void {

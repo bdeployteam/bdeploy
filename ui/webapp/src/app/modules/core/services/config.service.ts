@@ -42,7 +42,6 @@ export class ConfigService {
     iconRegistry.addSvgIcon('WINDOWS', sanitizer.bypassSecurityTrustResourceUrl('assets/windows.svg'));
     iconRegistry.addSvgIcon('AIX', sanitizer.bypassSecurityTrustResourceUrl('assets/aix.svg'));
     iconRegistry.addSvgIcon('MACOS', sanitizer.bypassSecurityTrustResourceUrl('assets/mac.svg'));
-    setInterval(() => this.isNewVersionAvailable(), 60000);
     this.newVersionInterval = setInterval(() => this.isNewVersionAvailable(), 60000);
   }
 

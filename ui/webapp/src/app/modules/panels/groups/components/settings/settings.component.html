@@ -1,0 +1,46 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="Instance Group Settings" [closeablePanel]="true"></app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px">
+      <app-bd-panel-button
+        text="Edit Instance Group"
+        icon="edit"
+        [collapsed]="false"
+        [toggle]="false"
+        [route]="['edit']"
+        [relative]="true"
+        [disabled]="!auth.isCurrentScopeAdmin()"
+      ></app-bd-panel-button>
+
+      <app-bd-panel-button
+        text="Group Attribute Values"
+        icon="local_offer"
+        [collapsed]="false"
+        [toggle]="false"
+        [route]="['attributes', 'values']"
+        [relative]="true"
+        [disabled]="!auth.isCurrentScopeWrite()"
+      ></app-bd-panel-button>
+      <app-bd-panel-button
+        text="Instance Attribute Definitions"
+        icon="more"
+        [collapsed]="false"
+        [toggle]="false"
+        [route]="['attributes', 'definitions']"
+        [relative]="true"
+        [disabled]="!auth.isCurrentScopeAdmin()"
+      ></app-bd-panel-button>
+
+      <app-bd-panel-button
+        text="Maintenance"
+        icon="build"
+        [collapsed]="false"
+        [toggle]="false"
+        [route]="['maintenance']"
+        [relative]="true"
+        [disabled]="!auth.isCurrentScopeWrite()"
+      ></app-bd-panel-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

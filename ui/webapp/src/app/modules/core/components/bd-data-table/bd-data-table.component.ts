@@ -1,30 +1,12 @@
 import { SelectionModel } from '@angular/cdk/collections';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { FlatTreeControl } from '@angular/cdk/tree';
-import {
-  AfterViewInit,
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  OnDestroy,
-  OnInit,
-  Output,
-  SimpleChanges,
-  ViewChild,
-} from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { MatSort, Sort, SortDirection } from '@angular/material/sort';
 import { MatTreeFlatDataSource, MatTreeFlattener } from '@angular/material/tree';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Subscription } from 'rxjs';
-import {
-  BdDataColumn,
-  BdDataColumnDisplay,
-  BdDataColumnTypeHint,
-  BdDataGrouping,
-  bdSortGroups,
-  UNMATCHED_GROUP,
-} from 'src/app/models/data';
+import { BdDataColumn, BdDataColumnDisplay, BdDataColumnTypeHint, BdDataGrouping, bdSortGroups, UNMATCHED_GROUP } from 'src/app/models/data';
 import { ErrorMessage, LoggingService } from '../../services/logging.service';
 import { BdSearchable, SearchService } from '../../services/search.service';
 
@@ -72,9 +54,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   /* template */ _visibleColumns: string[];
   @Input() set columns(val: BdDataColumn<T>[]) {
     // either unset or CARD is OK, only TABLE is not OK.
-    this._columns = val.filter(
-      (c) => !c.display || c.display === BdDataColumnDisplay.TABLE || c.display === BdDataColumnDisplay.BOTH
-    );
+    this._columns = val.filter((c) => !c.display || c.display === BdDataColumnDisplay.TABLE || c.display === BdDataColumnDisplay.BOTH);
     this.updateColumnsToDisplay();
     this.updateMediaSubscriptions();
   }
@@ -169,12 +149,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   /** The data source used by the table - using the flattened hierarchy given by the treeControl */
   dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
 
-  constructor(
-    private logging: LoggingService,
-    private searchService: SearchService,
-    private media: BreakpointObserver,
-    private sanitizer: DomSanitizer
-  ) {}
+  constructor(private logging: LoggingService, private searchService: SearchService, private media: BreakpointObserver, private sanitizer: DomSanitizer) {}
 
   ngOnInit(): void {
     if (this.searchable) {
@@ -212,9 +187,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     this.mediaSubscription = new Subscription();
     this._columns
       .filter((c) => !!c.showWhen)
-      .forEach((c) =>
-        this.mediaSubscription.add(this.media.observe(c.showWhen).subscribe((bs) => this.updateColumnsToDisplay()))
-      );
+      .forEach((c) => this.mediaSubscription.add(this.media.observe(c.showWhen).subscribe((bs) => this.updateColumnsToDisplay())));
   }
 
   private closeMediaSubscriptions() {
@@ -254,11 +227,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     // recreate the dataSource, applying sorting, filtering, grouping, etc.
     // benchmarks show that this method is quite fast, event with a lot of data.
     // it takes roughly 100 (76 - 110) ms to generate a model for ~1000 records.
-    this.dataSource.data = this.generateModel(
-      this.searchData(this.search, !!this.records ? [...this.records] : [], this._columns),
-      this.grouping,
-      this.sort
-    );
+    this.dataSource.data = this.generateModel(this.searchData(this.search, !!this.records ? [...this.records] : [], this._columns), this.grouping, this.sort);
 
     // TODO: Saving of expansion state on update. To achieve this, every BdDataGrouping must
     // have a unique ID. This ID, along with the group name (which is shown in the first column)
@@ -380,9 +349,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
       isChecked ? this.checkSelection.deselect(node) : this.checkSelection.select(node);
 
       const children = this.treeControl.getDescendants(node);
-      this.checkSelection.isSelected(node)
-        ? this.checkSelection.select(...children)
-        : this.checkSelection.deselect(...children);
+      this.checkSelection.isSelected(node) ? this.checkSelection.select(...children) : this.checkSelection.deselect(...children);
     }
     this.checkedChange.emit(this.checkSelection.selected.filter((s) => !!s.node.item).map((s) => s.node.item));
   }

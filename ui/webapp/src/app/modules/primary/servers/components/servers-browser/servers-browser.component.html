@@ -8,9 +8,9 @@
       [records]="servers.servers$ | async"
       presetKey="instanceGroups"
     ></app-bd-data-grouping>
-    <app-bd-button [isToggle]="true" icon="grid_view" text="Toggle Card Mode" [(toggle)]="dataTable.grid"></app-bd-button>
+    <app-bd-button [isToggle]="true" icon="grid_view" text="Toggle Card Mode" [(toggle)]="dataTable.grid" tooltip="below"></app-bd-button>
     <mat-divider [vertical]="true"></mat-divider>
-    <app-bd-panel-button icon="link" text="Link Managed Server" [route]="['panels', 'servers', 'link', 'managed']"></app-bd-panel-button>
+    <app-bd-panel-button icon="link" text="Link Managed Server" [route]="['panels', 'servers', 'link', 'managed']" tooltip="below"></app-bd-panel-button>
   </app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
