@@ -18,6 +18,8 @@ export class MaintenanceComponent implements OnInit {
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
 
   /* template */ deleting$ = new BehaviorSubject<boolean>(false);
+  /* template */ pruning$ = new BehaviorSubject<boolean>(false);
+  /* template */ repairing$ = new BehaviorSubject<boolean>(false);
 
   constructor(
     public auth: AuthenticationService,
@@ -29,9 +31,32 @@ export class MaintenanceComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  onRepair(group: InstanceGroupConfiguration): void {}
+  onRepair(group: InstanceGroupConfiguration): void {
+    this.repairing$.next(true);
+    this.details
+      .repair(group.name)
+      .pipe(finalize(() => this.repairing$.next(false)))
+      .subscribe((r) => {
+        console.groupCollapsed('Damaged Objects');
+        const keys = Object.keys(r);
+        for (const key of keys) {
+          console.log(key, ':', r[key]);
+        }
+        console.groupEnd();
 
-  onPrune(group: InstanceGroupConfiguration): void {}
+        this.dialog.info(`Repair`, !!keys?.length ? `Repair removed ${keys.length} damaged objects` : `No damaged objects were found.`, 'build').subscribe();
+      });
+  }
+
+  onPrune(group: InstanceGroupConfiguration): void {
+    this.pruning$.next(true);
+    this.details
+      .prune(group.name)
+      .pipe(finalize(() => this.pruning$.next(false)))
+      .subscribe((r) => {
+        this.dialog.info('Prune', `Prune freed <strong>${r}</strong> in ${group.name}.`).subscribe();
+      });
+  }
 
   onDelete(group: InstanceGroupConfiguration): void {
     this.dialog

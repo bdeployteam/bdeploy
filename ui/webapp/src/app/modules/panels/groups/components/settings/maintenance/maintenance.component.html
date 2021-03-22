@@ -9,14 +9,16 @@
         icon="build"
         [collapsed]="false"
         (click)="onRepair(group)"
-        [disabled]="!auth.isCurrentScopeAdmin()"
+        [loadingWhen$]="repairing$"
+        [disabled]="!auth.isCurrentScopeAdmin() || (repairing$ | async)"
       ></app-bd-button>
       <app-bd-button
         text="Prune unused data in BHive"
         icon="delete_sweep"
         [collapsed]="false"
         (click)="onPrune(group)"
-        [disabled]="!auth.isCurrentScopeWrite()"
+        [loadingWhen$]="pruning$"
+        [disabled]="!auth.isCurrentScopeWrite() || (pruning$ | async)"
       ></app-bd-button>
       <app-bd-button
         text="Delete Instance Group"
