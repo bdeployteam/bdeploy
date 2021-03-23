@@ -1,4 +1,4 @@
-import { ManifestKey, OperatingSystem } from './gen.dtos';
+import { ManifestKey, OperatingSystem } from '../../../../models/gen.dtos';
 
 export class SoftwarePackageGroup {
   /** Name (manifest.key without OS suffix) */

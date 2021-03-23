@@ -8,16 +8,11 @@ import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { MatTabChangeEvent } from '@angular/material/tabs';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { MessageBoxMode } from 'src/app/modules/core/components/messagebox/messagebox.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
-import { MessageboxService } from 'src/app/modules/core/services/messagebox.service';
 import { RoutingHistoryService } from 'src/app/modules/legacy/core/services/routing-history.service';
-import {
-  InstanceConfiguration,
-  RemoteDirectory,
-  RemoteDirectoryEntry,
-  StringEntryChunkDto,
-} from '../../../../../models/gen.dtos';
+import { MessageBoxMode } from 'src/app/modules/legacy/shared/components/messagebox/messagebox.component';
+import { MessageboxService } from 'src/app/modules/legacy/shared/services/messagebox.service';
+import { InstanceConfiguration, RemoteDirectory, RemoteDirectoryEntry, StringEntryChunkDto } from '../../../../../models/gen.dtos';
 import { InstanceService } from '../../services/instance.service';
 
 @Component({
@@ -71,11 +66,9 @@ export class DataFilesBrowserComponent implements OnInit {
   ) {}
 
   public ngOnInit(): void {
-    this.instanceService
-      .getInstanceVersion(this.groupParam, this.uuidParam, this.versionParam)
-      .subscribe((instanceVersion) => {
-        this.instanceVersion = instanceVersion;
-      });
+    this.instanceService.getInstanceVersion(this.groupParam, this.uuidParam, this.versionParam).subscribe((instanceVersion) => {
+      this.instanceVersion = instanceVersion;
+    });
     this.reload();
   }
 
@@ -105,12 +98,7 @@ export class DataFilesBrowserComponent implements OnInit {
   }
 
   public download(instanceDirectory: RemoteDirectory, instanceDirectoryEntry: RemoteDirectoryEntry) {
-    this.instanceService.downloadDataFileContent(
-      this.groupParam,
-      this.uuidParam,
-      instanceDirectory,
-      instanceDirectoryEntry
-    );
+    this.instanceService.downloadDataFileContent(this.groupParam, this.uuidParam, instanceDirectory, instanceDirectoryEntry);
   }
 
   public async delete(instanceDirectory: RemoteDirectory, instanceDirectoryEntry: RemoteDirectoryEntry) {
@@ -122,11 +110,9 @@ export class DataFilesBrowserComponent implements OnInit {
     if (!confirm) {
       return;
     }
-    this.instanceService
-      .deleteDataFile(this.groupParam, this.uuidParam, instanceDirectory, instanceDirectoryEntry)
-      .subscribe((_) => {
-        this.reload();
-      });
+    this.instanceService.deleteDataFile(this.groupParam, this.uuidParam, instanceDirectory, instanceDirectoryEntry).subscribe((_) => {
+      this.reload();
+    });
   }
 
   updateDataSource() {
@@ -185,20 +171,10 @@ export class DataFilesBrowserComponent implements OnInit {
   }
 
   getContentDownloader(): () => void {
-    return () =>
-      this.instanceService.downloadDataFileContent(
-        this.groupParam,
-        this.uuidParam,
-        this.activeRemoteDirectory,
-        this.activeRemoteDirectoryEntry
-      );
+    return () => this.instanceService.downloadDataFileContent(this.groupParam, this.uuidParam, this.activeRemoteDirectory, this.activeRemoteDirectoryEntry);
   }
 
-  openOutputOverlay(
-    remoteDirectory: RemoteDirectory,
-    remoteDirectoryEntry: RemoteDirectoryEntry,
-    template: TemplateRef<any>
-  ) {
+  openOutputOverlay(remoteDirectory: RemoteDirectory, remoteDirectoryEntry: RemoteDirectoryEntry, template: TemplateRef<any>) {
     this.activeRemoteDirectory = remoteDirectory;
     this.activeRemoteDirectoryEntry = remoteDirectoryEntry;
 

@@ -2,7 +2,7 @@ import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, Input, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
 import { MatButton } from '@angular/material/button';
-import { ApplicationGroup } from 'src/app/models/application.model';
+import { ApplicationGroup } from 'src/app/modules/legacy/core/models/application.model';
 
 @Component({
   selector: 'app-application-descriptor-detail',

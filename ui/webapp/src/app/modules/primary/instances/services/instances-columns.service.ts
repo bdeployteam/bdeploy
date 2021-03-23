@@ -4,8 +4,8 @@ import { BdDataColumn, BdDataColumnDisplay, BdDataColumnTypeHint } from 'src/app
 import { InstanceDto, MinionMode } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { ServersService } from '../../servers/services/servers.service';
-import { InstanceBannerHintComponent } from '../components/instances-browser/instance-banner-hint/instance-banner-hint.component';
-import { InstanceProductVersionComponent } from '../components/instances-browser/instance-product-version/instance-product-version.component';
+import { InstanceBannerHintComponent } from '../components/browser/instance-banner-hint/instance-banner-hint.component';
+import { InstanceProductVersionComponent } from '../components/browser/instance-product-version/instance-product-version.component';
 import { InstancesService } from './instances.service';
 
 @Injectable({

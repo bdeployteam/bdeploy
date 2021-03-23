@@ -2,14 +2,15 @@ import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnInit, Outp
 import { ThemePalette } from '@angular/material/core';
 import { TooltipPosition } from '@angular/material/tooltip';
 import { BehaviorSubject, fromEvent, Observable } from 'rxjs';
-import { delayedFadeIn } from '../../animations/fades';
-import { scaleWidthFromZero } from '../../animations/sizes';
+import { scaleWidthFromZero, scaleWidthToZero } from '../../animations/sizes';
+
+export type BdButtonColorMode = 'primary' | 'accent' | 'toolbar' | 'warn' | 'inherit';
 
 @Component({
   selector: 'app-bd-button',
   templateUrl: './bd-button.component.html',
   styleUrls: ['./bd-button.component.css'],
-  animations: [delayedFadeIn, scaleWidthFromZero],
+  animations: [scaleWidthFromZero, scaleWidthToZero],
 })
 export class BdButtonComponent implements OnInit, AfterViewInit {
   @Input() icon: string;
@@ -18,7 +19,7 @@ export class BdButtonComponent implements OnInit, AfterViewInit {
   @Input() badge: number;
   @Input() badgeColor: ThemePalette = 'accent';
   @Input() collapsed = true;
-  @Input() inverseColor = false;
+  @Input() color: BdButtonColorMode;
   @Input() disabled = false;
   @Input() isSubmit = true; // default in HTML *is* submit.
   @Input() loadingWhen$: Observable<boolean> = new BehaviorSubject<boolean>(false);
@@ -52,5 +53,32 @@ export class BdButtonComponent implements OnInit, AfterViewInit {
         // we will not inhibit the click event here, as routerLink (etc.) will need it.
       }
     });
+  }
+
+  /* template */ getColorClass(): string | string[] {
+    if (this.isToggle) {
+      if (this.toggle) {
+        return 'bd-toggle-highlight';
+      }
+    }
+
+    if (!this.color) {
+      return []; // no color class, but we want to inherit text color
+    }
+
+    switch (this.color) {
+      case 'toolbar':
+        return 'local-button-color-toolbar';
+      case 'inherit':
+        return 'local-button-color-inherit';
+      case 'warn':
+        return 'local-button-color-warn';
+      case 'accent':
+        return 'local-button-color-accent';
+      case 'primary':
+        return 'local-button-color-primary';
+    }
+
+    return [];
   }
 }

@@ -1,0 +1,17 @@
+<div class="local-dialog" fxFlex="1 0 auto">
+  <div fxFlex="1 0 auto" class="local-logo-area bd-glow-bg" fxLayout="column" fxLayoutAlign="center center">
+    <app-bd-logo [size]="64" class="local-logo-pulse"></app-bd-logo>
+  </div>
+  <div fxFlex="2 0 auto" fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="30px">
+    <div class="local-header">Server Version Changed</div>
+    <div fxLayout="column" fxLayoutGap="10px" fxLayoutAlign="center center">
+      <div>The server version has changed to:</div>
+      <div>
+        <strong>{{ newVersion }}</strong>
+      </div>
+      <div>BDeploy must be reloaded to apply changes.</div>
+    </div>
+    <app-bd-button icon="cached" text="Reload BDeploy" [collapsed]="false" (click)="onReload()"></app-bd-button>
+    <div class="bd-hint-text">Previous Server Version: {{ oldVersion }}</div>
+  </div>
+</div>

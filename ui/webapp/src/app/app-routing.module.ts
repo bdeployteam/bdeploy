@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { LoginComponent } from './modules/core/components/login/login.component';
-import { MessageboxComponent } from './modules/core/components/messagebox/messagebox.component';
+import { MainNavComponent } from './modules/core/components/main-nav/main-nav.component';
 import { AdminGuard } from './modules/core/guards/admin.guard';
 import { AuthGuard } from './modules/core/guards/authentication.guard';
 import { NotFoundGuard } from './modules/core/guards/not-found.guard';
@@ -106,7 +106,7 @@ const routes: Routes = [
 
   {
     path: '**',
-    component: MessageboxComponent, // This is a DUMMY! the NotFoundGuard will /always/ redirect
+    component: MainNavComponent, // This is a DUMMY! the NotFoundGuard will /always/ redirect
     canActivate: [NotFoundGuard],
   },
 ];

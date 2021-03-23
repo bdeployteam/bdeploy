@@ -1,0 +1,22 @@
+.local-icon {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.local-dialog {
+  width: 470px;
+  height: 300px;
+
+  background-color: var(--bd-bg-dialog);
+  color: var(--bd-text);
+}
+
+.local-header {
+  text-transform: uppercase;
+  color: var(--bd-text-secondary);
+  font-weight: bold;
+}
+
+.local-logo-area {
+  min-width: 128px;
+}

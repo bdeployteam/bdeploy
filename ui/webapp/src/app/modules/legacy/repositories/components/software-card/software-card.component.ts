@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { OperatingSystem } from 'src/app/models/gen.dtos';
-import { SoftwarePackageGroup } from 'src/app/models/software.model';
+import { SoftwarePackageGroup } from 'src/app/modules/legacy/core/models/software.model';
 import { SoftwareService } from '../../services/software.service';
 
 @Component({
@@ -26,11 +26,9 @@ export class SoftwareCardComponent implements OnInit {
   constructor(private softwareService: SoftwareService) {}
 
   ngOnInit() {
-    this.softwareService
-      .getSoftwareDiskUsage(this.softwareRepositoryName, this.softwarePackageGroup.name)
-      .subscribe((diskUsage) => {
-        this.diskUsage = diskUsage;
-      });
+    this.softwareService.getSoftwareDiskUsage(this.softwareRepositoryName, this.softwarePackageGroup.name).subscribe((diskUsage) => {
+      this.diskUsage = diskUsage;
+    });
   }
 
   public clickIt(): void {

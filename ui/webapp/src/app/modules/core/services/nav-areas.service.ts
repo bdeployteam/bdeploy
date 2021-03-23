@@ -35,6 +35,7 @@ export class NavAreasService {
         // 2. if the panel outlet is not visible, and a panel route is active, show the outlet.
         // 3. if a panel route is active, set the expanded state according to its data.
         // 4. if the primary outlet changed, navigate the panel outlet to 'null' to hide it.
+        // 5. in any case, if the main menu is expanded, collapse it.
 
         // the two potential activated routes are *direct* childs of the main route. no need to recurse.
         const primary = this.findChildRouteForOutlet(route, 'primary');
@@ -79,6 +80,9 @@ export class NavAreasService {
         if (this.instanceContext$.value !== instance) {
           this.instanceContext$.next(instance);
         }
+
+        // collapse the menu whenever something changed.
+        this.menuMaximized$.next(false);
       });
   }
 

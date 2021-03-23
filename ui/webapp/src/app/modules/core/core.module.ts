@@ -6,33 +6,21 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatBadgeModule } from '@angular/material/badge';
-import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
 import { MatButtonModule } from '@angular/material/button';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatRippleModule } from '@angular/material/core';
-import { MatDialogModule } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
-import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatSliderModule } from '@angular/material/slider';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSortModule } from '@angular/material/sort';
-import { MatStepperModule } from '@angular/material/stepper';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -80,9 +68,7 @@ import { MainNavFlyinComponent } from './components/main-nav-flyin/main-nav-flyi
 import { MainNavMenuComponent } from './components/main-nav-menu/main-nav-menu.component';
 import { MainNavTopComponent } from './components/main-nav-top/main-nav-top.component';
 import { MainNavComponent } from './components/main-nav/main-nav.component';
-import { MessageboxComponent } from './components/messagebox/messagebox.component';
 import { UserAvatarComponent } from './components/user-avatar/user-avatar.component';
-import { UserPickerComponent } from './components/user-picker/user-picker.component';
 import { ClickStopPropagationDirective } from './directives/click-stop-propagation.directive';
 import { FileDropDirective } from './directives/file-drop.directive';
 import { httpInterceptorProviders } from './interceptors';
@@ -91,6 +77,7 @@ import { VersionPipe } from './pipes/version.pipe';
 import { ConfigService } from './services/config.service';
 import { GroupIdValidator } from './validators/group-id';
 import { PasswordVerificationValidator } from './validators/password-verification';
+import { ConnectionVersionComponent } from './components/connection-version/connection-version.component';
 
 export function loadAppConfig(cfgService: ConfigService) {
   return () => cfgService.load();
@@ -107,14 +94,12 @@ export function loadAppConfig(cfgService: ConfigService) {
     UserAvatarComponent,
     VersionPipe,
     SafeHtmlPipe,
-    UserPickerComponent,
     MainNavTopComponent,
     MainNavFlyinComponent,
     MainNavMenuComponent,
     MainNavContentComponent,
     BdSearchFieldComponent,
     BdButtonComponent,
-    MessageboxComponent,
     BdDataTableComponent,
     BdDataGridComponent,
     BdDataCardComponent,
@@ -144,6 +129,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdDialogMessageComponent,
     BdGuideComponent,
     PasswordVerificationValidator,
+    ConnectionVersionComponent,
   ],
   providers: [
     httpInterceptorProviders,
@@ -155,84 +141,44 @@ export function loadAppConfig(cfgService: ConfigService) {
   ],
   imports: [
     CommonModule,
+
+    // angular material components used in our own components.
     MatButtonModule,
-    MatButtonToggleModule,
     MatToolbarModule,
-    MatSidenavModule,
     MatIconModule,
     MatListModule,
     MatSnackBarModule,
-    MatGridListModule,
     MatCardModule,
-    MatMenuModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
     MatTableModule,
-    MatChipsModule,
-    MatDialogModule,
     MatDividerModule,
-    MatAutocompleteModule,
+    MatAutocompleteModule, // TODO: not used yet, but bd-form-input should be using it.
     MatTooltipModule,
     MatProgressBarModule,
     MatProgressSpinnerModule,
     MatCheckboxModule,
     MatRippleModule,
-    MatExpansionModule,
     MatSlideToggleModule,
     MatBadgeModule,
-    MatBottomSheetModule,
     MatTreeModule,
-    MatPaginatorModule,
     MatSortModule,
     MatTabsModule,
-    MatStepperModule,
-    MatRadioModule,
+
+    // angular base infrastructure used throughout the application.
     HttpClientModule,
     FormsModule,
-    ReactiveFormsModule,
     FlexLayoutModule,
     RouterModule,
     LayoutModule,
+
+    // additional libraries used to provide cool UI :)
     GravatarModule,
     ClipboardModule,
   ],
   exports: [
-    // FIXME: go through and remove not required exports - other modules should MOSTLY use BD framework now.
-    MatButtonModule,
-    MatButtonToggleModule,
-    MatToolbarModule,
-    MatSidenavModule,
-    MatIconModule,
-    MatListModule,
-    MatSnackBarModule,
-    MatGridListModule,
-    MatCardModule,
-    MatMenuModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatTableModule,
-    MatChipsModule,
-    MatDialogModule,
-    MatDividerModule,
-    MatAutocompleteModule,
-    MatTooltipModule,
-    MatProgressBarModule,
-    MatProgressSpinnerModule,
-    MatCheckboxModule,
-    MatRippleModule,
-    MatExpansionModule,
-    MatSlideToggleModule,
-    MatSliderModule,
-    MatBadgeModule,
-    MatBottomSheetModule,
-    MatTreeModule,
-    MatPaginatorModule,
-    MatSortModule,
-    MatTabsModule,
-    MatStepperModule,
-    MatRadioModule,
+    // core infrastructure usable by any other module.
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
@@ -240,15 +186,18 @@ export function loadAppConfig(cfgService: ConfigService) {
     LayoutModule,
     ClipboardModule,
 
-    // our own exported components - names need to be aligned.
+    // angular material things we don't want to re-import in *every* module
+    MatIconModule,
+    MatDividerModule,
+    MatTooltipModule,
+
+    // our own exported components.
     MainNavComponent,
-    BdLogoComponent, // FIXME: Remove
     FileDropDirective,
     ClickStopPropagationDirective,
     LoginComponent,
     UserAvatarComponent,
     VersionPipe,
-    MessageboxComponent,
     BdDynamicComponent,
 
     // framework components to be used by others

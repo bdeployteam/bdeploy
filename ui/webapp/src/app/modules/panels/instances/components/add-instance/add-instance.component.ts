@@ -56,6 +56,8 @@ export class AddInstanceComponent implements OnInit {
     });
 
     this.servers.servers$.subscribe((s) => (this.serverList = s));
+
+    // TODO: init product from query params.
   }
 
   onSave(): void {

@@ -3,10 +3,10 @@ import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { finalize } from 'rxjs/operators';
 import { HiveEntryDto, TreeEntryType } from '../../../../models/gen.dtos';
-import { MessageBoxMode } from '../../../core/components/messagebox/messagebox.component';
 import { DownloadService } from '../../../core/services/download.service';
 import { Logger, LoggingService } from '../../../core/services/logging.service';
-import { MessageboxService } from '../../../core/services/messagebox.service';
+import { MessageBoxMode } from '../../../legacy/shared/components/messagebox/messagebox.component';
+import { MessageboxService } from '../../../legacy/shared/services/messagebox.service';
 import { HiveService } from '../../services/hive.service';
 
 @Component({
@@ -128,9 +128,7 @@ export class HiveComponent implements OnInit {
     const targetFilename = entry.name + (this.isManifest(entry) || this.isTree(entry) ? '.json' : '');
 
     if (this.isManifest(entry)) {
-      this.hiveService
-        .downloadManifest(this._hive, entry.mName, entry.mTag)
-        .subscribe((data) => this.downloadFile(targetFilename, data));
+      this.hiveService.downloadManifest(this._hive, entry.mName, entry.mTag).subscribe((data) => this.downloadFile(targetFilename, data));
     } else {
       this.hiveService.download(this._hive, entry.id).subscribe((data) => this.downloadFile(targetFilename, data));
     }

@@ -2,10 +2,10 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ConfigFileDto, InstanceUsageDto, ManifestKey, ProductDto } from '../../../../models/gen.dtos';
-import { ProcessConfigDto } from '../../../../models/process.model';
 import { ConfigService } from '../../../core/services/config.service';
 import { DownloadService } from '../../../core/services/download.service';
 import { Logger, LoggingService } from '../../../core/services/logging.service';
+import { ProcessConfigDto } from '../../core/models/process.model';
 
 @Injectable()
 export class ProductService {

@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { finalize } from 'rxjs/operators';
-import { BackendInfoDto, ManifestKey, OperatingSystem } from 'src/app/models/gen.dtos';
-import { MessageBoxMode } from 'src/app/modules/core/components/messagebox/messagebox.component';
+import { ManifestKey, OperatingSystem } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
-import { MessageboxService } from 'src/app/modules/core/services/messagebox.service';
 import { convert2String } from 'src/app/modules/core/utils/version.utils';
 import { FileUploadComponent } from 'src/app/modules/legacy/shared/components/file-upload/file-upload.component';
+import { MessageBoxMode } from 'src/app/modules/legacy/shared/components/messagebox/messagebox.component';
+import { MessageboxService } from 'src/app/modules/legacy/shared/services/messagebox.service';
 import { SoftwareUpdateService } from '../../services/software-update.service';
 import { UpdateDialogComponent } from '../update-dialog/update-dialog.component';
 
@@ -26,7 +26,6 @@ export class GroupedKeys {
 export class UpdateBrowserComponent implements OnInit {
   public systemVersions: GroupedKeys[];
   public launcherVersions: GroupedKeys[];
-  public backendInfo: BackendInfoDto;
 
   public systemLoading = false;
   public launcherLoading = false;
@@ -40,7 +39,6 @@ export class UpdateBrowserComponent implements OnInit {
   }
 
   private async reload() {
-    this.backendInfo = await this.cfgService.getBackendInfo().toPromise();
     this.updService
       .listBDeployVersions()
       .pipe(finalize(() => (this.systemLoading = false)))
@@ -55,7 +53,7 @@ export class UpdateBrowserComponent implements OnInit {
     const tags: { [key: string]: GroupedKeys } = {};
 
     // keys are already sorted by the backend. reverse the order to have the newest version on top.
-    const currentVersion = this.backendInfo.version;
+    const currentVersion = this.cfgService.config.version;
     keys.reverse().forEach((k) => {
       if (!(k.tag in tags)) {
         tags[k.tag] = new GroupedKeys();
@@ -176,7 +174,7 @@ export class UpdateBrowserComponent implements OnInit {
       return;
     }
 
-    this.cfgService.stopNewVersionInterval();
+    this.cfgService.stopCheckServerVersion();
 
     // perform update call and then wait some seconds for the master to go down.
     await this.openUpdateDialog(
@@ -196,7 +194,7 @@ export class UpdateBrowserComponent implements OnInit {
         minWidth: '300px',
         maxWidth: '800px',
         disableClose: true,
-        data: { waitFor: waitFor, oldVersion: this.backendInfo.version },
+        data: { waitFor: waitFor, oldVersion: this.cfgService.config.version },
       })
       .afterClosed()
       .toPromise();

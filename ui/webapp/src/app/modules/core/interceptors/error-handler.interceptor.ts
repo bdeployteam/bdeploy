@@ -5,19 +5,14 @@ import { Router } from '@angular/router';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { NO_ERROR_HANDLING_HDR } from 'src/app/models/consts';
+import { ConfigService } from '../services/config.service';
 import { ErrorMessage, Logger, LoggingService } from '../services/logging.service';
-import { SystemService } from '../services/system.service';
 
 @Injectable()
 export class HttpErrorHandlerInterceptor implements HttpInterceptor {
   private log: Logger = this.loggingService.getLogger('HttpErrorHandlerInterceptor');
 
-  constructor(
-    private loggingService: LoggingService,
-    private systemService: SystemService,
-    private snackbar: MatSnackBar,
-    private router: Router
-  ) {}
+  constructor(private loggingService: LoggingService, private config: ConfigService, private snackbar: MatSnackBar, private router: Router) {}
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(request).pipe(
@@ -25,7 +20,7 @@ export class HttpErrorHandlerInterceptor implements HttpInterceptor {
         if (e instanceof HttpErrorResponse && !request.headers.has(NO_ERROR_HANDLING_HDR)) {
           switch (e.status) {
             case 0:
-              this.systemService.backendUnreachable();
+              this.config.checkServerReachable();
               return of(null);
             case 401:
               // let 401 pass through for logout redirection in the other interceptor :)

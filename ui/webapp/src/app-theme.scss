@@ -15,38 +15,7 @@
 @import 'app/modules/admin/components/admin-shell/admin-shell.theme.scss';
 @import 'app/modules/admin/components/audit-log/audit-log-theme.scss';
 
-@import 'app/modules/legacy/shared/components/file-upload/file-upload-theme.scss';
-@import 'app/modules/legacy/core/components/product-card/product-card-theme.scss';
-@import 'app/modules/legacy/core/components/product-list/product-list-theme.scss';
-@import 'app/modules/legacy/core/components/managed-server-update/managed-server-update-theme.scss';
-@import 'app/modules/legacy/core/components/product-tag-card/product-tag-card-theme.scss';
-@import 'app/modules/legacy/core/components/instance-group-logo/instance-group-logo-theme.scss';
-@import 'app/modules/legacy/config-files/components/config-files-browser/config-files-browser-theme.scss';
-@import 'app/modules/legacy/servers/components/attach-central/attach-central-theme.scss';
-@import 'app/modules/legacy/servers/components/product-sync/product-sync-theme.scss';
-@import 'app/modules/legacy/instance-group/components/instance-group-delete-dialog/instance-group-delete-dialog-theme.scss';
-@import 'app/modules/legacy/instance-group/components/client-apps/client-apps-theme.scss';
-@import 'app/modules/legacy/instance-group/components/instance-group-add-edit/instance-group-add-edit-theme.scss';
-@import 'app/modules/legacy/instance-group/components/instance-group-browser/instance-group-browser-theme.scss';
-@import 'app/modules/legacy/instance/components/instance-card/instance-card-theme.scss';
-@import 'app/modules/legacy/instance/components/instance-node-card/instance-node-card-theme.scss';
-@import 'app/modules/legacy/instance/components/instance-node-port-list/instance-node-port-list-theme.scss';
-@import 'app/modules/legacy/instance/components/instance-version-card/instance-version-card-theme.scss';
-@import 'app/modules/legacy/instance/components/application-edit/application-edit-theme.scss';
-@import 'app/modules/legacy/instance/components/application-configuration-card/application-configuration-card-theme.scss';
-@import 'app/modules/legacy/instance/components/process-configuration/process-configuration-theme.scss';
-@import 'app/modules/legacy/instance/components/process-details/process-details-theme.scss';
-@import 'app/modules/legacy/instance/components/process-port-list/process-port-list-theme.scss';
-@import 'app/modules/legacy/instance/components/process-status/process-status-theme.scss';
-@import 'app/modules/legacy/instance/components/client-info/client-info-theme.scss';
-@import 'app/modules/legacy/instance/components/instance-browser/instance-browser-theme.scss';
-@import 'app/modules/legacy/instance/components/instance-notifications/instance-notifications-theme.scss';
-@import 'app/modules/legacy/instance/components/instance-sync/instance-sync-theme.scss';
-@import 'app/modules/legacy/instance/components/instance-template/instance-template-theme.scss';
-@import 'app/modules/legacy/instance/components/instance-shift-ports/instance-shift-ports-theme.scss';
-@import 'app/modules/legacy/instance/components/instance-history-timeline/instance-history-timeline-theme.scss';
-@import 'app/modules/legacy/instance/components/instance-history/instance-history-theme.scss';
-@import 'app/modules/legacy/repositories/components/software-repo-file-upload/software-repo-file-upload-theme.scss';
+@import 'app/modules/legacy/core/legacy-themes.scss';
 
 @mixin all-themes($theme) {
   @include angular-material-theme($theme);
@@ -55,42 +24,12 @@
   @include bd-image-upload-theme($theme);
   @include bd-form-toggle-theme($theme);
 
-  // application component themes // FIXME: those are all legacy and should be removed. Use CSS3 variables instead, see --bd- vars.
-  @include instance-group-delete-dialog-theme($theme);
   @include hive-theme($theme);
   @include audit-log-theme($theme);
-  @include instance-card-theme($theme);
-  @include instance-node-card-theme($theme);
-  @include instance-node-port-list-theme($theme);
-  @include instance-version-card-theme($theme);
-  @include application-edit-theme($theme);
-  @include product-tag-card-theme($theme);
-  @include application-configuration-card-theme($theme);
-  @include file-upload-theme($theme);
-  @include instance-group-logo-theme($theme);
-  @include instance-group-add-edit-theme($theme);
-  @include instance-group-browser-theme($theme);
-  @include process-configuration-theme($theme);
-  @include process-details-theme($theme);
-  @include process-port-list-theme($theme);
-  @include process-status-theme($theme);
-  @include client-info-theme($theme);
-  @include client-apps-theme($theme);
-  @include attach-central-theme($theme);
-  @include managed-server-update-theme($theme);
-  @include product-card-theme($theme);
-  @include product-list-theme($theme);
-  @include product-sync-theme($theme);
   @include settings-shell-theme($theme);
-  @include instance-browser-theme($theme);
-  @include instance-notifications-theme($theme);
-  @include instance-sync-theme($theme);
-  @include instance-template-theme($theme);
-  @include instance-shift-ports-theme($theme);
-  @include instance-history-timeline-theme($theme);
-  @include instance-history-theme($theme);
-  @include software-repo-file-upload-theme($theme);
-  @include config-files-browser-theme($theme);
+
+  // TODO: remove legacy
+  @include legacy-themes($theme);
 
   $dark: map-get($theme, 'is-dark');
 
@@ -208,13 +147,7 @@
     width: 34px;
     height: 34px;
     border-radius: 25%;
-    background: linear-gradient(
-      to right,
-      $theme-main-tb 0%,
-      $theme-main-tb 50%,
-      $theme-primary 51%,
-      $theme-primary 100%
-    );
+    background: linear-gradient(to right, $theme-main-tb 0%, $theme-main-tb 50%, $theme-primary 51%, $theme-primary 100%);
   }
 }
 
@@ -283,10 +216,7 @@ $app-yellow-palette: mat-palette($app-yellow-def);
 $app-light-primary: mat-palette($mat-indigo, 500);
 $app-light-accent: mat-palette($mat-pink, A200);
 $app-light-warning: mat-palette($mat-orange, A700);
-$app-light-theme: add-toolbar-color(
-  mat-light-theme($app-light-primary, $app-light-accent, $app-light-warning),
-  $app-light-primary
-);
+$app-light-theme: add-toolbar-color(mat-light-theme($app-light-primary, $app-light-accent, $app-light-warning), $app-light-primary);
 .app-light-theme {
   @include all-themes($app-light-theme);
 }
@@ -313,10 +243,7 @@ $app-light-yellow-theme: add-toolbar-color(
 $app-dark-primary: mat-palette($mat-indigo, 200);
 $app-dark-accent: $app-yellow-palette;
 $app-dark-warning: mat-palette($mat-deep-orange);
-$app-dark-theme: add-toolbar-color(
-  mat-dark-theme($app-dark-primary, $app-dark-accent, $app-dark-warning),
-  mat-palette($mat-indigo, 500)
-);
+$app-dark-theme: add-toolbar-color(mat-dark-theme($app-dark-primary, $app-dark-accent, $app-dark-warning), mat-palette($mat-indigo, 500));
 $app-dark-theme: override-theme-background($app-dark-theme, app-bar, #3d3c3e);
 .app-dark-theme {
   @include all-themes($app-dark-theme);
@@ -330,10 +257,7 @@ $app-dark-theme: override-theme-background($app-dark-theme, app-bar, #3d3c3e);
 $app-dark-yellow-primary: $app-yellow-palette;
 $app-dark-yellow-accent: mat-palette($mat-blue, 700);
 $app-dark-yellow-warning: mat-palette($mat-deep-orange);
-$app-dark-yellow-theme: add-toolbar-color(
-  mat-dark-theme($app-dark-yellow-primary, $app-dark-yellow-accent, $app-dark-yellow-warning),
-  $app-yellow-palette
-);
+$app-dark-yellow-theme: add-toolbar-color(mat-dark-theme($app-dark-yellow-primary, $app-dark-yellow-accent, $app-dark-yellow-warning), $app-yellow-palette);
 $app-dark-yellow-theme: override-theme-background($app-dark-yellow-theme, app-bar, #3d3c3e);
 .app-dark-yellow-theme {
   @include all-themes($app-dark-yellow-theme);

@@ -1,9 +1,9 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { MessageBoxMode } from 'src/app/modules/core/components/messagebox/messagebox.component';
-import { MessageboxService } from 'src/app/modules/core/services/messagebox.service';
 import { ManagedServersService } from 'src/app/modules/legacy/servers/services/managed-servers.service';
+import { MessageBoxMode } from 'src/app/modules/legacy/shared/components/messagebox/messagebox.component';
+import { MessageboxService } from 'src/app/modules/legacy/shared/services/messagebox.service';
 import { InstanceGroupConfiguration, MinionMode } from '../../../../../models/gen.dtos';
 import { AuthenticationService } from '../../../../core/services/authentication.service';
 import { ConfigService } from '../../../../core/services/config.service';
@@ -62,11 +62,9 @@ export class InstanceGroupCardComponent implements OnInit {
           .subscribe((r) => {
             if (r) {
               this.instanceGroup.managed = false;
-              this.instanceGroupService
-                .updateInstanceGroup(this.instanceGroup.name, this.instanceGroup)
-                .subscribe((_) => {
-                  this.router.navigate(['/l/instance/browser', this.instanceGroup.name]);
-                });
+              this.instanceGroupService.updateInstanceGroup(this.instanceGroup.name, this.instanceGroup).subscribe((_) => {
+                this.router.navigate(['/l/instance/browser', this.instanceGroup.name]);
+              });
             }
           });
       } else {

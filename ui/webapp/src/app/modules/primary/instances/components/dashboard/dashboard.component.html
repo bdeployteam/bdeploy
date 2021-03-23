@@ -1,0 +1,34 @@
+<app-bd-dialog [loadingWhen$]="instances.loading$">
+  <app-bd-dialog-toolbar *ngIf="!(instances.current$ | async)" header="Dashboard - loading"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar *ngIf="instances.current$ | async as instance" header="Dashboard - {{ instance.instanceConfiguration.name }}">
+    <div fxFlex="1 0 auto"></div>
+    <ng-container *ngIf="(instances.current$ | async)?.managedServer?.update?.updateAvailable">
+      <app-bd-button
+        text="Server Update Available"
+        icon="system_update"
+        [collapsed]="narrow$ | async"
+        color="accent"
+        (click)="
+          areas.navigateBoth(
+            ['/servers', 'browser', areas.groupContext$.value],
+            ['panels', 'servers', 'details', instances.current$.value?.managedServer?.hostName]
+          )
+        "
+      ></app-bd-button>
+      <mat-divider *ngIf="cfg.isCentral()" [vertical]="true"></mat-divider>
+    </ng-container>
+    <ng-container *ngIf="cfg.isCentral()">
+      <app-bd-button
+        text="Synchronize"
+        icon="history"
+        (click)="doSynchronize(instance.managedServer)"
+        [loadingWhen$]="synchronizing$"
+        [disabled]="synchronizing$ | async"
+        [matTooltip]="!servers.isSynchronized(instance.managedServer) ? 'The server is not synchronized. Click to synchronize now' : null"
+        [ngClass]="!servers.isSynchronized(instance.managedServer) ? 'bd-text-warn' : []"
+        color="inherit"
+      ></app-bd-button>
+    </ng-container>
+  </app-bd-dialog-toolbar>
+  <app-bd-dialog-content></app-bd-dialog-content>
+</app-bd-dialog>

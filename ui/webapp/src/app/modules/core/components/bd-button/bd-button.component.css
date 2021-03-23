@@ -1,5 +1,35 @@
-.local-button-color {
+.local-button-color-inherit {
   color: inherit !important;
+}
+
+.local-button-color-toolbar {
+  background-color: var(--bd-main-bar);
+  color: var(--bd-main-bar-contrast);
+}
+
+.local-button-color-warn {
+  color: var(--bd-warn-contrast);
+  background-color: var(--bd-warn);
+}
+
+.local-button-color-accent {
+  color: var(--bd-accent-contrast);
+  background-color: var(--bd-accent);
+}
+
+.local-button-color-primary {
+  color: var(--bd-primary-contrast);
+  background-color: var(--bd-primary);
+}
+
+.local-icon-position {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+}
+
+.local-label-position {
+  padding-left: 30px;
 }
 
 .local-button-collapsed {

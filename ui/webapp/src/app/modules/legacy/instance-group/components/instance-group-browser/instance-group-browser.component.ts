@@ -4,11 +4,11 @@ import { BehaviorSubject, forkJoin, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
-import { DataList } from '../../../../../models/dataList';
 import { CustomAttributesRecord, InstanceGroupConfiguration, MinionMode } from '../../../../../models/gen.dtos';
 import { AuthenticationService } from '../../../../core/services/authentication.service';
 import { ConfigService } from '../../../../core/services/config.service';
 import { Logger, LoggingService } from '../../../../core/services/logging.service';
+import { DataList } from '../../../core/models/dataList';
 import { InstanceGroupService } from '../../services/instance-group.service';
 
 @Component({
@@ -60,10 +60,7 @@ export class InstanceGroupBrowserComponent implements OnInit, OnDestroy, BdSearc
         return true;
       }
       const attributes: { [index: string]: string } = this.instanceGroupsAttributes[group.name].attributes;
-      if (
-        attributes &&
-        Object.keys(attributes).find((a) => attributes[a] && attributes[a].toLowerCase().includes(text))
-      ) {
+      if (attributes && Object.keys(attributes).find((a) => attributes[a] && attributes[a].toLowerCase().includes(text))) {
         return true;
       }
       return false;
@@ -144,8 +141,6 @@ export class InstanceGroupBrowserComponent implements OnInit, OnDestroy, BdSearc
   }
 
   getGroupsByAttribute(attributeValue: string): InstanceGroupConfiguration[] {
-    return this.instanceGroupList.filtered.filter(
-      (g) => this.instanceGroupsAttributes[g.name].attributes[this.groupAttribute] == attributeValue
-    );
+    return this.instanceGroupList.filtered.filter((g) => this.instanceGroupsAttributes[g.name].attributes[this.groupAttribute] == attributeValue);
   }
 }

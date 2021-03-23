@@ -7,8 +7,8 @@ import { EMPTY_SCOPE, ObjectChangesService } from 'src/app/modules/core/services
 import { ManifestKey, ObjectChangeDetails, ObjectChangeType } from '../../../../../models/gen.dtos';
 import { ActivitiesService, ActivitySnapshotTreeNode } from '../../../../core/services/activities.service';
 import { LoggingService } from '../../../../core/services/logging.service';
-import { MessageboxService } from '../../../../core/services/messagebox.service';
 import { UploadService, UploadState, UploadStatus, UrlParameter } from '../../../../core/services/upload.service';
+import { MessageboxService } from '../../services/messagebox.service';
 
 export interface UploadData {
   title: string;
@@ -303,12 +303,7 @@ export class FileUploadComponent implements OnInit, OnDestroy {
     this.showCancelButton = false;
 
     // start the upload and save the progress map
-    this.uploads = this.uploadService.upload(
-      this.uploadData.url,
-      this.files,
-      this.filesParameter,
-      this.uploadData.formDataParam
-    );
+    this.uploads = this.uploadService.upload(this.uploadData.url, this.files, this.filesParameter, this.uploadData.formDataParam);
     const allObservables = [];
     this.uploads.forEach((e) => {
       allObservables.push(e.progressObservable);

@@ -5,12 +5,16 @@
     <div fxLayout="column" fxLayoutGap="10px">
       <form #groupForm="ngForm" (ngSubmit)="onSave()" *ngIf="group">
         <div fxLayout="column" fxLayoutGap="10px">
-          <app-bd-image-upload (imageSelected)="onSelectImage($event)" [image]="origImage$ | async"></app-bd-image-upload>
+          <app-bd-image-upload
+            (imageSelected)="onSelectImage($event)"
+            [image]="origImage$ | async"
+            (unsupportedDrop)="onUnsupportedFile($event)"
+          ></app-bd-image-upload>
           <app-bd-form-input label="Title" name="title" [(ngModel)]="group.title" required></app-bd-form-input>
           <app-bd-form-input label="Description" name="description" [(ngModel)]="group.description"></app-bd-form-input>
           <app-bd-form-toggle label="Automatic Cleanup" name="autoDelete" [(ngModel)]="group.autoDelete"></app-bd-form-toggle>
 
-          <app-bd-button [inverseColor]="true" [collapsed]="false" text="SAVE" [disabled]="groupForm.invalid || !isDirty()"></app-bd-button>
+          <app-bd-button color="toolbar" [collapsed]="false" text="SAVE" [disabled]="groupForm.invalid || !isDirty()"></app-bd-button>
         </div>
       </form>
       <app-bd-panel-button

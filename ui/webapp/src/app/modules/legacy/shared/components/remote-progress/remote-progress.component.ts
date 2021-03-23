@@ -7,7 +7,6 @@ import { ObjectChangeDetails, ObjectChangeType } from 'src/app/models/gen.dtos';
 import { ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
 import { ActivitiesService, ActivitySnapshotTreeNode } from '../../../../core/services/activities.service';
 import { LoggingService } from '../../../../core/services/logging.service';
-import { SystemService } from '../../../../core/services/system.service';
 
 @Component({
   selector: 'app-remote-progress',
@@ -38,7 +37,6 @@ export class RemoteProgressComponent implements OnInit, OnDestroy {
     private eventsService: ActivitiesService,
     private loggingService: LoggingService,
     private bottomSheet: MatBottomSheet,
-    private systemService: SystemService,
     private changes: ObjectChangesService
   ) {}
 
@@ -66,7 +64,6 @@ export class RemoteProgressComponent implements OnInit, OnDestroy {
       { scope: this._scope },
       (e) => this.updateRemoteEvents(e.details[ObjectChangeDetails.ACTIVITIES]),
       (_) => {
-        this.systemService.backendUnreachable();
         this.remoteProgressElements = null;
       }
     );

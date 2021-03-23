@@ -14,13 +14,13 @@ import { SettingsService } from 'src/app/modules/core/services/settings.service'
 import { RoutingHistoryService } from 'src/app/modules/legacy/core/services/routing-history.service';
 import { CustomAttributeEditComponent } from 'src/app/modules/legacy/shared/components/custom-attribute-edit/custom-attribute-edit.component';
 import { CustomAttributeValueComponent } from 'src/app/modules/legacy/shared/components/custom-attribute-value/custom-attribute-value.component';
-import { EMPTY_ATTRIBUTES_RECORD, EMPTY_INSTANCE_GROUP } from '../../../../../models/consts';
 import { CustomAttributeDescriptor, CustomAttributesRecord, InstanceGroupConfiguration, MinionMode } from '../../../../../models/gen.dtos';
-import { MessageBoxMode } from '../../../../core/components/messagebox/messagebox.component';
 import { ConfigService } from '../../../../core/services/config.service';
 import { ErrorMessage, Logger, LoggingService } from '../../../../core/services/logging.service';
-import { MessageboxService } from '../../../../core/services/messagebox.service';
 import { InstanceGroupValidators } from '../../../../legacy/shared/validators/instance-group.validator';
+import { EMPTY_ATTRIBUTES_RECORD, EMPTY_INSTANCE_GROUP } from '../../../core/models/consts';
+import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
+import { MessageboxService } from '../../../shared/services/messagebox.service';
 import { InstanceGroupService } from '../../services/instance-group.service';
 
 @Component({

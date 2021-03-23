@@ -6,7 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { format } from 'date-fns';
 import { Observable, Subscription } from 'rxjs';
 import { finalize, map, mergeMap } from 'rxjs/operators';
-import { ProcessConfigDto } from 'src/app/models/process.model';
+import { ProcessConfigDto } from 'src/app/modules/legacy/core/models/process.model';
 import {
   ApplicationConfiguration,
   ApplicationStartType,
@@ -243,11 +243,7 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   canStart() {
-    return (
-      (this.isStopped() || this.isCrashedPermanently() || this.isCrashedWaiting()) &&
-      this.isMyVersion() &&
-      this.isActivated()
-    );
+    return (this.isStopped() || this.isCrashedPermanently() || this.isCrashedWaiting()) && this.isMyVersion() && this.isActivated();
   }
 
   canStop() {
@@ -443,62 +439,34 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   getCurrentOutputEntryFetcher(): () => Observable<RemoteDirectoryEntry> {
-    const tag: string = this.details
-      ? this.details.status.instanceTag
-      : this.activatedInstanceTag
-      ? this.activatedInstanceTag
-      : this.instanceTag;
+    const tag: string = this.details ? this.details.status.instanceTag : this.activatedInstanceTag ? this.activatedInstanceTag : this.instanceTag;
     return () =>
-      this.instanceService
-        .getApplicationOutputEntry(this.instanceGroup, this.instanceId, tag, this.appConfig.uid, false)
-        .pipe(
-          map((dir) => {
-            if (!dir.entries || !dir.entries.length) {
-              return null;
-            }
+      this.instanceService.getApplicationOutputEntry(this.instanceGroup, this.instanceId, tag, this.appConfig.uid, false).pipe(
+        map((dir) => {
+          if (!dir.entries || !dir.entries.length) {
+            return null;
+          }
 
-            return dir.entries[0];
-          })
-        );
+          return dir.entries[0];
+        })
+      );
   }
 
   getOutputContentFetcher(): (offset: number, limit: number) => Observable<StringEntryChunkDto> {
     return (offset, limit) => {
-      const tag: string = this.details
-        ? this.details.status.instanceTag
-        : this.activatedInstanceTag
-        ? this.activatedInstanceTag
-        : this.instanceTag;
+      const tag: string = this.details ? this.details.status.instanceTag : this.activatedInstanceTag ? this.activatedInstanceTag : this.instanceTag;
       return this.instanceService
         .getApplicationOutputEntry(this.instanceGroup, this.instanceId, tag, this.appConfig.uid, true)
-        .pipe(
-          mergeMap((dir) =>
-            this.instanceService.getContentChunk(
-              this.instanceGroup,
-              this.instanceId,
-              dir,
-              dir.entries[0],
-              offset,
-              limit,
-              true
-            )
-          )
-        );
+        .pipe(mergeMap((dir) => this.instanceService.getContentChunk(this.instanceGroup, this.instanceId, dir, dir.entries[0], offset, limit, true)));
     };
   }
 
   getContentDownloader(): () => void {
     return () => {
-      const tag: string = this.details
-        ? this.details.status.instanceTag
-        : this.activatedInstanceTag
-        ? this.activatedInstanceTag
-        : this.instanceTag;
-      this.instanceService
-        .getApplicationOutputEntry(this.instanceGroup, this.instanceId, tag, this.appConfig.uid, true)
-        .subscribe((dir) => {
-          this.instanceService.downloadDataFileContent(this.instanceGroup, this.instanceId, dir, dir.entries[0]);
-        });
+      const tag: string = this.details ? this.details.status.instanceTag : this.activatedInstanceTag ? this.activatedInstanceTag : this.instanceTag;
+      this.instanceService.getApplicationOutputEntry(this.instanceGroup, this.instanceId, tag, this.appConfig.uid, true).subscribe((dir) => {
+        this.instanceService.downloadDataFileContent(this.instanceGroup, this.instanceId, dir, dir.entries[0]);
+      });
     };
   }
 
@@ -529,8 +497,6 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   public onInputEvent(input: string) {
-    this.processService
-      .writeToStdin(this.instanceGroup, this.instanceId, this.appConfig.uid, input)
-      .subscribe((r) => {});
+    this.processService.writeToStdin(this.instanceGroup, this.instanceId, this.appConfig.uid, input).subscribe((r) => {});
   }
 }

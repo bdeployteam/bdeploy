@@ -33,7 +33,7 @@
           [text]="!server.update.packagesToTransfer?.length ? 'Install Update' : 'Transfer & Install Update'"
           icon="system_update"
           [collapsed]="false"
-          [inverseColor]="true"
+          color="toolbar"
           [disabled]="(installing$ | async) || !servers.isSynchronized(server)"
           [loadingWhen$]="installing$"
           (click)="doUpdateInstall(server)"
@@ -54,6 +54,7 @@
         [disabled]="synchronizing$ | async"
         [matTooltip]="!servers.isSynchronized(server) ? 'The server is not synchronized. Click to synchronize now' : null"
         [ngClass]="!servers.isSynchronized(server) ? 'bd-text-warn' : []"
+        color="inherit"
       ></app-bd-button>
       <app-bd-panel-button
         text="Edit Server Details"
@@ -67,7 +68,7 @@
         [collapsed]="false"
         text="Delete"
         icon="delete"
-        [inverseColor]="true"
+        color="toolbar"
         (click)="doDelete(server)"
         [disabled]="!auth.isCurrentScopeAdmin() || (loading$ | async)"
       ></app-bd-button>

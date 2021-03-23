@@ -4,9 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { MessageboxComponent, MessageBoxData } from '../components/messagebox/messagebox.component';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable()
 export class MessageboxService {
   constructor(private dialog: MatDialog) {}
 

@@ -12,8 +12,8 @@ import { InstancesService } from '../../services/instances.service';
 
 @Component({
   selector: 'app-instances-browser',
-  templateUrl: './instances-browser.component.html',
-  styleUrls: ['./instances-browser.component.css'],
+  templateUrl: './browser.component.html',
+  styleUrls: ['./browser.component.css'],
 })
 export class InstancesBrowserComponent implements OnInit, OnDestroy {
   initGrouping: BdDataGroupingDefinition<InstanceDto>[] = [{ name: 'Instance Purpose', group: (r) => r.instanceConfiguration.purpose }];

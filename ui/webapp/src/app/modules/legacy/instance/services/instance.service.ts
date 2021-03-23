@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { cloneDeep } from 'lodash-es';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { EMPTY_HISTORY_COMPARE, EMPTY_HISTORY_FILTER } from 'src/app/models/consts';
+import { EMPTY_HISTORY_COMPARE, EMPTY_HISTORY_FILTER } from 'src/app/modules/legacy/core/models/consts';
 import {
   ClickAndStartDescriptor,
   ConfigFileDto,
@@ -29,14 +29,13 @@ import {
   RemoteDirectoryEntry,
   StringEntryChunkDto,
 } from '../../../../models/gen.dtos';
-import { MessageBoxMode } from '../../../core/components/messagebox/messagebox.component';
 import { ConfigService } from '../../../core/services/config.service';
 import { DownloadService } from '../../../core/services/download.service';
 import { ErrorMessage, Logger, LoggingService } from '../../../core/services/logging.service';
-import { MessageboxService } from '../../../core/services/messagebox.service';
-import { SystemService } from '../../../core/services/system.service';
 import { suppressGlobalErrorHandling } from '../../../core/utils/server.utils';
 import { InstanceGroupService } from '../../instance-group/services/instance-group.service';
+import { MessageBoxMode } from '../../shared/components/messagebox/messagebox.component';
+import { MessageboxService } from '../../shared/services/messagebox.service';
 
 @Injectable({
   providedIn: 'root',
@@ -49,7 +48,6 @@ export class InstanceService {
     private http: HttpClient,
     private loggingService: LoggingService,
     private downloadService: DownloadService,
-    private systemService: SystemService,
     private messageBoxService: MessageboxService
   ) {}
 
@@ -105,7 +103,7 @@ export class InstanceService {
               .subscribe((_) => {});
             return throwError(e);
           } else if (e.status === 0) {
-            this.systemService.backendUnreachable();
+            this.cfg.checkServerReachable();
           } else {
             const displayPath = new URL(url).pathname;
             this.log.errorWithGuiMessage(new ErrorMessage(e.status + ': ' + e.statusText + ': ' + displayPath, e));

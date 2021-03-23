@@ -2,11 +2,11 @@ import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core
 import { format } from 'date-fns';
 import { finalize } from 'rxjs/operators';
 import { ManagedMasterDto, MinionMode } from 'src/app/models/gen.dtos';
-import { MessageBoxMode } from 'src/app/modules/core/components/messagebox/messagebox.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
-import { MessageboxService } from 'src/app/modules/core/services/messagebox.service';
 import { ManagedServersService } from 'src/app/modules/legacy/servers/services/managed-servers.service';
+import { MessageBoxMode } from 'src/app/modules/legacy/shared/components/messagebox/messagebox.component';
+import { MessageboxService } from 'src/app/modules/legacy/shared/services/messagebox.service';
 
 @Component({
   selector: 'app-instance-sync',
@@ -51,9 +51,7 @@ export class InstanceSyncComponent implements OnChanges {
       return; // only on central
     }
     if (this.instanceGroup && this.instance) {
-      this.server = await this.managedServers
-        .getServerForInstance(this.instanceGroup, this.instance, this.tag)
-        .toPromise();
+      this.server = await this.managedServers.getServerForInstance(this.instanceGroup, this.instance, this.tag).toPromise();
     } else {
       this.server = null;
     }

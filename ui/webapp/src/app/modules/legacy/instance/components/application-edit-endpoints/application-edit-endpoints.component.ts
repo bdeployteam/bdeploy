@@ -3,9 +3,9 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { cloneDeep, isEqual } from 'lodash-es';
 import { Observable, of } from 'rxjs';
 import { ApplicationConfiguration, ApplicationDescriptor, HttpAuthenticationType } from 'src/app/models/gen.dtos';
-import { EditAppConfigContext, ProcessConfigDto } from 'src/app/models/process.model';
-import { MessageBoxMode } from 'src/app/modules/core/components/messagebox/messagebox.component';
-import { MessageboxService } from 'src/app/modules/core/services/messagebox.service';
+import { EditAppConfigContext, ProcessConfigDto } from 'src/app/modules/legacy/core/models/process.model';
+import { MessageBoxMode } from 'src/app/modules/legacy/shared/components/messagebox/messagebox.component';
+import { MessageboxService } from 'src/app/modules/legacy/shared/services/messagebox.service';
 
 @Component({
   selector: 'app-application-edit-endpoints',
@@ -175,8 +175,7 @@ export class ApplicationEditEndpointsComponent implements OnInit {
     }
     return this.messageBoxService.open({
       title: 'Unsaved changes',
-      message:
-        'Application "' + this.appConfigContext.applicationConfiguration.name + '" was modified. Close without saving?',
+      message: 'Application "' + this.appConfigContext.applicationConfiguration.name + '" was modified. Close without saving?',
       mode: MessageBoxMode.CONFIRM_WARNING,
     });
   }

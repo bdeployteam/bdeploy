@@ -4,8 +4,8 @@ import { tap } from 'rxjs/operators';
 import { retryWithDelay } from 'src/app/modules/core/utils/server.utils';
 import { ManagedServersService } from 'src/app/modules/legacy/servers/services/managed-servers.service';
 import { MinionUpdateDto } from '../../../../../models/gen.dtos';
-import { areUpdatesAvailable, isTransferDone, isUpdateFailed, isUpdateInProgress, isUpdateSuccess, UpdateStatus } from '../../../../../models/update.model';
 import { AuthenticationService } from '../../../../core/services/authentication.service';
+import { areUpdatesAvailable, isTransferDone, isUpdateFailed, isUpdateInProgress, isUpdateSuccess, UpdateStatus } from '../../models/update.model';
 
 @Component({
   selector: 'app-managed-server-update',

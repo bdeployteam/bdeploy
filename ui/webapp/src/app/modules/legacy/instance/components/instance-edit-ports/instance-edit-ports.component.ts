@@ -12,17 +12,14 @@ import {
   ParameterDescriptor,
   ParameterType,
 } from 'src/app/models/gen.dtos';
-import { ProcessConfigDto } from 'src/app/models/process.model';
-import { MessageBoxMode } from 'src/app/modules/core/components/messagebox/messagebox.component';
 import { DownloadService } from 'src/app/modules/core/services/download.service';
-import { MessageboxService } from 'src/app/modules/core/services/messagebox.service';
+import { ProcessConfigDto } from 'src/app/modules/legacy/core/models/process.model';
+import { MessageBoxMode } from 'src/app/modules/legacy/shared/components/messagebox/messagebox.component';
+import { MessageboxService } from 'src/app/modules/legacy/shared/services/messagebox.service';
 import { getAppOs } from 'src/app/modules/legacy/shared/utils/manifest.utils';
 import { URLish } from 'src/app/modules/legacy/shared/utils/url.utils';
 import { ApplicationService } from '../../services/application.service';
-import {
-  InstanceShiftPortsComponent,
-  ShiftableParameter,
-} from '../instance-shift-ports/instance-shift-ports.component';
+import { InstanceShiftPortsComponent, ShiftableParameter } from '../instance-shift-ports/instance-shift-ports.component';
 
 interface ServerPortParameter {
   paramCfg: ParameterConfiguration;
@@ -71,11 +68,7 @@ export class InstanceEditPortsComponent implements OnInit, AfterViewInit {
             continue; // custom parameter
           }
 
-          if (
-            paramDesc.type === ParameterType.SERVER_PORT ||
-            paramDesc.type === ParameterType.CLIENT_PORT ||
-            paramDesc.type === ParameterType.URL
-          ) {
+          if (paramDesc.type === ParameterType.SERVER_PORT || paramDesc.type === ParameterType.CLIENT_PORT || paramDesc.type === ParameterType.URL) {
             if (paramDesc.type === ParameterType.URL) {
               try {
                 if (!new URLish(param.value).port) {
@@ -198,12 +191,7 @@ export class InstanceEditPortsComponent implements OnInit, AfterViewInit {
         this.portsPerApp[app]
           .filter((spp) => spp.paramDesc.type === ParameterType.SERVER_PORT)
           .map((spp) => {
-            return [
-              this.appConfigs[app].name,
-              spp.paramDesc.name,
-              spp.paramDesc.longDescription,
-              this.getPortValue(spp),
-            ];
+            return [this.appConfigs[app].name, spp.paramDesc.name, spp.paramDesc.longDescription, this.getPortValue(spp)];
           })
           .map((r) => r.map((e) => `"${e}"`).join(','))
           .join('\n');

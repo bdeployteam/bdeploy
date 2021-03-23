@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { EventWithCallback } from '../../../../../models/event';
 import { ApplicationConfiguration, InstanceStateRecord } from '../../../../../models/gen.dtos';
 import { LauncherService } from '../../../../legacy/shared/services/launcher.service';
 import { getAppOs } from '../../../../legacy/shared/utils/manifest.utils';
+import { EventWithCallback } from '../../../core/models/event';
 
 @Component({
   selector: 'app-client-info',

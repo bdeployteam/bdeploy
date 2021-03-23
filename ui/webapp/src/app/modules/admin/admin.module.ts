@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { MatSidenavModule } from '@angular/material/sidenav';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { CoreModule } from '../core/core.module';
+import { CoreLegacyModule } from '../legacy/core/core-legacy.module';
 import { SharedModule } from '../legacy/shared/shared.module';
 import { AdminRoutingModule } from './admin-routing.module';
 import { AdminShellComponent } from './components/admin-shell/admin-shell.component';
@@ -50,6 +52,6 @@ import { UsersBrowserComponent } from './components/users-browser/users-browser.
     MasterCleanupGroupComponent,
     PluginsBrowserComponent,
   ],
-  imports: [CommonModule, CoreModule, SharedModule, AdminRoutingModule, NgxChartsModule],
+  imports: [CommonModule, CoreModule, CoreLegacyModule, SharedModule, AdminRoutingModule, NgxChartsModule, MatSidenavModule],
 })
 export class AdminModule {}

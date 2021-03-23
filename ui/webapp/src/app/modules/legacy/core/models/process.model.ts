@@ -1,7 +1,4 @@
 import { cloneDeep } from 'lodash-es';
-import { getAppKeyName } from '../modules/legacy/shared/utils/manifest.utils';
-import { ApplicationGroup } from './application.model';
-import { CLIENT_NODE_NAME, EMPTY_INSTANCE_NODE_CONFIGURATION, EMPTY_INSTANCE_NODE_CONFIGURATION_DTO } from './consts';
 import {
   ApplicationConfiguration,
   ApplicationDto,
@@ -12,7 +9,10 @@ import {
   InstanceVersionDto,
   ManifestKey,
   MinionDto,
-} from './gen.dtos';
+} from '../../../../models/gen.dtos';
+import { getAppKeyName } from '../../shared/utils/manifest.utils';
+import { ApplicationGroup } from './application.model';
+import { CLIENT_NODE_NAME, EMPTY_INSTANCE_NODE_CONFIGURATION, EMPTY_INSTANCE_NODE_CONFIGURATION_DTO } from './consts';
 
 /**
  * Context information for EventEmitter
@@ -109,10 +109,7 @@ export class ProcessConfigDto {
    * Returns a sorted list of node configurations.
    * Master is always the first entry. Client node is always the last one
    */
-  sortNodeConfigs(
-    configs: InstanceNodeConfigurationDto[],
-    minions: { [minionName: string]: MinionDto }
-  ): InstanceNodeConfigurationDto[] {
+  sortNodeConfigs(configs: InstanceNodeConfigurationDto[], minions: { [minionName: string]: MinionDto }): InstanceNodeConfigurationDto[] {
     configs.sort((a, b) => {
       // Sort clients last
       if (a.nodeName === CLIENT_NODE_NAME) {

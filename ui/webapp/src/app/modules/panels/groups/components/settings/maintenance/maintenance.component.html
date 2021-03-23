@@ -27,7 +27,7 @@
         (click)="onDelete(group)"
         [disabled]="!auth.isCurrentScopeAdmin() || (deleting$ | async)"
         [loadingWhen$]="deleting$"
-        [inverseColor]="true"
+        color="toolbar"
       ></app-bd-button>
       <mat-divider></mat-divider>
       <app-bd-panel-button

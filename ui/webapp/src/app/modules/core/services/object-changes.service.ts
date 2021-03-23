@@ -1,18 +1,10 @@
 import { Injectable } from '@angular/core';
 import ReconnectingWebSocket, { ErrorEvent } from 'reconnecting-websocket';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
-import {
-  ObjectChangeDto,
-  ObjectChangeInitDto,
-  ObjectChangeRegistrationDto,
-  ObjectChangeType,
-  ObjectScope,
-  RegistrationAction,
-} from 'src/app/models/gen.dtos';
+import { ObjectChangeDto, ObjectChangeInitDto, ObjectChangeRegistrationDto, ObjectChangeType, ObjectScope, RegistrationAction } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from './authentication.service';
 import { ConfigService } from './config.service';
 import { ErrorMessage, LoggingService } from './logging.service';
-import { SystemService } from './system.service';
 
 export const EMPTY_SCOPE: ObjectScope = { scope: [] };
 
@@ -33,18 +25,13 @@ export class ObjectChangesService {
   private _open$ = new BehaviorSubject<boolean>(false);
   private _refs: { [index: string]: RemoteRegistration } = {};
 
-  constructor(
-    private cfg: ConfigService,
-    private auth: AuthenticationService,
-    private logging: LoggingService,
-    private systemService: SystemService
-  ) {
+  constructor(private cfg: ConfigService, private auth: AuthenticationService, private logging: LoggingService) {
     this.ws = this.createWebSocket();
   }
 
   private createWebSocket() {
     // See io.bdeploy.jersey.ws.change.ObjectChangeWebSocket
-    const _socket = new ReconnectingWebSocket(this.cfg.getWsUrl() + '/object-changes');
+    const _socket = new ReconnectingWebSocket(this.getWebsocketUrl() + '/object-changes');
     _socket.addEventListener('open', () => {
       const init: ObjectChangeInitDto = {
         token: this.auth.getToken(),
@@ -62,14 +49,29 @@ export class ObjectChangesService {
           } as ObjectChangeRegistrationDto)
         );
       }
+
+      // in case this is a re-connect, we want to check the server version.
+      this.cfg.checkServerVersion();
     });
     _socket.addEventListener('error', (err) => {
       this.log.error(new ErrorMessage('Error on WebSocket', err));
-      this.systemService.backendUnreachable();
+      this.cfg.checkServerReachable();
       this._error$.next(err);
     });
     _socket.addEventListener('message', (e) => this.onMessage(e));
     return _socket;
+  }
+
+  private getWebsocketUrl(): string {
+    if (this.cfg.config.api.startsWith('https://')) {
+      return this.cfg.config.api.replace('https', 'wss').replace('/api', '/ws');
+    } else if (this.cfg.config.api.startsWith('/')) {
+      // relative, use browser information to figure out an absolute URL, since WebSockets require this.
+      const url = new URL(window.location.href);
+      return 'wss://' + url.host + '/ws';
+    } else {
+      throw new Error('Cannot figure out WebSocket URL');
+    }
   }
 
   private onMessage(event: MessageEvent<string>) {
@@ -81,12 +83,7 @@ export class ObjectChangesService {
     return `${type}|${!!scope.scope?.length ? scope.scope.join(';') : '[]'}`;
   }
 
-  subscribe(
-    type: ObjectChangeType,
-    scope: ObjectScope,
-    next: (next: ObjectChangeDto) => void,
-    error?: (err: ErrorEvent) => void
-  ): Subscription {
+  subscribe(type: ObjectChangeType, scope: ObjectScope, next: (next: ObjectChangeDto) => void, error?: (err: ErrorEvent) => void): Subscription {
     // First determine whether we need to subscribe on the server.
     const key = this.key(type, scope);
     const needSub = !this._refs[key]?.refCount;
@@ -94,9 +91,7 @@ export class ObjectChangesService {
       // we're the first, need to subscribe
       this._refs[key] = { refCount: 1, type, scope };
       if (this._open$.value) {
-        this.ws.send(
-          JSON.stringify({ action: RegistrationAction.ADD, type: type, scope: scope } as ObjectChangeRegistrationDto)
-        );
+        this.ws.send(JSON.stringify({ action: RegistrationAction.ADD, type: type, scope: scope } as ObjectChangeRegistrationDto));
       }
     } else {
       // somebody else already using the same key, the server send us changes already.
@@ -127,9 +122,7 @@ export class ObjectChangesService {
       if (needUnsub) {
         // we're the last one with this subscription, unsubscribe from the server.
         delete this._refs[key];
-        this.ws.send(
-          JSON.stringify({ action: RegistrationAction.REMOVE, type: type, scope: scope } as ObjectChangeRegistrationDto)
-        );
+        this.ws.send(JSON.stringify({ action: RegistrationAction.REMOVE, type: type, scope: scope } as ObjectChangeRegistrationDto));
       } else {
         // we're not the last one, so just decrease the ref-count for the server subscription.
         this._refs[key].refCount--;

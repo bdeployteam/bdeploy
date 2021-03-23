@@ -30,7 +30,7 @@ export class UpdateDialogComponent implements OnInit {
 
   async waitForServer(): Promise<any> {
     this.waiting = true;
-    const observable = this.cfgSvc.tryGetBackendInfo();
+    const observable = this.cfgSvc.getBackendInfo();
     const dto = await observable.pipe(retryWithDelay()).toPromise();
     this.waiting = false;
     this.finished = true;

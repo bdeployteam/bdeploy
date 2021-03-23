@@ -76,11 +76,6 @@
     color: var(--bd-main-bar-contrast);
   }
 
-  .bd-inverted-color {
-    background-color: var(--bd-main-bar);
-    color: var(--bd-main-bar-contrast);
-  }
-
   /* Use when wrapping a button in an <a> tag - will remove underlines on button contents */
   .bd-button-link {
     text-decoration: none;
@@ -132,8 +127,8 @@
     border: dashed 2px $border-color;
   }
 
-  .bd-white-spinner circle {
-    stroke: white !important;
+  .bd-inherited-spinner circle {
+    stroke: currentColor;
   }
 }
 

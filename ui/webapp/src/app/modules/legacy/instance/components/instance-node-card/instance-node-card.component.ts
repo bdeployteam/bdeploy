@@ -7,13 +7,10 @@ import { cloneDeep } from 'lodash-es';
 import { DragulaService } from 'ng2-dragula';
 import { Subscription } from 'rxjs';
 import { StatusMessage } from 'src/app/models/config.model';
-import { MessageBoxMode } from 'src/app/modules/core/components/messagebox/messagebox.component';
 import { Logger, LoggingService } from 'src/app/modules/core/services/logging.service';
-import { MessageboxService } from 'src/app/modules/core/services/messagebox.service';
 import { convert2String } from 'src/app/modules/core/utils/version.utils';
-import { ApplicationGroup } from '../../../../../models/application.model';
-import { CLIENT_NODE_NAME, EMPTY_INSTANCE_NODE_CONFIGURATION } from '../../../../../models/consts';
-import { EventWithCallback } from '../../../../../models/event';
+import { MessageBoxMode } from 'src/app/modules/legacy/shared/components/messagebox/messagebox.component';
+import { MessageboxService } from 'src/app/modules/legacy/shared/services/messagebox.service';
 import {
   ApplicationConfiguration,
   ApplicationDto,
@@ -24,8 +21,11 @@ import {
   MinionStatusDto,
   ProductDto,
 } from '../../../../../models/gen.dtos';
-import { EditAppConfigContext, ProcessConfigDto } from '../../../../../models/process.model';
 import { getAppOs, updateAppOs } from '../../../../legacy/shared/utils/manifest.utils';
+import { ApplicationGroup } from '../../../core/models/application.model';
+import { CLIENT_NODE_NAME, EMPTY_INSTANCE_NODE_CONFIGURATION } from '../../../core/models/consts';
+import { EventWithCallback } from '../../../core/models/event';
+import { EditAppConfigContext, ProcessConfigDto } from '../../../core/models/process.model';
 import { ApplicationService } from '../../services/application.service';
 import {
   ApplicationTemplateVariableDialogComponent,

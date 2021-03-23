@@ -2,6 +2,7 @@ import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { TooltipPosition } from '@angular/material/tooltip';
 import { ActivatedRouteSnapshot, RouterLink, RouterLinkActive } from '@angular/router';
 import { NavAreasService } from '../../services/nav-areas.service';
+import { BdButtonColorMode } from '../bd-button/bd-button.component';
 
 @Component({
   selector: 'app-bd-panel-button',
@@ -15,7 +16,7 @@ export class BdPanelButtonComponent implements OnInit {
   @Input() relative = false;
   @Input() toggle = true;
   @Input() collapsed = true;
-  @Input() inverseColor = false;
+  @Input() color: BdButtonColorMode;
   @Input() disabled = false;
   @Input() tooltip: TooltipPosition;
 

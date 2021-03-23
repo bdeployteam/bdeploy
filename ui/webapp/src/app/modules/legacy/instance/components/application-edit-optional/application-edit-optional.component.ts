@@ -3,7 +3,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatInput } from '@angular/material/input';
 import { MatTableDataSource } from '@angular/material/table';
 import { cloneDeep, isEqual } from 'lodash-es';
-import { LinkedParameter } from '../../../../../models/application.model';
+import { LinkedParameter } from '../../../core/models/application.model';
 
 export interface EditOptionalData {
   filter: string;
@@ -24,10 +24,7 @@ export class ApplicationEditOptionalComponent implements OnInit {
 
   @ViewChild('searchField', { static: true }) searchField: ElementRef<MatInput>;
 
-  constructor(
-    @Inject(MAT_DIALOG_DATA) public data: EditOptionalData,
-    public dialogRef: MatDialogRef<ApplicationEditOptionalComponent>
-  ) {}
+  constructor(@Inject(MAT_DIALOG_DATA) public data: EditOptionalData, public dialogRef: MatDialogRef<ApplicationEditOptionalComponent>) {}
 
   ngOnInit() {
     this.clonedParameters = cloneDeep(this.data.parameters);

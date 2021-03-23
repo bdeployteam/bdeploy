@@ -7,17 +7,11 @@ import { AuthenticationService } from 'src/app/modules/core/services/authenticat
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { RoutingHistoryService } from 'src/app/modules/legacy/core/services/routing-history.service';
 import { InstanceGroupService } from 'src/app/modules/legacy/instance-group/services/instance-group.service';
-import { SORT_PURPOSE } from '../../../../../models/consts';
-import { DataList } from '../../../../../models/dataList';
-import {
-  CustomAttributesRecord,
-  InstanceDto,
-  InstanceGroupConfiguration,
-  InstancePurpose,
-  MinionMode,
-} from '../../../../../models/gen.dtos';
+import { CustomAttributesRecord, InstanceDto, InstanceGroupConfiguration, InstancePurpose, MinionMode } from '../../../../../models/gen.dtos';
 import { Logger, LoggingService } from '../../../../core/services/logging.service';
 import { ProductService } from '../../../../legacy/shared/services/product.service';
+import { SORT_PURPOSE } from '../../../core/models/consts';
+import { DataList } from '../../../core/models/dataList';
 import { InstanceService } from '../../services/instance.service';
 
 @Component({
@@ -69,12 +63,8 @@ export class InstanceBrowserComponent implements OnInit {
       if (instanceDto.productDto.key.tag.toLowerCase().startsWith(text)) {
         return true;
       }
-      const attributes: { [index: string]: string } = this.instancesAttributes[instanceDto.instanceConfiguration.uuid]
-        .attributes;
-      if (
-        attributes &&
-        Object.keys(attributes).find((a) => attributes[a] && attributes[a].toLowerCase().includes(text))
-      ) {
+      const attributes: { [index: string]: string } = this.instancesAttributes[instanceDto.instanceConfiguration.uuid].attributes;
+      if (attributes && Object.keys(attributes).find((a) => attributes[a] && attributes[a].toLowerCase().includes(text))) {
         return true;
       }
       return false;
@@ -107,11 +97,7 @@ export class InstanceBrowserComponent implements OnInit {
     return Array.from(
       new Set(
         this.instanceDtoList.filtered
-          .filter(
-            (dto) =>
-              this.instancesAttributes[dto.instanceConfiguration.uuid]?.attributes?.[this.groupAttribute] ==
-              attributeValue
-          )
+          .filter((dto) => this.instancesAttributes[dto.instanceConfiguration.uuid]?.attributes?.[this.groupAttribute] == attributeValue)
           .map((dto) => dto.instanceConfiguration.purpose)
           .sort(SORT_PURPOSE)
       )
@@ -123,8 +109,7 @@ export class InstanceBrowserComponent implements OnInit {
       .filter(
         (dto) =>
           dto.instanceConfiguration.purpose === purpose &&
-          (!this.groupAttribute ||
-            this.instancesAttributes[dto.instanceConfiguration.uuid]?.attributes[this.groupAttribute] == attributeValue)
+          (!this.groupAttribute || this.instancesAttributes[dto.instanceConfiguration.uuid]?.attributes[this.groupAttribute] == attributeValue)
       )
       .sort((a, b) => a.instanceConfiguration.name.localeCompare(b.instanceConfiguration.name));
   }

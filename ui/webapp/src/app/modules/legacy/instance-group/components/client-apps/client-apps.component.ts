@@ -3,7 +3,6 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { RoutingHistoryService } from 'src/app/modules/legacy/core/services/routing-history.service';
-import { SORT_PURPOSE } from '../../../../../models/consts';
 import {
   ClientApplicationDto,
   InstanceClientAppsDto,
@@ -15,6 +14,7 @@ import {
 import { SoftwareUpdateService } from '../../../../admin/services/software-update.service';
 import { DownloadService } from '../../../../core/services/download.service';
 import { LauncherService } from '../../../../legacy/shared/services/launcher.service';
+import { SORT_PURPOSE } from '../../../core/models/consts';
 import { InstanceService } from '../../../instance/services/instance.service';
 import { InstanceGroupService } from '../../services/instance-group.service';
 
@@ -91,11 +91,9 @@ export class ClientAppsComponent implements OnInit {
   }
 
   downloadClickAndRun(instance: InstanceConfiguration, app: ClientApplicationDto) {
-    this.instanceService
-      .createClickAndStartDescriptor(this.instanceGroupName, instance.uuid, app.uuid)
-      .subscribe((data) => {
-        this.downloadService.downloadJson(app.description + '.bdeploy', data);
-      });
+    this.instanceService.createClickAndStartDescriptor(this.instanceGroupName, instance.uuid, app.uuid).subscribe((data) => {
+      this.downloadService.downloadJson(app.description + '.bdeploy', data);
+    });
   }
 
   downloadInstaller(instance: InstanceConfiguration, app: ClientApplicationDto) {

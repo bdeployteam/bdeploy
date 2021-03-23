@@ -4,7 +4,7 @@ import { Component, Input, OnInit, TemplateRef, ViewContainerRef } from '@angula
 import { MatButton } from '@angular/material/button';
 import { StatusMessage } from 'src/app/models/config.model';
 import { ApplicationType, InstanceTemplateGroup, ProductDto, TemplateApplication } from 'src/app/models/gen.dtos';
-import { ProcessConfigDto } from 'src/app/models/process.model';
+import { ProcessConfigDto } from 'src/app/modules/legacy/core/models/process.model';
 
 @Component({
   selector: 'app-instance-template-group-detail',

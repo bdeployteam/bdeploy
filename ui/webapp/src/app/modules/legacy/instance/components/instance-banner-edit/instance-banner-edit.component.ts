@@ -2,7 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { cloneDeep } from 'lodash-es';
-import { EMPTY_INSTANCE_BANNER_RECORD } from 'src/app/models/consts';
+import { EMPTY_INSTANCE_BANNER_RECORD } from 'src/app/modules/legacy/core/models/consts';
 
 @Component({
   selector: 'app-instance-banner-edit',

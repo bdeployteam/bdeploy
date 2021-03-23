@@ -11,7 +11,6 @@ import { forkJoin, Observable, of } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { RoutingHistoryService } from 'src/app/modules/legacy/core/services/routing-history.service';
 import { CustomAttributeValueComponent } from 'src/app/modules/legacy/shared/components/custom-attribute-value/custom-attribute-value.component';
-import { EMPTY_ATTRIBUTES_RECORD, EMPTY_INSTANCE } from '../../../../../models/consts';
 import {
   CustomAttributesRecord,
   InstanceConfiguration,
@@ -22,13 +21,14 @@ import {
   MinionMode,
   ProductDto,
 } from '../../../../../models/gen.dtos';
-import { MessageBoxMode } from '../../../../core/components/messagebox/messagebox.component';
 import { ConfigService } from '../../../../core/services/config.service';
 import { Logger, LoggingService } from '../../../../core/services/logging.service';
-import { MessageboxService } from '../../../../core/services/messagebox.service';
 import { ProductService } from '../../../../legacy/shared/services/product.service';
+import { EMPTY_ATTRIBUTES_RECORD, EMPTY_INSTANCE } from '../../../core/models/consts';
 import { InstanceGroupService } from '../../../instance-group/services/instance-group.service';
 import { ManagedServersService } from '../../../servers/services/managed-servers.service';
+import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
+import { MessageboxService } from '../../../shared/services/messagebox.service';
 import { InstanceService } from '../../services/instance.service';
 
 @Component({
@@ -261,14 +261,7 @@ export class InstanceAddEditComponent implements OnInit {
     } else {
       forkJoin({
         configuration: this.isConfigurationModified()
-          ? this.instanceService.updateInstance(
-              this.groupParam,
-              this.uuidParam,
-              instance,
-              null,
-              managedServer,
-              this.expectedVersion.key.tag
-            )
+          ? this.instanceService.updateInstance(this.groupParam, this.uuidParam, instance, null, managedServer, this.expectedVersion.key.tag)
           : of(null),
         attributes: this.isAttributesModified()
           ? this.instanceService.updateInstanceAttributes(this.groupParam, this.uuidParam, this.instanceAttributes)
@@ -351,9 +344,7 @@ export class InstanceAddEditComponent implements OnInit {
   }
 
   addInstanceAttribute() {
-    const possibleDescriptors = this.instanceGroup?.instanceAttributes?.filter(
-      (d) => !this.instanceAttributes?.attributes[d.name]
-    );
+    const possibleDescriptors = this.instanceGroup?.instanceAttributes?.filter((d) => !this.instanceAttributes?.attributes[d.name]);
     this.dialog
       .open(CustomAttributeValueComponent, {
         width: '500px',

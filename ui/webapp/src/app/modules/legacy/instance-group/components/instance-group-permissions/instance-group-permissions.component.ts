@@ -9,13 +9,13 @@ import { cloneDeep } from 'lodash-es';
 import { Observable, of, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { Permission, ScopedPermission, UserInfo } from 'src/app/models/gen.dtos';
-import { MessageBoxMode } from 'src/app/modules/core/components/messagebox/messagebox.component';
-import { UserPickerComponent } from 'src/app/modules/core/components/user-picker/user-picker.component';
 import { Logger, LoggingService } from 'src/app/modules/core/services/logging.service';
-import { MessageboxService } from 'src/app/modules/core/services/messagebox.service';
 import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
+import { UserPickerComponent } from 'src/app/modules/legacy/core/components/user-picker/user-picker.component';
 import { RoutingHistoryService } from 'src/app/modules/legacy/core/services/routing-history.service';
+import { MessageBoxMode } from 'src/app/modules/legacy/shared/components/messagebox/messagebox.component';
+import { MessageboxService } from 'src/app/modules/legacy/shared/services/messagebox.service';
 import { InstanceGroupService } from '../../services/instance-group.service';
 
 @Component({
@@ -104,12 +104,9 @@ export class InstanceGroupPermissionsComponent implements OnInit, OnDestroy, BdS
           clone.permissions = cap4instanceGroup;
           if (this.hasScoped(clone)) {
             // add missing permissions of lower prio (required for grant/revoke actions)
-            const hasScopedRead =
-              clone.permissions.find((c) => c.scope !== null && c.permission === Permission.READ) != null;
-            const hasScopedWrite =
-              clone.permissions.find((c) => c.scope !== null && c.permission === Permission.WRITE) != null;
-            const hasScopedAdmin =
-              clone.permissions.find((c) => c.scope !== null && c.permission === Permission.ADMIN) != null;
+            const hasScopedRead = clone.permissions.find((c) => c.scope !== null && c.permission === Permission.READ) != null;
+            const hasScopedWrite = clone.permissions.find((c) => c.scope !== null && c.permission === Permission.WRITE) != null;
+            const hasScopedAdmin = clone.permissions.find((c) => c.scope !== null && c.permission === Permission.ADMIN) != null;
             if (hasScopedAdmin && !hasScopedWrite) {
               clone.permissions.push({
                 scope: this.nameParam,

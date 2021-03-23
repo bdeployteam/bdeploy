@@ -196,7 +196,7 @@ java configuration Central-Master : minion-base {
 	argument "--allowCors";
 	argument "--consoleLog";
 	vm-argument "-XX:+HeapDumpOnOutOfMemoryError";
-//	vm-argument "-Dbdeploy.version.override=2.0.0"; // TESTING
+//	vm-argument "-Dbdeploy.version.override=3.7.0-202103091811"; // TESTING
 	memory max=256 MB;
 }
 
@@ -209,6 +209,8 @@ java configuration Managed-Master : minion-base {
 	argument "--allowCors";
 	argument "--consoleLog";
 	vm-argument "-XX:+HeapDumpOnOutOfMemoryError";
+//	vm-argument "-Dbdeploy.version.override=3.6.2"; // TESTING
+//	vm-argument "-Dbdeploy.version.override=3.7.0-202103091811"; // TESTING
 	memory max=256 MB;
 }
 

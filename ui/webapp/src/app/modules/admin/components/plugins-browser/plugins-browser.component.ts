@@ -6,13 +6,13 @@ import { MatTableDataSource } from '@angular/material/table';
 import { Subscription } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { PluginInfoDto } from 'src/app/models/gen.dtos';
-import { MessageBoxMode } from 'src/app/modules/core/components/messagebox/messagebox.component';
 import { Logger, LoggingService } from 'src/app/modules/core/services/logging.service';
-import { MessageboxService } from 'src/app/modules/core/services/messagebox.service';
 import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { UploadStatus } from 'src/app/modules/core/services/upload.service';
 import { FileUploadComponent } from 'src/app/modules/legacy/shared/components/file-upload/file-upload.component';
+import { MessageBoxMode } from 'src/app/modules/legacy/shared/components/messagebox/messagebox.component';
+import { MessageboxService } from 'src/app/modules/legacy/shared/services/messagebox.service';
 import { PluginAdminService } from '../../services/plugin-admin.service';
 
 @Component({
@@ -61,11 +61,7 @@ export class PluginsBrowserComponent implements OnInit, OnDestroy, BdSearchable,
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
     this.dataSource.filterPredicate = (data, filter) => {
-      return (
-        this.filterPredicate(data.name, filter) ||
-        this.filterPredicate(data.version, filter) ||
-        this.filterPredicate(this.formatEditors(data), filter)
-      );
+      return this.filterPredicate(data.name, filter) || this.filterPredicate(data.version, filter) || this.filterPredicate(this.formatEditors(data), filter);
     };
 
     this.loadPlugins();
@@ -141,8 +137,7 @@ export class PluginsBrowserComponent implements OnInit, OnDestroy, BdSearchable,
     config.minHeight = '550px';
     config.data = {
       title: 'Upload Plugins',
-      headerMessage:
-        'Upload global plugins. The selected archive may either contain a new plugin or a new version of an existing plugin.',
+      headerMessage: 'Upload global plugins. The selected archive may either contain a new plugin or a new version of an existing plugin.',
       url: this.pluginAdminService.getGlobalUploadUrl(),
       urlParameter: [{ id: 'replace', name: 'Replace', type: 'boolean' }],
       fileTypes: ['.jar'],

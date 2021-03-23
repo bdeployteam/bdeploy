@@ -1,11 +1,11 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
-import { MessageboxService } from 'src/app/modules/core/services/messagebox.service';
 import { InstanceGroupService } from 'src/app/modules/legacy/instance-group/services/instance-group.service';
+import { MessageboxService } from 'src/app/modules/legacy/shared/services/messagebox.service';
 import { InstanceDto, InstanceGroupConfiguration } from '../../../../../models/gen.dtos';
-import { MessageBoxMode } from '../../../../core/components/messagebox/messagebox.component';
 import { LoggingService } from '../../../../core/services/logging.service';
+import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
 import { InstanceService } from '../../services/instance.service';
 import { InstanceBannerEditComponent } from '../instance-banner-edit/instance-banner-edit.component';
 
@@ -37,27 +37,25 @@ export class InstanceCardComponent implements OnInit {
   }
 
   onConfigureBanner() {
-    this.instanceService
-      .getInstanceBanner(this.instanceGroupName, this.instanceDto.instanceConfiguration.uuid)
-      .subscribe((banner) => {
-        this.dialog
-          .open(InstanceBannerEditComponent, {
-            width: '600px',
-            data: {
-              instanceBanner: banner,
-            },
-          })
-          .afterClosed()
-          .subscribe((r) => {
-            if (r) {
-              this.instanceService
-                .updateInstanceBanner(this.instanceGroupName, this.instanceDto.instanceConfiguration.uuid, r)
-                .subscribe
-                // nothing to update
-                ();
-            }
-          });
-      });
+    this.instanceService.getInstanceBanner(this.instanceGroupName, this.instanceDto.instanceConfiguration.uuid).subscribe((banner) => {
+      this.dialog
+        .open(InstanceBannerEditComponent, {
+          width: '600px',
+          data: {
+            instanceBanner: banner,
+          },
+        })
+        .afterClosed()
+        .subscribe((r) => {
+          if (r) {
+            this.instanceService
+              .updateInstanceBanner(this.instanceGroupName, this.instanceDto.instanceConfiguration.uuid, r)
+              .subscribe
+              // nothing to update
+              ();
+          }
+        });
+    });
   }
 
   delete(): void {
@@ -71,11 +69,9 @@ export class InstanceCardComponent implements OnInit {
         if (result !== true) {
           return;
         }
-        this.instanceService
-          .deleteInstance(this.instanceGroupName, this.instanceDto.instanceConfiguration.uuid)
-          .subscribe((r) => {
-            this.removeEvent.emit(true);
-          });
+        this.instanceService.deleteInstance(this.instanceGroupName, this.instanceDto.instanceConfiguration.uuid).subscribe((r) => {
+          this.removeEvent.emit(true);
+        });
       });
   }
 }

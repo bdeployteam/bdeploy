@@ -1,7 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { MessageboxService } from '../../services/messagebox.service';
-import { MessageBoxMode } from '../messagebox/messagebox.component';
 
 @Component({
   selector: 'app-bd-image-upload',
@@ -12,10 +10,11 @@ export class BdImageUploadComponent implements OnInit {
   @Input() disabled = false;
   @Input() image: SafeUrl;
   @Output() imageSelected = new EventEmitter<File>();
+  @Output() unsupportedDrop = new EventEmitter<File>();
 
   private origImage: SafeUrl;
 
-  constructor(private sanitizer: DomSanitizer, private messageBox: MessageboxService) {}
+  constructor(private sanitizer: DomSanitizer) {}
 
   ngOnInit(): void {
     this.origImage = this.image;
@@ -41,11 +40,7 @@ export class BdImageUploadComponent implements OnInit {
           this.image = this.sanitizer.bypassSecurityTrustUrl(selLogoUrl);
           this.imageSelected.emit(selLogoFile);
         } else {
-          this.messageBox.open({
-            title: 'Unsupported Image Type',
-            message: 'Please choose a different image. Supported types: jpeg, png, gif or svg',
-            mode: MessageBoxMode.ERROR,
-          });
+          this.unsupportedDrop.emit(selLogoFile);
         }
       };
       reader.readAsDataURL(selLogoFile);

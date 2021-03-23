@@ -1,9 +1,9 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { finalize } from 'rxjs/operators';
-import { SoftwarePackageGroup } from 'src/app/models/software.model';
-import { MessageBoxMode } from 'src/app/modules/core/components/messagebox/messagebox.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
-import { MessageboxService } from 'src/app/modules/core/services/messagebox.service';
+import { SoftwarePackageGroup } from 'src/app/modules/legacy/core/models/software.model';
+import { MessageBoxMode } from 'src/app/modules/legacy/shared/components/messagebox/messagebox.component';
+import { MessageboxService } from 'src/app/modules/legacy/shared/services/messagebox.service';
 import { ManifestKey, OperatingSystem } from '../../../../../models/gen.dtos';
 import { DownloadService } from '../../../../core/services/download.service';
 import { LoggingService } from '../../../../core/services/logging.service';
@@ -38,8 +38,7 @@ export class SoftwareListComponent implements OnInit {
     this.messageBoxService
       .open({
         title: 'Delete',
-        message:
-          'Do you really want to delete the software version ' + softwareVersion.name + ':' + softwareVersion.tag + '?',
+        message: 'Do you really want to delete the software version ' + softwareVersion.name + ':' + softwareVersion.tag + '?',
         mode: MessageBoxMode.CONFIRM,
       })
       .subscribe((r) => {

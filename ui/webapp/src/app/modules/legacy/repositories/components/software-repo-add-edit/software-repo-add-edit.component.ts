@@ -6,12 +6,12 @@ import { cloneDeep, isEqual } from 'lodash-es';
 import { Observable, of } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { RoutingHistoryService } from 'src/app/modules/legacy/core/services/routing-history.service';
-import { EMPTY_SOFTWARE_REPO } from '../../../../../models/consts';
 import { SoftwareRepositoryConfiguration } from '../../../../../models/gen.dtos';
-import { MessageBoxMode } from '../../../../core/components/messagebox/messagebox.component';
 import { ErrorMessage, Logger, LoggingService } from '../../../../core/services/logging.service';
-import { MessageboxService } from '../../../../core/services/messagebox.service';
 import { InstanceGroupValidators } from '../../../../legacy/shared/validators/instance-group.validator';
+import { EMPTY_SOFTWARE_REPO } from '../../../core/models/consts';
+import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
+import { MessageboxService } from '../../../shared/services/messagebox.service';
 import { SoftwareRepositoryService } from '../../services/software-repository.service';
 
 @Component({

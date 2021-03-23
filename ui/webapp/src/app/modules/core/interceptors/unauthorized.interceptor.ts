@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { NO_ERROR_HANDLING_HDR } from '../../../models/consts';
+import { NO_ERROR_HANDLING_HDR } from 'src/app/models/consts';
 import { AuthenticationService } from '../services/authentication.service';
 import { Logger, LoggingService } from '../services/logging.service';
 

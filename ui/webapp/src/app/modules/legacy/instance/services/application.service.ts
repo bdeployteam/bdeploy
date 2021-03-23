@@ -3,15 +3,6 @@ import { Injectable } from '@angular/core';
 import { cloneDeep, intersection, isEqual } from 'lodash-es';
 import { Observable } from 'rxjs';
 import { StatusMessage } from 'src/app/models/config.model';
-import { UnknownParameter } from '../../../../models/application.model';
-import {
-  CLIENT_NODE_NAME,
-  EMPTY_APPLICATION_CONFIGURATION,
-  EMPTY_COMMAND_CONFIGURATION,
-  EMPTY_PARAMETER_CONFIGURATION,
-  EMPTY_PARAMETER_DESCRIPTOR,
-  EMPTY_PROCESS_CONTROL_CONFIG,
-} from '../../../../models/consts';
 import {
   ApplicationConfiguration,
   ApplicationDescriptor,
@@ -26,13 +17,22 @@ import {
   ProcessControlConfiguration,
   TemplateApplication,
 } from '../../../../models/gen.dtos';
-import { ProcessConfigDto } from '../../../../models/process.model';
 import { ConfigService } from '../../../core/services/config.service';
 import { Logger, LoggingService } from '../../../core/services/logging.service';
 import { suppressGlobalErrorHandling } from '../../../core/utils/server.utils';
 import { getAppOs } from '../../../legacy/shared/utils/manifest.utils';
 import { findEntry } from '../../../legacy/shared/utils/object.utils';
 import { URLish } from '../../../legacy/shared/utils/url.utils';
+import { UnknownParameter } from '../../core/models/application.model';
+import {
+  CLIENT_NODE_NAME,
+  EMPTY_APPLICATION_CONFIGURATION,
+  EMPTY_COMMAND_CONFIGURATION,
+  EMPTY_PARAMETER_CONFIGURATION,
+  EMPTY_PARAMETER_DESCRIPTOR,
+  EMPTY_PROCESS_CONTROL_CONFIG,
+} from '../../core/models/consts';
+import { ProcessConfigDto } from '../../core/models/process.model';
 import { InstanceGroupService } from '../../instance-group/services/instance-group.service';
 
 @Injectable({

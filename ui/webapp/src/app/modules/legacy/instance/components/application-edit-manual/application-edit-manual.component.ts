@@ -3,8 +3,8 @@ import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/fo
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { cloneDeep, isEqual } from 'lodash-es';
-import { CustomParameter, GroupNames, NamedParameter } from '../../../../../models/application.model';
 import { ParameterValidators } from '../../../../legacy/shared/validators/parameter.validators';
+import { CustomParameter, GroupNames, NamedParameter } from '../../../core/models/application.model';
 
 /** Data to be passed to this dialog */
 export class Context {
@@ -54,10 +54,7 @@ export class ApplicationEditManualComponent implements OnInit {
   public formGroup = new FormGroup({});
   public nextControlIdx = 1;
 
-  constructor(
-    @Inject(MAT_DIALOG_DATA) public context: Context,
-    public dialogRef: MatDialogRef<ApplicationEditManualComponent>
-  ) {}
+  constructor(@Inject(MAT_DIALOG_DATA) public context: Context, public dialogRef: MatDialogRef<ApplicationEditManualComponent>) {}
 
   ngOnInit() {
     this.dataSource = new MatTableDataSource<ParameterRow>();

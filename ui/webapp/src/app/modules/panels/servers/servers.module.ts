@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { CoreModule } from '../../core/core.module';
 import { LinkCentralComponent } from './components/link-central/link-central.component';
 import { LinkManagedComponent } from './components/link-managed/link-managed.component';
@@ -10,6 +11,6 @@ import { ServersRoutingModule } from './servers-routing.module';
 
 @NgModule({
   declarations: [LinkCentralComponent, LinkManagedComponent, ServerDetailsComponent, ServerOsComponent, ServerEditComponent],
-  imports: [CommonModule, CoreModule, ServersRoutingModule],
+  imports: [CommonModule, CoreModule, ServersRoutingModule, MatExpansionModule],
 })
 export class ServersModule {}

@@ -9,13 +9,10 @@ import { DragulaService } from 'ng2-dragula';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import { forkJoin, Observable, of, Subscription } from 'rxjs';
 import { catchError, finalize, mergeMap } from 'rxjs/operators';
-import { isUpdateFailed, isUpdateInProgress, isUpdateSuccess, UpdateStatus } from 'src/app/models/update.model';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
+import { isUpdateFailed, isUpdateInProgress, isUpdateSuccess, UpdateStatus } from 'src/app/modules/legacy/core/models/update.model';
 import { InstanceGroupService } from 'src/app/modules/legacy/instance-group/services/instance-group.service';
-import { ApplicationGroup } from '../../../../../models/application.model';
-import { CLIENT_NODE_NAME, EMPTY_DEPLOYMENT_STATE } from '../../../../../models/consts';
-import { EventWithCallback } from '../../../../../models/event';
 import {
   ApplicationConfiguration,
   ApplicationDto,
@@ -37,18 +34,20 @@ import {
   ObjectEvent,
   ProductDto,
 } from '../../../../../models/gen.dtos';
-import { EditAppConfigContext, ProcessConfigDto } from '../../../../../models/process.model';
-import { MessageBoxMode } from '../../../../core/components/messagebox/messagebox.component';
 import { ActivitiesService, ActivitySnapshotTreeNode } from '../../../../core/services/activities.service';
 import { ConfigService } from '../../../../core/services/config.service';
 import { DownloadService } from '../../../../core/services/download.service';
 import { Logger, LoggingService } from '../../../../core/services/logging.service';
-import { MessageboxService } from '../../../../core/services/messagebox.service';
-import { SystemService } from '../../../../core/services/system.service';
 import { FileUploadComponent } from '../../../../legacy/shared/components/file-upload/file-upload.component';
 import { LauncherService } from '../../../../legacy/shared/services/launcher.service';
 import { ProductService } from '../../../../legacy/shared/services/product.service';
+import { ApplicationGroup } from '../../../core/models/application.model';
+import { CLIENT_NODE_NAME, EMPTY_DEPLOYMENT_STATE } from '../../../core/models/consts';
+import { EventWithCallback } from '../../../core/models/event';
+import { EditAppConfigContext, ProcessConfigDto } from '../../../core/models/process.model';
 import { RoutingHistoryService } from '../../../core/services/routing-history.service';
+import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
+import { MessageboxService } from '../../../shared/services/messagebox.service';
 import { ApplicationService } from '../../services/application.service';
 import { InstanceService } from '../../services/instance.service';
 import { ProcessService } from '../../services/process.service';
@@ -176,7 +175,6 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
     public downloadService: DownloadService,
     private dialog: MatDialog,
     private eventService: ActivitiesService,
-    private systemService: SystemService,
     private dragulaService: DragulaService,
     private configService: ConfigService,
     private router: Router,

@@ -9,13 +9,13 @@ import { cloneDeep } from 'lodash-es';
 import { Observable, of, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { Permission, ScopedPermission, UserInfo } from 'src/app/models/gen.dtos';
-import { MessageBoxMode } from 'src/app/modules/core/components/messagebox/messagebox.component';
-import { UserPickerComponent } from 'src/app/modules/core/components/user-picker/user-picker.component';
 import { Logger, LoggingService } from 'src/app/modules/core/services/logging.service';
-import { MessageboxService } from 'src/app/modules/core/services/messagebox.service';
 import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
+import { UserPickerComponent } from 'src/app/modules/legacy/core/components/user-picker/user-picker.component';
 import { RoutingHistoryService } from 'src/app/modules/legacy/core/services/routing-history.service';
+import { MessageBoxMode } from 'src/app/modules/legacy/shared/components/messagebox/messagebox.component';
+import { MessageboxService } from 'src/app/modules/legacy/shared/services/messagebox.service';
 import { SoftwareRepositoryService } from '../../services/software-repository.service';
 
 @Component({
@@ -237,9 +237,7 @@ export class SoftwareRepositoryPermissionsComponent implements OnInit, OnDestroy
   private getFilteredPermissions(user: UserInfo): ScopedPermission[] {
     // scoped WRITE or global WRITE/ADMIN
     return user.permissions.filter(
-      (c) =>
-        (c.scope === this.nameParam && c.permission === Permission.WRITE) ||
-        (c.scope === null && c.permission !== Permission.READ)
+      (c) => (c.scope === this.nameParam && c.permission === Permission.WRITE) || (c.scope === null && c.permission !== Permission.READ)
     );
   }
 

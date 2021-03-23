@@ -1,15 +1,6 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnDestroy,
-  OnInit,
-  Output,
-  TemplateRef,
-  ViewContainerRef,
-} from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef, ViewContainerRef } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatButton } from '@angular/material/button';
@@ -18,20 +9,6 @@ import { cloneDeep, isEqual } from 'lodash-es';
 import { Observable, of } from 'rxjs';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import {
-  CustomParameter,
-  findFirstParameter,
-  findLastParameter,
-  GroupNames,
-  LinkedParameter,
-  NamedParameter,
-  UnknownParameter,
-} from '../../../../../models/application.model';
-import {
-  CLIENT_NODE_NAME,
-  EMPTY_PARAMETER_CONFIGURATION,
-  EMPTY_PARAMETER_DESCRIPTOR,
-} from '../../../../../models/consts';
-import {
   ApplicationConfiguration,
   ApplicationDescriptor,
   ApplicationStartType,
@@ -39,17 +16,24 @@ import {
   ParameterDescriptor,
   ParameterType,
 } from '../../../../../models/gen.dtos';
-import { EditAppConfigContext, ProcessConfigDto } from '../../../../../models/process.model';
-import { MessageBoxMode } from '../../../../core/components/messagebox/messagebox.component';
-import { MessageboxService } from '../../../../core/services/messagebox.service';
 import { ParameterValidators } from '../../../../legacy/shared/validators/parameter.validators';
+import {
+  CustomParameter,
+  findFirstParameter,
+  findLastParameter,
+  GroupNames,
+  LinkedParameter,
+  NamedParameter,
+  UnknownParameter,
+} from '../../../core/models/application.model';
+import { CLIENT_NODE_NAME, EMPTY_PARAMETER_CONFIGURATION, EMPTY_PARAMETER_DESCRIPTOR } from '../../../core/models/consts';
+import { EditAppConfigContext, ProcessConfigDto } from '../../../core/models/process.model';
+import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
+import { MessageboxService } from '../../../shared/services/messagebox.service';
 import { ApplicationService } from '../../services/application.service';
 import { ApplicationEditCommandPreviewComponent } from '../application-edit-command-preview/application-edit-command-preview.component';
 import { ApplicationEditManualComponent, Context } from '../application-edit-manual/application-edit-manual.component';
-import {
-  ApplicationEditOptionalComponent,
-  EditOptionalData,
-} from '../application-edit-optional/application-edit-optional.component';
+import { ApplicationEditOptionalComponent, EditOptionalData } from '../application-edit-optional/application-edit-optional.component';
 
 @Component({
   selector: 'app-application-edit',
@@ -227,8 +211,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
     }
     return this.messageBoxService.open({
       title: 'Unsaved changes',
-      message:
-        'Application "' + this.appConfigContext.applicationConfiguration.name + '" was modified. Close without saving?',
+      message: 'Application "' + this.appConfigContext.applicationConfiguration.name + '" was modified. Close without saving?',
       mode: MessageBoxMode.CONFIRM_WARNING,
     });
   }
@@ -262,13 +245,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
   }
 
   getCtrlName(desc: ParameterDescriptor) {
-    return (
-      this.instanceGroup +
-      '-' +
-      this.appConfigContext.instanceNodeConfigurationDto.nodeConfiguration.uuid +
-      '-' +
-      desc.uid
-    );
+    return this.instanceGroup + '-' + this.appConfigContext.instanceNodeConfigurationDto.nodeConfiguration.uuid + '-' + desc.uid;
   }
 
   getCtrlPlaceholderText(desc: ParameterDescriptor) {
@@ -590,11 +567,7 @@ export class ApplicationEditComponent implements OnInit, OnDestroy {
   }
 
   meetsCondition(param: LinkedParameter): boolean {
-    return this.appService.meetsCondition(
-      param.desc,
-      this.appDesc.startCommand.parameters,
-      this.appConfigContext.applicationConfiguration.start.parameters
-    );
+    return this.appService.meetsCondition(param.desc, this.appDesc.startCommand.parameters, this.appConfigContext.applicationConfiguration.start.parameters);
   }
 
   /**

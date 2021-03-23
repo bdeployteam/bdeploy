@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { ApplicationGroup } from '../../../../../models/application.model';
+import { ApplicationGroup } from '../../../core/models/application.model';
 
 @Component({
   selector: 'app-application-descriptor-card',

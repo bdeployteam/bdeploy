@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { SoftwareRepositoryConfiguration } from '../../../../../models/gen.dtos';
-import { MessageBoxMode } from '../../../../core/components/messagebox/messagebox.component';
-import { MessageboxService } from '../../../../core/services/messagebox.service';
+import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
+import { MessageboxService } from '../../../shared/services/messagebox.service';
 import { SoftwareRepositoryService } from '../../services/software-repository.service';
 
 @Component({
@@ -14,11 +14,7 @@ export class SoftwareRepositoryCardComponent implements OnInit {
   @Input() repository: SoftwareRepositoryConfiguration = null;
   @Output() removeEvent = new EventEmitter<boolean>();
 
-  constructor(
-    private repoService: SoftwareRepositoryService,
-    private mbService: MessageboxService,
-    private authService: AuthenticationService
-  ) {}
+  constructor(private repoService: SoftwareRepositoryService, private mbService: MessageboxService, private authService: AuthenticationService) {}
 
   ngOnInit() {}
 

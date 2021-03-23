@@ -1,5 +1,3 @@
-import { ApplicationService } from '../modules/legacy/instance/services/application.service';
-import { getAppKeyName, getAppOs } from '../modules/legacy/shared/utils/manifest.utils';
 import {
   ApplicationDto,
   ApplicationTemplateDescriptor,
@@ -8,7 +6,9 @@ import {
   ParameterConfiguration,
   ParameterDescriptor,
   ParameterType,
-} from './gen.dtos';
+} from '../../../../models/gen.dtos';
+import { ApplicationService } from '../../instance/services/application.service';
+import { getAppKeyName, getAppOs } from '../../shared/utils/manifest.utils';
 
 /**
  * Default group names used in the application

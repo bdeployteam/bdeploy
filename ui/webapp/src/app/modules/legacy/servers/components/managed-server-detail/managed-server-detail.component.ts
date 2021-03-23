@@ -4,11 +4,11 @@ import { MatTableDataSource } from '@angular/material/table';
 import { format } from 'date-fns';
 import { cloneDeep } from 'lodash-es';
 import { catchError } from 'rxjs/operators';
-import { isUpdateFailed, isUpdateInProgress, isUpdateSuccess, UpdateStatus } from 'src/app/models/update.model';
 import { convert2String } from 'src/app/modules/core/utils/version.utils';
+import { isUpdateFailed, isUpdateInProgress, isUpdateSuccess, UpdateStatus } from 'src/app/modules/legacy/core/models/update.model';
 import { InstanceConfiguration, ManagedMasterDto, MinionDto, MinionStatusDto, MinionUpdateDto, Version } from '../../../../../models/gen.dtos';
-import { MessageBoxMode } from '../../../../core/components/messagebox/messagebox.component';
-import { MessageboxService } from '../../../../core/services/messagebox.service';
+import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
+import { MessageboxService } from '../../../shared/services/messagebox.service';
 import { ManagedServersService } from '../../services/managed-servers.service';
 import { ManagedServerEditComponent } from '../managed-server-edit/managed-server-edit.component';
 

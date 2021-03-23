@@ -62,6 +62,10 @@ export class EditComponent implements OnInit, DirtyableDialog {
     this.image = image;
   }
 
+  /* template */ onUnsupportedFile(file: File) {
+    this.dialog.info('Unsupported File Type', `${file.name} has an unsupported file type.`, 'warning');
+  }
+
   /* template */ onSave(): void {
     this.saving$.next(true);
     this.details.update(this.group).subscribe(

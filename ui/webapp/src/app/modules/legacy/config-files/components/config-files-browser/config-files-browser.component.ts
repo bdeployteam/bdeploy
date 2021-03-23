@@ -10,11 +10,11 @@ import { tap } from 'rxjs/operators';
 import { RoutingHistoryService } from 'src/app/modules/legacy/core/services/routing-history.service';
 import { ProductService } from 'src/app/modules/legacy/shared/services/product.service';
 import { FileStatusDto, FileStatusType, InstanceConfiguration } from '../../../../../models/gen.dtos';
-import { MessageBoxMode } from '../../../../core/components/messagebox/messagebox.component';
 import { CanComponentDeactivate } from '../../../../core/guards/can-deactivate.guard';
 import { Logger, LoggingService } from '../../../../core/services/logging.service';
-import { MessageboxService } from '../../../../core/services/messagebox.service';
 import { InstanceService } from '../../../instance/services/instance.service';
+import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
+import { MessageboxService } from '../../../shared/services/messagebox.service';
 
 export enum SyncStatusType {
   ADDED = 'ADD',
@@ -88,11 +88,9 @@ export class ConfigFilesBrowserComponent implements OnInit, CanComponentDeactiva
 
   public ngOnInit(): void {
     // get instance version
-    this.instanceService
-      .getInstanceVersion(this.groupParam, this.uuidParam, this.versionParam)
-      .subscribe((instanceVersion) => {
-        this.instanceVersion = instanceVersion;
-      });
+    this.instanceService.getInstanceVersion(this.groupParam, this.uuidParam, this.versionParam).subscribe((instanceVersion) => {
+      this.instanceVersion = instanceVersion;
+    });
 
     // get list of config files
     this.reload();
@@ -102,14 +100,12 @@ export class ConfigFilesBrowserComponent implements OnInit, CanComponentDeactiva
     this.statusCache.clear();
     this.typeCache.clear();
 
-    this.instanceService
-      .listConfigurationFiles(this.groupParam, this.uuidParam, this.versionParam)
-      .subscribe((configFilePaths) => {
-        configFilePaths.forEach((p) => {
-          this.statusCache.set(p.path, cloneDeep(EMPTY_CONFIG_FILE_STATUS));
-          this.typeCache.set(p.path, p.isText);
-        });
+    this.instanceService.listConfigurationFiles(this.groupParam, this.uuidParam, this.versionParam).subscribe((configFilePaths) => {
+      configFilePaths.forEach((p) => {
+        this.statusCache.set(p.path, cloneDeep(EMPTY_CONFIG_FILE_STATUS));
+        this.typeCache.set(p.path, p.isText);
       });
+    });
   }
 
   isNameDuplicateError() {
@@ -139,16 +135,14 @@ export class ConfigFilesBrowserComponent implements OnInit, CanComponentDeactiva
       this.editorPath = initialName;
       this.editorContent = cached.content;
     } else {
-      this.instanceService
-        .getConfigurationFile(this.groupParam, this.uuidParam, this.versionParam, path)
-        .subscribe((content) => {
-          if (this.typeCache.get(path)) {
-            content = Base64.decode(content);
-          }
-          this.editorPath = initialName;
-          this.editorContent = content;
-          this.originalContentCache.set(path, content);
-        });
+      this.instanceService.getConfigurationFile(this.groupParam, this.uuidParam, this.versionParam, path).subscribe((content) => {
+        if (this.typeCache.get(path)) {
+          content = Base64.decode(content);
+        }
+        this.editorPath = initialName;
+        this.editorContent = content;
+        this.originalContentCache.set(path, content);
+      });
     }
   }
 
@@ -319,15 +313,11 @@ export class ConfigFilesBrowserComponent implements OnInit, CanComponentDeactiva
       result.push(dto);
     });
 
-    this.instanceService
-      .updateConfigurationFiles(this.groupParam, this.uuidParam, this.versionParam, result)
-      .subscribe((_) => {
-        this.statusCache.clear(); // avoid isDirty
-        this.log.info(
-          'stored configuration files for ' + this.groupParam + ', ' + this.uuidParam + ', ' + this.versionParam
-        );
-        this.location.back();
-      });
+    this.instanceService.updateConfigurationFiles(this.groupParam, this.uuidParam, this.versionParam, result).subscribe((_) => {
+      this.statusCache.clear(); // avoid isDirty
+      this.log.info('stored configuration files for ' + this.groupParam + ', ' + this.uuidParam + ', ' + this.versionParam);
+      this.location.back();
+    });
   }
 
   /** Opens a modal overlay popup showing the given template */
@@ -403,12 +393,7 @@ export class ConfigFilesBrowserComponent implements OnInit, CanComponentDeactiva
     this.syncMode = true;
     forkJoin({
       productConfigs: this.productService.listConfigFiles(this.groupParam, this.instanceVersion.product),
-      changedConfigs: this.instanceService.syncConfigurationFiles(
-        this.groupParam,
-        this.uuidParam,
-        this.versionParam,
-        this.instanceVersion.product
-      ),
+      changedConfigs: this.instanceService.syncConfigurationFiles(this.groupParam, this.uuidParam, this.versionParam, this.instanceVersion.product),
     }).subscribe((r) => {
       r.productConfigs.forEach((pc) => {
         this.syncStatus.set(pc.path, SyncStatusType.IN_SYNC);
@@ -498,14 +483,10 @@ export class ConfigFilesBrowserComponent implements OnInit, CanComponentDeactiva
   }
 
   public isEditButtonDisabled(path: string): boolean {
-    return (
-      this.syncMode && (this.syncStatus.get(path) === undefined || this.syncStatus.get(path) === SyncStatusType.IN_SYNC)
-    );
+    return this.syncMode && (this.syncStatus.get(path) === undefined || this.syncStatus.get(path) === SyncStatusType.IN_SYNC);
   }
 
   public isDeleteButtonDisabled(path: string): boolean {
-    return (
-      this.syncMode && (this.syncStatus.get(path) === undefined || this.syncStatus.get(path) === SyncStatusType.IN_SYNC)
-    );
+    return this.syncMode && (this.syncStatus.get(path) === undefined || this.syncStatus.get(path) === SyncStatusType.IN_SYNC);
   }
 }

@@ -2,7 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { cloneDeep } from 'lodash-es';
-import { EMPTY_USER_CHANGE_PASSWORD_DTO } from 'src/app/models/consts';
+import { EMPTY_USER_CHANGE_PASSWORD_DTO } from 'src/app/modules/legacy/core/models/consts';
 
 @Component({
   selector: 'app-user-password',

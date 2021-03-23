@@ -2,17 +2,11 @@ import { Component, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild 
 import { MatButtonToggleChange } from '@angular/material/button-toggle';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { cloneDeep } from 'lodash-es';
-import { ApplicationGroup } from 'src/app/models/application.model';
 import { StatusMessage } from 'src/app/models/config.model';
-import { CLIENT_NODE_NAME, EMPTY_INSTANCE_NODE_CONFIGURATION } from 'src/app/models/consts';
-import {
-  ApplicationType,
-  InstanceTemplateDescriptor,
-  InstanceTemplateGroup,
-  MinionDto,
-  ProductDto,
-} from 'src/app/models/gen.dtos';
-import { ProcessConfigDto } from 'src/app/models/process.model';
+import { ApplicationType, InstanceTemplateDescriptor, InstanceTemplateGroup, MinionDto, ProductDto } from 'src/app/models/gen.dtos';
+import { ApplicationGroup } from 'src/app/modules/legacy/core/models/application.model';
+import { CLIENT_NODE_NAME, EMPTY_INSTANCE_NODE_CONFIGURATION } from 'src/app/modules/legacy/core/models/consts';
+import { ProcessConfigDto } from 'src/app/modules/legacy/core/models/process.model';
 import { ApplicationService } from '../../services/application.service';
 
 @Component({
@@ -134,8 +128,7 @@ export class InstanceTemplateComponent implements OnInit {
         nodeStatus.push(appStatus);
 
         const type = nodeTemplate.type === ApplicationType.CLIENT ? ApplicationType.CLIENT : ApplicationType.SERVER;
-        const appgroups: ApplicationGroup[] =
-          type === ApplicationType.CLIENT ? this.config.clientApps : this.config.serverApps;
+        const appgroups: ApplicationGroup[] = type === ApplicationType.CLIENT ? this.config.clientApps : this.config.serverApps;
         const targetAppName = this.product.product + '/' + app.application;
         const appGroup = appgroups.find((grp) => grp.appKeyName === targetAppName);
 
@@ -151,39 +144,19 @@ export class InstanceTemplateComponent implements OnInit {
         if (physNode.nodeName === CLIENT_NODE_NAME) {
           for (const perOsApp of appGroup.applications) {
             const cfg = await this.appService.createNewAppConfig(this.instanceGroupName, this.config, perOsApp);
-            this.appService.applyApplicationTemplate(
-              this.config,
-              physNode,
-              cfg,
-              perOsApp,
-              app,
-              this.variables,
-              appStatus
-            );
+            this.appService.applyApplicationTemplate(this.config, physNode, cfg, perOsApp, app, this.variables, appStatus);
             physNode.nodeConfiguration.applications.push(cfg);
           }
         } else if (this.minionConfigs[physNode.nodeName]?.os) {
           const appDesc = appGroup.getAppFor(this.minionConfigs[physNode.nodeName].os);
           if (appDesc) {
             const cfg = await this.appService.createNewAppConfig(this.instanceGroupName, this.config, appDesc);
-            this.appService.applyApplicationTemplate(
-              this.config,
-              physNode,
-              cfg,
-              appDesc,
-              app,
-              this.variables,
-              appStatus
-            );
+            this.appService.applyApplicationTemplate(this.config, physNode, cfg, appDesc, app, this.variables, appStatus);
             physNode.nodeConfiguration.applications.push(cfg);
           } else {
             appStatus.push({
               icon: 'warning',
-              message:
-                'Cannot find application ' +
-                appGroup.appName +
-                ' for target node OS: ' +
-                this.getNiceName(physNode.nodeName),
+              message: 'Cannot find application ' + appGroup.appName + ' for target node OS: ' + this.getNiceName(physNode.nodeName),
             });
           }
         } else {

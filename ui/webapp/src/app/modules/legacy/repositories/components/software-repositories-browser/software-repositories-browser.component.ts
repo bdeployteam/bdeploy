@@ -2,10 +2,10 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MediaChange, MediaObserver } from '@angular/flex-layout';
 import { Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { DataList } from '../../../../../models/dataList';
 import { SoftwareRepositoryConfiguration } from '../../../../../models/gen.dtos';
 import { AuthenticationService } from '../../../../core/services/authentication.service';
 import { Logger, LoggingService } from '../../../../core/services/logging.service';
+import { DataList } from '../../../core/models/dataList';
 import { SoftwareRepositoryService } from '../../services/software-repository.service';
 
 @Component({
