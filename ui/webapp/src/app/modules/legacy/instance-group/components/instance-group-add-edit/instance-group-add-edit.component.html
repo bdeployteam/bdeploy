@@ -1,28 +1,11 @@
 <form [formGroup]="instanceGroupFormGroup" (ngSubmit)="onSubmit()" fxLayout="column" [style.height]="'100%'">
   <mat-toolbar class="mat-elevation-z1 header-toolbar">
-    <button
-      mat-icon-button
-      type="button"
-      [disabled]="loading"
-      (click)="routingHistoryService.back('l/instancegroup/browser')"
-    >
+    <button mat-icon-button type="button" [disabled]="loading" (click)="routingHistoryService.back('l/instancegroup/browser')">
       <mat-icon>chevron_left</mat-icon>
     </button>
-    <button mat-icon-button type="button" [disabled]="loading" (click)="toggleWide()">
-      <mat-icon>expand</mat-icon>
-    </button>
-    <span *ngIf="isCreate() == false"
-      >Instance Group: <app-instance-group-title [instanceGroup]="nameParam"></app-instance-group-title
-    ></span>
+    <span *ngIf="isCreate() == false">Instance Group: <app-instance-group-title [instanceGroup]="nameParam"></app-instance-group-title></span>
     <span class="fill-space"></span>
-    <button
-      mat-raised-button
-      color="primary"
-      type="submit"
-      [disabled]="loading || !isModified() || !instanceGroupFormGroup.valid"
-    >
-      SAVE
-    </button>
+    <button mat-raised-button color="primary" type="submit" [disabled]="loading || !isModified() || !instanceGroupFormGroup.valid">SAVE</button>
   </mat-toolbar>
 
   <div class="mat-typography dialog bd-scroll-container">
@@ -128,20 +111,15 @@
       <mat-tab label="Instance Attribute Definitions">
         <div class="tab-content">
           <p>
-            Configure attributes that are available for all Instances of this Instance Group. If desired, define an
-            attribute by which the instances are grouped by default in the instance overview dialog.
+            Configure attributes that are available for all Instances of this Instance Group. If desired, define an attribute by which the instances are grouped
+            by default in the instance overview dialog.
           </p>
           <div class="attributes-grid">
             <ng-container *ngFor="let a of instanceAttributesDescriptors; let i = index">
               <div>{{ a.name }}</div>
               <div>{{ a.description }}</div>
               <div>
-                <button
-                  mat-icon-button
-                  type="button"
-                  (click)="toggleDefaultAttribute(a)"
-                  matTooltip="Select as default grouping attribute"
-                >
+                <button mat-icon-button type="button" (click)="toggleDefaultAttribute(a)" matTooltip="Select as default grouping attribute">
                   <mat-icon *ngIf="isDefaultAttribute(a)">star</mat-icon>
                   <mat-icon *ngIf="!isDefaultAttribute(a)">star_outline</mat-icon>
                 </button>

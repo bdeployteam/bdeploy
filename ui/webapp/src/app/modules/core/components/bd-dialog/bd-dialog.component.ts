@@ -26,8 +26,10 @@ export class BdDialogComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.subscription = this.resetWhen$.subscribe((r) => {
-      // currently only a dialog message would need to be reset.
-      this.messageComp.reset();
+      if (r) {
+        // currently only a dialog message would need to be reset.
+        this.messageComp.reset();
+      }
     });
   }
 

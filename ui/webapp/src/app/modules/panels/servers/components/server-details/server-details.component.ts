@@ -1,9 +1,10 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { format } from 'date-fns';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
-import { ManagedMasterDto, OperatingSystem } from 'src/app/models/gen.dtos';
+import { ManagedMasterDto, OperatingSystem, Version } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -57,6 +58,8 @@ export class ServerDetailsComponent implements OnInit {
   private deleting$ = new BehaviorSubject<boolean>(false);
 
   /* template */ loading$ = combineLatest([this.deleting$, this.servers.loading$, this.serverDetails.loading$]).pipe(map(([a, b, c]) => a || b || c));
+  /* template */ transfering$ = new BehaviorSubject<boolean>(false);
+  /* template */ installing$ = new BehaviorSubject<boolean>(false);
   /* template */ columns = [detailNameCol, detailVersionCol, detailMasterCol, detailOsCol];
   /* template */ synchronizing$ = new BehaviorSubject<boolean>(false);
 
@@ -68,6 +71,10 @@ export class ServerDetailsComponent implements OnInit {
 
   /* template */ formatDate(x: number) {
     return format(new Date(x), 'dd.MM.yyyy HH:mm');
+  }
+
+  /* template */ formatVersion(x: Version) {
+    return convert2String(x);
   }
 
   /* template */ getMinionRecords(server: ManagedMasterDto): MinionRow[] {
@@ -109,5 +116,36 @@ export class ServerDetailsComponent implements OnInit {
       .synchronize(server)
       .pipe(finalize(() => this.synchronizing$.next(false)))
       .subscribe();
+  }
+
+  /* template */ doUpdateTransfer(server: ManagedMasterDto) {
+    this.transfering$.next(true);
+    this.serverDetails
+      .remoteUpdateTransfer(server)
+      .pipe(finalize(() => this.transfering$.next(false)))
+      .subscribe();
+  }
+
+  /* template */ doUpdateInstall(server: ManagedMasterDto) {
+    this.installing$.next(true);
+    this.serverDetails
+      .remoteUpdateInstall(server)
+      .pipe(finalize(() => this.installing$.next(false)))
+      .subscribe(
+        (v) => {
+          this.dialog
+            .info('Update complete', `The server has come back online after updating, the current server version is ${this.formatVersion(v)}`)
+            .subscribe();
+        },
+        (err) => {
+          let msg = err;
+          if (err instanceof Error) {
+            msg = err.message;
+          } else if (err instanceof HttpErrorResponse) {
+            msg = err.statusText;
+          }
+          this.dialog.info('Eror Updating', `There was an error applying the update to the server: ${msg}`).subscribe();
+        }
+      );
   }
 }

@@ -1,11 +1,13 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { BehaviorSubject, Subscription } from 'rxjs';
-import { finalize, map } from 'rxjs/operators';
-import { InstanceConfiguration, ManagedMasterDto } from 'src/app/models/gen.dtos';
+import { isEqual } from 'lodash-es';
+import { BehaviorSubject, Observable, Subscriber, Subscription } from 'rxjs';
+import { finalize, map, tap } from 'rxjs/operators';
+import { InstanceConfiguration, ManagedMasterDto, Version } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
+import { retryWithDelay, suppressGlobalErrorHandling } from 'src/app/modules/core/utils/server.utils';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 
 // inter-browser support only works with text/plain...
@@ -60,5 +62,69 @@ export class ServerDetailsService implements OnDestroy {
 
   public update(server: ManagedMasterDto) {
     return this.http.post(`${this.apiPath}/update-server/${this.areas.groupContext$.value}/${server.hostName}`, server);
+  }
+
+  public remoteUpdateTransfer(server: ManagedMasterDto): Observable<ManagedMasterDto> {
+    return new Observable<ManagedMasterDto>((s) => {
+      this.http.post(`${this.apiPath}/minion-transfer-updates/${this.areas.groupContext$.value}/${server.hostName}`, server.update).subscribe(
+        (trans) => {
+          this.servers.synchronize(server).subscribe(
+            (sync) => this.complete(sync, s),
+            (err) => this.complete(null, s, err)
+          );
+        },
+        (err) => this.complete(null, s, err)
+      );
+    });
+  }
+
+  public remoteUpdateInstall(server: ManagedMasterDto): Observable<Version> {
+    return new Observable<Version>((s) => {
+      // first transfer if something is missing.
+      this.http.post(`${this.apiPath}/minion-transfer-updates/${this.areas.groupContext$.value}/${server.hostName}`, server.update).subscribe(
+        (trans) => {
+          // second install the update on the minion
+          this.http.post(`${this.apiPath}/minion-install-updates/${this.areas.groupContext$.value}/${server.hostName}`, server.update).subscribe(
+            (inst) =>
+              // third wait for the update to complete, including restart of the server.
+              this.waitForUpdate(server).subscribe(
+                (v) =>
+                  // last synchronize to fetch the updated data.
+                  this.servers.synchronize(server).subscribe(
+                    (sync) => this.complete(v, s),
+                    (err) => this.complete(null, s, err)
+                  ),
+                (err) => this.complete(null, s, err)
+              ),
+            (err) => this.complete(null, s, err)
+          );
+        },
+        (err) => this.complete(null, s, err)
+      );
+    });
+  }
+
+  private waitForUpdate(server: ManagedMasterDto): Observable<any> {
+    return this.http
+      .get<Version>(`${this.apiPath}/minion-ping/${this.areas.groupContext$.value}/${server.hostName}`, {
+        headers: suppressGlobalErrorHandling(new HttpHeaders()),
+      })
+      .pipe(
+        tap((v) => {
+          if (!isEqual(v, server.update.updateVersion)) {
+            throw new Error('Got unexpected version from server');
+          }
+        }),
+        retryWithDelay()
+      );
+  }
+
+  private complete<T>(val: T, obs: Subscriber<T>, err?: any) {
+    if (!!err) {
+      obs.error(err);
+    } else {
+      obs.next(val);
+    }
+    obs.complete();
   }
 }

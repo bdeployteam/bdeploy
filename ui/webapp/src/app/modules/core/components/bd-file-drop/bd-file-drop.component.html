@@ -1,6 +1,6 @@
 <div
   class="local-drop-zone"
-  [ngClass]="active ? 'local-drop-zone-active' : []"
+  [ngClass]="disabled ? 'local-drop-zone-disabled' : active ? 'local-drop-zone-active' : []"
   appFileDrop
   (filesHovered)="active = $event"
   (filesDropped)="onFilesDropped($event)"
@@ -11,7 +11,7 @@
   <div fxLayout="row" fxLayoutAlign="center center">
     <mat-icon class="local-drop-icon">cloud_upload</mat-icon>
     <span class="local-drop-text">Drop files to upload, or&nbsp;</span>
-    <button [disabled]="disabled" (click)="doSelectFiles()" class="local-drop-browse">browse.</button>
+    <button [disabled]="disabled" (click)="doSelectFiles()" class="local-drop-browse" [ngClass]="disabled ? 'local-drop-browse-disabled' : []">browse.</button>
     <input type="file" #file style="display: none" (change)="onFilesAdded()" [accept]="types" multiple />
   </div>
   <div *ngIf="validationError$ | async" fxLayout="row" fxLayoutAlign="center center" class="local-error">

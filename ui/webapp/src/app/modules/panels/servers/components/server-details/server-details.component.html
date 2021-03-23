@@ -1,4 +1,4 @@
-<app-bd-dialog [loadingWhen$]="loading$" [resetWhen$]="serverDetails.server$">
+<app-bd-dialog [loadingWhen$]="loading$">
   <app-bd-dialog-toolbar header="Details" [closeablePanel]="true"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
@@ -7,6 +7,38 @@
       <div><strong>Description:</strong>&nbsp;{{ server.description }}</div>
       <div><strong>URI:</strong>&nbsp;{{ server.uri }}</div>
       <div><strong>Last Sync.:</strong>&nbsp;{{ formatDate(server.lastSync) }}</div>
+      <ng-container *ngIf="server.update.updateAvailable">
+        <div fxLayout="row" fxLayoutAlign="start center">
+          <strong>Update available:</strong>&nbsp;{{ formatVersion(server.update.updateVersion)
+          }}<mat-icon class="bd-text-warn bd-small-icon">system_update</mat-icon>
+        </div>
+        <div gdGap="10px" gdColumns="24px auto" gdAlignColumns="start center" *ngIf="!servers.isSynchronized(server)">
+          <mat-icon class="bd-text-warn">warning</mat-icon>Please synchronize to enable update related actions.
+        </div>
+        <div class="bd-description-text" [style.text-align]="'justify'">
+          An update can be transfered without installing to prepare a future update up front. This option is only available if the update package is not yet
+          present on the managed server.
+        </div>
+        <app-bd-button
+          text="Transfer Update Package"
+          icon="cloud_upload"
+          [collapsed]="false"
+          [disabled]="(transfering$ | async) || !server.update.packagesToTransfer?.length || !servers.isSynchronized(server)"
+          [loadingWhen$]="transfering$"
+          (click)="doUpdateTransfer(server)"
+          [matTooltip]="!server.update.packagesToTransfer?.length ? 'All packages have already been transfered' : null"
+          matTooltipPosition="above"
+        ></app-bd-button>
+        <app-bd-button
+          [text]="!server.update.packagesToTransfer?.length ? 'Install Update' : 'Transfer & Install Update'"
+          icon="system_update"
+          [collapsed]="false"
+          [inverseColor]="true"
+          [disabled]="(installing$ | async) || !servers.isSynchronized(server)"
+          [loadingWhen$]="installing$"
+          (click)="doUpdateInstall(server)"
+        ></app-bd-button>
+      </ng-container>
       <div><strong>Nodes:</strong></div>
       <app-bd-data-display [records]="getMinionRecords(server)" [columns]="columns">
         <app-bd-no-data>

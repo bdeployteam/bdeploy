@@ -10,18 +10,12 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { cloneDeep, isEqual } from 'lodash-es';
 import { forkJoin, Observable, of } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { RoutingHistoryService } from 'src/app/modules/legacy/core/services/routing-history.service';
 import { CustomAttributeEditComponent } from 'src/app/modules/legacy/shared/components/custom-attribute-edit/custom-attribute-edit.component';
 import { CustomAttributeValueComponent } from 'src/app/modules/legacy/shared/components/custom-attribute-value/custom-attribute-value.component';
 import { EMPTY_ATTRIBUTES_RECORD, EMPTY_INSTANCE_GROUP } from '../../../../../models/consts';
-import {
-  CustomAttributeDescriptor,
-  CustomAttributesRecord,
-  InstanceGroupConfiguration,
-  MinionMode,
-} from '../../../../../models/gen.dtos';
+import { CustomAttributeDescriptor, CustomAttributesRecord, InstanceGroupConfiguration, MinionMode } from '../../../../../models/gen.dtos';
 import { MessageBoxMode } from '../../../../core/components/messagebox/messagebox.component';
 import { ConfigService } from '../../../../core/services/config.service';
 import { ErrorMessage, Logger, LoggingService } from '../../../../core/services/logging.service';
@@ -98,8 +92,7 @@ export class InstanceGroupAddEditComponent implements OnInit {
     private config: ConfigService,
     private settings: SettingsService,
     public routingHistoryService: RoutingHistoryService,
-    private dialog: MatDialog,
-    private nav: NavAreasService // FIXME: TESTING
+    private dialog: MatDialog
   ) {}
 
   ngOnInit() {
@@ -150,11 +143,6 @@ export class InstanceGroupAddEditComponent implements OnInit {
         }
       );
     }
-  }
-
-  // FIXME: TESTING
-  toggleWide() {
-    this.nav.panelMaximized$.next(!this.nav.panelMaximized$.value);
   }
 
   public getErrorMessage(ctrl: AbstractControl): string {
@@ -248,8 +236,7 @@ export class InstanceGroupAddEditComponent implements OnInit {
         this.messageBoxService
           .open({
             title: 'Updating Managed Servers',
-            message:
-              'This action will try to contact and synchronize with all managed servers for this instance group.',
+            message: 'This action will try to contact and synchronize with all managed servers for this instance group.',
             mode: MessageBoxMode.CONFIRM_WARNING,
           })
           .subscribe((r) => {
@@ -267,9 +254,7 @@ export class InstanceGroupAddEditComponent implements OnInit {
 
   private doUpdate(instanceGroup: any, instanceGroupAttributes: CustomAttributesRecord) {
     forkJoin({
-      configuration: this.isConfigurationModified()
-        ? this.instanceGroupService.updateInstanceGroup(this.nameParam, instanceGroup)
-        : of(null),
+      configuration: this.isConfigurationModified() ? this.instanceGroupService.updateInstanceGroup(this.nameParam, instanceGroup) : of(null),
       attributes: this.isAttributesModified()
         ? this.instanceGroupService.updateInstanceGroupAttributes(this.nameParam, this.instanceGroupAttributes)
         : of(null),
@@ -421,15 +406,11 @@ export class InstanceGroupAddEditComponent implements OnInit {
   }
 
   private sortInstanceAttributes() {
-    this.instanceAttributesDescriptors = this.instanceAttributesDescriptors.sort((a, b) =>
-      a.name.localeCompare(b.name)
-    );
+    this.instanceAttributesDescriptors = this.instanceAttributesDescriptors.sort((a, b) => a.name.localeCompare(b.name));
   }
 
   addInstanceGroupAttribute() {
-    const possibleDescriptors = this.settings
-      .getSettings()
-      .instanceGroup.attributes.filter((d) => !this.instanceGroupAttributes.attributes[d.name]);
+    const possibleDescriptors = this.settings.getSettings().instanceGroup.attributes.filter((d) => !this.instanceGroupAttributes.attributes[d.name]);
     this.dialog
       .open(CustomAttributeValueComponent, {
         width: '500px',

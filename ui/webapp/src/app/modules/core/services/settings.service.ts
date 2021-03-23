@@ -15,7 +15,6 @@ export class SettingsService {
   private origSettings: SettingsConfiguration;
 
   constructor(private config: ConfigService, private http: HttpClient) {
-    // TODO: service is not providedIn root - need reload strategy.
     this.load();
   }
 

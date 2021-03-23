@@ -8,7 +8,7 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class BdFileDropComponent implements OnInit {
   /** Whether the control is disabled. */
-  @Input() disabled = false; // TODO
+  @Input() disabled = false;
 
   /** A list of allowed file name endings, like '.zip' */
   @Input() types: string[];
@@ -35,6 +35,9 @@ export class BdFileDropComponent implements OnInit {
   }
 
   onFilesDropped(files: FileList) {
+    if (this.disabled) {
+      return;
+    }
     for (let i = 0; i < files.length; i++) {
       const file: File = files[i];
       if (this.nameVerifier(file.name)) {
