@@ -2,17 +2,16 @@ package io.bdeploy.jersey;
 
 import java.lang.reflect.InvocationTargetException;
 
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.ext.ExceptionMapper;
-import jakarta.ws.rs.ext.Provider;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.ActivityReporter.ActivityCancelledException;
 import io.bdeploy.common.util.ExceptionHelper;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.ext.Provider;
 
 @Provider
 public class JerseyExceptionMapper implements ExceptionMapper<RuntimeException> {
@@ -40,6 +39,9 @@ public class JerseyExceptionMapper implements ExceptionMapper<RuntimeException> 
         if (!(exception instanceof WebApplicationException)) {
             log.warn("Unmapped Exception", exception);
         } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Server Exception", exception);
+            }
             code = ((WebApplicationException) exception).getResponse().getStatus();
         }
 

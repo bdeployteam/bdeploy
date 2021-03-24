@@ -12,8 +12,11 @@
           <strong>Update available:</strong>&nbsp;{{ formatVersion(server.update.updateVersion)
           }}<mat-icon class="bd-text-warn bd-small-icon">system_update</mat-icon>
         </div>
-        <div gdGap="10px" gdColumns="24px auto" gdAlignColumns="start center" *ngIf="!servers.isSynchronized(server)">
+        <div gdGap="10px" gdColumns="24px auto" gdAlignColumns="start center" *ngIf="!servers.isSynchronized(server) && !server.update.forceUpdate">
           <mat-icon class="bd-text-warn">warning</mat-icon>Please synchronize to enable update related actions.
+        </div>
+        <div gdGap="10px" gdColumns="24px auto" gdAlignColumns="start center" *ngIf="!servers.isSynchronized(server) && server.update.forceUpdate">
+          <mat-icon class="bd-text-warn">warning</mat-icon>A major version update must be installed to re-enable synchronizing.
         </div>
         <div class="bd-description-text" [style.text-align]="'justify'">
           An update can be transfered without installing to prepare a future update up front. This option is only available if the update package is not yet
@@ -23,7 +26,7 @@
           text="Transfer Update Package"
           icon="cloud_upload"
           [collapsed]="false"
-          [disabled]="(transfering$ | async) || !server.update.packagesToTransfer?.length || !servers.isSynchronized(server)"
+          [disabled]="(transfering$ | async) || !server.update.packagesToTransfer?.length || !(servers.isSynchronized(server) || server.update.forceUpdate)"
           [loadingWhen$]="transfering$"
           (click)="doUpdateTransfer(server)"
           [matTooltip]="!server.update.packagesToTransfer?.length ? 'All packages have already been transfered' : null"
@@ -34,7 +37,7 @@
           icon="system_update"
           [collapsed]="false"
           color="toolbar"
-          [disabled]="(installing$ | async) || !servers.isSynchronized(server)"
+          [disabled]="(installing$ | async) || !(servers.isSynchronized(server) || server.update.forceUpdate)"
           [loadingWhen$]="installing$"
           (click)="doUpdateInstall(server)"
         ></app-bd-button>

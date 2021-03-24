@@ -603,8 +603,12 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
     @Override
     public Version pingServer(String groupName, String serverName) {
         RemoteService svc = getConfiguredRemote(groupName, serverName);
-        BackendInfoResource info = ResourceProvider.getVersionedResource(svc, BackendInfoResource.class, null);
-        return info.getVersion().version;
+        try {
+            BackendInfoResource info = ResourceProvider.getVersionedResource(svc, BackendInfoResource.class, null);
+            return info.getVersion().version;
+        } catch (Exception e) {
+            throw new WebApplicationException("Cannot contact " + serverName, e, Status.GATEWAY_TIMEOUT);
+        }
     }
 
     private Collection<ScopedManifestKey> getLocalPackage(String manifestName) {

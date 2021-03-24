@@ -8,6 +8,7 @@ import { InstanceConfiguration, ManagedMasterDto, Version } from 'src/app/models
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { retryWithDelay, suppressGlobalErrorHandling } from 'src/app/modules/core/utils/server.utils';
+import { convert2String } from 'src/app/modules/core/utils/version.utils';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 
 // inter-browser support only works with text/plain...
@@ -112,7 +113,7 @@ export class ServerDetailsService implements OnDestroy {
       .pipe(
         tap((v) => {
           if (!isEqual(v, server.update.updateVersion)) {
-            throw new Error('Got unexpected version from server');
+            throw new Error(`Server is running but reports the wrong version: ${convert2String(v)}`);
           }
         }),
         retryWithDelay()

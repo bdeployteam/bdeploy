@@ -43,83 +43,85 @@
         </div>
       </th>
 
-      <!-- First column, can not be an action. -->
-      <ng-container *ngIf="i === 0">
-        <td
-          class="bd-text-ellipsis"
-          mat-cell
-          *matCellDef="let row"
-          [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []"
-          [style.maxWidth]="col.width ? col.width : 0"
-        >
-          <!-- Button to expand or collapse a group -->
-          <button *ngIf="row.expandable" mat-icon-button [style.marginLeft.px]="row.level * 24" (click)="treeControl.toggle(row)" appClickStopPropagation>
-            <mat-icon class="mat-icon-rtl-mirror">
-              {{ treeControl.isExpanded(row) ? 'expand_more' : 'chevron_right' }}
-            </mat-icon>
-          </button>
-
-          <!-- Text for the first column, either group name or item text -->
-          <span
-            class="local-first-column"
-            [style.marginLeft.px]="row.expandable ? 0 : getNoExpandIndent(row.level)"
-            [style.fontWeight]="row.expandable ? 'bold' : 'normal'"
-            [matBadge]="row.node.children.length"
-            [matBadgeHidden]="!row.expandable"
-            matBadgeSize="small"
-            matBadgeOverlap="false"
-            [matTooltip]="!row.expandable ? row.node.groupOrFirstColumn : null"
-            [matTooltipShowDelay]="1000"
+      <ng-container *matCellDef="let row">
+        <!-- First column, can not be an action. -->
+        <ng-container *ngIf="i === 0">
+          <td
+            class="bd-text-ellipsis"
+            mat-cell
+            [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []"
+            [style.maxWidth]="col.width ? col.width : 0"
+            [attr.colspan]="row.expandable ? _columns.length : 1"
           >
-            <!-- Either simple label or check box in check mode -->
-            <ng-container *ngIf="!checkMode">{{ row.node.groupOrFirstColumn }}</ng-container>
-            <mat-checkbox *ngIf="checkMode" [checked]="isChecked(row)" [indeterminate]="isPartiallyChecked(row)" (change)="toggleCheck(row)">{{
-              row.node.groupOrFirstColumn
-            }}</mat-checkbox>
-          </span>
-        </td>
-      </ng-container>
+            <!-- Button to expand or collapse a group -->
+            <button *ngIf="row.expandable" mat-icon-button [style.marginLeft.px]="row.level * 24" (click)="treeControl.toggle(row)" appClickStopPropagation>
+              <mat-icon class="mat-icon-rtl-mirror">
+                {{ treeControl.isExpanded(row) ? 'expand_more' : 'chevron_right' }}
+              </mat-icon>
+            </button>
 
-      <!-- Columns after the first one -->
-      <ng-container *ngIf="i !== 0 && !col.action">
-        <td
-          mat-cell
-          *matCellDef="let row"
-          [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []"
-          [style.maxWidth]="col.width ? col.width : 0"
-        >
-          <ng-container *ngIf="!row.expandable">
-            <ng-container *ngIf="!isImageColumn(col)">
-              <div *ngIf="!col.component" class="bd-text-ellipsis" [matTooltip]="!!row.node.item ? col.data(row.node.item) : null" [matTooltipShowDelay]="1000">
-                {{ col.data(row.node.item) }}
-              </div>
-              <app-bd-data-component-cell *ngIf="!!col.component" [componentType]="col.component" [record]="row.node.item"></app-bd-data-component-cell>
-            </ng-container>
-            <ng-container *ngIf="isImageColumn(col)">
-              <div fxLayout="row" fxLayoutAlign="start center">
-                <img class="local-row-image" [src]="getImageUrl(col, row.node.item)" />
-              </div>
-            </ng-container>
-          </ng-container>
-        </td>
-      </ng-container>
+            <!-- Text for the first column, either group name or item text -->
+            <span
+              class="local-first-column"
+              [style.marginLeft.px]="row.expandable ? 0 : getNoExpandIndent(row.level)"
+              [style.fontWeight]="row.expandable ? 'bold' : 'normal'"
+              [matBadge]="row.node.children.length"
+              [matBadgeHidden]="!row.expandable"
+              matBadgeSize="small"
+              matBadgeOverlap="false"
+              [matTooltip]="!row.expandable ? row.node.groupOrFirstColumn : null"
+              [matTooltipShowDelay]="1000"
+            >
+              <!-- Either simple label or check box in check mode -->
+              <ng-container *ngIf="!checkMode">{{ row.node.groupOrFirstColumn }}</ng-container>
+              <mat-checkbox *ngIf="checkMode" [checked]="isChecked(row)" [indeterminate]="isPartiallyChecked(row)" (change)="toggleCheck(row)">{{
+                row.node.groupOrFirstColumn
+              }}</mat-checkbox>
+            </span>
+          </td>
+        </ng-container>
 
-      <!-- Items with an action (collapsed button), this may not occur on the first column -->
-      <ng-container *ngIf="col.action">
-        <td mat-cell *matCellDef="let row" [style.maxWidth]="col.width ? col.width : 0">
-          <div fxLayout="row" fxLayoutAlign="start center">
-            <app-bd-button
-              *ngIf="row.node.item"
-              [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []"
-              [text]="col.data(row.node.item)"
-              tooltip="below"
-              [icon]="col.icon ? col.icon(row.node.item) : getUnknownIcon(col)"
-              (click)="col.action(row.node.item)"
-              color="inherit"
-              appClickStopPropagation
-            ></app-bd-button>
-          </div>
-        </td>
+        <!-- Columns after the first one -->
+        <ng-container *ngIf="i !== 0 && !col.action && !row.expandable">
+          <td mat-cell [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []" [style.maxWidth]="col.width ? col.width : 0">
+            <ng-container *ngIf="!row.expandable">
+              <ng-container *ngIf="!isImageColumn(col)">
+                <div
+                  *ngIf="!col.component"
+                  class="bd-text-ellipsis"
+                  [matTooltip]="!!row.node.item ? col.data(row.node.item) : null"
+                  [matTooltipShowDelay]="1000"
+                >
+                  {{ col.data(row.node.item) }}
+                </div>
+                <app-bd-data-component-cell *ngIf="!!col.component" [componentType]="col.component" [record]="row.node.item"></app-bd-data-component-cell>
+              </ng-container>
+              <ng-container *ngIf="isImageColumn(col)">
+                <div fxLayout="row" fxLayoutAlign="start center">
+                  <img class="local-row-image" [src]="getImageUrl(col, row.node.item)" />
+                </div>
+              </ng-container>
+            </ng-container>
+          </td>
+        </ng-container>
+
+        <!-- Items with an action (collapsed button), this may not occur on the first column -->
+        <ng-container *ngIf="col.action && !row.expandable">
+          <td mat-cell [style.maxWidth]="col.width ? col.width : 0">
+            <div fxLayout="row" fxLayoutAlign="start center">
+              <app-bd-button
+                *ngIf="row.node.item"
+                [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []"
+                [text]="col.data(row.node.item)"
+                tooltip="below"
+                [icon]="col.icon ? col.icon(row.node.item) : getUnknownIcon(col)"
+                (click)="col.action(row.node.item)"
+                color="inherit"
+                appClickStopPropagation
+              ></app-bd-button>
+            </div>
+          </td>
+        </ng-container>
       </ng-container>
     </ng-container>
   </table>
